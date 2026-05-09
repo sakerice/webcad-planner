@@ -988,7 +988,7 @@ function setView(v) {
   document.getElementById('btn-3de').className = 'tbtn' + (v==='3d-ext'?' active':'');
   document.getElementById('btn-3di').className = 'tbtn' + (v==='3d-int'?' active':'');
   document.getElementById('st-mode').textContent = 'モード: ' +
-    {2d:'平面図','3d-ext':'外観3D','3d-int':'内観3D'}[v];
+    {'2d':'平面図','3d-ext':'外観3D','3d-int':'内観3D'}[v];
 
   if (v === '2d') {
     c2.style.display = 'block';
