@@ -8,6 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;height:100vh;background:#1c1c2e;color:#eee;overflow:hidden}
@@ -670,21 +675,18 @@ function applyHandleDrag(cx,cy,e){
     var ldx = dx*Math.cos(rad) - dy*Math.sin(rad);
     var ldy = dx*Math.sin(rad) + dy*Math.cos(rad);
 
-    if(h.indexOf('e')>=0) nw = o.w + ldx;
-    if(h.indexOf('w')>=0) { nw = o.w - ldx; nx = o.x + (o.w - nw); }
-    if(h.indexOf('s')>=0) nd = o.d + ldy;
-    if(h.indexOf('n')>=0) { nd = o.d - ldy; ny = o.y + (o.d - nd); }
-    
-    if(e.shiftKey){ nw=Math.round(nw/100)*100; nd=Math.round(nd/100)*100; }
-    it.w = Math.max(100, nw); it.d = Math.max(100, nd);
-    if(h.indexOf('w')>=0 || h.indexOf('n')>=0) {
-       if(it.type !== 'room') {
-         var movedX = it.x - nx, movedY = it.y - ny;
-         it.x = nx; it.y = ny;
-       } else {
-         it.x = nx; it.y = ny;
-       }
-    }
+    var snapG=e.shiftKey?(ST.snap||455):0;
+    if(h.indexOf('e')>=0) nw=o.w+ldx;
+    if(h.indexOf('w')>=0) nw=o.w-ldx;
+    if(h.indexOf('s')>=0) nd=o.d+ldy;
+    if(h.indexOf('n')>=0) nd=o.d-ldy;
+    // Apply Shift-snap BEFORE position recalculation
+    if(snapG){ nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG; }
+    nw=Math.max(snapG||100,nw); nd=Math.max(snapG||100,nd);
+    // Recalculate position AFTER snapping so opposite edge stays fixed
+    if(h.indexOf('w')>=0) nx=o.x+(o.w-nw);
+    if(h.indexOf('n')>=0) ny=o.y+(o.d-nd);
+    it.w=nw; it.d=nd; it.x=nx; it.y=ny;
   }
   updateProps();
 }
@@ -709,8 +711,10 @@ function hitHandle(it,mx,my){
 }
 
 // ───── 3D ENGINE ─────
-var ren=null,sc3=null,camExt=null,camInt=null,orbit=null;
-var isInt=false, iMov={};
+var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
+var isInt=false, iMov={}, _skyMesh=null;
+// Interior mouse look state
+var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 
 var _texCache = {};
 function getTexture3D(key) {
@@ -730,13 +734,24 @@ function init3D(){
   ren=new THREE.WebGLRenderer({antialias:true, logarithmicDepthBuffer: true});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
   ren.outputColorSpace = THREE.SRGBColorSpace;
+  ren.toneMapping = THREE.ACESFilmicToneMapping;
+  ren.toneMappingExposure = 0.88;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
-  ren.setClearColor(0xd0e8ff);
   wrap.appendChild(ren.domElement);
   sc3=new THREE.Scene();
-  sc3.fog=new THREE.Fog(0xd0e8ff,100,800);
-  sc3.background=new THREE.Color(0xd0e8ff);
+  sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
+  // Gradient sky sphere (no texture file needed)
+  var skyGeo=new THREE.SphereGeometry(900,20,14);
+  var skyCols=[];
+  var sPa=skyGeo.attributes.position;
+  for(var si=0;si<sPa.count;si++){
+    var syt=(sPa.getY(si)+900)/1800;
+    skyCols.push(0.42+syt*0.22, 0.62+syt*0.2, 0.82+syt*0.16);
+  }
+  skyGeo.setAttribute('color',new THREE.Float32BufferAttribute(skyCols,3));
+  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
+  sc3.add(_skyMesh);
 
   var pmrem = new THREE.PMREMGenerator(ren);
   pmrem.compileEquirectangularShader();
@@ -772,6 +787,34 @@ function init3D(){
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
   orbit.target.set(8,0,8);
+  // Bloom post-processing
+  if(THREE.EffectComposer&&THREE.RenderPass&&THREE.UnrealBloomPass){
+    composer=new THREE.EffectComposer(ren);
+    var rp=new THREE.RenderPass(sc3,camExt);
+    composer.addPass(rp);
+    var bp=new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth,wrap.clientHeight),0.35,0.5,0.82);
+    composer.addPass(bp);
+  }
+  // Interior mouse look
+  ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
+  ren.domElement.addEventListener('mousemove',function(e){
+    if(!isInt||!_intML.down) return;
+    var dx=e.clientX-_intML.lx, dy=e.clientY-_intML.ly;
+    _intML.lx=e.clientX; _intML.ly=e.clientY;
+    _intML.yaw-=dx*0.003;
+    _intML.pitch=Math.max(-1.35,Math.min(1.35,_intML.pitch-dy*0.003));
+    camInt.rotation.set(_intML.pitch,_intML.yaw,0,'YXZ');
+  });
+  ren.domElement.addEventListener('mouseup',function(){_intML.down=false;});
+  ren.domElement.addEventListener('contextmenu',function(e){e.preventDefault();});
+  // WASD / arrow keys for interior
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    var k=e.key.toLowerCase();
+    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0) iMov[k]=true;
+    if(e.key==='Escape'&&isInt) setView('2d');
+  });
+  document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
   build3D(); loop3D();
 }
 
@@ -966,11 +1009,37 @@ function buildRooms3D(){
   var woodTex = getTexture3D('wood_floor');
   if(woodTex) { woodTex.repeat.set(1, 1); }
   var matFloor=new THREE.MeshStandardMaterial({map: woodTex, color:0xffffff, roughness:0.8});
+  var matCeil=new THREE.MeshStandardMaterial({color:0xf8f6f0,roughness:0.92,side:THREE.BackSide});
+  var matBase=new THREE.MeshStandardMaterial({color:0xf0ece4,roughness:0.9});
+  var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:2.5,roughness:0.3});
   DATA.rooms.forEach(function(r){
-    var y=(r.floor-1)*FLOOR_H*U;
-    var slab=new THREE.Mesh(new THREE.BoxGeometry(r.w*U,0.05,r.d*U),matFloor);
-    slab.position.set((r.x+r.w/2)*U,y+0.025,(r.y+r.d/2)*U);
+    var ry=(r.floor-1)*FLOOR_H*U;
+    var ceilY=ry+WALL_H*U;
+    var rw=r.w*U, rd=r.d*U;
+    var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+    // Floor slab
+    var slab=new THREE.Mesh(new THREE.BoxGeometry(rw,0.05,rd),matFloor);
+    slab.position.set(rcx,ry+0.025,rcz);
     slab.receiveShadow=true; slab.userData={b:true}; sc3.add(slab);
+    // Ceiling
+    var ceil=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeil);
+    ceil.rotation.x=Math.PI/2; ceil.position.set(rcx,ceilY,rcz);
+    ceil.userData={b:true}; sc3.add(ceil);
+    // Baseboard 4 sides
+    var bh=0.09;
+    [[rw,bh,0.04,rcx,ry+bh/2,r.y*U],[rw,bh,0.04,rcx,ry+bh/2,(r.y+r.d)*U],[0.04,bh,rd,r.x*U,ry+bh/2,rcz],[0.04,bh,rd,(r.x+r.w)*U,ry+bh/2,rcz]].forEach(function(b){
+      var bm=new THREE.Mesh(new THREE.BoxGeometry(b[0],b[1],b[2]),matBase);
+      bm.position.set(b[3],b[4],b[5]); bm.userData={b:true}; sc3.add(bm);
+    });
+    // Ceiling downlights (grid, 1 per 5m²)
+    var nx2=Math.max(1,Math.round(rw/2.8)), nz2=Math.max(1,Math.round(rd/2.8));
+    for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
+      var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+      var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
+      fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
+      var pl=new THREE.PointLight(0xffd880,0.9,6.0,1.8);
+      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
+    }
   });
 }
 
@@ -1018,8 +1087,22 @@ function buildLandscape(){
 }
 function loop3D(){
   requestAnimationFrame(loop3D);
-  if(ST.view==='3d-ext'){orbit.update();ren.render(sc3,camExt);}
-  else if(ST.view==='3d-int'&&camInt){ren.render(sc3,camInt);}
+  if(ST.view==='3d-ext'){
+    orbit.update();
+    if(composer){composer.passes[0].camera=camExt;composer.render();}
+    else ren.render(sc3,camExt);
+  } else if(ST.view==='3d-int'&&camInt){
+    // WASD movement
+    var spd=0.06;
+    var fwd=new THREE.Vector3(-Math.sin(_intML.yaw),0,-Math.cos(_intML.yaw));
+    var rgt=new THREE.Vector3(Math.cos(_intML.yaw),0,-Math.sin(_intML.yaw));
+    if(iMov['w']||iMov['arrowup'])   camInt.position.addScaledVector(fwd,spd);
+    if(iMov['s']||iMov['arrowdown']) camInt.position.addScaledVector(fwd,-spd);
+    if(iMov['a']||iMov['arrowleft']) camInt.position.addScaledVector(rgt,-spd);
+    if(iMov['d']||iMov['arrowright'])camInt.position.addScaledVector(rgt,spd);
+    if(composer){composer.passes[0].camera=camInt;composer.render();}
+    else ren.render(sc3,camInt);
+  }
 }
 
 function setView(v){
@@ -1032,8 +1115,40 @@ function setView(v){
   document.getElementById('st-mode').textContent='モード:'+(modeNames[v]||v);
   if(v!=='2d'){
     init3D();
-    if(v==='3d-int'&&orbit){orbit.enabled=false;}
-    else if(orbit){orbit.enabled=true;}
+    if(sc3){
+      if(v==='3d-int'){
+        // Interior: no fog, dark bg, hide sky, warm ambient
+        isInt=true;
+        if(orbit) orbit.enabled=false;
+        sc3.fog=null;
+        sc3.background=new THREE.Color(0x1a1a22);
+        if(_skyMesh) _skyMesh.visible=false;
+        // Position interior cam in first room
+        var r0=DATA.rooms.filter(function(r){return r.floor===ST.floor;})[0];
+        if(r0){
+          camInt.position.set((r0.x+r0.w/2)*U,((ST.floor-1)*FLOOR_H+1600)*U,(r0.y+r0.d/2)*U);
+          _intML.yaw=Math.PI; _intML.pitch=0;
+          camInt.rotation.set(0,_intML.yaw,0,'YXZ');
+        }
+        // Resize bloom for interior (softer)
+        if(composer&&composer.passes[1]) composer.passes[1].strength=0.55;
+      } else {
+        isInt=false;
+        if(orbit) orbit.enabled=true;
+        sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
+        sc3.background=null;
+        if(_skyMesh) _skyMesh.visible=true;
+        if(composer&&composer.passes[1]) composer.passes[1].strength=0.35;
+      }
+    }
+    var wrap=document.getElementById('c3d-wrap');
+    if(ren){
+      ren.setSize(wrap.clientWidth,wrap.clientHeight);
+      if(camExt){camExt.aspect=wrap.clientWidth/wrap.clientHeight;camExt.updateProjectionMatrix();}
+      if(camInt){camInt.aspect=wrap.clientWidth/wrap.clientHeight;camInt.updateProjectionMatrix();}
+      if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+    }
+    build3D();
   }
   if(v==='2d') draw2d();
 }
