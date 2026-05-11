@@ -81,6 +81,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
 /* ── BOTTOM NAV (Mobile only) ──────────── */
 #bottom-nav{display:none}
+#mob-prop-hdr{display:none}
 
 /* ── 3D JOYSTICK (Mobile interior) ─────── */
 #joy-hint{position:absolute;bottom:68px;left:50%;transform:translateX(-50%);background:rgba(22,33,62,0.85);padding:5px 14px;border-radius:20px;font-size:10px;color:#aab;display:none;z-index:200;pointer-events:none;text-align:center}
@@ -124,24 +125,48 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     margin:10px auto 6px;
   }
 
-  /* Props: slides up from bottom as sheet */
+  /* Props: compact peek bar at bottom (48px), expands on tap */
   #props{
     position:fixed;
     bottom:0; left:0; right:0;
     width:100%;
-    max-height:65vh;
+    max-height:52px;            /* collapsed: header only */
     z-index:500;
     border-left:none;
-    border-top:2px solid #0f3460;
-    border-radius:16px 16px 0 0;
+    border-top:none;
+    border-radius:14px 14px 0 0;
     transform:translateY(100%);
-    transition:transform 0.28s ease;
-    padding:14px 14px calc(56px + var(--safe-bot));
-    overflow-y:auto;
-    box-shadow:0 -8px 32px rgba(0,0,0,0.5);
+    transition:max-height 0.28s cubic-bezier(.4,0,.2,1), transform 0.28s ease;
+    overflow:hidden;
+    box-shadow:0 -4px 24px rgba(0,0,0,0.45);
+    display:block!important;
+    padding:0;
   }
-  #props{display:block!important}
-  #props.show{transform:translateY(0)}
+  #props.show{ transform:translateY(0); }
+  #props.show.prop-expanded{
+    max-height:60vh;
+    overflow-y:auto;
+  }
+  /* Mobile props header (always visible when props shown) */
+  #mob-prop-hdr{
+    display:flex;align-items:center;justify-content:space-between;
+    height:52px;padding:0 16px;cursor:pointer;flex-shrink:0;
+    background:#1a2a4a;border-bottom:1px solid #0f3460;
+    border-radius:14px 14px 0 0;user-select:none;touch-action:manipulation;
+  }
+  #mob-prop-hdr:active{background:#1e3060}
+  .mob-prop-left{display:flex;align-items:center;gap:8px}
+  .mob-prop-icon{font-size:20px}
+  .mob-prop-info{display:flex;flex-direction:column;gap:1px}
+  .mob-prop-name{font-size:12px;font-weight:bold;color:#cce}
+  .mob-prop-size{font-size:10px;color:#7a8fb0}
+  .mob-prop-chevron{font-size:12px;color:#7a8fb0;padding:6px 8px;background:#0f3460;border-radius:6px}
+  /* Props body padding on mobile */
+  #props-body{padding:10px 14px calc(60px + var(--safe-bot)) 14px;}
+  #props .ph{padding:10px 14px 5px;margin-bottom:6px}
+  /* 2-column layout for props inputs on mobile */
+  .pr-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .pr-row2 .pr{margin-bottom:0}
 
   /* Canvas area fills screen */
   #canvas-area{flex:1;min-width:0}
@@ -342,6 +367,17 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   </div>
 
   <div id="props">
+    <!-- Mobile compact header (tap to expand) -->
+    <div id="mob-prop-hdr" onclick="toggleMobilePropPanel()">
+      <div class="mob-prop-left">
+        <span class="mob-prop-icon" id="mob-prop-icon">⚙</span>
+        <div class="mob-prop-info">
+          <span class="mob-prop-name" id="mob-prop-name">選択なし</span>
+          <span class="mob-prop-size" id="mob-prop-size"></span>
+        </div>
+      </div>
+      <span class="mob-prop-chevron" id="mob-prop-chevron">▲ 詳細</span>
+    </div>
     <div class="ph" id="props-title">プロパティ</div>
     <div id="props-body"></div>
   </div>
@@ -426,18 +462,85 @@ var ST = {
   drawing:false, drawPts:[],
   mouseW:{x:0,y:0}, snap:455, showGrid:true, showDim:true,
   placingRot:0,
-  isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false
+  isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false,
+  _snapState:null  // stores active edge-snap info for visual feedback
 };
+
+// ─── Edge Snap (object-to-object + grid) ──────────
+var EDGE_SNAP_THRESH = 280; // mm — snap within 280mm
+
+function getEdgeCandidates(excludeId){
+  var cx={}, cy={};  // deduplicate
+  var fl=ST.floor;
+  DATA.items.filter(function(it){return it.floor===fl&&it.id!==excludeId&&it.type!=='site-rect';}).forEach(function(it){
+    [it.x, it.x+it.w, it.x+it.w/2].forEach(function(v){cx[Math.round(v)]=v;});
+    [it.y, it.y+it.d, it.y+it.d/2].forEach(function(v){cy[Math.round(v)]=v;});
+  });
+  DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
+    [r.x, r.x+r.w, r.x+r.w/2].forEach(function(v){cx[Math.round(v)]=v;});
+    [r.y, r.y+r.d, r.y+r.d/2].forEach(function(v){cy[Math.round(v)]=v;});
+  });
+  DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
+    [w.x1,w.x2].forEach(function(v){cx[Math.round(v)]=v;});
+    [w.y1,w.y2].forEach(function(v){cy[Math.round(v)]=v;});
+  });
+  return {
+    x:Object.values(cx),
+    y:Object.values(cy)
+  };
+}
+
+function applyEdgeSnap(x, y, w, d, excludeId){
+  var thresh=EDGE_SNAP_THRESH;
+  var cands=getEdgeCandidates(excludeId);
+  var bestX=null, minXd=thresh, snapXAt=null;
+  cands.x.forEach(function(c){
+    // Left edge of item snaps to c
+    var dl=Math.abs(x-c);           if(dl<minXd){minXd=dl;bestX=c;snapXAt='left';}
+    // Right edge of item snaps to c
+    var dr=Math.abs((x+w)-c);       if(dr<minXd){minXd=dr;bestX=c-w;snapXAt='right';}
+    // Center of item snaps to c
+    var dc=Math.abs((x+w/2)-c);     if(dc<minXd){minXd=dc;bestX=c-w/2;snapXAt='cx';}
+  });
+  var bestY=null, minYd=thresh, snapYAt=null;
+  cands.y.forEach(function(c){
+    var dt=Math.abs(y-c);           if(dt<minYd){minYd=dt;bestY=c;snapYAt='top';}
+    var db=Math.abs((y+d)-c);       if(db<minYd){minYd=db;bestY=c-d;snapYAt='bottom';}
+    var dc=Math.abs((y+d/2)-c);     if(dc<minYd){minYd=dc;bestY=c-d/2;snapYAt='cy';}
+  });
+  return {
+    x: bestX!==null?bestX:x,
+    y: bestY!==null?bestY:y,
+    snapX: bestX!==null, snapXVal: bestX!==null?bestX+(snapXAt==='right'?w:snapXAt==='cx'?w/2:0):null,
+    snapY: bestY!==null, snapYVal: bestY!==null?bestY+(snapYAt==='bottom'?d:snapYAt==='cy'?d/2:0):null
+  };
+}
 
 function updateProps(){
   var body = document.getElementById('props-body');
-  if(!ST.selected) { document.getElementById('props').classList.remove('show'); return; }
+  if(!ST.selected) {
+    document.getElementById('props').classList.remove('show');
+    return;
+  }
   document.getElementById('props').classList.add('show');
   var it = ST.selected;
   if(it.sScale === undefined) { it.sScale = 1; it.sX = 0; it.sY = 0; }
   var html = '';
   var typeName = ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
+  // Update mobile header
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜',room:'⬜','door-swing':'🚪',window:'🪟',wall:'━'};
+  var icon=icons[it.type]||'⚙';
+  var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
+  if(mobIcon) mobIcon.textContent=icon;
+  if(mobName) mobName.textContent=typeName;
+  if(mobSize&&it.w&&it.d) mobSize.textContent=Math.round(it.w)+'×'+Math.round(it.d)+'mm';
+  else if(mobSize) mobSize.textContent='';
+  // Auto-expand on first selection if not already showing
+  var propsEl=document.getElementById('props');
+  if(!propsEl.classList.contains('prop-expanded')&&!isMobileLayout()){
+    // desktop: always show body
+  }
   
   html += '<div class="pr"><div class="pl">位置 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x)+'" onchange="updateSelectedProp(\'x\',+this.value)"></div>';
   html += '<div class="pr"><div class="pl">位置 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y)+'" onchange="updateSelectedProp(\'y\',+this.value)"></div>';
@@ -682,6 +785,22 @@ function draw2d(){
   if(ST.drawing&&ST.drawPts.length>0) drawPreview();
   if(ST.showDim) drawDim();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
+  // ── Snap guide lines ──
+  if(ST._snapState&&DRAG.active){
+    var sc3=ST.zoom*0.05;
+    ctx.save(); ctx.setLineDash([4,3]); ctx.lineWidth=1.5;
+    if(ST._snapState.snapX&&ST._snapState.snapXVal!==null){
+      var sx=ST.panX+ST._snapState.snapXVal*sc3;
+      ctx.strokeStyle='rgba(255,120,0,0.75)';
+      ctx.beginPath();ctx.moveTo(sx,0);ctx.lineTo(sx,canvas.height);ctx.stroke();
+    }
+    if(ST._snapState.snapY&&ST._snapState.snapYVal!==null){
+      var sy=ST.panY+ST._snapState.snapYVal*sc3;
+      ctx.strokeStyle='rgba(255,120,0,0.75)';
+      ctx.beginPath();ctx.moveTo(0,sy);ctx.lineTo(canvas.width,sy);ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+  }
 }
 
 function drawGrid(){
@@ -883,7 +1002,14 @@ function applyHandleDrag(cx,cy,e){
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
   if(h==='move'){
     var nx=o.x+dx, ny=o.y+dy;
-    if(e.shiftKey){nx=snapV(nx);ny=snapV(ny);}
+    if(e&&e.shiftKey){nx=snapV(nx);ny=snapV(ny);}
+    // Edge snap: always on mobile, opt-out with Shift on desktop
+    var useEdgeSnap = isMobileLayout() || (e&&!e.shiftKey);
+    if(useEdgeSnap&&it.type!=='wall'){
+      var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id);
+      nx=snapped.x; ny=snapped.y;
+      ST._snapState=snapped;
+    } else { ST._snapState=null; }
     it.x=nx; it.y=ny;
   }else if(h==='rot'){
     var ocx = o.x + o.w/2, ocy = o.y + o.d/2;
@@ -1736,7 +1862,8 @@ canvas.addEventListener('mousemove',function(e){
 });
 canvas.addEventListener('mouseup',function(){
   if(ST.panning) { ST.panning = false; return; }
-  DRAG.active=false;if(ren)build3D();
+  DRAG.active=false; ST._snapState=null;
+  if(ren)build3D();
 });
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -2123,6 +2250,16 @@ function applyMobileUI(){
 }
 
 // Mobile sidebar toggle
+function toggleMobilePropPanel(){
+  var p=document.getElementById('props');
+  var expanded=p.classList.toggle('prop-expanded');
+  var ch=document.getElementById('mob-prop-chevron');
+  if(ch) ch.textContent=expanded?'▼ 閉じる':'▲ 詳細';
+}
+// Close props expanded state when deselecting
+var _origUpdateProps=updateProps;
+// (already replaced above)
+
 function toggleMobileSidebar(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('sb-overlay');
@@ -2257,6 +2394,7 @@ canvas.addEventListener('touchend',function(e){
     }
   }
   _touch1.active=false; _pinch.active=false;
+  ST._snapState=null;
 },{passive:false});
 
 // ─── 3D Touch Events ─────────────────────────────
