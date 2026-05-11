@@ -8,10 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SAOShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -210,6 +214,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
+var composer = null;
 var ROOF = {type:'gable', pitch:30, color:'#2a2a30'};
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc' };
 
@@ -234,6 +239,13 @@ var ICOLORS = {
   'door-swing':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)'
 };
+var GLTF_MAP = {
+  'sofa': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sofa/glTF-Binary/Sofa.glb',
+  'dining_6': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb',
+  'tree': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb' 
+};
+var _modelCache = {};
+
 var ILABELS = {
   kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
@@ -289,10 +301,14 @@ function updateProps(){
   }
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+    if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+    if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
   }
   
   html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
@@ -304,6 +320,14 @@ function updateSelectedProp(p,v,noSave){
   ST.selected[p]=v;
   draw2d(); if(ren) rebuild3D();
   updateProps();
+}
+function uploadTex(inp){
+  var file=inp.files[0]; if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    updateSelectedProp('texture', e.target.result);
+  };
+  r.readAsDataURL(file);
 }
 
 // DRAG state for handle transform
@@ -718,6 +742,15 @@ var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 
 var _texCache = {};
 function getTexture3D(key) {
+  if (!key) return null;
+  if (key.startsWith('data:image')) {
+    if (_texCache[key]) return _texCache[key];
+    var tex = new THREE.TextureLoader().load(key, function() { if(ren) rebuild3D(); });
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.encoding = THREE.sRGBEncoding;
+    _texCache[key] = tex;
+    return tex;
+  }
   if (_texCache[key]) return _texCache[key];
   if (!PATTERNS[key]) return null;
   var tex = new THREE.CanvasTexture(PATTERNS[key]);
@@ -728,14 +761,28 @@ function getTexture3D(key) {
   return tex;
 }
 
+function disposeObj(obj) {
+  if (obj.geometry) obj.geometry.dispose();
+  if (obj.material) {
+    if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m); });
+    else disposeMat(obj.material);
+  }
+  if (obj.children) obj.children.forEach(disposeObj);
+}
+function disposeMat(m) {
+  m.dispose();
+  if (m.map) m.map.dispose();
+}
+
+var composer;
 function init3D(){
   if(ren) return;
   var wrap=document.getElementById('c3d-wrap');
-  ren=new THREE.WebGLRenderer({antialias:true, logarithmicDepthBuffer: true});
+  ren=new THREE.WebGLRenderer({antialias:true});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
-  ren.outputColorSpace = THREE.SRGBColorSpace;
+  ren.outputEncoding = THREE.sRGBEncoding;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
-  ren.toneMappingExposure = 0.88;
+  ren.toneMappingExposure = 1.0;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
   wrap.appendChild(ren.domElement);
@@ -753,13 +800,10 @@ function init3D(){
   _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
   sc3.add(_skyMesh);
 
-  var pmrem = new THREE.PMREMGenerator(ren);
-  pmrem.compileEquirectangularShader();
-  
-  var hemi=new THREE.HemisphereLight(0xffffff,0x444444,0.5);
+  var hemi=new THREE.HemisphereLight(0xffffff,0x444444,0.6);
   sc3.add(hemi);
 
-  var sun=new THREE.DirectionalLight(0xffffff,1.0);
+  var sun=new THREE.DirectionalLight(0xffffff,1.2);
   sun.position.set(100,200,100); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
@@ -767,16 +811,13 @@ function init3D(){
   sun.shadow.bias = -0.0005; 
   sc3.add(sun);
   
-  var fill = new THREE.DirectionalLight(0xffffff, 0.3);
-  fill.position.set(-100, 100, -100); sc3.add(fill);
-
   var amb = new THREE.AmbientLight(0xffffff, 0.4);
   sc3.add(amb);
 
   var grassTex = getTexture3D('grass');
   if(grassTex) { grassTex.repeat.set(50, 50); }
   var gnd=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000), new THREE.MeshStandardMaterial({
-    color:0xffffff, map: grassTex, roughness:1.0
+    color:0xffffff, map: grassTex, roughness:1.0, metalness: 0.0
   }));
   gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; sc3.add(gnd);
 
@@ -787,15 +828,28 @@ function init3D(){
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
   orbit.target.set(8,0,8);
-  // Bloom post-processing
-  if(THREE.EffectComposer&&THREE.RenderPass&&THREE.UnrealBloomPass){
-    composer=new THREE.EffectComposer(ren);
-    var rp=new THREE.RenderPass(sc3,camExt);
-    composer.addPass(rp);
-    var bp=new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth,wrap.clientHeight),0.35,0.5,0.82);
-    composer.addPass(bp);
+<<<<<<< HEAD
+
+  // Post-processing integration
+  if(THREE.EffectComposer && THREE.RenderPass){
+    try {
+      composer = new THREE.EffectComposer(ren);
+      composer.addPass(new THREE.RenderPass(sc3, camExt));
+      
+      // Bloom
+      if(THREE.UnrealBloomPass) {
+        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.35, 0.4, 0.85);
+        composer.addPass(bloom);
+      }
+      // SAO
+      if(THREE.SAOPass) {
+        var sao = new THREE.SAOPass(sc3, camExt, false, true);
+        sao.params.saoBias = 0.5; sao.params.saoIntensity = 0.008; sao.params.saoScale = 15;
+        composer.addPass(sao);
+      }
+    } catch(e) { console.error("Composer init failed", e); composer = null; }
   }
-  // Interior mouse look
+
   ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
   ren.domElement.addEventListener('mousemove',function(e){
     if(!isInt||!_intML.down) return;
@@ -815,6 +869,26 @@ function init3D(){
     if(e.key==='Escape'&&isInt) setView('2d');
   });
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
+=======
+
+  // Try to init composer
+  try {
+    if(typeof THREE.EffectComposer !== 'undefined') {
+      composer = new THREE.EffectComposer(ren);
+      var renderPass = new THREE.RenderPass(sc3, camExt);
+      composer.addPass(renderPass);
+      if(typeof THREE.SAOPass !== 'undefined') {
+        var saoPass = new THREE.SAOPass(sc3, camExt, true, true);
+        saoPass.params.saoBias = 0.5;
+        saoPass.params.saoIntensity = 0.01;
+        saoPass.params.saoScale = 10;
+        saoPass.params.saoKernelRadius = 25;
+        composer.addPass(saoPass);
+      }
+    }
+  } catch(e) { console.warn("Composer init failed", e); composer = null; }
+
+>>>>>>> 1fbc518 (Improve 3D rendering quality with PBR materials, textures, and post-processing while maintaining full backward compatibility)
   build3D(); loop3D();
 }
 
@@ -822,7 +896,10 @@ function build3D(){
   if(!sc3) return;
   var toRemove=[];
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
-  toRemove.forEach(function(c){sc3.remove(c);});
+  toRemove.forEach(function(c){
+    disposeObj(c);
+    sc3.remove(c);
+  });
   DATA.walls.forEach(function(w){buildWall3D(w);});
   buildRooms3D();
   DATA.items.forEach(function(it){buildItem3D(it);});
@@ -839,7 +916,20 @@ function buildWall3D(w){
   var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
   var isOuter=w.thick>=130;
   var color = isOuter ? (fl===1 ? WALL_COLORS[1] : '#e8e0cc') : '#f4f0e8';
-  var mat=new THREE.MeshStandardMaterial({color:color, roughness:0.7, metalness:0.1});
+  if(w.color) color = w.color;
+  
+  var matParams = {color:color, roughness:0.7, metalness:0.1};
+  if(w.texture) {
+    var baseTex = getTexture3D(w.texture);
+    if(baseTex && baseTex.image) {
+        var tex = baseTex.clone();
+        tex.needsUpdate = true;
+        tex.repeat.set(len / 0.9, WALL_H*U / 0.9);
+        matParams.map = tex;
+        matParams.color = 0xffffff;
+    }
+  }
+  var mat=new THREE.MeshStandardMaterial(matParams);
   var geo=new THREE.BoxGeometry(len,WALL_H*U,w.thick*U);
   var mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=true; mesh.receiveShadow=true;
@@ -901,10 +991,10 @@ function getSpriteTexture3D(sheet) {
   var img = sheet === 1 ? SPRITE_IMG1 : SPRITE_IMG2;
   if (!img.complete) return null;
   if (sheet === 1) {
-    if (!_tex3d_1) { _tex3d_1 = new THREE.CanvasTexture(img); _tex3d_1.colorSpace = THREE.SRGBColorSpace; }
+    if (!_tex3d_1) { _tex3d_1 = new THREE.CanvasTexture(img); _tex3d_1.encoding = THREE.sRGBEncoding; }
     return _tex3d_1;
   } else {
-    if (!_tex3d_2) { _tex3d_2 = new THREE.CanvasTexture(img); _tex3d_2.colorSpace = THREE.SRGBColorSpace; }
+    if (!_tex3d_2) { _tex3d_2 = new THREE.CanvasTexture(img); _tex3d_2.encoding = THREE.sRGBEncoding; }
     return _tex3d_2;
   }
 }
@@ -915,6 +1005,28 @@ function buildItem3D(it){
   grp.position.set((it.x+it.w/2)*U, fy, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
   grp.scale.set(it.flipX?-1:1, 1, it.flipY?-1:1);
+
+  // GLTF Loader Integration
+  if(GLTF_MAP[it.type]) {
+    var modelUrl = GLTF_MAP[it.type];
+    if(_modelCache[modelUrl]) {
+        var clone = _modelCache[modelUrl].clone();
+        var box = new THREE.Box3().setFromObject(clone);
+        var size = box.getSize(new THREE.Vector3());
+        var scale = (it.w*U)/size.x;
+        clone.scale.set(scale, scale, scale);
+        clone.position.y = 0;
+        clone.traverse(function(c){if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+        grp.add(clone);
+        grp.userData={b:true}; sc3.add(grp);
+        return;
+    } else {
+        new THREE.GLTFLoader().load(modelUrl, function(gltf){
+            _modelCache[modelUrl] = gltf.scene;
+            rebuild3D();
+        });
+    }
+  }
 
   if(['window','door-swing','door-slide','door-front'].indexOf(it.type)>=0) {
     var frameMat = new THREE.MeshStandardMaterial({color:0x333333});
@@ -1006,32 +1118,44 @@ function getItemH(type){return {kitchen:850,bath:500,toilet:380,sink:800,fridge:
 function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818}[type]||0xdddddd;}
 
 function buildRooms3D(){
-  var woodTex = getTexture3D('wood_floor');
-  if(woodTex) { woodTex.repeat.set(1, 1); }
-  var matFloor=new THREE.MeshStandardMaterial({map: woodTex, color:0xffffff, roughness:0.8});
   var matCeil=new THREE.MeshStandardMaterial({color:0xf8f6f0,roughness:0.92,side:THREE.BackSide});
   var matBase=new THREE.MeshStandardMaterial({color:0xf0ece4,roughness:0.9});
   var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:2.5,roughness:0.3});
+
   DATA.rooms.forEach(function(r){
     var ry=(r.floor-1)*FLOOR_H*U;
     var ceilY=ry+WALL_H*U;
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+
+    var matParams = {color:0xffffff, roughness:0.8};
+    var baseTex = getTexture3D(r.texture || 'wood_floor');
+    if(baseTex && baseTex.image) {
+        var tex = baseTex.clone();
+        tex.needsUpdate = true;
+        tex.repeat.set(r.w*U/0.9, r.d*U/0.9);
+        matParams.map = tex;
+    }
+    var matFloor=new THREE.MeshStandardMaterial(matParams);
+    
     // Floor slab
     var slab=new THREE.Mesh(new THREE.BoxGeometry(rw,0.05,rd),matFloor);
     slab.position.set(rcx,ry+0.025,rcz);
     slab.receiveShadow=true; slab.userData={b:true}; sc3.add(slab);
+
     // Ceiling
     var ceil=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeil);
     ceil.rotation.x=Math.PI/2; ceil.position.set(rcx,ceilY,rcz);
     ceil.userData={b:true}; sc3.add(ceil);
+
     // Baseboard 4 sides
     var bh=0.09;
     [[rw,bh,0.04,rcx,ry+bh/2,r.y*U],[rw,bh,0.04,rcx,ry+bh/2,(r.y+r.d)*U],[0.04,bh,rd,r.x*U,ry+bh/2,rcz],[0.04,bh,rd,(r.x+r.w)*U,ry+bh/2,rcz]].forEach(function(b){
       var bm=new THREE.Mesh(new THREE.BoxGeometry(b[0],b[1],b[2]),matBase);
       bm.position.set(b[3],b[4],b[5]); bm.userData={b:true}; sc3.add(bm);
     });
-    // Ceiling downlights (grid, 1 per 5m²)
+
+    // Ceiling downlights
     var nx2=Math.max(1,Math.round(rw/2.8)), nz2=Math.max(1,Math.round(rd/2.8));
     for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
       var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
@@ -1087,12 +1211,13 @@ function buildLandscape(){
 }
 function loop3D(){
   requestAnimationFrame(loop3D);
-  if(ST.view==='3d-ext'){
+  var cam = ST.view === '3d-int' ? camInt : camExt;
+  if(!cam || !ren) return;
+
+  if(ST.view==='3d-ext') {
     orbit.update();
-    if(composer){composer.passes[0].camera=camExt;composer.render();}
-    else ren.render(sc3,camExt);
   } else if(ST.view==='3d-int'&&camInt){
-    // WASD movement
+    // WASD movement logic
     var spd=0.06;
     var fwd=new THREE.Vector3(-Math.sin(_intML.yaw),0,-Math.cos(_intML.yaw));
     var rgt=new THREE.Vector3(Math.cos(_intML.yaw),0,-Math.sin(_intML.yaw));
@@ -1100,8 +1225,16 @@ function loop3D(){
     if(iMov['s']||iMov['arrowdown']) camInt.position.addScaledVector(fwd,-spd);
     if(iMov['a']||iMov['arrowleft']) camInt.position.addScaledVector(rgt,-spd);
     if(iMov['d']||iMov['arrowright'])camInt.position.addScaledVector(rgt,spd);
-    if(composer){composer.passes[0].camera=camInt;composer.render();}
-    else ren.render(sc3,camInt);
+  }
+
+  if(composer) {
+    composer.passes[0].camera = cam;
+    for(var i=1; i<composer.passes.length; i++) {
+        if(composer.passes[i].camera) composer.passes[i].camera = cam;
+    }
+    composer.render();
+  } else {
+    ren.render(sc3, cam);
   }
 }
 
@@ -1517,7 +1650,16 @@ function handleSiteClick(wx,wy){
   }
 }
 
-loadPreset(); resize2d(); resetView();
+function setFOV(v){
+  if(camInt){ camInt.fov=v; camInt.updateProjectionMatrix(); }
+}
+
+
+try {
+  loadPreset(); resize2d(); resetView();
+} catch(e) {
+  console.error("Initialization error:", e);
+}
 </script>
 </body>
 </html>
