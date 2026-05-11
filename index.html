@@ -662,14 +662,20 @@ function draw2d(){
     ctx.strokeRect(ST.panX+x1*sc, ST.panY+y1*sc, rw*sc, rd*sc);
     ctx.setLineDash([]);
   }
+  // ── Ghost preview + placement dimensions ──
   if(!ST.drawing && ISIZES[ST.tool] && ST.tool!=='site-rect' && ST.view === '2d') {
     var mx = snapV(ST.mouseW.x), my = snapV(ST.mouseW.y);
     var sz = ISIZES[ST.tool];
     var ghost = {type:ST.tool, x:mx - sz.w/2, y:my - sz.d/2, w:sz.w, d:sz.d, rot:ST.placingRot||0, floor:ST.floor, flipX:false, flipY:false, sScale:1, sX:0, sY:0};
-    ctx.save();
-    ctx.globalAlpha = 0.5;
-    drawItem2d(ghost);
-    ctx.restore();
+    ctx.save(); ctx.globalAlpha=0.5; drawItem2d(ghost); ctx.restore();
+    // Dimension label near ghost
+    drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
+  }
+  // ── Room-rect preview dimensions ──
+  if(ST.drawing && (ST.tool==='room-rect'||ST.tool==='site-rect') && ST.drawPts.length>0) {
+    var p1=ST.drawPts[0], p2=ST.mouseW;
+    var rw=Math.abs(snapV(p2.x)-p1.x), rd=Math.abs(snapV(p2.y)-p1.y);
+    if(rw>50&&rd>50) drawRectDim(Math.min(p1.x,snapV(p2.x)), Math.min(p1.y,snapV(p2.y)), rw, rd);
   }
 
   drawRoomLbls();
@@ -1811,6 +1817,66 @@ function nearWall(px,py,w){
   return dist<Math.max(w.thick*0.7,18/ST.zoom);
 }
 
+// ── Dimension label helpers ──────────────────────
+function drawDimLabel(cx, cy, text, bgColor, textColor){
+  bgColor = bgColor||'rgba(40,70,200,0.82)';
+  textColor = textColor||'#fff';
+  var fsz = Math.max(9, Math.min(13, ST.zoom*5));
+  ctx.font = 'bold '+fsz+'px "Noto Sans JP",sans-serif';
+  var tw = ctx.measureText(text).width;
+  var pad = 4;
+  ctx.fillStyle = bgColor;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(cx-tw/2-pad, cy-fsz/2-pad+1, tw+pad*2, fsz+pad, 3);
+  else ctx.rect(cx-tw/2-pad, cy-fsz/2-pad+1, tw+pad*2, fsz+pad);
+  ctx.fill();
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, cx, cy+1);
+}
+
+function drawPlacementDim(wx, wy, w, d, rot){
+  var sc = ST.zoom * 0.05;
+  var rad = (rot||0) * Math.PI/180;
+  var cos = Math.cos(rad), sin = Math.sin(rad);
+  // Place label below the item in local space
+  var lx = wx + sin*(d/2+120), ly = wy + cos*(d/2+120);
+  // Actually simpler: just place below bounding box
+  var cx = ST.panX + wx*sc;
+  var cy = ST.panY + wy*sc + d*sc/2 + 18;
+  var wStr = Math.round(w)+'×'+Math.round(d)+'mm';
+  ctx.save(); ctx.globalAlpha = 1;
+  drawDimLabel(cx, cy, wStr, 'rgba(40,70,200,0.88)', '#fff');
+  ctx.restore();
+}
+
+function drawRectDim(x, y, w, d){
+  var sc = ST.zoom * 0.05;
+  var ax = ST.panX + x*sc, ay = ST.panY + y*sc;
+  var bx = ax + w*sc, by = ay + d*sc;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(40,80,200,0.6)'; ctx.lineWidth = 1.2; ctx.setLineDash([4,3]);
+  var off = 22;
+  // Width dimension (top)
+  ctx.beginPath(); ctx.moveTo(ax, ay-off); ctx.lineTo(bx, ay-off); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); // end ticks
+  ctx.moveTo(ax, ay-off-5); ctx.lineTo(ax, ay-off+5);
+  ctx.moveTo(bx, ay-off-5); ctx.lineTo(bx, ay-off+5); ctx.stroke();
+  drawDimLabel((ax+bx)/2, ay-off, Math.round(w)+'mm', 'rgba(40,80,200,0.82)', '#fff');
+  // Height dimension (left)
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(ax-off, ay); ctx.lineTo(ax-off, by); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(ax-off-5, ay); ctx.lineTo(ax-off+5, ay);
+  ctx.moveTo(ax-off-5, by); ctx.lineTo(ax-off+5, by); ctx.stroke();
+  ctx.save(); ctx.translate(ax-off, (ay+by)/2); ctx.rotate(-Math.PI/2);
+  drawDimLabel(0, 0, Math.round(d)+'mm', 'rgba(40,80,200,0.82)', '#fff');
+  ctx.restore();
+  ctx.restore();
+}
+
 function drawPreview(){
   var last=ST.drawPts[ST.drawPts.length-1];
   var mx=snapV(ST.mouseW.x),my=snapV(ST.mouseW.y);
@@ -1877,22 +1943,65 @@ function drawDim(){
     drawBoxDim(minX, minY, maxX, maxY, 'rgba(40,70,160,0.6)', 30);
   }
 
-  // Selected Item Local Dims
-  if(ST.selected && ST.selected.w && ST.selected.d && ST.selected.type!=='site-rect'){
-    var s = ST.selected;
-    var sc=ST.zoom*0.05;
-    var ccx=ST.panX+(s.x+s.w/2)*sc, ccy=ST.panY+(s.y+s.d/2)*sc;
-    var rad=(s.rot||0)*Math.PI/180;
-    if(s.type==='room') rad=0;
-    ctx.save();
-    ctx.translate(ccx, ccy); ctx.rotate(rad);
-    ctx.strokeStyle='rgba(233,69,96,0.6)'; ctx.fillStyle='rgba(233,69,96,0.8)'; ctx.font='9px sans-serif';
-    var hw=s.w*sc/2, hd=s.d*sc/2, soff=15;
-    ctx.beginPath(); ctx.moveTo(-hw, -hd-soff); ctx.lineTo(hw, -hd-soff); ctx.stroke();
-    ctx.textAlign='center'; ctx.fillText(Math.round(s.w)+'mm', 0, -hd-soff-4);
-    ctx.save(); ctx.translate(-hw-soff-4, 0); ctx.rotate(-Math.PI/2);
-    ctx.fillText(Math.round(s.d)+'mm', 0, 0); ctx.restore();
-    ctx.restore();
+  var sc2 = ST.zoom*0.05;
+
+  // ── Wall length labels ──
+  if(ST.showDim && ST.zoom>=0.4){
+    var fw2=DATA.walls.filter(function(w){return w.floor===ST.floor;});
+    fw2.forEach(function(w){
+      var len=Math.sqrt((w.x2-w.x1)*(w.x2-w.x1)+(w.y2-w.y1)*(w.y2-w.y1));
+      if(len<200) return; // skip very short walls
+      var mx2=(w.x1+w.x2)/2, my2=(w.y1+w.y2)/2;
+      var cx3=ST.panX+mx2*sc2, cy3=ST.panY+my2*sc2;
+      var ang=Math.atan2(w.y2-w.y1,w.x2-w.x1);
+      ctx.save();
+      ctx.translate(cx3, cy3); ctx.rotate(ang);
+      var isSel=(ST.selected===w);
+      drawDimLabel(0, -(w.thick*sc2/2+14), Math.round(len)+'mm',
+        isSel?'rgba(233,69,96,0.9)':'rgba(60,60,60,0.62)',
+        '#fff');
+      ctx.restore();
+    });
+  }
+
+  // ── Items: dimension labels for all placed items ──
+  if(ST.showDim && ST.zoom>=0.4){
+    var fi2=DATA.items.filter(function(i){return i.floor===ST.floor&&i.type!=='site-rect'&&i.type!=='tree';});
+    fi2.forEach(function(it){
+      var ccx2=ST.panX+(it.x+it.w/2)*sc2, ccy2=ST.panY+(it.y+it.d/2)*sc2;
+      var isSel=(ST.selected===it);
+      var rad2=(it.rot||0)*Math.PI/180;
+      ctx.save(); ctx.translate(ccx2,ccy2); ctx.rotate(rad2);
+      var hw2=it.w*sc2/2, hd2=it.d*sc2/2;
+      // Width label (below item)
+      drawDimLabel(0, hd2+14, Math.round(it.w)+'mm',
+        isSel?'rgba(233,69,96,0.88)':'rgba(60,60,60,0.58)', '#fff');
+      // Depth label (right side) — only if item is big enough
+      if(it.d*sc2 > 40){
+        ctx.save(); ctx.rotate(Math.PI/2);
+        drawDimLabel(0, -(hw2+14), Math.round(it.d)+'mm',
+          isSel?'rgba(233,69,96,0.88)':'rgba(60,60,60,0.58)', '#fff');
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+  }
+
+  // ── Rooms: show W×D below room name ──
+  if(ST.showDim && ST.zoom>=0.35){
+    var fr2=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
+    fr2.forEach(function(r){
+      var p=w2c(r.x+r.w/2, r.y+r.d/2);
+      var isSel=(ST.selected===r);
+      // Small dims below room label
+      ctx.save();
+      var fsz=Math.max(8, ST.zoom*3.5);
+      ctx.font=fsz+'px "Noto Sans JP",sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=isSel?'rgba(233,69,96,0.85)':'rgba(80,80,100,0.55)';
+      ctx.fillText(Math.round(r.w)+'×'+Math.round(r.d)+'mm', p.cx, p.cy+Math.max(12,ST.zoom*5)+6);
+      ctx.restore();
+    });
   }
 }
 
