@@ -828,8 +828,6 @@ function init3D(){
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
   orbit.target.set(8,0,8);
-<<<<<<< HEAD
-
   // Post-processing integration
   if(THREE.EffectComposer && THREE.RenderPass){
     try {
@@ -869,26 +867,7 @@ function init3D(){
     if(e.key==='Escape'&&isInt) setView('2d');
   });
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
-=======
 
-  // Try to init composer
-  try {
-    if(typeof THREE.EffectComposer !== 'undefined') {
-      composer = new THREE.EffectComposer(ren);
-      var renderPass = new THREE.RenderPass(sc3, camExt);
-      composer.addPass(renderPass);
-      if(typeof THREE.SAOPass !== 'undefined') {
-        var saoPass = new THREE.SAOPass(sc3, camExt, true, true);
-        saoPass.params.saoBias = 0.5;
-        saoPass.params.saoIntensity = 0.01;
-        saoPass.params.saoScale = 10;
-        saoPass.params.saoKernelRadius = 25;
-        composer.addPass(saoPass);
-      }
-    }
-  } catch(e) { console.warn("Composer init failed", e); composer = null; }
-
->>>>>>> 1fbc518 (Improve 3D rendering quality with PBR materials, textures, and post-processing while maintaining full backward compatibility)
   build3D(); loop3D();
 }
 
