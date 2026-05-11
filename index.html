@@ -427,7 +427,7 @@ var FOOTPRINTS={1:{w:11830,h:7280},2:{w:11830,h:7280},3:{w:11830,h:7280}};
 function draw2d(){
   var W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#e8e4dc'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#f5f3ee'; ctx.fillRect(0,0,W,H);
   if(ST.showGrid) drawGrid();
   var sc=ST.zoom*0.05;
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
@@ -488,12 +488,12 @@ function drawGrid(){
   var sc=ST.zoom*0.05, mg=910*sc;
   if(mg<3) return;
   var ox=((ST.panX%mg)+mg)%mg, oy=((ST.panY%mg)+mg)%mg;
-  ctx.strokeStyle='rgba(0,0,0,0.07)'; ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(0,0,0,0.10)'; ctx.lineWidth=0.8;
   for(var x=ox;x<canvas.width;x+=mg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
   for(var y=oy;y<canvas.height;y+=mg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
   if(sc*455>10){
     var sg=455*sc,ox2=((ST.panX%sg)+sg)%sg,oy2=((ST.panY%sg)+sg)%sg;
-    ctx.strokeStyle='rgba(0,0,0,0.03)';
+    ctx.strokeStyle='rgba(0,0,0,0.04)';
     for(var x=ox2;x<canvas.width;x+=sg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
     for(var y=oy2;y<canvas.height;y+=sg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
   }
@@ -536,7 +536,7 @@ function drawWall2d(w){
   var dx=b.cx-a.cx,dy=b.cy-a.cy,len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return;
   var nx=-dy/len,ny=dx/len,t=w.thick*ST.zoom*0.05/2;
-  var isOuter=w.thick>=130, sel=ST.selected===w;
+  var isOuter=w.thick>=120, sel=ST.selected===w;
   ctx.save();
   if(!sel) {
     ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.2)';
@@ -553,14 +553,11 @@ function drawWall2d(w){
     ctx.fillStyle=w.color; ctx.fill();
     ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.stroke();
   } else if(isOuter){
-    ctx.fillStyle='#3a3a40'; ctx.fill();
-    ctx.strokeStyle='#111'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=0.5;
-    ctx.beginPath(); ctx.moveTo(a.cx+nx*t*0.6, a.cy+ny*t*0.6); ctx.lineTo(b.cx+nx*t*0.6, b.cy+ny*t*0.6); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(a.cx-nx*t*0.6, a.cy-ny*t*0.6); ctx.lineTo(b.cx-nx*t*0.6, b.cy-ny*t*0.6); ctx.stroke();
+    ctx.fillStyle='#e8e4dc'; ctx.fill();
+    ctx.strokeStyle='#555'; ctx.lineWidth=2.0; ctx.stroke();
   } else {
-    ctx.fillStyle='#909098'; ctx.fill();
-    ctx.strokeStyle='#666'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='#d0cfc8'; ctx.fill();
+    ctx.strokeStyle='#888'; ctx.lineWidth=1.2; ctx.stroke();
   }
   ctx.restore();
 }
