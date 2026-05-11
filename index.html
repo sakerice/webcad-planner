@@ -995,47 +995,99 @@ function drawHandles(o,ccx,ccy,hw,hd,sc){
   ctx.restore();
 }
 
+// ─── Resize edge snap helper ──────────────────────
+// Snaps moving edge(s) to nearest object edge (axis-aligned items only)
+function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
+  var thresh=EDGE_SNAP_THRESH;
+  var cands=getEdgeCandidates(excludeId);
+  var ss={snapX:false,snapXVal:null,snapY:false,snapYVal:null};
+  // East: right edge snaps to candidate X
+  if(h.indexOf('e')>=0){
+    var re=nx+nw, bx=null, md=thresh;
+    cands.x.forEach(function(c){var d=Math.abs(re-c);if(d<md){md=d;bx=c;}});
+    if(bx!==null){nw=Math.max(100,bx-nx);ss.snapX=true;ss.snapXVal=bx;}
+  }
+  // West: left edge snaps to candidate X (right edge stays fixed)
+  if(h.indexOf('w')>=0){
+    var le=nx, bx=null, md=thresh;
+    cands.x.forEach(function(c){var d=Math.abs(le-c);if(d<md){md=d;bx=c;}});
+    if(bx!==null){var re2=o.x+o.w;nx=bx;nw=Math.max(100,re2-nx);ss.snapX=true;ss.snapXVal=bx;}
+  }
+  // South: bottom edge snaps to candidate Y
+  if(h.indexOf('s')>=0){
+    var be=ny+nd, by=null, md=thresh;
+    cands.y.forEach(function(c){var d=Math.abs(be-c);if(d<md){md=d;by=c;}});
+    if(by!==null){nd=Math.max(100,by-ny);ss.snapY=true;ss.snapYVal=by;}
+  }
+  // North: top edge snaps to candidate Y (bottom edge stays fixed)
+  if(h.indexOf('n')>=0){
+    var te=ny, by=null, md=thresh;
+    cands.y.forEach(function(c){var d=Math.abs(te-c);if(d<md){md=d;by=c;}});
+    if(by!==null){var be2=o.y+o.d;ny=by;nd=Math.max(100,be2-ny);ss.snapY=true;ss.snapYVal=by;}
+  }
+  return {nx:nx,ny:ny,nw:nw,nd:nd,snapState:ss};
+}
+
 function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
   if(!DRAG.saved){saveState(); DRAG.saved=true;}
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
+  var onMobile=isMobileLayout();
+
   if(h==='move'){
     var nx=o.x+dx, ny=o.y+dy;
     if(e&&e.shiftKey){nx=snapV(nx);ny=snapV(ny);}
-    // Edge snap: always on mobile, opt-out with Shift on desktop
-    var useEdgeSnap = isMobileLayout() || (e&&!e.shiftKey);
+    var useEdgeSnap=onMobile||(e&&!e.shiftKey);
     if(useEdgeSnap&&it.type!=='wall'){
       var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id);
-      nx=snapped.x; ny=snapped.y;
-      ST._snapState=snapped;
+      nx=snapped.x; ny=snapped.y; ST._snapState=snapped;
     } else { ST._snapState=null; }
     it.x=nx; it.y=ny;
-  }else if(h==='rot'){
-    var ocx = o.x + o.w/2, ocy = o.y + o.d/2;
-    var oAng=Math.atan2(cy-ST.panY-(ocy*ST.zoom*0.05),cx-ST.panX-(ocx*ST.zoom*0.05));
-    var sAng=Math.atan2(DRAG.startCY-ST.panY-(ocy*ST.zoom*0.05),DRAG.startCX-ST.panX-(ocx*ST.zoom*0.05));
-    var nRot=o.rot+(oAng-sAng)*180/Math.PI;
-    if(e.shiftKey) nRot=Math.round(nRot/15)*15;
-    it.rot=nRot;
-  }else{
-    var nw = o.w, nd = o.d, nx = o.x, ny = o.y;
-    var rdx = dx, rdy = dy;
-    var rad = -(o.rot||0)*Math.PI/180;
-    var ldx = dx*Math.cos(rad) - dy*Math.sin(rad);
-    var ldy = dx*Math.sin(rad) + dy*Math.cos(rad);
 
-    var snapG=e.shiftKey?(ST.snap||455):0;
+  }else if(h==='rot'){
+    var ocx=o.x+o.w/2, ocy=o.y+o.d/2;
+    var sc2=ST.zoom*0.05;
+    var oAng=Math.atan2(cy-ST.panY-ocy*sc2, cx-ST.panX-ocx*sc2);
+    var sAng=Math.atan2(DRAG.startCY-ST.panY-ocy*sc2, DRAG.startCX-ST.panX-ocx*sc2);
+    var nRot=o.rot+(oAng-sAng)*180/Math.PI;
+    // Snap: 15° on mobile always; 15° on desktop with Shift; 45° on double-Shift (ctrl)
+    if(onMobile||(e&&e.shiftKey)){
+      var step=(e&&e.ctrlKey)?45:15;
+      nRot=Math.round(nRot/step)*step;
+    }
+    ST._snapState=null;
+    it.rot=nRot;
+
+  }else{
+    // Resize
+    var nw=o.w, nd=o.d, nx=o.x, ny=o.y;
+    var rad=-(o.rot||0)*Math.PI/180;
+    var ldx=dx*Math.cos(rad)-dy*Math.sin(rad);
+    var ldy=dx*Math.sin(rad)+dy*Math.cos(rad);
+
     if(h.indexOf('e')>=0) nw=o.w+ldx;
     if(h.indexOf('w')>=0) nw=o.w-ldx;
     if(h.indexOf('s')>=0) nd=o.d+ldy;
     if(h.indexOf('n')>=0) nd=o.d-ldy;
-    // Apply Shift-snap BEFORE position recalculation
-    if(snapG){ nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG; }
+
+    // Grid snap (Shift on desktop)
+    var snapG=e&&e.shiftKey?(ST.snap||455):0;
+    if(snapG){nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG;}
     nw=Math.max(snapG||100,nw); nd=Math.max(snapG||100,nd);
-    // Recalculate position AFTER snapping so opposite edge stays fixed
+
+    // Position: keep the opposite edge fixed
     if(h.indexOf('w')>=0) nx=o.x+(o.w-nw);
     if(h.indexOf('n')>=0) ny=o.y+(o.d-nd);
+
+    // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270)
+    var isAxisAligned=Math.abs((o.rot||0)%90)<4;
+    if(isAxisAligned&&it.type!=='wall'&&it.type!=='room'){
+      var res=applyResizeEdgeSnap(h,o,nx,ny,nw,nd,it.id);
+      nx=res.nx; ny=res.ny; nw=res.nw; nd=res.nd;
+      ST._snapState=res.snapState;
+    } else { ST._snapState=null; }
+
     it.w=nw; it.d=nd; it.x=nx; it.y=ny;
   }
   updateProps();
