@@ -441,9 +441,21 @@ var ICOLORS = {
   'door-swing':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)'
 };
-// GLTF_MAP: set to empty — broken CDN URLs removed. Upload .glb to assets/models/ to enable.
-// Example: 'sofa': 'assets/models/sofa.glb'
-var GLTF_MAP = {};
+// GLTF_MAP: PBR furniture GLBs (CC0, generated with pygltflib, multi-mesh PBR materials)
+var GLTF_MAP = {
+  'sofa':'assets/models/sofa.glb', 'loveseat_2p':'assets/models/sofa.glb',
+  'kitchen':'assets/models/kitchen.glb',
+  'bed-d':'assets/models/bed_double.glb', 'bed-s':'assets/models/bed_single.glb',
+  'semi_double_bed':'assets/models/bed_double.glb',
+  'dining-table':'assets/models/dining_table.glb', 'dining_6':'assets/models/dining_table.glb',
+  'tv':'assets/models/tv_unit.glb',
+  'bath':'assets/models/bathtub.glb',
+  'toilet':'assets/models/toilet.glb',
+  'sink':'assets/models/sink.glb',
+  'desk':'assets/models/desk.glb',
+  'closet':'assets/models/closet.glb', 'shoe_cabinet':'assets/models/closet.glb',
+  'fridge':'assets/models/fridge.glb', 'washer':'assets/models/fridge.glb'
+};
 var _modelCache = {};
 
 var ILABELS = {
@@ -1409,10 +1421,22 @@ function buildItem3D(it){
         var clone = _modelCache[modelUrl].clone();
         var box = new THREE.Box3().setFromObject(clone);
         var size = box.getSize(new THREE.Vector3());
-        var scale = (it.w*U)/size.x;
-        clone.scale.set(scale, scale, scale);
-        clone.position.y = 0;
-        clone.traverse(function(c){if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+        // Scale each axis independently to match item dimensions
+        var sx = (size.x>0.001) ? (it.w*U)/size.x : 1;
+        var sz2 = (size.z>0.001) ? (it.d*U)/size.z : 1;
+        // Y: keep proportional to X scale (don't squash height)
+        var sy = sx;
+        clone.scale.set(sx, sy, sz2);
+        // Align bottom of model to floor
+        box.setFromObject(clone);
+        clone.position.y = -box.min.y;
+        clone.traverse(function(c){
+          if(c.isMesh){
+            c.castShadow=true; c.receiveShadow=true;
+            // Ensure PBR materials render correctly
+            if(c.material) c.material.needsUpdate=true;
+          }
+        });
         grp.add(clone);
         grp.userData={b:true}; sc3.add(grp);
         return;
