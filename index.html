@@ -353,7 +353,37 @@ function mkItem(type,x,y,rot,floor,w,d){
 // ───── PRESET DATA ─────
 function loadPreset(){
   DATA.walls=[]; DATA.items=[]; DATA.rooms=[]; nextId=1;
-  // Start with empty data for fresh design
+  // Demo preset: 2-storey house (1F+2F)
+  var id=function(){return nextId++;};
+  function w(x1,y1,x2,y2,fl,tk){DATA.walls.push({id:id(),x1:x1,y1:y1,x2:x2,y2:y2,floor:fl,thick:tk||120,color:'#888888'});}
+  function rm(x,y,rw,rd,fl,n){DATA.rooms.push({id:'rm'+id(),type:'room',x:x,y:y,w:rw,d:rd,floor:fl,n:n||''});}
+  function it(tp,x,y,rot,fl,iw,id2){var sz=ISIZES[tp]||{w:900,d:900};DATA.items.push({id:id(),type:tp,x:x,y:y,w:iw||sz.w,d:id2||sz.d,rot:rot||0,floor:fl||1,sScale:1,sX:0,sY:0});}
+  // 1F outer walls 7280×4095mm
+  w(0,0,7280,0,1,150); w(7280,0,7280,4095,1,150); w(7280,4095,0,4095,1,150); w(0,4095,0,0,1,150);
+  // 1F inner walls
+  w(2730,0,2730,1820,1); w(2730,1820,5460,1820,1); w(5460,0,5460,1820,1);
+  w(0,2730,2730,2730,1); w(2730,2730,2730,4095,1); w(0,3640,2730,3640,1);
+  w(5460,0,5460,4095,1); w(5460,2730,7280,2730,1);
+  // 1F rooms
+  rm(2730,0,2730,1820,1,'玄関ホール'); rm(0,0,2730,2730,1,'LDK 14.3帖'); rm(0,2730,2730,1365,1,'和室'); rm(0,3640,2730,455,1,'収納');
+  rm(5460,0,1820,2730,1,'浴室・洗面'); rm(5460,2730,1820,1365,1,'バルコニー');
+  // 1F items
+  it('kitchen',200,50,0,1); it('fridge',0,1400,0,1); it('dining-table',1000,800,0,1); it('sofa',1200,1800,180,1); it('tv',2400,50,180,1);
+  it('bath',5560,0,0,1); it('toilet',5460,1400,0,1); it('sink',6500,0,90,1);
+  it('door-front',1200,0,0,1); it('door-swing',2730,500,90,1); it('window',700,0,180,1); it('window',3800,0,180,1); it('window',7280,1000,90,1);
+  it('stair',2730,0,0,1);
+  // 2F outer walls
+  w(0,0,7280,0,2,150); w(7280,0,7280,4095,2,150); w(7280,4095,0,4095,2,150); w(0,4095,0,0,2,150);
+  // 2F inner
+  w(0,2730,3640,2730,2); w(3640,0,3640,2730,2); w(3640,1365,7280,1365,2); w(5460,0,5460,4095,2);
+  // 2F rooms
+  rm(0,0,3640,2730,2,'洋室(主) 10帖'); rm(3640,0,1820,1365,2,'子供部屋 6帖'); rm(5460,0,1820,1365,2,'洗面・バス');
+  rm(0,2730,7280,1365,2,'ファミリーCL・ホール');
+  // 2F items
+  it('bed-d',200,200,0,2); it('closet',0,2730,0,2); it('desk',2800,50,0,2);
+  it('bed-s',3740,50,0,2); it('bath',5560,0,0,2); it('sink',5460,1000,90,2);
+  it('window',1400,0,180,2); it('window',0,1200,270,2); it('window',7280,600,90,2); it('window',7280,2200,90,2);
+  it('stair',2730,1365,0,2);
 }
 
 // ───── SPRITE PRELOADER ─────
@@ -738,10 +768,17 @@ var isInt=false, iMov={}, _skyMesh=null;
 var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 
 var _texCache = {};
-// Direct asset file map — load from assets/ folder for best quality
+// PBR texture map — high-quality generated textures in assets/textures/
 var ASSET_TEX_MAP = {
-  'wood_floor':'assets/wood_floor.png', 'grass':'assets/grass.png',
-  'stone':'assets/stone.png', 'tile_floor':'assets/tile_floor.png'
+  'wood_floor':  'assets/textures/wood_floor.jpg',
+  'grass':       'assets/textures/grass.jpg',
+  'stone':       'assets/textures/concrete.jpg',
+  'tile_floor':  'assets/textures/concrete.jpg',
+  'concrete':    'assets/textures/concrete.jpg',
+  'siding':      'assets/textures/siding_dark.jpg',
+  'plaster':     'assets/textures/plaster_white.jpg',
+  'roof_tile':   'assets/textures/roof_tile.jpg',
+  'wall_int':    'assets/textures/wall_interior.jpg'
 };
 function getTexture3D(key) {
   if (!key) return null;
@@ -902,24 +939,35 @@ function buildWall3D(w){
   var fl=w.floor, fy=(fl-1)*FLOOR_H*U;
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
   var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
+  if(len<0.001) return;
   var isOuter=w.thick>=130;
-  var color = isOuter ? (fl===1 ? WALL_COLORS[1] : '#e8e0cc') : '#f4f0e8';
-  if(w.color) color = w.color;
-  
-  var matParams = {color:color, roughness:0.7, metalness:0.1};
-  if(w.texture) {
-    var baseTex = getTexture3D(w.texture);
-    if(baseTex && baseTex.image) {
-        var tex = baseTex.clone();
-        tex.needsUpdate = true;
-        tex.repeat.set(len / 0.9, WALL_H*U / 0.9);
-        matParams.map = tex;
-        matParams.color = 0xffffff;
-    }
+  var matParams;
+  if(w.color && w.color!=='#888888'){
+    // User-specified color
+    matParams={color:w.color, roughness:0.7, metalness:0.05};
+  } else if(w.texture){
+    // User-specified texture
+    var ut=getTexture3D(w.texture);
+    if(ut){var utc=ut.clone();utc.repeat.set(len/0.9,WALL_H*U/0.9);matParams={map:utc,color:0xffffff,roughness:0.75};}
+    else matParams={color:'#f4f0e8',roughness:0.75};
+  } else if(isOuter&&fl===1){
+    // 1F exterior: dark wood siding
+    var st=getTexture3D('siding');
+    if(st){var stc=st.clone();stc.repeat.set(len*2.2,(WALL_H*U)*2.8);matParams={map:stc,color:0xffffff,roughness:0.85};}
+    else matParams={color:WALL_COLORS[1],roughness:0.85};
+  } else if(isOuter){
+    // 2F+ exterior: white plaster
+    var pt=getTexture3D('plaster');
+    if(pt){var ptc=pt.clone();ptc.repeat.set(len*1.8,(WALL_H*U)*1.8);matParams={map:ptc,color:0xffffff,roughness:0.82};}
+    else matParams={color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82};
+  } else {
+    // Interior wall
+    var it2=getTexture3D('wall_int');
+    if(it2){var it2c=it2.clone();it2c.repeat.set(len,WALL_H*U);matParams={map:it2c,color:0xffffff,roughness:0.88};}
+    else matParams={color:'#f4f0e8',roughness:0.88};
   }
   var mat=new THREE.MeshStandardMaterial(matParams);
-  var geo=new THREE.BoxGeometry(len,WALL_H*U,w.thick*U);
-  var mesh=new THREE.Mesh(geo,mat);
+  var mesh=new THREE.Mesh(new THREE.BoxGeometry(len,WALL_H*U,w.thick*U),mat);
   mesh.castShadow=true; mesh.receiveShadow=true;
   mesh.position.set((x1+x2)/2,fy+WALL_H*U/2,(z1+z2)/2);
   mesh.rotation.y=Math.atan2(-dz,dx);
@@ -1243,7 +1291,11 @@ function buildRoof3D(){
   var w = fp.w*U, d = fp.h*U, h = topFloor * FLOOR_H * U;
   var pitch = (ROOF.pitch || 30) * Math.PI / 180;
   var ridgeH = (w/2) * Math.tan(pitch);
-  var mat = new THREE.MeshStandardMaterial({color:ROOF.color||0x2a2a30, side:THREE.DoubleSide, roughness:0.7});
+  var roofTex=getTexture3D('roof_tile');
+  var roofMatP={side:THREE.DoubleSide,roughness:0.75};
+  if(roofTex){var rtc=roofTex.clone();rtc.repeat.set(w*1.4,d*0.9);roofMatP.map=rtc;roofMatP.color=ROOF.color||'#2a2a30';}
+  else{roofMatP.color=ROOF.color||'#2a2a30';}
+  var mat = new THREE.MeshStandardMaterial(roofMatP);
   if(ROOF.type === 'gable') {
     var geo = new THREE.BufferGeometry();
     var pts = new Float32Array([
@@ -1292,8 +1344,8 @@ function buildLandscape(){
   base.position.set(bx,0.125,bz); base.userData={b:true}; sc3.add(base);
 
   // Driveway
-  var cTex=getTexture3D('stone');
-  if(cTex){cTex=cTex.clone();cTex.repeat.set(3,6);}
+  var cTex=getTexture3D('concrete');
+  if(cTex){cTex=cTex.clone();cTex.repeat.set(3,7);}
   var drv=new THREE.Mesh(new THREE.PlaneGeometry(4.5,14),new THREE.MeshStandardMaterial({map:cTex||null,color:cTex?0xffffff:0x909080,roughness:0.95}));
   drv.rotation.x=-Math.PI/2;drv.position.set(bx,0.01,bz+(bd/2+7));drv.userData={b:true};sc3.add(drv);
 
