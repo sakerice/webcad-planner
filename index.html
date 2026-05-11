@@ -640,7 +640,12 @@ function loadPreset(){
   // 1F items
   it('kitchen',200,50,0,1); it('fridge',0,1400,0,1); it('dining-table',1000,800,0,1); it('sofa',1200,1800,180,1); it('tv',2400,50,180,1);
   it('bath',5560,0,0,1); it('toilet',5460,1400,0,1); it('sink',6500,0,90,1);
-  it('door-front',1200,0,0,1); it('door-swing',2730,500,90,1); it('window',700,0,180,1); it('window',3800,0,180,1); it('window',7280,1000,90,1);
+  it('door-front',1200,-100,0,1); it('door-swing',2730,500,90,1);
+  // Windows: x,y = top-left of bounding box. For wall windows, offset so CENTER is on wall.
+  // Top wall (rot=180, d=150): y = -d/2 = -75 so center.y = 0
+  it('window',700,-75,180,1); it('window',3800,-75,180,1);
+  // Right wall (rot=90, w=1650): x = wallX - w/2 = 7280-825 = 6455 so center.x = 7280
+  it('window',6455,1000,90,1);
   it('stair',2730,0,0,1);
   // 2F outer walls
   w(0,0,7280,0,2,150); w(7280,0,7280,4095,2,150); w(7280,4095,0,4095,2,150); w(0,4095,0,0,2,150);
@@ -652,7 +657,11 @@ function loadPreset(){
   // 2F items
   it('bed-d',200,200,0,2); it('closet',0,2730,0,2); it('desk',2800,50,0,2);
   it('bed-s',3740,50,0,2); it('bath',5560,0,0,2); it('sink',5460,1000,90,2);
-  it('window',1400,0,180,2); it('window',0,1200,270,2); it('window',7280,600,90,2); it('window',7280,2200,90,2);
+  // 2F windows: center on wall
+  it('window',1400,-75,180,2);               // top wall: center.y=0
+  it('window',-825,1200,270,2);              // left wall (rot=270): x=-825 so center.x=0
+  it('window',6455,600,90,2);               // right wall: center.x=7280
+  it('window',6455,2200,90,2);              // right wall: center.x=7280
   it('stair',2730,1365,0,2);
 }
 
@@ -1984,7 +1993,11 @@ function isInsideItem(it, px, py){
   var dx = px - cx, dy = py - cy;
   var lx = dx*Math.cos(rad) - dy*Math.sin(rad);
   var ly = dx*Math.sin(rad) + dy*Math.cos(rad);
-  return lx >= -it.w/2 && lx <= it.w/2 && ly >= -it.d/2 && ly <= it.d/2;
+  // Add a minimum hit margin (300mm) for thin items like windows/doors
+  var thinTypes = ['window','door-swing','door-slide','door-front'];
+  var margin = thinTypes.indexOf(it.type)>=0 ? 300 : 0;
+  return lx >= -(it.w/2+margin) && lx <= it.w/2+margin &&
+         ly >= -(it.d/2+margin) && ly <= it.d/2+margin;
 }
 
 function nearWall(px,py,w){
