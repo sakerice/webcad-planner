@@ -344,6 +344,9 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div class="roof-opt"><input type="radio" name="roof" value="mono" onchange="setRoof(this.value)"> 片流れ</div>
       <div style="margin-top:7px;font-size:10px;color:#7a8fb0">勾配(°):
         <input type="number" id="roof-pitch" value="30" min="5" max="60" style="width:44px;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit" onchange="ROOF.pitch=+this.value;rebuild3D()"></div>
+      <div style="margin-top:7px;font-size:10px;color:#7a8fb0">屋根 高さ(mm):
+        <input type="number" id="roof-basey" value="" placeholder="自動" min="0" max="20000" step="100" style="width:64px;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit" oninput="ROOF.baseY=this.value===''?null:+this.value;rebuild3D()">
+        <button onclick="ROOF.baseY=null;document.getElementById('roof-basey').value='';rebuild3D()" style="background:#0f3460;border:1px solid #2a4080;color:#aab;padding:1px 5px;border-radius:3px;cursor:pointer;font-size:10px">自動</button></div>
       <div style="margin-top:7px;font-size:10px;color:#7a8fb0">外壁 3F:
         <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[3]=this.value;rebuild3D()"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">外壁 2F:
@@ -418,7 +421,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
-var ROOF = {type:'gable', pitch:30, color:'#2a2a30'};
+var ROOF = {type:'gable', pitch:30, color:'#2a2a30', baseY:null};
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc' };
 
 var ISIZES = {
@@ -1758,7 +1761,8 @@ function buildRoof3D(){
   var topFloor = 1;
   DATA.rooms.forEach(function(r){if(r.floor>topFloor) topFloor=r.floor;});
   var fp = FOOTPRINTS[topFloor] || {w:8000, h:6000};
-  var w = fp.w*U, d = fp.h*U, h = (topFloor - 1) * FLOOR_H * U + WALL_H * U;
+  var autoH = (topFloor - 1) * FLOOR_H * U + WALL_H * U;
+  var w = fp.w*U, d = fp.h*U, h = (ROOF.baseY != null ? ROOF.baseY * U : autoH);
   var pitch = (ROOF.pitch || 30) * Math.PI / 180;
   var ridgeH = (w/2) * Math.tan(pitch);
   var roofTex=getTexture3D('roof_tile');
