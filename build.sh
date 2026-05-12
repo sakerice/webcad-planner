@@ -7,3 +7,4 @@ cp -r assets/. dist/assets/
 echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
+npx wrangler deploy
