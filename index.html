@@ -966,31 +966,36 @@ function drawItem2d(it){
       }
       ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
     } else if(it.type === 'door-swing' || it.type === 'door-front') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=2;
-      // Frame
-      ctx.beginPath(); ctx.moveTo(-hw, hd); ctx.lineTo(-hw, -hd); ctx.stroke();
-      // Door Leaf (open)
-      ctx.save();
-      ctx.translate(-hw, hd);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0, -it.w*sc); ctx.stroke();
-      // Arc
-      ctx.lineWidth=1; ctx.setLineDash([2,2]);
-      ctx.beginPath(); ctx.arc(0,0, it.w*sc, -Math.PI/2, 0); ctx.stroke();
-      ctx.restore();
-    } else if(it.type === 'door-slide') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
-      ctx.strokeRect(-hw,-hd*0.3, it.w*sc, hd*0.6);
+      ctx.strokeStyle='#333'; ctx.lineWidth=1.8;
+      ctx.beginPath(); ctx.moveTo(-hw, -hd); ctx.lineTo(-hw, hd); ctx.stroke();
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(-hw, hd); ctx.lineTo(hw, hd); ctx.stroke();
+      ctx.lineWidth=0.8; ctx.setLineDash([3,3]);
       ctx.beginPath();
-      ctx.moveTo(0, -hd*0.3); ctx.lineTo(0, hd*0.3);
-      ctx.moveTo(-hw*0.5, -hd*0.3); ctx.lineTo(-hw*0.5, hd*0.3);
-      ctx.moveTo(hw*0.5, -hd*0.3); ctx.lineTo(hw*0.5, hd*0.3);
+      ctx.arc(-hw, hd, it.w*sc, -Math.PI/2, 0);
+      ctx.strokeStyle='#555'; ctx.stroke();
+      ctx.setLineDash([]);
+    } else if(it.type === 'door-slide') {
+      ctx.strokeStyle='#333'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(-hw, -hd); ctx.lineTo(hw, -hd);
+      ctx.moveTo(-hw,  hd); ctx.lineTo(hw,  hd);
       ctx.stroke();
+      ctx.strokeRect(-hw, -hd*0.85, it.w*sc*0.6, hd*1.7);
+      ctx.beginPath();
+      ctx.moveTo(-hw + it.w*sc*0.55, -hd*0.3);
+      ctx.lineTo(-hw + it.w*sc*0.55,  hd*0.3);
+      ctx.lineWidth=2; ctx.stroke();
     } else if(it.type === 'window') {
-      ctx.strokeStyle='#666'; ctx.lineWidth=1;
-      ctx.strokeRect(-hw,-hd*0.5, it.w*sc, hd);
+      ctx.strokeStyle='#555'; ctx.lineWidth=1.0;
+      ctx.strokeRect(-hw, -hd, it.w*sc, it.d*sc);
       ctx.beginPath();
       ctx.moveTo(-hw, 0); ctx.lineTo(hw, 0);
-      ctx.strokeStyle='#3080e8'; ctx.stroke();
+      ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-hw, -hd*0.45); ctx.lineTo(hw, -hd*0.45);
+      ctx.moveTo(-hw,  hd*0.45); ctx.lineTo(hw,  hd*0.45);
+      ctx.strokeStyle='#777'; ctx.lineWidth=0.8; ctx.stroke();
     } else if(it.type === 'site-rect') {
       ctx.setLineDash([10,5]);
       ctx.strokeStyle='rgba(60,100,60,0.4)'; ctx.lineWidth=2;
