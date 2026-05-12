@@ -266,9 +266,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div class="stool" data-tool="select" onclick="setTool('select')"><span class="sicon">↖</span>選択・変形</div>
       <div class="stool" data-tool="erase" onclick="setTool('erase')"><span class="sicon">✕</span>削除</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🪜 階段 <span>▶</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)">🪜 階段・屋根 <span>▶</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="stair" onclick="setTool('stair')"><span class="sicon">🪜</span>階段</div>
+      <div class="stool" data-tool="roof" onclick="setTool('roof')"><span class="sicon">🏠</span>屋根</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🚪 建具 <span>▶</span></div>
     <div class="cat-body">
@@ -345,13 +346,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div class="roof-opt"><input type="radio" name="roof" value="mono" onchange="setRoof(this.value)"> 片流れ</div>
       <div style="margin-top:7px;font-size:10px;color:#7a8fb0">勾配(°):
         <input type="number" id="roof-pitch" value="30" min="5" max="60" style="width:44px;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit" onchange="ROOF.pitch=+this.value;rebuild3D()"></div>
-      <div style="margin-top:7px;font-size:10px;color:#7a8fb0">配置階:
-        <select id="roof-floor" style="background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit;font-size:11px" onchange="ROOF.floor=+this.value;rebuild3D()">
-          <option value="1">1F上</option>
-          <option value="2">2F上</option>
-          <option value="3">3F上</option>
-          <option value="4" selected>4F上</option>
-        </select></div>
+      <div style="margin-top:4px;font-size:10px;color:#7a8fb0;opacity:0.7">※ パレット「屋根」を配置したフロアに生成</div>
       <div style="margin-top:7px;font-size:10px;color:#7a8fb0">外壁 3F:
         <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[3]=this.value;rebuild3D()"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">外壁 2F:
@@ -440,7 +435,8 @@ var ISIZES = {
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500},
   'door-swing':{w:780,d:780}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'door-front':{w:900,d:200},
-  'site-rect':{w:10000,d:8000}
+  'site-rect':{w:10000,d:8000},
+  'roof':{w:1000,d:1000}
 };
 var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
@@ -448,7 +444,8 @@ var ICOLORS = {
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
   tv:'#1a1a1a', closet:'#e8d8c8', stair:'#e8e0c8', balcony:'#c8e8c8',
   'door-swing':'#f8e8c0','door-slide':'#f8e8c0',
-  window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)'
+  window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)',
+  'roof':'rgba(50,50,80,0.12)'
 };
 // GLTF_MAP: PBR furniture GLBs (CC0, generated with pygltflib, multi-mesh PBR materials)
 var GLTF_MAP = {
@@ -493,7 +490,8 @@ var ILABELS = {
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
   desk:'デスク',tv:'TV',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段',balcony:'バルコニー',
-  'door-swing':'開戸','door-slide':'引戸',window:'窓','door-front':'玄関','site-rect':'敷地'
+  'door-swing':'開戸','door-slide':'引戸',window:'窓','door-front':'玄関','site-rect':'敷地',
+  'roof':'屋根'
 };
 
 // ───── STATE ─────
@@ -998,7 +996,19 @@ function drawItem2d(it){
     ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1;
     ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
     
-    if(it.type === 'stair') {
+    if(it.type === 'roof') {
+      // 屋根: 建物フットプリントに合わせた破線矩形 + 🏠ラベル
+      ctx.setLineDash([8,4]);
+      ctx.strokeStyle='#334'; ctx.lineWidth=1.5;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc); ctx.setLineDash([]);
+      // 対角線
+      ctx.beginPath(); ctx.strokeStyle='rgba(50,50,80,0.3)'; ctx.lineWidth=1;
+      ctx.moveTo(-hw,-hd); ctx.lineTo(hw,hd);
+      ctx.moveTo(hw,-hd); ctx.lineTo(-hw,hd); ctx.stroke();
+      ctx.font='bold '+Math.max(10,it.w*sc*0.12)+'px sans-serif';
+      ctx.fillStyle='#334'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('🏠屋根',0,0);
+    } else if(it.type === 'stair') {
       ctx.beginPath();
       var steps = 14;
       for(var si=1; si<steps; si++) {
@@ -1204,7 +1214,7 @@ function hitHandle(it,mx,my){
 
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
-var isInt=false, iMov={}, _skyMesh=null;
+var isInt=false, iMov={}, _skyMesh=null, _gndMesh=null;
 // Interior mouse look state
 var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 
@@ -1212,7 +1222,7 @@ var _texCache = {};
 // PBR texture map — high-quality generated textures in assets/textures/
 var ASSET_TEX_MAP = {
   'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
-  'grass':       'assets/textures/grass.jpg',
+  'grass':       'assets/grass.png',
   'stone':       'assets/textures/floor_tile_diffuse.jpg',
   'tile_floor':  'assets/textures/floor_tile_diffuse.jpg',
   'concrete':    'assets/textures/floor_tile_diffuse.jpg',
@@ -1281,7 +1291,8 @@ function init3D(){
   var sPa=skyGeo.attributes.position;
   for(var si=0;si<sPa.count;si++){
     var syt=(sPa.getY(si)+900)/1800;
-    skyCols.push(0.42+syt*0.22, 0.62+syt*0.2, 0.82+syt*0.16);
+    // ACESFilmic補正: より鮮やかな青空
+    skyCols.push(0.28+syt*0.18, 0.52+syt*0.28, 0.95+syt*0.05);
   }
   skyGeo.setAttribute('color',new THREE.Float32BufferAttribute(skyCols,3));
   _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
@@ -1318,7 +1329,7 @@ function init3D(){
   sc3.add(amb);
 
   // Ground – resized in buildLandscape() based on building footprint
-  var _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+  _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
     new THREE.MeshStandardMaterial({color:0x5a8a3a,roughness:1.0,metalness:0.0}));
   _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
   _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
@@ -1532,6 +1543,7 @@ function getSpriteTexture3D(sheet) {
 }
 
 function buildItem3D(it){
+  if(it.type==='roof') return; // 屋根はbuildRoof3Dで処理
   var fy=(it.floor-1)*FLOOR_H*U, h=getItemH(it.type)*U, col=getItemCol(it.type);
   var grp = new THREE.Group();
   grp.position.set((it.x+it.w/2)*U, fy, (it.y+it.d/2)*U);
@@ -1797,7 +1809,11 @@ function buildRooms3D(){
 }
 
 function buildRoof3D(){
-  if(ROOF.type==='none' || DATA.walls.length===0) return;
+  if(ROOF.type==='none') return;
+  // 屋根アイテムが配置されていればそのフロアを使用、なければ return
+  var roofItem = DATA.items.filter(function(it){ return it.type==='roof'; })[0];
+  if(!roofItem || DATA.walls.length===0) return;
+  ROOF.floor = roofItem.floor;
   // Compute actual building footprint from walls
   var minX=Infinity,minZ=Infinity,maxX=-Infinity,maxZ=-Infinity;
   DATA.walls.forEach(function(wl){
@@ -1861,8 +1877,8 @@ function buildLandscape(){
   var gndSize = Math.max(bw, bd) + 12;
   var grassTex = getTexture3D('grass');
   var gndMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff, map: grassTex || null,
     color: grassTex ? 0xffffff : 0x5a8a3a,
+    map: grassTex || null,
     roughness: 1.0, metalness: 0.0
   });
   if(grassTex){ grassTex.repeat.set(gndSize/2, gndSize/2); }
