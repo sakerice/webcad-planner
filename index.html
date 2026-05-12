@@ -17,6 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;height:100vh;background:#1c1c2e;color:#eee;overflow:hidden}
@@ -240,11 +241,40 @@ var ICOLORS = {
   window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)'
 };
 var GLTF_MAP = {
-  'sofa': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Sofa/glTF-Binary/Sofa.glb',
-  'dining_6': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb',
-  'tree': 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxInterleaved/glTF-Binary/BoxInterleaved.glb' 
+  'sofa':         'assets/models/sofa.glb',
+  'bed-d':        'assets/models/bed_double.glb',
+  'bed-s':        'assets/models/bed_single.glb',
+  'kitchen':      'assets/models/kitchen.glb',
+  'bath':         'assets/models/bathtub.glb',
+  'toilet':       'assets/models/toilet.glb',
+  'sink':         'assets/models/sink.glb',
+  'fridge':       'assets/models/fridge.glb',
+  'dining-table': 'assets/models/dining_table.glb',
+  'desk':         'assets/models/desk.glb',
+  'tv':           'assets/models/tv.glb',
+  'closet':       'assets/models/closet.glb',
 };
 var _modelCache = {};
+// PBR Textures (lazy-loaded)
+var _pbrTex = {};
+function pbrTex(name) {
+  if (_pbrTex[name]) return _pbrTex[name];
+  var loader = new THREE.TextureLoader();
+  var t = loader.load('assets/textures/' + name, function(){ if(ren) ren.render(sc3, ST.view==='interior'?camInt:camExt); });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.encoding = THREE.sRGBEncoding;
+  _pbrTex[name] = t;
+  return t;
+}
+function pbrTexLinear(name) {
+  if (!name) return null;
+  if (_pbrTex['_lin_'+name]) return _pbrTex['_lin_'+name];
+  var loader = new THREE.TextureLoader();
+  var t = loader.load('assets/textures/' + name);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  _pbrTex['_lin_'+name] = t;
+  return t;
+}
 
 var ILABELS = {
   kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',
@@ -503,32 +533,59 @@ function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
     var p=w2c(l.x+l.w/2,l.y+l.d/2);
-    var nameFull=l.n||'部屋';
-    var parts=nameFull.split(' ');
-    var name=parts[0], area=parts[1]||'';
-    var szN=Math.max(10,ST.zoom*0.8), szA=Math.max(8,ST.zoom*0.5);
+    var name=l.n||'部屋';
+    var sqm = (l.w * l.d) / 1000000;
+    var tatami = sqm / 1.62;
+    var areaStr = tatami.toFixed(1) + '畳 / ' + sqm.toFixed(2) + '㎡';
+    var showArea = ST.zoom >= 0.4;
+    var szN=Math.max(10,ST.zoom*0.8), szA=Math.max(8,ST.zoom*0.55);
     ctx.font='bold '+szN+'px "Noto Sans JP",sans-serif';
-    var tw=Math.max(ctx.measureText(name).width,ctx.measureText(area).width)+18;
-    var th=area?szN+szA+14:szN+12;
+    var tw=Math.max(ctx.measureText(name).width, showArea?ctx.measureText(areaStr).width:0)+18;
+    var th=showArea?szN+szA+14:szN+12;
     ctx.save();
     ctx.translate(p.cx,p.cy);
     if(ST.selected===l) {
       ctx.shadowBlur=10; ctx.shadowColor='rgba(0,120,255,0.5)';
       ctx.strokeStyle='#0078ff'; ctx.lineWidth=2;
     }
-    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillStyle='rgba(255,255,255,0.88)';
     ctx.beginPath(); ctx.roundRect(-tw/2,-th/2,tw,th,6); ctx.fill();
     if(ST.selected===l) ctx.stroke();
     ctx.restore();
     ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold '+szN+'px "Noto Sans JP",sans-serif';
     ctx.fillStyle='#222';
-    ctx.fillText(name,p.cx,area?p.cy-szA/2-2:p.cy);
-    if(area){
-      ctx.font='bold '+szA+'px "Noto Sans JP",sans-serif';
-      ctx.fillStyle='#555';
-      ctx.fillText(area,p.cx,p.cy+szN/2+3);
+    ctx.fillText(name, p.cx, showArea ? p.cy-szA/2-2 : p.cy);
+    if(showArea){
+      ctx.font=szA+'px "Noto Sans JP",sans-serif';
+      ctx.fillStyle='#666';
+      ctx.fillText(areaStr, p.cx, p.cy+szN/2+3);
     }
   });
+}
+
+function drawHatch(ctx, pts, pitch) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].cx, pts[0].cy);
+  ctx.lineTo(pts[1].cx, pts[1].cy);
+  ctx.lineTo(pts[2].cx, pts[2].cy);
+  ctx.lineTo(pts[3].cx, pts[3].cy);
+  ctx.closePath();
+  ctx.clip();
+  var xs = pts.map(function(p){return p.cx;}), ys = pts.map(function(p){return p.cy;});
+  var x0=Math.min.apply(null,xs)-pitch, x1=Math.max.apply(null,xs)+pitch;
+  var y0=Math.min.apply(null,ys)-pitch, y1=Math.max.apply(null,ys)+pitch;
+  var span = (x1-x0) + (y1-y0);
+  ctx.beginPath();
+  for(var s = -span; s < span; s += pitch) {
+    ctx.moveTo(x0, y0 + s);
+    ctx.lineTo(x0 + span, y0 + s + span);
+  }
+  ctx.strokeStyle = 'rgba(100,90,80,0.35)';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+  ctx.restore();
 }
 
 function drawWall2d(w){
@@ -555,6 +612,13 @@ function drawWall2d(w){
   } else if(isOuter){
     ctx.fillStyle='#e8e4dc'; ctx.fill();
     ctx.strokeStyle='#555'; ctx.lineWidth=2.0; ctx.stroke();
+    var pts = [
+      {cx: a.cx+nx*t, cy: a.cy+ny*t},
+      {cx: b.cx+nx*t, cy: b.cy+ny*t},
+      {cx: b.cx-nx*t, cy: b.cy-ny*t},
+      {cx: a.cx-nx*t, cy: a.cy-ny*t}
+    ];
+    drawHatch(ctx, pts, Math.max(4, t * 0.7));
   } else {
     ctx.fillStyle='#d0cfc8'; ctx.fill();
     ctx.strokeStyle='#888'; ctx.lineWidth=1.2; ctx.stroke();
@@ -620,31 +684,36 @@ function drawItem2d(it){
       }
       ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
     } else if(it.type === 'door-swing' || it.type === 'door-front') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=2;
-      // Frame
-      ctx.beginPath(); ctx.moveTo(-hw, hd); ctx.lineTo(-hw, -hd); ctx.stroke();
-      // Door Leaf (open)
-      ctx.save();
-      ctx.translate(-hw, hd);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0, -it.w*sc); ctx.stroke();
-      // Arc
-      ctx.lineWidth=1; ctx.setLineDash([2,2]);
-      ctx.beginPath(); ctx.arc(0,0, it.w*sc, -Math.PI/2, 0); ctx.stroke();
-      ctx.restore();
-    } else if(it.type === 'door-slide') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
-      ctx.strokeRect(-hw,-hd*0.3, it.w*sc, hd*0.6);
+      ctx.strokeStyle='#333'; ctx.lineWidth=1.8;
+      ctx.beginPath(); ctx.moveTo(-hw, -hd); ctx.lineTo(-hw, hd); ctx.stroke();
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(-hw, hd); ctx.lineTo(hw, hd); ctx.stroke();
+      ctx.lineWidth=0.8; ctx.setLineDash([3,3]);
       ctx.beginPath();
-      ctx.moveTo(0, -hd*0.3); ctx.lineTo(0, hd*0.3);
-      ctx.moveTo(-hw*0.5, -hd*0.3); ctx.lineTo(-hw*0.5, hd*0.3);
-      ctx.moveTo(hw*0.5, -hd*0.3); ctx.lineTo(hw*0.5, hd*0.3);
+      ctx.arc(-hw, hd, it.w*sc, -Math.PI/2, 0);
+      ctx.strokeStyle='#555'; ctx.stroke();
+      ctx.setLineDash([]);
+    } else if(it.type === 'door-slide') {
+      ctx.strokeStyle='#333'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(-hw, -hd); ctx.lineTo(hw, -hd);
+      ctx.moveTo(-hw,  hd); ctx.lineTo(hw,  hd);
       ctx.stroke();
+      ctx.strokeRect(-hw, -hd*0.85, it.w*sc*0.6, hd*1.7);
+      ctx.beginPath();
+      ctx.moveTo(-hw + it.w*sc*0.55, -hd*0.3);
+      ctx.lineTo(-hw + it.w*sc*0.55,  hd*0.3);
+      ctx.lineWidth=2; ctx.stroke();
     } else if(it.type === 'window') {
-      ctx.strokeStyle='#666'; ctx.lineWidth=1;
-      ctx.strokeRect(-hw,-hd*0.5, it.w*sc, hd);
+      ctx.strokeStyle='#555'; ctx.lineWidth=1.0;
+      ctx.strokeRect(-hw, -hd, it.w*sc, it.d*sc);
       ctx.beginPath();
       ctx.moveTo(-hw, 0); ctx.lineTo(hw, 0);
-      ctx.strokeStyle='#3080e8'; ctx.stroke();
+      ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-hw, -hd*0.45); ctx.lineTo(hw, -hd*0.45);
+      ctx.moveTo(-hw,  hd*0.45); ctx.lineTo(hw,  hd*0.45);
+      ctx.strokeStyle='#777'; ctx.lineWidth=0.8; ctx.stroke();
     } else if(it.type === 'site-rect') {
       ctx.setLineDash([10,5]);
       ctx.strokeStyle='rgba(60,100,60,0.4)'; ctx.lineWidth=2;
@@ -809,6 +878,22 @@ function init3D(){
   sc3.add(sun);
   
   var amb = new THREE.AmbientLight(0xffffff, 0.4);
+  // HDR Environment Map
+  (function(){
+    if(typeof THREE.RGBELoader === 'undefined') return;
+    var pmrem = new THREE.PMREMGenerator(ren);
+    pmrem.compileEquirectangularShader();
+    new THREE.RGBELoader()
+      .setDataType(THREE.UnsignedByteType)
+      .load('assets/env/outdoor.hdr', function(hdrTex) {
+        sc3.environment = pmrem.fromEquirectangular(hdrTex).texture;
+        hdrTex.dispose(); pmrem.dispose();
+        rebuild3D();
+        console.log('[WebCAD] HDR environment map loaded');
+      }, undefined, function(err) {
+        console.warn('[WebCAD] HDR load failed, using fallback lighting');
+      });
+  })();
   sc3.add(amb);
 
   var grassTex = getTexture3D('grass');
@@ -833,7 +918,7 @@ function init3D(){
       
       // Bloom
       if(THREE.UnrealBloomPass) {
-        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.35, 0.4, 0.85);
+        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.25, 0.4, 0.90);
         composer.addPass(bloom);
       }
       // SAO
@@ -882,8 +967,27 @@ function build3D(){
   buildWinFrames();
   buildRoof3D();
   buildLandscape();
+  // Fit shadow camera to building bounds
+  var _sunLight = null;
+  sc3.traverse(function(o){ if(o.isDirectionalLight) _sunLight = o; });
+  if(_sunLight) fitShadowCamera(_sunLight);
 }
 
+
+function fitShadowCamera(sunLight) {
+  var box = new THREE.Box3();
+  sc3.traverse(function(obj){
+    if(obj.isMesh && obj.name !== '_sky') box.expandByObject(obj);
+  });
+  if(box.isEmpty()) return;
+  var size = box.getSize(new THREE.Vector3());
+  var r = Math.max(size.x, size.z) * 1.3 / 2;
+  sunLight.shadow.camera.left   = -r; sunLight.shadow.camera.right  =  r;
+  sunLight.shadow.camera.top    =  r; sunLight.shadow.camera.bottom = -r;
+  sunLight.shadow.camera.near   = 0.5;
+  sunLight.shadow.camera.far    = size.y * 3 + 80;
+  sunLight.shadow.camera.updateProjectionMatrix();
+}
 function rebuild3D(){if(sc3) build3D();}
 
 function buildWall3D(w){
@@ -894,8 +998,17 @@ function buildWall3D(w){
   var color = isOuter ? (fl===1 ? WALL_COLORS[1] : '#e8e0cc') : '#f4f0e8';
   if(w.color) color = w.color;
   
-  var matParams = {color:color, roughness:0.7, metalness:0.1};
-  if(w.texture) {
+  var matParams = {color:color, roughness:0.7, metalness:0.0};
+  var isOuter3d = w.thick >= 120;
+  if(!w.texture && isOuter3d && typeof pbrTex === 'function'){
+    var sidingDiff = pbrTex(w.floor === 1 ? 'wall_siding_diffuse.jpg' : 'wall_plaster_diffuse.jpg');
+    var sidingNorm = pbrTexLinear(w.floor === 1 ? 'wall_siding_normal.jpg' : null);
+    var wallLen = Math.sqrt(Math.pow(w.x2-w.x1,2)+Math.pow(w.y2-w.y1,2));
+    sidingDiff.repeat.set(Math.max(1, wallLen/600), 1);
+    matParams.map = sidingDiff;
+    matParams.color = 0xffffff;
+    if(sidingNorm){ sidingNorm.repeat.copy(sidingDiff.repeat); matParams.normalMap = sidingNorm; matParams.normalScale = new THREE.Vector2(0.8,0.8); }
+  } else if(w.texture) {
     var baseTex = getTexture3D(w.texture);
     if(baseTex && baseTex.image) {
         var tex = baseTex.clone();
@@ -1104,13 +1217,23 @@ function buildRooms3D(){
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
 
-    var matParams = {color:0xffffff, roughness:0.8};
-    var baseTex = getTexture3D(r.texture || 'wood_floor');
-    if(baseTex && baseTex.image) {
-        var tex = baseTex.clone();
-        tex.needsUpdate = true;
-        tex.repeat.set(r.w*U/0.9, r.d*U/0.9);
-        matParams.map = tex;
+    var isWet = r.texture === 'tile_floor' || r.n === 'バス' || r.n === 'トイレ' || r.n === '洗面';
+    var diffName = isWet ? 'floor_tile_diffuse.jpg' : 'floor_wood_diffuse.jpg';
+    var normName = isWet ? 'floor_tile_normal.jpg'  : 'floor_wood_normal.jpg';
+    var roughName= isWet ? 'floor_tile_roughness.jpg': 'floor_wood_roughness.jpg';
+    var repU = Math.max(0.5, r.w*U/0.9), repV = Math.max(0.5, r.d*U/0.9);
+    var floorDiff  = pbrTex(diffName);
+    var floorNorm  = pbrTexLinear(normName);
+    var floorRough = pbrTexLinear(roughName);
+    [floorDiff, floorNorm, floorRough].filter(Boolean).forEach(function(t){ t.repeat.set(repU, repV); });
+    var matParams = {
+      color: 0xffffff, map: floorDiff,
+      normalMap: floorNorm, normalScale: new THREE.Vector2(0.6, 0.6),
+      roughnessMap: floorRough, roughness: 1.0, metalness: 0.0
+    };
+    if(r.texture && r.texture !== 'wood_floor' && r.texture !== 'tile_floor'){
+      var baseTex = getTexture3D(r.texture);
+      if(baseTex && baseTex.image) { var tex=baseTex.clone(); tex.needsUpdate=true; tex.repeat.set(repU,repV); matParams.map=tex; }
     }
     var matFloor=new THREE.MeshStandardMaterial(matParams);
     
