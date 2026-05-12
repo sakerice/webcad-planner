@@ -780,19 +780,18 @@ function draw2d(){
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
   var fi=DATA.items.filter(function(i){return i.floor===ST.floor;});
 
-  // 0. Adjacent floor ghost (floors above and below, faded for reference)
-  [ST.floor - 1, ST.floor + 1].forEach(function(adjFloor){
-    if(adjFloor < 1 || adjFloor > 4) return;
-    var alpha = adjFloor < ST.floor ? 0.22 : 0.14;
-    ctx.save(); ctx.globalAlpha = alpha;
-    DATA.rooms.filter(function(r){return r.floor===adjFloor;}).forEach(function(r){
+  // 0. Floor below ghost – 1つ下のフロアをうっすら表示（2F編集時に1Fが見える）
+  var ghostFloor = ST.floor - 1;
+  if(ghostFloor >= 1) {
+    ctx.save(); ctx.globalAlpha = 0.22;
+    DATA.rooms.filter(function(r){return r.floor===ghostFloor;}).forEach(function(r){
       var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
-      ctx.fillStyle='rgba(180,180,220,0.5)'; ctx.fillRect(px,py,w,d);
+      ctx.fillStyle='rgba(160,160,210,0.4)'; ctx.fillRect(px,py,w,d);
       ctx.strokeStyle='#6070a0'; ctx.lineWidth=1; ctx.strokeRect(px,py,w,d);
     });
-    DATA.walls.filter(function(w){return w.floor===adjFloor;}).forEach(drawWall2d);
+    DATA.walls.filter(function(w){return w.floor===ghostFloor;}).forEach(drawWall2d);
     ctx.restore();
-  });
+  }
 
   // 1. Sites (Global Base Layer)
   DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
