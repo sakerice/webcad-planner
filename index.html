@@ -1197,15 +1197,15 @@ var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 var _texCache = {};
 // PBR texture map — high-quality generated textures in assets/textures/
 var ASSET_TEX_MAP = {
-  'wood_floor':  'assets/textures/wood_floor.jpg',
+  'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
   'grass':       'assets/textures/grass.jpg',
-  'stone':       'assets/textures/concrete.jpg',
-  'tile_floor':  'assets/textures/concrete.jpg',
-  'concrete':    'assets/textures/concrete.jpg',
-  'siding':      'assets/textures/siding_dark.jpg',
-  'plaster':     'assets/textures/plaster_white.jpg',
-  'roof_tile':   'assets/textures/roof_tile.jpg',
-  'wall_int':    'assets/textures/wall_interior.jpg'
+  'stone':       'assets/textures/floor_tile_diffuse.jpg',
+  'tile_floor':  'assets/textures/floor_tile_diffuse.jpg',
+  'concrete':    'assets/textures/floor_tile_diffuse.jpg',
+  'siding':      'assets/textures/wall_siding_diffuse.jpg',
+  'plaster':     'assets/textures/wall_plaster_diffuse.jpg',
+  'roof_tile':   'assets/textures/roof_tile_diffuse.jpg',
+  'wall_int':    'assets/textures/wall_plaster_diffuse.jpg'
 };
 function getTexture3D(key) {
   if (!key) return null;
@@ -1255,7 +1255,7 @@ function init3D(){
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
   ren.outputEncoding = THREE.sRGBEncoding;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
-  ren.toneMappingExposure = 1.0;
+  ren.toneMappingExposure = 1.4;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
   wrap.appendChild(ren.domElement);
@@ -1273,7 +1273,7 @@ function init3D(){
   _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
   sc3.add(_skyMesh);
 
-  var hemi=new THREE.HemisphereLight(0xffffff,0x444444,0.6);
+  var hemi=new THREE.HemisphereLight(0xffffff,0x666644,1.0);
   sc3.add(hemi);
 
   var sun=new THREE.DirectionalLight(0xffffff,1.2);
@@ -1284,7 +1284,7 @@ function init3D(){
   sun.shadow.bias = -0.0005; 
   sc3.add(sun);
   
-  var amb = new THREE.AmbientLight(0xffffff, 0.4);
+  var amb = new THREE.AmbientLight(0xffffff, 0.6);
   // HDR Environment Map
   (function(){
     if(typeof THREE.RGBELoader === 'undefined') return;

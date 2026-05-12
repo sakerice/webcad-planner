@@ -69,15 +69,16 @@ def tile_floor_roughness():
     return Image.fromarray(arr)
 
 def wall_siding_diffuse():
-    img = Image.new("RGB", (SZ, SZ), (82, 65, 50))
+    # 明るめのガルバリウム系サイディング
+    img = Image.new("RGB", (SZ, SZ), (175, 155, 130))
     draw = ImageDraw.Draw(img)
     ph = SZ // 14
     for i in range(15):
         y = i * ph
-        shade = 78 + (i % 2) * 14
-        draw.rectangle([0, y, SZ, y+ph-3], fill=(shade, shade-18, shade-30))
-        draw.line([(0, y+ph-2),(SZ, y+ph-2)], fill=(45,35,25), width=2)
-        draw.line([(0, y),(SZ, y)], fill=(shade+18, shade, shade-10), width=1)
+        shade = 170 + (i % 2) * 18
+        draw.rectangle([0, y, SZ, y+ph-3], fill=(shade, shade-18, shade-35))
+        draw.line([(0, y+ph-2),(SZ, y+ph-2)], fill=(120, 105, 85), width=2)
+        draw.line([(0, y),(SZ, y)], fill=(shade+20, shade+5, shade-15), width=1)
     return img
 
 def wall_siding_normal():
