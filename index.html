@@ -1253,8 +1253,8 @@ function applyHandleDrag(cx,cy,e){
     if(h.indexOf('s')>=0) nd=o.d+ldy;
     if(h.indexOf('n')>=0) nd=o.d-ldy;
 
-    // Grid snap (Shift on desktop)
-    var snapG=e&&e.shiftKey?(ST.snap||455):0;
+    // Grid snap: always use current snap setting (Shift = fine-tune / disable)
+    var snapG=onMobile ? (ST.snap||455) : (e&&e.shiftKey ? 0 : (ST.snap||0));
     if(snapG){nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG;}
     nw=Math.max(snapG||100,nw); nd=Math.max(snapG||100,nd);
 
