@@ -338,7 +338,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     </div>
     <div id="roof-panel">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🏠 屋根設定</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="gable" checked onchange="setRoof(this.value)"> 切妻屋根</div>
+      <div class="roof-opt"><input type="radio" name="roof" value="none" checked onchange="setRoof(this.value)"> なし（表示しない）</div>
+      <div class="roof-opt"><input type="radio" name="roof" value="gable" onchange="setRoof(this.value)"> 切妻屋根</div>
       <div class="roof-opt"><input type="radio" name="roof" value="hip" onchange="setRoof(this.value)"> 寄棟屋根</div>
       <div class="roof-opt"><input type="radio" name="roof" value="flat" onchange="setRoof(this.value)"> 陸屋根</div>
       <div class="roof-opt"><input type="radio" name="roof" value="mono" onchange="setRoof(this.value)"> 片流れ</div>
@@ -425,7 +426,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
-var ROOF = {type:'gable', pitch:30, color:'#2a2a30', floor:4};
+var ROOF = {type:'none', pitch:30, color:'#2a2a30', floor:2};
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc' };
 
 var ISIZES = {
@@ -1317,12 +1318,13 @@ function init3D(){
   })();
   sc3.add(amb);
 
-  // Ground is built dynamically in buildLandscape() based on building size
-  var _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(1,1),
-    new THREE.MeshStandardMaterial({color:0x4a7a3a,roughness:1.0,metalness:0.0}));
-  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
+  // Ground – resized in buildLandscape() based on building footprint
+  var _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+    new THREE.MeshStandardMaterial({color:0x5a8a3a,roughness:1.0,metalness:0.0}));
+  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
+  _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
 
-  camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,600);
+  camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,2000);
   camExt.position.set(12,9,18); camExt.lookAt(4,1,2);
   camInt=new THREE.PerspectiveCamera(75,wrap.clientWidth/wrap.clientHeight,0.01,100);
   camInt.position.set(4,1.6,4);
@@ -1796,7 +1798,7 @@ function buildRooms3D(){
 }
 
 function buildRoof3D(){
-  if(DATA.walls.length===0) return;
+  if(ROOF.type==='none' || DATA.walls.length===0) return;
   // Compute actual building footprint from walls
   var minX=Infinity,minZ=Infinity,maxX=-Infinity,maxZ=-Infinity;
   DATA.walls.forEach(function(wl){
@@ -1970,7 +1972,7 @@ function setView(v){
       } else {
         isInt=false;
         if(orbit) orbit.enabled=true;
-        sc3.fog=new THREE.Fog(0xb8d4f0,60,300);
+        sc3.fog=new THREE.Fog(0xb8d4f0,80,500);
         sc3.background=null;
         if(_skyMesh) _skyMesh.visible=true;
         if(composer&&composer.passes[1]) composer.passes[1].strength=0.25;
