@@ -1394,7 +1394,7 @@ function buildWall3D(w){
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
   var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
   if(len<0.001) return;
-  var isOuter=w.thick>=130;
+  var isOuter=w.thick>=120;
   var matParams;
   if(w.color && w.color!=='#888888'){
     // User-specified color
@@ -1758,7 +1758,7 @@ function buildRoof3D(){
   var topFloor = 1;
   DATA.rooms.forEach(function(r){if(r.floor>topFloor) topFloor=r.floor;});
   var fp = FOOTPRINTS[topFloor] || {w:8000, h:6000};
-  var w = fp.w*U, d = fp.h*U, h = topFloor * FLOOR_H * U;
+  var w = fp.w*U, d = fp.h*U, h = (topFloor - 1) * FLOOR_H * U + WALL_H * U;
   var pitch = (ROOF.pitch || 30) * Math.PI / 180;
   var ridgeH = (w/2) * Math.tan(pitch);
   var roofTex=getTexture3D('roof_tile');
