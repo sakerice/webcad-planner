@@ -717,18 +717,38 @@ var SPRITE_IMG1 = new Image(), SPRITE_IMG2 = new Image();
 var SPRITE_JSON = {
   cell: 512,
   sprites: {
-    // Sheet 1
-    toilet: {x: 0, y: 0, img:1}, bed: {x: 512, y: 0, img:1}, sink: {x: 1024, y: 0, img:1},
-    tv: {x: 1536, y: 0, img:1}, bathtub: {x: 2048, y: 0, img:1}, car: {x: 0, y: 512, img:1},
-    sofa: {x: 512, y: 512, img:1}, kitchen: {x: 1024, y: 512, img:1}, fridge: {x: 1536, y: 512, img:1},
-    dining: {x: 2048, y: 512, img:1}, wood_floor: {x: 0, y: 1024, img:1}, stone: {x: 512, y: 1024, img:1},
-    tree: {x: 1024, y: 1024, img:1}, tile_floor: {x: 1536, y: 1024, img:1}, grass: {x: 2048, y: 1024, img:1},
+    // Sheet 1 (with tight crop: cx,cy = offset within tile, cw,ch = content size)
+    toilet:    {x:0,    y:0,    img:1, cx:148, cy:54,  cw:207, ch:397},
+    bed:       {x:512,  y:0,    img:1, cx:153, cy:49,  cw:200, ch:407},
+    sink:      {x:1024, y:0,    img:1, cx:48,  cy:107, cw:414, ch:289},
+    tv:        {x:1536, y:0,    img:1, cx:51,  cy:162, cw:404, ch:177},
+    bathtub:   {x:2048, y:0,    img:1, cx:86,  cy:54,  cw:339, ch:396},
+    car:       {x:0,    y:512,  img:1, cx:152, cy:47,  cw:202, ch:412},
+    sofa:      {x:512,  y:512,  img:1, cx:31,  cy:136, cw:446, ch:232},
+    kitchen:   {x:1024, y:512,  img:1, cx:41,  cy:152, cw:429, ch:201},
+    fridge:    {x:1536, y:512,  img:1, cx:38,  cy:111, cw:436, ch:289},
+    dining:    {x:2048, y:512,  img:1, cx:67,  cy:55,  cw:369, ch:392},
+    wood_floor:{x:0,    y:1024, img:1, cx:67,  cy:55,  cw:387, ch:394},
+    stone:     {x:512,  y:1024, img:1, cx:62,  cy:55,  cw:386, ch:394},
+    tree:      {x:1024, y:1024, img:1, cx:65,  cy:55,  cw:382, ch:403},
+    tile_floor:{x:1536, y:1024, img:1, cx:64,  cy:55,  cw:381, ch:394},
+    grass:     {x:2048, y:1024, img:1, cx:61,  cy:55,  cw:386, ch:394},
     // Sheet 2
-    loveseat_2p: {x:0, y:0, img:2}, low_table: {x:512, y:0, img:2}, armchair_1p: {x:1024, y:0, img:2},
-    dining_6: {x:1536, y:0, img:2}, round_table_4: {x:2048, y:0, img:2}, desk: {x:0, y:512, img:2},
-    closet_pole: {x:512, y:512, img:2}, double_bed_alt: {x:1024, y:512, img:2}, semi_double_bed: {x:1536, y:512, img:2},
-    shoe_cabinet: {x:2048, y:512, img:2}, washer: {x:0, y:1024, img:2}, desk_chair: {x:512, y:1024, img:2},
-    chest_drawers: {x:1024, y:1024, img:2}, futon_set: {x:1536, y:1024, img:2}, storage_boxes: {x:2048, y:1024, img:2}
+    loveseat_2p:   {x:0,    y:0,    img:2, cx:53,  cy:184, cw:410, ch:253},
+    low_table:     {x:512,  y:0,    img:2, cx:59,  cy:130, cw:384, ch:258},
+    armchair_1p:   {x:1024, y:0,    img:2, cx:80,  cy:69,  cw:367, ch:378},
+    dining_6:      {x:1536, y:0,    img:2, cx:53,  cy:140, cw:394, ch:314},
+    round_table_4: {x:2048, y:0,    img:2, cx:59,  cy:59,  cw:392, ch:390},
+    desk:          {x:0,    y:512,  img:2, cx:92,  cy:145, cw:337, ch:219},
+    closet_pole:   {x:512,  y:512,  img:2, cx:50,  cy:136, cw:413, ch:241},
+    double_bed_alt:{x:1024, y:512,  img:2, cx:85,  cy:64,  cw:312, ch:397},
+    semi_double_bed:{x:1536,y:512,  img:2, cx:117, cy:69,  cw:195, ch:378},
+    shoe_cabinet:  {x:2048, y:512,  img:2, cx:68,  cy:162, cw:377, ch:189},
+    washer:        {x:0,    y:1024, img:2, cx:104, cy:86,  cw:305, ch:341},
+    desk_chair:    {x:512,  y:1024, img:2, cx:155, cy:56,  cw:268, ch:313},
+    chest_drawers: {x:1024, y:1024, img:2, cx:70,  cy:146, cw:373, ch:221},
+    futon_set:     {x:1536, y:1024, img:2, cx:101, cy:57,  cw:257, ch:406},
+    storage_boxes: {x:2048, y:1024, img:2, cx:80,  cy:120, cw:353, ch:277}
   }
 };
 var SPRITE_MAP = {
@@ -987,14 +1007,16 @@ function drawItem2d(it){
     var img = s.img === 1 ? SPRITE_IMG1 : SPRITE_IMG2;
     if (img.complete) {
       var tw = it.w * sc, td = it.d * sc;
-      var aspect = 1.0; 
+      // Use tight crop coords to remove whitespace
+      var scx=s.cx||0, scy=s.cy||0, scw=s.cw||512, sch=s.ch||512;
+      var aspect = scw/sch;
       var dw = tw, dd = td;
       if (tw / td > aspect) { dw = td * aspect; } else { dd = tw / aspect; }
       ctx.save();
       ctx.translate((it.sX||0)*sc, (it.sY||0)*sc);
       var ss = it.sScale||1;
       ctx.scale(ss, ss);
-      ctx.drawImage(img, s.x, s.y, 512, 512, -dw/2, -dd/2, dw, dd);
+      ctx.drawImage(img, s.x+scx, s.y+scy, scw, sch, -dw/2, -dd/2, dw, dd);
       ctx.restore();
     }
   } else {
@@ -1468,23 +1490,23 @@ function buildWall3D(w){
   } else if(isOuter&&fl===1){
     // 1F exterior: dark wood siding
     var st=getTexture3D('siding');
-    if(st){var stc=st.clone();stc.repeat.set(len*2.2,(WALL_H*U)*2.8);matParams={map:stc,color:0xffffff,roughness:0.85};}
+    if(st){var stc=st.clone();stc.repeat.set(len*2.2,(FLOOR_H*U)*2.8);matParams={map:stc,color:0xffffff,roughness:0.85};}
     else matParams={color:WALL_COLORS[1],roughness:0.85};
   } else if(isOuter){
     // 2F+ exterior: white plaster
     var pt=getTexture3D('plaster');
-    if(pt){var ptc=pt.clone();ptc.repeat.set(len*1.8,(WALL_H*U)*1.8);matParams={map:ptc,color:0xffffff,roughness:0.82};}
+    if(pt){var ptc=pt.clone();ptc.repeat.set(len*1.8,(FLOOR_H*U)*1.8);matParams={map:ptc,color:0xffffff,roughness:0.82};}
     else matParams={color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82};
   } else {
     // Interior wall
     var it2=getTexture3D('wall_int');
-    if(it2){var it2c=it2.clone();it2c.repeat.set(len,WALL_H*U);matParams={map:it2c,color:0xffffff,roughness:0.88};}
+    if(it2){var it2c=it2.clone();it2c.repeat.set(len,FLOOR_H*U);matParams={map:it2c,color:0xffffff,roughness:0.88};}
     else matParams={color:'#f4f0e8',roughness:0.88};
   }
   var mat=new THREE.MeshStandardMaterial(matParams);
-  var mesh=new THREE.Mesh(new THREE.BoxGeometry(len,WALL_H*U,w.thick*U),mat);
+  var mesh=new THREE.Mesh(new THREE.BoxGeometry(len,FLOOR_H*U,w.thick*U),mat);
   mesh.castShadow=true; mesh.receiveShadow=true;
-  mesh.position.set((x1+x2)/2,fy+WALL_H*U/2,(z1+z2)/2);
+  mesh.position.set((x1+x2)/2,fy+FLOOR_H*U/2,(z1+z2)/2);
   mesh.rotation.y=Math.atan2(-dz,dx);
   mesh.userData={b:true};
   sc3.add(mesh);
