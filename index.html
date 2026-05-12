@@ -1303,12 +1303,10 @@ function init3D(){
   })();
   sc3.add(amb);
 
-  var grassTex = getTexture3D('grass');
-  if(grassTex) { grassTex.repeat.set(20, 20); }
-  var gnd=new THREE.Mesh(new THREE.PlaneGeometry(120,120), new THREE.MeshStandardMaterial({
-    color:0xffffff, map: grassTex, roughness:1.0, metalness: 0.0
-  }));
-  gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; sc3.add(gnd);
+  // Ground is built dynamically in buildLandscape() based on building size
+  var _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(1,1),
+    new THREE.MeshStandardMaterial({color:0x4a7a3a,roughness:1.0,metalness:0.0}));
+  _gndMesh.rotation.x=-Math.PI/2; _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
 
   camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,600);
   camExt.position.set(12,9,18); camExt.lookAt(4,1,2);
@@ -1374,7 +1372,7 @@ function fitCameraToScene(){
   var size=box.getSize(new THREE.Vector3());
   var span=Math.max(size.x,size.z,4);
   var fov=camExt.fov*Math.PI/180;
-  var dist=(span/2)/Math.tan(fov/2)*1.6;
+  var dist=(span/2)/Math.tan(fov/2)*1.1;
   camExt.position.set(center.x+dist*0.55,dist*0.45,center.z+dist*0.75);
   orbit.target.copy(center);
   orbit.minDistance=span*0.2;
@@ -1784,10 +1782,16 @@ function buildRooms3D(){
 }
 
 function buildRoof3D(){
-  var topFloor = 1;
-  DATA.rooms.forEach(function(r){if(r.floor>topFloor) topFloor=r.floor;});
-  var fp = FOOTPRINTS[topFloor] || {w:8000, h:6000};
-  var w = fp.w*U, d = fp.h*U, h = (ROOF.floor - 1) * FLOOR_H * U + WALL_H * U;
+  if(DATA.walls.length===0) return;
+  // Compute actual building footprint from walls
+  var minX=Infinity,minZ=Infinity,maxX=-Infinity,maxZ=-Infinity;
+  DATA.walls.forEach(function(wl){
+    minX=Math.min(minX,wl.x1,wl.x2); minZ=Math.min(minZ,wl.y1,wl.y2);
+    maxX=Math.max(maxX,wl.x1,wl.x2); maxZ=Math.max(maxZ,wl.y1,wl.y2);
+  });
+  var ox=minX*U, oz=minZ*U;
+  var w=(maxX-minX)*U, d=(maxZ-minZ)*U;
+  var h = (ROOF.floor - 1) * FLOOR_H * U + WALL_H * U;
   var pitch = (ROOF.pitch || 30) * Math.PI / 180;
   var ridgeH = (w/2) * Math.tan(pitch);
   var roofTex=getTexture3D('roof_tile');
@@ -1797,13 +1801,14 @@ function buildRoof3D(){
   var mat = new THREE.MeshStandardMaterial(roofMatP);
   if(ROOF.type === 'gable') {
     var geo = new THREE.BufferGeometry();
+    var x0=ox,x1=ox+w,xm=ox+w/2, z0=oz,z1=oz+d;
     var pts = new Float32Array([
-      0, h, 0,  w, h, 0,  w/2, h+ridgeH, 0,
-      0, h, d,  w, h, d,  w/2, h+ridgeH, d,
-      0, h, 0,  0, h, d,  w/2, h+ridgeH, d,
-      0, h, 0,  w/2, h+ridgeH, 0,  w/2, h+ridgeH, d,
-      w, h, 0,  w, h, d,  w/2, h+ridgeH, d,
-      w, h, 0,  w/2, h+ridgeH, 0,  w/2, h+ridgeH, d
+      x0,h,z0, x1,h,z0, xm,h+ridgeH,z0,
+      x0,h,z1, x1,h,z1, xm,h+ridgeH,z1,
+      x0,h,z0, x0,h,z1, xm,h+ridgeH,z1,
+      x0,h,z0, xm,h+ridgeH,z0, xm,h+ridgeH,z1,
+      x1,h,z0, x1,h,z1, xm,h+ridgeH,z1,
+      x1,h,z0, xm,h+ridgeH,z0, xm,h+ridgeH,z1
     ]);
     geo.setAttribute('position', new THREE.BufferAttribute(pts, 3));
     geo.computeVertexNormals();
@@ -1813,7 +1818,7 @@ function buildRoof3D(){
   } else if(ROOF.type === 'flat') {
     var geo = new THREE.BoxGeometry(w+0.4, 0.2, d+0.4);
     var roof = new THREE.Mesh(geo, mat);
-    roof.position.set(w/2, h+0.1, d/2);
+    roof.position.set(ox+w/2, h+0.1, oz+d/2);
     roof.castShadow = true; roof.receiveShadow = true; roof.userData={b:true};
     sc3.add(roof);
   }
@@ -1836,6 +1841,20 @@ function buildLandscape(){
   });
   var bx=(minX+maxX)/2*U, bz=(minZ+maxZ)/2*U;
   var bw=(maxX-minX)*U, bd=(maxZ-minZ)*U;
+
+  // Update ground: building footprint + 6m margin on each side
+  var gndSize = Math.max(bw, bd) + 12;
+  var grassTex = getTexture3D('grass');
+  var gndMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, map: grassTex || null,
+    color: grassTex ? 0xffffff : 0x5a8a3a,
+    roughness: 1.0, metalness: 0.0
+  });
+  if(grassTex){ grassTex.repeat.set(gndSize/2, gndSize/2); }
+  _gndMesh.geometry.dispose();
+  _gndMesh.geometry = new THREE.PlaneGeometry(gndSize, gndSize);
+  _gndMesh.material = gndMat;
+  _gndMesh.position.set(bx, -0.01, bz);
 
   // Concrete foundation
   var baseMat=new THREE.MeshStandardMaterial({color:0x888878,roughness:0.9});
