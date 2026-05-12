@@ -1304,19 +1304,24 @@ function init3D(){
   sc3.add(amb);
 
   var grassTex = getTexture3D('grass');
-  if(grassTex) { grassTex.repeat.set(50, 50); }
-  var gnd=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000), new THREE.MeshStandardMaterial({
+  if(grassTex) { grassTex.repeat.set(20, 20); }
+  var gnd=new THREE.Mesh(new THREE.PlaneGeometry(120,120), new THREE.MeshStandardMaterial({
     color:0xffffff, map: grassTex, roughness:1.0, metalness: 0.0
   }));
   gnd.rotation.x=-Math.PI/2; gnd.receiveShadow=true; sc3.add(gnd);
 
-  camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,2000);
-  camExt.position.set(35,25,50); camExt.lookAt(8,0,8);
-  camInt=new THREE.PerspectiveCamera(75,wrap.clientWidth/wrap.clientHeight,0.01,800);
+  camExt=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.1,600);
+  camExt.position.set(12,9,18); camExt.lookAt(4,1,2);
+  camInt=new THREE.PerspectiveCamera(75,wrap.clientWidth/wrap.clientHeight,0.01,100);
   camInt.position.set(4,1.6,4);
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
-  orbit.target.set(8,0,8);
+  orbit.target.set(4,1,2);
+  orbit.rotateSpeed=0.4;
+  orbit.zoomSpeed=0.6;
+  orbit.panSpeed=0.5;
+  orbit.minDistance=2;
+  orbit.maxDistance=80;
   // Post-processing integration
   if(THREE.EffectComposer && THREE.RenderPass){
     try {
@@ -1358,6 +1363,23 @@ function init3D(){
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
 
   build3D(); loop3D();
+}
+
+function fitCameraToScene(){
+  if(!sc3||!camExt||!orbit) return;
+  var box=new THREE.Box3();
+  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
+  if(box.isEmpty()) return;
+  var center=box.getCenter(new THREE.Vector3());
+  var size=box.getSize(new THREE.Vector3());
+  var span=Math.max(size.x,size.z,4);
+  var fov=camExt.fov*Math.PI/180;
+  var dist=(span/2)/Math.tan(fov/2)*1.6;
+  camExt.position.set(center.x+dist*0.55,dist*0.45,center.z+dist*0.75);
+  orbit.target.copy(center);
+  orbit.minDistance=span*0.2;
+  orbit.maxDistance=span*6;
+  orbit.update();
 }
 
 function build3D(){
@@ -1708,7 +1730,7 @@ function build3DTree(grp,h){
 }
 
 function buildRooms3D(){
-  var matCeil=new THREE.MeshStandardMaterial({color:0xf8f6f0,roughness:0.92,side:THREE.BackSide});
+  var matCeil=new THREE.MeshStandardMaterial({color:0xf8f6f0,roughness:0.92,side:THREE.DoubleSide});
   var matBase=new THREE.MeshStandardMaterial({color:0xf0ece4,roughness:0.9});
   var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:2.5,roughness:0.3});
 
@@ -1915,10 +1937,10 @@ function setView(v){
       } else {
         isInt=false;
         if(orbit) orbit.enabled=true;
-        sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
+        sc3.fog=new THREE.Fog(0xb8d4f0,60,300);
         sc3.background=null;
         if(_skyMesh) _skyMesh.visible=true;
-        if(composer&&composer.passes[1]) composer.passes[1].strength=0.35;
+        if(composer&&composer.passes[1]) composer.passes[1].strength=0.25;
       }
     }
     var wrap=document.getElementById('c3d-wrap');
@@ -1929,6 +1951,7 @@ function setView(v){
       if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
     }
     build3D();
+    if(v==='3d-ext') setTimeout(fitCameraToScene, 100);
   }
   if(v==='2d') draw2d();
 }
