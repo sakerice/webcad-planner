@@ -179,7 +179,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   #help-box{font-size:9px;padding:6px 10px;line-height:1.5}
 
   /* Roof panel repositioned for mobile */
-  #roof-panel{left:8px;top:50px;right:8px;min-width:unset}
+  #roof-panel,#wall-panel{left:8px;top:50px;right:8px;min-width:unset}
 
   /* int-ctrl: full width on mobile */
   #int-ctrl{left:8px;right:8px;top:auto;bottom:68px;min-width:unset}
@@ -309,7 +309,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏠 外観・屋根 <span>▶</span></div>
     <div class="cat-body">
-      <div class="stool" onclick="document.getElementById('roof-panel').classList.toggle('show')"><span class="sicon">🏠</span>屋根設定</div>
+      <div class="stool" onclick="document.getElementById('roof-panel').classList.toggle('show');document.getElementById('wall-panel').classList.remove('show')"><span class="sicon">🏠</span>屋根設定</div>
+      <div class="stool" onclick="document.getElementById('wall-panel').classList.toggle('show');document.getElementById('roof-panel').classList.remove('show')"><span class="sicon">🎨</span>外壁カラー</div>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><span class="sicon">🌿</span>バルコニー</div>
     </div>
     <div style="padding:8px 10px">
@@ -347,15 +348,22 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div style="margin-top:7px;font-size:10px;color:#7a8fb0">勾配(°):
         <input type="number" id="roof-pitch" value="30" min="5" max="60" style="width:44px;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit" onchange="ROOF.pitch=+this.value;rebuild3D()"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0;opacity:0.7">※ パレット「屋根」を配置したフロアに生成</div>
-      <div style="margin-top:7px;font-size:10px;color:#7a8fb0">外壁 3F:
-        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[3]=this.value;rebuild3D()"></div>
-      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">外壁 2F:
-        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[2]=this.value;rebuild3D()"></div>
-      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">外壁 1F:
-        <input type="color" value="#5c3820" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[1]=this.value;rebuild3D()"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">屋根色:
         <input type="color" id="roof-color" value="#2a2a30" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="ROOF.color=this.value;rebuild3D()"></div>
       <button class="pbtn" onclick="document.getElementById('roof-panel').classList.remove('show')" style="margin-top:8px">閉じる</button>
+    </div>
+    <div id="wall-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:175px">
+      <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🎨 外壁カラー設定</div>
+      <div style="font-size:10px;color:#7a8fb0;margin-bottom:6px">外壁（厚さ120mm以上）に適用</div>
+      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">1F 外壁:
+        <input type="color" value="#5c3820" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[1]=this.value;rebuild3D()"></div>
+      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">2F 外壁:
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[2]=this.value;rebuild3D()"></div>
+      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">3F 外壁:
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[3]=this.value;rebuild3D()"></div>
+      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">4F 外壁:
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[4]=this.value;rebuild3D()"></div>
+      <button class="pbtn" onclick="document.getElementById('wall-panel').classList.remove('show')" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wasd">WASD/矢印:移動 | ドラッグ:視点回転 | ESC:戻る</div>
     <div id="joy-hint">1本指:視点回転 | 2本指ドラッグ:移動 | ピンチ:ズーム</div>
@@ -422,7 +430,7 @@ var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
 var ROOF = {type:'none', pitch:30, color:'#2a2a30', floor:2};
-var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc' };
+var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 
 var ISIZES = {
   bath:{w:1600,d:1600}, toilet:{w:380,d:680}, sink:{w:750,d:560},
