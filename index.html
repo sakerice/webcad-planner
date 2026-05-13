@@ -1167,9 +1167,15 @@ function drawHandles(o,ccx,ccy,hw,hd,sc){
   ctx.translate(ccx,ccy); ctx.rotate((o.rot||0)*Math.PI/180);
   ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.setLineDash([4,2]);
   ctx.strokeRect(-hw,-hd,hw*2,hd*2); ctx.setLineDash([]);
-  var pts=[[-hw,-hd],[0,-hd],[hw,-hd],[hw,0],[hw,hd],[0,hd],[-hw,hd],[-hw,0]];
-  pts.forEach(function(p){
-    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  // corners: square (aspect-ratio locked resize), edges: circle (single-axis resize)
+  var corners=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]];
+  var edges=[[0,-hd],[hw,0],[0,hd],[-hw,0]];
+  ctx.fillStyle='#fff';
+  corners.forEach(function(p){
+    ctx.beginPath(); ctx.rect(p[0]-5,p[1]-5,10,10); ctx.fill(); ctx.stroke();
+  });
+  edges.forEach(function(p){
+    ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.fill(); ctx.stroke();
   });
   if(o.type !== 'room'){
     ctx.beginPath(); ctx.moveTo(0,-hd); ctx.lineTo(0,-hd-30); ctx.stroke();
@@ -1250,23 +1256,47 @@ function applyHandleDrag(cx,cy,e){
     var ldx=dx*Math.cos(rad)-dy*Math.sin(rad);
     var ldy=dx*Math.sin(rad)+dy*Math.cos(rad);
 
-    if(h.indexOf('e')>=0) nw=o.w+ldx;
-    if(h.indexOf('w')>=0) nw=o.w-ldx;
-    if(h.indexOf('s')>=0) nd=o.d+ldy;
-    if(h.indexOf('n')>=0) nd=o.d-ldy;
+    var isCorner=h.length===2; // 'nw','ne','se','sw' are 2 chars; 'n','s','e','w' are 1 char
+    if(isCorner && o.w>0 && o.d>0){
+      // Corner drag: maintain aspect ratio via diagonal projection
+      var hw=o.w/2, hd=o.d/2;
+      var dirX=(h.indexOf('e')>=0)?hw:-hw;
+      var dirY=(h.indexOf('s')>=0)?hd:-hd;
+      var scale=1+(ldx*dirX+ldy*dirY)/(hw*hw+hd*hd);
+      scale=Math.max(scale,0.1);
+      nw=o.w*scale; nd=o.d*scale;
+    } else {
+      // Edge drag: one dimension only
+      if(h==='e') nw=o.w+ldx;
+      if(h==='w') nw=o.w-ldx;
+      if(h==='s') nd=o.d+ldy;
+      if(h==='n') nd=o.d-ldy;
+    }
 
     // Grid snap: always use current snap setting (Shift = fine-tune / disable)
     var snapG=onMobile ? (ST.snap||455) : (e&&e.shiftKey ? 0 : (ST.snap||0));
-    if(snapG){nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG;}
-    nw=Math.max(snapG||100,nw); nd=Math.max(snapG||100,nd);
+    var minSz=snapG||100;
+    if(isCorner && o.w>0 && o.d>0){
+      // Corner: snap width, derive height from ratio, enforce minimums while keeping ratio
+      if(snapG) nw=Math.round(nw/snapG)*snapG;
+      nw=Math.max(minSz,nw);
+      nd=nw*(o.d/o.w);
+      if(nd<minSz){ nd=minSz; nw=Math.max(minSz,nd*(o.w/o.d)); }
+    } else {
+      if(snapG){ nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG; }
+      nw=Math.max(minSz,nw); nd=Math.max(minSz,nd);
+      // Restore the dimension not being resized (snap may have drifted it)
+      if(h==='e'||h==='w') nd=o.d;
+      if(h==='s'||h==='n') nw=o.w;
+    }
 
     // Position: keep the opposite edge fixed
     if(h.indexOf('w')>=0) nx=o.x+(o.w-nw);
     if(h.indexOf('n')>=0) ny=o.y+(o.d-nd);
 
-    // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270)
+    // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270); skip for corners (would break ratio)
     var isAxisAligned=Math.abs((o.rot||0)%90)<4;
-    if(isAxisAligned&&it.type!=='wall'&&it.type!=='room'){
+    if(!isCorner&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'){
       var res=applyResizeEdgeSnap(h,o,nx,ny,nw,nd,it.id);
       nx=res.nx; ny=res.ny; nw=res.nw; nd=res.nd;
       ST._snapState=res.snapState;
@@ -1427,7 +1457,7 @@ function init3D(){
   orbit.target.set(4,1,2);
   orbit.rotateSpeed=0.4;
   orbit.zoomSpeed=0.6;
-  orbit.panSpeed=0.5;
+  orbit.panSpeed=-0.5;  // negative = camera moves in swipe direction (not scene-follows-finger)
   orbit.minDistance=2;
   orbit.maxDistance=80;
   // Post-processing integration
