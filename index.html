@@ -241,6 +241,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   <button class="tbtn active" id="btn-2d" onclick="setView('2d')">📐 平面図</button>
   <button class="tbtn" id="btn-3de" onclick="setView('3d-ext')">🏗 外観3D</button>
   <button class="tbtn" id="btn-3di" onclick="setView('3d-int')">🚶 内観3D</button>
+  <button class="tbtn" onclick="refresh3DPreview()">⟳ 3D更新</button>
   <div class="tsep mob-hide"></div>
   <button class="tbtn mob-hide" onclick="toggleGrid()">⊞ グリッド</button>
   <button class="tbtn mob-hide" onclick="toggleDim()">↔ 寸法</button>
@@ -269,11 +270,13 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     <div class="cat-hdr" onclick="toggleCat(this)">🪜 階段・屋根 <span>▶</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="stair" onclick="setTool('stair')"><span class="sicon">🪜</span>階段</div>
+      <div class="stool" data-tool="stair-corner" onclick="setTool('stair-corner')"><span class="sicon">↱</span>階段コーナー</div>
       <div class="stool" data-tool="roof" onclick="setTool('roof')"><span class="sicon">🏠</span>屋根</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🚪 建具 <span>▶</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="door-swing" onclick="setTool('door-swing')"><span class="sicon">🚪</span>開き戸</div>
+      <div class="stool" data-tool="door-swing-s" onclick="setTool('door-swing-s')"><span class="sicon">🚪</span>開き戸(小)</div>
       <div class="stool" data-tool="door-slide" onclick="setTool('door-slide')"><span class="sicon">⇔</span>引き戸</div>
       <div class="stool" data-tool="window" onclick="setTool('window')"><span class="sicon">🪟</span>窓</div>
       <div class="stool" data-tool="door-front" onclick="setTool('door-front')"><span class="sicon">🔑</span>玄関ドア</div>
@@ -318,8 +321,9 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     <div style="padding:8px 10px">
       <div style="font-size:10px;color:#5a6a80;margin-bottom:3px">スナップ</div>
       <select id="snap-sel" style="width:100%;background:#0f3460;color:#cce;border:1px solid #2a4080;padding:3px;border-radius:3px;font-size:10px;font-family:inherit" onchange="ST.snap=+this.value">
-        <option value="455">455mm (半間)</option><option value="910">910mm (1間)</option>
-        <option value="100">100mm</option><option value="0">なし</option>
+        <option value="10" selected>10mm</option><option value="5">5mm</option>
+        <option value="100">100mm</option><option value="455">455mm (半間)</option><option value="910">910mm (1間)</option>
+        <option value="0">なし</option>
       </select>
       <div style="font-size:10px;color:#5a6a80;margin:6px 0 3px">壁高さ(mm)</div>
       <input class="pi" type="number" value="2400" min="1800" max="4000" step="100" onchange="WALL_H=+this.value">
@@ -441,9 +445,9 @@ var ISIZES = {
   'dining-table':{w:1200,d:800}, dining_6:{w:1600,d:900}, round_table_4:{w:1000,d:1000},
   'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:80},
-  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820},
+  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120},
-  'door-swing':{w:780,d:780}, 'door-slide':{w:1650,d:150},
+  'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'door-front':{w:900,d:200},
   'site-rect':{w:10000,d:8000},
   'roof':{w:1000,d:1000}
@@ -452,8 +456,8 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', closet:'#e8d8c8', stair:'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080',
-  'door-swing':'#f8e8c0','door-slide':'#f8e8c0',
+  tv:'#1a1a1a', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080',
+  'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)',
   'roof':'rgba(50,50,80,0.12)'
 };
@@ -464,7 +468,7 @@ var GLTF_MAP = {
   'bed-d':'assets/models/bed_double.glb', 'bed-s':'assets/models/bed_single.glb',
   'semi_double_bed':'assets/models/bed_double.glb',
   'dining-table':'assets/models/dining_table.glb', 'dining_6':'assets/models/dining_table.glb',
-  'tv':'assets/models/tv_unit.glb',
+  'tv':'assets/models/tv.glb',
   'bath':'assets/models/bathtub.glb',
   'toilet':'assets/models/toilet.glb',
   'sink':'assets/models/sink.glb',
@@ -499,8 +503,8 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段',balcony:'バルコニー',car:'自動車',fence:'塀',
-  'door-swing':'開戸','door-slide':'引戸',window:'窓','door-front':'玄関','site-rect':'敷地',
+  desk:'デスク',tv:'TV',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀',
+  'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','door-front':'玄関','site-rect':'敷地',
   'roof':'屋根'
 };
 
@@ -509,7 +513,7 @@ var ST = {
   floor:1, view:'2d', tool:'wall', selected:null,
   zoom:1, panX:60, panY:60,
   drawing:false, drawPts:[],
-  mouseW:{x:0,y:0}, snap:455, showGrid:true, showDim:true,
+  mouseW:{x:0,y:0}, snap:10, showGrid:true, showDim:true,
   placingRot:0,
   isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false,
   _snapState:null  // stores active edge-snap info for visual feedback
@@ -578,7 +582,7 @@ function updateProps(){
   var typeName = ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜',room:'⬜','door-swing':'🚪',window:'🪟',wall:'━'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟',wall:'━'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -589,6 +593,20 @@ function updateProps(){
   var propsEl=document.getElementById('props');
   if(!propsEl.classList.contains('prop-expanded')&&!isMobileLayout()){
     // desktop: always show body
+  }
+
+  if(it.x1 !== undefined && it.x2 !== undefined) {
+    html += '<div class="pr"><div class="pl">始点 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x1)+'" onchange="updateSelectedProp(\'x1\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">始点 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y1)+'" onchange="updateSelectedProp(\'y1\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">終点 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x2)+'" onchange="updateSelectedProp(\'x2\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">終点 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y2)+'" onchange="updateSelectedProp(\'y2\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+    if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    body.innerHTML = html;
+    return;
   }
   
   html += '<div class="pr"><div class="pl">位置 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x)+'" onchange="updateSelectedProp(\'x\',+this.value)"></div>';
@@ -603,6 +621,8 @@ function updateProps(){
   if(it.rot !== undefined) {
     html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+Math.round(it.rot)+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
   }
+  if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipX=false;
+  if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipY=false;
   if(it.flipX !== undefined) {
     html += '<div class="pr"><div class="pl">反転</div><div style="display:flex;gap:4px">';
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipX\', !ST.selected.flipX)">左右反転</button>';
@@ -875,8 +895,8 @@ function draw2d(){
     ctx.restore();
   }
 
-  // 1. Sites (Global Base Layer)
-  DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
+  // 1. Sites (1F-only Base Layer)
+  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
     drawItem2d(i);
     if(ST.selected===i && ST.tool==='select'){
       var ccx=ST.panX+(i.x+i.w/2)*sc, ccy=ST.panY+(i.y+i.d/2)*sc;
@@ -899,11 +919,12 @@ function draw2d(){
   });
   // 3. Walls
   fw.forEach(drawWall2d);
+  if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
   // 4. Other Items
   fi.filter(function(i){return i.type!=='site-rect';}).forEach(drawItem2d);
 
   // Ghost Previews
-  if(ST.drawing && (ST.tool==='room-rect' || ST.tool==='site-rect')) {
+  if(ST.drawing && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var x1=Math.min(p1.x,p2.x), y1=Math.min(p1.y,p2.y), rw=Math.abs(p1.x-p2.x), rd=Math.abs(p1.y-p2.y);
     ctx.strokeStyle='rgba(48,128,232,0.5)'; ctx.setLineDash([5,5]);
@@ -920,7 +941,7 @@ function draw2d(){
     drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
   }
   // ── Room-rect preview dimensions ──
-  if(ST.drawing && (ST.tool==='room-rect'||ST.tool==='site-rect') && ST.drawPts.length>0) {
+  if(ST.drawing && (ST.tool==='room-rect'||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var rw=Math.abs(snapV(p2.x)-p1.x), rd=Math.abs(snapV(p2.y)-p1.y);
     if(rw>50&&rd>50) drawRectDim(Math.min(p1.x,snapV(p2.x)), Math.min(p1.y,snapV(p2.y)), rw, rd);
@@ -1077,6 +1098,7 @@ function drawItem2d(it){
     }
   } else {
     var hw = it.w*sc/2, hd = it.d*sc/2;
+    if(it.type==='stair'||it.type==='stair-corner') ctx.globalAlpha*=0.58;
     ctx.fillStyle=ICOLORS[it.type]||'#dddddd'; 
     ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
     ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1;
@@ -1110,6 +1132,31 @@ function drawItem2d(it){
       ctx.moveTo(0, hd - 15*sc); ctx.lineTo(0, -hd + 15*sc);
       ctx.lineTo(-5*sc, -hd + 25*sc); ctx.moveTo(0, -hd + 15*sc); ctx.lineTo(5*sc, -hd + 25*sc);
       ctx.stroke();
+    } else if(it.type === 'stair-corner') {
+      ctx.strokeStyle='rgba(0,0,0,0.68)'; ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd*0.18); ctx.lineTo(hw,hd*0.62);
+      ctx.moveTo(-hw*0.28,-hd); ctx.lineTo(hw,hd);
+      ctx.stroke();
+      ctx.strokeStyle='rgba(0,0,0,0.78)'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(-hw*0.08,hd); ctx.lineTo(-hw*0.08,-hd*0.08); ctx.lineTo(hw*0.58,-hd*0.08);
+      ctx.stroke();
+      ctx.strokeStyle='rgba(0,0,0,0.62)'; ctx.lineWidth=1;
+      var lowX=hw, lowY=hd;
+      [-0.75,-0.5,-0.25,0].forEach(function(r){
+        ctx.beginPath();
+        ctx.moveTo(-hw, hd*r); ctx.lineTo(lowX, lowY);
+        ctx.stroke();
+      });
+      ctx.fillStyle='rgba(40,40,40,0.78)';
+      ctx.fillRect(hw-9*sc,hd-9*sc,9*sc,9*sc);
+      ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(-hw*0.5,-hd*0.62); ctx.lineTo(hw*0.72,hd*0.72); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(hw*0.72,hd*0.72); ctx.lineTo(hw*0.54,hd*0.66); ctx.lineTo(hw*0.66,hd*0.48); ctx.closePath(); ctx.fill();
+      ctx.font=Math.max(9,10*sc)+'px sans-serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
+      ctx.fillText('下', hw-11*sc, hd-10*sc);
     } else if(it.type === 'closet') {
       ctx.beginPath();
       ctx.moveTo(-hw, -hd+5*sc); ctx.lineTo(hw, hd-5*sc);
@@ -1122,16 +1169,37 @@ function drawItem2d(it){
         ctx.moveTo(bx, -hd); ctx.lineTo(bx, hd);
       }
       ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
-    } else if(it.type === 'door-swing' || it.type === 'door-front') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=1.8;
-      ctx.beginPath(); ctx.moveTo(-hw, -hd); ctx.lineTo(-hw, hd); ctx.stroke();
-      ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(-hw, hd); ctx.lineTo(hw, hd); ctx.stroke();
-      ctx.lineWidth=0.8; ctx.setLineDash([3,3]);
+    } else if(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front') {
+      var hingeX=(it.flipX?hw:-hw), leafX=(it.flipX?-hw:hw);
+      var openDir=it.flipY?-1:1;
+      var hingeY=openDir>0?hd:-hd;
+      var closedY=hingeY, openY=-hingeY;
+      var arcStart=openDir>0?-Math.PI/2:Math.PI/2;
+      var arcEnd=it.flipX?(openDir>0?-Math.PI:-Math.PI):(openDir>0?0:0);
+      ctx.strokeStyle='#333'; ctx.fillStyle='#333';
+      ctx.fillRect(hingeX-2*sc, -hd, 4*sc, it.d*sc);
+      ctx.beginPath(); ctx.arc(hingeX, hingeY, Math.max(2.5,3*sc), 0, Math.PI*2); ctx.fill();
+      ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(hingeX, -hd); ctx.lineTo(hingeX, hd); ctx.stroke();
+      ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(hingeX, closedY); ctx.lineTo(leafX, closedY); ctx.stroke();
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(hingeX, hingeY); ctx.lineTo(leafX, openY); ctx.stroke();
+      ctx.lineWidth=0.9; ctx.setLineDash([3,3]);
       ctx.beginPath();
-      ctx.arc(-hw, hd, it.w*sc, -Math.PI/2, 0);
+      ctx.arc(hingeX, hingeY, it.w*sc, arcStart, arcEnd, !!it.flipX);
       ctx.strokeStyle='#555'; ctx.stroke();
       ctx.setLineDash([]);
+      var arrowT=it.flipX?0.68:0.32;
+      var arrowAng=arcStart+(arcEnd-arcStart)*arrowT;
+      var ax=hingeX+Math.cos(arrowAng)*it.w*sc, ay=hingeY+Math.sin(arrowAng)*it.w*sc;
+      var tangent=arrowAng+(it.flipX?-Math.PI/2:Math.PI/2);
+      ctx.fillStyle='#333';
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.lineTo(ax-Math.cos(tangent-0.55)*8*sc,ay-Math.sin(tangent-0.55)*8*sc);
+      ctx.lineTo(ax-Math.cos(tangent+0.55)*8*sc,ay-Math.sin(tangent+0.55)*8*sc);
+      ctx.closePath(); ctx.fill();
     } else if(it.type === 'door-slide') {
       ctx.strokeStyle='#333'; ctx.lineWidth=1.2;
       ctx.beginPath();
@@ -1187,6 +1255,33 @@ function drawHandles(o,ccx,ccy,hw,hd,sc){
   ctx.restore();
 }
 
+function drawWallHandles(w){
+  var a=w2c(w.x1,w.y1), b=w2c(w.x2,w.y2);
+  ctx.save();
+  ctx.strokeStyle='#3080e8'; ctx.fillStyle='#fff'; ctx.lineWidth=1.8;
+  ctx.beginPath(); ctx.arc(a.cx,a.cy,7,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(b.cx,b.cy,7,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function hitWallHandle(w,cx,cy){
+  var a=w2c(w.x1,w.y1), b=w2c(w.x2,w.y2);
+  if(Math.hypot(cx-a.cx,cy-a.cy)<12) return 'wall-a';
+  if(Math.hypot(cx-b.cx,cy-b.cy)<12) return 'wall-b';
+  return null;
+}
+
+function applyWallDrag(cx,cy){
+  var w=ST.selected;
+  if(!w||!DRAG.origItem) return;
+  if(!DRAG.saved){saveState();DRAG.saved=true;}
+  var p=c2w(cx,cy), sx=snapV(p.x), sy=snapV(p.y);
+  if(DRAG.handle==='wall-a'){w.x1=sx;w.y1=sy;}
+  if(DRAG.handle==='wall-b'){w.x2=sx;w.y2=sy;}
+  ST._snapState=null;
+  updateProps();
+}
+
 // ─── Resize edge snap helper ──────────────────────
 // Snaps moving edge(s) to nearest object edge (axis-aligned items only)
 function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
@@ -1223,6 +1318,7 @@ function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
 function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
+  if(h==='wall-a'||h==='wall-b'){applyWallDrag(cx,cy);return;}
   if(!DRAG.saved){saveState(); DRAG.saved=true;}
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
   var onMobile=isMobileLayout();
@@ -1259,7 +1355,8 @@ function applyHandleDrag(cx,cy,e){
     var ldy=dx*Math.sin(rad)+dy*Math.cos(rad);
 
     var isCorner=h.length===2; // 'nw','ne','se','sw' are 2 chars; 'n','s','e','w' are 1 char
-    if(isCorner && o.w>0 && o.d>0){
+    var freeCornerResize = it.type==='stair' || it.type==='stair-corner';
+    if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner drag: maintain aspect ratio via diagonal projection
       var hw=o.w/2, hd=o.d/2;
       var dirX=(h.indexOf('e')>=0)?hw:-hw;
@@ -1269,16 +1366,16 @@ function applyHandleDrag(cx,cy,e){
       nw=o.w*scale; nd=o.d*scale;
     } else {
       // Edge drag: one dimension only
-      if(h==='e') nw=o.w+ldx;
-      if(h==='w') nw=o.w-ldx;
-      if(h==='s') nd=o.d+ldy;
-      if(h==='n') nd=o.d-ldy;
+      if(h.indexOf('e')>=0) nw=o.w+ldx;
+      if(h.indexOf('w')>=0) nw=o.w-ldx;
+      if(h.indexOf('s')>=0) nd=o.d+ldy;
+      if(h.indexOf('n')>=0) nd=o.d-ldy;
     }
 
     // Grid snap: always use current snap setting (Shift = fine-tune / disable)
     var snapG=onMobile ? (ST.snap||455) : (e&&e.shiftKey ? 0 : (ST.snap||0));
     var minSz=snapG||100;
-    if(isCorner && o.w>0 && o.d>0){
+    if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner: snap width, derive height from ratio, enforce minimums while keeping ratio
       if(snapG) nw=Math.round(nw/snapG)*snapG;
       nw=Math.max(minSz,nw);
@@ -1288,13 +1385,22 @@ function applyHandleDrag(cx,cy,e){
       if(snapG){ nw=Math.round(nw/snapG)*snapG; nd=Math.round(nd/snapG)*snapG; }
       nw=Math.max(minSz,nw); nd=Math.max(minSz,nd);
       // Restore the dimension not being resized (snap may have drifted it)
-      if(h==='e'||h==='w') nd=o.d;
-      if(h==='s'||h==='n') nw=o.w;
+      if(!isCorner && (h==='e'||h==='w')) nd=o.d;
+      if(!isCorner && (h==='s'||h==='n')) nw=o.w;
     }
 
-    // Position: keep the opposite edge fixed
-    if(h.indexOf('w')>=0) nx=o.x+(o.w-nw);
-    if(h.indexOf('n')>=0) ny=o.y+(o.d-nd);
+    // Position: move the stored center along the item's local axes.
+    var oldCx=o.x+o.w/2, oldCy=o.y+o.d/2;
+    var dW=nw-o.w, dD=nd-o.d;
+    var shiftX=0, shiftY=0;
+    if(h.indexOf('e')>=0) shiftX+=dW/2;
+    if(h.indexOf('w')>=0) shiftX-=dW/2;
+    if(h.indexOf('s')>=0) shiftY+=dD/2;
+    if(h.indexOf('n')>=0) shiftY-=dD/2;
+    var wrad=(o.rot||0)*Math.PI/180;
+    var newCx=oldCx + shiftX*Math.cos(wrad) - shiftY*Math.sin(wrad);
+    var newCy=oldCy + shiftX*Math.sin(wrad) + shiftY*Math.cos(wrad);
+    nx=newCx-nw/2; ny=newCy-nd/2;
 
     // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270); skip for corners (would break ratio)
     var isAxisAligned=Math.abs((o.rot||0)%90)<4;
@@ -1591,16 +1697,50 @@ function buildWall3D(w){
     else matParams={color:'#f4f0e8',roughness:0.88};
   }
   var mat=new THREE.MeshStandardMaterial(matParams);
-  var mesh=new THREE.Mesh(new THREE.BoxGeometry(len,FLOOR_H*U,w.thick*U),mat);
-  mesh.castShadow=true; mesh.receiveShadow=true;
-  mesh.position.set((x1+x2)/2,fy+FLOOR_H*U/2,(z1+z2)/2);
-  mesh.rotation.y=Math.atan2(-dz,dx);
-  mesh.userData={b:true};
-  sc3.add(mesh);
+  var dirX=dx/len, dirZ=dz/len, rotY=Math.atan2(-dz,dx);
+  function addWallPiece(a,b,yBase,h){
+    var segLen=b-a;
+    if(segLen<0.03||h<0.03) return;
+    var mid=(a+b)/2;
+    var mesh=new THREE.Mesh(new THREE.BoxGeometry(segLen,h,w.thick*U),mat);
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    mesh.position.set(x1+dirX*mid,fy+yBase+h/2,z1+dirZ*mid);
+    mesh.rotation.y=rotY;
+    mesh.userData={b:true};
+    sc3.add(mesh);
+  }
+  var doorTypes=['door-swing','door-swing-s','door-slide','door-front'];
+  var openings=[];
+  DATA.items.filter(function(it){return it.floor===fl&&doorTypes.indexOf(it.type)>=0;}).forEach(function(it){
+    var cx=it.x+it.w/2, cy=it.y+it.d/2;
+    var d=ptSegDist(cx,cy,w.x1,w.y1,w.x2,w.y2);
+    if(d>400) return;
+    var wdx=w.x2-w.x1,wdy=w.y2-w.y1,wlen=Math.sqrt(wdx*wdx+wdy*wdy);
+    if(wlen<1) return;
+    var t=((cx-w.x1)*wdx+(cy-w.y1)*wdy)/(wlen*wlen);
+    if(t<0||t>1) return;
+    var c=t*len, openW=Math.min(len, Math.max(it.w*U+0.08, 0.45));
+    openings.push({a:Math.max(0,c-openW/2), b:Math.min(len,c+openW/2), h:2.05});
+  });
+  if(!openings.length){addWallPiece(0,len,0,FLOOR_H*U);return;}
+  openings.sort(function(a,b){return a.a-b.a;});
+  var merged=[];
+  openings.forEach(function(o){
+    var last=merged[merged.length-1];
+    if(last&&o.a<=last.b){last.b=Math.max(last.b,o.b);last.h=Math.max(last.h,o.h);}
+    else merged.push(o);
+  });
+  var cursor=0;
+  merged.forEach(function(o){
+    addWallPiece(cursor,o.a,0,FLOOR_H*U);
+    addWallPiece(o.a,o.b,o.h,Math.max(0,FLOOR_H*U-o.h));
+    cursor=o.b;
+  });
+  addWallPiece(cursor,len,0,FLOOR_H*U);
 }
 
 function buildWinFrames(flFilt){
-  var wdTypes=['window','door-swing','door-slide','door-front'];
+  var wdTypes=['window','door-swing','door-swing-s','door-slide','door-front'];
   DATA.items.filter(function(it){return wdTypes.indexOf(it.type)>=0&&(!flFilt||it.floor===flFilt);}).forEach(function(it){
     var fl=it.floor, fy=(fl-1)*FLOOR_H*U;
     var walls=DATA.walls.filter(function(w){return w.floor===fl;});
@@ -1651,15 +1791,18 @@ function buildWinFrames(flFilt){
         addBox(doorMat, ww*0.23,dh/2, 0.035,ww*0.54,dh-0.12,leafT);
       } else {
         var pivot=new THREE.Group();
-        pivot.position.set(-ww/2,0,0);
-        pivot.rotation.y=side*Math.PI/3;
+        var hingeX=it.flipX ? ww/2 : -ww/2;
+        var leafX=it.flipX ? -ww/2 : ww/2;
+        var openSide=side*(it.flipY?-1:1)*(it.flipX?-1:1);
+        pivot.position.set(hingeX,0,0);
+        pivot.rotation.y=openSide*Math.PI/3;
         var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,dh-0.08,leafT),doorMat);
-        leaf.position.set(ww/2,(dh-0.08)/2+0.04,0);
+        leaf.position.set(leafX,(dh-0.08)/2+0.04,0);
         leaf.castShadow=true; leaf.receiveShadow=true;
         pivot.add(leaf);
         var handleMat=new THREE.MeshStandardMaterial({color:0xc8a040,roughness:0.3,metalness:0.55});
         var handle=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.08,0.035),handleMat);
-        handle.position.set(ww*0.82,0.95,side*0.035);
+        handle.position.set(it.flipX?-ww*0.82:ww*0.82,0.95,openSide*0.035);
         handle.castShadow=true;
         pivot.add(handle);
         grp.add(pivot);
@@ -1694,10 +1837,58 @@ function getSpriteTexture3D(sheet) {
   }
 }
 
+function stairBounds2D(it){
+  return {l:it.x,t:it.y,r:it.x+it.w,b:it.y+it.d};
+}
+function stairPartsTouch(a,b){
+  var aa=stairBounds2D(a), bb=stairBounds2D(b);
+  var gapX=Math.max(0,Math.max(aa.l,bb.l)-Math.min(aa.r,bb.r));
+  var gapY=Math.max(0,Math.max(aa.t,bb.t)-Math.min(aa.b,bb.b));
+  var overlapX=Math.min(aa.r,bb.r)-Math.max(aa.l,bb.l);
+  var overlapY=Math.min(aa.b,bb.b)-Math.max(aa.t,bb.t);
+  return (gapX<=120&&overlapY>120) || (gapY<=120&&overlapX>120);
+}
+function getConnectedStairParts(seed){
+  var all=DATA.items.filter(function(o){
+    return o.floor===seed.floor && (o.type==='stair'||o.type==='stair-corner');
+  });
+  var group=[], queue=[seed], seen={};
+  seen[seed.id]=true;
+  while(queue.length){
+    var cur=queue.shift();
+    group.push(cur);
+    all.forEach(function(o){
+      if(!seen[o.id] && stairPartsTouch(cur,o)){
+        seen[o.id]=true;
+        queue.push(o);
+      }
+    });
+  }
+  return group;
+}
+function stairRiseInfo(it){
+  var group=getConnectedStairParts(it);
+  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U};
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  group.forEach(function(o){
+    minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
+    minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
+  });
+  var sortByX=(maxX-minX)>=(maxY-minY);
+  group.sort(function(a,b){
+    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
+    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
+    return ac-bc;
+  });
+  var idx=Math.max(0,group.indexOf(it));
+  var rise=(FLOOR_H*U)/group.length;
+  return {index:idx,count:group.length,base:rise*idx,rise:rise};
+}
+
 function buildItem3D(it){
   if(it.type==='roof') return; // 屋根はbuildRoof3Dで処理
   var fy=(it.floor-1)*FLOOR_H*U, h=getItemH(it.type)*U, col=it.color||getItemCol(it.type);
-  if(['window','door-swing','door-slide','door-front'].indexOf(it.type)>=0) return;
+  if(['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)>=0) return;
   var grp = new THREE.Group();
   grp.position.set((it.x+it.w/2)*U, fy, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
@@ -1716,9 +1907,11 @@ function buildItem3D(it){
         // Y: keep proportional to X scale (don't squash height)
         var sy = sx;
         clone.scale.set(sx, sy, sz2);
-        // Align bottom of model to floor
+        // Align bottom and center of model to the item's local origin.
         box.setFromObject(clone);
+        clone.position.x = -(box.min.x+box.max.x)/2;
         clone.position.y = -box.min.y;
+        clone.position.z = -(box.min.z+box.max.z)/2;
         clone.traverse(function(c){
           if(c.isMesh){
             c.castShadow=true; c.receiveShadow=true;
@@ -1739,7 +1932,7 @@ function buildItem3D(it){
     }
   }
 
-  if(['window','door-swing','door-slide','door-front'].indexOf(it.type)>=0) {
+  if(['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)>=0) {
     var frameMat = new THREE.MeshStandardMaterial({color:0x333333});
     if(it.type === 'window') {
       var geo = new THREE.BoxGeometry(it.w*U, 1200*U, 100*U);
@@ -1808,15 +2001,22 @@ function buildItem3D(it){
     _B(grp,fMat,0,0.4,0,w3,0.8,Math.max(d3,0.12));
     _B(grp,new THREE.MeshStandardMaterial({color:0x707068,roughness:0.8}),0,0.82,0,w3+0.04,0.06,Math.max(d3,0.14));
   }
-  else if(it.type==='stair'){
-    var sSteps=14,sH=FLOOR_H*U/sSteps,sD=d3/sSteps;
+  else if(it.type==='stair'||it.type==='stair-corner'){
+    var riseInfo=stairRiseInfo(it);
+    var baseRise=riseInfo.base, partRise=riseInfo.rise;
+    var sSteps=14,sH=partRise/sSteps,sD=d3/sSteps;
     var sMat=new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6}),rMat=new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
-    for(var si=0;si<sSteps;si++){
-      var sbox=new THREE.Mesh(new THREE.BoxGeometry(w3,sH*0.95,sD),sMat);
-      sbox.position.set(0,(si+0.5)*sH-sH*0.025,-d3/2+sD*si+sD/2);sbox.castShadow=true;sbox.receiveShadow=true;grp.add(sbox);
+    if(it.type==='stair-corner'){
+      build3DWinderCorner(grp,sMat,w3,d3,baseRise,partRise);
+    } else {
+      for(var si=0;si<sSteps;si++){
+        var sh=(si+1)*sH;
+        var sbox=new THREE.Mesh(new THREE.BoxGeometry(w3,sh,sD),sMat);
+        sbox.position.set(0,baseRise+sh/2,-d3/2+sD*si+sD/2);sbox.castShadow=true;sbox.receiveShadow=true;grp.add(sbox);
+      }
     }
     var railMat=new THREE.MeshStandardMaterial({color:0x806040,roughness:0.4,metalness:0.2});
-    _B(grp,railMat,w3/2-0.04,sSteps*sH/2,0,0.04,sSteps*sH*0.9,0.04);
+    _B(grp,railMat,w3/2-0.04,baseRise+partRise/2,0,0.04,partRise*0.9,0.04);
   }
   else{
     var matSide=new THREE.MeshStandardMaterial({color:col,roughness:0.85});
@@ -1855,10 +2055,46 @@ function buildItem3D(it){
   grp.userData={b:true}; sc3.add(grp);
 }
 
-function getItemH(type){return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,closet:2100,stair:20,balcony:50,car:1400,fence:800}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878}[type]||0xdddddd;}
+function getItemH(type){return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
+function _PRISM(g,mat,pts,h,baseY){
+  var verts=[], faces=[], n=pts.length;
+  pts.forEach(function(p){verts.push(p[0],baseY,p[1]);});
+  pts.forEach(function(p){verts.push(p[0],baseY+h,p[1]);});
+  for(var i=1;i<n-1;i++){faces.push(0,i+1,i,n,n+i,n+i+1);}
+  for(var j=0;j<n;j++){
+    var k=(j+1)%n;
+    faces.push(j,k,n+k,j,n+k,n+j);
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setIndex(faces); geo.computeVertexNormals();
+  var m=new THREE.Mesh(geo,mat);
+  m.castShadow=true; m.receiveShadow=true; g.add(m);
+}
+function build3DWinderCorner(grp,mat,w,d,baseRise,partRise){
+  var steps=3;
+  var inner=[w/2,d/2];
+  var path=[];
+  for(var i=0;i<=steps;i++){
+    var t=i/steps, len=t*(w+d);
+    if(len<=d) path.push([-w/2,d/2-len]);
+    else path.push([-w/2+(len-d),-d/2]);
+  }
+  for(var s=0;s<steps;s++){
+    var h=partRise*((s+1)/steps);
+    _PRISM(grp,mat,[inner,path[s],path[s+1]],h,baseRise);
+    var nosingMat=new THREE.MeshStandardMaterial({color:0x9a8060,roughness:0.5});
+    var mx=(path[s][0]+path[s+1][0])/2, mz=(path[s][1]+path[s+1][1])/2;
+    var len=Math.hypot(path[s+1][0]-path[s][0],path[s+1][1]-path[s][1]);
+    var nose=new THREE.Mesh(new THREE.BoxGeometry(len,0.025,0.035),nosingMat);
+    nose.position.set(mx,baseRise+h+0.012,mz);
+    nose.rotation.y=-Math.atan2(path[s+1][1]-path[s][1],path[s+1][0]-path[s][0]);
+    nose.castShadow=true; grp.add(nose);
+  }
+}
 function applySelectableColor(mat,color){
   if(!color) return mat;
   if(Array.isArray(mat)) return mat.map(function(m){return applySelectableColor(m,color);});
@@ -2141,6 +2377,18 @@ function setView(v){
   if(v==='2d') draw2d();
 }
 
+function refresh3DPreview(){
+  if(ST.view==='2d'){
+    setView('3d-ext');
+    return;
+  }
+  if(!ren) init3D();
+  if(ren){
+    build3D();
+    if(ST.view==='3d-ext') setTimeout(fitCameraToScene, 50);
+  }
+}
+
 function setTool(t){
   ST.tool=t;ST.drawing=false;ST.drawPts=[];ST.selected=null;
   var tools=document.querySelectorAll('.stool[data-tool]');
@@ -2190,6 +2438,15 @@ canvas.onmousedown=function(e){
 };
 
 function handleSelectDown(cx,cy,wx,wy,e){
+  if(ST.selected&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
+    var wh=hitWallHandle(ST.selected,cx,cy);
+    if(wh){
+      DRAG.active=true;DRAG.saved=false;DRAG.handle=wh;
+      DRAG.startCX=cx;DRAG.startCY=cy;
+      DRAG.origItem=JSON.parse(JSON.stringify(ST.selected));
+      return;
+    }
+  }
   if(ST.selected&&ST.selected.thick===undefined){
     var h=hitHandle(ST.selected,cx,cy);
     if(h){
@@ -2223,13 +2480,15 @@ function handleSelectDown(cx,cy,wx,wy,e){
     if(nearWall(wx,wy,fw[i])){ ST.selected=fw[i]; updateProps(); draw2d(); return; }
   }
 
-  // 4. Sites (Global - Base Layer)
-  var allSites = DATA.items.filter(function(i){return i.type==='site-rect';});
-  for(var i=allSites.length-1;i>=0;i--){
-    if(isInsideItem(allSites[i],wx,wy)){
-      ST.selected=allSites[i]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-      DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(allSites[i]));
-      updateProps(); draw2d(); return;
+  // 4. Sites (1F-only Base Layer)
+  if(ST.floor===1){
+    var allSites = DATA.items.filter(function(i){return i.type==='site-rect';});
+    for(var i=allSites.length-1;i>=0;i--){
+      if(isInsideItem(allSites[i],wx,wy)){
+        ST.selected=allSites[i]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+        DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(allSites[i]));
+        updateProps(); draw2d(); return;
+      }
     }
   }
   ST.selected=null; updateProps(); draw2d();
@@ -2290,9 +2549,10 @@ function handleRoomClick(wx,wy){
   }
 }
 function placeItem(type,wx,wy){
+  if(type==='site-rect' && ST.floor!==1) return;
   saveState();
   var sz=ISIZES[type]||{w:900,d:900};
-  var it=mkItem(type,wx-sz.w/2,wy-sz.d/2,ST.placingRot,ST.floor);
+  var it=mkItem(type,wx-sz.w/2,wy-sz.d/2,ST.placingRot,type==='site-rect'?1:ST.floor);
   DATA.items.push(it);ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   if(ren)build3D();draw2d();
@@ -2326,7 +2586,7 @@ function isInsideItem(it, px, py){
   var lx = dx*Math.cos(rad) - dy*Math.sin(rad);
   var ly = dx*Math.sin(rad) + dy*Math.cos(rad);
   // Add a minimum hit margin (300mm) for thin items like windows/doors
-  var thinTypes = ['window','door-swing','door-slide','door-front'];
+  var thinTypes = ['window','door-swing','door-swing-s','door-slide','door-front'];
   var margin = thinTypes.indexOf(it.type)>=0 ? 300 : 0;
   return lx >= -(it.w/2+margin) && lx <= it.w/2+margin &&
          ly >= -(it.d/2+margin) && ly <= it.d/2+margin;
@@ -2443,7 +2703,7 @@ function drawDim(){
     ctx.restore();
   }
 
-  var sites = DATA.items.filter(function(i){return i.type==='site-rect';});
+  var sites = ST.floor===1 ? DATA.items.filter(function(i){return i.type==='site-rect';}) : [];
   sites.forEach(function(s){
     var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
     getObjBounds(s).forEach(function(p){
@@ -2559,6 +2819,22 @@ window.addEventListener('keydown', function(e){
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undoAction(); }
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
+  if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
+    e.preventDefault();
+    saveState();
+    var step=ST.snap||1, dx=0, dy=0;
+    if(e.key==='ArrowLeft') dx=-step;
+    if(e.key==='ArrowRight') dx=step;
+    if(e.key==='ArrowUp') dy=-step;
+    if(e.key==='ArrowDown') dy=step;
+    if(ST.selected.x1!==undefined && ST.selected.x2!==undefined){
+      ST.selected.x1+=dx;ST.selected.x2+=dx;ST.selected.y1+=dy;ST.selected.y2+=dy;
+    } else {
+      ST.selected.x+=dx;ST.selected.y+=dy;
+    }
+    updateProps(); draw2d(); if(ren)rebuild3D();
+    return;
+  }
   if(e.key === 'Backspace' || e.key === 'Delete'){ if(ST.selected){ e.preventDefault(); delSel(); } }
   if(e.key.toLowerCase() === 'r') { ST.placingRot = (ST.placingRot + 90) % 360; draw2d(); }
   if(e.key.toLowerCase() === 'f') { if(ST.selected) { ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
@@ -2605,6 +2881,7 @@ function toggleCat(el){
 }
 
 function handleSiteClick(wx,wy){
+  if(ST.floor!==1) return;
   if(!ST.drawing){
     ST.drawing=true; ST.drawPts=[{x:wx,y:wy}];
   } else {
@@ -2612,7 +2889,7 @@ function handleSiteClick(wx,wy){
     var x1=Math.min(p1.x,wx), y1=Math.min(p1.y,wy), rw=Math.abs(p1.x-wx), rd=Math.abs(p1.y-wy);
     if(rw>500&&rd>500){
       saveState();
-      var it=mkItem('site-rect', x1, y1, 0, ST.floor, rw, rd);
+      var it=mkItem('site-rect', x1, y1, 0, 1, rw, rd);
       DATA.items.push(it);
       ST.selected=it; updateProps();
     }
