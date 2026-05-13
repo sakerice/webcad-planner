@@ -1890,7 +1890,6 @@ function build3DTree(grp,h){
 }
 
 function buildRooms3D(flFilt){
-  var matCeil=new THREE.MeshStandardMaterial({color:0xf8f6f0,roughness:0.92,side:THREE.DoubleSide});
   var matBase=new THREE.MeshStandardMaterial({color:0xf0ece4,roughness:0.9});
   var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:2.5,roughness:0.3});
 
@@ -1918,11 +1917,6 @@ function buildRooms3D(flFilt){
     var slab=new THREE.Mesh(new THREE.BoxGeometry(rw,0.05,rd),matFloor);
     slab.position.set(rcx,ry+0.025,rcz);
     slab.receiveShadow=true; slab.userData={b:true}; sc3.add(slab);
-
-    // Ceiling
-    var ceil=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeil);
-    ceil.rotation.x=Math.PI/2; ceil.position.set(rcx,ceilY,rcz);
-    ceil.userData={b:true}; sc3.add(ceil);
 
     // Baseboard 4 sides
     var bh=0.09;
