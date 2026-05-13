@@ -316,6 +316,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     <div class="cat-body">
       <div class="stool" onclick="document.getElementById('roof-panel').classList.toggle('show');document.getElementById('wall-panel').classList.remove('show')"><span class="sicon">🏠</span>屋根設定</div>
       <div class="stool" onclick="document.getElementById('wall-panel').classList.toggle('show');document.getElementById('roof-panel').classList.remove('show')"><span class="sicon">🎨</span>外壁カラー</div>
+      <div class="stool" onclick="toggleLightPanel()"><span class="sicon">💡</span>ライト調整</div>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><span class="sicon">🌿</span>バルコニー</div>
     </div>
     <div style="padding:8px 10px">
@@ -361,6 +362,16 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">4F 外壁:
         <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[4]=this.value;rebuild3D()"></div>
       <button class="pbtn" onclick="document.getElementById('wall-panel').classList.remove('show')" style="margin-top:8px">閉じる</button>
+    </div>
+    <div id="light-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:190px">
+      <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">💡 ライト調整</div>
+      <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.45</span></div>
+      <input type="range" min="0" max="1.2" step="0.05" value="0.45" style="width:100%" oninput="updateLightSetting('room',+this.value)">
+      <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.45</span></div>
+      <input type="range" min="0" max="1.2" step="0.05" value="0.45" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
+      <div style="font-size:10px;color:#7a8fb0">太陽光 <span id="light-sun-val">1.00</span></div>
+      <input type="range" min="0" max="2" step="0.05" value="1.0" style="width:100%" oninput="updateLightSetting('sun',+this.value)">
+      <button class="pbtn" onclick="document.getElementById('light-panel').style.display='none'" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wasd">WASD/矢印:移動 | ドラッグ:視点回転 | ESC:戻る</div>
     <div id="joy-hint">1本指:視点回転 | 2本指ドラッグ:移動 | ピンチ:ズーム</div>
@@ -427,6 +438,7 @@ var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
+var LIGHT_SETTINGS = {hemi:0.8, sun:1.0, ambient:0.45, room:0.45};
 
 var ISIZES = {
   bath:{w:1600,d:1600}, toilet:{w:380,d:680}, sink:{w:750,d:560},
@@ -453,7 +465,7 @@ var ICOLORS = {
 };
 // GLTF_MAP: PBR furniture GLBs. Some assets are exported from Unity Furniture Mega Pack via glTFast.
 var GLTF_MAP = {
-  'sofa':'assets/models/unity_exported/Sofa01.glb', 'loveseat_2p':'assets/models/unity_exported/Sofa01.glb',
+  'sofa':'assets/models/unity_exported/Sofa01.glb', 'loveseat_2p':'assets/models/unity_exported/Sofa02.glb',
   'bed-d':'assets/models/unity_exported/Bed01.glb', 'bed-s':'assets/models/unity_exported/Bed01.glb',
   'semi_double_bed':'assets/models/unity_exported/Bed01.glb',
   'dining-table':'assets/models/dining_table.glb', 'dining_6':'assets/models/dining_table.glb',
@@ -467,12 +479,20 @@ var GLTF_MAP = {
 };
 var _modelCache = {};
 var _modelLoading = {};
+var _modelFailed = {};
 var UNITY_FURNITURE_MODELS = {
   table:'assets/models/unity_exported/Table01.glb',
   chair:'assets/models/unity_exported/Chair01.glb',
   kitchenCabinet:'assets/models/unity_exported/CabinetA01.glb',
   kitchenSink:'assets/models/unity_exported/CabinetA_Sink.glb',
   kitchenStove:'assets/models/unity_exported/GasStove01.glb'
+};
+var GLTF_MODEL_CONFIG = {
+  loveseat_2p:{rotY:Math.PI},
+  toilet:{rotY:Math.PI},
+  'bed-d':{rotY:Math.PI},
+  'bed-s':{rotY:Math.PI},
+  semi_double_bed:{rotY:Math.PI}
 };
 // PBR Textures (lazy-loaded)
 var _pbrTex = {};
@@ -1543,10 +1563,12 @@ function init3D(){
   _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
   sc3.add(_skyMesh);
 
-  var hemi=new THREE.HemisphereLight(0xffffff,0x666644,1.0);
+  var hemi=new THREE.HemisphereLight(0xffffff,0x666644,LIGHT_SETTINGS.hemi);
+  hemi.name='HemiLight';
   sc3.add(hemi);
 
-  var sun=new THREE.DirectionalLight(0xffffff,1.2);
+  var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
+  sun.name='SunLight';
   sun.position.set(100,200,100); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
@@ -1554,7 +1576,8 @@ function init3D(){
   sun.shadow.bias = -0.0005; 
   sc3.add(sun);
   
-  var amb = new THREE.AmbientLight(0xffffff, 0.6);
+  var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
+  amb.name='AmbientLight';
   // HDR Environment Map
   (function(){
     if(typeof THREE.RGBELoader === 'undefined') return;
@@ -1687,6 +1710,26 @@ function fitShadowCamera(sunLight) {
   sunLight.shadow.camera.updateProjectionMatrix();
 }
 function rebuild3D(){if(sc3) build3D();}
+function toggleLightPanel(){
+  var lp=document.getElementById('light-panel');
+  if(!lp) return;
+  lp.style.display=lp.style.display==='block'?'none':'block';
+  document.getElementById('roof-panel').classList.remove('show');
+  document.getElementById('wall-panel').classList.remove('show');
+}
+function updateLightSetting(key,val){
+  LIGHT_SETTINGS[key]=val;
+  var label=document.getElementById('light-'+key+'-val');
+  if(label) label.textContent=val.toFixed(2);
+  if(sc3){
+    sc3.traverse(function(o){
+      if(key==='ambient'&&o.name==='AmbientLight') o.intensity=val;
+      if(key==='sun'&&o.name==='SunLight') o.intensity=val;
+      if(key==='hemi'&&o.name==='HemiLight') o.intensity=val;
+    });
+    if(key==='room') rebuild3D();
+  }
+}
 
 function isCustomWallColor(w){
   return !!(w.color && w.color !== '#888' && w.color !== '#888888');
@@ -2006,7 +2049,7 @@ function buildItem3D(it){
       grp.userData={b:true}; sc3.add(grp);
       return;
     }
-    return;
+    if(!anyGltfFailed([UNITY_FURNITURE_MODELS.kitchenSink,UNITY_FURNITURE_MODELS.kitchenCabinet,UNITY_FURNITURE_MODELS.kitchenStove])) return;
   }
 
   if(it.type==='dining-table'||it.type==='dining_6'||it.type==='round_table_4'||it.type==='low_table') {
@@ -2014,7 +2057,9 @@ function buildItem3D(it){
       grp.userData={b:true}; sc3.add(grp);
       return;
     }
-    return;
+    var tableUrls=[UNITY_FURNITURE_MODELS.table];
+    if(it.type!=='low_table') tableUrls.push(UNITY_FURNITURE_MODELS.chair);
+    if(!anyGltfFailed(tableUrls)) return;
   }
 
   // GLTF Loader Integration
@@ -2022,11 +2067,12 @@ function buildItem3D(it){
     var modelUrl = GLTF_MAP[it.type];
     if(ensureGltfModel(modelUrl)) {
         var clone = makeGltfClone(modelUrl,it.w*U,it.d*U,it.colorCustom?it.color:null);
+        applyGltfModelConfig(clone,it.type);
         grp.add(clone);
         grp.userData={b:true}; sc3.add(grp);
         return;
     }
-    return;
+    if(!_modelFailed[modelUrl]) return;
   }
 
   if(['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)>=0) {
@@ -2180,17 +2226,25 @@ function applySelectableColor(mat,color){
 }
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
+  if(_modelFailed[url]) return false;
   if(_modelLoading[url]) return false;
   _modelLoading[url]=true;
+  _modelFailed[url]=false;
   new THREE.GLTFLoader().load(url,function(gltf){
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
+    delete _modelFailed[url];
     rebuild3D();
   },undefined,function(err){
     _modelLoading[url]=false;
-    console.warn('GLB load failed:',url,err);
+    _modelFailed[url]=true;
+    console.warn('GLB load failed; using fallback geometry:',url,err);
+    rebuild3D();
   });
   return false;
+}
+function anyGltfFailed(urls){
+  return urls.some(function(url){ return !!_modelFailed[url]; });
 }
 function makeGltfClone(url,w,d,color){
   var clone=_modelCache[url].clone(true);
@@ -2213,6 +2267,11 @@ function makeGltfClone(url,w,d,color){
     }
   });
   return clone;
+}
+function applyGltfModelConfig(obj,type){
+  var cfg=GLTF_MODEL_CONFIG[type];
+  if(!cfg) return;
+  if(cfg.rotY) obj.rotation.y+=cfg.rotY;
 }
 function buildUnityTableSet3D(grp,it,w,d){
   var tableUrl=UNITY_FURNITURE_MODELS.table, chairUrl=UNITY_FURNITURE_MODELS.chair;
@@ -2387,7 +2446,7 @@ function buildRooms3D(flFilt){
       var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
       var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
       fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
-      var pl=new THREE.PointLight(0xffd880,0.9,6.0,1.8);
+      var pl=new THREE.PointLight(0xffd880,LIGHT_SETTINGS.room,6.0,1.8);
       pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
     }
   });
