@@ -346,16 +346,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     </div>
     <div id="roof-panel">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🏠 屋根設定</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="none" checked onchange="setRoof(this.value)"> なし（表示しない）</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="gable" onchange="setRoof(this.value)"> 切妻屋根</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="hip" onchange="setRoof(this.value)"> 寄棟屋根</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="flat" onchange="setRoof(this.value)"> 陸屋根</div>
-      <div class="roof-opt"><input type="radio" name="roof" value="mono" onchange="setRoof(this.value)"> 片流れ</div>
-      <div style="margin-top:7px;font-size:10px;color:#7a8fb0">勾配(°):
-        <input type="number" id="roof-pitch" value="30" min="5" max="60" style="width:44px;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:2px 4px;border-radius:3px;font-family:inherit" onchange="ROOF.pitch=+this.value;rebuild3D()"></div>
-      <div style="margin-top:4px;font-size:10px;color:#7a8fb0;opacity:0.7">※ パレット「屋根」を配置したフロアに生成</div>
-      <div style="margin-top:4px;font-size:10px;color:#7a8fb0">屋根色:
-        <input type="color" id="roof-color" value="#2a2a30" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="ROOF.color=this.value;rebuild3D()"></div>
+      <div style="font-size:10px;color:#7a8fb0;line-height:1.7">屋根は「階段・屋根」から平面図に配置するオブジェクトです。置いた屋根を選択すると、形状・勾配・色を設定できます。</div>
       <button class="pbtn" onclick="document.getElementById('roof-panel').classList.remove('show')" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wall-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:175px">
@@ -435,7 +426,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
-var ROOF = {type:'none', pitch:30, color:'#2a2a30', floor:3};
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 
 var ISIZES = {
@@ -450,7 +440,7 @@ var ISIZES = {
   'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'door-front':{w:900,d:200},
   'site-rect':{w:10000,d:8000},
-  'roof':{w:1000,d:1000}
+  'roof':{w:7280,d:4095}
 };
 var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
@@ -461,22 +451,27 @@ var ICOLORS = {
   window:'#c0e4f8','door-front':'#f8d0a0','site-rect':'rgba(100,160,100,0.1)',
   'roof':'rgba(50,50,80,0.12)'
 };
-// GLTF_MAP: PBR furniture GLBs (CC0, generated with pygltflib, multi-mesh PBR materials)
+// GLTF_MAP: PBR furniture GLBs. Some assets are exported from Unity Furniture Mega Pack via glTFast.
 var GLTF_MAP = {
-  'sofa':'assets/models/sofa.glb', 'loveseat_2p':'assets/models/sofa.glb',
+  'sofa':'assets/models/unity_exported/Sofa01.glb', 'loveseat_2p':'assets/models/unity_exported/Sofa01.glb',
   'kitchen':'assets/models/kitchen.glb',
-  'bed-d':'assets/models/bed_double.glb', 'bed-s':'assets/models/bed_single.glb',
-  'semi_double_bed':'assets/models/bed_double.glb',
+  'bed-d':'assets/models/unity_exported/Bed01.glb', 'bed-s':'assets/models/unity_exported/Bed01.glb',
+  'semi_double_bed':'assets/models/unity_exported/Bed01.glb',
   'dining-table':'assets/models/dining_table.glb', 'dining_6':'assets/models/dining_table.glb',
   'tv':'assets/models/tv.glb',
   'bath':'assets/models/bathtub.glb',
-  'toilet':'assets/models/toilet.glb',
+  'toilet':'assets/models/unity_exported/Toilet01.glb',
   'sink':'assets/models/sink.glb',
   'desk':'assets/models/desk.glb',
   'closet':'assets/models/closet.glb', 'shoe_cabinet':'assets/models/closet.glb',
   'fridge':'assets/models/fridge.glb', 'washer':'assets/models/fridge.glb'
 };
 var _modelCache = {};
+var _modelLoading = {};
+var UNITY_FURNITURE_MODELS = {
+  table:'assets/models/unity_exported/Table01.glb',
+  chair:'assets/models/unity_exported/Chair01.glb'
+};
 // PBR Textures (lazy-loaded)
 var _pbrTex = {};
 function pbrTex(name) {
@@ -520,7 +515,7 @@ var ST = {
 };
 
 // ─── Edge Snap (object-to-object + grid) ──────────
-var EDGE_SNAP_THRESH = 280; // mm — snap within 280mm
+var EDGE_SNAP_THRESH = 80; // mm — object-edge snap when Shift is held
 
 function getEdgeCandidates(excludeId){
   var cx={}, cy={};  // deduplicate
@@ -629,6 +624,22 @@ function updateProps(){
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipY\', !ST.selected.flipY)">上下反転</button>';
     html += '</div></div>';
   }
+  if(it.type === 'roof') {
+    if(!it.roofType) it.roofType='gable';
+    if(!it.pitch) it.pitch=30;
+    html += '<div class="pr"><div class="pl">屋根形状</div><select class="pi" onchange="updateSelectedProp(\'roofType\',this.value)">';
+    [['gable','切妻屋根'],['hip','寄棟屋根'],['flat','陸屋根'],['mono','片流れ']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+(it.roofType===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" value="'+Math.round(it.pitch||30)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
+  }
+  if(isStairPartType(it.type)) {
+    var sri = stairRiseInfo(it);
+    var orderVal = it.stairOrder !== undefined ? it.stairOrder : (sri.index + 1);
+    html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
+  }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect') {
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
@@ -682,13 +693,19 @@ function saveState(){
 // ───── DATA HELPERS ─────
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
-    thick:thick||120,color:color||'#888',texture:null,texScale:1,_texObj:null};
+    thick:thick||120,color:color||'#888888',texture:null,texScale:1,_texObj:null};
 }
 function mkItem(type,x,y,rot,floor,w,d){
   var sz=ISIZES[type]||{w:900,d:900};
-  return {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,
+  var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,
     w:w||sz.w,d:d||sz.d,color:ICOLORS[type]||'#ddd',
     flipX:false, flipY:false, sScale:1, sX:0, sY:0};
+  if(type==='roof'){
+    item.roofType='gable';
+    item.pitch=30;
+    item.color='#2a2a30';
+  }
+  return item;
 }
 
 // ───── PRESET DATA ─────
@@ -1282,6 +1299,10 @@ function applyWallDrag(cx,cy){
   updateProps();
 }
 
+function isStairPartType(type){
+  return type==='stair'||type==='stair-corner';
+}
+
 // ─── Resize edge snap helper ──────────────────────
 // Snaps moving edge(s) to nearest object edge (axis-aligned items only)
 function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
@@ -1325,8 +1346,8 @@ function applyHandleDrag(cx,cy,e){
 
   if(h==='move'){
     var nx=o.x+dx, ny=o.y+dy;
-    if(e&&e.shiftKey){nx=snapV(nx);ny=snapV(ny);}
-    var useEdgeSnap=onMobile||(e&&!e.shiftKey);
+    nx=snapV(nx); ny=snapV(ny);
+    var useEdgeSnap=e&&e.shiftKey;
     if(useEdgeSnap&&it.type!=='wall'){
       var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id);
       nx=snapped.x; ny=snapped.y; ST._snapState=snapped;
@@ -1355,7 +1376,7 @@ function applyHandleDrag(cx,cy,e){
     var ldy=dx*Math.sin(rad)+dy*Math.cos(rad);
 
     var isCorner=h.length===2; // 'nw','ne','se','sw' are 2 chars; 'n','s','e','w' are 1 char
-    var freeCornerResize = it.type==='stair' || it.type==='stair-corner';
+    var freeCornerResize = isStairPartType(it.type);
     if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner drag: maintain aspect ratio via diagonal projection
       var hw=o.w/2, hd=o.d/2;
@@ -1372,8 +1393,8 @@ function applyHandleDrag(cx,cy,e){
       if(h.indexOf('n')>=0) nd=o.d-ldy;
     }
 
-    // Grid snap: always use current snap setting (Shift = fine-tune / disable)
-    var snapG=onMobile ? (ST.snap||455) : (e&&e.shiftKey ? 0 : (ST.snap||0));
+    // Grid snap is the default; Shift enables object-edge snap after grid rounding.
+    var snapG=ST.snap||0;
     var minSz=snapG||100;
     if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner: snap width, derive height from ratio, enforce minimums while keeping ratio
@@ -1404,7 +1425,7 @@ function applyHandleDrag(cx,cy,e){
 
     // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270); skip for corners (would break ratio)
     var isAxisAligned=Math.abs((o.rot||0)%90)<4;
-    if(!isCorner&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'){
+    if(e&&e.shiftKey&&!isCorner&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'&&!isStairPartType(it.type)){
       var res=applyResizeEdgeSnap(h,o,nx,ny,nw,nd,it.id);
       nx=res.nx; ny=res.ny; nw=res.nw; nd=res.nd;
       ST._snapState=res.snapState;
@@ -1412,7 +1433,7 @@ function applyHandleDrag(cx,cy,e){
 
     it.w=nw; it.d=nd; it.x=nx; it.y=ny;
   }
-  updateProps();
+  if(!DRAG.active) updateProps();
 }
 
 function hitHandle(it,mx,my){
@@ -1642,7 +1663,7 @@ function build3D(){
   buildRooms3D(flFilt);
   DATA.items.filter(function(it){return !flFilt||it.floor===flFilt;}).forEach(function(it){buildItem3D(it);});
   buildWinFrames(flFilt);
-  if(!flFilt){buildRoof3D();buildLandscape();}
+  if(!flFilt){buildLandscape();}
   var _sunLight=null;
   sc3.traverse(function(o){if(o.isDirectionalLight)_sunLight=o;});
   if(_sunLight) fitShadowCamera(_sunLight);
@@ -1665,6 +1686,10 @@ function fitShadowCamera(sunLight) {
 }
 function rebuild3D(){if(sc3) build3D();}
 
+function isCustomWallColor(w){
+  return !!(w.color && w.color !== '#888' && w.color !== '#888888');
+}
+
 function buildWall3D(w){
   var fl=w.floor, fy=(fl-1)*FLOOR_H*U;
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
@@ -1672,7 +1697,7 @@ function buildWall3D(w){
   if(len<0.001) return;
   var isOuter=w.thick>=120;
   var matParams;
-  if(w.color && w.color!=='#888888'){
+  if(isCustomWallColor(w)){
     // User-specified color
     matParams={color:w.color, roughness:0.7, metalness:0.05};
   } else if(w.texture){
@@ -1683,12 +1708,12 @@ function buildWall3D(w){
   } else if(isOuter&&fl===1){
     // 1F exterior: dark wood siding
     var st=getTexture3D('siding');
-    if(st){var stc=st.clone();stc.repeat.set(len*2.2,(FLOOR_H*U)*2.8);matParams={map:stc,color:0xffffff,roughness:0.85};}
+    if(st){var stc=st.clone();stc.repeat.set(len*2.2,(FLOOR_H*U)*2.8);matParams={map:stc,color:WALL_COLORS[1],roughness:0.85};}
     else matParams={color:WALL_COLORS[1],roughness:0.85};
   } else if(isOuter){
     // 2F+ exterior: white plaster
     var pt=getTexture3D('plaster');
-    if(pt){var ptc=pt.clone();ptc.repeat.set(len*1.8,(FLOOR_H*U)*1.8);matParams={map:ptc,color:0xffffff,roughness:0.82};}
+    if(pt){var ptc=pt.clone();ptc.repeat.set(len*1.8,(FLOOR_H*U)*1.8);matParams={map:ptc,color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82};}
     else matParams={color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82};
   } else {
     // Interior wall
@@ -1838,7 +1863,17 @@ function getSpriteTexture3D(sheet) {
 }
 
 function stairBounds2D(it){
-  return {l:it.x,t:it.y,r:it.x+it.w,b:it.y+it.d};
+  var cx=it.x+it.w/2, cy=it.y+it.d/2, hw=it.w/2, hd=it.d/2;
+  var rad=(it.rot||0)*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
+  var pts=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
+    return {x:cx+p[0]*cos-p[1]*sin,y:cy+p[0]*sin+p[1]*cos};
+  });
+  return {
+    l:Math.min.apply(null,pts.map(function(p){return p.x;})),
+    t:Math.min.apply(null,pts.map(function(p){return p.y;})),
+    r:Math.max.apply(null,pts.map(function(p){return p.x;})),
+    b:Math.max.apply(null,pts.map(function(p){return p.y;}))
+  };
 }
 function stairPartsTouch(a,b){
   var aa=stairBounds2D(a), bb=stairBounds2D(b);
@@ -1846,7 +1881,7 @@ function stairPartsTouch(a,b){
   var gapY=Math.max(0,Math.max(aa.t,bb.t)-Math.min(aa.b,bb.b));
   var overlapX=Math.min(aa.r,bb.r)-Math.max(aa.l,bb.l);
   var overlapY=Math.min(aa.b,bb.b)-Math.max(aa.t,bb.t);
-  return (gapX<=120&&overlapY>120) || (gapY<=120&&overlapX>120);
+  return (gapX<=220&&overlapY>60) || (gapY<=220&&overlapX>60);
 }
 function getConnectedStairParts(seed){
   var all=DATA.items.filter(function(o){
@@ -1875,7 +1910,16 @@ function stairRiseInfo(it){
     minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
   });
   var sortByX=(maxX-minX)>=(maxY-minY);
+  var autoPos={};
+  group.slice().sort(function(a,b){
+    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
+    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
+    return ac-bc;
+  }).forEach(function(o,i){autoPos[o.id]=i+1;});
   group.sort(function(a,b){
+    var ao=(a.stairOrder!==undefined&&isFinite(a.stairOrder))?+a.stairOrder:autoPos[a.id];
+    var bo=(b.stairOrder!==undefined&&isFinite(b.stairOrder))?+b.stairOrder:autoPos[b.id];
+    if(ao!==bo) return ao-bo;
     var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
     var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
     return ac-bc;
@@ -1885,50 +1929,91 @@ function stairRiseInfo(it){
   return {index:idx,count:group.length,base:rise*idx,rise:rise};
 }
 
+function build3DRoofItem(grp,it,w3,d3){
+  var type=it.roofType||'gable';
+  var pitch=Math.max(5,Math.min(60,it.pitch||30))*Math.PI/180;
+  var baseY=0;
+  var over=0.28;
+  var W=w3+over*2, D=d3+over*2;
+  var roofTex=getTexture3D('roof_tile');
+  var matParams={color:it.color||'#2a2a30',side:THREE.DoubleSide,roughness:0.76,metalness:0.02};
+  if(roofTex){
+    var rtc=roofTex.clone();
+    rtc.repeat.set(Math.max(W,D)*1.2,Math.max(W,D)*0.9);
+    matParams.map=rtc;
+  }
+  var mat=new THREE.MeshStandardMaterial(matParams);
+  function addGeo(points){
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(points),3));
+    geo.computeVertexNormals();
+    var mesh=new THREE.Mesh(geo,mat);
+    mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
+  }
+  if(type==='flat'){
+    var slab=new THREE.Mesh(new THREE.BoxGeometry(W,0.18,D),mat);
+    slab.position.y=baseY+0.09; slab.castShadow=true; slab.receiveShadow=true; grp.add(slab);
+    return;
+  }
+  if(type==='mono'){
+    var rise=Math.tan(pitch)*D;
+    addGeo([
+      -W/2,baseY,-D/2, W/2,baseY,-D/2, W/2,baseY+rise,D/2,
+      -W/2,baseY,-D/2, W/2,baseY+rise,D/2, -W/2,baseY+rise,D/2,
+      -W/2,baseY,-D/2, -W/2,baseY+rise,D/2, W/2,baseY+rise,D/2,
+      -W/2,baseY,-D/2, W/2,baseY+rise,D/2, W/2,baseY,-D/2
+    ]);
+    return;
+  }
+  if(type==='hip'){
+    var rise=Math.tan(pitch)*Math.min(W,D)/2;
+    addGeo([
+      -W/2,baseY,-D/2, W/2,baseY,-D/2, 0,baseY+rise,0,
+      W/2,baseY,-D/2, W/2,baseY,D/2, 0,baseY+rise,0,
+      W/2,baseY,D/2, -W/2,baseY,D/2, 0,baseY+rise,0,
+      -W/2,baseY,D/2, -W/2,baseY,-D/2, 0,baseY+rise,0
+    ]);
+    return;
+  }
+  var rise=Math.tan(pitch)*D/2;
+  addGeo([
+    -W/2,baseY,-D/2, W/2,baseY,-D/2, W/2,baseY+rise,0,
+    -W/2,baseY,-D/2, W/2,baseY+rise,0, -W/2,baseY+rise,0,
+    W/2,baseY,D/2, -W/2,baseY,D/2, -W/2,baseY+rise,0,
+    W/2,baseY,D/2, -W/2,baseY+rise,0, W/2,baseY+rise,0,
+    -W/2,baseY,-D/2, -W/2,baseY,D/2, -W/2,baseY+rise,0,
+    W/2,baseY,D/2, W/2,baseY,-D/2, W/2,baseY+rise,0
+  ]);
+}
+
 function buildItem3D(it){
-  if(it.type==='roof') return; // 屋根はbuildRoof3Dで処理
   var fy=(it.floor-1)*FLOOR_H*U, h=getItemH(it.type)*U, col=it.color||getItemCol(it.type);
   if(['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)>=0) return;
   var grp = new THREE.Group();
   grp.position.set((it.x+it.w/2)*U, fy, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
   grp.scale.set(it.flipX?-1:1, 1, it.flipY?-1:1);
+  if(it.type==='roof'){
+    build3DRoofItem(grp,it,it.w*U,it.d*U);
+    grp.userData={b:true}; sc3.add(grp);
+    return;
+  }
+
+  if(it.type==='dining-table'||it.type==='dining_6'||it.type==='round_table_4'||it.type==='low_table') {
+    if(buildUnityTableSet3D(grp,it,it.w*U,it.d*U)){
+      grp.userData={b:true}; sc3.add(grp);
+      return;
+    }
+  }
 
   // GLTF Loader Integration
   if(GLTF_MAP[it.type]) {
     var modelUrl = GLTF_MAP[it.type];
-    if(_modelCache[modelUrl]) {
-        var clone = _modelCache[modelUrl].clone();
-        var box = new THREE.Box3().setFromObject(clone);
-        var size = box.getSize(new THREE.Vector3());
-        // Scale each axis independently to match item dimensions
-        var sx = (size.x>0.001) ? (it.w*U)/size.x : 1;
-        var sz2 = (size.z>0.001) ? (it.d*U)/size.z : 1;
-        // Y: keep proportional to X scale (don't squash height)
-        var sy = sx;
-        clone.scale.set(sx, sy, sz2);
-        // Align bottom and center of model to the item's local origin.
-        box.setFromObject(clone);
-        clone.position.x = -(box.min.x+box.max.x)/2;
-        clone.position.y = -box.min.y;
-        clone.position.z = -(box.min.z+box.max.z)/2;
-        clone.traverse(function(c){
-          if(c.isMesh){
-            c.castShadow=true; c.receiveShadow=true;
-            if(c.material) {
-              c.material = applySelectableColor(c.material, it.colorCustom?it.color:null);
-              c.material.needsUpdate=true;
-            }
-          }
-        });
+    if(ensureGltfModel(modelUrl)) {
+        var clone = makeGltfClone(modelUrl,it.w*U,it.d*U,it.colorCustom?it.color:null);
         grp.add(clone);
         grp.userData={b:true}; sc3.add(grp);
         return;
-    } else {
-        new THREE.GLTFLoader().load(modelUrl, function(gltf){
-            _modelCache[modelUrl] = gltf.scene;
-            rebuild3D();
-        });
     }
   }
 
@@ -2015,8 +2100,10 @@ function buildItem3D(it){
         sbox.position.set(0,baseRise+sh/2,-d3/2+sD*si+sD/2);sbox.castShadow=true;sbox.receiveShadow=true;grp.add(sbox);
       }
     }
-    var railMat=new THREE.MeshStandardMaterial({color:0x806040,roughness:0.4,metalness:0.2});
-    _B(grp,railMat,w3/2-0.04,baseRise+partRise/2,0,0.04,partRise*0.9,0.04);
+    if(it.type==='stair'){
+      var railMat=new THREE.MeshStandardMaterial({color:0x806040,roughness:0.4,metalness:0.2});
+      _B(grp,railMat,w3/2-0.04,baseRise+partRise/2,0,0.04,partRise*0.9,0.04);
+    }
   }
   else{
     var matSide=new THREE.MeshStandardMaterial({color:col,roughness:0.85});
@@ -2071,7 +2158,9 @@ function _PRISM(g,mat,pts,h,baseY){
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
   geo.setIndex(faces); geo.computeVertexNormals();
-  var m=new THREE.Mesh(geo,mat);
+  var prismMat=mat.clone();
+  prismMat.side=THREE.DoubleSide;
+  var m=new THREE.Mesh(geo,prismMat);
   m.castShadow=true; m.receiveShadow=true; g.add(m);
 }
 function build3DWinderCorner(grp,mat,w,d,baseRise,partRise){
@@ -2085,7 +2174,8 @@ function build3DWinderCorner(grp,mat,w,d,baseRise,partRise){
   }
   for(var s=0;s<steps;s++){
     var h=partRise*((s+1)/steps);
-    _PRISM(grp,mat,[inner,path[s],path[s+1]],h,baseRise);
+    var slabT=Math.min(0.07, Math.max(0.035, partRise/steps*0.35));
+    _PRISM(grp,mat,[inner,path[s],path[s+1]],slabT,baseRise+h-slabT);
     var nosingMat=new THREE.MeshStandardMaterial({color:0x9a8060,roughness:0.5});
     var mx=(path[s][0]+path[s+1][0])/2, mz=(path[s][1]+path[s+1][1])/2;
     var len=Math.hypot(path[s+1][0]-path[s][0],path[s+1][1]-path[s][1]);
@@ -2102,6 +2192,76 @@ function applySelectableColor(mat,color){
   var nm=mat.clone();
   nm.color.set(color);
   return nm;
+}
+function ensureGltfModel(url){
+  if(_modelCache[url]) return true;
+  if(_modelLoading[url]) return false;
+  _modelLoading[url]=true;
+  new THREE.GLTFLoader().load(url,function(gltf){
+    _modelCache[url]=gltf.scene;
+    _modelLoading[url]=false;
+    rebuild3D();
+  },undefined,function(err){
+    _modelLoading[url]=false;
+    console.warn('GLB load failed:',url,err);
+  });
+  return false;
+}
+function makeGltfClone(url,w,d,color){
+  var clone=_modelCache[url].clone(true);
+  var box=new THREE.Box3().setFromObject(clone);
+  var size=box.getSize(new THREE.Vector3());
+  var sx=(size.x>0.001)?w/size.x:1;
+  var sz=(size.z>0.001)?d/size.z:1;
+  clone.scale.set(sx,sx,sz);
+  box.setFromObject(clone);
+  clone.position.x=-(box.min.x+box.max.x)/2;
+  clone.position.y=-box.min.y;
+  clone.position.z=-(box.min.z+box.max.z)/2;
+  clone.traverse(function(c){
+    if(c.isMesh){
+      c.castShadow=true; c.receiveShadow=true;
+      if(c.material){
+        c.material=applySelectableColor(c.material,color);
+        c.material.needsUpdate=true;
+      }
+    }
+  });
+  return clone;
+}
+function buildUnityTableSet3D(grp,it,w,d){
+  var tableUrl=UNITY_FURNITURE_MODELS.table, chairUrl=UNITY_FURNITURE_MODELS.chair;
+  var ready=ensureGltfModel(tableUrl);
+  if(it.type!=='low_table') ready=ensureGltfModel(chairUrl)&&ready;
+  if(!ready) return false;
+
+  var tableW=it.type==='low_table'?w*0.92:w*0.54;
+  var tableD=it.type==='low_table'?d*0.86:d*0.46;
+  var table=makeGltfClone(tableUrl,tableW,tableD,it.colorCustom?it.color:null);
+  if(it.type==='low_table') table.scale.y*=0.55;
+  grp.add(table);
+  if(it.type==='low_table') return true;
+
+  var count=it.type==='dining_6'?6:4;
+  var chairW=Math.min(w*0.26,0.48), chairD=Math.min(d*0.34,0.52);
+  var xOff=Math.max(tableW*0.62,w*0.36);
+  var zOff=Math.max(tableD*0.72,d*0.34);
+  var placements=[
+    [-xOff,0,0, Math.PI/2],
+    [ xOff,0,0,-Math.PI/2],
+    [0,0,-zOff,0],
+    [0,0, zOff,Math.PI]
+  ];
+  if(count===6){
+    placements.push([-xOff*0.45,0,-zOff,0]);
+    placements.push([ xOff*0.45,0, zOff,Math.PI]);
+  }
+  placements.forEach(function(p){
+    var chair=makeGltfClone(chairUrl,chairW,chairD,it.colorCustom?it.color:null);
+    chair.position.x+=p[0]; chair.position.z+=p[2]; chair.rotation.y=p[3];
+    grp.add(chair);
+  });
+  return true;
 }
 function applyItemColorToGroup(grp,color){
   if(!color) return;
@@ -2228,52 +2388,6 @@ function buildRooms3D(flFilt){
   });
 }
 
-function buildRoof3D(){
-  if(ROOF.type==='none') return;
-  // 屋根アイテムが配置されていればそのフロアを使用、なければ return
-  var roofItem = DATA.items.filter(function(it){ return it.type==='roof'; })[0];
-  if(!roofItem || DATA.walls.length===0) return;
-  ROOF.floor = roofItem.floor;
-  // Compute actual building footprint from walls
-  var minX=Infinity,minZ=Infinity,maxX=-Infinity,maxZ=-Infinity;
-  DATA.walls.forEach(function(wl){
-    minX=Math.min(minX,wl.x1,wl.x2); minZ=Math.min(minZ,wl.y1,wl.y2);
-    maxX=Math.max(maxX,wl.x1,wl.x2); maxZ=Math.max(maxZ,wl.y1,wl.y2);
-  });
-  var ox=minX*U, oz=minZ*U;
-  var w=(maxX-minX)*U, d=(maxZ-minZ)*U;
-  var h = (ROOF.floor - 1) * FLOOR_H * U + WALL_H * U;
-  var pitch = (ROOF.pitch || 30) * Math.PI / 180;
-  var ridgeH = (w/2) * Math.tan(pitch);
-  var roofTex=getTexture3D('roof_tile');
-  var roofMatP={side:THREE.DoubleSide,roughness:0.75};
-  if(roofTex){var rtc=roofTex.clone();rtc.repeat.set(w*1.4,d*0.9);roofMatP.map=rtc;roofMatP.color=ROOF.color||'#2a2a30';}
-  else{roofMatP.color=ROOF.color||'#2a2a30';}
-  var mat = new THREE.MeshStandardMaterial(roofMatP);
-  if(ROOF.type === 'gable') {
-    var geo = new THREE.BufferGeometry();
-    var x0=ox,x1=ox+w,xm=ox+w/2, z0=oz,z1=oz+d;
-    var pts = new Float32Array([
-      x0,h,z0, x1,h,z0, xm,h+ridgeH,z0,
-      x0,h,z1, x1,h,z1, xm,h+ridgeH,z1,
-      x0,h,z0, x0,h,z1, xm,h+ridgeH,z1,
-      x0,h,z0, xm,h+ridgeH,z0, xm,h+ridgeH,z1,
-      x1,h,z0, x1,h,z1, xm,h+ridgeH,z1,
-      x1,h,z0, xm,h+ridgeH,z0, xm,h+ridgeH,z1
-    ]);
-    geo.setAttribute('position', new THREE.BufferAttribute(pts, 3));
-    geo.computeVertexNormals();
-    var roof = new THREE.Mesh(geo, mat);
-    roof.castShadow = true; roof.receiveShadow = true; roof.userData={b:true};
-    sc3.add(roof);
-  } else if(ROOF.type === 'flat') {
-    var geo = new THREE.BoxGeometry(w+0.4, 0.2, d+0.4);
-    var roof = new THREE.Mesh(geo, mat);
-    roof.position.set(ox+w/2, h+0.1, oz+d/2);
-    roof.castShadow = true; roof.receiveShadow = true; roof.userData={b:true};
-    sc3.add(roof);
-  }
-}
 function buildLandscape(){
   if(DATA.walls.length===0) return;
   // Compute building bounding box from walls
@@ -2415,7 +2529,6 @@ function onFloorChange(v){
   document.getElementById('st-floor').textContent='フロア:'+v+'F';
   draw2d();
 }
-function setRoof(v){ROOF.type=v;if(sc3)build3D();}
 
 // ───── CANVAS EVENTS ─────
 canvas.onmousedown=function(e){
@@ -2507,7 +2620,9 @@ canvas.addEventListener('mousemove',function(e){
 });
 canvas.addEventListener('mouseup',function(){
   if(ST.panning) { ST.panning = false; return; }
+  var wasDragging=DRAG.active;
   DRAG.active=false; ST._snapState=null;
+  if(wasDragging) updateProps();
   if(ren)build3D();
 });
 canvas.addEventListener('wheel', function(e){
