@@ -610,6 +610,7 @@ function updateProps(){
     html += '</div></div>';
   }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect') {
+    html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
     html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
     html += '<div class="pr"><div class="pl">位置 X: '+Math.round(it.sX||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedProp(\'sX\',+this.value, true)" onchange="saveState()"></div>';
@@ -633,6 +634,7 @@ function updateProps(){
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
   if(!noSave) saveState();
+  if(p==='color') ST.selected.colorCustom=true;
   ST.selected[p]=v;
   draw2d(); if(ren) rebuild3D();
   updateProps();
@@ -1611,28 +1613,63 @@ function buildWinFrames(flFilt){
     var wdx=best.x2-best.x1,wdy=best.y2-best.y1,wlen=Math.sqrt(wdx*wdx+wdy*wdy);
     var t=((it.x+it.w/2-best.x1)*wdx+(it.y+it.d/2-best.y1)*wdy)/(wlen*wlen);
     var px=(best.x1+t*wdx)*U, pz=(best.y1+t*wdy)*U;
+    var nx=-wdy/wlen, ny=wdx/wlen;
+    var side=((it.x+it.w/2-(best.x1+t*wdx))*nx+(it.y+it.d/2-(best.y1+t*wdy))*ny)>=0?1:-1;
     
     var grp=new THREE.Group();
-    var frameMat=new THREE.MeshStandardMaterial({color:0x3a3a3a,roughness:0.5});
+    var customColor=it.colorCustom?it.color:null;
+    var frameMat=new THREE.MeshStandardMaterial({color:it.type==='window'?(customColor||0x3a3a3a):0x3a3a3a,roughness:0.5});
     var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
+    var doorMat=new THREE.MeshStandardMaterial({color:customColor||(it.type==='door-front'?0x5c432f:0x8a765c),roughness:0.58});
+    var railMat=new THREE.MeshStandardMaterial({color:0x707070,roughness:0.35,metalness:0.25});
     
-    var ww=it.w*U, wh=1.8, wt=0.15;
-    if(it.type==='window') { wh=1.2; fy+=1.0; }
-    
-    var glass=new THREE.Mesh(new THREE.BoxGeometry(ww-0.08,wh-0.08,0.01),glassMat);
-    glass.position.set(0, wh/2, 0); grp.add(glass);
-    var sill=new THREE.Mesh(new THREE.BoxGeometry(ww+0.1,0.05,wt+0.1),frameMat);
-    sill.position.y=0.025; grp.add(sill);
-    var top=new THREE.Mesh(new THREE.BoxGeometry(ww+0.1,0.05,wt+0.05),frameMat);
-    top.position.y=wh; grp.add(top);
-    var sideL=new THREE.Mesh(new THREE.BoxGeometry(0.05,wh,wt+0.05),frameMat);
-    sideL.position.set(-ww/2,wh/2,0); grp.add(sideL);
-    var sideR=new THREE.Mesh(new THREE.BoxGeometry(0.05,wh,wt+0.05),frameMat);
-    sideR.position.set(ww/2,wh/2,0); grp.add(sideR);
+    function addBox(mat,x,y,z,w,h,d){
+      var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+      m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; grp.add(m);
+      return m;
+    }
+
+    var ww=it.w*U, wt=0.15;
+    if(it.type==='window') {
+      var wh=1.2; fy+=1.0;
+      addBox(glassMat,0,wh/2,0,Math.max(ww-0.08,0.02),wh-0.08,0.01);
+      addBox(frameMat,0,0.025,0,ww+0.1,0.05,wt+0.1);
+      addBox(frameMat,0,wh,0,ww+0.1,0.05,wt+0.05);
+      addBox(frameMat,-ww/2,wh/2,0,0.05,wh,wt+0.05);
+      addBox(frameMat, ww/2,wh/2,0,0.05,wh,wt+0.05);
+    } else {
+      var dh=2.0, jamb=0.08, leafT=0.04;
+      addBox(frameMat,-ww/2-jamb/2,dh/2,0,jamb,dh,wt);
+      addBox(frameMat, ww/2+jamb/2,dh/2,0,jamb,dh,wt);
+      addBox(frameMat,0,dh+jamb/2,0,ww+jamb*2,jamb,wt);
+      addBox(railMat,0,0.02,0,ww+jamb*2,0.04,wt+0.03);
+
+      if(it.type==='door-slide') {
+        addBox(railMat,0,dh+0.03,-0.045,ww+jamb*2,0.035,0.025);
+        addBox(railMat,0,dh+0.03, 0.045,ww+jamb*2,0.035,0.025);
+        addBox(doorMat,-ww*0.23,dh/2,-0.035,ww*0.54,dh-0.12,leafT);
+        addBox(doorMat, ww*0.23,dh/2, 0.035,ww*0.54,dh-0.12,leafT);
+      } else {
+        var pivot=new THREE.Group();
+        pivot.position.set(-ww/2,0,0);
+        pivot.rotation.y=side*Math.PI/3;
+        var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,dh-0.08,leafT),doorMat);
+        leaf.position.set(ww/2,(dh-0.08)/2+0.04,0);
+        leaf.castShadow=true; leaf.receiveShadow=true;
+        pivot.add(leaf);
+        var handleMat=new THREE.MeshStandardMaterial({color:0xc8a040,roughness:0.3,metalness:0.55});
+        var handle=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.08,0.035),handleMat);
+        handle.position.set(ww*0.82,0.95,side*0.035);
+        handle.castShadow=true;
+        pivot.add(handle);
+        grp.add(pivot);
+      }
+    }
 
     grp.position.set(px,fy,pz);
     grp.rotation.y=Math.atan2(wdy,wdx);
     grp.userData={b:true};
+    grp.traverse(function(o){if(o.isMesh)o.userData={b:true};});
     sc3.add(grp);
   });
 }
@@ -1659,7 +1696,8 @@ function getSpriteTexture3D(sheet) {
 
 function buildItem3D(it){
   if(it.type==='roof') return; // 屋根はbuildRoof3Dで処理
-  var fy=(it.floor-1)*FLOOR_H*U, h=getItemH(it.type)*U, col=getItemCol(it.type);
+  var fy=(it.floor-1)*FLOOR_H*U, h=getItemH(it.type)*U, col=it.color||getItemCol(it.type);
+  if(['window','door-swing','door-slide','door-front'].indexOf(it.type)>=0) return;
   var grp = new THREE.Group();
   grp.position.set((it.x+it.w/2)*U, fy, (it.y+it.d/2)*U);
   grp.rotation.y = -it.rot*Math.PI/180;
@@ -1684,8 +1722,10 @@ function buildItem3D(it){
         clone.traverse(function(c){
           if(c.isMesh){
             c.castShadow=true; c.receiveShadow=true;
-            // Ensure PBR materials render correctly
-            if(c.material) c.material.needsUpdate=true;
+            if(c.material) {
+              c.material = applySelectableColor(c.material, it.colorCustom?it.color:null);
+              c.material.needsUpdate=true;
+            }
           }
         });
         grp.add(clone);
@@ -1783,6 +1823,7 @@ function buildItem3D(it){
     var box=new THREE.Mesh(new THREE.BoxGeometry(w3,h,d3),matSide);
     box.position.y=h/2;box.castShadow=true;box.receiveShadow=true;grp.add(box);
   }
+  applyItemColorToGroup(grp, it.colorCustom?it.color:null);
 
   var spriteKey=SPRITE_MAP[it.type];
   var s = spriteKey ? SPRITE_JSON.sprites[spriteKey] : null;
@@ -1818,6 +1859,20 @@ function getItemH(type){return {kitchen:850,bath:500,toilet:380,sink:800,fridge:
 function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
+function applySelectableColor(mat,color){
+  if(!color) return mat;
+  if(Array.isArray(mat)) return mat.map(function(m){return applySelectableColor(m,color);});
+  if(!mat || mat.transparent || mat.map || !mat.color) return mat;
+  var nm=mat.clone();
+  nm.color.set(color);
+  return nm;
+}
+function applyItemColorToGroup(grp,color){
+  if(!color) return;
+  grp.traverse(function(o){
+    if(o.isMesh && o.material) o.material=applySelectableColor(o.material,color);
+  });
+}
 function _B(g,mat,x,y,z,w,h,d){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);}
 function _CY(g,mat,x,y,z,rt,rb,h,s){var m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s||8),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
 function _SP(g,mat,x,y,z,r,s){var m=new THREE.Mesh(new THREE.SphereGeometry(r,s||8,s||6),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
@@ -1852,7 +1907,7 @@ function build3DDining(grp,w,d){
   _B(grp,tM,0,0.75,0,w,0.04,d);
   [[w/2-0.05,0.365,d/2-0.05],[w/2-0.05,0.365,-d/2+0.05],[-w/2+0.05,0.365,d/2-0.05],[-w/2+0.05,0.365,-d/2+0.05]].forEach(function(p){_B(grp,lM,p[0],p[1],p[2],0.055,0.73,0.055);});
   var sW=0.42,sD=0.38,sH=0.44;
-  [[0,d/2+0.32,0],[0,-d/2-0.32,Math.PI],[w/2+0.28,0,-Math.PI/2],[-w/2-0.28,0,Math.PI/2]].forEach(function(c){
+  [[0,d/2+0.32,Math.PI],[0,-d/2-0.32,0],[w/2+0.28,0,-Math.PI/2],[-w/2-0.28,0,Math.PI/2]].forEach(function(c){
     var cg=new THREE.Group();
     _B(cg,cM,0,sH,0,sW,0.04,sD);_B(cg,cM,0,sH+0.28,-sD/2+0.02,sW,0.48,0.04);
     [[sW/2-0.04,sH/2,sD/2-0.04],[-sW/2+0.04,sH/2,sD/2-0.04],[sW/2-0.04,sH/2,-sD/2+0.04],[-sW/2+0.04,sH/2,-sD/2+0.04]].forEach(function(p){_B(cg,lM,p[0],p[1],p[2],0.035,sH,0.035);});
