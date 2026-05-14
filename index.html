@@ -54,6 +54,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .asset-tile.active{background:#e94560;color:#fff}
 .asset-tile img{display:block;width:18px;height:18px;object-fit:contain;flex-shrink:0}
 .asset-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#asset-preview{position:fixed;left:260px;top:56px;width:190px;min-height:216px;padding:10px;background:rgba(18,26,48,0.96);border:1px solid #2a4080;border-radius:6px;box-shadow:0 14px 30px rgba(0,0,0,0.36);z-index:500;display:none;pointer-events:none}
+#asset-preview.show{display:block}
+#asset-preview img{display:block;width:190px;height:190px;object-fit:contain;background:#0f172a;border-radius:4px}
+#asset-preview div{margin-top:7px;font-size:12px;line-height:1.35;color:#fff;white-space:normal;word-break:break-word}
 
 /* ── CANVAS AREA ───────────────────────── */
 #canvas-area{flex:1;position:relative;overflow:hidden;background:#f0ece4;min-width:0}
@@ -329,6 +333,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <input class="pi" type="number" value="2400" min="1800" max="4000" step="100" onchange="WALL_H=+this.value">
     </div>
   </div>
+  <div id="asset-preview"><img alt=""><div></div></div>
 
   <div id="canvas-area">
     <canvas id="c2d"></canvas>
@@ -353,13 +358,13 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🎨 外壁カラー設定</div>
       <div style="font-size:10px;color:#7a8fb0;margin-bottom:6px">外壁（厚さ120mm以上）に適用</div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">1F 外壁:
-        <input type="color" value="#5c3820" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[1]=this.value;rebuild3D()"></div>
+        <input type="color" value="#5c3820" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="setExteriorWallColor(1,this.value)"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">2F 外壁:
-        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[2]=this.value;rebuild3D()"></div>
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="setExteriorWallColor(2,this.value)"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">3F 外壁:
-        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[3]=this.value;rebuild3D()"></div>
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="setExteriorWallColor(3,this.value)"></div>
       <div style="margin-top:4px;font-size:10px;color:#7a8fb0">4F 外壁:
-        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="WALL_COLORS[4]=this.value;rebuild3D()"></div>
+        <input type="color" value="#e8e0cc" style="width:38px;height:20px;vertical-align:middle;border:none;cursor:pointer" onchange="setExteriorWallColor(4,this.value)"></div>
       <button class="pbtn" onclick="document.getElementById('wall-panel').classList.remove('show')" style="margin-top:8px">閉じる</button>
     </div>
     <div id="light-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:190px">
@@ -437,6 +442,7 @@ var WALL_H = 2400;
 var FLOOR_H = 2700;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
+var WALL_COLOR_CUSTOM = {};
 var LIGHT_SETTINGS = {hemi:0.8, sun:1.0, ambient:0.45, room:0.45};
 
 var ISIZES = {
@@ -564,7 +570,7 @@ function renderFurnitureMegaLibrary(){
       cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
       html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)"><span class="sicon">'+(icons[cat]||'◻')+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">▶</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" title="'+escHtml(item.name)+'">';
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name)+'" data-preview="'+escHtml(item.thumb)+'" data-preview-name="'+escHtml(item.name)+'">';
         html+='<img src="'+escHtml(item.thumb)+'" loading="lazy" alt="">';
         html+='<div class="asset-name">'+escHtml(item.name)+'</div></button>';
       });
@@ -588,6 +594,26 @@ function getFmpTopImage(item){
     FMP_TOP_IMAGES[item.id]=img;
   }
   return FMP_TOP_IMAGES[item.id];
+}
+function showAssetPreview(el,e){
+  var pv=document.getElementById('asset-preview'); if(!pv) return;
+  var img=pv.querySelector('img'), label=pv.querySelector('div');
+  img.src=el.getAttribute('data-preview')||'';
+  label.textContent=el.getAttribute('data-preview-name')||'';
+  pv.classList.add('show');
+  moveAssetPreview(e);
+}
+function moveAssetPreview(e){
+  var pv=document.getElementById('asset-preview'); if(!pv||!pv.classList.contains('show')) return;
+  var pad=14, w=pv.offsetWidth||212, h=pv.offsetHeight||236;
+  var x=e.clientX+pad, y=e.clientY+pad;
+  if(x+w>window.innerWidth-8) x=e.clientX-w-pad;
+  if(y+h>window.innerHeight-8) y=window.innerHeight-h-8;
+  pv.style.left=Math.max(8,x)+'px';
+  pv.style.top=Math.max(8,y)+'px';
+}
+function hideAssetPreview(){
+  var pv=document.getElementById('asset-preview'); if(pv) pv.classList.remove('show');
 }
 // PBR Textures (lazy-loaded)
 var _pbrTex = {};
@@ -734,9 +760,9 @@ function updateProps(){
   if(it.rot !== undefined) {
     html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+Math.round(it.rot)+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
   }
-  if(isFmpItemType(it.type)) {
-    if(it.elev === undefined) it.elev = 0;
-    html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" value="'+Math.round(it.elev||0)+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
+  if(canSetItemElevation(it)) {
+    if(it.elev === undefined || isNaN(it.elev)) it.elev = 0;
+    html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" step="10" value="'+Math.round(it.elev||0)+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
   }
   if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipX=false;
   if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipY=false;
@@ -788,6 +814,7 @@ function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
   if(!noSave) saveState();
   if(p==='color') ST.selected.colorCustom=true;
+  if(p==='texture' && ST.selected._texObj) ST.selected._texObj=null;
   ST.selected[p]=v;
   draw2d(); if(ren) rebuild3D();
   updateProps();
@@ -796,9 +823,27 @@ function uploadTex(inp){
   var file=inp.files[0]; if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    updateSelectedProp('texture', e.target.result);
+    prepareUploadedTexture(e.target.result,function(dataUrl){
+      updateSelectedProp('texture', dataUrl);
+    });
   };
   r.readAsDataURL(file);
+}
+function prepareUploadedTexture(src,done){
+  var img=new Image();
+  img.onload=function(){
+    var size=1024;
+    var c=document.createElement('canvas');
+    c.width=size; c.height=size;
+    var g=c.getContext('2d');
+    g.fillStyle='#ffffff'; g.fillRect(0,0,size,size);
+    var scale=Math.max(size/img.width,size/img.height);
+    var w=img.width*scale, h=img.height*scale;
+    g.drawImage(img,(size-w)/2,(size-h)/2,w,h);
+    done(c.toDataURL('image/jpeg',0.86));
+  };
+  img.onerror=function(){done(src);};
+  img.src=src;
 }
 
 // DRAG state for handle transform
@@ -807,6 +852,7 @@ var DRAG = {active:false, saved:false, handle:null, startCX:0, startCY:0, origIt
 var DATA = {walls:[], items:[], rooms:[]};
 var nextId = 1;
 var HISTORY = [];
+var CLIPBOARD = null;
 function saveState(){
   var s=JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;});
   HISTORY.push(s);if(HISTORY.length>50)HISTORY.shift();
@@ -823,8 +869,8 @@ function mkItem(type,x,y,rot,floor,w,d){
   var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,
     w:w||sz.w,d:d||sz.d,color:ICOLORS[type]||'#ddd',
     flipX:false, flipY:false, sScale:1, sX:0, sY:0};
+  if(canSetItemElevation(item)) item.elev=0;
   if(isFmpItemType(type)){
-    item.elev=0;
     item.fmpId=type;
     item.color=null;
     item.colorCustom=false;
@@ -1231,7 +1277,10 @@ function drawItem2d(it){
     var topImg=getFmpTopImage(fmp);
     var hwF=it.w*sc/2, hdF=it.d*sc/2;
     if(topImg && topImg.complete && topImg.naturalWidth>0){
+      ctx.save();
+      ctx.rotate(Math.PI);
       ctx.drawImage(topImg,-hwF,-hdF,it.w*sc,it.d*sc);
+      ctx.restore();
     } else {
       ctx.fillStyle='rgba(210,215,225,0.72)';
       ctx.fillRect(-hwF,-hdF,it.w*sc,it.d*sc);
@@ -1868,9 +1917,20 @@ function updateLightSetting(key,val){
     if(key==='room') rebuild3D();
   }
 }
+function setExteriorWallColor(floor,color){
+  WALL_COLORS[floor]=color;
+  WALL_COLOR_CUSTOM[floor]=true;
+  rebuild3D();
+}
 
 function isCustomWallColor(w){
   return !!(w.color && w.color !== '#888' && w.color !== '#888888');
+}
+
+function canSetItemElevation(it){
+  if(!it || !it.type) return false;
+  if(it.type==='room' || it.type==='wall' || it.type==='site-rect') return false;
+  return ['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)<0;
 }
 
 function buildWall3D(w){
@@ -1880,14 +1940,17 @@ function buildWall3D(w){
   if(len<0.001) return;
   var isOuter=w.thick>=120;
   var matParams;
-  if(isCustomWallColor(w)){
-    // User-specified color
-    matParams={color:w.color, roughness:0.7, metalness:0.05};
-  } else if(w.texture){
+  if(w.texture){
     // User-specified texture
     var ut=getTexture3D(w.texture);
     if(ut){var utc=ut.clone();utc.repeat.set(len/0.9,WALL_H*U/0.9);matParams={map:utc,color:0xffffff,roughness:0.75};}
     else matParams={color:'#f4f0e8',roughness:0.75};
+  } else if(isCustomWallColor(w)){
+    // User-specified color
+    matParams={color:w.color, roughness:0.7, metalness:0.05};
+  } else if(isOuter&&WALL_COLOR_CUSTOM[fl]){
+    // Exterior wall color chosen from the global color panel: show the color directly.
+    matParams={color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82,metalness:0.02};
   } else if(isOuter&&fl===1){
     // 1F exterior: dark wood siding
     var st=getTexture3D('siding');
@@ -3140,6 +3203,51 @@ function delSel(){
   if(ren)rebuild3D();draw2d();
 }
 
+function getSelectedCollectionKind(obj){
+  if(!obj) return null;
+  if(DATA.walls.indexOf(obj)>=0) return 'wall';
+  if(DATA.rooms.indexOf(obj)>=0) return 'room';
+  if(DATA.items.indexOf(obj)>=0) return 'item';
+  return null;
+}
+
+function copySelectedObject(){
+  var kind=getSelectedCollectionKind(ST.selected);
+  if(!kind) return false;
+  CLIPBOARD={kind:kind,data:JSON.parse(JSON.stringify(ST.selected)),count:0};
+  return true;
+}
+
+function pasteCopiedObject(){
+  if(!CLIPBOARD) return false;
+  saveState();
+  CLIPBOARD.count++;
+  var cp=JSON.parse(JSON.stringify(CLIPBOARD.data));
+  var off=Math.max(200, ST.snap||10)*CLIPBOARD.count;
+  cp.id = CLIPBOARD.kind==='room' ? 'rm'+(nextId++) : nextId++;
+  if(CLIPBOARD.kind==='wall'){
+    cp.x1+=off; cp.y1+=off; cp.x2+=off; cp.y2+=off;
+    cp.floor=ST.floor;
+    DATA.walls.push(cp);
+  } else {
+    cp.x+=off; cp.y+=off;
+    if(cp.type==='site-rect') cp.floor=1;
+    else cp.floor=ST.floor;
+    if(CLIPBOARD.kind==='room'){
+      DATA.rooms.push(cp);
+    } else {
+      DATA.items.push(cp);
+    }
+  }
+  ST.selectAll=false;
+  ST.selected=cp;
+  ST.tool='select';
+  updateProps();
+  draw2d();
+  if(ren) rebuild3D();
+  return true;
+}
+
 function undoAction(){
   if(!HISTORY.length) return;
   DATA = JSON.parse(HISTORY.pop());
@@ -3149,6 +3257,14 @@ function undoAction(){
 
 window.addEventListener('keydown', function(e){
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'c'){
+    if(copySelectedObject()) e.preventDefault();
+    return;
+  }
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'v'){
+    if(pasteCopiedObject()) e.preventDefault();
+    return;
+  }
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undoAction(); }
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
   if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
