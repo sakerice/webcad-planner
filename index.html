@@ -21,6 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script src="assets/models/furniture_mega/manifest.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -43,12 +44,15 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .stool:hover,.stool:active{background:#1a2a4a}.stool.active{background:#e94560;color:#fff}
 .sicon{font-size:14px;width:18px;text-align:center}
 .asset-subcat{border-bottom:1px solid #1a2540}
-.asset-subhdr{padding:7px 12px;font-size:10px;color:#9fb0d0;background:#101c34;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
-.asset-grid{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:7px;background:#111b32}
-.asset-subcat.open .asset-grid{display:grid}
-.asset-tile{min-height:72px;border:1px solid #263a70;background:#0f3460;border-radius:6px;padding:5px;cursor:pointer;color:#cce;font-size:9px;text-align:center;overflow:hidden}
-.asset-tile:hover,.asset-tile.active{border-color:#e94560;background:#1a2a4a;color:#fff}
-.asset-tile img{display:block;width:100%;height:44px;object-fit:contain;margin-bottom:3px}
+.asset-subhdr{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:11px;cursor:pointer;border-bottom:1px solid #1a2540;user-select:none;touch-action:manipulation;min-height:40px;color:#cce;background:transparent}
+.asset-subhdr:hover,.asset-subhdr:active{background:#1a2a4a}
+.asset-arrow{margin-left:auto;color:#7a8fb0;font-size:11px}
+.asset-grid{display:none;background:#121a30}
+.asset-subcat.open .asset-grid{display:block}
+.asset-tile{width:100%;min-height:40px;border:0;border-bottom:1px solid #1a2540;background:transparent;padding:8px 14px;cursor:pointer;color:#cce;font-size:11px;font-family:inherit;text-align:left;overflow:hidden;display:flex;align-items:center;gap:6px}
+.asset-tile:hover,.asset-tile:active{background:#1a2a4a}
+.asset-tile.active{background:#e94560;color:#fff}
+.asset-tile img{display:block;width:18px;height:18px;object-fit:contain;flex-shrink:0}
 .asset-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── CANVAS AREA ───────────────────────── */
@@ -522,20 +526,27 @@ function getItemDefaultSize(type){
 function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
+function applyFurnitureMegaManifest(manifest){
+  FMP_ITEMS={};
+  (manifest.items||[]).forEach(function(item){
+    FMP_ITEMS[item.id]=item;
+  });
+  normalizeLegacyFurnitureItems();
+  renderFurnitureMegaLibrary();
+  draw2d();
+  if(ren) rebuild3D();
+}
 function loadFurnitureMegaLibrary(){
   fetch(FMP_MANIFEST_URL,{cache:'no-store'}).then(function(r){
     if(!r.ok) throw new Error('manifest '+r.status);
     return r.json();
   }).then(function(manifest){
-    FMP_ITEMS={};
-    (manifest.items||[]).forEach(function(item){
-      FMP_ITEMS[item.id]=item;
-    });
-    normalizeLegacyFurnitureItems();
-    renderFurnitureMegaLibrary();
-    draw2d();
-    if(ren) rebuild3D();
+    applyFurnitureMegaManifest(manifest);
   }).catch(function(err){
+    if(window.FMP_MANIFEST){
+      applyFurnitureMegaManifest(window.FMP_MANIFEST);
+      return;
+    }
     console.warn('Furniture Mega Pack manifest not loaded:',err);
   });
 }
@@ -551,7 +562,7 @@ function renderFurnitureMegaLibrary(){
     var html='';
     Object.keys(cats).sort().forEach(function(cat){
       cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
-      html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)"><span>'+(icons[cat]||'◻')+' '+escHtml(cat)+'</span><span>▶</span></div><div class="asset-grid">';
+      html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)"><span class="sicon">'+(icons[cat]||'◻')+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">▶</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
         html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" title="'+escHtml(item.name)+'">';
         html+='<img src="'+escHtml(item.thumb)+'" loading="lazy" alt="">';
