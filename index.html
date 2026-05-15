@@ -79,6 +79,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .pi[type=color]{height:28px;padding:2px}.pi[type=range]{padding:0}.pi[type=file]{font-size:10px}
 .pbtn{width:100%;padding:7px;background:#e94560;border:none;border-radius:3px;color:#fff;cursor:pointer;font-size:11px;margin-top:3px;font-family:inherit;touch-action:manipulation}
 .pbtn:active{background:#c73350}.pbtn.sec{background:#0f3460;border:1px solid #2a4080}.pbtn.sec:active{background:#1a5080}
+.mobile-only{display:none}
+.snap-shift-btn.active{background:#e94560!important;border-color:#e94560!important;color:#fff!important}
 
 /* ── STATUS BAR ────────────────────────── */
 #statusbar{height:20px;background:#0f3460;padding:2px 10px;font-size:10px;color:#7a8fb0;display:flex;gap:14px;flex-shrink:0;align-items:center}
@@ -236,6 +238,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
   /* Stool larger tap targets */
   .stool{padding:10px 14px;min-height:44px}
+  .mobile-only{display:block}
 
   /* Sidebar sub-categories: grid layout for tools */
   .cat-body.open{display:grid;grid-template-columns:1fr 1fr;background:#121a30}
@@ -346,6 +349,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
         <option value="100">100mm</option><option value="455">455mm (半間)</option><option value="910">910mm (1間)</option>
         <option value="0">なし</option>
       </select>
+      <div class="mobile-only" style="margin-top:8px">
+        <button id="mobile-shift-btn" class="pbtn sec snap-shift-btn" type="button" onclick="toggleMobileShift()">仮想Shift: OFF</button>
+        <div style="font-size:9px;color:#7a8fb0;margin-top:4px;line-height:1.45">ONで角度スナップ/近接オブジェクトスナップを有効化</div>
+      </div>
       <div style="font-size:10px;color:#5a6a80;margin:6px 0 3px">壁高さ(mm)</div>
       <input class="pi" type="number" value="2400" min="1800" max="4000" step="100" onchange="WALL_H=+this.value">
     </div>
@@ -667,6 +674,7 @@ var ST = {
   mouseW:{x:0,y:0}, snap:10, showGrid:true, showDim:true,
   placingRot:0,
   isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false,
+  mobileShift:false,
   _snapState:null  // stores active edge-snap info for visual feedback
 };
 
@@ -784,7 +792,7 @@ function updateProps(){
         html += '<div style="padding:7px;border:1px solid #20365d;border-radius:6px;margin-top:7px;background:rgba(5,18,42,0.26)">';
         html += '<div style="font-size:10px;color:#dce8ff;font-weight:bold;margin-bottom:5px">内面 '+(idx+1)+'</div>';
         html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(fs.mode==='custom'?'checked':'')+' onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別設定を利用</label>';
-        html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(fs.color||ap.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value)" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
+        html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(fs.color||ap.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
         html += '<div style="margin-top:6px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><div style="font-size:10px;color:#7a8fb0;margin-bottom:3px">テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;color:#cce;width:100%;max-width:100%" onchange="uploadInteriorFaceTex(this,'+it.id+',\''+faceKey+'\')" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
         html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:5px"><input type="checkbox" '+(fs.mode==='whole'||inheritedWhole?'checked':'')+' onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'whole\':\'inherit\')"> 家全体に合わせる</label>';
@@ -807,7 +815,7 @@ function updateProps(){
           html += '<div style="padding:7px;border:1px solid #20365d;border-radius:6px;margin-top:7px;background:rgba(5,18,42,0.26)">';
           html += '<div style="font-size:10px;color:#dce8ff;font-weight:bold;margin-bottom:5px">外面 '+(idx+1)+'</div>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(efs.mode==='custom'?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別カラーを利用</label>';
-          html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(efs.color||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value)" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
+          html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(efs.color||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:5px"><input type="checkbox" '+(efs.mode==='whole'||inheritedWhole?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'whole\':\'inherit\')"> 家全体に合わせる</label>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:3px"><input type="checkbox" '+(efs.mode==='floor'||inheritedFloor?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'floor\':\'inherit\')"> '+it.floor+'Fに合わせる</label>';
           html += '</div>';
@@ -882,6 +890,11 @@ function updateProps(){
   }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type)) {
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(canSetItemTexture(it)){
+      var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
+      html += '<div class="pr"><div class="pl">'+texLabel+'</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+      if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+    }
     html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
     html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
     html += '<div class="pr"><div class="pl">位置 X: '+Math.round(it.sX||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedProp(\'sX\',+this.value, true)" onchange="saveState()"></div>';
@@ -1190,6 +1203,31 @@ function resize2d(){
 function w2c(wx,wy){return{cx:ST.panX+wx*ST.zoom*0.05, cy:ST.panY+wy*ST.zoom*0.05};}
 function c2w(cx,cy){return{x:(cx-ST.panX)/(ST.zoom*0.05), y:(cy-ST.panY)/(ST.zoom*0.05)};}
 function snapV(v){return ST.snap?Math.round(v/ST.snap)*ST.snap:Math.round(v);}
+function isShiftLike(e){return !!(ST.mobileShift || (e&&e.shiftKey));}
+function markAppearanceColorDirty(){
+  if(!ST.appearanceColorDirty){
+    saveState();
+    ST.appearanceColorDirty=true;
+  }
+}
+function commitAppearanceColorEdits(){
+  if(!ST.appearanceColorDirty) return;
+  ST.appearanceColorDirty=false;
+  updateProps();
+  if(ren) rebuild3D();
+}
+function toggleMobileShift(){
+  ST.mobileShift=!ST.mobileShift;
+  ST.shiftKey=ST.mobileShift;
+  updateMobileShiftButton();
+  draw2d();
+}
+function updateMobileShiftButton(){
+  var btn=document.getElementById('mobile-shift-btn');
+  if(!btn) return;
+  btn.textContent=ST.mobileShift?'仮想Shift: ON':'仮想Shift: OFF';
+  btn.classList.toggle('active',!!ST.mobileShift);
+}
 
 var FOOTPRINTS={1:{w:11830,h:7280},2:{w:11830,h:7280},3:{w:11830,h:7280}};
 
@@ -1427,17 +1465,20 @@ function drawWall2d(w){
 
 function getOpeningWallInfo(it){
   if(['window','door-swing','door-swing-s','door-slide','door-front'].indexOf(it.type)<0) return null;
-  var cx=it.x+it.w/2, cy=it.y+it.d/2;
-  var best=null, bestD=999999, bestT=0;
-  DATA.walls.filter(function(w){return w.floor===it.floor;}).forEach(function(w){
-    var dx=w.x2-w.x1, dy=w.y2-w.y1;
-    var len2=dx*dx+dy*dy;
-    if(len2<1) return;
-    var t=((cx-w.x1)*dx+(cy-w.y1)*dy)/len2;
-    var tc=Math.max(0,Math.min(1,t));
-    var px=w.x1+tc*dx, py=w.y1+tc*dy;
-    var d=Math.hypot(cx-px,cy-py);
-    if(d<bestD){bestD=d;best=w;bestT=tc;}
+  var centers=getOpeningCenterCandidates(it);
+  var best=null, bestD=999999, bestT=0, bestCenter=centers[0];
+  centers.forEach(function(cen){
+    var cx=cen.x, cy=cen.y;
+    DATA.walls.filter(function(w){return w.floor===it.floor;}).forEach(function(w){
+      var dx=w.x2-w.x1, dy=w.y2-w.y1;
+      var len2=dx*dx+dy*dy;
+      if(len2<1) return;
+      var t=((cx-w.x1)*dx+(cy-w.y1)*dy)/len2;
+      var tc=Math.max(0,Math.min(1,t));
+      var px=w.x1+tc*dx, py=w.y1+tc*dy;
+      var d=Math.hypot(cx-px,cy-py);
+      if(d<bestD){bestD=d;best=w;bestT=tc;bestCenter=cen;}
+    });
   });
   if(!best || bestD>400) return null;
   var wdx=best.x2-best.x1, wdy=best.y2-best.y1;
@@ -1445,10 +1486,21 @@ function getOpeningWallInfo(it){
     wall:best,
     dist:bestD,
     t:bestT,
+    center:bestCenter,
     x:best.x1+wdx*bestT,
     y:best.y1+wdy*bestT,
     rot:Math.atan2(wdy,wdx)*180/Math.PI
   };
+}
+function getOpeningCenterCandidates(it){
+  var a={x:it.x+it.w/2,y:it.y+it.d/2};
+  var b={x:it.x+it.d/2,y:it.y+it.w/2};
+  if(Math.abs(a.x-b.x)<0.001 && Math.abs(a.y-b.y)<0.001) return [a];
+  return [a,b];
+}
+function getOpeningCenter(it){
+  var info=getOpeningWallInfo(it);
+  return info&&info.center ? info.center : getOpeningCenterCandidates(it)[0];
 }
 
 function drawItem2d(it){
@@ -1703,7 +1755,7 @@ function hitWallHandle(w,cx,cy){
 }
 
 function snapWallAnglePoint(anchor, point, e){
-  if(!e || !e.shiftKey) return point;
+  if(!isShiftLike(e)) return point;
   var dx=point.x-anchor.x, dy=point.y-anchor.y;
   var len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return point;
@@ -1777,7 +1829,7 @@ function applyHandleDrag(cx,cy,e){
   if(h==='move'){
     var nx=o.x+dx, ny=o.y+dy;
     nx=snapV(nx); ny=snapV(ny);
-    var useEdgeSnap=e&&e.shiftKey;
+    var useEdgeSnap=isShiftLike(e);
     if(useEdgeSnap&&it.type!=='wall'){
       var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id);
       nx=snapped.x; ny=snapped.y; ST._snapState=snapped;
@@ -1791,7 +1843,7 @@ function applyHandleDrag(cx,cy,e){
     var sAng=Math.atan2(DRAG.startCY-ST.panY-ocy*sc2, DRAG.startCX-ST.panX-ocx*sc2);
     var nRot=o.rot+(oAng-sAng)*180/Math.PI;
     // Snap: 15° on mobile always; 15° on desktop with Shift; 45° on double-Shift (ctrl)
-    if(onMobile||(e&&e.shiftKey)){
+    if(onMobile||isShiftLike(e)){
       var step=(e&&e.ctrlKey)?45:15;
       nRot=Math.round(nRot/step)*step;
     }
@@ -1874,7 +1926,7 @@ function applyHandleDrag(cx,cy,e){
 
     // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270); skip for corners (would break ratio)
     var isAxisAligned=Math.abs((o.rot||0)%90)<4;
-    if(e&&e.shiftKey&&!isCorner&&!lockAspect&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'&&!isStairPartType(it.type)){
+    if(isShiftLike(e)&&!isCorner&&!lockAspect&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'&&!isStairPartType(it.type)){
       var res=applyResizeEdgeSnap(h,o,nx,ny,nw,nd,it.id);
       nx=res.nx; ny=res.ny; nw=res.nw; nd=res.nd;
       ST._snapState=res.snapState;
@@ -1965,6 +2017,60 @@ function disposeMat(m) {
 }
 
 var composer = null; // single declaration
+function makeSkyTexture(){
+  var c=document.createElement('canvas');
+  c.width=1024; c.height=512;
+  var ctx=c.getContext('2d');
+  var g=ctx.createLinearGradient(0,0,0,c.height);
+  g.addColorStop(0,'#4e91ff');
+  g.addColorStop(0.35,'#82bdff');
+  g.addColorStop(0.72,'#d4ecff');
+  g.addColorStop(1,'#f4f7ec');
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,c.width,c.height);
+
+  var sunX=c.width*0.78, sunY=c.height*0.2;
+  var sg=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,170);
+  sg.addColorStop(0,'rgba(255,255,235,0.95)');
+  sg.addColorStop(0.12,'rgba(255,249,205,0.45)');
+  sg.addColorStop(1,'rgba(255,249,205,0)');
+  ctx.fillStyle=sg;
+  ctx.fillRect(0,0,c.width,c.height);
+
+  function cloud(cx,cy,s,alpha){
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,s*1.4);
+    cg.addColorStop(0,'rgba(255,255,255,0.92)');
+    cg.addColorStop(0.72,'rgba(255,255,255,0.28)');
+    cg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=cg;
+    [[0,0,1.2],[-42,8,0.9],[44,10,0.95],[-82,18,0.7],[86,20,0.65],[10,-18,0.85]].forEach(function(p){
+      ctx.beginPath();
+      ctx.ellipse(cx+p[0]*s/80,cy+p[1]*s/80,s*p[2],s*p[2]*0.42,0,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+  cloud(190,126,72,0.48);
+  cloud(430,92,54,0.34);
+  cloud(690,154,82,0.38);
+  cloud(900,118,62,0.3);
+  cloud(74,210,48,0.26);
+
+  var hg=ctx.createLinearGradient(0,c.height*0.72,0,c.height);
+  hg.addColorStop(0,'rgba(255,255,255,0)');
+  hg.addColorStop(1,'rgba(255,245,215,0.55)');
+  ctx.fillStyle=hg;
+  ctx.fillRect(0,c.height*0.66,c.width,c.height*0.34);
+
+  var tex=new THREE.CanvasTexture(c);
+  tex.encoding=THREE.sRGBEncoding;
+  tex.wrapS=THREE.ClampToEdgeWrapping;
+  tex.wrapT=THREE.ClampToEdgeWrapping;
+  tex.needsUpdate=true;
+  return tex;
+}
 function init3D(){
   if(ren) return;
   var wrap=document.getElementById('c3d-wrap');
@@ -1978,17 +2084,15 @@ function init3D(){
   wrap.appendChild(ren.domElement);
   sc3=new THREE.Scene();
   sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
-  // Gradient sky sphere (no texture file needed)
-  var skyGeo=new THREE.SphereGeometry(900,20,14);
-  var skyCols=[];
-  var sPa=skyGeo.attributes.position;
-  for(var si=0;si<sPa.count;si++){
-    var syt=(sPa.getY(si)+900)/1800;
-    // ACESFilmic補正: より鮮やかな青空
-    skyCols.push(0.28+syt*0.18, 0.52+syt*0.28, 0.95+syt*0.05);
-  }
-  skyGeo.setAttribute('color',new THREE.Float32BufferAttribute(skyCols,3));
-  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false}));
+  var skyGeo=new THREE.SphereGeometry(900,48,24);
+  _skyMesh=new THREE.Mesh(skyGeo,new THREE.MeshBasicMaterial({
+    map:makeSkyTexture(),
+    side:THREE.BackSide,
+    fog:false,
+    toneMapped:false
+  }));
+  _skyMesh.name='_sky';
+  _skyMesh.renderOrder=-10;
   sc3.add(_skyMesh);
 
   var hemi=new THREE.HemisphereLight(0xffffff,0x777777,LIGHT_SETTINGS.hemi);
@@ -2307,6 +2411,33 @@ function setTextureRepeatNoDistort(tex,surfaceW,surfaceH,tileH){
   tex.repeat.set(repX,repY);
 }
 
+function makeColorAccurateMaterial(params){
+  var mat=new THREE.MeshBasicMaterial(params);
+  mat.toneMapped=false;
+  return mat;
+}
+function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor){
+  var tex=it&&it.texture?getTexture3D(it.texture):null;
+  if(!tex) return null;
+  var tc=tex.clone();
+  tc.needsUpdate=true;
+  if(mode==='stretch'){
+    tc.wrapS=tc.wrapT=THREE.ClampToEdgeWrapping;
+    tc.repeat.set(1,1);
+    tc.offset.set(0,0);
+  } else {
+    tc.wrapS=tc.wrapT=THREE.RepeatWrapping;
+    setTextureRepeatNoDistort(tc,surfaceW||1,surfaceH||1,0.9);
+  }
+  return makeColorAccurateMaterial({map:tc,color:fallbackColor||0xffffff});
+}
+function isDoorItemType(type){
+  return ['door-swing','door-swing-s','door-slide','door-front'].indexOf(type)>=0;
+}
+function canSetItemTexture(it){
+  return !!(it && (it.type==='fence' || it.type==='wood-fence' || isDoorItemType(it.type)));
+}
+
 function pickSelectable3D(e){
   if(!sc3 || !ren || !camExt) return null;
   if(!_ray3d) _ray3d=new THREE.Raycaster();
@@ -2366,6 +2497,7 @@ function toggleExteriorColorPanel(){ toggleAppearancePanel('exterior'); }
 function toggleRoofColorPanel(){ toggleAppearancePanel('roof'); }
 function toggleWallPanel(){ toggleExteriorColorPanel(); }
 function toggleAppearancePanel(mode){
+  if(APPEARANCE_PANEL_MODE !== mode) commitAppearanceColorEdits();
   APPEARANCE_PANEL_MODE = mode || 'exterior';
   var wp=document.getElementById('wall-panel');
   var lp=document.getElementById('light-panel');
@@ -2387,6 +2519,7 @@ function toggleAppearancePanel(mode){
   }
 }
 function hideWallPanel(){
+  commitAppearanceColorEdits();
   var wp=document.getElementById('wall-panel');
   if(wp){wp.style.display='none';wp.classList.remove('show');}
 }
@@ -2475,7 +2608,8 @@ function ensureRoofAppearance(){
 
 function updateRoofAppearance(scope,key,value,floor,noSave){
   var s=ensureRoofAppearance();
-  if(!noSave) saveState();
+  if(noSave&&key==='color') markAppearanceColorDirty();
+  else if(!noSave) saveState();
   if(scope==='whole'){
     s.whole[key]=value;
     if(key==='color'||key==='texture') s.whole.linked=true;
@@ -2566,7 +2700,8 @@ function resolveInteriorWallAppearance(w){
 
 function updateInteriorSetting(scope,key,value,floor,noSave){
   var s=ensureInteriorWallSettings();
-  if(!noSave) saveState();
+  if(noSave&&key==='color') markAppearanceColorDirty();
+  else if(!noSave) saveState();
   if(scope==='whole'){
     s.whole[key]=value;
     if(key==='color'||key==='texture') s.whole.linked=true;
@@ -2590,8 +2725,10 @@ function updateInteriorFaceSetting(wallId,faceKey,key,value,noSave){
   var face=getWallInteriorFaces(w).find(function(f){return interiorFaceKey(w,f)===faceKey;});
   if(!face) return;
   var fs=getInteriorFaceSetting(w,face);
-  if(!noSave) saveState();
+  if(noSave&&key==='color') markAppearanceColorDirty();
+  else if(!noSave) saveState();
   fs[key]=value;
+  if(noSave && key==='color') return;
   updateProps();
   if(ren) rebuild3D();
 }
@@ -2641,8 +2778,10 @@ function updateExteriorFaceSetting(wallId,faceKey,key,value,noSave){
   var face=getWallExteriorSpans(w).find(function(f){return exteriorFaceKey(w,f)===faceKey;});
   if(!face) return;
   var fs=getExteriorFaceSetting(w,face);
-  if(!noSave) saveState();
+  if(noSave&&key==='color') markAppearanceColorDirty();
+  else if(!noSave) saveState();
   fs[key]=value;
+  if(noSave && key==='color') return;
   updateProps();
   if(ren) rebuild3D();
 }
@@ -2784,7 +2923,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ins.whole.linked?'checked':'')+' onchange="updateInteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(ins.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value)">';
+  html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -2794,7 +2933,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ifs.linked?'checked':'')+' onchange="updateInteriorSetting(\'floor\',\'linked\',this.checked,'+ifl+')" '+(ins.whole.linked?'disabled':'')+'> '+ifl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!ins.whole.linked&&ifs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+')">';
+    html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="commitAppearanceColorEdits()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div></div>';
   }
@@ -2809,7 +2948,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(roof.whole.linked?'checked':'')+' onchange="updateRoofAppearance(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(roof.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value)">';
+  html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="commitAppearanceColorEdits()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -2819,7 +2958,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(rfs.linked?'checked':'')+' onchange="updateRoofAppearance(\'floor\',\'linked\',this.checked,'+rfl+')" '+(roof.whole.linked?'disabled':'')+'> '+rfl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!roof.whole.linked&&rfs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+')">';
+    html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="commitAppearanceColorEdits()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
@@ -2837,7 +2976,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(s.whole.linked?'checked':'')+' onchange="updateExteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(s.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value)" '+(!s.whole.linked?'disabled':'')+'>';
+  html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="commitAppearanceColorEdits()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -2848,7 +2987,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(fs.linked?'checked':'')+' onchange="updateExteriorSetting(\'floor\',\'linked\',this.checked,'+fl+')" '+(s.whole.linked?'disabled':'')+'> '+fl+'F <span style="font-size:9px;color:#7a8fb0">('+walls.length+'枚)</span></label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!s.whole.linked&&fs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
+    html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="commitAppearanceColorEdits()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
@@ -2859,7 +2998,7 @@ function renderExteriorWallPanel(mode){
         html += '<div style="margin-top:7px;padding:7px;border:1px solid #20365d;border-radius:6px;background:rgba(5,18,42,0.32)">';
         html += '<button class="pbtn sec" style="padding:3px 6px;margin:0 0 5px 0;text-align:left" onclick="selectWallById('+w.id+')">'+exteriorWallLabel(w,idx)+'</button>';
         html += '<div style="display:flex;gap:6px;align-items:center">';
-        html += '<input type="color" value="'+(ws.color||w.exteriorColor||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+')">';
+        html += '<input type="color" value="'+(ws.color||w.exteriorColor||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onblur="commitAppearanceColorEdits()">';
         html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadExteriorTex(this,\'wall\','+fl+','+w.id+')">';
         html += '</div>';
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ws.texture||w.exteriorTexture)+' '+(ws.texture||w.exteriorTexture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'wall\',\'texture\',null,'+fl+','+w.id+')">解除</button>':'')+'</div>';
@@ -2882,7 +3021,8 @@ function selectWallById(id){
 
 function updateExteriorSetting(scope,key,value,floor,wallId,noSave){
   var s=ensureExteriorWallSettings();
-  if(!noSave) saveState();
+  if(noSave&&key==='color') markAppearanceColorDirty();
+  else if(!noSave) saveState();
   if(scope==='whole'){
     s.whole[key]=value;
   } else if(scope==='floor'){
@@ -3336,11 +3476,11 @@ function makeExteriorWallMaterial(w,fl,len,face){
       utc.wrapS = utc.wrapT = THREE.RepeatWrapping;
       setTextureRepeatNoDistort(utc,len,FLOOR_H*U,0.9);
       utc.needsUpdate=true;
-      return finish(new THREE.MeshStandardMaterial({map:utc,color:0xffffff,roughness:0.84,metalness:0.02}));
+      return finish(makeColorAccurateMaterial({map:utc,color:0xffffff}));
     }
   }
   if(ap.color){
-    return finish(new THREE.MeshStandardMaterial({color:ap.color,roughness:0.82,metalness:0.02}));
+    return finish(makeColorAccurateMaterial({color:ap.color}));
   }
   if(fl===1){
     var st=getTexture3D('siding');
@@ -3377,7 +3517,7 @@ function makeInteriorWallMaterial(w,len,face){
     tc.wrapS = tc.wrapT = THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,len,FLOOR_H*U,0.9);
     tc.needsUpdate=true;
-    return finish(new THREE.MeshStandardMaterial({map:tc,color:0xffffff,roughness:0.78,metalness:0.02}));
+    return finish(makeColorAccurateMaterial({map:tc,color:0xffffff}));
   }
   if(ap.source==='default'){
     var it2=getTexture3D('wall_int');
@@ -3387,11 +3527,24 @@ function makeInteriorWallMaterial(w,len,face){
       return finish(new THREE.MeshStandardMaterial({map:it2c,color:0xffffff,roughness:0.88,metalness:0.0}));
     }
   }
-  return finish(new THREE.MeshStandardMaterial({color:ap.color||INTERIOR_WALL_DEFAULT,roughness:0.82,metalness:0.02}));
+  return finish(makeColorAccurateMaterial({color:ap.color||INTERIOR_WALL_DEFAULT}));
 }
 
 function makeWallCoreMaterial(){
   return new THREE.MeshStandardMaterial({color:0xd8d5ce,roughness:0.9,metalness:0.0});
+}
+function makeWallGlassMaterial(){
+  return new THREE.MeshPhysicalMaterial({
+    color:0xb8ddff,
+    transparent:true,
+    opacity:0.38,
+    roughness:0.04,
+    metalness:0.0,
+    transmission:0.35,
+    thickness:0.02,
+    side:THREE.DoubleSide,
+    depthWrite:false
+  });
 }
 
 function getWallBandRange(w){
@@ -3513,35 +3666,61 @@ function buildWall3D(w){
   function addBandPiece(a,b){
     addWallPiece(a,b,bandRange.base,bandRange.height);
   }
+  function addWindowGlassPiece(a,b,yBase,h){
+    var segLen=b-a;
+    if(segLen<0.03||h<0.03) return;
+    var mid=(a+b)/2;
+    var glass=new THREE.Mesh(new THREE.BoxGeometry(segLen,h,Math.max(0.018,w.thick*U*0.18)),makeWallGlassMaterial());
+    glass.castShadow=false;
+    glass.receiveShadow=true;
+    glass.position.set(x1+dirX*mid,fy+yBase+h/2,z1+dirZ*mid);
+    glass.rotation.y=rotY;
+    glass.renderOrder=2;
+    glass.userData.windowWallGlass=true;
+    mark3DSelectable(glass,w,'wall');
+    sc3.add(glass);
+  }
   var doorTypes=['door-swing','door-swing-s','door-slide','door-front'];
+  var openingTypes=doorTypes.concat(['window']);
   var openings=[];
   if((w.wallBand||'full')!=='full' || style!=='solid'){
     addBandPiece(0,len);
     return;
   }
-  DATA.items.filter(function(it){return it.floor===fl&&doorTypes.indexOf(it.type)>=0;}).forEach(function(it){
-    var cx=it.x+it.w/2, cy=it.y+it.d/2;
-    var d=ptSegDist(cx,cy,w.x1,w.y1,w.x2,w.y2);
-    if(d>400) return;
-    var wdx=w.x2-w.x1,wdy=w.y2-w.y1,wlen=Math.sqrt(wdx*wdx+wdy*wdy);
-    if(wlen<1) return;
-    var t=((cx-w.x1)*wdx+(cy-w.y1)*wdy)/(wlen*wlen);
-    if(t<0||t>1) return;
-    var c=t*len, openW=Math.min(len, Math.max(it.w*U+0.08, 0.45));
-    openings.push({a:Math.max(0,c-openW/2), b:Math.min(len,c+openW/2), h:2.05});
+  DATA.items.filter(function(it){return it.floor===fl&&openingTypes.indexOf(it.type)>=0;}).forEach(function(it){
+    var wallInfo=getOpeningWallInfo(it);
+    if(!wallInfo || wallInfo.wall!==w) return;
+    var c=wallInfo.t*len, openW=Math.min(len, Math.max(it.w*U+0.08, 0.45));
+    if(it.type==='window'){
+      openings.push({a:Math.max(0,c-openW/2), b:Math.min(len,c+openW/2), kind:'window', sill:1.0, h:1.2});
+    } else {
+      openings.push({a:Math.max(0,c-openW/2), b:Math.min(len,c+openW/2), kind:'door', h:2.05});
+    }
   });
   if(!openings.length){addBandPiece(0,len);return;}
   openings.sort(function(a,b){return a.a-b.a;});
   var merged=[];
   openings.forEach(function(o){
     var last=merged[merged.length-1];
-    if(last&&o.a<=last.b){last.b=Math.max(last.b,o.b);last.h=Math.max(last.h,o.h);}
+    if(last&&o.kind===last.kind&&o.a<=last.b){
+      last.b=Math.max(last.b,o.b);
+      last.h=Math.max(last.h,o.h);
+      if(o.sill!==undefined) last.sill=Math.min(last.sill,o.sill);
+    }
     else merged.push(o);
   });
   var cursor=0;
   merged.forEach(function(o){
     addBandPiece(cursor,o.a);
-    addWallPiece(o.a,o.b,o.h,Math.max(0,FLOOR_H*U-o.h));
+    if(o.kind==='window'){
+      var sill=o.sill||1.0;
+      var wh=o.h||1.2;
+      addWallPiece(o.a,o.b,0,sill);
+      addWindowGlassPiece(o.a,o.b,sill,wh);
+      addWallPiece(o.a,o.b,sill+wh,Math.max(0,FLOOR_H*U-(sill+wh)));
+    } else {
+      addWallPiece(o.a,o.b,o.h,Math.max(0,FLOOR_H*U-o.h));
+    }
     cursor=o.b;
   });
   addBandPiece(cursor,len);
@@ -3557,13 +3736,15 @@ function buildWinFrames(flFilt){
     var wdx=best.x2-best.x1,wdy=best.y2-best.y1,wlen=Math.sqrt(wdx*wdx+wdy*wdy);
     var px=wallInfo.x*U, pz=wallInfo.y*U;
     var nx=-wdy/wlen, ny=wdx/wlen;
-    var side=((it.x+it.w/2-wallInfo.x)*nx+(it.y+it.d/2-wallInfo.y)*ny)>=0?1:-1;
+    var cen=wallInfo.center||getOpeningCenter(it);
+    var side=((cen.x-wallInfo.x)*nx+(cen.y-wallInfo.y)*ny)>=0?1:-1;
     
     var grp=new THREE.Group();
     var customColor=it.colorCustom?it.color:null;
     var frameMat=new THREE.MeshStandardMaterial({color:it.type==='window'?(customColor||0x3a3a3a):0x3a3a3a,roughness:0.5});
     var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
-    var doorMat=new THREE.MeshStandardMaterial({color:customColor||(it.type==='door-front'?0x5c432f:0x8a765c),roughness:0.58});
+    var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
+    var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
     var railMat=new THREE.MeshStandardMaterial({color:0x707070,roughness:0.35,metalness:0.25});
     
     function addBox(mat,x,y,z,w,h,d){
@@ -3740,7 +3921,9 @@ function build3DRoofItem(grp,it,w3,d3){
     matParams.map=rtc;
     if(ap.texture) matParams.color=0xffffff;
   }
-  var mat=new THREE.MeshStandardMaterial(matParams);
+  var mat=ap.source==='item' && !ap.texture
+    ? new THREE.MeshStandardMaterial(matParams)
+    : makeColorAccurateMaterial({map:matParams.map||null,color:matParams.color||ap.color||'#2a2a30',side:THREE.DoubleSide});
   function addGeo(points){
     var geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(points),3));
@@ -3804,6 +3987,11 @@ function buildItem3D(it){
   }
   if(it.type==='roof'){
     build3DRoofItem(grp,it,it.w*U,it.d*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
+  if(it.type==='site-rect'){
+    build3DSiteRect(grp,it,it.w*U,it.d*U);
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
   }
@@ -3913,7 +4101,7 @@ function buildItem3D(it){
     });
   }
   else if(it.type==='fence'){
-    var fMat=new THREE.MeshStandardMaterial({color:0x888878,roughness:0.85});
+    var fMat=makeItemTextureMaterial(it,w3,h,'repeat',0xffffff) || new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0x888878,roughness:0.85});
     _B(grp,fMat,0,0.4,0,w3,0.8,Math.max(d3,0.12));
     _B(grp,new THREE.MeshStandardMaterial({color:0x707068,roughness:0.8}),0,0.82,0,w3+0.04,0.06,Math.max(d3,0.14));
   }
@@ -3946,7 +4134,11 @@ function buildItem3D(it){
 }
 
 function buildWoodFence3D(grp,it,w3,d3,h){
-  var wood=new THREE.MeshStandardMaterial({color:it.color||0x9a7a3a,roughness:0.86,metalness:0.02});
+  var baseWoodColor=it.colorCustom?it.color:0x9a7a3a;
+  function boardMat(surfaceW,surfaceH){
+    return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff) ||
+      new THREE.MeshStandardMaterial({color:baseWoodColor,roughness:0.86,metalness:0.02});
+  }
   var dark=new THREE.MeshStandardMaterial({color:0x5d4320,roughness:0.9});
   var depth=Math.max(d3,0.06);
   var pattern=it.fencePattern||'vertical';
@@ -3956,7 +4148,7 @@ function buildWoodFence3D(grp,it,w3,d3,h){
     for(var r=0;r<rows;r++){
       var y=boardH/2+r*(boardH+gap)+0.04;
       if(y+boardH/2>h) break;
-      _B(grp,wood,0,y,0,w3,boardH,depth);
+      _B(grp,boardMat(w3,boardH),0,y,0,w3,boardH,depth);
     }
     var postCount=Math.max(2,Math.floor(w3/0.9)+1);
     for(var p=0;p<postCount;p++){
@@ -3969,7 +4161,8 @@ function buildWoodFence3D(grp,it,w3,d3,h){
     for(var i=0;i<count;i++){
       var x=-w3/2+(i+0.5)*w3/count;
       var boardH=h*(0.96+0.04*((i%3)/2));
-      _B(grp,wood,x,boardH/2,0,Math.min(bw,w3/count*0.72),boardH,depth);
+      var boardW=Math.min(bw,w3/count*0.72);
+      _B(grp,boardMat(boardW,boardH),x,boardH/2,0,boardW,boardH,depth);
     }
     _B(grp,dark,0,h*0.28,-depth*0.28,w3,0.055,depth*0.45);
     _B(grp,dark,0,h*0.72,-depth*0.28,w3,0.055,depth*0.45);
@@ -4267,6 +4460,30 @@ function _CY(g,mat,x,y,z,rt,rb,h,s){var m=new THREE.Mesh(new THREE.CylinderGeome
 function _SP(g,mat,x,y,z,r,s){var m=new THREE.Mesh(new THREE.SphereGeometry(r,s||8,s||6),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
 function _CO(g,mat,x,y,z,r,h,s){var m=new THREE.Mesh(new THREE.ConeGeometry(r,h,s||8),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
 function _placeGrp(g,x,y,z,ry){g.position.set(x,y,z);if(ry)g.rotation.y=ry;g.userData={b:true};g.children.forEach(function(c){c.userData={b:true};});sc3.add(g);}
+function build3DSiteRect(grp,it,w,d){
+  var mat=new THREE.MeshBasicMaterial({
+    color:0x6ca35b,
+    transparent:true,
+    opacity:0.22,
+    side:THREE.DoubleSide,
+    depthWrite:false
+  });
+  mat.toneMapped=false;
+  var plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat);
+  plane.rotation.x=-Math.PI/2;
+  plane.position.y=-0.035;
+  plane.receiveShadow=false;
+  plane.userData.siteRect=true;
+  grp.add(plane);
+
+  var edgeGeo=new THREE.EdgesGeometry(new THREE.PlaneGeometry(w,d));
+  var edgeMat=new THREE.LineBasicMaterial({color:0x3f6f35,transparent:true,opacity:0.7});
+  var edge=new THREE.LineSegments(edgeGeo,edgeMat);
+  edge.rotation.x=-Math.PI/2;
+  edge.position.y=-0.034;
+  edge.userData.siteRect=true;
+  grp.add(edge);
+}
 
 function build3DSofa(grp,w,d){
   var fab=new THREE.MeshStandardMaterial({color:0xd8c8b0,roughness:0.8}),cush=new THREE.MeshStandardMaterial({color:0xe8d8c0,roughness:0.7}),leg=new THREE.MeshStandardMaterial({color:0x504020,roughness:0.5,metalness:0.1});
@@ -4351,11 +4568,14 @@ function buildRooms3D(flFilt){
     var fd=pbrTex(diffName),fn=pbrTexLinear(normName),fr2=pbrTexLinear(roughName);
     [fd,fn,fr2].filter(Boolean).forEach(function(t){t.repeat.set(repU,repV);});
     var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0};
+    var customRoomTexture=false;
     if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
       var baseTex=getTexture3D(r.texture);
-      if(baseTex&&baseTex.image){var tex=baseTex.clone();tex.needsUpdate=true;setTextureRepeatNoDistort(tex,rw,rd,0.9);matParams.map=tex;}
+      if(baseTex&&baseTex.image){var tex=baseTex.clone();tex.needsUpdate=true;setTextureRepeatNoDistort(tex,rw,rd,0.9);matParams.map=tex;customRoomTexture=true;}
     }
-    var matFloor=new THREE.MeshStandardMaterial(matParams);
+    var matFloor=customRoomTexture
+      ? makeColorAccurateMaterial({map:matParams.map,color:0xffffff})
+      : new THREE.MeshStandardMaterial(matParams);
     
     // Floor slab
     var slab=new THREE.Mesh(new THREE.BoxGeometry(rw,0.05,rd),matFloor);
@@ -4403,12 +4623,13 @@ function buildLandscape(){
   _gndMesh.geometry.dispose();
   _gndMesh.geometry = new THREE.PlaneGeometry(gndSize, gndSize);
   _gndMesh.material = gndMat;
-  _gndMesh.position.set(bx, -0.01, bz);
+  _gndMesh.position.set(bx, -0.06, bz);
 
   // Concrete foundation
   var baseMat=new THREE.MeshStandardMaterial({color:0x888878,roughness:0.9});
-  var base=new THREE.Mesh(new THREE.BoxGeometry(bw+0.6,0.25,bd+0.6),baseMat);
-  base.position.set(bx,0.125,bz); base.userData={b:true}; sc3.add(base);
+  var baseH=0.18;
+  var base=new THREE.Mesh(new THREE.BoxGeometry(bw+0.6,baseH,bd+0.6),baseMat);
+  base.position.set(bx,-baseH/2-0.015,bz); base.userData={b:true,foundation:true}; sc3.add(base);
 }
 function loop3D(){
   requestAnimationFrame(loop3D);
@@ -4615,7 +4836,7 @@ canvas.addEventListener('mousemove',function(e){
   }
   var wc=c2w(cx,cy);
   ST.mouseW = wc;
-  ST.shiftKey = e.shiftKey;
+  ST.shiftKey = isShiftLike(e);
   ST.ctrlKey = e.ctrlKey;
   document.getElementById('coords').textContent='X:'+Math.round(snapV(wc.x))+'mm Y:'+Math.round(snapV(wc.y))+'mm';
   if(DRAG.active&&e.buttons===1){ applyHandleDrag(cx,cy,e); draw2d(); }
@@ -5127,6 +5348,7 @@ function applyMobileUI(){
   if(!isMobileLayout()) return;
   var mobBtn=document.getElementById('mob-menu-btn');
   if(mobBtn) mobBtn.style.display='';
+  updateMobileShiftButton();
   // Hide .mob-hide items handled by CSS
 }
 
