@@ -40,6 +40,11 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .cat-hdr{padding:7px 10px;font-size:11px;font-weight:bold;color:#7a8fb0;cursor:pointer;display:flex;justify-content:space-between;border-bottom:1px solid #0f3460;user-select:none;touch-action:manipulation}
 .cat-hdr:hover,.cat-hdr:active{background:#1a2a4a}
 .cat-body{display:none;background:#121a30}.cat-body.open{display:block}
+.common-tools{padding:8px;border-bottom:1px solid #0f3460;background:#101a33}
+.common-tools-title{font-size:10px;font-weight:bold;color:#7a8fb0;margin:0 2px 6px}
+.common-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.common-tools .stool{justify-content:center;border:1px solid #24385f;border-radius:6px;background:#16213e;padding:8px 8px;min-height:36px}
+.common-tools .stool:hover,.common-tools .stool:active{background:#1d2d52}
 .stool{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:11px;cursor:pointer;border-bottom:1px solid #1a2540;user-select:none;touch-action:manipulation;min-height:40px}
 .stool:hover,.stool:active{background:#1a2a4a}.stool.active{background:#e94560;color:#fff}
 .sicon{font-size:14px;width:18px;text-align:center}
@@ -271,6 +276,13 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 </div>
 <div id="main">
   <div id="sidebar">
+    <div class="common-tools">
+      <div class="common-tools-title">共通操作</div>
+      <div class="common-tools-grid">
+        <div class="stool" data-tool="select" onclick="setTool('select')"><span class="sicon">↖</span>選択・変形</div>
+        <div class="stool" data-tool="erase" onclick="setTool('erase')"><span class="sicon">✕</span>削除</div>
+      </div>
+    </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>▶</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="site-rect" onclick="setTool('site-rect')"><span class="sicon">⬜</span>敷地(矩形)</div>
@@ -279,8 +291,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
     <div class="cat-body open">
       <div class="stool active" data-tool="wall" onclick="setTool('wall')"><span class="sicon">━</span>壁を描く</div>
       <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><span class="sicon">▭</span>部屋(矩形)</div>
-      <div class="stool" data-tool="select" onclick="setTool('select')"><span class="sicon">↖</span>選択・変形</div>
-      <div class="stool" data-tool="erase" onclick="setTool('erase')"><span class="sicon">✕</span>削除</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🪜 階段・屋根 <span>▶</span></div>
     <div class="cat-body">
