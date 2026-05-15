@@ -294,6 +294,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
       <div class="common-tools-grid">
         <div class="stool active" data-tool="select" onclick="setTool('select')"><span class="sicon">↖</span>選択・変形</div>
         <div class="stool" data-tool="erase" onclick="setTool('erase')"><span class="sicon">✕</span>削除</div>
+        <div class="stool mobile-only" onclick="copySelectedFromButton()"><span class="sicon">⧉</span>コピー</div>
+        <div class="stool mobile-only" onclick="pasteCopiedFromButton()"><span class="sicon">▣</span>ペースト</div>
       </div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>▶</span></div>
@@ -795,7 +797,7 @@ function updateProps(){
         html += '<div style="padding:7px;border:1px solid #20365d;border-radius:6px;margin-top:7px;background:rgba(5,18,42,0.26)">';
         html += '<div style="font-size:10px;color:#dce8ff;font-weight:bold;margin-bottom:5px">内面 '+(idx+1)+'</div>';
         html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(fs.mode==='custom'?'checked':'')+' onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別設定を利用</label>';
-        html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(fs.color||ap.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
+        html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(fs.color||ap.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
         html += '<div style="margin-top:6px;opacity:'+(fs.mode==='custom'?1:0.45)+'"><div style="font-size:10px;color:#7a8fb0;margin-bottom:3px">テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;color:#cce;width:100%;max-width:100%" onchange="uploadInteriorFaceTex(this,'+it.id+',\''+faceKey+'\')" '+(fs.mode!=='custom'?'disabled':'')+'></div>';
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
         html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:5px"><input type="checkbox" '+(fs.mode==='whole'||inheritedWhole?'checked':'')+' onchange="updateInteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'whole\':\'inherit\')"> 家全体に合わせる</label>';
@@ -818,7 +820,7 @@ function updateProps(){
           html += '<div style="padding:7px;border:1px solid #20365d;border-radius:6px;margin-top:7px;background:rgba(5,18,42,0.26)">';
           html += '<div style="font-size:10px;color:#dce8ff;font-weight:bold;margin-bottom:5px">外面 '+(idx+1)+'</div>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(efs.mode==='custom'?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別設定を利用</label>';
-          html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(efs.color||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
+          html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(efs.color||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
           html += '<div style="margin-top:6px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><div style="font-size:10px;color:#7a8fb0;margin-bottom:3px">テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;color:#cce;width:100%;max-width:100%" onchange="uploadExteriorFaceTex(this,'+it.id+',\''+faceKey+'\')" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
           html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(efs.texture)+' '+(efs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:5px"><input type="checkbox" '+(efs.mode==='whole'||inheritedWhole?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'whole\':\'inherit\')"> 家全体に合わせる</label>';
@@ -1220,6 +1222,16 @@ function commitAppearanceColorEdits(){
   ST.appearanceColorDirty=false;
   updateProps();
   if(ren) rebuild3D();
+}
+function finishAppearanceColorInput(){
+  if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches) return;
+  commitAppearanceColorEdits();
+}
+function scheduleAppearancePreviewUpdate(){
+  clearTimeout(ST.appearancePreviewTimer);
+  ST.appearancePreviewTimer=setTimeout(function(){
+    if(ren) rebuild3D();
+  },80);
 }
 function toggleMobileShift(){
   ST.mobileShift=!ST.mobileShift;
@@ -2626,7 +2638,7 @@ function updateRoofAppearance(scope,key,value,floor,noSave){
       s.floors[floor].linked=true;
     }
   }
-  if(noSave && key==='color') return;
+  if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   if(key!=='color') renderExteriorWallPanel();
   updateProps();
   if(ren) rebuild3D();
@@ -2718,7 +2730,7 @@ function updateInteriorSetting(scope,key,value,floor,noSave){
       s.floors[floor].linked=true;
     }
   }
-  if(noSave && key==='color') return;
+  if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   if(key!=='color') renderExteriorWallPanel();
   updateProps();
   if(ren) rebuild3D();
@@ -2733,7 +2745,7 @@ function updateInteriorFaceSetting(wallId,faceKey,key,value,noSave){
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   fs[key]=value;
-  if(noSave && key==='color') return;
+  if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   updateProps();
   if(ren) rebuild3D();
 }
@@ -2786,7 +2798,7 @@ function updateExteriorFaceSetting(wallId,faceKey,key,value,noSave){
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   fs[key]=value;
-  if(noSave && key==='color') return;
+  if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   updateProps();
   if(ren) rebuild3D();
 }
@@ -2939,7 +2951,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ins.whole.linked?'checked':'')+' onchange="updateInteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(ins.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()">';
+  html += '<input type="color" value="'+(ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onchange="updateInteriorSetting(\'whole\',\'color\',this.value,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -2949,7 +2961,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(ifs.linked?'checked':'')+' onchange="updateInteriorSetting(\'floor\',\'linked\',this.checked,'+ifl+')" '+(ins.whole.linked?'disabled':'')+'> '+ifl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!ins.whole.linked&&ifs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="commitAppearanceColorEdits()">';
+    html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
     html += '</div></div>';
   }
@@ -2964,7 +2976,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(roof.whole.linked?'checked':'')+' onchange="updateRoofAppearance(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(roof.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="commitAppearanceColorEdits()">';
+  html += '<input type="color" value="'+(roof.whole.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onchange="updateRoofAppearance(\'whole\',\'color\',this.value,null,true)" onblur="finishAppearanceColorInput()">';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -2974,7 +2986,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(rfs.linked?'checked':'')+' onchange="updateRoofAppearance(\'floor\',\'linked\',this.checked,'+rfl+')" '+(roof.whole.linked?'disabled':'')+'> '+rfl+'F</label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!roof.whole.linked&&rfs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="commitAppearanceColorEdits()">';
+    html += '<input type="color" value="'+(rfs.color||'#2a2a30')+'" style="width:42px;height:24px;border:none" oninput="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onchange="updateRoofAppearance(\'floor\',\'color\',this.value,'+rfl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
@@ -2992,7 +3004,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="padding:8px;border:1px solid #24406f;border-radius:6px;margin-bottom:8px;background:rgba(15,52,96,0.32)">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(s.whole.linked?'checked':'')+' onchange="updateExteriorSetting(\'whole\',\'linked\',this.checked)"> 家全体</label>';
   html += '<div style="display:flex;gap:6px;align-items:center;margin-top:7px;opacity:'+(s.whole.linked?1:0.45)+'">';
-  html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="commitAppearanceColorEdits()" '+(!s.whole.linked?'disabled':'')+'>';
+  html += '<input type="color" value="'+(s.whole.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onchange="updateExteriorSetting(\'whole\',\'color\',this.value,null,null,true)" onblur="finishAppearanceColorInput()" '+(!s.whole.linked?'disabled':'')+'>';
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
@@ -3003,7 +3015,7 @@ function renderExteriorWallPanel(mode){
     html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
     html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(fs.linked?'checked':'')+' onchange="updateExteriorSetting(\'floor\',\'linked\',this.checked,'+fl+')" '+(s.whole.linked?'disabled':'')+'> '+fl+'F <span style="font-size:9px;color:#7a8fb0">('+walls.length+'枚)</span></label>';
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!s.whole.linked&&fs.linked?1:0.45)+'">';
-    html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="commitAppearanceColorEdits()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
+    html += '<input type="color" value="'+(fs.color||WALL_COLORS[fl]||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onchange="updateExteriorSetting(\'floor\',\'color\',this.value,'+fl+',null,true)" onblur="finishAppearanceColorInput()" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
@@ -3014,7 +3026,7 @@ function renderExteriorWallPanel(mode){
         html += '<div style="margin-top:7px;padding:7px;border:1px solid #20365d;border-radius:6px;background:rgba(5,18,42,0.32)">';
         html += '<button class="pbtn sec" style="padding:3px 6px;margin:0 0 5px 0;text-align:left" onclick="selectWallById('+w.id+')">'+exteriorWallLabel(w,idx)+'</button>';
         html += '<div style="display:flex;gap:6px;align-items:center">';
-        html += '<input type="color" value="'+(ws.color||w.exteriorColor||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onblur="commitAppearanceColorEdits()">';
+        html += '<input type="color" value="'+(ws.color||w.exteriorColor||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onchange="updateExteriorSetting(\'wall\',\'color\',this.value,'+fl+','+w.id+',true)" onblur="finishAppearanceColorInput()">';
         html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadExteriorTex(this,\'wall\','+fl+','+w.id+')">';
         html += '</div>';
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ws.texture||w.exteriorTexture)+' '+(ws.texture||w.exteriorTexture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'wall\',\'texture\',null,'+fl+','+w.id+')">解除</button>':'')+'</div>';
@@ -3053,7 +3065,7 @@ function updateExteriorSetting(scope,key,value,floor,wallId,noSave){
       else if(key==='texture'){ ws.texture=value; w.exteriorTexture=value; }
     }
   }
-  if(noSave && key==='color') return;
+  if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   if(key!=='color') renderExteriorWallPanel();
   updateProps();
   if(ren) rebuild3D();
@@ -3927,7 +3939,7 @@ function build3DRoofItem(grp,it,w3,d3){
   var over=0.28;
   var W=w3+over*2, D=d3+over*2;
   var ap=resolveRoofAppearance(it);
-  var roofTex=ap.texture?getTexture3D(ap.texture):getTexture3D('roof_tile');
+  var roofTex=ap.texture?getTexture3D(ap.texture):null;
   var matParams={color:ap.color||'#2a2a30',side:THREE.DoubleSide,roughness:0.76,metalness:0.02};
   if(roofTex){
     var rtc=roofTex.clone();
@@ -3942,7 +3954,13 @@ function build3DRoofItem(grp,it,w3,d3){
     : makeColorAccurateMaterial({map:matParams.map||null,color:matParams.color||ap.color||'#2a2a30',side:THREE.DoubleSide});
   function addGeo(points){
     var geo=new THREE.BufferGeometry();
-    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(points),3));
+    var verts=new Float32Array(points);
+    geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
+    var uvs=[];
+    for(var ui=0; ui<verts.length; ui+=3){
+      uvs.push((verts[ui]+W/2)/W, (verts[ui+2]+D/2)/D);
+    }
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
     geo.computeVertexNormals();
     var mesh=new THREE.Mesh(geo,mat);
     mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
@@ -5212,6 +5230,14 @@ function pasteCopiedObject(){
   draw2d();
   if(ren) rebuild3D();
   return true;
+}
+function copySelectedFromButton(){
+  copySelectedObject();
+}
+function pasteCopiedFromButton(){
+  if(pasteCopiedObject()){
+    closeMobilePanels();
+  }
 }
 
 function undoAction(){
