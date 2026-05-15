@@ -817,8 +817,10 @@ function updateProps(){
           var inheritedFloor=efs.mode==='inherit' && !exteriorSettings.whole.linked && floorSetting.linked;
           html += '<div style="padding:7px;border:1px solid #20365d;border-radius:6px;margin-top:7px;background:rgba(5,18,42,0.26)">';
           html += '<div style="font-size:10px;color:#dce8ff;font-weight:bold;margin-bottom:5px">外面 '+(idx+1)+'</div>';
-          html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(efs.mode==='custom'?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別カラーを利用</label>';
+          html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px"><input type="checkbox" '+(efs.mode==='custom'?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'custom\':\'inherit\')"> 個別設定を利用</label>';
           html += '<div style="display:flex;gap:6px;align-items:center;margin-top:5px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><span style="font-size:10px;color:#7a8fb0">個別</span><input type="color" value="'+(efs.color||ap.color||'#e8e0cc')+'" style="width:42px;height:24px;border:none" oninput="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'color\',this.value,true)" onblur="commitAppearanceColorEdits()" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
+          html += '<div style="margin-top:6px;opacity:'+(efs.mode==='custom'?1:0.45)+'"><div style="font-size:10px;color:#7a8fb0;margin-bottom:3px">テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;color:#cce;width:100%;max-width:100%" onchange="uploadExteriorFaceTex(this,'+it.id+',\''+faceKey+'\')" '+(efs.mode!=='custom'?'disabled':'')+'></div>';
+          html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(efs.texture)+' '+(efs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:5px"><input type="checkbox" '+(efs.mode==='whole'||inheritedWhole?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'whole\':\'inherit\')"> 家全体に合わせる</label>';
           html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:10px;margin-top:3px"><input type="checkbox" '+(efs.mode==='floor'||inheritedFloor?'checked':'')+' onchange="updateExteriorFaceSetting('+it.id+',\''+faceKey+'\',\'mode\',this.checked?\'floor\':\'inherit\')"> '+it.floor+'Fに合わせる</label>';
           html += '</div>';
@@ -2787,6 +2789,17 @@ function updateExteriorFaceSetting(wallId,faceKey,key,value,noSave){
   if(noSave && key==='color') return;
   updateProps();
   if(ren) rebuild3D();
+}
+
+function uploadExteriorFaceTex(inp,wallId,faceKey){
+  var file=inp.files[0]; if(!file) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    prepareUploadedTexture(e.target.result,function(dataUrl){
+      updateExteriorFaceSetting(wallId,faceKey,'texture',dataUrl);
+    });
+  };
+  r.readAsDataURL(file);
 }
 
 function uploadInteriorTex(inp,scope,floor){
