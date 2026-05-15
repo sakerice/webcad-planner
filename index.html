@@ -81,6 +81,9 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .pbtn:active{background:#c73350}.pbtn.sec{background:#0f3460;border:1px solid #2a4080}.pbtn.sec:active{background:#1a5080}
 .mobile-only{display:none}
 .snap-shift-btn.active{background:#e94560!important;border-color:#e94560!important;color:#fff!important}
+@media (max-width:1180px), (pointer:coarse){
+  .mobile-only{display:block}
+}
 
 /* ── STATUS BAR ────────────────────────── */
 #statusbar{height:20px;background:#0f3460;padding:2px 10px;font-size:10px;color:#7a8fb0;display:flex;gap:14px;flex-shrink:0;align-items:center}
