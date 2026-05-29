@@ -2299,6 +2299,56 @@ body{
     display:flex;
   }
 }
+@media (pointer:coarse), (max-width:768px){
+  .tbtn,
+  .pbtn,
+  .stool,
+  .asset-tile,
+  .asset-subhdr,
+  .cat-hdr,
+  .bnav-btn,
+  #mob-prop-hdr,
+  #mob-prop-close-fab,
+  .unity-render-close{
+    -webkit-tap-highlight-color:rgba(242,74,46,0.18);
+    touch-action:manipulation;
+  }
+  .tbtn:active,
+  .pbtn:active,
+  .stool:active,
+  .asset-tile:active,
+  .asset-subhdr:active,
+  .cat-hdr:active,
+  .bnav-btn:active,
+  #mob-prop-hdr:active,
+  .unity-render-close:active,
+  .touch-pressing{
+    transform:scale(.965) translateY(2px)!important;
+    background:var(--hp-secondary-soft)!important;
+    border-color:var(--hp-secondary)!important;
+    color:var(--hp-secondary-dark)!important;
+    box-shadow:0 3px 9px rgba(8,127,175,0.20), inset 0 2px 0 rgba(0,0,0,0.05)!important;
+    filter:saturate(1.08);
+  }
+  .tbtn.active:active,
+  .stool.active:active,
+  .asset-tile.active:active,
+  .bnav-btn.active:active,
+  .touch-pressing.active,
+  #mob-prop-close-fab:active,
+  #mob-prop-close-fab.touch-pressing{
+    transform:scale(.94) translateY(2px)!important;
+    background:var(--hp-primary-dark)!important;
+    border-color:var(--hp-primary-dark)!important;
+    color:#fff!important;
+    box-shadow:0 3px 8px rgba(200,50,32,0.32), inset 0 2px 0 rgba(0,0,0,0.12)!important;
+  }
+  .touch-pressing .sicon,
+  .stool:active .sicon,
+  .asset-tile:active .sicon{
+    transform:scale(.92);
+  }
+}
 </style>
 </head>
 <body>
@@ -8592,6 +8642,7 @@ function ensureAiRenderable3D(){
   var cam=getActive3DCamera();
   if(cam) cam.updateMatrixWorld(true);
   sc3.updateMatrixWorld(true);
+  updateInteriorCutawayWalls();
   return !!cam;
 }
 function captureCurrent3DDataUrl(){
@@ -8601,6 +8652,7 @@ function captureCurrent3DDataUrl(){
   return ren.domElement.toDataURL('image/png');
 }
 function aiSegmentColorForObject(o){
+  if(o.userData&&o.userData.windowWallGlass) return 0x19c7ff;
   var ref=o.userData&&o.userData.selectRef;
   var kind=o.userData&&o.userData.selectKind;
   if(o===_gndMesh) return 0x8ccf7a;
@@ -8627,7 +8679,12 @@ function captureSegmentation3DDataUrl(){
   sc3.traverse(function(o){
     if(!(o.isMesh||o.isLine||o.isSprite)) return;
     states.push({o:o,visible:o.visible,material:o.material});
-    if((o.userData&&o.userData.selectionHelper) || o.name==='_sky' || o.isLine || o.isSprite){
+    var mat=o.material;
+    var mats=Array.isArray(mat)?mat:[mat];
+    var isFullyTransparent=mats.length&&mats.every(function(m){
+      return m && m.transparent && Number(m.opacity)<=0.03;
+    });
+    if(!o.visible || (o.userData&&(o.userData.selectionHelper||o.userData.moveGizmo||o.userData.hitProxy)) || o.name==='_sky' || o.isLine || o.isSprite || isFullyTransparent){
       o.visible=false;
       return;
     }
@@ -8761,9 +8818,11 @@ function buildAiRenderPrompt(metadata){
   var siteLines = metadata.siteContext && metadata.siteContext.hasSite ? [
     '- A site boundary is explicitly defined. Keep the planned house, yard, fences, driveway, and exterior elements inside that site boundary.',
     '- Treat the site boundary as the property line, not as an empty setback buffer. Do not enlarge the site or create a wide vacant margin around it.',
-    '- Outside the site boundary, continue immediately into ordinary residential surroundings: neighboring houses/buildings, roads, sidewalks, fences, gates, gardens, parked cars, and utility elements may begin just outside the boundary.',
-    '- Keep only a small, realistic clearance outside the site boundary where needed for fences, walls, roads, or sidewalks. Avoid excessive open land, blank ground, or empty space around the specified site.',
-    '- Do not place neighboring houses/buildings inside the site boundary. They belong outside the property line and should make the planned site read as one lot within a dense residential neighborhood.'
+    '- Draw surrounding neighboring houses/buildings immediately outside the site boundary on visible sides. They should begin just beyond the property line, like a dense Japanese residential neighborhood.',
+    '- Keep the outside gap narrow: about 0.5 to 2 meters where roads, sidewalks, fences, gutters, or small service spaces are needed. Do not create a large empty yard, vacant lot, field, or wide setback outside the site.',
+    '- If the camera crop shows space beyond the property line, fill that outside area with neighboring building facades, roofs, walls, gates, fences, utility poles/wires, parked cars, roads, or sidewalks.',
+    '- Do not place neighboring houses/buildings inside the site boundary. They belong outside the property line and should make the planned site read as one lot embedded among other lots.',
+    '- The site boundary should feel tight and meaningful: outside it is another property or public street, not unused blank land.'
   ] : [];
   return [
     '# house-planner mobile AI rendering instructions',
@@ -8798,7 +8857,7 @@ function buildAiRenderPrompt(metadata){
     }, null, 2),
     '',
     'Negative prompt:',
-    'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed, underspecified materials'
+    'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed, underspecified materials, wide empty land outside the site, large vacant setback, isolated house in an empty field'
   ].filter(function(line){return line!==null;}).join('\n');
 }
 async function ensureAiRenderableView(){
@@ -9683,7 +9742,33 @@ window.addEventListener('resize',function(){
   applyMobileUI();
 });
 
+// ─── Touch press feedback ────────────────────────
+function initTouchPressFeedback(){
+  if(initTouchPressFeedback._done) return;
+  initTouchPressFeedback._done=true;
+  var selector='.tbtn,.pbtn,.stool,.asset-tile,.asset-subhdr,.cat-hdr,.bnav-btn,#mob-prop-hdr,#mob-prop-close-fab,.unity-render-close';
+  function clear(el){
+    if(!el) return;
+    window.setTimeout(function(){ el.classList.remove('touch-pressing'); },110);
+  }
+  document.addEventListener('pointerdown',function(e){
+    var el=e.target&&e.target.closest?e.target.closest(selector):null;
+    if(!el) return;
+    el.classList.add('touch-pressing');
+  },{passive:true});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(type){
+    document.addEventListener(type,function(e){
+      var el=e.target&&e.target.closest?e.target.closest(selector):null;
+      clear(el);
+    },{passive:true});
+  });
+  document.addEventListener('touchend',function(){
+    document.querySelectorAll('.touch-pressing').forEach(clear);
+  },{passive:true});
+}
+
 // ─── Init mobile ─────────────────────────────────
+initTouchPressFeedback();
 applyMobileUI();
 </script>
 </body>
