@@ -2410,6 +2410,9 @@ body{
   <button class="bnav-btn" id="bnav-3di" onclick="setView('3d-int');closeMobilePanels()">
     <span class="bnav-icon">🚶</span>内観3D
   </button>
+  <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
+    <span class="bnav-icon">🎥</span>AI
+  </button>
   <button class="bnav-btn" id="bnav-undo" onclick="undoAction()">
     <span class="bnav-icon">↩</span>Undo
   </button>
@@ -2869,7 +2872,7 @@ function updateProps(){
   }
   if(isDoorLikeOpeningType(it.type)){
     html += '<div class="ph" style="margin-top:12px">ドア・開口高さ</div>';
-    html += '<div class="pr"><div class="pl">高さ (mm)</div><input class="pi" type="number" min="1200" max="3200" step="10" value="'+Math.round(doorHeightMm(it))+'" onchange="updateSelectedProp(\'doorHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ (mm)</div><input class="pi" type="number" min="300" max="3200" step="10" value="'+Math.round(doorHeightMm(it))+'" onchange="updateSelectedProp(\'doorHeight\',+this.value)"></div>';
     if(isDoorPanelType(it.type)){
       html += '<div class="pr"><div class="pl">開閉状態</div><select class="pi" onchange="updateSelectedProp(\'doorOpenState\',this.value)">';
       [['open','開き'],['closed','閉じ']].forEach(function(opt){
@@ -2881,10 +2884,16 @@ function updateProps(){
   if(it.type==='wood-fence'){
     if(!it.fenceHeight) it.fenceHeight=1600;
     if(!it.fencePattern) it.fencePattern='vertical';
+    if(!it.fenceTopStyle) it.fenceTopStyle='even';
     html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.fenceHeight)+'" onchange="updateSelectedProp(\'fenceHeight\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">板方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
     [['vertical','縦板'],['horizontal','横板']].forEach(function(opt){
       html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
+    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
   }
@@ -3056,6 +3065,7 @@ function mkItem(type,x,y,rot,floor,w,d){
   if(type==='wood-fence'){
     item.fenceHeight=1600;
     item.fencePattern='vertical';
+    item.fenceTopStyle='even';
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -5217,7 +5227,7 @@ function isArchOpeningType(type){
 }
 function doorHeightMm(it){
   var v=Number(it&&it.doorHeight);
-  return isFinite(v)?Math.max(1200,Math.min(3200,v)):2000;
+  return isFinite(v)?Math.max(300,Math.min(3200,v)):2000;
 }
 function doorOpenState(it){
   return it&&it.doorOpenState==='closed'?'closed':'open';
@@ -5755,6 +5765,50 @@ function makeInteriorWallMaterial(w,len,face){
 function makeWallCoreMaterial(){
   return new THREE.MeshStandardMaterial({color:0xd8d5ce,roughness:0.9,metalness:0.0});
 }
+function makeInteriorCutawayWallMaterial(source,opacity){
+  var mat=source&&source.clone?source.clone():makeWallCoreMaterial();
+  mat.transparent=true;
+  mat.opacity=opacity===undefined?0:opacity;
+  mat.depthWrite=false;
+  mat.side=THREE.DoubleSide;
+  mat.needsUpdate=true;
+  return mat;
+}
+function markInteriorCutawayCandidate(mesh,w,sign,opacity){
+  if(!mesh || !w) return;
+  mesh.userData.cutawayWall={
+    wall:w,
+    sign:sign||0,
+    original:mesh.material,
+    cutaway:makeInteriorCutawayWallMaterial(mesh.material,opacity)
+  };
+}
+function cameraExteriorSideForWall(w){
+  if(!camExt || !w) return 0;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return 0;
+  var nx=-dy/len, ny=dx/len;
+  var cx=camExt.position.x/U, cy=camExt.position.z/U;
+  return ((cx-w.x1)*nx+(cy-w.y1)*ny)>=0?1:-1;
+}
+function shouldCutawayWallForCamera(info){
+  if(!isInt || !info || !info.wall) return false;
+  var camSign=cameraExteriorSideForWall(info.wall);
+  if(!camSign) return false;
+  if(info.sign) return camSign===info.sign;
+  return getWallExteriorSpans(info.wall).some(function(sp){return sp.sign===camSign;});
+}
+function updateInteriorCutawayWalls(){
+  if(!sc3) return;
+  sc3.traverse(function(o){
+    var info=o.userData&&o.userData.cutawayWall;
+    if(!info) return;
+    var cut=shouldCutawayWallForCamera(info);
+    var next=cut?info.cutaway:info.original;
+    if(o.material!==next) o.material=next;
+  });
+}
 function makeFloorSlabMaterial(matFloor){
   var avg=0xb8b2a8;
   if(matFloor && matFloor.color) avg=matFloor.color.getHex();
@@ -5820,6 +5874,7 @@ function buildWall3D(w){
       );
       face.rotation.y=rotY+(sp.sign<0?Math.PI:0);
       face.userData.exteriorFace=true;
+      markInteriorCutawayCandidate(face,w,sp.sign,0);
       mark3DSelectable(face,w,'wall');
       sc3.add(face);
     });
@@ -5842,6 +5897,7 @@ function buildWall3D(w){
       );
       face.rotation.y=rotY+(faceInfo.sign<0?Math.PI:0);
       face.userData.interiorFace=true;
+      if(isOuter) markInteriorCutawayCandidate(face,w,0,0);
       mark3DSelectable(face,w,'wall');
       sc3.add(face);
     });
@@ -5862,6 +5918,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*mid,fy+yBase+h/2,z1+dirZ*mid);
     mesh.rotation.y=rotY;
+    if(isOuter) markInteriorCutawayCandidate(mesh,w,0,0);
     mark3DSelectable(mesh,w,'wall');
     sc3.add(mesh);
     addExteriorFace(a,b,yBase,h);
@@ -5925,6 +5982,7 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*a,fy,z1+dirZ*a);
     mesh.rotation.y=rotY;
+    if(isOuter) markInteriorCutawayCandidate(mesh,w,0,0);
     mark3DSelectable(mesh,w,'wall');
     sc3.add(mesh);
   }
@@ -5940,7 +5998,7 @@ function buildWall3D(w){
         var barLen=Math.min(bw,segLen);
         var bar=new THREE.Mesh(new THREE.BoxGeometry(barLen,h,depth),barMat);
         bar.position.set(x1+dirX*x,fy+yBase+h/2,z1+dirZ*x);
-        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; mark3DSelectable(bar,w,'wall'); sc3.add(bar);
+        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(bar,w,0,0); mark3DSelectable(bar,w,'wall'); sc3.add(bar);
       }
     } else {
       var hpitch=0.22, bh=0.045;
@@ -5949,7 +6007,7 @@ function buildWall3D(w){
         var yy=yBase+(rows===1?h/2:h*j/(rows-1));
         var rail=new THREE.Mesh(new THREE.BoxGeometry(segLen,bh,depth),barMat);
         rail.position.set(x1+dirX*(a+segLen/2),fy+yy,z1+dirZ*(a+segLen/2));
-        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; mark3DSelectable(rail,w,'wall'); sc3.add(rail);
+        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(rail,w,0,0); mark3DSelectable(rail,w,'wall'); sc3.add(rail);
       }
       var postPitch=0.9, pw=0.04;
       var posts=Math.max(2,Math.floor(segLen/postPitch)+1);
@@ -5957,7 +6015,7 @@ function buildWall3D(w){
         var px=a+(posts===1?segLen/2:segLen*k/(posts-1));
         var post=new THREE.Mesh(new THREE.BoxGeometry(pw,h,depth),barMat);
         post.position.set(x1+dirX*px,fy+yBase+h/2,z1+dirZ*px);
-        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; mark3DSelectable(post,w,'wall'); sc3.add(post);
+        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(post,w,0,0); mark3DSelectable(post,w,'wall'); sc3.add(post);
       }
     }
   }
@@ -6572,11 +6630,7 @@ function buildItem3D(it){
     if(it.type==='stair-corner'){
       build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
     } else {
-      for(var si=0;si<sSteps;si++){
-        var sh=(si+1)*sH;
-        var sbox=new THREE.Mesh(new THREE.BoxGeometry(w3,sh,sD),sMat);
-        sbox.position.set(0,baseRise+sh/2,-d3/2+sD*si+sD/2);sbox.castShadow=true;sbox.receiveShadow=true;grp.add(sbox);
-      }
+      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps);
     }
   }
   else{
@@ -6618,9 +6672,10 @@ function buildWoodFence3D(grp,it,w3,d3,h){
   } else {
     var bw=0.075, pitch=0.105;
     var count=Math.max(4,Math.floor(w3/pitch));
+    var variedTop=(it.fenceTopStyle||'even')==='varied';
     for(var i=0;i<count;i++){
       var x=-w3/2+(i+0.5)*w3/count;
-      var boardH=h*(0.96+0.04*((i%3)/2));
+      var boardH=variedTop ? h*(0.96+0.04*((i%3)/2)) : h;
       var boardW=Math.min(bw,w3/count*0.72);
       _B(grp,boardMat(boardW,boardH+drop),x,boardH/2-drop/2,0,boardW,boardH+drop,depth);
     }
@@ -6658,11 +6713,36 @@ function addStairRiserPanel(grp,mat,a,b,y,h){
   var len=Math.hypot(b[0]-a[0],b[1]-a[1]);
   if(len<0.02||h<0.01) return;
   var panelMat=(mat&&mat.clone)?mat.clone():mat;
-  if(panelMat) panelMat.side=THREE.DoubleSide;
-  var panel=new THREE.Mesh(new THREE.PlaneGeometry(len,h),panelMat||mat);
+  var thickness=0.035;
+  var panel=new THREE.Mesh(new THREE.BoxGeometry(len,h,thickness),panelMat||mat);
   panel.position.set((a[0]+b[0])/2,y+h/2,(a[1]+b[1])/2);
   panel.rotation.y=-Math.atan2(b[1]-a[1],b[0]-a[0]);
   panel.castShadow=true; panel.receiveShadow=true; grp.add(panel);
+}
+function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
+  steps=Math.max(1,steps||6);
+  var treadD=d/steps;
+  var rise=partRise/steps;
+  var treadT=Math.min(0.07,Math.max(0.04,rise*0.35));
+  var riserT=Math.min(0.045,Math.max(0.025,treadD*0.16));
+  for(var si=0;si<steps;si++){
+    var topY=baseRise+(si+1)*rise;
+    var z=-d/2+treadD*si+treadD/2;
+    var tread=new THREE.Mesh(new THREE.BoxGeometry(w,treadT,treadD),mat);
+    tread.position.set(0,topY-treadT/2,z);
+    tread.castShadow=true;
+    tread.receiveShadow=true;
+    grp.add(tread);
+
+    var riserH=rise;
+    var riserY=baseRise+si*rise+riserH/2;
+    var riserZ=-d/2+treadD*si-riserT/2;
+    var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
+    riser.position.set(0,riserY,riserZ);
+    riser.castShadow=true;
+    riser.receiveShadow=true;
+    grp.add(riser);
+  }
 }
 function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
   var steps=3;
@@ -6694,7 +6774,8 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
   for(var s=0;s<treadPolys.length;s++){
     var h=partRise*((s+1)/steps);
     var prevH=partRise*(s/steps);
-    _PRISM(grp,mat,treadPolys[s],h,baseRise);
+    var treadT=Math.min(0.07,Math.max(0.04,(h-prevH)*0.35));
+    _PRISM(grp,mat,treadPolys[s],treadT,baseRise+h-treadT);
     addStairRiserPanel(grp,riserMat||mat,riserEdges[s][0],riserEdges[s][1],baseRise+prevH,h-prevH);
   }
 }
@@ -7182,6 +7263,7 @@ function loop3D(){
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int')) {
     orbit.update();
   }
+  updateInteriorCutawayWalls();
 
   if(composer) {
     composer.passes[0].camera = cam;
@@ -7489,8 +7571,11 @@ function getItemHitPadding(it){
   if(isWindowLikeType(it.type)){
     return {x:120,y:520};
   }
-  if(isDoorLikeOpeningType(it.type)){
-    return {x:140,y:340};
+  if(isSwingDoorType(it.type)){
+    return {x:40,y:40};
+  }
+  if(it.type==='door-slide' || isNoDoorOpeningType(it.type)){
+    return {x:80,y:80};
   }
   return {x:0,y:0};
 }
@@ -7880,15 +7965,14 @@ function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';
 }
 function isUnityRenderFeatureEnabled(){
-  var host=(location&&location.hostname)||'';
   var params=new URLSearchParams((location&&location.search)||'');
   var explicit=params.get('unityRender');
   if(explicit==='1'||explicit==='true') return true;
   if(explicit==='0'||explicit==='false') return false;
-  return location.protocol==='file:'||host==='127.0.0.1'||host==='localhost';
+  return true;
 }
 function updateUnityRenderControls(){
-  var show=isUnityRenderableView();
+  var show=isUnityRenderFeatureEnabled();
   ['unity-render-toolbar-btn','unity-render-fab'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.classList.toggle('show',show);
@@ -8203,8 +8287,10 @@ function buildAiRenderPrompt(metadata){
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
   var siteLines = metadata.siteContext && metadata.siteContext.hasSite ? [
     '- A site boundary is explicitly defined. Keep the planned house, yard, fences, driveway, and exterior elements inside that site boundary.',
-    '- Outside the site boundary, depict surrounding neighboring houses/buildings and ordinary residential context so the specified site reads as one property within a neighborhood.',
-    '- Do not place neighboring houses/buildings inside the site boundary.'
+    '- Treat the site boundary as the property line, not as an empty setback buffer. Do not enlarge the site or create a wide vacant margin around it.',
+    '- Outside the site boundary, continue immediately into ordinary residential surroundings: neighboring houses/buildings, roads, sidewalks, fences, gates, gardens, parked cars, and utility elements may begin just outside the boundary.',
+    '- Keep only a small, realistic clearance outside the site boundary where needed for fences, walls, roads, or sidewalks. Avoid excessive open land, blank ground, or empty space around the specified site.',
+    '- Do not place neighboring houses/buildings inside the site boundary. They belong outside the property line and should make the planned site read as one lot within a dense residential neighborhood.'
   ] : [];
   return [
     '# house-planner mobile AI rendering instructions',
