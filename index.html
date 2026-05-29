@@ -2245,9 +2245,10 @@ body{
     max-height:52px!important;
     transform:translateY(112%)!important;
     overflow:hidden!important;
-    display:block!important;
+    display:none!important;
   }
   #props.show{
+    display:block!important;
     transform:translateY(0)!important;
   }
   #props.show.prop-expanded{
@@ -2349,8 +2350,8 @@ body{
       <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><span class="sicon">▤</span>外構階段</div>
       <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><span class="sicon">▱</span>スロープ</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🧱 部屋・壁 <span>-</span></div>
-    <div class="cat-body open">
+    <div class="cat-hdr" onclick="toggleCat(this)">🧱 部屋・壁 <span>+</span></div>
+    <div class="cat-body">
       <div class="stool" data-tool="wall" onclick="setTool('wall')"><span class="sicon">━</span>壁を描く</div>
       <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><span class="sicon">▭</span>部屋(矩形)</div>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><span class="sicon">🌿</span>バルコニー</div>
