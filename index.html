@@ -2148,6 +2148,68 @@ body{
 .face-card input[type="file"]{
   color:#334155!important;
 }
+#sidebar .stool,
+#sidebar .asset-subhdr,
+#sidebar .asset-tile{
+  color:var(--hp-text)!important;
+  opacity:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  transition:transform .14s ease, box-shadow .14s ease!important;
+}
+#sidebar .stool.active,
+#sidebar .asset-tile.active,
+#sidebar .stool.active:hover,
+#sidebar .asset-tile.active:hover{
+  color:#fff!important;
+  opacity:1!important;
+}
+#sidebar .stool.active *,
+#sidebar .asset-tile.active *,
+#sidebar .stool.active::before,
+#sidebar .asset-tile.active::before{
+  color:#fff!important;
+  opacity:1!important;
+}
+#sidebar .sicon{
+  flex:0 0 auto!important;
+}
+#sidebar .common-tools .stool.active,
+#sidebar .common-tools .stool.active:hover,
+#sidebar .cat-body.open > .stool.active,
+#sidebar .cat-body.open > .stool.active:hover,
+#sidebar .cat-body.open .asset-grid .asset-tile.active,
+#sidebar .cat-body.open .asset-grid .asset-tile.active:hover{
+  background:var(--hp-primary)!important;
+  color:#fff!important;
+  opacity:1!important;
+  box-shadow:0 4px 10px rgba(255,63,39,0.34)!important;
+}
+#sidebar .cat-body.open > .stool:not(.active),
+#sidebar .cat-body.open .asset-grid .asset-tile:not(.active),
+#sidebar .asset-subhdr{
+  color:var(--hp-text)!important;
+  opacity:1!important;
+}
+#sidebar .cat-body.open > .stool.active::before,
+#sidebar .cat-body.open .asset-grid .asset-tile.active::before{
+  background:#fff!important;
+  opacity:.9!important;
+}
+#sidebar .common-tools .stool.active .sicon,
+#sidebar .cat-body.open > .stool.active .sicon,
+#sidebar .cat-body.open .asset-grid .asset-tile.active .sicon{
+  color:#fff!important;
+  background:rgba(255,255,255,.22)!important;
+  border-color:rgba(255,255,255,.28)!important;
+}
+#sidebar .common-tools .stool.active *,
+#sidebar .cat-body.open > .stool.active *,
+#sidebar .cat-body.open .asset-grid .asset-tile.active *{
+  color:#fff!important;
+  opacity:1!important;
+}
 @media (max-width:768px){
   #toolbar{
     left:calc(8px + var(--safe-l))!important;
@@ -2225,6 +2287,9 @@ body{
     <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="site-rect" onclick="setTool('site-rect')"><span class="sicon">⬜</span>敷地(矩形)</div>
+      <div class="stool" data-tool="foundation" onclick="setTool('foundation')"><span class="sicon">▰</span>基礎</div>
+      <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><span class="sicon">▤</span>外構階段</div>
+      <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><span class="sicon">▱</span>スロープ</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🧱 部屋・壁 <span>-</span></div>
     <div class="cat-body open">
@@ -2429,8 +2494,23 @@ var WALL_COLOR_CUSTOM = {};
 var LIGHT_SETTINGS = {hemi:0.45, sun:0.65, ambient:0.22, room:0.25, exposure:0.95, env:0.55};
 var INTERIOR_WALL_DEFAULT = '#f4f0e8';
 
+function foundationHeightMm(){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return 0;
+  var maxH=0;
+  DATA.items.forEach(function(it){
+    if(it && it.type==='foundation'){
+      var h=Number(it.foundationHeight);
+      if(!isFinite(h)) h=450;
+      maxH=Math.max(maxH,Math.max(0,h));
+    }
+  });
+  return Math.max(0,Math.min(2000,maxH));
+}
+function foundationHeightM(){
+  return foundationHeightMm()*U;
+}
 function floorBaseY(floor){
-  return ((floor||1)-1)*FLOOR_H*U;
+  return ((floor||1)-1)*FLOOR_H*U + foundationHeightM();
 }
 function floorSlabHeightM(){
   return Math.max(0,FLOOR_SLAB_H||0)*U;
@@ -2451,6 +2531,7 @@ var ISIZES = {
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
+  foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
   'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:900,d:200},
   'door-opening':{w:780,d:160}, 'door-opening-arch':{w:900,d:160},
@@ -2462,6 +2543,7 @@ var ICOLORS = {
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
   tv:'#1a1a1a', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
   'door-opening':'#f6efe2','door-opening-arch':'#f6efe2','site-rect':'rgba(100,160,100,0.1)',
@@ -2651,6 +2733,7 @@ var ILABELS = {
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
   desk:'デスク',tv:'TV',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','window-door':'開き窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
   'roof':'屋根'
@@ -2765,7 +2848,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'▥','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'▥','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -2778,6 +2861,9 @@ function updateProps(){
     // desktop: always show body
   }
   html += '<div class="pr"><div class="pl">ID</div><input class="pi" type="text" value="'+objectIdLabel(it)+'" readonly></div>';
+  if(DATA.items.indexOf(it)>=0){
+    html += '<button class="pbtn sec" onclick="sendSelectedToBack()">最背面へ</button>';
+  }
 
   if(it.x1 !== undefined && it.x2 !== undefined) {
     html += '<div class="pr"><div class="pl">始点 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x1)+'" onchange="updateSelectedProp(\'x1\',+this.value)"></div>';
@@ -2868,7 +2954,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">見込み/奥行 (mm)</div><input class="pi" type="number" min="30" step="10" value="'+Math.round(it.d||0)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">下端高さ (床からmm)</div><input class="pi" type="number" min="0" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowSillMm(it))+'" onchange="updateSelectedProp(\'windowSill\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">窓の縦高さ (mm)</div><input class="pi" type="number" min="200" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowHeightMm(it))+'" onchange="updateSelectedProp(\'windowHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">上端高さ (床からmm)</div><input class="pi" type="number" min="200" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowTopMm(it))+'" onchange="updateSelectedProp(\'windowTop\',+this.value)"></div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">上端高さ: '+Math.round(windowTopMm(it))+'mm</div>';
   }
   if(isDoorLikeOpeningType(it.type)){
     html += '<div class="ph" style="margin-top:12px">ドア・開口高さ</div>';
@@ -2897,12 +2983,27 @@ function updateProps(){
     });
     html += '</select></div>';
   }
+  if(it.type==='foundation'){
+    if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
+    html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
+    html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.foundationHeight)+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。</div>';
+  }
+  if(it.type==='exterior-stair' || it.type==='ramp'){
+    if(!it.targetHeight) it.targetHeight=foundationHeightMm()||450;
+    html += '<div class="ph" style="margin-top:12px">外構高さ</div>';
+    html += '<div class="pr"><div class="pl">到達高さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.targetHeight)+'" onchange="updateSelectedProp(\'targetHeight\',+this.value)"></div>';
+    if(it.type==='exterior-stair'){
+      if(!it.accessSteps) it.accessSteps=3;
+      html += '<div class="pr"><div class="pl">段数</div><input class="pi" type="number" min="1" max="12" step="1" value="'+Math.round(it.accessSteps)+'" onchange="updateSelectedProp(\'accessSteps\',+this.value)"></div>';
+    }
+  }
   if(canSetItemElevation(it)) {
     if(it.elev === undefined || isNaN(it.elev)) it.elev = 0;
     html += '<div class="pr"><div class="pl">高さ Z (mm)</div><input class="pi" type="number" step="10" value="'+Math.round(it.elev||0)+'" onchange="updateSelectedProp(\'elev\',+this.value)"></div>';
   }
-  if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipX=false;
-  if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect') it.flipY=false;
+  if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipX=false;
+  if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipY=false;
   if(it.flipX !== undefined) {
     html += '<div class="pr"><div class="pl">反転</div><div style="display:flex;gap:4px">';
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipX\', !ST.selected.flipX)">左右反転</button>';
@@ -2975,6 +3076,7 @@ function updateSelectedProp(p,v,noSave){
   if(isWindowLikeType(ST.selected.type) && p==='windowTop'){
     ST.selected.windowHeight=Number(v)-windowSillMm(ST.selected);
     normalizeWindowVerticalProps(ST.selected,'windowTop');
+    delete ST.selected.windowTop;
   } else {
     ST.selected[p]=v;
     if(isWindowLikeType(ST.selected.type) && (p==='windowSill'||p==='windowHeight')) normalizeWindowVerticalProps(ST.selected,p);
@@ -3017,6 +3119,9 @@ function prepareUploadedTexture(src,done){
 
 // DRAG state for handle transform
 var DRAG = {active:false, saved:false, handle:null, startCX:0, startCY:0, origItem:null};
+var NATURAL_PAN = true;
+var CANVAS_TOUCH_FOLLOWS_FINGER = true;
+var CANVAS_TRACKPAD_USES_NATIVE_SCROLL = true;
 
 var DATA = {walls:[], items:[], rooms:[], exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
 var nextId = 1;
@@ -3066,6 +3171,16 @@ function mkItem(type,x,y,rot,floor,w,d){
     item.fenceHeight=1600;
     item.fencePattern='vertical';
     item.fenceTopStyle='even';
+  }
+  if(type==='foundation'){
+    item.foundationHeight=450;
+  }
+  if(type==='exterior-stair'){
+    item.targetHeight=foundationHeightMm()||450;
+    item.accessSteps=3;
+  }
+  if(type==='ramp'){
+    item.targetHeight=foundationHeightMm()||450;
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -3254,7 +3369,9 @@ function draw2d(){
       drawHandles(i, ccx, ccy, i.w*sc/2, i.d*sc/2, sc);
     }
   });
-  // 2. Rooms
+  // 2. Foundation (above site, below building plan)
+  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='foundation';}).forEach(drawItem2d);
+  // 3. Rooms
   DATA.rooms.filter(function(r){return r.floor===ST.floor;}).forEach(function(r){
     var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
     var sel=ST.selected===r || (ST.selectAll && r.floor===ST.floor);
@@ -3268,11 +3385,11 @@ function draw2d(){
     ctx.strokeRect(px,py,w,d);
     if(ST.selected===r&&ST.tool==='select') drawHandles(r,px+w/2,py+d/2,w/2,d/2,sc);
   });
-  // 3. Walls
+  // 4. Walls
   fw.forEach(drawWall2d);
   if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
-  // 4. Other Items
-  fi.filter(function(i){return i.type!=='site-rect';}).forEach(drawItem2d);
+  // 5. Other Items
+  fi.filter(function(i){return i.type!=='site-rect' && i.type!=='foundation';}).forEach(drawItem2d);
 
   // Ghost Previews
   if(ST.drawing && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
@@ -3283,7 +3400,7 @@ function draw2d(){
     ctx.setLineDash([]);
   }
   // ── Ghost preview + placement dimensions ──
-  if(!ST.drawing && (ISIZES[ST.tool]||isFmpItemType(ST.tool)) && ST.tool!=='site-rect' && ST.view === '2d') {
+  if(!ST.drawing && (ISIZES[ST.tool]||isFmpItemType(ST.tool)) && ST.tool!=='site-rect' && !(ST.floor!==1 && (ST.tool==='foundation'||ST.tool==='exterior-stair'||ST.tool==='ramp')) && ST.view === '2d') {
     var mx = snapV(ST.mouseW.x), my = snapV(ST.mouseW.y);
     var sz = getItemDefaultSize(ST.tool);
     var ghost = {type:ST.tool, x:mx - sz.w/2, y:my - sz.d/2, w:sz.w, d:sz.d, rot:ST.placingRot||0, floor:ST.floor, flipX:false, flipY:false, sScale:1, sX:0, sY:0};
@@ -3630,6 +3747,51 @@ function drawItem2d(it){
       ctx.moveTo(hw*0.72,hd*0.72); ctx.lineTo(hw*0.54,hd*0.66); ctx.lineTo(hw*0.66,hd*0.48); ctx.closePath(); ctx.fill();
       ctx.font=Math.max(9,10*sc)+'px sans-serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
       ctx.fillText('下', hw-11*sc, hd-10*sc);
+    } else if(it.type === 'foundation') {
+      ctx.fillStyle='rgba(184,178,168,0.32)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(90,86,78,0.72)';
+      ctx.lineWidth=1.4;
+      ctx.setLineDash([7,4]);
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.setLineDash([]);
+      ctx.font='bold '+Math.max(10,12*sc)+'px sans-serif';
+      ctx.fillStyle='rgba(65,62,56,0.86)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('基礎 '+Math.round(isFinite(Number(it.foundationHeight))?Number(it.foundationHeight):450)+'mm',0,0);
+    } else if(it.type === 'exterior-stair') {
+      ctx.fillStyle='rgba(184,178,168,0.6)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(80,78,72,0.8)';
+      ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      var n=Math.max(1,Math.min(12,Math.round(it.accessSteps||3)));
+      ctx.beginPath();
+      for(var ei=1; ei<n; ei++){
+        var ey=-hd+(it.d*sc/n)*ei;
+        ctx.moveTo(-hw,ey); ctx.lineTo(hw,ey);
+      }
+      ctx.stroke();
+      ctx.fillStyle='rgba(45,45,45,0.75)';
+      ctx.beginPath();
+      ctx.moveTo(0,hd-5*sc); ctx.lineTo(0,-hd+8*sc);
+      ctx.lineTo(-5*sc,-hd+18*sc); ctx.moveTo(0,-hd+8*sc); ctx.lineTo(5*sc,-hd+18*sc);
+      ctx.stroke();
+    } else if(it.type === 'ramp') {
+      ctx.fillStyle='rgba(184,178,168,0.48)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(80,78,72,0.78)';
+      ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.beginPath();
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(0,-hd*0.72);
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(-6*sc,-hd*0.56);
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(6*sc,-hd*0.56);
+      ctx.stroke();
+      ctx.font='bold '+Math.max(9,10*sc)+'px sans-serif';
+      ctx.fillStyle='rgba(65,62,56,0.8)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('スロープ',0,0);
     } else if(it.type === 'closet') {
       ctx.beginPath();
       ctx.moveTo(-hw, -hd+5*sc); ctx.lineTo(hw, hd-5*sc);
@@ -4030,6 +4192,7 @@ function hitHandle(it,mx,my){
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
 var _ray3d=null, _mouse3d=null, _pick3d={x:0,y:0,t:0};
+var GIZMO_DRAG={active:false,axis:null,ref:null,startX:0,startY:0,orig:null,saved:false};
 var isInt=false, iMov={}, _skyMesh=null, _gndMesh=null;
 // Interior mouse look state
 var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
@@ -4214,7 +4377,7 @@ function init3D(){
   orbit.target.set(4,1,2);
   orbit.rotateSpeed=0.4;
   orbit.zoomSpeed=0.6;
-  orbit.panSpeed=-0.5;  // negative = camera moves in swipe direction (not scene-follows-finger)
+  orbit.panSpeed=0.5;  // natural pan: scene follows the swipe/finger direction
   orbit.minDistance=2;
   orbit.maxDistance=80;
   // Post-processing integration
@@ -4239,13 +4402,28 @@ function init3D(){
 
   ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
   ren.domElement.addEventListener('pointerdown',function(e){
+    if(ST.view!=='2d' && e.button===0 && start3DGizmoDrag(e)){
+      e.preventDefault();
+      return;
+    }
     _pick3d.x=e.clientX; _pick3d.y=e.clientY; _pick3d.t=Date.now();
   });
   ren.domElement.addEventListener('pointerup',function(e){
+    if(GIZMO_DRAG.active){
+      finish3DGizmoDrag();
+      e.preventDefault();
+      return;
+    }
     if(ST.view==='2d' || e.button!==0) return;
     var moved=Math.hypot(e.clientX-_pick3d.x,e.clientY-_pick3d.y);
     if(moved>6 || Date.now()-_pick3d.t>650) return;
     handle3DPointerPick(e);
+  });
+  ren.domElement.addEventListener('pointermove',function(e){
+    if(GIZMO_DRAG.active){
+      apply3DGizmoDrag(e);
+      e.preventDefault();
+    }
   });
   ren.domElement.addEventListener('mousemove',function(e){
     if(!isInt||!_intML.down) return;
@@ -4306,6 +4484,7 @@ function build3D(){
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
   add3DSelectionMarker();
+  add3DMoveGizmo();
   var _sunLight=null;
   sc3.traverse(function(o){if(o.isDirectionalLight)_sunLight=o;});
   if(_sunLight) fitShadowCamera(_sunLight);
@@ -4413,6 +4592,128 @@ function add3DSelectionMarker(){
   sc3.add(group);
 }
 
+function canMoveRef3D(ref){
+  return !!(ref && ((ref.x!==undefined && ref.y!==undefined) || (ref.x1!==undefined && ref.y1!==undefined)));
+}
+function canMoveRefVertically3D(ref){
+  return !!(ref && ref.x!==undefined && ref.y!==undefined && canSetItemElevation(ref));
+}
+function add3DMoveGizmo(){
+  if(!sc3 || !ST.selected || !canMoveRef3D(ST.selected) || ST.tool!=='select') return;
+  var box=getSelectionBox3D(ST.selected);
+  if(box.isEmpty()) return;
+  var center=box.getCenter(new THREE.Vector3());
+  var size=box.getSize(new THREE.Vector3());
+  center.y=Math.max(box.max.y+0.08,center.y);
+  var group=new THREE.Group();
+  group.userData={b:true,moveGizmo:true};
+  var len=Math.max(0.55,Math.min(1.35,Math.max(size.x,size.y,size.z)*0.55));
+  function mat(color){return new THREE.MeshBasicMaterial({color:color,depthTest:false,transparent:true,opacity:0.95,toneMapped:false});}
+  function axis(name,dir,color){
+    var axisGroup=new THREE.Group();
+    axisGroup.userData={b:true,moveGizmo:true,gizmoAxis:name};
+    var cylinder=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,len,12),mat(color));
+    cylinder.position.y=len/2;
+    cylinder.userData={b:true,moveGizmo:true,gizmoAxis:name};
+    axisGroup.add(cylinder);
+    var cone=new THREE.Mesh(new THREE.ConeGeometry(0.075,0.18,18),mat(color));
+    cone.position.y=len+0.09;
+    cone.userData={b:true,moveGizmo:true,gizmoAxis:name};
+    axisGroup.add(cone);
+    if(name==='x') axisGroup.rotation.z=-Math.PI/2;
+    if(name==='z') axisGroup.rotation.x=Math.PI/2;
+    axisGroup.position.copy(center);
+    group.add(axisGroup);
+  }
+  axis('x',new THREE.Vector3(1,0,0),0xff3b1f);
+  axis('z',new THREE.Vector3(0,0,1),0x18a8e8);
+  if(canMoveRefVertically3D(ST.selected)) axis('y',new THREE.Vector3(0,1,0),0x32b36b);
+  sc3.add(group);
+}
+
+function pickGizmoAxis3D(e){
+  if(!sc3 || !ren || !camExt) return null;
+  if(!_ray3d) _ray3d=new THREE.Raycaster();
+  if(!_mouse3d) _mouse3d=new THREE.Vector2();
+  var rect=ren.domElement.getBoundingClientRect();
+  _mouse3d.x=((e.clientX-rect.left)/rect.width)*2-1;
+  _mouse3d.y=-((e.clientY-rect.top)/rect.height)*2+1;
+  _ray3d.setFromCamera(_mouse3d,camExt);
+  var candidates=[];
+  sc3.traverse(function(o){
+    if(o.visible && o.userData && o.userData.gizmoAxis) candidates.push(o);
+  });
+  var hits=_ray3d.intersectObjects(candidates,false);
+  return hits.length ? hits[0].object.userData.gizmoAxis : null;
+}
+
+function getGizmoDragBasis(axis,ref){
+  var box=getSelectionBox3D(ref);
+  if(box.isEmpty()) return null;
+  var center=box.getCenter(new THREE.Vector3());
+  center.y=Math.max(box.max.y+0.08,center.y);
+  var dir=axis==='x'?new THREE.Vector3(1,0,0):(axis==='z'?new THREE.Vector3(0,0,1):new THREE.Vector3(0,1,0));
+  var rect=ren.domElement.getBoundingClientRect();
+  function project(v){
+    var p=v.clone().project(camExt);
+    return {x:(p.x*0.5+0.5)*rect.width, y:(-p.y*0.5+0.5)*rect.height};
+  }
+  var p0=project(center), p1=project(center.clone().add(dir));
+  var sx=p1.x-p0.x, sy=p1.y-p0.y;
+  var l=Math.hypot(sx,sy);
+  if(l<0.1) return null;
+  return {sx:sx/l,sy:sy/l,pxPerM:l};
+}
+
+function start3DGizmoDrag(e){
+  if(ST.tool!=='select' || !ST.selected || !canMoveRef3D(ST.selected)) return false;
+  var axis=pickGizmoAxis3D(e);
+  if(!axis) return false;
+  if(axis==='y' && !canMoveRefVertically3D(ST.selected)) return false;
+  GIZMO_DRAG.active=true;
+  GIZMO_DRAG.axis=axis;
+  GIZMO_DRAG.ref=ST.selected;
+  GIZMO_DRAG.startX=e.clientX;
+  GIZMO_DRAG.startY=e.clientY;
+  GIZMO_DRAG.orig=JSON.parse(JSON.stringify(ST.selected));
+  GIZMO_DRAG.saved=false;
+  if(orbit) orbit.enabled=false;
+  return true;
+}
+
+function apply3DGizmoDrag(e){
+  var gd=GIZMO_DRAG, ref=gd.ref;
+  if(!gd.active || !ref) return;
+  if(!gd.saved){saveState(); gd.saved=true;}
+  var basis=getGizmoDragBasis(gd.axis,ref);
+  if(!basis || !gd.orig) return;
+  var deltaPx=(e.clientX-gd.startX)*basis.sx+(e.clientY-gd.startY)*basis.sy;
+  var deltaM=deltaPx/basis.pxPerM;
+  var deltaMm=deltaM/U;
+  if(gd.axis==='x'){
+    if(ref.x!==undefined) ref.x=gd.orig.x+deltaMm;
+    else {ref.x1=gd.orig.x1+deltaMm; ref.x2=gd.orig.x2+deltaMm;}
+  } else if(gd.axis==='z'){
+    if(ref.y!==undefined) ref.y=gd.orig.y+deltaMm;
+    else {ref.y1=gd.orig.y1+deltaMm; ref.y2=gd.orig.y2+deltaMm;}
+  } else if(gd.axis==='y' && canMoveRefVertically3D(ref)){
+    ref.elev=Math.max(-5000,Math.min(10000,(gd.orig.elev||0)+deltaMm));
+  }
+  draw2d();
+  updateProps();
+  rebuild3D();
+}
+
+function finish3DGizmoDrag(){
+  GIZMO_DRAG.active=false;
+  GIZMO_DRAG.axis=null;
+  GIZMO_DRAG.ref=null;
+  GIZMO_DRAG.orig=null;
+  if(orbit) orbit.enabled=true;
+  draw2d();
+  rebuild3D();
+}
+
 function getSelectionBox3D(ref){
   var box=new THREE.Box3();
   if(!ref) return box;
@@ -4431,7 +4732,7 @@ function getSelectionBox3D(ref){
     return box;
   }
   if(ref.type==='room' || ref.type==='site-rect'){
-    var ry=ref.type==='site-rect'?floorBaseY(ref.floor):floorTopY(ref.floor);
+    var ry=ref.type==='site-rect'?0:floorTopY(ref.floor);
     box.set(
       new THREE.Vector3(ref.x*U,ry,(ref.y||0)*U),
       new THREE.Vector3((ref.x+ref.w)*U,ry+0.12,(ref.y+ref.d)*U)
@@ -4456,7 +4757,7 @@ function getSelectionBox3D(ref){
       og.dispose();
       return box;
     }
-    var iy=(ref.type==='site-rect'?floorBaseY(ref.floor):floorTopY(ref.floor))+(ref.elev||0)*U;
+    var iy=((ref.type==='site-rect'||ref.type==='foundation'||ref.type==='exterior-stair'||ref.type==='ramp')?0:floorTopY(ref.floor))+(ref.elev||0)*U;
     var ih=Math.max(getItemHeightValue(ref)*U,0.18);
     var cx2=(ref.x+ref.w/2)*U, cz2=(ref.y+ref.d/2)*U;
     var iw=Math.max(ref.w*U,0.08), id=Math.max(ref.d*U,0.08);
@@ -4550,7 +4851,7 @@ function isDoorItemType(type){
   return isDoorLikeOpeningType(type) && !isNoDoorOpeningType(type);
 }
 function canSetItemTexture(it){
-  return !!(it && (it.type==='fence' || it.type==='wood-fence' || isDoorItemType(it.type)));
+  return !!(it && (it.type==='fence' || it.type==='wood-fence' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isDoorItemType(it.type)));
 }
 
 function pickSelectable3D(e){
@@ -5204,7 +5505,7 @@ function isCustomWallColor(w){
 
 function canSetItemElevation(it){
   if(!it || !it.type) return false;
-  if(it.type==='room' || it.type==='wall' || it.type==='site-rect') return false;
+  if(it.type==='room' || it.type==='wall' || it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp') return false;
   return !isOpeningItemType(it.type);
 }
 function isWindowLikeType(type){
@@ -5280,17 +5581,17 @@ function normalizeWindowVerticalProps(it,prefer){
   sill=Math.max(0,Math.min(maxTop-200,sill));
   height=Math.max(200,Math.min(maxTop,height));
   if(sill+height>maxTop){
-    if(prefer==='windowHeight' || prefer==='windowTop'){
-      sill=Math.max(0,maxTop-height);
-    } else {
-      height=Math.max(200,maxTop-sill);
-    }
+    height=Math.max(200,maxTop-sill);
   }
   it.windowSill=Math.round(sill);
   it.windowHeight=Math.round(height);
+  if(it.windowTop!==undefined) delete it.windowTop;
 }
 function ensureWindowProps(it){
   if(!it || !isWindowLikeType(it.type)) return;
+  if((it.windowHeight===undefined || isNaN(Number(it.windowHeight))) && isFinite(Number(it.windowTop))){
+    it.windowHeight=Number(it.windowTop)-windowSillMm(it);
+  }
   if(it.windowSill===undefined || isNaN(Number(it.windowSill))) it.windowSill=it.type==='window-door'?0:900;
   if(it.windowHeight===undefined || isNaN(Number(it.windowHeight))) it.windowHeight=it.type==='window-door'?2100:1200;
   normalizeWindowVerticalProps(it);
@@ -6491,7 +6792,9 @@ function build3DRoofItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
-  var fy=it.type==='site-rect'?floorBaseY(it.floor):floorTopY(it.floor);
+  var groundTypes={};
+  groundTypes['site-rect']=true; groundTypes.foundation=true; groundTypes['exterior-stair']=true; groundTypes.ramp=true;
+  var fy=groundTypes[it.type]?0:floorTopY(it.floor);
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
   if(isOpeningItemType(it.type)) return;
   var grp = new THREE.Group();
@@ -6516,6 +6819,21 @@ function buildItem3D(it){
   }
   if(it.type==='site-rect'){
     build3DSiteRect(grp,it,it.w*U,it.d*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
+  if(it.type==='foundation'){
+    build3DFoundation(grp,it,it.w*U,it.d*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
+  if(it.type==='exterior-stair'){
+    build3DExteriorStair(grp,it,it.w*U,it.d*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
+  if(it.type==='ramp'){
+    build3DRamp(grp,it,it.w*U,it.d*U);
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
   }
@@ -6686,10 +7004,16 @@ function buildWoodFence3D(grp,it,w3,d3,h){
 
 function getItemHeightValue(it){
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
+  if(it && it.type==='foundation') {
+    var fh=Number(it.foundationHeight);
+    if(!isFinite(fh)) fh=450;
+    return Math.max(0,Math.min(2000,fh));
+  }
+  if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800,'wood-fence':1600}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -6749,27 +7073,20 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
   var inner=[w/2,d/2];
   var outer=[
     [-w/2,d/2],
-    [-w/2,-d*0.10],
+    [-w/2,0],
     [-w/2,-d/2],
-    [w*0.10,-d/2],
+    [0,-d/2],
     [w/2,-d/2]
   ];
-  var throat=Math.min(w,d)*0.16;
-  var innerPts=[
-    inner,
-    [inner[0]-throat*0.42,inner[1]-throat],
-    [inner[0]-throat,inner[1]-throat*0.42],
-    inner
-  ];
   var treadPolys=[
-    [innerPts[0],outer[0],outer[1],innerPts[1]],
-    [innerPts[1],outer[1],outer[2],outer[3],innerPts[2]],
-    [innerPts[2],outer[3],outer[4],innerPts[3]]
+    [inner,outer[0],outer[1]],
+    [inner,outer[1],outer[2],outer[3]],
+    [inner,outer[3],outer[4]]
   ];
   var riserEdges=[
-    [innerPts[1],outer[1]],
-    [innerPts[2],outer[3]],
-    [innerPts[3],outer[4]]
+    [inner,outer[0]],
+    [inner,outer[1]],
+    [inner,outer[3]]
   ];
   for(var s=0;s<treadPolys.length;s++){
     var h=partRise*((s+1)/steps);
@@ -7081,6 +7398,59 @@ function build3DCar(grp,it,w,d,col){
     cylX(trimMat,p[0]+(p[0]<0?-wt*0.57:wt*0.57),p[1],p[2],wr*0.16,0.04,12);
   });
 }
+function accessTargetHeightM(it){
+  var mm=Number(it&&it.targetHeight);
+  if(!isFinite(mm) || mm<=0) mm=foundationHeightMm()||450;
+  return Math.max(0,Math.min(2000,mm))*U;
+}
+function build3DFoundation(grp,it,w,d){
+  var mm=Number(it.foundationHeight);
+  if(!isFinite(mm)) mm=450;
+  var h=Math.max(0.005,Math.min(2,Math.max(0,mm)*U));
+  var mat=makeItemTextureMaterial(it,w,h,'repeat',0xffffff) ||
+    new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
+  var capMat=makeItemTextureMaterial(it,w,d,'repeat',0xffffff) ||
+    new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xc7c1b7,roughness:0.9,metalness:0.02});
+  _B(grp,mat,0,h/2,0,w,h,d);
+  _B(grp,capMat,0,h+0.01,0,w+0.02,0.02,d+0.02);
+}
+function build3DExteriorStair(grp,it,w,d){
+  var h=Math.max(0.02,accessTargetHeightM(it));
+  var steps=Math.max(1,Math.min(12,Math.round(it.accessSteps||Math.max(2,Math.round(h/0.16)))));
+  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff) ||
+    new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.9,metalness:0.02});
+  var treadD=d/steps;
+  for(var i=0;i<steps;i++){
+    var topH=h*(i+1)/steps;
+    var z=-d/2+treadD*(i+0.5);
+    _B(grp,mat,0,topH/2,z,w,topH,treadD);
+  }
+}
+function build3DRamp(grp,it,w,d){
+  var h=Math.max(0.02,accessTargetHeightM(it));
+  var low=Math.min(0.04,h*0.25);
+  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff) ||
+    new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
+  mat=mat.clone();
+  mat.side=THREE.DoubleSide;
+  var verts=[
+    -w/2,0,-d/2,     w/2,0,-d/2,     -w/2,0,d/2,     w/2,0,d/2,
+    -w/2,low,-d/2,   w/2,low,-d/2,   -w/2,h,d/2,     w/2,h,d/2
+  ];
+  var faces=[
+    0,4,5, 0,5,1, // low vertical face
+    2,3,7, 2,7,6, // high vertical face
+    0,2,6, 0,6,4, // left side
+    1,5,7, 1,7,3, // right side
+    4,6,7, 4,7,5, // sloped walking surface
+    0,1,3, 0,3,2  // bottom
+  ];
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setIndex(faces); geo.computeVertexNormals();
+  var mesh=new THREE.Mesh(geo,mat);
+  mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
+}
 function build3DSiteRect(grp,it,w,d){
   var mat=new THREE.MeshBasicMaterial({
     color:0x6ca35b,
@@ -7248,12 +7618,6 @@ function buildLandscape(){
   _gndMesh.geometry = new THREE.PlaneGeometry(gndSize, gndSize);
   _gndMesh.material = gndMat;
   _gndMesh.position.set(bx, -0.06, bz);
-
-  // Concrete foundation
-  var baseMat=new THREE.MeshStandardMaterial({color:0x888878,roughness:0.9});
-  var baseH=0.18;
-  var base=new THREE.Mesh(new THREE.BoxGeometry(bw+0.6,baseH,bd+0.6),baseMat);
-  base.position.set(bx,-baseH/2-0.015,bz); base.userData={b:true,foundation:true}; sc3.add(base);
 }
 function loop3D(){
   requestAnimationFrame(loop3D);
@@ -7439,13 +7803,20 @@ function handleSelectDown(cx,cy,wx,wy,e){
     }
   }
   // 1. Furniture Items (Floor-specific)
-  var fi=DATA.items.filter(function(i){return i.floor===ST.floor && i.type!=='site-rect';});
+  var fi=DATA.items.filter(function(i){return i.floor===ST.floor && i.type!=='site-rect' && i.type!=='foundation';});
+  var hits=[];
   for(var i=fi.length-1;i>=0;i--){
-    if(isInsideItem(fi[i],wx,wy)){
-      ST.selected=fi[i]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-      DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(fi[i]));
-      updateProps(); draw2d(); return;
-    }
+    if(isInsideItem(fi[i],wx,wy)) hits.push({item:fi[i],idx:i,area:(fi[i].w||0)*(fi[i].d||0)});
+  }
+  if(hits.length){
+    hits.sort(function(a,b){
+      if(a.area!==b.area) return a.area-b.area;
+      return b.idx-a.idx;
+    });
+    var picked=hits[0].item;
+    ST.selected=picked; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+    DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(picked));
+    updateProps(); draw2d(); return;
   }
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   for(var i=fr.length-1;i>=0;i--){
@@ -7466,9 +7837,17 @@ function handleSelectDown(cx,cy,wx,wy,e){
   if(ST.floor===1){
     var allSites = DATA.items.filter(function(i){return i.type==='site-rect';});
     for(var i=allSites.length-1;i>=0;i--){
-      if(isInsideItem(allSites[i],wx,wy)){
+      if(isNearItemBorder(allSites[i],wx,wy)){
         ST.selected=allSites[i]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
         DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(allSites[i]));
+        updateProps(); draw2d(); return;
+      }
+    }
+    var foundations = DATA.items.filter(function(i){return i.type==='foundation';});
+    for(var f=foundations.length-1;f>=0;f--){
+      if(isNearItemBorder(foundations[f],wx,wy)){
+        ST.selected=foundations[f]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+        DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(foundations[f]));
         updateProps(); draw2d(); return;
       }
     }
@@ -7505,7 +7884,8 @@ canvas.addEventListener('wheel', function(e){
     ST.panX = cx - (cx - ST.panX) * (ST.zoom / oldZoom);
     ST.panY = cy - (cy - ST.panY) * (ST.zoom / oldZoom);
   } else {
-    ST.panX -= e.deltaX; ST.panY -= e.deltaY;
+    var panSign=CANVAS_TRACKPAD_USES_NATIVE_SCROLL?-1:(NATURAL_PAN?1:-1);
+    ST.panX += e.deltaX*panSign; ST.panY += e.deltaY*panSign;
   }
   draw2d();
 }, {passive: false});
@@ -7537,10 +7917,11 @@ function handleRoomClick(wx,wy){
   }
 }
 function placeItem(type,wx,wy){
-  if(type==='site-rect' && ST.floor!==1) return;
+  var groundOnly=(type==='site-rect' || type==='foundation' || type==='exterior-stair' || type==='ramp');
+  if(groundOnly && ST.floor!==1) return;
   saveState();
   var sz=getItemDefaultSize(type);
-  var it=mkItem(type,wx-sz.w/2,wy-sz.d/2,ST.placingRot,type==='site-rect'?1:ST.floor);
+  var it=mkItem(type,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly?1:ST.floor);
   DATA.items.push(it);ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   if(ren)build3D();draw2d();
@@ -7590,6 +7971,20 @@ function isInsideItem(it, px, py){
   var pad=getItemHitPadding(it);
   return lx >= -(it.w/2+pad.x) && lx <= it.w/2+pad.x &&
          ly >= -(it.d/2+pad.y) && ly <= it.d/2+pad.y;
+}
+
+function isNearItemBorder(it, px, py){
+  if(!it || !isInsideItem(it,px,py)) return false;
+  var pose=getItemDisplayPose(it);
+  var cx = pose.x, cy = pose.y;
+  var rad = -(pose.rot||0)*Math.PI/180;
+  var dx = px - cx, dy = py - cy;
+  var lx = dx*Math.cos(rad) - dy*Math.sin(rad);
+  var ly = dx*Math.sin(rad) + dy*Math.cos(rad);
+  var threshold=Math.max(70,14/(ST.zoom*0.05));
+  var ix=Math.abs(Math.abs(lx)-it.w/2);
+  var iy=Math.abs(Math.abs(ly)-it.d/2);
+  return ix<=threshold || iy<=threshold;
 }
 
 function nearWall(px,py,w){
@@ -7833,6 +8228,18 @@ function delSel(){
   syncExteriorWallSettings();
   updateProps();
   if(ren)rebuild3D();draw2d();
+}
+
+function sendSelectedToBack(){
+  if(!ST.selected) return;
+  var idx=DATA.items.indexOf(ST.selected);
+  if(idx<0) return;
+  saveState();
+  var item=DATA.items.splice(idx,1)[0];
+  DATA.items.unshift(item);
+  updateProps();
+  draw2d();
+  if(ren) rebuild3D();
 }
 
 function getSelectedCollectionKind(obj){
@@ -9091,7 +9498,8 @@ canvas.addEventListener('touchmove',function(e){
     if(_touch1.moved&&ST.tool==='select'){
       // Pan when in select mode with no selected item being dragged
       if(!DRAG.active){
-        ST.panX-=dx; ST.panY-=dy;
+        var touchPanSign=CANVAS_TOUCH_FOLLOWS_FINGER?1:-1;
+        ST.panX+=dx*touchPanSign; ST.panY+=dy*touchPanSign;
       } else {
         canvas.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,buttons:1,clientX:t.clientX,clientY:t.clientY}));
       }
@@ -9115,7 +9523,8 @@ canvas.addEventListener('touchmove',function(e){
     ST.panY=(mid.y-rect.top)-wby*ST.zoom*0.05;
     // Two-finger pan
     var dm={x:mid.x-_pinch.midX, y:mid.y-_pinch.midY};
-    ST.panX-=dm.x; ST.panY-=dm.y;
+    var pinchTouchPanSign=CANVAS_TOUCH_FOLLOWS_FINGER?1:-1;
+    ST.panX+=dm.x*pinchTouchPanSign; ST.panY+=dm.y*pinchTouchPanSign;
     _pinch.midX=mid.x; _pinch.midY=mid.y;
     draw2d();
   }
@@ -9180,8 +9589,9 @@ function init3DTouchOnce(){
       if(_t3d.p2x!==null){
         var pdx=mx-_t3d.p2x, pdy=my-_t3d.p2y;
         var rgt=new THREE.Vector3(Math.cos(_intML.yaw),0,-Math.sin(_intML.yaw));
-        camInt.position.addScaledVector(rgt,-pdx*0.012);
-        camInt.position.y-=pdy*0.012;
+        var panSign=NATURAL_PAN?1:-1;
+        camInt.position.addScaledVector(rgt,pdx*0.012*panSign);
+        camInt.position.y+=pdy*0.012*panSign;
       }
       _t3d.p2x=mx; _t3d.p2y=my;
     }
