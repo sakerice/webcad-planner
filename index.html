@@ -2239,6 +2239,64 @@ body{
   #coords{
     display:none!important;
   }
+  #props{
+    bottom:calc(76px + var(--safe-bot))!important;
+    height:52px!important;
+    max-height:52px!important;
+    transform:translateY(112%)!important;
+    overflow:hidden!important;
+    display:block!important;
+  }
+  #props.show{
+    transform:translateY(0)!important;
+  }
+  #props.show.prop-expanded{
+    top:calc(72px + var(--safe-top))!important;
+    bottom:calc(76px + var(--safe-bot))!important;
+    height:auto!important;
+    max-height:none!important;
+    transform:translateY(0)!important;
+    display:flex!important;
+    flex-direction:column;
+    overflow:hidden!important;
+  }
+  #props.show.prop-expanded #mob-prop-hdr,
+  #props.show.prop-expanded #props-title{
+    flex:0 0 auto;
+  }
+  #props.show.prop-expanded #props-body{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:86px!important;
+  }
+  #mob-prop-close-fab{
+    position:absolute;
+    right:18px;
+    bottom:18px;
+    z-index:2;
+    width:48px;
+    height:48px;
+    border:0;
+    border-radius:999px;
+    background:var(--hp-primary);
+    color:#fff;
+    font-size:18px;
+    font-weight:700;
+    box-shadow:0 5px 12px rgba(255,63,39,0.30)!important;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    touch-action:manipulation;
+  }
+  #mob-prop-close-fab:active{
+    transform:translateY(1px);
+    background:var(--hp-primary-dark);
+  }
+  #props.show.prop-expanded #mob-prop-close-fab{
+    display:flex;
+  }
 }
 </style>
 </head>
@@ -2412,6 +2470,7 @@ body{
     </div>
     <div class="ph" id="props-title">プロパティ</div>
     <div id="props-body"></div>
+    <button id="mob-prop-close-fab" type="button" onclick="closeMobilePropPanel()" aria-label="設定を閉じる">×</button>
   </div>
 </div>
 <!-- Sidebar overlay (mobile) -->
@@ -9390,17 +9449,25 @@ function applyMobileUI(){
 function toggleMobilePropPanel(){
   var p=document.getElementById('props');
   var expanded=p.classList.toggle('prop-expanded');
+  ['max-height','height','overflow-y','overflow','top','bottom','transform'].forEach(function(prop){
+    p.style.removeProperty(prop);
+  });
   if(expanded){
-    p.style.setProperty('max-height','60vh','important');
-    p.style.setProperty('height','60vh','important');
-    p.style.setProperty('overflow-y','auto','important');
-  } else {
-    p.style.setProperty('max-height','52px','important');
-    p.style.setProperty('height','52px','important');
-    p.style.setProperty('overflow','hidden','important');
+    var body=document.getElementById('props-body');
+    if(body) body.scrollTop=0;
   }
   var ch=document.getElementById('mob-prop-chevron');
   if(ch) ch.textContent=expanded?'▼ 閉じる':'▲ 詳細';
+}
+function closeMobilePropPanel(){
+  var p=document.getElementById('props');
+  if(!p) return;
+  p.classList.remove('prop-expanded');
+  ['max-height','height','overflow-y','overflow','top','bottom','transform'].forEach(function(prop){
+    p.style.removeProperty(prop);
+  });
+  var ch=document.getElementById('mob-prop-chevron');
+  if(ch) ch.textContent='▲ 詳細';
 }
 // Close props expanded state when deselecting
 var _origUpdateProps=updateProps;
