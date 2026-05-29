@@ -2518,6 +2518,12 @@ function floorSlabHeightM(){
 function floorTopY(floor){
   return floorBaseY(floor)+floorSlabHeightM();
 }
+function item3DBaseY(it){
+  if(!it) return 0;
+  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp') return 0;
+  if(it.type==='roof') return floorBaseY(it.floor);
+  return floorTopY(it.floor);
+}
 function wallFullHeightM(){
   return Math.max(WALL_H*U+floorSlabHeightM(),FLOOR_H*U);
 }
@@ -4757,7 +4763,7 @@ function getSelectionBox3D(ref){
       og.dispose();
       return box;
     }
-    var iy=((ref.type==='site-rect'||ref.type==='foundation'||ref.type==='exterior-stair'||ref.type==='ramp')?0:floorTopY(ref.floor))+(ref.elev||0)*U;
+    var iy=item3DBaseY(ref)+(ref.elev||0)*U;
     var ih=Math.max(getItemHeightValue(ref)*U,0.18);
     var cx2=(ref.x+ref.w/2)*U, cz2=(ref.y+ref.d/2)*U;
     var iw=Math.max(ref.w*U,0.08), id=Math.max(ref.d*U,0.08);
@@ -6792,9 +6798,7 @@ function build3DRoofItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
-  var groundTypes={};
-  groundTypes['site-rect']=true; groundTypes.foundation=true; groundTypes['exterior-stair']=true; groundTypes.ramp=true;
-  var fy=groundTypes[it.type]?0:floorTopY(it.floor);
+  var fy=item3DBaseY(it);
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
   if(isOpeningItemType(it.type)) return;
   var grp = new THREE.Group();
@@ -8465,6 +8469,8 @@ function buildUnityRenderPlan(){
     var ap=resolveRoofAppearance(src);
     it.color=ap.color||it.color||'#2a2a30';
     it.texture=ap.texture||it.texture||null;
+    it.renderBaseY=Math.round(floorBaseY(src.floor)/U);
+    it.renderBaseNote='roof base is floor base height, not floor slab top';
   });
   return plan;
 }
