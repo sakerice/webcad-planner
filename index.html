@@ -7574,6 +7574,8 @@ function build3DRamp(grp,it,w,d){
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
   mat=mat.clone();
   mat.side=THREE.DoubleSide;
+  mat.flatShading=true;
+  mat.needsUpdate=true;
   var verts=[
     -w/2,0,-d/2,     w/2,0,-d/2,     -w/2,0,d/2,     w/2,0,d/2,
     -w/2,low,-d/2,   w/2,low,-d/2,   -w/2,h,d/2,     w/2,h,d/2
@@ -7588,7 +7590,9 @@ function build3DRamp(grp,it,w,d){
   ];
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-  geo.setIndex(faces); geo.computeVertexNormals();
+  geo.setIndex(faces);
+  geo=geo.toNonIndexed();
+  geo.computeVertexNormals();
   var mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
 }
