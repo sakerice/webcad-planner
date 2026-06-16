@@ -3283,10 +3283,33 @@ var CANVAS_TRACKPAD_USES_NATIVE_SCROLL = true;
 var DATA = {walls:[], items:[], rooms:[], exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
 var nextId = 1;
 var HISTORY = [];
+var DIRTY = false;
+var StorageAdapter = {
+  save: function(data){
+    try{ localStorage.setItem('webcad-plan-v1', JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;})); }catch(e){ alert('ブラウザ保存に失敗しました: '+e.message); }
+  },
+  load: function(){
+    try{ var s=localStorage.getItem('webcad-plan-v1'); return s?JSON.parse(s):null; }catch(e){ return null; }
+  },
+  hasData: function(){
+    try{ return !!localStorage.getItem('webcad-plan-v1'); }catch(e){ return false; }
+  }
+};
+function markDirty(){
+  DIRTY=true;
+  var btn=document.getElementById('save-btn');
+  if(btn) btn.classList.add('dirty');
+}
+function clearDirty(){
+  DIRTY=false;
+  var btn=document.getElementById('save-btn');
+  if(btn) btn.classList.remove('dirty');
+}
 var CLIPBOARD = null;
 function saveState(){
   var s=JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;});
   HISTORY.push(s);if(HISTORY.length>50)HISTORY.shift();
+  markDirty();
 }
 
 function ensureObjectIds(){
