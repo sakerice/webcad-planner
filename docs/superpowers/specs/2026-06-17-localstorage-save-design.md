@@ -78,8 +78,35 @@ function clearDirty() {
 - `doImport()` の処理内容（ファイル読み込みロジックはそのまま）
 - AIレンダー関連の保存ボタン群（別機能）
 
-## スコープ外
+## 拡張性：クラウド同期への備え
+
+将来のクラウド同期を見越して、保存・読み込み処理をストレージアダプター経由に抽象化する。
+
+### ストレージアダプター（シンプルなオブジェクト）
+
+```js
+var StorageAdapter = {
+  save: function(data) {
+    // localStorage実装
+    localStorage.setItem('webcad-plan-v1', JSON.stringify(data));
+  },
+  load: function() {
+    // localStorage実装
+    var s = localStorage.getItem('webcad-plan-v1');
+    return s ? JSON.parse(s) : null;
+  },
+  hasData: function() {
+    return !!localStorage.getItem('webcad-plan-v1');
+  }
+};
+```
+
+- `savePlanToStorage()` / `loadPlanFromStorage()` は `StorageAdapter` 経由で呼ぶ
+- クラウド同期を追加する際は `StorageAdapter.save` / `.load` を差し替えるだけでよい
+- アダプター自体はシンプルなオブジェクトで十分（クラスやDIは不要）
+
+## スコープ外（今回）
 
 - 複数プランの管理
-- クラウド同期
+- クラウド同期（アダプター設計で将来対応できるようにする）
 - 自動保存（オートセーブ）
