@@ -83,6 +83,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .pbtn:active{background:#c73350}.pbtn.sec{background:#0f3460;border:1px solid #2a4080}.pbtn.sec:active{background:#1a5080}
 .mobile-only{display:none}
 .snap-shift-btn.active{background:#e94560!important;border-color:#e94560!important;color:#fff!important}
+#save-btn{position:relative}
+#save-btn.dirty::after{content:'*';position:absolute;top:2px;right:4px;font-size:10px;color:#e94560;font-weight:bold;line-height:1}
 @media (max-width:1180px), (pointer:coarse){
   .mobile-only{display:block}
 }
@@ -2411,7 +2413,7 @@ body{
   <button class="tbtn mob-hide" onclick="undoAction()">↩ Undo</button>
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
-  <button class="tbtn mob-hide" onclick="exportPlan()">💾 保存</button>
+  <button id="save-btn" class="tbtn mob-hide" onclick="exportPlan()">💾 保存</button>
   <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -3098,6 +3100,10 @@ function updateProps(){
   if(it.rot !== undefined) {
     html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+Math.round(it.rot)+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
   }
+  if(it.type==='site-rect'){
+    html += '<div class="ph" style="margin-top:12px">敷地設定</div>';
+    html += '<div class="pr"><div class="pl">敷地表面</div><select class="pi" onchange="updateSelectedProp(\'siteSurface\',this.value)">'+siteSurfaceOptionsHtml(it.siteSurface)+'</select></div>';
+  }
   if(isWindowLikeType(it.type)){
     ensureWindowProps(it);
     html += '<div class="ph" style="margin-top:12px">窓サイズ・高さ</div>';
@@ -3306,6 +3312,30 @@ function objectIdLabel(o){
   return 'I'+o.id;
 }
 
+var SITE_SURFACE_OPTIONS = {
+  grass:{label:'芝生',texture:'grass',color:0xffffff,edge:0x3f6f35,segment:0x43b047},
+  gravel:{label:'砂利',texture:'gravel',color:0xd8d2c6,edge:0x8c8372,segment:0x9c8f78},
+  concrete:{label:'コンクリート',texture:'concrete',color:0xd7d9d8,edge:0x8f9396,segment:0xbfc3c7}
+};
+function siteSurfaceType(it){
+  return (it&&SITE_SURFACE_OPTIONS[it.siteSurface]) ? it.siteSurface : 'grass';
+}
+function siteSurfaceLabel(type){
+  var opt=SITE_SURFACE_OPTIONS[type]||SITE_SURFACE_OPTIONS.grass;
+  return opt.label;
+}
+function siteSurfaceSegmentColor(it){
+  var opt=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
+  return opt.segment;
+}
+function siteSurfaceOptionsHtml(value){
+  var cur=SITE_SURFACE_OPTIONS[value]?value:'grass';
+  return Object.keys(SITE_SURFACE_OPTIONS).map(function(key){
+    var opt=SITE_SURFACE_OPTIONS[key];
+    return '<option value="'+key+'" '+(cur===key?'selected':'')+'>'+opt.label+'</option>';
+  }).join('');
+}
+
 // ───── DATA HELPERS ─────
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
@@ -3332,6 +3362,9 @@ function mkItem(type,x,y,rot,floor,w,d){
   }
   if(type==='ramp'){
     item.targetHeight=foundationHeightMm()||450;
+  }
+  if(type==='site-rect'){
+    item.siteSurface='grass';
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -3635,63 +3668,22 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
   }
 }
 
-function drawIdBadge(cx,cy,label,anchor){
-  if(!label) return;
-  if(!isFiniteCanvasValue(cx) || !isFiniteCanvasValue(cy)) return;
-  var fs=Math.max(8,Math.min(10,ST.zoom*0.55+7));
-  ctx.save();
-  ctx.font='bold '+fs+'px "Noto Sans JP",sans-serif';
-  ctx.textAlign='left'; ctx.textBaseline='top';
-  var padX=4, padY=2, tw=ctx.measureText(label).width;
-  var x=cx, y=cy;
-  if(anchor==='center'){ x=cx-(tw+padX*2)/2; y=cy-(fs+padY*2)/2; }
-  if(anchor==='right'){ x=cx-(tw+padX*2); }
-  ctx.fillStyle='rgba(10,24,48,0.62)';
-  ctx.strokeStyle='rgba(255,255,255,0.75)';
-  ctx.lineWidth=0.8;
-  ctx.beginPath();
-  ctx.roundRect(x,y,tw+padX*2,fs+padY*2,4);
-  ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#fff';
-  ctx.fillText(label,x+padX,y+padY);
-  ctx.restore();
-}
-
 function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
     drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',ST.selected===l);
-    var p=w2c(l.x+80,l.y+80);
-    drawIdBadge(p.cx,p.cy,objectIdLabel(l));
   });
   DATA.items.filter(function(i){return i.floor===ST.floor && i.type==='balcony';}).forEach(function(it){
     drawAreaTag(it.x+it.w/2,it.y+it.d/2,it.w,it.d,it.n||ILABELS[it.type]||'バルコニー',ST.selected===it);
-    var p=w2c(it.x+80,it.y+80);
-    drawIdBadge(p.cx,p.cy,objectIdLabel(it));
   });
 }
 
-function drawHatch(ctx, pts, pitch) {
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(pts[0].cx, pts[0].cy); ctx.lineTo(pts[1].cx, pts[1].cy);
-  ctx.lineTo(pts[2].cx, pts[2].cy); ctx.lineTo(pts[3].cx, pts[3].cy);
-  ctx.closePath(); ctx.clip();
-  var xs=pts.map(function(p){return p.cx;}), ys=pts.map(function(p){return p.cy;});
-  var x0=Math.min.apply(null,xs)-pitch, x1=Math.max.apply(null,xs)+pitch;
-  var y0=Math.min.apply(null,ys)-pitch, y1=Math.max.apply(null,ys)+pitch;
-  var span=(x1-x0)+(y1-y0);
-  ctx.beginPath();
-  for(var s=-span;s<span;s+=pitch){ctx.moveTo(x0,y0+s);ctx.lineTo(x0+span,y0+s+span);}
-  ctx.strokeStyle='rgba(100,90,80,0.35)'; ctx.lineWidth=0.6; ctx.stroke();
-  ctx.restore();
-}
 function drawWall2d(w){
   var a=w2c(w.x1,w.y1),b=w2c(w.x2,w.y2);
   var dx=b.cx-a.cx,dy=b.cy-a.cy,len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return;
   var nx=-dy/len,ny=dx/len,t=w.thick*ST.zoom*0.05/2;
-  var isOuter=w.thick>=120, sel=ST.selected===w;
+  var sel=ST.selected===w;
   ctx.save();
   if(!sel) {
     ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.2)';
@@ -3704,25 +3696,11 @@ function drawWall2d(w){
   if(sel||(ST.selectAll && w.floor===ST.floor)){
     ctx.fillStyle='rgba(233,69,96,0.95)'; ctx.fill();
     ctx.strokeStyle='#e94560'; ctx.lineWidth=2.5; ctx.stroke();
-  } else if(w.color&&w.color!=='#888'){
-    ctx.fillStyle=w.color; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.stroke();
-  } else if(isOuter){
+  } else {
     ctx.fillStyle='#e8e4dc'; ctx.fill();
     ctx.strokeStyle='#555'; ctx.lineWidth=2.0; ctx.stroke();
-    var pts = [
-      {cx: a.cx+nx*t, cy: a.cy+ny*t},
-      {cx: b.cx+nx*t, cy: b.cy+ny*t},
-      {cx: b.cx-nx*t, cy: b.cy-ny*t},
-      {cx: a.cx-nx*t, cy: a.cy-ny*t}
-    ];
-    drawHatch(ctx, pts, Math.max(4, t * 0.7));
-  } else {
-    ctx.fillStyle='#d0cfc8'; ctx.fill();
-    ctx.strokeStyle='#888'; ctx.lineWidth=1.2; ctx.stroke();
   }
   ctx.restore();
-  drawIdBadge((a.cx+b.cx)/2,(a.cy+b.cy)/2,objectIdLabel(w),'center');
 }
 
 function isOpeningItemType(type){
@@ -4086,14 +4064,16 @@ function drawItem2d(it){
       ctx.moveTo(-hw,  hd*0.45); ctx.lineTo(hw,  hd*0.45);
       ctx.strokeStyle='#777'; ctx.lineWidth=0.8; ctx.stroke();
     } else if(it.type === 'site-rect') {
+      var surface=siteSurfaceType(it);
+      var fillMap={grass:'rgba(100,160,100,0.08)',gravel:'rgba(150,140,120,0.12)',concrete:'rgba(140,145,150,0.12)'};
+      var strokeMap={grass:'rgba(60,100,60,0.4)',gravel:'rgba(120,105,85,0.45)',concrete:'rgba(90,95,100,0.45)'};
       ctx.setLineDash([10,5]);
-      ctx.strokeStyle='rgba(60,100,60,0.4)'; ctx.lineWidth=2;
+      ctx.strokeStyle=strokeMap[surface]||strokeMap.grass; ctx.lineWidth=2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc); ctx.setLineDash([]);
-      ctx.fillStyle='rgba(100,160,100,0.08)'; ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.fillStyle=fillMap[surface]||fillMap.grass; ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
     }
   }
   ctx.restore();
-  if(it.type!=='balcony') drawIdBadge(ccx,ccy,objectIdLabel(it),'center');
   if(ST.selected===it&&ST.tool==='select') drawHandles(it,ccx,ccy,it.w*sc/2,it.d*sc/2,sc,drawRot);
 }
 
@@ -4353,7 +4333,8 @@ var _texCache = {};
 var ASSET_TEX_MAP = {
   'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
   'grass':       'assets/grass.png',
-  'stone':       'assets/textures/floor_tile_diffuse.jpg',
+  'stone':       'assets/stone.png',
+  'gravel':      'assets/stone.png',
   'tile_floor':  'assets/textures/floor_tile_diffuse.jpg',
   'concrete':    'assets/textures/floor_tile_diffuse.jpg',
   'siding':      'assets/textures/wall_siding_diffuse.jpg',
@@ -4515,7 +4496,7 @@ function init3D(){
 
   // Ground – resized in buildLandscape() based on building footprint
   _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
-    new THREE.MeshStandardMaterial({color:0x5a8a3a,roughness:1.0,metalness:0.0}));
+    new THREE.MeshStandardMaterial({color:0xd7d5ce,roughness:1.0,metalness:0.0}));
   _gndMesh.rotation.x=-Math.PI/2; _gndMesh.position.set(4,0,2);
   _gndMesh.receiveShadow=true; sc3.add(_gndMesh);
 
@@ -7604,24 +7585,36 @@ function build3DRamp(grp,it,w,d){
   var mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
 }
-function build3DSiteRect(grp,it,w,d){
-  var mat=new THREE.MeshBasicMaterial({
-    color:0x6ca35b,
-    transparent:true,
-    opacity:0.22,
-    side:THREE.DoubleSide,
-    depthWrite:false
+function makeSiteSurfaceMaterial(it,w,d){
+  var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
+  var baseTex=cfg.texture?getTexture3D(cfg.texture):null;
+  var tex=null;
+  if(baseTex){
+    tex=baseTex.clone();
+    tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    tex.repeat.set(Math.max(1,w/1.8),Math.max(1,d/1.8));
+    tex.needsUpdate=true;
+  }
+  return new THREE.MeshStandardMaterial({
+    color:cfg.color,
+    map:tex,
+    roughness:1.0,
+    metalness:0.0,
+    side:THREE.DoubleSide
   });
-  mat.toneMapped=false;
+}
+function build3DSiteRect(grp,it,w,d){
+  var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
+  var mat=makeSiteSurfaceMaterial(it,w,d);
   var plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat);
   plane.rotation.x=-Math.PI/2;
   plane.position.y=-0.035;
-  plane.receiveShadow=false;
+  plane.receiveShadow=true;
   plane.userData.siteRect=true;
   grp.add(plane);
 
   var edgeGeo=new THREE.EdgesGeometry(new THREE.PlaneGeometry(w,d));
-  var edgeMat=new THREE.LineBasicMaterial({color:0x3f6f35,transparent:true,opacity:0.7});
+  var edgeMat=new THREE.LineBasicMaterial({color:cfg.edge,transparent:true,opacity:0.85});
   var edge=new THREE.LineSegments(edgeGeo,edgeMat);
   edge.rotation.x=-Math.PI/2;
   edge.position.y=-0.034;
@@ -7759,14 +7752,13 @@ function buildLandscape(){
   var bx=(minX+maxX)/2*U, bz=(minZ+maxZ)/2*U;
   var bw=(maxX-minX)*U, bd=(maxZ-minZ)*U;
 
-  // Ground: building footprint + margin
+  // Neutral context ground. Actual grass/gravel/concrete is drawn only by site rectangles.
   var gndSize = Math.max(bw, bd) + 12;
-  var grassTex = getTexture3D('grass');
   var gndMat = new THREE.MeshStandardMaterial({
-    color: grassTex ? 0xffffff : 0x5a8a3a,
-    map: grassTex || null, roughness: 1.0, metalness: 0.0
+    color: 0xd7d5ce,
+    roughness: 1.0,
+    metalness: 0.0
   });
-  if(grassTex){ grassTex.repeat.set(gndSize/2, gndSize/2); }
   _gndMesh.geometry.dispose();
   _gndMesh.geometry = new THREE.PlaneGeometry(gndSize, gndSize);
   _gndMesh.material = gndMat;
@@ -8691,11 +8683,34 @@ function captureCurrent3DDataUrl(){
   ren.render(sc3,cam);
   return ren.domElement.toDataURL('image/png');
 }
+function aiSegHex(n){
+  return '#'+('000000'+Number(n).toString(16)).slice(-6);
+}
+function aiSegmentationLegend(){
+  var legend={
+    '#ff4b4b':'walls: exterior and interior wall solids',
+    '#54c878':'rooms/floor slabs: interior room floor surfaces',
+    '#7b61ff':'roof: all roof parts',
+    '#19c7ff':'windows/glass: windows, window doors, and glazing',
+    '#ffc928':'doors/openings: doors, entrance doors, and wall openings',
+    '#4f8cff':'fixtures/equipment: toilet, bath, sink, washer, fridge, kitchen equipment',
+    '#d45cff':'furniture/other placed items',
+    '#70b85f':'exterior objects: balcony, tree, fence, wood fence, car',
+    '#d9dde5':'unclassified helper geometry',
+    '#ffffff':'sky/background'
+  };
+  Object.keys(SITE_SURFACE_OPTIONS).forEach(function(key){
+    var opt=SITE_SURFACE_OPTIONS[key];
+    legend[aiSegHex(opt.segment)]='site surface: '+key+' ('+opt.label+'), only inside site rectangles';
+  });
+  legend['#e2ded2']='neutral outside-site context ground, not lawn';
+  return legend;
+}
 function aiSegmentColorForObject(o){
   if(o.userData&&o.userData.windowWallGlass) return 0x19c7ff;
   var ref=o.userData&&o.userData.selectRef;
   var kind=o.userData&&o.userData.selectKind;
-  if(o===_gndMesh) return 0x8ccf7a;
+  if(o===_gndMesh) return 0xe2ded2;
   if(!ref){
     if(o.name==='_sky') return 0xffffff;
     return 0xd9dde5;
@@ -8705,7 +8720,8 @@ function aiSegmentColorForObject(o){
   if(ref.type==='roof') return 0x7b61ff;
   if(isWindowLikeType(ref.type)) return 0x19c7ff;
   if(isDoorLikeOpeningType(ref.type)) return 0xffc928;
-  if(ref.type==='site-rect'||ref.type==='balcony'||ref.type==='tree'||ref.type==='fence'||ref.type==='wood-fence'||ref.type==='car') return 0x70b85f;
+  if(ref.type==='site-rect') return siteSurfaceSegmentColor(ref);
+  if(ref.type==='balcony'||ref.type==='tree'||ref.type==='fence'||ref.type==='wood-fence'||ref.type==='car') return 0x70b85f;
   if(['toilet','bath','sink','washer','fridge','kitchen','kitchen_counter'].indexOf(ref.type)>=0) return 0x4f8cff;
   return 0xd45cff;
 }
@@ -8790,7 +8806,8 @@ function collectAiMaterialSummary(plan){
     floors[it.floor]=true;
     itemTypes[it.type]=(itemTypes[it.type]||0)+1;
     if(it.type==='site-rect'){
-      sites.push({floor:it.floor,x:it.x,y:it.y,w:it.w,d:it.d});
+      var surface=siteSurfaceType(it);
+      sites.push({floor:it.floor,x:it.x,y:it.y,w:it.w,d:it.d,surface:surface,surfaceLabel:siteSurfaceLabel(surface)});
     }
     if(it.type==='roof'){
       if(it.texture) roofTextures[it.texture]=true;
@@ -8831,17 +8848,10 @@ function buildAiRenderMetadata(baseDataUrl, edgeDataUrl, segDataUrl){
     attachments:{
       baseImage:'base_render.png',
       edgeImage:'edge_guide.png',
-      segmentationImage:'segmentation_guide.png'
+      segmentationImage:'segmentation_guide.png',
+      segmentationLegend:'segmentation-legend.json'
     },
-    segmentationLegend:{
-      red:'walls',
-      green:'rooms/floor/site/exterior',
-      purple:'roof',
-      cyan:'windows/glass',
-      yellow:'doors/openings',
-      blue:'fixtures/equipment',
-      magenta:'furniture'
-    },
+    segmentationLegend:aiSegmentationLegend(),
     preserveRules:[
       'Do not change the floor plan, wall positions, openings, window positions, door positions, roof shape, furniture placement, or camera composition.',
       'Use the base render as the primary geometry reference.',
@@ -8857,6 +8867,9 @@ function buildAiRenderPrompt(metadata){
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
   var siteLines = metadata.siteContext && metadata.siteContext.hasSite ? [
     '- A site boundary is explicitly defined. Keep the planned house, yard, fences, driveway, and exterior elements inside that site boundary.',
+    '- Site rectangles have explicit surface materials in the metadata: grass, gravel, or concrete. Preserve each specified surface material exactly.',
+    '- Grass is allowed only on site rectangles whose surface is grass. Do not extend lawn/grass onto neutral outside-site ground or neighboring lots.',
+    '- Gravel and concrete site rectangles must remain gravel/concrete, not become lawn.',
     '- Treat the site boundary as the property line, not as an empty setback buffer. Do not enlarge the site or create a wide vacant margin around it.',
     '- Draw surrounding neighboring houses/buildings immediately outside the site boundary on visible sides. They should begin just beyond the property line, like a dense Japanese residential neighborhood.',
     '- Keep the outside gap narrow: about 0.5 to 2 meters where roads, sidewalks, fences, gutters, or small service spaces are needed. Do not create a large empty yard, vacant lot, field, or wide setback outside the site.',
@@ -8876,7 +8889,8 @@ function buildAiRenderPrompt(metadata){
     'Attachments:',
     '- base_render.png: primary reference. Preserve geometry, camera, placement, proportions, openings, roof, furniture, and materials.',
     '- edge_guide.png: structural outline guide. Keep these outlines aligned.',
-    '- segmentation_guide.png: object-category guide. Do not reinterpret categories.',
+    '- segmentation_guide.png: exact color-coded object-category mask. Read it together with segmentation-legend.json and the color map below.',
+    '- segmentation-legend.json: machine-readable map of every segment color to its object/category meaning.',
     '',
     'Strict requirements:',
     '- Do not add, remove, or move walls, windows, doors, roof parts, stairs, rooms, furniture, fixtures, fences, balconies, or cars.',
@@ -8888,6 +8902,14 @@ function buildAiRenderPrompt(metadata){
     siteLines.length ? 'Site boundary context:' : null,
     siteLines.length ? siteLines.join('\n') : null,
     '',
+    'Segmentation color map:',
+    JSON.stringify(metadata.segmentationLegend, null, 2),
+    '',
+    'Segmentation usage rules:',
+    '- Treat every solid color in segmentation_guide.png as a category label, not as a final material color.',
+    '- Use site surface segment colors only to identify grass/gravel/concrete areas. Do not infer grass from the neutral outside-site ground.',
+    '- If a segment color conflicts with the base render, preserve the geometry from base_render.png and the category from segmentation_guide.png.',
+    '',
     'Material/context summary:',
     JSON.stringify({
       counts:metadata.counts,
@@ -8897,7 +8919,7 @@ function buildAiRenderPrompt(metadata){
     }, null, 2),
     '',
     'Negative prompt:',
-    'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed, underspecified materials, wide empty land outside the site, large vacant setback, isolated house in an empty field'
+    'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed, underspecified materials, wide empty land outside the site, large vacant setback, isolated house in an empty field, grass covering the entire scene, lawn outside the site boundary, changing gravel to grass, changing concrete to grass'
   ].filter(function(line){return line!==null;}).join('\n');
 }
 async function ensureAiRenderableView(){
@@ -9109,9 +9131,11 @@ async function generateAiRenderPackage(){
     var prompt=buildAiRenderPrompt(metadata);
     setUnityRenderStatus('一括DL用ZIPを準備しています...');
     var enc=new TextEncoder();
+    var legendText=JSON.stringify({version:1,legend:metadata.segmentationLegend,siteContext:metadata.siteContext},null,2);
     var zipFiles=[
       {name:'ai-instructions.md',bytes:enc.encode(prompt)},
       {name:'ai-render-package.json',bytes:enc.encode(JSON.stringify({version:1,createdAt:metadata.createdAt,prompt:prompt,metadata:metadata},null,2))},
+      {name:'segmentation-legend.json',bytes:enc.encode(legendText)},
       {name:'base_render.png',bytes:await dataUrlToBytes(base)},
       {name:'edge_guide.png',bytes:await dataUrlToBytes(edge)},
       {name:'segmentation_guide.png',bytes:await dataUrlToBytes(seg)}
@@ -9136,8 +9160,8 @@ async function generateAiRenderPackage(){
       'AI高品質化用データを生成しました。\n\n'+
       '推奨手順:\n'+
       '1. AIへの指示文をコピー\n'+
-      '2. 基準画像・エッジ画像・セグメント画像を保存\n'+
-      '3. 画像生成AIに3枚の画像と指示文を渡す\n\n'+
+      '2. 基準画像・エッジ画像・セグメント画像・凡例JSONを保存\n'+
+      '3. 画像生成AIに3枚の画像、凡例JSON、指示文を渡す\n\n'+
       '基準画像を最重要参照に指定すると、間取りの正確性を保ちやすくなります。'
     );
     return AI_RENDER_PACKAGE;
@@ -9223,6 +9247,7 @@ async function downloadAiRenderBundle(){
       '保存される内容:\n'+
       '- ai-instructions.md（AIへの指示文）\n'+
       '- ai-render-package.json\n'+
+      '- segmentation-legend.json\n'+
       '- base_render.png\n'+
       '- edge_guide.png\n'+
       '- segmentation_guide.png'
@@ -9231,9 +9256,11 @@ async function downloadAiRenderBundle(){
   }
   setUnityRenderStatus('ZIPを作成しています...');
   var enc=new TextEncoder();
+  var legendText=JSON.stringify({version:1,legend:AI_RENDER_PACKAGE.metadata.segmentationLegend,siteContext:AI_RENDER_PACKAGE.metadata.siteContext},null,2);
   var files=[
     {name:'ai-instructions.md',bytes:enc.encode(AI_RENDER_PACKAGE.prompt)},
     {name:'ai-render-package.json',bytes:enc.encode(aiRenderPackageJsonText())},
+    {name:'segmentation-legend.json',bytes:enc.encode(legendText)},
     {name:'base_render.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.base.dataUrl)},
     {name:'edge_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.edge.dataUrl)},
     {name:'segmentation_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.segmentation.dataUrl)}
@@ -9244,6 +9271,7 @@ async function downloadAiRenderBundle(){
     '保存される内容:\n'+
     '- ai-instructions.md（AIへの指示文）\n'+
     '- ai-render-package.json\n'+
+    '- segmentation-legend.json\n'+
     '- base_render.png\n'+
     '- edge_guide.png\n'+
     '- segmentation_guide.png'
