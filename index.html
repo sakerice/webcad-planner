@@ -2413,8 +2413,9 @@ body{
   <button class="tbtn mob-hide" onclick="undoAction()">↩ Undo</button>
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
-  <button id="save-btn" class="tbtn mob-hide" onclick="exportPlan()">💾 保存</button>
+  <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
   <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+  <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
 </div>
@@ -9889,6 +9890,8 @@ function initTouchPressFeedback(){
   },{passive:true});
 }
 
+// ─── Init storage ─────────────────────────────────
+checkStorageOnInit();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
 applyMobileUI();
