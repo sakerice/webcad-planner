@@ -8537,6 +8537,37 @@ function exportPlan(){
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
   a.download='plan.json';a.click();
 }
+function savePlanToStorage(){
+  normalizeLegacyFurnitureItems();
+  ensureObjectIds();
+  ensureExteriorWallSettings();
+  ensureInteriorWallSettings();
+  ensureRoofAppearance();
+  syncExteriorWallSettings();
+  StorageAdapter.save(DATA);
+  clearDirty();
+}
+function loadPlanFromStorage(){
+  var d=StorageAdapter.load();
+  if(!d) return false;
+  DATA=d;
+  ensureObjectIds();
+  ensureExteriorWallSettings();
+  ensureInteriorWallSettings();
+  ensureRoofAppearance();
+  syncExteriorWallSettings();
+  normalizeLegacyFurnitureItems();
+  return true;
+}
+function checkStorageOnInit(){
+  if(!StorageAdapter.hasData()) return;
+  if(confirm('前回保存したプランがあります。読み込みますか？')){
+    if(loadPlanFromStorage()){
+      draw2d();
+      if(ren) rebuild3D();
+    }
+  }
+}
 function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';
 }
