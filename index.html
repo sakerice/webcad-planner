@@ -2468,6 +2468,7 @@ body{
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🛋 家具 <span>+</span></div>
     <div class="cat-body">
+      <div class="stool" data-tool="custom-block" onclick="setTool('custom-block')"><span class="sicon">▣</span>任意ブロック</div>
       <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><span class="sicon">👘</span>布団セット</div>
       <div class="stool" data-tool="tv" onclick="setTool('tv')"><span class="sicon">📺</span>TV台</div>
       <div id="fmp-furniture"></div>
@@ -2686,6 +2687,7 @@ var ISIZES = {
   'dining-table':{w:1200,d:800}, dining_6:{w:1600,d:900}, round_table_4:{w:1000,d:1000},
   'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
+  'custom-block':{w:900,d:450},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
@@ -2699,7 +2701,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -2889,7 +2891,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
@@ -2958,6 +2960,45 @@ function applyEdgeSnap(x, y, w, d, excludeId){
   };
 }
 
+function normalizeTextureOrientationTarget(obj){
+  if(!obj) return obj;
+  if(obj.textureFlipX===undefined) obj.textureFlipX=false;
+  if(obj.textureFlipY===undefined) obj.textureFlipY=false;
+  return obj;
+}
+function setTextureSettingValue(obj,key,value){
+  if(!obj) return;
+  obj[key]=value;
+  if(key==='texture' && !value){
+    obj.textureFlipX=false;
+    obj.textureFlipY=false;
+  }
+}
+function appearanceWithTextureOrientation(color, texture, source, owner, prefix){
+  var flipX=false, flipY=false;
+  if(texture && owner){
+    flipX=!!(prefix ? owner[prefix+'FlipX'] : owner.textureFlipX);
+    flipY=!!(prefix ? owner[prefix+'FlipY'] : owner.textureFlipY);
+  }
+  return {color:color,texture:texture||null,source:source,textureFlipX:flipX,textureFlipY:flipY};
+}
+function textureFlipControlsHtml(updateX, updateY, owner, disabled){
+  if(!owner || !owner.texture) return '';
+  var dis=disabled?' disabled':'';
+  return '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">'
+    + '<button class="pbtn sec '+(owner.textureFlipX?'active':'')+'" style="padding:3px 8px;margin-top:0" onclick="'+updateX+'"'+dis+'>左右反転</button>'
+    + '<button class="pbtn sec '+(owner.textureFlipY?'active':'')+'" style="padding:3px 8px;margin-top:0" onclick="'+updateY+'"'+dis+'>上下反転</button>'
+    + '</div>';
+}
+function selectedTextureFlipControlsHtml(it){
+  return textureFlipControlsHtml(
+    'updateSelectedProp(\'textureFlipX\','+(!it.textureFlipX)+')',
+    'updateSelectedProp(\'textureFlipY\','+(!it.textureFlipY)+')',
+    it,
+    false
+  );
+}
+
 function faceRuleMode(setting, appearance){
   var mode=setting&&setting.mode;
   if(mode==='custom'||mode==='whole'||mode==='floor'||mode==='inherit') return mode;
@@ -2988,6 +3029,12 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
   html += '</div>';
   html += '<div style="margin-top:7px;opacity:'+(mode==='custom'?1:0.42)+'"><div class="face-muted" style="margin-bottom:4px">個別テクスチャ</div><input type="file" accept="image/*" style="font-size:10px;width:100%;max-width:100%" onchange="'+uploadFn+'(this,'+wall.id+',\''+faceKey+'\')" '+(mode!=='custom'?'disabled':'')+'></div>';
   html += '<div class="face-muted" style="margin-top:5px">テクスチャ: '+texLabel+' '+(setting.texture?'<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += textureFlipControlsHtml(
+    updateFn+'('+wall.id+',\''+faceKey+'\',\'textureFlipX\','+(!setting.textureFlipX)+')',
+    updateFn+'('+wall.id+',\''+faceKey+'\',\'textureFlipY\','+(!setting.textureFlipY)+')',
+    setting,
+    mode!=='custom'
+  );
   return html;
 }
 
@@ -3005,7 +3052,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -3053,6 +3100,7 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+      html += selectedTextureFlipControlsHtml(it);
     }
     if((it.thick||0)>=120){
       var faces=getWallInteriorFaces(it);
@@ -3144,6 +3192,19 @@ function updateProps(){
     });
     html += '</select></div>';
   }
+  if(isCustomBlockType(it.type)){
+    if(!it.customHeight) it.customHeight=900;
+    if(!it.color) it.color=ICOLORS[it.type]||'#c9d7ee';
+    html += '<div class="ph" style="margin-top:12px">任意ブロック設定</div>';
+    html += '<div class="pr"><div class="pl">名称</div><input class="pi" type="text" value="'+escHtml(it.name||'任意ブロック')+'" onchange="updateSelectedProp(\'name\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="10" max="6000" step="10" value="'+Math.round(getCustomBlockHeight(it))+'" onchange="updateSelectedProp(\'customHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#c9d7ee')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(canSetItemTexture(it)){
+      html += '<div class="pr"><div class="pl">テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+      if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+      html += selectedTextureFlipControlsHtml(it);
+    }
+  }
   if(it.type==='foundation'){
     if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
     html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
@@ -3194,6 +3255,7 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">屋根カラー</div><input class="pi" type="color" value="'+(it.color||'#2a2a30')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">屋根テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">屋根テクスチャ解除</button>';
+      html += selectedTextureFlipControlsHtml(it);
     }
   }
   if(isStairPartType(it.type)) {
@@ -3202,12 +3264,13 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
   }
-  if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type)) {
+  if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type)) {
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
       html += '<div class="pr"><div class="pl">'+texLabel+'</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+      html += selectedTextureFlipControlsHtml(it);
     }
     html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
     html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
@@ -3218,12 +3281,14 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+    html += selectedTextureFlipControlsHtml(it);
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
+    html += selectedTextureFlipControlsHtml(it);
   }
   
   html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
@@ -3233,7 +3298,13 @@ function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
   if(!noSave) saveState();
   if(p==='color') ST.selected.colorCustom=true;
-  if(p==='texture' && ST.selected._texObj) ST.selected._texObj=null;
+  if(p==='texture'){
+    if(ST.selected._texObj) ST.selected._texObj=null;
+    if(!v){
+      ST.selected.textureFlipX=false;
+      ST.selected.textureFlipY=false;
+    }
+  }
   if(isWindowLikeType(ST.selected.type) && p==='windowTop'){
     ST.selected.windowHeight=Number(v)-windowSillMm(ST.selected);
     normalizeWindowVerticalProps(ST.selected,'windowTop');
@@ -3409,7 +3480,7 @@ function siteSurfaceOptionsHtml(value){
 // ───── DATA HELPERS ─────
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
-    thick:thick||120,color:color||'#888888',texture:null,texScale:1,_texObj:null,
+    thick:thick||120,color:color||'#888888',texture:null,textureFlipX:false,textureFlipY:false,texScale:1,_texObj:null,
     wallBand:'full',wallStyle:'solid',wallHeight:WALL_H,wallTopShape:'flat',wallTopSide:'both'};
 }
 function mkItem(type,x,y,rot,floor,w,d){
@@ -3417,7 +3488,7 @@ function mkItem(type,x,y,rot,floor,w,d){
   var sz=getItemDefaultSize(type);
   var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,
     w:w||sz.w,d:d||sz.d,color:ICOLORS[type]||'#ddd',
-    flipX:false, flipY:false, sScale:1, sX:0, sY:0};
+    flipX:false, flipY:false, textureFlipX:false, textureFlipY:false, sScale:1, sX:0, sY:0};
   if(type==='wood-fence'){
     item.fenceHeight=1600;
     item.fencePattern='vertical';
@@ -3435,6 +3506,11 @@ function mkItem(type,x,y,rot,floor,w,d){
   }
   if(type==='site-rect'){
     item.siteSurface='grass';
+  }
+  if(type==='custom-block'){
+    item.customHeight=900;
+    item.name='任意ブロック';
+    item.colorCustom=true;
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -3837,6 +3913,10 @@ function getItemDisplayPose(it){
   }
   return {x:it.x+it.w/2,y:it.y+it.d/2,rot:it.rot||0,wallInfo:null};
 }
+function getItem2dFillColor(it){
+  if(it && it.colorCustom && it.color) return it.color;
+  return (it && ICOLORS[it.type]) || '#dddddd';
+}
 
 function drawItem2d(it){
   var sc=ST.zoom*0.05;
@@ -3887,13 +3967,46 @@ function drawItem2d(it){
     if(it.type==='stair'||it.type==='stair-corner') ctx.globalAlpha*=0.58;
     var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type));
     if(!doorSymbolOnly){
-      ctx.fillStyle=ICOLORS[it.type]||'#dddddd'; 
+      ctx.fillStyle=getItem2dFillColor(it);
       ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
       ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
     }
     
-    if(it.type === 'roof') {
+    if(it.type === 'custom-block') {
+      var blockFill=getItem2dFillColor(it);
+      ctx.fillStyle=blockFill;
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(25,45,75,0.78)';
+      ctx.lineWidth=Math.max(1.2,Math.min(2.4,sc*18));
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(255,255,255,0.45)';
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(-hw+5,-hd+5); ctx.lineTo(hw-5,hd-5);
+      ctx.moveTo(hw-5,-hd+5); ctx.lineTo(-hw+5,hd-5);
+      ctx.stroke();
+      var label=(it.name||ILABELS[it.type]||'任意ブロック').trim();
+      var heightLabel='H '+Math.round(getCustomBlockHeight(it))+'mm';
+      var maxTextW=Math.max(0,it.w*sc-10);
+      if(maxTextW>24 && it.d*sc>18){
+        ctx.save();
+        ctx.beginPath(); ctx.rect(-hw+4,-hd+4,it.w*sc-8,it.d*sc-8); ctx.clip();
+        var fs=Math.max(8,Math.min(12,Math.min(it.w*sc/6,it.d*sc/3)));
+        ctx.font='bold '+fs+'px "Noto Sans JP",sans-serif';
+        while(label.length>1 && ctx.measureText(label).width>maxTextW) label=label.slice(0,-1);
+        if(ctx.measureText(label).width>maxTextW) label='';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(21,32,50,0.86)';
+        if(label) ctx.fillText(label,0,it.d*sc>34?-fs*0.35:0);
+        if(it.d*sc>42){
+          ctx.font=Math.max(7,fs-2)+'px "Noto Sans JP",sans-serif';
+          ctx.fillStyle='rgba(21,32,50,0.62)';
+          ctx.fillText(heightLabel,0,fs*0.85);
+        }
+        ctx.restore();
+      }
+    } else if(it.type === 'roof') {
       // 屋根: 建物フットプリントに合わせた破線矩形 + 🏠ラベル
       ctx.setLineDash([8,4]);
       ctx.strokeStyle='#334'; ctx.lineWidth=1.5;
@@ -4231,6 +4344,13 @@ function applyWallDrag(cx,cy,e){
 function isStairPartType(type){
   return type==='stair'||type==='stair-corner';
 }
+function isCustomBlockType(type){
+  return type==='custom-block';
+}
+function getCustomBlockHeight(it){
+  var v=Number(it&&it.customHeight);
+  return isFinite(v)?Math.max(10,Math.min(6000,v)):900;
+}
 
 // ─── Resize edge snap helper ──────────────────────
 // Snaps moving edge(s) to nearest object edge (axis-aligned items only)
@@ -4305,7 +4425,7 @@ function applyHandleDrag(cx,cy,e){
     var ldy=dx*Math.sin(rad)+dy*Math.cos(rad);
 
     var isCorner=h.length===2; // 'nw','ne','se','sw' are 2 chars; 'n','s','e','w' are 1 char
-    var freeCornerResize = isStairPartType(it.type);
+    var freeCornerResize = isStairPartType(it.type) || isCustomBlockType(it.type);
     var lockAspect = isFmpItemType(it.type);
     if(lockAspect && o.w>0 && o.d>0){
       var aspect=o.d/o.w;
@@ -5015,6 +5135,22 @@ function setTextureRepeatNoDistort(tex,surfaceW,surfaceH,tileH){
   var repX=Math.max(surfaceW/(th*aspect),0.1);
   tex.repeat.set(repX,repY);
 }
+function applyTextureFlip(tex, source){
+  if(!tex) return tex;
+  var rx=Math.abs((tex.repeat&&tex.repeat.x)||1);
+  var ry=Math.abs((tex.repeat&&tex.repeat.y)||1);
+  tex.repeat.set(source&&source.textureFlipX?-rx:rx, source&&source.textureFlipY?-ry:ry);
+  tex.offset.set(source&&source.textureFlipX?1:0, source&&source.textureFlipY?1:0);
+  tex.needsUpdate=true;
+  return tex;
+}
+function cloneTextureWithRepeat(base,repX,repY,source){
+  if(!base) return null;
+  var tex=base.clone();
+  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+  tex.repeat.set(repX,repY);
+  return applyTextureFlip(tex,source);
+}
 function wallTextureTileHeight(){
   return 0.45;
 }
@@ -5050,6 +5186,7 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor){
     tc.wrapS=tc.wrapT=THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,surfaceW||1,surfaceH||1,wallTextureTileHeight());
   }
+  applyTextureFlip(tc,it);
   return makeColorAccurateMaterial({map:tc,color:fallbackColor||0xffffff});
 }
 function roofTypeOptions(){
@@ -5067,7 +5204,7 @@ function isDoorItemType(type){
   return isDoorLikeOpeningType(type) && !isNoDoorOpeningType(type);
 }
 function canSetItemTexture(it){
-  return !!(it && (it.type==='fence' || it.type==='wood-fence' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isDoorItemType(it.type)));
+  return !!(it && (isCustomBlockType(it.type) || it.type==='fence' || it.type==='wood-fence' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isDoorItemType(it.type)));
 }
 
 function pickSelectable3D(e){
@@ -5182,20 +5319,21 @@ function setExteriorWallColor(floor,color){
 }
 
 function defaultInteriorFloorSetting(){
-  return {linked:false,color:INTERIOR_WALL_DEFAULT,texture:null};
+  return {linked:false,color:INTERIOR_WALL_DEFAULT,texture:null,textureFlipX:false,textureFlipY:false};
 }
 
 function ensureInteriorWallSettings(){
   if(!DATA.interiorWallSettings){
     DATA.interiorWallSettings={
-      whole:{linked:false,color:INTERIOR_WALL_DEFAULT,texture:null},
+      whole:{linked:false,color:INTERIOR_WALL_DEFAULT,texture:null,textureFlipX:false,textureFlipY:false},
       floors:{},
       faces:{}
     };
   }
   if(!DATA.interiorWallSettings.whole){
-    DATA.interiorWallSettings.whole={linked:false,color:INTERIOR_WALL_DEFAULT,texture:null};
+    DATA.interiorWallSettings.whole={linked:false,color:INTERIOR_WALL_DEFAULT,texture:null,textureFlipX:false,textureFlipY:false};
   }
+  normalizeTextureOrientationTarget(DATA.interiorWallSettings.whole);
   if(!DATA.interiorWallSettings.floors) DATA.interiorWallSettings.floors={};
   if(!DATA.interiorWallSettings.faces) DATA.interiorWallSettings.faces={};
   for(var f=1; f<=4; f++){
@@ -5205,6 +5343,7 @@ function ensureInteriorWallSettings(){
       if(DATA.interiorWallSettings.floors[f].linked===undefined) DATA.interiorWallSettings.floors[f].linked=false;
       if(!DATA.interiorWallSettings.floors[f].color) DATA.interiorWallSettings.floors[f].color=INTERIOR_WALL_DEFAULT;
       if(DATA.interiorWallSettings.floors[f].texture===undefined) DATA.interiorWallSettings.floors[f].texture=null;
+      normalizeTextureOrientationTarget(DATA.interiorWallSettings.floors[f]);
     }
   }
   return DATA.interiorWallSettings;
@@ -5212,27 +5351,31 @@ function ensureInteriorWallSettings(){
 
 function ensureRoofAppearance(){
   if(!DATA.roofAppearance){
-    DATA.roofAppearance={whole:{linked:true,color:'#2a2a30',texture:null},floors:{}};
+    DATA.roofAppearance={whole:{linked:true,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false},floors:{}};
   }
   if(DATA.roofAppearance.whole===undefined){
     DATA.roofAppearance={whole:{
       linked:DATA.roofAppearance.linked!==undefined?DATA.roofAppearance.linked:true,
       color:DATA.roofAppearance.color||'#2a2a30',
-      texture:DATA.roofAppearance.texture||null
+      texture:DATA.roofAppearance.texture||null,
+      textureFlipX:!!DATA.roofAppearance.textureFlipX,
+      textureFlipY:!!DATA.roofAppearance.textureFlipY
     },floors:{}};
   }
-  if(!DATA.roofAppearance.whole) DATA.roofAppearance.whole={linked:true,color:'#2a2a30',texture:null};
+  if(!DATA.roofAppearance.whole) DATA.roofAppearance.whole={linked:true,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
   if(DATA.roofAppearance.whole.linked===undefined) DATA.roofAppearance.whole.linked=true;
   if(!DATA.roofAppearance.whole.color) DATA.roofAppearance.whole.color='#2a2a30';
   if(DATA.roofAppearance.whole.texture===undefined) DATA.roofAppearance.whole.texture=null;
+  normalizeTextureOrientationTarget(DATA.roofAppearance.whole);
   if(!DATA.roofAppearance.floors) DATA.roofAppearance.floors={};
   for(var f=1; f<=4; f++){
     if(!DATA.roofAppearance.floors[f]){
-      DATA.roofAppearance.floors[f]={linked:false,color:'#2a2a30',texture:null};
+      DATA.roofAppearance.floors[f]={linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
     } else {
       if(DATA.roofAppearance.floors[f].linked===undefined) DATA.roofAppearance.floors[f].linked=false;
       if(!DATA.roofAppearance.floors[f].color) DATA.roofAppearance.floors[f].color='#2a2a30';
       if(DATA.roofAppearance.floors[f].texture===undefined) DATA.roofAppearance.floors[f].texture=null;
+      normalizeTextureOrientationTarget(DATA.roofAppearance.floors[f]);
     }
   }
   return DATA.roofAppearance;
@@ -5243,11 +5386,12 @@ function updateRoofAppearance(scope,key,value,floor,noSave){
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   if(scope==='whole'){
-    s.whole[key]=value;
+    setTextureSettingValue(s.whole,key,value);
     if(key==='color'||key==='texture') s.whole.linked=true;
   } else if(scope==='floor'){
-    s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null};
-    s.floors[floor][key]=value;
+    s.floors[floor]=s.floors[floor]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false};
+    normalizeTextureOrientationTarget(s.floors[floor]);
+    setTextureSettingValue(s.floors[floor],key,value);
     if(key==='color'||key==='texture'){
       s.whole.linked=false;
       s.floors[floor].linked=true;
@@ -5273,14 +5417,14 @@ function uploadRoofAppearanceTex(inp,scope,floor){
 function resolveRoofAppearance(it){
   var s=ensureRoofAppearance();
   var fl=it.floor||1;
-  var fs=s.floors[fl]||{linked:false,color:'#2a2a30',texture:null};
+  var fs=normalizeTextureOrientationTarget(s.floors[fl]||{linked:false,color:'#2a2a30',texture:null,textureFlipX:false,textureFlipY:false});
   if(s.whole && s.whole.linked){
-    return {color:s.whole.color||'#2a2a30',texture:s.whole.texture||null,source:'whole'};
+    return appearanceWithTextureOrientation(s.whole.color||'#2a2a30',s.whole.texture||null,'whole',s.whole);
   }
   if(fs.linked){
-    return {color:fs.color||'#2a2a30',texture:fs.texture||null,source:'floor'};
+    return appearanceWithTextureOrientation(fs.color||'#2a2a30',fs.texture||null,'floor',fs);
   }
-  return {color:it.color||'#2a2a30',texture:it.texture||null,source:'item'};
+  return appearanceWithTextureOrientation(it.color||'#2a2a30',it.texture||null,'item',it);
 }
 
 function interiorFaceKey(w,face){
@@ -5290,7 +5434,8 @@ function interiorFaceKey(w,face){
 function getInteriorFaceSetting(w,face){
   var s=ensureInteriorWallSettings();
   var key=interiorFaceKey(w,face);
-  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null};
+  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
+  normalizeTextureOrientationTarget(s.faces[key]);
   return s.faces[key];
 }
 
@@ -5303,7 +5448,7 @@ function findExistingWallFaceAppearance(w,face,field){
     if((f.sign||0)!==(face.sign||0)) continue;
     if(Math.abs((f.a||0)-(face.a||0))>tol) continue;
     if(Math.abs((f.b||0)-(face.b||0))>tol) continue;
-    if(f.color||f.texture) return {color:f.color||null,texture:f.texture||null,source:'existing-face'};
+    if(f.color||f.texture) return appearanceWithTextureOrientation(f.color||null,f.texture||null,'existing-face',f);
   }
   return null;
 }
@@ -5314,38 +5459,38 @@ function resolveInteriorFaceAppearance(w,face){
   var fs=s.floors[fl]||defaultInteriorFloorSetting();
   var faceSetting=face?getInteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
-    return {color:faceSetting.color||INTERIOR_WALL_DEFAULT,texture:faceSetting.texture||null,source:'face'};
+    return appearanceWithTextureOrientation(faceSetting.color||INTERIOR_WALL_DEFAULT,faceSetting.texture||null,'face',faceSetting);
   }
   if(faceSetting && faceSetting.mode==='floor'){
-    return {color:fs.color||INTERIOR_WALL_DEFAULT,texture:fs.texture||null,source:'floor'};
+    return appearanceWithTextureOrientation(fs.color||INTERIOR_WALL_DEFAULT,fs.texture||null,'floor',fs);
   }
   if(faceSetting && faceSetting.mode==='whole'){
-    return {color:s.whole.color||INTERIOR_WALL_DEFAULT,texture:s.whole.texture||null,source:'whole'};
+    return appearanceWithTextureOrientation(s.whole.color||INTERIOR_WALL_DEFAULT,s.whole.texture||null,'whole',s.whole);
   }
   if(s.whole && s.whole.linked){
-    return {color:s.whole.color||INTERIOR_WALL_DEFAULT,texture:s.whole.texture||null,source:'whole'};
+    return appearanceWithTextureOrientation(s.whole.color||INTERIOR_WALL_DEFAULT,s.whole.texture||null,'whole',s.whole);
   }
   if(fs.linked){
-    return {color:fs.color||INTERIOR_WALL_DEFAULT,texture:fs.texture||null,source:'floor'};
+    return appearanceWithTextureOrientation(fs.color||INTERIOR_WALL_DEFAULT,fs.texture||null,'floor',fs);
   }
   var existingFace=findExistingWallFaceAppearance(w,face,'interiorFaces');
   if(existingFace) return existingFace;
   if(w.interiorColor||w.interiorTexture){
-    return {color:w.interiorColor||INTERIOR_WALL_DEFAULT,texture:w.interiorTexture||null,source:'wall-interior'};
+    return appearanceWithTextureOrientation(w.interiorColor||INTERIOR_WALL_DEFAULT,w.interiorTexture||null,'wall-interior',w,'interiorTexture');
   }
-  return {color:INTERIOR_WALL_DEFAULT,texture:null,source:'default'};
+  return appearanceWithTextureOrientation(INTERIOR_WALL_DEFAULT,null,'default',null);
 }
 
 function resolveInteriorWallAppearance(w){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
   var fs=s.floors[fl]||defaultInteriorFloorSetting();
-  if(s.whole && s.whole.linked) return {color:s.whole.color||INTERIOR_WALL_DEFAULT,texture:s.whole.texture||null,source:'whole'};
-  if(fs.linked) return {color:fs.color||INTERIOR_WALL_DEFAULT,texture:fs.texture||null,source:'floor'};
+  if(s.whole && s.whole.linked) return appearanceWithTextureOrientation(s.whole.color||INTERIOR_WALL_DEFAULT,s.whole.texture||null,'whole',s.whole);
+  if(fs.linked) return appearanceWithTextureOrientation(fs.color||INTERIOR_WALL_DEFAULT,fs.texture||null,'floor',fs);
   if(w.interiorColor||w.interiorTexture){
-    return {color:w.interiorColor||INTERIOR_WALL_DEFAULT,texture:w.interiorTexture||null,source:'wall-interior'};
+    return appearanceWithTextureOrientation(w.interiorColor||INTERIOR_WALL_DEFAULT,w.interiorTexture||null,'wall-interior',w,'interiorTexture');
   }
-  return {color:INTERIOR_WALL_DEFAULT,texture:null,source:'default'};
+  return appearanceWithTextureOrientation(INTERIOR_WALL_DEFAULT,null,'default',null);
 }
 
 function updateInteriorSetting(scope,key,value,floor,noSave){
@@ -5353,11 +5498,12 @@ function updateInteriorSetting(scope,key,value,floor,noSave){
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   if(scope==='whole'){
-    s.whole[key]=value;
+    setTextureSettingValue(s.whole,key,value);
     if(key==='color'||key==='texture') s.whole.linked=true;
   } else if(scope==='floor'){
     s.floors[floor]=s.floors[floor]||defaultInteriorFloorSetting();
-    s.floors[floor][key]=value;
+    normalizeTextureOrientationTarget(s.floors[floor]);
+    setTextureSettingValue(s.floors[floor],key,value);
     if(key==='color'||key==='texture'){
       s.whole.linked=false;
       s.floors[floor].linked=true;
@@ -5377,7 +5523,7 @@ function updateInteriorFaceSetting(wallId,faceKey,key,value,noSave){
   var fs=getInteriorFaceSetting(w,face);
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
-  fs[key]=value;
+  setTextureSettingValue(fs,key,value);
   if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   updateProps();
   if(ren) rebuild3D();
@@ -5401,7 +5547,8 @@ function exteriorFaceKey(w,face){
 function getExteriorFaceSetting(w,face){
   var s=ensureExteriorWallSettings();
   var key=exteriorFaceKey(w,face);
-  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null};
+  if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
+  normalizeTextureOrientationTarget(s.faces[key]);
   return s.faces[key];
 }
 
@@ -5411,13 +5558,13 @@ function resolveExteriorFaceAppearance(w,face){
   var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
   var faceSetting=face?getExteriorFaceSetting(w,face):null;
   if(faceSetting && faceSetting.mode==='custom'){
-    return {color:faceSetting.color||'#e8e0cc',texture:faceSetting.texture||null,source:'face'};
+    return appearanceWithTextureOrientation(faceSetting.color||'#e8e0cc',faceSetting.texture||null,'face',faceSetting);
   }
   if(faceSetting && faceSetting.mode==='floor'){
-    return {color:fs.color||WALL_COLORS[fl]||'#e8e0cc',texture:fs.texture||null,source:'floor'};
+    return appearanceWithTextureOrientation(fs.color||WALL_COLORS[fl]||'#e8e0cc',fs.texture||null,'floor',fs);
   }
   if(faceSetting && faceSetting.mode==='whole'){
-    return {color:s.whole.color||'#e8e0cc',texture:s.whole.texture||null,source:'whole'};
+    return appearanceWithTextureOrientation(s.whole.color||'#e8e0cc',s.whole.texture||null,'whole',s.whole);
   }
   return resolveExteriorWallAppearance(w);
 }
@@ -5430,7 +5577,7 @@ function updateExteriorFaceSetting(wallId,faceKey,key,value,noSave){
   var fs=getExteriorFaceSetting(w,face);
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
-  fs[key]=value;
+  setTextureSettingValue(fs,key,value);
   if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
   updateProps();
   if(ren) rebuild3D();
@@ -5459,21 +5606,22 @@ function uploadInteriorTex(inp,scope,floor){
 }
 
 function defaultExteriorFloorSetting(floor){
-  return {linked:true,color:WALL_COLORS[floor]||'#e8e0cc',texture:null};
+  return {linked:true,color:WALL_COLORS[floor]||'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false};
 }
 
 function ensureExteriorWallSettings(){
   if(!DATA.exteriorWallSettings){
     DATA.exteriorWallSettings={
-      whole:{linked:false,color:'#e8e0cc',texture:null},
+      whole:{linked:false,color:'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false},
       floors:{},
       walls:{},
       faces:{}
     };
   }
   if(!DATA.exteriorWallSettings.whole){
-    DATA.exteriorWallSettings.whole={linked:false,color:'#e8e0cc',texture:null};
+    DATA.exteriorWallSettings.whole={linked:false,color:'#e8e0cc',texture:null,textureFlipX:false,textureFlipY:false};
   }
+  normalizeTextureOrientationTarget(DATA.exteriorWallSettings.whole);
   if(!DATA.exteriorWallSettings.floors) DATA.exteriorWallSettings.floors={};
   if(!DATA.exteriorWallSettings.walls) DATA.exteriorWallSettings.walls={};
   if(!DATA.exteriorWallSettings.faces) DATA.exteriorWallSettings.faces={};
@@ -5484,6 +5632,7 @@ function ensureExteriorWallSettings(){
       if(DATA.exteriorWallSettings.floors[f].linked===undefined) DATA.exteriorWallSettings.floors[f].linked=true;
       if(!DATA.exteriorWallSettings.floors[f].color) DATA.exteriorWallSettings.floors[f].color=WALL_COLORS[f]||'#e8e0cc';
       if(DATA.exteriorWallSettings.floors[f].texture===undefined) DATA.exteriorWallSettings.floors[f].texture=null;
+      normalizeTextureOrientationTarget(DATA.exteriorWallSettings.floors[f]);
     }
   }
   return DATA.exteriorWallSettings;
@@ -5496,9 +5645,12 @@ function wallSettingKey(w){
 function getExteriorWallSetting(w){
   var s=ensureExteriorWallSettings();
   var key=wallSettingKey(w);
-  if(!s.walls[key]) s.walls[key]={color:null,texture:null};
+  if(!s.walls[key]) s.walls[key]={color:null,texture:null,textureFlipX:false,textureFlipY:false};
+  normalizeTextureOrientationTarget(s.walls[key]);
   if(w.exteriorColor && !s.walls[key].color) s.walls[key].color=w.exteriorColor;
   if(w.exteriorTexture && !s.walls[key].texture) s.walls[key].texture=w.exteriorTexture;
+  if(w.exteriorTextureFlipX) s.walls[key].textureFlipX=true;
+  if(w.exteriorTextureFlipY) s.walls[key].textureFlipY=true;
   return s.walls[key];
 }
 
@@ -5553,14 +5705,18 @@ function resolveExteriorWallAppearance(w){
   var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
   var ws=getExteriorWallSetting(w);
   if(s.whole && s.whole.linked){
-    return {color:s.whole.color||'#e8e0cc',texture:s.whole.texture||null,source:'whole'};
+    return appearanceWithTextureOrientation(s.whole.color||'#e8e0cc',s.whole.texture||null,'whole',s.whole);
   }
   if(fs.linked){
-    return {color:fs.color||WALL_COLORS[fl]||'#e8e0cc',texture:fs.texture||null,source:'floor'};
+    return appearanceWithTextureOrientation(fs.color||WALL_COLORS[fl]||'#e8e0cc',fs.texture||null,'floor',fs);
   }
+  var wallTexture=ws.texture||w.exteriorTexture||fs.texture||null;
+  var wallTextureOwner=ws.texture?ws:(w.exteriorTexture?w:fs);
   return {
     color:ws.color||w.exteriorColor||fs.color||WALL_COLORS[fl]||'#e8e0cc',
-    texture:ws.texture||w.exteriorTexture||fs.texture||null,
+    texture:wallTexture,
+    textureFlipX:!!(wallTexture && (wallTextureOwner===w?w.exteriorTextureFlipX:wallTextureOwner.textureFlipX)),
+    textureFlipY:!!(wallTexture && (wallTextureOwner===w?w.exteriorTextureFlipY:wallTextureOwner.textureFlipY)),
     source:ws.color||ws.texture||w.exteriorColor||w.exteriorTexture?'wall':'fallback'
   };
 }
@@ -5588,6 +5744,12 @@ function renderExteriorWallPanel(mode){
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadInteriorTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ins.whole.texture)+' '+(ins.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += textureFlipControlsHtml(
+    'updateInteriorSetting(\'whole\',\'textureFlipX\','+(!ins.whole.textureFlipX)+')',
+    'updateInteriorSetting(\'whole\',\'textureFlipY\','+(!ins.whole.textureFlipY)+')',
+    ins.whole,
+    false
+  );
   html += '</div>';
   for(var ifl=1; ifl<=4; ifl++){
     var ifs=ins.floors[ifl]||defaultInteriorFloorSetting();
@@ -5596,7 +5758,15 @@ function renderExteriorWallPanel(mode){
     html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;opacity:'+(!ins.whole.linked&&ifs.linked?1:0.45)+'">';
     html += '<input type="color" value="'+(ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" oninput="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onchange="updateInteriorSetting(\'floor\',\'color\',this.value,'+ifl+',true)" onblur="finishAppearanceColorInput()">';
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadInteriorTex(this,\'floor\','+ifl+')">';
-    html += '</div></div>';
+    html += '</div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ifs.texture)+' '+(ifs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateInteriorSetting(\'floor\',\'texture\',null,'+ifl+')">解除</button>':'')+'</div>';
+    html += textureFlipControlsHtml(
+      'updateInteriorSetting(\'floor\',\'textureFlipX\','+(!ifs.textureFlipX)+','+ifl+')',
+      'updateInteriorSetting(\'floor\',\'textureFlipY\','+(!ifs.textureFlipY)+','+ifl+')',
+      ifs,
+      false
+    );
+    html += '</div>';
   }
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
   body.innerHTML=html;
@@ -5613,6 +5783,12 @@ function renderExteriorWallPanel(mode){
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadRoofAppearanceTex(this,\'whole\')">';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(roof.whole.texture)+' '+(roof.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += textureFlipControlsHtml(
+    'updateRoofAppearance(\'whole\',\'textureFlipX\','+(!roof.whole.textureFlipX)+')',
+    'updateRoofAppearance(\'whole\',\'textureFlipY\','+(!roof.whole.textureFlipY)+')',
+    roof.whole,
+    false
+  );
   html += '</div>';
   for(var rfl=1; rfl<=4; rfl++){
     var rfs=roof.floors[rfl]||{linked:false,color:'#2a2a30',texture:null};
@@ -5623,6 +5799,12 @@ function renderExteriorWallPanel(mode){
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadRoofAppearanceTex(this,\'floor\','+rfl+')">';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(rfs.texture)+' '+(rfs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateRoofAppearance(\'floor\',\'texture\',null,'+rfl+')">解除</button>':'')+'</div>';
+    html += textureFlipControlsHtml(
+      'updateRoofAppearance(\'floor\',\'textureFlipX\','+(!rfs.textureFlipX)+','+rfl+')',
+      'updateRoofAppearance(\'floor\',\'textureFlipY\','+(!rfs.textureFlipY)+','+rfl+')',
+      rfs,
+      false
+    );
     html += '</div>';
   }
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
@@ -5641,6 +5823,12 @@ function renderExteriorWallPanel(mode){
   html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'whole\')" '+(!s.whole.linked?'disabled':'')+'>';
   html += '</div>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(s.whole.texture)+' '+(s.whole.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'whole\',\'texture\',null)">解除</button>':'')+'</div>';
+  html += textureFlipControlsHtml(
+    'updateExteriorSetting(\'whole\',\'textureFlipX\','+(!s.whole.textureFlipX)+')',
+    'updateExteriorSetting(\'whole\',\'textureFlipY\','+(!s.whole.textureFlipY)+')',
+    s.whole,
+    !s.whole.linked
+  );
   html += '</div>';
   for(var fl=1; fl<=4; fl++){
     var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
@@ -5652,6 +5840,12 @@ function renderExteriorWallPanel(mode){
     html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:190px" onchange="uploadExteriorTex(this,\'floor\','+fl+')" '+(s.whole.linked||!fs.linked?'disabled':'')+'>';
     html += '</div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(fs.texture)+' '+(fs.texture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'floor\',\'texture\',null,'+fl+')" '+(s.whole.linked?'disabled':'')+'>解除</button>':'')+'</div>';
+    html += textureFlipControlsHtml(
+      'updateExteriorSetting(\'floor\',\'textureFlipX\','+(!fs.textureFlipX)+','+fl+')',
+      'updateExteriorSetting(\'floor\',\'textureFlipY\','+(!fs.textureFlipY)+','+fl+')',
+      fs,
+      s.whole.linked||!fs.linked
+    );
     if(!s.whole.linked && !fs.linked){
       walls.forEach(function(w,idx){
         var ap=resolveExteriorWallAppearance(w);
@@ -5663,6 +5857,12 @@ function renderExteriorWallPanel(mode){
         html += '<input type="file" accept="image/*" style="font-size:10px;color:#cce;max-width:175px" onchange="uploadExteriorTex(this,\'wall\','+fl+','+w.id+')">';
         html += '</div>';
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">テクスチャ: '+textureStateLabel(ws.texture||w.exteriorTexture)+' '+(ws.texture||w.exteriorTexture?'<button class="pbtn sec" style="padding:3px 6px;margin-top:3px" onclick="updateExteriorSetting(\'wall\',\'texture\',null,'+fl+','+w.id+')">解除</button>':'')+'</div>';
+        html += textureFlipControlsHtml(
+          'updateExteriorSetting(\'wall\',\'textureFlipX\','+(!ws.textureFlipX)+','+fl+','+w.id+')',
+          'updateExteriorSetting(\'wall\',\'textureFlipY\','+(!ws.textureFlipY)+','+fl+','+w.id+')',
+          ws,
+          false
+        );
         html += '</div>';
       });
     }
@@ -5685,17 +5885,31 @@ function updateExteriorSetting(scope,key,value,floor,wallId,noSave){
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   if(scope==='whole'){
-    s.whole[key]=value;
+    setTextureSettingValue(s.whole,key,value);
   } else if(scope==='floor'){
     s.floors[floor]=s.floors[floor]||defaultExteriorFloorSetting(floor);
-    s.floors[floor][key]=value;
+    normalizeTextureOrientationTarget(s.floors[floor]);
+    setTextureSettingValue(s.floors[floor],key,value);
     if(key==='color'){WALL_COLORS[floor]=value; WALL_COLOR_CUSTOM[floor]=true;}
   } else if(scope==='wall'){
     var w=DATA.walls.find(function(x){return x.id===wallId;});
     if(w){
       var ws=getExteriorWallSetting(w);
       if(key==='color'){ ws.color=value; w.exteriorColor=value; }
-      else if(key==='texture'){ ws.texture=value; w.exteriorTexture=value; }
+      else if(key==='texture'){
+        setTextureSettingValue(ws,key,value);
+        w.exteriorTexture=value;
+        if(!value){
+          w.exteriorTextureFlipX=false;
+          w.exteriorTextureFlipY=false;
+        }
+      } else if(key==='textureFlipX'){
+        ws.textureFlipX=!!value;
+        w.exteriorTextureFlipX=!!value;
+      } else if(key==='textureFlipY'){
+        ws.textureFlipY=!!value;
+        w.exteriorTextureFlipY=!!value;
+      }
     }
   }
   if(noSave && key==='color'){ scheduleAppearancePreviewUpdate(); return; }
@@ -6224,7 +6438,7 @@ function makeExteriorWallMaterial(w,fl,len,face){
       var utc=userTex.clone();
       utc.wrapS = utc.wrapT = THREE.RepeatWrapping;
       setTextureRepeatNoDistort(utc,len,wallFullHeightM(fl),wallTextureTileHeight());
-      utc.needsUpdate=true;
+      applyTextureFlip(utc,ap);
       return finish(makeColorAccurateMaterial({map:utc,color:0xffffff}));
     }
   }
@@ -6265,7 +6479,7 @@ function makeInteriorWallMaterial(w,len,face){
     var tc=tex.clone();
     tc.wrapS = tc.wrapT = THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,len,wallFullHeightM(w&&w.floor),wallTextureTileHeight());
-    tc.needsUpdate=true;
+    applyTextureFlip(tc,ap);
     return finish(makeColorAccurateMaterial({map:tc,color:0xffffff}));
   }
   if(ap.source==='default'){
@@ -6906,7 +7120,7 @@ function build3DRoofItem(grp,it,w3,d3){
     var rtc=roofTex.clone();
     rtc.wrapS = rtc.wrapT = THREE.RepeatWrapping;
     setTextureRepeatNoDistort(rtc,W,D,0.8);
-    rtc.needsUpdate=true;
+    applyTextureFlip(rtc,ap);
     matParams.map=rtc;
     if(ap.texture) matParams.color=0xffffff;
   }
@@ -7172,6 +7386,20 @@ function buildItem3D(it){
   else if(it.type==='wood-fence'){
     buildWoodFence3D(grp,it,w3,d3,h);
   }
+  else if(isCustomBlockType(it.type)){
+    var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff) ||
+      new THREE.MeshStandardMaterial({color:it.color||ICOLORS[it.type]||0xc9d7ee,roughness:0.78,metalness:0.02});
+    var blockGeo=new THREE.BoxGeometry(w3,h,d3);
+    var block=new THREE.Mesh(blockGeo,blockMat);
+    block.position.y=h/2;
+    block.castShadow=true; block.receiveShadow=true;
+    grp.add(block);
+    var edgeGeo=new THREE.EdgesGeometry(blockGeo);
+    var edgeMat=new THREE.LineBasicMaterial({color:0x26364a,transparent:true,opacity:0.32});
+    var edges=new THREE.LineSegments(edgeGeo,edgeMat);
+    edges.position.y=h/2;
+    grp.add(edges);
+  }
   else if(it.type==='stair'||it.type==='stair-corner'){
     var riseInfo=stairRiseInfo(it);
     var baseRise=riseInfo.base, partRise=riseInfo.rise;
@@ -7235,6 +7463,7 @@ function buildWoodFence3D(grp,it,w3,d3,h){
 }
 
 function getItemHeightValue(it){
+  if(it && isCustomBlockType(it.type)) return getCustomBlockHeight(it);
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
   if(it && it.type==='foundation') {
     var fh=Number(it.foundationHeight);
@@ -7244,8 +7473,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -7695,7 +7924,7 @@ function makeSiteSurfaceMaterial(it,w,d){
     tex=baseTex.clone();
     tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
     tex.repeat.set(Math.max(1,w/1.8),Math.max(1,d/1.8));
-    tex.needsUpdate=true;
+    applyTextureFlip(tex,it);
   }
   return new THREE.MeshStandardMaterial({
     color:cfg.color,
@@ -7804,13 +8033,14 @@ function buildRooms3D(flFilt){
     var normName=isWet?'floor_tile_normal.jpg':'floor_wood_normal.jpg';
     var roughName=isWet?'floor_tile_roughness.jpg':'floor_wood_roughness.jpg';
     var repU=Math.max(0.5,r.w*U/0.9), repV=Math.max(0.5,r.d*U/0.9);
-    var fd=pbrTex(diffName),fn=pbrTexLinear(normName),fr2=pbrTexLinear(roughName);
-    [fd,fn,fr2].filter(Boolean).forEach(function(t){t.repeat.set(repU,repV);});
+    var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
+    var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
+    var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
     var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0};
     var customRoomTexture=false;
     if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
       var baseTex=getTexture3D(r.texture);
-      if(baseTex&&baseTex.image){var tex=baseTex.clone();tex.needsUpdate=true;setTextureRepeatNoDistort(tex,rw,rd,0.9);matParams.map=tex;customRoomTexture=true;}
+      if(baseTex&&baseTex.image){var tex=baseTex.clone();setTextureRepeatNoDistort(tex,rw,rd,0.9);applyTextureFlip(tex,r);matParams.map=tex;customRoomTexture=true;}
     }
     var matFloor=customRoomTexture
       ? makeColorAccurateMaterial({map:matParams.map,color:0xffffff})
@@ -8157,7 +8387,7 @@ function handleRoomClick(wx,wy){
     var rw=x2-x1, rd=y2-y1;
     if(rw>100 && rd>100){
       saveState();
-      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor};
+      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor, textureFlipX:false, textureFlipY:false};
       DATA.rooms.push(r);
     }
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
@@ -8719,8 +8949,12 @@ function buildUnityRenderPlan(){
     var interior=resolveInteriorWallAppearance(src);
     w.exteriorColor=exterior.color||null;
     w.exteriorTexture=exterior.texture||null;
+    w.exteriorTextureFlipX=!!exterior.textureFlipX;
+    w.exteriorTextureFlipY=!!exterior.textureFlipY;
     w.interiorColor=interior.color||null;
     w.interiorTexture=interior.texture||null;
+    w.interiorTextureFlipX=!!interior.textureFlipX;
+    w.interiorTextureFlipY=!!interior.textureFlipY;
     w.exteriorFaces=getWallExteriorSpans(src).map(function(face){
       var ap=resolveExteriorFaceAppearance(src,face);
       return {
@@ -8728,7 +8962,9 @@ function buildUnityRenderPlan(){
         b:face.b,
         sign:face.sign,
         color:ap.color||w.exteriorColor||null,
-        texture:ap.texture||w.exteriorTexture||null
+        texture:ap.texture||w.exteriorTexture||null,
+        textureFlipX:!!ap.textureFlipX,
+        textureFlipY:!!ap.textureFlipY
       };
     });
     w.interiorFaces=getWallInteriorFaces(src).map(function(face){
@@ -8738,7 +8974,9 @@ function buildUnityRenderPlan(){
         b:face.b,
         sign:face.sign,
         color:ap.color||w.interiorColor||null,
-        texture:ap.texture||w.interiorTexture||null
+        texture:ap.texture||w.interiorTexture||null,
+        textureFlipX:!!ap.textureFlipX,
+        textureFlipY:!!ap.textureFlipY
       };
     });
   });
@@ -8748,6 +8986,8 @@ function buildUnityRenderPlan(){
     var ap=resolveRoofAppearance(src);
     it.color=ap.color||it.color||'#2a2a30';
     it.texture=ap.texture||it.texture||null;
+    it.textureFlipX=!!ap.textureFlipX;
+    it.textureFlipY=!!ap.textureFlipY;
     it.renderBaseY=Math.round(floorBaseY(src.floor)/U);
     it.renderBaseNote='roof base is floor base height, not floor slab top';
   });
