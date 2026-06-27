@@ -1,15 +1,25 @@
-# ブラウザ保存（localStorage）設計
+# ブラウザ保存（IndexedDB）設計
 
 ## 概要
 
-現在の「保存」機能（JSONダウンロード）を、ブラウザのlocalStorageへの保存に変更する。
+現在の「保存」機能（JSONダウンロード）を、ブラウザ内ストレージへの保存に変更する。
 JSONダウンロードはバックアップ用として、インポートボタンの隣に残す。
+
+> **2026-06-27 更新**: 当初 localStorage で実装したが、プランに埋め込まれた
+> base64 テクスチャ（デフォルトでも約4.4MB）がモバイル Safari の localStorage
+> 容量（約5MB、UTF-16 換算で実質さらに半分）を超過し、`setItem` が
+> `QuotaExceededError` を投げて保存できなかった。容量が桁違いに大きい
+> **IndexedDB** に移行した。`StorageAdapter` 抽象のおかげで保存先のみ差し替え。
 
 ## データ
 
-- **localStorageキー**: `webcad-plan-v1`
-- **保存内容**: `exportPlan()` と同じ正規化済みJSON文字列
+- **DB名**: `webcad` / **オブジェクトストア**: `plans` / **キー**: `webcad-plan-v1`
+- **保存内容**: `exportPlan()` と同じ正規化済みJSON文字列（IndexedDB に文字列として put）
   - `normalizeLegacyFurnitureItems()`, `ensureObjectIds()`, `ensureExteriorWallSettings()`, `ensureInteriorWallSettings()`, `ensureRoofAppearance()`, `syncExteriorWallSettings()` を適用したもの
+- **旧 localStorage からの移行**: IndexedDB が空で、旧 `webcad-plan-v1` キーが
+  localStorage に残っている場合はそれを読み込む。次回保存時に localStorage 側は削除。
+- **非同期**: IndexedDB は Promise ベース。`StorageAdapter.save/load/hasData` と
+  それを呼ぶ `savePlanToStorage/loadPlanFromStorage/checkStorageOnInit` は `async`。
 
 ## 起動時の挙動
 

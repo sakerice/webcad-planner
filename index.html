@@ -3288,17 +3288,60 @@ var DATA = {walls:[], items:[], rooms:[], exteriorWallSettings:null, interiorWal
 var nextId = 1;
 var HISTORY = [];
 var DIRTY = false;
-var StorageAdapter = {
-  save: function(data){
-    try{ localStorage.setItem('webcad-plan-v1', JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;})); }catch(e){ alert('ブラウザ保存に失敗しました: '+e.message); }
-  },
-  load: function(){
-    try{ var s=localStorage.getItem('webcad-plan-v1'); return s?JSON.parse(s):null; }catch(e){ return null; }
-  },
-  hasData: function(){
-    try{ return !!localStorage.getItem('webcad-plan-v1'); }catch(e){ return false; }
+// Plans embed base64 textures (multiple MB), which overflow localStorage's
+// ~5MB quota on mobile Safari (counted as UTF-16). IndexedDB has a far larger
+// quota and is built for blob-sized data. All methods are async (Promise-based).
+var StorageAdapter = (function(){
+  var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
+  var LEGACY_LS_KEY='webcad-plan-v1';
+  function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }
+  function legacyGet(){ try{ var s=localStorage.getItem(LEGACY_LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+  function openDB(){
+    return new Promise(function(resolve,reject){
+      var req=indexedDB.open(DB_NAME,VERSION);
+      req.onupgradeneeded=function(){ var db=req.result; if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE); };
+      req.onsuccess=function(){ resolve(req.result); };
+      req.onerror=function(){ reject(req.error); };
+    });
   }
-};
+  function store(db,mode){ return db.transaction(STORE,mode).objectStore(STORE); }
+  return {
+    save: function(data){
+      var json=serialize(data);
+      return openDB().then(function(db){
+        return new Promise(function(resolve,reject){
+          var r=store(db,'readwrite').put(json,KEY);
+          r.onsuccess=function(){ try{ localStorage.removeItem(LEGACY_LS_KEY); }catch(e){} resolve(true); };
+          r.onerror=function(){ reject(r.error); };
+        });
+      });
+    },
+    load: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').get(KEY);
+          r.onsuccess=function(){
+            if(r.result){ try{ resolve(JSON.parse(r.result)); }catch(e){ resolve(null); } return; }
+            resolve(legacyGet());
+          };
+          r.onerror=function(){ resolve(legacyGet()); };
+        });
+      }).catch(function(){ return legacyGet(); });
+    },
+    hasData: function(){
+      return openDB().then(function(db){
+        return new Promise(function(resolve){
+          var r=store(db,'readonly').getKey(KEY);
+          r.onsuccess=function(){
+            if(r.result!==undefined && r.result!==null){ resolve(true); return; }
+            resolve(!!legacyGet());
+          };
+          r.onerror=function(){ resolve(!!legacyGet()); };
+        });
+      }).catch(function(){ return !!legacyGet(); });
+    }
+  };
+})();
 function markDirty(){
   DIRTY=true;
   var btn=document.getElementById('save-btn');
@@ -4529,7 +4572,6 @@ function init3D(){
         sc3.environment = pmrem.fromEquirectangular(hdrTex).texture;
         hdrTex.dispose(); pmrem.dispose();
         rebuild3D();
-        console.log('[WebCAD] HDR environment map loaded');
       }, undefined, function(err) {
         console.warn('[WebCAD] HDR load failed, using fallback lighting');
       });
@@ -8574,18 +8616,22 @@ function exportPlan(){
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
   a.download='plan.json';a.click();
 }
-function savePlanToStorage(){
+async function savePlanToStorage(){
   normalizeLegacyFurnitureItems();
   ensureObjectIds();
   ensureExteriorWallSettings();
   ensureInteriorWallSettings();
   ensureRoofAppearance();
   syncExteriorWallSettings();
-  StorageAdapter.save(DATA);
-  clearDirty();
+  try{
+    await StorageAdapter.save(DATA);
+    clearDirty();
+  }catch(e){
+    alert('ブラウザ保存に失敗しました: '+(e&&e.message?e.message:e));
+  }
 }
-function loadPlanFromStorage(){
-  var d=StorageAdapter.load();
+async function loadPlanFromStorage(){
+  var d=await StorageAdapter.load();
   if(!d) return false;
   DATA=d;
   ensureObjectIds();
@@ -8596,10 +8642,10 @@ function loadPlanFromStorage(){
   normalizeLegacyFurnitureItems();
   return true;
 }
-function checkStorageOnInit(){
-  if(!StorageAdapter.hasData()) return;
+async function checkStorageOnInit(){
+  if(!(await StorageAdapter.hasData())) return;
   if(confirm('前回保存したプランがあります。読み込みますか？')){
-    if(loadPlanFromStorage()){
+    if(await loadPlanFromStorage()){
       draw2d();
       if(ren) rebuild3D();
     }
