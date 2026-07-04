@@ -2585,6 +2585,9 @@ body{
           <label class="lock-category-toggle"><input id="lock-cat-floor" type="checkbox" onchange="setLockCategory('floor',this.checked)">床面</label>
           <label class="lock-category-toggle"><input id="lock-cat-base" type="checkbox" onchange="setLockCategory('base',this.checked)">基礎/敷地</label>
           <label class="lock-category-toggle"><input id="lock-cat-roof" type="checkbox" onchange="setLockCategory('roof',this.checked)">屋根</label>
+          <label class="lock-category-toggle"><input id="lock-cat-joinery" type="checkbox" onchange="setLockCategory('joinery',this.checked)">建具</label>
+          <label class="lock-category-toggle"><input id="lock-cat-fixtures" type="checkbox" onchange="setLockCategory('fixtures',this.checked)">住設</label>
+          <label class="lock-category-toggle"><input id="lock-cat-furniture" type="checkbox" onchange="setLockCategory('furniture',this.checked)">家具</label>
         </div>
       </div>
       <div class="mobile-only mobile-data-tools">
@@ -3272,11 +3275,41 @@ function setObjectLocked(obj,locked){
 function getAllLockableObjects(){
   return DATA.walls.concat(DATA.rooms,DATA.items);
 }
+var LOCK_FIXTURE_TYPES = {
+  bath:1,toilet:1,sink:1,kitchen:1,fridge:1,washer:1
+};
+var LOCK_FURNITURE_TYPES = {
+  sofa:1,loveseat_2p:1,low_table:1,'dining-table':1,dining_6:1,round_table_4:1,
+  'bed-d':1,'bed-s':1,semi_double_bed:1,futon_set:1,desk:1,tv:1,
+  'custom-block':1,closet:1,shoe_cabinet:1
+};
+function getLockFmpItem(it){
+  if(!it || !it.type) return null;
+  return getFmpItem(it.fmpId||it.type) || getFmpItem(bestFmpType(it.type));
+}
+function isLockFixtureItem(it){
+  if(!it || !it.type) return false;
+  var fmp=getLockFmpItem(it);
+  return !!(LOCK_FIXTURE_TYPES[it.type] || (fmp && fmp.group==='住設'));
+}
+function isLockFurnitureItem(it){
+  if(!it || !it.type) return false;
+  var fmp=getLockFmpItem(it);
+  return !!(LOCK_FURNITURE_TYPES[it.type] || (fmp && fmp.group==='家具' && !isBuildingComponentFmpItem(fmp)));
+}
+function isLockJoineryItem(it){
+  if(!it || !it.type) return false;
+  var fmp=getLockFmpItem(it);
+  return !!(isOpeningItemType(it.type) || (fmp && isBuildingComponentFmpItem(fmp)));
+}
 function getLockCategoryObjects(category){
   if(category==='wall') return DATA.walls.slice();
   if(category==='floor') return DATA.rooms.concat(DATA.items.filter(function(it){return it.type==='balcony';}));
   if(category==='base') return DATA.items.filter(function(it){return it.type==='site-rect'||it.type==='foundation';});
   if(category==='roof') return DATA.items.filter(function(it){return it.type==='roof';});
+  if(category==='joinery') return DATA.items.filter(isLockJoineryItem);
+  if(category==='fixtures') return DATA.items.filter(isLockFixtureItem);
+  if(category==='furniture') return DATA.items.filter(isLockFurnitureItem);
   return [];
 }
 function setLockOnObjects(list,locked){
@@ -3301,7 +3334,10 @@ function syncLockBatchUi(){
     ['wall','lock-cat-wall'],
     ['floor','lock-cat-floor'],
     ['base','lock-cat-base'],
-    ['roof','lock-cat-roof']
+    ['roof','lock-cat-roof'],
+    ['joinery','lock-cat-joinery'],
+    ['fixtures','lock-cat-fixtures'],
+    ['furniture','lock-cat-furniture']
   ].forEach(function(pair){
     var el=document.getElementById(pair[1]);
     if(!el) return;
