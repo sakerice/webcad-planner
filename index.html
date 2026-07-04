@@ -3233,6 +3233,31 @@ function drawFmpTopImage(img,item,dx,dy,dw,dh){
     ctx.drawImage(img,dx,dy,dw,dh);
   }
 }
+function getFmpTopBaseRotationRad(item){
+  if(item && /^im0261-/.test(item.id||'')) return 0;
+  return Math.PI;
+}
+function getFmpTopRotationRad(item){
+  var rot=getFmpTopBaseRotationRad(item);
+  if(item && item.topRot!==undefined && isFinite(+item.topRot)){
+    rot+=Number(item.topRot)*Math.PI/180;
+  }
+  var cfg=item ? GLTF_MODEL_CONFIG[item.id] : null;
+  if(cfg){
+    if(cfg.planRot!==undefined) rot+=cfg.planRot;
+    else if(cfg.rotY!==undefined) rot-=cfg.rotY;
+  }
+  return rot;
+}
+function drawFmpTopImageOriented(img,item,w,h){
+  var rot=getFmpTopRotationRad(item);
+  var quarter=Math.round(rot/(Math.PI/2));
+  var oddQuarter=Math.abs(quarter)%2===1;
+  ctx.save();
+  if(rot) ctx.rotate(rot);
+  drawFmpTopImage(img,item,-(oddQuarter?h:w)/2,-(oddQuarter?w:h)/2,oddQuarter?h:w,oddQuarter?w:h);
+  ctx.restore();
+}
 function showAssetPreview(el,e){
   var pv=document.getElementById('asset-preview'); if(!pv) return;
   var img=pv.querySelector('img'), label=pv.querySelector('div');
@@ -4852,10 +4877,7 @@ function drawItem2d(it){
     var topImg=getFmpTopImage(fmp);
     var hwF=it.w*sc/2, hdF=it.d*sc/2;
     if(topImg && topImg.complete && topImg.naturalWidth>0){
-      ctx.save();
-      ctx.rotate(Math.PI);
-      drawFmpTopImage(topImg,fmp,-hwF,-hdF,it.w*sc,it.d*sc);
-      ctx.restore();
+      drawFmpTopImageOriented(topImg,fmp,it.w*sc,it.d*sc);
     } else {
       ctx.fillStyle='rgba(210,215,225,0.72)';
       ctx.fillRect(-hwF,-hdF,it.w*sc,it.d*sc);
