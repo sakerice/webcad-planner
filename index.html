@@ -2472,6 +2472,57 @@ body{
   line-height:1.2!important;
   white-space:normal!important;
 }
+.lock-tools{
+  margin-top:8px!important;
+  padding-top:8px!important;
+  border-top:1px solid var(--hp-border,#24385f)!important;
+}
+.lock-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:6px!important;
+  margin-bottom:7px!important;
+}
+.lock-actions .pbtn{
+  margin:0!important;
+  min-height:36px!important;
+  padding:7px 8px!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+}
+.lock-category-grid{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:5px!important;
+}
+.lock-category-toggle,.lock-control-label{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-height:30px!important;
+  padding:6px 7px!important;
+  border:1px solid var(--hp-border,#24385f)!important;
+  border-radius:6px!important;
+  background:rgba(255,255,255,0.72)!important;
+  color:var(--hp-text,#cce)!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  cursor:pointer!important;
+}
+.lock-category-toggle input,.lock-control-label input{flex-shrink:0!important}
+.lock-status-note{
+  font-size:9px!important;
+  line-height:1.35!important;
+  color:var(--hp-muted,#7a8fb0)!important;
+  margin-top:5px!important;
+}
+#props-body.is-locked input:not([data-lock-control]),
+#props-body.is-locked select,
+#props-body.is-locked textarea,
+#props-body.is-locked button{
+  opacity:.48!important;
+  cursor:not-allowed!important;
+}
 .note-textarea{
   border-radius:12px!important;
   min-height:156px!important;
@@ -2522,6 +2573,19 @@ body{
         <div class="stool" onclick="pasteCopiedFromButton()"><span class="sicon">▣</span>ペースト</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')"><span class="sicon">↔</span>定規</div>
+      </div>
+      <div class="lock-tools">
+        <div class="mobile-data-title">ロック管理</div>
+        <div class="lock-actions">
+          <button class="pbtn sec" type="button" onclick="setAllObjectLocks(true)">全てロック</button>
+          <button class="pbtn sec" type="button" onclick="setAllObjectLocks(false)">全解除</button>
+        </div>
+        <div class="lock-category-grid">
+          <label class="lock-category-toggle"><input id="lock-cat-wall" type="checkbox" onchange="setLockCategory('wall',this.checked)">壁面</label>
+          <label class="lock-category-toggle"><input id="lock-cat-floor" type="checkbox" onchange="setLockCategory('floor',this.checked)">床面</label>
+          <label class="lock-category-toggle"><input id="lock-cat-base" type="checkbox" onchange="setLockCategory('base',this.checked)">基礎/敷地</label>
+          <label class="lock-category-toggle"><input id="lock-cat-roof" type="checkbox" onchange="setLockCategory('roof',this.checked)">屋根</label>
+        </div>
       </div>
       <div class="mobile-only mobile-data-tools">
         <div class="mobile-data-title">データ管理</div>
@@ -2885,6 +2949,11 @@ function getItemDefaultSize(type){
   if(fmp) return {w:fmp.w||900,d:fmp.d||900,h:fmp.h||600};
   return ISIZES[type]||{w:900,d:900};
 }
+function hasCustomPlanSize(it){
+  if(!it || it.w===undefined || it.d===undefined) return false;
+  var sz=getItemDefaultSize(it.type);
+  return Math.abs((it.w||0)-(sz.w||0))>1 || Math.abs((it.d||0)-(sz.d||0))>1;
+}
 function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
@@ -3192,6 +3261,75 @@ var RULER_THICKNESS_MM = 120;
 function isPlanAnnotationType(type){
   return type==='memo' || type==='ruler';
 }
+function isObjectLocked(obj){
+  return !!(obj && obj.locked);
+}
+function setObjectLocked(obj,locked){
+  if(!obj) return;
+  if(locked) obj.locked=true;
+  else delete obj.locked;
+}
+function getAllLockableObjects(){
+  return DATA.walls.concat(DATA.rooms,DATA.items);
+}
+function getLockCategoryObjects(category){
+  if(category==='wall') return DATA.walls.slice();
+  if(category==='floor') return DATA.rooms.concat(DATA.items.filter(function(it){return it.type==='balcony';}));
+  if(category==='base') return DATA.items.filter(function(it){return it.type==='site-rect'||it.type==='foundation';});
+  if(category==='roof') return DATA.items.filter(function(it){return it.type==='roof';});
+  return [];
+}
+function setLockOnObjects(list,locked){
+  var changed=list.filter(function(obj){return isObjectLocked(obj)!==!!locked;});
+  if(!changed.length){ syncLockBatchUi(); return; }
+  saveState();
+  changed.forEach(function(obj){ setObjectLocked(obj,locked); });
+  if(ST.selected && changed.indexOf(ST.selected)>=0) updateProps();
+  syncLockBatchUi();
+  draw2d();
+  if(ren) rebuild3D();
+}
+function setAllObjectLocks(locked){
+  setLockOnObjects(getAllLockableObjects(),locked);
+  closeMobilePanels();
+}
+function setLockCategory(category,locked){
+  setLockOnObjects(getLockCategoryObjects(category),locked);
+}
+function syncLockBatchUi(){
+  [
+    ['wall','lock-cat-wall'],
+    ['floor','lock-cat-floor'],
+    ['base','lock-cat-base'],
+    ['roof','lock-cat-roof']
+  ].forEach(function(pair){
+    var el=document.getElementById(pair[1]);
+    if(!el) return;
+    var objs=getLockCategoryObjects(pair[0]);
+    var lockedCount=objs.filter(isObjectLocked).length;
+    el.checked=objs.length>0 && lockedCount===objs.length;
+    el.indeterminate=lockedCount>0 && lockedCount<objs.length;
+    el.disabled=objs.length===0;
+  });
+}
+function selectedLockControlHtml(it){
+  var locked=isObjectLocked(it);
+  var html='<div class="pr"><label class="lock-control-label">';
+  html+='<input data-lock-control type="checkbox" '+(locked?'checked':'')+' onchange="updateSelectedProp(\'locked\',this.checked)">編集をロック';
+  html+='</label>';
+  if(locked) html+='<div class="lock-status-note">ロック中です。解除するまで削除・移動・寸法/座標変更はできません。</div>';
+  html+='</div>';
+  return html;
+}
+function setPropsBodyHtml(body,html,it){
+  body.innerHTML=html;
+  body.classList.toggle('is-locked',isObjectLocked(it));
+  if(!isObjectLocked(it)) return;
+  body.querySelectorAll('input,select,textarea,button').forEach(function(el){
+    if(el.hasAttribute('data-lock-control')) return;
+    el.disabled=true;
+  });
+}
 
 function getEdgeCandidates(excludeId){
   var cx={}, cy={};  // deduplicate
@@ -3322,6 +3460,7 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
 function updateProps(){
   var body = document.getElementById('props-body');
   if(!ST.selected) {
+    body.classList.remove('is-locked');
     document.getElementById('props').classList.remove('show');
     return;
   }
@@ -3345,12 +3484,13 @@ function updateProps(){
   if(!propsEl.classList.contains('prop-expanded')&&!isMobileLayout()){
     // desktop: always show body
   }
+  html += selectedLockControlHtml(it);
   if(it.type==='memo'){
     html += '<div class="ph">メモ</div>';
     html += '<div class="pr"><div class="pl">テキスト</div><textarea class="pi note-textarea" oninput="updateSelectedNoteText(this.value)" onblur="finishSelectedNoteText()">'+escHtml(it.noteText||'')+'</textarea></div>';
     html += '<div class="pr"><div class="pl">背景色</div><input class="pi" type="color" value="'+(it.color||'#fff3a6')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
-    body.innerHTML = html;
+    setPropsBodyHtml(body,html,it);
     return;
   }
   if(it.type==='ruler'){
@@ -3358,7 +3498,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">測定長さ</div><input class="pi" type="text" value="'+Math.round(rulerLengthMm(it))+'mm" readonly></div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
-    body.innerHTML = html;
+    setPropsBodyHtml(body,html,it);
     return;
   }
   html += '<div class="pr"><div class="pl">ID</div><input class="pi" type="text" value="'+objectIdLabel(it)+'" readonly></div>';
@@ -3433,7 +3573,7 @@ function updateProps(){
       }
     }
     html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
-    body.innerHTML = html;
+    setPropsBodyHtml(body,html,it);
     return;
   }
   
@@ -3590,11 +3730,20 @@ function updateProps(){
   }
   
   html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
-  body.innerHTML = html;
+  setPropsBodyHtml(body,html,it);
 }
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
+  if(isObjectLocked(ST.selected) && p!=='locked'){ updateProps(); return; }
   if(!noSave) saveState();
+  if(p==='locked'){
+    setObjectLocked(ST.selected,!!v);
+    syncLockBatchUi();
+    draw2d();
+    if(ren) rebuild3D();
+    updateProps();
+    return;
+  }
   if(p==='color') ST.selected.colorCustom=true;
   if(p==='texture'){
     if(ST.selected._texObj) ST.selected._texObj=null;
@@ -3621,6 +3770,7 @@ function updateSelectedProp(p,v,noSave){
 }
 function updateSelectedNoteText(v){
   if(!ST.selected || ST.selected.type!=='memo') return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
   if(!ST._noteTextEditing){
     saveState();
     ST._noteTextEditing=true;
@@ -3635,6 +3785,7 @@ function finishSelectedNoteText(){
 }
 function updateOpeningModel(modelId){
   if(!ST.selected || !isOpeningItemType(ST.selected.type)) return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
   saveState();
   applyOpeningModelToItem(ST.selected,modelId);
   draw2d();
@@ -3666,6 +3817,7 @@ function applyOpeningModelToItem(it,modelId){
   }
 }
 function uploadTex(inp){
+  if(ST.selected && isObjectLocked(ST.selected)){ updateProps(); return; }
   var file=inp.files[0]; if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
@@ -4110,7 +4262,9 @@ function draw2d(){
   drawRoomLbls();
   if(ST.drawing&&ST.drawPts.length>0) drawPreview();
   if(ST.showDim) drawDim();
+  drawLockOverlays(fw,fi);
   document.getElementById('st-walls').textContent='壁:'+fw.length;
+  syncLockBatchUi();
   // ── Snap guide lines ──
   if(ST._snapState&&DRAG.active){
     var sc3=ST.zoom*0.05;
@@ -4209,6 +4363,37 @@ function drawWall2d(w){
     ctx.strokeStyle='#555'; ctx.lineWidth=2.0; ctx.stroke();
   }
   ctx.restore();
+}
+
+function drawLockBadgePx(cx,cy){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.fillStyle='rgba(22,33,62,0.88)';
+  ctx.strokeStyle='rgba(255,255,255,0.9)';
+  ctx.lineWidth=1;
+  ctx.fillRect(-9,-9,18,18);
+  ctx.strokeRect(-9,-9,18,18);
+  ctx.fillStyle='#ffffff';
+  ctx.font='12px "Noto Sans JP",sans-serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText('🔒',0,0);
+  ctx.restore();
+}
+
+function drawLockOverlays(fw,fi){
+  DATA.rooms.filter(function(r){return r.floor===ST.floor && isObjectLocked(r);}).forEach(function(r){
+    var p=w2c(r.x+r.w/2,r.y+r.d/2);
+    drawLockBadgePx(p.cx,p.cy);
+  });
+  fw.filter(isObjectLocked).forEach(function(w){
+    var p=w2c((w.x1+w.x2)/2,(w.y1+w.y2)/2);
+    drawLockBadgePx(p.cx,p.cy);
+  });
+  fi.filter(isObjectLocked).forEach(function(it){
+    var p=w2c((it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
+    drawLockBadgePx(p.cx,p.cy);
+  });
 }
 
 function isOpeningItemType(type){
@@ -4948,6 +5133,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
   ctx.translate(ccx,ccy); ctx.rotate((rotOverride!==undefined?rotOverride:(o.rot||0))*Math.PI/180);
   ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.setLineDash([4,2]);
   ctx.strokeRect(-hw,-hd,hw*2,hd*2); ctx.setLineDash([]);
+  if(isObjectLocked(o)){ ctx.restore(); return; }
   // corners: square (aspect-ratio locked resize), edges: circle (single-axis resize)
   var corners=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]];
   var edges=[[0,-hd],[hw,0],[0,hd],[-hw,0]];
@@ -4967,6 +5153,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
 }
 
 function drawWallHandles(w){
+  if(isObjectLocked(w)) return;
   var a=w2c(w.x1,w.y1), b=w2c(w.x2,w.y2);
   ctx.save();
   ctx.strokeStyle='#3080e8'; ctx.fillStyle='#fff'; ctx.lineWidth=1.8;
@@ -5061,6 +5248,7 @@ function snapWallAnglePoint(anchor, point, e, opts){
 function applyWallDrag(cx,cy,e){
   var w=ST.selected;
   if(!w||!DRAG.origItem) return;
+  if(isObjectLocked(w)){ DRAG.active=false; return; }
   if(!DRAG.saved){saveState();DRAG.saved=true;}
   var p=c2w(cx,cy), sx=snapV(p.x), sy=snapV(p.y);
   var fixed=DRAG.handle==='wall-a'?{x:DRAG.origItem.x2,y:DRAG.origItem.y2}:{x:DRAG.origItem.x1,y:DRAG.origItem.y1};
@@ -5119,6 +5307,7 @@ function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
 function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
+  if(isObjectLocked(it)){ DRAG.active=false; return; }
   if(h==='wall-a'||h==='wall-b'){applyWallDrag(cx,cy,e);return;}
   if(!DRAG.saved){saveState(); DRAG.saved=true;}
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
@@ -5157,26 +5346,7 @@ function applyHandleDrag(cx,cy,e){
 
     var isCorner=h.length===2; // 'nw','ne','se','sw' are 2 chars; 'n','s','e','w' are 1 char
     var freeCornerResize = isStairPartType(it.type) || isCustomBlockType(it.type);
-    var lockAspect = isFmpItemType(it.type);
-    if(lockAspect && o.w>0 && o.d>0){
-      var aspect=o.d/o.w;
-      if(h==='e'||h==='w'){
-        if(h==='e') nw=o.w+ldx;
-        if(h==='w') nw=o.w-ldx;
-        nd=nw*aspect;
-      } else if(h==='n'||h==='s'){
-        if(h==='s') nd=o.d+ldy;
-        if(h==='n') nd=o.d-ldy;
-        nw=nd/aspect;
-      } else {
-        var hw=o.w/2, hd=o.d/2;
-        var dirX=(h.indexOf('e')>=0)?hw:-hw;
-        var dirY=(h.indexOf('s')>=0)?hd:-hd;
-        var scale=1+(ldx*dirX+ldy*dirY)/(hw*hw+hd*hd);
-        scale=Math.max(scale,0.1);
-        nw=o.w*scale; nd=o.d*scale;
-      }
-    } else if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
+    if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner drag: maintain aspect ratio via diagonal projection
       var hw=o.w/2, hd=o.d/2;
       var dirX=(h.indexOf('e')>=0)?hw:-hw;
@@ -5195,7 +5365,7 @@ function applyHandleDrag(cx,cy,e){
     // Grid snap is the default; Shift enables object-edge snap after grid rounding.
     var snapG=ST.snap||0;
     var minSz=snapG||100;
-    if((lockAspect || (isCorner && !freeCornerResize)) && o.w>0 && o.d>0){
+    if(isCorner && !freeCornerResize && o.w>0 && o.d>0){
       // Corner: snap width, derive height from ratio, enforce minimums while keeping ratio
       if(snapG) nw=Math.round(nw/snapG)*snapG;
       nw=Math.max(minSz,nw);
@@ -5224,7 +5394,7 @@ function applyHandleDrag(cx,cy,e){
 
     // Edge snap for resize — axis-aligned items only (rot near 0/90/180/270); skip for corners (would break ratio)
     var isAxisAligned=Math.abs((o.rot||0)%90)<4;
-    if(isShiftLike(e)&&!isCorner&&!lockAspect&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'&&!isStairPartType(it.type)){
+    if(isShiftLike(e)&&!isCorner&&isAxisAligned&&it.type!=='wall'&&it.type!=='room'&&!isStairPartType(it.type)){
       var res=applyResizeEdgeSnap(h,o,nx,ny,nw,nd,it.id);
       nx=res.nx; ny=res.ny; nw=res.nw; nd=res.nd;
       ST._snapState=res.snapState;
@@ -5670,7 +5840,7 @@ function canMoveRefVertically3D(ref){
   return !!(ref && ref.x!==undefined && ref.y!==undefined && canSetItemElevation(ref));
 }
 function add3DMoveGizmo(){
-  if(!sc3 || !ST.selected || !canMoveRef3D(ST.selected) || ST.tool!=='select') return;
+  if(!sc3 || !ST.selected || !canMoveRef3D(ST.selected) || ST.tool!=='select' || isObjectLocked(ST.selected)) return;
   var box=getSelectionBox3D(ST.selected);
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
@@ -5738,6 +5908,7 @@ function getGizmoDragBasis(axis,ref){
 
 function start3DGizmoDrag(e){
   if(ST.tool!=='select' || !ST.selected || !canMoveRef3D(ST.selected)) return false;
+  if(isObjectLocked(ST.selected)) return false;
   var axis=pickGizmoAxis3D(e);
   if(!axis) return false;
   if(axis==='y' && !canMoveRefVertically3D(ST.selected)) return false;
@@ -5755,6 +5926,7 @@ function start3DGizmoDrag(e){
 function apply3DGizmoDrag(e){
   var gd=GIZMO_DRAG, ref=gd.ref;
   if(!gd.active || !ref) return;
+  if(isObjectLocked(ref)){ finish3DGizmoDrag(); return; }
   if(!gd.saved){saveState(); gd.saved=true;}
   var basis=getGizmoDragBasis(gd.axis,ref);
   if(!basis || !gd.orig) return;
@@ -8037,7 +8209,7 @@ function buildItem3D(it){
   if(isFmpItemType(it.type)){
     var fmp=getFmpItem(it.type);
     if(fmp && ensureGltfModel(fmp.model)){
-      var fmpClone=makeGltfClone(fmp.model,it.w*U,it.d*U,null);
+      var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
       grp.add(fmpClone);
       mark3DSelectable(grp,it,'item'); sc3.add(grp);
@@ -8097,12 +8269,14 @@ function buildItem3D(it){
         var clone;
         if(cfg.nativeScale){
           clone = makeGltfNativeClone(modelUrl,it.colorCustom?it.color:null,cfg);
-        } else if(cfg.uniformFit){
+        } else if(cfg.uniformFit && !hasCustomPlanSize(it)){
           clone = makeGltfUniformFitClone(modelUrl,it.w*U,it.d*U,it.colorCustom?it.color:null,cfg);
         } else {
           var targetSize=getGltfTargetSize(it.type,it.w*U,it.d*U);
-          clone = makeGltfClone(modelUrl,targetSize.w,targetSize.d,it.colorCustom?it.color:null);
-          applyGltfModelConfig(clone,it.type);
+          clone = cfg.uniformFit
+            ? makeGltfBoxFitClone(modelUrl,targetSize.w,getItemHeightValue(it)*U,targetSize.d,it.colorCustom?it.color:null,cfg)
+            : makeGltfClone(modelUrl,targetSize.w,targetSize.d,it.colorCustom?it.color:null);
+          if(!cfg.uniformFit) applyGltfModelConfig(clone,it.type);
         }
         grp.add(clone);
         mark3DSelectable(grp,it,'item'); sc3.add(grp);
@@ -9045,6 +9219,7 @@ function applyOpeningPresetToItem(it,preset){
 function chooseOpeningModelTool(t){
   var preset=getOpeningModelToolPreset(t);
   if(preset && ST.selected && canApplyOpeningPresetToItem(ST.selected,preset)){
+    if(isObjectLocked(ST.selected)){ updateProps(); return; }
     saveState();
     applyOpeningPresetToItem(ST.selected,preset);
     updateProps();
@@ -9119,7 +9294,7 @@ canvas.onmousedown=function(e){
 };
 
 function handleSelectDown(cx,cy,wx,wy,e){
-  if(ST.selected&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
+  if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
     var wh=hitWallHandle(ST.selected,cx,cy);
     if(wh){
       DRAG.active=true;DRAG.saved=false;DRAG.handle=wh;
@@ -9128,7 +9303,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
       return;
     }
   }
-  if(ST.selected&&ST.selected.thick===undefined){
+  if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.thick===undefined){
     var h=hitHandle(ST.selected,cx,cy);
     if(h){
       DRAG.active=true;DRAG.saved=false; DRAG.handle=h;
@@ -9149,17 +9324,22 @@ function handleSelectDown(cx,cy,wx,wy,e){
       return b.idx-a.idx;
     });
     var picked=hits[0].item;
-    ST.selected=picked; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-    DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(picked));
+    ST.selected=picked;
+    if(!isObjectLocked(picked)){
+      DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+      DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(picked));
+    }
     updateProps(); draw2d(); return;
   }
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   for(var i=fr.length-1;i>=0;i--){
     if(isNearRoomLabel(fr[i],cx,cy)){
       ST.selected=fr[i];
-      DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-      DRAG.startCX=cx; DRAG.startCY=cy;
-      DRAG.origItem=JSON.parse(JSON.stringify(fr[i]));
+      if(!isObjectLocked(fr[i])){
+        DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+        DRAG.startCX=cx; DRAG.startCY=cy;
+        DRAG.origItem=JSON.parse(JSON.stringify(fr[i]));
+      }
       updateProps(); draw2d();return;
     }
   }
@@ -9173,16 +9353,22 @@ function handleSelectDown(cx,cy,wx,wy,e){
     var allSites = DATA.items.filter(function(i){return i.type==='site-rect';});
     for(var i=allSites.length-1;i>=0;i--){
       if(isNearItemBorder(allSites[i],wx,wy)){
-        ST.selected=allSites[i]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-        DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(allSites[i]));
+        ST.selected=allSites[i];
+        if(!isObjectLocked(allSites[i])){
+          DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+          DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(allSites[i]));
+        }
         updateProps(); draw2d(); return;
       }
     }
     var foundations = DATA.items.filter(function(i){return i.type==='foundation';});
     for(var f=foundations.length-1;f>=0;f--){
       if(isNearItemBorder(foundations[f],wx,wy)){
-        ST.selected=foundations[f]; DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
-        DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(foundations[f]));
+        ST.selected=foundations[f];
+        if(!isObjectLocked(foundations[f])){
+          DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
+          DRAG.startCX=cx; DRAG.startCY=cy; DRAG.origItem=JSON.parse(JSON.stringify(foundations[f]));
+        }
         updateProps(); draw2d(); return;
       }
     }
@@ -9305,15 +9491,24 @@ function placeItem(type,wx,wy){
 function handleErase(wx,wy){
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
   for(var i=fw.length-1;i>=0;i--){
-    if(nearWall(wx,wy,fw[i])){saveState();DATA.walls=DATA.walls.filter(function(w){return w!==fw[i];});draw2d();if(ren)build3D();return;}
+    if(nearWall(wx,wy,fw[i])){
+      if(isObjectLocked(fw[i])){ ST.selected=fw[i]; updateProps(); draw2d(); return; }
+      saveState();DATA.walls=DATA.walls.filter(function(w){return w!==fw[i];});draw2d();if(ren)build3D();return;
+    }
   }
   var fi=DATA.items.filter(function(it){return it.floor===ST.floor;});
   for(var i=fi.length-1;i>=0;i--){
-    if(isInsideItem(fi[i],wx,wy)){saveState();DATA.items=DATA.items.filter(function(x){return x!==fi[i];});draw2d();if(ren)build3D();return;}
+    if(isInsideItem(fi[i],wx,wy)){
+      if(isObjectLocked(fi[i])){ ST.selected=fi[i]; updateProps(); draw2d(); return; }
+      saveState();DATA.items=DATA.items.filter(function(x){return x!==fi[i];});draw2d();if(ren)build3D();return;
+    }
   }
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   for(var i=fr.length-1;i>=0;i--){
-    if(isInsideItem(fr[i],wx,wy)){saveState();DATA.rooms=DATA.rooms.filter(function(x){return x!==fr[i];});draw2d();if(ren)build3D();return;}
+    if(isInsideItem(fr[i],wx,wy)){
+      if(isObjectLocked(fr[i])){ ST.selected=fr[i]; updateProps(); draw2d(); return; }
+      saveState();DATA.rooms=DATA.rooms.filter(function(x){return x!==fr[i];});draw2d();if(ren)build3D();return;
+    }
   }
 }
 function isNearRoomLabel(r, cx, cy){
@@ -9653,14 +9848,20 @@ function drawDim(){
 
 function delSel(){
   if(!ST.selected && !ST.selectAll)return;
-  saveState();
   if(ST.selectAll){
-    DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor;});
-    DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor;});
-    DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor;});
+    var willDelete=DATA.walls.some(function(w){return w.floor===ST.floor && !isObjectLocked(w);}) ||
+      DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);}) ||
+      DATA.items.some(function(i){return i.floor===ST.floor && !isObjectLocked(i);});
+    if(!willDelete){ ST.selectAll=false; draw2d(); return; }
+    saveState();
+    DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor || isObjectLocked(w);});
+    DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor || isObjectLocked(r);});
+    DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
     ST.selectAll=false;
   } else {
     var it=ST.selected;
+    if(isObjectLocked(it)){ updateProps(); draw2d(); return; }
+    saveState();
     DATA.walls=DATA.walls.filter(function(w){return w!==it;});
     DATA.rooms=DATA.rooms.filter(function(r){return r!==it;});
     DATA.items=DATA.items.filter(function(i){return i!==it;});
@@ -9673,6 +9874,7 @@ function delSel(){
 
 function sendSelectedToBack(){
   if(!ST.selected) return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
   var idx=DATA.items.indexOf(ST.selected);
   if(idx<0) return;
   saveState();
@@ -9703,6 +9905,7 @@ function pasteCopiedObject(){
   saveState();
   CLIPBOARD.count++;
   var cp=JSON.parse(JSON.stringify(CLIPBOARD.data));
+  delete cp.locked;
   var off=Math.max(200, ST.snap||10)*CLIPBOARD.count;
   cp.id = CLIPBOARD.kind==='room' ? 'rm'+(nextId++) : nextId++;
   if(CLIPBOARD.kind==='wall'){
@@ -9758,6 +9961,7 @@ window.addEventListener('keydown', function(e){
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
   if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
     e.preventDefault();
+    if(isObjectLocked(ST.selected)){ updateProps(); return; }
     saveState();
     var step=ST.snap||1, dx=0, dy=0;
     if(e.key==='ArrowLeft') dx=-step;
@@ -9774,8 +9978,8 @@ window.addEventListener('keydown', function(e){
   }
   if(e.key === 'Backspace' || e.key === 'Delete'){ if(ST.selected){ e.preventDefault(); delSel(); } }
   if(e.key.toLowerCase() === 'r') { ST.placingRot = (ST.placingRot + 90) % 360; draw2d(); }
-  if(e.key.toLowerCase() === 'f') { if(ST.selected) { ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
-  if(e.key.toLowerCase() === 'v') { if(ST.selected) { ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
 });
 window.addEventListener('keyup', function(e){
   if(e.key==='Shift'){ST.shiftKey=false; ST.ctrlKey=false; draw2d();}
@@ -9788,12 +9992,18 @@ window.addEventListener('resize',function(){
 });
 
 function clearFloor(){
-  if(!confirm(ST.floor+'Fの全要素を削除しますか？'))return;
+  var willDelete=DATA.walls.some(function(w){return w.floor===ST.floor && !isObjectLocked(w);}) ||
+    DATA.items.some(function(i){return i.floor===ST.floor && !isObjectLocked(i);}) ||
+    DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);});
+  if(!willDelete) return;
+  if(!confirm(ST.floor+'Fの未ロック要素を削除しますか？\nロック済みの要素は残ります。'))return;
   saveState();
-  DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor;});
-  DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor;});
-  DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor;});
+  DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor || isObjectLocked(w);});
+  DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
+  DATA.rooms=DATA.rooms.filter(function(r){return r.floor!==ST.floor || isObjectLocked(r);});
   ST.selected=null;document.getElementById('props').classList.remove('show');
+  syncExteriorWallSettings();
+  syncLockBatchUi();
   draw2d();if(ren)rebuild3D();
 }
 
