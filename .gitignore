@@ -1,0 +1,19 @@
+.DS_Store
+
+# Local build output
+dist/
+
+# Browser automation artifacts
+.playwright-mcp/
+
+# Runtime and tool logs
+*.log
+
+# Generated sprite analysis output
+assets/japanese_floorplan_parts_sprite_gpt_cropped.json
+
+# Local scratch workspace
+scratch/
+
+# Dependency installs
+node_modules/
