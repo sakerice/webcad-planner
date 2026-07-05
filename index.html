@@ -2612,6 +2612,7 @@ body{
         <div class="stool" onclick="pasteCopiedFromButton()"><span class="sicon">▣</span>ペースト</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')"><span class="sicon">↔</span>定規</div>
+        <div class="stool" data-tool="walk-route" onclick="setTool('walk-route')"><span class="sicon">↝</span>ウォーク</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -2628,6 +2629,7 @@ body{
             <label class="lock-category-toggle"><input id="lock-cat-joinery" type="checkbox" onchange="setLockCategory('joinery',this.checked)">建具</label>
             <label class="lock-category-toggle"><input id="lock-cat-fixtures" type="checkbox" onchange="setLockCategory('fixtures',this.checked)">住設</label>
             <label class="lock-category-toggle"><input id="lock-cat-furniture" type="checkbox" onchange="setLockCategory('furniture',this.checked)">家具</label>
+            <label class="lock-category-toggle"><input id="lock-cat-walk" type="checkbox" onchange="setLockCategory('walk',this.checked)">ウォーク</label>
           </div>
         </div>
       </details>
@@ -2730,14 +2732,21 @@ body{
     <div id="wall-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.96);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:260px;max-width:360px;max-height:78vh;overflow:auto">
       <div id="exterior-wall-panel-body"></div>
     </div>
-    <div id="light-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:190px">
+    <div id="light-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:220px">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">💡 ライト調整</div>
+      <div style="font-size:10px;color:#7a8fb0;margin-bottom:4px">時間帯 <span id="light-mode-label">昼</span></div>
+      <div id="light-preset-buttons" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <button id="light-preset-morning" type="button" class="pbtn sec" onclick="applyLightPreset('morning')" style="margin-top:0;padding:6px 4px">朝</button>
+        <button id="light-preset-day" type="button" class="pbtn sec" onclick="applyLightPreset('day')" style="margin-top:0;padding:6px 4px">昼</button>
+        <button id="light-preset-evening" type="button" class="pbtn sec" onclick="applyLightPreset('evening')" style="margin-top:0;padding:6px 4px">夕方</button>
+        <button id="light-preset-night" type="button" class="pbtn sec" onclick="applyLightPreset('night')" style="margin-top:0;padding:6px 4px">夜</button>
+      </div>
       <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.25</span></div>
-      <input type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
+      <input id="light-room" type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
       <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.22</span></div>
-      <input type="range" min="0" max="1.2" step="0.05" value="0.22" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
+      <input id="light-ambient" type="range" min="0" max="1.2" step="0.05" value="0.22" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
       <div style="font-size:10px;color:#7a8fb0">太陽光 <span id="light-sun-val">0.65</span></div>
-      <input type="range" min="0" max="2" step="0.05" value="0.65" style="width:100%" oninput="updateLightSetting('sun',+this.value)">
+      <input id="light-sun" type="range" min="0" max="2" step="0.05" value="0.65" style="width:100%" oninput="updateLightSetting('sun',+this.value)">
       <button class="pbtn" onclick="document.getElementById('light-panel').style.display='none'" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wasd">WASD/矢印:移動 | ドラッグ:視点回転 | ESC:戻る</div>
@@ -2847,7 +2856,33 @@ var FLOOR_SLAB_H = 180;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
-var LIGHT_SETTINGS = {hemi:0.45, sun:0.65, ambient:0.22, room:0.25, exposure:0.95, env:0.55};
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.45, sun:0.65, ambient:0.22, room:0.25, exposure:0.95, env:0.55};
+var LIGHT_PRESETS = {
+  morning:{
+    label:'朝',hemi:0.36,sun:0.58,ambient:0.24,room:0.28,exposure:0.92,env:0.42,
+    sunColor:'#ffd6a3',ambientColor:'#fff2df',hemiSky:'#d7ecff',hemiGround:'#8f7a66',
+    sunPos:{x:-120,y:78,z:85},fogColor:0xd6e7f1,fogNear:70,fogFar:470,interiorBg:0x151821,
+    sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
+  },
+  day:{
+    label:'昼',hemi:0.45,sun:0.65,ambient:0.22,room:0.25,exposure:0.95,env:0.55,
+    sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
+    sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
+    sky:{top:'#4e91ff',mid:'#82bdff',horizon:'#d4ecff',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
+  },
+  evening:{
+    label:'夕方',hemi:0.28,sun:0.5,ambient:0.26,room:0.38,exposure:0.86,env:0.36,
+    sunColor:'#ffad62',ambientColor:'#ffe4cc',hemiSky:'#b8a5d8',hemiGround:'#6c5142',
+    sunPos:{x:150,y:46,z:-90},fogColor:0xd8a878,fogNear:65,fogFar:430,interiorBg:0x18131a,
+    sky:{top:'#4d5f91',mid:'#a06f9e',horizon:'#f0a85e',ground:'#5c4a54',sunX:0.82,sunY:0.55,sunCore:'rgba(255,230,186,0.9)',sunGlow:'rgba(255,128,50,0.5)',haze:'rgba(255,145,72,0.38)',cloudAlpha:0.46}
+  },
+  night:{
+    label:'夜',hemi:0.18,sun:0.08,ambient:0.12,room:0.68,exposure:0.78,env:0.18,
+    sunColor:'#c9dcff',ambientColor:'#c9d7ff',hemiSky:'#1d2b5d',hemiGround:'#11131d',
+    sunPos:{x:-70,y:110,z:-120},fogColor:0x1b2544,fogNear:50,fogFar:330,interiorBg:0x070913,
+    sky:{top:'#071028',mid:'#14224c',horizon:'#26365f',ground:'#0b1020',sunX:0.2,sunY:0.23,sunCore:'rgba(222,235,255,0.78)',sunGlow:'rgba(105,145,255,0.24)',haze:'rgba(35,50,95,0.42)',cloudAlpha:0.14}
+  }
+};
 var INTERIOR_WALL_DEFAULT = '#f4f0e8';
 
 function foundationHeightMm(){
@@ -2895,7 +2930,7 @@ var ISIZES = {
   'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
   'custom-block':{w:900,d:450},
-  memo:{w:760,d:460},
+  memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
@@ -2909,7 +2944,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', memo:'#fff3a6', ruler:'#2f80ed', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -3041,25 +3076,6 @@ function isInteriorSwingDoorType(type){
 }
 function isClassroomDoorModel(item){
   return !!(item && item.category==='ドア' && /^Classroom-door-/i.test(item.name||''));
-}
-function openingModelOptionsForItem(it){
-  var items=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];});
-  if(it && isWindowLikeType(it.type)){
-    return items.filter(function(item){return item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }
-  if(it && isInteriorSwingDoorType(it.type)){
-    return items.filter(isClassroomDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }
-  return [];
-}
-function openingModelOptionsHtml(it){
-  var label=isWindowLikeType(it.type)?'デフォルト（既存の窓）':'デフォルト（カラー/テクスチャ）';
-  var cur=it.openingModel||'';
-  var html='<option value="" '+(cur===''?'selected':'')+'>'+escHtml(label)+'</option>';
-  openingModelOptionsForItem(it).forEach(function(item){
-    html+='<option value="'+escHtml(item.id)+'" '+(cur===item.id?'selected':'')+'>'+escHtml(item.name)+'</option>';
-  });
-  return html;
 }
 function getOpeningModelItem(it){
   var model=getFmpItem(it&&it.openingModel);
@@ -3304,7 +3320,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック',memo:'メモ',ruler:'定規',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
@@ -3327,8 +3343,14 @@ var ST = {
 var EDGE_SNAP_THRESH = 80; // mm — object-edge snap when Shift is held
 
 var RULER_THICKNESS_MM = 120;
+var WALK_ROUTE_THICKNESS_MM = 140;
+var WALK_EYE_HEIGHT_MM = 1700;
+var WALK_DEFAULT_SPEED_MPS = 1.2;
 function isPlanAnnotationType(type){
-  return type==='memo' || type==='ruler';
+  return type==='memo' || type==='ruler' || type==='walk-route';
+}
+function isLineAnnotationTool(type){
+  return type==='ruler' || type==='walk-route';
 }
 function isObjectLocked(obj){
   return !!(obj && obj.locked);
@@ -3376,6 +3398,7 @@ function getLockCategoryObjects(category){
   if(category==='joinery') return DATA.items.filter(isLockJoineryItem);
   if(category==='fixtures') return DATA.items.filter(isLockFixtureItem);
   if(category==='furniture') return DATA.items.filter(isLockFurnitureItem);
+  if(category==='walk') return DATA.items.filter(function(it){return it.type==='walk-route';});
   return [];
 }
 function setLockOnObjects(list,locked){
@@ -3403,7 +3426,8 @@ function syncLockBatchUi(){
     ['roof','lock-cat-roof'],
     ['joinery','lock-cat-joinery'],
     ['fixtures','lock-cat-fixtures'],
-    ['furniture','lock-cat-furniture']
+    ['furniture','lock-cat-furniture'],
+    ['walk','lock-cat-walk']
   ].forEach(function(pair){
     var el=document.getElementById(pair[1]);
     if(!el) return;
@@ -3574,7 +3598,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣',memo:'✎',ruler:'↔',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -3599,6 +3623,26 @@ function updateProps(){
     html += '<div class="ph">定規</div>';
     html += '<div class="pr"><div class="pl">測定長さ</div><input class="pi" type="text" value="'+Math.round(rulerLengthMm(it))+'mm" readonly></div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    setPropsBodyHtml(body,html,it);
+    return;
+  }
+  if(it.type==='walk-route'){
+    var walkLen=walkRouteLengthMm(it);
+    var walkSpeed=walkRouteSpeedMps(it);
+    var walkDuration=walkRouteDurationSec(it);
+    var isWalking=isWalkthroughRouteActive(it);
+    var isDrawingRoute=ST.drawing && ST.tool==='walk-route' && ST.selected===it;
+    html += '<div class="ph">ウォークルート</div>';
+    html += '<div class="pr"><div class="pl">ルート長さ</div><input class="pi" type="text" value="'+formatWalkRouteDistance(walkLen)+'" readonly></div>';
+    html += '<div class="pr"><div class="pl">区間数</div><input class="pi" type="text" value="'+walkRouteSegmentCount(it)+'" readonly></div>';
+    html += '<div class="pr"><div class="pl">歩行速度 (m/s)</div><input class="pi" type="number" min="0.1" max="3" step="0.1" value="'+walkSpeed.toFixed(1)+'" onchange="updateWalkRouteSpeed(+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">再生時間</div><input class="pi" type="text" value="'+walkDuration.toFixed(1)+'秒" readonly></div>';
+    html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#10b981')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(isDrawingRoute) html += '<button class="pbtn" data-lock-control type="button" onclick="finishWalkRouteDrawing()">ルート確定</button>';
+    html += isWalking
+      ? '<button class="pbtn" data-lock-control type="button" onclick="stopWalkthrough()">再生を停止</button>'
+      : '<button class="pbtn" data-lock-control type="button" onclick="playSelectedWalkthroughRoute()">外観3Dで再生</button>';
     html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
     return;
@@ -3698,7 +3742,6 @@ function updateProps(){
   if(isWindowLikeType(it.type)){
     ensureWindowProps(it);
     html += '<div class="ph" style="margin-top:12px">窓サイズ・高さ</div>';
-    html += '<div class="pr"><div class="pl">窓モデル</div><select class="pi" onchange="updateOpeningModel(this.value)">'+openingModelOptionsHtml(it)+'</select></div>';
     html += '<div class="pr"><div class="pl">窓幅 (mm)</div><input class="pi" type="number" min="200" step="10" value="'+Math.round(it.w||0)+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">見込み/奥行 (mm)</div><input class="pi" type="number" min="30" step="10" value="'+Math.round(it.d||0)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">下端高さ (床からmm)</div><input class="pi" type="number" min="0" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowSillMm(it))+'" onchange="updateSelectedProp(\'windowSill\',+this.value)"></div>';
@@ -3885,13 +3928,14 @@ function finishSelectedNoteText(){
   ST._noteTextEditing=false;
   updateProps();
 }
-function updateOpeningModel(modelId){
-  if(!ST.selected || !isOpeningItemType(ST.selected.type)) return;
+function updateWalkRouteSpeed(v){
+  if(!ST.selected || ST.selected.type!=='walk-route') return;
   if(isObjectLocked(ST.selected)){ updateProps(); return; }
+  var next=Math.max(0.1,Math.min(3,Number(v)||WALK_DEFAULT_SPEED_MPS));
   saveState();
-  applyOpeningModelToItem(ST.selected,modelId);
+  ST.selected.walkSpeed=next;
+  if(WALKTHROUGH && WALKTHROUGH.routeId===ST.selected.id) beginWalkthrough(ST.selected);
   draw2d();
-  if(ren) rebuild3D();
   updateProps();
 }
 function applyOpeningModelToItem(it,modelId){
@@ -4052,9 +4096,9 @@ function objectIdLabel(o){
 }
 
 var SITE_SURFACE_OPTIONS = {
-  grass:{label:'芝生',texture:'grass',color:0xffffff,edge:0x3f6f35,segment:0x43b047},
-  gravel:{label:'砂利',texture:'gravel',color:0xd8d2c6,edge:0x8c8372,segment:0x9c8f78},
-  concrete:{label:'コンクリート',texture:'concrete',color:0xd7d9d8,edge:0x8f9396,segment:0xbfc3c7}
+  grass:{label:'芝生',texture:'grass',color:0x7ea86a,edge:0x3f6f35,segment:0x43b047,env:0.04},
+  gravel:{label:'砂利',texture:'gravel',color:0xc1b7a6,edge:0x8c8372,segment:0x9c8f78,env:0.05},
+  concrete:{label:'コンクリート',texture:'concrete',color:0xc2c5c3,edge:0x8f9396,segment:0xbfc3c7,env:0.06}
 };
 function siteSurfaceType(it){
   return (it&&SITE_SURFACE_OPTIONS[it.siteSurface]) ? it.siteSurface : 'grass';
@@ -4118,6 +4162,12 @@ function mkItem(type,x,y,rot,floor,w,d){
   if(type==='ruler'){
     item.d=RULER_THICKNESS_MM;
     item.color='#2f80ed';
+    item.colorCustom=true;
+  }
+  if(type==='walk-route'){
+    item.d=WALK_ROUTE_THICKNESS_MM;
+    item.walkSpeed=WALK_DEFAULT_SPEED_MPS;
+    item.color='#10b981';
     item.colorCustom=true;
   }
   if(isWindowLikeType(type)){
@@ -4239,6 +4289,9 @@ function w2c(wx,wy){return{cx:ST.panX+wx*ST.zoom*0.05, cy:ST.panY+wy*ST.zoom*0.0
 function c2w(cx,cy){return{x:(cx-ST.panX)/(ST.zoom*0.05), y:(cy-ST.panY)/(ST.zoom*0.05)};}
 function snapV(v){return ST.snap?Math.round(v/ST.snap)*ST.snap:Math.round(v);}
 function isShiftLike(e){return !!(ST.mobileShift || (e&&e.shiftKey));}
+function isTouchInputDevice(){
+  return !!(('ontouchstart' in window) || (navigator.maxTouchPoints&&navigator.maxTouchPoints>0) || (navigator.msMaxTouchPoints&&navigator.msMaxTouchPoints>0));
+}
 function markAppearanceColorDirty(){
   if(!ST.appearanceColorDirty){
     saveState();
@@ -4252,7 +4305,7 @@ function commitAppearanceColorEdits(){
   if(ren) rebuild3D();
 }
 function finishAppearanceColorInput(){
-  if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches) return;
+  if(isTouchInputDevice() || (window.matchMedia && window.matchMedia('(pointer:coarse)').matches)) return;
   commitAppearanceColorEdits();
 }
 function scheduleAppearancePreviewUpdate(){
@@ -4660,6 +4713,110 @@ function drawMemo2d(it,sc){
 function rulerLengthMm(it){
   return Math.max(0,Number(it&&it.w)||0);
 }
+function copyWalkRoutePoint(p){
+  return {x:Number(p&&p.x)||0,y:Number(p&&p.y)||0};
+}
+function getWalkRouteLocalPoints(it){
+  if(it && Array.isArray(it.pathPoints) && it.pathPoints.length>=2){
+    return it.pathPoints.map(copyWalkRoutePoint);
+  }
+  var len=Math.max(0,Number(it&&it.w)||0);
+  if(len<1) return [];
+  return [{x:-len/2,y:0},{x:len/2,y:0}];
+}
+function getWalkRouteWorldPoints(it){
+  var pts=getWalkRouteLocalPoints(it);
+  if(!pts.length) return [];
+  var pose=getItemDisplayPose(it);
+  var rad=(pose.rot||0)*Math.PI/180;
+  var cos=Math.cos(rad), sin=Math.sin(rad);
+  return pts.map(function(p){
+    return {
+      x:pose.x+p.x*cos-p.y*sin,
+      y:pose.y+p.x*sin+p.y*cos
+    };
+  });
+}
+function walkRoutePathLengthMmFromPoints(points){
+  if(!points || points.length<2) return 0;
+  var len=0;
+  for(var i=1;i<points.length;i++){
+    len+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);
+  }
+  return len;
+}
+function walkRouteLengthMm(it){
+  return walkRoutePathLengthMmFromPoints(getWalkRouteLocalPoints(it));
+}
+function walkRouteSegmentCount(it){
+  return Math.max(0,getWalkRouteLocalPoints(it).length-1);
+}
+function walkRouteSpeedMps(it){
+  var v=Number(it&&it.walkSpeed);
+  if(!isFinite(v)) v=WALK_DEFAULT_SPEED_MPS;
+  return Math.max(0.1,Math.min(3,v));
+}
+function walkRouteDurationSec(it){
+  var lenM=walkRouteLengthMm(it)/1000;
+  return lenM/Math.max(0.1,walkRouteSpeedMps(it));
+}
+function formatWalkRouteDistance(lenMm){
+  lenMm=Math.max(0,Number(lenMm)||0);
+  if(lenMm>=1000){
+    var m=lenMm/1000;
+    var fixed=m>=10?m.toFixed(1):m.toFixed(2);
+    return fixed.replace(/\.0+$/,'').replace(/(\.\d)0$/,'$1')+'m';
+  }
+  return Math.round(lenMm)+'mm';
+}
+function makeWalkRouteShapeFromWorldPoints(points, floor, color, speed){
+  var clean=(points||[]).filter(function(p){
+    return p && isFiniteCanvasValue(p.x) && isFiniteCanvasValue(p.y);
+  }).map(copyWalkRoutePoint);
+  if(clean.length<2) return null;
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  clean.forEach(function(p){
+    minX=Math.min(minX,p.x); minY=Math.min(minY,p.y);
+    maxX=Math.max(maxX,p.x); maxY=Math.max(maxY,p.y);
+  });
+  var w=Math.max(WALK_ROUTE_THICKNESS_MM,maxX-minX+WALK_ROUTE_THICKNESS_MM);
+  var d=Math.max(WALK_ROUTE_THICKNESS_MM,maxY-minY+WALK_ROUTE_THICKNESS_MM);
+  var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  return {
+    type:'walk-route',
+    x:cx-w/2,y:cy-d/2,w:w,d:d,rot:0,floor:floor||ST.floor,
+    color:color||'#10b981',
+    walkSpeed:speed||WALK_DEFAULT_SPEED_MPS,
+    pathPoints:clean.map(function(p){return {x:p.x-cx,y:p.y-cy};})
+  };
+}
+function applyWalkRoutePathFromWorldPoints(it,points){
+  var shape=makeWalkRouteShapeFromWorldPoints(points,it.floor,it.color,walkRouteSpeedMps(it));
+  if(!shape) return false;
+  it.x=shape.x; it.y=shape.y; it.w=shape.w; it.d=shape.d; it.rot=shape.rot;
+  it.pathPoints=shape.pathPoints;
+  return true;
+}
+function sampleWalkRoutePath(points,distanceMm){
+  if(!points || !points.length) return {point:{x:0,y:0},angle:0};
+  if(points.length===1) return {point:copyWalkRoutePoint(points[0]),angle:0};
+  var remaining=Math.max(0,Number(distanceMm)||0);
+  for(var i=1;i<points.length;i++){
+    var a=points[i-1], b=points[i];
+    var segLen=Math.hypot(b.x-a.x,b.y-a.y);
+    if(segLen<0.001) continue;
+    if(remaining<=segLen){
+      var t=remaining/segLen;
+      return {
+        point:{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},
+        angle:Math.atan2(b.y-a.y,b.x-a.x)
+      };
+    }
+    remaining-=segLen;
+  }
+  var last=points[points.length-1], prev=points[points.length-2];
+  return {point:copyWalkRoutePoint(last),angle:Math.atan2(last.y-prev.y,last.x-prev.x)};
+}
 function rulerTickStepMm(sc){
   var steps=[100,250,500,910,1000,2000,5000];
   for(var i=0;i<steps.length;i++){
@@ -4711,6 +4868,95 @@ function drawRuler2d(it,sc,preview){
   drawDimLabel(0,-labelOffset,Math.round(len)+'mm',preview?'rgba(47,128,237,0.72)':(selected?'rgba(233,69,96,0.9)':'rgba(47,128,237,0.84)'),'#fff');
   ctx.restore();
 }
+function drawWalkRoute2d(it,sc,preview){
+  var pts=getWalkRouteLocalPoints(it);
+  var len=walkRoutePathLengthMmFromPoints(pts);
+  if(len<1 || pts.length<2) return;
+  var selected=ST.selected===it && !preview;
+  var col=it.color||'#10b981';
+  var lineW=preview?2:(selected?3:2.2);
+  var markerR=Math.max(4,Math.min(8,70*sc));
+  var tickStep=1000;
+  var tickCount=Math.floor(len/tickStep);
+  ctx.save();
+  ctx.globalAlpha=preview?0.72:1;
+  ctx.strokeStyle=selected?'#e94560':col;
+  ctx.fillStyle=selected?'#e94560':col;
+  ctx.lineWidth=lineW;
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+  ctx.setLineDash(preview?[8,5]:[12,7]);
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x*sc,pts[0].y*sc);
+  for(var pi=1;pi<pts.length;pi++){
+    ctx.lineTo(pts[pi].x*sc,pts[pi].y*sc);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  for(var vi=1;vi<pts.length-1;vi++){
+    ctx.beginPath();
+    ctx.arc(pts[vi].x*sc,pts[vi].y*sc,markerR*0.72,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(pts[0].x*sc,pts[0].y*sc,markerR,0,Math.PI*2);
+  ctx.fill();
+  var end=pts[pts.length-1], prev=pts[pts.length-2];
+  var endAng=Math.atan2(end.y-prev.y,end.x-prev.x);
+  var arrowLen=Math.max(12,110*sc);
+  var arrowWid=Math.max(6,56*sc);
+  ctx.save();
+  ctx.translate(end.x*sc,end.y*sc);
+  ctx.rotate(endAng);
+  ctx.beginPath();
+  ctx.moveTo(markerR*0.6,0);
+  ctx.lineTo(-arrowLen,-arrowWid);
+  ctx.lineTo(-arrowLen,arrowWid);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  if(tickCount>0){
+    ctx.strokeStyle=selected?'rgba(233,69,96,0.75)':'rgba(16,185,129,0.75)';
+    ctx.lineWidth=Math.max(1,1.2*lineW/2);
+    ctx.beginPath();
+    for(var i=1;i<=tickCount;i++){
+      var sample=sampleWalkRoutePath(pts,i*tickStep);
+      var posX=sample.point.x*sc, posY=sample.point.y*sc;
+      var tl=Math.max(5,Math.min(11,95*sc));
+      var nx=-Math.sin(sample.angle), ny=Math.cos(sample.angle);
+      ctx.moveTo(posX-nx*tl,posY-ny*tl);
+      ctx.lineTo(posX+nx*tl,posY+ny*tl);
+    }
+    ctx.stroke();
+  }
+  if(preview && pts.length>1){
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.strokeStyle=col;
+    ctx.lineWidth=1.4;
+    pts.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(p.x*sc,p.y*sc,Math.max(3,markerR*0.55),0,Math.PI*2);
+      ctx.fill(); ctx.stroke();
+    });
+  }
+  var labelOffset=Math.max(20,Math.min(32,200*sc));
+  var mid=sampleWalkRoutePath(pts,len/2);
+  var label=formatWalkRouteDistance(len)+' / '+walkRouteDurationSec(it).toFixed(1)+'秒';
+  drawDimLabel(mid.point.x*sc,mid.point.y*sc-labelOffset,label,preview?'rgba(16,185,129,0.72)':(selected?'rgba(233,69,96,0.9)':'rgba(16,132,94,0.86)'),'#fff');
+  ctx.restore();
+}
+function drawWalkRoutePathPreview(points,preview){
+  var shape=makeWalkRouteShapeFromWorldPoints(points,ST.floor,'#10b981',WALK_DEFAULT_SPEED_MPS);
+  if(!shape) return;
+  var sc=ST.zoom*0.05;
+  var pose=getItemDisplayPose(shape);
+  var p=w2c(pose.x,pose.y);
+  ctx.save();
+  ctx.translate(p.cx,p.cy);
+  ctx.rotate((pose.rot||0)*Math.PI/180);
+  drawWalkRoute2d(shape,sc,!!preview);
+  ctx.restore();
+}
 function drawRulerBetweenPoints(x1,y1,x2,y2,preview){
   var dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
   if(len<1) return;
@@ -4721,6 +4967,18 @@ function drawRulerBetweenPoints(x1,y1,x2,y2,preview){
   ctx.translate(p.cx,p.cy);
   ctx.rotate(Math.atan2(dy,dx));
   drawRuler2d({type:'ruler',w:len,d:RULER_THICKNESS_MM,color:'#2f80ed'},sc,!!preview);
+  ctx.restore();
+}
+function drawWalkRouteBetweenPoints(x1,y1,x2,y2,preview){
+  var dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
+  if(len<1) return;
+  var sc=ST.zoom*0.05;
+  var midX=(x1+x2)/2, midY=(y1+y2)/2;
+  var p=w2c(midX,midY);
+  ctx.save();
+  ctx.translate(p.cx,p.cy);
+  ctx.rotate(Math.atan2(dy,dx));
+  drawWalkRoute2d({type:'walk-route',w:len,d:WALK_ROUTE_THICKNESS_MM,color:'#10b981',walkSpeed:WALK_DEFAULT_SPEED_MPS},sc,!!preview);
   ctx.restore();
 }
 function getWallOutlinePoints(w){
@@ -4821,11 +5079,24 @@ function makeRulerItemFromPoints(x1,y1,x2,y2){
   var rot=Math.atan2(dy,dx)*180/Math.PI;
   return mkItem('ruler',midX-len/2,midY-RULER_THICKNESS_MM/2,rot,ST.floor,len,RULER_THICKNESS_MM);
 }
-function drawRulerSnapMarker(p){
+function makeWalkRouteItemFromPathPoints(points){
+  var shape=makeWalkRouteShapeFromWorldPoints(points,ST.floor,'#10b981',WALK_DEFAULT_SPEED_MPS);
+  if(!shape) return null;
+  var it=mkItem('walk-route',shape.x,shape.y,shape.rot,shape.floor,shape.w,shape.d);
+  it.pathPoints=shape.pathPoints;
+  it.walkSpeed=shape.walkSpeed;
+  it.color=shape.color;
+  it.colorCustom=true;
+  return it;
+}
+function makeWalkRouteItemFromPoints(x1,y1,x2,y2){
+  return makeWalkRouteItemFromPathPoints([{x:x1,y:y1},{x:x2,y:y2}]);
+}
+function drawRulerSnapMarker(p,color){
   if(!p || !p.snapped) return;
   var c=w2c(p.x,p.y);
   ctx.save();
-  ctx.strokeStyle='rgba(47,128,237,0.9)';
+  ctx.strokeStyle=color||'rgba(47,128,237,0.9)';
   ctx.fillStyle='rgba(255,255,255,0.92)';
   ctx.lineWidth=1.8;
   ctx.beginPath();
@@ -4850,7 +5121,7 @@ function drawItem2d(it){
   var ccx=ST.panX+drawX*sc, ccy=ST.panY+drawY*sc; 
   ctx.save();
   ctx.translate(ccx,ccy); ctx.rotate(drawRot*Math.PI/180);
-  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'memo' || it.type === 'ruler');
+  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'memo' || it.type === 'ruler' || it.type === 'walk-route');
   if(!manualFlipSymbol) ctx.scale(it.flipX?-1:1, it.flipY?-1:1);
   if(it.type==='memo'){
     drawMemo2d(it,sc);
@@ -4867,6 +5138,15 @@ function drawItem2d(it){
     if(ST.selected===it&&ST.tool==='select'){
       var rulerHalf=getItemSelectionHalfExtentsPx(it,sc);
       drawHandles(it,ccx,ccy,rulerHalf.hw,rulerHalf.hd,sc,drawRot);
+    }
+    return;
+  }
+  if(it.type==='walk-route'){
+    drawWalkRoute2d(it,sc,false);
+    ctx.restore();
+    if(ST.selected===it&&ST.tool==='select'){
+      var walkHalf=getItemSelectionHalfExtentsPx(it,sc);
+      drawHandles(it,ccx,ccy,walkHalf.hw,walkHalf.hd,sc,drawRot);
     }
     return;
   }
@@ -5221,7 +5501,7 @@ function getItemSelectionHalfExtentsPx(it,sc){
   if(it && isSwingDoorType(it.type)){
     hd=Math.max(12,Math.min(hd,Math.max(12,110*sc)));
   }
-  if(it && it.type==='ruler'){
+  if(it && (it.type==='ruler' || it.type==='walk-route')){
     hd=Math.max(12,hd);
   }
   return {hw:hw,hd:hd};
@@ -5499,6 +5779,10 @@ function applyHandleDrag(cx,cy,e){
       ST._snapState=res.snapState;
     } else { ST._snapState=null; }
 
+    if(it.type==='walk-route' && Array.isArray(o.pathPoints)){
+      var sx=o.w?nw/o.w:1, sy=o.d?nd/o.d:1;
+      it.pathPoints=o.pathPoints.map(function(p){return {x:(Number(p.x)||0)*sx,y:(Number(p.y)||0)*sy};});
+    }
     it.w=nw; it.d=nd; it.x=nx; it.y=ny;
   }
   if(!DRAG.active) updateProps();
@@ -5534,6 +5818,7 @@ var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
 var _ray3d=null, _mouse3d=null, _pick3d={x:0,y:0,t:0};
 var GIZMO_DRAG={active:false,axis:null,ref:null,startX:0,startY:0,orig:null,saved:false};
 var isInt=false, iMov={}, _skyMesh=null, _gndMesh=null;
+var WALKTHROUGH=null;
 // Interior mouse look state
 var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 
@@ -5593,28 +5878,44 @@ function disposeMat(m) {
 
 var composer = null; // single declaration
 function makeSkyTexture(){
+  var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
+  var sky=preset.sky||LIGHT_PRESETS.day.sky;
   var c=document.createElement('canvas');
   c.width=1024; c.height=512;
   var ctx=c.getContext('2d');
   var g=ctx.createLinearGradient(0,0,0,c.height);
-  g.addColorStop(0,'#4e91ff');
-  g.addColorStop(0.35,'#82bdff');
-  g.addColorStop(0.72,'#d4ecff');
-  g.addColorStop(1,'#f4f7ec');
+  g.addColorStop(0,sky.top||'#4e91ff');
+  g.addColorStop(0.35,sky.mid||'#82bdff');
+  g.addColorStop(0.72,sky.horizon||'#d4ecff');
+  g.addColorStop(1,sky.ground||'#f4f7ec');
   ctx.fillStyle=g;
   ctx.fillRect(0,0,c.width,c.height);
 
-  var sunX=c.width*0.78, sunY=c.height*0.2;
+  if(LIGHT_SETTINGS.timeOfDay==='night'){
+    ctx.save();
+    ctx.fillStyle='rgba(255,255,255,0.75)';
+    for(var si=0;si<58;si++){
+      var sx=(si*137.5)%c.width;
+      var sy=18+((si*61)%185);
+      var sr=(si%5===0)?1.5:0.85;
+      ctx.globalAlpha=(si%7===0)?0.85:0.45;
+      ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  var sunX=c.width*(sky.sunX==null?0.78:sky.sunX), sunY=c.height*(sky.sunY==null?0.2:sky.sunY);
   var sg=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,170);
-  sg.addColorStop(0,'rgba(255,255,235,0.95)');
-  sg.addColorStop(0.12,'rgba(255,249,205,0.45)');
+  sg.addColorStop(0,sky.sunCore||'rgba(255,255,235,0.95)');
+  sg.addColorStop(0.12,sky.sunGlow||'rgba(255,249,205,0.45)');
   sg.addColorStop(1,'rgba(255,249,205,0)');
   ctx.fillStyle=sg;
   ctx.fillRect(0,0,c.width,c.height);
 
+  var cloudAlpha=(sky.cloudAlpha==null)?1:sky.cloudAlpha;
   function cloud(cx,cy,s,alpha){
     ctx.save();
-    ctx.globalAlpha=alpha;
+    ctx.globalAlpha=alpha*cloudAlpha;
     var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,s*1.4);
     cg.addColorStop(0,'rgba(255,255,255,0.92)');
     cg.addColorStop(0.72,'rgba(255,255,255,0.28)');
@@ -5635,7 +5936,7 @@ function makeSkyTexture(){
 
   var hg=ctx.createLinearGradient(0,c.height*0.72,0,c.height);
   hg.addColorStop(0,'rgba(255,255,255,0)');
-  hg.addColorStop(1,'rgba(255,245,215,0.55)');
+  hg.addColorStop(1,sky.haze||'rgba(255,245,215,0.55)');
   ctx.fillStyle=hg;
   ctx.fillRect(0,c.height*0.66,c.width,c.height*0.34);
 
@@ -5701,6 +6002,7 @@ function init3D(){
       });
   })();
   sc3.add(amb);
+  applyLightingToScene(false);
 
   // Ground – resized in buildLandscape() based on building footprint
   _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
@@ -5789,6 +6091,7 @@ function init3D(){
 
 function fitCameraToScene(){
   if(!sc3||!camExt||!orbit) return;
+  if(WALKTHROUGH) return;
   var box=new THREE.Box3();
   sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
   if(box.isEmpty()) return;
@@ -6179,9 +6482,38 @@ function makeColorAccurateMaterial(params){
   mat.toneMapped=false;
   return mat;
 }
-function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor){
+function makeExteriorLightingMaterial(params){
+  params=params||{};
+  var matParams={
+    color:params.color==null?0xffffff:params.color,
+    roughness:params.roughness==null?0.9:params.roughness,
+    metalness:params.metalness==null?0.0:params.metalness,
+    envMapIntensity:Math.min(params.envMapIntensity==null?0.22:params.envMapIntensity,LIGHT_SETTINGS.env)
+  };
+  if(params.map) matParams.map=params.map;
+  if(params.side!==undefined) matParams.side=params.side;
+  if(params.flatShading!==undefined) matParams.flatShading=params.flatShading;
+  return new THREE.MeshStandardMaterial(matParams);
+}
+function makeInteriorLightingMaterial(params){
+  params=params||{};
+  var matParams={
+    color:params.color==null?0xffffff:params.color,
+    roughness:params.roughness==null?0.94:params.roughness,
+    metalness:params.metalness==null?0.0:params.metalness,
+    envMapIntensity:Math.min(params.envMapIntensity==null?0.08:params.envMapIntensity,LIGHT_SETTINGS.env)
+  };
+  if(params.map) matParams.map=params.map;
+  if(params.normalMap) matParams.normalMap=params.normalMap;
+  if(params.normalScale) matParams.normalScale=params.normalScale;
+  if(params.roughnessMap) matParams.roughnessMap=params.roughnessMap;
+  if(params.side!==undefined) matParams.side=params.side;
+  return new THREE.MeshStandardMaterial(matParams);
+}
+function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
   var tex=it&&it.texture?getTexture3D(it.texture):null;
   if(!tex) return null;
+  opts=opts||{};
   var tc=tex.clone();
   tc.needsUpdate=true;
   if(mode==='stretch'){
@@ -6193,6 +6525,16 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor){
     setTextureRepeatNoDistort(tc,surfaceW||1,surfaceH||1,wallTextureTileHeight());
   }
   applyTextureFlip(tc,it);
+  if(opts.lighting){
+    return makeExteriorLightingMaterial({
+      map:tc,
+      color:fallbackColor||0xffffff,
+      roughness:opts.roughness==null?0.88:opts.roughness,
+      metalness:opts.metalness==null?0.02:opts.metalness,
+      envMapIntensity:opts.envMapIntensity==null?0.18:opts.envMapIntensity,
+      side:opts.side
+    });
+  }
   return makeColorAccurateMaterial({map:tc,color:fallbackColor||0xffffff});
 }
 function roofTypeOptions(){
@@ -6263,7 +6605,9 @@ function handle3DPointerPick(e){
 function toggleLightPanel(){
   var lp=document.getElementById('light-panel');
   if(!lp) return;
-  lp.style.display=lp.style.display==='block'?'none':'block';
+  var next=lp.style.display==='block'?'none':'block';
+  lp.style.display=next;
+  if(next==='block') syncLightPanelUi();
   hideWallPanel();
 }
 var APPEARANCE_PANEL_MODE = 'exterior';
@@ -6279,6 +6623,7 @@ function toggleAppearancePanel(mode){
   if(lp) lp.style.display='none';
   if(!wp) return;
   var sameOpen=wp.style.display==='block' && wp.dataset.mode===APPEARANCE_PANEL_MODE;
+  if(sameOpen && isTouchInputDevice()) return;
   var next=sameOpen?'none':'block';
   wp.style.display=next;
   wp.dataset.mode=APPEARANCE_PANEL_MODE;
@@ -6298,19 +6643,96 @@ function hideWallPanel(){
   var wp=document.getElementById('wall-panel');
   if(wp){wp.style.display='none';wp.classList.remove('show');}
 }
+function getLightPreset(key){
+  return LIGHT_PRESETS[key]||LIGHT_PRESETS.day;
+}
+function syncLightPanelUi(){
+  var key=LIGHT_SETTINGS.timeOfDay||'day';
+  var preset=getLightPreset(key);
+  var modeLabel=document.getElementById('light-mode-label');
+  if(modeLabel) modeLabel.textContent=preset.label||'昼';
+  ['room','ambient','sun'].forEach(function(k){
+    var v=Number(LIGHT_SETTINGS[k]||0);
+    var label=document.getElementById('light-'+k+'-val');
+    var input=document.getElementById('light-'+k);
+    if(label) label.textContent=v.toFixed(2);
+    if(input) input.value=v;
+  });
+  ['morning','day','evening','night'].forEach(function(k){
+    var btn=document.getElementById('light-preset-'+k);
+    if(!btn) return;
+    var active=key===k;
+    btn.style.background=active?'#e94560':'#0f3460';
+    btn.style.borderColor=active?'#ff7188':'#1f4b78';
+    btn.style.color=active?'#fff':'#dfe8ff';
+    btn.setAttribute('aria-pressed',active?'true':'false');
+  });
+}
+function refreshSkyTexture(){
+  if(!_skyMesh||!_skyMesh.material||typeof THREE==='undefined') return;
+  var oldMap=_skyMesh.material.map;
+  _skyMesh.material.map=makeSkyTexture();
+  _skyMesh.material.needsUpdate=true;
+  if(oldMap&&oldMap.dispose) oldMap.dispose();
+}
+function applyLightingToScene(refreshSky){
+  var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
+  if(ren) ren.toneMappingExposure=LIGHT_SETTINGS.exposure;
+  if(sc3&&typeof THREE!=='undefined'){
+    sc3.traverse(function(o){
+      if(o.name==='AmbientLight'){
+        o.intensity=LIGHT_SETTINGS.ambient;
+        if(o.color) o.color.set(preset.ambientColor||'#ffffff');
+      } else if(o.name==='SunLight'){
+        o.intensity=LIGHT_SETTINGS.sun;
+        if(o.color) o.color.set(preset.sunColor||'#ffffff');
+        var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
+        o.position.set(p.x,p.y,p.z);
+      } else if(o.name==='HemiLight'){
+        o.intensity=LIGHT_SETTINGS.hemi;
+        if(o.color) o.color.set(preset.hemiSky||'#ffffff');
+        if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
+      } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
+        var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(o.userData.siteRectRef)]||SITE_SURFACE_OPTIONS.grass;
+        o.material.envMapIntensity=Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env);
+        o.material.needsUpdate=true;
+      }
+    });
+    if(_gndMesh && _gndMesh.material && _gndMesh.material.envMapIntensity!==undefined){
+      _gndMesh.material.envMapIntensity=Math.min(0.035,LIGHT_SETTINGS.env);
+      _gndMesh.material.needsUpdate=true;
+    }
+    if(refreshSky) refreshSkyTexture();
+    if(ST.view==='3d-int'){
+      sc3.fog=null;
+      sc3.background=new THREE.Color(preset.interiorBg==null?0x12121a:preset.interiorBg);
+      if(_skyMesh) _skyMesh.visible=false;
+    } else if(ST.view==='3d-ext'){
+      sc3.background=null;
+      sc3.fog=new THREE.Fog(preset.fogColor||0xb8d4f0,preset.fogNear||80,preset.fogFar||500);
+      if(_skyMesh) _skyMesh.visible=true;
+    }
+  }
+  syncLightPanelUi();
+}
+function applyLightPreset(key){
+  if(!LIGHT_PRESETS[key]) key='day';
+  var preset=LIGHT_PRESETS[key];
+  LIGHT_SETTINGS.timeOfDay=key;
+  ['hemi','sun','ambient','room','exposure','env'].forEach(function(k){
+    LIGHT_SETTINGS[k]=preset[k];
+  });
+  applyLightingToScene(true);
+  if(sc3) rebuild3D();
+}
 function updateLightSetting(key,val){
   LIGHT_SETTINGS[key]=val;
-  var label=document.getElementById('light-'+key+'-val');
-  if(label) label.textContent=val.toFixed(2);
-  if(sc3){
-    sc3.traverse(function(o){
-      if(key==='ambient'&&o.name==='AmbientLight') o.intensity=val;
-      if(key==='sun'&&o.name==='SunLight') o.intensity=val;
-      if(key==='hemi'&&o.name==='HemiLight') o.intensity=val;
-    });
-    if(key==='exposure'&&ren) ren.toneMappingExposure=val;
-    if(key==='room') rebuild3D();
+  syncLightPanelUi();
+  if(key==='room'||key==='env'){
+    if(sc3) rebuild3D();
+    return;
   }
+  applyLightingToScene(false);
 }
 function setExteriorWallColor(floor,color){
   saveState();
@@ -7430,6 +7852,17 @@ function addWallIntersectionBreakpointsBySide(w,sideBreaks){
   });
 }
 
+function wallJointCapLengthM(w){
+  var thickM=Math.max(0.08,wallThicknessMm(w)*U);
+  return Math.max(0.18,Math.min(0.36,thickM*2.1));
+}
+function isWallJointCapInteriorSpan(w,ta,tb,len){
+  var lenM=len*U;
+  var a=ta*lenM, b=tb*lenM;
+  var span=b-a;
+  var cap=wallJointCapLengthM(w);
+  return span<cap && (a<cap || lenM-b<cap);
+}
 function getWallInteriorFaces(w){
   if((w.thick||0)<120) return [];
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
@@ -7457,6 +7890,7 @@ function getWallInteriorFaces(w){
     for(var i=0;i<uniq.length-1;i++){
       var ta=uniq[i], tb=uniq[i+1];
       if(tb-ta<0.0005) continue;
+      if(isWallJointCapInteriorSpan(w,ta,tb,len)) continue;
       if(isExteriorOnSide(ta,tb,sign)) return;
       faces.push({a:ta*len*U,b:tb*len*U,sign:sign});
     }
@@ -7482,11 +7916,11 @@ function makeExteriorWallMaterial(w,fl,len,face){
       utc.wrapS = utc.wrapT = THREE.RepeatWrapping;
       setTextureRepeatNoDistort(utc,len,wallFullHeightM(fl),wallTextureTileHeight());
       applyTextureFlip(utc,ap);
-      return finish(makeColorAccurateMaterial({map:utc,color:0xffffff}));
+      return finish(makeExteriorLightingMaterial({map:utc,color:0xffffff,roughness:0.92,envMapIntensity:0.18}));
     }
   }
   if(ap.color){
-    return finish(makeColorAccurateMaterial({color:ap.color}));
+    return finish(makeExteriorLightingMaterial({color:ap.color,roughness:0.9,envMapIntensity:0.14}));
   }
   if(fl===1){
     var st=getTexture3D('siding');
@@ -7523,17 +7957,17 @@ function makeInteriorWallMaterial(w,len,face){
     tc.wrapS = tc.wrapT = THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,len,wallFullHeightM(w&&w.floor),wallTextureTileHeight());
     applyTextureFlip(tc,ap);
-    return finish(makeColorAccurateMaterial({map:tc,color:0xffffff}));
+    return finish(makeInteriorLightingMaterial({map:tc,color:0xffffff,roughness:0.94,envMapIntensity:0.07,side:THREE.DoubleSide}));
   }
   if(ap.source==='default'){
     var it2=getTexture3D('wall_int');
     if(it2){
       var it2c=it2.clone();
       setTextureRepeatNoDistort(it2c,len,wallFullHeightM(w&&w.floor),1.0);
-      return finish(new THREE.MeshStandardMaterial({map:it2c,color:0xffffff,roughness:0.88,metalness:0.0}));
+      return finish(new THREE.MeshStandardMaterial({map:it2c,color:0xffffff,roughness:0.88,metalness:0.0,envMapIntensity:0.06}));
     }
   }
-  return finish(makeColorAccurateMaterial({color:ap.color||INTERIOR_WALL_DEFAULT}));
+  return finish(makeInteriorLightingMaterial({color:ap.color||INTERIOR_WALL_DEFAULT,roughness:0.94,envMapIntensity:0.06,side:THREE.DoubleSide}));
 }
 
 function makeWallCoreMaterial(){
@@ -7586,7 +8020,7 @@ function updateInteriorCutawayWalls(){
 function makeFloorSlabMaterial(matFloor){
   var avg=0xb8b2a8;
   if(matFloor && matFloor.color) avg=matFloor.color.getHex();
-  return new THREE.MeshStandardMaterial({color:avg,roughness:0.95,metalness:0.0});
+  return new THREE.MeshStandardMaterial({color:avg,roughness:0.95,metalness:0.0,envMapIntensity:0.04});
 }
 function makeWallGlassMaterial(){
   return new THREE.MeshPhysicalMaterial({
@@ -7900,7 +8334,7 @@ function buildWinFrames(flFilt){
     var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(customColor||0x3a3a3a):0x3a3a3a,roughness:0.5});
     var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
     var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
-    var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
+    var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
     var railMat=new THREE.MeshStandardMaterial({color:0x707070,roughness:0.35,metalness:0.25});
     var openingModel=getOpeningModelItem(it);
     var openingModelReady=openingModel && ensureGltfModel(openingModel.model);
@@ -8181,11 +8615,16 @@ function build3DRoofItem(grp,it,w3,d3){
     matParams.map=rtc;
     if(ap.texture) matParams.color=0xffffff;
   }
-  var mat=ap.source==='item' && !ap.texture
-    ? new THREE.MeshStandardMaterial(matParams)
-    : makeColorAccurateMaterial({map:matParams.map||null,color:matParams.color||ap.color||'#2a2a30',side:THREE.DoubleSide});
-  var edgeMat=makeColorAccurateMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide});
-  var skirtMat=makeColorAccurateMaterial({color:'#d8d5ce',side:THREE.DoubleSide});
+  var mat=makeExteriorLightingMaterial({
+    map:matParams.map||null,
+    color:matParams.color||ap.color||'#2a2a30',
+    side:THREE.DoubleSide,
+    roughness:0.76,
+    metalness:0.02,
+    envMapIntensity:0.2
+  });
+  var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
+  var skirtMat=makeExteriorLightingMaterial({color:'#d8d5ce',side:THREE.DoubleSide,roughness:0.88,envMapIntensity:0.12});
   function addGeo(points,material){
     var geo=new THREE.BufferGeometry();
     var verts=new Float32Array(points);
@@ -8438,8 +8877,8 @@ function buildItem3D(it){
   }
   else if(it.type==='fence'){
     var drop=floorSlabHeightMForFloor(it.floor);
-    var fMat=makeItemTextureMaterial(it,w3,h,'repeat',0xffffff) || new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0x888878,roughness:0.85});
-    var fCapMat=makeItemTextureMaterial(it,w3+0.04,0.06,'repeat',0xffffff) || new THREE.MeshStandardMaterial({color:0x707068,roughness:0.8});
+    var fMat=makeItemTextureMaterial(it,w3,h,'repeat',0xffffff,{lighting:true,roughness:0.88,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0x888878,roughness:0.85});
+    var fCapMat=makeItemTextureMaterial(it,w3+0.04,0.06,'repeat',0xffffff,{lighting:true,roughness:0.86,envMapIntensity:0.14}) || new THREE.MeshStandardMaterial({color:0x707068,roughness:0.8});
     _B(grp,fMat,0,0.4-drop/2,0,w3,0.8+drop,Math.max(d3,0.12));
     _B(grp,fCapMat,0,0.82,0,w3+0.04,0.06,Math.max(d3,0.14));
   }
@@ -8485,12 +8924,12 @@ function buildWoodFence3D(grp,it,w3,d3,h){
   var drop=floorSlabHeightMForFloor(it.floor);
   var baseWoodColor=it.colorCustom?it.color:0x9a7a3a;
   function boardMat(surfaceW,surfaceH){
-    return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff) ||
+    return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.88,envMapIntensity:0.16}) ||
       new THREE.MeshStandardMaterial({color:baseWoodColor,roughness:0.86,metalness:0.02});
   }
   var dark=new THREE.MeshStandardMaterial({color:0x5d4320,roughness:0.9});
-  var postMat=makeItemTextureMaterial(it,0.08,h,'repeat',0xffffff) || dark;
-  var railMat=makeItemTextureMaterial(it,w3,0.055,'repeat',0xffffff) || dark;
+  var postMat=makeItemTextureMaterial(it,0.08,h,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) || dark;
+  var railMat=makeItemTextureMaterial(it,w3,0.055,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) || dark;
   var depth=Math.max(d3,0.06);
   var pattern=it.fencePattern||'vertical';
   if(pattern==='horizontal'){
@@ -8950,9 +9389,9 @@ function build3DFoundation(grp,it,w,d){
   var mm=Number(it.foundationHeight);
   if(!isFinite(mm)) mm=450;
   var h=Math.max(0.005,Math.min(2,Math.max(0,mm)*U));
-  var mat=makeItemTextureMaterial(it,w,h,'repeat',0xffffff) ||
+  var mat=makeItemTextureMaterial(it,w,h,'repeat',0xffffff,{lighting:true,roughness:0.92,envMapIntensity:0.16}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
-  var capMat=makeItemTextureMaterial(it,w,d,'repeat',0xffffff) ||
+  var capMat=makeItemTextureMaterial(it,w,d,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xc7c1b7,roughness:0.9,metalness:0.02});
   _B(grp,mat,0,h/2,0,w,h,d);
   _B(grp,capMat,0,h+0.01,0,w+0.02,0.02,d+0.02);
@@ -8960,7 +9399,7 @@ function build3DFoundation(grp,it,w,d){
 function build3DExteriorStair(grp,it,w,d){
   var h=Math.max(0.02,accessTargetHeightM(it));
   var steps=Math.max(1,Math.min(12,Math.round(it.accessSteps||Math.max(2,Math.round(h/0.16)))));
-  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff) ||
+  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.15}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.9,metalness:0.02});
   var treadD=d/steps;
   for(var i=0;i<steps;i++){
@@ -8972,7 +9411,7 @@ function build3DExteriorStair(grp,it,w,d){
 function build3DRamp(grp,it,w,d){
   var h=Math.max(0.02,accessTargetHeightM(it));
   var low=Math.min(0.04,h*0.25);
-  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff) ||
+  var mat=makeItemTextureMaterial(it,w,Math.max(d,h),'repeat',0xffffff,{lighting:true,roughness:0.92,envMapIntensity:0.16,side:THREE.DoubleSide}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
   mat=mat.clone();
   mat.side=THREE.DoubleSide;
@@ -9013,6 +9452,7 @@ function makeSiteSurfaceMaterial(it,w,d){
     map:tex,
     roughness:1.0,
     metalness:0.0,
+    envMapIntensity:Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env),
     side:THREE.DoubleSide
   });
 }
@@ -9024,6 +9464,7 @@ function build3DSiteRect(grp,it,w,d){
   plane.position.y=-0.035;
   plane.receiveShadow=true;
   plane.userData.siteRect=true;
+  plane.userData.siteRectRef=it;
   grp.add(plane);
 
   var edgeGeo=new THREE.EdgesGeometry(new THREE.PlaneGeometry(w,d));
@@ -9101,7 +9542,8 @@ function build3DTree(grp,h){
 }
 
 function buildRooms3D(flFilt){
-  var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:2.5,roughness:0.3});
+  var fixtureGlow=Math.max(0,Math.min(2.5,LIGHT_SETTINGS.room*3.6));
+  var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3});
 
   DATA.rooms.filter(function(r){return !flFilt||r.floor===flFilt;}).forEach(function(r){
     var ry=floorBaseY(r.floor);
@@ -9118,14 +9560,14 @@ function buildRooms3D(flFilt){
     var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
     var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
     var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
-    var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0};
+    var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.06};
     var customRoomTexture=false;
     if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
       var baseTex=getTexture3D(r.texture);
       if(baseTex&&baseTex.image){var tex=baseTex.clone();setTextureRepeatNoDistort(tex,rw,rd,0.9);applyTextureFlip(tex,r);matParams.map=tex;customRoomTexture=true;}
     }
     var matFloor=customRoomTexture
-      ? makeColorAccurateMaterial({map:matParams.map,color:0xffffff})
+      ? makeInteriorLightingMaterial({map:matParams.map,color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.06})
       : new THREE.MeshStandardMaterial(matParams);
     
     var slabH=floorSlabHeightMForFloor(r.floor);
@@ -9171,19 +9613,126 @@ function buildLandscape(){
   var gndMat = new THREE.MeshStandardMaterial({
     color: 0xd7d5ce,
     roughness: 1.0,
-    metalness: 0.0
+    metalness: 0.0,
+    envMapIntensity: Math.min(0.035,LIGHT_SETTINGS.env)
   });
   _gndMesh.geometry.dispose();
   _gndMesh.geometry = new THREE.PlaneGeometry(gndSize, gndSize);
   _gndMesh.material = gndMat;
   _gndMesh.position.set(bx, -0.06, bz);
 }
+function getWalkRouteEndpoints(it){
+  if(!it || it.type!=='walk-route') return null;
+  var pts=getWalkRouteWorldPoints(it);
+  var len=walkRoutePathLengthMmFromPoints(pts);
+  if(len<50 || pts.length<2) return null;
+  return {
+    a:copyWalkRoutePoint(pts[0]),
+    b:copyWalkRoutePoint(pts[pts.length-1]),
+    points:pts,
+    len:len
+  };
+}
+function getWalkRouteById(id){
+  if(!id) return null;
+  for(var i=0;i<DATA.items.length;i++){
+    if(DATA.items[i].id===id && DATA.items[i].type==='walk-route') return DATA.items[i];
+  }
+  return null;
+}
+function isWalkthroughRouteActive(it){
+  return !!(WALKTHROUGH && it && WALKTHROUGH.routeId===it.id);
+}
+function beginWalkthrough(it){
+  if(!it || it.type!=='walk-route' || !camExt) return false;
+  var ep=getWalkRouteEndpoints(it);
+  if(!ep) return false;
+  var lenM=ep.len*U;
+  var speed=walkRouteSpeedMps(it);
+  var duration=Math.max(0.6,lenM/Math.max(0.1,speed))*1000;
+  var baseY=item3DBaseY(it);
+  var eyeY=baseY+WALK_EYE_HEIGHT_MM*U;
+  var oldFov=(WALKTHROUGH&&WALKTHROUGH.oldFov)||camExt.fov;
+  WALKTHROUGH={
+    routeId:it.id,
+    startedAt:performance.now(),
+    duration:duration,
+    eyeY:eyeY,
+    lenM:lenM,
+    oldFov:oldFov
+  };
+  camExt.fov=68;
+  camExt.updateProjectionMatrix();
+  if(orbit) orbit.enabled=false;
+  updateWalkthroughCamera(performance.now());
+  updateProps();
+  return true;
+}
+function playSelectedWalkthroughRoute(){
+  if(!ST.selected || ST.selected.type!=='walk-route') return;
+  if(ST.view!=='3d-ext') setView('3d-ext');
+  beginWalkthrough(ST.selected);
+}
+function stopWalkthrough(){
+  if(!WALKTHROUGH) return;
+  var oldFov=WALKTHROUGH.oldFov;
+  var route=getWalkRouteById(WALKTHROUGH.routeId);
+  var ep=route?getWalkRouteEndpoints(route):null;
+  WALKTHROUGH=null;
+  if(camExt && oldFov){
+    camExt.fov=oldFov;
+    camExt.updateProjectionMatrix();
+  }
+  if(orbit){
+    orbit.enabled=true;
+    if(ep){
+      var y=item3DBaseY(route)+WALK_EYE_HEIGHT_MM*U;
+      orbit.target.set(ep.b.x*U,y,ep.b.y*U);
+    }
+  }
+  updateProps();
+}
+function updateWalkthroughCamera(now){
+  if(!WALKTHROUGH || !camExt) return false;
+  var route=getWalkRouteById(WALKTHROUGH.routeId);
+  if(!route){ stopWalkthrough(); return false; }
+  var ep=getWalkRouteEndpoints(route);
+  if(!ep){ stopWalkthrough(); return false; }
+  var baseY=item3DBaseY(route);
+  var eyeY=baseY+WALK_EYE_HEIGHT_MM*U;
+  var lenM=Math.max(0.05,ep.len*U);
+  var t=Math.max(0,Math.min(1,(now-WALKTHROUGH.startedAt)/Math.max(1,WALKTHROUGH.duration)));
+  var cur=sampleWalkRoutePath(ep.points,ep.len*t);
+  var lookSample=sampleWalkRoutePath(ep.points,Math.min(ep.len,ep.len*t+1800));
+  var pos=new THREE.Vector3(cur.point.x*U,eyeY,cur.point.y*U);
+  var look=new THREE.Vector3(lookSample.point.x*U,eyeY,lookSample.point.y*U);
+  if(look.distanceToSquared(pos)<0.0001){
+    look.set(pos.x+Math.cos(cur.angle),pos.y,pos.z+Math.sin(cur.angle));
+  }
+  camExt.position.copy(pos);
+  camExt.lookAt(look.x,look.y,look.z);
+  if(t>=1){
+    var oldFov=WALKTHROUGH.oldFov;
+    WALKTHROUGH=null;
+    if(oldFov){
+      camExt.fov=oldFov;
+      camExt.updateProjectionMatrix();
+    }
+    if(orbit){
+      orbit.enabled=true;
+      orbit.target.copy(look);
+    }
+    updateProps();
+  }
+  return true;
+}
 function loop3D(){
   requestAnimationFrame(loop3D);
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
 
-  if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int')) {
+  var walking=ST.view==='3d-ext' && updateWalkthroughCamera(performance.now());
+  if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
     orbit.update();
   }
   updateInteriorCutawayWalls();
@@ -9200,6 +9749,7 @@ function loop3D(){
 }
 
 function setView(v){
+  if(v!=='3d-ext' && WALKTHROUGH) stopWalkthrough();
   ST.view=v;
   document.getElementById('c2d').style.display=(v==='2d'?'block':'none');
   document.getElementById('c3d-wrap').style.display=(v==='2d'?'none':'block');
@@ -9213,9 +9763,7 @@ function setView(v){
       if(v==='3d-int'){
         // Interior: bird's eye of current floor only, no fog/sky
         isInt=true;
-        sc3.fog=null;
-        sc3.background=new THREE.Color(0x12121a);
-        if(_skyMesh) _skyMesh.visible=false;
+        applyLightingToScene(false);
         if(orbit) { orbit.enabled=true; orbit.enablePan=true; }
         // Compute floor bounding box
         var flWalls=DATA.walls.filter(function(w){return w.floor===ST.floor;});
@@ -9234,9 +9782,7 @@ function setView(v){
       } else {
         isInt=false;
         if(orbit) { orbit.enabled=true; orbit.enablePan=true; }
-        sc3.fog=new THREE.Fog(0xb8d4f0,80,500);
-        sc3.background=null;
-        if(_skyMesh) _skyMesh.visible=true;
+        applyLightingToScene(false);
         if(composer&&composer.passes[1]) composer.passes[1].strength=0.25;
       }
     }
@@ -9279,10 +9825,16 @@ function syncToolUi(){
     else assets[j].classList.remove('active');
   }
   var preset=getOpeningModelToolPreset(ST.tool);
-  document.getElementById('st-tool').textContent='ツール: '+(preset?preset.label:ST.tool);
+  var toolNames={select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク'};
+  document.getElementById('st-tool').textContent='ツール: '+(preset?preset.label:(toolNames[ST.tool]||ST.tool));
 }
 function setTool(t){
+  if(ST.tool==='walk-route' && ST.drawing && t!=='walk-route'){
+    finishWalkRouteDrawing();
+    if(t==='select') return;
+  }
   ST.tool=t;ST.drawing=false;ST.drawPts=[];ST.selected=null;
+  ST._walkRouteItemId=null;
   syncToolUi();
   draw2d();
 }
@@ -9379,18 +9931,28 @@ canvas.onmousedown=function(e){
     ST.panning = true; ST.lastPanCX = cx; ST.lastPanCY = cy;
     e.preventDefault(); return;
   }
-  if(e.button===2){ST.drawing=false;ST.drawPts=[];DRAG.active=false;draw2d();return;}
+  if(e.button===2){
+    if(ST.tool==='walk-route' && ST.drawing){ finishWalkRouteDrawing(); return; }
+    ST.drawing=false;ST.drawPts=[];DRAG.active=false;draw2d();return;
+  }
   if(e.button!==0) return;
   var w=c2w(cx,cy);
   var wx=snapV(w.x), wy=snapV(w.y);
   if(ST.tool==='select') handleSelectDown(cx,cy,wx,wy,e);
   else if(ST.tool==='erase') handleErase(wx,wy);
   else if(ST.tool==='wall') handleWallClick(wx,wy,e);
-  else if(ST.tool==='ruler') handleRulerClick(w.x,w.y,e);
+  else if(isLineAnnotationTool(ST.tool)) handleLineAnnotationClick(ST.tool,w.x,w.y,e);
   else if(ST.tool==='room-rect') handleRoomClick(wx,wy);
   else if(ST.tool==='site-rect') handleSiteClick(wx,wy);
   else placeItem(ST.tool,wx,wy);
 };
+canvas.addEventListener('contextmenu',function(e){e.preventDefault();});
+canvas.addEventListener('dblclick',function(e){
+  if(ST.tool==='walk-route' && ST.drawing){
+    e.preventDefault();
+    finishWalkRouteDrawing();
+  }
+});
 
 function handleSelectDown(cx,cy,wx,wy,e){
   if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
@@ -9487,7 +10049,7 @@ canvas.addEventListener('mousemove',function(e){
   ST.ctrlKey = e.ctrlKey;
   document.getElementById('coords').textContent='X:'+Math.round(snapV(wc.x))+'mm Y:'+Math.round(snapV(wc.y))+'mm';
   if(DRAG.active&&e.buttons===1){ applyHandleDrag(cx,cy,e); draw2d(); }
-  else if(ST.drawing&&ST.tool==='ruler'){ draw2d(); }
+  else if(ST.drawing&&isLineAnnotationTool(ST.tool)){ draw2d(); }
 });
 canvas.addEventListener('mouseup',function(){
   if(ST.panning) { ST.panning = false; return; }
@@ -9526,7 +10088,11 @@ function handleWallClick(wx,wy,e){
     if(ren)build3D();draw2d();
   }
 }
-function handleRulerClick(wx,wy,e){
+function handleLineAnnotationClick(tool,wx,wy,e){
+  if(tool==='walk-route'){
+    handleWalkRouteClick(wx,wy,e);
+    return;
+  }
   var p=snapRulerPoint(wx,wy);
   if(!ST.drawing){
     ST.drawing=true;
@@ -9548,7 +10114,9 @@ function handleRulerClick(wx,wy,e){
     return;
   }
   saveState();
-  var it=makeRulerItemFromPoints(st.x,st.y,ex,ey);
+  var it=tool==='walk-route'
+    ? makeWalkRouteItemFromPoints(st.x,st.y,ex,ey)
+    : makeRulerItemFromPoints(st.x,st.y,ex,ey);
   DATA.items.push(it);
   ST.drawing=false;
   ST.drawPts=[];
@@ -9557,6 +10125,64 @@ function handleRulerClick(wx,wy,e){
   syncToolUi();
   updateProps();
   draw2d();
+}
+function handleRulerClick(wx,wy,e){
+  handleLineAnnotationClick('ruler',wx,wy,e);
+}
+function getLineAnnotationSnappedPoint(wx,wy,anchor,e){
+  var end=snapRulerPoint(wx,wy);
+  var ex=end.x, ey=end.y;
+  if(anchor && isShiftLike(e)){
+    var dx=ex-anchor.x, dy=ey-anchor.y;
+    if(Math.abs(dx)>=Math.abs(dy)) ey=anchor.y;
+    else ex=anchor.x;
+  }
+  return {x:ex,y:ey,snap:end};
+}
+function handleWalkRouteClick(wx,wy,e){
+  var p=snapRulerPoint(wx,wy);
+  if(!ST.drawing){
+    ST.drawing=true;
+    ST.drawPts=[{x:p.x,y:p.y}];
+    ST._walkRouteItemId=null;
+    ST._rulerSnap=p;
+    draw2d();
+    return;
+  }
+  var st=ST.drawPts[ST.drawPts.length-1];
+  var end=getLineAnnotationSnappedPoint(wx,wy,st,e);
+  if(Math.hypot(end.x-st.x,end.y-st.y)<50){
+    draw2d();
+    return;
+  }
+  var nextPts=ST.drawPts.concat([{x:end.x,y:end.y}]);
+  var route=getWalkRouteById(ST._walkRouteItemId);
+  if(route && isObjectLocked(route)){ finishWalkRouteDrawing(); return; }
+  saveState();
+  if(!route){
+    route=makeWalkRouteItemFromPathPoints(nextPts);
+    if(!route) return;
+    DATA.items.push(route);
+    ST._walkRouteItemId=route.id;
+  } else {
+    applyWalkRoutePathFromWorldPoints(route,nextPts);
+  }
+  ST.drawPts=nextPts;
+  ST.selected=route;
+  syncToolUi();
+  updateProps();
+  draw2d();
+}
+function finishWalkRouteDrawing(){
+  if(!(ST.tool==='walk-route' && ST.drawing)) return false;
+  ST.drawing=false;
+  ST.drawPts=[];
+  ST._walkRouteItemId=null;
+  ST.tool='select';
+  syncToolUi();
+  updateProps();
+  draw2d();
+  return true;
 }
 function handleRoomClick(wx,wy){
   if(!ST.drawing){ST.drawing=true;ST.drawPts=[{x:wx,y:wy}];}
@@ -9625,7 +10251,7 @@ function getItemHitPadding(it){
   if(isSwingDoorType(it.type)){
     return {x:40,y:40};
   }
-  if(it.type==='ruler'){
+  if(it.type==='ruler' || it.type==='walk-route'){
     return {x:80,y:160};
   }
   if(it.type==='door-slide' || isNoDoorOpeningType(it.type)){
@@ -9656,6 +10282,15 @@ function angleOnSweepRad(a,start,end){
   var span=end-start;
   if(span>=0) return normAngleRad(a-start)<=span+0.02;
   return normAngleRad(start-a)<=(-span)+0.02;
+}
+function isNearWalkRoute2d(it,px,py){
+  var pts=getWalkRouteWorldPoints(it);
+  if(pts.length<2) return false;
+  var tol=planHitToleranceMm(11)+WALK_ROUTE_THICKNESS_MM*0.35;
+  for(var i=1;i<pts.length;i++){
+    if(distPointToSegment2d(px,py,pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y)<=tol) return true;
+  }
+  return false;
 }
 function isInsideSwingDoor2dLocal(it,lx,ly){
   var w=Math.max(1,it.w||0);
@@ -9690,6 +10325,7 @@ function isInsideItem(it, px, py){
   var lx = dx*Math.cos(rad) - dy*Math.sin(rad);
   var ly = dx*Math.sin(rad) + dy*Math.cos(rad);
   if(isSwingDoorType(it.type)) return isInsideSwingDoor2dLocal(it,lx,ly);
+  if(it.type==='walk-route') return isNearWalkRoute2d(it,px,py);
   var pad=getItemHitPadding(it);
   return lx >= -(it.w/2+pad.x) && lx <= it.w/2+pad.x &&
          ly >= -(it.d/2+pad.y) && ly <= it.d/2+pad.y;
@@ -9798,16 +10434,15 @@ function drawPreview(){
     var p=snapWallAnglePoint(last,{x:mx,y:my},{shiftKey:ST.shiftKey,ctrlKey:ST.ctrlKey},{floor:ST.floor,thickness:120});
     mx=p.x; my=p.y;
   }
-  if(ST.tool==='ruler'){
+  if(isLineAnnotationTool(ST.tool)){
     var rp=snapRulerPoint(mx,my);
-    mx=rp.x; my=rp.y;
-    if(ST.shiftKey){
-      var rdx=mx-last.x, rdy=my-last.y;
-      if(Math.abs(rdx)>=Math.abs(rdy)) my=last.y;
-      else mx=last.x;
+    var next=getLineAnnotationSnappedPoint(mx,my,last,{shiftKey:ST.shiftKey,ctrlKey:ST.ctrlKey});
+    mx=next.x; my=next.y;
+    if(ST.tool==='walk-route'){
+      drawWalkRoutePathPreview(ST.drawPts.concat([{x:mx,y:my}]),true);
     }
-    drawRulerBetweenPoints(last.x,last.y,mx,my,true);
-    drawRulerSnapMarker(rp);
+    else drawRulerBetweenPoints(last.x,last.y,mx,my,true);
+    drawRulerSnapMarker(rp,ST.tool==='walk-route'?'rgba(16,185,129,0.9)':null);
     return;
   }
   var a=w2c(last.x,last.y),b=w2c(mx,my);
@@ -9947,6 +10582,14 @@ function drawDim(){
 
 function delSel(){
   if(!ST.selected && !ST.selectAll)return;
+  if(WALKTHROUGH){
+    var activeRoute=getWalkRouteById(WALKTHROUGH.routeId);
+    var deletingActiveRoute=activeRoute && (
+      (!ST.selectAll && ST.selected===activeRoute) ||
+      (ST.selectAll && activeRoute.floor===ST.floor && !isObjectLocked(activeRoute))
+    );
+    if(deletingActiveRoute) stopWalkthrough();
+  }
   if(ST.selectAll){
     var willDelete=DATA.walls.some(function(w){return w.floor===ST.floor && !isObjectLocked(w);}) ||
       DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);}) ||
@@ -10048,6 +10691,11 @@ function undoAction(){
 window.addEventListener('keydown', function(e){
   if(e.key==='Shift'){ST.shiftKey=true; draw2d();}
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+  if((e.key==='Enter' || e.key==='Escape') && ST.tool==='walk-route' && ST.drawing){
+    e.preventDefault();
+    finishWalkRouteDrawing();
+    return;
+  }
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'c'){
     if(copySelectedObject()) e.preventDefault();
     return;
@@ -10096,6 +10744,10 @@ function clearFloor(){
     DATA.rooms.some(function(r){return r.floor===ST.floor && !isObjectLocked(r);});
   if(!willDelete) return;
   if(!confirm(ST.floor+'Fの未ロック要素を削除しますか？\nロック済みの要素は残ります。'))return;
+  if(WALKTHROUGH){
+    var activeRoute=getWalkRouteById(WALKTHROUGH.routeId);
+    if(activeRoute && activeRoute.floor===ST.floor && !isObjectLocked(activeRoute)) stopWalkthrough();
+  }
   saveState();
   DATA.walls=DATA.walls.filter(function(w){return w.floor!==ST.floor || isObjectLocked(w);});
   DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
@@ -11261,7 +11913,7 @@ try {
 // ═══════════════════════════════════════════════
 // MOBILE SUPPORT
 // ═══════════════════════════════════════════════
-var IS_MOBILE = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+var IS_MOBILE = isTouchInputDevice();
 
 function isMobileLayout(){return window.innerWidth<=768;}
 
