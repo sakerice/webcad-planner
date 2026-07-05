@@ -2823,7 +2823,7 @@ body{
   <span id="st-floor">フロア: 1F</span>
   <span id="st-mode">モード: 平面図</span>
   <span id="st-walls">壁: 0</span>
-  <span id="app-version">house-planner mobile v3.0</span>
+  <span id="app-version">house-planner mobile v3.0.1</span>
 </div>
 
 <!-- Bottom navigation (mobile only) -->
@@ -3297,6 +3297,7 @@ function hideAssetPreview(){
 // PBR Textures (lazy-loaded)
 var _pbrTex = {};
 var _textureRefreshPending = false;
+var _repeatSafeTexCache = {};
 function scheduleTextureSceneRefresh(){
   if(_textureRefreshPending) return;
   _textureRefreshPending = true;
@@ -5852,11 +5853,27 @@ var ASSET_TEX_MAP = {
   'roof_tile':   'assets/textures/roof_tile_diffuse.jpg',
   'wall_int':    'assets/textures/wall_plaster_diffuse.jpg'
 };
+function normalizeDataImageMime(src){
+  if(typeof src!=='string' || src.indexOf('data:image/')!==0) return src;
+  var comma=src.indexOf(',');
+  if(comma<0) return src;
+  var head=src.slice(0,comma);
+  if(head.indexOf(';base64')<0) return src;
+  var body=src.slice(comma+1);
+  var sig=body.slice(0,16).replace(/\s/g,'');
+  var type=null;
+  if(sig.indexOf('/9j/')===0) type='jpeg';
+  else if(sig.indexOf('iVBOR')===0) type='png';
+  else if(sig.indexOf('R0lGOD')===0) type='gif';
+  else if(sig.indexOf('UklGR')===0) type='webp';
+  if(!type || head.indexOf('data:image/'+type+';')===0) return src;
+  return 'data:image/'+type+';base64,'+body;
+}
 function getTexture3D(key) {
   if (!key) return null;
   if (_texCache[key]) return _texCache[key];
   var src = null;
-  if (key.startsWith('data:image')) { src = key; }
+  if (key.startsWith('data:image')) { src = normalizeDataImageMime(key); }
   else if (ASSET_TEX_MAP[key]) { src = ASSET_TEX_MAP[key]; }
   if (src) {
     var tex = new THREE.TextureLoader().load(src, function(){
@@ -6452,6 +6469,24 @@ function textureImageAspect(tex){
   var h=tex.image.naturalHeight || tex.image.videoHeight || tex.image.height || 1;
   return h ? Math.max(0.01,w/h) : 1;
 }
+function textureImageSize(tex){
+  if(!tex || !tex.image) return {w:0,h:0};
+  return {
+    w:tex.image.naturalWidth || tex.image.videoWidth || tex.image.width || 0,
+    h:tex.image.naturalHeight || tex.image.videoHeight || tex.image.height || 0
+  };
+}
+function isPowerOfTwoSize(v){
+  v=Math.floor(v||0);
+  return v>0 && (v & (v-1))===0;
+}
+function nearestTexturePowerOfTwo(v){
+  v=Math.max(1,Math.round(v||1));
+  var p=1;
+  while(p<v && p<1024) p*=2;
+  var down=p>1?p/2:p;
+  return Math.max(1,Math.min(1024,(p-v)<=(v-down)?p:down));
+}
 function isTextureImageReady(tex){
   return !!(tex && tex.image && (
     tex.image.width || tex.image.naturalWidth || tex.image.videoWidth || tex.image.data
@@ -6464,6 +6499,27 @@ function cloneReadyTexture(base){
   tex.image=base.image;
   tex.needsUpdate=true;
   return tex;
+}
+function getRepeatSafeBaseTexture(base){
+  if(!isTextureImageReady(base)) return null;
+  var size=textureImageSize(base);
+  if(isPowerOfTwoSize(size.w) && isPowerOfTwoSize(size.h)) return base;
+  var key=base.uuid+':'+size.w+'x'+size.h;
+  if(_repeatSafeTexCache[key]) return _repeatSafeTexCache[key];
+  var canvas=document.createElement('canvas');
+  canvas.width=nearestTexturePowerOfTwo(size.w);
+  canvas.height=nearestTexturePowerOfTwo(size.h);
+  var ctx=canvas.getContext('2d');
+  ctx.drawImage(base.image,0,0,canvas.width,canvas.height);
+  var tex=new THREE.CanvasTexture(canvas);
+  tex.encoding=base.encoding!==undefined?base.encoding:THREE.sRGBEncoding;
+  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+  if(ren) tex.anisotropy=ren.capabilities.getMaxAnisotropy();
+  _repeatSafeTexCache[key]=tex;
+  return tex;
+}
+function cloneRepeatReadyTexture(base){
+  return cloneReadyTexture(getRepeatSafeBaseTexture(base));
 }
 
 function setTextureRepeatNoDistort(tex,surfaceW,surfaceH,tileH){
@@ -6484,7 +6540,7 @@ function applyTextureFlip(tex, source){
   return tex;
 }
 function cloneTextureWithRepeat(base,repX,repY,source){
-  var tex=cloneReadyTexture(base);
+  var tex=cloneRepeatReadyTexture(base);
   if(!tex) return null;
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
   tex.repeat.set(repX,repY);
@@ -6544,7 +6600,7 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
   var tex=it&&it.texture?getTexture3D(it.texture):null;
   if(!tex) return null;
   opts=opts||{};
-  var tc=cloneReadyTexture(tex);
+  var tc=mode==='stretch'?cloneReadyTexture(tex):cloneRepeatReadyTexture(tex);
   if(!tc) return null;
   if(mode==='stretch'){
     tc.wrapS=tc.wrapT=THREE.ClampToEdgeWrapping;
@@ -7942,7 +7998,7 @@ function makeExteriorWallMaterial(w,fl,len,face){
   if(ap.texture){
     var userTex=getTexture3D(ap.texture);
     if(userTex){
-      var utc=cloneReadyTexture(userTex);
+      var utc=cloneRepeatReadyTexture(userTex);
       if(!utc) return finish(makeExteriorLightingMaterial({color:ap.color||'#e8e0cc',roughness:0.9,envMapIntensity:0.14}));
       utc.wrapS = utc.wrapT = THREE.RepeatWrapping;
       setTextureRepeatNoDistort(utc,len,wallFullHeightM(fl),wallTextureTileHeight());
@@ -7956,7 +8012,7 @@ function makeExteriorWallMaterial(w,fl,len,face){
   if(fl===1){
     var st=getTexture3D('siding');
     if(st){
-      var stc=cloneReadyTexture(st);
+      var stc=cloneRepeatReadyTexture(st);
       if(!stc) return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[1],roughness:0.85}));
       setTextureRepeatNoDistort(stc,len,wallFullHeightM(fl),0.45);
       return finish(new THREE.MeshStandardMaterial({map:stc,color:WALL_COLORS[1],roughness:0.85}));
@@ -7965,7 +8021,7 @@ function makeExteriorWallMaterial(w,fl,len,face){
   }
   var pt=getTexture3D('plaster');
   if(pt){
-    var ptc=cloneReadyTexture(pt);
+    var ptc=cloneRepeatReadyTexture(pt);
     if(!ptc) return finish(new THREE.MeshStandardMaterial({color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82}));
     setTextureRepeatNoDistort(ptc,len,wallFullHeightM(fl),0.55);
     return finish(new THREE.MeshStandardMaterial({map:ptc,color:WALL_COLORS[fl]||'#e8e0cc',roughness:0.82}));
@@ -7986,7 +8042,7 @@ function makeInteriorWallMaterial(w,len,face){
     return m;
   }
   if(tex){
-    var tc=cloneReadyTexture(tex);
+    var tc=cloneRepeatReadyTexture(tex);
     if(!tc) return finish(makeInteriorLightingMaterial({color:ap.color||INTERIOR_WALL_DEFAULT,roughness:0.94,envMapIntensity:0.06,side:THREE.DoubleSide}));
     tc.wrapS = tc.wrapT = THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,len,wallFullHeightM(w&&w.floor),wallTextureTileHeight());
@@ -7996,7 +8052,7 @@ function makeInteriorWallMaterial(w,len,face){
   if(ap.source==='default'){
     var it2=getTexture3D('wall_int');
     if(it2){
-      var it2c=cloneReadyTexture(it2);
+      var it2c=cloneRepeatReadyTexture(it2);
       if(!it2c) return finish(makeInteriorLightingMaterial({color:ap.color||INTERIOR_WALL_DEFAULT,roughness:0.94,envMapIntensity:0.06,side:THREE.DoubleSide}));
       setTextureRepeatNoDistort(it2c,len,wallFullHeightM(w&&w.floor),1.0);
       return finish(new THREE.MeshStandardMaterial({map:it2c,color:0xffffff,roughness:0.88,metalness:0.0,envMapIntensity:0.06}));
@@ -8649,7 +8705,7 @@ function build3DRoofItem(grp,it,w3,d3){
   var roofTex=ap.texture?getTexture3D(ap.texture):null;
   var matParams={color:ap.color||'#2a2a30',side:THREE.DoubleSide,roughness:0.76,metalness:0.02};
   if(roofTex){
-    var rtc=cloneReadyTexture(roofTex);
+    var rtc=cloneRepeatReadyTexture(roofTex);
     if(rtc){
       rtc.wrapS = rtc.wrapT = THREE.RepeatWrapping;
       setTextureRepeatNoDistort(rtc,W,D,0.8);
@@ -9514,7 +9570,7 @@ function makeSiteSurfaceMaterial(it,w,d){
   var baseTex=cfg.texture?getTexture3D(cfg.texture):null;
   var tex=null;
   if(baseTex){
-    tex=cloneReadyTexture(baseTex);
+    tex=cloneRepeatReadyTexture(baseTex);
     if(tex){
       tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
       tex.repeat.set(Math.max(1,w/1.8),Math.max(1,d/1.8));
@@ -9638,7 +9694,7 @@ function buildRooms3D(flFilt){
     var customRoomTexture=false;
     if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
       var baseTex=getTexture3D(r.texture);
-      var tex=cloneReadyTexture(baseTex);
+      var tex=cloneRepeatReadyTexture(baseTex);
       if(tex){setTextureRepeatNoDistort(tex,rw,rd,0.9);applyTextureFlip(tex,r);matParams.map=tex;customRoomTexture=true;}
     }
     var matFloor=customRoomTexture
