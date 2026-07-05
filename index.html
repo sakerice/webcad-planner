@@ -2823,7 +2823,7 @@ body{
   <span id="st-floor">フロア: 1F</span>
   <span id="st-mode">モード: 平面図</span>
   <span id="st-walls">壁: 0</span>
-  <span id="app-version">house-planner mobile v3.0.2</span>
+  <span id="app-version">house-planner mobile v3.0.3</span>
 </div>
 
 <!-- Bottom navigation (mobile only) -->
@@ -6440,6 +6440,20 @@ function getSelectionBox3D(ref){
     var ih=Math.max(getItemHeightValue(ref)*U,0.18);
     var cx2=(ref.x+ref.w/2)*U, cz2=(ref.y+ref.d/2)*U;
     var iw=Math.max(ref.w*U,0.08), id=Math.max(ref.d*U,0.08);
+    if(ref.type==='balcony'){
+      box.set(
+        new THREE.Vector3(-iw/2, -ih+0.006, -id/2),
+        new THREE.Vector3(iw/2, 0.006, id/2)
+      );
+      var bm=new THREE.Matrix4();
+      bm.compose(
+        new THREE.Vector3(cx2,iy,cz2),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(0,-(ref.rot||0)*Math.PI/180,0)),
+        new THREE.Vector3(1,1,1)
+      );
+      box.applyMatrix4(bm);
+      return box;
+    }
     var g=new THREE.BoxGeometry(iw,ih,id);
     var m=new THREE.Mesh(g);
     m.position.set(cx2,iy+ih/2,cz2);
@@ -8974,6 +8988,9 @@ function buildItem3D(it){
   else if(it.type==='car'){
     build3DCar(grp,it,w3,d3,col);
   }
+  else if(it.type==='balcony'){
+    build3DBalcony(grp,it,w3,d3,h);
+  }
   else if(it.type==='fence'){
     var drop=floorSlabHeightMForFloor(it.floor);
     var fMat=makeItemTextureMaterial(it,w3,h,'repeat',0xffffff,{lighting:true,roughness:0.88,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0x888878,roughness:0.85});
@@ -9019,6 +9036,28 @@ function buildItem3D(it){
   mark3DSelectable(grp,it,'item'); sc3.add(grp);
 }
 
+function balconySlabHeightMm(){
+  return Math.max(80,Math.min(400,FLOOR_SLAB_H||180));
+}
+function build3DBalcony(grp,it,w3,d3,h){
+  var slabH=Math.max(0.08,Math.min(0.4,h||balconySlabHeightMm()*U));
+  var topY=0.006;
+  var baseColor=it.colorCustom?it.color:0xc8e8c8;
+  var mat=makeItemTextureMaterial(it,Math.max(w3,d3),slabH,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.12}) ||
+    makeExteriorLightingMaterial({color:baseColor,roughness:0.9,metalness:0.0,envMapIntensity:0.12});
+  var geo=new THREE.BoxGeometry(w3,slabH,d3);
+  var slab=new THREE.Mesh(geo,mat);
+  slab.position.y=topY-slabH/2;
+  slab.castShadow=true;
+  slab.receiveShadow=true;
+  grp.add(slab);
+  var edgeGeo=new THREE.EdgesGeometry(geo);
+  var edgeMat=new THREE.LineBasicMaterial({color:0x5f7e66,transparent:true,opacity:0.36});
+  var edges=new THREE.LineSegments(edgeGeo,edgeMat);
+  edges.position.y=slab.position.y;
+  grp.add(edges);
+}
+
 function buildWoodFence3D(grp,it,w3,d3,h){
   var drop=floorSlabHeightMForFloor(it.floor);
   var baseWoodColor=it.colorCustom?it.color:0x9a7a3a;
@@ -9062,6 +9101,7 @@ function buildWoodFence3D(grp,it,w3,d3,h){
 
 function getItemHeightValue(it){
   if(it && isCustomBlockType(it.type)) return getCustomBlockHeight(it);
+  if(it && it.type==='balcony') return balconySlabHeightMm();
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
   if(it && it.type==='foundation') {
     var fh=Number(it.foundationHeight);
@@ -9071,7 +9111,7 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,closet:2100,stair:20,'stair-corner':20,balcony:50,car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
 function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
