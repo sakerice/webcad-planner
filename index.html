@@ -2823,7 +2823,7 @@ body{
   <span id="st-floor">フロア: 1F</span>
   <span id="st-mode">モード: 平面図</span>
   <span id="st-walls">壁: 0</span>
-  <span id="app-version">house-planner mobile v3.0.3</span>
+  <span id="app-version">house-planner mobile v3.0.4</span>
 </div>
 
 <!-- Bottom navigation (mobile only) -->
@@ -8538,6 +8538,9 @@ function buildWinFrames(flFilt){
       addHitProxy(0,wh/2,0,Math.max(ww+0.4,0.6),Math.max(wh+0.24,0.5),Math.max(wt+0.55,0.7));
     } else {
       var dh=doorHeightMm(it)*U, jamb=0.08, leafT=0.04;
+      var panelBottomGap=0.02, panelTopGap=0.02;
+      var panelH=Math.max(0.18,dh-panelBottomGap-panelTopGap);
+      var panelY=panelBottomGap+panelH/2;
       var archMode=isArchOpeningType(it.type);
       var archR=archMode?Math.min(ww/2,dh*0.42):0;
       var archShoulder=archMode?Math.max(0.6,dh-archR):dh;
@@ -8547,23 +8550,24 @@ function buildWinFrames(flFilt){
       if(archMode){
         addArchTrim(ww,archShoulder,archR,jamb,wt);
       } else {
-        addBox(frameMat,0,dh+jamb/2,0,ww+jamb*2,jamb,wt);
+        addBox(frameMat,0,Math.max(jamb/2,dh-jamb/2),0,ww+jamb*2,jamb,wt);
       }
       addBox(railMat,0,0.02,0,ww+jamb*2,0.04,wt+0.03);
 
       if(isNoDoorOpeningType(it.type)){
         addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(wt+0.55,0.7));
       } else if(it.type==='door-slide') {
-        addBox(railMat,0,dh+0.03,-0.045,ww+jamb*2,0.035,0.025);
-        addBox(railMat,0,dh+0.03, 0.045,ww+jamb*2,0.035,0.025);
+        var topRailY=Math.max(0.08,dh-0.035);
+        addBox(railMat,0,topRailY,-0.045,ww+jamb*2,0.035,0.025);
+        addBox(railMat,0,topRailY, 0.045,ww+jamb*2,0.035,0.025);
         var slideOpen=doorOpenState(it)!=='closed';
         var leftOpen=!!it.flipX;
         var panelW=ww*0.54;
         var leftPos=-ww*0.23, rightPos=ww*0.23;
         var fixedX=leftOpen?rightPos:leftPos;
         var movingX=slideOpen?fixedX:(leftOpen?leftPos:rightPos);
-        addBox(doorMat,fixedX,dh/2,-0.035,panelW,dh-0.12,leafT);
-        addBox(doorMat,movingX,dh/2, 0.035,panelW,dh-0.12,leafT);
+        addBox(doorMat,fixedX,panelY,-0.035,panelW,panelH,leafT);
+        addBox(doorMat,movingX,panelY, 0.035,panelW,panelH,leafT);
       } else {
         var pivot=new THREE.Group();
         var hingeX=it.flipX ? ww/2 : -ww/2;
@@ -8573,14 +8577,14 @@ function buildWinFrames(flFilt){
         pivot.position.set(hingeX,0,0);
         pivot.rotation.y=doorOpenState(it)==='closed'?0:openSide*Math.PI/3;
         if(openingModelReady){
-          var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,dh-0.08,Math.max((openingModel.d||40)*U,leafT),null);
+          var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,panelH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
-          modelLeafWrap.position.set(leafX,0.04,0);
+          modelLeafWrap.position.set(leafX,panelBottomGap,0);
           modelLeafWrap.add(modelLeaf);
           pivot.add(modelLeafWrap);
         } else {
-          var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,dh-0.08,leafT),doorMat);
-          leaf.position.set(leafX,(dh-0.08)/2+0.04,0);
+          var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorMat);
+          leaf.position.set(leafX,panelY,0);
           leaf.castShadow=true; leaf.receiveShadow=true;
           pivot.add(leaf);
         }
