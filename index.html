@@ -2743,10 +2743,10 @@ body{
       </div>
       <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.25</span></div>
       <input id="light-room" type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
-      <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.22</span></div>
-      <input id="light-ambient" type="range" min="0" max="1.2" step="0.05" value="0.22" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
-      <div style="font-size:10px;color:#7a8fb0">太陽光 <span id="light-sun-val">0.65</span></div>
-      <input id="light-sun" type="range" min="0" max="2" step="0.05" value="0.65" style="width:100%" oninput="updateLightSetting('sun',+this.value)">
+      <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.16</span></div>
+      <input id="light-ambient" type="range" min="0" max="1.2" step="0.05" value="0.16" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
+      <div style="font-size:10px;color:#7a8fb0">太陽光 <span id="light-sun-val">0.78</span></div>
+      <input id="light-sun" type="range" min="0" max="2" step="0.05" value="0.78" style="width:100%" oninput="updateLightSetting('sun',+this.value)">
       <button class="pbtn" onclick="document.getElementById('light-panel').style.display='none'" style="margin-top:8px">閉じる</button>
     </div>
     <div id="wasd">WASD/矢印:移動 | ドラッグ:視点回転 | ESC:戻る</div>
@@ -2823,7 +2823,7 @@ body{
   <span id="st-floor">フロア: 1F</span>
   <span id="st-mode">モード: 平面図</span>
   <span id="st-walls">壁: 0</span>
-  <span id="app-version">house-planner mobile v3.0.4</span>
+  <span id="app-version">house-planner mobile v3.0.5</span>
 </div>
 
 <!-- Bottom navigation (mobile only) -->
@@ -2856,28 +2856,28 @@ var FLOOR_SLAB_H = 180;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.45, sun:0.65, ambient:0.22, room:0.25, exposure:0.95, env:0.55};
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.25, exposure:0.93, env:0.42};
 var LIGHT_PRESETS = {
   morning:{
-    label:'朝',hemi:0.36,sun:0.58,ambient:0.24,room:0.28,exposure:0.92,env:0.42,
+    label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.28,exposure:0.9,env:0.34,
     sunColor:'#ffd6a3',ambientColor:'#fff2df',hemiSky:'#d7ecff',hemiGround:'#8f7a66',
     sunPos:{x:-120,y:78,z:85},fogColor:0xd6e7f1,fogNear:70,fogFar:470,interiorBg:0x151821,
     sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
   },
   day:{
-    label:'昼',hemi:0.45,sun:0.65,ambient:0.22,room:0.25,exposure:0.95,env:0.55,
+    label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.25,exposure:0.93,env:0.42,
     sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
     sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
     sky:{top:'#4e91ff',mid:'#82bdff',horizon:'#d4ecff',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
   },
   evening:{
-    label:'夕方',hemi:0.28,sun:0.5,ambient:0.26,room:0.38,exposure:0.86,env:0.36,
+    label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.38,exposure:0.84,env:0.28,
     sunColor:'#ffad62',ambientColor:'#ffe4cc',hemiSky:'#b8a5d8',hemiGround:'#6c5142',
     sunPos:{x:150,y:46,z:-90},fogColor:0xd8a878,fogNear:65,fogFar:430,interiorBg:0x18131a,
     sky:{top:'#4d5f91',mid:'#a06f9e',horizon:'#f0a85e',ground:'#5c4a54',sunX:0.82,sunY:0.55,sunCore:'rgba(255,230,186,0.9)',sunGlow:'rgba(255,128,50,0.5)',haze:'rgba(255,145,72,0.38)',cloudAlpha:0.46}
   },
   night:{
-    label:'夜',hemi:0.18,sun:0.08,ambient:0.12,room:0.68,exposure:0.78,env:0.18,
+    label:'夜',hemi:0.10,sun:0.10,ambient:0.06,room:0.62,exposure:0.76,env:0.12,
     sunColor:'#c9dcff',ambientColor:'#c9d7ff',hemiSky:'#1d2b5d',hemiGround:'#11131d',
     sunPos:{x:-70,y:110,z:-120},fogColor:0x1b2544,fogNear:50,fogFar:330,interiorBg:0x070913,
     sky:{top:'#071028',mid:'#14224c',horizon:'#26365f',ground:'#0b1020',sunX:0.2,sunY:0.23,sunCore:'rgba(222,235,255,0.78)',sunGlow:'rgba(105,145,255,0.24)',haze:'rgba(35,50,95,0.42)',cloudAlpha:0.14}
@@ -6014,8 +6014,11 @@ function init3D(){
   sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
   sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
-  sun.shadow.bias = -0.0005; 
+  sun.shadow.bias = -0.00018;
+  sun.shadow.normalBias = 0.018;
+  sun.shadow.radius = 2.1;
   sc3.add(sun);
+  sc3.add(sun.target);
   
   var amb = new THREE.AmbientLight(0xffffff, LIGHT_SETTINGS.ambient);
   amb.name='AmbientLight';
@@ -6169,19 +6172,49 @@ function build3D(){
 }
 
 
+function isTransparentShadowHelperMesh(obj){
+  if(!obj || !obj.isMesh) return true;
+  if(obj.name==='_sky' || obj===_gndMesh) return true;
+  if(obj.userData && (obj.userData.hitProxy || obj.userData.shadowHelper)) return true;
+  if(!obj.castShadow) return true;
+  var mats=Array.isArray(obj.material)?obj.material:[obj.material];
+  return mats.every(function(m){
+    return !m || m.visible===false || (m.transparent && Number(m.opacity)<=0.08);
+  });
+}
+
 function fitShadowCamera(sunLight) {
   var box = new THREE.Box3();
   sc3.traverse(function(obj){
-    if(obj.isMesh && obj.name !== '_sky') box.expandByObject(obj);
+    if(!isTransparentShadowHelperMesh(obj)) box.expandByObject(obj);
   });
   if(box.isEmpty()) return;
+  var center = box.getCenter(new THREE.Vector3());
   var size = box.getSize(new THREE.Vector3());
-  var r = Math.max(size.x, size.z) * 1.3 / 2;
+  var span = Math.max(size.x, size.z, 4);
+  var height = Math.max(size.y, 2.4);
+  var r = Math.min(32, Math.max(5, Math.max(span, height) * 0.82 + 1.8));
+  var preset = getLightPreset(LIGHT_SETTINGS.timeOfDay);
+  var p = preset.sunPos || LIGHT_PRESETS.day.sunPos;
+  var dir = new THREE.Vector3(p.x, p.y, p.z);
+  if(dir.lengthSq()<0.001) dir.set(1,2,1);
+  dir.normalize();
+  var dist = Math.max(18, r * 3.2);
+  sunLight.position.set(center.x + dir.x * dist, center.y + dir.y * dist, center.z + dir.z * dist);
+  if(sunLight.target){
+    if(!sunLight.target.parent) sc3.add(sunLight.target);
+    sunLight.target.position.copy(center);
+    sunLight.target.updateMatrixWorld();
+  }
   sunLight.shadow.camera.left   = -r; sunLight.shadow.camera.right  =  r;
   sunLight.shadow.camera.top    =  r; sunLight.shadow.camera.bottom = -r;
-  sunLight.shadow.camera.near   = 0.5;
-  sunLight.shadow.camera.far    = size.y * 3 + 80;
+  sunLight.shadow.camera.near   = 0.2;
+  sunLight.shadow.camera.far    = dist + r * 3.5 + height;
+  sunLight.shadow.bias = -0.00018;
+  sunLight.shadow.normalBias = 0.018;
+  sunLight.shadow.radius = 2.1;
   sunLight.shadow.camera.updateProjectionMatrix();
+  if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
 function rebuild3D(){if(sc3) build3D();}
 
