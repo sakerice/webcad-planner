@@ -2433,6 +2433,16 @@ body{
   color:var(--hp-secondary-dark)!important;
   font-size:17px!important;
 }
+#sidebar .opening-window-tile{
+  min-height:88px!important;
+  grid-template-rows:54px auto!important;
+  padding:7px 6px 6px!important;
+}
+#sidebar .opening-window-tile img,
+#sidebar .opening-window-tile .opening-model-thumb{
+  width:54px!important;
+  height:54px!important;
+}
 #sidebar .asset-grid .asset-name{
   display:block!important;
   width:100%!important;
@@ -2442,6 +2452,13 @@ body{
   white-space:nowrap!important;
   overflow:hidden!important;
   text-overflow:ellipsis!important;
+}
+#sidebar .opening-window-tile .asset-name{
+  white-space:normal!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  line-height:1.14!important;
 }
 .mobile-data-tools{
   display:none!important;
@@ -3175,10 +3192,10 @@ function renderOpeningWindowModelToolMenu(){
   if(!mount) return;
   var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon">🪟</span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
-  html+=openingToolTileHtml(openingWindowModelToolId(''),'デフォルト','🪟',null,'opening-model-default-tile');
-  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'引き違い','⇔',null,'opening-model-default-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId(''),'デフォルト','🪟',null,'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'引き違い','⇔',null,'opening-model-default-tile opening-window-tile');
   windows.forEach(function(item){
-    html+=openingToolTileHtml(openingWindowModelToolId(item.id),item.name,'🪟',item,'');
+    html+=openingToolTileHtml(openingWindowModelToolId(item.id),item.name,'🪟',item,'opening-window-tile');
   });
   html+='</div></div>';
   mount.innerHTML=html;
@@ -11378,7 +11395,7 @@ function drawDim(){
   });
 
   var building = [].concat(DATA.walls, DATA.rooms, DATA.items).filter(function(x){
-    return x.floor===ST.floor && x.type !== 'site-rect' && !isPlanAnnotationType(x.type) && !isOpeningItemType(x.type);
+    return x.floor===ST.floor && x.type !== 'site-rect' && !isPlanAnnotationType(x.type) && !isOpeningItemType(x.type) && !isContextExteriorItemType(x.type);
   });
   if(building.length>0){
     var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
@@ -11422,7 +11439,7 @@ function drawDim(){
 
   // ── Items: dimension labels for all placed items ──
   if(ST.showDim && ST.zoom>=0.4){
-    var fi2=DATA.items.filter(function(i){return i.floor===ST.floor&&i.type!=='site-rect'&&i.type!=='tree'&&!isPlanAnnotationType(i.type);});
+    var fi2=DATA.items.filter(function(i){return i.floor===ST.floor&&i.type!=='site-rect'&&i.type!=='tree'&&!isPlanAnnotationType(i.type)&&!isContextExteriorItemType(i.type);});
     fi2.forEach(function(it){
       if(!isFiniteCanvasValue(it.x) || !isFiniteCanvasValue(it.y) || !isFiniteCanvasValue(it.w) || !isFiniteCanvasValue(it.d)) return;
       var pose=getItemDisplayPose(it);
