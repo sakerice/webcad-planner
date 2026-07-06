@@ -2688,6 +2688,10 @@ body{
       <div class="stool" data-tool="car" onclick="setTool('car')"><span class="sicon">🚗</span>自動車</div>
       <div class="stool" data-tool="fence" onclick="setTool('fence')"><span class="sicon">🧱</span>塀</div>
       <div class="stool" data-tool="wood-fence" onclick="setTool('wood-fence')"><span class="sicon">▥</span>フェンス</div>
+      <div class="stool" data-tool="neighbor-building" onclick="setTool('neighbor-building')"><span class="sicon">▥</span>周辺ビル</div>
+      <div class="stool" data-tool="neighbor-house" onclick="setTool('neighbor-house')"><span class="sicon">⌂</span>隣家</div>
+      <div class="stool" data-tool="road" onclick="setTool('road')"><span class="sicon">═</span>道路</div>
+      <div class="stool" data-tool="utility-pole" onclick="setTool('utility-pole')"><span class="sicon">│</span>電柱</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏠 内観・外観 <span>+</span></div>
     <div class="cat-body">
@@ -2695,6 +2699,11 @@ body{
       <div class="stool" onclick="toggleExteriorColorPanel()"><span class="sicon">🏠</span>外観カラー設定</div>
       <div class="stool" onclick="toggleRoofColorPanel()"><span class="sicon">🏡</span>屋根カラー設定</div>
       <div class="stool" onclick="toggleLightPanel()"><span class="sicon">💡</span>ライト調整</div>
+      <div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="照明"><span class="sicon">💡</span><span>照明</span><span class="asset-arrow">+</span></div><div class="asset-grid">
+        <button class="asset-tile" type="button" data-tool="light-ceiling" onclick="setTool('light-ceiling')" title="シーリングライト"><span class="sicon">◉</span><div class="asset-name">シーリングライト</div></button>
+        <button class="asset-tile" type="button" data-tool="light-down" onclick="setTool('light-down')" title="ダウンライト"><span class="sicon">⌄</span><div class="asset-name">ダウンライト</div></button>
+        <button class="asset-tile" type="button" data-tool="light-spot" onclick="setTool('light-spot')" title="スポットライト"><span class="sicon">◒</span><div class="asset-name">スポットライト</div></button>
+      </div></div>
     </div>
     <div class="sidebar-settings">
       <div class="sidebar-settings-label">スナップ</div>
@@ -2823,7 +2832,7 @@ body{
   <span id="st-floor">フロア: 1F</span>
   <span id="st-mode">モード: 平面図</span>
   <span id="st-walls">壁: 0</span>
-  <span id="app-version">house-planner mobile v3.0.5</span>
+  <span id="app-version">house-planner mobile v3.0.6</span>
 </div>
 
 <!-- Bottom navigation (mobile only) -->
@@ -2912,9 +2921,13 @@ function floorSlabHeightMForFloor(floor){
 function floorTopY(floor){
   return floorBaseY(floor)+floorSlabHeightMForFloor(floor);
 }
+var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
+function isContextExteriorItemType(type){
+  return !!CONTEXT_EXTERIOR_TYPES[type];
+}
 function item3DBaseY(it){
   if(!it) return 0;
-  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp') return 0;
+  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isContextExteriorItemType(it.type)) return 0;
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
@@ -2930,9 +2943,11 @@ var ISIZES = {
   'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
   'custom-block':{w:900,d:450},
+  'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
+  'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:3000}, 'utility-pole':{w:350,d:350},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
   'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:900,d:200},
@@ -2944,7 +2959,8 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  'neighbor-building':'#8f98a3','neighbor-house':'#d7c1a3',road:'#55585c','utility-pole':'#6d5540',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -3336,7 +3352,8 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
@@ -3362,8 +3379,60 @@ var RULER_THICKNESS_MM = 120;
 var WALK_ROUTE_THICKNESS_MM = 140;
 var WALK_EYE_HEIGHT_MM = 1700;
 var WALK_DEFAULT_SPEED_MPS = 1.2;
+var LIGHT_ITEM_TYPES = {'light-ceiling':1,'light-down':1,'light-spot':1};
+var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-spot'};
+var MAX_INTERIOR_SHADOW_LIGHTS = 3;
+var _activeInteriorShadowLightCount = 0;
 function isPlanAnnotationType(type){
   return type==='memo' || type==='ruler' || type==='walk-route';
+}
+function isLightItemType(type){
+  return !!LIGHT_ITEM_TYPES[type];
+}
+function lightKindFromType(type){
+  if(type==='light-down') return 'down';
+  if(type==='light-spot') return 'spot';
+  return 'ceiling';
+}
+function lightTypeForKind(kind){
+  return LIGHT_KIND_TO_TYPE[kind]||'light-ceiling';
+}
+function lightKindLabel(kind){
+  return {ceiling:'シーリングライト',down:'ダウンライト',spot:'スポットライト'}[kind]||'シーリングライト';
+}
+function lightShapeLabel(shape){
+  return shape==='line'?'線ライト':'点ライト';
+}
+function defaultLightElevationMm(floor){
+  return Math.max(1800,Math.round(wallFullHeightM(floor||ST.floor||1)*1000-160));
+}
+function ensureLightDefaults(it){
+  if(!it || !isLightItemType(it.type)) return it;
+  var kind=lightKindFromType(it.type);
+  if(!it.lightKind || !LIGHT_KIND_TO_TYPE[it.lightKind]) it.lightKind=kind;
+  if(!it.lightShape) it.lightShape='point';
+  if(!it.lightColor) it.lightColor=it.color&&/^#/.test(String(it.color))?it.color:'#fff6dd';
+  if(!isFinite(Number(it.lightIntensity))) it.lightIntensity=it.lightKind==='spot'?0.9:(it.lightKind==='down'?0.72:0.56);
+  if(!isFinite(Number(it.lightRange))) it.lightRange=it.lightKind==='spot'?5200:(it.lightKind==='down'?4400:5600);
+  if(!isFinite(Number(it.lightAngle))) it.lightAngle=it.lightKind==='spot'?32:64;
+  if(it.lightCastShadow===undefined) it.lightCastShadow=true;
+  if(!isFinite(Number(it.elev))) it.elev=defaultLightElevationMm(it.floor);
+  it.color=it.lightColor;
+  return it;
+}
+function defaultContextExteriorHeight(type){
+  if(type==='neighbor-building') return 9000;
+  if(type==='neighbor-house') return 5200;
+  if(type==='utility-pole') return 6500;
+  if(type==='road') return 70;
+  return 400;
+}
+function getContextExteriorHeight(it){
+  if(!it || !isContextExteriorItemType(it.type)) return 400;
+  var h=Number(it.contextHeight);
+  if(!isFinite(h)) h=defaultContextExteriorHeight(it.type);
+  var max=it.type==='road'?200:30000;
+  return Math.max(20,Math.min(max,h));
 }
 function isLineAnnotationTool(type){
   return type==='ruler' || type==='walk-route';
@@ -3380,7 +3449,7 @@ function getAllLockableObjects(){
   return DATA.walls.concat(DATA.rooms,DATA.items);
 }
 var LOCK_FIXTURE_TYPES = {
-  bath:1,toilet:1,sink:1,kitchen:1,fridge:1,washer:1
+  bath:1,toilet:1,sink:1,kitchen:1,fridge:1,washer:1,'light-ceiling':1,'light-down':1,'light-spot':1
 };
 var LOCK_FURNITURE_TYPES = {
   sofa:1,loveseat_2p:1,low_table:1,'dining-table':1,dining_6:1,round_table_4:1,
@@ -3614,7 +3683,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -3791,6 +3860,15 @@ function updateProps(){
     });
     html += '</select></div>';
   }
+  if(isContextExteriorItemType(it.type)){
+    if(!isFinite(Number(it.contextHeight))) it.contextHeight=defaultContextExteriorHeight(it.type);
+    html += '<div class="ph" style="margin-top:12px">周辺要素設定</div>';
+    if(it.type!=='road'){
+      html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="100" max="30000" step="100" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
+    } else {
+      html += '<div class="pr"><div class="pl">路面厚 (mm)</div><input class="pi" type="number" min="20" max="200" step="10" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
+    }
+  }
   if(isCustomBlockType(it.type)){
     if(!it.customHeight) it.customHeight=900;
     if(!it.color) it.color=ICOLORS[it.type]||'#c9d7ee';
@@ -3803,6 +3881,28 @@ function updateProps(){
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
     }
+  }
+  if(isLightItemType(it.type)){
+    ensureLightDefaults(it);
+    var lk=it.lightKind||lightKindFromType(it.type);
+    html += '<div class="ph" style="margin-top:12px">ライト設定</div>';
+    html += '<div class="pr"><div class="pl">ライト種</div><select class="pi" onchange="updateSelectedLightKind(this.value)">';
+    [['ceiling','シーリングライト'],['down','ダウンライト'],['spot','スポットライト']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+(lk===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr"><div class="pl">ライト形状</div><select class="pi" onchange="updateSelectedProp(\'lightShape\',this.value)">';
+    [['point','点ライト'],['line','線ライト']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.lightShape||'point')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr"><div class="pl">ライトカラー</div><input class="pi" type="color" value="'+(it.lightColor||'#fff6dd')+'" onchange="updateSelectedProp(\'lightColor\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">明るさ</div><input class="pi" type="number" min="0" max="3" step="0.05" value="'+Number(it.lightIntensity||0).toFixed(2)+'" onchange="updateSelectedProp(\'lightIntensity\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">光の届く距離 (mm)</div><input class="pi" type="number" min="500" max="12000" step="100" value="'+Math.round(it.lightRange||4500)+'" onchange="updateSelectedProp(\'lightRange\',+this.value)"></div>';
+    if(lk!=='ceiling'){
+      html += '<div class="pr"><div class="pl">照射角 (°)</div><input class="pi" type="number" min="10" max="110" step="1" value="'+Math.round(it.lightAngle||45)+'" onchange="updateSelectedProp(\'lightAngle\',+this.value)"></div>';
+    }
+    html += '<label class="lock-control-label" style="margin-top:8px"><input type="checkbox" '+(it.lightCastShadow!==false?'checked':'')+' onchange="updateSelectedProp(\'lightCastShadow\',this.checked)">影を落とす</label>';
   }
   if(it.type==='foundation'){
     if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
@@ -3825,7 +3925,7 @@ function updateProps(){
   }
   if(it.flipX === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipX=false;
   if(it.flipY === undefined && it.type && it.type!=='room' && it.type!=='site-rect' && it.type!=='foundation') it.flipY=false;
-  if(it.flipX !== undefined) {
+  if(it.flipX !== undefined && !isLightItemType(it.type)) {
     html += '<div class="pr"><div class="pl">反転</div><div style="display:flex;gap:4px">';
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipX\', !ST.selected.flipX)">左右反転</button>';
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipY\', !ST.selected.flipY)">上下反転</button>';
@@ -3863,7 +3963,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
   }
-  if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type)) {
+  if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type) && !isLightItemType(it.type)) {
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
@@ -3871,10 +3971,12 @@ function updateProps(){
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
     }
-    html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
-    html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
-    html += '<div class="pr"><div class="pl">位置 X: '+Math.round(it.sX||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedProp(\'sX\',+this.value, true)" onchange="saveState()"></div>';
-    html += '<div class="pr"><div class="pl">位置 Y: '+Math.round(it.sY||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedProp(\'sY\',+this.value, true)" onchange="saveState()"></div>';
+    if(!isContextExteriorItemType(it.type)){
+      html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
+      html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
+      html += '<div class="pr"><div class="pl">位置 X: '+Math.round(it.sX||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedProp(\'sX\',+this.value, true)" onchange="saveState()"></div>';
+      html += '<div class="pr"><div class="pl">位置 Y: '+Math.round(it.sY||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedProp(\'sY\',+this.value, true)" onchange="saveState()"></div>';
+    }
   }
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
@@ -3906,6 +4008,10 @@ function updateSelectedProp(p,v,noSave){
     return;
   }
   if(p==='color') ST.selected.colorCustom=true;
+  if(isLightItemType(ST.selected.type) && p==='lightColor'){
+    ST.selected.color=v;
+    ST.selected.colorCustom=true;
+  }
   if(p==='texture'){
     if(ST.selected._texObj) ST.selected._texObj=null;
     if(!v){
@@ -3952,6 +4058,21 @@ function updateWalkRouteSpeed(v){
   ST.selected.walkSpeed=next;
   if(WALKTHROUGH && WALKTHROUGH.routeId===ST.selected.id) beginWalkthrough(ST.selected);
   draw2d();
+  updateProps();
+}
+function updateSelectedLightKind(kind){
+  if(!ST.selected || !isLightItemType(ST.selected.type)) return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
+  kind=LIGHT_KIND_TO_TYPE[kind]?kind:'ceiling';
+  saveState();
+  ST.selected.type=lightTypeForKind(kind);
+  ST.selected.lightKind=kind;
+  ensureLightDefaults(ST.selected);
+  ST.selected.lightIntensity=kind==='spot'?0.9:(kind==='down'?0.72:0.56);
+  ST.selected.lightRange=kind==='spot'?5200:(kind==='down'?4400:5600);
+  ST.selected.lightAngle=kind==='spot'?32:64;
+  draw2d();
+  if(ren) rebuild3D();
   updateProps();
 }
 function applyOpeningModelToItem(it,modelId){
@@ -4170,6 +4291,10 @@ function mkItem(type,x,y,rot,floor,w,d){
     item.name='任意ブロック';
     item.colorCustom=true;
   }
+  if(isLightItemType(type)){
+    ensureLightDefaults(item);
+    item.colorCustom=true;
+  }
   if(type==='memo'){
     item.noteText='メモ';
     item.color='#fff3a6';
@@ -4185,6 +4310,9 @@ function mkItem(type,x,y,rot,floor,w,d){
     item.walkSpeed=WALK_DEFAULT_SPEED_MPS;
     item.color='#10b981';
     item.colorCustom=true;
+  }
+  if(isContextExteriorItemType(type)){
+    item.contextHeight=defaultContextExteriorHeight(type);
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -5128,6 +5256,50 @@ function drawRulerSnapMarker(p,color){
   ctx.restore();
 }
 
+function drawLight2d(it,sc){
+  ensureLightDefaults(it);
+  var hw=(it.w||200)*sc/2, hd=(it.d||200)*sc/2;
+  var color=it.lightColor||'#fff6dd';
+  var kind=it.lightKind||lightKindFromType(it.type);
+  var shape=it.lightShape||'point';
+  ctx.save();
+  ctx.fillStyle='rgba(255,246,210,0.28)';
+  ctx.strokeStyle='rgba(78,70,48,0.62)';
+  ctx.lineWidth=Math.max(1,1.4*sc);
+  if(shape==='line'){
+    var barH=Math.max(8*sc,Math.min(hd*0.7,18*sc));
+    ctx.fillRect(-hw,-barH/2,hw*2,barH);
+    ctx.strokeRect(-hw,-barH/2,hw*2,barH);
+    ctx.fillStyle=color;
+    ctx.fillRect(-hw*0.82,-barH*0.22,hw*1.64,barH*0.44);
+  } else {
+    var r=Math.max(7*sc,Math.min(hw,hd,18*sc));
+    ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=color;
+    ctx.beginPath(); ctx.arc(0,0,r*0.52,0,Math.PI*2); ctx.fill();
+  }
+  if(kind!=='ceiling'){
+    var beam=kind==='spot'?0.42:0.74;
+    var reach=Math.max(hd,Math.min(60*sc,Math.max(hw,hd)*1.2));
+    ctx.fillStyle=kind==='spot'?'rgba(255,226,140,0.16)':'rgba(255,236,180,0.13)';
+    ctx.strokeStyle=kind==='spot'?'rgba(180,125,32,0.55)':'rgba(160,128,70,0.42)';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(Math.sin(beam)*reach,Math.cos(beam)*reach);
+    ctx.arc(0,0,reach,Math.PI/2-beam,Math.PI/2+beam,false);
+    ctx.lineTo(0,0);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.strokeStyle='rgba(60,52,38,0.72)';
+  ctx.lineWidth=Math.max(1,1.1*sc);
+  ctx.beginPath();
+  ctx.moveTo(-Math.min(hw,10*sc),0); ctx.lineTo(Math.min(hw,10*sc),0);
+  ctx.moveTo(0,-Math.min(hd,10*sc)); ctx.lineTo(0,Math.min(hd,10*sc));
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawItem2d(it){
   var sc=ST.zoom*0.05;
   var pose=getItemDisplayPose(it);
@@ -5163,6 +5335,15 @@ function drawItem2d(it){
     if(ST.selected===it&&ST.tool==='select'){
       var walkHalf=getItemSelectionHalfExtentsPx(it,sc);
       drawHandles(it,ccx,ccy,walkHalf.hw,walkHalf.hd,sc,drawRot);
+    }
+    return;
+  }
+  if(isLightItemType(it.type)){
+    drawLight2d(it,sc);
+    ctx.restore();
+    if(ST.selected===it&&ST.tool==='select'){
+      var lightHalf=getItemSelectionHalfExtentsPx(it,sc);
+      drawHandles(it,ccx,ccy,lightHalf.hw,lightHalf.hd,sc,drawRot);
     }
     return;
   }
@@ -5369,6 +5550,84 @@ function drawItem2d(it){
         }
       }
       ctx.stroke();
+    } else if(it.type === 'road') {
+      ctx.fillStyle='rgba(72,76,82,0.86)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(255,255,255,0.78)';
+      ctx.lineWidth=Math.max(1,2*sc);
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd*0.72); ctx.lineTo(hw,-hd*0.72);
+      ctx.moveTo(-hw, hd*0.72); ctx.lineTo(hw, hd*0.72);
+      ctx.stroke();
+      ctx.setLineDash([Math.max(6,14*sc),Math.max(4,10*sc)]);
+      ctx.strokeStyle='rgba(255,222,90,0.9)';
+      ctx.beginPath();
+      ctx.moveTo(-hw,0); ctx.lineTo(hw,0);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='bold '+Math.max(9,Math.min(14,it.d*sc*0.18))+'px sans-serif';
+      ctx.fillStyle='rgba(255,255,255,0.72)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('道路',0,0);
+    } else if(it.type === 'neighbor-building') {
+      ctx.fillStyle='rgba(143,152,163,0.72)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(62,72,84,0.82)';
+      ctx.lineWidth=1.3;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      var cols=Math.max(2,Math.min(8,Math.floor(it.w/700)));
+      var rows=Math.max(2,Math.min(5,Math.floor(it.d/620)));
+      ctx.fillStyle='rgba(226,238,246,0.58)';
+      for(var bc=0;bc<cols;bc++){
+        for(var br=0;br<rows;br++){
+          var bwid=it.w*sc/(cols*2.8), bhgt=it.d*sc/(rows*3.2);
+          var bx=-hw+(bc+0.5)*it.w*sc/cols-bwid/2;
+          var by=-hd+(br+0.5)*it.d*sc/rows-bhgt/2;
+          ctx.fillRect(bx,by,bwid,bhgt);
+        }
+      }
+      ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
+      ctx.fillStyle='rgba(28,39,52,0.86)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('ビル',0,0);
+    } else if(it.type === 'neighbor-house') {
+      ctx.fillStyle='rgba(215,193,163,0.7)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(92,68,48,0.75)';
+      ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd);
+      ctx.lineTo(0,-hd-Math.min(hd*0.42,22*sc));
+      ctx.lineTo(hw,-hd);
+      ctx.strokeStyle='rgba(115,52,40,0.85)';
+      ctx.lineWidth=1.4;
+      ctx.stroke();
+      ctx.fillStyle='rgba(120,64,45,0.16)';
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd);
+      ctx.lineTo(0,-hd-Math.min(hd*0.42,22*sc));
+      ctx.lineTo(hw,-hd);
+      ctx.closePath();
+      ctx.fill();
+      ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
+      ctx.fillStyle='rgba(70,50,38,0.86)';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('隣家',0,0);
+    } else if(it.type === 'utility-pole') {
+      var rr=Math.max(5,Math.min(hw,hd)*0.72);
+      ctx.fillStyle='rgba(109,85,64,0.78)';
+      ctx.beginPath(); ctx.arc(0,0,rr,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(62,45,32,0.88)';
+      ctx.lineWidth=Math.max(1.2,2*sc);
+      ctx.beginPath();
+      ctx.moveTo(-rr*2.4,0); ctx.lineTo(rr*2.4,0);
+      ctx.moveTo(0,-rr*2.4); ctx.lineTo(0,rr*2.4);
+      ctx.stroke();
+      ctx.font='bold '+Math.max(8,Math.min(12,rr*0.9))+'px sans-serif';
+      ctx.fillStyle='rgba(45,32,24,0.82)';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText('電柱',0,rr+3);
     } else if(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front') {
       var hingeX=(it.flipX?hw:-hw), leafX=(it.flipX?-hw:hw);
       var openDir=it.flipY?-1:1;
@@ -6154,6 +6413,7 @@ function build3D(){
     disposeObj(c);
     sc3.remove(c);
   });
+  _activeInteriorShadowLightCount=0;
   // Interior mode: show only current floor
   var flFilt = isInt ? ST.floor : null;
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
@@ -6167,7 +6427,7 @@ function build3D(){
   add3DMoveGizmo();
   var _sunLight=null;
   sc3.traverse(function(o){if(o.isDirectionalLight)_sunLight=o;});
-  if(_sunLight) fitShadowCamera(_sunLight);
+  if(_sunLight && !isInt) fitShadowCamera(_sunLight);
   syncExteriorWallPanel();
 }
 
@@ -6817,7 +7077,9 @@ function applyLightingToScene(refreshSky){
         o.intensity=LIGHT_SETTINGS.ambient;
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
-        o.intensity=LIGHT_SETTINGS.sun;
+        var interiorMode=(ST.view==='3d-int'||isInt);
+        o.intensity=interiorMode?0:LIGHT_SETTINGS.sun;
+        o.castShadow=!interiorMode;
         if(o.color) o.color.set(preset.sunColor||'#ffffff');
         var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
         o.position.set(p.x,p.y,p.z);
@@ -7496,7 +7758,7 @@ function isCustomWallColor(w){
 
 function canSetItemElevation(it){
   if(!it || !it.type) return false;
-  if(it.type==='room' || it.type==='wall' || isPlanAnnotationType(it.type) || it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp') return false;
+  if(it.type==='room' || it.type==='wall' || isPlanAnnotationType(it.type) || it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isContextExteriorItemType(it.type)) return false;
   return !isOpeningItemType(it.type);
 }
 var ITEM_SURFACE_CATEGORIES = {
@@ -7532,6 +7794,10 @@ function findDefaultPlacementSurface(item){
   return best ? {item:best, top:bestTop} : null;
 }
 function applyDefaultPlacementElevation(item){
+  if(item && isLightItemType(item.type)){
+    item.elev=defaultLightElevationMm(item.floor);
+    return null;
+  }
   var surface=findDefaultPlacementSurface(item);
   if(surface) item.elev=Math.max(-5000,Math.min(10000,Math.round(surface.top)));
   return surface;
@@ -8570,25 +8836,30 @@ function buildWinFrames(flFilt){
       }
       addHitProxy(0,wh/2,0,Math.max(ww+0.4,0.6),Math.max(wh+0.24,0.5),Math.max(wt+0.55,0.7));
     } else {
-      var dh=doorHeightMm(it)*U, jamb=0.08, leafT=0.04;
-      var panelBottomGap=0.02, panelTopGap=0.02;
+      var dh=doorHeightMm(it)*U;
+      var frontDoor=it.type==='door-front';
+      var jamb=frontDoor?0.04:0.08;
+      var frameDepth=frontDoor?Math.max(0.08,Math.min(0.14,(it.d||200)*U*0.65)):wt;
+      var leafT=frontDoor?0.05:0.04;
+      var thresholdH=frontDoor?0.025:0.04;
+      var panelBottomGap=frontDoor?0.012:0.02, panelTopGap=frontDoor?0.015:0.02;
       var panelH=Math.max(0.18,dh-panelBottomGap-panelTopGap);
       var panelY=panelBottomGap+panelH/2;
       var archMode=isArchOpeningType(it.type);
       var archR=archMode?Math.min(ww/2,dh*0.42):0;
       var archShoulder=archMode?Math.max(0.6,dh-archR):dh;
       var jambH=archMode?archShoulder:dh;
-      addBox(frameMat,-ww/2-jamb/2,jambH/2,0,jamb,jambH,wt);
-      addBox(frameMat, ww/2+jamb/2,jambH/2,0,jamb,jambH,wt);
+      addBox(frameMat,-ww/2-jamb/2,jambH/2,0,jamb,jambH,frameDepth);
+      addBox(frameMat, ww/2+jamb/2,jambH/2,0,jamb,jambH,frameDepth);
       if(archMode){
-        addArchTrim(ww,archShoulder,archR,jamb,wt);
+        addArchTrim(ww,archShoulder,archR,jamb,frameDepth);
       } else {
-        addBox(frameMat,0,Math.max(jamb/2,dh-jamb/2),0,ww+jamb*2,jamb,wt);
+        addBox(frameMat,0,Math.max(jamb/2,dh-jamb/2),0,ww+jamb*2,jamb,frameDepth);
       }
-      addBox(railMat,0,0.02,0,ww+jamb*2,0.04,wt+0.03);
+      addBox(railMat,0,thresholdH/2,0,ww+jamb*2,thresholdH,frameDepth+0.03);
 
       if(isNoDoorOpeningType(it.type)){
-        addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(wt+0.55,0.7));
+        addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(frameDepth+0.55,0.7));
       } else if(it.type==='door-slide') {
         var topRailY=Math.max(0.08,dh-0.035);
         addBox(railMat,0,topRailY,-0.045,ww+jamb*2,0.035,0.025);
@@ -8885,6 +9156,112 @@ function build3DRoofItem(grp,it,w3,d3){
   gableEnd(-W/2,'x'); gableEnd(W/2,'x');
 }
 
+function claimInteriorShadowLightSlot(it){
+  if(!isInt || !it || it.lightCastShadow===false) return false;
+  if(_activeInteriorShadowLightCount>=MAX_INTERIOR_SHADOW_LIGHTS) return false;
+  _activeInteriorShadowLightCount++;
+  return true;
+}
+function configureInteriorLightShadow(light,rangeM){
+  light.castShadow=true;
+  if(light.shadow && light.shadow.mapSize) light.shadow.mapSize.set(512,512);
+  if(light.shadow && light.shadow.camera){
+    light.shadow.camera.near=0.08;
+    light.shadow.camera.far=Math.max(1.5,rangeM+0.8);
+  }
+  if(light.shadow){
+    light.shadow.bias=-0.00018;
+    light.shadow.normalBias=0.018;
+    light.shadow.radius=2.2;
+  }
+}
+function addLightBeamHint(grp,kind,color,rangeM,angleRad){
+  if(kind==='ceiling') return;
+  var height=Math.max(0.35,Math.min(rangeM*0.45,1.2));
+  var radius=Math.tan(angleRad)*height;
+  var geo=new THREE.ConeGeometry(Math.max(0.08,radius),height,24,1,true);
+  var mat=new THREE.MeshBasicMaterial({
+    color:color,
+    transparent:true,
+    opacity:kind==='spot'?0.10:0.07,
+    depthWrite:false,
+    side:THREE.DoubleSide,
+    toneMapped:false
+  });
+  var cone=new THREE.Mesh(geo,mat);
+  cone.position.y=-height/2;
+  cone.rotation.x=Math.PI;
+  cone.userData.shadowHelper=true;
+  grp.add(cone);
+}
+function makeLightFixtureMaterial(color){
+  return new THREE.MeshStandardMaterial({
+    color:0xf7f1e2,
+    emissive:new THREE.Color(color),
+    emissiveIntensity:0.45,
+    roughness:0.34,
+    metalness:0.06
+  });
+}
+function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
+  var intensity=Math.max(0,Math.min(3,Number(it.lightIntensity)||0));
+  var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
+  if(kind==='ceiling'){
+    var p=new THREE.PointLight(color,intensity,rangeM,1.65);
+    p.position.set(localX,-0.08,localZ);
+    if(castsShadow) configureInteriorLightShadow(p,rangeM);
+    grp.add(p);
+    return;
+  }
+  var angleDeg=Math.max(10,Math.min(110,Number(it.lightAngle)||45));
+  var angleRad=THREE.MathUtils.degToRad(angleDeg/2);
+  var s=new THREE.SpotLight(color,intensity,rangeM,angleRad,kind==='spot'?0.34:0.62,1.65);
+  s.position.set(localX,-0.06,localZ);
+  var target=new THREE.Object3D();
+  var forward=kind==='spot'?Math.min(rangeM*0.32,1.2):0;
+  target.position.set(localX,-Math.max(1.0,Math.min(rangeM,3.2)),localZ+forward);
+  grp.add(target);
+  s.target=target;
+  if(castsShadow) configureInteriorLightShadow(s,rangeM);
+  grp.add(s);
+}
+function build3DLightItem(grp,it,w3,d3){
+  ensureLightDefaults(it);
+  var kind=it.lightKind||lightKindFromType(it.type);
+  var shape=it.lightShape||'point';
+  var color=new THREE.Color(it.lightColor||'#fff6dd');
+  var mat=makeLightFixtureMaterial(color);
+  var trimMat=new THREE.MeshStandardMaterial({color:0x4b4b4b,roughness:0.38,metalness:0.35});
+  var lineMode=shape==='line';
+  if(lineMode){
+    var body=new THREE.Mesh(new THREE.BoxGeometry(Math.max(w3,0.28),0.035,Math.max(d3,0.045)),mat);
+    body.castShadow=true; body.receiveShadow=true; grp.add(body);
+    var endW=Math.min(0.035,Math.max(w3*0.12,0.025));
+    [-1,1].forEach(function(side){
+      var cap=new THREE.Mesh(new THREE.BoxGeometry(endW,0.04,Math.max(d3,0.055)),trimMat);
+      cap.position.x=side*Math.max(w3/2-endW/2,0);
+      cap.castShadow=true; cap.receiveShadow=true; grp.add(cap);
+    });
+  } else if(kind==='ceiling'){
+    var disk=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.42,0.08),Math.max(Math.min(w3,d3)*0.42,0.08),0.045,32),mat);
+    disk.castShadow=true; disk.receiveShadow=true; grp.add(disk);
+  } else {
+    var cyl=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.28,0.055),Math.max(Math.min(w3,d3)*0.22,0.045),0.12,20),mat);
+    cyl.castShadow=true; cyl.receiveShadow=true; grp.add(cyl);
+    var yoke=new THREE.Mesh(new THREE.BoxGeometry(Math.max(w3*0.72,0.12),0.025,0.035),trimMat);
+    yoke.position.y=0.045;
+    yoke.castShadow=true; yoke.receiveShadow=true; grp.add(yoke);
+  }
+  var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
+  var angleRad=THREE.MathUtils.degToRad(Math.max(10,Math.min(110,Number(it.lightAngle)||45))/2);
+  addLightBeamHint(grp,kind,color,rangeM,angleRad);
+  var offsets=lineMode?[-0.32,0.32]:[0];
+  offsets.forEach(function(frac,idx){
+    var localX=lineMode?frac*Math.max(w3,0.28):0;
+    addConfiguredLight(grp,it,kind,color,localX,0,idx===0&&claimInteriorShadowLightSlot(it));
+  });
+}
+
 function buildItem3D(it){
   if(isPlanAnnotationType(it.type)) return;
   var fy=item3DBaseY(it);
@@ -8927,6 +9304,11 @@ function buildItem3D(it){
   }
   if(it.type==='ramp'){
     build3DRamp(grp,it,it.w*U,it.d*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
+  if(isLightItemType(it.type)){
+    build3DLightItem(grp,it,it.w*U,it.d*U);
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
   }
@@ -9038,6 +9420,18 @@ function buildItem3D(it){
   else if(it.type==='wood-fence'){
     buildWoodFence3D(grp,it,w3,d3,h);
   }
+  else if(it.type==='neighbor-building'){
+    build3DNeighborBuilding(grp,it,w3,d3,h);
+  }
+  else if(it.type==='neighbor-house'){
+    build3DNeighborHouse(grp,it,w3,d3,h);
+  }
+  else if(it.type==='road'){
+    build3DRoad(grp,it,w3,d3,h);
+  }
+  else if(it.type==='utility-pole'){
+    build3DUtilityPole(grp,it,w3,d3,h);
+  }
   else if(isCustomBlockType(it.type)){
     var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff) ||
       new THREE.MeshStandardMaterial({color:it.color||ICOLORS[it.type]||0xc9d7ee,roughness:0.78,metalness:0.02});
@@ -9068,7 +9462,7 @@ function buildItem3D(it){
     var box=new THREE.Mesh(new THREE.BoxGeometry(w3,h,d3),matSide);
     box.position.y=h/2;box.castShadow=true;box.receiveShadow=true;grp.add(box);
   }
-  if(it.type!=='roof') applyItemColorToGroup(grp, it.colorCustom?it.color:null);
+  if(it.type!=='roof' && !isContextExteriorItemType(it.type)) applyItemColorToGroup(grp, it.colorCustom?it.color:null);
 
   mark3DSelectable(grp,it,'item'); sc3.add(grp);
 }
@@ -9136,8 +9530,130 @@ function buildWoodFence3D(grp,it,w3,d3,h){
   }
 }
 
+function addContextBox(grp,mat,x,y,z,w,h,d,cast,receive){
+  var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(x,y,z);
+  m.castShadow=cast!==false;
+  m.receiveShadow=receive!==false;
+  grp.add(m);
+  return m;
+}
+function addContextEdges(grp,w,h,d,y,color,opacity){
+  var geo=new THREE.BoxGeometry(w,h,d);
+  var edgeGeo=new THREE.EdgesGeometry(geo);
+  var edgeMat=new THREE.LineBasicMaterial({color:color||0x33404a,transparent:true,opacity:opacity==null?0.32:opacity});
+  var edges=new THREE.LineSegments(edgeGeo,edgeMat);
+  edges.position.y=y;
+  grp.add(edges);
+}
+function build3DNeighborBuilding(grp,it,w3,d3,h){
+  h=Math.max(2.4,Math.min(30,h||defaultContextExteriorHeight('neighbor-building')*U));
+  var baseColor=it.colorCustom?it.color:0x8f98a3;
+  var wallMat=makeExteriorLightingMaterial({color:baseColor,roughness:0.88,envMapIntensity:0.14});
+  var capMat=makeExteriorLightingMaterial({color:0x6f7882,roughness:0.9,envMapIntensity:0.12});
+  var winMat=makeExteriorLightingMaterial({color:0xb9d3e2,roughness:0.35,metalness:0.02,envMapIntensity:0.22});
+  addContextBox(grp,wallMat,0,h/2,0,w3,h,d3,true,true);
+  addContextBox(grp,capMat,0,h+0.08,0,w3+0.16,0.16,d3+0.16,true,true);
+  addContextEdges(grp,w3,h,d3,h/2,0x2d3944,0.28);
+  var cols=Math.max(2,Math.min(6,Math.floor(w3/0.78)));
+  var rows=Math.max(2,Math.min(7,Math.floor(h/1.25)));
+  var winW=Math.min(0.48,w3/(cols*2.4));
+  var winH=Math.min(0.58,h/(rows*2.8));
+  for(var r=0;r<rows;r++){
+    var wy=0.85+(r+0.55)*(Math.max(0.4,(h-1.5))/rows);
+    if(wy+winH/2>h-0.35) continue;
+    for(var c=0;c<cols;c++){
+      var wx=-w3/2+(c+0.5)*w3/cols;
+      addContextBox(grp,winMat,wx,wy,-d3/2-0.007,winW,winH,0.014,false,true);
+    }
+  }
+  var sideRows=Math.min(rows,5);
+  var sideCols=Math.max(1,Math.min(3,Math.floor(d3/0.85)));
+  for(var sr=0;sr<sideRows;sr++){
+    var sy=1.0+(sr+0.45)*(Math.max(0.4,(h-1.8))/sideRows);
+    for(var sc=0;sc<sideCols;sc++){
+      var sz=-d3/2+(sc+0.6)*d3/sideCols;
+      addContextBox(grp,winMat,w3/2+0.007,sy,sz,0.014,winH,winW,false,true);
+    }
+  }
+}
+function createGableRoofMesh(w,d,baseY,roofH,mat){
+  var verts=[
+    -w/2,baseY,-d/2, w/2,baseY,-d/2, 0,baseY+roofH,-d/2,
+    -w/2,baseY,d/2,  w/2,baseY,d/2,  0,baseY+roofH,d/2
+  ];
+  var idx=[0,1,2,4,3,5,0,2,5,0,5,3,1,4,5,1,5,2,0,3,4,0,4,1];
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  var roof=new THREE.Mesh(geo,mat);
+  roof.castShadow=true;
+  roof.receiveShadow=true;
+  return roof;
+}
+function build3DNeighborHouse(grp,it,w3,d3,h){
+  h=Math.max(2.4,Math.min(12,h||defaultContextExteriorHeight('neighbor-house')*U));
+  var bodyH=Math.max(2.2,Math.min(h*0.72,h-0.8));
+  var roofH=Math.max(0.6,h-bodyH);
+  var wallColor=it.colorCustom?it.color:0xd7c1a3;
+  var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
+  var roofMat=makeExteriorLightingMaterial({color:0x7b4537,roughness:0.86,envMapIntensity:0.12,side:THREE.DoubleSide});
+  var trimMat=makeExteriorLightingMaterial({color:0xf2ede3,roughness:0.82,envMapIntensity:0.12});
+  var glassMat=makeExteriorLightingMaterial({color:0xb9d7ea,roughness:0.32,envMapIntensity:0.22});
+  var doorMat=makeExteriorLightingMaterial({color:0x81583c,roughness:0.78,envMapIntensity:0.1});
+  addContextBox(grp,wallMat,0,bodyH/2,0,w3,bodyH,d3,true,true);
+  grp.add(createGableRoofMesh(w3*1.08,d3*1.12,bodyH,roofH,roofMat));
+  addContextBox(grp,doorMat,-w3*0.24,0.95,-d3/2-0.01,Math.min(0.75,w3*0.16),1.9,0.02,true,true);
+  addContextBox(grp,glassMat,w3*0.18,1.45,-d3/2-0.012,Math.min(0.95,w3*0.18),0.78,0.024,false,true);
+  addContextBox(grp,trimMat,w3*0.18,1.45,-d3/2-0.018,Math.min(1.06,w3*0.2),0.08,0.018,false,true);
+  addContextBox(grp,trimMat,w3*0.18,1.06,-d3/2-0.018,Math.min(1.06,w3*0.2),0.08,0.018,false,true);
+  addContextBox(grp,glassMat,-w3*0.08,bodyH*0.68,d3/2+0.012,Math.min(0.9,w3*0.16),0.68,0.024,false,true);
+  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x654936,0.24);
+}
+function build3DRoad(grp,it,w3,d3,h){
+  var roadH=Math.max(0.02,Math.min(0.2,h||defaultContextExteriorHeight('road')*U));
+  var roadMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x55585c,roughness:0.96,envMapIntensity:0.06});
+  var whiteMat=makeExteriorLightingMaterial({color:0xf2f2ed,roughness:0.88,envMapIntensity:0.08});
+  var yellowMat=makeExteriorLightingMaterial({color:0xf3ca4a,roughness:0.88,envMapIntensity:0.08});
+  addContextBox(grp,roadMat,0,roadH/2+0.012,0,w3,roadH,d3,true,true);
+  var lineH=0.012, lineY=roadH+0.026;
+  addContextBox(grp,whiteMat,0,lineY,-d3*0.36,w3*0.94,lineH,0.045,false,true);
+  addContextBox(grp,whiteMat,0,lineY,d3*0.36,w3*0.94,lineH,0.045,false,true);
+  var dashCount=Math.max(3,Math.min(14,Math.floor(w3/1.1)));
+  var dashW=Math.min(0.62,w3/(dashCount*1.9));
+  for(var i=0;i<dashCount;i++){
+    var x=-w3/2+(i+0.5)*w3/dashCount;
+    addContextBox(grp,yellowMat,x,lineY,0,dashW,lineH,0.055,false,true);
+  }
+}
+function build3DUtilityPole(grp,it,w3,d3,h){
+  h=Math.max(2.0,Math.min(15,h||defaultContextExteriorHeight('utility-pole')*U));
+  var poleMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x6d5540,roughness:0.92,envMapIntensity:0.08});
+  var armMat=makeExteriorLightingMaterial({color:0x5d4634,roughness:0.9,envMapIntensity:0.08});
+  var metalMat=makeExteriorLightingMaterial({color:0x6f7478,roughness:0.7,metalness:0.08,envMapIntensity:0.12});
+  var radius=Math.max(0.055,Math.min(0.13,Math.min(w3,d3)*0.28));
+  _CY(grp,poleMat,0,h/2,0,radius*0.78,radius,h,12);
+  addContextBox(grp,armMat,0,h*0.82,0,Math.max(1.25,w3*3.5),0.08,0.1,true,true);
+  addContextBox(grp,armMat,0,h*0.69,0,Math.max(1.05,w3*3.0),0.07,0.085,true,true);
+  addContextBox(grp,metalMat,radius*1.2,h*0.48,0,0.32,0.55,0.2,true,true);
+  var wireMat=new THREE.LineBasicMaterial({color:0x161616,transparent:true,opacity:0.82});
+  function wire(y,z){
+    var geo=new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-2.0,y,z),
+      new THREE.Vector3(2.0,y,z)
+    ]);
+    grp.add(new THREE.Line(geo,wireMat));
+  }
+  wire(h*0.85,-0.17);
+  wire(h*0.85,0.17);
+  wire(h*0.72,0);
+}
+
 function getItemHeightValue(it){
   if(it && isCustomBlockType(it.type)) return getCustomBlockHeight(it);
+  if(it && isLightItemType(it.type)) return 80;
+  if(it && isContextExteriorItemType(it.type)) return getContextExteriorHeight(it);
   if(it && it.type==='balcony') return balconySlabHeightMm();
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
   if(it && it.type==='foundation') {
@@ -9148,8 +9664,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,'neighbor-building':9000,'neighbor-house':5200,road:70,'utility-pole':6500,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xd7c1a3,road:0x55585c,'utility-pole':0x6d5540,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -10036,7 +10552,7 @@ function syncToolUi(){
     else assets[j].classList.remove('active');
   }
   var preset=getOpeningModelToolPreset(ST.tool);
-  var toolNames={select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク'};
+  var toolNames={select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト','neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱'};
   document.getElementById('st-tool').textContent='ツール: '+(preset?preset.label:(toolNames[ST.tool]||ST.tool));
 }
 function setTool(t){
@@ -10412,7 +10928,7 @@ function handleRoomClick(wx,wy){
 function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp');
+  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || isContextExteriorItemType(placeType));
   if(groundOnly && ST.floor!==1) return;
   saveState();
   var sz=getItemDefaultSize(placeType);
