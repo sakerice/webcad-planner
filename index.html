@@ -2960,7 +2960,7 @@ var ICOLORS = {
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
   tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
-  'neighbor-building':'#8f98a3','neighbor-house':'#d7c1a3',road:'#55585c','utility-pole':'#6d5540',
+  'neighbor-building':'#8f98a3','neighbor-house':'#d7c1a3',road:'#55585c','utility-pole':'#8c9297',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -3420,15 +3420,48 @@ function ensureLightDefaults(it){
   it.color=it.lightColor;
   return it;
 }
+function contextStoryHeightMm(){
+  return Math.round(Math.max(FLOOR_H||2700,WALL_H||2400,2700));
+}
+function contextStoryHeightM(){
+  return contextStoryHeightMm()*U;
+}
+function defaultContextFloors(type){
+  if(type==='neighbor-building') return 4;
+  if(type==='neighbor-house') return 2;
+  return 1;
+}
+function clampContextFloors(type,floors){
+  var max=type==='neighbor-building'?12:(type==='neighbor-house'?3:1);
+  return Math.max(1,Math.min(max,Math.round(Number(floors)||defaultContextFloors(type))));
+}
+function contextRoofExtraHeightMm(type){
+  if(type==='neighbor-building') return 450;
+  if(type==='neighbor-house') return 1050;
+  return 0;
+}
+function contextHeightFromFloors(type,floors){
+  floors=clampContextFloors(type,floors);
+  return Math.round(floors*contextStoryHeightMm()+contextRoofExtraHeightMm(type));
+}
+function getContextFloors(it){
+  if(!it || (it.type!=='neighbor-building' && it.type!=='neighbor-house')) return 1;
+  if(isFinite(Number(it.contextFloors))) return clampContextFloors(it.type,it.contextFloors);
+  var h=Number(it.contextHeight);
+  if(isFinite(h)){
+    return clampContextFloors(it.type,(h-contextRoofExtraHeightMm(it.type))/Math.max(1,contextStoryHeightMm()));
+  }
+  return defaultContextFloors(it.type);
+}
 function defaultContextExteriorHeight(type){
-  if(type==='neighbor-building') return 9000;
-  if(type==='neighbor-house') return 5200;
+  if(type==='neighbor-building' || type==='neighbor-house') return contextHeightFromFloors(type,defaultContextFloors(type));
   if(type==='utility-pole') return 6500;
   if(type==='road') return 70;
   return 400;
 }
 function getContextExteriorHeight(it){
   if(!it || !isContextExteriorItemType(it.type)) return 400;
+  if(it.type==='neighbor-building' || it.type==='neighbor-house') return contextHeightFromFloors(it.type,getContextFloors(it));
   var h=Number(it.contextHeight);
   if(!isFinite(h)) h=defaultContextExteriorHeight(it.type);
   var max=it.type==='road'?200:30000;
@@ -3863,7 +3896,12 @@ function updateProps(){
   if(isContextExteriorItemType(it.type)){
     if(!isFinite(Number(it.contextHeight))) it.contextHeight=defaultContextExteriorHeight(it.type);
     html += '<div class="ph" style="margin-top:12px">周辺要素設定</div>';
-    if(it.type!=='road'){
+    if(it.type==='neighbor-building' || it.type==='neighbor-house'){
+      var ctxFloors=getContextFloors(it);
+      var maxFloors=it.type==='neighbor-building'?12:3;
+      html += '<div class="pr"><div class="pl">階数</div><input class="pi" type="number" min="1" max="'+maxFloors+'" step="1" value="'+ctxFloors+'" onchange="updateSelectedContextFloors(+this.value)"></div>';
+      html += '<div class="pr"><div class="pl">算定高さ</div><input class="pi" type="text" value="'+Math.round(getContextExteriorHeight(it))+'mm（1階 '+contextStoryHeightMm()+'mm）" readonly></div>';
+    } else if(it.type!=='road'){
       html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="100" max="30000" step="100" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
     } else {
       html += '<div class="pr"><div class="pl">路面厚 (mm)</div><input class="pi" type="number" min="20" max="200" step="10" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
@@ -4058,6 +4096,17 @@ function updateWalkRouteSpeed(v){
   ST.selected.walkSpeed=next;
   if(WALKTHROUGH && WALKTHROUGH.routeId===ST.selected.id) beginWalkthrough(ST.selected);
   draw2d();
+  updateProps();
+}
+function updateSelectedContextFloors(v){
+  if(!ST.selected || (ST.selected.type!=='neighbor-building' && ST.selected.type!=='neighbor-house')) return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
+  var floors=clampContextFloors(ST.selected.type,v);
+  saveState();
+  ST.selected.contextFloors=floors;
+  ST.selected.contextHeight=contextHeightFromFloors(ST.selected.type,floors);
+  draw2d();
+  if(ren) rebuild3D();
   updateProps();
 }
 function updateSelectedLightKind(kind){
@@ -4313,6 +4362,7 @@ function mkItem(type,x,y,rot,floor,w,d){
   }
   if(isContextExteriorItemType(type)){
     item.contextHeight=defaultContextExteriorHeight(type);
+    if(type==='neighbor-building' || type==='neighbor-house') item.contextFloors=defaultContextFloors(type);
   }
   if(isWindowLikeType(type)){
     item.windowSill=type==='window-door'?0:900;
@@ -5616,16 +5666,16 @@ function drawItem2d(it){
       ctx.fillText('隣家',0,0);
     } else if(it.type === 'utility-pole') {
       var rr=Math.max(5,Math.min(hw,hd)*0.72);
-      ctx.fillStyle='rgba(109,85,64,0.78)';
+      ctx.fillStyle='rgba(140,146,151,0.86)';
       ctx.beginPath(); ctx.arc(0,0,rr,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle='rgba(62,45,32,0.88)';
+      ctx.strokeStyle='rgba(72,78,84,0.9)';
       ctx.lineWidth=Math.max(1.2,2*sc);
       ctx.beginPath();
       ctx.moveTo(-rr*2.4,0); ctx.lineTo(rr*2.4,0);
       ctx.moveTo(0,-rr*2.4); ctx.lineTo(0,rr*2.4);
       ctx.stroke();
       ctx.font='bold '+Math.max(8,Math.min(12,rr*0.9))+'px sans-serif';
-      ctx.fillStyle='rgba(45,32,24,0.82)';
+      ctx.fillStyle='rgba(48,54,60,0.86)';
       ctx.textAlign='center'; ctx.textBaseline='top';
       ctx.fillText('電柱',0,rr+3);
     } else if(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front') {
@@ -9546,36 +9596,91 @@ function addContextEdges(grp,w,h,d,y,color,opacity){
   edges.position.y=y;
   grp.add(edges);
 }
+function addContextFacadeBox(grp,mat,face,axis,y,w,h,buildingW,buildingD,depth,cast,receive){
+  depth=depth||0.018;
+  if(face==='front') return addContextBox(grp,mat,axis,y,-buildingD/2-depth/2,w,h,depth,cast,receive);
+  if(face==='back') return addContextBox(grp,mat,axis,y,buildingD/2+depth/2,w,h,depth,cast,receive);
+  if(face==='left') return addContextBox(grp,mat,-buildingW/2-depth/2,y,axis,depth,h,w,cast,receive);
+  return addContextBox(grp,mat,buildingW/2+depth/2,y,axis,depth,h,w,cast,receive);
+}
+function addContextWindow(grp,glassMat,frameMat,face,axis,y,w,h,buildingW,buildingD){
+  var frame=0.055, depth=0.018;
+  addContextFacadeBox(grp,glassMat,face,axis,y,w,h,buildingW,buildingD,depth,false,true);
+  addContextFacadeBox(grp,frameMat,face,axis,y+h/2+frame/2,w+frame*2,frame,buildingW,buildingD,depth*1.2,false,true);
+  addContextFacadeBox(grp,frameMat,face,axis,y-h/2-frame/2,w+frame*2,frame,buildingW,buildingD,depth*1.2,false,true);
+  addContextFacadeBox(grp,frameMat,face,axis-w/2-frame/2,y,frame,h+frame*2,buildingW,buildingD,depth*1.2,false,true);
+  addContextFacadeBox(grp,frameMat,face,axis+w/2+frame/2,y,frame,h+frame*2,buildingW,buildingD,depth*1.2,false,true);
+  if(w>0.7) addContextFacadeBox(grp,frameMat,face,axis,y,frame*0.72,h,buildingW,buildingD,depth*1.35,false,true);
+}
+function addContextFloorBand(grp,mat,y,w3,d3){
+  addContextFacadeBox(grp,mat,'front',0,y,w3+0.06,0.075,w3,d3,0.028,true,true);
+  addContextFacadeBox(grp,mat,'back',0,y,w3+0.06,0.075,w3,d3,0.028,true,true);
+  addContextFacadeBox(grp,mat,'left',0,y,d3+0.06,0.075,w3,d3,0.028,true,true);
+  addContextFacadeBox(grp,mat,'right',0,y,d3+0.06,0.075,w3,d3,0.028,true,true);
+}
+function addContextCornerColumns(grp,mat,w3,d3,h){
+  var s=0.12;
+  addContextBox(grp,mat,-w3/2+s/2,h/2,-d3/2+s/2,s,h,s,true,true);
+  addContextBox(grp,mat,w3/2-s/2,h/2,-d3/2+s/2,s,h,s,true,true);
+  addContextBox(grp,mat,-w3/2+s/2,h/2,d3/2-s/2,s,h,s,true,true);
+  addContextBox(grp,mat,w3/2-s/2,h/2,d3/2-s/2,s,h,s,true,true);
+}
+function addHouseSidingLines(grp,mat,w3,d3,bodyH){
+  var rows=Math.max(4,Math.min(18,Math.floor(bodyH/0.34)));
+  for(var i=1;i<rows;i++){
+    var y=i*bodyH/rows;
+    addContextFacadeBox(grp,mat,'front',0,y,w3+0.02,0.018,w3,d3,0.012,false,true);
+    addContextFacadeBox(grp,mat,'back',0,y,w3+0.02,0.018,w3,d3,0.012,false,true);
+    addContextFacadeBox(grp,mat,'left',0,y,d3+0.02,0.018,w3,d3,0.012,false,true);
+    addContextFacadeBox(grp,mat,'right',0,y,d3+0.02,0.018,w3,d3,0.012,false,true);
+  }
+}
 function build3DNeighborBuilding(grp,it,w3,d3,h){
-  h=Math.max(2.4,Math.min(30,h||defaultContextExteriorHeight('neighbor-building')*U));
+  var floors=getContextFloors(it);
+  var storyH=contextStoryHeightM();
+  var bodyH=floors*storyH;
+  var parapetH=contextRoofExtraHeightMm('neighbor-building')*U;
+  h=bodyH+parapetH;
   var baseColor=it.colorCustom?it.color:0x8f98a3;
   var wallMat=makeExteriorLightingMaterial({color:baseColor,roughness:0.88,envMapIntensity:0.14});
-  var capMat=makeExteriorLightingMaterial({color:0x6f7882,roughness:0.9,envMapIntensity:0.12});
-  var winMat=makeExteriorLightingMaterial({color:0xb9d3e2,roughness:0.35,metalness:0.02,envMapIntensity:0.22});
-  addContextBox(grp,wallMat,0,h/2,0,w3,h,d3,true,true);
-  addContextBox(grp,capMat,0,h+0.08,0,w3+0.16,0.16,d3+0.16,true,true);
-  addContextEdges(grp,w3,h,d3,h/2,0x2d3944,0.28);
-  var cols=Math.max(2,Math.min(6,Math.floor(w3/0.78)));
-  var rows=Math.max(2,Math.min(7,Math.floor(h/1.25)));
-  var winW=Math.min(0.48,w3/(cols*2.4));
-  var winH=Math.min(0.58,h/(rows*2.8));
-  for(var r=0;r<rows;r++){
-    var wy=0.85+(r+0.55)*(Math.max(0.4,(h-1.5))/rows);
-    if(wy+winH/2>h-0.35) continue;
+  var trimMat=makeExteriorLightingMaterial({color:0x6f7882,roughness:0.9,envMapIntensity:0.12});
+  var frameMat=makeExteriorLightingMaterial({color:0x56606a,roughness:0.82,envMapIntensity:0.12});
+  var winMat=makeExteriorLightingMaterial({color:0xaec9d8,roughness:0.32,metalness:0.02,envMapIntensity:0.2});
+  var shopGlassMat=makeExteriorLightingMaterial({color:0x9fc3d4,roughness:0.24,metalness:0.03,envMapIntensity:0.26});
+  var doorMat=makeExteriorLightingMaterial({color:0x3f4851,roughness:0.68,envMapIntensity:0.1});
+  addContextBox(grp,wallMat,0,bodyH/2,0,w3,bodyH,d3,true,true);
+  addContextBox(grp,trimMat,0,0.12,0,w3+0.16,0.24,d3+0.16,true,true);
+  addContextBox(grp,trimMat,0,bodyH+parapetH/2,0,w3+0.18,parapetH,d3+0.18,true,true);
+  addContextCornerColumns(grp,frameMat,w3,d3,bodyH);
+  for(var fi=1;fi<=floors;fi++) addContextFloorBand(grp,trimMat,fi*storyH,w3,d3);
+  var winW=0.92, winH=1.2, sill=0.9;
+  var cols=Math.max(2,Math.min(6,Math.floor((w3-0.8)/1.25)));
+  var sideCols=Math.max(1,Math.min(4,Math.floor((d3-0.8)/1.25)));
+  for(var f=0;f<floors;f++){
+    var baseY=f*storyH;
     for(var c=0;c<cols;c++){
-      var wx=-w3/2+(c+0.5)*w3/cols;
-      addContextBox(grp,winMat,wx,wy,-d3/2-0.007,winW,winH,0.014,false,true);
+      var x=-w3/2+(c+0.5)*w3/cols;
+      if(f===0 && c===Math.floor(cols/2)){
+        addContextFacadeBox(grp,doorMat,'front',x,baseY+1.05,0.9,2.1,w3,d3,0.028,true,true);
+        addContextFacadeBox(grp,trimMat,'front',x,baseY+2.25,1.18,0.16,w3,d3,0.05,true,true);
+      } else if(f===0){
+        addContextWindow(grp,shopGlassMat,frameMat,'front',x,baseY+1.4,Math.min(0.95,w3/cols*0.62),1.55,w3,d3);
+      } else {
+        addContextWindow(grp,winMat,frameMat,'front',x,baseY+sill+winH/2,winW,winH,w3,d3);
+      }
+    }
+    for(var s=0;s<sideCols;s++){
+      var z=-d3/2+(s+0.5)*d3/sideCols;
+      var sideY=f===0 ? baseY+1.35 : baseY+sill+winH/2;
+      var sideH=f===0 ? 1.45 : winH;
+      addContextWindow(grp,f===0?shopGlassMat:winMat,frameMat,'right',z,sideY,Math.min(0.88,d3/sideCols*0.62),sideH,w3,d3);
     }
   }
-  var sideRows=Math.min(rows,5);
-  var sideCols=Math.max(1,Math.min(3,Math.floor(d3/0.85)));
-  for(var sr=0;sr<sideRows;sr++){
-    var sy=1.0+(sr+0.45)*(Math.max(0.4,(h-1.8))/sideRows);
-    for(var sc=0;sc<sideCols;sc++){
-      var sz=-d3/2+(sc+0.6)*d3/sideCols;
-      addContextBox(grp,winMat,w3/2+0.007,sy,sz,0.014,winH,winW,false,true);
-    }
-  }
+  addContextBox(grp,trimMat,0,bodyH+parapetH+0.08,0,w3+0.28,0.16,d3+0.28,true,true);
+  var equipMat=makeExteriorLightingMaterial({color:0xb6b1a8,roughness:0.88,envMapIntensity:0.1});
+  addContextBox(grp,equipMat,-w3*0.24,bodyH+parapetH+0.32,d3*0.18,0.72,0.48,0.62,true,true);
+  addContextBox(grp,equipMat,w3*0.18,bodyH+parapetH+0.24,-d3*0.12,0.54,0.32,0.48,true,true);
+  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x2d3944,0.22);
 }
 function createGableRoofMesh(w,d,baseY,roofH,mat){
   var verts=[
@@ -9593,31 +9698,54 @@ function createGableRoofMesh(w,d,baseY,roofH,mat){
   return roof;
 }
 function build3DNeighborHouse(grp,it,w3,d3,h){
-  h=Math.max(2.4,Math.min(12,h||defaultContextExteriorHeight('neighbor-house')*U));
-  var bodyH=Math.max(2.2,Math.min(h*0.72,h-0.8));
-  var roofH=Math.max(0.6,h-bodyH);
+  var floors=getContextFloors(it);
+  var storyH=contextStoryHeightM();
+  var bodyH=floors*storyH;
+  var roofH=contextRoofExtraHeightMm('neighbor-house')*U;
   var wallColor=it.colorCustom?it.color:0xd7c1a3;
   var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
   var roofMat=makeExteriorLightingMaterial({color:0x7b4537,roughness:0.86,envMapIntensity:0.12,side:THREE.DoubleSide});
   var trimMat=makeExteriorLightingMaterial({color:0xf2ede3,roughness:0.82,envMapIntensity:0.12});
+  var sidingMat=makeExteriorLightingMaterial({color:0xc9ad89,roughness:0.88,envMapIntensity:0.08});
   var glassMat=makeExteriorLightingMaterial({color:0xb9d7ea,roughness:0.32,envMapIntensity:0.22});
   var doorMat=makeExteriorLightingMaterial({color:0x81583c,roughness:0.78,envMapIntensity:0.1});
+  var baseMat=makeExteriorLightingMaterial({color:0xb8b2a8,roughness:0.92,envMapIntensity:0.08});
   addContextBox(grp,wallMat,0,bodyH/2,0,w3,bodyH,d3,true,true);
-  grp.add(createGableRoofMesh(w3*1.08,d3*1.12,bodyH,roofH,roofMat));
-  addContextBox(grp,doorMat,-w3*0.24,0.95,-d3/2-0.01,Math.min(0.75,w3*0.16),1.9,0.02,true,true);
-  addContextBox(grp,glassMat,w3*0.18,1.45,-d3/2-0.012,Math.min(0.95,w3*0.18),0.78,0.024,false,true);
-  addContextBox(grp,trimMat,w3*0.18,1.45,-d3/2-0.018,Math.min(1.06,w3*0.2),0.08,0.018,false,true);
-  addContextBox(grp,trimMat,w3*0.18,1.06,-d3/2-0.018,Math.min(1.06,w3*0.2),0.08,0.018,false,true);
-  addContextBox(grp,glassMat,-w3*0.08,bodyH*0.68,d3/2+0.012,Math.min(0.9,w3*0.16),0.68,0.024,false,true);
-  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x654936,0.24);
+  addContextBox(grp,baseMat,0,0.12,0,w3+0.1,0.24,d3+0.1,true,true);
+  addHouseSidingLines(grp,sidingMat,w3,d3,bodyH);
+  for(var fi=1;fi<=floors;fi++) addContextFloorBand(grp,trimMat,fi*storyH,w3,d3);
+  grp.add(createGableRoofMesh(w3*1.16,d3*1.18,bodyH,roofH,roofMat));
+  addContextBox(grp,roofMat,-w3*0.54,bodyH+0.05,0,0.08,0.12,d3*1.18,true,true);
+  addContextBox(grp,roofMat,w3*0.54,bodyH+0.05,0,0.08,0.12,d3*1.18,true,true);
+  addContextBox(grp,baseMat,-w3*0.26,0.06,-d3/2-0.34,1.25,0.12,0.68,true,true);
+  addContextFacadeBox(grp,doorMat,'front',-w3*0.26,1.05,0.88,2.1,w3,d3,0.03,true,true);
+  addContextFacadeBox(grp,trimMat,'front',-w3*0.26,2.17,1.08,0.08,w3,d3,0.04,false,true);
+  var winW=0.92, winH=1.2, sill=0.9;
+  for(var f=0;f<floors;f++){
+    var baseY=f*storyH;
+    var wy=baseY+sill+winH/2;
+    addContextWindow(grp,glassMat,trimMat,'front',w3*0.2,wy,winW,winH,w3,d3);
+    if(f>0 || w3>4.4) addContextWindow(grp,glassMat,trimMat,'front',-w3*0.02,wy,winW*0.82,winH*0.88,w3,d3);
+    addContextWindow(grp,glassMat,trimMat,'right',-d3*0.2,wy,winW*0.9,winH,w3,d3);
+    if(d3>3.2) addContextWindow(grp,glassMat,trimMat,'left',d3*0.18,wy,winW*0.86,winH*0.9,w3,d3);
+  }
+  if(floors>=2){
+    var railMat=makeExteriorLightingMaterial({color:0x6d5540,roughness:0.86,envMapIntensity:0.08});
+    var balconyY=storyH+0.05;
+    addContextBox(grp,baseMat,w3*0.22,balconyY,-d3/2-0.36,1.45,0.1,0.55,true,true);
+    addContextBox(grp,railMat,w3*0.22,balconyY+0.52,-d3/2-0.63,1.55,0.08,0.06,true,true);
+    addContextBox(grp,railMat,w3*0.22-0.78,balconyY+0.3,-d3/2-0.63,0.06,0.55,0.06,true,true);
+    addContextBox(grp,railMat,w3*0.22+0.78,balconyY+0.3,-d3/2-0.63,0.06,0.55,0.06,true,true);
+  }
+  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x654936,0.22);
 }
 function build3DRoad(grp,it,w3,d3,h){
   var roadH=Math.max(0.02,Math.min(0.2,h||defaultContextExteriorHeight('road')*U));
   var roadMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x55585c,roughness:0.96,envMapIntensity:0.06});
   var whiteMat=makeExteriorLightingMaterial({color:0xf2f2ed,roughness:0.88,envMapIntensity:0.08});
   var yellowMat=makeExteriorLightingMaterial({color:0xf3ca4a,roughness:0.88,envMapIntensity:0.08});
-  addContextBox(grp,roadMat,0,roadH/2+0.012,0,w3,roadH,d3,true,true);
-  var lineH=0.012, lineY=roadH+0.026;
+  addContextBox(grp,roadMat,0,0.006-roadH/2,0,w3,roadH,d3,false,true);
+  var lineH=0.01, lineY=0.014;
   addContextBox(grp,whiteMat,0,lineY,-d3*0.36,w3*0.94,lineH,0.045,false,true);
   addContextBox(grp,whiteMat,0,lineY,d3*0.36,w3*0.94,lineH,0.045,false,true);
   var dashCount=Math.max(3,Math.min(14,Math.floor(w3/1.1)));
@@ -9629,9 +9757,9 @@ function build3DRoad(grp,it,w3,d3,h){
 }
 function build3DUtilityPole(grp,it,w3,d3,h){
   h=Math.max(2.0,Math.min(15,h||defaultContextExteriorHeight('utility-pole')*U));
-  var poleMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x6d5540,roughness:0.92,envMapIntensity:0.08});
-  var armMat=makeExteriorLightingMaterial({color:0x5d4634,roughness:0.9,envMapIntensity:0.08});
-  var metalMat=makeExteriorLightingMaterial({color:0x6f7478,roughness:0.7,metalness:0.08,envMapIntensity:0.12});
+  var poleMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x8c9297,roughness:0.92,envMapIntensity:0.08});
+  var armMat=makeExteriorLightingMaterial({color:0x767d83,roughness:0.9,envMapIntensity:0.08});
+  var metalMat=makeExteriorLightingMaterial({color:0x6f7478,roughness:0.68,metalness:0.08,envMapIntensity:0.12});
   var radius=Math.max(0.055,Math.min(0.13,Math.min(w3,d3)*0.28));
   _CY(grp,poleMat,0,h/2,0,radius*0.78,radius,h,12);
   addContextBox(grp,armMat,0,h*0.82,0,Math.max(1.25,w3*3.5),0.08,0.1,true,true);
@@ -9664,8 +9792,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,'neighbor-building':9000,'neighbor-house':5200,road:70,'utility-pole':6500,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xd7c1a3,road:0x55585c,'utility-pole':0x6d5540,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xd7c1a3,road:0x55585c,'utility-pole':0x8c9297,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
