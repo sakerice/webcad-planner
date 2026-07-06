@@ -6205,15 +6205,22 @@ function getTexture3D(key) {
   return tex;
 }
 
-function disposeObj(obj) {
-  if (obj.geometry) obj.geometry.dispose();
-  if (obj.material) {
-    if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m); });
-    else disposeMat(obj.material);
+function disposeObj(obj,seenGeo,seenMat) {
+  seenGeo=seenGeo||new Set();
+  seenMat=seenMat||new Set();
+  if (obj.geometry && !seenGeo.has(obj.geometry)) {
+    seenGeo.add(obj.geometry);
+    obj.geometry.dispose();
   }
-  if (obj.children) obj.children.forEach(disposeObj);
+  if (obj.material) {
+    if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m,seenMat); });
+    else disposeMat(obj.material,seenMat);
+  }
+  if (obj.children) obj.children.forEach(function(child){disposeObj(child,seenGeo,seenMat);});
 }
-function disposeMat(m) {
+function disposeMat(m,seenMat) {
+  if(!m || (seenMat&&seenMat.has(m))) return;
+  if(seenMat) seenMat.add(m);
   m.dispose();
   if (m.map) m.map.dispose();
 }
@@ -9585,6 +9592,8 @@ function addContextBox(grp,mat,x,y,z,w,h,d,cast,receive){
   m.position.set(x,y,z);
   m.castShadow=cast!==false;
   m.receiveShadow=receive!==false;
+  m.updateMatrix();
+  m.matrixAutoUpdate=false;
   grp.add(m);
   return m;
 }
@@ -9594,6 +9603,8 @@ function addContextEdges(grp,w,h,d,y,color,opacity){
   var edgeMat=new THREE.LineBasicMaterial({color:color||0x33404a,transparent:true,opacity:opacity==null?0.32:opacity});
   var edges=new THREE.LineSegments(edgeGeo,edgeMat);
   edges.position.y=y;
+  edges.updateMatrix();
+  edges.matrixAutoUpdate=false;
   grp.add(edges);
 }
 function addContextFacadeBox(grp,mat,face,axis,y,w,h,buildingW,buildingD,depth,cast,receive){
@@ -9605,18 +9616,15 @@ function addContextFacadeBox(grp,mat,face,axis,y,w,h,buildingW,buildingD,depth,c
 }
 function addContextWindow(grp,glassMat,frameMat,face,axis,y,w,h,buildingW,buildingD){
   var frame=0.055, depth=0.018;
-  addContextFacadeBox(grp,glassMat,face,axis,y,w,h,buildingW,buildingD,depth,false,true);
-  addContextFacadeBox(grp,frameMat,face,axis,y+h/2+frame/2,w+frame*2,frame,buildingW,buildingD,depth*1.2,false,true);
-  addContextFacadeBox(grp,frameMat,face,axis,y-h/2-frame/2,w+frame*2,frame,buildingW,buildingD,depth*1.2,false,true);
-  addContextFacadeBox(grp,frameMat,face,axis-w/2-frame/2,y,frame,h+frame*2,buildingW,buildingD,depth*1.2,false,true);
-  addContextFacadeBox(grp,frameMat,face,axis+w/2+frame/2,y,frame,h+frame*2,buildingW,buildingD,depth*1.2,false,true);
-  if(w>0.7) addContextFacadeBox(grp,frameMat,face,axis,y,frame*0.72,h,buildingW,buildingD,depth*1.35,false,true);
+  addContextFacadeBox(grp,frameMat,face,axis,y,w+frame*2,h+frame*2,buildingW,buildingD,depth*1.25,false,true);
+  addContextFacadeBox(grp,glassMat,face,axis,y,w,h,buildingW,buildingD,depth*0.8,false,true);
+  if(w>0.86) addContextFacadeBox(grp,frameMat,face,axis,y,frame*0.72,h,buildingW,buildingD,depth*1.45,false,true);
 }
 function addContextFloorBand(grp,mat,y,w3,d3){
-  addContextFacadeBox(grp,mat,'front',0,y,w3+0.06,0.075,w3,d3,0.028,true,true);
-  addContextFacadeBox(grp,mat,'back',0,y,w3+0.06,0.075,w3,d3,0.028,true,true);
-  addContextFacadeBox(grp,mat,'left',0,y,d3+0.06,0.075,w3,d3,0.028,true,true);
-  addContextFacadeBox(grp,mat,'right',0,y,d3+0.06,0.075,w3,d3,0.028,true,true);
+  addContextFacadeBox(grp,mat,'front',0,y,w3+0.06,0.075,w3,d3,0.028,false,true);
+  addContextFacadeBox(grp,mat,'back',0,y,w3+0.06,0.075,w3,d3,0.028,false,true);
+  addContextFacadeBox(grp,mat,'left',0,y,d3+0.06,0.075,w3,d3,0.028,false,true);
+  addContextFacadeBox(grp,mat,'right',0,y,d3+0.06,0.075,w3,d3,0.028,false,true);
 }
 function addContextCornerColumns(grp,mat,w3,d3,h){
   var s=0.12;
@@ -9695,6 +9703,8 @@ function createGableRoofMesh(w,d,baseY,roofH,mat){
   var roof=new THREE.Mesh(geo,mat);
   roof.castShadow=true;
   roof.receiveShadow=true;
+  roof.updateMatrix();
+  roof.matrixAutoUpdate=false;
   return roof;
 }
 function build3DNeighborHouse(grp,it,w3,d3,h){
@@ -9771,7 +9781,10 @@ function build3DUtilityPole(grp,it,w3,d3,h){
       new THREE.Vector3(-2.0,y,z),
       new THREE.Vector3(2.0,y,z)
     ]);
-    grp.add(new THREE.Line(geo,wireMat));
+    var line=new THREE.Line(geo,wireMat);
+    line.updateMatrix();
+    line.matrixAutoUpdate=false;
+    grp.add(line);
   }
   wire(h*0.85,-0.17);
   wire(h*0.85,0.17);
@@ -10581,12 +10594,22 @@ function updateWalkthroughCamera(now){
   }
   return true;
 }
+var _last3DFrameAt=0;
+function get3DFrameInterval(){
+  var touchDevice=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
+  return (touchDevice || isMobileLayout()) ? 33 : 0;
+}
 function loop3D(){
   requestAnimationFrame(loop3D);
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
+  if(ST.view==='2d') return;
+  var now=performance.now();
+  var frameInterval=get3DFrameInterval();
+  if(frameInterval && now-_last3DFrameAt<frameInterval) return;
+  _last3DFrameAt=now;
 
-  var walking=ST.view==='3d-ext' && updateWalkthroughCamera(performance.now());
+  var walking=ST.view==='3d-ext' && updateWalkthroughCamera(now);
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
     orbit.update();
   }
