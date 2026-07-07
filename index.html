@@ -261,9 +261,18 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   .mob-prop-info{display:flex;flex-direction:column;gap:1px}
   .mob-prop-name{font-size:12px;font-weight:bold;color:#cce}
   .mob-prop-size{font-size:10px;color:#7a8fb0}
+  .mob-prop-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .mob-prop-chevron{font-size:12px;color:#7a8fb0;padding:6px 8px;background:#0f3460;border-radius:6px}
+  .mob-prop-close-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:34px;height:34px;border:0;border-radius:999px;
+    background:#0f3460;color:#cce;font-size:18px;font-weight:800;
+    font-family:inherit;cursor:pointer;touch-action:manipulation;
+    flex:0 0 auto;
+  }
+  .mob-prop-close-btn:active{background:#1e3060}
   /* Props body padding on mobile */
-  #props-body{padding:10px 14px calc(60px + var(--safe-bot)) 14px;}
+  #props-body{padding:10px 14px calc(18px + var(--safe-bot)) 14px;}
   #props .ph{padding:10px 14px 5px;margin-bottom:6px}
   /* 2-column layout for props inputs on mobile */
   .pr-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
@@ -784,6 +793,16 @@ body{
     background:var(--hp-secondary-soft);
     color:var(--hp-secondary-dark);
     border-radius:999px;
+  }
+  .mob-prop-close-btn{
+    background:var(--hp-secondary-soft);
+    color:var(--hp-secondary-dark);
+    border:1px solid var(--hp-border);
+    box-shadow:none;
+  }
+  .mob-prop-close-btn:active{
+    background:var(--hp-secondary-soft);
+    color:var(--hp-secondary-dark);
   }
   #coords{
     background:rgba(255,255,255,0.94)!important;
@@ -1752,6 +1771,7 @@ body{
 .ic-row select,
 .unity-render-config input,
 .unity-render-close,
+.mob-prop-close-btn,
 .mob-prop-chevron,
 .bnav-btn{
   border-radius:999px!important;
@@ -2310,33 +2330,7 @@ body{
     min-height:0;
     overflow-y:auto!important;
     -webkit-overflow-scrolling:touch;
-    padding-bottom:86px!important;
-  }
-  #mob-prop-close-fab{
-    position:absolute;
-    right:18px;
-    bottom:18px;
-    z-index:2;
-    width:48px;
-    height:48px;
-    border:0;
-    border-radius:999px;
-    background:var(--hp-primary);
-    color:#fff;
-    font-size:18px;
-    font-weight:700;
-    box-shadow:0 5px 12px rgba(255,63,39,0.30)!important;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    touch-action:manipulation;
-  }
-  #mob-prop-close-fab:active{
-    transform:translateY(1px);
-    background:var(--hp-primary-dark);
-  }
-  #props.show.prop-expanded #mob-prop-close-fab{
-    display:flex;
+    padding-bottom:calc(18px + var(--safe-bot))!important;
   }
 }
 @media (pointer:coarse), (max-width:768px){
@@ -2348,7 +2342,7 @@ body{
   .cat-hdr,
   .bnav-btn,
   #mob-prop-hdr,
-  #mob-prop-close-fab,
+  #mob-prop-close-btn,
   .unity-render-close{
     -webkit-tap-highlight-color:rgba(242,74,46,0.18);
     touch-action:manipulation;
@@ -2375,13 +2369,13 @@ body{
   .asset-tile.active:active,
   .bnav-btn.active:active,
   .touch-pressing.active,
-  #mob-prop-close-fab:active,
-  #mob-prop-close-fab.touch-pressing{
+  #mob-prop-close-btn:active,
+  #mob-prop-close-btn.touch-pressing{
     transform:scale(.94) translateY(2px)!important;
-    background:var(--hp-primary-dark)!important;
-    border-color:var(--hp-primary-dark)!important;
-    color:#fff!important;
-    box-shadow:0 3px 8px rgba(200,50,32,0.32), inset 0 2px 0 rgba(0,0,0,0.12)!important;
+    background:var(--hp-secondary-soft)!important;
+    border-color:var(--hp-secondary)!important;
+    color:var(--hp-secondary-dark)!important;
+    box-shadow:0 3px 8px rgba(8,127,175,0.16), inset 0 2px 0 rgba(0,0,0,0.05)!important;
   }
   .touch-pressing .sicon,
   .stool:active .sicon,
@@ -2651,153 +2645,39 @@ body{
   min-height:156px!important;
   resize:vertical!important;
 }
-.stable-color-control{
-  display:flex!important;
-  align-items:center!important;
-  gap:7px!important;
-  min-height:34px!important;
-  box-sizing:border-box!important;
-}
-.stable-color-control.pi{
-  padding:3px 7px!important;
-}
-.stable-color-control.is-disabled{
-  opacity:.48!important;
-  pointer-events:none!important;
-}
-.stable-color-button{
-  width:26px!important;
-  height:26px!important;
-  flex:0 0 26px!important;
-  border-radius:50%!important;
-  border:1px solid rgba(148,163,184,.86)!important;
-  background:var(--stable-color,#ffffff)!important;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72),0 1px 4px rgba(15,23,42,.16)!important;
-  cursor:pointer!important;
-  padding:0!important;
-}
-.stable-color-hex{
-  min-width:0!important;
-  flex:1 1 auto!important;
-  border:0!important;
-  outline:none!important;
-  background:transparent!important;
-  color:inherit!important;
-  font:inherit!important;
-  text-transform:uppercase!important;
-  letter-spacing:0!important;
-  padding:2px 0!important;
-}
-.stable-color-hex.is-invalid{
-  color:#d43b2a!important;
-}
-.face-card .stable-color-control{
-  width:156px!important;
-  background:#fff!important;
-  color:#334155!important;
-  border:1px solid #d9e2ec!important;
-}
-#stable-color-picker{
-  position:fixed;
-  left:16px;
-  top:96px;
-  width:min(292px,calc(100vw - 16px));
-  padding:12px;
-  display:none;
-  z-index:980;
-  border:1px solid rgba(203,213,225,.96);
-  border-radius:8px;
-  background:rgba(255,255,255,.98);
-  color:#1f2937;
-  box-shadow:0 18px 46px rgba(15,23,42,.22);
-  box-sizing:border-box;
-}
-#stable-color-picker.show{display:block}
-.stable-color-picker-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-.stable-color-picker-title{
-  font-size:12px;
-  font-weight:800;
-  color:#344155;
-}
-.stable-color-picker-close{
-  width:auto!important;
-  min-width:58px!important;
-  padding:6px 12px!important;
-  margin:0!important;
+input[type="color"]{
+  width:46px!important;
+  min-width:46px!important;
+  height:32px!important;
+  padding:2px!important;
+  border:1px solid var(--hp-border-strong,#d6dde4)!important;
   border-radius:999px!important;
+  background:#fff!important;
+  cursor:pointer!important;
+  touch-action:manipulation;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72),0 1px 4px rgba(15,23,42,.12)!important;
 }
-.stable-color-picker-preview{
-  height:34px;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,.85);
-  background:var(--stable-color,#ffffff);
-  margin-bottom:10px;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72);
+input[type="color"]:disabled{
+  opacity:.42!important;
+  cursor:not-allowed!important;
 }
-.stable-color-picker-hex{
-  width:100%;
-  box-sizing:border-box;
-  min-height:34px;
-  border:1px solid #d6dee9;
-  border-radius:999px;
-  padding:7px 12px;
-  color:#1f2937;
-  background:#f8fafc;
-  font:inherit;
-  font-size:12px;
-  text-transform:uppercase;
-}
-.stable-color-picker-hex.is-invalid{
-  border-color:#f0a195;
-  color:#c8291a;
-}
-.stable-color-picker-row{
-  display:grid;
-  grid-template-columns:18px 1fr 34px;
-  align-items:center;
-  gap:8px;
-  margin-top:10px;
-  font-size:11px;
-  color:#536173;
-}
-.stable-color-picker-row input[type="range"]{
-  width:100%;
-  accent-color:var(--hp-primary);
-}
-.stable-color-picker-value{
-  text-align:right;
-  font-variant-numeric:tabular-nums;
-}
-.stable-color-swatches{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  gap:7px;
-  margin-top:12px;
-}
-.stable-color-swatch{
-  width:100%;
-  aspect-ratio:1;
-  border-radius:50%;
-  border:1px solid rgba(148,163,184,.82);
-  background:var(--swatch-color,#fff);
-  cursor:pointer;
+input[type="color"]::-webkit-color-swatch-wrapper{
   padding:0;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.62);
+  border-radius:999px;
+}
+input[type="color"]::-webkit-color-swatch{
+  border:0;
+  border-radius:999px;
+}
+input[type="color"]::-moz-color-swatch{
+  border:0;
+  border-radius:999px;
 }
 @media (max-width:768px), (pointer:coarse){
-  #stable-color-picker{
-    left:8px!important;
-    right:8px!important;
-    top:auto!important;
-    bottom:calc(76px + var(--safe-bot));
-    width:auto!important;
-    max-width:none!important;
+  input[type="color"]{
+    width:50px!important;
+    min-width:50px!important;
+    height:38px!important;
   }
 }
 </style>
@@ -2807,27 +2687,6 @@ body{
   <div class="app-loading-pill" role="status">
     <span class="app-loading-spinner" aria-hidden="true"></span>
     <span id="app-loading-text">読み込み中</span>
-  </div>
-</div>
-<div id="stable-color-picker" aria-hidden="true" onclick="event.stopPropagation()">
-  <div class="stable-color-picker-head">
-    <div class="stable-color-picker-title">カラー</div>
-    <button type="button" class="pbtn sec stable-color-picker-close" onclick="closeStableColorPicker(true)">完了</button>
-  </div>
-  <div id="stable-color-preview" class="stable-color-picker-preview"></div>
-  <input id="stable-color-hex" class="stable-color-picker-hex" type="text" inputmode="text" maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" value="#FFFFFF" oninput="handleStablePickerHexInput(this)" onchange="commitStablePickerHexInput(this)">
-  <div class="stable-color-picker-row"><span>R</span><input id="stable-color-r" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-r-val" class="stable-color-picker-value">255</span></div>
-  <div class="stable-color-picker-row"><span>G</span><input id="stable-color-g" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-g-val" class="stable-color-picker-value">255</span></div>
-  <div class="stable-color-picker-row"><span>B</span><input id="stable-color-b" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-b-val" class="stable-color-picker-value">255</span></div>
-  <div class="stable-color-swatches">
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#ffffff" onclick="chooseStableColorSwatch('#ffffff')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#f5f1e8" onclick="chooseStableColorSwatch('#f5f1e8')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#e8e0cc" onclick="chooseStableColorSwatch('#e8e0cc')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#b9bcc2" onclick="chooseStableColorSwatch('#b9bcc2')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#888888" onclick="chooseStableColorSwatch('#888888')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#3a2f2a" onclick="chooseStableColorSwatch('#3a2f2a')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#2f80ed" onclick="chooseStableColorSwatch('#2f80ed')"></button>
-    <button type="button" class="stable-color-swatch" style="--swatch-color:#ff4328" onclick="chooseStableColorSwatch('#ff4328')"></button>
   </div>
 </div>
 <div id="toolbar">
@@ -3043,11 +2902,13 @@ body{
           <span class="mob-prop-size" id="mob-prop-size"></span>
         </div>
       </div>
-      <span class="mob-prop-chevron" id="mob-prop-chevron">▲ 詳細</span>
+      <div class="mob-prop-actions">
+        <span class="mob-prop-chevron" id="mob-prop-chevron">▲ 詳細</span>
+        <button id="mob-prop-close-btn" class="mob-prop-close-btn" type="button" onclick="event.stopPropagation(); closeMobilePropPanel()" aria-label="設定を閉じる">×</button>
+      </div>
     </div>
     <div class="ph" id="props-title">プロパティ</div>
     <div id="props-body"></div>
-    <button id="mob-prop-close-fab" type="button" onclick="closeMobilePropPanel()" aria-label="設定を閉じる">×</button>
   </div>
 </div>
 <!-- Sidebar overlay (mobile) -->
@@ -3187,6 +3048,11 @@ var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'u
 function isContextExteriorItemType(type){
   return !!CONTEXT_EXTERIOR_TYPES[type];
 }
+function shouldRenderItemInCurrent3DView(it){
+  if(!it) return false;
+  if(isInt && isContextExteriorItemType(it.type)) return false;
+  return true;
+}
 function item3DBaseY(it){
   if(!it) return 0;
   if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isContextExteriorItemType(it.type)) return 0;
@@ -3314,241 +3180,17 @@ function hasCustomPlanSize(it){
 function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
-function normalizeHexColor(value){
-  var v=String(value||'').trim();
-  if(!v) return null;
-  if(v.charAt(0)!=='#') v='#'+v;
-  if(/^#[0-9a-fA-F]{3}$/.test(v)){
-    v='#'+v.charAt(1)+v.charAt(1)+v.charAt(2)+v.charAt(2)+v.charAt(3)+v.charAt(3);
-  }
-  if(!/^#[0-9a-fA-F]{6}$/.test(v)) return null;
-  return v.toLowerCase();
+function isAppearanceColorInput(inp){
+  return !!(inp && inp.matches && inp.matches('input[type="color"]') && (inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0);
 }
-function hexToRgb(hex){
-  hex=normalizeHexColor(hex)||'#ffffff';
-  return {
-    r:parseInt(hex.slice(1,3),16),
-    g:parseInt(hex.slice(3,5),16),
-    b:parseInt(hex.slice(5,7),16)
-  };
-}
-function rgbToHex(r,g,b){
-  function part(v){
-    v=Math.max(0,Math.min(255,Math.round(Number(v)||0)));
-    return ('0'+v.toString(16)).slice(-2);
-  }
-  return '#'+part(r)+part(g)+part(b);
-}
-function colorUpdateCodeFromInput(inp){
-  var code=inp.getAttribute('oninput') || inp.getAttribute('onchange') || '';
-  return code.replace(/this\.value/g,'__COLOR__');
-}
-function updateStableColorControlVisual(control,value){
-  value=normalizeHexColor(value)||'#ffffff';
-  control.dataset.colorValue=value;
-  control.style.setProperty('--stable-color',value);
-  var btn=control.querySelector('.stable-color-button');
-  var hex=control.querySelector('.stable-color-hex');
-  if(btn) btn.style.setProperty('--stable-color',value);
-  if(hex){
-    hex.value=value.toUpperCase();
-    hex.classList.remove('is-invalid');
-  }
-}
-function runStableColorUpdate(control,value){
-  value=normalizeHexColor(value);
-  if(!control || !value || control.classList.contains('is-disabled')) return false;
-  updateStableColorControlVisual(control,value);
-  var code=control.dataset.colorUpdate||'';
-  if(code){
-    try{
-      new Function(code.replace(/__COLOR__/g,JSON.stringify(value)))();
-    }catch(err){
-      console.error('Color update failed:',err);
-      return false;
+function initNativeColorInputs(){
+  if(initNativeColorInputs._done) return;
+  initNativeColorInputs._done=true;
+  document.addEventListener('change',function(e){
+    if(isAppearanceColorInput(e.target)){
+      setTimeout(commitAppearanceColorEdits,0);
     }
-  }
-  return true;
-}
-function commitStableColorControl(control){
-  if(!control) return;
-  if(control.dataset.colorDeferred==='true') commitAppearanceColorEdits();
-}
-function isStableColorLiveControl(control){
-  return !!(control && control.dataset.colorLive==='true');
-}
-function previewStablePickerValue(value){
-  value=normalizeHexColor(value);
-  if(!value) return;
-  syncStablePickerFields(value);
-  var control=STABLE_COLOR_PICKER.control;
-  if(isStableColorLiveControl(control)) runStableColorUpdate(control,value);
-  else updateStableColorControlVisual(control,value);
-}
-function handleStableColorTextInput(inp){
-  var value=normalizeHexColor(inp.value);
-  inp.classList.toggle('is-invalid',!!inp.value && !value);
-  if(!value) return;
-  var control=inp.closest('.stable-color-control');
-  runStableColorUpdate(control,value);
-  if(STABLE_COLOR_PICKER.control===control) syncStablePickerFields(value);
-}
-function commitStableColorTextInput(inp){
-  var control=inp.closest('.stable-color-control');
-  var value=normalizeHexColor(inp.value);
-  if(value){
-    runStableColorUpdate(control,value);
-    commitStableColorControl(control);
-  } else if(control) {
-    inp.value=(control.dataset.colorValue||'#ffffff').toUpperCase();
-    inp.classList.remove('is-invalid');
-  }
-}
-function upgradeColorInputs(root){
-  root=root||document;
-  var inputs=[];
-  if(root.matches && root.matches('input[type="color"]')) inputs=[root];
-  root.querySelectorAll && root.querySelectorAll('input[type="color"]').forEach(function(inp){inputs.push(inp);});
-  inputs.forEach(function(inp){
-    if(inp.dataset.stableColorUpgraded==='true') return;
-    var value=normalizeHexColor(inp.value||inp.getAttribute('value')||'#ffffff')||'#ffffff';
-    var updateCode=colorUpdateCodeFromInput(inp);
-    var disabled=inp.disabled || inp.hasAttribute('disabled');
-    var wrap=document.createElement('div');
-    wrap.className='stable-color-control';
-    if((inp.className||'').split(/\s+/).indexOf('pi')>=0) wrap.classList.add('pi');
-    if(disabled) wrap.classList.add('is-disabled');
-    wrap.dataset.colorUpdate=updateCode;
-    wrap.dataset.colorValue=value;
-    wrap.dataset.colorDeferred=(inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0?'true':'false';
-    wrap.dataset.colorLive=inp.getAttribute('oninput')?'true':'false';
-    wrap.innerHTML='<button class="stable-color-button" type="button" data-color-control aria-label="カラーを選択" onclick="openStableColorPicker(this)" '+(disabled?'disabled':'')+'></button>'
-      +'<input class="stable-color-hex" type="text" inputmode="none" readonly maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" onclick="openStableColorPicker(this)" onfocus="this.blur()" '+(disabled?'disabled':'')+'>';
-    inp.replaceWith(wrap);
-    updateStableColorControlVisual(wrap,value);
   });
-}
-var STABLE_COLOR_PICKER={control:null,value:'#ffffff'};
-function stableColorPickerEl(){ return document.getElementById('stable-color-picker'); }
-function positionStableColorPicker(control){
-  var picker=stableColorPickerEl();
-  if(!picker || !control) return;
-  if(isMobileLayout() || isTouchInputDevice()){
-    var vv=window.visualViewport;
-    var keyboardGap=vv?Math.max(0,window.innerHeight-(vv.height+vv.offsetTop)):0;
-    picker.style.left='8px';
-    picker.style.right='8px';
-    picker.style.top='auto';
-    picker.style.bottom='calc('+(Math.round(keyboardGap)+76)+'px + var(--safe-bot))';
-    picker.style.width='auto';
-    return;
-  }
-  var rect=control.getBoundingClientRect();
-  var w=picker.offsetWidth||292;
-  var h=picker.offsetHeight||300;
-  var left=Math.max(8,Math.min(rect.left,window.innerWidth-w-8));
-  var top=Math.max(8,Math.min(rect.bottom+8,window.innerHeight-h-8));
-  picker.style.left=left+'px';
-  picker.style.top=top+'px';
-  picker.style.right='auto';
-  picker.style.bottom='auto';
-  picker.style.width='';
-}
-function syncStablePickerFields(value){
-  value=normalizeHexColor(value)||'#ffffff';
-  STABLE_COLOR_PICKER.value=value;
-  var rgb=hexToRgb(value);
-  var picker=stableColorPickerEl();
-  if(picker) picker.style.setProperty('--stable-color',value);
-  var preview=document.getElementById('stable-color-preview');
-  if(preview) preview.style.setProperty('--stable-color',value);
-  var hex=document.getElementById('stable-color-hex');
-  if(hex){
-    hex.value=value.toUpperCase();
-    hex.classList.remove('is-invalid');
-  }
-  [['r',rgb.r],['g',rgb.g],['b',rgb.b]].forEach(function(pair){
-    var input=document.getElementById('stable-color-'+pair[0]);
-    var label=document.getElementById('stable-color-'+pair[0]+'-val');
-    if(input) input.value=pair[1];
-    if(label) label.textContent=pair[1];
-  });
-}
-function openStableColorPicker(btn){
-  var control=btn&&btn.closest?btn.closest('.stable-color-control'):null;
-  if(!control || control.classList.contains('is-disabled')) return;
-  STABLE_COLOR_PICKER.control=control;
-  var value=normalizeHexColor(control.dataset.colorValue)||'#ffffff';
-  syncStablePickerFields(value);
-  var picker=stableColorPickerEl();
-  if(!picker) return;
-  picker.classList.add('show');
-  picker.setAttribute('aria-hidden','false');
-  positionStableColorPicker(control);
-}
-function closeStableColorPicker(commit){
-  var control=STABLE_COLOR_PICKER.control;
-  if(commit && control) commitStableColorControl(control);
-  var picker=stableColorPickerEl();
-  if(picker){
-    picker.classList.remove('show');
-    picker.setAttribute('aria-hidden','true');
-  }
-  STABLE_COLOR_PICKER.control=null;
-}
-function handleStablePickerHexInput(inp){
-  var value=normalizeHexColor(inp.value);
-  inp.classList.toggle('is-invalid',!!inp.value && !value);
-  if(!value) return;
-  previewStablePickerValue(value);
-}
-function commitStablePickerHexInput(inp){
-  var value=normalizeHexColor(inp.value);
-  if(value){
-    previewStablePickerValue(value);
-    commitStablePickerValue();
-  } else {
-    inp.value=(STABLE_COLOR_PICKER.value||'#ffffff').toUpperCase();
-    inp.classList.remove('is-invalid');
-  }
-}
-function handleStablePickerSliderInput(){
-  var r=document.getElementById('stable-color-r');
-  var g=document.getElementById('stable-color-g');
-  var b=document.getElementById('stable-color-b');
-  var value=rgbToHex(r&&r.value,g&&g.value,b&&b.value);
-  previewStablePickerValue(value);
-}
-function commitStablePickerValue(){
-  var control=STABLE_COLOR_PICKER.control;
-  if(control) runStableColorUpdate(control,STABLE_COLOR_PICKER.value);
-  commitStableColorControl(control);
-}
-function chooseStableColorSwatch(value){
-  value=normalizeHexColor(value)||'#ffffff';
-  previewStablePickerValue(value);
-  commitStablePickerValue();
-}
-function initStableColorInputs(){
-  if(initStableColorInputs._done) return;
-  initStableColorInputs._done=true;
-  upgradeColorInputs(document);
-  if(window.MutationObserver){
-    new MutationObserver(function(mutations){
-      mutations.forEach(function(m){
-        m.addedNodes && m.addedNodes.forEach(function(node){
-          if(node.nodeType===1) upgradeColorInputs(node);
-        });
-      });
-    }).observe(document.body,{childList:true,subtree:true});
-  }
-  var reposition=function(){
-    if(STABLE_COLOR_PICKER.control && stableColorPickerEl() && stableColorPickerEl().classList.contains('show')){
-      positionStableColorPicker(STABLE_COLOR_PICKER.control);
-    }
-  };
-  window.addEventListener('resize',reposition);
-  if(window.visualViewport) window.visualViewport.addEventListener('resize',reposition);
 }
 function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
@@ -7029,7 +6671,7 @@ function build3D(){
   var flFilt = isInt ? ST.floor : null;
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
   buildRooms3D(flFilt);
-  DATA.items.filter(function(it){return !flFilt||it.floor===flFilt;}).forEach(function(it){buildItem3D(it);});
+  DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){buildItem3D(it);});
   buildWinFrames(flFilt);
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
@@ -7104,6 +6746,7 @@ function mark3DSelectable(root, ref, kind){
 
 function add3DSelectionMarker(){
   if(!sc3 || !ST.selected) return;
+  if(ST.selected.type && !shouldRenderItemInCurrent3DView(ST.selected)) return;
   var box=getSelectionBox3D(ST.selected);
   if(box.isEmpty()) return;
   var size=box.getSize(new THREE.Vector3());
@@ -7181,6 +6824,7 @@ function canMoveRefVertically3D(ref){
 }
 function add3DMoveGizmo(){
   if(!sc3 || !ST.selected || !canMoveRef3D(ST.selected) || ST.tool!=='select' || isObjectLocked(ST.selected)) return;
+  if(ST.selected.type && !shouldRenderItemInCurrent3DView(ST.selected)) return;
   var box=getSelectionBox3D(ST.selected);
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
@@ -7300,6 +6944,7 @@ function finish3DGizmoDrag(){
 function getSelectionBox3D(ref){
   var box=new THREE.Box3();
   if(!ref) return box;
+  if(ref.type && !shouldRenderItemInCurrent3DView(ref)) return box;
   if(ref.x1!==undefined && ref.x2!==undefined){
     var fy=floorBaseY(ref.floor), band=getWallBandRange(ref);
     var len=Math.hypot(ref.x2-ref.x1,ref.y2-ref.y1)*U;
@@ -9874,6 +9519,7 @@ function build3DLightItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
+  if(!shouldRenderItemInCurrent3DView(it)) return;
   if(isPlanAnnotationType(it.type)) return;
   var fy=item3DBaseY(it);
   var h=getItemHeightValue(it)*U, col=it.color||getItemCol(it.type);
@@ -10289,6 +9935,8 @@ function createHipRoofMesh(w,d,baseY,roofH,mat){
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
   geo.setIndex(idx);
+  // Keep the hip roof planes crisp; shared vertices make context roofs look softly warped.
+  geo=geo.toNonIndexed();
   geo.computeVertexNormals();
   var roof=new THREE.Mesh(geo,mat);
   roof.castShadow=true;
@@ -10336,7 +9984,7 @@ function build3DNeighborHouse(grp,it,w3,d3,h){
   var roofH=contextRoofExtraHeightMm('neighbor-house')*U;
   var wallColor=it.colorCustom?it.color:0xb9bcc2;
   var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
-  var roofMat=makeExteriorLightingMaterial({color:0x6c7178,roughness:0.86,envMapIntensity:0.12,side:THREE.DoubleSide});
+  var roofMat=makeExteriorLightingMaterial({color:0x6f747a,roughness:0.98,metalness:0.0,envMapIntensity:0.035,side:THREE.DoubleSide,flatShading:true});
   var trimMat=makeExteriorLightingMaterial({color:0xd9dcdf,roughness:0.82,envMapIntensity:0.12});
   var sidingMat=makeExteriorLightingMaterial({color:0xa8adb3,roughness:0.88,envMapIntensity:0.08});
   var glassMat=makeExteriorLightingMaterial({color:0xc5c9cc,roughness:0.34,envMapIntensity:0.16});
@@ -11060,7 +10708,8 @@ function build3DTree(grp,h){
 
 function buildRooms3D(flFilt){
   var fixtureGlow=Math.max(0,Math.min(2.5,LIGHT_SETTINGS.room*3.6));
-  var fixMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3});
+  var showAutoLightFixtures=!isInt;
+  var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
 
   DATA.rooms.filter(function(r){return !flFilt||r.floor===flFilt;}).forEach(function(r){
     var ry=floorBaseY(r.floor);
@@ -11103,15 +10752,17 @@ function buildRooms3D(flFilt){
     slab.position.set(rcx,floorY+0.004,rcz);
     slab.receiveShadow=true; mark3DSelectable(slab,r,'room'); sc3.add(slab);
 
-    // Ceiling downlights
-    var nx2=Math.max(1,Math.round(rw/2.8)), nz2=Math.max(1,Math.round(rd/2.8));
-    for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
-      var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
-      var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
-      fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
-      var pl=new THREE.PointLight(0xffffff,LIGHT_SETTINGS.room,6.0,1.8);
-      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
-    }
+	    // Ceiling downlights
+	    var nx2=Math.max(1,Math.round(rw/2.8)), nz2=Math.max(1,Math.round(rd/2.8));
+	    for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
+	      var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+	      if(showAutoLightFixtures){
+	        var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
+	        fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
+	      }
+	      var pl=new THREE.PointLight(0xffffff,LIGHT_SETTINGS.room,6.0,1.8);
+	      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
+	    }
   });
 }
 
@@ -12546,7 +12197,9 @@ function buildUnityRenderPlan(){
     it.renderBaseY=Math.round(floorBaseY(src.floor)/U);
     it.renderBaseNote='roof base is floor base height, not floor slab top';
   });
-  plan.items=plan.items.filter(function(it){return it && !isPlanAnnotationType(it.type);});
+  plan.items=plan.items.filter(function(it){
+    return it && !isPlanAnnotationType(it.type) && !(ST.view==='3d-int' && isContextExteriorItemType(it.type));
+  });
   return plan;
 }
 function exportUnityRenderRequest(){
@@ -12798,7 +12451,7 @@ function buildAiRenderPrompt(metadata){
   var styleInput=document.getElementById('ai-render-style-input');
   var style=(styleInput&&styleInput.value.trim())||'photorealistic architectural visualization, natural daylight, clean modern Japanese residential presentation';
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
-  var siteLines = metadata.siteContext && metadata.siteContext.hasSite ? [
+  var siteLines = metadata.view==='exterior' && metadata.siteContext && metadata.siteContext.hasSite ? [
     '- A site boundary is explicitly defined. Keep the planned house, yard, fences, driveway, and exterior elements inside that site boundary.',
     '- Site rectangles have explicit surface materials in the metadata: grass, gravel, or concrete. Preserve each specified surface material exactly.',
     '- Grass is allowed only on site rectangles whose surface is grass. Do not extend lawn/grass onto neutral outside-site ground or neighboring lots.',
@@ -13560,7 +13213,7 @@ function toggleMobilePropPanel(){
 function closeMobilePropPanel(){
   var p=document.getElementById('props');
   if(!p) return;
-  p.classList.remove('prop-expanded');
+  p.classList.remove('show','prop-expanded');
   ['max-height','height','overflow-y','overflow','top','bottom','transform'].forEach(function(prop){
     p.style.removeProperty(prop);
   });
@@ -13784,7 +13437,7 @@ window.addEventListener('resize',function(){
 function initTouchPressFeedback(){
   if(initTouchPressFeedback._done) return;
   initTouchPressFeedback._done=true;
-  var selector='.tbtn,.pbtn,.stool,.asset-tile,.asset-subhdr,.cat-hdr,.bnav-btn,#mob-prop-hdr,#mob-prop-close-fab,.unity-render-close';
+  var selector='.tbtn,.pbtn,.stool,.asset-tile,.asset-subhdr,.cat-hdr,.bnav-btn,#mob-prop-hdr,#mob-prop-close-btn,.unity-render-close';
   function clear(el){
     if(!el) return;
     window.setTimeout(function(){ el.classList.remove('touch-pressing'); },110);
@@ -13807,7 +13460,7 @@ function initTouchPressFeedback(){
 
 // ─── Init storage ─────────────────────────────────
 checkStorageOnInit();
-initStableColorInputs();
+initNativeColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
 applyMobileUI();
