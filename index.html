@@ -143,6 +143,42 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #unity-render-fab.show{display:block}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
+#app-loading{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:980;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.42);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  pointer-events:auto;
+}
+#app-loading.show{display:flex}
+.app-loading-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:0 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.96);
+  border:1px solid var(--hp-border,#d6dde4);
+  color:var(--hp-text,#2d2a27);
+  font-size:12px;
+  font-weight:800;
+  box-shadow:0 8px 22px rgba(24,20,18,0.14);
+}
+.app-loading-spinner{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid rgba(95,106,116,0.24);
+  border-top-color:var(--hp-primary,#e94560);
+  animation:app-loading-spin .72s linear infinite;
+}
+@keyframes app-loading-spin{to{transform:rotate(360deg)}}
 
 /* ── BOTTOM NAV (Mobile only) ──────────── */
 #bottom-nav{display:none}
@@ -2372,21 +2408,52 @@ body{
 #bottom-nav .bnav-btn.active:active{
   box-shadow:none!important;
 }
+#sidebar .common-tools{
+  margin:0 0 12px!important;
+  padding:12px!important;
+  border-radius:24px!important;
+}
+#sidebar .common-tools-title{
+  margin:0 2px 8px!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+}
 #sidebar .common-tools-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:6px!important;
 }
 #sidebar .common-tools .stool{
   min-width:0!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
-  line-height:1.25!important;
-  white-space:normal!important;
+  min-height:34px!important;
+  padding:0 6px!important;
+  justify-content:center!important;
+  gap:3px!important;
+  font-size:9.5px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
   overflow:hidden!important;
-  overflow-wrap:anywhere!important;
-  word-break:keep-all!important;
+  text-overflow:clip!important;
+  border-radius:999px!important;
+  background:#f8fafc!important;
+  border:1px solid rgba(214,221,228,0.72)!important;
 }
 #sidebar .common-tools .stool .sicon{
-  flex:0 0 26px!important;
+  flex:0 0 16px!important;
+  width:16px!important;
+  height:16px!important;
+  min-width:16px!important;
+  font-size:11px!important;
+  line-height:16px!important;
+}
+#sidebar .common-tools .stool.active,
+#sidebar .common-tools .stool.active:hover{
+  background:var(--hp-primary)!important;
+  border-color:var(--hp-primary)!important;
+  color:#fff!important;
+}
+#sidebar .common-tools .stool.active .sicon{
+  background:rgba(255,255,255,0.18)!important;
+  color:#fff!important;
 }
 
 /* ── Dense asset model lists ─────────────────────
@@ -2584,9 +2651,185 @@ body{
   min-height:156px!important;
   resize:vertical!important;
 }
+.stable-color-control{
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  min-height:34px!important;
+  box-sizing:border-box!important;
+}
+.stable-color-control.pi{
+  padding:3px 7px!important;
+}
+.stable-color-control.is-disabled{
+  opacity:.48!important;
+  pointer-events:none!important;
+}
+.stable-color-button{
+  width:26px!important;
+  height:26px!important;
+  flex:0 0 26px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(148,163,184,.86)!important;
+  background:var(--stable-color,#ffffff)!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72),0 1px 4px rgba(15,23,42,.16)!important;
+  cursor:pointer!important;
+  padding:0!important;
+}
+.stable-color-hex{
+  min-width:0!important;
+  flex:1 1 auto!important;
+  border:0!important;
+  outline:none!important;
+  background:transparent!important;
+  color:inherit!important;
+  font:inherit!important;
+  text-transform:uppercase!important;
+  letter-spacing:0!important;
+  padding:2px 0!important;
+}
+.stable-color-hex.is-invalid{
+  color:#d43b2a!important;
+}
+.face-card .stable-color-control{
+  width:156px!important;
+  background:#fff!important;
+  color:#334155!important;
+  border:1px solid #d9e2ec!important;
+}
+#stable-color-picker{
+  position:fixed;
+  left:16px;
+  top:96px;
+  width:min(292px,calc(100vw - 16px));
+  padding:12px;
+  display:none;
+  z-index:980;
+  border:1px solid rgba(203,213,225,.96);
+  border-radius:8px;
+  background:rgba(255,255,255,.98);
+  color:#1f2937;
+  box-shadow:0 18px 46px rgba(15,23,42,.22);
+  box-sizing:border-box;
+}
+#stable-color-picker.show{display:block}
+.stable-color-picker-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.stable-color-picker-title{
+  font-size:12px;
+  font-weight:800;
+  color:#344155;
+}
+.stable-color-picker-close{
+  width:auto!important;
+  min-width:58px!important;
+  padding:6px 12px!important;
+  margin:0!important;
+  border-radius:999px!important;
+}
+.stable-color-picker-preview{
+  height:34px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,.85);
+  background:var(--stable-color,#ffffff);
+  margin-bottom:10px;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72);
+}
+.stable-color-picker-hex{
+  width:100%;
+  box-sizing:border-box;
+  min-height:34px;
+  border:1px solid #d6dee9;
+  border-radius:999px;
+  padding:7px 12px;
+  color:#1f2937;
+  background:#f8fafc;
+  font:inherit;
+  font-size:12px;
+  text-transform:uppercase;
+}
+.stable-color-picker-hex.is-invalid{
+  border-color:#f0a195;
+  color:#c8291a;
+}
+.stable-color-picker-row{
+  display:grid;
+  grid-template-columns:18px 1fr 34px;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+  font-size:11px;
+  color:#536173;
+}
+.stable-color-picker-row input[type="range"]{
+  width:100%;
+  accent-color:var(--hp-primary);
+}
+.stable-color-picker-value{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.stable-color-swatches{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:7px;
+  margin-top:12px;
+}
+.stable-color-swatch{
+  width:100%;
+  aspect-ratio:1;
+  border-radius:50%;
+  border:1px solid rgba(148,163,184,.82);
+  background:var(--swatch-color,#fff);
+  cursor:pointer;
+  padding:0;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.62);
+}
+@media (max-width:768px), (pointer:coarse){
+  #stable-color-picker{
+    left:8px!important;
+    right:8px!important;
+    top:auto!important;
+    bottom:calc(76px + var(--safe-bot));
+    width:auto!important;
+    max-width:none!important;
+  }
+}
 </style>
 </head>
 <body>
+<div id="app-loading" aria-live="polite" aria-busy="true">
+  <div class="app-loading-pill" role="status">
+    <span class="app-loading-spinner" aria-hidden="true"></span>
+    <span id="app-loading-text">読み込み中</span>
+  </div>
+</div>
+<div id="stable-color-picker" aria-hidden="true" onclick="event.stopPropagation()">
+  <div class="stable-color-picker-head">
+    <div class="stable-color-picker-title">カラー</div>
+    <button type="button" class="pbtn sec stable-color-picker-close" onclick="closeStableColorPicker(true)">完了</button>
+  </div>
+  <div id="stable-color-preview" class="stable-color-picker-preview"></div>
+  <input id="stable-color-hex" class="stable-color-picker-hex" type="text" inputmode="text" maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" value="#FFFFFF" oninput="handleStablePickerHexInput(this)" onchange="commitStablePickerHexInput(this)">
+  <div class="stable-color-picker-row"><span>R</span><input id="stable-color-r" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-r-val" class="stable-color-picker-value">255</span></div>
+  <div class="stable-color-picker-row"><span>G</span><input id="stable-color-g" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-g-val" class="stable-color-picker-value">255</span></div>
+  <div class="stable-color-picker-row"><span>B</span><input id="stable-color-b" type="range" min="0" max="255" step="1" value="255" oninput="handleStablePickerSliderInput()" onchange="commitStablePickerValue()"><span id="stable-color-b-val" class="stable-color-picker-value">255</span></div>
+  <div class="stable-color-swatches">
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#ffffff" onclick="chooseStableColorSwatch('#ffffff')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#f5f1e8" onclick="chooseStableColorSwatch('#f5f1e8')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#e8e0cc" onclick="chooseStableColorSwatch('#e8e0cc')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#b9bcc2" onclick="chooseStableColorSwatch('#b9bcc2')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#888888" onclick="chooseStableColorSwatch('#888888')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#3a2f2a" onclick="chooseStableColorSwatch('#3a2f2a')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#2f80ed" onclick="chooseStableColorSwatch('#2f80ed')"></button>
+    <button type="button" class="stable-color-swatch" style="--swatch-color:#ff4328" onclick="chooseStableColorSwatch('#ff4328')"></button>
+  </div>
+</div>
 <div id="toolbar">
   <b class="brand-mark" aria-label="house-planner mobile">
     <img class="brand-logo" src="assets/brand/house-planner-mobile-icon.png?v=3" alt="" aria-hidden="true">
@@ -2600,15 +2843,16 @@ body{
   </select>
   <div class="tsep"></div>
   <button class="tbtn active" id="btn-2d" onclick="setView('2d')">📐 平面図</button>
-  <button class="tbtn" id="btn-3de" onclick="setView('3d-ext')">🏗 外観3D</button>
-  <button class="tbtn" id="btn-3di" onclick="setView('3d-int')">🚶 内観3D</button>
-  <button class="tbtn" onclick="refresh3DPreview()">⟳ 3D更新</button>
+  <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')">🏗 外観3D</button>
+  <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')">🚶 内観3D</button>
+  <button class="tbtn" onclick="refresh3DPreviewWithLoading()">⟳ 3D更新</button>
   <div class="tsep mob-hide"></div>
   <button class="tbtn mob-hide" onclick="toggleGrid()">⊞ グリッド</button>
   <button class="tbtn mob-hide" onclick="toggleDim()">↔ 寸法</button>
   <button class="tbtn mob-hide" onclick="resetView()">⊙ 全体表示</button>
   <div class="tsep mob-hide"></div>
   <button class="tbtn mob-hide" onclick="undoAction()">↩ Undo</button>
+  <button class="tbtn mob-hide" onclick="redoAction()">↪ Redo</button>
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
@@ -2622,14 +2866,15 @@ body{
     <div class="common-tools">
       <div class="common-tools-title">共通操作</div>
       <div class="common-tools-grid">
-        <div class="stool active" data-tool="select" onclick="setTool('select')"><span class="sicon">↖</span>選択・変形</div>
-        <div class="stool" data-tool="erase" onclick="setTool('erase')"><span class="sicon">✕</span>削除</div>
-        <div class="stool" onclick="undoAction()"><span class="sicon">↩</span>Undo</div>
-        <div class="stool" onclick="copySelectedFromButton()"><span class="sicon">⧉</span>コピー</div>
-        <div class="stool" onclick="pasteCopiedFromButton()"><span class="sicon">▣</span>ペースト</div>
-        <div class="stool" data-tool="memo" onclick="setTool('memo')"><span class="sicon">✎</span>メモ</div>
-        <div class="stool" data-tool="ruler" onclick="setTool('ruler')"><span class="sicon">↔</span>定規</div>
-        <div class="stool" data-tool="walk-route" onclick="setTool('walk-route')"><span class="sicon">↝</span>ウォーク</div>
+        <div class="stool active" data-tool="select" onclick="setTool('select')" title="選択・変形"><span class="sicon">↖</span>選択</div>
+        <div class="stool" data-tool="erase" onclick="setTool('erase')" title="削除"><span class="sicon">✕</span>削除</div>
+        <div class="stool" onclick="undoAction()" title="Undo"><span class="sicon">↩</span>Undo</div>
+        <div class="stool" onclick="redoAction()" title="Redo"><span class="sicon">↪</span>Redo</div>
+        <div class="stool" onclick="copySelectedFromButton()" title="コピー"><span class="sicon">⧉</span>コピー</div>
+        <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
+        <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
+        <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
+        <div class="stool" data-tool="walk-route" onclick="setTool('walk-route')" title="ウォーク"><span class="sicon">↝</span>ウォーク</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -2860,10 +3105,10 @@ body{
   <button class="bnav-btn active" id="bnav-2d" onclick="setView('2d');closeMobilePanels()">
     <span class="bnav-icon">📐</span>平面図
   </button>
-  <button class="bnav-btn" id="bnav-3de" onclick="setView('3d-ext');closeMobilePanels()">
+  <button class="bnav-btn" id="bnav-3de" onclick="setViewWithLoading('3d-ext');closeMobilePanels()">
     <span class="bnav-icon">🏗</span>外観3D
   </button>
-  <button class="bnav-btn" id="bnav-3di" onclick="setView('3d-int');closeMobilePanels()">
+  <button class="bnav-btn" id="bnav-3di" onclick="setViewWithLoading('3d-int');closeMobilePanels()">
     <span class="bnav-icon">🚶</span>内観3D
   </button>
   <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
@@ -2977,7 +3222,7 @@ var ICOLORS = {
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
   tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
-  'neighbor-building':'#8f98a3','neighbor-house':'#d7c1a3',road:'#55585c','utility-pole':'#8c9297',
+  'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -3068,6 +3313,242 @@ function hasCustomPlanSize(it){
 }
 function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function normalizeHexColor(value){
+  var v=String(value||'').trim();
+  if(!v) return null;
+  if(v.charAt(0)!=='#') v='#'+v;
+  if(/^#[0-9a-fA-F]{3}$/.test(v)){
+    v='#'+v.charAt(1)+v.charAt(1)+v.charAt(2)+v.charAt(2)+v.charAt(3)+v.charAt(3);
+  }
+  if(!/^#[0-9a-fA-F]{6}$/.test(v)) return null;
+  return v.toLowerCase();
+}
+function hexToRgb(hex){
+  hex=normalizeHexColor(hex)||'#ffffff';
+  return {
+    r:parseInt(hex.slice(1,3),16),
+    g:parseInt(hex.slice(3,5),16),
+    b:parseInt(hex.slice(5,7),16)
+  };
+}
+function rgbToHex(r,g,b){
+  function part(v){
+    v=Math.max(0,Math.min(255,Math.round(Number(v)||0)));
+    return ('0'+v.toString(16)).slice(-2);
+  }
+  return '#'+part(r)+part(g)+part(b);
+}
+function colorUpdateCodeFromInput(inp){
+  var code=inp.getAttribute('oninput') || inp.getAttribute('onchange') || '';
+  return code.replace(/this\.value/g,'__COLOR__');
+}
+function updateStableColorControlVisual(control,value){
+  value=normalizeHexColor(value)||'#ffffff';
+  control.dataset.colorValue=value;
+  control.style.setProperty('--stable-color',value);
+  var btn=control.querySelector('.stable-color-button');
+  var hex=control.querySelector('.stable-color-hex');
+  if(btn) btn.style.setProperty('--stable-color',value);
+  if(hex){
+    hex.value=value.toUpperCase();
+    hex.classList.remove('is-invalid');
+  }
+}
+function runStableColorUpdate(control,value){
+  value=normalizeHexColor(value);
+  if(!control || !value || control.classList.contains('is-disabled')) return false;
+  updateStableColorControlVisual(control,value);
+  var code=control.dataset.colorUpdate||'';
+  if(code){
+    try{
+      new Function(code.replace(/__COLOR__/g,JSON.stringify(value)))();
+    }catch(err){
+      console.error('Color update failed:',err);
+      return false;
+    }
+  }
+  return true;
+}
+function commitStableColorControl(control){
+  if(!control) return;
+  if(control.dataset.colorDeferred==='true') commitAppearanceColorEdits();
+}
+function isStableColorLiveControl(control){
+  return !!(control && control.dataset.colorLive==='true');
+}
+function previewStablePickerValue(value){
+  value=normalizeHexColor(value);
+  if(!value) return;
+  syncStablePickerFields(value);
+  var control=STABLE_COLOR_PICKER.control;
+  if(isStableColorLiveControl(control)) runStableColorUpdate(control,value);
+  else updateStableColorControlVisual(control,value);
+}
+function handleStableColorTextInput(inp){
+  var value=normalizeHexColor(inp.value);
+  inp.classList.toggle('is-invalid',!!inp.value && !value);
+  if(!value) return;
+  var control=inp.closest('.stable-color-control');
+  runStableColorUpdate(control,value);
+  if(STABLE_COLOR_PICKER.control===control) syncStablePickerFields(value);
+}
+function commitStableColorTextInput(inp){
+  var control=inp.closest('.stable-color-control');
+  var value=normalizeHexColor(inp.value);
+  if(value){
+    runStableColorUpdate(control,value);
+    commitStableColorControl(control);
+  } else if(control) {
+    inp.value=(control.dataset.colorValue||'#ffffff').toUpperCase();
+    inp.classList.remove('is-invalid');
+  }
+}
+function upgradeColorInputs(root){
+  root=root||document;
+  var inputs=[];
+  if(root.matches && root.matches('input[type="color"]')) inputs=[root];
+  root.querySelectorAll && root.querySelectorAll('input[type="color"]').forEach(function(inp){inputs.push(inp);});
+  inputs.forEach(function(inp){
+    if(inp.dataset.stableColorUpgraded==='true') return;
+    var value=normalizeHexColor(inp.value||inp.getAttribute('value')||'#ffffff')||'#ffffff';
+    var updateCode=colorUpdateCodeFromInput(inp);
+    var disabled=inp.disabled || inp.hasAttribute('disabled');
+    var wrap=document.createElement('div');
+    wrap.className='stable-color-control';
+    if((inp.className||'').split(/\s+/).indexOf('pi')>=0) wrap.classList.add('pi');
+    if(disabled) wrap.classList.add('is-disabled');
+    wrap.dataset.colorUpdate=updateCode;
+    wrap.dataset.colorValue=value;
+    wrap.dataset.colorDeferred=(inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0?'true':'false';
+    wrap.dataset.colorLive=inp.getAttribute('oninput')?'true':'false';
+    wrap.innerHTML='<button class="stable-color-button" type="button" data-color-control aria-label="カラーを選択" onclick="openStableColorPicker(this)" '+(disabled?'disabled':'')+'></button>'
+      +'<input class="stable-color-hex" type="text" inputmode="none" readonly maxlength="7" autocapitalize="off" autocomplete="off" spellcheck="false" onclick="openStableColorPicker(this)" onfocus="this.blur()" '+(disabled?'disabled':'')+'>';
+    inp.replaceWith(wrap);
+    updateStableColorControlVisual(wrap,value);
+  });
+}
+var STABLE_COLOR_PICKER={control:null,value:'#ffffff'};
+function stableColorPickerEl(){ return document.getElementById('stable-color-picker'); }
+function positionStableColorPicker(control){
+  var picker=stableColorPickerEl();
+  if(!picker || !control) return;
+  if(isMobileLayout() || isTouchInputDevice()){
+    var vv=window.visualViewport;
+    var keyboardGap=vv?Math.max(0,window.innerHeight-(vv.height+vv.offsetTop)):0;
+    picker.style.left='8px';
+    picker.style.right='8px';
+    picker.style.top='auto';
+    picker.style.bottom='calc('+(Math.round(keyboardGap)+76)+'px + var(--safe-bot))';
+    picker.style.width='auto';
+    return;
+  }
+  var rect=control.getBoundingClientRect();
+  var w=picker.offsetWidth||292;
+  var h=picker.offsetHeight||300;
+  var left=Math.max(8,Math.min(rect.left,window.innerWidth-w-8));
+  var top=Math.max(8,Math.min(rect.bottom+8,window.innerHeight-h-8));
+  picker.style.left=left+'px';
+  picker.style.top=top+'px';
+  picker.style.right='auto';
+  picker.style.bottom='auto';
+  picker.style.width='';
+}
+function syncStablePickerFields(value){
+  value=normalizeHexColor(value)||'#ffffff';
+  STABLE_COLOR_PICKER.value=value;
+  var rgb=hexToRgb(value);
+  var picker=stableColorPickerEl();
+  if(picker) picker.style.setProperty('--stable-color',value);
+  var preview=document.getElementById('stable-color-preview');
+  if(preview) preview.style.setProperty('--stable-color',value);
+  var hex=document.getElementById('stable-color-hex');
+  if(hex){
+    hex.value=value.toUpperCase();
+    hex.classList.remove('is-invalid');
+  }
+  [['r',rgb.r],['g',rgb.g],['b',rgb.b]].forEach(function(pair){
+    var input=document.getElementById('stable-color-'+pair[0]);
+    var label=document.getElementById('stable-color-'+pair[0]+'-val');
+    if(input) input.value=pair[1];
+    if(label) label.textContent=pair[1];
+  });
+}
+function openStableColorPicker(btn){
+  var control=btn&&btn.closest?btn.closest('.stable-color-control'):null;
+  if(!control || control.classList.contains('is-disabled')) return;
+  STABLE_COLOR_PICKER.control=control;
+  var value=normalizeHexColor(control.dataset.colorValue)||'#ffffff';
+  syncStablePickerFields(value);
+  var picker=stableColorPickerEl();
+  if(!picker) return;
+  picker.classList.add('show');
+  picker.setAttribute('aria-hidden','false');
+  positionStableColorPicker(control);
+}
+function closeStableColorPicker(commit){
+  var control=STABLE_COLOR_PICKER.control;
+  if(commit && control) commitStableColorControl(control);
+  var picker=stableColorPickerEl();
+  if(picker){
+    picker.classList.remove('show');
+    picker.setAttribute('aria-hidden','true');
+  }
+  STABLE_COLOR_PICKER.control=null;
+}
+function handleStablePickerHexInput(inp){
+  var value=normalizeHexColor(inp.value);
+  inp.classList.toggle('is-invalid',!!inp.value && !value);
+  if(!value) return;
+  previewStablePickerValue(value);
+}
+function commitStablePickerHexInput(inp){
+  var value=normalizeHexColor(inp.value);
+  if(value){
+    previewStablePickerValue(value);
+    commitStablePickerValue();
+  } else {
+    inp.value=(STABLE_COLOR_PICKER.value||'#ffffff').toUpperCase();
+    inp.classList.remove('is-invalid');
+  }
+}
+function handleStablePickerSliderInput(){
+  var r=document.getElementById('stable-color-r');
+  var g=document.getElementById('stable-color-g');
+  var b=document.getElementById('stable-color-b');
+  var value=rgbToHex(r&&r.value,g&&g.value,b&&b.value);
+  previewStablePickerValue(value);
+}
+function commitStablePickerValue(){
+  var control=STABLE_COLOR_PICKER.control;
+  if(control) runStableColorUpdate(control,STABLE_COLOR_PICKER.value);
+  commitStableColorControl(control);
+}
+function chooseStableColorSwatch(value){
+  value=normalizeHexColor(value)||'#ffffff';
+  previewStablePickerValue(value);
+  commitStablePickerValue();
+}
+function initStableColorInputs(){
+  if(initStableColorInputs._done) return;
+  initStableColorInputs._done=true;
+  upgradeColorInputs(document);
+  if(window.MutationObserver){
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        m.addedNodes && m.addedNodes.forEach(function(node){
+          if(node.nodeType===1) upgradeColorInputs(node);
+        });
+      });
+    }).observe(document.body,{childList:true,subtree:true});
+  }
+  var reposition=function(){
+    if(STABLE_COLOR_PICKER.control && stableColorPickerEl() && stableColorPickerEl().classList.contains('show')){
+      positionStableColorPicker(STABLE_COLOR_PICKER.control);
+    }
+  };
+  window.addEventListener('resize',reposition);
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',reposition);
 }
 function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
@@ -3385,7 +3866,7 @@ var ST = {
   mouseW:{x:0,y:0}, snap:10, showGrid:true, showDim:true,
   placingRot:0,
   isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false,
-  mobileShift:false,
+  mobileShift:true, shiftKey:true,
   _snapState:null  // stores active edge-snap info for visual feedback
 };
 
@@ -4203,6 +4684,8 @@ var CANVAS_TRACKPAD_USES_NATIVE_SCROLL = true;
 var DATA = {walls:[], items:[], rooms:[], exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
 var nextId = 1;
 var HISTORY = [];
+var REDO_HISTORY = [];
+var HISTORY_LIMIT = 50;
 var DIRTY = false;
 // Plans embed base64 textures (multiple MB), which overflow localStorage's
 // ~5MB quota on mobile Safari (counted as UTF-16). IndexedDB has a far larger
@@ -4269,9 +4752,20 @@ function clearDirty(){
   if(btn) btn.classList.remove('dirty');
 }
 var CLIPBOARD = null;
+function serializeDataSnapshot(){
+  return JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;});
+}
+function pushHistorySnapshot(stack,s){
+  stack.push(s);
+  if(stack.length>HISTORY_LIMIT) stack.shift();
+}
+function clearEditHistory(){
+  HISTORY.length=0;
+  REDO_HISTORY.length=0;
+}
 function saveState(){
-  var s=JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;});
-  HISTORY.push(s);if(HISTORY.length>50)HISTORY.shift();
+  pushHistorySnapshot(HISTORY,serializeDataSnapshot());
+  REDO_HISTORY.length=0;
   markDirty();
 }
 
@@ -4415,6 +4909,7 @@ function loadPreset(){
   DATA.interiorWallSettings={"whole":{"linked":true,"color":"#ebebeb","texture":null},"floors":{"1":{"linked":false,"color":"#f4f0e8","texture":null},"2":{"linked":false,"color":"#f4f0e8","texture":null},"3":{"linked":false,"color":"#f4f0e8","texture":null},"4":{"linked":false,"color":"#f4f0e8","texture":null}},"faces":{"82_-1_0_4100":{"mode":"inherit","color":null,"texture":null},"83_-1_0_2300":{"mode":"inherit","color":null,"texture":null},"83_-1_2300_5500":{"mode":"inherit","color":null,"texture":null},"83_-1_5500_6800":{"mode":"inherit","color":null,"texture":null},"85_1_0_3200":{"mode":"inherit","color":null,"texture":null},"85_1_3200_5490":{"mode":"inherit","color":null,"texture":null},"85_1_5490_7300":{"mode":"inherit","color":null,"texture":null},"86_1_0_1800":{"mode":"inherit","color":null,"texture":null},"90_1_0_2300":{"mode":"inherit","color":"#1a0804","texture":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABAKADAAQAAAABAAABAAAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgBAAEAAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBQQEBAQEBQcFBQUFBQUHBwcHBwcHBwgICAgICAkJCQkJCgoKCgoKCgoKCv/bAEMBAgICAwIDBAICBAsHBgcLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAEP/aAAwDAQACEQMRAD8A/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//0P496KKK5zsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9H+Peiiiuc7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//S/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//0/496KKK5zsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9T+Peiiiuc7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//V/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//1v496KKK5zsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9f+Peiiiuc7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//0f496KKK5zsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9L+Peiiiuc7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//T/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//1P496KKK5zsCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9X+Peiiiuc7AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//W/j3ooornOwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//2Q=="},"92_-1_0_1800":{"mode":"inherit","color":null,"texture":null},"92_1_0_1800":{"mode":"inherit","color":null,"texture":null},"98_-1_0_3190":{"mode":"inherit","color":null,"texture":null},"98_1_0_3190":{"mode":"inherit","color":null,"texture":null},"99_-1_0_2300":{"mode":"inherit","color":null,"texture":null},"99_1_0_1400":{"mode":"inherit","color":null,"texture":null},"99_1_1400_2300":{"mode":"inherit","color":null,"texture":null},"102_-1_0_2300":{"mode":"inherit","color":null,"texture":null},"102_1_0_2310":{"mode":"inherit","color":null,"texture":null},"105_-1_0_2300":{"mode":"inherit","color":null,"texture":null},"105_1_0_2300":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1400":{"mode":"inherit","color":null,"texture":null},"109_1_0_1400":{"mode":"inherit","color":null,"texture":null},"110_-1_0_900":{"mode":"inherit","color":null,"texture":null},"110_1_0_900":{"mode":"inherit","color":null,"texture":null},"112_-1_0_1800":{"mode":"inherit","color":null,"texture":null},"112_1_0_1300":{"mode":"inherit","color":null,"texture":null},"112_1_1300_1330":{"mode":"inherit","color":null,"texture":null},"86_1_0_2210":{"mode":"inherit","color":null,"texture":null},"86_1_2210_7310":{"mode":"inherit","color":null,"texture":null},"87_1_0_2740":{"mode":"custom","color":"#000000","texture":"data:image/jpeg;base64,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"},"88_-1_0_4100":{"mode":"inherit","color":null,"texture":null},"89_-1_0_5920":{"mode":"inherit","color":null,"texture":null},"91_-1_0_890":{"mode":"inherit","color":null,"texture":null},"91_1_0_920":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1380":{"mode":"inherit","color":null,"texture":null},"92_1_0_1380":{"mode":"inherit","color":null,"texture":null},"93_1_0_1330":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1830":{"mode":"inherit","color":null,"texture":null},"99_-1_0_650":{"mode":"inherit","color":null,"texture":null},"99_1_0_650":{"mode":"inherit","color":null,"texture":null},"100_-1_0_650":{"mode":"inherit","color":null,"texture":null},"100_1_0_650":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1550":{"mode":"inherit","color":null,"texture":null},"101_1_3_1550":{"mode":"inherit","color":null,"texture":null},"103_-1_10_3180":{"mode":"inherit","color":null,"texture":null},"104_-1_0_5040":{"mode":"inherit","color":null,"texture":null},"104_-1_5040_5950":{"mode":"inherit","color":null,"texture":null},"105_-1_0_3190":{"mode":"inherit","color":null,"texture":null},"106_-1_0_2730":{"mode":"inherit","color":"#a96800","texture":null},"106_-1_2730_3650":{"mode":"inherit","color":"#831100","texture":null},"106_-1_3650_5950":{"mode":"custom","color":"#001213","texture":null},"107_-1_6_1360":{"mode":"inherit","color":null,"texture":null},"107_1_6_1360":{"mode":"inherit","color":null,"texture":null},"107_-1_1360_3180":{"mode":"inherit","color":null,"texture":null},"107_1_1360_3180":{"mode":"inherit","color":null,"texture":null},"108_-1_15_2300":{"mode":"inherit","color":null,"texture":null},"108_1_15_2300":{"mode":"inherit","color":null,"texture":null},"109_-1_10_920":{"mode":"inherit","color":null,"texture":null},"109_1_10_920":{"mode":"inherit","color":null,"texture":null},"110_-1_0_870":{"mode":"inherit","color":null,"texture":null},"110_1_0_870":{"mode":"inherit","color":null,"texture":null},"111_-1_0_908":{"mode":"inherit","color":null,"texture":null},"111_1_0_908":{"mode":"inherit","color":null,"texture":null},"112_-1_4_920":{"mode":"inherit","color":null,"texture":null},"112_1_4_920":{"mode":"inherit","color":null,"texture":null},"87_1_2740_2750":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_840":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_840":{"mode":"inherit","color":null,"texture":null},"1778673921396_-1_0_800":{"mode":"inherit","color":null,"texture":null},"1778673921396_1_0_800":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_870":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_870":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_20":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_20_890":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_20":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_20_890":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_30":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_30_900":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_30":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_30_900":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_40":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_40_910":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_40":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_40_910":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_41":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_911":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_41":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_41_911":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_51":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_51_921":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_51":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_51_921":{"mode":"inherit","color":null,"texture":null},"92_-1_0_40":{"mode":"inherit","color":null,"texture":null},"92_-1_40_1800":{"mode":"inherit","color":null,"texture":null},"92_1_0_40":{"mode":"inherit","color":null,"texture":null},"92_1_40_1800":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_31":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_31_901":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_31":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_31_901":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_942":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_942":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_953":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_953":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_963":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_963":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_964":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_964":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_968":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_968":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_42":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_42_971":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_0_42":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_42_971":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_42_972":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_42_972":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_42_974":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_974_977":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_42_974":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_974_977":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_974_981":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_974_981":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_941":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_941":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_921":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_921":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_931":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_931":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_971":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_971":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_982":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_982":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_41_972":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_972":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_40_930":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_910_930":{"mode":"inherit","color":null,"texture":null},"92_-1_0_97":{"mode":"inherit","color":null,"texture":null},"92_-1_97_1800":{"mode":"inherit","color":null,"texture":null},"92_1_0_97":{"mode":"inherit","color":null,"texture":null},"92_1_97_1800":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_40_911":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_40_911":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_911_932":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_911_932":{"mode":"inherit","color":null,"texture":null},"92_-1_2_1800":{"mode":"inherit","color":null,"texture":null},"92_1_2_1800":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_931":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_40_931":{"mode":"inherit","color":null,"texture":null},"1778673921393_-1_0_930":{"mode":"inherit","color":null,"texture":null},"1778673921393_1_40_930":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1440":{"mode":"inherit","color":null,"texture":null},"109_1_0_1440":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1490":{"mode":"inherit","color":null,"texture":null},"109_1_0_1490":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1530":{"mode":"inherit","color":null,"texture":null},"109_1_0_1530":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1570":{"mode":"inherit","color":null,"texture":null},"109_1_0_1570":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1610":{"mode":"inherit","color":null,"texture":null},"109_1_0_1610":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1630":{"mode":"inherit","color":null,"texture":null},"109_1_0_1630":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1670":{"mode":"inherit","color":null,"texture":null},"109_1_0_1670":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1700":{"mode":"inherit","color":null,"texture":null},"109_1_0_1700":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1730":{"mode":"inherit","color":null,"texture":null},"109_1_0_1730":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1760":{"mode":"inherit","color":null,"texture":null},"109_1_0_1760":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1790":{"mode":"inherit","color":null,"texture":null},"109_1_0_1790":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1820":{"mode":"inherit","color":null,"texture":null},"109_1_0_1820":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1840":{"mode":"inherit","color":null,"texture":null},"109_1_0_1840":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1860":{"mode":"inherit","color":null,"texture":null},"109_1_0_1860":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1890":{"mode":"inherit","color":null,"texture":null},"109_1_0_1890":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1910":{"mode":"inherit","color":null,"texture":null},"109_1_0_1910":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1930":{"mode":"inherit","color":null,"texture":null},"109_1_0_1930":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1960":{"mode":"inherit","color":null,"texture":null},"109_1_0_1960":{"mode":"inherit","color":null,"texture":null},"109_-1_0_1990":{"mode":"inherit","color":null,"texture":null},"109_1_0_1990":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2030":{"mode":"inherit","color":null,"texture":null},"109_1_0_2030":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2050":{"mode":"inherit","color":null,"texture":null},"109_1_0_2050":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2080":{"mode":"inherit","color":null,"texture":null},"109_1_0_2080":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2100":{"mode":"inherit","color":null,"texture":null},"109_1_0_2100":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2120":{"mode":"inherit","color":null,"texture":null},"109_1_0_2120":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2130":{"mode":"inherit","color":null,"texture":null},"109_1_0_2130":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2140":{"mode":"inherit","color":null,"texture":null},"109_1_0_2140":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2160":{"mode":"inherit","color":null,"texture":null},"109_1_0_2160":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2180":{"mode":"inherit","color":null,"texture":null},"109_1_0_2180":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2200":{"mode":"inherit","color":null,"texture":null},"109_1_0_2200":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2210":{"mode":"inherit","color":null,"texture":null},"109_1_0_2210":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2230":{"mode":"inherit","color":null,"texture":null},"109_1_0_2230":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2240":{"mode":"inherit","color":null,"texture":null},"109_1_0_2240":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2250":{"mode":"inherit","color":null,"texture":null},"109_1_0_2250":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2260":{"mode":"inherit","color":null,"texture":null},"109_1_0_2260":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2270":{"mode":"inherit","color":null,"texture":null},"109_1_0_2270":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2280":{"mode":"inherit","color":null,"texture":null},"109_1_0_2280":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2290":{"mode":"inherit","color":null,"texture":null},"109_1_0_2290":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2300":{"mode":"inherit","color":null,"texture":null},"109_1_0_2300":{"mode":"inherit","color":null,"texture":null},"109_-1_0_40":{"mode":"inherit","color":null,"texture":null},"109_-1_40_2340":{"mode":"inherit","color":null,"texture":null},"109_1_0_40":{"mode":"inherit","color":null,"texture":null},"109_1_40_2340":{"mode":"inherit","color":null,"texture":null},"109_-1_0_60":{"mode":"inherit","color":null,"texture":null},"109_-1_60_2360":{"mode":"inherit","color":null,"texture":null},"109_1_0_60":{"mode":"inherit","color":null,"texture":null},"109_1_60_2360":{"mode":"inherit","color":null,"texture":null},"109_-1_0_50":{"mode":"inherit","color":null,"texture":null},"109_-1_50_2350":{"mode":"inherit","color":null,"texture":null},"109_1_0_50":{"mode":"inherit","color":null,"texture":null},"109_1_50_2350":{"mode":"inherit","color":null,"texture":null},"109_-1_0_30":{"mode":"inherit","color":null,"texture":null},"109_-1_30_2330":{"mode":"inherit","color":null,"texture":null},"109_1_0_30":{"mode":"inherit","color":null,"texture":null},"109_1_30_2330":{"mode":"inherit","color":null,"texture":null},"109_-1_0_20":{"mode":"inherit","color":null,"texture":null},"109_-1_20_2320":{"mode":"inherit","color":null,"texture":null},"109_1_0_20":{"mode":"inherit","color":null,"texture":null},"109_1_20_2320":{"mode":"inherit","color":null,"texture":null},"109_-1_0_10":{"mode":"inherit","color":null,"texture":null},"109_-1_10_2310":{"mode":"inherit","color":null,"texture":null},"109_1_0_10":{"mode":"inherit","color":null,"texture":null},"109_1_10_2310":{"mode":"inherit","color":null,"texture":null},"109_-1_0_11":{"mode":"inherit","color":null,"texture":null},"109_-1_11_2311":{"mode":"inherit","color":null,"texture":null},"109_1_0_11":{"mode":"inherit","color":null,"texture":null},"109_1_11_2311":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2301":{"mode":"inherit","color":null,"texture":null},"109_1_0_2301":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2281":{"mode":"inherit","color":null,"texture":null},"109_1_0_2281":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2271":{"mode":"inherit","color":null,"texture":null},"109_1_0_2271":{"mode":"inherit","color":null,"texture":null},"109_-1_0_2291":{"mode":"inherit","color":null,"texture":null},"109_1_0_2291":{"mode":"inherit","color":null,"texture":null},"101_-1_0_3":{"mode":"inherit","color":null,"texture":null},"101_1_0_3":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1530":{"mode":"inherit","color":null,"texture":null},"101_1_3_1530":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1510":{"mode":"inherit","color":null,"texture":null},"101_1_3_1510":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1490":{"mode":"inherit","color":null,"texture":null},"101_1_3_1490":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1470":{"mode":"inherit","color":null,"texture":null},"101_1_3_1470":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1450":{"mode":"inherit","color":null,"texture":null},"101_1_3_1450":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1440":{"mode":"inherit","color":null,"texture":null},"101_1_3_1440":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1430":{"mode":"inherit","color":null,"texture":null},"101_1_3_1430":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1420":{"mode":"inherit","color":null,"texture":null},"101_1_3_1420":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1400":{"mode":"inherit","color":null,"texture":null},"101_1_3_1400":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1340":{"mode":"inherit","color":null,"texture":null},"101_1_3_1340":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1270":{"mode":"inherit","color":null,"texture":null},"101_1_3_1270":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1220":{"mode":"inherit","color":null,"texture":null},"101_1_3_1220":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1160":{"mode":"inherit","color":null,"texture":null},"101_1_3_1160":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1120":{"mode":"inherit","color":null,"texture":null},"101_1_3_1120":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1100":{"mode":"inherit","color":null,"texture":null},"101_1_3_1100":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1060":{"mode":"inherit","color":null,"texture":null},"101_1_3_1060":{"mode":"inherit","color":null,"texture":null},"101_-1_3_1030":{"mode":"inherit","color":null,"texture":null},"101_1_3_1030":{"mode":"inherit","color":null,"texture":null},"101_-1_3_990":{"mode":"inherit","color":null,"texture":null},"101_1_3_990":{"mode":"inherit","color":null,"texture":null},"101_-1_3_950":{"mode":"inherit","color":null,"texture":null},"101_1_3_950":{"mode":"inherit","color":null,"texture":null},"101_-1_3_920":{"mode":"inherit","color":null,"texture":null},"101_1_3_920":{"mode":"inherit","color":null,"texture":null},"101_-1_3_890":{"mode":"inherit","color":null,"texture":null},"101_1_3_890":{"mode":"inherit","color":null,"texture":null},"101_-1_3_860":{"mode":"inherit","color":null,"texture":null},"101_1_3_860":{"mode":"inherit","color":null,"texture":null},"101_-1_3_840":{"mode":"inherit","color":null,"texture":null},"101_1_3_840":{"mode":"inherit","color":null,"texture":null},"101_-1_3_830":{"mode":"inherit","color":null,"texture":null},"101_1_3_830":{"mode":"inherit","color":null,"texture":null},"101_-1_3_820":{"mode":"inherit","color":null,"texture":null},"101_1_3_820":{"mode":"inherit","color":null,"texture":null},"101_-1_3_850":{"mode":"inherit","color":null,"texture":null},"101_1_3_850":{"mode":"inherit","color":null,"texture":null},"101_-1_3_870":{"mode":"inherit","color":null,"texture":null},"101_1_3_870":{"mode":"inherit","color":null,"texture":null},"101_-1_3_900":{"mode":"inherit","color":null,"texture":null},"101_1_3_900":{"mode":"inherit","color":null,"texture":null},"101_-1_3_910":{"mode":"inherit","color":null,"texture":null},"101_1_3_910":{"mode":"inherit","color":null,"texture":null},"101_-1_3_930":{"mode":"inherit","color":null,"texture":null},"101_1_3_930":{"mode":"inherit","color":null,"texture":null},"101_-1_3_940":{"mode":"inherit","color":null,"texture":null},"101_1_3_940":{"mode":"inherit","color":null,"texture":null},"100_-1_0_640":{"mode":"inherit","color":null,"texture":null},"100_1_0_640":{"mode":"inherit","color":null,"texture":null},"100_-1_0_682":{"mode":"inherit","color":null,"texture":null},"100_1_0_682":{"mode":"inherit","color":null,"texture":null},"100_-1_0_729":{"mode":"inherit","color":null,"texture":null},"100_1_0_729":{"mode":"inherit","color":null,"texture":null},"100_-1_0_767":{"mode":"inherit","color":null,"texture":null},"100_1_0_767":{"mode":"inherit","color":null,"texture":null},"100_-1_0_781":{"mode":"inherit","color":null,"texture":null},"100_1_0_781":{"mode":"inherit","color":null,"texture":null},"100_-1_0_802":{"mode":"inherit","color":null,"texture":null},"100_1_0_802":{"mode":"inherit","color":null,"texture":null},"100_-1_0_805":{"mode":"inherit","color":null,"texture":null},"100_1_0_805":{"mode":"inherit","color":null,"texture":null},"100_-1_0_818":{"mode":"inherit","color":null,"texture":null},"100_1_0_818":{"mode":"inherit","color":null,"texture":null},"100_-1_0_827":{"mode":"inherit","color":null,"texture":null},"100_1_0_827":{"mode":"inherit","color":null,"texture":null},"100_-1_0_844":{"mode":"inherit","color":null,"texture":null},"100_1_0_844":{"mode":"inherit","color":null,"texture":null},"100_-1_0_869":{"mode":"inherit","color":null,"texture":null},"100_1_0_869":{"mode":"inherit","color":null,"texture":null},"100_-1_0_884":{"mode":"inherit","color":null,"texture":null},"100_1_0_884":{"mode":"inherit","color":null,"texture":null},"100_-1_0_911":{"mode":"inherit","color":null,"texture":null},"100_1_0_911":{"mode":"inherit","color":null,"texture":null},"100_-1_0_940":{"mode":"inherit","color":null,"texture":null},"100_1_0_940":{"mode":"inherit","color":null,"texture":null},"100_-1_0_955":{"mode":"inherit","color":null,"texture":null},"100_1_0_955":{"mode":"inherit","color":null,"texture":null},"100_-1_0_975":{"mode":"inherit","color":null,"texture":null},"100_1_0_975":{"mode":"inherit","color":null,"texture":null},"100_-1_0_991":{"mode":"inherit","color":null,"texture":null},"100_1_0_991":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1022":{"mode":"inherit","color":null,"texture":null},"100_1_0_1022":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1024":{"mode":"inherit","color":null,"texture":null},"100_1_0_1024":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1038":{"mode":"inherit","color":null,"texture":null},"100_1_0_1038":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1043":{"mode":"inherit","color":null,"texture":null},"100_1_0_1043":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1048":{"mode":"inherit","color":null,"texture":null},"100_1_0_1048":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1058":{"mode":"inherit","color":null,"texture":null},"100_1_0_1058":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1062":{"mode":"inherit","color":null,"texture":null},"100_1_0_1062":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1075":{"mode":"inherit","color":null,"texture":null},"100_1_0_1075":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1082":{"mode":"inherit","color":null,"texture":null},"100_1_0_1082":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1089":{"mode":"inherit","color":null,"texture":null},"100_1_0_1089":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1096":{"mode":"inherit","color":null,"texture":null},"100_1_0_1096":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1110":{"mode":"inherit","color":null,"texture":null},"100_1_0_1110":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1119":{"mode":"inherit","color":null,"texture":null},"100_1_0_1119":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1112":{"mode":"inherit","color":null,"texture":null},"100_1_0_1112":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1120":{"mode":"inherit","color":null,"texture":null},"100_1_0_1120":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1114":{"mode":"inherit","color":null,"texture":null},"100_1_0_1114":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1107":{"mode":"inherit","color":null,"texture":null},"100_1_0_1107":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1102":{"mode":"inherit","color":null,"texture":null},"100_1_0_1102":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1109":{"mode":"inherit","color":null,"texture":null},"100_1_0_1109":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1051":{"mode":"inherit","color":null,"texture":null},"100_-1_1051_1106":{"mode":"inherit","color":null,"texture":null},"100_1_0_1051":{"mode":"inherit","color":null,"texture":null},"100_1_1051_1106":{"mode":"inherit","color":null,"texture":null},"100_-1_1051_1114":{"mode":"inherit","color":null,"texture":null},"100_1_1051_1114":{"mode":"inherit","color":null,"texture":null},"100_-1_1051_1122":{"mode":"inherit","color":null,"texture":null},"100_1_0_898":{"mode":"inherit","color":null,"texture":null},"100_-1_1051_1116":{"mode":"inherit","color":null,"texture":null},"100_1_1051_1116":{"mode":"inherit","color":null,"texture":null},"100_-1_1051_1125":{"mode":"inherit","color":null,"texture":null},"100_1_1051_1125":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1106":{"mode":"inherit","color":null,"texture":null},"100_1_0_1106":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1113":{"mode":"inherit","color":null,"texture":null},"100_1_0_1113":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1133":{"mode":"inherit","color":null,"texture":null},"100_1_0_1133":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1131":{"mode":"inherit","color":null,"texture":null},"100_1_0_1131":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1146":{"mode":"inherit","color":null,"texture":null},"100_1_0_1146":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1153":{"mode":"inherit","color":null,"texture":null},"100_1_0_1153":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1160":{"mode":"inherit","color":null,"texture":null},"100_1_0_1160":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1174":{"mode":"inherit","color":null,"texture":null},"100_1_0_1174":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1167":{"mode":"inherit","color":null,"texture":null},"100_1_0_1167":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1100":{"mode":"inherit","color":null,"texture":null},"100_1_0_1100":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1008":{"mode":"inherit","color":null,"texture":null},"100_1_0_1008":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1012":{"mode":"inherit","color":null,"texture":null},"100_1_0_1012":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1002":{"mode":"inherit","color":null,"texture":null},"100_1_0_1002":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1006":{"mode":"inherit","color":null,"texture":null},"100_1_0_1006":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1003":{"mode":"inherit","color":null,"texture":null},"100_1_0_1003":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1000":{"mode":"inherit","color":null,"texture":null},"100_1_0_1000":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1004":{"mode":"inherit","color":null,"texture":null},"100_1_0_1004":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1017":{"mode":"inherit","color":null,"texture":null},"100_1_0_1017":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1026":{"mode":"inherit","color":null,"texture":null},"100_1_0_1026":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1018":{"mode":"inherit","color":null,"texture":null},"100_1_0_1018":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1031":{"mode":"inherit","color":null,"texture":null},"100_1_0_1031":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1036":{"mode":"inherit","color":null,"texture":null},"100_1_0_1036":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1044":{"mode":"inherit","color":null,"texture":null},"100_1_0_1044":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1042":{"mode":"inherit","color":null,"texture":null},"100_1_0_1042":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1041":{"mode":"inherit","color":null,"texture":null},"100_1_0_1041":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1040":{"mode":"inherit","color":null,"texture":null},"100_1_0_1040":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1030":{"mode":"inherit","color":null,"texture":null},"100_1_0_1030":{"mode":"inherit","color":null,"texture":null},"100_-1_0_1010":{"mode":"inherit","color":null,"texture":null},"100_1_0_1010":{"mode":"inherit","color":null,"texture":null},"100_-1_0_990":{"mode":"inherit","color":null,"texture":null},"100_1_0_990":{"mode":"inherit","color":null,"texture":null},"100_-1_0_960":{"mode":"inherit","color":null,"texture":null},"100_1_0_960":{"mode":"inherit","color":null,"texture":null},"100_-1_0_950":{"mode":"inherit","color":null,"texture":null},"100_1_0_950":{"mode":"inherit","color":null,"texture":null},"100_-1_0_930":{"mode":"inherit","color":null,"texture":null},"100_1_0_930":{"mode":"inherit","color":null,"texture":null},"100_-1_0_920":{"mode":"inherit","color":null,"texture":null},"100_1_0_920":{"mode":"inherit","color":null,"texture":null},"100_-1_0_910":{"mode":"inherit","color":null,"texture":null},"100_1_0_910":{"mode":"inherit","color":null,"texture":null},"100_-1_0_900":{"mode":"inherit","color":null,"texture":null},"100_1_0_900":{"mode":"inherit","color":null,"texture":null},"100_-1_0_890":{"mode":"inherit","color":null,"texture":null},"100_1_0_890":{"mode":"inherit","color":null,"texture":null},"100_-1_0_880":{"mode":"inherit","color":null,"texture":null},"100_1_0_880":{"mode":"inherit","color":null,"texture":null},"100_-1_0_870":{"mode":"inherit","color":null,"texture":null},"100_1_0_870":{"mode":"inherit","color":null,"texture":null},"100_-1_0_850":{"mode":"inherit","color":null,"texture":null},"100_1_0_850":{"mode":"inherit","color":null,"texture":null},"100_-1_0_840":{"mode":"inherit","color":null,"texture":null},"100_1_0_840":{"mode":"inherit","color":null,"texture":null},"100_-1_0_830":{"mode":"inherit","color":null,"texture":null},"100_1_0_830":{"mode":"inherit","color":null,"texture":null},"100_-1_0_820":{"mode":"inherit","color":null,"texture":null},"100_1_0_820":{"mode":"inherit","color":null,"texture":null},"100_-1_0_810":{"mode":"inherit","color":null,"texture":null},"100_1_0_810":{"mode":"inherit","color":null,"texture":null},"100_-1_0_800":{"mode":"inherit","color":null,"texture":null},"100_1_0_800":{"mode":"inherit","color":null,"texture":null},"100_-1_0_801":{"mode":"inherit","color":null,"texture":null},"100_1_0_801":{"mode":"inherit","color":null,"texture":null},"100_-1_0_811":{"mode":"inherit","color":null,"texture":null},"100_1_0_811":{"mode":"inherit","color":null,"texture":null},"100_-1_0_821":{"mode":"inherit","color":null,"texture":null},"100_1_0_821":{"mode":"inherit","color":null,"texture":null},"100_-1_0_831":{"mode":"inherit","color":null,"texture":null},"100_1_0_831":{"mode":"inherit","color":null,"texture":null},"100_-1_0_841":{"mode":"inherit","color":null,"texture":null},"100_1_0_841":{"mode":"inherit","color":null,"texture":null},"100_-1_0_851":{"mode":"inherit","color":null,"texture":null},"100_1_0_851":{"mode":"inherit","color":null,"texture":null},"100_-1_0_861":{"mode":"inherit","color":null,"texture":null},"100_1_0_861":{"mode":"inherit","color":null,"texture":null},"100_-1_0_871":{"mode":"inherit","color":null,"texture":null},"100_1_0_871":{"mode":"inherit","color":null,"texture":null},"100_-1_0_881":{"mode":"inherit","color":null,"texture":null},"100_1_0_881":{"mode":"inherit","color":null,"texture":null},"91_-1_0_920":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1410":{"mode":"inherit","color":null,"texture":null},"92_1_0_1410":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1420":{"mode":"inherit","color":null,"texture":null},"92_1_0_1420":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1421":{"mode":"inherit","color":null,"texture":null},"92_1_0_1421":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1431":{"mode":"inherit","color":null,"texture":null},"92_1_0_1431":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1452":{"mode":"inherit","color":null,"texture":null},"92_1_0_1452":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1473":{"mode":"inherit","color":null,"texture":null},"92_1_0_1473":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1483":{"mode":"inherit","color":null,"texture":null},"92_1_0_1483":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1493":{"mode":"inherit","color":null,"texture":null},"92_1_0_1493":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1503":{"mode":"inherit","color":null,"texture":null},"92_1_0_1503":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1504":{"mode":"inherit","color":null,"texture":null},"92_1_0_1504":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1524":{"mode":"inherit","color":null,"texture":null},"92_1_0_1524":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1545":{"mode":"inherit","color":null,"texture":null},"92_1_0_1545":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1565":{"mode":"inherit","color":null,"texture":null},"92_1_0_1565":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1575":{"mode":"inherit","color":null,"texture":null},"92_1_0_1575":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1595":{"mode":"inherit","color":null,"texture":null},"92_1_0_1595":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1605":{"mode":"inherit","color":null,"texture":null},"92_1_0_1605":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1625":{"mode":"inherit","color":null,"texture":null},"92_1_0_1625":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1656":{"mode":"inherit","color":null,"texture":null},"92_1_0_1656":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1718":{"mode":"inherit","color":null,"texture":null},"92_1_0_1718":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1749":{"mode":"inherit","color":null,"texture":null},"92_1_0_1749":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1781":{"mode":"inherit","color":null,"texture":null},"92_1_0_1781":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1812":{"mode":"inherit","color":null,"texture":null},"92_1_0_1812":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1852":{"mode":"inherit","color":null,"texture":null},"92_1_0_1852":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1882":{"mode":"inherit","color":null,"texture":null},"92_1_0_1882":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1902":{"mode":"inherit","color":null,"texture":null},"92_1_0_1902":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1920":{"mode":"inherit","color":null,"texture":null},"92_1_0_1920":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1950":{"mode":"inherit","color":null,"texture":null},"92_1_0_1950":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1970":{"mode":"inherit","color":null,"texture":null},"92_1_0_1970":{"mode":"inherit","color":null,"texture":null},"92_-1_0_1989":{"mode":"inherit","color":null,"texture":null},"92_1_0_1989":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2039":{"mode":"inherit","color":null,"texture":null},"92_1_0_2039":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2087":{"mode":"inherit","color":null,"texture":null},"92_1_0_2087":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2126":{"mode":"inherit","color":null,"texture":null},"92_1_0_2126":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2175":{"mode":"inherit","color":null,"texture":null},"92_1_0_2175":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2224":{"mode":"inherit","color":null,"texture":null},"92_1_0_2224":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2264":{"mode":"inherit","color":null,"texture":null},"92_1_0_2264":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2304":{"mode":"inherit","color":null,"texture":null},"92_1_0_2304":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2343":{"mode":"inherit","color":null,"texture":null},"92_1_0_2343":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2373":{"mode":"inherit","color":null,"texture":null},"92_1_0_2373":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2413":{"mode":"inherit","color":null,"texture":null},"92_1_0_2413":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2432":{"mode":"inherit","color":null,"texture":null},"92_1_0_2432":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2452":{"mode":"inherit","color":null,"texture":null},"92_1_0_2452":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2472":{"mode":"inherit","color":null,"texture":null},"92_1_0_2472":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2492":{"mode":"inherit","color":null,"texture":null},"92_1_0_2492":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2502":{"mode":"inherit","color":null,"texture":null},"92_1_0_2502":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2482":{"mode":"inherit","color":null,"texture":null},"92_1_0_2482":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2462":{"mode":"inherit","color":null,"texture":null},"92_1_0_2462":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2503":{"mode":"inherit","color":null,"texture":null},"92_1_0_2503":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2513":{"mode":"inherit","color":null,"texture":null},"92_1_0_2513":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2493":{"mode":"inherit","color":null,"texture":null},"92_1_0_2493":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2483":{"mode":"inherit","color":null,"texture":null},"92_1_0_2483":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2473":{"mode":"inherit","color":null,"texture":null},"92_1_0_2473":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2463":{"mode":"inherit","color":null,"texture":null},"92_1_0_2463":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2453":{"mode":"inherit","color":null,"texture":null},"92_1_0_2453":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2443":{"mode":"inherit","color":null,"texture":null},"92_1_0_2443":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2433":{"mode":"inherit","color":null,"texture":null},"92_1_0_2433":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2474":{"mode":"inherit","color":null,"texture":null},"92_1_0_2474":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2484":{"mode":"inherit","color":null,"texture":null},"92_1_0_2484":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2494":{"mode":"inherit","color":null,"texture":null},"92_1_0_2494":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2520":{"mode":"inherit","color":null,"texture":null},"92_1_0_2520":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2510":{"mode":"inherit","color":null,"texture":null},"92_1_0_2510":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2500":{"mode":"inherit","color":null,"texture":null},"92_1_0_2500":{"mode":"inherit","color":null,"texture":null},"92_-1_0_2490":{"mode":"inherit","color":null,"texture":null},"92_1_0_2490":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1330":{"mode":"inherit","color":null,"texture":null},"93_1_0_1340":{"mode":"inherit","color":null,"texture":null},"93_1_0_1360":{"mode":"inherit","color":null,"texture":null},"93_1_0_1370":{"mode":"inherit","color":null,"texture":null},"93_-1_0_60":{"mode":"inherit","color":null,"texture":null},"93_-1_60_77":{"mode":"inherit","color":null,"texture":null},"93_1_0_1380":{"mode":"inherit","color":null,"texture":null},"93_-1_0_70":{"mode":"inherit","color":null,"texture":null},"93_-1_70_77":{"mode":"inherit","color":null,"texture":null},"93_1_0_1390":{"mode":"inherit","color":null,"texture":null},"87_1_0_20":{"mode":"inherit","color":null,"texture":null},"87_1_20_2760":{"mode":"inherit","color":null,"texture":null},"87_1_2760_2770":{"mode":"inherit","color":null,"texture":null},"87_1_0_30":{"mode":"inherit","color":null,"texture":null},"87_1_30_2770":{"mode":"inherit","color":null,"texture":null},"87_1_2770_2780":{"mode":"inherit","color":null,"texture":null},"87_-1_0_40":{"mode":"inherit","color":null,"texture":null},"87_-1_40_2780":{"mode":"inherit","color":null,"texture":null},"87_-1_2780_2790":{"mode":"inherit","color":null,"texture":null},"87_1_0_40":{"mode":"inherit","color":null,"texture":null},"87_1_40_2780":{"mode":"inherit","color":null,"texture":null},"87_1_2780_2790":{"mode":"inherit","color":null,"texture":null},"87_-1_0_50":{"mode":"inherit","color":null,"texture":null},"87_-1_50_2790":{"mode":"inherit","color":null,"texture":null},"87_-1_2790_2800":{"mode":"inherit","color":null,"texture":null},"87_1_0_50":{"mode":"inherit","color":null,"texture":null},"87_1_50_2790":{"mode":"inherit","color":null,"texture":null},"87_1_2790_2800":{"mode":"inherit","color":null,"texture":null},"86_-1_0_2210":{"mode":"inherit","color":null,"texture":null},"86_-1_2210_7300":{"mode":"inherit","color":null,"texture":null},"86_1_2210_7300":{"mode":"inherit","color":null,"texture":null},"88_1_0_4100":{"mode":"inherit","color":null,"texture":null},"89_1_0_5470":{"mode":"inherit","color":null,"texture":null},"93_-1_0_50":{"mode":"inherit","color":null,"texture":null},"93_-1_50_1370":{"mode":"inherit","color":null,"texture":null},"94_1_0_1830":{"mode":"inherit","color":null,"texture":null},"87_-1_0_80":{"mode":"inherit","color":null,"texture":null},"87_-1_80_157":{"mode":"inherit","color":null,"texture":null},"87_1_0_80":{"mode":"inherit","color":null,"texture":null},"87_1_80_2820":{"mode":"inherit","color":null,"texture":null},"87_1_2820_2830":{"mode":"inherit","color":null,"texture":null},"87_-1_0_90":{"mode":"inherit","color":null,"texture":null},"87_-1_90_158":{"mode":"inherit","color":null,"texture":null},"87_1_0_90":{"mode":"inherit","color":null,"texture":null},"87_1_90_2830":{"mode":"inherit","color":null,"texture":null},"87_1_2830_2840":{"mode":"inherit","color":null,"texture":null},"87_-1_0_100":{"mode":"inherit","color":null,"texture":null},"87_-1_100_158":{"mode":"inherit","color":null,"texture":null},"87_1_0_100":{"mode":"inherit","color":null,"texture":null},"87_1_100_2840":{"mode":"inherit","color":null,"texture":null},"87_1_2840_2850":{"mode":"inherit","color":null,"texture":null},"87_-1_0_70":{"mode":"inherit","color":null,"texture":null},"87_-1_70_157":{"mode":"inherit","color":null,"texture":null},"87_1_0_70":{"mode":"inherit","color":null,"texture":null},"87_1_70_2810":{"mode":"inherit","color":null,"texture":null},"87_1_2810_2820":{"mode":"inherit","color":null,"texture":null},"87_1_0_60":{"mode":"inherit","color":null,"texture":null},"87_1_60_2800":{"mode":"inherit","color":null,"texture":null},"87_1_2800_2810":{"mode":"inherit","color":null,"texture":null},"88_-1_0_10":{"mode":"inherit","color":null,"texture":null},"88_-1_10_4110":{"mode":"inherit","color":null,"texture":null},"88_1_0_10":{"mode":"inherit","color":null,"texture":null},"88_1_10_4110":{"mode":"inherit","color":null,"texture":null},"88_-1_0_20":{"mode":"inherit","color":null,"texture":null},"88_-1_20_4120":{"mode":"inherit","color":null,"texture":null},"88_1_0_20":{"mode":"inherit","color":null,"texture":null},"88_1_20_4120":{"mode":"inherit","color":null,"texture":null},"88_-1_0_30":{"mode":"inherit","color":null,"texture":null},"88_-1_30_4130":{"mode":"inherit","color":null,"texture":null},"88_1_0_30":{"mode":"inherit","color":null,"texture":null},"88_1_30_4130":{"mode":"inherit","color":null,"texture":null},"88_-1_0_40":{"mode":"inherit","color":null,"texture":null},"88_-1_40_4140":{"mode":"inherit","color":null,"texture":null},"88_1_0_40":{"mode":"inherit","color":null,"texture":null},"88_1_40_4140":{"mode":"inherit","color":null,"texture":null},"88_-1_0_50":{"mode":"inherit","color":null,"texture":null},"88_-1_50_4150":{"mode":"inherit","color":null,"texture":null},"88_-1_0_60":{"mode":"inherit","color":null,"texture":null},"88_-1_60_4160":{"mode":"inherit","color":null,"texture":null},"88_1_0_60":{"mode":"inherit","color":null,"texture":null},"88_1_60_80":{"mode":"inherit","color":null,"texture":null},"86_1_10_2210":{"mode":"inherit","color":null,"texture":null},"88_-1_50_4160":{"mode":"inherit","color":null,"texture":null},"88_-1_50_4170":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4180":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4190":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4200":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4210":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4220":{"mode":"inherit","color":null,"texture":null},"88_-1_4170_4230":{"mode":"inherit","color":null,"texture":null},"102_-1_2300_2310":{"mode":"inherit","color":null,"texture":null},"86_1_0_10":{"mode":"inherit","color":null,"texture":null},"86_1_7300_7310":{"mode":"inherit","color":null,"texture":null},"94_-1_1830_1840":{"mode":"inherit","color":null,"texture":null},"94_1_0_10":{"mode":"inherit","color":null,"texture":null},"103_-1_0_10":{"mode":"inherit","color":null,"texture":null},"107_-1_0_6":{"mode":"inherit","color":null,"texture":null},"107_1_0_6":{"mode":"inherit","color":null,"texture":null},"108_-1_0_15":{"mode":"inherit","color":null,"texture":null},"108_-1_2300_2310":{"mode":"inherit","color":null,"texture":null},"108_1_0_15":{"mode":"inherit","color":null,"texture":null},"108_1_2300_2310":{"mode":"inherit","color":null,"texture":null},"111_-1_908_920":{"mode":"inherit","color":null,"texture":null},"111_1_908_920":{"mode":"inherit","color":null,"texture":null},"112_-1_0_4":{"mode":"inherit","color":null,"texture":null},"112_1_0_4":{"mode":"inherit","color":null,"texture":null},"1778673921394_-1_0_14":{"mode":"inherit","color":null,"texture":null},"1778673921394_1_0_14":{"mode":"inherit","color":null,"texture":null},"1778673921562_-1_0_14":{"mode":"inherit","color":null,"texture":null},"1778673921562_1_0_14":{"mode":"inherit","color":null,"texture":null},"89_-1_0_5680":{"mode":"inherit","color":null,"texture":null},"94_1_0_77":{"mode":"inherit","color":null,"texture":null},"89_-1_0_5520":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1811":{"mode":"inherit","color":null,"texture":null},"94_1_0_79":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1801":{"mode":"inherit","color":null,"texture":null},"94_1_0_78":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1804":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1816":{"mode":"inherit","color":null,"texture":null},"94_1_0_1816":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1823":{"mode":"inherit","color":null,"texture":null},"94_1_0_1823":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1826":{"mode":"inherit","color":null,"texture":null},"94_1_0_1826":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1834":{"mode":"inherit","color":null,"texture":null},"94_1_0_1834":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1846":{"mode":"inherit","color":null,"texture":null},"94_1_0_1846":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1847":{"mode":"inherit","color":null,"texture":null},"94_1_0_1847":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1849":{"mode":"inherit","color":null,"texture":null},"94_1_0_1849":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1822":{"mode":"inherit","color":null,"texture":null},"94_1_0_1822":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1797":{"mode":"inherit","color":null,"texture":null},"94_1_0_1797":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1799":{"mode":"inherit","color":null,"texture":null},"94_1_0_1799":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1812":{"mode":"inherit","color":null,"texture":null},"94_1_0_1812":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1824":{"mode":"inherit","color":null,"texture":null},"94_1_0_1824":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1831":{"mode":"inherit","color":null,"texture":null},"94_1_0_1831":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1841":{"mode":"inherit","color":null,"texture":null},"94_1_0_1841":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1851":{"mode":"inherit","color":null,"texture":null},"94_1_0_1851":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1882":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1892":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1889":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1895":{"mode":"inherit","color":null,"texture":null},"94_-1_1895_1900":{"mode":"inherit","color":null,"texture":null},"94_-1_1895_1909":{"mode":"inherit","color":null,"texture":null},"87_1_50_2800":{"mode":"inherit","color":null,"texture":null},"94_-1_0_22":{"mode":"inherit","color":null,"texture":null},"94_-1_22_1911":{"mode":"inherit","color":null,"texture":null},"94_-1_0_20":{"mode":"inherit","color":null,"texture":null},"94_-1_20_1909":{"mode":"inherit","color":null,"texture":null},"94_-1_0_5":{"mode":"inherit","color":null,"texture":null},"94_-1_5_1894":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1868":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1840":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1836":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1832":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1818":{"mode":"inherit","color":null,"texture":null},"94_1_0_1818":{"mode":"inherit","color":null,"texture":null},"94_1_0_1804":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1793":{"mode":"inherit","color":null,"texture":null},"94_1_0_1793":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1780":{"mode":"inherit","color":null,"texture":null},"94_1_0_1780":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1748":{"mode":"inherit","color":null,"texture":null},"94_1_0_1748":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1707":{"mode":"inherit","color":null,"texture":null},"94_1_0_1707":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1686":{"mode":"inherit","color":null,"texture":null},"94_1_0_1686":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1676":{"mode":"inherit","color":null,"texture":null},"94_1_0_1676":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1675":{"mode":"inherit","color":null,"texture":null},"94_1_0_1675":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1696":{"mode":"inherit","color":null,"texture":null},"94_1_0_1696":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1706":{"mode":"inherit","color":null,"texture":null},"94_1_0_1706":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1725":{"mode":"inherit","color":null,"texture":null},"94_1_0_1725":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1735":{"mode":"inherit","color":null,"texture":null},"94_1_0_1735":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1745":{"mode":"inherit","color":null,"texture":null},"94_1_0_1745":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1775":{"mode":"inherit","color":null,"texture":null},"94_1_0_1775":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1786":{"mode":"inherit","color":null,"texture":null},"94_1_0_1786":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1796":{"mode":"inherit","color":null,"texture":null},"94_1_0_1796":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1806":{"mode":"inherit","color":null,"texture":null},"94_1_0_1806":{"mode":"inherit","color":null,"texture":null},"86_-1_10_2210":{"mode":"inherit","color":null,"texture":null},"87_-1_50_2800":{"mode":"inherit","color":null,"texture":null},"88_1_0_50":{"mode":"inherit","color":null,"texture":null},"88_1_50_4230":{"mode":"inherit","color":null,"texture":null},"89_1_0_5920":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1370":{"mode":"inherit","color":null,"texture":null},"93_1_0_457":{"mode":"inherit","color":null,"texture":null},"89_-1_0_5505":{"mode":"inherit","color":null,"texture":null},"93_1_0_533":{"mode":"inherit","color":null,"texture":null},"87_-1_50_2368":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1390":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1430":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1470":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1540":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1580":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1610":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1640":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1650":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1680":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1700":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1730":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1760":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1780":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1790":{"mode":"inherit","color":null,"texture":null},"93_1_0_1800":{"mode":"inherit","color":null,"texture":null},"93_1_0_1820":{"mode":"inherit","color":null,"texture":null},"93_1_0_1840":{"mode":"inherit","color":null,"texture":null},"93_1_0_1860":{"mode":"inherit","color":null,"texture":null},"93_1_0_1870":{"mode":"inherit","color":null,"texture":null},"93_1_0_1880":{"mode":"inherit","color":null,"texture":null},"93_1_0_1890":{"mode":"inherit","color":null,"texture":null},"93_-1_0_79":{"mode":"inherit","color":null,"texture":null},"93_1_0_1900":{"mode":"inherit","color":null,"texture":null},"93_1_0_1901":{"mode":"inherit","color":null,"texture":null},"93_-1_0_80":{"mode":"inherit","color":null,"texture":null},"93_1_0_1911":{"mode":"inherit","color":null,"texture":null},"93_1_0_1891":{"mode":"inherit","color":null,"texture":null},"93_1_0_1881":{"mode":"inherit","color":null,"texture":null},"94_-1_1_1826":{"mode":"inherit","color":null,"texture":null},"93_1_0_18":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1740":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1710":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1690":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1620":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1600":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1590":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1570":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1560":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1550":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1530":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1520":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1510":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1500":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1490":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1460":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1450":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1420":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1391":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1371":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1351":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1361":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1381":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1341":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1401":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1421":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1441":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1451":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1461":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1471":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1431":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1481":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1501":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1491":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1511":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1551":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1571":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1630":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1660":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1720":{"mode":"inherit","color":null,"texture":null},"93_-1_0_1750":{"mode":"inherit","color":null,"texture":null},"93_1_0_8":{"mode":"inherit","color":null,"texture":null},"93_1_0_1830":{"mode":"inherit","color":null,"texture":null},"93_1_0_1850":{"mode":"inherit","color":null,"texture":null},"87_1_50_2770":{"mode":"inherit","color":null,"texture":null},"87_1_50_2760":{"mode":"inherit","color":null,"texture":null},"87_1_50_2720":{"mode":"inherit","color":null,"texture":null},"87_1_50_2680":{"mode":"inherit","color":null,"texture":null},"87_1_50_2650":{"mode":"inherit","color":null,"texture":null},"87_1_50_2620":{"mode":"inherit","color":null,"texture":null},"87_1_50_2590":{"mode":"inherit","color":null,"texture":null},"87_1_50_2560":{"mode":"inherit","color":null,"texture":null},"87_1_50_2530":{"mode":"inherit","color":null,"texture":null},"87_1_50_2520":{"mode":"inherit","color":null,"texture":null},"87_1_50_2500":{"mode":"inherit","color":null,"texture":null},"87_1_50_2480":{"mode":"inherit","color":null,"texture":null},"87_1_50_2470":{"mode":"inherit","color":null,"texture":null},"87_1_50_2450":{"mode":"inherit","color":null,"texture":null},"87_1_50_2430":{"mode":"inherit","color":null,"texture":null},"87_1_50_2400":{"mode":"inherit","color":null,"texture":null},"87_1_50_2390":{"mode":"inherit","color":null,"texture":null},"87_1_50_2380":{"mode":"inherit","color":null,"texture":null},"87_1_50_2370":{"mode":"inherit","color":null,"texture":null},"94_-1_0_1":{"mode":"inherit","color":null,"texture":null}}};
   DATA.roofAppearance={"whole":{"linked":true,"color":"#050505","texture":null},"floors":{"1":{"linked":false,"color":"#2a2a30","texture":null},"2":{"linked":false,"color":"#2a2a30","texture":null},"3":{"linked":false,"color":"#2a2a30","texture":null},"4":{"linked":false,"color":"#2a2a30","texture":null}}};
   nextId=1778673921566;
+  clearEditHistory();
 }
 
 // ───── SPRITE PRELOADER ─────
@@ -5658,27 +6153,59 @@ function drawItem2d(it){
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('ビル',0,0);
     } else if(it.type === 'neighbor-house') {
-      ctx.fillStyle='rgba(215,193,163,0.7)';
+      ctx.fillStyle='rgba(185,188,194,0.68)';
       ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
-      ctx.strokeStyle='rgba(92,68,48,0.75)';
+      ctx.strokeStyle='rgba(96,103,110,0.78)';
       ctx.lineWidth=1.2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      var roofOver=Math.max(3,Math.min(14,Math.min(hw,hd)*0.08));
+      var roofX0=-hw-roofOver, roofY0=-hd-roofOver;
+      var roofX1=hw+roofOver, roofY1=hd+roofOver;
+      var roofW=roofX1-roofX0, roofD=roofY1-roofY0;
+      ctx.fillStyle='rgba(120,126,134,0.12)';
+      ctx.fillRect(roofX0,roofY0,roofW,roofD);
+      ctx.strokeStyle='rgba(88,94,101,0.72)';
+      ctx.lineWidth=1.1;
+      ctx.strokeRect(roofX0,roofY0,roofW,roofD);
       ctx.beginPath();
-      ctx.moveTo(-hw,-hd);
-      ctx.lineTo(0,-hd-Math.min(hd*0.42,22*sc));
-      ctx.lineTo(hw,-hd);
-      ctx.strokeStyle='rgba(115,52,40,0.85)';
-      ctx.lineWidth=1.4;
+      if(roofW>roofD+4){
+        var rh=(roofW-roofD)/2;
+        ctx.moveTo(-rh,0); ctx.lineTo(rh,0);
+        ctx.moveTo(roofX0,roofY0); ctx.lineTo(-rh,0);
+        ctx.moveTo(roofX0,roofY1); ctx.lineTo(-rh,0);
+        ctx.moveTo(roofX1,roofY0); ctx.lineTo(rh,0);
+        ctx.moveTo(roofX1,roofY1); ctx.lineTo(rh,0);
+      } else if(roofD>roofW+4){
+        var rv=(roofD-roofW)/2;
+        ctx.moveTo(0,-rv); ctx.lineTo(0,rv);
+        ctx.moveTo(roofX0,roofY0); ctx.lineTo(0,-rv);
+        ctx.moveTo(roofX1,roofY0); ctx.lineTo(0,-rv);
+        ctx.moveTo(roofX0,roofY1); ctx.lineTo(0,rv);
+        ctx.moveTo(roofX1,roofY1); ctx.lineTo(0,rv);
+      } else {
+        ctx.moveTo(roofX0,roofY0); ctx.lineTo(0,0);
+        ctx.moveTo(roofX1,roofY0); ctx.lineTo(0,0);
+        ctx.moveTo(roofX0,roofY1); ctx.lineTo(0,0);
+        ctx.moveTo(roofX1,roofY1); ctx.lineTo(0,0);
+      }
+      ctx.strokeStyle='rgba(80,86,94,0.74)';
+      ctx.lineWidth=1.2;
       ctx.stroke();
-      ctx.fillStyle='rgba(120,64,45,0.16)';
+      var garageW2=Math.min(2600*sc,it.w*sc*0.5);
+      var garageD2=Math.min(900*sc,it.d*sc*0.26);
+      var garageX2=Math.min(hw-garageW2/2-4,Math.max(-hw+garageW2/2+4,hw*0.28));
+      ctx.fillStyle='rgba(34,38,42,0.62)';
+      ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
+      ctx.strokeStyle='rgba(214,217,220,0.76)';
+      ctx.lineWidth=1;
+      ctx.strokeRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
+      ctx.strokeStyle='rgba(130,136,143,0.82)';
       ctx.beginPath();
-      ctx.moveTo(-hw,-hd);
-      ctx.lineTo(0,-hd-Math.min(hd*0.42,22*sc));
-      ctx.lineTo(hw,-hd);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(garageX2-garageW2/2+3,-hd+Math.max(3,garageD2*0.18));
+      ctx.lineTo(garageX2+garageW2/2-3,-hd+Math.max(3,garageD2*0.18));
+      ctx.stroke();
       ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
-      ctx.fillStyle='rgba(70,50,38,0.86)';
+      ctx.fillStyle='rgba(62,68,74,0.86)';
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('隣家',0,0);
     } else if(it.type === 'utility-pole') {
@@ -9707,12 +10234,48 @@ function build3DNeighborBuilding(grp,it,w3,d3,h){
   addContextBox(grp,equipMat,w3*0.18,bodyH+parapetH+0.24,-d3*0.12,0.54,0.32,0.48,true,true);
   addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x2d3944,0.22);
 }
-function createGableRoofMesh(w,d,baseY,roofH,mat){
-  var verts=[
-    -w/2,baseY,-d/2, w/2,baseY,-d/2, 0,baseY+roofH,-d/2,
-    -w/2,baseY,d/2,  w/2,baseY,d/2,  0,baseY+roofH,d/2
-  ];
-  var idx=[0,1,2,4,3,5,0,2,5,0,5,3,1,4,5,1,5,2,0,3,4,0,4,1];
+function getHipRoofRidgeSpec(w,d){
+  var ridgeLen=Math.max(0,Math.abs(w-d));
+  if(ridgeLen<Math.min(w,d)*0.08) ridgeLen=0;
+  return {axis:w>=d?'x':'z',half:ridgeLen/2};
+}
+function createHipRoofMesh(w,d,baseY,roofH,mat){
+  var topY=baseY+roofH;
+  var ridge=getHipRoofRidgeSpec(w,d);
+  var verts, idx;
+  if(ridge.half<0.025){
+    verts=[
+      -w/2,baseY,-d/2, w/2,baseY,-d/2, w/2,baseY,d/2, -w/2,baseY,d/2,
+      0,topY,0
+    ];
+    idx=[0,1,4,1,2,4,2,3,4,3,0,4,0,3,2,0,2,1];
+  } else if(ridge.axis==='x'){
+    var lx=-ridge.half, rx=ridge.half;
+    verts=[
+      -w/2,baseY,-d/2, w/2,baseY,-d/2, w/2,baseY,d/2, -w/2,baseY,d/2,
+      lx,topY,0, rx,topY,0
+    ];
+    idx=[
+      0,1,5,0,5,4,
+      3,4,5,3,5,2,
+      0,4,3,
+      1,2,5,
+      0,3,2,0,2,1
+    ];
+  } else {
+    var fz=-ridge.half, bz=ridge.half;
+    verts=[
+      -w/2,baseY,-d/2, w/2,baseY,-d/2, w/2,baseY,d/2, -w/2,baseY,d/2,
+      0,topY,fz, 0,topY,bz
+    ];
+    idx=[
+      0,1,4,
+      3,5,2,
+      0,4,5,0,5,3,
+      1,2,5,1,5,4,
+      0,3,2,0,2,1
+    ];
+  }
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
   geo.setIndex(idx);
@@ -9724,47 +10287,107 @@ function createGableRoofMesh(w,d,baseY,roofH,mat){
   roof.matrixAutoUpdate=false;
   return roof;
 }
+function getNeighborHouseGarageSpec(w3,d3,storyH){
+  var garageW=Math.min(2.65,Math.max(1.85,w3-1.25));
+  var garageH=Math.min(2.32,Math.max(1.9,storyH*0.82));
+  var garageX=Math.min(w3/2-garageW/2-0.35,Math.max(-w3/2+garageW/2+0.35,w3*0.24));
+  var garageY=garageH/2+0.08;
+  return {x:garageX,w:garageW,h:garageH,y:garageY};
+}
+function addNeighborHouseInnerGarage(grp,w3,d3,storyH,bodyH,frameMat,baseMat){
+  var garage=getNeighborHouseGarageSpec(w3,d3,storyH);
+  var garageW=garage.w, garageH=garage.h, garageX=garage.x, garageY=garage.y;
+  var recessMat=makeExteriorLightingMaterial({color:0x34383d,roughness:0.94,envMapIntensity:0.04});
+  var shutterMat=makeExteriorLightingMaterial({color:0x72777d,roughness:0.88,envMapIntensity:0.08});
+  var lineMat=makeExteriorLightingMaterial({color:0x4d5359,roughness:0.9,envMapIntensity:0.05});
+  var apronMat=makeExteriorLightingMaterial({color:0xa9adb1,roughness:0.96,envMapIntensity:0.06});
+  var innerWallMat=makeExteriorLightingMaterial({color:0x292d31,roughness:0.96,envMapIntensity:0.03});
+  var innerFloorMat=makeExteriorLightingMaterial({color:0x565b60,roughness:0.96,envMapIntensity:0.05});
+  addContextFacadeBox(grp,recessMat,'front',garageX,garageY,garageW,garageH,w3,d3,0.055,true,true);
+  var innerD=Math.min(1.65,Math.max(0.95,d3*0.34));
+  addContextBox(grp,innerFloorMat,garageX,0.045,-d3/2+innerD/2,garageW-0.34,0.09,innerD,true,true);
+  addContextBox(grp,innerWallMat,garageX,garageY,-d3/2+innerD,garageW-0.34,garageH-0.24,0.08,true,true);
+  addContextBox(grp,innerWallMat,garageX-garageW/2+0.08,garageY,-d3/2+innerD/2,0.16,garageH-0.18,innerD,true,true);
+  addContextBox(grp,innerWallMat,garageX+garageW/2-0.08,garageY,-d3/2+innerD/2,0.16,garageH-0.18,innerD,true,true);
+  addContextFacadeBox(grp,shutterMat,'front',garageX,garageH+0.03,garageW-0.32,0.24,w3,d3,0.09,true,true);
+  for(var i=1;i<4;i++){
+    addContextFacadeBox(grp,lineMat,'front',garageX,garageH-0.1+i*0.055,garageW-0.42,0.018,w3,d3,0.105,false,true);
+  }
+  addContextFacadeBox(grp,frameMat,'front',garageX,garageH+0.18,garageW+0.32,0.16,w3,d3,0.085,true,true);
+  addContextFacadeBox(grp,frameMat,'front',garageX-garageW/2-0.09,garageY,0.14,garageH+0.1,w3,d3,0.085,true,true);
+  addContextFacadeBox(grp,frameMat,'front',garageX+garageW/2+0.09,garageY,0.14,garageH+0.1,w3,d3,0.085,true,true);
+  addContextBox(grp,apronMat,garageX,0.035,-d3/2-0.58,garageW+0.55,0.07,1.05,true,true);
+  addContextBox(grp,baseMat,garageX,storyH+0.05,-d3/2-0.1,garageW+0.42,0.1,0.16,true,true);
+}
 function build3DNeighborHouse(grp,it,w3,d3,h){
   var floors=getContextFloors(it);
   var storyH=contextStoryHeightM();
   var bodyH=floors*storyH;
   var roofH=contextRoofExtraHeightMm('neighbor-house')*U;
-  var wallColor=it.colorCustom?it.color:0xd7c1a3;
+  var wallColor=it.colorCustom?it.color:0xb9bcc2;
   var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
-  var roofMat=makeExteriorLightingMaterial({color:0x7b4537,roughness:0.86,envMapIntensity:0.12,side:THREE.DoubleSide});
-  var trimMat=makeExteriorLightingMaterial({color:0xf2ede3,roughness:0.82,envMapIntensity:0.12});
-  var sidingMat=makeExteriorLightingMaterial({color:0xc9ad89,roughness:0.88,envMapIntensity:0.08});
-  var glassMat=makeExteriorLightingMaterial({color:0xb9d7ea,roughness:0.32,envMapIntensity:0.22});
-  var doorMat=makeExteriorLightingMaterial({color:0x81583c,roughness:0.78,envMapIntensity:0.1});
+  var roofMat=makeExteriorLightingMaterial({color:0x6c7178,roughness:0.86,envMapIntensity:0.12,side:THREE.DoubleSide});
+  var trimMat=makeExteriorLightingMaterial({color:0xd9dcdf,roughness:0.82,envMapIntensity:0.12});
+  var sidingMat=makeExteriorLightingMaterial({color:0xa8adb3,roughness:0.88,envMapIntensity:0.08});
+  var glassMat=makeExteriorLightingMaterial({color:0xc5c9cc,roughness:0.34,envMapIntensity:0.16});
+  var doorMat=makeExteriorLightingMaterial({color:0x747a80,roughness:0.78,envMapIntensity:0.1});
   var baseMat=makeExteriorLightingMaterial({color:0xb8b2a8,roughness:0.92,envMapIntensity:0.08});
   addContextBox(grp,wallMat,0,bodyH/2,0,w3,bodyH,d3,true,true);
   addContextBox(grp,baseMat,0,0.12,0,w3+0.1,0.24,d3+0.1,true,true);
   addHouseSidingLines(grp,sidingMat,w3,d3,bodyH);
   for(var fi=1;fi<=floors;fi++) addContextFloorBand(grp,trimMat,fi*storyH,w3,d3);
-  grp.add(createGableRoofMesh(w3*1.16,d3*1.18,bodyH,roofH,roofMat));
-  addContextBox(grp,roofMat,-w3*0.54,bodyH+0.05,0,0.08,0.12,d3*1.18,true,true);
-  addContextBox(grp,roofMat,w3*0.54,bodyH+0.05,0,0.08,0.12,d3*1.18,true,true);
+  var roofW=w3*1.16, roofD=d3*1.18;
+  grp.add(createHipRoofMesh(roofW,roofD,bodyH,roofH,roofMat));
+  addContextBox(grp,roofMat,0,bodyH+0.045,-roofD/2,roofW+0.08,0.09,0.08,true,true);
+  addContextBox(grp,roofMat,0,bodyH+0.045,roofD/2,roofW+0.08,0.09,0.08,true,true);
+  addContextBox(grp,roofMat,-roofW/2,bodyH+0.045,0,0.08,0.09,roofD+0.08,true,true);
+  addContextBox(grp,roofMat,roofW/2,bodyH+0.045,0,0.08,0.09,roofD+0.08,true,true);
+  var ridge=getHipRoofRidgeSpec(roofW,roofD);
+  if(ridge.half>0.04){
+    if(ridge.axis==='x') addContextBox(grp,roofMat,0,bodyH+roofH+0.025,0,ridge.half*2+0.16,0.05,0.08,true,true);
+    else addContextBox(grp,roofMat,0,bodyH+roofH+0.025,0,0.08,0.05,ridge.half*2+0.16,true,true);
+  }
   addContextBox(grp,baseMat,-w3*0.26,0.06,-d3/2-0.34,1.25,0.12,0.68,true,true);
   addContextFacadeBox(grp,doorMat,'front',-w3*0.26,1.05,0.88,2.1,w3,d3,0.03,true,true);
   addContextFacadeBox(grp,trimMat,'front',-w3*0.26,2.17,1.08,0.08,w3,d3,0.04,false,true);
+  addNeighborHouseInnerGarage(grp,w3,d3,storyH,bodyH,trimMat,baseMat);
   var winW=0.92, winH=1.2, sill=0.9;
+  var garageSpec=getNeighborHouseGarageSpec(w3,d3,storyH);
   for(var f=0;f<floors;f++){
     var baseY=f*storyH;
     var wy=baseY+sill+winH/2;
-    addContextWindow(grp,glassMat,trimMat,'front',w3*0.2,wy,winW,winH,w3,d3);
-    if(f>0 || w3>4.4) addContextWindow(grp,glassMat,trimMat,'front',-w3*0.02,wy,winW*0.82,winH*0.88,w3,d3);
+    if(f>0){
+      if(f===1){
+        var balconyDoorH=Math.min(2.16,storyH-0.44);
+        var balconyDoorBottom=baseY+0.14;
+        var balconyDoorW=Math.min(1.42,Math.max(1.05,garageSpec.w*0.58));
+        addContextWindow(grp,glassMat,trimMat,'front',garageSpec.x,balconyDoorBottom+balconyDoorH/2,balconyDoorW,balconyDoorH,w3,d3);
+        addContextFacadeBox(grp,trimMat,'front',garageSpec.x,balconyDoorBottom+0.08,balconyDoorW+0.18,0.09,w3,d3,0.04,false,true);
+        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.2,wy,winW*0.78,winH*0.88,w3,d3);
+      } else {
+        addContextWindow(grp,glassMat,trimMat,'front',w3*0.2,wy,winW,winH,w3,d3);
+        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.02,wy,winW*0.82,winH*0.88,w3,d3);
+      }
+    }
     addContextWindow(grp,glassMat,trimMat,'right',-d3*0.2,wy,winW*0.9,winH,w3,d3);
     if(d3>3.2) addContextWindow(grp,glassMat,trimMat,'left',d3*0.18,wy,winW*0.86,winH*0.9,w3,d3);
   }
   if(floors>=2){
-    var railMat=makeExteriorLightingMaterial({color:0x6d5540,roughness:0.86,envMapIntensity:0.08});
+    var railMat=makeExteriorLightingMaterial({color:0x757b82,roughness:0.86,envMapIntensity:0.08});
+    var garage=getNeighborHouseGarageSpec(w3,d3,storyH);
+    var balconyX=garage.x;
+    var balconyW=Math.min(w3-0.8,garage.w+0.42);
+    var balconyD=0.82;
     var balconyY=storyH+0.05;
-    addContextBox(grp,baseMat,w3*0.22,balconyY,-d3/2-0.36,1.45,0.1,0.55,true,true);
-    addContextBox(grp,railMat,w3*0.22,balconyY+0.52,-d3/2-0.63,1.55,0.08,0.06,true,true);
-    addContextBox(grp,railMat,w3*0.22-0.78,balconyY+0.3,-d3/2-0.63,0.06,0.55,0.06,true,true);
-    addContextBox(grp,railMat,w3*0.22+0.78,balconyY+0.3,-d3/2-0.63,0.06,0.55,0.06,true,true);
+    var balconyZ=-d3/2-balconyD/2+0.03;
+    var frontZ=-d3/2-balconyD+0.03;
+    var sideRailD=balconyD-0.08;
+    addContextBox(grp,baseMat,balconyX,balconyY,balconyZ,balconyW,0.1,balconyD,true,true);
+    addContextBox(grp,railMat,balconyX,balconyY+0.52,frontZ,balconyW+0.08,0.08,0.06,true,true);
+    addContextBox(grp,railMat,balconyX-balconyW/2,balconyY+0.3,balconyZ,0.06,0.55,sideRailD,true,true);
+    addContextBox(grp,railMat,balconyX+balconyW/2,balconyY+0.3,balconyZ,0.06,0.55,sideRailD,true,true);
   }
-  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x654936,0.22);
+  addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x4f5862,0.18);
 }
 function build3DRoad(grp,it,w3,d3,h){
   var roadH=Math.max(0.02,Math.min(0.2,h||defaultContextExteriorHeight('road')*U));
@@ -9823,7 +10446,7 @@ function getItemHeightValue(it){
   return getItemH(it&&it.type);
 }
 function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xd7c1a3,road:0x55585c,'utility-pole':0x8c9297,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -10641,6 +11264,55 @@ function loop3D(){
   } else {
     ren.render(sc3, cam);
   }
+}
+
+var APP_LOADING_MIN_MS = 260;
+var _appLoadingShownAt = 0;
+var _appLoadingHideTimer = null;
+function showAppLoading(label){
+  var el=document.getElementById('app-loading');
+  var text=document.getElementById('app-loading-text');
+  if(!el) return;
+  if(text) text.textContent=label||'読み込み中';
+  if(_appLoadingHideTimer){clearTimeout(_appLoadingHideTimer);_appLoadingHideTimer=null;}
+  _appLoadingShownAt=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+  el.classList.add('show');
+}
+function hideAppLoading(){
+  var el=document.getElementById('app-loading');
+  if(!el) return;
+  var now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+  var wait=Math.max(0,APP_LOADING_MIN_MS-(now-_appLoadingShownAt));
+  if(_appLoadingHideTimer) clearTimeout(_appLoadingHideTimer);
+  _appLoadingHideTimer=setTimeout(function(){
+    el.classList.remove('show');
+    _appLoadingHideTimer=null;
+  },wait);
+}
+function runWithAppLoading(label,work){
+  showAppLoading(label);
+  requestAnimationFrame(function(){
+    setTimeout(function(){
+      try{
+        var result=work&&work();
+        if(result&&typeof result.then==='function'){
+          result.then(hideAppLoading,function(err){console.error(err);hideAppLoading();});
+        }else{
+          hideAppLoading();
+        }
+      }catch(err){
+        console.error(err);
+        hideAppLoading();
+      }
+    },0);
+  });
+}
+function setViewWithLoading(v){
+  if(v==='2d'){setView(v);return;}
+  runWithAppLoading(v==='3d-int'?'内観3Dを準備中':'外観3Dを準備中',function(){setView(v);});
+}
+function refresh3DPreviewWithLoading(){
+  runWithAppLoading('3Dを更新中',refresh3DPreview);
 }
 
 function setView(v){
@@ -11578,8 +12250,20 @@ function pasteCopiedFromButton(){
 
 function undoAction(){
   if(!HISTORY.length) return;
-  DATA = JSON.parse(HISTORY.pop());
-  ST.selected=null;DRAG.active=false;document.getElementById('props').classList.remove('show');
+  pushHistorySnapshot(REDO_HISTORY,serializeDataSnapshot());
+  restoreHistorySnapshot(HISTORY.pop());
+}
+function redoAction(){
+  if(!REDO_HISTORY.length) return;
+  pushHistorySnapshot(HISTORY,serializeDataSnapshot());
+  restoreHistorySnapshot(REDO_HISTORY.pop());
+}
+function restoreHistorySnapshot(snapshot){
+  DATA = JSON.parse(snapshot);
+  ST.selected=null;ST.selectAll=false;DRAG.active=false;
+  var props=document.getElementById('props');
+  if(props) props.classList.remove('show');
+  markDirty();
   draw2d();if(ren)rebuild3D();
 }
 
@@ -11599,7 +12283,9 @@ window.addEventListener('keydown', function(e){
     if(pasteCopiedObject()) e.preventDefault();
     return;
   }
-  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undoAction(); }
+  var key=(e.key||'').toLowerCase();
+  if((e.metaKey || e.ctrlKey) && (key==='y' || (key==='z' && e.shiftKey))){ e.preventDefault(); redoAction(); return; }
+  if((e.metaKey || e.ctrlKey) && key === 'z'){ e.preventDefault(); undoAction(); return; }
   if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
   if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
     e.preventDefault();
@@ -11689,6 +12375,7 @@ async function loadPlanFromStorage(){
   ensureRoofAppearance();
   syncExteriorWallSettings();
   normalizeLegacyFurnitureItems();
+  clearEditHistory();
   return true;
 }
 async function loadPlanFromStorageButton(){
@@ -12668,7 +13355,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); draw2d(); rebuild3D(); }
+    try{ DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); clearEditHistory(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -13085,6 +13772,7 @@ function initTouchPressFeedback(){
 
 // ─── Init storage ─────────────────────────────────
 checkStorageOnInit();
+initStableColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
 applyMobileUI();
