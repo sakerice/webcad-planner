@@ -5124,6 +5124,7 @@ function draw2d(){
   if(ST.drawing&&ST.drawPts.length>0) drawPreview();
   if(ST.showDim) drawDim();
   drawLockOverlays(fw,fi);
+  drawBaseSelectionOverlay();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
   syncLockBatchUi();
   // ── Snap guide lines ──
@@ -5255,6 +5256,15 @@ function drawLockOverlays(fw,fi){
     var p=w2c((it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
     drawLockBadgePx(p.cx,p.cy);
   });
+}
+function drawBaseSelectionOverlay(){
+  if(ST.tool!=='select' || ST.floor!==1 || !ST.selected || ST.selected.type!=='foundation') return;
+  var it=ST.selected;
+  var sc=ST.zoom*0.05;
+  var pose=getItemDisplayPose(it);
+  var p=w2c(pose.x,pose.y);
+  var selHalf=getItemSelectionHalfExtentsPx(it,sc);
+  drawHandles(it,p.cx,p.cy,selHalf.hw,selHalf.hd,sc,pose.rot||0);
 }
 
 function isOpeningItemType(type){
@@ -11591,7 +11601,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
     }
     var foundations = DATA.items.filter(function(i){return i.type==='foundation';});
     for(var f=foundations.length-1;f>=0;f--){
-      if(isNearItemBorder(foundations[f],wx,wy)){
+      if(isFoundationSelectableHit(foundations[f],wx,wy)){
         ST.selected=foundations[f];
         if(!isObjectLocked(foundations[f])){
           DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
@@ -11910,6 +11920,15 @@ function isNearItemBorder(it, px, py){
   var ix=Math.abs(Math.abs(lx)-it.w/2);
   var iy=Math.abs(Math.abs(ly)-it.d/2);
   return ix<=threshold || iy<=threshold;
+}
+function isFoundationSelectableHit(it, px, py){
+  if(!it || it.type!=='foundation' || !isInsideItem(it,px,py)) return false;
+  if(isNearItemBorder(it,px,py)) return true;
+  var floor=ST.floor||1;
+  var insideRoom=DATA.rooms.some(function(r){
+    return r.floor===floor && isInsideItem(r,px,py);
+  });
+  return !insideRoom;
 }
 
 function nearWall(px,py,w){
