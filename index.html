@@ -4264,7 +4264,7 @@ function updateProps(){
     return;
   }
   html += '<div class="pr"><div class="pl">ID</div><input class="pi" type="text" value="'+objectIdLabel(it)+'" readonly></div>';
-  if(DATA.items.indexOf(it)>=0){
+  if(canSendItemToBack(it)){
     html += '<button class="pbtn sec" onclick="sendSelectedToBack()">最背面へ</button>';
   }
 
@@ -11554,13 +11554,9 @@ function handleSelectDown(cx,cy,wx,wy,e){
   var fi=DATA.items.filter(function(i){return i.floor===ST.floor && i.type!=='site-rect' && i.type!=='foundation';});
   var hits=[];
   for(var i=fi.length-1;i>=0;i--){
-    if(isInsideItem(fi[i],wx,wy)) hits.push({item:fi[i],idx:i,area:(fi[i].w||0)*(fi[i].d||0)});
+    if(isInsideItem(fi[i],wx,wy)) hits.push({item:fi[i],idx:i});
   }
   if(hits.length){
-    hits.sort(function(a,b){
-      if(a.area!==b.area) return a.area-b.area;
-      return b.idx-a.idx;
-    });
     var picked=hits[0].item;
     ST.selected=picked;
     if(!isObjectLocked(picked)){
@@ -12203,14 +12199,34 @@ function delSel(){
 function sendSelectedToBack(){
   if(!ST.selected) return;
   if(isObjectLocked(ST.selected)){ updateProps(); return; }
+  if(!canSendItemToBack(ST.selected)){ updateProps(); return; }
   var idx=DATA.items.indexOf(ST.selected);
   if(idx<0) return;
   saveState();
   var item=DATA.items.splice(idx,1)[0];
-  DATA.items.unshift(item);
+  var insertAt=findItemLayerBackIndex(item);
+  DATA.items.splice(insertAt,0,item);
   updateProps();
   draw2d();
   if(ren) rebuild3D();
+}
+function itemDrawOrderLayerKey(it){
+  if(!it) return '';
+  if(it.type==='site-rect') return 'site';
+  if(it.type==='foundation') return 'foundation';
+  return 'item:'+(it.floor||1);
+}
+function canSendItemToBack(it){
+  if(!it || DATA.items.indexOf(it)<0) return false;
+  if(it.type==='site-rect' || it.type==='foundation') return false;
+  return true;
+}
+function findItemLayerBackIndex(item){
+  var key=itemDrawOrderLayerKey(item);
+  for(var i=0;i<DATA.items.length;i++){
+    if(itemDrawOrderLayerKey(DATA.items[i])===key) return i;
+  }
+  return DATA.items.length;
 }
 
 function getSelectedCollectionKind(obj){
