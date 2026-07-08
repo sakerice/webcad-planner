@@ -24,7 +24,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
@@ -6572,7 +6571,6 @@ function disposeMat(m,seenMat) {
 }
 
 var composer = null; // single declaration
-var _bloomPass = null; // 夜景のみ有効化するBloomパス
 function lerpHexColor(a,b,t){
   function px(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   var ca=px(a), cb=px(b);
@@ -6760,12 +6758,8 @@ function init3D(){
       composer = new THREE.EffectComposer(ren);
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       
-      // Bloom: 昼景では空・白面の滲みが窓周りに被るため夜景のみ有効(applyLightingToSceneで切替)
-      if(THREE.UnrealBloomPass) {
-        _bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.22, 0.3, 0.85);
-        _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
-        composer.addPass(_bloomPass);
-      }
+      // Bloom は撤去: どのプリセットでも明部の滲みが全体をボケさせ、
+      // 住宅シミュレータとして輪郭の明瞭さを損なうため使用しない
       // SAO: タッチデバイス(iPad等)はGPU負荷と発熱を抑えるためなし(Bloom+ガンマ補正のみ)
       // デスクトップはフル解像度(ハーフ解像度はエッジ周りのボケが目立つため不採用)
       var _saoCapable=!((typeof navigator!=='undefined') && (navigator.maxTouchPoints||0)>0);
@@ -7587,8 +7581,6 @@ function applyLightingToScene(refreshSky){
       if(_skyMesh) _skyMesh.visible=true;
     }
   }
-  // Bloomは夜景専用(昼は空・白面の滲みが窓周りに被るため無効)
-  if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night');
   syncLightPanelUi();
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -9737,8 +9729,22 @@ function roofLocalToWorldMm(it,xl,zl){
   var dz=-Math.sin(a)*xl+Math.cos(a)*zl;
   return {x:it.x+it.w/2+dx/U, y:it.y+it.d/2+dz/U};
 }
-// 竪樋の降下経路上にある障害物(他の屋根・バルコニー)の最上面ワールドY(m)。なければ null
-function downspoutObstacleTopY(it,xl,zl,topWorldY){
+// 屋根ローカル座標(m)での屋根面の高さ(基準面からの上がり)。勾配面に竪樋が刺さらないための近似
+function roofSurfaceHeightAt(o,lx,lz){
+  var type=o.roofType||'gable';
+  var W=o.w*U, D=o.d*U;
+  var pitch=Math.max(5,Math.min(60,o.pitch||30))*Math.PI/180;
+  var tanP=Math.tan(pitch);
+  if(type==='flat') return 0;
+  if(type==='mono') return tanP*Math.max(0,Math.min(D,lz+D/2));
+  if(type==='gable-y') return Math.min(tanP*W/2, tanP*Math.max(0,W/2-Math.abs(lx)));
+  if(type==='gable') return Math.min(tanP*D/2, tanP*Math.max(0,D/2-Math.abs(lz)));
+  // hip / hip-ridge / hip-ridge-long: 各軒から勾配で上がり、棟高でキャップ
+  var ridgeRise=tanP*Math.min(W,D)/2;
+  return Math.min(ridgeRise, tanP*Math.max(0,Math.min(W/2-Math.abs(lx), D/2-Math.abs(lz))));
+}
+// 竪樋の降下経路上にある障害物。{top:最上面ワールドY(m), kind:'roof'|'balcony'} / なければ null
+function downspoutObstacleInfo(it,xl,zl,topWorldY){
   var wp=roofLocalToWorldMm(it,xl,zl);
   var best=null;
   (DATA.items||[]).forEach(function(o){
@@ -9746,14 +9752,17 @@ function downspoutObstacleTopY(it,xl,zl,topWorldY){
     if(o.type!=='roof' && o.type!=='balcony') return;
     var lp=roofLocalPoint(o,wp.x,wp.y);
     if(Math.abs(lp.x)>o.w*U/2+0.03 || Math.abs(lp.z)>o.d*U/2+0.03) return;
-    var oTop;
+    var oTop, oStop;
     if(o.type==='roof'){
-      oTop=floorBaseY(o.floor)+((o.elev||0)*U);
+      // 勾配屋根はその地点の屋根面高さで判定(基準面だと斜面に刺さる)
+      oTop=floorBaseY(o.floor)+((o.elev||0)*U)+roofSurfaceHeightAt(o,lp.x,lp.z);
+      oStop=oTop; // 屋根面で受ける
     } else {
-      oTop=floorTopY(o.floor)+((o.elev||0)*U)+getItemHeightValue(o)*U;
+      oTop=floorTopY(o.floor)+((o.elev||0)*U)+getItemHeightValue(o)*U; // 柵天端(経路判定用)
+      oStop=floorTopY(o.floor)+((o.elev||0)*U)+0.15; // 竪樋はデッキ面まで降ろす
     }
     if(oTop>=topWorldY-0.05) return; // 樋より上の構造物は経路外
-    if(best===null||oTop>best) best=oTop;
+    if(best===null||oTop>best.top) best={top:oTop,stop:oStop,kind:o.type};
   });
   return best;
 }
@@ -9857,26 +9866,29 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
       var slide=(cand.t<len/2)?0.10:-0.10;
       cand.px=cand.x-nx*0.11+ux*slide;
       cand.pz=cand.z-nz*0.11+uz*slide;
-      // 降下経路上の障害物(下屋・バルコニー)チェック — クリアな候補を優先
-      var obs=downspoutObstacleTopY(it,cand.px,cand.pz,topWorldY);
-      if(obs===null){ chosen=cand; chosenObs=null; break; }
-      if(!chosen){ chosen=cand; chosenObs=obs; }
+      // 降下経路上の障害物チェック — 地面までクリアな候補を優先
+      var obsInfo=downspoutObstacleInfo(it,cand.px,cand.pz,topWorldY);
+      if(obsInfo===null){ chosen=cand; chosenObs=null; break; }
+      if(!chosen){ chosen=cand; chosenObs=obsInfo.stop; }
     }
     if(chosen){
+      // エルボは竪樋位置をエッジへ射影した点から純法線方向で降ろす(コーナー壁体を横切らない)
+      var tp=((chosen.px-e.x1)*ux+(chosen.pz-e.z1)*uz);
+      tp=Math.max(0.05,Math.min(len-0.05,tp));
       downspouts.push({
         kind:'elbow',
-        ax:e.x1+ex*(chosen.t/len), az:e.z1+ez*(chosen.t/len), ay:e.y+gutterY-rG*0.5,
+        ax:e.x1+ex*(tp/len), az:e.z1+ez*(tp/len), ay:e.y+gutterY-rG*0.5,
         x:chosen.px, z:chosen.pz,
-        // 障害物があればその上面で止める(下屋に落とす納まり)。なければ地面まで
+        // 障害物(下屋)があればその上面で止める(下屋に落とす納まり)。なければ地面まで
         bottomY:(chosenObs===null)?groundLocalY:(chosenObs+groundLocalY+0.02)
       });
     } else {
       // 壁が見つからない場合はエッジ端で直下(コンテキスト建物等のフォールバック)
       var t0=0.08/len;
       var fx=e.x1+ex*t0, fz=e.z1+ez*t0;
-      var fobs=downspoutObstacleTopY(it,fx,fz,topWorldY);
+      var fobs=downspoutObstacleInfo(it,fx,fz,topWorldY);
       downspouts.push({kind:'straight', x:fx, z:fz, ax:null, az:null, ay:e.y+gutterY-rG*0.5,
-        bottomY:(fobs===null)?groundLocalY:(fobs+groundLocalY+0.02)});
+        bottomY:(fobs===null)?groundLocalY:(fobs.stop+groundLocalY+0.02)});
     }
   });
   // 重複排除: 同一屋根内の近接候補に加え、屋根をまたいだ同一コーナーの重複も
