@@ -7611,6 +7611,15 @@ function applyLightingToScene(refreshSky){
       _gndMesh.material.envMapIntensity=Math.min(0.035,LIGHT_SETTINGS.env);
       _gndMesh.material.needsUpdate=true;
     }
+    // 環境マップ(HDR)の寄与を時間帯・太陽高度に連動させる。
+    // r169ではHDRが本来の高輝度で読まれるため、固定強度だと夜でも壁が昼のように照らされ
+    // 「時間帯を変えても壁の見え方が変わらない」状態になる
+    var envFactor=1;
+    if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
+      var envSp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
+      envFactor=sunSimDimFactor(envSp.altitude);
+    }
+    sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*2.4*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
       sc3.fog=null;
