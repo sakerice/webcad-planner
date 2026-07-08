@@ -4309,6 +4309,7 @@ function updateSelectedLightKind(kind){
 }
 function applyOpeningModelToItem(it,modelId){
   if(!it || !isOpeningItemType(it.type)) return;
+  delete it.windowStd; // 開口モデル適用で規格プリセット表示が実寸と乖離しないようクリア
   if(!modelId){
     delete it.openingModel;
   } else {
