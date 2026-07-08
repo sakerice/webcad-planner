@@ -6759,20 +6759,17 @@ function init3D(){
       composer = new THREE.EffectComposer(ren);
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       
-      // Bloom
+      // Bloom (昼景の白面・ガラスが滲まないよう高閾値・弱強度に留める)
       if(THREE.UnrealBloomPass) {
-        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.25, 0.4, 0.90);
+        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.12, 0.25, 0.97);
         composer.addPass(bloom);
       }
-      // SAO (ハーフ解像度で実行し負荷を半減。深度ぼかしで見た目は維持)
-      // タッチデバイス(iPad等)はGPU負荷と発熱を抑えるためSAOなし(Bloom+ガンマ補正のみ)
+      // SAO: タッチデバイス(iPad等)はGPU負荷と発熱を抑えるためなし(Bloom+ガンマ補正のみ)
+      // デスクトップはフル解像度(ハーフ解像度はエッジ周りのボケが目立つため不採用)
       var _saoCapable=!((typeof navigator!=='undefined') && (navigator.maxTouchPoints||0)>0);
       if(THREE.SAOPass && _saoCapable) {
         var sao = new THREE.SAOPass(sc3, camExt, false, true);
         sao.params.saoBias = 0.5; sao.params.saoIntensity = 0.008; sao.params.saoScale = 15;
-        var _saoSetSize = sao.setSize.bind(sao);
-        sao.setSize = function(w,h){ _saoSetSize(Math.max(1,Math.round(w/2)), Math.max(1,Math.round(h/2))); };
-        sao.setSize(wrap.clientWidth, wrap.clientHeight);
         composer.addPass(sao);
       }
       // r128のEffectComposerはリニア出力のままなので最終パスでsRGB変換する
@@ -8060,6 +8057,11 @@ function setExteriorDetail(key,on){
   DATA.exteriorDetail[key]=!!on;
   if(ren) rebuild3D();
 }
+function setExteriorDetailValue(key,val){
+  if(!DATA.exteriorDetail) DATA.exteriorDetail={};
+  DATA.exteriorDetail[key]=val;
+  if(ren) rebuild3D();
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -8145,6 +8147,7 @@ function renderExteriorWallPanel(mode){
   html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
   html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(exteriorDetailEnabled('gutters')?'checked':'')+' onchange="setExteriorDetail(\'gutters\',this.checked)"> 雨樋・排水を表示</label>';
   html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">屋根の軒先に雨樋・竪樋・雨水枡を自動生成します。</div>';
+  html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><span style="font-size:10px;color:#7a8fb0">雨樋カラー</span><input type="color" value="'+((DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73')+'" style="width:42px;height:22px;border:none" onchange="setExteriorDetailValue(\'gutterColor\',this.value)"></div>';
   html += '</div>';
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
   body.innerHTML=html;
@@ -9717,45 +9720,133 @@ function roofEaveEdges(it,W,D){
   }
   return edges;
 }
+// ワールドmm座標 → 屋根グループローカルm座標(回転・フリップ・平行移動の逆変換)
+function roofLocalPoint(it,pxMm,pyMm){
+  var cx=it.x+it.w/2, cy=it.y+it.d/2;
+  var a=-(it.rot||0)*Math.PI/180; // grp.rotation.y と同じ角
+  var dx=(pxMm-cx)*U, dz=(pyMm-cy)*U;
+  var xl=Math.cos(a)*dx - Math.sin(a)*dz;
+  var zl=Math.sin(a)*dx + Math.cos(a)*dz;
+  if(it.flipX) xl=-xl;
+  if(it.flipY) zl=-zl;
+  return {x:xl,z:zl};
+}
+// 指定フロアの壁端点(コーナー候補)をワールドmmで列挙し、屋根ローカルmへ変換
+function wallCornersInRoofLocal(it,floor){
+  var seen={}, out=[];
+  (DATA.walls||[]).forEach(function(w){
+    if((w.floor||1)!==floor) return;
+    [[w.x1,w.y1],[w.x2,w.y2]].forEach(function(p){
+      var key=Math.round(p[0]/10)+','+Math.round(p[1]/10);
+      if(seen[key]) return;
+      seen[key]=1;
+      out.push(roofLocalPoint(it,p[0],p[1]));
+    });
+  });
+  return out;
+}
+// 2点間を結ぶパイプ(エルボ・竪樋兼用)
+function addPipeBetween(grp,a,b,r,mat){
+  var vx=b.x-a.x, vy=b.y-a.y, vz=b.z-a.z;
+  var len=Math.sqrt(vx*vx+vy*vy+vz*vz);
+  if(len<0.02) return;
+  var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,8),mat);
+  m.position.set((a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(vx/len,vy/len,vz/len));
+  m.castShadow=false; m.receiveShadow=false;
+  grp.add(m);
+}
 function build3DRoofGutters(grp,it,W,D,groundLocalY){
   // マテリアルは build3D 毎に dispose されるため都度生成(共有キャッシュ禁止)
-  var gutterMat=new THREE.MeshStandardMaterial({color:0x6b6e73,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
+  var gutterColor=(DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73';
+  var gutterMat=new THREE.MeshStandardMaterial({color:gutterColor,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
   var pitMat=new THREE.MeshStandardMaterial({color:0x7c7f83,roughness:0.8,metalness:0.1});
   var rG=0.055; // 軒樋半径(半丸105相当)
   var rP=0.03;  // 竪樋φ60
+  var thick=Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U));
+  // 軒樋は鼻隠し(屋根端面)の下部に吊る。屋根面より上に出ないよう厚みに応じて下げる
+  var gutterY=-Math.max(0.10,Math.min(thick,0.30)*0.66);
   var edges=roofEaveEdges(it,W,D);
-  var downspoutAt=[];
+  var roofFloor=Math.max(1,it.floor||1);
+  // 玄関ドア付近には竪樋を立てない(動線・見た目への配慮)
+  var entranceLocals=(DATA.items||[]).filter(function(d){return d.type==='door-front';}).map(function(d){
+    return roofLocalPoint(it,d.x+d.w/2,d.y+d.d/2);
+  });
+  function nearEntrance(x,z){
+    for(var i=0;i<entranceLocals.length;i++){
+      if(Math.hypot(entranceLocals[i].x-x,entranceLocals[i].z-z)<1.2) return true;
+    }
+    return false;
+  }
+  var downspouts=[];
   edges.forEach(function(e){
     var ex=e.x2-e.x1, ez=e.z2-e.z1;
     var len=Math.hypot(ex,ez);
     if(len<0.3) return;
-    // 半丸軒樋(下半分シェル、開口が上向き)
+    // 内向き法線(建物中心方向)
+    var nx=-ez/len, nz=ex/len;
+    var midx=(e.x1+e.x2)/2, midz=(e.z1+e.z2)/2;
+    if(nx*(-midx)+nz*(-midz)<0){ nx=-nx; nz=-nz; }
+    // 半丸軒樋: 鼻隠し面の外側に少し出して吊る(屋根面と重ならない)
+    var gx=midx-nx*rG*0.8, gz=midz-nz*rG*0.8;
     var geo=new THREE.CylinderGeometry(rG,rG,len,8,1,true,Math.PI,Math.PI);
     var m=new THREE.Mesh(geo,gutterMat);
-    m.position.set((e.x1+e.x2)/2, e.y-0.03, (e.z1+e.z2)/2);
+    m.position.set(gx, e.y+gutterY, gz);
     m.rotation.z=Math.PI/2;
     m.rotation.y=-Math.atan2(ez,ex);
     m.castShadow=false; m.receiveShadow=false;
     grp.add(m);
-    // 内向き法線(建物中心方向): 竪樋を壁際に寄せるためのオフセット
-    var nx=-ez/len, nz=ex/len;
-    var midx=(e.x1+e.x2)/2, midz=(e.z1+e.z2)/2;
-    if(nx*(-midx)+nz*(-midz)<0){ nx=-nx; nz=-nz; }
-    // エッジ始端から150mmの位置に竪樋(軒の出分150mm内側へ)
-    var t=0.15/len;
-    downspoutAt.push({
-      x:e.x1+ex*t+nx*0.15,
-      z:e.z1+ez*t+nz*0.15,
-      y:e.y-0.03
-    });
+    // 竪樋の取付先: 直下階の壁コーナーへスナップ(軒の出の内側・エッジ近傍)
+    var best=null;
+    for(var fl=roofFloor-1; fl>=1 && !best; fl--){
+      var corners=wallCornersInRoofLocal(it,fl);
+      corners.forEach(function(c){
+        var t=((c.x-e.x1)*ex+(c.z-e.z1)*ez)/len; // エッジ方向の射影(m)
+        var dIn=(c.x-e.x1)*nx+(c.z-e.z1)*nz;     // 内向き距離(m)
+        if(t<-0.1||t>len+0.1) return;
+        if(dIn<0.02||dIn>1.2) return;             // 軒の出の範囲内(壁は屋根縁より内側)
+        if(nearEntrance(c.x,c.z)) return;         // 玄関前を避ける
+        var endDist=Math.min(Math.abs(t),Math.abs(len-t)); // 建物コーナー(エッジ端)優先
+        if(!best||endDist<best.endDist) best={x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),dIn:dIn,endDist:endDist};
+      });
+    }
+    if(best){
+      // 竪樋は壁面の外側すれすれ(壁端点=壁芯なので 半壁厚60+管半径30+隙間20mm 外へ)
+      // さらにコーナーの直交壁と干渉しないようエッジ方向へ100mmスライド
+      var ux=ex/len, uz=ez/len;
+      var slide=(best.t<len/2)?0.10:-0.10;
+      var px=best.x-nx*0.11+ux*slide, pz=best.z-nz*0.11+uz*slide;
+      downspouts.push({
+        kind:'elbow',
+        // 軒樋上の接続点(コーナーをエッジへ射影した位置)
+        ax:e.x1+ex*(best.t/len), az:e.z1+ez*(best.t/len), ay:e.y+gutterY-rG*0.5,
+        x:px, z:pz
+      });
+    } else {
+      // 壁が見つからない場合はエッジ端で直下(コンテキスト建物等のフォールバック)
+      var t0=0.08/len;
+      downspouts.push({kind:'straight', x:e.x1+ex*t0, z:e.z1+ez*t0, ax:null, az:null, ay:e.y+gutterY-rG*0.5});
+    }
   });
-  downspoutAt.forEach(function(p){
-    var h=p.y-groundLocalY;
+  // 近接する竪樋の重複排除(複数エッジが同じ壁コーナーへスナップした場合)
+  var placed=[];
+  downspouts.forEach(function(p){
+    for(var i=0;i<placed.length;i++){
+      if(Math.hypot(placed[i].x-p.x,placed[i].z-p.z)<0.15) return;
+    }
+    placed.push(p);
+    var topY=p.ay;
+    if(p.kind==='elbow'){
+      // エルボ(呼び樋): 軒樋端から45度で壁面上端へ
+      var horiz=Math.hypot(p.x-p.ax,p.z-p.az);
+      var wallTopY=topY-Math.max(0.08,horiz); // 45度勾配
+      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.x,y:wallTopY,z:p.z},rP,gutterMat);
+      topY=wallTopY;
+    }
+    var h=topY-groundLocalY;
     if(h<0.5) return;
-    var pipe=new THREE.Mesh(new THREE.CylinderGeometry(rP,rP,h,8),gutterMat);
-    pipe.position.set(p.x, p.y-h/2, p.z);
-    pipe.castShadow=false; pipe.receiveShadow=false;
-    grp.add(pipe);
+    // 壁沿いの垂直竪樋
+    addPipeBetween(grp,{x:p.x,y:topY,z:p.z},{x:p.x,y:groundLocalY,z:p.z},rP,gutterMat);
     // 雨水枡(150角)
     var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),pitMat);
     pit.position.set(p.x, groundLocalY+0.02, p.z);
