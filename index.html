@@ -6496,7 +6496,7 @@ function makeSkyTexture(){
 function init3D(){
   if(ren) return;
   var wrap=document.getElementById('c3d-wrap');
-  ren=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+  ren=new THREE.WebGLRenderer({antialias:true});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
   ren.outputEncoding = THREE.sRGBEncoding;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
