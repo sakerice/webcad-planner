@@ -6614,8 +6614,9 @@ function makeSkyTexture(){
 
   var sunX=c.width*(sky.sunX==null?0.78:sky.sunX), sunY=c.height*(sky.sunY==null?0.2:sky.sunY);
   if(simSun){
-    // 方位角→パノラマX(0=北=画像左端0.5?いいえ: 単純比例で連続的に回る)、高度→Y
-    sunX=c.width*(((simSun.azimuth/(Math.PI*2))%1+1)%1);
+    // SphereGeometry のUV: u=0.25が+Z(南)、u=0.5が+X(東)。azWorld→u は 0.75-az/2π
+    var su=((0.75-simSun.azimuth/(Math.PI*2))%1+1)%1;
+    sunX=c.width*su;
     sunY=c.height*Math.max(0.06,0.5-Math.sin(simSun.altitude)*0.44);
   }
   var sg=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,170);
@@ -7595,8 +7596,11 @@ function updateSunSim(key,val){
   else if(key==='hour') LIGHT_SETTINGS.hour=Math.max(5,Math.min(19,Number(val)||13));
   else if(key==='season') LIGHT_SETTINGS.season=(val==='summer'||val==='winter')?val:'equinox';
   else if(key==='northDeg') LIGHT_SETTINGS.northDeg=((Number(val)||0)%360+360)%360;
-  // 太陽シミュレーション中に夜プリセットだったら昼に戻す
-  if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay==='night') LIGHT_SETTINGS.timeOfDay='day';
+  // 太陽シミュレーション中に夜プリセットだったら昼プリセットへ完全復帰(光量値も同期)
+  if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay==='night'){
+    applyLightPreset('day'); // 内部で applyLightingToScene + rebuild3D(影フィット含む)
+    return;
+  }
   applyLightingToScene(true);
   if(sc3){
     var sun=null;
