@@ -3460,6 +3460,7 @@ function scheduleTextureSceneRefresh(){
   setTimeout(function(){
     _textureRefreshPending = false;
     if(ren) rebuild3D();
+    if(typeof invalidate3D==='function') invalidate3D();
   }, 50);
 }
 function pbrTex(name) {
@@ -10251,11 +10252,13 @@ function ensureGltfModel(url){
     _modelLoading[url]=false;
     delete _modelFailed[url];
     rebuild3D();
+    if(typeof invalidate3D==='function') invalidate3D();
   },undefined,function(err){
     _modelLoading[url]=false;
     _modelFailed[url]=true;
     console.warn('GLB load failed; using fallback geometry:',url,err);
     rebuild3D();
+    if(typeof invalidate3D==='function') invalidate3D();
   });
   return false;
 }
