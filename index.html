@@ -12304,8 +12304,8 @@ function ensureAiRenderable3D(){
 }
 function captureCurrent3DDataUrl(){
   if(!ensureAiRenderable3D()) return '';
-  var cam=getActive3DCamera();
-  ren.render(sc3,cam);
+  // ビューポートと同じ見た目(SAO/Bloom/ガンマ込み)でキャプチャする
+  render3DNow();
   return ren.domElement.toDataURL('image/png');
 }
 function aiSegHex(n){
