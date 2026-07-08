@@ -6563,6 +6563,7 @@ function init3D(){
   camInt=new THREE.PerspectiveCamera(75,wrap.clientWidth/wrap.clientHeight,0.01,100);
   camInt.position.set(4,1.6,4);
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
+  orbit.addEventListener('change',function(){invalidate3D();});
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
   orbit.target.set(4,1,2);
   orbit.rotateSpeed=0.4;
@@ -6622,6 +6623,7 @@ function init3D(){
     _intML.yaw-=dx*0.003;
     _intML.pitch=Math.max(-1.35,Math.min(1.35,_intML.pitch-dy*0.003));
     camInt.rotation.set(_intML.pitch,_intML.yaw,0,'YXZ');
+    invalidate3D();
   });
   ren.domElement.addEventListener('mouseup',function(){_intML.down=false;});
   ren.domElement.addEventListener('contextmenu',function(e){e.preventDefault();});
@@ -6629,7 +6631,7 @@ function init3D(){
   document.addEventListener('keydown',function(e){
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     var k=e.key.toLowerCase();
-    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0) iMov[k]=true;
+    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0){ iMov[k]=true; invalidate3D(); }
     if(e.key==='Escape'&&isInt) setView('2d');
   });
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
@@ -6682,6 +6684,7 @@ function build3D(){
   sc3.traverse(function(o){if(o.isDirectionalLight)_sunLight=o;});
   if(_sunLight && !isInt) fitShadowCamera(_sunLight);
   syncExteriorWallPanel();
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 
 
@@ -7323,6 +7326,7 @@ function refreshSkyTexture(){
   _skyMesh.material.map=makeSkyTexture();
   _skyMesh.material.needsUpdate=true;
   if(oldMap&&oldMap.dispose) oldMap.dispose();
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 function applyLightingToScene(refreshSky){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
@@ -7365,6 +7369,7 @@ function applyLightingToScene(refreshSky){
     }
   }
   syncLightPanelUi();
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 function applyLightPreset(key){
   if(!LIGHT_PRESETS[key]) key='day';
@@ -10860,6 +10865,7 @@ function stopWalkthrough(){
     }
   }
   updateProps();
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 function updateWalkthroughCamera(now){
   if(!WALKTHROUGH || !camExt) return false;
@@ -10896,6 +10902,25 @@ function updateWalkthroughCamera(now){
   return true;
 }
 var _last3DFrameAt=0;
+var _needs3DRender=true;
+var _lastSafety3DRenderAt=0;
+function invalidate3D(){_needs3DRender=true;}
+function anyWasdActive(){
+  for(var k in iMov){ if(iMov[k]) return true; }
+  return false;
+}
+function render3DNow(){
+  if(!ren||!sc3||!camExt) return;
+  if(composer){
+    composer.passes[0].camera=camExt;
+    for(var i=1;i<composer.passes.length;i++){
+      if(composer.passes[i].camera) composer.passes[i].camera=camExt;
+    }
+    composer.render();
+  } else {
+    ren.render(sc3,camExt);
+  }
+}
 function get3DFrameInterval(){
   var touchDevice=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
   return (touchDevice || isMobileLayout()) ? 33 : 0;
@@ -10908,23 +10933,19 @@ function loop3D(){
   var now=performance.now();
   var frameInterval=get3DFrameInterval();
   if(frameInterval && now-_last3DFrameAt<frameInterval) return;
-  _last3DFrameAt=now;
 
   var walking=ST.view==='3d-ext' && updateWalkthroughCamera(now);
+  var orbitMoved=false;
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
-    orbit.update();
+    orbitMoved=orbit.update()===true;
   }
+  var animating=walking||orbitMoved||GIZMO_DRAG.active||anyWasdActive();
+  if(!animating && !_needs3DRender && now-_lastSafety3DRenderAt<1500) return;
+  _last3DFrameAt=now;
+  _needs3DRender=false;
+  _lastSafety3DRenderAt=now;
   updateInteriorCutawayWalls();
-
-  if(composer) {
-    composer.passes[0].camera = cam;
-    for(var i=1; i<composer.passes.length; i++) {
-        if(composer.passes[i].camera) composer.passes[i].camera = cam;
-    }
-    composer.render();
-  } else {
-    ren.render(sc3, cam);
-  }
+  render3DNow();
 }
 
 var APP_LOADING_MIN_MS = 260;
@@ -11039,6 +11060,7 @@ function refresh3DPreview(){
     if(ST.view==='3d-ext') setTimeout(fitCameraToScene, 50);
   }
   syncExteriorWallPanel();
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 
 function syncToolUi(){
@@ -12002,7 +12024,9 @@ window.addEventListener('keyup', function(e){
 window.addEventListener('resize',function(){
   resize2d();
   if(ren){var wrap=document.getElementById('c3d-wrap');ren.setSize(wrap.clientWidth,wrap.clientHeight);
-    [camExt,camInt].forEach(function(c){c.aspect=wrap.clientWidth/wrap.clientHeight;c.updateProjectionMatrix();});}
+    if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+    [camExt,camInt].forEach(function(c){c.aspect=wrap.clientWidth/wrap.clientHeight;c.updateProjectionMatrix();});
+    invalidate3D();}
 });
 
 function clearFloor(){
