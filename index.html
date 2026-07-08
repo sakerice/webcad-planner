@@ -4739,7 +4739,8 @@ function mkItem(type,x,y,rot,floor,w,d){
 
 // ───── PRESET DATA ─────
 var _defaultPlanPending=true; // 保存プラン復元やインポートが先に走ったらデフォルト適用を中止
-function loadPreset(){
+function loadPreset(attempt){
+  attempt=attempt||0;
   fetch('assets/default_plan.json').then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
@@ -4759,7 +4760,15 @@ function loadPreset(){
     normalizeLegacyFurnitureItems();
     draw2d();
     if(ren) rebuild3D();
-  }).catch(function(e){ console.warn('[WebCAD] default plan load failed:', e); });
+  }).catch(function(e){
+    console.warn('[WebCAD] default plan load failed:', e);
+    if(!_defaultPlanPending) return;
+    // 低速回線等での取得失敗時は数回リトライし、それでも空なら画面に通知する
+    if(attempt<3){ setTimeout(function(){ if(_defaultPlanPending) loadPreset(attempt+1); }, 2000*(attempt+1)); return; }
+    if(!DATA.walls.length && !DATA.items.length){
+      alert('デフォルトプランの読み込みに失敗しました。\n通信環境を確認してページを再読み込みしてください。');
+    }
+  });
 }
 
 // ───── SPRITE PRELOADER ─────
@@ -12923,6 +12932,11 @@ function exportPlan(){
   a.download='plan.json';a.click();
 }
 async function savePlanToStorage(){
+  // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
+  if(!DATA.walls.length && !DATA.items.length && !DATA.rooms.length){
+    alert('プランが空のため保存しませんでした。');
+    return;
+  }
   normalizeLegacyFurnitureItems();
   ensureObjectIds();
   ensureExteriorWallSettings();
@@ -12939,14 +12953,27 @@ async function savePlanToStorage(){
 async function loadPlanFromStorage(){
   var d=await StorageAdapter.load();
   if(!d) return false;
+  // 空プラン(壁・アイテム・部屋が全て無い)の復元は無視してデフォルトプランを優先する。
+  // 空の状態で保存されたデータを復元すると「グリッドだけの空画面」に固定されてしまうため
+  var isEmpty=(!d.walls||!d.walls.length)&&(!d.items||!d.items.length)&&(!d.rooms||!d.rooms.length);
+  if(isEmpty) return false;
   _defaultPlanPending=false;
   DATA=d;
-  ensureObjectIds();
-  ensureExteriorWallSettings();
-  ensureInteriorWallSettings();
-  ensureRoofAppearance();
-  syncExteriorWallSettings();
-  normalizeLegacyFurnitureItems();
+  try{
+    ensureObjectIds();
+    ensureExteriorWallSettings();
+    ensureInteriorWallSettings();
+    ensureRoofAppearance();
+    syncExteriorWallSettings();
+    normalizeLegacyFurnitureItems();
+  }catch(e){
+    // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
+    console.error('[WebCAD] saved plan restore failed:', e);
+    DATA={walls:[], items:[], rooms:[], exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
+    _defaultPlanPending=true;
+    loadPreset();
+    return false;
+  }
   clearEditHistory();
   return true;
 }
@@ -12962,6 +12989,8 @@ async function loadPlanFromStorageButton(){
     document.getElementById('props').classList.remove('show');
     draw2d();
     if(ren) rebuild3D();
+  }else{
+    alert('保存されたプランが空のため読み込みませんでした。');
   }
 }
 async function checkStorageOnInit(){
