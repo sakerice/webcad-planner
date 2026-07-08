@@ -3,8 +3,8 @@
 import re, subprocess, sys, tempfile, os
 
 html = open(os.path.join(os.path.dirname(__file__), '..', 'index.html'), encoding='utf-8').read()
-# src= 付き(CDN)を除くインラインscriptを抽出
-blocks = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', html, re.S)
+# src= 付き(CDN)と type= 付き(importmap/module)を除くインラインscriptを抽出
+blocks = re.findall(r'<script(?![^>]*\b(?:src|type)=)[^>]*>(.*?)</script>', html, re.S)
 if not blocks:
     print('No inline scripts found'); sys.exit(1)
 src = '\n;\n'.join(blocks)

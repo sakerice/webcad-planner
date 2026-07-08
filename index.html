@@ -11,10 +11,22 @@
 <link rel="apple-touch-icon" href="assets/brand/house-planner-mobile-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+// three.js r169 (ESモジュール) をグローバルTHREEとして公開する互換シム。
+// 本体スクリプトはクラシックスクリプトのため、addons もTHREE名前空間へ合流させる
+import * as THREE_NS from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RGBELoader} from 'three/addons/loaders/RGBELoader.js';
+window.THREE = Object.assign({}, THREE_NS, {OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader});
+window.dispatchEvent(new Event('three-ready'));
+</script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
 <style>
@@ -3582,7 +3594,7 @@ function pbrTex(name) {
     scheduleTextureSceneRefresh();
   });
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.encoding = THREE.sRGBEncoding;
+  t.colorSpace = THREE.SRGBColorSpace;
   _pbrTex[name] = t;
   return t;
 }
@@ -6522,7 +6534,7 @@ function getTexture3D(key) {
   if (src) {
     var tex = new THREE.TextureLoader().load(src, function(){
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.encoding = THREE.sRGBEncoding;
+      tex.colorSpace = THREE.SRGBColorSpace;
       if(ren) tex.anisotropy = ren.capabilities.getMaxAnisotropy();
       scheduleTextureSceneRefresh();
     });
@@ -6534,7 +6546,7 @@ function getTexture3D(key) {
   if (!PATTERNS[key]) return null;
   var tex = new THREE.CanvasTexture(PATTERNS[key]);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.encoding = THREE.sRGBEncoding;
+  tex.colorSpace = THREE.SRGBColorSpace;
   if(ren) tex.anisotropy = ren.capabilities.getMaxAnisotropy();
   _texCache[key] = tex;
   return tex;
@@ -6657,7 +6669,7 @@ function makeSkyTexture(){
   ctx.fillRect(0,c.height*0.66,c.width,c.height*0.34);
 
   var tex=new THREE.CanvasTexture(c);
-  tex.encoding=THREE.sRGBEncoding;
+  tex.colorSpace=THREE.SRGBColorSpace;
   tex.wrapS=THREE.ClampToEdgeWrapping;
   tex.wrapT=THREE.ClampToEdgeWrapping;
   tex.needsUpdate=true;
@@ -6665,10 +6677,15 @@ function makeSkyTexture(){
 }
 function init3D(){
   if(ren) return;
+  if(typeof window.THREE==='undefined'){
+    // ESモジュール(three.js)ロード前に呼ばれた場合はロード完了後に再実行
+    window.addEventListener('three-ready',function(){ init3D(); if(sc3&&ST.view!=='2d') rebuild3D(); },{once:true});
+    return;
+  }
   var wrap=document.getElementById('c3d-wrap');
   ren=new THREE.WebGLRenderer({antialias:true});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
-  ren.outputEncoding = THREE.sRGBEncoding;
+  ren.outputColorSpace = THREE.SRGBColorSpace;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
   ren.toneMappingExposure = LIGHT_SETTINGS.exposure;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -6711,7 +6728,6 @@ function init3D(){
     var pmrem = new THREE.PMREMGenerator(ren);
     pmrem.compileEquirectangularShader();
     new THREE.RGBELoader()
-      .setDataType(THREE.UnsignedByteType)
       .load('assets/env/outdoor.hdr', function(hdrTex) {
         sc3.environment = pmrem.fromEquirectangular(hdrTex).texture;
         hdrTex.dispose(); pmrem.dispose();
@@ -6969,7 +6985,7 @@ function add3DSelectionMarker(){
   lctx.fillStyle='#ffffff';
   lctx.fillText('選択中',96,32);
   var labelTex=new THREE.CanvasTexture(labelCanvas);
-  labelTex.encoding=THREE.sRGBEncoding;
+  labelTex.colorSpace=THREE.SRGBColorSpace;
   var label=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex,transparent:true,depthTest:false}));
   label.position.set(center.x,box.max.y+0.42,center.z);
   label.scale.set(1.15,0.38,1);
@@ -7238,7 +7254,7 @@ function getRepeatSafeBaseTexture(base){
   var ctx=canvas.getContext('2d');
   ctx.drawImage(base.image,0,0,canvas.width,canvas.height);
   var tex=new THREE.CanvasTexture(canvas);
-  tex.encoding=base.encoding!==undefined?base.encoding:THREE.sRGBEncoding;
+  tex.colorSpace=base.colorSpace;
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
   if(ren) tex.anisotropy=ren.capabilities.getMaxAnisotropy();
   _repeatSafeTexCache[key]=tex;
@@ -9420,10 +9436,10 @@ function getSpriteTexture3D(sheet) {
   var img = sheet === 1 ? SPRITE_IMG1 : SPRITE_IMG2;
   if (!img.complete) return null;
   if (sheet === 1) {
-    if (!_tex3d_1) { _tex3d_1 = new THREE.CanvasTexture(img); _tex3d_1.encoding = THREE.sRGBEncoding; }
+    if (!_tex3d_1) { _tex3d_1 = new THREE.CanvasTexture(img); _tex3d_1.colorSpace = THREE.SRGBColorSpace; }
     return _tex3d_1;
   } else {
-    if (!_tex3d_2) { _tex3d_2 = new THREE.CanvasTexture(img); _tex3d_2.encoding = THREE.sRGBEncoding; }
+    if (!_tex3d_2) { _tex3d_2 = new THREE.CanvasTexture(img); _tex3d_2.colorSpace = THREE.SRGBColorSpace; }
     return _tex3d_2;
   }
 }
@@ -9988,7 +10004,8 @@ function makeLightFixtureMaterial(color){
   });
 }
 function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
-  var intensity=Math.max(0,Math.min(3,Number(it.lightIntensity)||0));
+  // r155+ の物理ライト単位ではpoint/spotの強度がカンデラ基準になるためπ倍で従来の明るさを維持
+  var intensity=Math.max(0,Math.min(3,Number(it.lightIntensity)||0))*Math.PI;
   var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
   if(kind==='ceiling'){
     var p=new THREE.PointLight(color,intensity,rangeM,1.65);
@@ -11400,7 +11417,7 @@ function buildRooms3D(flFilt){
 	        var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
 	        fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
 	      }
-	      var pl=new THREE.PointLight(0xffffff,LIGHT_SETTINGS.room,6.0,1.8);
+	      var pl=new THREE.PointLight(0xffffff,LIGHT_SETTINGS.room*Math.PI,6.0,1.8);
 	      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
 	    }
   });
