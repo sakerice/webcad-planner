@@ -7058,8 +7058,16 @@ function mark3DSelectable(root, ref, kind){
   return root;
 }
 
+// ウォークスルー再生中は選択ハイライト(赤ボックス・選択中ラベル・移動ギズモ)を場面から除去する
+function remove3DSelectionHelpers(){
+  if(!sc3) return;
+  var rm=[];
+  sc3.traverse(function(o){ if(o.userData&&(o.userData.selectionHelper||o.userData.moveGizmo)) rm.push(o); });
+  rm.forEach(function(o){ if(o.parent) o.parent.remove(o); });
+}
 function add3DSelectionMarker(){
   if(!sc3 || !ST.selected) return;
+  if(WALKTHROUGH) return; // 再生中の視界に選択ボックスを出さない
   if(ST.selected.type && !shouldRenderItemInCurrent3DView(ST.selected)) return;
   var box=getSelectionBox3D(ST.selected);
   if(box.isEmpty()) return;
@@ -7138,6 +7146,7 @@ function canMoveRefVertically3D(ref){
 }
 function add3DMoveGizmo(){
   if(!sc3 || !ST.selected || !canMoveRef3D(ST.selected) || ST.tool!=='select' || isObjectLocked(ST.selected)) return;
+  if(WALKTHROUGH) return; // 再生中の視界にギズモを出さない
   if(ST.selected.type && !shouldRenderItemInCurrent3DView(ST.selected)) return;
   var box=getSelectionBox3D(ST.selected);
   if(box.isEmpty()) return;
@@ -9412,7 +9421,8 @@ function buildWinFrames(flFilt){
     var customColor=it.colorCustom?it.color:null;
     // it.sashColor 未設定時は customColor→現行色(0x3a3a3a)の順にフォールバックし、既存プランの見た目を変えない。
     var sashColorHex=isWindowLikeType(it.type)?(it.sashColor||customColor):null;
-    var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(sashColorHex||0x3a3a3a):0x3a3a3a,roughness:isWindowLikeType(it.type)?0.42:0.5,metalness:isWindowLikeType(it.type)?0.22:0});
+    // サッシは環境反射を抑えないと空色のハイライトが地の色を覆い、サッシ色の違いが見えなくなる
+    var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(sashColorHex||0x3a3a3a):0x3a3a3a,roughness:isWindowLikeType(it.type)?0.55:0.5,metalness:isWindowLikeType(it.type)?0.08:0,envMapIntensity:isWindowLikeType(it.type)?0.25:1});
     var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
     var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
     var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
@@ -11750,6 +11760,7 @@ function beginWalkthrough(it){
   camExt.fov=68;
   camExt.updateProjectionMatrix();
   if(orbit) orbit.enabled=false;
+  remove3DSelectionHelpers();
   updateWalkthroughCamera(performance.now());
   updateProps();
   return true;
@@ -11776,6 +11787,9 @@ function stopWalkthrough(){
       orbit.target.set(ep.b.x*U,y,ep.b.y*U);
     }
   }
+  // 再生終了後は選択ハイライトを復帰させる
+  add3DSelectionMarker();
+  add3DMoveGizmo();
   updateProps();
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -11809,6 +11823,9 @@ function updateWalkthroughCamera(now){
       orbit.enabled=true;
       orbit.target.copy(look);
     }
+    // 自然終了時も選択ハイライトを復帰させる
+    add3DSelectionMarker();
+    add3DMoveGizmo();
     updateProps();
   }
   return true;
