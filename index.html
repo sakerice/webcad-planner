@@ -8922,15 +8922,17 @@ function makeFloorSlabMaterial(matFloor){
   return new THREE.MeshStandardMaterial({color:avg,roughness:0.95,metalness:0.0,envMapIntensity:0.04});
 }
 function makeWallGlassMaterial(){
+  // 昼間の窓は反射が勝って室内が透けにくい実際の見え方に寄せる
+  // (不透明度が低すぎると白い内装が透けて「白い箱」に見える)
   return new THREE.MeshPhysicalMaterial({
-    color:0xb8ddff,
+    color:0xa8c2d8,
     transparent:true,
-    opacity:0.38,
+    opacity:0.52,
     roughness:0.14,        // 低すぎると空テクスチャの雲筋が縞状に映り込む
     metalness:0.0,
-    transmission:0.35,
+    transmission:0.2,
     thickness:0.02,
-    envMapIntensity:0.5,
+    envMapIntensity:0.75,
     side:THREE.DoubleSide,
     depthWrite:false
   });
