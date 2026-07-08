@@ -3100,6 +3100,12 @@ var WINDOW_STD_PRESETS=[
   {id:'25620', label:'25620 掃き出し W2600×H2030',    w:2600, h:2030, kind:'window-door'}
 ];
 function windowStdSill(p){ return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
+// LIXILアルミ樹脂複合サッシ風カラー(シャイングレーがカタログ標準色)。未設定(undefined)時は既存プラン互換のため現行色を維持する。
+var SASH_COLORS=[
+  {hex:'#9a9da1', label:'シャイングレー'},
+  {hex:'#22252a', label:'ブラック'},
+  {hex:'#f2f2f0', label:'ホワイト'}
+];
 // 室内開きドアの規格幅プリセット(LIXIL実勢値ベース)
 var DOOR_STD_WIDTHS=[
   {w:650, label:'W650 (トイレ・洗面)'},
@@ -4065,6 +4071,11 @@ function updateProps(){
       stdOpts+='<option value="'+p.id+'"'+(it.windowStd===p.id?' selected':'')+'>'+p.label+'</option>';
     });
     html += '<div class="pr"><div class="pl">サッシ規格 (LIXIL呼称)</div><select class="pi" onchange="applyWindowStdPreset(this.value)">'+stdOpts+'</select></div>';
+    var sashColorOpts='';
+    SASH_COLORS.forEach(function(sc){
+      sashColorOpts+='<option value="'+sc.hex+'"'+(it.sashColor===sc.hex?' selected':'')+'>'+sc.label+'</option>';
+    });
+    html += '<div class="pr"><div class="pl">サッシ色</div><select class="pi" onchange="updateSelectedProp(\'sashColor\',this.value)">'+sashColorOpts+'</select></div>';
     html += '<div class="pr"><div class="pl">窓の縦高さ (mm)</div><input class="pi" type="number" min="200" max="'+Math.round(windowMaxTopMm(it))+'" step="10" value="'+Math.round(windowHeightMm(it))+'" onchange="updateSelectedProp(\'windowHeight\',+this.value)"></div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">上端高さ: '+Math.round(windowTopMm(it))+'mm</div>';
   }
@@ -9098,7 +9109,9 @@ function buildWinFrames(flFilt){
     
     var grp=new THREE.Group();
     var customColor=it.colorCustom?it.color:null;
-    var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(customColor||0x3a3a3a):0x3a3a3a,roughness:0.5});
+    // it.sashColor 未設定時は customColor→現行色(0x3a3a3a)の順にフォールバックし、既存プランの見た目を変えない。
+    var sashColorHex=isWindowLikeType(it.type)?(it.sashColor||customColor):null;
+    var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(sashColorHex||0x3a3a3a):0x3a3a3a,roughness:isWindowLikeType(it.type)?0.42:0.5,metalness:isWindowLikeType(it.type)?0.22:0});
     var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
     var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
     var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
@@ -9166,6 +9179,10 @@ function buildWinFrames(flFilt){
         addBox(frameMat,0,wh,0,ww+0.1,0.05,wt+0.05);
         addBox(frameMat,-ww/2,wh/2,0,0.05,wh,wt+0.05);
         addBox(frameMat, ww/2,wh/2,0,0.05,wh,wt+0.05);
+        if(it.type==='window'){
+          // 引違い窓の召合せ框(中桟): 幅30mm相当、ガラス中央。window-door は下の専用サッシ表現側で同等の框を持つ。
+          addBox(frameMat,0,wh/2,0,0.03,wh-0.08,wt+0.03);
+        }
       }
       if(!openingModelReady && it.type==='window-door'){
         var winSlideOpen=doorOpenState(it)!=='closed';
@@ -9175,7 +9192,7 @@ function buildWinFrames(flFilt){
         var winLeftPos=-ww*0.23, winRightPos=ww*0.23;
         var winFixedX=winLeftOpen?winRightPos:winLeftPos;
         var winMovingX=winSlideOpen?winFixedX:(winLeftOpen?winLeftPos:winRightPos);
-        addBox(frameMat,0,wh/2,0,0.045,wh,wt+0.03);
+        addBox(frameMat,0,wh/2,0,0.03,wh,wt+0.03);
         addBox(railMat,0,0.10,-0.045,ww+0.06,0.035,0.025);
         addBox(railMat,0,0.10, 0.045,ww+0.06,0.035,0.025);
         addBox(railMat,0,wh-0.10,-0.045,ww+0.06,0.035,0.025);
