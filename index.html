@@ -3076,7 +3076,7 @@ var ISIZES = {
   'custom-block':{w:900,d:450},
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
-  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:1820}, 'stair-corner':{w:910,d:910},
+  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:3000}, 'utility-pole':{w:350,d:350},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
@@ -9314,7 +9314,7 @@ function getConnectedStairParts(seed){
 }
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
-  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U,steps:stairStepCount(FLOOR_H)};
+  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U,steps:getStairStepCount(it)};
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
@@ -9348,19 +9348,28 @@ function stairRiseInfo(it){
   return {index:idx,count:group.length,base:stepRise*beforeSteps,rise:stepRise*mySteps,steps:mySteps,stepRise:stepRise};
 }
 
+// 直階段の段数。2Dの踏み板線と3Dの段数はともにこの関数を参照し、常に一致する。
 function getStairStepCount(it){
   if(!it) return 3;
   if(it.type==='stair-corner') return 3;
-  var baseRun=(ISIZES['stair-corner']&&ISIZES['stair-corner'].d)||910;
-  var tread=baseRun/3;
-  return Math.max(3,Math.round((it.d||ISIZES.stair.d)/tread));
+  return stairStepCount(FLOOR_H, it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
 }
-// 建築基準法(蹴上げ上限230mm)・目標蹴上げ200mmから段数を算出。
-// 単独の1フライト階段(stairRiseInfoのgroup.length<=1)の3D段数決定に使用。
-function stairStepCount(totalRiseMm){
+// 建築基準法整合の段数算出:
+// - 蹴上げ: 目標200mm・上限230mm(令23条)から基本段数を決める
+// - 踏面: footprintDepthMm が有効なら 踏面>=150mm(令23条)を満たす段数上限
+//   Math.floor(depth/150) でクランプする(下限3段は維持)
+// - クランプ後に蹴上げが230mmを超える場合は、平面上の奥行という物理制約を
+//   優先してそのまま許容する(奥行が浅すぎる階段は両立不可能なため)
+function stairStepCount(totalRiseMm, footprintDepthMm){
   var n=Math.round(totalRiseMm/200);
   while(n>1 && totalRiseMm/n>230) n++;
-  return Math.max(3,n);
+  n=Math.max(3,n);
+  var depth=Number(footprintDepthMm);
+  if(isFinite(depth) && depth>0){
+    var maxSteps=Math.max(3,Math.floor(depth/150));
+    if(n>maxSteps) n=maxSteps;
+  }
+  return n;
 }
 
 function build3DRoofItem(grp,it,w3,d3){
