@@ -6348,6 +6348,7 @@ function applyHandleDrag(cx,cy,e){
       var sx=o.w?nw/o.w:1, sy=o.d?nd/o.d:1;
       it.pathPoints=o.pathPoints.map(function(p){return {x:(Number(p.x)||0)*sx,y:(Number(p.y)||0)*sy};});
     }
+    if(it.windowStd && nw!==o.w) delete it.windowStd; // 手動リサイズで規格プリセット表示を解除
     it.w=nw; it.d=nd; it.x=nx; it.y=ny;
   }
   if(!DRAG.active) updateProps();
