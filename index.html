@@ -6572,6 +6572,7 @@ function disposeMat(m,seenMat) {
 }
 
 var composer = null; // single declaration
+var _bloomPass = null; // 夜景のみ有効化するBloomパス
 function lerpHexColor(a,b,t){
   function px(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   var ca=px(a), cb=px(b);
@@ -6759,10 +6760,11 @@ function init3D(){
       composer = new THREE.EffectComposer(ren);
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       
-      // Bloom (昼景の白面・ガラスが滲まないよう高閾値・弱強度に留める)
+      // Bloom: 昼景では空・白面の滲みが窓周りに被るため夜景のみ有効(applyLightingToSceneで切替)
       if(THREE.UnrealBloomPass) {
-        var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.12, 0.25, 0.97);
-        composer.addPass(bloom);
+        _bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.22, 0.3, 0.85);
+        _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
+        composer.addPass(_bloomPass);
       }
       // SAO: タッチデバイス(iPad等)はGPU負荷と発熱を抑えるためなし(Bloom+ガンマ補正のみ)
       // デスクトップはフル解像度(ハーフ解像度はエッジ周りのボケが目立つため不採用)
@@ -6857,6 +6859,7 @@ function build3D(){
     sc3.remove(c);
   });
   _activeInteriorShadowLightCount=0;
+  _downspoutRegistry=[];
   // Interior mode: show only current floor
   var flFilt = isInt ? ST.floor : null;
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
@@ -7584,6 +7587,8 @@ function applyLightingToScene(refreshSky){
       if(_skyMesh) _skyMesh.visible=true;
     }
   }
+  // Bloomは夜景専用(昼は空・白面の滲みが窓周りに被るため無効)
+  if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night');
   syncLightPanelUi();
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -9721,6 +9726,37 @@ function roofEaveEdges(it,W,D){
   }
   return edges;
 }
+// 竪樋のワールド登録簿(build3D毎にリセット)。屋根をまたいだ同一コーナー重複を防ぐ
+var _downspoutRegistry=[];
+// 屋根ローカルm → ワールドmm(roofLocalPointの逆変換)
+function roofLocalToWorldMm(it,xl,zl){
+  if(it.flipX) xl=-xl;
+  if(it.flipY) zl=-zl;
+  var a=-(it.rot||0)*Math.PI/180;
+  var dx=Math.cos(a)*xl+Math.sin(a)*zl;
+  var dz=-Math.sin(a)*xl+Math.cos(a)*zl;
+  return {x:it.x+it.w/2+dx/U, y:it.y+it.d/2+dz/U};
+}
+// 竪樋の降下経路上にある障害物(他の屋根・バルコニー)の最上面ワールドY(m)。なければ null
+function downspoutObstacleTopY(it,xl,zl,topWorldY){
+  var wp=roofLocalToWorldMm(it,xl,zl);
+  var best=null;
+  (DATA.items||[]).forEach(function(o){
+    if(o===it) return;
+    if(o.type!=='roof' && o.type!=='balcony') return;
+    var lp=roofLocalPoint(o,wp.x,wp.y);
+    if(Math.abs(lp.x)>o.w*U/2+0.03 || Math.abs(lp.z)>o.d*U/2+0.03) return;
+    var oTop;
+    if(o.type==='roof'){
+      oTop=floorBaseY(o.floor)+((o.elev||0)*U);
+    } else {
+      oTop=floorTopY(o.floor)+((o.elev||0)*U)+getItemHeightValue(o)*U;
+    }
+    if(oTop>=topWorldY-0.05) return; // 樋より上の構造物は経路外
+    if(best===null||oTop>best) best=oTop;
+  });
+  return best;
+}
 // ワールドmm座標 → 屋根グループローカルm座標(回転・フリップ・平行移動の逆変換)
 function roofLocalPoint(it,pxMm,pyMm){
   var cx=it.x+it.w/2, cy=it.y+it.d/2;
@@ -9797,9 +9833,9 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     m.rotation.y=-Math.atan2(ez,ex);
     m.castShadow=false; m.receiveShadow=false;
     grp.add(m);
-    // 竪樋の取付先: 直下階の壁コーナーへスナップ(軒の出の内側・エッジ近傍)
-    var best=null;
-    for(var fl=roofFloor-1; fl>=1 && !best; fl--){
+    // 竪樋の取付先候補: 直下階の壁コーナー(軒の出の内側・エッジ近傍)を全て集める
+    var candidates=[];
+    for(var fl=roofFloor-1; fl>=1 && candidates.length===0; fl--){
       var corners=wallCornersInRoofLocal(it,fl);
       corners.forEach(function(c){
         var t=((c.x-e.x1)*ex+(c.z-e.z1)*ez)/len; // エッジ方向の射影(m)
@@ -9808,51 +9844,80 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         if(dIn<0.02||dIn>1.2) return;             // 軒の出の範囲内(壁は屋根縁より内側)
         if(nearEntrance(c.x,c.z)) return;         // 玄関前を避ける
         var endDist=Math.min(Math.abs(t),Math.abs(len-t)); // 建物コーナー(エッジ端)優先
-        if(!best||endDist<best.endDist) best={x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),dIn:dIn,endDist:endDist};
+        candidates.push({x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),endDist:endDist});
       });
     }
-    if(best){
-      // 竪樋は壁面の外側すれすれ(壁端点=壁芯なので 半壁厚60+管半径30+隙間20mm 外へ)
-      // さらにコーナーの直交壁と干渉しないようエッジ方向へ100mmスライド
-      var ux=ex/len, uz=ez/len;
-      var slide=(best.t<len/2)?0.10:-0.10;
-      var px=best.x-nx*0.11+ux*slide, pz=best.z-nz*0.11+uz*slide;
+    candidates.sort(function(a,b){return a.endDist-b.endDist;});
+    var topWorldY=-groundLocalY+e.y+gutterY; // 軒樋のワールド高さ
+    var chosen=null, chosenObs=null;
+    var ux=ex/len, uz=ez/len;
+    for(var ci=0; ci<candidates.length; ci++){
+      var cand=candidates[ci];
+      // 竪樋位置: 壁芯から外へ(半壁厚60+管半径30+隙間20mm)+コーナーの直交壁を避けてスライド
+      var slide=(cand.t<len/2)?0.10:-0.10;
+      cand.px=cand.x-nx*0.11+ux*slide;
+      cand.pz=cand.z-nz*0.11+uz*slide;
+      // 降下経路上の障害物(下屋・バルコニー)チェック — クリアな候補を優先
+      var obs=downspoutObstacleTopY(it,cand.px,cand.pz,topWorldY);
+      if(obs===null){ chosen=cand; chosenObs=null; break; }
+      if(!chosen){ chosen=cand; chosenObs=obs; }
+    }
+    if(chosen){
       downspouts.push({
         kind:'elbow',
-        // 軒樋上の接続点(コーナーをエッジへ射影した位置)
-        ax:e.x1+ex*(best.t/len), az:e.z1+ez*(best.t/len), ay:e.y+gutterY-rG*0.5,
-        x:px, z:pz
+        ax:e.x1+ex*(chosen.t/len), az:e.z1+ez*(chosen.t/len), ay:e.y+gutterY-rG*0.5,
+        x:chosen.px, z:chosen.pz,
+        // 障害物があればその上面で止める(下屋に落とす納まり)。なければ地面まで
+        bottomY:(chosenObs===null)?groundLocalY:(chosenObs+groundLocalY+0.02)
       });
     } else {
       // 壁が見つからない場合はエッジ端で直下(コンテキスト建物等のフォールバック)
       var t0=0.08/len;
-      downspouts.push({kind:'straight', x:e.x1+ex*t0, z:e.z1+ez*t0, ax:null, az:null, ay:e.y+gutterY-rG*0.5});
+      var fx=e.x1+ex*t0, fz=e.z1+ez*t0;
+      var fobs=downspoutObstacleTopY(it,fx,fz,topWorldY);
+      downspouts.push({kind:'straight', x:fx, z:fz, ax:null, az:null, ay:e.y+gutterY-rG*0.5,
+        bottomY:(fobs===null)?groundLocalY:(fobs+groundLocalY+0.02)});
     }
   });
-  // 近接する竪樋の重複排除(複数エッジが同じ壁コーナーへスナップした場合)
+  // 重複排除: 同一屋根内の近接候補に加え、屋根をまたいだ同一コーナーの重複も
+  // ワールド登録簿で防ぐ(水平0.6m以内かつ高さ範囲が重なる竪樋はスキップ。
+  // 上の樋が下屋で止まり下屋の樋が地面へ続く「縦継ぎ」は高さが重ならないため許容)
   var placed=[];
   downspouts.forEach(function(p){
     for(var i=0;i<placed.length;i++){
       if(Math.hypot(placed[i].x-p.x,placed[i].z-p.z)<0.15) return;
     }
-    placed.push(p);
     var topY=p.ay;
+    var elbowDropY=topY;
     if(p.kind==='elbow'){
-      // エルボ(呼び樋): 軒樋端から45度で壁面上端へ
       var horiz=Math.hypot(p.x-p.ax,p.z-p.az);
-      var wallTopY=topY-Math.max(0.08,horiz); // 45度勾配
-      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.x,y:wallTopY,z:p.z},rP,gutterMat);
-      topY=wallTopY;
+      elbowDropY=topY-Math.max(0.08,horiz); // 45度勾配で壁面上端へ
     }
-    var h=topY-groundLocalY;
-    if(h<0.5) return;
-    // 壁沿いの垂直竪樋
-    addPipeBetween(grp,{x:p.x,y:topY,z:p.z},{x:p.x,y:groundLocalY,z:p.z},rP,gutterMat);
-    // 雨水枡(150角)
-    var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),pitMat);
-    pit.position.set(p.x, groundLocalY+0.02, p.z);
-    pit.castShadow=false;
-    grp.add(pit);
+    var bottomY=(p.bottomY===undefined)?groundLocalY:p.bottomY;
+    var h=elbowDropY-bottomY;
+    if(h<0.3) return;
+    // 屋根をまたいだ重複チェック(ワールド座標)
+    var wp=roofLocalToWorldMm(it,p.x,p.z);
+    var wTop=-groundLocalY+elbowDropY, wBottom=-groundLocalY+bottomY;
+    for(var j=0;j<_downspoutRegistry.length;j++){
+      var r=_downspoutRegistry[j];
+      var horizDist=Math.hypot((r.x-wp.x)*U,(r.y-wp.y)*U);
+      if(horizDist<0.6 && Math.min(wTop,r.top)-Math.max(wBottom,r.bottom)>0.3) return; // 高さ重複
+    }
+    placed.push(p);
+    _downspoutRegistry.push({x:wp.x,y:wp.y,top:wTop,bottom:wBottom});
+    if(p.kind==='elbow'){
+      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.x,y:elbowDropY,z:p.z},rP,gutterMat);
+    }
+    // 壁沿いの垂直竪樋(障害物があれば下屋上面で止まる)
+    addPipeBetween(grp,{x:p.x,y:elbowDropY,z:p.z},{x:p.x,y:bottomY,z:p.z},rP,gutterMat);
+    // 雨水枡は地面到達時のみ
+    if(bottomY<=groundLocalY+0.03){
+      var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),pitMat);
+      pit.position.set(p.x, groundLocalY+0.02, p.z);
+      pit.castShadow=false;
+      grp.add(pit);
+    }
   });
 }
 function claimInteriorShadowLightSlot(it){
