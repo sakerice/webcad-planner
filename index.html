@@ -9776,10 +9776,10 @@ function buildItem3D(it){
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
   }
-  if(it.type==='ac-outdoor'){ build3DAcOutdoor(grp,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
-  if(it.type==='water-heater'){ build3DWaterHeater(grp,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
-  if(it.type==='meter-box'){ build3DMeterBox(grp,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
-  if(it.type==='sewer-pit'){ build3DSewerPit(grp,it.w*U,it.d*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
+  if(it.type==='ac-outdoor'){ build3DAcOutdoor(grp,it,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
+  if(it.type==='water-heater'){ build3DWaterHeater(grp,it,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
+  if(it.type==='meter-box'){ build3DMeterBox(grp,it,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
+  if(it.type==='sewer-pit'){ build3DSewerPit(grp,it,it.w*U,it.d*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
   if(isLightItemType(it.type)){
     build3DLightItem(grp,it,it.w*U,it.d*U);
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
@@ -10304,8 +10304,8 @@ function build3DUtilityPole(grp,it,w3,d3,h){
   wire(h*0.85,0.17);
   wire(h*0.72,0);
 }
-function build3DAcOutdoor(grp,w,d,h){
-  var body=new THREE.MeshStandardMaterial({color:0xd8dadc,roughness:0.6,metalness:0.25});
+function build3DAcOutdoor(grp,it,w,d,h){
+  var body=new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xd8dadc,roughness:0.6,metalness:0.25});
   var dark=new THREE.MeshStandardMaterial({color:0x8b8e92,roughness:0.7,metalness:0.2});
   var b=new THREE.Mesh(new THREE.BoxGeometry(w,h*0.92,d),body);
   b.position.y=h*0.54; b.castShadow=true; grp.add(b);
@@ -10321,8 +10321,8 @@ function build3DAcOutdoor(grp,w,d,h){
     grp.add(foot);
   });
 }
-function build3DWaterHeater(grp,w,d,h){
-  var body=new THREE.MeshStandardMaterial({color:0xe8e9eb,roughness:0.4,metalness:0.3});
+function build3DWaterHeater(grp,it,w,d,h){
+  var body=new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xe8e9eb,roughness:0.4,metalness:0.3});
   // 貯湯タンク(角丸風: box + 前面にわずかな面取り)
   var tank=new THREE.Mesh(new THREE.BoxGeometry(w,h,d*0.75),body);
   tank.position.set(0,h/2,-d*0.1); tank.castShadow=true; grp.add(tank);
@@ -10330,14 +10330,14 @@ function build3DWaterHeater(grp,w,d,h){
   var hp=new THREE.Mesh(new THREE.BoxGeometry(w*0.9,h*0.38,d*0.28),body);
   hp.position.set(0,h*0.19,d*0.33); hp.castShadow=true; grp.add(hp);
 }
-function build3DMeterBox(grp,w,d,h){
+function build3DMeterBox(grp,it,w,d,h){
   var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
-    new THREE.MeshStandardMaterial({color:0xc8cacc,roughness:0.5,metalness:0.2}));
+    new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xc8cacc,roughness:0.5,metalness:0.2}));
   m.position.y=h/2; grp.add(m);
 }
-function build3DSewerPit(grp,w,d){
+function build3DSewerPit(grp,it,w,d){
   var disc=new THREE.Mesh(new THREE.CylinderGeometry(w/2,w/2,0.02,16),
-    new THREE.MeshStandardMaterial({color:0x6f7275,roughness:0.85,metalness:0.15}));
+    new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0x6f7275,roughness:0.85,metalness:0.15}));
   disc.position.y=0.01; grp.add(disc);
 }
 
@@ -11763,7 +11763,7 @@ function handleRoomClick(wx,wy){
 function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || isContextExteriorItemType(placeType));
+  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || isContextExteriorItemType(placeType));
   if(groundOnly && ST.floor!==1) return;
   saveState();
   var sz=getItemDefaultSize(placeType);
