@@ -2878,6 +2878,21 @@ input[type="color"]::-moz-color-swatch{
         <button id="light-preset-evening" type="button" class="pbtn sec" onclick="applyLightPreset('evening')" style="margin-top:0;padding:6px 4px">夕方</button>
         <button id="light-preset-night" type="button" class="pbtn sec" onclick="applyLightPreset('night')" style="margin-top:0;padding:6px 4px">夜</button>
       </div>
+      <div style="border-top:1px solid #22375f;margin:8px 0 0;padding-top:8px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:10px;color:#cce;font-weight:bold"><input id="sun-sim-toggle" type="checkbox" onchange="updateSunSim('sunSim',this.checked)"> ☀ 太陽シミュレーション</label>
+        <div id="sun-sim-controls" style="display:none;margin-top:6px">
+          <div style="font-size:10px;color:#7a8fb0">時刻 <span id="sun-hour-val">13:00</span></div>
+          <input id="sun-hour" type="range" min="5" max="19" step="0.5" value="13" style="width:100%" oninput="updateSunSim('hour',+this.value)">
+          <div style="font-size:10px;color:#7a8fb0;margin-top:4px">季節</div>
+          <select id="sun-season" onchange="updateSunSim('season',this.value)" style="width:100%;background:#0f3460;color:#dfe8ff;border:1px solid #1f4b78;border-radius:4px;padding:3px;font-size:11px">
+            <option value="summer">夏至 (6月)</option>
+            <option value="equinox" selected>春分・秋分</option>
+            <option value="winter">冬至 (12月)</option>
+          </select>
+          <div style="font-size:10px;color:#7a8fb0;margin-top:4px">北の方角 <span id="sun-north-val">0°</span></div>
+          <input id="sun-north" type="range" min="0" max="355" step="5" value="0" style="width:100%" oninput="updateSunSim('northDeg',+this.value)">
+        </div>
+      </div>
       <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.25</span></div>
       <input id="light-room" type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
       <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.16</span></div>
@@ -2995,7 +3010,8 @@ var FLOOR_SLAB_H = 180;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.25, exposure:0.93, env:0.42};
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.25, exposure:0.93, env:0.42,
+  sunSim:false, hour:13, season:'equinox', northDeg:0};
 var LIGHT_PRESETS = {
   morning:{
     label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.28,exposure:0.9,env:0.34,
@@ -3022,6 +3038,37 @@ var LIGHT_PRESETS = {
     sky:{top:'#071028',mid:'#14224c',horizon:'#26365f',ground:'#0b1020',sunX:0.2,sunY:0.23,sunCore:'rgba(222,235,255,0.78)',sunGlow:'rgba(105,145,255,0.24)',haze:'rgba(35,50,95,0.42)',cloudAlpha:0.14}
   }
 };
+// ─── 太陽軌道シミュレーション(東京近郊 緯度35.7度の簡易モデル) ───
+function computeSunPosition(hour,season,northDeg){
+  var lat=35.7*Math.PI/180;
+  var decl=(season==='summer'?23.4:season==='winter'?-23.4:0)*Math.PI/180;
+  var H=(hour-12)*15*Math.PI/180; // 時角
+  var alt=Math.asin(Math.sin(lat)*Math.sin(decl)+Math.cos(lat)*Math.cos(decl)*Math.cos(H));
+  // 方位角: 0=南、+が西回り
+  var az=Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(lat)-Math.tan(decl)*Math.cos(lat));
+  // ワールド方位へ: 画面奥(-Z)を北とし、northDeg で敷地の向きを回転
+  var azWorld=az+Math.PI+(northDeg||0)*Math.PI/180;
+  var R=220;
+  var y=Math.max(8,Math.sin(alt)*R);
+  var horiz=Math.cos(alt)*R;
+  return {
+    x:Math.sin(azWorld)*horiz,
+    y:y,
+    z:-Math.cos(azWorld)*horiz,
+    altitude:alt, azimuth:azWorld
+  };
+}
+// 高度に応じた太陽光の色(低高度=暖色)
+function sunColorForAltitude(alt){
+  var t=Math.max(0,Math.min(1,alt/(Math.PI/3)));
+  var r=Math.round(255);
+  var g=Math.round(158+(250-158)*t);
+  var b=Math.round(88+(244-88)*t);
+  return 'rgb('+r+','+g+','+b+')';
+}
+function sunSimDimFactor(alt){
+  return Math.max(0.12,Math.min(1,Math.sin(alt)*1.6));
+}
 var INTERIOR_WALL_DEFAULT = '#f4f0e8';
 
 function foundationHeightMm(){
@@ -6512,9 +6559,35 @@ function disposeMat(m,seenMat) {
 }
 
 var composer = null; // single declaration
+function lerpHexColor(a,b,t){
+  function px(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  var ca=px(a), cb=px(b);
+  var c=ca.map(function(v,i){return Math.round(v+(cb[i]-v)*t);});
+  return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+}
 function makeSkyTexture(){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
   var sky=preset.sky||LIGHT_PRESETS.day.sky;
+  var sunSimActive=LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night';
+  var simSun=null;
+  if(sunSimActive){
+    simSun=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
+    // 低高度(<15度)は夕方プリセットの空色へ補間して朝焼け/夕焼けを表現
+    var lowT=1-Math.max(0,Math.min(1,(simSun.altitude*180/Math.PI)/15));
+    if(lowT>0){
+      var ev=LIGHT_PRESETS.evening.sky;
+      sky={
+        top:lerpHexColor(sky.top||'#4e91ff',ev.top||'#4d5f91',lowT*0.8),
+        mid:lerpHexColor(sky.mid||'#82bdff',ev.mid||'#a06f9e',lowT*0.8),
+        horizon:lerpHexColor(sky.horizon||'#d4ecff',ev.horizon||'#f0a85e',lowT),
+        ground:sky.ground, sunX:sky.sunX, sunY:sky.sunY,
+        sunCore:sky.sunCore,
+        sunGlow:lowT>0.5?'rgba(255,128,50,0.5)':sky.sunGlow,
+        haze:lowT>0.5?'rgba(255,145,72,0.38)':sky.haze,
+        cloudAlpha:sky.cloudAlpha
+      };
+    }
+  }
   var c=document.createElement('canvas');
   c.width=1024; c.height=512;
   var ctx=c.getContext('2d');
@@ -6540,6 +6613,11 @@ function makeSkyTexture(){
   }
 
   var sunX=c.width*(sky.sunX==null?0.78:sky.sunX), sunY=c.height*(sky.sunY==null?0.2:sky.sunY);
+  if(simSun){
+    // 方位角→パノラマX(0=北=画像左端0.5?いいえ: 単純比例で連続的に回る)、高度→Y
+    sunX=c.width*(((simSun.azimuth/(Math.PI*2))%1+1)%1);
+    sunY=c.height*Math.max(0.06,0.5-Math.sin(simSun.altitude)*0.44);
+  }
   var sg=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,170);
   sg.addColorStop(0,sky.sunCore||'rgba(255,255,235,0.95)');
   sg.addColorStop(0.12,sky.sunGlow||'rgba(255,249,205,0.45)');
@@ -6811,6 +6889,9 @@ function fitShadowCamera(sunLight) {
   var r = Math.min(32, Math.max(5, Math.max(span, height) * 0.82 + 1.8));
   var preset = getLightPreset(LIGHT_SETTINGS.timeOfDay);
   var p = preset.sunPos || LIGHT_PRESETS.day.sunPos;
+  if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
+    p = computeSunPosition(LIGHT_SETTINGS.hour, LIGHT_SETTINGS.season, LIGHT_SETTINGS.northDeg);
+  }
   var dir = new THREE.Vector3(p.x, p.y, p.z);
   if(dir.lengthSq()<0.001) dir.set(1,2,1);
   dir.normalize();
@@ -7418,6 +7499,24 @@ function syncLightPanelUi(){
     btn.style.color=active?'#fff':'#dfe8ff';
     btn.setAttribute('aria-pressed',active?'true':'false');
   });
+  // 太陽シミュレーションUI
+  var simToggle=document.getElementById('sun-sim-toggle');
+  var simControls=document.getElementById('sun-sim-controls');
+  if(simToggle) simToggle.checked=!!LIGHT_SETTINGS.sunSim;
+  if(simControls) simControls.style.display=LIGHT_SETTINGS.sunSim?'block':'none';
+  var hourInput=document.getElementById('sun-hour');
+  var hourVal=document.getElementById('sun-hour-val');
+  if(hourInput) hourInput.value=LIGHT_SETTINGS.hour;
+  if(hourVal){
+    var hh=Math.floor(LIGHT_SETTINGS.hour), mm=Math.round((LIGHT_SETTINGS.hour-hh)*60);
+    hourVal.textContent=hh+':'+(mm<10?'0':'')+mm;
+  }
+  var seasonSel=document.getElementById('sun-season');
+  if(seasonSel) seasonSel.value=LIGHT_SETTINGS.season||'equinox';
+  var northInput=document.getElementById('sun-north');
+  var northVal=document.getElementById('sun-north-val');
+  if(northInput) northInput.value=LIGHT_SETTINGS.northDeg||0;
+  if(northVal) northVal.textContent=(LIGHT_SETTINGS.northDeg||0)+'°';
 }
 function refreshSkyTexture(){
   if(!_skyMesh||!_skyMesh.material||typeof THREE==='undefined') return;
@@ -7437,11 +7536,18 @@ function applyLightingToScene(refreshSky){
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         var interiorMode=(ST.view==='3d-int'||isInt);
-        o.intensity=interiorMode?0:LIGHT_SETTINGS.sun;
         o.castShadow=!interiorMode;
-        if(o.color) o.color.set(preset.sunColor||'#ffffff');
-        var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
-        o.position.set(p.x,p.y,p.z);
+        if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
+          var sp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
+          o.position.set(sp.x,sp.y,sp.z);
+          if(o.color) o.color.set(sunColorForAltitude(sp.altitude));
+          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude);
+        } else {
+          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun;
+          if(o.color) o.color.set(preset.sunColor||'#ffffff');
+          var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
+          o.position.set(p.x,p.y,p.z);
+        }
       } else if(o.name==='HemiLight'){
         o.intensity=LIGHT_SETTINGS.hemi;
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
@@ -7477,8 +7583,27 @@ function applyLightPreset(key){
   ['hemi','sun','ambient','room','exposure','env'].forEach(function(k){
     LIGHT_SETTINGS[k]=preset[k];
   });
+  // 太陽シミュレーション中は朝昼夕ボタンが時刻セットとして働く(夜は従来夜景)
+  if(LIGHT_SETTINGS.sunSim && key!=='night'){
+    LIGHT_SETTINGS.hour=(key==='morning')?7:(key==='evening')?17:13;
+  }
   applyLightingToScene(true);
   if(sc3) rebuild3D();
+}
+function updateSunSim(key,val){
+  if(key==='sunSim') LIGHT_SETTINGS.sunSim=!!val;
+  else if(key==='hour') LIGHT_SETTINGS.hour=Math.max(5,Math.min(19,Number(val)||13));
+  else if(key==='season') LIGHT_SETTINGS.season=(val==='summer'||val==='winter')?val:'equinox';
+  else if(key==='northDeg') LIGHT_SETTINGS.northDeg=((Number(val)||0)%360+360)%360;
+  // 太陽シミュレーション中に夜プリセットだったら昼に戻す
+  if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay==='night') LIGHT_SETTINGS.timeOfDay='day';
+  applyLightingToScene(true);
+  if(sc3){
+    var sun=null;
+    sc3.traverse(function(o){if(o.isDirectionalLight)sun=o;});
+    if(sun && !isInt) fitShadowCamera(sun);
+  }
+  if(typeof invalidate3D==='function') invalidate3D();
 }
 function updateLightSetting(key,val){
   LIGHT_SETTINGS[key]=val;
