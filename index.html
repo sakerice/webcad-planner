@@ -9786,6 +9786,33 @@ function downspoutClearOfWalls(wxMm,wyMm,topWorldY,bottomWorldY){
   }
   return true;
 }
+// 竪樋の降下範囲の全ての階で近傍(0.3m以内)に壁が存在するか(壁の連続性)。
+// 下階がセットバックしている(玄関ポーチ等)位置に宙吊りの竪樋を立てないための必須条件
+function downspoutWallSupport(wxMm,wyMm,topWorldY,bottomWorldY){
+  var px=wxMm/1000, pz=wyMm/1000;
+  var walls=DATA.walls||[];
+  var maxFloor=1;
+  walls.forEach(function(w){ if((w.floor||1)>maxFloor) maxFloor=w.floor||1; });
+  for(var f=1; f<=maxFloor; f++){
+    var fBase=floorBaseY(f), fTop=fBase+wallFullHeightM(f);
+    // この階の壁帯と降下範囲が重なるか(重なりが僅かな階は不問)
+    var overlap=Math.min(fTop,topWorldY)-Math.max(fBase,bottomWorldY);
+    if(overlap<0.4) continue;
+    var supported=false;
+    for(var i=0;i<walls.length && !supported;i++){
+      var w=walls[i];
+      if((w.floor||1)!==f) continue;
+      var ax=w.x1/1000, az=w.y1/1000, bx=w.x2/1000, bz=w.y2/1000;
+      var dx=bx-ax, dz=bz-az;
+      var L2=dx*dx+dz*dz; if(L2<1e-6) continue;
+      var t=((px-ax)*dx+(pz-az)*dz)/L2; t=Math.max(0,Math.min(1,t));
+      var dist=Math.hypot(px-(ax+dx*t), pz-(az+dz*t));
+      if(dist<0.30) supported=true;
+    }
+    if(!supported) return false;
+  }
+  return true;
+}
 // 竪樋の降下経路上にある障害物。{top:最上面ワールドY(m), kind:'roof'|'balcony'} / なければ null
 function downspoutObstacleInfo(it,xl,zl,topWorldY){
   var wp=roofLocalToWorldMm(it,xl,zl);
@@ -9893,13 +9920,15 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         var t=((c.x-e.x1)*ex+(c.z-e.z1)*ez)/len; // エッジ方向の射影(m)
         var dIn=(c.x-e.x1)*nx+(c.z-e.z1)*nz;     // 内向き距離(m)
         if(t<-0.1||t>len+0.1) return;
-        if(dIn<0.02||dIn>1.2) return;             // 軒の出の範囲内(壁は屋根縁より内側)
+        // 実際の軒の出(450-600mm)相当の範囲のみ。深い位置だと呼び樋の斜めが非現実的に長くなる
+        if(dIn<0.02||dIn>0.8) return;
         if(nearEntrance(c.x,c.z)) return;         // 玄関前を避ける
         var endDist=Math.min(Math.abs(t),Math.abs(len-t)); // 建物コーナー(エッジ端)優先
-        candidates.push({x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),endDist:endDist});
+        candidates.push({x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),dIn:dIn,endDist:endDist});
       });
     }
-    candidates.sort(function(a,b){return a.endDist-b.endDist;});
+    // 建物コーナーへの近さ+軒先への近さ(呼び樋の短さ)の複合スコアで優先
+    candidates.sort(function(a,b){return (a.endDist+a.dIn*2)-(b.endDist+b.dIn*2);});
     var topWorldY=-groundLocalY+e.y+gutterY; // 軒樋のワールド高さ
     var chosen=null, chosenObs=null;
     var ux=ex/len, uz=ez/len;
@@ -9914,11 +9943,15 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         var px0=cand.x-nx*0.11+ux*slide, pz0=cand.z-nz*0.11+uz*slide;
         var wpc=roofLocalToWorldMm(it,px0,pz0);
         if(!downspoutClearOfWalls(wpc.x,wpc.y,topWorldY,0)) continue;
-        cand.px=px0; cand.pz=pz0; found=true;
+        cand.px=px0; cand.pz=pz0; cand.wx=wpc.x; cand.wy=wpc.y; found=true;
       }
       if(!found) continue;
-      // 降下経路上の障害物チェック — 地面までクリアな候補を優先
+      // 降下経路上の障害物(下屋など)で止まる高さを先に決める
       var obsInfo=downspoutObstacleInfo(it,cand.px,cand.pz,topWorldY);
+      var stopWorldY=(obsInfo===null)?0:obsInfo.stop;
+      // 【壁の連続性】降下範囲の全ての階に壁があること。
+      // 下階がセットバックしている位置(玄関ポーチ等)に宙吊りの竪樋を立てない
+      if(!downspoutWallSupport(cand.wx,cand.wy,topWorldY,stopWorldY)) continue;
       if(obsInfo===null){ chosen=cand; chosenObs=null; break; }
       if(!chosen){ chosen=cand; chosenObs=obsInfo.stop; }
     }
@@ -9934,20 +9967,25 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         bottomY:(chosenObs===null)?groundLocalY:(chosenObs+groundLocalY+0.02)
       });
     } else {
-      // 壁が見つからない場合はエッジ端付近で直下(フォールバック)。
-      // 軒の出ゼロで壁と重なる場合に備え、位置候補を離隔チェックしながら探す
-      var fx=null, fz=null;
-      var fbTries=[[0.08,0],[0.08,0.08],[0.08,0.13],[len*0.5,0],[len*0.5,0.08]];
+      // 壁コーナーが無い場合のフォールバック: エッジ沿いに「壁の連続性」を満たす位置を探す。
+      // どこにも無ければこのエッジは軒樋のみ(宙吊りの竪樋は立てない)
+      var fbTries=[0.08, len*0.25, len*0.5, len*0.75, len-0.08];
       for(var fi=0; fi<fbTries.length; fi++){
-        var tAl=Math.min(len-0.08,fbTries[fi][0]), oOut=fbTries[fi][1];
-        var cx0=e.x1+ex*(tAl/len)-nx*oOut, cz0=e.z1+ez*(tAl/len)-nz*oOut;
-        var wpf=roofLocalToWorldMm(it,cx0,cz0);
-        if(downspoutClearOfWalls(wpf.x,wpf.y,topWorldY,0)){ fx=cx0; fz=cz0; break; }
+        var tAl=Math.max(0.08,Math.min(len-0.08,fbTries[fi]));
+        for(var oi=0; oi<3; oi++){
+          var oOut=[0,0.08,0.13][oi];
+          var cx0=e.x1+ex*(tAl/len)-nx*oOut, cz0=e.z1+ez*(tAl/len)-nz*oOut;
+          var wpf=roofLocalToWorldMm(it,cx0,cz0);
+          if(!downspoutClearOfWalls(wpf.x,wpf.y,topWorldY,0)) continue;
+          var fobs=downspoutObstacleInfo(it,cx0,cz0,topWorldY);
+          var fstop=(fobs===null)?0:fobs.stop;
+          if(!downspoutWallSupport(wpf.x,wpf.y,topWorldY,fstop)) continue;
+          downspouts.push({kind:'straight', x:cx0, z:cz0, ax:null, az:null, ay:e.y+gutterY-rG*0.5,
+            bottomY:(fobs===null)?groundLocalY:(fobs.stop+groundLocalY+0.02)});
+          fi=fbTries.length; // 二重ループ脱出
+          break;
+        }
       }
-      if(fx===null){ fx=e.x1+ex*(0.08/len)-nx*0.13; fz=e.z1+ez*(0.08/len)-nz*0.13; }
-      var fobs=downspoutObstacleInfo(it,fx,fz,topWorldY);
-      downspouts.push({kind:'straight', x:fx, z:fz, ax:null, az:null, ay:e.y+gutterY-rG*0.5,
-        bottomY:(fobs===null)?groundLocalY:(fobs.stop+groundLocalY+0.02)});
     }
   });
   // 重複排除: 同一屋根内の近接候補に加え、屋根をまたいだ同一コーナーの重複も
@@ -9960,9 +9998,10 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     }
     var topY=p.ay;
     var elbowDropY=topY;
+    var stub=0.12; // 集水器からの垂直落とし口
     if(p.kind==='elbow'){
       var horiz=Math.hypot(p.x-p.ax,p.z-p.az);
-      elbowDropY=topY-Math.max(0.08,horiz); // 45度勾配で壁面上端へ
+      elbowDropY=topY-stub-Math.max(0.06,horiz); // 垂直スタブ+45度の呼び樋で壁面上端へ
     }
     var bottomY=(p.bottomY===undefined)?groundLocalY:p.bottomY;
     var h=elbowDropY-bottomY;
@@ -9978,7 +10017,9 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     placed.push(p);
     _downspoutRegistry.push({x:wp.x,y:wp.y,top:wTop,bottom:wBottom});
     if(p.kind==='elbow'){
-      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.x,y:elbowDropY,z:p.z},rP,gutterMat);
+      // 集水器の垂直スタブ → 45度の呼び樋 → 壁面へ
+      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.ax,y:topY-stub,z:p.az},rP,gutterMat);
+      addPipeBetween(grp,{x:p.ax,y:topY-stub,z:p.az},{x:p.x,y:elbowDropY,z:p.z},rP,gutterMat);
     }
     // 壁沿いの垂直竪樋(障害物があれば下屋上面で止まる)
     addPipeBetween(grp,{x:p.x,y:elbowDropY,z:p.z},{x:p.x,y:bottomY,z:p.z},rP,gutterMat);
