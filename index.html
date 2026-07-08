@@ -3153,6 +3153,13 @@ var WINDOW_STD_PRESETS=[
 ];
 function windowStdSill(p){ return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
 // LIXILアルミ樹脂複合サッシ風カラー(シャイングレーがカタログ標準色)。未設定(undefined)時は既存プラン互換のため現行色を維持する。
+// 室内照明の色温度プリセット(JIS光色区分の近似色)
+var LIGHT_KELVIN_PRESETS=[
+  {label:'電球色', color:'#ffd9a6'},
+  {label:'温白色', color:'#ffe9cc'},
+  {label:'昼白色', color:'#fff8f0'},
+  {label:'昼光色', color:'#eef3ff'}
+];
 var SASH_COLORS=[
   {hex:'#9a9da1', label:'シャイングレー'},
   {hex:'#22252a', label:'ブラック'},
@@ -4209,6 +4216,12 @@ function updateProps(){
     });
     html += '</select></div>';
     html += '<div class="pr"><div class="pl">ライトカラー</div><input class="pi" type="color" value="'+(it.lightColor||'#fff6dd')+'" onchange="updateSelectedProp(\'lightColor\',this.value)"></div>';
+    html += '<div class="pr"><div class="pl">色温度プリセット</div><div style="display:flex;gap:4px;flex-wrap:wrap">';
+    LIGHT_KELVIN_PRESETS.forEach(function(k){
+      var active=(it.lightColor||'').toLowerCase()===k.color;
+      html += '<button type="button" class="pbtn sec" style="margin-top:0;padding:4px 6px;font-size:10px;background:'+k.color+';color:#333;border:'+(active?'2px solid #e94560':'1px solid #999')+'" onclick="updateSelectedProp(\'lightColor\',\''+k.color+'\')">'+k.label+'</button>';
+    });
+    html += '</div></div>';
     html += '<div class="pr"><div class="pl">明るさ</div><input class="pi" type="number" min="0" max="3" step="0.05" value="'+Number(it.lightIntensity||0).toFixed(2)+'" onchange="updateSelectedProp(\'lightIntensity\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">光の届く距離 (mm)</div><input class="pi" type="number" min="500" max="12000" step="100" value="'+Math.round(it.lightRange||4500)+'" onchange="updateSelectedProp(\'lightRange\',+this.value)"></div>';
     if(lk!=='ceiling'){
