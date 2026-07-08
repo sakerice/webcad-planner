@@ -14,7 +14,9 @@
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+  "three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+  "postprocessing":"https://cdn.jsdelivr.net/npm/postprocessing@6.36.0/build/index.js"
 }}
 </script>
 <script type="module">
@@ -24,7 +26,20 @@ import * as THREE_NS from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RGBELoader} from 'three/addons/loaders/RGBELoader.js';
-window.THREE = Object.assign({}, THREE_NS, {OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader});
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+window.THREE = Object.assign({}, THREE_NS, {
+  OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader,
+  EffectComposer: EffectComposer, RenderPass: RenderPass, OutputPass: OutputPass,
+  UnrealBloomPass: UnrealBloomPass
+});
+// N8AO(高品質AO)は任意ロード: 失敗してもアプリは素のレンダラーで動作する
+try {
+  const mod = await import('https://cdn.jsdelivr.net/npm/n8ao@1/dist/N8AO.js');
+  window.THREE.N8AOPass = mod.N8AOPass;
+} catch(e) { console.warn('N8AO load failed; AO disabled', e); }
 window.dispatchEvent(new Event('three-ready'));
 </script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
@@ -6573,6 +6588,7 @@ function disposeMat(m,seenMat) {
 }
 
 var composer = null; // single declaration
+var _bloomPass = null; // 夜景のみ有効化(HDR閾値>1の物理的選択Bloom)
 function lerpHexColor(a,b,t){
   function px(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   var ca=px(a), cb=px(b);
@@ -6758,10 +6774,28 @@ function init3D(){
   orbit.panSpeed=0.5;  // natural pan: scene follows the swipe/finger direction
   orbit.minDistance=2;
   orbit.maxDistance=80;
-  // ポストプロセスは不使用: Bloomは明部の滲み、SAOはエッジ周りの黒いハローで
-  // 輪郭の明瞭さを損なうため全て撤去し、素のレンダラー(sRGB出力)で描画する。
-  // composer=null のため render3DNow() は ren.render() 経路を使う
-  composer = null;
+  // ポストプロセス(r169): RenderPass → N8AO(高品質AO・エッジハローなし) → 夜景のみBloom → OutputPass。
+  // タッチデバイス(iPad等)は負荷と発熱を抑えるため素のレンダラーのまま。
+  // HDRリニア空間でthreshold>1のBloomは「白より明るい光源周りだけ」が発光する物理的な選択Bloom
+  var _postCapable=!((typeof navigator!=='undefined') && (navigator.maxTouchPoints||0)>0);
+  if(_postCapable && THREE.EffectComposer && THREE.N8AOPass){
+    try {
+      composer = new THREE.EffectComposer(ren);
+      composer.addPass(new THREE.RenderPass(sc3, camExt));
+      var n8ao = new THREE.N8AOPass(sc3, camExt, wrap.clientWidth, wrap.clientHeight);
+      n8ao.configuration.aoRadius = 0.7;
+      n8ao.configuration.intensity = 2.0;
+      n8ao.configuration.distanceFalloff = 0.7;
+      n8ao.configuration.screenSpaceRadius = false;
+      n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
+      n8ao.configuration.halfRes = false;
+      composer.addPass(n8ao);
+      _bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.25, 0.3, 1.4);
+      _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
+      composer.addPass(_bloomPass);
+      composer.addPass(new THREE.OutputPass());
+    } catch(e) { console.error('Composer init failed', e); composer = null; }
+  }
 
   ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
   ren.domElement.addEventListener('pointerdown',function(e){
@@ -7569,6 +7603,7 @@ function applyLightingToScene(refreshSky){
       if(_skyMesh) _skyMesh.visible=true;
     }
   }
+  if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night');
   syncLightPanelUi();
   if(typeof invalidate3D==='function') invalidate3D();
 }
