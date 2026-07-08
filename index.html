@@ -8957,10 +8957,11 @@ function makeWallGlassMaterial(){
     color:0xb8ddff,
     transparent:true,
     opacity:0.38,
-    roughness:0.04,
+    roughness:0.14,        // 低すぎると空テクスチャの雲筋が縞状に映り込む
     metalness:0.0,
     transmission:0.35,
     thickness:0.02,
+    envMapIntensity:0.5,
     side:THREE.DoubleSide,
     depthWrite:false
   });
@@ -9582,9 +9583,9 @@ function build3DRoofItem(grp,it,w3,d3){
     map:matParams.map||null,
     color:matParams.color||ap.color||'#2a2a30',
     side:THREE.DoubleSide,
-    roughness:0.76,
-    metalness:0.02,
-    envMapIntensity:0.2
+    roughness:0.92,       // 屋根材はマット(暗色でもピアノブラック化しない)
+    metalness:0.0,
+    envMapIntensity:0.06
   });
   var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
   var skirtMat=makeExteriorLightingMaterial({color:'#d8d5ce',side:THREE.DoubleSide,roughness:0.88,envMapIntensity:0.12});
@@ -9750,7 +9751,7 @@ function addPipeBetween(grp,a,b,r,mat){
   var vx=b.x-a.x, vy=b.y-a.y, vz=b.z-a.z;
   var len=Math.sqrt(vx*vx+vy*vy+vz*vz);
   if(len<0.02) return;
-  var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,8),mat);
+  var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,14),mat);
   m.position.set((a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(vx/len,vy/len,vz/len));
   m.castShadow=false; m.receiveShadow=false;
@@ -9789,7 +9790,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     if(nx*(-midx)+nz*(-midz)<0){ nx=-nx; nz=-nz; }
     // 半丸軒樋: 鼻隠し面の外側に少し出して吊る(屋根面と重ならない)
     var gx=midx-nx*rG*0.8, gz=midz-nz*rG*0.8;
-    var geo=new THREE.CylinderGeometry(rG,rG,len,8,1,true,Math.PI,Math.PI);
+    var geo=new THREE.CylinderGeometry(rG,rG,len,12,1,true,Math.PI,Math.PI);
     var m=new THREE.Mesh(geo,gutterMat);
     m.position.set(gx, e.y+gutterY, gz);
     m.rotation.z=Math.PI/2;
