@@ -10783,20 +10783,20 @@ function build3DKitchen(grp,w,d){
   var burnerMat=new THREE.MeshStandardMaterial({color:0x303030,roughness:0.4,metalness:0.5});
   _B(grp,cab,0,0.43,0,w,0.86,d);_B(grp,cnt,0,0.882,0.01,w+0.02,0.03,d+0.04);
   for(var i=0;i<Math.floor(w/0.45);i++){_B(grp,hnd,-w/2+0.22+i*0.45,0.65,d/2+0.01,0.25,0.025,0.02);}
-  // シンク凹み(暗色ボックス)
+  // シンク凹み(暗色ボックス、上面=天板上面0.897+0.001=0.898で開口を見せる)
   var sinkX=-w*0.28;
-  _B(grp,sinkMat,sinkX,0.868,0.02,w*0.22,0.03,d*0.42);
+  _B(grp,sinkMat,sinkX,0.883,0.02,w*0.22,0.03,d*0.42);
   // 水栓(細Cylinder L字)
   var riser=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.16,8),faucetMat);
   riser.position.set(sinkX,0.965,d/2-0.1); riser.castShadow=true; grp.add(riser);
   var spout=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.13,8),faucetMat);
   spout.rotation.z=Math.PI/2; spout.position.set(sinkX+0.065,1.035,d/2-0.1); spout.castShadow=true; grp.add(spout);
-  // コンロ面(黒スラブ+円3つ)
+  // コンロ面(黒スラブ+円3つ、スラブ上面=天板上面0.897+0.002=0.899でビルトインの縁を表現)
   var stoveX=w*0.22;
-  _B(grp,stoveMat,stoveX,0.8895,-d*0.02,w*0.32,0.015,d*0.5);
+  _B(grp,stoveMat,stoveX,0.8915,-d*0.02,w*0.32,0.015,d*0.5);
   [[stoveX-0.09,-d*0.16],[stoveX-0.09,d*0.06],[stoveX+0.09,-d*0.06]].forEach(function(b){
     var burner=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.008,8),burnerMat);
-    burner.position.set(b[0],0.899,b[1]); burner.castShadow=true; grp.add(burner);
+    burner.position.set(b[0],0.902,b[1]); burner.castShadow=true; grp.add(burner);
   });
   _B(grp,up,0,1.72,-d*0.25,w,0.62,d*0.32);
   for(var i=0;i<Math.floor(w/0.45);i++){_B(grp,hnd,-w/2+0.22+i*0.45,1.42,-d*0.1,0.25,0.025,0.02);}
@@ -10837,8 +10837,8 @@ function build3DBath(grp,w,d){
   _B(grp,new THREE.MeshStandardMaterial({color:0x24242a,roughness:0.3,metalness:0.05}),0,cavY,0,w-wallT*2,cavH,d-wallT*2);
   // 水面
   _B(grp,new THREE.MeshStandardMaterial({color:0xb0d8f0,transparent:true,opacity:0.7,roughness:0.05,metalness:0.1}),0,floorT+cavH-0.03,0,(w-wallT*2)*0.94,0.06,(d-wallT*2)*0.94);
-  // 縁の丸み(上縁の細いボックス)
-  _B(grp,new THREE.MeshStandardMaterial({color:0xfbfbff,roughness:0.15,metalness:0.05}),0,outerH-0.02,0,w+0.03,0.04,d+0.03);
+  // 縁の丸み(上縁の細いボックス、上面=外形上面+2mmでz-fighting回避)
+  _B(grp,new THREE.MeshStandardMaterial({color:0xfbfbff,roughness:0.15,metalness:0.05}),0,outerH-0.018,0,w+0.03,0.04,d+0.03);
   var ch=new THREE.MeshStandardMaterial({color:0xd0d0d0,roughness:0.1,metalness:0.8});
   _B(grp,ch,-w*0.42,0.75,0,0.05,0.14,0.05);_B(grp,ch,-w*0.42,0.82,d*0.12,0.04,0.04,0.22);
 }
