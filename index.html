@@ -3081,7 +3081,7 @@ var ISIZES = {
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:3000}, 'utility-pole':{w:350,d:350},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
   'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
-  window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:900,d:200},
+  window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:940,d:200},
   'door-opening':{w:780,d:160}, 'door-opening-arch':{w:900,d:160},
   'site-rect':{w:10000,d:8000},
   'roof':{w:7280,d:4095}
@@ -3100,6 +3100,26 @@ var WINDOW_STD_PRESETS=[
   {id:'25620', label:'25620 掃き出し W2600×H2030',    w:2600, h:2030, kind:'window-door'}
 ];
 function windowStdSill(p){ return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
+// 室内開きドアの規格幅プリセット(LIXIL実勢値ベース)
+var DOOR_STD_WIDTHS=[
+  {w:650, label:'W650 (トイレ・洗面)'},
+  {w:750, label:'W750 (標準)'},
+  {w:780, label:'W780 (標準・広め)'}
+];
+function applyDoorWidthPreset(w){
+  var it=ST.selected;
+  if(!it || !isInteriorSwingDoorType(it.type)) return;
+  if(isObjectLocked(it)){ updateProps(); return; }
+  w=Number(w);
+  if(!isFinite(w) || w<=0) return;
+  saveState();
+  var oldCx=(it.x||0)+(it.w||0)/2, oldCy=(it.y||0)+(it.d||0)/2;
+  it.w=w; it.d=w;
+  it.x=oldCx-it.w/2; it.y=oldCy-it.d/2;
+  draw2d();
+  if(ren) rebuild3D();
+  updateProps();
+}
 function applyWindowStdPreset(id){
   var it=ST.selected;
   if(!it || !isWindowLikeType(it.type)) return;
@@ -4050,6 +4070,13 @@ function updateProps(){
   }
   if(isDoorLikeOpeningType(it.type)){
     html += '<div class="ph" style="margin-top:12px">ドア・開口高さ</div>';
+    if(isInteriorSwingDoorType(it.type)){
+      var doorWOpts='<option value="">規格幅を選択...</option>';
+      DOOR_STD_WIDTHS.forEach(function(p){
+        doorWOpts+='<option value="'+p.w+'"'+(it.w===p.w?' selected':'')+'>'+p.label+'</option>';
+      });
+      html += '<div class="pr"><div class="pl">ドア幅規格 (LIXIL実勢値)</div><select class="pi" onchange="applyDoorWidthPreset(this.value)">'+doorWOpts+'</select></div>';
+    }
     html += '<div class="pr"><div class="pl">高さ (mm)</div><input class="pi" type="number" min="300" max="3200" step="10" value="'+Math.round(doorHeightMm(it))+'" onchange="updateSelectedProp(\'doorHeight\',+this.value)"></div>';
     if(isDoorPanelType(it.type)){
       html += '<div class="pr"><div class="pl">開閉状態</div><select class="pi" onchange="updateSelectedProp(\'doorOpenState\',this.value)">';
@@ -4566,7 +4593,7 @@ function mkItem(type,x,y,rot,floor,w,d){
     item.windowHeight=type==='window-door'?2100:1200;
   }
   if(isDoorLikeOpeningType(type)){
-    item.doorHeight=type==='door-front'?2200:2000;
+    item.doorHeight=type==='door-front'?2330:2000;
     if(isDoorPanelType(type)) item.doorOpenState='open';
   }
   if(canSetItemElevation(item)) item.elev=0;
@@ -8137,7 +8164,8 @@ function isArchOpeningType(type){
 }
 function doorHeightMm(it){
   var v=Number(it&&it.doorHeight);
-  return isFinite(v)?Math.max(300,Math.min(3200,v)):2000;
+  if(isFinite(v)) return Math.max(300,Math.min(3200,v));
+  return (it && it.type==='door-front') ? 2330 : 2000;
 }
 function doorOpenState(it){
   return it&&it.doorOpenState==='closed'?'closed':'open';
@@ -9286,7 +9314,7 @@ function getConnectedStairParts(seed){
 }
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
-  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U,steps:getStairStepCount(it)};
+  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U,steps:stairStepCount(FLOOR_H)};
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
@@ -9326,6 +9354,13 @@ function getStairStepCount(it){
   var baseRun=(ISIZES['stair-corner']&&ISIZES['stair-corner'].d)||910;
   var tread=baseRun/3;
   return Math.max(3,Math.round((it.d||ISIZES.stair.d)/tread));
+}
+// 建築基準法(蹴上げ上限230mm)・目標蹴上げ200mmから段数を算出。
+// 単独の1フライト階段(stairRiseInfoのgroup.length<=1)の3D段数決定に使用。
+function stairStepCount(totalRiseMm){
+  var n=Math.round(totalRiseMm/200);
+  while(n>1 && totalRiseMm/n>230) n++;
+  return Math.max(3,n);
 }
 
 function build3DRoofItem(grp,it,w3,d3){
