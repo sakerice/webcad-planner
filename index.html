@@ -3165,9 +3165,13 @@ var WINDOW_STD_PRESETS=[
   {id:'16511', label:'16511 引違い W1690×H1170',      w:1690, h:1170, kind:'window'},
   {id:'16513', label:'16513 引違い W1690×H1370',      w:1690, h:1370, kind:'window'},
   {id:'16520', label:'16520 掃き出し W1690×H2030',    w:1690, h:2030, kind:'window-door'},
-  {id:'25620', label:'25620 掃き出し W2600×H2030',    w:2600, h:2030, kind:'window-door'}
+  {id:'25620', label:'25620 掃き出し W2600×H2030',    w:2600, h:2030, kind:'window-door'},
+  {id:'F03613', label:'FIX 03613 W405×H1370',        w:405,  h:1370, kind:'window', win:'fix'},
+  {id:'F06013', label:'FIX 06013 W600×H1370',        w:600,  h:1370, kind:'window', win:'fix'},
+  {id:'F11913', label:'FIX 11913 W1235×H1370',       w:1235, h:1370, kind:'window', win:'fix'},
+  {id:'F16503', label:'FIX 16503 W1690×H370 (高窓)',  w:1690, h:370,  kind:'window', win:'fix', sill:1800}
 ];
-function windowStdSill(p){ return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
+function windowStdSill(p){ if(p.sill!==undefined) return p.sill; return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
 // LIXILアルミ樹脂複合サッシ風カラー(シャイングレーがカタログ標準色)。未設定(undefined)時は既存プラン互換のため現行色を維持する。
 // 室内照明の色温度プリセット(JIS光色区分の近似色)
 var LIGHT_KELVIN_PRESETS=[
@@ -3215,6 +3219,10 @@ function applyWindowStdPreset(id){
   it.windowSill=windowStdSill(p);
   it.windowHeight=p.h;
   it.windowStd=p.id;
+  if(it.type==='window'){
+    if(p.win==='fix') it.windowKind='fix';
+    else if(p.win===undefined && p.kind==='window') it.windowKind='sliding';
+  }
   normalizeWindowVerticalProps(it,'windowHeight');
   draw2d();
   if(ren) rebuild3D();
@@ -3405,10 +3413,13 @@ function getOpeningModelToolPreset(tool){
   if(tool.indexOf(OPENING_WINDOW_MODEL_TOOL_PREFIX)===0){
     var windowModelId=tool.slice(OPENING_WINDOW_MODEL_TOOL_PREFIX.length);
     if(windowModelId==='default') return {
-      kind:'window', baseType:'window', openingModel:'', model:null, label:'窓: デフォルト'
+      kind:'window', baseType:'window', openingModel:'', model:null, label:'窓: 引違い'
+    };
+    if(windowModelId==='fix') return {
+      kind:'window', baseType:'window', openingModel:'', model:null, windowKind:'fix', label:'窓: FIX(はめ殺し)'
     };
     if(windowModelId==='window-door') return {
-      kind:'window', baseType:'window-door', openingModel:'', model:null, label:'窓: 引き違い'
+      kind:'window', baseType:'window-door', openingModel:'', model:null, label:'窓: 掃き出し'
     };
     var windowModel=getFmpItem(windowModelId);
     if(!windowModel || windowModel.category!=='窓') return null;
@@ -3453,8 +3464,9 @@ function renderOpeningWindowModelToolMenu(){
   if(!mount) return;
   var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon">🪟</span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
-  html+=openingToolTileHtml(openingWindowModelToolId(''),'デフォルト','🪟',null,'opening-model-default-tile opening-window-tile');
-  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'引き違い','⇔',null,'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','🪟',null,'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','▢',null,'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'掃き出し','⇔',null,'opening-model-default-tile opening-window-tile');
   windows.forEach(function(item){
     html+=openingToolTileHtml(openingWindowModelToolId(item.id),item.name,'🪟',item,'opening-window-tile');
   });
@@ -4147,6 +4159,13 @@ function updateProps(){
     WINDOW_STD_PRESETS.forEach(function(p){
       stdOpts+='<option value="'+p.id+'"'+(it.windowStd===p.id?' selected':'')+'>'+p.label+'</option>';
     });
+    if(it.type==='window'){
+      var wk=it.windowKind||'sliding';
+      html += '<div class="pr"><div class="pl">窓種別</div><select class="pi" onchange="updateSelectedProp(\'windowKind\',this.value)">';
+      html += '<option value="sliding"'+(wk==='sliding'?' selected':'')+'>引違い</option>';
+      html += '<option value="fix"'+(wk==='fix'?' selected':'')+'>FIX (はめ殺し)</option>';
+      html += '</select></div>';
+    }
     html += '<div class="pr"><div class="pl">サッシ規格 (LIXIL呼称)</div><select class="pi" onchange="applyWindowStdPreset(this.value)">'+stdOpts+'</select></div>';
     var sashColorOpts='<option value=""'+(!it.sashColor?' selected':'')+'>標準 (ダークグレー)</option>';
     SASH_COLORS.forEach(function(sc){
@@ -9354,8 +9373,9 @@ function buildWinFrames(flFilt){
         addBox(frameMat,0,wh,0,ww+0.1,0.05,wt+0.05);
         addBox(frameMat,-ww/2,wh/2,0,0.05,wh,wt+0.05);
         addBox(frameMat, ww/2,wh/2,0,0.05,wh,wt+0.05);
-        if(it.type==='window'){
+        if(it.type==='window' && (it.windowKind||'sliding')!=='fix'){
           // 引違い窓の召合せ框(中桟): 幅30mm相当、ガラス中央。window-door は下の専用サッシ表現側で同等の框を持つ。
+          // FIX窓(windowKind==='fix')は一枚ガラスのため框なし
           addBox(frameMat,0,wh/2,0,0.03,wh-0.08,wt+0.03);
         }
       }
@@ -11842,6 +11862,11 @@ function applyOpeningPresetToItem(it,preset){
     it.x=oldCx-it.w/2;
     it.y=oldCy-it.d/2;
   }
+  // 窓種別(引違い/FIX)をツールプリセットから反映
+  if(preset.kind==='window'){
+    if(preset.windowKind) it.windowKind=preset.windowKind;
+    else delete it.windowKind;
+  }
   applyOpeningModelToItem(it,preset.openingModel);
   return true;
 }
@@ -12180,6 +12205,7 @@ function placeItem(type,wx,wy){
   saveState();
   var sz=getItemDefaultSize(placeType);
   var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly?1:ST.floor);
+  if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
   if(openingPreset) applyOpeningModelToItem(it,openingPreset.openingModel);
   applyDefaultPlacementElevation(it);
   DATA.items.push(it);ST.placingRot=0;
