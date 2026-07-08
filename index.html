@@ -7890,6 +7890,16 @@ function textureStateLabel(tex){
   return tex ? '設定済み' : 'なし';
 }
 
+// 外部設備ディテール(雨樋・水切り等)の表示トグル。未定義時はtrue(既存プラン互換)
+function exteriorDetailEnabled(key){
+  if(!DATA.exteriorDetail) return true;
+  return DATA.exteriorDetail[key]!==false;
+}
+function setExteriorDetail(key,on){
+  if(!DATA.exteriorDetail) DATA.exteriorDetail={};
+  DATA.exteriorDetail[key]=!!on;
+  if(ren) rebuild3D();
+}
 function renderExteriorWallPanel(mode){
   mode=mode||APPEARANCE_PANEL_MODE||'exterior';
   var body=document.getElementById('exterior-wall-panel-body');
@@ -7972,6 +7982,10 @@ function renderExteriorWallPanel(mode){
     );
     html += '</div>';
   }
+  html += '<div style="border-top:1px solid #22375f;padding-top:8px;margin-top:8px">';
+  html += '<label style="display:flex;align-items:center;gap:6px;color:#cce;font-size:11px;font-weight:bold"><input type="checkbox" '+(exteriorDetailEnabled('gutters')?'checked':'')+' onchange="setExteriorDetail(\'gutters\',this.checked)"> 雨樋・排水を表示</label>';
+  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:4px">屋根の軒先に雨樋・竪樋・雨水枡を自動生成します。</div>';
+  html += '</div>';
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
   body.innerHTML=html;
   return;
@@ -9515,6 +9529,74 @@ function build3DRoofItem(grp,it,w3,d3){
   gableEnd(-W/2,'x'); gableEnd(W/2,'x');
 }
 
+// ─── 雨樋・竪樋・雨水枡の自動生成 ───
+// 屋根タイプごとに雨が落ちる軒先エッジを列挙する {x1,z1,x2,z2,y}(屋根グループローカル座標)
+function roofEaveEdges(it,W,D){
+  var type=it.roofType||'gable';
+  var edges=[];
+  var y=0; // 軒先は屋根アイテムのローカル基準面(baseY)
+  if(type==='flat'||type==='hip'||type==='hip-ridge'||type==='hip-ridge-long'){
+    edges.push({x1:-W/2,z1:-D/2,x2:W/2,z2:-D/2,y:y});
+    edges.push({x1:W/2,z1:D/2,x2:-W/2,z2:D/2,y:y});
+    edges.push({x1:-W/2,z1:D/2,x2:-W/2,z2:-D/2,y:y});
+    edges.push({x1:W/2,z1:-D/2,x2:W/2,z2:D/2,y:y});
+  } else if(type==='mono'){
+    edges.push({x1:-W/2,z1:-D/2,x2:W/2,z2:-D/2,y:y}); // 片流れは低い側のみ
+  } else if(type==='gable-y'){
+    edges.push({x1:-W/2,z1:D/2,x2:-W/2,z2:-D/2,y:y});
+    edges.push({x1:W/2,z1:-D/2,x2:W/2,z2:D/2,y:y});
+  } else { // gable
+    edges.push({x1:-W/2,z1:-D/2,x2:W/2,z2:-D/2,y:y});
+    edges.push({x1:W/2,z1:D/2,x2:-W/2,z2:D/2,y:y});
+  }
+  return edges;
+}
+function build3DRoofGutters(grp,it,W,D,groundLocalY){
+  // マテリアルは build3D 毎に dispose されるため都度生成(共有キャッシュ禁止)
+  var gutterMat=new THREE.MeshStandardMaterial({color:0x6b6e73,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
+  var pitMat=new THREE.MeshStandardMaterial({color:0x7c7f83,roughness:0.8,metalness:0.1});
+  var rG=0.055; // 軒樋半径(半丸105相当)
+  var rP=0.03;  // 竪樋φ60
+  var edges=roofEaveEdges(it,W,D);
+  var downspoutAt=[];
+  edges.forEach(function(e){
+    var ex=e.x2-e.x1, ez=e.z2-e.z1;
+    var len=Math.hypot(ex,ez);
+    if(len<0.3) return;
+    // 半丸軒樋(下半分シェル、開口が上向き)
+    var geo=new THREE.CylinderGeometry(rG,rG,len,8,1,true,Math.PI,Math.PI);
+    var m=new THREE.Mesh(geo,gutterMat);
+    m.position.set((e.x1+e.x2)/2, e.y-0.03, (e.z1+e.z2)/2);
+    m.rotation.z=Math.PI/2;
+    m.rotation.y=-Math.atan2(ez,ex);
+    m.castShadow=false; m.receiveShadow=false;
+    grp.add(m);
+    // 内向き法線(建物中心方向): 竪樋を壁際に寄せるためのオフセット
+    var nx=-ez/len, nz=ex/len;
+    var midx=(e.x1+e.x2)/2, midz=(e.z1+e.z2)/2;
+    if(nx*(-midx)+nz*(-midz)<0){ nx=-nx; nz=-nz; }
+    // エッジ始端から150mmの位置に竪樋(軒の出分150mm内側へ)
+    var t=0.15/len;
+    downspoutAt.push({
+      x:e.x1+ex*t+nx*0.15,
+      z:e.z1+ez*t+nz*0.15,
+      y:e.y-0.03
+    });
+  });
+  downspoutAt.forEach(function(p){
+    var h=p.y-groundLocalY;
+    if(h<0.5) return;
+    var pipe=new THREE.Mesh(new THREE.CylinderGeometry(rP,rP,h,8),gutterMat);
+    pipe.position.set(p.x, p.y-h/2, p.z);
+    pipe.castShadow=false; pipe.receiveShadow=false;
+    grp.add(pipe);
+    // 雨水枡(150角)
+    var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),pitMat);
+    pit.position.set(p.x, groundLocalY+0.02, p.z);
+    pit.castShadow=false;
+    grp.add(pit);
+  });
+}
 function claimInteriorShadowLightSlot(it){
   if(!isInt || !it || it.lightCastShadow===false) return false;
   if(_activeInteriorShadowLightCount>=MAX_INTERIOR_SHADOW_LIGHTS) return false;
@@ -9644,6 +9726,9 @@ function buildItem3D(it){
   }
   if(it.type==='roof'){
     build3DRoofItem(grp,it,it.w*U,it.d*U);
+    if(!isInt && exteriorDetailEnabled('gutters')){
+      build3DRoofGutters(grp,it,it.w*U,it.d*U,-grp.position.y);
+    }
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
   }
