@@ -14,16 +14,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SAOShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/DepthLimitedBlurShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/UnpackDepthRGBAShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SAOPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
@@ -6752,28 +6742,10 @@ function init3D(){
   orbit.panSpeed=0.5;  // natural pan: scene follows the swipe/finger direction
   orbit.minDistance=2;
   orbit.maxDistance=80;
-  // Post-processing integration
-  if(THREE.EffectComposer && THREE.RenderPass){
-    try {
-      composer = new THREE.EffectComposer(ren);
-      composer.addPass(new THREE.RenderPass(sc3, camExt));
-      
-      // Bloom は撤去: どのプリセットでも明部の滲みが全体をボケさせ、
-      // 住宅シミュレータとして輪郭の明瞭さを損なうため使用しない
-      // SAO: タッチデバイス(iPad等)はGPU負荷と発熱を抑えるためなし(Bloom+ガンマ補正のみ)
-      // デスクトップはフル解像度(ハーフ解像度はエッジ周りのボケが目立つため不採用)
-      var _saoCapable=!((typeof navigator!=='undefined') && (navigator.maxTouchPoints||0)>0);
-      if(THREE.SAOPass && _saoCapable) {
-        var sao = new THREE.SAOPass(sc3, camExt, false, true);
-        sao.params.saoBias = 0.5; sao.params.saoIntensity = 0.008; sao.params.saoScale = 15;
-        composer.addPass(sao);
-      }
-      // r128のEffectComposerはリニア出力のままなので最終パスでsRGB変換する
-      if(THREE.GammaCorrectionShader && THREE.ShaderPass) {
-        composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
-      }
-    } catch(e) { console.error("Composer init failed", e); composer = null; }
-  }
+  // ポストプロセスは不使用: Bloomは明部の滲み、SAOはエッジ周りの黒いハローで
+  // 輪郭の明瞭さを損なうため全て撤去し、素のレンダラー(sRGB出力)で描画する。
+  // composer=null のため render3DNow() は ren.render() 経路を使う
+  composer = null;
 
   ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
   ren.domElement.addEventListener('pointerdown',function(e){
@@ -9743,6 +9715,24 @@ function roofSurfaceHeightAt(o,lx,lz){
   var ridgeRise=tanP*Math.min(W,D)/2;
   return Math.min(ridgeRise, tanP*Math.max(0,Math.min(W/2-Math.abs(lx), D/2-Math.abs(lz))));
 }
+// 竪樋(ワールドmm位置)が全ての壁の躯体から離れているか(半壁厚+管半径+隙間)
+function downspoutClearOfWalls(wxMm,wyMm,topWorldY,bottomWorldY){
+  var px=wxMm/1000, pz=wyMm/1000;
+  var walls=DATA.walls||[];
+  for(var i=0;i<walls.length;i++){
+    var w=walls[i];
+    var fBase=floorBaseY(w.floor||1), fTop=fBase+wallFullHeightM(w.floor||1);
+    if(bottomWorldY>fTop-0.05 || topWorldY<fBase+0.05) continue;
+    var ax=w.x1/1000, az=w.y1/1000, bx=w.x2/1000, bz=w.y2/1000;
+    var dx=bx-ax, dz=bz-az;
+    var L2=dx*dx+dz*dz; if(L2<1e-6) continue;
+    var t=((px-ax)*dx+(pz-az)*dz)/L2; t=Math.max(0,Math.min(1,t));
+    var dist=Math.hypot(px-(ax+dx*t), pz-(az+dz*t));
+    var half=((w.thick||120)/1000)/2;
+    if(dist<half+0.035) return false; // 管半径30mm+隙間5mm
+  }
+  return true;
+}
 // 竪樋の降下経路上にある障害物。{top:最上面ワールドY(m), kind:'roof'|'balcony'} / なければ null
 function downspoutObstacleInfo(it,xl,zl,topWorldY){
   var wp=roofLocalToWorldMm(it,xl,zl);
@@ -9862,10 +9852,18 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     var ux=ex/len, uz=ez/len;
     for(var ci=0; ci<candidates.length; ci++){
       var cand=candidates[ci];
-      // 竪樋位置: 壁芯から外へ(半壁厚60+管半径30+隙間20mm)+コーナーの直交壁を避けてスライド
-      var slide=(cand.t<len/2)?0.10:-0.10;
-      cand.px=cand.x-nx*0.11+ux*slide;
-      cand.pz=cand.z-nz*0.11+uz*slide;
+      // 竪樋位置: 壁芯から外へ(半壁厚60+管半径30+隙間20mm)+コーナーの直交壁を避けてスライド。
+      // 別の壁(間仕切り等)に食い込む場合はスライド方向を反転、それでも駄目なら次候補へ
+      var slideSign=(cand.t<len/2)?1:-1;
+      var found=false;
+      for(var si=0; si<2 && !found; si++){
+        var slide=slideSign*(si===0?0.10:-0.10);
+        var px0=cand.x-nx*0.11+ux*slide, pz0=cand.z-nz*0.11+uz*slide;
+        var wpc=roofLocalToWorldMm(it,px0,pz0);
+        if(!downspoutClearOfWalls(wpc.x,wpc.y,topWorldY,0)) continue;
+        cand.px=px0; cand.pz=pz0; found=true;
+      }
+      if(!found) continue;
       // 降下経路上の障害物チェック — 地面までクリアな候補を優先
       var obsInfo=downspoutObstacleInfo(it,cand.px,cand.pz,topWorldY);
       if(obsInfo===null){ chosen=cand; chosenObs=null; break; }
@@ -9883,9 +9881,17 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         bottomY:(chosenObs===null)?groundLocalY:(chosenObs+groundLocalY+0.02)
       });
     } else {
-      // 壁が見つからない場合はエッジ端で直下(コンテキスト建物等のフォールバック)
-      var t0=0.08/len;
-      var fx=e.x1+ex*t0, fz=e.z1+ez*t0;
+      // 壁が見つからない場合はエッジ端付近で直下(フォールバック)。
+      // 軒の出ゼロで壁と重なる場合に備え、位置候補を離隔チェックしながら探す
+      var fx=null, fz=null;
+      var fbTries=[[0.08,0],[0.08,0.08],[0.08,0.13],[len*0.5,0],[len*0.5,0.08]];
+      for(var fi=0; fi<fbTries.length; fi++){
+        var tAl=Math.min(len-0.08,fbTries[fi][0]), oOut=fbTries[fi][1];
+        var cx0=e.x1+ex*(tAl/len)-nx*oOut, cz0=e.z1+ez*(tAl/len)-nz*oOut;
+        var wpf=roofLocalToWorldMm(it,cx0,cz0);
+        if(downspoutClearOfWalls(wpf.x,wpf.y,topWorldY,0)){ fx=cx0; fz=cz0; break; }
+      }
+      if(fx===null){ fx=e.x1+ex*(0.08/len)-nx*0.13; fz=e.z1+ez*(0.08/len)-nz*0.13; }
       var fobs=downspoutObstacleInfo(it,fx,fz,topWorldY);
       downspouts.push({kind:'straight', x:fx, z:fz, ax:null, az:null, ay:e.y+gutterY-rG*0.5,
         bottomY:(fobs===null)?groundLocalY:(fobs.stop+groundLocalY+0.02)});
