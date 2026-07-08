@@ -6739,6 +6739,12 @@ function init3D(){
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
   wrap.appendChild(ren.domElement);
+  // モバイルでのメモリ圧等によるWebGLコンテキスト喪失から自動復帰する
+  ren.domElement.addEventListener('webglcontextlost',function(e){ e.preventDefault(); },false);
+  ren.domElement.addEventListener('webglcontextrestored',function(){
+    if(sc3){ rebuild3D(); }
+    if(typeof invalidate3D==='function') invalidate3D();
+  },false);
   sc3=new THREE.Scene();
   sc3.fog=new THREE.Fog(0xb8d4f0,80,600);
   var skyGeo=new THREE.SphereGeometry(900,48,24);
@@ -10946,6 +10952,42 @@ function stabilizeOpeningWindowModelClone(clone){
     c.renderOrder=1;
   });
 }
+// タッチ端末(スマホ/タブレット)のGPUメモリ保護: GLBの高解像度テクスチャを上限サイズへ縮小する。
+// 2K-4Kテクスチャを複数展開するとモバイルブラウザのタブがメモリ不足でクラッシュするため必須
+function capModelTextures(root,maxSize){
+  var seen=new Set();
+  root.traverse(function(o){
+    if(!o.isMesh) return;
+    var mats=Array.isArray(o.material)?o.material:[o.material];
+    mats.forEach(function(m){
+      if(!m) return;
+      ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap'].forEach(function(k){
+        var t=m[k];
+        if(!t||!t.image||seen.has(t)) return;
+        seen.add(t);
+        var iw=t.image.width||0, ih=t.image.height||0;
+        var mx=Math.max(iw,ih);
+        if(!mx||mx<=maxSize) return;
+        try{
+          var scale=maxSize/mx;
+          var c=document.createElement('canvas');
+          c.width=Math.max(1,Math.round(iw*scale));
+          c.height=Math.max(1,Math.round(ih*scale));
+          c.getContext('2d').drawImage(t.image,0,0,c.width,c.height);
+          t.image=c;
+          t.needsUpdate=true;
+        }catch(e){ /* ImageBitmap等で描画不可の場合はそのまま */ }
+      });
+    });
+  });
+}
+var _isTouchGpu=(typeof navigator!=='undefined') && (navigator.maxTouchPoints||0)>0;
+// テクスチャ上限: スマホ(短辺<768px)=512, タブレット=1024, PC=無制限
+var _texCapSize=(function(){
+  if(!_isTouchGpu) return 0;
+  var shortSide=Math.min((screen&&screen.width)||1024,(screen&&screen.height)||1024);
+  return shortSide<768?512:1024;
+})();
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
@@ -10953,6 +10995,7 @@ function ensureGltfModel(url){
   _modelLoading[url]=true;
   _modelFailed[url]=false;
   new THREE.GLTFLoader().load(url,function(gltf){
+    if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
     delete _modelFailed[url];
