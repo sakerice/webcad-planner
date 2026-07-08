@@ -2836,6 +2836,7 @@ input[type="color"]::-moz-color-swatch{
       <div class="stool" data-tool="water-heater" onclick="setTool('water-heater')"><span class="sicon">♨</span>給湯器</div>
       <div class="stool" data-tool="meter-box" onclick="setTool('meter-box')"><span class="sicon">🔌</span>電気メーター</div>
       <div class="stool" data-tool="sewer-pit" onclick="setTool('sewer-pit')"><span class="sicon">🕳</span>汚水枡</div>
+      <div class="stool" data-tool="downspout" onclick="setTool('downspout')"><span class="sicon">〡</span>竪樋</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏠 内観・外観 <span>+</span></div>
     <div class="cat-body">
@@ -3125,7 +3126,7 @@ function shouldRenderItemInCurrent3DView(it){
 }
 function item3DBaseY(it){
   if(!it) return 0;
-  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || it.type==='ac-outdoor' || it.type==='water-heater' || it.type==='meter-box' || it.type==='sewer-pit' || isContextExteriorItemType(it.type)) return 0;
+  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || it.type==='ac-outdoor' || it.type==='water-heater' || it.type==='meter-box' || it.type==='sewer-pit' || it.type==='downspout' || isContextExteriorItemType(it.type)) return 0;
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
@@ -3147,6 +3148,7 @@ var ISIZES = {
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:3000}, 'utility-pole':{w:350,d:350},
   'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
+  'downspout':{w:150,d:150},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
   'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150},
   window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:940,d:200},
@@ -3234,7 +3236,7 @@ var ICOLORS = {
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
   tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
-  'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275',
+  'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
   'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
@@ -3645,7 +3647,7 @@ var ILABELS = {
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
   desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
-  'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡',
+  'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
@@ -4008,7 +4010,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','meter-box':'🔌','sewer-pit':'🕳',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -4304,6 +4306,12 @@ function updateProps(){
     });
     html += '</select></div>';
     html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" value="'+Math.round(it.pitch||30)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
+    var gm=it.gutterMode||'auto';
+    html += '<div class="pr"><div class="pl">雨樋</div><select class="pi" onchange="updateSelectedProp(\'gutterMode\',this.value)">';
+    html += '<option value="auto"'+(gm==='auto'?' selected':'')+'>自動 (軒樋+竪樋)</option>';
+    html += '<option value="eaves"'+(gm==='eaves'?' selected':'')+'>軒樋のみ (竪樋は手動配置)</option>';
+    html += '<option value="off"'+(gm==='off'?' selected':'')+'>なし</option>';
+    html += '</select></div>';
     html += '<div class="pr"><div class="pl">屋根厚み (mm)</div><input class="pi" type="number" min="30" max="600" step="10" value="'+Math.round(it.roofThickness||180)+'" onchange="updateSelectedProp(\'roofThickness\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">隙間補完下がり (mm)</div><input class="pi" type="number" min="0" max="1200" step="10" value="'+Math.round(it.roofSkirt||0)+'" onchange="updateSelectedProp(\'roofSkirt\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">厚み部分の色</div><input class="pi" type="color" value="'+(it.roofEdgeColor||'#3a2f2a')+'" onchange="updateSelectedProp(\'roofEdgeColor\',this.value)"></div>';
@@ -4324,6 +4332,9 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
   }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type) && !isLightItemType(it.type)) {
+    if(it.type==='downspout'){
+      html += '<div class="pr"><div class="pl">上端の高さ (mm)</div><input class="pi" type="number" min="500" max="12000" step="50" value="'+Math.round(it.downspoutTop||5450)+'" onchange="updateSelectedProp(\'downspoutTop\',+this.value)"></div>';
+    }
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
@@ -6903,6 +6914,12 @@ function build3D(){
   });
   _activeInteriorShadowLightCount=0;
   _downspoutRegistry=[];
+  // 手動配置の竪樋を先に登録し、自動生成が近傍(0.6m)に重複して立てないようにする
+  (DATA.items||[]).forEach(function(o){
+    if(o.type!=='downspout') return;
+    _downspoutRegistry.push({x:o.x+o.w/2, y:o.y+o.d/2,
+      top:Math.max(0.5,Math.min(12,(Number(o.downspoutTop)||5450)*U)), bottom:0});
+  });
   // Interior mode: show only current floor
   var flFilt = isInt ? ST.floor : null;
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
@@ -9925,7 +9942,8 @@ function addPipeBetween(grp,a,b,r,mat){
   m.castShadow=false; m.receiveShadow=false;
   grp.add(m);
 }
-function build3DRoofGutters(grp,it,W,D,groundLocalY){
+function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
+  var eavesOnly=!!(opts&&opts.eavesOnly);
   // マテリアルは build3D 毎に dispose されるため都度生成(共有キャッシュ禁止)
   var gutterColor=(DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73';
   var gutterMat=new THREE.MeshStandardMaterial({color:gutterColor,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
@@ -9943,7 +9961,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
   });
   function nearEntrance(x,z){
     for(var i=0;i<entranceLocals.length;i++){
-      if(Math.hypot(entranceLocals[i].x-x,entranceLocals[i].z-z)<1.2) return true;
+      if(Math.hypot(entranceLocals[i].x-x,entranceLocals[i].z-z)<1.8) return true;
     }
     return false;
   }
@@ -9965,6 +9983,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
     m.rotation.y=-Math.atan2(ez,ex);
     m.castShadow=false; m.receiveShadow=false;
     grp.add(m);
+    if(eavesOnly) return; // このエッジは軒樋のみ(竪樋は手動配置)
     // 竪樋の取付先候補: 直下階の壁コーナー(軒の出の内側・エッジ近傍)を全て集める
     var candidates=[];
     for(var fl=roofFloor-1; fl>=1 && candidates.length===0; fl--){
@@ -9974,7 +9993,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         var dIn=(c.x-e.x1)*nx+(c.z-e.z1)*nz;     // 内向き距離(m)
         if(t<-0.1||t>len+0.1) return;
         // 実際の軒の出(450-600mm)相当の範囲のみ。深い位置だと呼び樋の斜めが非現実的に長くなる
-        if(dIn<0.02||dIn>0.8) return;
+        if(dIn<0.02||dIn>0.55) return;
         if(nearEntrance(c.x,c.z)) return;         // 玄関前を避ける
         var endDist=Math.min(Math.abs(t),Math.abs(len-t)); // 建物コーナー(エッジ端)優先
         candidates.push({x:c.x,z:c.z,t:Math.max(0.08,Math.min(len-0.08,t)),dIn:dIn,endDist:endDist});
@@ -10028,6 +10047,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY){
         for(var oi=0; oi<3; oi++){
           var oOut=[0,0.08,0.13][oi];
           var cx0=e.x1+ex*(tAl/len)-nx*oOut, cz0=e.z1+ez*(tAl/len)-nz*oOut;
+          if(nearEntrance(cx0,cz0)) continue; // フォールバックでも玄関前を避ける
           var wpf=roofLocalToWorldMm(it,cx0,cz0);
           if(!downspoutClearOfWalls(wpf.x,wpf.y,topWorldY,0)) continue;
           var fobs=downspoutObstacleInfo(it,cx0,cz0,topWorldY);
@@ -10215,8 +10235,8 @@ function buildItem3D(it){
   }
   if(it.type==='roof'){
     build3DRoofItem(grp,it,it.w*U,it.d*U);
-    if(!isInt && exteriorDetailEnabled('gutters')){
-      build3DRoofGutters(grp,it,it.w*U,it.d*U,-grp.position.y);
+    if(!isInt && exteriorDetailEnabled('gutters') && (it.gutterMode||'auto')!=='off'){
+      build3DRoofGutters(grp,it,it.w*U,it.d*U,-grp.position.y,{eavesOnly:(it.gutterMode==='eaves')});
     }
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
     return;
@@ -10245,6 +10265,7 @@ function buildItem3D(it){
   if(it.type==='water-heater'){ build3DWaterHeater(grp,it,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
   if(it.type==='meter-box'){ build3DMeterBox(grp,it,it.w*U,it.d*U,getItemHeightValue(it)*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
   if(it.type==='sewer-pit'){ build3DSewerPit(grp,it,it.w*U,it.d*U); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
+  if(it.type==='downspout'){ build3DManualDownspout(grp,it); mark3DSelectable(grp,it,'item'); sc3.add(grp); return; }
   if(isLightItemType(it.type)){
     build3DLightItem(grp,it,it.w*U,it.d*U);
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
@@ -10806,6 +10827,22 @@ function build3DSewerPit(grp,it,w,d){
   disc.position.y=0.01; grp.add(disc);
 }
 
+// 手動配置の竪樋: 上端高さ(downspoutTop mm)から地面までの垂直管+雨水枡。
+// 自動生成はこの近傍(0.6m)に重複する竪樋を作らない(_downspoutRegistry へ事前登録)
+function build3DManualDownspout(grp,it){
+  var topM=Math.max(0.5,Math.min(12,(Number(it.downspoutTop)||5450)*U));
+  var col=(it.colorCustom&&it.color)?it.color:((DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73');
+  var mat=new THREE.MeshStandardMaterial({color:col,roughness:0.55,metalness:0.35});
+  var pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,topM,14),mat);
+  pipe.position.y=topM/2;
+  pipe.castShadow=false; pipe.receiveShadow=false;
+  grp.add(pipe);
+  var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),
+    new THREE.MeshStandardMaterial({color:0x7c7f83,roughness:0.8,metalness:0.1}));
+  pit.position.y=0.02;
+  grp.add(pit);
+}
+
 function getItemHeightValue(it){
   if(it && isCustomBlockType(it.type)) return getCustomBlockHeight(it);
   if(it && isLightItemType(it.type)) return 80;
@@ -10820,8 +10857,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,'ac-outdoor':630,'water-heater':1850,'meter-box':250,'sewer-pit':20,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,'ac-outdoor':630,'water-heater':1850,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -12270,7 +12307,7 @@ function handleRoomClick(wx,wy){
 function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || isContextExteriorItemType(placeType));
+  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || isContextExteriorItemType(placeType));
   if(groundOnly && ST.floor!==1) return;
   saveState();
   var sz=getItemDefaultSize(placeType);
