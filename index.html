@@ -4071,7 +4071,7 @@ function updateProps(){
       stdOpts+='<option value="'+p.id+'"'+(it.windowStd===p.id?' selected':'')+'>'+p.label+'</option>';
     });
     html += '<div class="pr"><div class="pl">サッシ規格 (LIXIL呼称)</div><select class="pi" onchange="applyWindowStdPreset(this.value)">'+stdOpts+'</select></div>';
-    var sashColorOpts='';
+    var sashColorOpts='<option value=""'+(!it.sashColor?' selected':'')+'>標準 (ダークグレー)</option>';
     SASH_COLORS.forEach(function(sc){
       sashColorOpts+='<option value="'+sc.hex+'"'+(it.sashColor===sc.hex?' selected':'')+'>'+sc.label+'</option>';
     });
