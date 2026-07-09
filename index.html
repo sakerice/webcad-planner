@@ -6806,7 +6806,7 @@ function init3D(){
   }
   hide3DEngineNotice();
   var wrap=document.getElementById('c3d-wrap');
-  ren=new THREE.WebGLRenderer({antialias:true});
+  ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
   ren.outputColorSpace = THREE.SRGBColorSpace;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
@@ -7052,8 +7052,47 @@ function fitShadowCamera(sunLight) {
 }
 function rebuild3D(){if(sc3) build3D();}
 
+// グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
+// ドローコールを削減する。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
+// GLBモデルはネストしたグループ内にあるため対象外(直下の子のみ統合)
+function mergeGroupMeshes(grp){
+  var merge=window.THREE&&THREE.BufferGeometryUtils&&THREE.BufferGeometryUtils.mergeGeometries;
+  if(!merge||!grp||!grp.isGroup) return;
+  var byKey={};
+  grp.children.forEach(function(o){
+    if(!o.isMesh||!o.geometry||(o.userData&&o.userData.noMerge)) return;
+    if(Array.isArray(o.material)) return;
+    var attrs=Object.keys(o.geometry.attributes).sort().join(',');
+    var key=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0)+'|'+attrs+'|'+(o.renderOrder||0);
+    (byKey[key]=byKey[key]||[]).push(o);
+  });
+  Object.keys(byKey).forEach(function(k){
+    var list=byKey[k];
+    if(list.length<2) return;
+    var geos=list.map(function(o){
+      o.updateMatrix();
+      var g=o.geometry.clone().applyMatrix4(o.matrix);
+      return g.index?g.toNonIndexed():g;
+    });
+    var merged=merge(geos,false);
+    geos.forEach(function(g){ g.dispose(); });
+    if(!merged) return;
+    var first=list[0];
+    list.forEach(function(o){ grp.remove(o); o.geometry.dispose(); });
+    var m=new THREE.Mesh(merged,first.material);
+    m.castShadow=first.castShadow; m.receiveShadow=first.receiveShadow;
+    m.renderOrder=first.renderOrder||0;
+    m.userData=Object.assign({},first.userData);
+    m.matrixAutoUpdate=false;
+    grp.add(m);
+  });
+}
 function mark3DSelectable(root, ref, kind){
   if(!root || !ref) return root;
+  if(root.isGroup && !root.userData._meshesMerged){
+    root.userData._meshesMerged=true;
+    mergeGroupMeshes(root);
+  }
   function apply(o){
     o.userData=o.userData||{};
     o.userData.b=true;
