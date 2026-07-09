@@ -42,10 +42,12 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 window.THREE = Object.assign({}, THREE_NS, {
   OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader,
   EffectComposer: EffectComposer, RenderPass: RenderPass, OutputPass: OutputPass,
-  UnrealBloomPass: UnrealBloomPass
+  UnrealBloomPass: UnrealBloomPass,
+  BufferGeometryUtils: {mergeGeometries: mergeGeometries}
 });
 // N8AO(高品質AO)は任意ロード: 失敗してもアプリは素のレンダラーで動作する
 try {
@@ -4244,6 +4246,7 @@ function updateProps(){
       var maxFloors=it.type==='neighbor-building'?12:3;
       html += '<div class="pr"><div class="pl">階数</div><input class="pi" type="number" min="1" max="'+maxFloors+'" step="1" value="'+ctxFloors+'" onchange="updateSelectedContextFloors(+this.value)"></div>';
       html += '<div class="pr"><div class="pl">算定高さ</div><input class="pi" type="text" value="'+Math.round(getContextExteriorHeight(it))+'mm（1階 '+contextStoryHeightMm()+'mm）" readonly></div>';
+      html += '<div class="pr"><div class="pl">半透明表示</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.contextGhost!==false?'checked':'')+' onchange="updateSelectedProp(\'contextGhost\',this.checked)">計画建物を見やすくする</label></div>';
     } else if(it.type!=='road'){
       html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="100" max="30000" step="100" value="'+Math.round(getContextExteriorHeight(it))+'" onchange="updateSelectedProp(\'contextHeight\',+this.value)"></div>';
     } else {
@@ -10448,15 +10451,19 @@ function buildItem3D(it){
   }
   else if(it.type==='neighbor-building'){
     build3DNeighborBuilding(grp,it,w3,d3,h);
+    finalizeContextGroup(grp,it);
   }
   else if(it.type==='neighbor-house'){
     build3DNeighborHouse(grp,it,w3,d3,h);
+    finalizeContextGroup(grp,it);
   }
   else if(it.type==='road'){
     build3DRoad(grp,it,w3,d3,h);
+    finalizeContextGroup(grp,it);
   }
   else if(it.type==='utility-pole'){
     build3DUtilityPole(grp,it,w3,d3,h);
+    finalizeContextGroup(grp,it);
   }
   else if(isCustomBlockType(it.type)){
     var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff) ||
@@ -10556,6 +10563,57 @@ function buildWoodFence3D(grp,it,w3,d3,h){
   }
 }
 
+function isContextGhost(it){
+  return !!it && (it.type==='neighbor-building'||it.type==='neighbor-house') && it.contextGhost!==false;
+}
+// 周辺モデル(隣家・ビル・道路・電柱)は小さなボックスの集合で組み立てるため、
+// そのままだと1棟あたり数十〜百超のメッシュ=ドローコールになる。
+// マテリアル+影設定が同じもの同士でジオメトリを統合し、数メッシュに圧縮する。
+// 単色マテリアルのみでUVは未使用のため破棄してよい。
+function finalizeContextGroup(grp,it){
+  var merge=window.THREE&&THREE.BufferGeometryUtils&&THREE.BufferGeometryUtils.mergeGeometries;
+  if(merge){
+    var buckets={}, meshes=[];
+    grp.children.slice().forEach(function(o){
+      if(!o.isMesh||!o.geometry) return;
+      var key=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0);
+      buckets[key]=buckets[key]||{mat:o.material,cast:o.castShadow,recv:o.receiveShadow,geos:[]};
+      var g=o.geometry.clone();
+      o.updateMatrix();
+      g.applyMatrix4(o.matrix);
+      g.deleteAttribute('uv');
+      if(g.getAttribute('uv1')) g.deleteAttribute('uv1');
+      if(g.index) g=g.toNonIndexed(); // indexed/non-indexed混在はmerge不可のため統一
+      buckets[key].geos.push(g);
+      meshes.push(o);
+    });
+    var keys=Object.keys(buckets);
+    if(meshes.length>keys.length){
+      meshes.forEach(function(o){ grp.remove(o); o.geometry.dispose(); });
+      keys.forEach(function(k){
+        var b=buckets[k];
+        var merged=merge(b.geos,false);
+        b.geos.forEach(function(g){ g.dispose(); });
+        if(!merged) return;
+        var m=new THREE.Mesh(merged,b.mat);
+        m.castShadow=b.cast; m.receiveShadow=b.recv;
+        m.matrixAutoUpdate=false;
+        grp.add(m);
+      });
+    }
+  }
+  // 隣家・ビルの半透明(ゴースト)表示。統合済みなので透過による負荷増は小さい
+  if(isContextGhost(it)){
+    grp.traverse(function(o){
+      if(o.isMesh&&o.material){
+        o.material.transparent=true;
+        o.material.opacity=0.45;
+        o.material.depthWrite=false;
+        o.castShadow=false; // 半透明の建物が濃い影を落とすと不自然なため
+      }
+    });
+  }
+}
 function addContextBox(grp,mat,x,y,z,w,h,d,cast,receive){
   var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
   m.position.set(x,y,z);
@@ -10646,11 +10704,18 @@ function build3DNeighborBuilding(grp,it,w3,d3,h){
         addContextWindow(grp,winMat,frameMat,'front',x,baseY+sill+winH/2,winW,winH,w3,d3);
       }
     }
+    // 背面: 正面と同じ窓割り(出入口なし)。左右側面: 両面に同じ窓割り
+    for(var cb=0;cb<cols;cb++){
+      var xb=-w3/2+(cb+0.5)*w3/cols;
+      addContextWindow(grp,winMat,frameMat,'back',xb,baseY+sill+winH/2,winW,winH,w3,d3);
+    }
     for(var s=0;s<sideCols;s++){
       var z=-d3/2+(s+0.5)*d3/sideCols;
       var sideY=f===0 ? baseY+1.35 : baseY+sill+winH/2;
       var sideH=f===0 ? 1.45 : winH;
-      addContextWindow(grp,f===0?shopGlassMat:winMat,frameMat,'right',z,sideY,Math.min(0.88,d3/sideCols*0.62),sideH,w3,d3);
+      var sideWinW=Math.min(0.88,d3/sideCols*0.62);
+      addContextWindow(grp,f===0?shopGlassMat:winMat,frameMat,'right',z,sideY,sideWinW,sideH,w3,d3);
+      addContextWindow(grp,f===0?shopGlassMat:winMat,frameMat,'left',z,sideY,sideWinW,sideH,w3,d3);
     }
   }
   addContextBox(grp,trimMat,0,bodyH+parapetH+0.08,0,w3+0.28,0.16,d3+0.28,true,true);
@@ -10778,26 +10843,34 @@ function build3DNeighborHouse(grp,it,w3,d3,h){
   addContextFacadeBox(grp,doorMat,'front',-w3*0.26,1.05,0.88,2.1,w3,d3,0.03,true,true);
   addContextFacadeBox(grp,trimMat,'front',-w3*0.26,2.17,1.08,0.08,w3,d3,0.04,false,true);
   addNeighborHouseInnerGarage(grp,w3,d3,storyH,bodyH,trimMat,baseMat);
-  var winW=0.92, winH=1.2, sill=0.9;
+  // 窓はLIXIL呼称の規格寸法に合わせる(上端FL+2000基準)
+  var winW=1.69, winH=1.17, sill=0.83;        // 16511 引違い
+  var sideW=1.235, sideH=0.97, sideSill=1.03; // 11909 引違い(腰窓)
+  var smallW=0.78, smallH=0.97;               // 07409 引違い(小窓)
   var garageSpec=getNeighborHouseGarageSpec(w3,d3,storyH);
   for(var f=0;f<floors;f++){
     var baseY=f*storyH;
     var wy=baseY+sill+winH/2;
+    var sideWy=baseY+sideSill+sideH/2;
     if(f>0){
       if(f===1){
-        var balconyDoorH=Math.min(2.16,storyH-0.44);
+        // バルコニーの掃き出し窓(16520: 1690×2030, FL±0)
+        var balconyDoorH=Math.min(2.03,storyH-0.44);
         var balconyDoorBottom=baseY+0.14;
-        var balconyDoorW=Math.min(1.42,Math.max(1.05,garageSpec.w*0.58));
+        var balconyDoorW=Math.min(1.69,Math.max(1.2,garageSpec.w*0.7));
         addContextWindow(grp,glassMat,trimMat,'front',garageSpec.x,balconyDoorBottom+balconyDoorH/2,balconyDoorW,balconyDoorH,w3,d3);
         addContextFacadeBox(grp,trimMat,'front',garageSpec.x,balconyDoorBottom+0.08,balconyDoorW+0.18,0.09,w3,d3,0.04,false,true);
-        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.2,wy,winW*0.78,winH*0.88,w3,d3);
+        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.24,sideWy,smallW,smallH,w3,d3);
       } else {
-        addContextWindow(grp,glassMat,trimMat,'front',w3*0.2,wy,winW,winH,w3,d3);
-        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.02,wy,winW*0.82,winH*0.88,w3,d3);
+        addContextWindow(grp,glassMat,trimMat,'front',w3*0.22,wy,Math.min(winW,w3*0.36),winH,w3,d3);
+        addContextWindow(grp,glassMat,trimMat,'front',-w3*0.22,sideWy,sideW,sideH,w3,d3);
       }
     }
-    addContextWindow(grp,glassMat,trimMat,'right',-d3*0.2,wy,winW*0.9,winH,w3,d3);
-    if(d3>3.2) addContextWindow(grp,glassMat,trimMat,'left',d3*0.18,wy,winW*0.86,winH*0.9,w3,d3);
+    addContextWindow(grp,glassMat,trimMat,'right',-d3*0.2,sideWy,Math.min(sideW,d3*0.36),sideH,w3,d3);
+    if(d3>3.2) addContextWindow(grp,glassMat,trimMat,'left',d3*0.18,sideWy,Math.min(sideW,d3*0.34),sideH,w3,d3);
+    // 背面にも窓を設ける(裏から見たときの無地壁を避ける)
+    addContextWindow(grp,glassMat,trimMat,'back',w3*0.22,sideWy,sideW,sideH,w3,d3);
+    addContextWindow(grp,glassMat,trimMat,'back',-w3*0.22,sideWy,smallW,smallH,w3,d3);
   }
   if(floors>=2){
     var railMat=makeExteriorLightingMaterial({color:0x757b82,roughness:0.86,envMapIntensity:0.08});
@@ -10808,11 +10881,15 @@ function build3DNeighborHouse(grp,it,w3,d3,h){
     var balconyY=storyH+0.05;
     var balconyZ=-d3/2-balconyD/2+0.03;
     var frontZ=-d3/2-balconyD+0.03;
-    var sideRailD=balconyD-0.08;
+    var sideRailD=balconyD-0.03;
     addContextBox(grp,baseMat,balconyX,balconyY,balconyZ,balconyW,0.1,balconyD,true,true);
-    addContextBox(grp,railMat,balconyX,balconyY+0.52,frontZ,balconyW+0.08,0.08,0.06,true,true);
-    addContextBox(grp,railMat,balconyX-balconyW/2,balconyY+0.3,balconyZ,0.06,0.55,sideRailD,true,true);
-    addContextBox(grp,railMat,balconyX+balconyW/2,balconyY+0.3,balconyZ,0.06,0.55,sideRailD,true,true);
+    // 手すり壁: 建築基準の1100mmで正面+両側面を隙間なく閉じ、笠木を載せる
+    var railH=1.1, railT=0.07;
+    var railCY=balconyY+0.05+railH/2;
+    addContextBox(grp,railMat,balconyX,railCY,frontZ,balconyW+railT,railH,railT,true,true);
+    addContextBox(grp,railMat,balconyX-balconyW/2,railCY,balconyZ-0.015,railT,railH,sideRailD,true,true);
+    addContextBox(grp,railMat,balconyX+balconyW/2,railCY,balconyZ-0.015,railT,railH,sideRailD,true,true);
+    addContextBox(grp,trimMat,balconyX,railCY+railH/2+0.025,frontZ,balconyW+railT+0.08,0.05,railT+0.06,true,true);
   }
   addContextEdges(grp,w3,bodyH,d3,bodyH/2,0x4f5862,0.18);
 }
