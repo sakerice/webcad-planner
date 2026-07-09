@@ -10612,7 +10612,8 @@ function finalizeContextGroup(grp,it){
     grp.traverse(function(o){
       if(o.isMesh&&o.material){
         o.material.transparent=true;
-        o.material.opacity=0.45;
+        // 躯体(基本の箱)は20%、屋根・窓・玄関・ガレージ・バルコニー等のディテールは10%
+        o.material.opacity=(o.material.userData&&o.material.userData.ghostBody)?0.2:0.1;
         o.material.depthWrite=false;
         o.castShadow=false; // 半透明の建物が濃い影を落とすと不自然なため
       }
@@ -10683,6 +10684,7 @@ function build3DNeighborBuilding(grp,it,w3,d3,h){
   h=bodyH+parapetH;
   var baseColor=it.colorCustom?it.color:0x8f98a3;
   var wallMat=makeExteriorLightingMaterial({color:baseColor,roughness:0.88,envMapIntensity:0.14});
+  wallMat.userData.ghostBody=true; // 半透明表示時に躯体だけ濃度を上げる
   var trimMat=makeExteriorLightingMaterial({color:0x6f7882,roughness:0.9,envMapIntensity:0.12});
   var frameMat=makeExteriorLightingMaterial({color:0x56606a,roughness:0.82,envMapIntensity:0.12});
   var winMat=makeExteriorLightingMaterial({color:0xaec9d8,roughness:0.32,metalness:0.02,envMapIntensity:0.2});
@@ -10823,6 +10825,7 @@ function build3DNeighborHouse(grp,it,w3,d3,h){
   var roofH=contextRoofExtraHeightMm('neighbor-house')*U;
   var wallColor=it.colorCustom?it.color:0xb9bcc2;
   var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
+  wallMat.userData.ghostBody=true; // 半透明表示時に躯体だけ濃度を上げる
   var roofMat=makeExteriorLightingMaterial({color:0x6f747a,roughness:0.98,metalness:0.0,envMapIntensity:0.035,side:THREE.DoubleSide,flatShading:true});
   var trimMat=makeExteriorLightingMaterial({color:0xd9dcdf,roughness:0.82,envMapIntensity:0.12});
   var sidingMat=makeExteriorLightingMaterial({color:0xa8adb3,roughness:0.88,envMapIntensity:0.08});
