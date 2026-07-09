@@ -3042,29 +3042,29 @@ var FLOOR_SLAB_H = 180;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.25, exposure:0.93, env:0.42,
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.12, exposure:0.93, env:0.42,
   sunSim:false, hour:13, season:'equinox', northDeg:0};
 var LIGHT_PRESETS = {
   morning:{
-    label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.28,exposure:0.9,env:0.34,
+    label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.14,exposure:0.9,env:0.34,
     sunColor:'#ffd6a3',ambientColor:'#fff2df',hemiSky:'#d7ecff',hemiGround:'#8f7a66',
     sunPos:{x:-120,y:78,z:85},fogColor:0xd6e7f1,fogNear:70,fogFar:470,interiorBg:0x151821,
     sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
   },
   day:{
-    label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.25,exposure:0.93,env:0.42,
+    label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.12,exposure:0.93,env:0.42,
     sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
     sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
     sky:{top:'#4e91ff',mid:'#82bdff',horizon:'#d4ecff',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
   },
   evening:{
-    label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.38,exposure:0.84,env:0.28,
+    label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.19,exposure:0.84,env:0.28,
     sunColor:'#ffad62',ambientColor:'#ffe4cc',hemiSky:'#b8a5d8',hemiGround:'#6c5142',
     sunPos:{x:150,y:46,z:-90},fogColor:0xd8a878,fogNear:65,fogFar:430,interiorBg:0x18131a,
     sky:{top:'#4d5f91',mid:'#a06f9e',horizon:'#f0a85e',ground:'#5c4a54',sunX:0.82,sunY:0.55,sunCore:'rgba(255,230,186,0.9)',sunGlow:'rgba(255,128,50,0.5)',haze:'rgba(255,145,72,0.38)',cloudAlpha:0.46}
   },
   night:{
-    label:'夜',hemi:0.10,sun:0.10,ambient:0.06,room:0.62,exposure:0.76,env:0.12,
+    label:'夜',hemi:0.10,sun:0.10,ambient:0.06,room:0.30,exposure:0.76,env:0.12,
     sunColor:'#c9dcff',ambientColor:'#c9d7ff',hemiSky:'#1d2b5d',hemiGround:'#11131d',
     sunPos:{x:-70,y:110,z:-120},fogColor:0x1b2544,fogNear:50,fogFar:330,interiorBg:0x070913,
     sky:{top:'#071028',mid:'#14224c',horizon:'#26365f',ground:'#0b1020',sunX:0.2,sunY:0.23,sunCore:'rgba(222,235,255,0.78)',sunGlow:'rgba(105,145,255,0.24)',haze:'rgba(35,50,95,0.42)',cloudAlpha:0.14}
@@ -7733,7 +7733,8 @@ function applyLightingToScene(refreshSky){
       var envSp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
       envFactor=sunSimDimFactor(envSp.altitude);
     }
-    sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*2.4*envFactor);
+    var envBoost=(ST.view==='3d-int')?0.9:2.4; // 内観はIBL寄与を抑えて配置ライトを主役にする
+    sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
       sc3.fog=null;
@@ -10199,7 +10200,9 @@ function configureInteriorLightShadow(light,rangeM){
   }
 }
 function addLightBeamHint(grp,kind,color,rangeM,angleRad){
-  if(kind==='ceiling') return;
+  // ダウンライトは実際の光の当たり方が見えるべきなので光錐ヒントを出さない。
+  // スポットライトのみ照射方向の確認用に薄い光錐を残す
+  if(kind!=='spot') return;
   var height=Math.max(0.35,Math.min(rangeM*0.45,1.2));
   var radius=Math.tan(angleRad)*height;
   var geo=new THREE.ConeGeometry(Math.max(0.08,radius),height,24,1,true);
