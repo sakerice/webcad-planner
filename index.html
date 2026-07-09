@@ -7695,7 +7695,8 @@ function applyLightingToScene(refreshSky){
   if(sc3&&typeof THREE!=='undefined'){
     sc3.traverse(function(o){
       if(o.name==='AmbientLight'){
-        o.intensity=LIGHT_SETTINGS.ambient;
+        // 内観は配置ライトを主役にするためベース光を絞る
+        o.intensity=LIGHT_SETTINGS.ambient*((ST.view==='3d-int'||isInt)?0.6:1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         var interiorMode=(ST.view==='3d-int'||isInt);
@@ -7712,7 +7713,7 @@ function applyLightingToScene(refreshSky){
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi;
+        o.intensity=LIGHT_SETTINGS.hemi*((ST.view==='3d-int'||isInt)?0.4:1);
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
@@ -7733,7 +7734,7 @@ function applyLightingToScene(refreshSky){
       var envSp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
       envFactor=sunSimDimFactor(envSp.altitude);
     }
-    var envBoost=(ST.view==='3d-int')?0.9:2.4; // 内観はIBL寄与を抑えて配置ライトを主役にする
+    var envBoost=(ST.view==='3d-int')?0.4:2.4; // 内観はIBL寄与を大きく抑えて配置ライトを主役にする
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
@@ -10230,6 +10231,10 @@ function makeLightFixtureMaterial(color){
   });
 }
 function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
+  // 外観3Dでは配置ライトの実光源を生成しない(フォワードレンダリングではライト数が
+  // そのまま全マテリアルの描画コストになるため)。窓明かりは自動ルームライトが担い、
+  // 器具メッシュの発光表現は維持されるので見た目への影響は小さい
+  if(!isInt) return;
   // r155+ の物理ライト単位ではpoint/spotの強度がカンデラ基準になるためπ倍で従来の明るさを維持
   var intensity=Math.max(0,Math.min(3,Number(it.lightIntensity)||0))*Math.PI;
   var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
@@ -11760,7 +11765,11 @@ function build3DTree(grp,h){
 }
 
 function buildRooms3D(flFilt){
-  var fixtureGlow=Math.max(0,Math.min(2.5,LIGHT_SETTINGS.room*3.6));
+  // 内観: 配置ライトを主役にするため自動ルームライトはさらに暗く・やや間引く。
+  // 外観: 配置ライトの実光源を生成しない代わりに自動ルームライトを強め、数は大幅に間引く(性能対策)
+  var roomInt=LIGHT_SETTINGS.room*(isInt?0.5:1.8);
+  var lightPitch=isInt?3.4:5.6;
+  var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isInt;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
 
@@ -11806,14 +11815,14 @@ function buildRooms3D(flFilt){
     slab.receiveShadow=true; mark3DSelectable(slab,r,'room'); sc3.add(slab);
 
 	    // Ceiling downlights
-	    var nx2=Math.max(1,Math.round(rw/2.8)), nz2=Math.max(1,Math.round(rd/2.8));
+	    var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
 	    for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
 	      var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
 	      if(showAutoLightFixtures){
 	        var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
 	        fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
 	      }
-	      var pl=new THREE.PointLight(0xffffff,LIGHT_SETTINGS.room*Math.PI,6.0,1.8);
+	      var pl=new THREE.PointLight(0xffffff,roomInt*Math.PI,6.0,1.8);
 	      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
 	    }
   });
