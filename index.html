@@ -2979,6 +2979,10 @@ input[type="color"]::-moz-color-swatch{
         <label for="ai-render-style-input">任意の仕上げメモ</label>
         <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
         <small>空欄でもOKです。間取りを変えず、雰囲気だけ追加したい時に使います。</small>
+        <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px">
+          <input id="ai-render-life-check" type="checkbox" checked>
+          生活感を加える(通行人・自転車・植栽など。建物の形は変えない)
+        </label>
       </div>
       <div class="ai-instruction-actions">
         <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
@@ -13419,9 +13423,25 @@ function ensureAiRenderable3D(){
 }
 function captureCurrent3DDataUrl(){
   if(!ensureAiRenderable3D()) return '';
-  // ビューポートと同じ見た目(SAO/Bloom/ガンマ込み)でキャプチャする
-  render3DNow();
-  return ren.domElement.toDataURL('image/png');
+  // 画像生成AIの入力品質を上げるため、一時的に2倍解像度でレンダリングしてキャプチャする
+  var prevRatio=ren.getPixelRatio();
+  var boosted=Math.min(prevRatio*2,4);
+  try{
+    ren.setPixelRatio(boosted);
+    if(composer&&composer.setPixelRatio) composer.setPixelRatio(boosted);
+    var wrap=document.getElementById('c3d-wrap');
+    ren.setSize(wrap.clientWidth,wrap.clientHeight);
+    if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+    render3DNow();
+    return ren.domElement.toDataURL('image/png');
+  }finally{
+    ren.setPixelRatio(prevRatio);
+    if(composer&&composer.setPixelRatio) composer.setPixelRatio(prevRatio);
+    var wrap2=document.getElementById('c3d-wrap');
+    ren.setSize(wrap2.clientWidth,wrap2.clientHeight);
+    if(composer) composer.setSize(wrap2.clientWidth,wrap2.clientHeight);
+    render3DNow();
+  }
 }
 function aiSegHex(n){
   return '#'+('000000'+Number(n).toString(16)).slice(-6);
@@ -13605,6 +13625,16 @@ function buildAiRenderPrompt(metadata){
   var styleInput=document.getElementById('ai-render-style-input');
   var style=(styleInput&&styleInput.value.trim())||'photorealistic architectural visualization, natural daylight, clean modern Japanese residential presentation';
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
+  var lifeCheck=document.getElementById('ai-render-life-check');
+  var allowLife=!!(lifeCheck&&lifeCheck.checked)&&metadata.view!=='interior';
+  // カメラ・照明の実測値を渡すと、生成側の視点・光の再現性が上がる
+  var camInfo='';
+  try{
+    var camPos=camExt.position, tgt=orbit&&orbit.target?orbit.target:camPos;
+    var az=Math.round(Math.atan2(tgt.x-camPos.x,tgt.z-camPos.z)*180/Math.PI);
+    camInfo='Camera: fov '+Math.round(camExt.fov)+' deg, eye height about '+camPos.y.toFixed(1)+' m above ground, looking azimuth '+az+' deg, perspective matches base_render.png exactly.';
+  }catch(e){}
+  var lightInfo='Lighting: time-of-day preset "'+(LIGHT_SETTINGS.timeOfDay||'day')+'"'+(LIGHT_SETTINGS.sunSim?(', solar simulation at '+LIGHT_SETTINGS.hour+':00, season '+LIGHT_SETTINGS.season):'')+'. Match the sun direction and shadow direction visible in base_render.png.';
   var siteLines = metadata.view==='exterior' && metadata.siteContext && metadata.siteContext.hasSite ? [
     '- A site boundary is explicitly defined. Keep the planned house, yard, fences, driveway, and exterior elements inside that site boundary.',
     '- Site rectangles have explicit surface materials in the metadata: grass, gravel, or concrete. Preserve each specified surface material exactly.',
@@ -13625,6 +13655,8 @@ function buildAiRenderPrompt(metadata){
     'View: '+mode,
     'Floor: '+metadata.floor+'F',
     'Preferred style: '+style,
+    camInfo||null,
+    lightInfo,
     '',
     'Attachments:',
     '- base_render.png: primary reference. Preserve geometry, camera, placement, proportions, openings, roof, furniture, and materials.',
@@ -13638,6 +13670,8 @@ function buildAiRenderPrompt(metadata){
     '- Preserve assigned colors and textures as much as possible.',
     '- Improve only lighting, shadow softness, ambient occlusion, glass transparency, material realism, texture clarity, and overall rendering quality.',
     '- If uncertain, prefer the base_render.png over aesthetic interpretation.',
+    '- Render at high resolution with crisp architectural detail; avoid painterly or illustration looks.',
+    allowLife ? '- You MAY add believable street life for realism: one or two pedestrians walking on the road/sidewalk, a bicycle, subtle planting, utility wires. People must not occlude the main facade, must be at correct human scale (about 1.6-1.75 m), and must not alter any architecture.' : '- Do not add people or vehicles.',
     siteLines.length ? '' : null,
     siteLines.length ? 'Site boundary context:' : null,
     siteLines.length ? siteLines.join('\n') : null,
