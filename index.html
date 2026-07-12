@@ -3710,7 +3710,7 @@ var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-
 // 追加描画になるため無制限にはできないが、メッシュ統合等の最適化で余力ができたので
 // PC=8灯・タッチ端末=4灯まで許可する(超過分は従来通り遮蔽なし)
 function maxInteriorShadowLights(){
-  return ((typeof navigator!=='undefined')&&(navigator.maxTouchPoints||0)>0)?3:8;
+  return ((typeof navigator!=='undefined')&&(navigator.maxTouchPoints||0)>0)?4:8;
 }
 var _activeInteriorShadowLightCount = 0;
 function isPlanAnnotationType(type){
@@ -6853,9 +6853,7 @@ function init3D(){
   var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
   sun.name='SunLight';
   sun.position.set(100,200,100); sun.castShadow=true;
-  // タッチ端末は影の再描画コストを抑えるため1024に(PCは2048)
-  var sunShadowSize=((navigator.maxTouchPoints||0)>0)?1024:2048;
-  sun.shadow.mapSize.set(sunShadowSize,sunShadowSize);
+  sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
   sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
   sun.shadow.bias = -0.00018;
