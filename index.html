@@ -3710,7 +3710,7 @@ var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-
 // 追加描画になるため無制限にはできないが、メッシュ統合等の最適化で余力ができたので
 // PC=8灯・タッチ端末=4灯まで許可する(超過分は従来通り遮蔽なし)
 function maxInteriorShadowLights(){
-  return ((typeof navigator!=='undefined')&&(navigator.maxTouchPoints||0)>0)?4:8;
+  return ((typeof navigator!=='undefined')&&(navigator.maxTouchPoints||0)>0)?3:8;
 }
 var _activeInteriorShadowLightCount = 0;
 function isPlanAnnotationType(type){
@@ -6823,6 +6823,10 @@ function init3D(){
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
   wrap.appendChild(ren.domElement);
+  // 動的解像度用: カメラ操作入力の時刻を記録する
+  ['pointerdown','pointermove','wheel','touchstart','touchmove'].forEach(function(ev){
+    ren.domElement.addEventListener(ev,noteCam3DInput,{passive:true});
+  });
   // モバイルでのメモリ圧等によるWebGLコンテキスト喪失から自動復帰する
   ren.domElement.addEventListener('webglcontextlost',function(e){ e.preventDefault(); },false);
   ren.domElement.addEventListener('webglcontextrestored',function(){
@@ -6849,7 +6853,9 @@ function init3D(){
   var sun=new THREE.DirectionalLight(0xffffff,LIGHT_SETTINGS.sun);
   sun.name='SunLight';
   sun.position.set(100,200,100); sun.castShadow=true;
-  sun.shadow.mapSize.set(2048,2048);
+  // タッチ端末は影の再描画コストを抑えるため1024に(PCは2048)
+  var sunShadowSize=((navigator.maxTouchPoints||0)>0)?1024:2048;
+  sun.shadow.mapSize.set(sunShadowSize,sunShadowSize);
   sun.shadow.camera.left=-150; sun.shadow.camera.right=150;
   sun.shadow.camera.top=150; sun.shadow.camera.bottom=-150;
   sun.shadow.bias = -0.00018;
@@ -12037,6 +12043,27 @@ function get3DFrameInterval(){
   var touchDevice=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
   return (touchDevice || isMobileLayout()) ? 33 : 0;
 }
+// 動的解像度: カメラ操作・ウォークスルー中は描画解像度を下げ、静止したら
+// フル解像度で描き直す。操作中のGPU負荷が半分以下になり、静止時の画質は不変
+var _dynResLow=false;
+var _lastCam3DInputAt=0;
+function noteCam3DInput(){ _lastCam3DInputAt=performance.now(); }
+function setDynamicResolution(low){
+  if(_dynResLow===low || !ren) return;
+  // 恩恵が大きいタッチ端末・モバイルレイアウトのみ適用
+  var eligible=((navigator.maxTouchPoints||0)>0)||isMobileLayout();
+  if(low && !eligible) return;
+  _dynResLow=low;
+  var base=Math.min(window.devicePixelRatio,2);
+  var r=low?Math.min(base,1.2):base;
+  var wrap=document.getElementById('c3d-wrap');
+  ren.setPixelRatio(r);
+  ren.setSize(wrap.clientWidth,wrap.clientHeight);
+  if(composer){
+    if(composer.setPixelRatio) composer.setPixelRatio(r);
+    composer.setSize(wrap.clientWidth,wrap.clientHeight);
+  }
+}
 function loop3D(){
   requestAnimationFrame(loop3D);
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
@@ -12052,6 +12079,15 @@ function loop3D(){
     orbitMoved=orbit.update()===true;
   }
   var animating=walking||orbitMoved||GIZMO_DRAG.active||anyWasdActive();
+  // 低解像度は「ユーザーが実際に操作している間」だけ。慣性(ダンピング)の減衰待ちは
+  // 数秒続くことがあるため、入力が600ms途絶えたらフル解像度へ復帰する
+  var lowResWanted=animating && (walking||GIZMO_DRAG.active||anyWasdActive()||(now-_lastCam3DInputAt<600));
+  if(_dynResLow && !lowResWanted){
+    setDynamicResolution(false);
+    _needs3DRender=true;
+  } else if(lowResWanted){
+    setDynamicResolution(true);
+  }
   if(!animating && !_needs3DRender && now-_lastSafety3DRenderAt<1500) return;
   _last3DFrameAt=now;
   _needs3DRender=false;
