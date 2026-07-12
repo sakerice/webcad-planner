@@ -13423,25 +13423,37 @@ function ensureAiRenderable3D(){
 }
 function captureCurrent3DDataUrl(){
   if(!ensureAiRenderable3D()) return '';
-  // 画像生成AIの入力品質を上げるため、一時的に2倍解像度でレンダリングしてキャプチャする
+  var wrap=document.getElementById('c3d-wrap');
+  var w=Math.max(1,wrap.clientWidth), h=Math.max(1,wrap.clientHeight);
   var prevRatio=ren.getPixelRatio();
-  var boosted=Math.min(prevRatio*2,4);
-  try{
-    ren.setPixelRatio(boosted);
-    if(composer&&composer.setPixelRatio) composer.setPixelRatio(boosted);
-    var wrap=document.getElementById('c3d-wrap');
-    ren.setSize(wrap.clientWidth,wrap.clientHeight);
-    if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+  // 画像生成AIの入力品質を上げるため高解像度でキャプチャする。ただし iOS/iPadOS は
+  // canvasの上限(約16.7MP・1辺4096px)を超えると toDataURL が空になりプレビューが
+  // 表示されないため、辺長と面積の両方でブースト倍率を制限する
+  var boosted=Math.min(prevRatio*2, 4, 4096/w, 4096/h, Math.sqrt(12000000/(w*h)));
+  if(!isFinite(boosted)||boosted<prevRatio) boosted=prevRatio;
+  function captureAt(ratio){
+    ren.setPixelRatio(ratio);
+    if(composer&&composer.setPixelRatio) composer.setPixelRatio(ratio);
+    ren.setSize(w,h);
+    if(composer) composer.setSize(w,h);
     render3DNow();
     return ren.domElement.toDataURL('image/png');
+  }
+  var url='';
+  try{
+    try{ url=captureAt(boosted); }catch(e){ url=''; }
+    if(!url||url.length<1000){
+      // 高解像度キャプチャに失敗する端末は等倍で撮り直す(表示されないより確実さ優先)
+      try{ url=captureAt(prevRatio); }catch(e2){ url=''; }
+    }
   }finally{
     ren.setPixelRatio(prevRatio);
     if(composer&&composer.setPixelRatio) composer.setPixelRatio(prevRatio);
-    var wrap2=document.getElementById('c3d-wrap');
-    ren.setSize(wrap2.clientWidth,wrap2.clientHeight);
-    if(composer) composer.setSize(wrap2.clientWidth,wrap2.clientHeight);
+    ren.setSize(w,h);
+    if(composer) composer.setSize(w,h);
     render3DNow();
   }
+  return url;
 }
 function aiSegHex(n){
   return '#'+('000000'+Number(n).toString(16)).slice(-6);
