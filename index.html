@@ -3706,7 +3706,12 @@ var WALK_EYE_HEIGHT_MM = 1700;
 var WALK_DEFAULT_SPEED_MPS = 1.2;
 var LIGHT_ITEM_TYPES = {'light-ceiling':1,'light-down':1,'light-spot':1};
 var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-spot'};
-var MAX_INTERIOR_SHADOW_LIGHTS = 3;
+// 影を落とせる配置ライトの上限。シャドウマップはスポット系+1回/シーリング+6回の
+// 追加描画になるため無制限にはできないが、メッシュ統合等の最適化で余力ができたので
+// PC=8灯・タッチ端末=4灯まで許可する(超過分は従来通り遮蔽なし)
+function maxInteriorShadowLights(){
+  return ((typeof navigator!=='undefined')&&(navigator.maxTouchPoints||0)>0)?4:8;
+}
 var _activeInteriorShadowLightCount = 0;
 function isPlanAnnotationType(type){
   return type==='memo' || type==='ruler' || type==='walk-route';
@@ -10226,7 +10231,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
 }
 function claimInteriorShadowLightSlot(it){
   if(!isInt || !it || it.lightCastShadow===false) return false;
-  if(_activeInteriorShadowLightCount>=MAX_INTERIOR_SHADOW_LIGHTS) return false;
+  if(_activeInteriorShadowLightCount>=maxInteriorShadowLights()) return false;
   _activeInteriorShadowLightCount++;
   return true;
 }
