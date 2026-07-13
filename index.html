@@ -3360,16 +3360,45 @@ function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
 function isAppearanceColorInput(inp){
-  return !!(inp && inp.matches && inp.matches('input[type="color"]') && (inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0);
+  return !!(inp && inp.matches && inp.matches('input[type="color"]') &&
+    ((inp.closest && inp.closest('#wall-panel')) || (inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0));
+}
+var _activeAppearanceColorInput = null;
+function beginAppearanceColorInput(inp){
+  if(isAppearanceColorInput(inp)) _activeAppearanceColorInput=inp;
+}
+function isAppearanceColorInputActive(){
+  return !!_activeAppearanceColorInput;
+}
+function releaseAppearanceColorInput(commit){
+  if(!_activeAppearanceColorInput) return;
+  _activeAppearanceColorInput=null;
+  if(commit) setTimeout(commitAppearanceColorEdits,0);
 }
 function initNativeColorInputs(){
   if(initNativeColorInputs._done) return;
   initNativeColorInputs._done=true;
+  document.addEventListener('pointerdown',function(e){
+    var inp=e.target&&e.target.closest?e.target.closest('input[type="color"]'):null;
+    if(isAppearanceColorInput(inp)){
+      beginAppearanceColorInput(inp);
+    } else {
+      releaseAppearanceColorInput(true);
+    }
+  },true);
+  document.addEventListener('focusin',function(e){
+    if(isAppearanceColorInput(e.target)) beginAppearanceColorInput(e.target);
+    else releaseAppearanceColorInput(true);
+  },true);
+  document.addEventListener('input',function(e){
+    if(isAppearanceColorInput(e.target)) beginAppearanceColorInput(e.target);
+  },true);
   document.addEventListener('change',function(e){
     if(isAppearanceColorInput(e.target)){
+      beginAppearanceColorInput(e.target);
       setTimeout(commitAppearanceColorEdits,0);
     }
-  });
+  },true);
 }
 function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
@@ -4912,6 +4941,7 @@ function commitAppearanceColorEdits(){
 }
 function finishAppearanceColorInput(){
   if(isTouchInputDevice() || (window.matchMedia && window.matchMedia('(pointer:coarse)').matches)) return;
+  releaseAppearanceColorInput(false);
   commitAppearanceColorEdits();
 }
 function scheduleAppearancePreviewUpdate(){
@@ -6869,6 +6899,7 @@ function init3D(){
   // 外部HDR(outdoor.hdr)は暖色の色被りがあり、時間帯にも追従しないため不使用
   refreshEnvironmentFromSky();
   applyLightingToScene(false);
+  refreshSkyTexture();
 
   // Ground – resized in buildLandscape() based on building footprint
   _gndMesh = new THREE.Mesh(new THREE.PlaneGeometry(60,60),
@@ -7647,7 +7678,10 @@ function toggleExteriorColorPanel(){ toggleAppearancePanel('exterior'); }
 function toggleRoofColorPanel(){ toggleAppearancePanel('roof'); }
 function toggleWallPanel(){ toggleExteriorColorPanel(); }
 function toggleAppearancePanel(mode){
-  if(APPEARANCE_PANEL_MODE !== mode) commitAppearanceColorEdits();
+  if(APPEARANCE_PANEL_MODE !== mode){
+    releaseAppearanceColorInput(false);
+    commitAppearanceColorEdits();
+  }
   APPEARANCE_PANEL_MODE = mode || 'exterior';
   var wp=document.getElementById('wall-panel');
   var lp=document.getElementById('light-panel');
@@ -7656,9 +7690,14 @@ function toggleAppearancePanel(mode){
   var sameOpen=wp.style.display==='block' && wp.dataset.mode===APPEARANCE_PANEL_MODE;
   if(sameOpen && isTouchInputDevice()) return;
   var next=sameOpen?'none':'block';
+  if(next==='none') releaseAppearanceColorInput(false);
   wp.style.display=next;
   wp.dataset.mode=APPEARANCE_PANEL_MODE;
   wp.classList.toggle('show',next==='block');
+  if(next==='none'){
+    commitAppearanceColorEdits();
+    return;
+  }
   if(next==='block'){
     if(isMobileLayout()){
       var sb=document.getElementById('sidebar');
@@ -7670,9 +7709,10 @@ function toggleAppearancePanel(mode){
   }
 }
 function hideWallPanel(){
-  commitAppearanceColorEdits();
+  releaseAppearanceColorInput(false);
   var wp=document.getElementById('wall-panel');
   if(wp){wp.style.display='none';wp.classList.remove('show');}
+  commitAppearanceColorEdits();
 }
 function getLightPreset(key){
   return LIGHT_PRESETS[key]||LIGHT_PRESETS.day;
@@ -7732,12 +7772,51 @@ function refreshEnvironmentFromSky(){
     skyTex.dispose();
   }catch(e){ console.warn('[WebCAD] environment refresh failed:', e); }
 }
+// フォトリアル空パノラマ(gpt-image-2生成・エクイレクタングラー2048x1024)。
+// 見た目の空ドームにのみ使用し、環境光(IBL)は従来どおり手続き空から生成するため
+// ライティング・発色には影響しない。太陽シミュレーション中は太陽位置が動くので
+// 手続き空(太陽グロー可動)へ自動フォールバックする
+var _skyPhotoCache={};
+function skyPhotoUrl(key){
+  return {morning:'assets/sky/morning.jpg',day:'assets/sky/day.jpg',evening:'assets/sky/evening.jpg',night:'assets/sky/night.jpg'}[key]||null;
+}
+function applySkyMap(tex){
+  if(!_skyMesh||!_skyMesh.material) return;
+  var old=_skyMesh.material.map;
+  _skyMesh.material.map=tex;
+  _skyMesh.material.needsUpdate=true;
+  // 手続き空(使い捨てcanvas)のみ破棄。フォト空はキャッシュ共有のため保持
+  if(old&&old!==tex&&old.dispose&&old.userData&&old.userData._procedural) old.dispose();
+  if(typeof invalidate3D==='function') invalidate3D();
+}
 function refreshSkyTexture(){
   if(!_skyMesh||!_skyMesh.material||typeof THREE==='undefined') return;
-  var oldMap=_skyMesh.material.map;
-  _skyMesh.material.map=makeSkyTexture();
-  _skyMesh.material.needsUpdate=true;
-  if(oldMap&&oldMap.dispose) oldMap.dispose();
+  var key=LIGHT_SETTINGS.timeOfDay||'day';
+  var url=LIGHT_SETTINGS.sunSim?null:skyPhotoUrl(key);
+  if(url && _skyPhotoCache[url]){
+    applySkyMap(_skyPhotoCache[url]);
+  } else {
+    var proc=makeSkyTexture();
+    proc.userData._procedural=true;
+    applySkyMap(proc);
+    if(url){
+      new THREE.TextureLoader().load(url,function(tex){
+        tex.colorSpace=THREE.SRGBColorSpace;
+        // タブレットはGPUメモリ対策で1024x512に縮小
+        if(_texCapSize&&tex.image&&tex.image.width>_texCapSize){
+          var sc=_texCapSize/tex.image.width;
+          var c=document.createElement('canvas');
+          c.width=Math.round(tex.image.width*sc); c.height=Math.round(tex.image.height*sc);
+          c.getContext('2d').drawImage(tex.image,0,0,c.width,c.height);
+          tex.image=c; tex.needsUpdate=true;
+        }
+        _skyPhotoCache[url]=tex;
+        // ロード完了時点でまだ同じ空が求められていれば差し替える
+        var want=LIGHT_SETTINGS.sunSim?null:skyPhotoUrl(LIGHT_SETTINGS.timeOfDay||'day');
+        if(want===url) applySkyMap(tex);
+      });
+    }
+  }
   refreshEnvironmentFromSky();
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -8212,7 +8291,9 @@ function syncExteriorWallSettings(){
 
 function syncExteriorWallPanel(){
   var wp=document.getElementById('wall-panel');
-  if(wp && wp.style.display==='block') renderExteriorWallPanel(wp.dataset.mode||APPEARANCE_PANEL_MODE);
+  if(wp && wp.style.display==='block' && !isAppearanceColorInputActive()){
+    renderExteriorWallPanel(wp.dataset.mode||APPEARANCE_PANEL_MODE);
+  }
 }
 
 function getExteriorWallsByFloor(){
