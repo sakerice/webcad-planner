@@ -2859,6 +2859,7 @@ input[type="color"]::-moz-color-swatch{
       <div class="stool" onclick="toggleExteriorColorPanel()"><span class="sicon">🏠</span>外観カラー設定</div>
       <div class="stool" onclick="toggleRoofColorPanel()"><span class="sicon">🏡</span>屋根カラー設定</div>
       <div class="stool" onclick="toggleLightPanel()"><span class="sicon">💡</span>ライト調整</div>
+      <div class="stool" onclick="clearAll3DHidden()"><span class="sicon">👁</span>3D非表示を全て解除</div>
       <div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="照明"><span class="sicon">💡</span><span>照明</span><span class="asset-arrow">+</span></div><div class="asset-grid">
         <button class="asset-tile" type="button" data-tool="light-ceiling" onclick="setTool('light-ceiling')" title="シーリングライト"><span class="sicon">◉</span><div class="asset-name">シーリングライト</div></button>
         <button class="asset-tile" type="button" data-tool="light-down" onclick="setTool('light-down')" title="ダウンライト"><span class="sicon">⌄</span><div class="asset-name">ダウンライト</div></button>
@@ -3922,7 +3923,44 @@ function selectedLockControlHtml(it){
   html+='</label>';
   if(locked) html+='<div class="lock-status-note">ロック中です。解除するまで削除・移動・寸法/座標変更はできません。</div>';
   html+='</div>';
+  html+=selectedVisibilityControlHtml(it);
   return html;
+}
+// AIレンダーの画角調整などのため、オブジェクト単位で3D表示を一時制御できるようにする。
+// 壁: 自動カットアウェイの上書き(常に表示/非表示)。アイテム・部屋: 非表示チェック
+function selectedVisibilityControlHtml(it){
+  if(!it) return '';
+  if(it.x1!==undefined && it.x2!==undefined){
+    var v=it.vis3D||'auto';
+    var html='<div class="pr"><div class="pl">3D表示</div><select class="pi" onchange="updateSelectedProp(\'vis3D\',this.value===\'auto\'?\'\':this.value)">';
+    html+='<option value="auto"'+(v==='auto'||v===''?' selected':'')+'>自動(内観で自動透過)</option>';
+    html+='<option value="show"'+(v==='show'?' selected':'')+'>常に表示(透過しない)</option>';
+    html+='<option value="hide"'+(v==='hide'?' selected':'')+'>一時的に非表示</option>';
+    html+='</select></div>';
+    if(v==='hide') html+='<div class="lock-status-note">この壁は3Dに表示されません(2Dでは編集できます)。</div>';
+    return html;
+  }
+  if(it.type==='room'){
+    var html2='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示(床・天井)</label></div>';
+    if(it.hidden3D) html2+='<div class="lock-status-note">3Dビューに表示されません(2Dでは編集できます)。</div>';
+    return html2;
+  }
+  if(it.type){
+    var html3='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示</label></div>';
+    if(it.hidden3D) html3+='<div class="lock-status-note">3Dビューに表示されません(2Dでは編集できます)。</div>';
+    return html3;
+  }
+  return '';
+}
+function clearAll3DHidden(){
+  var n=0;
+  DATA.walls.forEach(function(w){ if(w.vis3D){ delete w.vis3D; n++; } });
+  DATA.items.forEach(function(it){ if(it.hidden3D){ delete it.hidden3D; n++; } });
+  DATA.rooms.forEach(function(r){ if(r.hidden3D){ delete r.hidden3D; n++; } });
+  if(!n){ alert('3D非表示・表示上書きの設定はありません。'); return; }
+  saveState();
+  draw2d(); if(ren) rebuild3D();
+  if(ST.selected) updateProps();
 }
 function setPropsBodyHtml(body,html,it){
   body.innerHTML=html;
@@ -9205,6 +9243,7 @@ function makeInteriorCutawayWallMaterial(source,opacity){
 }
 function markInteriorCutawayCandidate(mesh,w,sign,opacity){
   if(!mesh || !w) return;
+  if(w.vis3D==='show') return; // 常に表示: 自動カットアウェイ対象にしない
   mesh.userData.cutawayWall={
     wall:w,
     sign:sign||0,
@@ -9280,6 +9319,7 @@ function getWallBandRange(w){
 }
 
 function buildWall3D(w){
+  if(w.vis3D==='hide') return;
   var fl=w.floor, fy=floorBaseY(fl);
   var slabH=floorSlabHeightMForFloor(fl);
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
@@ -9548,11 +9588,12 @@ function buildWall3D(w){
 }
 
 function buildWinFrames(flFilt){
-  DATA.items.filter(function(it){return isOpeningItemType(it.type)&&(!flFilt||it.floor===flFilt);}).forEach(function(it){
+  DATA.items.filter(function(it){return isOpeningItemType(it.type)&&!it.hidden3D&&(!flFilt||it.floor===flFilt);}).forEach(function(it){
     var fl=it.floor, fy=floorTopY(fl);
     var wallInfo=getOpeningWallInfo(it);
     if(!wallInfo) return;
     var best=wallInfo.wall;
+    if(best.vis3D==='hide') return; // 非表示の壁に付く建具も一緒に隠す
     var wdx=best.x2-best.x1,wdy=best.y2-best.y1,wlen=Math.sqrt(wdx*wdx+wdy*wdy);
     var px=wallInfo.x*U, pz=wallInfo.y*U;
     var nx=-wdy/wlen, ny=wdx/wlen;
@@ -10428,6 +10469,7 @@ function build3DLightItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
+  if(it.hidden3D) return;
   if(!shouldRenderItemInCurrent3DView(it)) return;
   if(isPlanAnnotationType(it.type)) return;
   var fy=item3DBaseY(it);
@@ -11906,7 +11948,7 @@ function buildRooms3D(flFilt){
   var showAutoLightFixtures=!isInt;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
 
-  DATA.rooms.filter(function(r){return !flFilt||r.floor===flFilt;}).forEach(function(r){
+  DATA.rooms.filter(function(r){return !r.hidden3D&&(!flFilt||r.floor===flFilt);}).forEach(function(r){
     var ry=floorBaseY(r.floor);
     var floorY=floorTopY(r.floor);
     var ceilY=ry+wallFullHeightM(r.floor);
