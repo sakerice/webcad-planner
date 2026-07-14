@@ -12345,11 +12345,42 @@ function walkMinimapTap(ev){
   noteCam3DInput();
   if(typeof invalidate3D==='function') invalidate3D();
 }
+// ヘッダー/フッター(モバイルの下部ナビ・ステータスバー)と重ならないよう、
+// 実際の要素位置を測ってHUDの上下オフセットを決める
+function positionWalkHud(){
+  var hud=document.getElementById('walk-hud');
+  var wrap=document.getElementById('c3d-wrap');
+  if(!hud||!wrap) return;
+  var wr=wrap.getBoundingClientRect();
+  function overlapTop(id){
+    var el=document.getElementById(id);
+    if(!el) return 0;
+    var r=el.getBoundingClientRect();
+    if(r.height<=0||r.bottom<=wr.top) return 0;
+    return Math.max(0,r.bottom-wr.top);
+  }
+  function overlapBottom(id){
+    var el=document.getElementById(id);
+    if(!el) return 0;
+    var r=el.getBoundingClientRect();
+    if(r.height<=0||r.top>=wr.bottom) return 0;
+    return Math.max(0,wr.bottom-r.top);
+  }
+  var topSafe=Math.max(12,overlapTop('toolbar')+10);
+  var botSafe=Math.max(16,overlapBottom('bottom-nav')+12,overlapBottom('statusbar')+12);
+  var mm=document.getElementById('walk-minimap');
+  var ex=document.getElementById('walk-exit');
+  var dp=document.getElementById('walk-dpad');
+  if(mm) mm.style.top=topSafe+'px';
+  if(ex) ex.style.top=topSafe+'px';
+  if(dp) dp.style.bottom=botSafe+'px';
+}
 function initWalkHud(){
   var mm=document.getElementById('walk-minimap');
   if(mm&&!mm._wired){
     mm._wired=true;
     mm.addEventListener('pointerdown',function(e){e.preventDefault();walkMinimapTap(e);});
+    window.addEventListener('resize',positionWalkHud);
   }
   document.querySelectorAll('.wk-btn').forEach(function(b){
     if(b._wired) return; b._wired=true;
@@ -12549,7 +12580,8 @@ function setView(v){
         initWalkHud();
         var hud=document.getElementById('walk-hud');
         if(hud) hud.style.display='block';
-        setTimeout(drawWalkMinimap,30);
+        positionWalkHud();
+        setTimeout(function(){ positionWalkHud(); drawWalkMinimap(); },50);
         if(composer&&composer.passes[1]) composer.passes[1].strength=0.25;
       } else if(v==='3d-int'){
         // Interior: bird's eye of current floor only, no fog/sky
