@@ -70,6 +70,19 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .tsep{width:1px;height:22px;background:#2a4080;margin:0 2px;flex-shrink:0}
 #floor-sel{background:#0f3460;color:#cce;border:1px solid #2a4080;padding:4px 8px;border-radius:4px;font-size:11px;font-family:inherit}
 
+/* ── ウォークスルーHUD ─────────────────── */
+#walk-hud{position:absolute;inset:0;pointer-events:none;z-index:30}
+#walk-minimap{position:absolute;top:12px;right:12px;width:220px;height:176px;border-radius:10px;
+  background:rgba(255,255,255,0.92);box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:auto;touch-action:none}
+#walk-exit{position:absolute;top:12px;left:12px;pointer-events:auto;background:rgba(22,33,62,0.85);color:#fff;
+  border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer}
+#walk-dpad{position:absolute;right:26px;bottom:48px;width:180px;height:180px;pointer-events:none}
+.wk-btn{position:absolute;width:56px;height:56px;border-radius:14px;border:1px solid rgba(255,255,255,0.4);
+  background:rgba(22,33,62,0.72);color:#fff;font-size:20px;pointer-events:auto;touch-action:none;
+  user-select:none;-webkit-user-select:none;cursor:pointer}
+.wk-btn:active{background:#e94560}
+.wk-fwd{left:62px;top:0}.wk-left{left:0;top:62px}.wk-back{left:62px;top:124px}.wk-right{left:124px;top:62px}
+@media (max-width:768px){#walk-minimap{width:160px;height:128px}#walk-dpad{right:14px;bottom:14px}}
 /* ── MAIN LAYOUT ───────────────────────── */
 #main{display:flex;flex:1;overflow:hidden;min-height:0}
 #sidebar{width:175px;background:#16213e;border-right:2px solid #0f3460;overflow-y:auto;flex-shrink:0;transition:transform 0.28s cubic-bezier(.4,0,.2,1)}
@@ -2737,6 +2750,7 @@ input[type="color"]::-moz-color-swatch{
   <button class="tbtn active" id="btn-2d" onclick="setView('2d')">📐 平面図</button>
   <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')">🏗 外観3D</button>
   <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')">🚶 内観3D</button>
+  <button class="tbtn" id="btn-3dw" onclick="setViewWithLoading('3d-walk')">👣 ウォークスルー</button>
   <button class="tbtn" onclick="refresh3DPreviewWithLoading()">⟳ 3D更新</button>
   <div class="tsep mob-hide"></div>
   <button class="tbtn mob-hide" onclick="toggleGrid()">⊞ グリッド</button>
@@ -2766,7 +2780,6 @@ input[type="color"]::-moz-color-swatch{
         <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
-        <div class="stool" data-tool="walk-route" onclick="setTool('walk-route')" title="ウォーク"><span class="sicon">↝</span>ウォーク</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -2886,6 +2899,16 @@ input[type="color"]::-moz-color-swatch{
   <div id="canvas-area">
     <canvas id="c2d"></canvas>
     <div id="c3d-wrap">
+      <div id="walk-hud" style="display:none">
+        <canvas id="walk-minimap" width="220" height="176"></canvas>
+        <button id="walk-exit" type="button" onclick="exitWalkMode()">✕ ウォークスルー終了</button>
+        <div id="walk-dpad">
+          <button type="button" class="wk-btn wk-fwd"  data-wdir="fwd">▲</button>
+          <button type="button" class="wk-btn wk-left" data-wdir="left">◀</button>
+          <button type="button" class="wk-btn wk-back" data-wdir="back">▼</button>
+          <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
+        </div>
+      </div>
       <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
     </div>
     <div id="int-ctrl">
@@ -7022,6 +7045,7 @@ function init3D(){
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     var k=e.key.toLowerCase();
     if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0){ iMov[k]=true; invalidate3D(); }
+    if(e.key==='Escape'&&isWalkView()){ exitWalkMode(); return; }
     if(e.key==='Escape'&&isInt) setView('2d');
   });
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
@@ -7059,6 +7083,7 @@ function build3D(){
     sc3.remove(c);
   });
   _activeInteriorShadowLightCount=0;
+  _doorAnims=[];
   _downspoutRegistry=[];
   // 手動配置の竪樋を先に登録し、自動生成が近傍(0.6m)に重複して立てないようにする
   (DATA.items||[]).forEach(function(o){
@@ -7910,7 +7935,7 @@ function applyLightingToScene(refreshSky){
       sc3.fog=null;
       sc3.background=new THREE.Color(preset.interiorBg==null?0x12121a:preset.interiorBg);
       if(_skyMesh) _skyMesh.visible=false;
-    } else if(ST.view==='3d-ext'){
+    } else if(ST.view==='3d-ext'||ST.view==='3d-walk'){
       sc3.background=null;
       sc3.fog=new THREE.Fog(preset.fogColor||0xb8d4f0,preset.fogNear||80,preset.fogFar||500);
       if(_skyMesh) _skyMesh.visible=true;
@@ -9747,7 +9772,11 @@ function buildWinFrames(flFilt){
         var fixedX=leftOpen?rightPos:leftPos;
         var movingX=slideOpen?fixedX:(leftOpen?leftPos:rightPos);
         addBox(doorMat,fixedX,panelY,-0.035,panelW,panelH,leafT);
-        addBox(doorMat,movingX,panelY, 0.035,panelW,panelH,leafT);
+        var slideLeaf=addBox(doorMat,movingX,panelY, 0.035,panelW,panelH,leafT);
+        slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
+        _doorAnims.push({it:it,grp:grp,slideMesh:slideLeaf,openX:fixedX,
+          closedX:(leftOpen?leftPos:rightPos),
+          initiallyOpen:slideOpen,_want:slideOpen?1:0});
       } else {
         var pivot=new THREE.Group();
         var hingeX=it.flipX ? ww/2 : -ww/2;
@@ -9755,7 +9784,9 @@ function buildWinFrames(flFilt){
         var openDir=it.flipY?-1:1;
         var openSide=-openDir;
         pivot.position.set(hingeX,0,0);
-        pivot.rotation.y=doorOpenState(it)==='closed'?0:openSide*Math.PI/3;
+        // 開き戸は90度まで開く(ウォークスルーの通行と実際の使い方に合わせる)
+        var doorOpenY=openSide*Math.PI/2;
+        pivot.rotation.y=doorOpenState(it)==='closed'?0:doorOpenY;
         if(openingModelReady){
           var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,panelH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
@@ -9813,6 +9844,9 @@ function buildWinFrames(flFilt){
           }
         }
         grp.add(pivot);
+        // ウォークスルーの接近自動開閉用に登録(閉まっているドアが対象)
+        _doorAnims.push({it:it,grp:grp,pivot:pivot,openY:doorOpenY,
+          initiallyOpen:doorOpenState(it)!=='closed',_want:doorOpenState(it)!=='closed'?1:0});
       }
     }
 
@@ -10400,7 +10434,7 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
   });
 }
 function claimInteriorShadowLightSlot(it){
-  if(!isInt || !it || it.lightCastShadow===false) return false;
+  if((!isInt&&!isWalkView()) || !it || it.lightCastShadow===false) return false;
   if(_activeInteriorShadowLightCount>=maxInteriorShadowLights()) return false;
   _activeInteriorShadowLightCount++;
   return true;
@@ -10451,8 +10485,9 @@ function makeLightFixtureMaterial(color){
 function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
   // 外観3Dでは配置ライトの実光源を生成しない(フォワードレンダリングではライト数が
   // そのまま全マテリアルの描画コストになるため)。窓明かりは自動ルームライトが担い、
-  // 器具メッシュの発光表現は維持されるので見た目への影響は小さい
-  if(!isInt) return;
+  // 器具メッシュの発光表現は維持されるので見た目への影響は小さい。
+  // ウォークスルーは屋内を歩くため実光源を有効にする
+  if(!isInt && !isWalkView()) return;
   // r155+ の物理ライト単位ではpoint/spotの強度がカンデラ基準になるためπ倍で従来の明るさを維持
   var intensity=Math.max(0,Math.min(3,Number(it.lightIntensity)||0))*Math.PI;
   var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
@@ -12208,6 +12243,177 @@ function get3DFrameInterval(){
   var touchDevice=typeof navigator!=='undefined' && (navigator.maxTouchPoints||0)>0;
   return (touchDevice || isMobileLayout()) ? 33 : 0;
 }
+// ─── 新ウォークスルーモード(3d-walk) ───────────────────────
+// ヘッダーから起動し、3Dモデルの中に目線カメラで立つ。右下の十字キー/矢印キーで
+// 前後移動・その場回転、右上のミニマップのタップで移動。閉まっているドアには
+// 接近すると90度まで開くアニメーションが走る
+var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0};
+var _doorAnims=[];
+function isWalkView(){ return ST.view==='3d-walk'; }
+function walkEyeY(){ return floorTopY(WALK.floor)+WALK_EYE_HEIGHT_MM*U; }
+function walkSpawn(){
+  WALK.floor=ST.floor||1;
+  var fl=WALK.floor;
+  var px=null,pz=null,tx=null,tz=null;
+  var df=DATA.items.filter(function(i){return i.type==='door-front'&&i.floor===fl;})[0];
+  var rooms=DATA.rooms.filter(function(r){return r.floor===fl;});
+  var big=rooms.slice().sort(function(a,b){return b.w*b.d-a.w*a.d;})[0];
+  if(df){
+    var wi=getOpeningWallInfo(df);
+    if(wi){
+      var w=wi.wall,dx=w.x2-w.x1,dy=w.y2-w.y1,L=Math.hypot(dx,dy)||1;
+      var nx=-dy/L,nz=dx/L;
+      // 建物内側へ0.9m入った位置に立ち、部屋側を向く
+      var cen=big?{x:(big.x+big.w/2),y:(big.y+big.d/2)}:{x:wi.x,y:wi.y};
+      var sideIn=((cen.x-wi.x)*nx+(cen.y-wi.y)*nz)>=0?1:-1;
+      px=(wi.x+nx*sideIn*900)*U; pz=(wi.y+nz*sideIn*900)*U;
+      tx=cen.x*U; tz=cen.y*U;
+    }
+  }
+  if(px===null){
+    if(big){ px=(big.x+big.w/2)*U; pz=(big.y+big.d/2)*U; tx=px; tz=pz-1; }
+    else { px=4; pz=2; tx=4; tz=1; }
+  }
+  WALK.x=px; WALK.z=pz;
+  WALK.yaw=Math.atan2(-(tx-px),-(tz-pz));
+}
+function walkApplyCamera(){
+  if(!camExt) return;
+  camExt.position.set(WALK.x,walkEyeY(),WALK.z);
+  camExt.rotation.order='YXZ';
+  camExt.rotation.set(0,WALK.yaw,0);
+}
+function walkMapTransform(){
+  var fl=WALK.floor;
+  var ws=DATA.walls.filter(function(w){return w.floor===fl;});
+  var mnX=Infinity,mnY=Infinity,mxX=-Infinity,mxY=-Infinity;
+  ws.forEach(function(w){mnX=Math.min(mnX,w.x1,w.x2);mnY=Math.min(mnY,w.y1,w.y2);mxX=Math.max(mxX,w.x1,w.x2);mxY=Math.max(mxY,w.y1,w.y2);});
+  if(!isFinite(mnX)){mnX=0;mnY=0;mxX=9100;mxY=9100;}
+  var cv=document.getElementById('walk-minimap');
+  var pad=14, sw=cv.width-pad*2, sh=cv.height-pad*2;
+  var sc=Math.min(sw/Math.max(1,mxX-mnX),sh/Math.max(1,mxY-mnY));
+  var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=pad+(sh-(mxY-mnY)*sc)/2;
+  return {sc:sc,ox:ox,oy:oy,mnX:mnX,mnY:mnY};
+}
+function drawWalkMinimap(){
+  var cv=document.getElementById('walk-minimap');
+  if(!cv) return;
+  var ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var t=walkMapTransform();
+  var fl=WALK.floor;
+  function mx(v){return t.ox+(v-t.mnX)*t.sc;}
+  function my(v){return t.oy+(v-t.mnY)*t.sc;}
+  // 部屋
+  ctx.fillStyle='rgba(120,150,200,0.18)';
+  DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
+    ctx.fillRect(mx(r.x),my(r.y),r.w*t.sc,r.d*t.sc);
+  });
+  // 壁
+  ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.lineCap='round';
+  DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
+    ctx.beginPath(); ctx.moveTo(mx(w.x1),my(w.y1)); ctx.lineTo(mx(w.x2),my(w.y2)); ctx.stroke();
+  });
+  // ドア(開口)
+  ctx.strokeStyle='#c8a060'; ctx.lineWidth=3;
+  DATA.items.filter(function(i){return isOpeningItemType(i.type)&&i.floor===fl&&!isWindowLikeType(i.type);}).forEach(function(d){
+    var cx=mx(d.x+d.w/2), cy=my(d.y+d.d/2);
+    ctx.beginPath(); ctx.arc(cx,cy,2.4,0,Math.PI*2); ctx.stroke();
+  });
+  // 現在位置+向き
+  var pxm=mx(WALK.x/U), pzm=my(WALK.z/U);
+  var fx=-Math.sin(WALK.yaw), fz=-Math.cos(WALK.yaw);
+  ctx.fillStyle='rgba(233,69,96,0.25)';
+  ctx.beginPath(); ctx.moveTo(pxm,pzm);
+  ctx.arc(pxm,pzm,16,Math.atan2(fz,fx)-0.5,Math.atan2(fz,fx)+0.5); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#e94560';
+  ctx.beginPath(); ctx.arc(pxm,pzm,5,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+  // 階表示
+  ctx.fillStyle='#33415e'; ctx.font='bold 11px sans-serif';
+  ctx.fillText(fl+'F タップで移動',8,13);
+}
+function walkMinimapTap(ev){
+  var cv=document.getElementById('walk-minimap');
+  var r=cv.getBoundingClientRect();
+  var cx=(ev.clientX-r.left)*(cv.width/r.width);
+  var cy=(ev.clientY-r.top)*(cv.height/r.height);
+  var t=walkMapTransform();
+  WALK.x=((cx-t.ox)/t.sc+t.mnX)*U;
+  WALK.z=((cy-t.oy)/t.sc+t.mnY)*U;
+  walkApplyCamera(); drawWalkMinimap();
+  noteCam3DInput();
+  if(typeof invalidate3D==='function') invalidate3D();
+}
+function initWalkHud(){
+  var mm=document.getElementById('walk-minimap');
+  if(mm&&!mm._wired){
+    mm._wired=true;
+    mm.addEventListener('pointerdown',function(e){e.preventDefault();walkMinimapTap(e);});
+  }
+  document.querySelectorAll('.wk-btn').forEach(function(b){
+    if(b._wired) return; b._wired=true;
+    var dir=b.getAttribute('data-wdir');
+    function press(e){e.preventDefault();WALK.keys[dir]=true;noteCam3DInput();if(typeof invalidate3D==='function')invalidate3D();}
+    function release(){WALK.keys[dir]=false;}
+    b.addEventListener('pointerdown',press);
+    b.addEventListener('pointerup',release);
+    b.addEventListener('pointercancel',release);
+    b.addEventListener('pointerleave',release);
+  });
+}
+function exitWalkMode(){ setView('3d-ext'); setTimeout(fitCameraToScene,100); }
+// ドアの接近自動開閉(閉まっているドアのみ)。ヒステリシスでばたつきを防ぐ
+function updateWalkDoors(dt){
+  var animating=false;
+  for(var i=0;i<_doorAnims.length;i++){
+    var d=_doorAnims[i];
+    if(d.initiallyOpen) continue;
+    var dx=d.grp.position.x-WALK.x, dz=d.grp.position.z-WALK.z;
+    var dist=Math.hypot(dx,dz);
+    var floorOk=Math.abs(d.grp.position.y-floorTopY(WALK.floor))<1.6;
+    if(dist<1.5&&floorOk) d._want=1;
+    else if(dist>2.4||!floorOk) d._want=0;
+    var k=Math.min(1,dt*4.5);
+    if(d.slideMesh){
+      var target=d._want?d.openX:d.closedX;
+      var cur=d.slideMesh.position.x;
+      if(Math.abs(target-cur)>0.0008){ d.slideMesh.position.x=cur+(target-cur)*k; animating=true; }
+    } else if(d.pivot){
+      var tY=d._want?d.openY:0;
+      var cY=d.pivot.rotation.y;
+      if(Math.abs(tY-cY)>0.001){ d.pivot.rotation.y=cY+(tY-cY)*k; animating=true; }
+    }
+  }
+  return animating;
+}
+var _lastWalkTick=0;
+function updateWalkMode(now){
+  if(!isWalkView()||!WALK.active) return false;
+  var dt=Math.min(0.1,Math.max(0.001,(now-(_lastWalkTick||now))/1000));
+  _lastWalkTick=now;
+  if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; drawWalkMinimap(); }
+  var rot=(WALK.keys.left?1:0)-(WALK.keys.right?1:0)
+        +((iMov['arrowleft']||iMov['a'])?1:0)-((iMov['arrowright']||iMov['d'])?1:0);
+  var fwd=(WALK.keys.fwd?1:0)-(WALK.keys.back?1:0)
+        +((iMov['arrowup']||iMov['w'])?1:0)-((iMov['arrowdown']||iMov['s'])?1:0);
+  rot=Math.max(-1,Math.min(1,rot)); fwd=Math.max(-1,Math.min(1,fwd));
+  var moved=false;
+  if(rot){ WALK.yaw+=rot*1.7*dt; moved=true; }
+  if(fwd){
+    var sp=2.0*dt*fwd;
+    WALK.x+=-Math.sin(WALK.yaw)*sp;
+    WALK.z+=-Math.cos(WALK.yaw)*sp;
+    moved=true;
+  }
+  if(moved){
+    walkApplyCamera();
+    if(now-WALK._mapT>120){ WALK._mapT=now; drawWalkMinimap(); }
+  }
+  var doors=updateWalkDoors(dt);
+  WALK.moving=moved;
+  return moved||doors;
+}
 // 動的解像度: カメラ操作・ウォークスルー中は描画解像度を下げ、静止したら
 // フル解像度で描き直す。操作中のGPU負荷が半分以下になり、静止時の画質は不変
 var _dynResLow=false;
@@ -12239,14 +12445,15 @@ function loop3D(){
   if(frameInterval && now-_last3DFrameAt<frameInterval) return;
 
   var walking=ST.view==='3d-ext' && updateWalkthroughCamera(now);
+  var walkMode=updateWalkMode(now);
   var orbitMoved=false;
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
     orbitMoved=orbit.update()===true;
   }
-  var animating=walking||orbitMoved||GIZMO_DRAG.active||anyWasdActive();
+  var animating=walking||walkMode||orbitMoved||GIZMO_DRAG.active||anyWasdActive();
   // 低解像度は「ユーザーが実際に操作している間」だけ。慣性(ダンピング)の減衰待ちは
   // 数秒続くことがあるため、入力が600ms途絶えたらフル解像度へ復帰する
-  var lowResWanted=animating && (walking||GIZMO_DRAG.active||anyWasdActive()||(now-_lastCam3DInputAt<600));
+  var lowResWanted=animating && (walking||WALK.moving||GIZMO_DRAG.active||anyWasdActive()||(now-_lastCam3DInputAt<600));
   if(_dynResLow && !lowResWanted){
     setDynamicResolution(false);
     _needs3DRender=true;
@@ -12304,7 +12511,8 @@ function runWithAppLoading(label,work){
 }
 function setViewWithLoading(v){
   if(v==='2d'){setView(v);return;}
-  runWithAppLoading(v==='3d-int'?'内観3Dを準備中':'外観3Dを準備中',function(){setView(v);});
+  var label=v==='3d-int'?'内観3Dを準備中':(v==='3d-walk'?'ウォークスルーを準備中':'外観3Dを準備中');
+  runWithAppLoading(label,function(){setView(v);});
 }
 function refresh3DPreviewWithLoading(){
   runWithAppLoading('3Dを更新中',refresh3DPreview);
@@ -12312,17 +12520,38 @@ function refresh3DPreviewWithLoading(){
 
 function setView(v){
   if(v!=='3d-ext' && WALKTHROUGH) stopWalkthrough();
+  if(v!=='3d-walk' && WALK.active){
+    WALK.active=false; WALK.keys={}; WALK.moving=false;
+    var _wh=document.getElementById('walk-hud');
+    if(_wh) _wh.style.display='none';
+    if(camExt && WALK.prevFov!==null){ camExt.fov=WALK.prevFov; WALK.prevFov=null; camExt.updateProjectionMatrix(); }
+  }
   ST.view=v;
   document.getElementById('c2d').style.display=(v==='2d'?'block':'none');
   document.getElementById('c3d-wrap').style.display=(v==='2d'?'none':'block');
   document.getElementById('help-box').style.display=(v==='2d'?'block':'none');
   document.getElementById('wasd').style.display='none';  // orbit mode for interior
-  var modeNames={'2d':'平面図','3d-ext':'外観3D','3d-int':'内観3D'};
+  var modeNames={'2d':'平面図','3d-ext':'外観3D','3d-int':'内観3D','3d-walk':'ウォークスルー'};
   document.getElementById('st-mode').textContent='モード:'+(modeNames[v]||v);
   if(v!=='2d'){
     init3D();
     if(sc3){
-      if(v==='3d-int'){
+      if(v==='3d-walk'){
+        // ウォークスルー: 建物内の目線カメラ。オービット無効・HUD表示・室内ライト有効
+        isInt=false;
+        WALK.active=true;
+        if(WALK.prevFov===null){ WALK.prevFov=camExt.fov; }
+        camExt.fov=68; camExt.updateProjectionMatrix();
+        if(orbit) orbit.enabled=false;
+        applyLightingToScene(false);
+        walkSpawn();
+        walkApplyCamera();
+        initWalkHud();
+        var hud=document.getElementById('walk-hud');
+        if(hud) hud.style.display='block';
+        setTimeout(drawWalkMinimap,30);
+        if(composer&&composer.passes[1]) composer.passes[1].strength=0.25;
+      } else if(v==='3d-int'){
         // Interior: bird's eye of current floor only, no fog/sky
         isInt=true;
         applyLightingToScene(false);
@@ -14654,8 +14883,8 @@ function closeMobilePanels(){
 var _origSetView = setView;
 setView = function(v){
   _origSetView(v);
-  var topIds={'2d':'btn-2d','3d-ext':'btn-3de','3d-int':'btn-3di'};
-  ['btn-2d','btn-3de','btn-3di'].forEach(function(id){
+  var topIds={'2d':'btn-2d','3d-ext':'btn-3de','3d-int':'btn-3di','3d-walk':'btn-3dw'};
+  ['btn-2d','btn-3de','btn-3di','btn-3dw'].forEach(function(id){
     var b=document.getElementById(id);
     if(b) b.classList.remove('active');
   });
