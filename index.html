@@ -7040,8 +7040,9 @@ function init3D(){
       if(_walkDrag.id!==e.pointerId) return;
       var dx=e.clientX-_walkDrag.lx, dy=e.clientY-_walkDrag.ly;
       _walkDrag.lx=e.clientX; _walkDrag.ly=e.clientY;
-      WALK.yaw-=dx*0.0045;
-      WALK.pitch=Math.max(-1.1,Math.min(1.1,(WALK.pitch||0)-dy*0.003));
+      // 外観/内観のオービット操作と同じ「スワイプ方向に景色がついてくる」向き
+      WALK.yaw+=dx*0.0045;
+      WALK.pitch=Math.max(-1.1,Math.min(1.1,(WALK.pitch||0)+dy*0.003));
       walkApplyCamera();
       var nw=performance.now();
       if(nw-WALK._mapT>150){ WALK._mapT=nw; drawWalkMinimap(); }
