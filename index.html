@@ -4320,6 +4320,11 @@ function updateProps(){
         html += '<option value="'+opt[0]+'" '+(doorOpenState(it)===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
       });
       html += '</select></div>';
+      // テクスチャにノブや窓が描かれている場合に3Dの造形と干渉しないようOFFにできる
+      html += '<div class="pr"><div class="pl">ドアノブ・ハンドル</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.showDoorHandle!==false?'checked':'')+' onchange="updateSelectedProp(\'showDoorHandle\',this.checked)">3Dで表示する</label></div>';
+      if(it.type==='door-front'){
+        html += '<div class="pr"><div class="pl">採光スリット (小窓)</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.showDoorSlit!==false?'checked':'')+' onchange="updateSelectedProp(\'showDoorSlit\',this.checked)">3Dで表示する</label></div>';
+      }
     }
   }
   if(it.type==='wood-fence'){
@@ -9828,19 +9833,21 @@ function buildWinFrames(flFilt){
         if(!openingModelReady){
           // 金物(サテンシルバー): LIXIL標準色のハンドル・丁番
           var hwMat=new THREE.MeshStandardMaterial({color:0xb9bcc0,roughness:0.32,metalness:0.7,envMapIntensity:0.5});
-          var handleX=leafX*(frontDoor?0.78:0.85);
+          // pivot(吊元)基準ローカル座標。戸先端=leafX*2 からバックセット分内側に置く
+          var handleBack=frontDoor?0.10:0.06;
+          var handleX=leafX*2-(leafX>0?1:-1)*handleBack;
           function pmesh(m,x,y,z){ m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; pivot.add(m); return m; }
           if(frontDoor){
             // ジエスタ2風: 縦スリット採光ガラス
-            if(ww>0.7 && dh>1.8){
-              var slitW=0.08, slitH=dh-0.62, slitX=leafX*0.34;
+            if(ww>0.7 && dh>1.8 && it.showDoorSlit!==false){
+              var slitW=0.08, slitH=dh-0.62, slitX=leafX*1.34;
               pmesh(new THREE.Mesh(new THREE.BoxGeometry(slitW+0.05,slitH+0.05,leafT+0.004),
                 new THREE.MeshStandardMaterial({color:0x2c2f33,roughness:0.5,metalness:0.3})),slitX,panelY,0);
               pmesh(new THREE.Mesh(new THREE.BoxGeometry(slitW,slitH,leafT+0.012),
                 new THREE.MeshStandardMaterial({color:0xdfe9ee,transparent:true,opacity:0.6,roughness:0.3})),slitX,panelY,0);
             }
             // プッシュプルハンドル(縦バー450mm・FL+1050中心)を内外両面に
-            [-1,1].forEach(function(side){
+            if(it.showDoorHandle!==false) [-1,1].forEach(function(side){
               var barZ=side*(leafT/2+0.032);
               pmesh(new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,10),hwMat),handleX,1.05,barZ);
               [0.17,-0.17].forEach(function(dy){
@@ -9851,7 +9858,7 @@ function buildWinFrames(flFilt){
             });
           } else {
             // ラシッサ風: レバーハンドル+丸座(FL+950)を両面に
-            [-1,1].forEach(function(side){
+            if(it.showDoorHandle!==false) [-1,1].forEach(function(side){
               var rose=new THREE.Mesh(new THREE.CylinderGeometry(0.026,0.026,0.008,14),hwMat);
               rose.rotation.x=Math.PI/2;
               pmesh(rose,handleX,0.95,side*(leafT/2+0.004));
