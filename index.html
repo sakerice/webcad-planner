@@ -38,6 +38,8 @@ import * as THREE_NS from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RGBELoader} from 'three/addons/loaders/RGBELoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {KTX2Loader} from 'three/addons/loaders/KTX2Loader.js';
 import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
@@ -45,6 +47,7 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 window.THREE = Object.assign({}, THREE_NS, {
   OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader,
+  DRACOLoader: DRACOLoader, KTX2Loader: KTX2Loader,
   EffectComposer: EffectComposer, RenderPass: RenderPass, OutputPass: OutputPass,
   UnrealBloomPass: UnrealBloomPass,
   BufferGeometryUtils: {mergeGeometries: mergeGeometries}
@@ -74,8 +77,12 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #walk-hud{position:absolute;inset:0;pointer-events:none;z-index:30}
 #walk-minimap{position:absolute;top:12px;right:12px;width:220px;height:176px;border-radius:10px;
   background:rgba(255,255,255,0.92);box-shadow:0 4px 16px rgba(0,0,0,0.35);pointer-events:auto;touch-action:none}
-#walk-exit{position:absolute;top:12px;left:12px;pointer-events:auto;background:rgba(22,33,62,0.85);color:#fff;
-  border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer}
+/* design.md準拠: 濃紺の枠付きボックスではなく、ミニマップと同じ白いフローティングカードに統一し、
+   押下/ホバー時のみプライマリのコーラルで強調する(フラットデザイン・過剰な縁取りを避ける方針) */
+#walk-exit{position:absolute;top:12px;left:12px;pointer-events:auto;background:rgba(255,255,255,0.94);color:var(--hp-text,#2d2a27);
+  border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,0.18)}
+#walk-exit:hover,#walk-exit:active{background:var(--hp-primary,#f24a2e);color:#fff}
 #walk-dpad{position:absolute;right:26px;bottom:48px;width:180px;height:180px;pointer-events:none}
 .wk-btn{position:absolute;width:56px;height:56px;border-radius:14px;border:1px solid rgba(255,255,255,0.4);
   background:rgba(22,33,62,0.72);color:#fff;font-size:20px;pointer-events:auto;touch-action:none;
@@ -2726,6 +2733,30 @@ input[type="color"]::-moz-color-swatch{
     height:38px!important;
   }
 }
+
+/* ── フォーカスリングの全体統一 ──────────────────
+   アプリ内のあらゆるボタン/リンクボタンが、これまでブラウザ既定の
+   フォーカスリング(重い黒/青の縁取り)にフォールバックし、フラットな
+   白/アクセントカラー基調のデザインと衝突していた。#floor-sel や .pi
+   入力欄で既に使っているスカイブルーのアクセントリングに統一し、
+   キーボード操作時(:focus-visible)のみ表示することでマウス/タッチ
+   操作時は縁取りが出ないようにする */
+button,
+a.pbtn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"]{
+  outline:none;
+}
+button:focus-visible,
+a.pbtn:focus-visible,
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="reset"]:focus-visible{
+  outline:3px solid rgba(0,168,239,0.18)!important;
+  outline-offset:2px!important;
+  box-shadow:inset 0 0 0 1px var(--hp-secondary)!important;
+}
 </style>
 </head>
 <body>
@@ -3755,7 +3786,7 @@ var EDGE_SNAP_THRESH = 80; // mm — object-edge snap when Shift is held
 
 var RULER_THICKNESS_MM = 120;
 var WALK_ROUTE_THICKNESS_MM = 140;
-var WALK_EYE_HEIGHT_MM = 1700;
+var WALK_EYE_HEIGHT_MM = 1550;
 var WALK_DEFAULT_SPEED_MPS = 1.2;
 var LIGHT_ITEM_TYPES = {'light-ceiling':1,'light-down':1,'light-spot':1};
 var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-spot'};
@@ -5145,15 +5176,20 @@ function drawGrid(){
   var sc=ST.zoom*0.05, mg=910*sc;
   if(mg<3) return;
   var ox=((ST.panX%mg)+mg)%mg, oy=((ST.panY%mg)+mg)%mg;
-  ctx.strokeStyle='rgba(0,0,0,0.07)'; ctx.lineWidth=1;
+  ctx.save();
+  // 910mmモジュール線は建築製図の通り芯の慣例に倣い一点鎖線(細線)で表現する
+  ctx.strokeStyle='rgba(40,60,90,0.16)'; ctx.lineWidth=1; ctx.setLineDash([9,3,1.5,3]);
   for(var x=ox;x<canvas.width;x+=mg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
   for(var y=oy;y<canvas.height;y+=mg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  ctx.setLineDash([]);
   if(sc*455>10){
     var sg=455*sc,ox2=((ST.panX%sg)+sg)%sg,oy2=((ST.panY%sg)+sg)%sg;
-    ctx.strokeStyle='rgba(0,0,0,0.03)';
+    ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.setLineDash([1.5,3]);
     for(var x=ox2;x<canvas.width;x+=sg){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
     for(var y=oy2;y<canvas.height;y+=sg){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    ctx.setLineDash([]);
   }
+  ctx.restore();
 }
 
 function drawAreaTag(cx,cy,w,d,name,isSelected){
@@ -5205,20 +5241,19 @@ function drawWall2d(w){
   var nx=-dy/len,ny=dx/len,t=w.thick*ST.zoom*0.05/2;
   var sel=ST.selected===w;
   ctx.save();
-  if(!sel) {
-    ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(0,0,0,0.2)';
-    ctx.shadowOffsetX = 1.5; ctx.shadowOffsetY = 1.5;
-  }
+  // JIS A0150(建築製図通則)/公共建築工事標準仕様書に準拠した壁の断面表現:
+  // 壁体断面は塗りつぶし(黒に近い濃色)+ 最も太い外形線とし、図面上で最優先の線種として扱う。
+  // ドロップシャドウ等の装飾効果は製図表現に存在しないため付与しない。
   ctx.beginPath();
   ctx.moveTo(a.cx+nx*t,a.cy+ny*t); ctx.lineTo(b.cx+nx*t,b.cy+ny*t);
   ctx.lineTo(b.cx-nx*t,b.cy-ny*t); ctx.lineTo(a.cx-nx*t,a.cy-ny*t);
   ctx.closePath();
   if(sel||(ST.selectAll && w.floor===ST.floor)){
     ctx.fillStyle='rgba(233,69,96,0.95)'; ctx.fill();
-    ctx.strokeStyle='#e94560'; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.strokeStyle='#e94560'; ctx.lineWidth=2.6; ctx.stroke();
   } else {
-    ctx.fillStyle='#e8e4dc'; ctx.fill();
-    ctx.strokeStyle='#555'; ctx.lineWidth=2.0; ctx.stroke();
+    ctx.fillStyle='#2b2b2b'; ctx.fill();
+    ctx.strokeStyle='#000'; ctx.lineWidth=2.4; ctx.stroke();
   }
   ctx.restore();
 }
@@ -5537,45 +5572,30 @@ function rulerTickStepMm(sc){
   return 10000;
 }
 function drawRuler2d(it,sc,preview){
+  // 寸法線(JIS製図の標準表記): 目盛りを刻んだ物差し風の見た目をやめ、
+  // 他の寸法表示(drawRectDim等)と同じ「本体線+端部の45度斜線+中央の寸法値」に揃える
   var len=rulerLengthMm(it);
   if(len<1) return;
   var half=len*sc/2;
   var selected=ST.selected===it && !preview;
   var col=it.color||'#2f80ed';
-  var tickStep=rulerTickStepMm(sc);
-  var tickCount=Math.max(1,Math.round(len/tickStep));
-  var tickLenMinor=Math.max(5,Math.min(9,70*sc));
-  var tickLenMajor=Math.max(9,Math.min(15,110*sc));
   var lineW=preview?1.5:(selected?2.4:1.7);
+  var tickHalf=Math.max(5,Math.min(9,70*sc)); // 端部記号(45度の短い斜線)の半径
   ctx.save();
   ctx.globalAlpha=preview?0.72:1;
   ctx.strokeStyle=selected?'#e94560':col;
   ctx.fillStyle=selected?'#e94560':col;
   ctx.lineWidth=lineW;
+  // 寸法線本体
   ctx.beginPath();
   ctx.moveTo(-half,0);
   ctx.lineTo(half,0);
   ctx.stroke();
+  // 端部記号(45度の短い斜線)を両端に配置する
   ctx.beginPath();
-  ctx.moveTo(-half,-tickLenMajor);
-  ctx.lineTo(-half,tickLenMajor);
-  ctx.moveTo(half,-tickLenMajor);
-  ctx.lineTo(half,tickLenMajor);
-  for(var i=1;i<tickCount;i++){
-    var pos=-half+i*tickStep*sc;
-    if(pos>=half-1) continue;
-    var major=(i%5===0);
-    var tl=major?tickLenMajor:tickLenMinor;
-    ctx.moveTo(pos,-tl);
-    ctx.lineTo(pos,tl);
-  }
+  ctx.moveTo(-half-tickHalf,tickHalf); ctx.lineTo(-half+tickHalf,-tickHalf);
+  ctx.moveTo(half-tickHalf,tickHalf); ctx.lineTo(half+tickHalf,-tickHalf);
   ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(half,0);
-  ctx.lineTo(half-Math.max(8,80*sc),-Math.max(4,38*sc));
-  ctx.lineTo(half-Math.max(8,80*sc),Math.max(4,38*sc));
-  ctx.closePath();
-  ctx.fill();
   var labelOffset=Math.max(18,Math.min(28,180*sc));
   drawDimLabel(0,-labelOffset,Math.round(len)+'mm',preview?'rgba(47,128,237,0.72)':(selected?'rgba(233,69,96,0.9)':'rgba(47,128,237,0.84)'),'#fff');
   ctx.restore();
@@ -5868,6 +5888,12 @@ function drawLight2d(it,sc){
   ctx.restore();
 }
 
+function drawStairUpText(it,sc,x,y,align){
+  ctx.font='bold '+Math.max(9,10*sc)+'px sans-serif'; ctx.textAlign=align||'left'; ctx.textBaseline='middle';
+  // flip時もラベルが鏡文字にならないよう、文字だけ逆スケールで戻す
+  ctx.save(); ctx.translate(x,y); ctx.scale(it.flipX?-1:1, it.flipY?-1:1); ctx.fillText('上',0,0); ctx.restore();
+}
+
 function drawItem2d(it){
   var sc=ST.zoom*0.05;
   var pose=getItemDisplayPose(it);
@@ -5877,7 +5903,7 @@ function drawItem2d(it){
   var ccx=ST.panX+drawX*sc, ccy=ST.panY+drawY*sc; 
   ctx.save();
   ctx.translate(ccx,ccy); ctx.rotate(drawRot*Math.PI/180);
-  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'memo' || it.type === 'ruler' || it.type === 'walk-route');
+  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'door-slide' || it.type === 'window-door' || it.type === 'memo' || it.type === 'ruler' || it.type === 'walk-route');
   if(!manualFlipSymbol) ctx.scale(it.flipX?-1:1, it.flipY?-1:1);
   if(it.type==='memo'){
     drawMemo2d(it,sc);
@@ -5947,8 +5973,8 @@ function drawItem2d(it){
     }
   } else {
     var hw = it.w*sc/2, hd = it.d*sc/2;
-    if(it.type==='stair'||it.type==='stair-corner') ctx.globalAlpha*=0.58;
-    var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type));
+    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
+    var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type) || isPlanSymbol);
     if(!doorSymbolOnly){
       ctx.fillStyle=getItem2dFillColor(it);
       ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
@@ -6002,6 +6028,14 @@ function drawItem2d(it){
       ctx.fillStyle='#334'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('🏠屋根',0,0);
     } else if(it.type === 'stair') {
+      // 階段は床面を淡く残し、段鼻線と昇り矢印を壁外形より細い中細線で描く。
+      ctx.save();
+      ctx.globalAlpha=0.30;
+      ctx.fillStyle=getItem2dFillColor(it);
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.restore();
+      ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
       ctx.beginPath();
       var steps = getStairStepCount(it);
       for(var si=1; si<steps; si++) {
@@ -6009,39 +6043,45 @@ function drawItem2d(it){
         ctx.moveTo(-hw, sy); ctx.lineTo(hw, sy);
       }
       ctx.stroke();
-      // Arrow
-      ctx.strokeStyle='rgba(0,0,0,0.7)'; ctx.lineWidth=1.5;
+      // 昇り方向矢印(矢先=昇り先)。3Dモデルの昇り向き(+d側)に合わせる
+      ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
       ctx.beginPath();
-      ctx.arc(0, hd - 15*sc, 3*sc, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, hd - 15*sc); ctx.lineTo(0, -hd + 15*sc);
-      ctx.lineTo(-5*sc, -hd + 25*sc); ctx.moveTo(0, -hd + 15*sc); ctx.lineTo(5*sc, -hd + 25*sc);
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
       ctx.stroke();
+      var sAw=Math.max(5*sc,4), sAl=Math.min(hd*0.17,Math.max(10*sc,9));
+      ctx.beginPath();
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(-sAw,hd*0.72-sAl); ctx.lineTo(sAw,hd*0.72-sAl); ctx.closePath(); ctx.fill();
+      drawStairUpText(it,sc,Math.max(6*sc,5),hd*0.68);
     } else if(it.type === 'stair-corner') {
-      ctx.strokeStyle='rgba(0,0,0,0.68)'; ctx.lineWidth=1.2;
+      // 廻り3段コーナーのJIS流平面記号: 外形+内側隅から放射する段鼻線+昇り歩行線(1/4弧の矢印)。
+      // 3Dモデル(build3DWinderCorner)と同じ割付で、下辺から入り右下の内側隅を廻って右辺へ抜ける。
+      ctx.save();
+      ctx.globalAlpha=0.30;
+      ctx.fillStyle=getItem2dFillColor(it);
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.restore();
+      ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      // 段鼻線: 内側隅(右下)→左辺中点、内側隅→上辺中点(3Dの蹴上げ位置と同じ)
       ctx.beginPath();
-      ctx.moveTo(-hw,-hd*0.18); ctx.lineTo(hw,hd*0.62);
-      ctx.moveTo(-hw*0.28,-hd); ctx.lineTo(hw,hd);
+      ctx.moveTo(hw,hd); ctx.lineTo(-hw,0);
+      ctx.moveTo(hw,hd); ctx.lineTo(0,-hd);
       ctx.stroke();
-      ctx.strokeStyle='rgba(0,0,0,0.78)'; ctx.lineWidth=1.5;
+      // 昇り歩行線: 直線の折れ線(下辺中央→中心→右辺中央)。JIS流の表現
+      ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
+      var aHeadLen=Math.min(Math.min(hw,hd)*0.28,Math.max(10*sc,9));
+      var wTipX=hw*0.96, wAw=Math.max(5*sc,4);
       ctx.beginPath();
-      ctx.moveTo(-hw*0.08,hd); ctx.lineTo(-hw*0.08,-hd*0.08); ctx.lineTo(hw*0.58,-hd*0.08);
+      ctx.moveTo(0,hd*0.96);
+      ctx.lineTo(0,0);
+      ctx.lineTo(wTipX-aHeadLen,0);
       ctx.stroke();
-      ctx.strokeStyle='rgba(0,0,0,0.62)'; ctx.lineWidth=1;
-      var lowX=hw, lowY=hd;
-      [-0.75,-0.5,-0.25,0].forEach(function(r){
-        ctx.beginPath();
-        ctx.moveTo(-hw, hd*r); ctx.lineTo(lowX, lowY);
-        ctx.stroke();
-      });
-      ctx.fillStyle='rgba(40,40,40,0.78)';
-      ctx.fillRect(hw-9*sc,hd-9*sc,9*sc,9*sc);
-      ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.lineWidth=1.4;
-      ctx.beginPath(); ctx.moveTo(-hw*0.5,-hd*0.62); ctx.lineTo(hw*0.72,hd*0.72); ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(hw*0.72,hd*0.72); ctx.lineTo(hw*0.54,hd*0.66); ctx.lineTo(hw*0.66,hd*0.48); ctx.closePath(); ctx.fill();
-      ctx.font=Math.max(9,10*sc)+'px sans-serif'; ctx.textAlign='right'; ctx.textBaseline='bottom';
-      ctx.fillText('下', hw-11*sc, hd-10*sc);
+      ctx.moveTo(wTipX,0);
+      ctx.lineTo(wTipX-aHeadLen,-wAw);
+      ctx.lineTo(wTipX-aHeadLen,wAw);
+      ctx.closePath(); ctx.fill();
+      drawStairUpText(it,sc,wTipX-Math.max(3*sc,3),-Math.max(9*sc,8),'right');
     } else if(it.type === 'foundation') {
       ctx.fillStyle='rgba(184,178,168,0.32)';
       ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
@@ -6250,9 +6290,10 @@ function drawItem2d(it){
       ctx.strokeRect(baseX, -baseThickness/2, baseW, baseThickness);
       ctx.strokeStyle='#333'; ctx.fillStyle='#333';
       ctx.beginPath(); ctx.arc(hingeX, 0, Math.max(2.5,3*sc), 0, Math.PI*2); ctx.fill();
-      ctx.lineWidth=3;
+      // 建具線(扉)は壁外形線より細くし、線の太さの優先順位(壁>建具>寸法/軌跡線)を明確にする
+      ctx.lineWidth=1.4;
       ctx.beginPath(); ctx.moveTo(hingeX, 0); ctx.lineTo(leafX, 0); ctx.stroke();
-      ctx.lineWidth=2;
+      ctx.lineWidth=1.8;
       ctx.beginPath(); ctx.moveTo(hingeX, 0); ctx.lineTo(openX, openY); ctx.stroke();
       if(!isClosed){
         ctx.lineWidth=0.9; ctx.setLineDash([3,3]);
@@ -6272,7 +6313,8 @@ function drawItem2d(it){
         ctx.closePath(); ctx.fill();
       }
     } else if(it.type === 'door-opening' || it.type === 'door-opening-arch') {
-      ctx.strokeStyle='#555'; ctx.lineWidth=1.4;
+      // 建具なし開口: 開口端を中細線、開口範囲を細い破線で示す。
+      ctx.strokeStyle='#444'; ctx.lineWidth=1.4;
       ctx.beginPath();
       ctx.moveTo(-hw,-hd); ctx.lineTo(-hw,hd);
       ctx.moveTo(hw,-hd); ctx.lineTo(hw,hd);
@@ -6283,35 +6325,31 @@ function drawItem2d(it){
         ctx.moveTo(-hw,-hd); ctx.lineTo(hw,-hd);
       }
       ctx.stroke();
-      ctx.setLineDash([4,3]);
-      ctx.strokeStyle='rgba(80,80,80,0.55)';
+      ctx.setLineDash([4,3]); ctx.lineWidth=0.8;
+      ctx.strokeStyle='rgba(70,70,70,0.58)';
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
       ctx.setLineDash([]);
     } else if(it.type === 'door-slide') {
-      ctx.strokeStyle='#333'; ctx.lineWidth=1.2;
+      // 引き違い戸: 壁厚内の二本のレールと、互い違いの二枚の建具線に簡略化する。
+      ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
+      ctx.strokeStyle='#444'; ctx.lineWidth=0.9;
       ctx.beginPath();
-      ctx.moveTo(-hw, -hd); ctx.lineTo(hw, -hd);
-      ctx.moveTo(-hw,  hd); ctx.lineTo(hw,  hd);
+      ctx.moveTo(-hw,-hd*0.62); ctx.lineTo(hw,-hd*0.62);
+      ctx.moveTo(-hw, hd*0.62); ctx.lineTo(hw, hd*0.62);
       ctx.stroke();
       var slideOpen=doorOpenState(it)!=='closed';
       var leftOpen=!!it.flipX;
-      var panelW=it.w*sc*0.52;
-      var fixedX=leftOpen?(-hw+it.w*sc*0.42):(-hw+it.w*sc*0.06);
-      var movingX=slideOpen
-        ? (leftOpen?(-hw+it.w*sc*0.42):(-hw+it.w*sc*0.06))
-        : (leftOpen?(-hw+it.w*sc*0.06):(-hw+it.w*sc*0.42));
-      ctx.strokeStyle='rgba(40,40,40,0.75)'; ctx.lineWidth=1.1;
-      ctx.strokeRect(fixedX, -hd*0.85, panelW, hd*1.7);
-      ctx.strokeStyle='#333'; ctx.lineWidth=1.5;
-      ctx.strokeRect(movingX, -hd*0.62, panelW, hd*1.24);
+      var panelW=it.w*sc*0.56;
+      var fixedX=leftOpen?(-hw+it.w*sc*0.40):(-hw+it.w*sc*0.04);
+      var movingClosedX=leftOpen?(-hw+it.w*sc*0.04):(-hw+it.w*sc*0.40);
+      var movingX=slideOpen?fixedX:movingClosedX;
+      ctx.strokeStyle='#222'; ctx.lineWidth=1.5;
       ctx.beginPath();
-      var handleX=movingX+(leftOpen?panelW*0.18:panelW*0.82);
-      ctx.moveTo(handleX, -hd*0.25);
-      ctx.lineTo(handleX,  hd*0.25);
-      ctx.lineWidth=2; ctx.stroke();
+      ctx.moveTo(fixedX,-hd*0.28); ctx.lineTo(fixedX+panelW,-hd*0.28);
+      ctx.moveTo(movingX,hd*0.28); ctx.lineTo(movingX+panelW,hd*0.28);
+      ctx.stroke();
       if(slideOpen){
-        ctx.fillStyle='#333';
-        var ax=leftOpen?-hw+it.w*sc*0.2:hw-it.w*sc*0.2;
+        ctx.fillStyle='#333'; var ax=leftOpen?-hw+it.w*sc*0.18:hw-it.w*sc*0.18;
         var dir=leftOpen?-1:1;
         ctx.beginPath();
         ctx.moveTo(ax,0);
@@ -6320,8 +6358,14 @@ function drawItem2d(it){
         ctx.closePath(); ctx.fill();
       }
     } else if(it.type === 'window' || it.type === 'window-door') {
-      ctx.strokeStyle='#555'; ctx.lineWidth=1.0;
-      ctx.strokeRect(-hw, -hd, it.w*sc, it.d*sc);
+      // 窓は壁厚内の三本の平行細線（枠＋ガラス芯）で統一する。
+      ctx.save(); ctx.globalAlpha=0.20; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
+      ctx.strokeStyle='#3f5261'; ctx.lineWidth=0.9;
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd*0.68); ctx.lineTo(hw,-hd*0.68);
+      ctx.moveTo(-hw,0); ctx.lineTo(hw,0);
+      ctx.moveTo(-hw,hd*0.68); ctx.lineTo(hw,hd*0.68);
+      ctx.stroke();
       if(it.type==='window-door'){
         var winSlideOpen=doorOpenState(it)!=='closed';
         var winLeftOpen=!!it.flipX;
@@ -6329,30 +6373,17 @@ function drawItem2d(it){
         var winFixedX=winLeftOpen?(-hw+it.w*sc*0.40):(-hw+it.w*sc*0.06);
         var winMovingClosedX=winLeftOpen?(-hw+it.w*sc*0.06):(-hw+it.w*sc*0.40);
         var winMovingX=winSlideOpen?winFixedX:winMovingClosedX;
-        ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.1;
+        ctx.strokeStyle='#243b4a'; ctx.lineWidth=1.4;
         ctx.beginPath();
-        ctx.moveTo(-hw, -hd*0.62); ctx.lineTo(hw, -hd*0.62);
-        ctx.moveTo(-hw,  hd*0.62); ctx.lineTo(hw,  hd*0.62);
+        ctx.moveTo(winFixedX,-hd*0.24); ctx.lineTo(winFixedX+winPanelW,-hd*0.24);
+        ctx.moveTo(winMovingX,hd*0.24); ctx.lineTo(winMovingX+winPanelW,hd*0.24);
         ctx.stroke();
-        ctx.strokeStyle='rgba(48,128,232,0.82)';
-        ctx.lineWidth=1.1;
-        ctx.strokeRect(winFixedX, -hd*0.62, winPanelW, hd*1.24);
-        ctx.strokeStyle='#3080e8';
-        ctx.lineWidth=1.4;
-        ctx.strokeRect(winMovingX, -hd*0.40, winPanelW, hd*0.80);
-        ctx.beginPath();
-        var winHandleX=winMovingX+(winLeftOpen?winPanelW*0.20:winPanelW*0.80);
-        ctx.moveTo(winHandleX, -hd*0.22);
-        ctx.lineTo(winHandleX,  hd*0.22);
-        ctx.strokeStyle='#333'; ctx.lineWidth=1.6; ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(-hw, 0); ctx.lineTo(hw, 0);
-        ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-hw, -hd*0.45); ctx.lineTo(hw, -hd*0.45);
-        ctx.moveTo(-hw,  hd*0.45); ctx.lineTo(hw,  hd*0.45);
-        ctx.strokeStyle='#777'; ctx.lineWidth=0.8; ctx.stroke();
+        if(winSlideOpen){
+          var wax=winLeftOpen?-hw+it.w*sc*0.18:hw-it.w*sc*0.18;
+          var wdir=winLeftOpen?-1:1;
+          ctx.fillStyle='#243b4a'; ctx.beginPath(); ctx.moveTo(wax,0);
+          ctx.lineTo(wax-wdir*8*sc,-5*sc); ctx.lineTo(wax-wdir*8*sc,5*sc); ctx.closePath(); ctx.fill();
+        }
       }
     } else if(it.type === 'site-rect') {
       var surface=siteSurfaceType(it);
@@ -7115,6 +7146,7 @@ function build3D(){
   });
   _activeInteriorShadowLightCount=0;
   _doorAnims=[];
+  _fmpInstancePools={};
   _downspoutRegistry=[];
   // 手動配置の竪樋を先に登録し、自動生成が近傍(0.6m)に重複して立てないようにする
   (DATA.items||[]).forEach(function(o){
@@ -7127,6 +7159,7 @@ function build3D(){
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
   buildRooms3D(flFilt);
   DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){buildItem3D(it);});
+  finalizeFmpInstancePools();
   buildWinFrames(flFilt);
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
@@ -7721,11 +7754,19 @@ function pickSelectable3D(e){
   _ray3d.setFromCamera(_mouse3d,camExt);
   var candidates=[];
   sc3.traverse(function(o){
-    if(o.isMesh && o.visible && o.userData && o.userData.selectRef) candidates.push(o);
+    if(o.isMesh && o.visible && o.userData && (o.userData.selectRef || o.userData.instanceRefs)) candidates.push(o);
   });
   var hits=_ray3d.intersectObjects(candidates,false);
   for(var i=0;i<hits.length;i++){
-    var ref=findSelectableRef3D(hits[i].object);
+    // InstancedMesh(FMP家具の統合描画)はインスタンス単位でヒット判定されるため、
+    // instanceId から実際にクリックされたプランアイテムを引く
+    var obj=hits[i].object;
+    if(obj.isInstancedMesh && obj.userData.instanceRefs && hits[i].instanceId!==undefined){
+      var ref0=obj.userData.instanceRefs[hits[i].instanceId];
+      if(ref0) return ref0;
+      continue;
+    }
+    var ref=findSelectableRef3D(obj);
     if(ref) return ref;
   }
   return null;
@@ -9162,22 +9203,39 @@ function addWallIntersectionBreakpointsBySide(w,sideBreaks){
   });
 }
 
-function wallJointCapLengthM(w){
-  var thickM=Math.max(0.08,wallThicknessMm(w)*U);
-  return Math.max(0.18,Math.min(0.36,thickM*2.1));
-}
-function isWallJointCapInteriorSpan(w,ta,tb,len){
-  var lenM=len*U;
-  var a=ta*lenM, b=tb*lenM;
-  var span=b-a;
-  var cap=wallJointCapLengthM(w);
-  return span<cap && (a<cap || lenM-b<cap);
+// 壁の始点(atEnd=false)/終点(atEnd=true)がT字・L字で他の壁と交差している場合、
+// この壁自身の内装仕上げ面(センターラインから thick/2+INTERIOR_FINISH_MM だけ内側へ
+// オフセットした平面)を、相手の壁の内装仕上げ面とちょうど突き合うところまで延長する
+// のに必要な距離(mm)を返す。定数で一律に延ばすと、相手の壁の始点がこちらの
+// センターライン上にあるケースと、こちらの壁面(コア端)上にあるケースとで
+// 必要な延長量が大きく異なり(例: 72mmと12mm)、一律の値では片方が塞ぎきれず
+// もう片方は逆に大きくはみ出して室内に薄い板が浮いて見える不具合になっていた
+var INTERIOR_FINISH_MM=12;
+function wallCornerExtensionMm(w,atEnd){
+  var px=atEnd?w.x2:w.x1, py=atEnd?w.y2:w.y1;
+  var best=0;
+  DATA.walls.forEach(function(o){
+    if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
+    var odx=o.x2-o.x1, ody=o.y2-o.y1, olen2=odx*odx+ody*ody;
+    if(olen2<1) return;
+    var t=((px-o.x1)*odx+(py-o.y1)*ody)/olen2;
+    if(t<-0.08 || t>1.08) return; // 相手の壁のセンターライン範囲付近に投影されるものだけ対象
+    var qx=o.x1+odx*t, qy=o.y1+ody*t;
+    var dist=Math.hypot(px-qx,py-qy);
+    if(dist>(o.thick||120)/2+40) return; // 交差とみなせる距離を超えたら対象外
+    var neededFromCenterline=(o.thick||120)/2+INTERIOR_FINISH_MM;
+    var extMm=neededFromCenterline-dist;
+    if(extMm>best) best=extMm;
+  });
+  return Math.max(0,Math.min(best,200));
 }
 function getWallInteriorFaces(w){
   if((w.thick||0)<120) return [];
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
   var len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return [];
+  var fillStartM=wallCornerExtensionMm(w,false)*U;
+  var fillEndM=wallCornerExtensionMm(w,true)*U;
   var ext=getWallExteriorSpans(w);
   var sideBreaks={};
   sideBreaks[-1]=[0,1];
@@ -9200,9 +9258,20 @@ function getWallInteriorFaces(w){
     for(var i=0;i<uniq.length-1;i++){
       var ta=uniq[i], tb=uniq[i+1];
       if(tb-ta<0.0005) continue;
-      if(isWallJointCapInteriorSpan(w,ta,tb,len)) continue;
-      if(isExteriorOnSide(ta,tb,sign)) return;
-      faces.push({a:ta*len*U,b:tb*len*U,sign:sign});
+      // 旧: 壁端近くの短い区間は「交差する隣の壁で隠れる」前提で内壁面を省略していたが、
+      // 対応する隅埋めパーツが存在せず、その前提が崩れる配置(壁の重なり等)で
+      // 室内から外壁テクスチャが素通しに見える不具合の原因だったため描画するようにした。
+      // 壁メッシュは同一素材の隣接ピースを自動統合するため、描画コールへの影響は軽微
+      // 注意: ここは for ループの中(forEach コールバック直下)。区間ごとに exterior/interior を
+      // 判定しているため、1区間が exterior だったとしても後続の区間まで打ち切ってはいけない。
+      // 以前 return になっていたため、この壁の当該 side で最初に exterior 区間へ到達した時点で
+      // それ以降の(本来 interior 面が必要な)区間が丸ごとスキップされ、壁コア(外壁マテリアル)が
+      // 室内側にそのまま露出する不具合があった
+      if(isExteriorOnSide(ta,tb,sign)) continue;
+      // atStart/atEnd: この区間が壁自身のセンターライン始点/終点(内隅になりやすい)に
+      // 接しているかどうか。addInteriorFaces 側でこのフラグを見て、実際の描画時に
+      // 面を内隅方向へ、相手の壁の内装面とちょうど突き合う分だけ延長し隙間を塞ぐ
+      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM});
     }
   });
   return faces;
@@ -9381,9 +9450,25 @@ function buildWall3D(w){
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
   var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
   if(len<0.001) return;
+  // 壁1本ぶんのピースを個別に sc3.add() せずグループへ集約し、最後に
+  // mark3DSelectable(group,...) 経由で mergeGroupMeshes に同一マテリアルの
+  // ピースをまとめさせる(描画コール削減)。内観3Dのカットアウェイ対象
+  // (markInteriorCutawayCandidate 済み = 外壁のコア/内外面)は個別に材質を
+  // 差し替える必要があるため userData.noMerge で統合から除外する
+  var wallGroup=new THREE.Group();
+  function finishWallGroup(){
+    sc3.add(wallGroup);
+    mark3DSelectable(wallGroup,w,'wall');
+  }
   var extSpans=getWallExteriorSpans(w);
   var isOuter=extSpans.length>0;
   var mat=isOuter?makeExteriorWallMaterial(w,fl,len):makeWallCoreMaterial();
+  // 壁コア(Box)の上下面(天井側の断面)は、内観3Dの俯瞰(ドールハウス)カメラで
+  // 壁の上端を見下ろした際にそのまま見えてしまうことがある。外装材(mat)は
+  // 側面用の繰り返しテクスチャなので、それが上面にも同じ材質で貼られると
+  // 壁の角(コーナー)に外壁テクスチャの帯が室内側から見えるように映る不具合になる。
+  // 上下面だけは無地の断面材にしておくことで、俯瞰時に見えても違和感が出ないようにする
+  var capMat=isOuter?makeWallCoreMaterial():mat;
   var dirX=dx/len, dirZ=dz/len, rotY=Math.atan2(-dz,dx);
   var extMat=isOuter?makeExteriorWallMaterial(w,fl,len):null;
   var style=w.wallStyle||'solid';
@@ -9394,7 +9479,7 @@ function buildWall3D(w){
     if(!extMat || !extSpans.length) return;
     extSpans.forEach(function(sp){
       var aa=Math.max(a,sp.a), bb=Math.min(b,sp.b);
-      if(bb-aa<0.03) return;
+      if(bb-aa<0.004) return;
       var mid=(aa+bb)/2, segLen=bb-aa;
       var normalX=baseNormalX*sp.sign, normalZ=baseNormalZ*sp.sign;
       var faceMat=makeExteriorWallMaterial(w,fl,len,sp);
@@ -9410,14 +9495,26 @@ function buildWall3D(w){
       face.rotation.y=rotY+(sp.sign<0?Math.PI:0);
       face.userData.exteriorFace=true;
       markInteriorCutawayCandidate(face,w,sp.sign,0);
-      mark3DSelectable(face,w,'wall');
-      sc3.add(face);
+      face.userData.noMerge=true; // カットアウェイで個別に材質差し替えが必要
+      wallGroup.add(face);
     });
   }
   function addInteriorFaces(a,b,yBase,h){
+    // しきい値は「面として無視してよい」浮動小数の誤差程度(数mm)に留める。
+    // 30mm等の大きめの閾値だと、隣接壁との交点(センターライン基準)と外壁判定の
+    // サンプリング境界(グリッド刻み)がわずかにズレただけの正当な狭い区間まで
+    // スキップされ、その部分だけ面が抜けて奥の壁コア(外壁マテリアル)が
+    // 室内側にそのまま露出してしまう不具合があった
     getWallInteriorFaces(w).forEach(function(faceInfo){
       var aa=Math.max(a,faceInfo.a), bb=Math.min(b,faceInfo.b);
-      if(bb-aa<0.03) return;
+      if(bb-aa<0.004) return;
+      // 壁自身のセンターライン始点/終点にちょうど接している区間は、交差する隣の壁と
+      // 作る内隅であることが多い。お互いの内装オフセット面が正確に一致せず、隅に
+      // 細い隙間(奥の外壁コアが露出)ができる不具合があったため、内隅方向へ少し
+      // 延長してこの面で隙間を覆う(隣の壁の面とも重なるが、双方とも同じ内装仕上げ材なので
+      // 見た目には影響しない)
+      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=faceInfo.fillStartM;
+      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=faceInfo.fillEndM;
       var mid=(aa+bb)/2, segLen=bb-aa;
       var normalX=baseNormalX*faceInfo.sign, normalZ=baseNormalZ*faceInfo.sign;
       var faceMat=makeInteriorWallMaterial(w,len,faceInfo);
@@ -9432,9 +9529,8 @@ function buildWall3D(w){
       );
       face.rotation.y=rotY+(faceInfo.sign<0?Math.PI:0);
       face.userData.interiorFace=true;
-      if(isOuter) markInteriorCutawayCandidate(face,w,0,0);
-      mark3DSelectable(face,w,'wall');
-      sc3.add(face);
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      wallGroup.add(face);
     });
   }
   function addWallPiece(a,b,yBase,h){
@@ -9449,13 +9545,14 @@ function buildWall3D(w){
       addShapedWallPiece(a,b,yBase,h);
       return;
     }
-    var mesh=new THREE.Mesh(new THREE.BoxGeometry(segLen,h,w.thick*U),mat);
+    // BoxGeometry の材質配列は [+x,-x,+y(上面),-y(底面),+z,-z] の順。上下面だけ capMat にする
+    var boxMat=isOuter?[mat,mat,capMat,capMat,mat,mat]:mat;
+    var mesh=new THREE.Mesh(new THREE.BoxGeometry(segLen,h,w.thick*U),boxMat);
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*mid,fy+yBase+h/2,z1+dirZ*mid);
     mesh.rotation.y=rotY;
-    if(isOuter) markInteriorCutawayCandidate(mesh,w,0,0);
-    mark3DSelectable(mesh,w,'wall');
-    sc3.add(mesh);
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    wallGroup.add(mesh);
     addExteriorFace(a,b,yBase,h);
     addInteriorFaces(a,b,yBase,h);
   }
@@ -9517,9 +9614,8 @@ function buildWall3D(w){
     mesh.castShadow=true; mesh.receiveShadow=true;
     mesh.position.set(x1+dirX*a,fy,z1+dirZ*a);
     mesh.rotation.y=rotY;
-    if(isOuter) markInteriorCutawayCandidate(mesh,w,0,0);
-    mark3DSelectable(mesh,w,'wall');
-    sc3.add(mesh);
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    wallGroup.add(mesh);
   }
   function addLatticePiece(a,b,yBase,h){
     var segLen=b-a, barMat=extMat||mat;
@@ -9533,7 +9629,7 @@ function buildWall3D(w){
         var barLen=Math.min(bw,segLen);
         var bar=new THREE.Mesh(new THREE.BoxGeometry(barLen,h,depth),barMat);
         bar.position.set(x1+dirX*x,fy+yBase+h/2,z1+dirZ*x);
-        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(bar,w,0,0); mark3DSelectable(bar,w,'wall'); sc3.add(bar);
+        bar.rotation.y=rotY; bar.castShadow=true; bar.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(bar,w,0,0); bar.userData.noMerge=true; } wallGroup.add(bar);
       }
     } else {
       var hpitch=0.22, bh=0.045;
@@ -9542,7 +9638,7 @@ function buildWall3D(w){
         var yy=yBase+(rows===1?h/2:h*j/(rows-1));
         var rail=new THREE.Mesh(new THREE.BoxGeometry(segLen,bh,depth),barMat);
         rail.position.set(x1+dirX*(a+segLen/2),fy+yy,z1+dirZ*(a+segLen/2));
-        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(rail,w,0,0); mark3DSelectable(rail,w,'wall'); sc3.add(rail);
+        rail.rotation.y=rotY; rail.castShadow=true; rail.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(rail,w,0,0); rail.userData.noMerge=true; } wallGroup.add(rail);
       }
       var postPitch=0.9, pw=0.04;
       var posts=Math.max(2,Math.floor(segLen/postPitch)+1);
@@ -9550,7 +9646,7 @@ function buildWall3D(w){
         var px=a+(posts===1?segLen/2:segLen*k/(posts-1));
         var post=new THREE.Mesh(new THREE.BoxGeometry(pw,h,depth),barMat);
         post.position.set(x1+dirX*px,fy+yBase+h/2,z1+dirZ*px);
-        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter) markInteriorCutawayCandidate(post,w,0,0); mark3DSelectable(post,w,'wall'); sc3.add(post);
+        post.rotation.y=rotY; post.castShadow=true; post.receiveShadow=true; if(isOuter){ markInteriorCutawayCandidate(post,w,0,0); post.userData.noMerge=true; } wallGroup.add(post);
       }
     }
   }
@@ -9568,18 +9664,24 @@ function buildWall3D(w){
     glass.rotation.y=rotY;
     glass.renderOrder=2;
     glass.userData.windowWallGlass=true;
-    mark3DSelectable(glass,w,'wall');
-    sc3.add(glass);
+    wallGroup.add(glass);
   }
   var openings=[];
   if((w.wallBand||'full')!=='full' || style!=='solid'){
     addBandPiece(0,len);
+    finishWallGroup();
     return;
   }
   DATA.items.filter(function(it){return it.floor===fl&&isOpeningItemType(it.type);}).forEach(function(it){
     var wallInfo=getOpeningWallInfo(it);
     if(!wallInfo || wallInfo.wall!==w) return;
-    var c=wallInfo.t*len, openW=Math.min(len, Math.max(it.w*U+0.08, 0.45));
+    var c=wallInfo.t*len;
+    // 窓は buildWinFrames() が呼称幅(it.w)ちょうどで窓枠・ガラスを描画するため、
+    // 壁側の開口(=このガラス充填の幅)も同じ it.w*U に合わせる。
+    // 以前は+80mm・最小450mmの余裕を持たせていたが、これは窓枠の外形より広く、
+    // 特に幅の狭い窓(すべり出し窓など)で壁側ガラスが窓枠からはみ出して見える
+    // 原因になっていた。ドア側は建具の納まり上の余白が必要なため従来通り。
+    var openW=isWindowLikeType(it.type) ? Math.min(len, Math.max(it.w*U,0.1)) : Math.min(len, Math.max(it.w*U+0.08, 0.45));
     if(isWindowLikeType(it.type)){
       var sillM=slabH+windowSillMm(it)*U;
       var whM=Math.max(0.2,Math.min(windowHeightMm(it)*U,wallH-sillM-0.05));
@@ -9600,7 +9702,7 @@ function buildWall3D(w){
       });
     }
   });
-  if(!openings.length){addBandPiece(0,len);return;}
+  if(!openings.length){addBandPiece(0,len);finishWallGroup();return;}
   openings.sort(function(a,b){return a.a-b.a;});
   var merged=[];
   openings.forEach(function(o){
@@ -9641,6 +9743,7 @@ function buildWall3D(w){
     cursor=o.b;
   });
   addBandPiece(cursor,len);
+  finishWallGroup();
 }
 
 function buildWinFrames(flFilt){
@@ -9724,12 +9827,31 @@ function buildWinFrames(flFilt){
       if(openingModelReady){
         grp.add(makeGltfBoxFitClone(openingModel.model,ww,wh,Math.max((openingModel.d||it.d||120)*U,0.045),null,{openingWindowModel:true}));
       } else {
-        addBox(glassMat,0,wh/2,0,Math.max(ww-0.08,0.02),wh-0.08,0.01);
-        addBox(frameMat,0,0.025,0,ww+0.1,0.05,wt+0.1);
-        addBox(frameMat,0,wh,0,ww+0.1,0.05,wt+0.05);
-        addBox(frameMat,-ww/2,wh/2,0,0.05,wh,wt+0.05);
-        addBox(frameMat, ww/2,wh/2,0,0.05,wh,wt+0.05);
-        if(it.type==='window' && effectiveWindowKind(it)==='sliding'){
+        // 枠外形を呼称寸法内に収める。旧実装は側枠中心を外形端に置き、上枠も外形より
+        // 25mm上へ出ていた。ガラスも固定40mmインセットで50mm外枠へ10mm食い込んでいた。
+        var windowKind=effectiveWindowKind(it);
+        var outerBar=Math.min(0.05,Math.max(0.026,ww*0.115));
+        var innerW=Math.max(ww-outerBar*2,0.02);
+        var innerH=Math.max(wh-outerBar*2,0.02);
+        addBox(frameMat,0,outerBar/2,0,ww,outerBar,wt+0.1);
+        addBox(frameMat,0,wh-outerBar/2,0,ww,outerBar,wt+0.05);
+        addBox(frameMat,-ww/2+outerBar/2,wh/2,0,outerBar,wh,wt+0.05);
+        addBox(frameMat, ww/2-outerBar/2,wh/2,0,outerBar,wh,wt+0.05);
+        if(it.type==='window' && windowKind==='casement'){
+          // 縦すべり出しは外枠直下にガラスを置かず、クリアランスを持つ一枚障子に納める。
+          var sashGap=Math.min(0.008,innerW*0.04);
+          var sashBar=Math.min(0.028,Math.max(0.018,ww*0.075));
+          var sashW=Math.max(innerW-sashGap*2,0.02);
+          var sashH=Math.max(innerH-sashGap*2,0.02);
+          addBox(glassMat,0,wh/2,0,Math.max(sashW-sashBar*2,0.01),Math.max(sashH-sashBar*2,0.01),0.01);
+          addBox(frameMat,-sashW/2+sashBar/2,wh/2,0,sashBar,sashH,wt+0.025);
+          addBox(frameMat, sashW/2-sashBar/2,wh/2,0,sashBar,sashH,wt+0.025);
+          addBox(frameMat,0,wh/2-sashH/2+sashBar/2,0,sashW,sashBar,wt+0.025);
+          addBox(frameMat,0,wh/2+sashH/2-sashBar/2,0,sashW,sashBar,wt+0.025);
+        } else {
+          addBox(glassMat,0,wh/2,0,Math.max(innerW-0.01,0.01),Math.max(innerH-0.01,0.01),0.01);
+        }
+        if(it.type==='window' && windowKind==='sliding'){
           // 引違い窓の召合せ框(中桟): 幅30mm相当、ガラス中央。window-door は下の専用サッシ表現側で同等の框を持つ。
           // FIX窓・すべり出し窓は一枚障子のため框なし
           addBox(frameMat,0,wh/2,0,0.03,wh-0.08,wt+0.03);
@@ -9797,17 +9919,20 @@ function buildWinFrames(flFilt){
         addBox(railMat,0,topRailY,-0.045,ww+jamb*2,0.035,0.025);
         addBox(railMat,0,topRailY, 0.045,ww+jamb*2,0.035,0.025);
         var slideOpen=doorOpenState(it)!=='closed';
+        // ウォークスルー中に近接判定で開閉させた状態は、家具の非同期ロード完了ごとに
+        // 起きる rebuild3D() で消えないよう、アイテムをキーに前回値を引き継ぐ
+        var slideWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):(slideOpen?1:0);
         var leftOpen=!!it.flipX;
         var panelW=ww*0.54;
         var leftPos=-ww*0.23, rightPos=ww*0.23;
         var fixedX=leftOpen?rightPos:leftPos;
-        var movingX=slideOpen?fixedX:(leftOpen?leftPos:rightPos);
+        var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
         addBox(doorMat,fixedX,panelY,-0.035,panelW,panelH,leafT);
         var slideLeaf=addBox(doorMat,movingX,panelY, 0.035,panelW,panelH,leafT);
         slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
         _doorAnims.push({it:it,grp:grp,slideMesh:slideLeaf,openX:fixedX,
           closedX:(leftOpen?leftPos:rightPos),
-          initiallyOpen:slideOpen,_want:slideOpen?1:0});
+          initiallyOpen:slideOpen,_want:slideWant});
       } else {
         var pivot=new THREE.Group();
         var hingeX=it.flipX ? ww/2 : -ww/2;
@@ -9817,7 +9942,9 @@ function buildWinFrames(flFilt){
         pivot.position.set(hingeX,0,0);
         // 開き戸は90度まで開く(ウォークスルーの通行と実際の使い方に合わせる)
         var doorOpenY=openSide*Math.PI/2;
-        pivot.rotation.y=doorOpenState(it)==='closed'?0:doorOpenY;
+        var pivotDefaultWant=doorOpenState(it)==='closed'?0:1;
+        var pivotWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):pivotDefaultWant;
+        pivot.rotation.y=pivotWant?doorOpenY:0;
         if(openingModelReady){
           var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,panelH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
@@ -9877,9 +10004,9 @@ function buildWinFrames(flFilt){
           }
         }
         grp.add(pivot);
-        // ウォークスルーの接近自動開閉用に登録(閉まっているドアが対象)
+        // ウォークスルーの接近自動開閉用に登録
         _doorAnims.push({it:it,grp:grp,pivot:pivot,openY:doorOpenY,
-          initiallyOpen:doorOpenState(it)!=='closed',_want:doorOpenState(it)!=='closed'?1:0});
+          initiallyOpen:doorOpenState(it)!=='closed',_want:pivotWant});
       }
     }
 
@@ -10563,6 +10690,21 @@ function build3DLightItem(grp,it,w3,d3){
   } else if(kind==='ceiling'){
     var disk=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.42,0.08),Math.max(Math.min(w3,d3)*0.42,0.08),0.045,32),mat);
     disk.castShadow=true; disk.receiveShadow=true; grp.add(disk);
+  } else if(kind==='down'){
+    // 天井埋め込み型ダウンライト: 天井面とほぼツライチの穴あきトリムリング(中央に
+    // 開口があり奥のレンズが見える)+ その奥(天井内)へわずかに引っ込めた発光レンズ。
+    // 光源本体(PointLight/SpotLight)の位置・強さは addConfiguredLight 側のままで
+    // ここでは触らないため、光の落ち方(照らし出し方)は埋め込み表現の影響を受けない
+    var dr=Math.max(Math.min(w3,d3)*0.30,0.055);
+    var ringMat=new THREE.MeshStandardMaterial({color:0x4b4b4b,roughness:0.4,metalness:0.3,side:THREE.DoubleSide});
+    var ring=new THREE.Mesh(new THREE.RingGeometry(dr*0.66,dr,28),ringMat);
+    ring.rotation.x=Math.PI/2; // 天井面(下向き)を向くように
+    ring.position.y=-0.002;
+    ring.castShadow=false; ring.receiveShadow=true; grp.add(ring);
+    var lensR=dr*0.6;
+    var lens=new THREE.Mesh(new THREE.CylinderGeometry(lensR,lensR,0.008,20),mat);
+    lens.position.y=0.006; // リングより天井側へわずかに引っ込め、埋め込み感を出す
+    lens.castShadow=false; lens.receiveShadow=false; grp.add(lens);
   } else {
     var cyl=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.28,0.055),Math.max(Math.min(w3,d3)*0.22,0.045),0.12,20),mat);
     cyl.castShadow=true; cyl.receiveShadow=true; grp.add(cyl);
@@ -10594,6 +10736,7 @@ function buildItem3D(it){
   if(isFmpItemType(it.type)){
     var fmp=getFmpItem(it.type);
     if(fmp && ensureGltfModel(fmp.model)){
+      if(queueFmpInstance(fmp.model,it,grp)) return;
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
       grp.add(fmpClone);
@@ -10820,6 +10963,20 @@ function build3DBalcony(grp,it,w3,d3,h){
   var edges=new THREE.LineSegments(edgeGeo,edgeMat);
   edges.position.y=slab.position.y;
   grp.add(edges);
+
+  // Keep the balcony readable from the exterior without turning every rail into
+  // a separate draw call: one parapet body plus a cap and two short returns.
+  var railH=0.92, railT=Math.min(0.11,Math.max(0.065,d3*0.055));
+  var railColor=it.colorCustom?it.color:0xd9ded8;
+  var railMat=makeExteriorLightingMaterial({color:railColor,roughness:0.82,metalness:0.02,envMapIntensity:0.14});
+  var capMat=makeExteriorLightingMaterial({color:0x747b78,roughness:0.52,metalness:0.22,envMapIntensity:0.22});
+  // The open edge is +Z; this matches the existing front-facing item convention.
+  _B(grp,railMat,0,railH/2,d3/2-railT/2,w3,railH,railT);
+  _B(grp,railMat,-w3/2+railT/2,railH/2,0,railT,railH,d3);
+  _B(grp,railMat,w3/2-railT/2,railH/2,0,railT,railH,d3);
+  _B(grp,capMat,0,railH+0.025,d3/2-railT/2,w3+0.035,0.05,railT+0.035);
+  _B(grp,capMat,-w3/2+railT/2,railH+0.025,0,railT+0.035,0.05,d3);
+  _B(grp,capMat,w3/2-railT/2,railH+0.025,0,railT+0.035,0.05,d3);
 }
 
 function buildWoodFence3D(grp,it,w3,d3,h){
@@ -11363,6 +11520,23 @@ function _PRISM(g,mat,pts,h,baseY){
   var m=new THREE.Mesh(geo,prismMat);
   m.castShadow=true; m.receiveShadow=true; g.add(m);
 }
+// 側面プロファイル(z,y座標の閉多角形)をX方向(幅)に押し出したソリッドを生成。
+// 車体シルエットのような「押し出し断面」形状を低頂点数で表現するのに使う。
+function _PRISM_X(g,mat,pts,w,baseX){
+  var verts=[], faces=[], n=pts.length;
+  pts.forEach(function(p){verts.push(baseX,p[1],p[0]);});
+  pts.forEach(function(p){verts.push(baseX+w,p[1],p[0]);});
+  for(var i=1;i<n-1;i++){faces.push(0,i+1,i, n,n+i,n+i+1);}
+  for(var j=0;j<n;j++){var k=(j+1)%n; faces.push(j,k,n+k, j,n+k,n+j);}
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setIndex(faces);
+  geo=geo.toNonIndexed(); // フラットシェーディングで面を明瞭に
+  geo.computeVertexNormals();
+  var m=new THREE.Mesh(geo,mat);
+  m.castShadow=true; m.receiveShadow=true; g.add(m);
+  return m;
+}
 function addStairRiserPanel(grp,mat,a,b,y,h){
   var len=Math.hypot(b[0]-a[0],b[1]-a[1]);
   if(len<0.02||h<0.01) return;
@@ -11510,13 +11684,36 @@ var _texCapSize=(function(){
   var shortSide=Math.min((screen&&screen.width)||1024,(screen&&screen.height)||1024);
   return shortSide<768?512:1024;
 })();
+var _gltfLoader=null;
+// Draco(ジオメトリ)/KTX2(テクスチャ)圧縮モデルにも対応した共有GLTFLoaderを遅延生成する。
+// デコーダーはCDNを使わず自前ホスティング(assets/vendor)から読む。
+// 失敗しても ensureGltfModel 側の onError で1体ずつフォールバック表示になるため、
+// 画面全体が無言で止まることはない。
+function getGltfLoader(){
+  if(!_gltfLoader){
+    _gltfLoader=new THREE.GLTFLoader();
+    if(THREE.DRACOLoader){
+      var draco=new THREE.DRACOLoader();
+      draco.setDecoderPath('assets/vendor/three/examples/jsm/libs/draco/');
+      _gltfLoader.setDRACOLoader(draco);
+    }
+  }
+  if(!_gltfLoader._ktx2Attached && THREE.KTX2Loader && ren){
+    var ktx2=new THREE.KTX2Loader();
+    ktx2.setTranscoderPath('assets/vendor/three/examples/jsm/libs/basis/');
+    ktx2.detectSupport(ren);
+    _gltfLoader.setKTX2Loader(ktx2);
+    _gltfLoader._ktx2Attached=true;
+  }
+  return _gltfLoader;
+}
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
   if(_modelLoading[url]) return false;
   _modelLoading[url]=true;
   _modelFailed[url]=false;
-  new THREE.GLTFLoader().load(url,function(gltf){
+  getGltfLoader().load(url,function(gltf){
     if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
@@ -11652,6 +11849,98 @@ function makeGltfBoxFitClone(url,w,h,d,color,cfg){
   if(cfg.openingWindowModel) stabilizeOpeningWindowModelClone(clone);
   return clone;
 }
+// ── FMP家具のInstancedMesh化(描画コール削減) ──────────────────
+// 同一モデル・デフォルト色(色変更なし)・非選択中のアイテムだけを対象に、
+// build3D() の中で一旦「配置予定」として溜めておき、ループの最後に
+// モデルごとまとめて THREE.InstancedMesh を1〜数個生成する。
+// 選択中の1個は従来通り個別メッシュのままにして、選択・ドラッグ・
+// 色変更まわりの既存実装を一切変更しないようにする。
+var _fmpInstancePools={};
+var _gltfNativeBoxCache={};
+function getGltfNativeBox(url){
+  var cached=_modelCache[url];
+  if(!cached) return null;
+  if(!_gltfNativeBoxCache[url]){
+    _gltfNativeBoxCache[url]=new THREE.Box3().setFromObject(cached);
+  }
+  return _gltfNativeBoxCache[url];
+}
+// makeGltfBoxFitClone と同じフィット(3軸独立スケール+底面センタリング)を
+// 実際にはクローンせず解析的に計算する
+function computeBoxFitLocalMatrix(url,w,h,d){
+  var box=getGltfNativeBox(url);
+  if(!box) return null;
+  var size=box.getSize(new THREE.Vector3());
+  var sx=size.x>0.001?w/size.x:1;
+  var sy=size.y>0.001?h/size.y:1;
+  var sz=size.z>0.001?d/size.z:1;
+  if(!isFinite(sx)||sx<=0) sx=1;
+  if(!isFinite(sy)||sy<=0) sy=1;
+  if(!isFinite(sz)||sz<=0) sz=1;
+  var minX=box.min.x*sx, maxX=box.max.x*sx;
+  var minY=box.min.y*sy;
+  var minZ=box.min.z*sz, maxZ=box.max.z*sz;
+  var m=new THREE.Matrix4();
+  m.compose(
+    new THREE.Vector3(-(minX+maxX)/2,-minY,-(minZ+maxZ)/2),
+    new THREE.Quaternion(),
+    new THREE.Vector3(sx,sy,sz)
+  );
+  return m;
+}
+// モデル内の各メッシュパーツ(ジオメトリ・マテリアル・モデル内ローカル行列)を列挙する
+function collectGltfSubmeshes(url){
+  var cached=_modelCache[url];
+  if(!cached) return [];
+  cached.updateMatrixWorld(true);
+  var list=[];
+  cached.traverse(function(o){
+    if(o.isMesh && o.geometry){
+      list.push({geometry:o.geometry,material:o.material,localMatrix:o.matrixWorld.clone(),
+        castShadow:!!o.castShadow,receiveShadow:!!o.receiveShadow});
+    }
+  });
+  return list;
+}
+// 対象アイテムをインスタンス化キューへ登録できるか判定し、できれば登録してtrueを返す。
+// falseの場合、呼び出し側は従来通り個別メッシュを生成する
+function queueFmpInstance(url,it,grp){
+  if(!ren) return false; // レンダラー未初期化時は解析計算に必要なTHREEクラスの都合上スキップ
+  if(it===ST.selected) return false; // 選択中は個別メッシュのまま(ギズモ/選択box等に影響させない)
+  if(it.colorCustom) return false; // 現状FMPは常にデフォルト色だが将来対応時のための保険
+  if(!getGltfNativeBox(url)) return false;
+  grp.updateMatrix();
+  var fitMatrix=computeBoxFitLocalMatrix(url,it.w*U,getItemHeightValue(it)*U,it.d*U);
+  if(!fitMatrix) return false;
+  var finalMatrix=grp.matrix.clone().multiply(fitMatrix);
+  (_fmpInstancePools[url]=_fmpInstancePools[url]||[]).push({matrix:finalMatrix,it:it});
+  return true;
+}
+function finalizeFmpInstancePools(){
+  Object.keys(_fmpInstancePools).forEach(function(url){
+    var entries=_fmpInstancePools[url];
+    if(!entries || !entries.length) return;
+    var submeshes=collectGltfSubmeshes(url);
+    submeshes.forEach(function(sub){
+      var geo=sub.geometry.clone(); // _modelCache由来のジオメトリはdispose厳禁のため複製
+      var mat=Array.isArray(sub.material)?sub.material.map(function(m){return m.clone();}):sub.material.clone();
+      tameMaterialBrightness(mat);
+      var inst=new THREE.InstancedMesh(geo,mat,entries.length);
+      inst.castShadow=sub.castShadow; inst.receiveShadow=sub.receiveShadow;
+      var m4=new THREE.Matrix4();
+      for(var i=0;i<entries.length;i++){
+        m4.copy(entries[i].matrix).multiply(sub.localMatrix);
+        inst.setMatrixAt(i,m4);
+      }
+      inst.instanceMatrix.needsUpdate=true;
+      inst.userData.b=true;
+      inst.userData.instanceRefs=entries.map(function(e){return e.it;});
+      inst.userData.selectKind='item';
+      sc3.add(inst);
+    });
+  });
+  _fmpInstancePools={};
+}
 function applyGltfModelConfig(obj,type){
   var cfg=GLTF_MODEL_CONFIG[type];
   if(!cfg) return;
@@ -11760,62 +12049,92 @@ function _CY(g,mat,x,y,z,rt,rb,h,s){var m=new THREE.Mesh(new THREE.CylinderGeome
 function _SP(g,mat,x,y,z,r,s){var m=new THREE.Mesh(new THREE.SphereGeometry(r,s||8,s||6),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
 function _CO(g,mat,x,y,z,r,h,s){var m=new THREE.Mesh(new THREE.ConeGeometry(r,h,s||8),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);}
 function _placeGrp(g,x,y,z,ry){g.position.set(x,y,z);if(ry)g.rotation.y=ry;g.userData={b:true};g.children.forEach(function(c){c.userData={b:true};});sc3.add(g);}
+// 乗用車(セダン/ハッチバック風)。側面シルエットを1枚の押し出しソリッドで表現し、
+// ラケット(前後傾斜)したフロント/リアガラスやグリル・灯火類を最小限のメッシュで追加する。
+// 低ポリ・低メッシュ数(車体1+ガラス4+灯火・トリム類約9+ホイール4輪×3=12 ≒ 30メッシュ)で
+// 従来のボックス積み上げ版より説得力のあるプロポーションにしている。
 function build3DCar(grp,it,w,d,col){
   var bodyColor=it.colorCustom?it.color:col;
-  var bodyMat=new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.36,metalness:0.22});
-  var trimMat=new THREE.MeshStandardMaterial({color:0x20242a,roughness:0.62,metalness:0.15});
-  var glassMat=new THREE.MeshStandardMaterial({color:0x76a9c8,transparent:true,opacity:0.58,roughness:0.08,metalness:0.25});
-  var tireMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.92,metalness:0.02});
-  var rimMat=new THREE.MeshStandardMaterial({color:0xd8d8d2,roughness:0.26,metalness:0.75});
-  var lightMat=new THREE.MeshStandardMaterial({color:0xfff4cc,emissive:0xffe7a0,emissiveIntensity:0.18,roughness:0.35});
-  var tailMat=new THREE.MeshStandardMaterial({color:0xaa1f22,emissive:0x661010,emissiveIntensity:0.16,roughness:0.45});
+  var bodyMat=new THREE.MeshStandardMaterial({color:bodyColor,roughness:0.32,metalness:0.28});
+  var glassMat=new THREE.MeshStandardMaterial({color:0x30414c,transparent:true,opacity:0.82,roughness:0.12,metalness:0.4,side:THREE.DoubleSide});
+  var trimMat=new THREE.MeshStandardMaterial({color:0x1c1e22,roughness:0.55,metalness:0.15});
+  var tireMat=new THREE.MeshStandardMaterial({color:0x101012,roughness:0.92,metalness:0.02});
+  var rimMat=new THREE.MeshStandardMaterial({color:0x8b9095,roughness:0.32,metalness:0.8});
+  var hubMat=new THREE.MeshStandardMaterial({color:0x2a2c30,roughness:0.4,metalness:0.6});
+  var lightMat=new THREE.MeshStandardMaterial({color:0xfff2c8,emissive:0xffcf7a,emissiveIntensity:0.3,roughness:0.3});
+  var tailMat=new THREE.MeshStandardMaterial({color:0xb01a1e,emissive:0x7a0f10,emissiveIntensity:0.24,roughness:0.4});
   function box(mat,x,y,z,bw,bh,bd){
     var m=new THREE.Mesh(new THREE.BoxGeometry(bw,bh,bd),mat);
     m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; grp.add(m); return m;
   }
   function cylX(mat,x,y,z,r,len,seg){
-    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg||24),mat);
+    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg||22),mat);
     m.rotation.z=Math.PI/2;
     m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; grp.add(m); return m;
   }
-  function softenedBox(mat,x,y,z,bw,bh,bd,r){
-    var g=new THREE.BoxGeometry(bw,bh,bd,3,2,5);
-    var p=g.attributes.position;
-    for(var i=0;i<p.count;i++){
-      var vx=p.getX(i), vy=p.getY(i), vz=p.getZ(i);
-      var ax=Math.abs(vx)/(bw/2), az=Math.abs(vz)/(bd/2);
-      vx-=Math.sign(vx)*r*ax;
-      vz-=Math.sign(vz)*r*az;
-      if(vy>0) vy-=r*0.22;
-      p.setXYZ(i,vx,vy,vz);
-    }
-    g.computeVertexNormals();
-    var m=new THREE.Mesh(g,mat);
-    m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; grp.add(m); return m;
+  // z1,y1 → z2,y2 を結ぶ傾斜パネル(フロント/リアガラス用)。車体表面のすぐ外側に置く。
+  function rakedPanel(mat,z1,y1,z2,y2,width,thickness,flip){
+    var dz=z2-z1, dy=y2-y1, len=Math.hypot(dz,dy);
+    var m=new THREE.Mesh(new THREE.BoxGeometry(width,len,thickness),mat);
+    m.rotation.x=Math.atan2(dz,dy);
+    var nz=-dy/len, ny=dz/len; if(flip){nz=-nz;ny=-ny;}
+    var eps=thickness*0.5+0.008;
+    m.position.set(0,(y1+y2)/2+ny*eps,(z1+z2)/2+nz*eps);
+    m.castShadow=false; m.receiveShadow=false;
+    grp.add(m); return m;
   }
   var baseH=Math.min(0.58,w*0.32), ground=0.06;
-  softenedBox(bodyMat,0,ground+baseH*0.55,0,w*0.9,baseH,d*0.88,0.045);
-  box(bodyMat,0,ground+baseH*0.98,-d*0.25,w*0.78,baseH*0.28,d*0.35);
-  box(bodyMat,0,ground+baseH*0.92,d*0.31,w*0.82,baseH*0.22,d*0.28);
-  softenedBox(bodyMat,0,ground+baseH*1.42,-d*0.03,w*0.66,baseH*0.62,d*0.42,0.035);
-  box(glassMat,0,ground+baseH*1.45,-d*0.03,w*0.58,baseH*0.46,d*0.33);
-  box(trimMat,0,ground+baseH*1.46,-d*0.03,w*0.03,baseH*0.5,d*0.35);
-  box(glassMat,0,ground+baseH*1.43,-d*0.235,w*0.46,baseH*0.28,0.024);
-  box(glassMat,0,ground+baseH*1.4,d*0.18,w*0.45,baseH*0.25,0.024);
-  box(trimMat,0,ground+baseH*0.93,-d*0.438,w*0.7,baseH*0.08,0.035);
-  box(trimMat,0,ground+baseH*0.86,d*0.438,w*0.7,baseH*0.08,0.035);
-  box(lightMat,-w*0.22,ground+baseH*0.83,-d*0.43,w*0.17,baseH*0.105,0.022);
-  box(lightMat, w*0.22,ground+baseH*0.83,-d*0.43,w*0.17,baseH*0.105,0.022);
-  box(tailMat,-w*0.25,ground+baseH*0.81,d*0.43,w*0.14,baseH*0.11,0.022);
-  box(tailMat, w*0.25,ground+baseH*0.81,d*0.43,w*0.14,baseH*0.11,0.022);
-  box(trimMat,-w*0.47,ground+baseH*1.15,-d*0.08,0.028,baseH*0.1,d*0.1);
-  box(trimMat, w*0.47,ground+baseH*1.15,-d*0.08,0.028,baseH*0.1,d*0.1);
-  var wr=w*0.18, wt=w*0.14;
-  var wheelY=Math.max(wr*0.82,ground+wr*0.72);
-  [[-w*0.44,wheelY,-d*0.31],[-w*0.44,wheelY,d*0.31],[w*0.44,wheelY,-d*0.31],[w*0.44,wheelY,d*0.31]].forEach(function(p){
-    cylX(tireMat,p[0],p[1],p[2],wr,wt,28);
-    cylX(rimMat,p[0]+(p[0]<0?-wt*0.54:wt*0.54),p[1],p[2],wr*0.54,0.035,18);
-    cylX(trimMat,p[0]+(p[0]<0?-wt*0.57:wt*0.57),p[1],p[2],wr*0.16,0.04,12);
+  function Y(f){return ground+f*baseH;}
+  function Z(f){return f*d;}
+  var hw=w*0.43;
+  // 側面シルエット(バンパー→ボンネット→カウル→ルーフ→トランク→バンパー)を1枚の押し出しで生成
+  var prof=[
+    [Z(-0.50), Y(0.06)],
+    [Z(-0.50), Y(0.58)],
+    [Z(-0.42), Y(0.92)],
+    [Z(-0.15), Y(1.00)],
+    [Z(-0.03), Y(1.62)],
+    [Z( 0.14), Y(1.62)],
+    [Z( 0.30), Y(0.86)],
+    [Z( 0.44), Y(0.55)],
+    [Z( 0.50), Y(0.55)],
+    [Z( 0.50), Y(0.06)]
+  ];
+  _PRISM_X(grp, bodyMat, prof, hw*2, -hw);
+
+  // フロント/リアガラス(ラケット)+サイドウィンドウ
+  rakedPanel(glassMat,Z(-0.15),Y(1.00),Z(-0.03),Y(1.62), hw*1.65,0.02,false);
+  rakedPanel(glassMat,Z(0.14),Y(1.62),Z(0.30),Y(0.86), hw*1.65,0.02,true);
+  [-1,1].forEach(function(s){
+    var y0=Y(1.00), y1=Y(1.60), z0=Z(-0.10), z1=Z(0.11);
+    box(glassMat, s*(hw+0.009), (y0+y1)/2, (z0+z1)/2, 0.014, y1-y0, z1-z0);
+  });
+
+  // ヘッドライト/テールライト+グリル+バンパー下部(車体外側にオフセットして自己遮蔽を回避)
+  var frontZ=Z(-0.5)-0.013, rearZ=Z(0.5)+0.013;
+  [-1,1].forEach(function(s){
+    box(lightMat, s*hw*0.6, Y(0.36), frontZ, hw*0.55, baseH*0.22, 0.018);
+    box(tailMat, s*hw*0.6, Y(0.34), rearZ, hw*0.5, baseH*0.2, 0.018);
+  });
+  box(trimMat,0,Y(0.40),frontZ,hw*0.7,baseH*0.24,0.016);
+  box(trimMat,0,Y(0.16),frontZ,hw*1.5,baseH*0.2,0.016);
+  box(trimMat,0,Y(0.16),rearZ,hw*1.5,baseH*0.2,0.016);
+  // ロッカーパネル(下部サイドトリム)
+  [-1,1].forEach(function(s){
+    box(trimMat, s*(hw+0.011), Y(0.10), 0, 0.018, baseH*0.14, d*0.5);
+  });
+  // ドアミラー
+  [-1,1].forEach(function(s){
+    box(trimMat, s*(hw+0.05), Y(1.05), Z(-0.19), 0.05, 0.05, 0.1);
+    box(trimMat, s*(hw+0.015), Y(1.03), Z(-0.19), 0.02, 0.02, 0.03);
+  });
+  // ホイール(タイヤ+リム+ハブ)
+  var wr=w*0.155, wt=w*0.13;
+  var axleX=hw-wt*0.30;
+  [[-axleX,Z(-0.30)],[-axleX,Z(0.30)],[axleX,Z(-0.30)],[axleX,Z(0.30)]].forEach(function(p){
+    cylX(tireMat,p[0],wr,p[1],wr,wt,26);
+    cylX(rimMat,p[0]+(p[0]<0?-wt*0.5:wt*0.5),wr,p[1],wr*0.58,0.025,16);
+    cylX(hubMat,p[0]+(p[0]<0?-wt*0.53:wt*0.53),wr,p[1],wr*0.16,0.03,10);
   });
 }
 function accessTargetHeightM(it){
@@ -12045,12 +12364,139 @@ function build3DSink(grp){
 }
 function build3DTree(grp,h){
   h=h||3.0;
-  _CY(grp,new THREE.MeshStandardMaterial({color:0x4a2e0e,roughness:0.9}),0,h*0.28,0,0.1,0.15,h*0.56,8);
-  _CO(grp,new THREE.MeshStandardMaterial({color:0x2d6018,roughness:0.8}),0,h*0.72,0,h*0.38,h*0.68,8);
-  _CO(grp,new THREE.MeshStandardMaterial({color:0x3a7020,roughness:0.8}),0,h*0.92,0,h*0.26,h*0.5,8);
-  _CO(grp,new THREE.MeshStandardMaterial({color:0x487828,roughness:0.8}),0,h*1.08,0,h*0.15,h*0.34,8);
+  var barkMat=new THREE.MeshStandardMaterial({color:0x5a3518,roughness:0.96,metalness:0.0,flatShading:true});
+  var leafDark=new THREE.MeshStandardMaterial({color:0x285f2c,roughness:0.94,metalness:0.0,flatShading:true});
+  var leafMid=new THREE.MeshStandardMaterial({color:0x397b38,roughness:0.92,metalness:0.0,flatShading:true});
+  var leafLight=new THREE.MeshStandardMaterial({color:0x559447,roughness:0.9,metalness:0.0,flatShading:true});
+  // Tapered, slightly off-centre trunk and two visible limbs make the silhouette
+  // read as a broad-leaved garden tree instead of a stack of conifers.
+  _CY(grp,barkMat,0,h*0.27,0,h*0.075,h*0.125,h*0.54,7);
+  var limb1=new THREE.Mesh(new THREE.CylinderGeometry(h*0.035,h*0.065,h*0.34,6),barkMat);
+  limb1.position.set(-h*0.075,h*0.49,0); limb1.rotation.z=-0.52; limb1.castShadow=true; grp.add(limb1);
+  var limb2=new THREE.Mesh(new THREE.CylinderGeometry(h*0.03,h*0.055,h*0.28,6),barkMat);
+  limb2.position.set(h*0.07,h*0.52,h*0.035); limb2.rotation.z=0.58; limb2.rotation.x=0.22; limb2.castShadow=true; grp.add(limb2);
+  function crown(mat,x,y,z,r,sy){
+    var m=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat);
+    m.position.set(x,y,z); m.scale.y=sy; m.castShadow=true; m.receiveShadow=true; grp.add(m);
+  }
+  crown(leafDark,0,h*0.72,0,h*0.25,0.9);
+  crown(leafMid,-h*0.20,h*0.76,h*0.02,h*0.24,0.84);
+  crown(leafMid,h*0.19,h*0.78,-h*0.035,h*0.235,0.88);
+  crown(leafLight,-h*0.07,h*0.94,-h*0.02,h*0.22,0.92);
+  crown(leafDark,h*0.08,h*0.84,h*0.18,h*0.20,0.82);
 }
 
+// ── 階段の踏み抜け穴(上階の床スラブの吹き抜け) ─────────────
+// 階段(1つ下の階に配置)がちょうど上る先の階の床には、実際に上り続けられるよう
+// 階段の平面フットプリントぶんの穴を開ける。回転した階段矩形もそのまま扱えるよう、
+// 中心+ローカル4隅を rotation.y=-rot*PI/180 と同じ規則で回転して穴の輪郭にする。
+function stairwellQuadsForFloor(floor){
+  var belowFloor=floor-1;
+  if(belowFloor<1) return [];
+  return DATA.items.filter(function(it){
+    return it.floor===belowFloor && (it.type==='stair'||it.type==='stair-corner') && !it.hidden3D;
+  }).map(function(it){
+    var cx=(it.x+it.w/2)*U, cz=(it.y+it.d/2)*U;
+    var hw=it.w/2*U, hd=it.d/2*U;
+    var th=-(it.rot||0)*Math.PI/180;
+    var cos=Math.cos(th), sin=Math.sin(th);
+    return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
+      return {x:cx+p[0]*cos+p[1]*sin, z:cz-p[0]*sin+p[1]*cos};
+    });
+  });
+}
+// Sutherland-Hodgman: 凸多角形(階段の穴)を軸並行の矩形(部屋の範囲)でクリップする。
+// 階段が部屋境界をまたぐ場合でも、穴が部屋の外形からはみ出して形状生成が壊れないようにする
+function clipPolyToRect(poly,minX,minZ,maxX,maxZ){
+  function clipEdge(pts,inside,intersect){
+    var out=[];
+    for(var i=0;i<pts.length;i++){
+      var cur=pts[i], prev=pts[(i+pts.length-1)%pts.length];
+      var curIn=inside(cur), prevIn=inside(prev);
+      if(curIn){
+        if(!prevIn) out.push(intersect(prev,cur));
+        out.push(cur);
+      } else if(prevIn){
+        out.push(intersect(prev,cur));
+      }
+    }
+    return out;
+  }
+  function lerp(a,b,t){return {x:a.x+(b.x-a.x)*t, z:a.z+(b.z-a.z)*t};}
+  poly=clipEdge(poly,function(p){return p.x>=minX;},function(a,b){return lerp(a,b,(minX-a.x)/(b.x-a.x));});
+  poly=clipEdge(poly,function(p){return p.x<=maxX;},function(a,b){return lerp(a,b,(maxX-a.x)/(b.x-a.x));});
+  poly=clipEdge(poly,function(p){return p.z>=minZ;},function(a,b){return lerp(a,b,(minZ-a.z)/(b.z-a.z));});
+  poly=clipEdge(poly,function(p){return p.z<=maxZ;},function(a,b){return lerp(a,b,(maxZ-a.z)/(b.z-a.z));});
+  return poly;
+}
+function polyAreaAbs(poly){
+  var a=0;
+  for(var i=0;i<poly.length;i++){
+    var p=poly[i], q=poly[(i+1)%poly.length];
+    a+=p.x*q.z-q.x*p.z;
+  }
+  return Math.abs(a)/2;
+}
+// 部屋(ワールドmメートル矩形)に重なる階段の穴を、部屋内にクリップして返す(面積が
+// 無視できるほど小さいものは除外)
+function stairwellHolesForRoom(r,stairQuadsCache){
+  var quads=stairQuadsCache[r.floor];
+  if(!quads) return [];
+  var minX=r.x*U, maxX=(r.x+r.w)*U, minZ=r.y*U, maxZ=(r.y+r.d)*U;
+  var holes=[];
+  quads.forEach(function(q){
+    var clipped=clipPolyToRect(q,minX,minZ,maxX,maxZ);
+    if(clipped.length>=3 && polyAreaAbs(clipped)>0.01) holes.push(clipped);
+  });
+  return holes;
+}
+// 部屋の床(スラブ本体・仕上げ面)を、階段の穴があれば THREE.Shape+holes で、
+// なければ従来通りの単純な Box/Plane で生成する
+function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
+  var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
+  var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+  if(!holes || !holes.length){
+    var out={};
+    if(slabH>0){
+      var slabBody=new THREE.Mesh(new THREE.BoxGeometry(rw,slabH,rd),makeFloorSlabMaterial(matFloor));
+      slabBody.position.set(rcx,ry+slabH/2,rcz);
+      slabBody.castShadow=true; slabBody.receiveShadow=true;
+      out.slabBody=slabBody;
+    }
+    var slab=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matFloor);
+    slab.rotation.x=-Math.PI/2;
+    slab.position.set(rcx,floorY+0.004,rcz);
+    slab.receiveShadow=true;
+    out.slab=slab;
+    return out;
+  }
+  // シェイプ座標は shapeX=ワールドX, shapeY=-ワールドZ とし、生成後に X軸-90°回転で
+  // (shapeX, extrudeDepth, -shapeY) = (worldX, 0..slabH, worldZ) の向きに揃える
+  var outline=new THREE.Shape();
+  outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
+  holes.forEach(function(hole){
+    var path=new THREE.Path();
+    hole.forEach(function(p,i){ if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z); });
+    path.closePath();
+    outline.holes.push(path);
+  });
+  var out={};
+  if(slabH>0){
+    var extGeo=new THREE.ExtrudeGeometry(outline,{depth:Math.max(slabH,0.001),bevelEnabled:false});
+    extGeo.rotateX(-Math.PI/2);
+    var slabBody=new THREE.Mesh(extGeo,makeFloorSlabMaterial(matFloor));
+    slabBody.position.y=ry;
+    slabBody.castShadow=true; slabBody.receiveShadow=true;
+    out.slabBody=slabBody;
+  }
+  var flatGeo=new THREE.ShapeGeometry(outline);
+  flatGeo.rotateX(-Math.PI/2);
+  var slab=new THREE.Mesh(flatGeo,matFloor);
+  slab.position.y=floorY+0.004;
+  slab.receiveShadow=true;
+  out.slab=slab;
+  return out;
+}
 function buildRooms3D(flFilt){
   // 内観: 配置ライトを主役にするため自動ルームライトはさらに暗く・やや間引く。
   // 外観: 配置ライトの実光源を生成しない代わりに自動ルームライトを強め、数は大幅に間引く(性能対策)
@@ -12059,6 +12505,11 @@ function buildRooms3D(flFilt){
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isInt;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
+  // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
+  var stairQuadsByFloor={};
+  DATA.rooms.forEach(function(r){
+    if(stairQuadsByFloor[r.floor]===undefined) stairQuadsByFloor[r.floor]=stairwellQuadsForFloor(r.floor);
+  });
 
   DATA.rooms.filter(function(r){return !r.hidden3D&&(!flFilt||r.floor===flFilt);}).forEach(function(r){
     var ry=floorBaseY(r.floor);
@@ -12087,19 +12538,13 @@ function buildRooms3D(flFilt){
       : new THREE.MeshStandardMaterial(matParams);
     
     var slabH=floorSlabHeightMForFloor(r.floor);
-    if(slabH>0){
-      var slabBody=new THREE.Mesh(new THREE.BoxGeometry(rw,slabH,rd),makeFloorSlabMaterial(matFloor));
-      slabBody.position.set(rcx,ry+slabH/2,rcz);
-      slabBody.castShadow=true;
-      slabBody.receiveShadow=true;
-      mark3DSelectable(slabBody,r,'room');
-      sc3.add(slabBody);
+    var stairHoles=stairwellHolesForRoom(r,stairQuadsByFloor);
+    var floorMeshes=buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,stairHoles);
+    if(floorMeshes.slabBody){
+      mark3DSelectable(floorMeshes.slabBody,r,'room');
+      sc3.add(floorMeshes.slabBody);
     }
-
-    var slab=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matFloor);
-    slab.rotation.x=-Math.PI/2;
-    slab.position.set(rcx,floorY+0.004,rcz);
-    slab.receiveShadow=true; mark3DSelectable(slab,r,'room'); sc3.add(slab);
+    mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
 
 	    // Ceiling downlights
 	    var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
@@ -12282,6 +12727,11 @@ function get3DFrameInterval(){
 // 接近すると90度まで開くアニメーションが走る
 var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0};
 var _doorAnims=[];
+// ドアの開閉希望状態(0=閉/1=開)をプランアイテム単位で保持する。
+// 家具の非同期ロード完了のたびに rebuild3D() が全ドアを作り直すため、
+// これが無いとウォークスルー中の開閉アニメーションがプラン既定値へ毎回巻き戻り、
+// 近くのドアが連続的にパタパタしてしまう
+var _doorWantByItem=new WeakMap();
 function isWalkView(){ return ST.view==='3d-walk'; }
 function walkEyeY(){ return floorTopY(WALK.floor)+WALK_EYE_HEIGHT_MM*U; }
 function walkSpawn(){
@@ -12400,13 +12850,23 @@ function positionWalkHud(){
     if(r.height<=0||r.top>=wr.bottom) return 0;
     return Math.max(0,wr.bottom-r.top);
   }
+  // #c3d-wrap はビューポート全幅で配置され、デスクトップの常時表示サイドバーの
+  // 下にも重なっているため、左寄せのHUD要素はサイドバー分だけ避ける必要がある
+  function overlapLeft(id){
+    var el=document.getElementById(id);
+    if(!el) return 0;
+    var r=el.getBoundingClientRect();
+    if(r.width<=0||r.right<=wr.left) return 0;
+    return Math.max(0,r.right-wr.left);
+  }
   var topSafe=Math.max(12,overlapTop('toolbar')+10);
   var botSafe=Math.max(16,overlapBottom('bottom-nav')+12,overlapBottom('statusbar')+12);
+  var leftSafe=Math.max(12,overlapLeft('sidebar')+10);
   var mm=document.getElementById('walk-minimap');
   var ex=document.getElementById('walk-exit');
   var dp=document.getElementById('walk-dpad');
   if(mm) mm.style.top=topSafe+'px';
-  if(ex) ex.style.top=topSafe+'px';
+  if(ex){ ex.style.top=topSafe+'px'; ex.style.left=leftSafe+'px'; }
   if(dp) dp.style.bottom=botSafe+'px';
 }
 function initWalkHud(){
@@ -12428,17 +12888,21 @@ function initWalkHud(){
   });
 }
 function exitWalkMode(){ setView('3d-ext'); setTimeout(fitCameraToScene,100); }
-// ドアの接近自動開閉(閉まっているドアのみ)。ヒステリシスでばたつきを防ぐ
+// ドアの接近自動開閉。プラン上のデフォルト状態(開/閉)に関わらず、
+// ウォークスルー中は「近づくと開き、離れると閉まる」で統一する。
+// (以前はプラン側で開扉状態のドアを丸ごとスキップしており、
+//  ドアが大半"開"扱いの実際のプランでは開閉が事実上動作していなかった)
+// ヒステリシスでばたつきを防ぐ
 function updateWalkDoors(dt){
   var animating=false;
   for(var i=0;i<_doorAnims.length;i++){
     var d=_doorAnims[i];
-    if(d.initiallyOpen) continue;
     var dx=d.grp.position.x-WALK.x, dz=d.grp.position.z-WALK.z;
     var dist=Math.hypot(dx,dz);
     var floorOk=Math.abs(d.grp.position.y-floorTopY(WALK.floor))<1.6;
     if(dist<1.5&&floorOk) d._want=1;
     else if(dist>2.4||!floorOk) d._want=0;
+    _doorWantByItem.set(d.it,d._want);
     var k=Math.min(1,dt*4.5);
     if(d.slideMesh){
       var target=d._want?d.openX:d.closedX;
@@ -12452,12 +12916,60 @@ function updateWalkDoors(dt){
   }
   return animating;
 }
+// ── ウォークスルーの壁衝突判定 ─────────────────────────
+// DATA.walls (mm単位の平面プランデータ) を直接参照して円(プレイヤー)と
+// 壁セグメントの距離判定を行う。ドア開口区間は通行可としてすり抜けさせる。
+var WALK_PLAYER_RADIUS_MM = 280; // 肩幅程度の余裕。一般的な引違い/開き戸の有効開口(750mm前後)は通過できる
+// ドア(窓は除く)の開口区間を、壁始点からの距離(mm, 壁のローカル座標)で返す。
+// 3D側の壁生成(buildWall3D)と同じ開口幅ロジック(it.w+80mm, 最小450mm)を踏襲
+function getWallDoorGapsMm(w){
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy);
+  var gaps=[];
+  if(len<1) return gaps;
+  DATA.items.filter(function(it){
+    return it.floor===w.floor && isOpeningItemType(it.type) && !isWindowLikeType(it.type);
+  }).forEach(function(it){
+    var info=getOpeningWallInfo(it);
+    if(!info || info.wall!==w) return;
+    var c=info.t*len;
+    var openW=Math.min(len,Math.max((Number(it.w)||800)+80,450));
+    gaps.push({a:Math.max(0,c-openW/2),b:Math.min(len,c+openW/2)});
+  });
+  return gaps;
+}
+var _walkCollWalls=null, _walkCollFloor=null;
+function buildWalkCollisionCache(floor){
+  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
+    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w)};
+  });
+  _walkCollFloor=floor;
+}
+// (xMm,zMm) がいずれかの壁の実体(ドア開口を除く)に衝突するか
+function walkBlockedAt(xMm,zMm,floor){
+  if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
+  var walls=_walkCollWalls;
+  for(var i=0;i<walls.length;i++){
+    var w=walls[i];
+    var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+    if(len2<1) continue;
+    var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2;
+    var tc=Math.max(0,Math.min(1,t));
+    var px=w.x1+tc*dx, py=w.y1+tc*dy;
+    var dist=Math.hypot(xMm-px,zMm-py);
+    if(dist>=w.thick/2+WALK_PLAYER_RADIUS_MM) continue;
+    var alongMm=tc*Math.sqrt(len2);
+    var pad=WALK_PLAYER_RADIUS_MM*0.3;
+    var inGap=w.gaps.some(function(g){return alongMm>=g.a-pad && alongMm<=g.b+pad;});
+    if(!inGap) return true;
+  }
+  return false;
+}
 var _lastWalkTick=0;
 function updateWalkMode(now){
   if(!isWalkView()||!WALK.active) return false;
   var dt=Math.min(0.1,Math.max(0.001,(now-(_lastWalkTick||now))/1000));
   _lastWalkTick=now;
-  if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; drawWalkMinimap(); }
+  if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; _walkCollFloor=null; drawWalkMinimap(); }
   var rot=(WALK.keys.left?1:0)-(WALK.keys.right?1:0)
         +((iMov['arrowleft']||iMov['a'])?1:0)-((iMov['arrowright']||iMov['d'])?1:0);
   var fwd=(WALK.keys.fwd?1:0)-(WALK.keys.back?1:0)
@@ -12467,8 +12979,15 @@ function updateWalkMode(now){
   if(rot){ WALK.yaw+=rot*1.7*dt; moved=true; }
   if(fwd){
     var sp=2.0*dt*fwd;
-    WALK.x+=-Math.sin(WALK.yaw)*sp;
-    WALK.z+=-Math.cos(WALK.yaw)*sp;
+    var nx=WALK.x-Math.sin(WALK.yaw)*sp, nz=WALK.z-Math.cos(WALK.yaw)*sp;
+    // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
+    if(!walkBlockedAt(nx/U,nz/U,WALK.floor)){
+      WALK.x=nx; WALK.z=nz;
+    } else if(!walkBlockedAt(nx/U,WALK.z/U,WALK.floor)){
+      WALK.x=nx;
+    } else if(!walkBlockedAt(WALK.x/U,nz/U,WALK.floor)){
+      WALK.z=nz;
+    }
     moved=true;
   }
   if(moved){
@@ -12486,8 +13005,9 @@ var _lastCam3DInputAt=0;
 function noteCam3DInput(){ _lastCam3DInputAt=performance.now(); }
 function setDynamicResolution(low){
   if(_dynResLow===low || !ren) return;
-  // 恩恵が大きいタッチ端末・モバイルレイアウトのみ適用
-  var eligible=((navigator.maxTouchPoints||0)>0)||isMobileLayout();
+  // 恩恵が大きいタッチ端末・モバイルレイアウト、および
+  // PCでもウォークスルー移動中(N8AO+Bloomが解像度そのままだと重い)に適用
+  var eligible=((navigator.maxTouchPoints||0)>0)||isMobileLayout()||(isWalkView()&&WALK.active);
   if(low && !eligible) return;
   _dynResLow=low;
   var base=Math.min(window.devicePixelRatio,2);
@@ -12584,6 +13104,14 @@ function refresh3DPreviewWithLoading(){
 }
 
 function setView(v){
+  // ビュー切替時は必ずモバイルサイドメニュー・光/時間帯設定パネル・外観色パネルを閉じる。
+  // これらは position:absolute; z-index:200 で、ウォークスルーHUD(z-index:30)より
+  // 手前に表示され続けるため、開いたままウォークスルーへ入るとD-pad・ミニマップ・
+  // 終了ボタンに重なって操作できなくなる不具合があった
+  if(typeof closeMobilePanels==='function') closeMobilePanels();
+  if(typeof hideWallPanel==='function') hideWallPanel();
+  var _lp=document.getElementById('light-panel');
+  if(_lp) _lp.style.display='none';
   if(v!=='3d-ext' && WALKTHROUGH) stopWalkthrough();
   if(v!=='3d-walk' && WALK.active){
     WALK.active=false; WALK.keys={}; WALK.moving=false;
@@ -12605,6 +13133,7 @@ function setView(v){
         // ウォークスルー: 建物内の目線カメラ。オービット無効・HUD表示・室内ライト有効
         isInt=false;
         WALK.active=true;
+        _walkCollFloor=null; // 直近の編集内容を反映するため衝突判定キャッシュを作り直す
         if(WALK.prevFov===null){ WALK.prevFov=camExt.fov; }
         camExt.fov=68; camExt.updateProjectionMatrix();
         if(orbit) orbit.enabled=false;
@@ -13273,22 +13802,35 @@ function drawRectDim(x, y, w, d){
   var ax = ST.panX + x*sc, ay = ST.panY + y*sc;
   var bx = ax + w*sc, by = ay + d*sc;
   ctx.save();
-  ctx.strokeStyle = 'rgba(40,80,200,0.6)'; ctx.lineWidth = 1.2; ctx.setLineDash([4,3]);
-  var off = 22;
-  // Width dimension (top)
-  ctx.beginPath(); ctx.moveTo(ax, ay-off); ctx.lineTo(bx, ay-off); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.beginPath(); // end ticks
-  ctx.moveTo(ax, ay-off-5); ctx.lineTo(ax, ay-off+5);
-  ctx.moveTo(bx, ay-off-5); ctx.lineTo(bx, ay-off+5); ctx.stroke();
-  drawDimLabel((ax+bx)/2, ay-off, Math.round(w)+'mm', 'rgba(40,80,200,0.82)', '#fff');
-  // Height dimension (left)
-  ctx.setLineDash([4,3]);
-  ctx.beginPath(); ctx.moveTo(ax-off, ay); ctx.lineTo(ax-off, by); ctx.stroke();
-  ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(40,80,200,0.72)';
+  var off = 22, gap = 3, over = 4;
+  // 寸法補助線(幅方向): 対象の辺から少し離して起こし、寸法線を少し超えて延ばす(JIS製図の慣例)
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(ax-off-5, ay); ctx.lineTo(ax-off+5, ay);
-  ctx.moveTo(ax-off-5, by); ctx.lineTo(ax-off+5, by); ctx.stroke();
+  ctx.moveTo(ax, ay-gap); ctx.lineTo(ax, ay-off-over);
+  ctx.moveTo(bx, ay-gap); ctx.lineTo(bx, ay-off-over);
+  ctx.stroke();
+  // 寸法線(幅方向) + 端部記号(45°の短い斜線)
+  ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(ax, ay-off); ctx.lineTo(bx, ay-off); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(ax-5, ay-off+5); ctx.lineTo(ax+5, ay-off-5);
+  ctx.moveTo(bx-5, ay-off+5); ctx.lineTo(bx+5, ay-off-5);
+  ctx.stroke();
+  drawDimLabel((ax+bx)/2, ay-off, Math.round(w)+'mm', 'rgba(40,80,200,0.82)', '#fff');
+  // 寸法補助線(奥行方向)
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ax-gap, ay); ctx.lineTo(ax-off-over, ay);
+  ctx.moveTo(ax-gap, by); ctx.lineTo(ax-off-over, by);
+  ctx.stroke();
+  // 寸法線(奥行方向) + 端部記号
+  ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(ax-off, ay); ctx.lineTo(ax-off, by); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(ax-off-5, ay+5); ctx.lineTo(ax-off+5, ay-5);
+  ctx.moveTo(ax-off-5, by+5); ctx.lineTo(ax-off+5, by-5);
+  ctx.stroke();
   ctx.save(); ctx.translate(ax-off, (ay+by)/2); ctx.rotate(-Math.PI/2);
   drawDimLabel(0, 0, Math.round(d)+'mm', 'rgba(40,80,200,0.82)', '#fff');
   ctx.restore();
@@ -13343,12 +13885,29 @@ function drawDim(){
     if(!isFiniteCanvasValue(minX) || !isFiniteCanvasValue(minY) || !isFiniteCanvasValue(maxX) || !isFiniteCanvasValue(maxY)) return;
     if(maxX<=minX || maxY<=minY) return;
     var a=w2c(minX, minY), b=w2c(maxX, minY), c=w2c(minX, maxY);
-    ctx.save(); ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=1.2;
+    var gap=3, over=4;
+    ctx.save(); ctx.strokeStyle=col; ctx.fillStyle=col;
     var fsz=Math.max(10,ST.zoom*5.5); ctx.font='bold '+fsz+'px sans-serif'; ctx.textAlign='center';
+    // 寸法補助線(幅方向): 対象の辺から少し離して起こし、寸法線を少し超えて延ばす
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(a.cx, a.cy-gap); ctx.lineTo(a.cx, a.cy-off-over);
+    ctx.moveTo(b.cx, a.cy-gap); ctx.lineTo(b.cx, a.cy-off-over);
+    ctx.stroke();
+    // 寸法線(幅方向) + 端部記号(45°の短い斜線)
+    ctx.lineWidth=1.2;
     ctx.beginPath(); ctx.moveTo(a.cx, a.cy-off); ctx.lineTo(b.cx, a.cy-off); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(a.cx-5, a.cy-off+5); ctx.lineTo(a.cx+5, a.cy-off-5); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(b.cx-5, a.cy-off+5); ctx.lineTo(b.cx+5, a.cy-off-5); ctx.stroke();
     ctx.fillText((label||"") + Math.round(maxX-minX)+'mm', (a.cx+b.cx)/2, a.cy-off-6);
+    // 寸法補助線(奥行方向)
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(a.cx-gap, a.cy); ctx.lineTo(a.cx-off-over, a.cy);
+    ctx.moveTo(a.cx-gap, c.cy); ctx.lineTo(a.cx-off-over, c.cy);
+    ctx.stroke();
+    // 寸法線(奥行方向) + 端部記号
+    ctx.lineWidth=1.2;
     ctx.beginPath(); ctx.moveTo(a.cx-off, a.cy); ctx.lineTo(a.cx-off, c.cy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(a.cx-off-5, a.cy+5); ctx.lineTo(a.cx-off+5, a.cy-5); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(a.cx-off-5, c.cy+5); ctx.lineTo(a.cx-off+5, c.cy-5); ctx.stroke();
@@ -13380,7 +13939,8 @@ function drawDim(){
         maxX=Math.max(maxX, p.x); maxY=Math.max(maxY, p.y);
       });
     });
-    drawBoxDim(minX, minY, maxX, maxY, 'rgba(40,70,160,0.6)', 30);
+    // 寸法線は壁体(躯体)の外側に出す(JIS製図: 寸法線は図形と重ねない)。壁厚の半分より確実に大きいオフセットを確保する。
+    drawBoxDim(minX, minY, maxX, maxY, 'rgba(40,70,160,0.6)', 70);
   }
 
   var sc2 = ST.zoom*0.05;
@@ -13401,6 +13961,8 @@ function drawDim(){
       var mx2=(w.x1+w.x2)/2, my2=(w.y1+w.y2)/2;
       var cx3=ST.panX+mx2*sc2, cy3=ST.panY+my2*sc2;
       var ang=Math.atan2(w.y2-w.y1,w.x2-w.x1);
+      // 数値は下または右から正しく読める向きに統一する(JIS製図: 天地逆転を避ける)
+      if(ang>Math.PI/2 || ang<-Math.PI/2) ang+=Math.PI;
       ctx.save();
       ctx.translate(cx3, cy3); ctx.rotate(ang);
       var isSel=(ST.selected===w);
@@ -13982,6 +14544,7 @@ function aiSegmentationLegend(){
 function aiSegmentColorForObject(o){
   if(o.userData&&o.userData.windowWallGlass) return 0x19c7ff;
   var ref=o.userData&&o.userData.selectRef;
+  if(!ref && o.userData&&o.userData.instanceRefs&&o.userData.instanceRefs.length) ref=o.userData.instanceRefs[0];
   var kind=o.userData&&o.userData.selectKind;
   if(o===_gndMesh) return 0xe2ded2;
   if(!ref){

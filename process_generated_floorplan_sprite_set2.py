@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 
 SOURCE = Path("/private/tmp/floorplan_parts_set2_keyed.png")
-ASSETS = Path("/Users/nariiwa/Documents/GitHub/webcad-planner/assets")
+ASSETS = Path(__file__).parent / "assets"
 OUT = ASSETS / "japanese_floorplan_parts_sprite_gpt_2.png"
 PREVIEW = ASSETS / "japanese_floorplan_parts_sprite_gpt_2_preview.png"
 META = ASSETS / "japanese_floorplan_parts_sprite_gpt.json"

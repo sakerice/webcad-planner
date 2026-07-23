@@ -7,7 +7,7 @@ from PIL import Image, ImageChops
 
 
 SOURCE = Path("/private/tmp/generated_floorplan_sprite_keyed.png")
-ASSETS = Path("/Users/nariiwa/Documents/GitHub/webcad-planner/assets")
+ASSETS = Path(__file__).parent / "assets"
 OUT = ASSETS / "japanese_floorplan_parts_sprite_gpt.png"
 PREVIEW = ASSETS / "japanese_floorplan_parts_sprite_gpt_preview.png"
 META = ASSETS / "japanese_floorplan_parts_sprite_gpt.json"

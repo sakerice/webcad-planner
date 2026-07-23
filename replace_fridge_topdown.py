@@ -5,7 +5,7 @@ sys.path.insert(0, "/private/tmp/pdfdeps")
 from PIL import Image
 
 
-ASSETS = Path("/Users/nariiwa/Documents/GitHub/webcad-planner/assets")
+ASSETS = Path(__file__).parent / "assets"
 FRIDGE_SOURCE = Path("/private/tmp/fridge_topdown_keyed.png")
 SPRITE = ASSETS / "japanese_floorplan_parts_sprite_gpt.png"
 PREVIEW = ASSETS / "japanese_floorplan_parts_sprite_gpt_preview.png"

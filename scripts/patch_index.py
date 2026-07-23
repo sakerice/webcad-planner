@@ -174,7 +174,6 @@ HDR_INIT = """
         sc3.environment = pmrem.fromEquirectangular(hdrTex).texture;
         hdrTex.dispose(); pmrem.dispose();
         rebuild3D();
-        console.log('[WebCAD] HDR environment map loaded');
       }, undefined, function(err) {
         console.warn('[WebCAD] HDR load failed, using fallback lighting');
       });
