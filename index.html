@@ -7996,8 +7996,10 @@ function applyLightingToScene(refreshSky){
   if(sc3&&typeof THREE!=='undefined'){
     sc3.traverse(function(o){
       if(o.name==='AmbientLight'){
-        // 内観は配置ライトを主役にするためベース光を絞る
-        o.intensity=LIGHT_SETTINGS.ambient*((ST.view==='3d-int'||isInt)?0.6:1);
+        // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
+        // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
+        //  色味が白いベース光に洗い流されてしまう)
+        o.intensity=LIGHT_SETTINGS.ambient*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?0.6:1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         var interiorMode=(ST.view==='3d-int'||isInt);
@@ -8014,7 +8016,7 @@ function applyLightingToScene(refreshSky){
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi*((ST.view==='3d-int'||isInt)?0.4:1);
+        o.intensity=LIGHT_SETTINGS.hemi*((ST.view==='3d-int'||isInt)?0.4:(ST.view==='3d-walk'?0.5:1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
@@ -8035,7 +8037,9 @@ function applyLightingToScene(refreshSky){
       var envSp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
       envFactor=sunSimDimFactor(envSp.altitude);
     }
-    var envBoost=(ST.view==='3d-int')?0.4:2.4; // 内観はIBL寄与を大きく抑えて配置ライトを主役にする
+    // 内観はIBL寄与を大きく抑えて配置ライトを主役にする。ウォークスルーも室内目線のため
+    // 大幅に絞る(2.4のままだと昼空のIBLが室内を白く洗い流し、配置ライトの色味が消える)
+    var envBoost=(ST.view==='3d-int')?0.4:(ST.view==='3d-walk'?0.7:2.4);
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
