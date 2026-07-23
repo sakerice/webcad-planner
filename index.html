@@ -10185,14 +10185,17 @@ function getConnectedStairParts(seed){
   }
   return group;
 }
-// 階段グループの総蹴上げ高さ(m)。上階が存在する場合はスラブ厚も含めて
-// 「上階の床仕上げ面」まで上がる(最上段と上階床の間に段差・穴を作らない)
+// 階段グループの総蹴上げ高さ(m)。上階が存在する場合は
+// 「当階の床仕上げ面 → 上階の床仕上げ面」の実差分まで上がる
+// (1F→2Fは階高+スラブ厚、2F→3F以上は両階にスラブがあるため階高ちょうど。
+//  固定で+スラブ厚すると2F→3Fで1段分上へ突き抜ける)
 function stairGroupTotalRiseM(floor){
-  var nf=(floor||1)+1;
+  var fl=floor||1, nf=fl+1;
   var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
                DATA.rooms.some(function(r){return r.floor===nf;}) ||
                DATA.items.some(function(i){return i.floor===nf;});
-  return FLOOR_H*U + (hasUpper?floorSlabHeightMForFloor(nf):0);
+  if(!hasUpper) return FLOOR_H*U;
+  return Math.max(0.5,floorTopY(nf)-floorTopY(fl));
 }
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
