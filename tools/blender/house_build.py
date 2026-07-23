@@ -183,31 +183,31 @@ def uv_project(ob, size=1.8):
     bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True, scale_to_bounds=False)
     bpy.ops.object.mode_set(mode='OBJECT')
 
-GARA  = matp('NhGarage', (0.30, 0.30, 0.31), rough=0.9)
-GARAF = matp('NhGarageFloor', (0.55, 0.55, 0.54), rough=0.95)
+GARA  = matp('NhGarage', (0.16, 0.16, 0.17), rough=0.92)
+GARAF = matp('NhGarageFloor', (0.38, 0.38, 0.37), rough=0.95)
 wall = raw_box(WALL2, 0, 0, SH/2, FW, FD, SH)
 frames, glasses, sills, trims = [], [], [], []
 # 掃き出し窓(正面左)
-window(wall, frames, glasses, sills, 'f', -1.75, 0.03, 1.40, 2.00, 'v')
-window(wall, frames, glasses, sills, 'l', 0.50, 0.95, 1.20, 1.05)
-window(wall, frames, glasses, sills, 'r', 0.05, 0.95, 1.20, 1.05)
-window(wall, frames, glasses, sills, 'b', -FW*0.18, 0.95, 1.40, 1.05)
-window(wall, frames, glasses, sills, 'b', FW*0.25, 1.30, 0.55, 0.55, 'none')
+window(wall, frames, glasses, sills, 'f', -0.35, 0.90, 0.60, 1.10, 'none')
+window(wall, frames, glasses, sills, 'l', 0.55, 0.03, 1.65, 2.03, 'v')
+window(wall, frames, glasses, sills, 'r', 0.05, 0.90, 1.65, 1.10)
+window(wall, frames, glasses, sills, 'b', -FW*0.18, 0.90, 1.65, 1.10)
+window(wall, frames, glasses, sills, 'b', FW*0.25, 1.10, 0.60, 0.90, 'none')
 # 玄関(掃き出し窓とガレージの間): 開口を彫って奥にドアを納める
-px = -0.35
-reg_open('f', px, 0.0, 1.10, 2.26)
-cut(wall, px, -FD/2 - 0.1 + NICHE/2 + 0.001, 1.13, 1.10, NICHE + 0.2, 2.26)
+px = -1.55
+reg_open('f', px, 0.0, 1.06, 2.36)
+cut(wall, px, -FD/2 - 0.1 + NICHE/2 + 0.001, 1.18, 1.06, NICHE + 0.2, 2.36)
 inner = -FD/2 + NICHE
-frames.append(raw_box(SASH, px, inner + 0.02, 1.12, 1.02, 0.05, 2.24))
-d = raw_box(DOOR, px, inner + 0.045, 1.10, 0.86, 0.045, 2.18)
-glasses.append(raw_box(GLASS, px - 0.25, inner + 0.075, 1.35, 0.13, 0.02, 1.40))
-frames.append(raw_box(SASH, px + 0.29, inner + 0.08, 1.05, 0.03, 0.03, 0.30))
-trims.append(raw_box(TRIMD, px, -FD/2 - 0.14, 0.045, 1.20, 0.30, 0.09))
-trims.append(raw_box(TRIMD, px, -FD/2 - 0.22, 2.36, 1.26, 0.58, 0.055))
-trims.append(raw_box(TRIMD, px - 0.58, -FD/2 - 0.09, 2.24, 0.05, 0.24, 0.05))
-trims.append(raw_box(TRIMD, px + 0.58, -FD/2 - 0.09, 2.24, 0.05, 0.24, 0.05))
+frames.append(raw_box(SASH, px, inner + 0.02, 1.17, 1.00, 0.05, 2.34))
+d = raw_box(DOOR, px, inner + 0.045, 1.165, 0.87, 0.045, 2.30)
+glasses.append(raw_box(GLASS, px - 0.26, inner + 0.075, 1.40, 0.13, 0.02, 1.55))
+frames.append(raw_box(SASH, px + 0.30, inner + 0.08, 1.05, 0.03, 0.03, 0.30))
+trims.append(raw_box(TRIMD, px, -FD/2 - 0.14, 0.045, 1.16, 0.30, 0.09))
+trims.append(raw_box(TRIMD, px, -FD/2 - 0.22, 2.46, 1.22, 0.58, 0.055))
+trims.append(raw_box(TRIMD, px - 0.56, -FD/2 - 0.09, 2.34, 0.05, 0.24, 0.05))
+trims.append(raw_box(TRIMD, px + 0.56, -FD/2 - 0.09, 2.34, 0.05, 0.24, 0.05))
 # ── インナーガレージ(正面右): 車が入る貫通開口 ──
-GX, GW, GH_, GD = 1.30, 2.30, 2.25, FD - 0.15   # 中心x, 幅, 高さ, 奥行(奥壁0.15残し)
+GX, GW, GH_, GD = 1.38, 2.20, 2.20, FD - 0.15   # 中心x, 幅, 高さ, 奥行(奥壁0.15残し)
 reg_open('f', GX, 0.0, GW, GH_ + 0.15)
 cut(wall, GX, -FD/2 + GD/2 - 0.101, GH_/2 + 0.02, GW, GD + 0.2, GH_)
 gz0 = -FD/2 + GD   # 奥壁の内面y
@@ -262,28 +262,27 @@ wall = raw_box(WALL, 0, 0, SH/2, FW, FD, SH)
 frames, glasses, sills, trims, rails = [], [], [], [], []
 # バルコニーに面した掃き出し窓(正面中央左)
 bx = -FW*0.10
-window(wall, frames, glasses, sills, 'f', bx, 0.03, 1.80, 2.05, 'v')
-window(wall, frames, glasses, sills, 'f', FW*0.36, 1.10, 0.75, 0.90)
-window(wall, frames, glasses, sills, 'l', 0.10, 0.90, 1.20, 1.05)
-window(wall, frames, glasses, sills, 'r', -0.15, 0.90, 1.20, 1.05)
-window(wall, frames, glasses, sills, 'b', -FW*0.20, 0.90, 1.30, 1.05)
-window(wall, frames, glasses, sills, 'b', FW*0.22, 0.90, 1.30, 1.05)
+window(wall, frames, glasses, sills, 'f', bx, 0.03, 1.65, 2.03, 'v')
+window(wall, frames, glasses, sills, 'f', FW*0.36, 0.90, 0.60, 1.10, 'none')
+window(wall, frames, glasses, sills, 'l', 0.10, 0.90, 1.65, 1.10)
+window(wall, frames, glasses, sills, 'r', -0.15, 0.90, 1.65, 1.10)
+window(wall, frames, glasses, sills, 'b', -FW*0.20, 0.90, 1.65, 1.10)
+window(wall, frames, glasses, sills, 'b', FW*0.22, 0.90, 1.65, 1.10)
 trims.append(raw_box(TRIMD, 0, 0, 0.05, FW + 0.08, FD + 0.08, 0.10))
 corner_boards(trims, SH)
-# バルコニー(掃き出し窓の正面、幅=窓+余裕)
-bw, bdp, bz = 2.55, 0.85, 0.0
-rails.append(raw_box(FASCIA, bx, -FD/2 - bdp/2, bz + 0.07, bw, bdp, 0.14))
-rails.append(raw_box(RAIL, bx, -FD/2 - bdp + 0.03, bz + 1.10, bw, 0.05, 0.05))
-rails.append(raw_box(RAIL, bx - bw/2 + 0.025, -FD/2 - bdp/2, bz + 1.10, 0.05, bdp - 0.05, 0.05))
-rails.append(raw_box(RAIL, bx + bw/2 - 0.025, -FD/2 - bdp/2, bz + 1.10, 0.05, bdp - 0.05, 0.05))
-nb = int(bw / 0.125)
-for i in range(nb + 1):
-    xx = bx - bw/2 + i * bw/nb
-    rails.append(raw_box(RAIL, xx, -FD/2 - bdp + 0.03, bz + 0.62, 0.022, 0.022, 0.96))
-for s in (-1, 1):
-    for k in range(4):
-        yy = -FD/2 - bdp + 0.03 + (k+1)*(bdp-0.06)/4
-        rails.append(raw_box(RAIL, bx + s*(bw/2 - 0.025), yy, bz + 0.62, 0.022, 0.022, 0.96))
+# バルコニー: 規格1820x910(1x0.5間)・手すり壁H1100(建築基準法)+アルミ笠木
+bw, bdp = 1.82, 0.91
+rails.append(raw_box(FASCIA, bx, -FD/2 - bdp/2, 0.07, bw, bdp, 0.14))          # 床スラブ
+WALLP = 0.075
+rails.append(raw_box(WALL, bx, -FD/2 - bdp + WALLP/2, 0.62, bw, WALLP, 1.10))  # 前面手すり壁
+rails.append(raw_box(WALL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
+rails.append(raw_box(WALL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
+KASA = 0.04
+rails.append(raw_box(RAIL, bx, -FD/2 - bdp + WALLP/2, 1.19, bw + 0.03, WALLP + 0.03, KASA))
+rails.append(raw_box(RAIL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
+rails.append(raw_box(RAIL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
+# 水切り(スラブ下端の見切り)
+rails.append(raw_box(TRIMD, bx, -FD/2 - bdp/2, -0.005, bw + 0.02, bdp + 0.02, 0.02))
 wall.name = 'nh_mid_wall'
 uv_project(wall)
 join_group('nh_mid_trim', trims)

@@ -9190,9 +9190,31 @@ function getWallExteriorSpans(w){
     if(last&&last.sign===sign&&Math.abs(last.b-a)<0.001) last.b=b;
     else spans.push({a:a,b:b,sign:sign});
   }
+  if(!spans.length) return spans;
+  // 支配的な外装側(合計長が最大のsign)を求め、判定抜けを埋めて外装面を連続させる。
+  // ここに穴が残ると、その区間に内装(白)面がファサード側へ描かれて
+  // 「外壁に白いライン」が出る
+  var totalBySign={};
+  spans.forEach(function(sp){ totalBySign[sp.sign]=(totalBySign[sp.sign]||0)+(sp.b-sp.a); });
+  var domSign=(totalBySign[1]||0)>=(totalBySign[-1]||0)?1:-1;
+  // 誤判定によるごく短い反対側スパンは捨てる
+  spans=spans.filter(function(sp){ return sp.sign===domSign || sp.b-sp.a>=0.5; });
+  spans.sort(function(a,b){return a.a-b.a;});
+  var merged=[];
+  spans.forEach(function(sp){
+    var last=merged[merged.length-1];
+    if(last && last.sign===sp.sign && sp.a-last.b<=0.95){ last.b=Math.max(last.b,sp.b); }
+    else merged.push({a:sp.a,b:sp.b,sign:sp.sign});
+  });
+  // 壁端近くまで来ている支配側スパンは端まで延長(出隅のサンプル失敗対策)
+  merged.forEach(function(sp){
+    if(sp.sign===domSign){
+      if(sp.a<=0.6) sp.a=0;
+      if(sp.b>=len*U-0.6) sp.b=len*U;
+    }
+  });
   var minSpan=Math.min(0.22,len*U*0.18);
-  spans=spans.filter(function(sp){return sp.b-sp.a>=minSpan;});
-  return spans;
+  return merged.filter(function(sp){return sp.b-sp.a>=minSpan;});
 }
 
 function addWallIntersectionBreakpoints(w,breaks){
@@ -9259,7 +9281,11 @@ function wallCornerExtensionMm(w,atEnd){
     var dist=Math.hypot(px-qx,py-qy);
     if(dist>(o.thick||120)/2+40) return; // 交差とみなせる距離を超えたら対象外
     var neededFromCenterline=(o.thick||120)/2+INTERIOR_FINISH_MM;
-    var extMm=neededFromCenterline-dist;
+    // 相手の壁の外装面(芯+厚/2+6mm)を貫通すると、ファサードに内装(白)面の
+    // エッジが縦線として露出する。芯+4mmまでにキャップして必ず内側に留める
+    // (入隅は双方の壁が互いに延長し合うため、キャップ後も面同士の重なりで塞がる)
+    var maxSafeFromCenterline=(o.thick||120)/2-2;
+    var extMm=Math.min(neededFromCenterline,maxSafeFromCenterline)-dist;
     if(extMm>best) best=extMm;
   });
   return Math.max(0,Math.min(best,200));
@@ -9522,10 +9548,13 @@ function buildWall3D(w){
       applyWallFaceUv(faceGeo,aa,bb,yBase,h,len,wallH);
       var face=new THREE.Mesh(faceGeo,faceMat);
       face.castShadow=true; face.receiveShadow=true;
+      // 壁ごとに面オフセットを僅かにずらし、重なって描かれた壁同士の
+      // 外装面が同一平面でZファイト(白い破線)しないようにする
+      var extOff=w.thick*U/2+0.006+((w.id||0)%7)*0.0004;
       face.position.set(
-        x1+dirX*mid+normalX*(w.thick*U/2+0.006),
+        x1+dirX*mid+normalX*extOff,
         fy+yBase+h/2,
-        z1+dirZ*mid+normalZ*(w.thick*U/2+0.006)
+        z1+dirZ*mid+normalZ*extOff
       );
       face.rotation.y=rotY+(sp.sign<0?Math.PI:0);
       face.userData.exteriorFace=true;
@@ -9557,10 +9586,11 @@ function buildWall3D(w){
       applyWallFaceUv(faceGeo,aa,bb,yBase,h,len,wallH);
       var face=new THREE.Mesh(faceGeo,faceMat);
       face.castShadow=true; face.receiveShadow=true;
+      var intOff=w.thick*U/2+0.012+((w.id||0)%7)*0.0004;
       face.position.set(
-        x1+dirX*mid+normalX*(w.thick*U/2+0.012),
+        x1+dirX*mid+normalX*intOff,
         fy+yBase+h/2,
-        z1+dirZ*mid+normalZ*(w.thick*U/2+0.012)
+        z1+dirZ*mid+normalZ*intOff
       );
       face.rotation.y=rotY+(faceInfo.sign<0?Math.PI:0);
       face.userData.interiorFace=true;
@@ -9582,9 +9612,15 @@ function buildWall3D(w){
     }
     // BoxGeometry の材質配列は [+x,-x,+y(上面),-y(底面),+z,-z] の順。上下面だけ capMat にする
     var boxMat=isOuter?[mat,mat,capMat,capMat,mat,mat]:mat;
-    var mesh=new THREE.Mesh(new THREE.BoxGeometry(segLen,h,w.thick*U),boxMat);
+    // 壁の真端に接するピースは6mmだけ延長し、突き付け接合部の浮動小数点誤差による
+    // スリット(向こう側が点線状に透ける)を物理的に塞ぐ
+    var coreA=a, coreB=b;
+    if(a<=0.002) coreA-=0.006;
+    if(b>=len-0.002) coreB+=0.006;
+    var coreLen=coreB-coreA, coreMid=(coreA+coreB)/2;
+    var mesh=new THREE.Mesh(new THREE.BoxGeometry(coreLen,h,w.thick*U),boxMat);
     mesh.castShadow=true; mesh.receiveShadow=true;
-    mesh.position.set(x1+dirX*mid,fy+yBase+h/2,z1+dirZ*mid);
+    mesh.position.set(x1+dirX*coreMid,fy+yBase+h/2,z1+dirZ*coreMid);
     mesh.rotation.y=rotY;
     if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
@@ -11029,19 +11065,57 @@ function build3DBalcony(grp,it,w3,d3,h){
   edges.position.y=slab.position.y;
   grp.add(edges);
 
-  // Keep the balcony readable from the exterior without turning every rail into
-  // a separate draw call: one parapet body plus a cap and two short returns.
-  var railH=0.92, railT=Math.min(0.11,Math.max(0.065,d3*0.055));
+  // 腰壁(パラペット)は「部屋に隣接していない辺」だけに立てる。
+  // 建物側の辺は自動で開放し、掃き出し窓からの出入りを塞がない。
+  // 高さは建築基準法(2階以上の手すり1100mm以上)に合わせる
+  function sideOpenToRoom(lxMm,lyMm){
+    var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
+    var lx=lxMm*fx, ly=lyMm*fy;
+    var r=(it.rot||0)*Math.PI/180;
+    var wx=it.x+it.w/2 + lx*Math.cos(r)-ly*Math.sin(r);
+    var wy=it.y+it.d/2 + lx*Math.sin(r)+ly*Math.cos(r);
+    // 部屋に隣接している辺(=掃き出し窓側)は開放
+    var nearRoom=DATA.rooms.some(function(rm){
+      return rm.floor===it.floor && wx>=rm.x-60&&wx<=rm.x+rm.w+60&&wy>=rm.y-60&&wy<=rm.y+rm.d+60;
+    });
+    if(nearRoom) return true;
+    // その辺に沿ってユーザーが壁(格子壁など)を既に立てている場合も腰壁は出さない
+    return DATA.walls.some(function(wl){
+      if(wl.floor!==it.floor) return false;
+      var dx=wl.x2-wl.x1, dy=wl.y2-wl.y1, len2=dx*dx+dy*dy;
+      if(len2<1) return false;
+      var t=((wx-wl.x1)*dx+(wy-wl.y1)*dy)/len2;
+      if(t<-0.05||t>1.05) return false;
+      var px=wl.x1+dx*t, py=wl.y1+dy*t;
+      return Math.hypot(wx-px,wy-py)<((wl.thick||120)/2+320);
+    });
+  }
+  var openNZ=sideOpenToRoom(0,-(it.d/2+300));
+  var openPZ=sideOpenToRoom(0,(it.d/2+300));
+  var openNX=sideOpenToRoom(-(it.w/2+300),0);
+  var openPX=sideOpenToRoom((it.w/2+300),0);
+  if(!openNZ&&!openPZ&&!openNX&&!openPX) openPZ=true; // 隣接なし: 従来通り+Z開放
+  else if(openNZ&&openPZ&&openNX&&openPX){ openNZ=openNX=openPX=false; } // 全隣接は異常: +Zのみ開放
+  var railH=1.10, railT=Math.min(0.11,Math.max(0.065,d3*0.055));
   var railColor=it.colorCustom?it.color:0xd9ded8;
   var railMat=makeExteriorLightingMaterial({color:railColor,roughness:0.82,metalness:0.02,envMapIntensity:0.14});
   var capMat=makeExteriorLightingMaterial({color:0x747b78,roughness:0.52,metalness:0.22,envMapIntensity:0.22});
-  // The open edge is +Z; this matches the existing front-facing item convention.
-  _B(grp,railMat,0,railH/2,d3/2-railT/2,w3,railH,railT);
-  _B(grp,railMat,-w3/2+railT/2,railH/2,0,railT,railH,d3);
-  _B(grp,railMat,w3/2-railT/2,railH/2,0,railT,railH,d3);
-  _B(grp,capMat,0,railH+0.025,d3/2-railT/2,w3+0.035,0.05,railT+0.035);
-  _B(grp,capMat,-w3/2+railT/2,railH+0.025,0,railT+0.035,0.05,d3);
-  _B(grp,capMat,w3/2-railT/2,railH+0.025,0,railT+0.035,0.05,d3);
+  if(!openPZ){
+    _B(grp,railMat,0,railH/2,d3/2-railT/2,w3,railH,railT);
+    _B(grp,capMat,0,railH+0.025,d3/2-railT/2,w3+0.035,0.05,railT+0.035);
+  }
+  if(!openNZ){
+    _B(grp,railMat,0,railH/2,-d3/2+railT/2,w3,railH,railT);
+    _B(grp,capMat,0,railH+0.025,-d3/2+railT/2,w3+0.035,0.05,railT+0.035);
+  }
+  if(!openNX){
+    _B(grp,railMat,-w3/2+railT/2,railH/2,0,railT,railH,d3);
+    _B(grp,capMat,-w3/2+railT/2,railH+0.025,0,railT+0.035,0.05,d3);
+  }
+  if(!openPX){
+    _B(grp,railMat,w3/2-railT/2,railH/2,0,railT,railH,d3);
+    _B(grp,capMat,w3/2-railT/2,railH+0.025,0,railT+0.035,0.05,d3);
+  }
 }
 
 function buildWoodFence3D(grp,it,w3,d3,h){

@@ -97,12 +97,46 @@ cyl_between('bk2_fork_l', SILVER, (0.035, HB.y+0.02, HB.z-0.08), (0.035, FA.y, F
 cyl_between('bk2_fork_r', SILVER, (-0.035, HB.y+0.02, HB.z-0.08), (-0.035, FA.y, FA.z), 0.010)
 # シートポスト(長い)+サドル
 cyl_between('bk2_spost', SILVER, SC, (0, -0.36, 0.86), 0.014)
-bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=0.085, location=(0, -0.38, 0.88))
-sad = bpy.context.object; sad.name = 'bk2_saddle'
-sad.scale = (0.72, 1.45, 0.34)
-bpy.ops.object.transform_apply(scale=True)
-sad.data.materials.append(SADDLE)
-bpy.ops.object.shade_smooth()
+
+def build_saddle(name, mat, cx, cy, cz, s=1.0):
+    """実物比のサドル: 先細ノーズ+幅広リアのロフト(250x170相当)"""
+    import bmesh as _bm
+    secs = [
+        ( 0.125, 0.018, 0.009, 0.012),
+        ( 0.060, 0.030, 0.015, 0.004),
+        (-0.020, 0.052, 0.020, 0.000),
+        (-0.075, 0.083, 0.024, 0.006),
+        (-0.115, 0.060, 0.019, 0.014),
+    ]
+    mesh = bpy.data.meshes.new(name)
+    bm = _bm.new()
+    rings = []
+    for (dy, hw_, hh, dz) in secs:
+        ring = []
+        for k in range(12):
+            a = k * math.tau / 12
+            ring.append(bm.verts.new((cx + math.cos(a)*hw_*s, cy + dy*s, cz + dz*s + math.sin(a)*hh*s)))
+        rings.append(ring)
+    n = 12
+    for i in range(len(rings)-1):
+        for j in range(n):
+            bm.faces.new((rings[i][j], rings[i][(j+1)%n], rings[i+1][(j+1)%n], rings[i+1][j]))
+    bm.faces.new(tuple(reversed(rings[0])))
+    bm.faces.new(tuple(rings[-1]))
+    _bm.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bm.to_mesh(mesh); bm.free()
+    ob = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.data.materials.append(mat)
+    sub = ob.modifiers.new('S', 'SUBSURF'); sub.levels = 1
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier=sub.name)
+    bpy.ops.object.select_all(action='DESELECT')
+    ob.select_set(True)
+    bpy.ops.object.shade_smooth()
+    return ob
+
+build_saddle('bk2_saddle', SADDLE, 0, -0.37, 0.885, 0.92)
 # リア三角+BB+クランク
 for s in (-1, 1):
     cyl_between('bk2_cs%d' % max(s,0), FRAME, (s*0.025, SC.y, SC.z-0.02), (s*0.04, RA.y, RA.z), 0.009)
