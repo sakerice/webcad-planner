@@ -25,6 +25,10 @@ def ensure_group(prefix, keys):
     return empties
 
 house_empties = ensure_group('nh_', ['base', 'mid', 'roof'])
+be = bpy.data.objects.get('nh_balc')
+if be:
+    be.location = (be.location.x, be.location.y, 0)
+    house_empties.append('nh_balc')
 bldg_empties = ensure_group('bd_', ['base', 'mid', 'top'])
 fbike_root = bpy.data.objects.get('bk2_root')
 if not fbike_root:

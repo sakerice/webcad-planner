@@ -270,19 +270,30 @@ window(wall, frames, glasses, sills, 'b', -FW*0.20, 0.90, 1.65, 1.10)
 window(wall, frames, glasses, sills, 'b', FW*0.22, 0.90, 1.65, 1.10)
 trims.append(raw_box(TRIMD, 0, 0, 0.05, FW + 0.08, FD + 0.08, 0.10))
 corner_boards(trims, SH)
-# バルコニー: 規格1820x910(1x0.5間)・手すり壁H1100(建築基準法)+アルミ笠木
-bw, bdp = 1.82, 0.91
-rails.append(raw_box(FASCIA, bx, -FD/2 - bdp/2, 0.07, bw, bdp, 0.14))          # 床スラブ
+# バルコニー: 幅1820・持ち出し650mm・手すり壁H1100+アルミ笠木。
+# アプリ側でフットプリントに比例させず実寸を保てるよう、独立ノード
+# nh_balc(原点=取付壁面・階床レベル)としてエクスポートする
+bw, bdp = 1.82, 0.65
+balc = []
+balc.append(raw_box(FASCIA, bx, -FD/2 - bdp/2, 0.07, bw, bdp, 0.14))
 WALLP = 0.075
-rails.append(raw_box(WALL, bx, -FD/2 - bdp + WALLP/2, 0.62, bw, WALLP, 1.10))  # 前面手すり壁
-rails.append(raw_box(WALL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
-rails.append(raw_box(WALL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
+balc.append(raw_box(WALL, bx, -FD/2 - bdp + WALLP/2, 0.62, bw, WALLP, 1.10))
+balc.append(raw_box(WALL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
+balc.append(raw_box(WALL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 0.62, WALLP, bdp - 0.04, 1.10))
 KASA = 0.04
-rails.append(raw_box(RAIL, bx, -FD/2 - bdp + WALLP/2, 1.19, bw + 0.03, WALLP + 0.03, KASA))
-rails.append(raw_box(RAIL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
-rails.append(raw_box(RAIL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
-# 水切り(スラブ下端の見切り)
-rails.append(raw_box(TRIMD, bx, -FD/2 - bdp/2, -0.005, bw + 0.02, bdp + 0.02, 0.02))
+balc.append(raw_box(RAIL, bx, -FD/2 - bdp + WALLP/2, 1.19, bw + 0.03, WALLP + 0.03, KASA))
+balc.append(raw_box(RAIL, bx - bw/2 + WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
+balc.append(raw_box(RAIL, bx + bw/2 - WALLP/2, -FD/2 - bdp/2 - 0.02, 1.19, WALLP + 0.03, bdp - 0.02, KASA))
+balc.append(raw_box(TRIMD, bx, -FD/2 - bdp/2, -0.005, bw + 0.02, bdp + 0.02, 0.02))
+balc_main = join_group('nh_balc_main', balc)
+balc_empty = bpy.data.objects.get('nh_balc')
+if balc_empty:
+    bpy.data.objects.remove(balc_empty, do_unlink=True)
+balc_empty = bpy.data.objects.new('nh_balc', None)
+bpy.context.scene.collection.objects.link(balc_empty)
+balc_empty.location = (bx, -FD/2, 0)
+balc_main.parent = balc_empty
+balc_main.matrix_parent_inverse = balc_empty.matrix_world.inverted()
 wall.name = 'nh_mid_wall'
 uv_project(wall)
 join_group('nh_mid_trim', trims)

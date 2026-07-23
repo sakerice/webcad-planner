@@ -6268,7 +6268,7 @@ function drawItem2d(it){
       ctx.stroke();
       var garageW2=Math.min(2600*sc,it.w*sc*0.5);
       var garageD2=Math.min(900*sc,it.d*sc*0.26);
-      var garageX2=Math.min(hw-garageW2/2-4,Math.max(-hw+garageW2/2+4,hw*0.28));
+      var garageX2=Math.min(hw-garageW2/2-4,Math.max(-hw+garageW2/2+4,-hw*0.28));
       ctx.fillStyle='rgba(34,38,42,0.62)';
       ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
       ctx.strokeStyle='rgba(214,217,220,0.76)';
@@ -11262,7 +11262,7 @@ function addHouseSidingLines(grp,mat,w3,d3,bodyH){
 // 隣家/ビルは base(1F)+mid(中間階)+roof/top(屋根・パラペット) の
 // 名前付きノードを持つGLBで、階数に応じてmidを積み上げる。
 var CONTEXT_GLB_SPECS={
-  'neighbor-house':{url:'assets/models/context/neighbor_house.glb',base:'nh_base',mid:'nh_mid',roof:'nh_roof',fw:5.2,fd:3.6,sh:2.7,roofH:1.05,wallMats:{NhWall:1,NhWall2:1}},
+  'neighbor-house':{url:'assets/models/context/neighbor_house.glb',base:'nh_base',mid:'nh_mid',roof:'nh_roof',balc:'nh_balc',fw:5.2,fd:3.6,sh:2.7,roofH:1.05,wallMats:{NhWall:1,NhWall2:1}},
   'neighbor-building':{url:'assets/models/context/neighbor_building.glb',base:'bd_base',mid:'bd_mid',roof:'bd_top',fw:5.2,fd:3.6,sh:2.7,roofH:0.45,wallMats:{BdPanel:1,BdPanelDark:1}}
 };
 var CONTEXT_CAR_GLB='assets/models/context/car_sedan.glb';
@@ -11301,10 +11301,7 @@ function buildContextGlbStack(grp,it,w3,d3){
   var sx=w3/spec.fw, sz=d3/spec.fd, syStory=storyH/spec.sh;
   var syRoof=(contextRoofExtraHeightMm(it.type)*U)/spec.roofH;
   var needOwnMats=isContextGhost(it)||!!it.colorCustom;
-  function addModule(node,y,sy){
-    var c=node.clone(true);
-    c.position.set(0,y,0);
-    c.scale.set(sx,sy,sz);
+  function prepCloneMats(c){
     c.traverse(function(o){
       if(o.isMesh){
         o.castShadow=true; o.receiveShadow=true;
@@ -11323,10 +11320,36 @@ function buildContextGlbStack(grp,it,w3,d3){
         }
       }
     });
+  }
+  function addModule(node,y,sy){
+    var c=node.clone(true);
+    c.position.set(0,y,0);
+    // モデルはBlender上で正面=-Y(glTF +Z=2D南)で作られているが、
+    // 2D記号はガレージ・玄関を北(上)側に描くため180°回して整合させる
+    c.rotation.y=Math.PI;
+    c.scale.set(sx,sy,sz);
+    prepCloneMats(c);
     grp.add(c);
   }
+  // バルコニー等の「実寸を保つべき付属ノード」: フットプリント拡大に持ち出し寸法を
+  // 追従させない(拡大時は実寸維持・縮小時のみ追従)。原点=取付壁面なので
+  // 奥行き非スケールでも壁面への取り付き位置はズレない
+  var balcNode=spec.balc?model.getObjectByName(spec.balc):null;
+  function addBalcony(floorIdx){
+    if(!balcNode) return;
+    var bc=balcNode.clone(true);
+    var t=balcNode.position;
+    bc.position.set(-t.x*sx, floorIdx*storyH + t.y*syStory, -t.z*sz);
+    bc.rotation.y=Math.PI;
+    bc.scale.set(sx, syStory, Math.min(sz,1));
+    prepCloneMats(bc);
+    grp.add(bc);
+  }
   addModule(nodes.base,0,syStory);
-  for(var f=1;f<floors;f++) addModule(nodes.mid,f*storyH,syStory);
+  for(var f=1;f<floors;f++){
+    addModule(nodes.mid,f*storyH,syStory);
+    addBalcony(f);
+  }
   addModule(nodes.roof,floors*storyH,syRoof);
   return true;
 }
