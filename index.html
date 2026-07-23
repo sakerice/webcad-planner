@@ -12715,7 +12715,13 @@ function buildRooms3D(flFilt){
   // ウォークスルーは屋内を歩くため内観と同じ扱い: 自動ライトは弱い補助光に留め、
   // ユーザー設置ライト(実光源)を主役にする。外観3Dのみ窓明かり用に強い自動光を使う
   var isIndoorView=isInt||isWalkView();
-  var roomInt=LIGHT_SETTINGS.room*(isIndoorView?0.5:1.8);
+  // ユーザーがライトを設置するほど自動ライトを逓減させる(照明計画が進むほど
+  // 自動光は「未設定の部屋の非常灯」程度まで薄くなる)
+  var userLightsByFloor={};
+  DATA.items.forEach(function(li){
+    if(isLightItemType(li.type)&&!li.hidden3D) userLightsByFloor[li.floor]=(userLightsByFloor[li.floor]||0)+1;
+  });
+  var roomInt=LIGHT_SETTINGS.room*(isIndoorView?0.35:1.8);
   var lightPitch=isIndoorView?3.4:5.6;
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isIndoorView;
@@ -12770,6 +12776,7 @@ function buildRooms3D(flFilt){
 	      return lcx>=r.x-200 && lcx<=r.x+r.w+200 && lcy>=r.y-200 && lcy<=r.y+r.d+200;
 	    });
 	    if(!roomHasUserLight){
+	      var autoDim=isIndoorView?1/(1+0.35*(userLightsByFloor[r.floor]||0)):1;
 	      var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
 	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
 	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
@@ -12777,7 +12784,7 @@ function buildRooms3D(flFilt){
 	          var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
 	          fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
 	        }
-	        var pl=new THREE.PointLight(0xffffff,roomInt*Math.PI,6.0,1.8);
+	        var pl=new THREE.PointLight(0xffffff,roomInt*autoDim*Math.PI,6.0,1.8);
 	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
 	      }
 	    }
