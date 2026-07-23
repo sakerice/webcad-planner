@@ -9874,7 +9874,7 @@ function buildWinFrames(flFilt){
     var sashColorHex=isWindowLikeType(it.type)?(it.sashColor||customColor):null;
     // サッシは環境反射を抑えないと空色のハイライトが地の色を覆い、サッシ色の違いが見えなくなる
     var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(sashColorHex||0x3a3a3a):0x3a3a3a,roughness:isWindowLikeType(it.type)?0.55:0.5,metalness:isWindowLikeType(it.type)?0.08:0,envMapIntensity:isWindowLikeType(it.type)?0.25:1});
-    var glassMat=new THREE.MeshStandardMaterial({color:0xaaccff,transparent:true,opacity:0.4,roughness:0.1,metalness:0.8});
+    var glassMat=new THREE.MeshStandardMaterial({color:0x8fbfae,transparent:true,opacity:0.42,roughness:0.05,metalness:0.5,envMapIntensity:1.4});
     var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
     var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
     var railMat=new THREE.MeshStandardMaterial({color:0x707070,roughness:0.35,metalness:0.25});
@@ -9929,66 +9929,144 @@ function buildWinFrames(flFilt){
     }
 
     var ww=it.w*U, wt=0.15;
+    // サッシ金物色(クレセント・引手)
+    var hwSilverMat=new THREE.MeshStandardMaterial({color:0xb9bcc0,roughness:0.35,metalness:0.65,envMapIntensity:0.4});
+    // ── 引き違いサッシ共通ビルダー(JIS/メーカー標準の納まり) ──
+    // 枠見込み70mm・半外付け(外壁面から約25mm持ち出し)・レールピッチ33mm・
+    // 障子見込み30mm・戸先框/上框30mm・召し合わせ框40mm(閉時25mm重なり)・
+    // 下框45mm・クレセント錠(内障子内面)・外レールに網戸
+    var exSign=0;
+    (function(){
+      // 第一候補: 壁自身の外装スパン判定(ファサード描画と同じ基準なので確実)
+      var spans=getWallExteriorSpans(best);
+      if(spans.length){
+        var alongM=Math.hypot(wallInfo.x-best.x1,wallInfo.y-best.y1)*U;
+        var bestSp=null,bd=1e9;
+        spans.forEach(function(sp){
+          var d=alongM<sp.a?sp.a-alongM:(alongM>sp.b?alongM-sp.b:0);
+          if(d<bd){bd=d;bestSp=sp;}
+        });
+        if(bestSp) exSign=bestSp.sign;
+      }
+      if(!exSign){
+        // フォールバック: 部屋矩形の有無で内外を推定
+        function roomAt(sx,sy){
+          return DATA.rooms.some(function(r){return r.floor===fl && sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d;});
+        }
+        var rp=roomAt(wallInfo.x+nx*450,wallInfo.y+ny*450), rn=roomAt(wallInfo.x-nx*450,wallInfo.y-ny*450);
+        if(rp&&!rn) exSign=-1; else if(rn&&!rp) exSign=1;
+      }
+    })();
+    var exS=exSign||-1;              // 室外方向(不明時は-z)
+    // 半外付けオフセット: 外側が確定した窓のみ。内部間仕切りの窓は中央納まり
+    var zBase=(isWindowLikeType(it.type)&&exSign)?exSign*0.050:0;
+    var crescentMat=new THREE.MeshStandardMaterial({color:0x3f4347,roughness:0.4,metalness:0.5});
+    function addSlidingSashUnit(y0,totalH,isOpen,leftOpen){
+      var SD=0.07, frW=0.035, fbW=0.045;
+      var innerW=Math.max(ww-frW*2,0.06);
+      var innerH=Math.max(totalH-frW-fbW,0.06);
+      addBox(frameMat,0,y0+totalH-frW/2,zBase,ww,frW,SD);
+      addBox(frameMat,0,y0+fbW/2,zBase,ww,fbW,SD);
+      addBox(frameMat,-ww/2+frW/2,y0+totalH/2,zBase,frW,totalH,SD);
+      addBox(frameMat, ww/2-frW/2,y0+totalH/2,zBase,frW,totalH,SD);
+      // 下枠水切り(室外側へ突き出し・水勾配イメージの薄板)
+      addBox(frameMat,0,y0+0.008,zBase+exS*(SD/2+0.014),ww,0.016,0.028);
+      // 下枠上面のレール2本
+      [-1,1].forEach(function(s){
+        addBox(railMat,0,y0+fbW+0.003,zBase+s*0.0165,innerW,0.006,0.006);
+      });
+      var zP=0.0165, pT=0.030, stW=0.030, meetW=0.040, topW=0.030, botW=0.045;
+      var OVERLAP=0.025;             // 召し合わせ重なり(25mm: 内障子の框が15mm見える)
+      var panelW=(innerW+OVERLAP)/2;
+      var glassW=Math.max(panelW-stW-meetW,0.02);
+      var glassH=Math.max(innerH-topW-botW,0.02);
+      var closedL=-innerW/2+panelW/2, closedR=innerW/2-panelW/2;
+      var py=y0+fbW+innerH/2;
+      // 外障子の框は1段暗くして内外の層を読めるようにする
+      var frameMatFar=frameMat.clone();
+      if(frameMatFar.color){ frameMatFar.color.multiplyScalar(0.82); }
+      function sashPanel(cx,cz,meetLeft,isFar){
+        var fm=isFar?frameMatFar:frameMat;
+        var gOff=(meetLeft?1:-1)*(meetW-stW)/2;
+        addBox(glassMat,cx+gOff,py,cz,glassW,glassH,0.006);
+        var meetX=meetLeft?cx-panelW/2+meetW/2:cx+panelW/2-meetW/2;
+        var edgeX=meetLeft?cx+panelW/2-stW/2:cx-panelW/2+stW/2;
+        addBox(fm,meetX,py,cz,meetW,innerH,pT);
+        // 召し合わせ框の気密材(内側エッジの影線)
+        addBox(crescentMat,meetLeft?meetX-meetW/2+0.002:meetX+meetW/2-0.002,py,cz,0.004,innerH-0.02,pT+0.002);
+        addBox(fm,edgeX,py,cz,stW,innerH,pT);
+        addBox(fm,cx,y0+fbW+innerH-topW/2,cz,panelW,topW,pT);
+        addBox(fm,cx,y0+fbW+botW/2,cz,panelW,botW,pT);
+        // 障子外周の目地影(枠との見切り線2mm)
+        var sh=pT+0.001;
+        addBox(crescentMat,cx,y0+fbW+innerH-topW+0.001,cz,panelW,0.002,sh);
+        addBox(crescentMat,cx,y0+fbW+botW-0.001,cz,panelW,0.002,sh);
+        addBox(crescentMat,meetLeft?cx+panelW/2-stW:cx-panelW/2+stW,py,cz,0.002,innerH-topW-botW,sh);
+        return meetX;
+      }
+      // 内障子(室内側レール)・外障子(室外側レール)。開時は内障子を外障子側へ重ねる
+      var farZ=zBase+exS*zP, nearZ=zBase-exS*zP;
+      var far={x:leftOpen?closedR:closedL, meetLeft:!!leftOpen};
+      var near={x:leftOpen?closedL:closedR, meetLeft:!leftOpen};
+      sashPanel(far.x,farZ,far.meetLeft,true);
+      var meetNearX=sashPanel(isOpen?far.x:near.x,nearZ,near.meetLeft,false);
+      // クレセント錠: 内障子召し合わせ框の室内面に密着(本体30x100+受けレバー)
+      var crZ=nearZ-exS*(pT/2+0.010);
+      addBox(crescentMat,meetNearX,py,crZ,0.028,0.100,0.020);
+      addBox(crescentMat,meetNearX+((near.meetLeft)?0.024:-0.024),py+0.018,crZ-exS*0.008,0.036,0.014,0.012);
+      // 網戸(室外側の専用レール): 可動側半分に細框+メッシュ
+      var screenMat=new THREE.MeshStandardMaterial({color:0x2e3134,transparent:true,opacity:0.42,roughness:0.9});
+      var scrFrameMat=new THREE.MeshStandardMaterial({color:0x8b9095,roughness:0.55,metalness:0.3});
+      var scrZ=zBase+exS*(SD/2+0.008);
+      var scrX=isOpen?(leftOpen?closedR:closedL):(leftOpen?closedL:closedR);
+      addBox(scrFrameMat,scrX-panelW/2+0.007,py,scrZ,0.014,innerH,0.010);
+      addBox(scrFrameMat,scrX+panelW/2-0.007,py,scrZ,0.014,innerH,0.010);
+      addBox(scrFrameMat,scrX,y0+fbW+innerH-0.007,scrZ,panelW,0.014,0.010);
+      addBox(scrFrameMat,scrX,y0+fbW+0.007,scrZ,panelW,0.014,0.010);
+      addBox(screenMat,scrX,py,scrZ,panelW-0.02,innerH-0.02,0.003);
+    }
     if(isWindowLikeType(it.type)) {
       var sill=windowSillMm(it)*U;
       var wh=Math.max(0.2,Math.min(windowHeightMm(it)*U,wallHeightMm(best)*U-sill-0.05));
       fy+=sill;
       if(openingModelReady){
         grp.add(makeGltfBoxFitClone(openingModel.model,ww,wh,Math.max((openingModel.d||it.d||120)*U,0.045),null,{openingWindowModel:true}));
+      } else if(it.type==='window-door' || effectiveWindowKind(it)==='sliding'){
+        // 掃き出し窓・引き違い窓: 2枚障子の引き違いサッシ
+        var slideIsOpen=it.type==='window-door' && doorOpenState(it)!=='closed';
+        addSlidingSashUnit(0,wh,slideIsOpen,!!it.flipX);
       } else {
-        // 枠外形を呼称寸法内に収める。旧実装は側枠中心を外形端に置き、上枠も外形より
-        // 25mm上へ出ていた。ガラスも固定40mmインセットで50mm外枠へ10mm食い込んでいた。
+        // FIX・縦すべり出し: 枠見込み70mm(半外付け)+障子は5mm手前に段差を付けて分離
         var windowKind=effectiveWindowKind(it);
-        var outerBar=Math.min(0.05,Math.max(0.026,ww*0.115));
+        var SD2=0.07;
+        var outerBar=0.035;
         var innerW=Math.max(ww-outerBar*2,0.02);
         var innerH=Math.max(wh-outerBar*2,0.02);
-        addBox(frameMat,0,outerBar/2,0,ww,outerBar,wt+0.1);
-        addBox(frameMat,0,wh-outerBar/2,0,ww,outerBar,wt+0.05);
-        addBox(frameMat,-ww/2+outerBar/2,wh/2,0,outerBar,wh,wt+0.05);
-        addBox(frameMat, ww/2-outerBar/2,wh/2,0,outerBar,wh,wt+0.05);
-        if(it.type==='window' && windowKind==='casement'){
-          // 縦すべり出しは外枠直下にガラスを置かず、クリアランスを持つ一枚障子に納める。
-          var sashGap=Math.min(0.008,innerW*0.04);
-          var sashBar=Math.min(0.028,Math.max(0.018,ww*0.075));
+        addBox(frameMat,0,outerBar/2,zBase,ww,outerBar,SD2);
+        addBox(frameMat,0,wh-outerBar/2,zBase,ww,outerBar,SD2);
+        addBox(frameMat,-ww/2+outerBar/2,wh/2,zBase,outerBar,wh,SD2);
+        addBox(frameMat, ww/2-outerBar/2,wh/2,zBase,outerBar,wh,SD2);
+        addBox(frameMat,0,0.006,zBase+exS*(SD2/2+0.012),ww,0.012,0.024);
+        if(windowKind==='casement'){
+          // 縦すべり出し: 枠から3mm目地を開けた一枚障子(框30mm・見込み30mm)を室内寄りに
+          var sashGap=0.003;
+          var sashBar=0.030;
+          var sashZ=zBase-exS*0.012;
           var sashW=Math.max(innerW-sashGap*2,0.02);
           var sashH=Math.max(innerH-sashGap*2,0.02);
-          addBox(glassMat,0,wh/2,0,Math.max(sashW-sashBar*2,0.01),Math.max(sashH-sashBar*2,0.01),0.01);
-          addBox(frameMat,-sashW/2+sashBar/2,wh/2,0,sashBar,sashH,wt+0.025);
-          addBox(frameMat, sashW/2-sashBar/2,wh/2,0,sashBar,sashH,wt+0.025);
-          addBox(frameMat,0,wh/2-sashH/2+sashBar/2,0,sashW,sashBar,wt+0.025);
-          addBox(frameMat,0,wh/2+sashH/2-sashBar/2,0,sashW,sashBar,wt+0.025);
+          addBox(glassMat,0,wh/2,sashZ,Math.max(sashW-sashBar*2,0.01),Math.max(sashH-sashBar*2,0.01),0.006);
+          addBox(frameMat,-sashW/2+sashBar/2,wh/2,sashZ,sashBar,sashH,0.030);
+          addBox(frameMat, sashW/2-sashBar/2,wh/2,sashZ,sashBar,sashH,0.030);
+          addBox(frameMat,0,wh/2-sashH/2+sashBar/2,sashZ,sashW,sashBar,0.030);
+          addBox(frameMat,0,wh/2+sashH/2-sashBar/2,sashZ,sashW,sashBar,0.030);
+          // カムラッチハンドル: 戸先框の室内面に密着(スリム)
+          addBox(crescentMat,sashW/2-sashBar/2,wh*0.5,sashZ-exS*(0.015+0.008),0.016,0.070,0.014);
+          // ロール網戸ケース(室内側上枠内・シルバーで框と分離)
+          var rollMat=new THREE.MeshStandardMaterial({color:0x9aa0a5,roughness:0.45,metalness:0.4});
+          addBox(rollMat,0,wh-outerBar-0.02,zBase-exS*(SD2/2-0.012),innerW-0.006,0.04,0.022);
         } else {
-          addBox(glassMat,0,wh/2,0,Math.max(innerW-0.01,0.01),Math.max(innerH-0.01,0.01),0.01);
+          addBox(glassMat,0,wh/2,zBase,Math.max(innerW-0.006,0.01),Math.max(innerH-0.006,0.01),0.006);
         }
-        if(it.type==='window' && windowKind==='sliding'){
-          // 引違い窓の召合せ框(中桟): 幅30mm相当、ガラス中央。window-door は下の専用サッシ表現側で同等の框を持つ。
-          // FIX窓・すべり出し窓は一枚障子のため框なし
-          addBox(frameMat,0,wh/2,0,0.03,wh-0.08,wt+0.03);
-        }
-      }
-      if(!openingModelReady && it.type==='window-door'){
-        var winSlideOpen=doorOpenState(it)!=='closed';
-        var winLeftOpen=!!it.flipX;
-        var winPanelW=Math.max(ww*0.54,0.12);
-        var winSashH=Math.max(wh-0.16,0.08);
-        var winLeftPos=-ww*0.23, winRightPos=ww*0.23;
-        var winFixedX=winLeftOpen?winRightPos:winLeftPos;
-        var winMovingX=winSlideOpen?winFixedX:(winLeftOpen?winLeftPos:winRightPos);
-        addBox(frameMat,0,wh/2,0,0.03,wh,wt+0.03);
-        addBox(railMat,0,0.10,-0.045,ww+0.06,0.035,0.025);
-        addBox(railMat,0,0.10, 0.045,ww+0.06,0.035,0.025);
-        addBox(railMat,0,wh-0.10,-0.045,ww+0.06,0.035,0.025);
-        addBox(railMat,0,wh-0.10, 0.045,ww+0.06,0.035,0.025);
-        var addSlidingWindowSash=function(cx,cz){
-          addBox(glassMat,cx,wh/2,cz,winPanelW,winSashH,0.018);
-          addBox(frameMat,cx-winPanelW/2,wh/2,cz,0.025,winSashH+0.04,0.035);
-          addBox(frameMat,cx+winPanelW/2,wh/2,cz,0.025,winSashH+0.04,0.035);
-          addBox(frameMat,cx,0.08,cz,winPanelW+0.02,0.025,0.035);
-          addBox(frameMat,cx,wh-0.08,cz,winPanelW+0.02,0.025,0.035);
-        };
-        addSlidingWindowSash(winFixedX,-0.035);
-        addSlidingWindowSash(winMovingX,0.035);
-        addBox(frameMat,winMovingX+(winLeftOpen?-winPanelW*0.30:winPanelW*0.30),wh/2,0.07,0.018,Math.min(winSashH*0.34,0.5),0.035);
       }
       addHitProxy(0,wh/2,0,Math.max(ww+0.4,0.6),Math.max(wh+0.24,0.5),Math.max(wt+0.55,0.7));
     } else {
@@ -10017,16 +10095,23 @@ function buildWinFrames(flFilt){
         addBox(doorJambMat,0,Math.max(jamb/2,dh-jamb/2),0,ww+jamb*2,jamb,frameDepth);
       }
       // 沓摺: 玄関=ステンレス、引戸=Vレール(薄)。室内開き戸・開口は沓摺なし
-      if(frontDoor||it.type==='door-slide'){
+      if(frontDoor){
         addBox(railMat,0,thresholdH/2,0,ww+jamb*2,thresholdH,frameDepth+0.03);
+      } else if(it.type==='door-slide'){
+        // フラットレール: 床面からの突出3mm・開口有効幅内・V溝2本(ピッチ38mm)
+        var vRailMat=new THREE.MeshStandardMaterial({color:0xb8b8b8,roughness:0.5,metalness:0.35});
+        var vGrooveMat=new THREE.MeshStandardMaterial({color:0x4a4d50,roughness:0.7});
+        addBox(vRailMat,0,0.0015,0,ww,0.003,0.085);
+        [-1,1].forEach(function(s){
+          addBox(vGrooveMat,0,0.0032,s*0.019,ww-0.01,0.0015,0.004);
+        });
       }
 
       if(isNoDoorOpeningType(it.type)){
         addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(frameDepth+0.55,0.7));
       } else if(it.type==='door-slide') {
-        var topRailY=Math.max(0.08,dh-0.035);
-        addBox(railMat,0,topRailY,-0.045,ww+jamb*2,0.035,0.025);
-        addBox(railMat,0,topRailY, 0.045,ww+jamb*2,0.035,0.025);
+        // 鴨居(上枠)にレールを隠す納まり。露出したダブルバーは使わない
+        addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,0.11);
         var slideOpen=doorOpenState(it)!=='closed';
         // ウォークスルー中に近接判定で開閉させた状態は、家具の非同期ロード完了ごとに
         // 起きる rebuild3D() で消えないよう、アイテムをキーに前回値を引き継ぐ
@@ -10036,8 +10121,21 @@ function buildWinFrames(flFilt){
         var leftPos=-ww*0.23, rightPos=ww*0.23;
         var fixedX=leftOpen?rightPos:leftPos;
         var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
-        addBox(doorMat,fixedX,panelY,-0.035,panelW,panelH,leafT);
-        var slideLeaf=addBox(doorMat,movingX,panelY, 0.035,panelW,panelH,leafT);
+        // 引き違い2枚のレールピッチは34mm(戸厚36mmでほぼ密着する実際の納まり)
+        addBox(doorMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
+        var slideLeaf=addBox(doorMat,movingX,panelY, 0.019,panelW,panelH,leafT);
+        // 掘り込み引手: 各戸の召し合わせ側端部から25mm内側、縦長30x100(中心H950)・両面。
+        // パネル面より一段暗いグレーで2mm沈んで見える表現
+        var pullMat=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
+        function addPull(px0,pz0,edgeDir){
+          var hx=px0+edgeDir*(panelW/2-0.025-0.015);
+          [-1,1].forEach(function(sside){
+            addBox(pullMat,hx,0.95,pz0+sside*(leafT/2-0.001),0.030,0.100,0.004);
+          });
+        }
+        // 固定戸: 召し合わせ側=可動戸側 / 可動戸: 召し合わせ側=固定戸側
+        addPull(fixedX,-0.019,(movingX>=fixedX)?1:-1);
+        addPull(movingX, 0.019,(fixedX>=movingX)?1:-1);
         slideLeaf.userData.noMerge=true; // ウォークスルーで動かすため統合しない
         _doorAnims.push({it:it,grp:grp,slideMesh:slideLeaf,openX:fixedX,
           closedX:(leftOpen?leftPos:rightPos),
