@@ -26,6 +26,22 @@ def ensure_group(prefix, keys):
 
 house_empties = ensure_group('nh_', ['base', 'mid', 'roof'])
 bldg_empties = ensure_group('bd_', ['base', 'mid', 'top'])
+fbike_root = bpy.data.objects.get('bk2_root')
+if not fbike_root:
+    fbike_root = bpy.data.objects.new('bk2_root', None)
+    bpy.context.scene.collection.objects.link(fbike_root)
+for ob in bpy.data.objects:
+    if ob.type == 'MESH' and ob.name.startswith('bk2_') and ob.parent is None:
+        ob.parent = fbike_root
+
+bike_root = bpy.data.objects.get('bk_root')
+if not bike_root:
+    bike_root = bpy.data.objects.new('bk_root', None)
+    bpy.context.scene.collection.objects.link(bike_root)
+for ob in bpy.data.objects:
+    if ob.type == 'MESH' and ob.name.startswith('bk_') and not ob.name.startswith('bk2_') and ob.parent is None:
+        ob.parent = bike_root
+
 pole_root = bpy.data.objects.get('up_root')
 if not pole_root:
     pole_root = bpy.data.objects.new('up_root', None)
@@ -57,3 +73,5 @@ print('car', export_sel(['car_'], ['car_root'], OUT + '/car_sedan.glb'))
 print('house', export_sel(['nh_'], house_empties, OUT + '/neighbor_house.glb'))
 print('bldg', export_sel(['bd_'], bldg_empties, OUT + '/neighbor_building.glb'))
 print('pole', export_sel(['up_'], ['up_root'], OUT + '/utility_pole.glb'))
+print('bike', export_sel(['bk_'], ['bk_root'], OUT + '/bicycle.glb'))
+print('fbike', export_sel(['bk2_'], ['bk2_root'], OUT + '/bicycle_folding.glb'))

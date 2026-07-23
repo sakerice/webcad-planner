@@ -2884,6 +2884,8 @@ input[type="reset"]:focus-visible{
     <div class="cat-body">
       <div class="stool" data-tool="tree" onclick="setTool('tree')"><span class="sicon">🌳</span>植栽(木)</div>
       <div class="stool" data-tool="car" onclick="setTool('car')"><span class="sicon">🚗</span>自動車</div>
+      <div class="stool" data-tool="bicycle" onclick="setTool('bicycle')"><span class="sicon">🚲</span>自転車</div>
+      <div class="stool" data-tool="bicycle-fold" onclick="setTool('bicycle-fold')"><span class="sicon">🚲</span>折りたたみ自転車</div>
       <div class="stool" data-tool="fence" onclick="setTool('fence')"><span class="sicon">🧱</span>塀</div>
       <div class="stool" data-tool="wood-fence" onclick="setTool('wood-fence')"><span class="sicon">▥</span>フェンス</div>
       <div class="stool" data-tool="neighbor-building" onclick="setTool('neighbor-building')"><span class="sicon">▥</span>周辺ビル</div>
@@ -3219,7 +3221,7 @@ var ISIZES = {
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
-  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
+  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
   'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'gas-heater':{w:470,d:240}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
   'downspout':{w:150,d:150},
@@ -3320,7 +3322,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', fence:'#909080', 'wood-fence':'#9a7a3a',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a',
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
@@ -3760,7 +3762,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',fence:'塀','wood-fence':'フェンス',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
@@ -4167,7 +4169,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -6082,6 +6084,33 @@ function drawItem2d(it){
       ctx.lineTo(wTipX-aHeadLen,wAw);
       ctx.closePath(); ctx.fill();
       drawStairUpText(it,sc,wTipX-Math.max(3*sc,3),-Math.max(9*sc,8),'right');
+    } else if(it.type === 'bicycle' || it.type === 'bicycle-fold') {
+      // 自転車の平面記号: 前後輪+フレーム線+ハンドル+前カゴ+サドル
+      var bkln=Math.max(1,1.2*sc*10);
+      ctx.strokeStyle='rgba(40,48,60,0.85)'; ctx.fillStyle='rgba(40,48,60,0.85)';
+      ctx.lineWidth=Math.max(1,hw*0.14);
+      // 車輪(縦長の細い角丸): 前輪は上(-y)、後輪は下
+      [-1,1].forEach(function(sgn){
+        var wy=sgn*hd*0.55, wl=hd*0.62, wwd=Math.max(2,hw*0.16);
+        ctx.beginPath();
+        ctx.moveTo(0,wy-wl/2); ctx.lineTo(0,wy+wl/2);
+        ctx.lineWidth=wwd; ctx.stroke();
+      });
+      // フレーム中心線
+      ctx.lineWidth=Math.max(1,hw*0.10);
+      ctx.beginPath(); ctx.moveTo(0,-hd*0.30); ctx.lineTo(0,hd*0.35); ctx.stroke();
+      // ハンドル(前輪軸上の横棒)
+      ctx.lineWidth=Math.max(1,hw*0.12);
+      ctx.beginPath(); ctx.moveTo(-hw*0.85,-hd*0.32); ctx.lineTo(hw*0.85,-hd*0.32); ctx.stroke();
+      // 前カゴ(ママチャリのみ)
+      if(it.type==='bicycle'){
+        ctx.lineWidth=1;
+        ctx.strokeRect(-hw*0.52,-hd*0.62,hw*1.04,hd*0.20);
+      }
+      // サドル
+      ctx.beginPath();
+      ctx.ellipse(0,hd*0.30,hw*0.34,hd*0.10,0,0,Math.PI*2);
+      ctx.fill();
     } else if(it.type === 'foundation') {
       ctx.fillStyle='rgba(184,178,168,0.32)';
       ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
@@ -10900,6 +10929,21 @@ function buildItem3D(it){
       build3DCar(grp,it,w3,d3,col); // 読込中・失敗時のフォールバック
     }
   }
+  else if(it.type==='bicycle'||it.type==='bicycle-fold'){
+    var bikeUrl=it.type==='bicycle'?CONTEXT_BIKE_GLB:CONTEXT_FBIKE_GLB;
+    if(ensureGltfModel(bikeUrl)){
+      configureBikeGlbMaterials(bikeUrl);
+      grp.add(makeGltfBoxFitClone(bikeUrl,w3,h,d3,it.colorCustom?it.color:null));
+    } else {
+      // 読込中・失敗時: 簡易表現(フレーム+2輪の箱)
+      var bkMat=new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0x4a6288,roughness:0.5,metalness:0.3});
+      _B(grp,bkMat,0,0.55,0,0.06,0.5,d3*0.7);
+      var bkTire=new THREE.MeshStandardMaterial({color:0x1a1a1c,roughness:0.9});
+      _CY(grp,bkTire,0,0.31,d3*0.31,0.31,0.31,0.05,14);
+      _CY(grp,bkTire,0,0.31,-d3*0.31,0.31,0.31,0.05,14);
+      grp.children.slice(-2).forEach(function(m){m.rotation.z=Math.PI/2;});
+    }
+  }
   else if(it.type==='balcony'){
     build3DBalcony(grp,it,w3,d3,h);
   }
@@ -11166,6 +11210,19 @@ function configureCarGlbMaterials(){
     if(o.isMesh&&o.material&&o.material.name!=='CarBody'){
       o.material.userData=o.material.userData||{};
       o.material.userData.lockColor=true; // カスタム色はボディ塗装のみに適用
+    }
+  });
+}
+var CONTEXT_BIKE_GLB='assets/models/context/bicycle.glb';
+var CONTEXT_FBIKE_GLB='assets/models/context/bicycle_folding.glb';
+var _bikeGlbConfigured={};
+function configureBikeGlbMaterials(url){
+  if(_bikeGlbConfigured[url] || !_modelCache[url]) return;
+  _bikeGlbConfigured[url]=true;
+  _modelCache[url].traverse(function(o){
+    if(o.isMesh&&o.material&&o.material.name!=='BkFrame'&&o.material.name!=='Bk2Frame'){
+      o.material.userData=o.material.userData||{};
+      o.material.userData.lockColor=true; // カスタム色はフレームのみに適用
     }
   });
 }
@@ -11589,8 +11646,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1400,fence:800,'wood-fence':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1435,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){

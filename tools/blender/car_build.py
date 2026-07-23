@@ -1,7 +1,5 @@
 import bpy, bmesh, math
-
-def matg(name):
-    return bpy.data.materials[name]
+from mathutils import Vector
 
 def matp(name, color, rough=0.5, metal=0.0, alpha=1.0):
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -19,49 +17,56 @@ for ob in list(bpy.data.objects):
     if ob.name.startswith('car_'):
         bpy.data.objects.remove(ob, do_unlink=True)
 
-BODY = matp('CarBody', (0.26, 0.33, 0.42), rough=0.30, metal=0.7)
+BODY = matp('CarBody', (0.90, 0.90, 0.91), rough=0.30, metal=0.15)
 try:
-    bsdf = BODY.node_tree.nodes['Principled BSDF']
-    bsdf.inputs['Coat Weight'].default_value = 0.5
-    bsdf.inputs['Coat Roughness'].default_value = 0.12
+    b = BODY.node_tree.nodes['Principled BSDF']
+    b.inputs['Coat Weight'].default_value = 0.6
+    b.inputs['Coat Roughness'].default_value = 0.10
 except Exception:
     pass
-GLASS = matg('CarGlass'); TRIM = matg('CarTrim')
-TIRE = matg('CarTire'); RIM = matg('CarRim')
-HEAD = matg('CarHeadlight'); TAIL = matg('CarTaillight'); PLATE = matg('CarPlate')
-DRL = matp('CarDRL', (0.85, 0.88, 0.9), rough=0.2, metal=0.1)
+GLASS = matp('CarGlass', (0.05, 0.06, 0.07), rough=0.10, metal=0.25)
+TRIM  = matp('CarTrim', (0.06, 0.06, 0.07), rough=0.55)
+TIRE  = matp('CarTire', (0.03, 0.03, 0.035), rough=0.95)
+RIM   = matp('CarRim', (0.60, 0.61, 0.63), rough=0.32, metal=0.9)
+HEAD  = matp('CarHeadlight', (0.80, 0.84, 0.88), rough=0.12, metal=0.3)
+TAIL  = matp('CarTaillight', (0.50, 0.04, 0.05), rough=0.25)
+PLATE = matp('CarPlate', (0.92, 0.92, 0.9), rough=0.5)
+CHROME= matp('CarChrome', (0.85, 0.86, 0.88), rough=0.12, metal=1.0)
 
-W = 1.85
-HW = W / 2
+# ---- カローラセダン実寸: 4495 x 1745 x 1435, WB2640 ----
+L, W, H = 4.495, 1.745, 1.435
+HL, HW = L/2, W/2
+AXLE_F, AXLE_R = HL-0.94, -HL+0.915
+WHEEL_R, ARCH_R, TIRE_W = 0.316, 0.355, 0.205
+AXLE_Z = 0.316
 
-# ---------- body loft (subsurf control cage) ----------
+# ボディロフト(ベルトラインまで)。カローラの卵型ノーズ+低いボンネット+短いデッキ
 STATIONS = [
-    ( 2.250, 0.78, 0.34, 0.52, 0.030),
-    ( 2.2495, 0.795, 0.30, 0.545, 0.032),
-    ( 2.235, 0.845, 0.20, 0.60, 0.036),
-    ( 2.150, 0.92, 0.15, 0.65, 0.045),
-    ( 1.750, 0.98, 0.13, 0.71, 0.055),
-    ( 1.100, 1.005, 0.13, 0.775, 0.060),
-    ( 0.300, 1.005, 0.13, 0.805, 0.058),
-    (-0.700, 1.005, 0.13, 0.845, 0.058),
-    (-1.500, 0.995, 0.13, 0.875, 0.050),
-    (-2.050, 0.94, 0.16, 0.875, 0.042),
-    (-2.235, 0.865, 0.22, 0.81, 0.035),
-    (-2.2495, 0.815, 0.30, 0.735, 0.031),
-    (-2.250, 0.80, 0.34, 0.71, 0.030),
+    ( 2.2475, 0.74, 0.36, 0.52, 0.024),
+    ( 2.2470, 0.76, 0.30, 0.545, 0.026),
+    ( 2.2300, 0.815, 0.20, 0.585, 0.030),
+    ( 2.1200, 0.885, 0.14, 0.635, 0.038),
+    ( 1.8500, 0.945, 0.13, 0.685, 0.046),
+    ( 1.3500, 0.99, 0.13, 0.745, 0.052),
+    ( 0.7000, 1.005, 0.13, 0.80, 0.050),
+    (-0.2000, 1.005, 0.13, 0.845, 0.048),
+    (-1.0000, 1.00, 0.13, 0.885, 0.044),
+    (-1.6000, 0.975, 0.14, 0.915, 0.038),
+    (-2.0500, 0.92, 0.19, 0.92, 0.030),
+    (-2.2470, 0.845, 0.27, 0.86, 0.026),
+    (-2.2475, 0.83, 0.30, 0.84, 0.024),
 ]
 def ring_points(hw_s, zb, zt, crown):
     hw = HW * hw_s
     pts = [
         (0.0, zb), (hw*0.82, zb),
-        (hw*0.97, zb + (zt-zb)*0.20),
+        (hw*0.97, zb + (zt-zb)*0.18),
         (hw*1.00, zb + (zt-zb)*0.52),
-        (hw*0.99, zt - 0.015),
-        (hw*0.91, zt + crown*0.55),
+        (hw*0.995, zt - 0.012),
+        (hw*0.93, zt + crown*0.55),
         (hw*0.45, zt + crown), (0.0, zt + crown),
     ]
     return pts + [(-x, z) for (x, z) in reversed(pts[1:-1])]
-
 mesh = bpy.data.meshes.new('car_body')
 bm = bmesh.new()
 rings = []
@@ -79,13 +84,9 @@ bm.to_mesh(mesh); bm.free()
 body = bpy.data.objects.new('car_body', mesh)
 bpy.context.scene.collection.objects.link(body)
 body.data.materials.append(BODY)
-sub = body.modifiers.new('Sub', 'SUBSURF'); sub.levels = 2; sub.render_levels = 2
+sub = body.modifiers.new('Sub', 'SUBSURF'); sub.levels = 2
 bpy.context.view_layer.objects.active = body
 bpy.ops.object.modifier_apply(modifier=sub.name)
-
-# arches
-AXLE_F, AXLE_R, WHEEL_R, ARCH_R, TIRE_W = 1.42, -1.38, 0.31, 0.355, 0.225
-AXLE_Z = 0.31
 for i, ay in enumerate((AXLE_F, AXLE_R)):
     bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=ARCH_R, depth=W+0.5,
         location=(0, ay, AXLE_Z), rotation=(0, math.radians(90), 0))
@@ -99,21 +100,22 @@ bpy.ops.object.select_all(action='DESELECT')
 body.select_set(True); bpy.context.view_layer.objects.active = body
 bpy.ops.object.shade_smooth_by_angle(angle=math.radians(35))
 
-# ---------- greenhouse: glass band + painted roof in one subsurf loft ----------
+# ---- キャノピー: ダークガラスのロフト + ルーフ塗装(面割当) + 白ピラー ----
+# (y, 幅スケール, 上端z)。ファストバック気味のカローラのルーフライン
 GH = [
-    ( 0.95, 0.87, 0.79),
-    ( 0.90, 0.865, 0.82),
-    ( 0.32, 0.845, 1.33),
-    ( 0.05, 0.835, 1.395),
-    (-0.55, 0.835, 1.395),
-    (-0.95, 0.825, 1.32),
-    (-1.45, 0.795, 0.87),
-    (-1.52, 0.79, 0.80),
+    ( 0.98, 0.875, 0.80),
+    ( 0.93, 0.870, 0.83),
+    ( 0.40, 0.845, 1.32),
+    ( 0.10, 0.835, 1.415),
+    (-0.45, 0.835, 1.415),
+    (-0.85, 0.825, 1.35),
+    (-1.28, 0.795, 1.00),
+    (-1.40, 0.79, 0.90)
 ]
 def gh_ring(hw_s, z):
     hw = HW * hw_s
-    zl = 0.765
-    pts = [(0.0, zl), (hw*0.99, zl), (hw, zl + (z-zl)*0.35), (hw*0.94, z - 0.005), (hw*0.55, z + 0.012), (0.0, z + 0.015)]
+    zl = 0.775
+    pts = [(0.0, zl), (hw*0.99, zl), (hw, zl + (z-zl)*0.33), (hw*0.93, z - 0.004), (hw*0.5, z + 0.010), (0.0, z + 0.013)]
     return pts + [(-x, zz) for (x, zz) in reversed(pts[1:-1])]
 mesh2 = bpy.data.meshes.new('car_glasshouse')
 bm = bmesh.new()
@@ -133,16 +135,40 @@ gh = bpy.data.objects.new('car_glasshouse', mesh2)
 bpy.context.scene.collection.objects.link(gh)
 gh.data.materials.append(GLASS)
 gh.data.materials.append(BODY)
-sub = gh.modifiers.new('Sub', 'SUBSURF'); sub.levels = 2; sub.render_levels = 2
+gh.data.materials.append(TRIM)
+sub = gh.modifiers.new('Sub', 'SUBSURF'); sub.levels = 2
 bpy.context.view_layer.objects.active = gh
 bpy.ops.object.modifier_apply(modifier=sub.name)
-# 上面(ほぼ水平かつ高い位置)だけボディ色=塗装ルーフ
+# 面割当: ルーフ/A・Cピラー=ボディ白, Bピラー=黒, その他=ガラス
+def ghw_raw(y):
+    for i in range(len(GH)-1):
+        (y0,s0,_),(y1,s1,_)=GH[i],GH[i+1]
+        if y1<=y<=y0:
+            t=(y-y0)/(y1-y0) if y1!=y0 else 0
+            return HW*(s0+(s1-s0)*t)
+    return HW*(GH[0][1] if y>GH[0][0] else GH[-1][1])
 for poly in gh.data.polygons:
-    if poly.center.z > 1.30 and poly.normal.z > 0.86:
-        poly.material_index = 1
+    c = poly.center; n = poly.normal
+    w_here = max(0.001, ghw_raw(c.y))
+    edge = abs(c.x) / w_here
+    mi = 0
+    if c.z > 1.335 and n.z > 0.80:
+        mi = 1                       # 塗装ルーフ
+    elif n.y > 0.30:                 # フロントスロープ
+        mi = 1 if edge > 0.78 else 0 # Aピラー / ウィンドシールド
+    elif n.y < -0.30:                # リアスロープ
+        mi = 1 if edge > 0.74 else 0 # Cピラー / リアガラス
+    elif abs(n.x) > 0.45:            # サイド
+        if c.y < -0.92 or c.y > 0.66:
+            mi = 1                   # クォーター(C)/Aピラー基部
+        elif -0.34 < c.y < -0.21:
+            mi = 2                   # Bピラー(黒)
+        else:
+            mi = 0                   # ドアガラス
+    poly.material_index = mi
 bpy.ops.object.select_all(action='DESELECT')
 gh.select_set(True); bpy.context.view_layer.objects.active = gh
-bpy.ops.object.shade_smooth_by_angle(angle=math.radians(38))
+bpy.ops.object.shade_smooth_by_angle(angle=math.radians(40))
 
 def add_box(name, mat, x, y, z, sx, sy, sz, rx=0, ry=0, rz=0, bevel=0.0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=(x, y, z), rotation=(rx, ry, rz))
@@ -154,72 +180,75 @@ def add_box(name, mat, x, y, z, sx, sy, sz, rx=0, ry=0, rz=0, bevel=0.0):
         bv = ob.modifiers.new('B', 'BEVEL'); bv.width = bevel; bv.segments = 2
     return ob
 
-# ---------- wheels ----------
+# ---- ホイール ----
 def build_wheel(name, x, y, s):
     bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=WHEEL_R, depth=TIRE_W,
         location=(x, y, WHEEL_R), rotation=(0, math.radians(90), 0))
     t = bpy.context.object; t.name = name + '_tire'
     t.data.materials.append(TIRE)
-    bv = t.modifiers.new('B', 'BEVEL'); bv.width = 0.055; bv.segments = 4
+    bv = t.modifiers.new('B', 'BEVEL'); bv.width = 0.05; bv.segments = 4
     bpy.ops.object.shade_smooth_by_angle(angle=math.radians(50))
-    bpy.ops.mesh.primitive_cylinder_add(vertices=28, radius=WHEEL_R*0.67, depth=0.026,
-        location=(x + s*(TIRE_W/2 - 0.020), y, WHEEL_R), rotation=(0, math.radians(90), 0))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=28, radius=WHEEL_R*0.64, depth=0.026,
+        location=(x + s*(TIRE_W/2 - 0.02), y, WHEEL_R), rotation=(0, math.radians(90), 0))
     r = bpy.context.object; r.name = name + '_rim'
     r.data.materials.append(RIM)
     for k in range(5):
         a = k * math.tau / 5
-        for da in (-0.055, 0.055):
+        for da in (-0.05, 0.05):
             add_box(name + '_sp%d%d' % (k, da>0), RIM,
                 x + s*(TIRE_W/2 - 0.008),
-                y + math.sin(a+da)*WHEEL_R*0.31, WHEEL_R + math.cos(a+da)*WHEEL_R*0.31,
-                0.02, WHEEL_R*0.11, WHEEL_R*0.40, rx=-(a+da))
-    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=WHEEL_R*0.13, depth=0.045,
-        location=(x + s*(TIRE_W/2 - 0.000), y, WHEEL_R), rotation=(0, math.radians(90), 0))
+                y + math.sin(a+da)*WHEEL_R*0.30, WHEEL_R + math.cos(a+da)*WHEEL_R*0.30,
+                0.02, WHEEL_R*0.10, WHEEL_R*0.38, rx=-(a+da))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=WHEEL_R*0.12, depth=0.045,
+        location=(x + s*TIRE_W/2, y, WHEEL_R), rotation=(0, math.radians(90), 0))
     h = bpy.context.object; h.name = name + '_hub'
     h.data.materials.append(TRIM)
-
 for i, ay in enumerate((AXLE_F, AXLE_R)):
     for s in (-1, 1):
-        x = s * (HW - TIRE_W/2 - 0.022)
+        x = s * (HW - TIRE_W/2 - 0.03)
         build_wheel('car_wh%d%d' % (i, max(s,0)), x, ay, s)
 for ay in (AXLE_F, AXLE_R):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=ARCH_R-0.012, depth=W-0.62,
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=ARCH_R-0.012, depth=W-0.6,
         location=(0, ay, AXLE_Z), rotation=(0, math.radians(90), 0))
     tub = bpy.context.object; tub.name = 'car_tub%.0f' % (ay*100)
     tub.data.materials.append(TRIM)
 
-# ---------- fascia details ----------
-# スリムヘッドライト+DRLストリップ(ノーズ角に沿わせて回転)
+# ---- カローラ流フロント: 薄型ライト+細い上部グリル+大型台形ロアグリル ----
 for s in (-1, 1):
-    add_box('car_head%d' % max(s,0), HEAD, s*0.58, 2.195, 0.625, 0.42, 0.05, 0.055, rz=math.radians(-10*s), bevel=0.012)
-    add_box('car_drl%d' % max(s,0), DRL, s*0.58, 2.202, 0.578, 0.38, 0.04, 0.016, rz=math.radians(-10*s))
-# グリルストリップ(ライト間を結ぶ)+下部インテーク
-add_box('car_grille', TRIM, 0, 2.232, 0.60, 0.40, 0.025, 0.05, bevel=0.008)
-add_box('car_intake', TRIM, 0, 2.205, 0.235, 1.00, 0.03, 0.11, bevel=0.01)
-# テール: フルワイドのライトバー+左右レッド
-add_box('car_tailbar', TAIL, 0, -2.253, 0.66, 1.38, 0.035, 0.05, bevel=0.01)
+    add_box('car_head%d' % max(s,0), HEAD, s*0.55, 2.175, 0.655, 0.44, 0.055, 0.055, rz=math.radians(-16*s), ry=math.radians(-4*s), bevel=0.012)
+    add_box('car_drl%d' % max(s,0), TRIM, s*0.55, 2.183, 0.615, 0.42, 0.045, 0.014, rz=math.radians(-16*s))
+add_box('car_grilleup', TRIM, 0, 2.235, 0.665, 0.62, 0.02, 0.035, bevel=0.006)
+bpy.ops.mesh.primitive_cylinder_add(vertices=20, radius=0.052, depth=0.015, location=(0, 2.246, 0.60), rotation=(math.radians(90), 0, 0))
+emb = bpy.context.object; emb.name = 'car_emblem'
+emb.scale = (1.0, 0.66, 1.0)
+bpy.ops.object.transform_apply(scale=True)
+emb.data.materials.append(CHROME)
+# 大型ロアグリル(台形: 下ほど広い)
+add_box('car_grillelow1', TRIM, 0, 2.225, 0.42, 0.78, 0.035, 0.16, bevel=0.012)
+add_box('car_grillelow2', TRIM, 0, 2.235, 0.245, 1.06, 0.035, 0.185, bevel=0.012)
 for s in (-1, 1):
-    add_box('car_tail%d' % max(s,0), TAIL, s*0.585, -2.248, 0.585, 0.30, 0.05, 0.07, rz=math.radians(6*s), bevel=0.012)
-# プレート
-add_box('car_plate_f', PLATE, 0, 2.235, 0.35, 0.33, 0.012, 0.165)
-add_box('car_plate_r', PLATE, 0, -2.263, 0.42, 0.33, 0.012, 0.165)
-# ミラー(涙滴形: 球をスケール)
+    add_box('car_fog%d' % max(s,0), TRIM, s*0.70, 2.16, 0.27, 0.14, 0.05, 0.14, rz=math.radians(-18*s), bevel=0.012)
+add_box('car_plate_f', PLATE, 0, 2.252, 0.40, 0.33, 0.012, 0.165)
+# ---- リア: 横長テール(コーナー回り込み)+メッキガーニッシュ ----
 for s in (-1, 1):
-    add_box('car_mirarm%d' % max(s,0), TRIM, s*0.855, 0.62, 0.865, 0.13, 0.028, 0.026)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=14, ring_count=10, radius=0.055, location=(s*0.955, 0.60, 0.885))
+    add_box('car_tail%d' % max(s,0), TAIL, s*0.545, -2.205, 0.79, 0.36, 0.055, 0.075, rz=math.radians(15*s), bevel=0.012)
+    add_box('car_tailside%d' % max(s,0), TAIL, s*(HW*0.955), -2.03, 0.80, 0.05, 0.15, 0.06, rz=math.radians(7*s), bevel=0.01)
+add_box('car_garnish', CHROME, 0, -2.24, 0.79, 1.02, 0.015, 0.03)
+add_box('car_plate_r', PLATE, 0, -2.243, 0.48, 0.33, 0.012, 0.165)
+# ---- 共通ディテール ----
+for s in (-1, 1):
+    add_box('car_mirarm%d' % max(s,0), TRIM, s*0.875, 0.62, 0.88, 0.12, 0.028, 0.026)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=14, ring_count=10, radius=0.055, location=(s*0.965, 0.60, 0.90))
     mo = bpy.context.object; mo.name = 'car_mirror%d' % max(s,0)
     mo.scale = (1.0, 0.62, 0.78)
     bpy.ops.object.transform_apply(scale=True)
     mo.data.materials.append(BODY)
     bpy.ops.object.shade_smooth()
-# ドア継ぎ目+ハンドル
 for s in (-1, 1):
-    for yy in (0.72, -0.05, -0.95):
-        add_box('car_seamv%d%.0f' % (max(s,0), yy*100), TRIM, s*(HW*0.982), yy, 0.53, 0.012, 0.010, 0.44)
-    add_box('car_seamh%d' % max(s,0), TRIM, s*(HW*0.982), -0.15, 0.80, 0.012, 1.75, 0.010)
-    for yy in (0.30, -0.55):
-        add_box('car_hdl%d%.0f' % (max(s,0), yy*100), TRIM, s*(HW*0.985), yy, 0.715, 0.016, 0.15, 0.028, bevel=0.008)
-# アンテナフィン
-add_box('car_fin', TRIM, 0, -0.52, 1.415, 0.042, 0.125, 0.038, bevel=0.014)
-
-print('CAR4_OK', len([o for o in bpy.data.objects if o.name.startswith('car_')]))
+    for yy in (0.80, 0.0, -0.80):
+        add_box('car_seamv%d%.0f' % (max(s,0), yy*100), TRIM, s*(HW*0.985), yy, 0.52, 0.012, 0.010, 0.40)
+    add_box('car_seamh%d' % max(s,0), TRIM, s*(HW*0.982), -0.05, 0.775, 0.012, 1.75, 0.010)
+    for yy in (0.38, -0.42):
+        add_box('car_hdl%d%.0f' % (max(s,0), yy*100), TRIM, s*(HW*0.988), yy, 0.72, 0.016, 0.14, 0.026, bevel=0.008)
+add_box('car_fin', TRIM, 0, -1.05, 1.40, 0.040, 0.115, 0.034, bevel=0.014)
+print('CAR6_OK', len([o for o in bpy.data.objects if o.name.startswith('car_')]))
