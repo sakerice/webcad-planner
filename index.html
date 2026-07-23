@@ -6809,6 +6809,7 @@ function disposeMat(m,seenMat) {
 
 var composer = null; // single declaration
 var _bloomPass = null; // 夜景のみ有効化(HDR閾値>1の物理的選択Bloom)
+var _n8aoPass = null;  // 操作中はAOを切って軽量化するため参照を保持
 function lerpHexColor(a,b,t){
   function px(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   var ca=px(a), cb=px(b);
@@ -6944,6 +6945,10 @@ function init3D(){
   var wrap=document.getElementById('c3d-wrap');
   ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
   ren.shadowMap.enabled=true; ren.shadowMap.type=THREE.PCFSoftShadowMap;
+  // シャドウマップは静的化: 毎フレームの全キャスター再描画をやめ、
+  // シーン変更時(invalidate3D経由)・ドアアニメ中・ギズモ操作中だけ更新する
+  ren.shadowMap.autoUpdate=false;
+  ren.shadowMap.needsUpdate=true;
   ren.outputColorSpace = THREE.SRGBColorSpace;
   ren.toneMapping = THREE.ACESFilmicToneMapping;
   ren.toneMappingExposure = LIGHT_SETTINGS.exposure;
@@ -7033,6 +7038,7 @@ function init3D(){
       n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
       n8ao.configuration.halfRes = false;
       composer.addPass(n8ao);
+      _n8aoPass = n8ao;
       _bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(wrap.clientWidth, wrap.clientHeight), 0.25, 0.3, 1.4);
       _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
       composer.addPass(_bloomPass);
@@ -7221,7 +7227,7 @@ function fitShadowCamera(sunLight) {
   sunLight.shadow.camera.updateProjectionMatrix();
   if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
-function rebuild3D(){if(sc3) build3D();}
+function rebuild3D(){if(sc3){build3D(); if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;}}
 
 // グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
 // ドローコールを削減する。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
@@ -10076,9 +10082,19 @@ function getConnectedStairParts(seed){
   }
   return group;
 }
+// 階段グループの総蹴上げ高さ(m)。上階が存在する場合はスラブ厚も含めて
+// 「上階の床仕上げ面」まで上がる(最上段と上階床の間に段差・穴を作らない)
+function stairGroupTotalRiseM(floor){
+  var nf=(floor||1)+1;
+  var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
+               DATA.rooms.some(function(r){return r.floor===nf;}) ||
+               DATA.items.some(function(i){return i.floor===nf;});
+  return FLOOR_H*U + (hasUpper?floorSlabHeightMForFloor(nf):0);
+}
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
-  if(group.length<=1) return {index:0,count:1,base:0,rise:FLOOR_H*U,steps:getStairStepCount(it)};
+  var totalRise=stairGroupTotalRiseM(it.floor);
+  if(group.length<=1) return {index:0,count:1,base:0,rise:totalRise,steps:getStairStepCount(it)};
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
@@ -10107,7 +10123,7 @@ function stairRiseInfo(it){
     totalSteps+=steps;
   });
   totalSteps=Math.max(1,totalSteps);
-  var stepRise=(FLOOR_H*U)/totalSteps;
+  var stepRise=totalRise/totalSteps;
   var mySteps=getStairStepCount(it);
   return {index:idx,count:group.length,base:stepRise*beforeSteps,rise:stepRise*mySteps,steps:mySteps,stepRise:stepRise};
 }
@@ -10877,7 +10893,12 @@ function buildItem3D(it){
   else if(it.type==='sink'){build3DSink(grp);}
   else if(it.type==='tree'){build3DTree(grp,2.8+Math.random()*0.8);}
   else if(it.type==='car'){
-    build3DCar(grp,it,w3,d3,col);
+    if(ensureGltfModel(CONTEXT_CAR_GLB)){
+      configureCarGlbMaterials();
+      grp.add(makeGltfBoxFitClone(CONTEXT_CAR_GLB,w3,h,d3,it.colorCustom?it.color:null));
+    } else {
+      build3DCar(grp,it,w3,d3,col); // 読込中・失敗時のフォールバック
+    }
   }
   else if(it.type==='balcony'){
     build3DBalcony(grp,it,w3,d3,h);
@@ -10893,11 +10914,11 @@ function buildItem3D(it){
     buildWoodFence3D(grp,it,w3,d3,h);
   }
   else if(it.type==='neighbor-building'){
-    build3DNeighborBuilding(grp,it,w3,d3,h);
+    if(!buildContextGlbStack(grp,it,w3,d3)) build3DNeighborBuilding(grp,it,w3,d3,h);
     finalizeContextGroup(grp,it);
   }
   else if(it.type==='neighbor-house'){
-    build3DNeighborHouse(grp,it,w3,d3,h);
+    if(!buildContextGlbStack(grp,it,w3,d3)) build3DNeighborHouse(grp,it,w3,d3,h);
     finalizeContextGroup(grp,it);
   }
   else if(it.type==='road'){
@@ -11128,6 +11149,65 @@ function addHouseSidingLines(grp,mat,w3,d3,bodyH){
     addContextFacadeBox(grp,mat,'left',0,y,d3+0.02,0.018,w3,d3,0.012,false,true);
     addContextFacadeBox(grp,mat,'right',0,y,d3+0.02,0.018,w3,d3,0.012,false,true);
   }
+}
+// ── Blender製コンテキストモデル(隣家・ビル・車) ──────────────────
+// 隣家/ビルは base(1F)+mid(中間階)+roof/top(屋根・パラペット) の
+// 名前付きノードを持つGLBで、階数に応じてmidを積み上げる。
+var CONTEXT_GLB_SPECS={
+  'neighbor-house':{url:'assets/models/context/neighbor_house.glb',base:'nh_base',mid:'nh_mid',roof:'nh_roof',fw:5.2,fd:3.6,sh:2.7,roofH:1.05,wallMats:{NhWall:1,NhWall2:1}},
+  'neighbor-building':{url:'assets/models/context/neighbor_building.glb',base:'bd_base',mid:'bd_mid',roof:'bd_top',fw:5.2,fd:3.6,sh:2.7,roofH:0.45,wallMats:{BdPanel:1,BdPanelDark:1}}
+};
+var CONTEXT_CAR_GLB='assets/models/context/car_sedan.glb';
+var _carGlbConfigured=false;
+function configureCarGlbMaterials(){
+  if(_carGlbConfigured || !_modelCache[CONTEXT_CAR_GLB]) return;
+  _carGlbConfigured=true;
+  _modelCache[CONTEXT_CAR_GLB].traverse(function(o){
+    if(o.isMesh&&o.material&&o.material.name!=='CarBody'){
+      o.material.userData=o.material.userData||{};
+      o.material.userData.lockColor=true; // カスタム色はボディ塗装のみに適用
+    }
+  });
+}
+function buildContextGlbStack(grp,it,w3,d3){
+  var spec=CONTEXT_GLB_SPECS[it.type];
+  if(!spec || !ensureGltfModel(spec.url)) return false;
+  var model=_modelCache[spec.url];
+  var nodes={base:model.getObjectByName(spec.base),mid:model.getObjectByName(spec.mid),roof:model.getObjectByName(spec.roof)};
+  if(!nodes.base||!nodes.mid||!nodes.roof) return false;
+  var floors=getContextFloors(it);
+  var storyH=contextStoryHeightM();
+  var sx=w3/spec.fw, sz=d3/spec.fd, syStory=storyH/spec.sh;
+  var syRoof=(contextRoofExtraHeightMm(it.type)*U)/spec.roofH;
+  var needOwnMats=isContextGhost(it)||!!it.colorCustom;
+  function addModule(node,y,sy){
+    var c=node.clone(true);
+    c.position.set(0,y,0);
+    c.scale.set(sx,sy,sz);
+    c.traverse(function(o){
+      if(o.isMesh){
+        o.castShadow=true; o.receiveShadow=true;
+        if(o.material){
+          if(needOwnMats){
+            // ゴースト表示のopacity変更やカスタム色がキャッシュ共有マテリアルを
+            // 汚染しないよう、このアイテム専用にクローンする
+            o.material=o.material.clone();
+            o.material.userData=Object.assign({},o.material.userData);
+            if(spec.wallMats[o.material.name]){
+              o.material.userData.ghostBody=true;
+              if(it.colorCustom&&o.material.color&&!o.material.userData.lockColor) o.material.color.set(it.color);
+            }
+          }
+          tameMaterialBrightness(o.material);
+        }
+      }
+    });
+    grp.add(c);
+  }
+  addModule(nodes.base,0,syStory);
+  for(var f=1;f<floors;f++) addModule(nodes.mid,f*storyH,syStory);
+  addModule(nodes.roof,floors*storyH,syRoof);
+  return true;
 }
 function build3DNeighborBuilding(grp,it,w3,d3,h){
   var floors=getContextFloors(it);
@@ -11385,16 +11465,26 @@ function build3DRoad(grp,it,w3,d3,h){
     }
   }
 }
+var CONTEXT_POLE_GLB='assets/models/context/utility_pole.glb';
 function build3DUtilityPole(grp,it,w3,d3,h){
   h=Math.max(2.0,Math.min(15,h||defaultContextExteriorHeight('utility-pole')*U));
-  var poleMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x8c9297,roughness:0.92,envMapIntensity:0.08});
-  var armMat=makeExteriorLightingMaterial({color:0x767d83,roughness:0.9,envMapIntensity:0.08});
-  var metalMat=makeExteriorLightingMaterial({color:0x6f7478,roughness:0.68,metalness:0.08,envMapIntensity:0.12});
-  var radius=Math.max(0.055,Math.min(0.13,Math.min(w3,d3)*0.28));
-  _CY(grp,poleMat,0,h/2,0,radius*0.78,radius,h,12);
-  addContextBox(grp,armMat,0,h*0.82,0,Math.max(1.25,w3*3.5),0.08,0.1,true,true);
-  addContextBox(grp,armMat,0,h*0.69,0,Math.max(1.05,w3*3.0),0.07,0.085,true,true);
-  addContextBox(grp,metalMat,radius*1.2,h*0.48,0,0.32,0.55,0.2,true,true);
+  if(ensureGltfModel(CONTEXT_POLE_GLB)){
+    // Blender製モデル(6.5m基準)。腕金を潰さないよう高さ基準の等方スケール
+    var poleClone=_modelCache[CONTEXT_POLE_GLB].clone(true);
+    var ps=h/6.5;
+    poleClone.scale.set(ps,ps,ps);
+    normalizeGltfClone(poleClone,it.colorCustom?it.color:null);
+    grp.add(poleClone);
+  } else {
+    var poleMat=makeExteriorLightingMaterial({color:it.colorCustom?it.color:0x8c9297,roughness:0.92,envMapIntensity:0.08});
+    var armMat=makeExteriorLightingMaterial({color:0x767d83,roughness:0.9,envMapIntensity:0.08});
+    var metalMat=makeExteriorLightingMaterial({color:0x6f7478,roughness:0.68,metalness:0.08,envMapIntensity:0.12});
+    var radius=Math.max(0.055,Math.min(0.13,Math.min(w3,d3)*0.28));
+    _CY(grp,poleMat,0,h/2,0,radius*0.78,radius,h,12);
+    addContextBox(grp,armMat,0,h*0.82,0,Math.max(1.25,w3*3.5),0.08,0.1,true,true);
+    addContextBox(grp,armMat,0,h*0.69,0,Math.max(1.05,w3*3.0),0.07,0.085,true,true);
+    addContextBox(grp,metalMat,radius*1.2,h*0.48,0,0.32,0.55,0.2,true,true);
+  }
   var wireMat=new THREE.LineBasicMaterial({color:0x161616,transparent:true,opacity:0.82});
   function wire(y,z){
     var geo=new THREE.BufferGeometry().setFromPoints([
@@ -11406,9 +11496,9 @@ function build3DUtilityPole(grp,it,w3,d3,h){
     line.matrixAutoUpdate=false;
     grp.add(line);
   }
-  wire(h*0.85,-0.17);
-  wire(h*0.85,0.17);
-  wire(h*0.72,0);
+  wire(h*0.92,-0.10);
+  wire(h*0.92,0.10);
+  wire(h*0.78,0);
 }
 function build3DAcOutdoor(grp,it,w,d,h){
   var body=new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xd8dadc,roughness:0.6,metalness:0.25});
@@ -11604,6 +11694,7 @@ function applySelectableColor(mat,color){
   if(!color) return mat;
   if(Array.isArray(mat)) return mat.map(function(m){return applySelectableColor(m,color);});
   if(!mat || mat.transparent || mat.map || !mat.color) return mat;
+  if(mat.userData && mat.userData.lockColor) return mat; // タイヤ等、色変更対象外パーツ
   var nm=mat.clone();
   nm.color.set(color);
   return nm;
@@ -12500,10 +12591,13 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
 function buildRooms3D(flFilt){
   // 内観: 配置ライトを主役にするため自動ルームライトはさらに暗く・やや間引く。
   // 外観: 配置ライトの実光源を生成しない代わりに自動ルームライトを強め、数は大幅に間引く(性能対策)
-  var roomInt=LIGHT_SETTINGS.room*(isInt?0.5:1.8);
-  var lightPitch=isInt?3.4:5.6;
+  // ウォークスルーは屋内を歩くため内観と同じ扱い: 自動ライトは弱い補助光に留め、
+  // ユーザー設置ライト(実光源)を主役にする。外観3Dのみ窓明かり用に強い自動光を使う
+  var isIndoorView=isInt||isWalkView();
+  var roomInt=LIGHT_SETTINGS.room*(isIndoorView?0.5:1.8);
+  var lightPitch=isIndoorView?3.4:5.6;
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
-  var showAutoLightFixtures=!isInt;
+  var showAutoLightFixtures=!isIndoorView;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
@@ -12547,15 +12641,24 @@ function buildRooms3D(flFilt){
     mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
 
 	    // Ceiling downlights
-	    var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
-	    for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
-	      var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
-	      if(showAutoLightFixtures){
-	        var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
-	        fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
+	    // ユーザーがこの部屋にライトを設置している場合、屋内ビュー(内観・ウォークスルー)
+	    // では自動ライトを出さず、ユーザー設定のライトに照明を委ねる
+	    var roomHasUserLight=isIndoorView && DATA.items.some(function(li){
+	      if(!isLightItemType(li.type) || li.floor!==r.floor || li.hidden3D) return false;
+	      var lcx=li.x+li.w/2, lcy=li.y+li.d/2;
+	      return lcx>=r.x-200 && lcx<=r.x+r.w+200 && lcy>=r.y-200 && lcy<=r.y+r.d+200;
+	    });
+	    if(!roomHasUserLight){
+	      var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
+	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
+	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+	        if(showAutoLightFixtures){
+	          var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
+	          fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
+	        }
+	        var pl=new THREE.PointLight(0xffffff,roomInt*Math.PI,6.0,1.8);
+	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
 	      }
-	      var pl=new THREE.PointLight(0xffffff,roomInt*Math.PI,6.0,1.8);
-	      pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
 	    }
   });
 }
@@ -12733,7 +12836,105 @@ var _doorAnims=[];
 // 近くのドアが連続的にパタパタしてしまう
 var _doorWantByItem=new WeakMap();
 function isWalkView(){ return ST.view==='3d-walk'; }
-function walkEyeY(){ return floorTopY(WALK.floor)+WALK_EYE_HEIGHT_MM*U; }
+function walkEyeY(){ return floorTopY(WALK.floor)+(WALK.groundOff||0)+WALK_EYE_HEIGHT_MM*U; }
+// ── 階段の昇降(坂面近似) ──────────────────────────────
+// プレイヤー位置が階段パーツ(stair / stair-corner)の上にあるとき、
+// パーツ内の進行率tから「そのフロア床からの高さ」を坂面として返す。
+// 衝突判定は従来通り円(シリンダー)のまま、足元の高さだけを変える。
+function walkStairSampleAt(xMm,zMm,floor,marginMm){
+  var margin=(marginMm===undefined)?120:marginMm, best=null;
+  for(var i=0;i<DATA.items.length;i++){
+    var it=DATA.items[i];
+    if(it.floor!==floor || !isStairPartType(it.type)) continue;
+    var cx=it.x+it.w/2, cy=it.y+it.d/2;
+    var r=(it.rot||0)*Math.PI/180;
+    var dx=xMm-cx, dy=zMm-cy;
+    var lx=dx*Math.cos(r)+dy*Math.sin(r);
+    var ly=-dx*Math.sin(r)+dy*Math.cos(r);
+    if(it.flipX) lx=-lx;
+    if(it.flipY) ly=-ly;
+    if(Math.abs(lx)>it.w/2+margin || Math.abs(ly)>it.d/2+margin) continue;
+    var t;
+    if(it.type==='stair-corner'){
+      // 廻り階段: 内側隅(ローカル右下 w/2,d/2)まわりの角度で進行率を出す。
+      // 下辺(entry, 角度-π)→右辺(exit, -π/2)
+      var vx=lx-it.w/2, vy=ly-it.d/2;
+      var a=Math.atan2(vy,vx);
+      if(a>Math.PI/2) a-=Math.PI*2;
+      t=(a+Math.PI)/(Math.PI/2);
+    } else {
+      // 直進階段: -d/2(下端)→+d/2(上端)
+      t=(ly+it.d/2)/Math.max(1,it.d);
+    }
+    t=Math.max(0,Math.min(1,t));
+    var sri=stairRiseInfo(it);
+    var frac=(sri.base+t*sri.rise)/Math.max(0.001,stairGroupTotalRiseM(floor));
+    frac=Math.max(0,Math.min(1,frac));
+    if(!best || frac>best.frac) best={frac:frac};
+  }
+  return best;
+}
+function walkFloorHasData(f){
+  if(f<1) return false;
+  return DATA.walls.some(function(w){return w.floor===f;}) ||
+         DATA.rooms.some(function(r){return r.floor===f;}) ||
+         DATA.items.some(function(i){return i.floor===f;});
+}
+function walkSetFloor(f){
+  ST.floor=f; ST.selected=null;
+  var sel=document.getElementById('floor-sel');
+  if(sel) sel.value=String(f);
+  var stf=document.getElementById('st-floor');
+  if(stf) stf.textContent='フロア:'+f+'F';
+  WALK.floor=f;
+  _walkCollFloor=null;
+  _walkCullAt=0; // フロアカリングを即時再適用
+  drawWalkMinimap();
+}
+// 移動後に呼ぶ: 足元高さ(WALK.groundOff)の更新と階段でのフロア遷移。
+// snap=true(スポーン・ミニマップ移動などのテレポート)は連続性クランプを免除し、
+// 階段の中腹に直接立てるようにする
+function walkUpdateGround(snap){
+  var fl=WALK.floor;
+  var xMm=WALK.x/U, zMm=WALK.z/U;
+  // 行き先フロアが存在する階段だけを坂面化する。
+  // (間取り図の慣習で2Fにも同じ階段が描かれるが、3Fが無ければただの床として扱う)
+  var prevOff=WALK.groundOff||0;
+  if(walkFloorHasData(fl+1)){
+    var storyUp=floorTopY(fl+1)-floorTopY(fl);
+    var up=walkStairSampleAt(xMm,zMm,fl);
+    // 連続性クランプ: 現在の足元から0.45m超いきなり高くなる坂面は無効。
+    // 階段室が上下階で重なるプラン(2F着地点が2F→3F階段の足元判定内)での
+    // ワープを防ぎ、各フライトは正しい入口からのみ乗れる
+    if(up && (snap || up.frac*storyUp-prevOff<=0.45)){
+      if(up.frac>=0.955){
+        walkSetFloor(fl+1);
+        WALK.groundOff=0;
+      } else {
+        WALK.groundOff=up.frac*storyUp;
+      }
+      return;
+    }
+  }
+  // 降下判定はフラットな床にいるときだけ。自フロアの坂面を登っている最中に
+  // 下階の吹き抜け上空を横切っても誤降下しない
+  if(fl>1 && prevOff<=0.3){
+    // 降下はマージン無しの実フットプリント内、かつ階段の上半分に
+    // 踏み出したときだけ(下半分の吹き抜け縁は床として扱い、大落下させない)
+    var down=walkStairSampleAt(xMm,zMm,fl-1,0);
+    if(down){
+      var storyDown=floorTopY(fl)-floorTopY(fl-1);
+      if(down.frac>=0.5 && down.frac<0.93){
+        // 階段吹き抜けへ踏み出した → 下階の坂面に乗り移る
+        walkSetFloor(fl-1);
+        WALK.groundOff=down.frac*storyDown;
+        return;
+      }
+      // 最上段付近は上階床(踊り場)として、下半分の上空は床縁として扱う
+    }
+  }
+  WALK.groundOff=0;
+}
 function walkSpawn(){
   WALK.floor=ST.floor||1;
   var fl=WALK.floor;
@@ -12759,7 +12960,9 @@ function walkSpawn(){
   }
   WALK.x=px; WALK.z=pz;
   WALK.pitch=0;
+  WALK.groundOff=0;
   WALK.yaw=Math.atan2(-(tx-px),-(tz-pz));
+  walkUpdateGround(true);
 }
 function walkApplyCamera(){
   if(!camExt) return;
@@ -12825,6 +13028,7 @@ function walkMinimapTap(ev){
   var t=walkMapTransform();
   WALK.x=((cx-t.ox)/t.sc+t.mnX)*U;
   WALK.z=((cy-t.oy)/t.sc+t.mnY)*U;
+  walkUpdateGround(true);
   walkApplyCamera(); drawWalkMinimap();
   noteCam3DInput();
   if(typeof invalidate3D==='function') invalidate3D();
@@ -12969,7 +13173,7 @@ function updateWalkMode(now){
   if(!isWalkView()||!WALK.active) return false;
   var dt=Math.min(0.1,Math.max(0.001,(now-(_lastWalkTick||now))/1000));
   _lastWalkTick=now;
-  if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; _walkCollFloor=null; drawWalkMinimap(); }
+  if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; WALK.groundOff=0; _walkCollFloor=null; drawWalkMinimap(); }
   var rot=(WALK.keys.left?1:0)-(WALK.keys.right?1:0)
         +((iMov['arrowleft']||iMov['a'])?1:0)-((iMov['arrowright']||iMov['d'])?1:0);
   var fwd=(WALK.keys.fwd?1:0)-(WALK.keys.back?1:0)
@@ -12980,23 +13184,78 @@ function updateWalkMode(now){
   if(fwd){
     var sp=2.0*dt*fwd;
     var nx=WALK.x-Math.sin(WALK.yaw)*sp, nz=WALK.z-Math.cos(WALK.yaw)*sp;
+    // 坂面(階段)上では壁判定を行わない(階段下の間仕切り壁が2D判定で
+    // 進行を塞ぐため)。代わりに坂面フットプリントから外れる移動を止め、
+    // 手すりのように階段上へ誘導する
+    var onRamp=(WALK.groundOff||0)>0.4;
+    function stepBlocked(txM,tzM){
+      if(onRamp) return !walkStairSampleAt(txM,tzM,WALK.floor);
+      return walkBlockedAt(txM,tzM,WALK.floor);
+    }
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
-    if(!walkBlockedAt(nx/U,nz/U,WALK.floor)){
+    if(!stepBlocked(nx/U,nz/U)){
       WALK.x=nx; WALK.z=nz;
-    } else if(!walkBlockedAt(nx/U,WALK.z/U,WALK.floor)){
+    } else if(!stepBlocked(nx/U,WALK.z/U)){
       WALK.x=nx;
-    } else if(!walkBlockedAt(WALK.x/U,nz/U,WALK.floor)){
+    } else if(!stepBlocked(WALK.x/U,nz/U)){
       WALK.z=nz;
     }
     moved=true;
   }
   if(moved){
+    walkUpdateGround();
     walkApplyCamera();
     if(now-WALK._mapT>120){ WALK._mapT=now; drawWalkMinimap(); }
   }
   var doors=updateWalkDoors(dt);
+  WALK._doorsAnim=doors;
   WALK.moving=moved;
   return moved||doors;
+}
+// ── ウォークスルー中のフロアカリング ─────────────────────────
+// スラブに遮られて見えない他フロアのアイテム(家具・住設等)を非表示にして
+// ドローコールを削減する。階段吹き抜けの周辺(3m)は上下から見えるため表示を維持。
+// 壁・部屋・建具・屋根・周辺コンテキストは対象外(窓越し・吹き抜け越しに見えるため)
+var _walkCullApplied=false, _walkCullAt=0;
+function walkCullSkipType(t){
+  return !t || isOpeningItemType(t) || isStairPartType(t) || isContextExteriorItemType(t) ||
+    t==='room' || t==='wall' || t==='roof' || t==='balcony' || t==='site-rect' ||
+    t==='foundation' || t==='fence' || t==='wood-fence' || t==='tree' || t==='car';
+}
+function applyWalkCulling(){
+  if(!sc3) return;
+  var fl=WALK.floor;
+  var zones=[];
+  DATA.items.forEach(function(it){
+    if(isStairPartType(it.type) && Math.abs(it.floor-fl)<=1){
+      zones.push(stairBounds2D(it));
+    }
+  });
+  function nearStairs(ref){
+    var cx=ref.x+(ref.w||0)/2, cy=ref.y+(ref.d||0)/2;
+    for(var i=0;i<zones.length;i++){
+      var b=zones[i];
+      if(cx>b.x1-3000&&cx<b.x2+3000&&cy>b.y1-3000&&cy<b.y2+3000) return true;
+    }
+    return false;
+  }
+  sc3.children.forEach(function(c){
+    if(!c.userData||!c.userData.b||c.userData.selectKind!=='item') return;
+    var ref=c.userData.selectRef;
+    if(!ref||typeof ref.floor!=='number'||walkCullSkipType(ref.type)) return;
+    c.visible=(ref.floor===fl)||nearStairs(ref);
+  });
+  _walkCullApplied=true;
+}
+function clearWalkCulling(){
+  if(!sc3||!_walkCullApplied) return;
+  _walkCullApplied=false;
+  sc3.children.forEach(function(c){
+    if(c.userData&&c.userData.b&&c.userData.selectKind==='item'&&c.userData.selectRef&&
+       !walkCullSkipType(c.userData.selectRef.type)){
+      c.visible=true;
+    }
+  });
 }
 // 動的解像度: カメラ操作・ウォークスルー中は描画解像度を下げ、静止したら
 // フル解像度で描き直す。操作中のGPU負荷が半分以下になり、静止時の画質は不変
@@ -13019,6 +13278,9 @@ function setDynamicResolution(low){
     if(composer.setPixelRatio) composer.setPixelRatio(r);
     composer.setSize(wrap.clientWidth,wrap.clientHeight);
   }
+  // 操作中は重いパス(N8AO / Bloom)も止める。静止したら元の品質へ戻る
+  if(_n8aoPass) _n8aoPass.enabled=!low;
+  if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
   requestAnimationFrame(loop3D);
@@ -13031,6 +13293,14 @@ function loop3D(){
 
   var walking=ST.view==='3d-ext' && updateWalkthroughCamera(now);
   var walkMode=updateWalkMode(now);
+  // 静的シャドウマップの更新トリガ: シーン変更・ドア開閉アニメ・ギズモ操作
+  if(ren&&ren.shadowMap&&(_needs3DRender||GIZMO_DRAG.active||WALK._doorsAnim)) ren.shadowMap.needsUpdate=true;
+  // ウォークスルー中は他フロアの家具を間引く(500ms毎に再適用: rebuild3D後も追従)
+  if(isWalkView()&&WALK.active){
+    if(now-_walkCullAt>500){ _walkCullAt=now; applyWalkCulling(); }
+  } else if(_walkCullApplied){
+    clearWalkCulling(); _needs3DRender=true;
+  }
   var orbitMoved=false;
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
     orbitMoved=orbit.update()===true;
