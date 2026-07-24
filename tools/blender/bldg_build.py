@@ -42,11 +42,62 @@ for ob in list(bpy.data.objects):
     if ob.name.startswith('bd_'):
         bpy.data.objects.remove(ob, do_unlink=True)
 
-PANEL = matp('BdPanel', (0.60, 0.61, 0.63), rough=0.85)
+import random
+def make_alc_image(name, base, groove_mul=0.80):
+    img = bpy.data.images.get(name)
+    if img: bpy.data.images.remove(img)
+    N = 256
+    img = bpy.data.images.new(name, N, N, alpha=False)
+    cols = 4          # 縦目地4本/タイル → cube_project 2.4m で600mmピッチ
+    cw = N // cols
+    rng = random.Random(7)
+    tones = [1.0 + rng.uniform(-0.02, 0.02) for _ in range(cols)]
+    px = [0.0] * (N * N * 4)
+    for y in range(N):
+        for x in range(N):
+            col = min(cols - 1, x // cw)
+            incol = x % cw
+            tone = tones[col]
+            if incol < 2:
+                tone *= groove_mul
+            g = tone * (1.0 + rng.uniform(-0.006, 0.006))
+            i = (y * N + x) * 4
+            px[i]   = min(1.0, base[0] * g)
+            px[i+1] = min(1.0, base[1] * g)
+            px[i+2] = min(1.0, base[2] * g)
+            px[i+3] = 1.0
+    img.pixels = px
+    img.pack()
+    return img
+
+def make_alc_mat(name, base):
+    m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        if n.type == 'TEX_IMAGE': nt.nodes.remove(n)
+    b = nt.nodes['Principled BSDF']
+    tex = nt.nodes.new('ShaderNodeTexImage')
+    tex.image = make_alc_image(name + 'Img', base)
+    nt.links.new(tex.outputs['Color'], b.inputs['Base Color'])
+    b.inputs['Roughness'].default_value = 0.85
+    b.inputs['Metallic'].default_value = 0.0
+    return m
+
+def uv_project(ob, size=2.4):
+    bpy.ops.object.select_all(action='DESELECT')
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True, scale_to_bounds=False)
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+PANEL = make_alc_mat('BdPanel', (0.60, 0.61, 0.63))
 PANEL2= matp('BdPanelDark', (0.33, 0.35, 0.38), rough=0.85)
 FRAME = matp('BdFrame', (0.13, 0.14, 0.16), rough=0.45, metal=0.55)
-GLASS = matp('BdGlass', (0.38, 0.50, 0.60), rough=0.08, metal=0.25)
-GLASSD= matp('BdGlassDoor', (0.30, 0.42, 0.50), rough=0.08, metal=0.25)
+GLASS = matp('BdGlass', (0.46, 0.57, 0.66), rough=0.08, metal=0.25)
+GLASSD= matp('BdGlassDoor', (0.52, 0.62, 0.70), rough=0.08, metal=0.2)
 SPAN  = matp('BdSpandrel', (0.46, 0.48, 0.51), rough=0.8)
 EQUIP = matp('BdEquip', (0.72, 0.71, 0.68), rough=0.85)
 SIGN  = matp('BdSign', (0.23, 0.36, 0.52), rough=0.6)
@@ -90,7 +141,8 @@ spans.append(raw_box(FRAME, 0, -FD/2 - 0.42, 2.62, 2.75, 0.88, 0.07))
 sign = raw_box(SIGN, 0, -FD/2 - 0.05, 2.95, FW - 0.35, 0.09, 0.42)
 for k in range(4):  # abstract lettering blocks on sign
     frames.append(raw_box(FRAME, -1.35 + k*0.55, -FD/2 - 0.105, 2.95, 0.30, 0.02, 0.20))
-join_group('bd_base_wall', walls)
+bw_ = join_group('bd_base_wall', walls)
+uv_project(bw_)
 join_group('bd_base_frame', frames)
 join_group('bd_base_glass', glasses)
 join_group('bd_base_span', spans)
@@ -117,7 +169,7 @@ def band(face):
         nmul = 7
         for i in range(nmul + 1):
             xx = -(FW - 0.36)/2 + i * (FW - 0.36)/nmul
-            frames.append(raw_box(FRAME, xx, y, gz0 + gh/2, 0.045, 0.07, gh))
+            frames.append(raw_box(FRAME, xx, y + sgn*0.030, gz0 + gh/2, 0.05, 0.10, gh))
         # top/bottom reveal panels bridging recess
         spans.append(raw_box(SPAN, 0, sgn*(FD/2 - IN/2), gz0 - 0.02, FW, IN, 0.06))
         spans.append(raw_box(SPAN, 0, sgn*(FD/2 - IN/2), gz1 + 0.02, FW, IN, 0.06))
@@ -130,7 +182,7 @@ def band(face):
         nmul = 5
         for i in range(nmul + 1):
             yy = -(FD - 0.36)/2 + i * (FD - 0.36)/nmul
-            frames.append(raw_box(FRAME, x, yy, gz0 + gh/2, 0.07, 0.045, gh))
+            frames.append(raw_box(FRAME, x + sgn*0.030, yy, gz0 + gh/2, 0.10, 0.05, gh))
         spans.append(raw_box(SPAN, sgn*(FW/2 - IN/2), 0, gz0 - 0.02, IN, FD, 0.06))
         spans.append(raw_box(SPAN, sgn*(FW/2 - IN/2), 0, gz1 + 0.02, IN, FD, 0.06))
 for f in ('f', 'b', 'l', 'r'):
@@ -139,7 +191,8 @@ for f in ('f', 'b', 'l', 'r'):
 for sx in (-1, 1):
     for sy in (-1, 1):
         walls.append(raw_box(PANEL, sx*(FW/2 - 0.10), sy*(FD/2 - 0.10), SH/2, 0.26, 0.26, SH))
-join_group('bd_mid_wall', walls)
+mw = join_group('bd_mid_wall', walls)
+uv_project(mw)
 join_group('bd_mid_frame', frames)
 join_group('bd_mid_glass', glasses)
 join_group('bd_mid_span', spans)
@@ -150,7 +203,8 @@ walls.append(raw_box(PANEL, 0, -FD/2 + 0.09, PARA/2, FW, 0.18, PARA))
 walls.append(raw_box(PANEL, 0, FD/2 - 0.09, PARA/2, FW, 0.18, PARA))
 walls.append(raw_box(PANEL, -FW/2 + 0.09, 0, PARA/2, 0.18, FD - 0.36, PARA))
 walls.append(raw_box(PANEL, FW/2 - 0.09, 0, PARA/2, 0.18, FD - 0.36, PARA))
-spans.append(raw_box(SPAN, 0, 0, PARA + 0.035, FW + 0.12, FD + 0.12, 0.07))
+KASAM = matp('BdCoping', (0.78, 0.79, 0.80), rough=0.4, metal=0.6)
+spans.append(raw_box(KASAM, 0, 0, PARA + 0.045, FW + 0.16, FD + 0.16, 0.09))
 spans.append(raw_box(SPAN, 0, 0, 0.025, FW - 0.3, FD - 0.3, 0.05))
 # penthouse + door
 ph = raw_box(PANEL2, FW*0.26, FD*0.20, PARA*0.5 + 0.62, 1.35, 1.15, 1.24)
@@ -179,7 +233,8 @@ for i in range(1, 5):
     fr.append(raw_box(EQUIP, -fx, yy, PARA + 0.33, 0.028, 0.028, 0.62))
     fr.append(raw_box(EQUIP, fx, yy, PARA + 0.33, 0.028, 0.028, 0.62))
 equips.extend(fr)
-join_group('bd_top_wall', walls)
+tw = join_group('bd_top_wall', walls)
+uv_project(tw)
 join_group('bd_top_span', spans)
 join_group('bd_top_equip', equips)
 

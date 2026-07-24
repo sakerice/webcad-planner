@@ -92,10 +92,53 @@ def make_siding_mat(name, base, groove_mul=0.72):
 WALL  = make_siding_mat('NhWall',  (0.88, 0.86, 0.80))
 WALL2 = make_siding_mat('NhWall2', (0.58, 0.55, 0.50), groove_mul=0.78)
 TRIMD = matp('NhTrim',  (0.28, 0.27, 0.26), rough=0.8)
-SASH  = matp('NhSash',  (0.13, 0.14, 0.16), rough=0.45, metal=0.5)
-GLASS = matp('NhGlass', (0.36, 0.48, 0.58), rough=0.06, metal=0.2)
+SASH  = matp('NhSash',  (0.70, 0.71, 0.73), rough=0.35, metal=0.8)
+GLASS = matp('NhGlass', (0.30, 0.42, 0.53), rough=0.06, metal=0.25)
+FGLASS= matp('NhGlassFrost', (0.66, 0.71, 0.74), rough=0.45, metal=0.0)
 DOOR  = matp('NhDoor',  (0.33, 0.21, 0.12), rough=0.55)
-ROOF  = matp('NhRoof',  (0.16, 0.155, 0.17), rough=0.65)
+def make_slate_image(name, base):
+    img = bpy.data.images.get(name)
+    if img: bpy.data.images.remove(img)
+    N = 256
+    img = bpy.data.images.new(name, N, N, alpha=False)
+    rows = 6          # 段/タイル → cube_project 2.7m で455mmピッチ
+    rh = N // rows
+    rng = random.Random(11)
+    tones = [1.0 + rng.uniform(-0.06, 0.06) for _ in range(rows)]
+    px = [0.0] * (N * N * 4)
+    for y in range(N):
+        row = min(rows - 1, y // rh)
+        inrow = y % rh
+        tone = tones[row]
+        if inrow < 2:
+            tone *= 0.55      # 段の影
+        elif inrow < 4:
+            tone *= 1.15      # 段鼻のハイライト
+        for x in range(N):
+            i = (y * N + x) * 4
+            g = tone * (1.0 + rng.uniform(-0.02, 0.02))
+            px[i]   = min(1.0, base[0] * g)
+            px[i+1] = min(1.0, base[1] * g)
+            px[i+2] = min(1.0, base[2] * g)
+            px[i+3] = 1.0
+    img.pixels = px
+    img.pack()
+    return img
+
+def make_slate_mat(name, base):
+    m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        if n.type == 'TEX_IMAGE': nt.nodes.remove(n)
+    b = nt.nodes['Principled BSDF']
+    tex = nt.nodes.new('ShaderNodeTexImage')
+    tex.image = make_slate_image(name + 'Img', base)
+    nt.links.new(tex.outputs['Color'], b.inputs['Base Color'])
+    b.inputs['Roughness'].default_value = 0.7
+    b.inputs['Metallic'].default_value = 0.0
+    return m
+ROOF  = make_slate_mat('NhRoof', (0.20, 0.195, 0.215))
 FASCIA= matp('NhFascia',(0.82, 0.82, 0.80), rough=0.7)
 RAIL  = matp('NhRail',  (0.60, 0.60, 0.62), rough=0.4, metal=0.6)
 
@@ -140,7 +183,7 @@ def corner_boards(store, h):
         for sy in (-1, 1):
             store.append(raw_box(FASCIA, sx*(FW/2 - 0.001), sy*(FD/2 - 0.001), h/2, 0.09, 0.09, h))
 
-def window(wall, frames, glasses, sills, face, u, z, w, h, mullion='cross'):
+def window(wall, frames, glasses, sills, face, u, z, w, h, mullion='cross', frosted=False):
     """壁に開口を彫り、サッシ・ガラス・方立を開口内(壁面より奥)に納める"""
     fr = 0.05
     reg_open(face, u, z, w, h)
@@ -152,9 +195,14 @@ def window(wall, frames, glasses, sills, face, u, z, w, h, mullion='cross'):
         # ↑ cutter: 壁面の外側0.2m〜内側NICHEまで貫入
         inner = wallface - sgn*NICHE
         fy = inner + sgn*0.055     # サッシ面(壁面より奥)
-        gy = inner + sgn*0.035
-        frames.append(raw_box(SASH, u, fy, z + h/2, w - 0.015, 0.06, h - 0.015))
-        glasses.append(raw_box(GLASS, u, gy, z + h/2, w - fr*2, 0.02, h - fr*2))
+        gy = inner + sgn*0.030
+        # 4辺フレーム(枠のみ、中はガラス)
+        frames.append(raw_box(SASH, u, fy, z + fr/2, w - 0.015, 0.06, fr))
+        frames.append(raw_box(SASH, u, fy, z + h - fr/2, w - 0.015, 0.06, fr))
+        frames.append(raw_box(SASH, u - w/2 + fr/2, fy, z + h/2, fr, 0.06, h - 0.015))
+        frames.append(raw_box(SASH, u + w/2 - fr/2, fy, z + h/2, fr, 0.06, h - 0.015))
+        glasses.append(raw_box(FGLASS if frosted else GLASS, u, gy, z + h/2, w - fr*1.2, 0.02, h - fr*1.2))
+        # 召合せ框(引き違いの中央縦)
         frames.append(raw_box(SASH, u, fy, z + h/2, 0.035, 0.065, h - fr))
         if mullion == 'cross':
             frames.append(raw_box(SASH, u, fy, z + h*0.62, w - fr, 0.065, 0.035))
@@ -165,9 +213,12 @@ def window(wall, frames, glasses, sills, face, u, z, w, h, mullion='cross'):
         cut(wall, wallface - sgn*NICHE/2 + sgn*0.1, u, z + h/2, NICHE + 0.2, w, h)
         inner = wallface - sgn*NICHE
         fx = inner + sgn*0.055
-        gx = inner + sgn*0.035
-        frames.append(raw_box(SASH, fx, u, z + h/2, 0.06, w - 0.015, h - 0.015))
-        glasses.append(raw_box(GLASS, gx, u, z + h/2, 0.02, w - fr*2, h - fr*2))
+        gx = inner + sgn*0.030
+        frames.append(raw_box(SASH, fx, u, z + fr/2, 0.06, w - 0.015, fr))
+        frames.append(raw_box(SASH, fx, u, z + h - fr/2, 0.06, w - 0.015, fr))
+        frames.append(raw_box(SASH, fx, u - w/2 + fr/2, z + h/2, 0.06, fr, h - 0.015))
+        frames.append(raw_box(SASH, fx, u + w/2 - fr/2, z + h/2, 0.06, fr, h - 0.015))
+        glasses.append(raw_box(FGLASS if frosted else GLASS, gx, u, z + h/2, 0.02, w - fr*1.2, h - fr*1.2))
         frames.append(raw_box(SASH, fx, u, z + h/2, 0.065, 0.035, h - fr))
         if mullion == 'cross':
             frames.append(raw_box(SASH, fx, u, z + h*0.62, 0.065, w - fr, 0.035))
@@ -183,7 +234,7 @@ def uv_project(ob, size=1.8):
     bpy.ops.uv.cube_project(cube_size=size, correct_aspect=True, scale_to_bounds=False)
     bpy.ops.object.mode_set(mode='OBJECT')
 
-GARA  = matp('NhGarage', (0.16, 0.16, 0.17), rough=0.92)
+GARA  = matp('NhGarage', (0.24, 0.24, 0.25), rough=0.92)
 GARAF = matp('NhGarageFloor', (0.38, 0.38, 0.37), rough=0.95)
 wall = raw_box(WALL2, 0, 0, SH/2, FW, FD, SH)
 frames, glasses, sills, trims = [], [], [], []
@@ -192,7 +243,7 @@ window(wall, frames, glasses, sills, 'f', -0.35, 0.90, 0.60, 1.10, 'none')
 window(wall, frames, glasses, sills, 'l', 0.55, 0.03, 1.65, 2.03, 'v')
 window(wall, frames, glasses, sills, 'r', 0.05, 0.90, 1.65, 1.10)
 window(wall, frames, glasses, sills, 'b', -FW*0.18, 0.90, 1.65, 1.10)
-window(wall, frames, glasses, sills, 'b', FW*0.25, 1.10, 0.60, 0.90, 'none')
+window(wall, frames, glasses, sills, 'b', FW*0.25, 1.10, 0.60, 0.90, 'none', frosted=True)
 # 玄関(掃き出し窓とガレージの間): 開口を彫って奥にドアを納める
 px = -1.55
 reg_open('f', px, 0.0, 1.06, 2.36)
@@ -201,6 +252,10 @@ inner = -FD/2 + NICHE
 frames.append(raw_box(SASH, px, inner + 0.02, 1.17, 1.00, 0.05, 2.34))
 d = raw_box(DOOR, px, inner + 0.045, 1.165, 0.87, 0.045, 2.30)
 glasses.append(raw_box(GLASS, px - 0.26, inner + 0.075, 1.40, 0.13, 0.02, 1.55))
+# 鏡板ライン(縦2本の浅い段差)
+DOORD = matp('NhDoorDark', (0.26, 0.16, 0.09), rough=0.6)
+trims.append(raw_box(DOORD, px + 0.06, inner + 0.070, 1.40, 0.02, 0.006, 1.60))
+trims.append(raw_box(DOORD, px + 0.28, inner + 0.070, 1.40, 0.02, 0.006, 1.60))
 frames.append(raw_box(SASH, px + 0.30, inner + 0.08, 1.05, 0.03, 0.03, 0.30))
 trims.append(raw_box(TRIMD, px, -FD/2 - 0.14, 0.045, 1.16, 0.30, 0.09))
 trims.append(raw_box(TRIMD, px, -FD/2 - 0.22, 2.46, 1.22, 0.58, 0.055))
@@ -213,7 +268,13 @@ cut(wall, GX, -FD/2 + GD/2 - 0.101, GH_/2 + 0.02, GW, GD + 0.2, GH_)
 gz0 = -FD/2 + GD   # 奥壁の内面y
 # 内装ライナー(暗色): 奥壁・左右壁・天井
 garas = []
-garas.append(raw_box(GARA, GX, gz0 - 0.015, GH_/2 + 0.02, GW - 0.02, 0.03, GH_ - 0.02))
+GARA2 = matp('NhGarageDeep', (0.12, 0.12, 0.13), rough=0.95)
+LIGHTB= matp('NhGarageLight', (0.85, 0.86, 0.82), rough=0.4)
+garas.append(raw_box(GARA2, GX, gz0 - 0.015, GH_/2 + 0.02, GW - 0.02, 0.03, GH_ - 0.02))
+# 天井ライン照明
+garas.append(raw_box(LIGHTB, GX, -FD/2 + GD*0.45, GH_ - 0.04, 0.10, 1.20, 0.04))
+# 奥壁の物置棚
+garas.append(raw_box(GARA, GX + GW*0.28, gz0 - 0.20, 0.95, 0.90, 0.35, 1.80))
 garas.append(raw_box(GARA, GX - GW/2 + 0.015, -FD/2 + GD/2, GH_/2 + 0.02, 0.03, GD - 0.04, GH_ - 0.02))
 garas.append(raw_box(GARA, GX + GW/2 - 0.015, -FD/2 + GD/2, GH_/2 + 0.02, 0.03, GD - 0.04, GH_ - 0.02))
 garas.append(raw_box(GARA, GX, -FD/2 + GD/2, GH_ + 0.005, GW - 0.02, GD - 0.04, 0.03))
@@ -248,7 +309,7 @@ d.name = 'nh_base_door'
 # 竪樋(front-right / back-left)
 def add_pipe_column(prefix, height):
     pipes = []
-    for (ppx, ppy) in ((-FW/2 + 0.14, -FD/2 - 0.075), (-FW/2 + 0.34, FD/2 + 0.075)):
+    for (ppx, ppy) in ((-FW/2 + 0.14, -FD/2 - 0.075), (FW/2 - 0.14, -FD/2 - 0.075), (-FW/2 + 0.34, FD/2 + 0.075)):
         bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.035, depth=height, location=(ppx, ppy, height/2))
         c = bpy.context.object
         c.data.materials.append(RAIL)
@@ -263,7 +324,7 @@ frames, glasses, sills, trims, rails = [], [], [], [], []
 # バルコニーに面した掃き出し窓(正面中央左)
 bx = -FW*0.10
 window(wall, frames, glasses, sills, 'f', bx, 0.03, 1.65, 2.03, 'v')
-window(wall, frames, glasses, sills, 'f', FW*0.36, 0.90, 0.60, 1.10, 'none')
+window(wall, frames, glasses, sills, 'f', FW*0.36, 0.90, 0.60, 1.10, 'none', frosted=True)
 window(wall, frames, glasses, sills, 'l', 0.10, 0.90, 1.65, 1.10)
 window(wall, frames, glasses, sills, 'r', -0.15, 0.90, 1.65, 1.10)
 window(wall, frames, glasses, sills, 'b', -FW*0.20, 0.90, 1.65, 1.10)
@@ -308,6 +369,13 @@ join_group('nh_mid_sash', frames)
 join_group('nh_mid_glass', glasses)
 join_group('nh_mid_sill', sills)
 join_group('nh_mid_rail', rails)
+vents = []
+for (vx, vy, vz, rx, ry_) in ((FW*0.42, -FD/2 - 0.03, 2.15, math.radians(90), 0), (-FW*0.30, FD/2 + 0.03, 2.15, math.radians(90), 0)):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.075, depth=0.06, location=(vx, vy, vz), rotation=(rx, ry_, 0))
+    vc = bpy.context.object
+    vc.data.materials.append(RAIL)
+    vents.append(vc)
+join_group('nh_mid_vent', vents)
 join_group('nh_mid_pipe', add_pipe_column('mid', SH))
 
 # ============ ROOF ============
@@ -329,15 +397,34 @@ rob = bpy.data.objects.new('nh_roof_hip', me)
 bpy.context.scene.collection.objects.link(rob)
 rob.data.materials.append(ROOF)
 sol = rob.modifiers.new('Sol', 'SOLIDIFY'); sol.thickness = 0.10; sol.offset = 1
+bpy.context.view_layer.objects.active = rob
+bpy.ops.object.modifier_apply(modifier=sol.name)
+uv_project(rob, size=2.7)
+# 隅棟の棟包み(4本の斜めボックス)
+hips = []
+for (cx, cy, tx) in ((-hw, -hd, -ridge_half), (hw, -hd, ridge_half), (hw, hd, ridge_half), (-hw, hd, -ridge_half)):
+    dx, dy, dz = tx - cx, 0 - cy, ROOF_H - 0
+    ln = math.sqrt(dx*dx + dy*dy + dz*dz)
+    mx, my, mz = (cx + tx)/2, cy/2, ROOF_H/2 + 0.06
+    ang_z = math.atan2(dy, dx)
+    ang_y = -math.asin(dz / ln)
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(mx, my, mz), rotation=(0, ang_y, ang_z))
+    hb = bpy.context.object
+    hb.scale = (ln + 0.10, 0.16, 0.055)
+    bpy.ops.object.transform_apply(scale=True)
+    hb.data.materials.append(TRIMD)
+    hips.append(hb)
+join_group('nh_roof_hipcap', hips)
 rtrims = []
 rtrims.append(raw_box(FASCIA, 0, 0, -0.09, FW + OVER*2 - 0.04, FD + OVER*2 - 0.04, 0.18))
 for sgn in (-1, 1):
-    rtrims.append(raw_box(RAIL, 0, sgn*(FD/2 + OVER + 0.035), 0.02, FW + OVER*2 + 0.05, 0.09, 0.10))
+    rtrims.append(raw_box(RAIL, 0, sgn*(FD/2 + OVER + 0.045), 0.02, FW + OVER*2 + 0.05, 0.11, 0.12))
+    rtrims.append(raw_box(RAIL, sgn*(FW/2 + OVER + 0.045), 0, 0.02, 0.11, FD + OVER*2 + 0.05, 0.12))
 join_group('nh_roof_eave', rtrims)
 caps = [raw_box(TRIMD, 0, 0, ROOF_H + 0.035, ridge_half*2 + 0.28, 0.26, 0.09)]
 join_group('nh_roof_cap', caps)
 elbows = []
-for (ppx, ppy, sgn) in ((-FW/2 + 0.14, -FD/2 - 0.075, -1), (-FW/2 + 0.34, FD/2 + 0.075, 1)):
+for (ppx, ppy, sgn) in ((-FW/2 + 0.14, -FD/2 - 0.075, -1), (FW/2 - 0.14, -FD/2 - 0.075, -1), (-FW/2 + 0.34, FD/2 + 0.075, 1)):
     gy = sgn * (FD/2 + OVER + 0.035)
     elbows.append(raw_box(RAIL, ppx, (gy + ppy)/2, -0.02, 0.055, abs(gy - ppy), 0.05))
     bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.035, depth=0.16, location=(ppx, ppy, -0.08))
