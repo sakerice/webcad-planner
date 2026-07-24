@@ -12718,6 +12718,10 @@ function collectGltfSubmeshes(url){
 function queueFmpInstance(url,it,grp){
   if(!ren) return false; // レンダラー未初期化時は解析計算に必要なTHREEクラスの都合上スキップ
   if(it===ST.selected) return false; // 選択中は個別メッシュのまま(ギズモ/選択box等に影響させない)
+  // InstancedMesh#setMatrixAt は負のスケールをサポートしない。
+  // 反転家具をインスタンス化すると、未選択時だけ面の欠落やパーツ位置の破綻が起き、
+  // 選択時（個別メッシュ）には正常に戻るため、反転時は通常描画へフォールバックする。
+  if(it.flipX || it.flipY) return false;
   if(it.colorCustom) return false; // 現状FMPは常にデフォルト色だが将来対応時のための保険
   if(!getGltfNativeBox(url)) return false;
   grp.updateMatrix();
