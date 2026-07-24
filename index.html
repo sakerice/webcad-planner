@@ -14060,12 +14060,15 @@ function updateWalkMode(now){
   if(fwd){
     var sp=2.0*dt*fwd;
     var nx=WALK.x-Math.sin(WALK.yaw)*sp, nz=WALK.z-Math.cos(WALK.yaw)*sp;
-    // 坂面(階段)上では壁判定を行わない(階段下の間仕切り壁が2D判定で
-    // 進行を塞ぐため)。代わりに坂面フットプリントから外れる移動を止め、
-    // 手すりのように階段上へ誘導する
-    var onRamp=(WALK.groundOff||0)>0.4;
+    // 階段面では階段室まわり（階段下の低壁・勾配壁を含む）の壁判定を使わない。従来は足元高さ0.4m以上を
+    // 条件にしていたため、総上昇約0.5mのコーナー3段では曲がり切る直前まで
+    // 壁に衝突していた。高さではなく実際の階段フットプリントで判定する。
+    var stairHere=walkStairSampleAt(WALK.x/U,WALK.z/U,WALK.floor,0);
     function stepBlocked(txM,tzM){
-      if(onRamp) return !walkStairSampleAt(txM,tzM,WALK.floor);
+      // 入口の120mm手前から階段側へ乗り移れるようにし、乗った後は同じ余白内へ
+      // 誘導する。コーナーから直階段へ接続する境界も両方の判定が重なるため連続する。
+      var stairTarget=walkStairSampleAt(txM,tzM,WALK.floor,120);
+      if(stairHere || stairTarget) return !stairTarget;
       return walkBlockedAt(txM,tzM,WALK.floor);
     }
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
