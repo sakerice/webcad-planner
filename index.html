@@ -10404,6 +10404,9 @@ function buildWinFrames(flFilt){
       var panelBottomGap=frontDoor?0.012:0.02, panelTopGap=frontDoor?0.015:0.02;
       var panelH=Math.max(0.18,dh-panelBottomGap-panelTopGap);
       var panelY=panelBottomGap+panelH/2;
+      // 金物の実寸は保ちつつ、低くリサイズされた扉ではパネル外へ残らないよう
+      // 標準取付高さをパネル中央までに制限する。
+      function doorHardwareY(preferredY){ return Math.min(preferredY,panelY); }
       var archR=archMode?Math.min(ww/2,dh*0.42):0;
       var archShoulder=archMode?Math.max(0.6,dh-archR):dh;
       var jambH=archMode?archShoulder:dh;
@@ -10452,7 +10455,7 @@ function buildWinFrames(flFilt){
         var pullMatS=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
         [-1,1].forEach(function(ss){
           var pm=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.10,0.004),pullMatS);
-          pm.position.set(-ssDir*(leafW/2-0.05),0.95,zOffS+ss*(0.036/2-0.001));
+          pm.position.set(-ssDir*(leafW/2-0.05),doorHardwareY(0.95),zOffS+ss*(0.036/2-0.001));
           leafG.add(pm);
         });
         // 片引き戸: 上吊りレールを控え壁側まで延長
@@ -10485,7 +10488,7 @@ function buildWinFrames(flFilt){
           [-1,1].forEach(function(ss){
             var knob=new THREE.Mesh(new THREE.CylinderGeometry(0.011,0.011,0.018,10),knobMat);
             knob.rotation.x=Math.PI/2;
-            knob.position.set(dirX*pw*0.72,1.0,ss*(0.016+0.009));
+            knob.position.set(dirX*pw*0.72,doorHardwareY(1.0),ss*(0.016+0.009));
             knob.castShadow=false; pivotB.add(knob);
           });
           var aOpen=-zProt*dirX*FOLD_A;
@@ -10523,7 +10526,7 @@ function buildWinFrames(flFilt){
         function addPull(px0,pz0,edgeDir){
           var hx=px0+edgeDir*(panelW/2-0.025-0.015);
           [-1,1].forEach(function(sside){
-            addBox(pullMat,hx,0.95,pz0+sside*(leafT/2-0.001),0.030,0.100,0.004);
+            addBox(pullMat,hx,doorHardwareY(0.95),pz0+sside*(leafT/2-0.001),0.030,0.100,0.004);
           });
         }
         // 固定戸: 召し合わせ側=可動戸側 / 可動戸: 召し合わせ側=固定戸側
@@ -10586,11 +10589,11 @@ function buildWinFrames(flFilt){
             // プッシュプルハンドル(縦バー450mm・FL+1050中心)を内外両面に
             if(it.showDoorHandle!==false) [-1,1].forEach(function(side){
               var barZ=side*(leafT/2+0.032);
-              pmesh(new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,10),hwMat),handleX,1.05,barZ);
+              pmesh(new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,10),hwMat),handleX,doorHardwareY(1.05),barZ);
               [0.17,-0.17].forEach(function(dy){
                 var stay=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.032,8),hwMat);
                 stay.rotation.x=Math.PI/2;
-                pmesh(stay,handleX,1.05+dy,side*(leafT/2+0.016));
+                pmesh(stay,handleX,doorHardwareY(1.05)+dy,side*(leafT/2+0.016));
               });
             });
           } else {
@@ -10598,14 +10601,14 @@ function buildWinFrames(flFilt){
             if(it.showDoorHandle!==false) [-1,1].forEach(function(side){
               var rose=new THREE.Mesh(new THREE.CylinderGeometry(0.026,0.026,0.008,14),hwMat);
               rose.rotation.x=Math.PI/2;
-              pmesh(rose,handleX,0.95,side*(leafT/2+0.004));
+              pmesh(rose,handleX,doorHardwareY(0.95),side*(leafT/2+0.004));
               var neck=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.05,8),hwMat);
               neck.rotation.x=Math.PI/2;
-              pmesh(neck,handleX,0.95,side*(leafT/2+0.02));
+              pmesh(neck,handleX,doorHardwareY(0.95),side*(leafT/2+0.02));
               var lever=new THREE.Mesh(new THREE.CylinderGeometry(0.0105,0.0105,0.13,10),hwMat);
               lever.rotation.z=Math.PI/2;
               // レバーは吊元方向へ倒して伸ばす
-              pmesh(lever,handleX-(leafX>0?0.062:-0.062),0.95,side*(leafT/2+0.042));
+              pmesh(lever,handleX-(leafX>0?0.062:-0.062),doorHardwareY(0.95),side*(leafT/2+0.042));
             });
             // 丁番(吊元側・上下2枚)
             [0.28,Math.max(0.5,dh-0.3)].forEach(function(hy){
