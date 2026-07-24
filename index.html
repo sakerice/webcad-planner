@@ -233,6 +233,11 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   animation:app-loading-spin .72s linear infinite;
 }
 @keyframes app-loading-spin{to{transform:rotate(360deg)}}
+@media (pointer:coarse){
+  /* タブレットでは背景blur自体がGPU負荷になるため、半透明色だけで軽く覆う */
+  #app-loading{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,0.58)}
+}
+@media (prefers-reduced-motion:reduce){.app-loading-spinner{animation-duration:1.4s}}
 
 /* ── BOTTOM NAV (Mobile only) ──────────── */
 #bottom-nav{display:none}
@@ -7567,7 +7572,45 @@ function fitShadowCamera(sunLight) {
   sunLight.shadow.camera.updateProjectionMatrix();
   if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
-function rebuild3D(){if(sc3){build3D(); if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;}}
+var _tablet3DRebuildQueued=false;
+function perform3DRebuild(){
+  if(!sc3) return;
+  build3D();
+  if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+}
+function isLikelyHeavy3DRebuild(){
+  if(!isTouchInputDevice() || ST.view==='2d') return false;
+  var walls=(DATA.walls||[]).length;
+  var rooms=(DATA.rooms||[]).length;
+  var items=(DATA.items||[]).length;
+  var modelItems=0;
+  (DATA.items||[]).forEach(function(it){if(isFmpItemType(it.type)||GLTF_MAP[it.type]) modelItems++;});
+  // 壁・部屋は複数面を生成し、GLB家具は複数サブメッシュを持つため重めに数える。
+  return walls*2+rooms*3+items+modelItems*5>=90;
+}
+function rebuild3D(){
+  if(!sc3) return;
+  var loadingEl=document.getElementById('app-loading');
+  var loadingAlreadyVisible=!!(loadingEl&&loadingEl.classList.contains('show'));
+  if(!isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
+    perform3DRebuild();
+    return;
+  }
+  // 重い同期処理の前に一度ブラウザへ描画を返す。短時間に複数回呼ばれても
+  // 再構築は1回にまとめ、タブレットでの固まったような見え方と無駄な処理を抑える。
+  if(_tablet3DRebuildQueued) return;
+  _tablet3DRebuildQueued=true;
+  showAppLoading('3Dを更新中');
+  requestAnimationFrame(function(){
+    setTimeout(function(){
+      try{perform3DRebuild();}
+      finally{
+        _tablet3DRebuildQueued=false;
+        hideAppLoading();
+      }
+    },0);
+  });
+}
 
 // グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
 // ドローコールを削減する。見た目は不変。グループ単位の選択/移動/表示制御は維持される。
