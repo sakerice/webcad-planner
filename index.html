@@ -12511,7 +12511,9 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
     tread.receiveShadow=true;
     grp.add(tread);
 
-    var riserH=rise;
+    // 踏板の前面は BoxGeometry 自身が持つため、蹴込み板は踏板下面までに止める。
+    // 全高まで伸ばすと上端が踏板前面と重なり、角度によって余計なポリゴンに見える。
+    var riserH=Math.max(0.01,rise-treadT);
     var riserY=baseRise+si*rise+riserH/2;
     var riserZ=-d/2+treadD*si-riserT/2;
     var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
@@ -12546,7 +12548,8 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
     var prevH=partRise*(s/steps);
     var treadT=Math.min(0.07,Math.max(0.04,(h-prevH)*0.35));
     _PRISM(grp,mat,treadPolys[s],treadT,baseRise+h-treadT);
-    addStairRiserPanel(grp,riserMat||mat,riserEdges[s][0],riserEdges[s][1],baseRise+prevH,h-prevH);
+    // プリズムの側面と蹴込み板を重ねず、踏板下面で正確に接続する。
+    addStairRiserPanel(grp,riserMat||mat,riserEdges[s][0],riserEdges[s][1],baseRise+prevH,Math.max(0.01,(h-prevH)-treadT));
   }
 }
 function applySelectableColor(mat,color){
