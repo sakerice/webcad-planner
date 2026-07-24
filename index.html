@@ -9587,11 +9587,18 @@ function addWallIntersectionBreakpointsBySide(w,sideBreaks){
 var INTERIOR_FINISH_MM=12;
 function wallCornerExtensionMm(w,atEnd){
   var px=atEnd?w.x2:w.x1, py=atEnd?w.y2:w.y1;
+  var wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
+  if(wlen<1) return 0;
   var best=0;
   DATA.walls.forEach(function(o){
     if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen2=odx*odx+ody*ody;
     if(olen2<1) return;
+    // 延長が必要なのはL字・T字など、壁面同士が角度を持って交差する接合だけ。
+    // 同一直線／ほぼ平行な継ぎ足し壁まで延長すると、接続先の壁を越えて
+    // 内装仕上げ面が薄い板として露出する（例: W1778673921743→W1778673921741）。
+    var sinAngle=Math.abs(wdx*ody-wdy*odx)/(wlen*Math.sqrt(olen2));
+    if(sinAngle<0.12) return; // 約7度未満は平行接続として端で突き合わせる
     var t=((px-o.x1)*odx+(py-o.y1)*ody)/olen2;
     if(t<-0.08 || t>1.08) return; // 相手の壁のセンターライン範囲付近に投影されるものだけ対象
     var qx=o.x1+odx*t, qy=o.y1+ody*t;
@@ -9925,6 +9932,14 @@ function buildWall3D(w){
     var fenceMat;
     try{ fenceMat=makeExteriorWallMaterial(w,fl,len); }
     catch(e){ fenceMat=new THREE.MeshStandardMaterial({color:w.color||0xdadfdc,roughness:0.85}); }
+    // 通常壁用マテリアルは階高を基準にテクスチャの縦リピート数を決める。
+    // 高さ1.1mのバルコニーフェンスへそのまま貼ると縦方向だけ圧縮されるため、
+    // フェンス片の実寸でUV密度を再計算し、長さ・高さ変更後も柄の比率を保つ。
+    if(fenceMat.map){
+      setTextureRepeatNoDistort(fenceMat.map,segLen,FENCE_H,wallTextureTileHeight());
+      applyTextureFlip(fenceMat.map,resolveExteriorWallAppearance(w));
+      fenceMat.map.needsUpdate=true;
+    }
     var panel=new THREE.Mesh(new THREE.BoxGeometry(segLen,FENCE_H,w.thick*U),fenceMat);
     panel.position.set(x1+dirX*mid,fy+FENCE_H/2,z1+dirZ*mid);
     panel.rotation.y=rotY;
@@ -9936,13 +9951,6 @@ function buildWall3D(w){
     kasa.rotation.y=rotY;
     kasa.castShadow=true; kasa.receiveShadow=true;
     wallGroup.add(kasa);
-    // 根元の水切り
-    var mizuMat=new THREE.MeshStandardMaterial({color:0x5e6266,roughness:0.6,metalness:0.3});
-    var mizu=new THREE.Mesh(new THREE.BoxGeometry(segLen,0.06,w.thick*U+0.02),mizuMat);
-    mizu.position.set(x1+dirX*mid,fy+0.03,z1+dirZ*mid);
-    mizu.rotation.y=rotY;
-    mizu.receiveShadow=true;
-    wallGroup.add(mizu);
   }
   function addWallPiece(a,b,yBase,h){
     var segLen=b-a;
