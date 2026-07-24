@@ -14137,7 +14137,13 @@ function applyWalkCulling(){
         c.setMatrixAt(idx,visible?c.userData.instanceBaseMatrices[idx]:zero);
         instanceChanged=true; changed=true;
       });
-      if(instanceChanged) c.instanceMatrix.needsUpdate=true;
+      if(instanceChanged){
+        c.instanceMatrix.needsUpdate=true;
+        // setMatrixAt後もInstancedMeshの境界は自動更新されない。古い境界のままだと
+        // 現在階へ復帰した家具群が視錐台外と誤判定され、近距離でも丸ごと消える。
+        c.computeBoundingBox();
+        c.computeBoundingSphere();
+      }
       return;
     }
     if(!c.userData||!c.userData.b||c.userData.selectKind!=='item') return;
@@ -14161,7 +14167,11 @@ function clearWalkCulling(){
         }
       });
       c.userData.instanceWalkVisible=null;
-      if(restored) c.instanceMatrix.needsUpdate=true;
+      if(restored){
+        c.instanceMatrix.needsUpdate=true;
+        c.computeBoundingBox();
+        c.computeBoundingSphere();
+      }
       return;
     }
     if(c.userData&&c.userData.b&&c.userData.selectKind==='item'&&c.userData.selectRef&&
