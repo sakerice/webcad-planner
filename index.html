@@ -7486,6 +7486,11 @@ function fitCameraToScene(){
 
 function build3D(){
   if(!sc3) return;
+  // 2D編集中は3Dキャンバスが非表示。ここで裏のシーンを作り直さず、
+  // 3Dへ切り替えた時のbuild3D() 1回にまとめる（表示品質・最終状態は同一）。
+  if(ST.view==='2d') return;
+  // 別の操作ですでに最新シーンを作る場合、保留中のGLB完了バッチは重複するため破棄。
+  if(_gltfRebuildTimer){clearTimeout(_gltfRebuildTimer);_gltfRebuildTimer=null;_gltfRebuildBatchStartedAt=0;}
   syncExteriorWallSettings();
   ensureInteriorWallSettings();
   ensureRoofAppearance();
@@ -7664,12 +7669,54 @@ function mark3DSelectable(root, ref, kind){
   return root;
 }
 
+function getSelectableRoots3D(ref){
+  if(!sc3 || !ref) return [];
+  var roots=[];
+  sc3.traverse(function(o){
+    if(!o.userData || o.userData.selectRef!==ref) return;
+    if(o.parent && o.parent.userData && o.parent.userData.selectRef===ref) return;
+    roots.push(o);
+  });
+  return roots;
+}
+function canPartiallyMoveItem3D(ref){
+  if(!ref || DATA.items.indexOf(ref)<0 || isOpeningItemType(ref.type)) return false;
+  // 移動によって床穴・地面・排水経路など周辺形状も変わるものは全再構築する。
+  return ['roof','site-rect','foundation','stair','stair-corner','downspout'].indexOf(ref.type)<0;
+}
+function capturePartial3DMove(ref){
+  if(!canPartiallyMoveItem3D(ref)) return null;
+  var roots=getSelectableRoots3D(ref);
+  if(!roots.length) return null; // 未ロードのGLBやInstancedMeshは安全側へフォールバック
+  return roots.map(function(root){return {root:root,position:root.position.clone()};});
+}
+function applyPartial3DMove(captured,dx,dy,dz){
+  if(!captured || !captured.length) return false;
+  captured.forEach(function(entry){
+    entry.root.position.set(entry.position.x+dx,entry.position.y+dy,entry.position.z+dz);
+    entry.root.updateMatrixWorld(true);
+  });
+  remove3DSelectionHelpers();
+  add3DSelectionMarker();
+  add3DMoveGizmo();
+  if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+  if(typeof invalidate3D==='function') invalidate3D();
+  return true;
+}
+
 // ウォークスルー再生中は選択ハイライト(赤ボックス・選択中ラベル・移動ギズモ)を場面から除去する
 function remove3DSelectionHelpers(){
   if(!sc3) return;
   var rm=[];
-  sc3.traverse(function(o){ if(o.userData&&(o.userData.selectionHelper||o.userData.moveGizmo)) rm.push(o); });
-  rm.forEach(function(o){ if(o.parent) o.parent.remove(o); });
+  sc3.traverse(function(o){
+    if(!o.userData || !(o.userData.selectionHelper||o.userData.moveGizmo)) return;
+    if(o.parent && o.parent.userData && (o.parent.userData.selectionHelper||o.parent.userData.moveGizmo)) return;
+    rm.push(o);
+  });
+  rm.forEach(function(o){
+    if(o.parent) o.parent.remove(o);
+    disposeObj(o);
+  });
 }
 function add3DSelectionMarker(){
   if(!sc3 || !ST.selected) return;
@@ -7831,6 +7878,7 @@ function start3DGizmoDrag(e){
   GIZMO_DRAG.startX=e.clientX;
   GIZMO_DRAG.startY=e.clientY;
   GIZMO_DRAG.orig=JSON.parse(JSON.stringify(ST.selected));
+  GIZMO_DRAG.partialRoots=capturePartial3DMove(ST.selected);
   GIZMO_DRAG.saved=false;
   if(orbit) orbit.enabled=false;
   return true;
@@ -7857,17 +7905,23 @@ function apply3DGizmoDrag(e){
   }
   draw2d();
   updateProps();
-  rebuild3D();
+  var dx=ref.x!==undefined?(ref.x-gd.orig.x)*U:0;
+  var dz=ref.y!==undefined?(ref.y-gd.orig.y)*U:0;
+  var dy=((ref.elev||0)-(gd.orig.elev||0))*U;
+  if(!applyPartial3DMove(gd.partialRoots,dx,dy,dz)) rebuild3D();
 }
 
 function finish3DGizmoDrag(){
+  var usedPartial=!!(GIZMO_DRAG.partialRoots&&GIZMO_DRAG.partialRoots.length);
   GIZMO_DRAG.active=false;
   GIZMO_DRAG.axis=null;
   GIZMO_DRAG.ref=null;
   GIZMO_DRAG.orig=null;
+  GIZMO_DRAG.partialRoots=null;
   if(orbit) orbit.enabled=true;
   draw2d();
-  rebuild3D();
+  if(!usedPartial) rebuild3D();
+  else if(typeof invalidate3D==='function') invalidate3D();
 }
 
 function getSelectionBox3D(ref){
@@ -8175,6 +8229,18 @@ function removeObjectRef(obj){
   return true;
 }
 
+function refresh3DSelectionOnly(){
+  if(!sc3) return;
+  remove3DSelectionHelpers();
+  add3DSelectionMarker();
+  add3DMoveGizmo();
+  if(typeof invalidate3D==='function') invalidate3D();
+}
+function selectionNeedsFull3DRebuild(previous,next){
+  // FMP家具は未選択時にInstancedMesh、選択時に個別メッシュへ切り替わる。
+  return !!((previous&&isFmpItemType(previous.type))||(next&&isFmpItemType(next.type)));
+}
+
 function handle3DPointerPick(e){
   if(ST.tool!=='select' && ST.tool!=='erase') return;
   var ref=pickSelectable3D(e);
@@ -8182,11 +8248,15 @@ function handle3DPointerPick(e){
     if(ref) removeObjectRef(ref);
     return;
   }
+  var previous=ST.selected;
   ST.selectAll=false;
   ST.selected=ref;
   updateProps();
   draw2d();
-  if(ren) rebuild3D();
+  if(ren){
+    if(selectionNeedsFull3DRebuild(previous,ref)) rebuild3D();
+    else refresh3DSelectionOnly();
+  }
 }
 function toggleLightPanel(){
   var lp=document.getElementById('light-panel');
@@ -12566,6 +12636,23 @@ function getGltfLoader(){
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
 var MODEL_ASSET_VER = 5;
+var _gltfRebuildTimer=null;
+var _gltfRebuildBatchStartedAt=0;
+function scheduleGltfRebuild3D(){
+  var now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+  if(!_gltfRebuildBatchStartedAt) _gltfRebuildBatchStartedAt=now;
+  if(_gltfRebuildTimer) clearTimeout(_gltfRebuildTimer);
+  // 近いタイミングで完了したモデルをまとめる。低速端末でも500ms以上は待たせない。
+  var delay=(now-_gltfRebuildBatchStartedAt>=500)?0:120;
+  _gltfRebuildTimer=setTimeout(function(){
+    _gltfRebuildTimer=null;
+    _gltfRebuildBatchStartedAt=0;
+    // 2D表示中は次回3Dへ入る際に必ずbuild3Dされるため、裏での再構築は不要。
+    if(!sc3 || ST.view==='2d') return;
+    rebuild3D();
+    if(typeof invalidate3D==='function') invalidate3D();
+  },delay);
+}
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
@@ -12578,14 +12665,12 @@ function ensureGltfModel(url){
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
     delete _modelFailed[url];
-    rebuild3D();
-    if(typeof invalidate3D==='function') invalidate3D();
+    scheduleGltfRebuild3D();
   },undefined,function(err){
     _modelLoading[url]=false;
     _modelFailed[url]=true;
     console.warn('GLB load failed; using fallback geometry:',url,err);
-    rebuild3D();
-    if(typeof invalidate3D==='function') invalidate3D();
+    scheduleGltfRebuild3D();
   });
   return false;
 }
@@ -12799,6 +12884,7 @@ function finalizeFmpInstancePools(){
       inst.instanceMatrix.needsUpdate=true;
       inst.userData.b=true;
       inst.userData.instanceRefs=entries.map(function(e){return e.it;});
+      inst.userData.instanceBaseMatrices=entries.map(function(e){return e.matrix.clone().multiply(sub.localMatrix);});
       inst.userData.selectKind='item';
       sc3.add(inst);
     });
@@ -14015,6 +14101,7 @@ function walkCullSkipType(t){
 function applyWalkCulling(){
   if(!sc3) return;
   var fl=WALK.floor;
+  var changed=false;
   var zones=[];
   DATA.items.forEach(function(it){
     if(isStairPartType(it.type) && Math.abs(it.floor-fl)<=1){
@@ -14029,18 +14116,52 @@ function applyWalkCulling(){
     }
     return false;
   }
+  function shouldShow(ref){
+    if(!ref || walkCullSkipType(ref.type)) return true;
+    if(ref.floor!==fl && !nearStairs(ref)) return false;
+    // 遠距離家具は壁越し・別室で画面へ寄与しにくい。移動に合わせ500msごとに復帰する。
+    var cx=(ref.x+(ref.w||0)/2)*U, cz=(ref.y+(ref.d||0)/2)*U;
+    return Math.hypot(cx-WALK.x,cz-WALK.z)<=18;
+  }
   sc3.children.forEach(function(c){
+    if(c.isInstancedMesh && c.userData && c.userData.instanceRefs && c.userData.instanceBaseMatrices){
+      var zero=new THREE.Matrix4().makeScale(0,0,0);
+      var states=c.userData.instanceWalkVisible||(c.userData.instanceWalkVisible=[]);
+      var instanceChanged=false;
+      c.userData.instanceRefs.forEach(function(ref,idx){
+        var visible=shouldShow(ref);
+        if(states[idx]===visible) return;
+        states[idx]=visible;
+        c.setMatrixAt(idx,visible?c.userData.instanceBaseMatrices[idx]:zero);
+        instanceChanged=true; changed=true;
+      });
+      if(instanceChanged) c.instanceMatrix.needsUpdate=true;
+      return;
+    }
     if(!c.userData||!c.userData.b||c.userData.selectKind!=='item') return;
     var ref=c.userData.selectRef;
     if(!ref||typeof ref.floor!=='number'||walkCullSkipType(ref.type)) return;
-    c.visible=(ref.floor===fl)||nearStairs(ref);
+    var visible=shouldShow(ref);
+    if(c.visible!==visible){c.visible=visible;changed=true;}
   });
   _walkCullApplied=true;
+  if(changed && typeof invalidate3D==='function') invalidate3D();
 }
 function clearWalkCulling(){
   if(!sc3||!_walkCullApplied) return;
   _walkCullApplied=false;
   sc3.children.forEach(function(c){
+    if(c.isInstancedMesh && c.userData && c.userData.instanceBaseMatrices){
+      var restored=false;
+      c.userData.instanceBaseMatrices.forEach(function(matrix,idx){
+        if(c.userData.instanceWalkVisible && c.userData.instanceWalkVisible[idx]===false){
+          c.setMatrixAt(idx,matrix); restored=true;
+        }
+      });
+      c.userData.instanceWalkVisible=null;
+      if(restored) c.instanceMatrix.needsUpdate=true;
+      return;
+    }
     if(c.userData&&c.userData.b&&c.userData.selectKind==='item'&&c.userData.selectRef&&
        !walkCullSkipType(c.userData.selectRef.type)){
       c.visible=true;
