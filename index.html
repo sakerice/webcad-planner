@@ -14121,10 +14121,9 @@ function applyWalkCulling(){
   }
   function shouldShow(ref){
     if(!ref || walkCullSkipType(ref.type)) return true;
-    if(ref.floor!==fl && !nearStairs(ref)) return false;
-    // 遠距離家具は壁越し・別室で画面へ寄与しにくい。移動に合わせ500msごとに復帰する。
-    var cx=(ref.x+(ref.w||0)/2)*U, cz=(ref.y+(ref.d||0)/2)*U;
-    return Math.hypot(cx-WALK.x,cz-WALK.z)<=18;
+    // 現在階は距離で消さず、カメラの視錐台に基づくThree.js標準カリングへ任せる。
+    // 距離だけで隠すと、長い廊下などで正面に見えている家具まで消えてしまう。
+    return ref.floor===fl || nearStairs(ref);
   }
   sc3.children.forEach(function(c){
     if(c.isInstancedMesh && c.userData && c.userData.instanceRefs && c.userData.instanceBaseMatrices){
