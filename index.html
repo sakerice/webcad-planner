@@ -11489,7 +11489,9 @@ function buildItem3D(it){
   }
   if(it.type==='roof'){
     build3DRoofItem(grp,it,it.w*U,it.d*U);
-    if(!isInt && exteriorDetailEnabled('gutters') && (it.gutterMode||'auto')!=='off'){
+    // 雨樋は外観用ディテール。ウォークスルーでは屋根のローカル形状が室内側へ
+    // 張り出して見えるケースがあるため生成しない（内観3Dと同じ扱い）。
+    if(!isInt && !isWalkView() && exteriorDetailEnabled('gutters') && (it.gutterMode||'auto')!=='off'){
       build3DRoofGutters(grp,it,it.w*U,it.d*U,-grp.position.y,{eavesOnly:(it.gutterMode==='eaves')});
     }
     mark3DSelectable(grp,it,'item'); sc3.add(grp);
@@ -13447,6 +13449,50 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   out.slab=slab;
   return out;
 }
+// 部屋の直上に上階の部屋または屋根があるかを、部屋内の代表点で判定する。
+// 屋根は回転できるため isInsideItem を使い、わずかな接触だけでは天井を作らない。
+function roomHasCoverAbove(r){
+  var upperFloor=r.floor+1;
+  var upperRooms=DATA.rooms.filter(function(u){return !u.hidden3D&&u.floor===upperFloor;});
+  var upperRoofs=DATA.items.filter(function(it){return !it.hidden3D&&it.floor===upperFloor&&it.type==='roof';});
+  if(!upperRooms.length&&!upperRoofs.length) return false;
+  var fractions=[0.18,0.5,0.82];
+  for(var ix=0;ix<fractions.length;ix++) for(var iz=0;iz<fractions.length;iz++){
+    var px=r.x+r.w*fractions[ix], pz=r.y+r.d*fractions[iz];
+    var roomCovered=upperRooms.some(function(u){
+      return px>=u.x&&px<=u.x+u.w&&pz>=u.y&&pz<=u.y+u.d;
+    });
+    if(roomCovered||upperRoofs.some(function(roof){return isInsideItem(roof,px,pz);})) return true;
+  }
+  return false;
+}
+// 実体の天井面。編集用の内観3Dでは上から部屋を操作できるよう生成せず、
+// ウォークスルー／外観でのみ表示する。階段位置には床と同じ開口を設ける。
+function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
+  var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
+  var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+  var ceiling;
+  if(!holes||!holes.length){
+    ceiling=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeiling);
+    ceiling.rotation.x=-Math.PI/2;
+    ceiling.position.set(rcx,ceilY-0.012,rcz);
+  } else {
+    var outline=new THREE.Shape();
+    outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
+    holes.forEach(function(hole){
+      var path=new THREE.Path();
+      hole.forEach(function(p,i){if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z);});
+      path.closePath(); outline.holes.push(path);
+    });
+    var geo=new THREE.ShapeGeometry(outline);
+    geo.rotateX(-Math.PI/2);
+    ceiling=new THREE.Mesh(geo,matCeiling);
+    ceiling.position.y=ceilY-0.012;
+  }
+  ceiling.castShadow=false; ceiling.receiveShadow=true;
+  ceiling.userData={b:true,ceiling:true,roomId:r.id};
+  return ceiling;
+}
 function buildRooms3D(flFilt){
   // 内観: 配置ライトを主役にするため自動ルームライトはさらに暗く・やや間引く。
   // 外観: 配置ライトの実光源を生成しない代わりに自動ルームライトを強め、数は大幅に間引く(性能対策)
@@ -13464,8 +13510,10 @@ function buildRooms3D(flFilt){
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isIndoorView;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
+  var matCeiling=!isInt ? new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}) : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
+  var ceilingStairQuadsByFloor={};
   DATA.rooms.forEach(function(r){
     if(stairQuadsByFloor[r.floor]===undefined) stairQuadsByFloor[r.floor]=stairwellQuadsForFloor(r.floor);
   });
@@ -13504,6 +13552,15 @@ function buildRooms3D(flFilt){
       sc3.add(floorMeshes.slabBody);
     }
     mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
+
+    if(matCeiling&&roomHasCoverAbove(r)){
+      // 現在階の階段は、その上端にあたる天井にも開口を必要とする。
+      if(ceilingStairQuadsByFloor[r.floor]===undefined){
+        ceilingStairQuadsByFloor[r.floor]=stairwellQuadsForFloor(r.floor+1);
+      }
+      var ceilingHoles=stairwellHolesForRoom(r,ceilingStairQuadsByFloor);
+      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles));
+    }
 
 	    // Ceiling downlights
 	    // ユーザーがこの部屋にライトを設置している場合、屋内ビュー(内観・ウォークスルー)
