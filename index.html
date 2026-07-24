@@ -12176,13 +12176,16 @@ function getGltfLoader(){
   }
   return _gltfLoader;
 }
+// GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
+var MODEL_ASSET_VER = 2;
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
   if(_modelLoading[url]) return false;
   _modelLoading[url]=true;
   _modelFailed[url]=false;
-  getGltfLoader().load(url,function(gltf){
+  var fetchUrl = url + (url.indexOf('?')<0 ? '?v='+MODEL_ASSET_VER : '');
+  getGltfLoader().load(fetchUrl,function(gltf){
     if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;

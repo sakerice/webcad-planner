@@ -292,8 +292,15 @@ if balc_empty:
 balc_empty = bpy.data.objects.new('nh_balc', None)
 bpy.context.scene.collection.objects.link(balc_empty)
 balc_empty.location = (bx, -FD/2, 0)
+# 頂点データをアンカー(取付壁面・階床)基準のローカル座標へベイクする。
+# オブジェクト変換に頼ると glTF エクスポート時に二重変位するため、
+# メッシュ自体をローカル化し、子のローカル変換はゼロにする
+import mathutils
+balc_main.data.transform(mathutils.Matrix.Translation((-bx, FD/2, 0)) @ balc_main.matrix_world)
+balc_main.matrix_world = mathutils.Matrix.Identity(4)
 balc_main.parent = balc_empty
-balc_main.matrix_parent_inverse = balc_empty.matrix_world.inverted()
+balc_main.matrix_parent_inverse.identity()
+balc_main.location = (0, 0, 0)
 wall.name = 'nh_mid_wall'
 uv_project(wall)
 join_group('nh_mid_trim', trims)
