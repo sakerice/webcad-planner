@@ -2924,7 +2924,7 @@ input[type="reset"]:focus-visible{
         <option value="0">なし</option>
       </select>
       <div class="mobile-only sidebar-mobile-shift">
-        <button id="mobile-shift-btn" class="pbtn sec snap-shift-btn" type="button" onclick="toggleMobileShift()">仮想Shift: OFF</button>
+        <button id="mobile-shift-btn" class="pbtn sec snap-shift-btn active" type="button" onclick="toggleMobileShift()">仮想Shift: ON</button>
         <div class="sidebar-settings-note">ONで回転角度/近接オブジェクトスナップを有効化</div>
       </div>
       <div class="sidebar-settings-label wall-height-label">壁高さ(mm)</div>
@@ -4197,6 +4197,8 @@ function updateProps(){
   if(it.type==='ruler'){
     html += '<div class="ph">定規</div>';
     html += '<div class="pr"><div class="pl">測定長さ</div><input class="pi" type="text" value="'+Math.round(rulerLengthMm(it))+'mm" readonly></div>';
+    html += '<div class="pr"><div class="pl">補助線の長さ(mm)</div><input class="pi" type="number" step="100" value="'+Math.round(Number(it.extLen)||0)+'" onchange="updateSelectedProp(\'extLen\',+this.value)"></div>';
+    html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">両端から測定対象へ垂直に伸びる補助線。負の値で反対側に伸びます</div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
@@ -5602,6 +5604,18 @@ function drawRuler2d(it,sc,preview){
   ctx.moveTo(-half-tickHalf,tickHalf); ctx.lineTo(-half+tickHalf,-tickHalf);
   ctx.moveTo(half-tickHalf,tickHalf); ctx.lineTo(half+tickHalf,-tickHalf);
   ctx.stroke();
+  // 寸法補助線(ひげ線): 測定対象へ向けて両端から垂直に伸ばす。
+  // extLen(mm)の符号で伸ばす側を切り替える(JIS製図: 補助線は寸法線を僅かに超えて描く)
+  var extLen=Number(it.extLen)||0;
+  if(Math.abs(extLen)>=1){
+    var e=extLen*sc;
+    var overhang=Math.sign(e)*-5; // 寸法線の反対側へ僅かに突き出す
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(-half,overhang); ctx.lineTo(-half,e);
+    ctx.moveTo(half,overhang); ctx.lineTo(half,e);
+    ctx.stroke();
+  }
   var labelOffset=Math.max(18,Math.min(28,180*sc));
   drawDimLabel(0,-labelOffset,Math.round(len)+'mm',preview?'rgba(47,128,237,0.72)':(selected?'rgba(233,69,96,0.9)':'rgba(47,128,237,0.84)'),'#fff');
   ctx.restore();
@@ -13904,6 +13918,9 @@ function setView(v){
     }
     build3D();
     if(v==='3d-ext') setTimeout(fitCameraToScene, 100);
+    // 2Dで選択中のオブジェクトがあれば、3Dでも設定パネルを引き継いで開く
+    // (ウォークスルーはHUDと干渉するため除外)
+    if(ST.selected && v!=='3d-walk') updateProps();
   }
   if(v==='2d') draw2d();
 }
@@ -14639,6 +14656,27 @@ function drawDim(){
     ctx.restore();
   }
 
+  // 全長寸法から除外する外構オブジェクト(建物躯体のみを計測対象にする)
+  function isSiteFurnishingItemType(t){
+    return t==='car'||t==='bicycle'||t==='bicycle-fold'||t==='tree'||
+      t==='ac-outdoor'||t==='water-heater'||t==='gas-heater'||t==='meter-box'||
+      t==='sewer-pit'||t==='downspout'||t==='fence'||t==='wood-fence'||
+      t==='exterior-stair'||t==='ramp';
+  }
+  // 建物全長の外形を先に求める(敷地寸法線のオフセット計算に使う)
+  var building = [].concat(DATA.walls, DATA.rooms, DATA.items).filter(function(x){
+    return x.floor===ST.floor && x.type !== 'site-rect' && !isPlanAnnotationType(x.type) && !isOpeningItemType(x.type) && !isContextExteriorItemType(x.type) && !isSiteFurnishingItemType(x.type);
+  });
+  var bMinX=Infinity, bMinY=Infinity, bMaxX=-Infinity, bMaxY=-Infinity;
+  building.forEach(function(o){
+    getObjBounds(o).forEach(function(p){
+      if(!isFiniteCanvasValue(p.x) || !isFiniteCanvasValue(p.y)) return;
+      bMinX=Math.min(bMinX, p.x); bMinY=Math.min(bMinY, p.y);
+      bMaxX=Math.max(bMaxX, p.x); bMaxY=Math.max(bMaxY, p.y);
+    });
+  });
+
+  var pxScale=ST.zoom*0.05;
   var sites = ST.floor===1 ? DATA.items.filter(function(i){return i.type==='site-rect';}) : [];
   sites.forEach(function(s){
     var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
@@ -14647,23 +14685,19 @@ function drawDim(){
       minX=Math.min(minX, p.x); minY=Math.min(minY, p.y);
       maxX=Math.max(maxX, p.x); maxY=Math.max(maxY, p.y);
     });
-    drawBoxDim(minX, minY, maxX, maxY, 'rgba(60,120,60,0.5)', 60, "敷地 ");
+    // 敷地寸法線は全長寸法線(オフセット70+ラベル)より必ず外側に描く
+    var offSite=60;
+    if(building.length>0 && isFiniteCanvasValue(bMinX) && isFiniteCanvasValue(bMinY)){
+      var gapTopPx=(bMinY-minY)*pxScale;
+      var gapLeftPx=(bMinX-minX)*pxScale;
+      offSite=Math.max(60, 104-gapTopPx, 104-gapLeftPx);
+    }
+    drawBoxDim(minX, minY, maxX, maxY, 'rgba(60,120,60,0.5)', offSite, "敷地 ");
   });
 
-  var building = [].concat(DATA.walls, DATA.rooms, DATA.items).filter(function(x){
-    return x.floor===ST.floor && x.type !== 'site-rect' && !isPlanAnnotationType(x.type) && !isOpeningItemType(x.type) && !isContextExteriorItemType(x.type);
-  });
   if(building.length>0){
-    var minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-    building.forEach(function(o){
-      getObjBounds(o).forEach(function(p){
-        if(!isFiniteCanvasValue(p.x) || !isFiniteCanvasValue(p.y)) return;
-        minX=Math.min(minX, p.x); minY=Math.min(minY, p.y);
-        maxX=Math.max(maxX, p.x); maxY=Math.max(maxY, p.y);
-      });
-    });
     // 寸法線は壁体(躯体)の外側に出す(JIS製図: 寸法線は図形と重ねない)。壁厚の半分より確実に大きいオフセットを確保する。
-    drawBoxDim(minX, minY, maxX, maxY, 'rgba(40,70,160,0.6)', 70);
+    drawBoxDim(bMinX, bMinY, bMaxX, bMaxY, 'rgba(40,70,160,0.6)', 70);
   }
 
   var sc2 = ST.zoom*0.05;
@@ -14674,9 +14708,9 @@ function drawDim(){
     drawDimLabel(sx, sy, text, bgColor, '#fff');
   }
 
-  // ── Wall length labels ──
+  // ── Wall length labels(選択中の壁のみ表示) ──
   if(ST.showDim && ST.zoom>=0.4){
-    var fw2=DATA.walls.filter(function(w){return w.floor===ST.floor;});
+    var fw2=DATA.walls.filter(function(w){return w.floor===ST.floor && ST.selected===w;});
     fw2.forEach(function(w){
       if(!isFiniteCanvasValue(w.x1) || !isFiniteCanvasValue(w.y1) || !isFiniteCanvasValue(w.x2) || !isFiniteCanvasValue(w.y2)) return;
       var len=Math.sqrt((w.x2-w.x1)*(w.x2-w.x1)+(w.y2-w.y1)*(w.y2-w.y1));
@@ -14688,46 +14722,43 @@ function drawDim(){
       if(ang>Math.PI/2 || ang<-Math.PI/2) ang+=Math.PI;
       ctx.save();
       ctx.translate(cx3, cy3); ctx.rotate(ang);
-      var isSel=(ST.selected===w);
       drawDimLabel(0, -(w.thick*sc2/2+14), Math.round(len)+'mm',
-        isSel?'rgba(233,69,96,0.9)':'rgba(60,60,60,0.62)',
+        'rgba(233,69,96,0.9)',
         '#fff');
       ctx.restore();
     });
   }
 
-  // ── Items: dimension labels for all placed items ──
+  // ── Items: dimension labels(選択中のアイテムのみ表示) ──
   if(ST.showDim && ST.zoom>=0.4){
-    var fi2=DATA.items.filter(function(i){return i.floor===ST.floor&&i.type!=='site-rect'&&i.type!=='tree'&&!isPlanAnnotationType(i.type)&&!isContextExteriorItemType(i.type);});
+    var fi2=DATA.items.filter(function(i){return i.floor===ST.floor&&i.type!=='site-rect'&&i.type!=='tree'&&!isPlanAnnotationType(i.type)&&!isContextExteriorItemType(i.type)&&ST.selected===i;});
     fi2.forEach(function(it){
       if(!isFiniteCanvasValue(it.x) || !isFiniteCanvasValue(it.y) || !isFiniteCanvasValue(it.w) || !isFiniteCanvasValue(it.d)) return;
       var pose=getItemDisplayPose(it);
       if(!isFiniteCanvasValue(pose.x) || !isFiniteCanvasValue(pose.y)) return;
-      var isSel=(ST.selected===it);
       var hw2=it.w*sc2/2, hd2=it.d*sc2/2;
-      var bg=isSel?'rgba(233,69,96,0.88)':'rgba(60,60,60,0.58)';
+      var bg='rgba(233,69,96,0.88)';
       // Width label (below item)
       drawItemDimLabelAtLocal(pose, 0, hd2+14, Math.round(it.w)+'mm', bg);
       // Depth label (right side) — always show for thin wall openings when selected.
-      if(it.d*sc2 > 40 || (isOpeningItemType(it.type) && isSel)){
+      if(it.d*sc2 > 40 || isOpeningItemType(it.type)){
         drawItemDimLabelAtLocal(pose, hw2+14, 0, Math.round(it.d)+'mm', bg);
       }
     });
   }
 
-  // ── Rooms: show W×D below room name ──
+  // ── Rooms: show W×D below room name(選択中の部屋のみ表示) ──
   if(ST.showDim && ST.zoom>=0.35){
-    var fr2=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
+    var fr2=DATA.rooms.filter(function(r){return r.floor===ST.floor && ST.selected===r;});
     fr2.forEach(function(r){
       if(!isFiniteCanvasValue(r.x) || !isFiniteCanvasValue(r.y) || !isFiniteCanvasValue(r.w) || !isFiniteCanvasValue(r.d)) return;
       var p=w2c(r.x+r.w/2, r.y+r.d/2);
-      var isSel=(ST.selected===r);
       // Small dims below room label
       ctx.save();
       var fsz=Math.max(8, ST.zoom*3.5);
       ctx.font=fsz+'px "Noto Sans JP",sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle=isSel?'rgba(233,69,96,0.85)':'rgba(80,80,100,0.55)';
+      ctx.fillStyle='rgba(233,69,96,0.85)';
       ctx.fillText(Math.round(r.w)+'×'+Math.round(r.d)+'mm', p.cx, p.cy+Math.max(12,ST.zoom*5)+6);
       ctx.restore();
     });
@@ -16451,6 +16482,7 @@ initNativeColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
 applyMobileUI();
+updateMobileShiftButton();
 </script>
 </body>
 </html>
