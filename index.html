@@ -3243,7 +3243,7 @@ var ISIZES = {
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
-  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120},
+  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
   'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'gas-heater':{w:470,d:240}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
   'downspout':{w:150,d:150},
@@ -3344,7 +3344,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
@@ -3784,7 +3784,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
@@ -4051,51 +4051,86 @@ function setPropsBodyHtml(body,html,it){
   });
 }
 
+function rectSnapBounds(x,y,w,d,rot){
+  var cx=x+w/2, cy=y+d/2, rad=(rot||0)*Math.PI/180;
+  var ex=Math.abs(Math.cos(rad))*w/2+Math.abs(Math.sin(rad))*d/2;
+  var ey=Math.abs(Math.sin(rad))*w/2+Math.abs(Math.cos(rad))*d/2;
+  return {left:cx-ex,right:cx+ex,top:cy-ey,bottom:cy+ey,cx:cx,cy:cy};
+}
 function getEdgeCandidates(excludeId){
-  var cx={}, cy={};  // deduplicate
+  var ex={}, ey={}, cx={}, cy={};  // deduplicate edges and centers separately
   var fl=ST.floor;
   DATA.items.filter(function(it){return it.floor===fl&&it.id!==excludeId&&it.type!=='site-rect'&&!isPlanAnnotationType(it.type);}).forEach(function(it){
     if(!isFiniteCanvasValue(it.x) || !isFiniteCanvasValue(it.y) || !isFiniteCanvasValue(it.w) || !isFiniteCanvasValue(it.d)) return;
-    [it.x, it.x+it.w, it.x+it.w/2].forEach(function(v){cx[Math.round(v)]=v;});
-    [it.y, it.y+it.d, it.y+it.d/2].forEach(function(v){cy[Math.round(v)]=v;});
+    var b=rectSnapBounds(it.x,it.y,it.w,it.d,it.rot||0);
+    [b.left,b.right].forEach(function(v){ex[Math.round(v)]=v;});
+    [b.top,b.bottom].forEach(function(v){ey[Math.round(v)]=v;});
+    cx[Math.round(b.cx)]=b.cx; cy[Math.round(b.cy)]=b.cy;
   });
   DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
-    [r.x, r.x+r.w, r.x+r.w/2].forEach(function(v){cx[Math.round(v)]=v;});
-    [r.y, r.y+r.d, r.y+r.d/2].forEach(function(v){cy[Math.round(v)]=v;});
+    [r.x,r.x+r.w].forEach(function(v){ex[Math.round(v)]=v;});
+    [r.y,r.y+r.d].forEach(function(v){ey[Math.round(v)]=v;});
+    cx[Math.round(r.x+r.w/2)]=r.x+r.w/2; cy[Math.round(r.y+r.d/2)]=r.y+r.d/2;
   });
   DATA.walls.filter(function(w){return w.floor===fl;}).forEach(function(w){
-    [w.x1,w.x2].forEach(function(v){cx[Math.round(v)]=v;});
-    [w.y1,w.y2].forEach(function(v){cy[Math.round(v)]=v;});
+    var half=wallThicknessMm(w)/2;
+    if(Math.abs(w.x2-w.x1)<Math.abs(w.y2-w.y1)){
+      var wx=(w.x1+w.x2)/2;
+      [wx-half,wx+half].forEach(function(v){ex[Math.round(v)]=v;});
+      cx[Math.round(wx)]=wx;
+      [Math.min(w.y1,w.y2),Math.max(w.y1,w.y2)].forEach(function(v){ey[Math.round(v)]=v;});
+    }else{
+      var wy=(w.y1+w.y2)/2;
+      [wy-half,wy+half].forEach(function(v){ey[Math.round(v)]=v;});
+      cy[Math.round(wy)]=wy;
+      [Math.min(w.x1,w.x2),Math.max(w.x1,w.x2)].forEach(function(v){ex[Math.round(v)]=v;});
+    }
   });
   return {
-    x:Object.values(cx),
-    y:Object.values(cy)
+    edgeX:Object.values(ex), edgeY:Object.values(ey),
+    centerX:Object.values(cx), centerY:Object.values(cy),
+    // Resize snapping intentionally uses physical edges, not center lines.
+    x:Object.values(ex), y:Object.values(ey)
   };
 }
 
-function applyEdgeSnap(x, y, w, d, excludeId){
+function nearestAxisDelta(values,candidates,thresh){
+  var best=null, min=thresh;
+  values.forEach(function(v){candidates.forEach(function(c){
+    var delta=c-v, dist=Math.abs(delta);
+    if(dist<min){min=dist;best={delta:delta,target:c};}
+  });});
+  return best;
+}
+function snapRectOriginToGrid(x,y,w,d,rot){
+  var step=Number(ST.snap)||0;
+  if(!step) return {x:x,y:y};
+  var b=rectSnapBounds(x,y,w,d,rot);
+  function gridDelta(values){
+    var best=null,min=Infinity;
+    values.forEach(function(v){
+      var delta=Math.round(v/step)*step-v, dist=Math.abs(delta);
+      if(dist<min){min=dist;best=delta;}
+    });
+    return best||0;
+  }
+  // Snap a physical edge—not merely the stored origin/center—to the configured grid.
+  return {x:x+gridDelta([b.left,b.right]),y:y+gridDelta([b.top,b.bottom])};
+}
+function applyEdgeSnap(x, y, w, d, excludeId, rot){
   var thresh=EDGE_SNAP_THRESH;
   var cands=getEdgeCandidates(excludeId);
-  var bestX=null, minXd=thresh, snapXAt=null;
-  cands.x.forEach(function(c){
-    // Left edge of item snaps to c
-    var dl=Math.abs(x-c);           if(dl<minXd){minXd=dl;bestX=c;snapXAt='left';}
-    // Right edge of item snaps to c
-    var dr=Math.abs((x+w)-c);       if(dr<minXd){minXd=dr;bestX=c-w;snapXAt='right';}
-    // Center of item snaps to c
-    var dc=Math.abs((x+w/2)-c);     if(dc<minXd){minXd=dc;bestX=c-w/2;snapXAt='cx';}
-  });
-  var bestY=null, minYd=thresh, snapYAt=null;
-  cands.y.forEach(function(c){
-    var dt=Math.abs(y-c);           if(dt<minYd){minYd=dt;bestY=c;snapYAt='top';}
-    var db=Math.abs((y+d)-c);       if(db<minYd){minYd=db;bestY=c-d;snapYAt='bottom';}
-    var dc=Math.abs((y+d/2)-c);     if(dc<minYd){minYd=dc;bestY=c-d/2;snapYAt='cy';}
-  });
+  var b=rectSnapBounds(x,y,w,d,rot||0);
+  // Edge-to-edge alignment always wins while it is within the snap threshold.
+  var bestX=nearestAxisDelta([b.left,b.right],cands.edgeX,thresh);
+  var bestY=nearestAxisDelta([b.top,b.bottom],cands.edgeY,thresh);
+  // Only fall back to center alignment when no edge match is available.
+  if(!bestX) bestX=nearestAxisDelta([b.cx],cands.centerX,thresh);
+  if(!bestY) bestY=nearestAxisDelta([b.cy],cands.centerY,thresh);
   return {
-    x: bestX!==null?bestX:x,
-    y: bestY!==null?bestY:y,
-    snapX: bestX!==null, snapXVal: bestX!==null?bestX+(snapXAt==='right'?w:snapXAt==='cx'?w/2:0):null,
-    snapY: bestY!==null, snapYVal: bestY!==null?bestY+(snapYAt==='bottom'?d:snapYAt==='cy'?d/2:0):null
+    x:bestX?x+bestX.delta:x, y:bestY?y+bestY.delta:y,
+    snapX:!!bestX, snapXVal:bestX?bestX.target:null,
+    snapY:!!bestY, snapYVal:bestY?bestY.target:null
   };
 }
 
@@ -4195,7 +4230,7 @@ function updateProps(){
     ? selectedCount+'件を選択中（'+typeName+'）'
     : typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪','door-slide-s':'⇢','door-pocket':'⇥',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪','door-slide-s':'⇢','door-pocket':'⇥',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','lattice-screen':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -4390,7 +4425,7 @@ function updateProps(){
   }
   if(it.type==='wood-fence'){
     if(!it.fenceHeight) it.fenceHeight=1600;
-    if(!it.fencePattern) it.fencePattern='vertical';
+    if(!it.fencePattern) it.fencePattern='horizontal';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
     html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.fenceHeight)+'" onchange="updateSelectedProp(\'fenceHeight\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">板方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
@@ -4403,6 +4438,23 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
+  }
+  if(it.type==='lattice-screen'){
+    if(!it.latticeHeight) it.latticeHeight=1600;
+    if(!it.fencePattern) it.fencePattern='vertical';
+    if(!it.fenceTopStyle) it.fenceTopStyle='even';
+    html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.latticeHeight)+'" onchange="updateSelectedProp(\'latticeHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">格子方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
+    [['vertical','縦格子'],['horizontal','横格子']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
+    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">高さZ(mm)で浮かせて、バルコニーのルーバーや室内間仕切りに使えます</div>';
   }
   if(isContextExteriorItemType(it.type)){
     if(!isFinite(Number(it.contextHeight))) it.contextHeight=defaultContextExteriorHeight(it.type);
@@ -4887,6 +4939,11 @@ function mkItem(type,x,y,rot,floor,w,d){
     flipX:false, flipY:false, textureFlipX:false, textureFlipY:false, sScale:1, sX:0, sY:0};
   if(type==='wood-fence'){
     item.fenceHeight=1600;
+    item.fencePattern='horizontal';
+    item.fenceTopStyle='even';
+  }
+  if(type==='lattice-screen'){
+    item.latticeHeight=1600;
     item.fencePattern='vertical';
     item.fenceTopStyle='even';
   }
@@ -5192,6 +5249,14 @@ function draw2d(){
       applyOpeningModelToItem(ghost,openingGhostPreset.openingModel);
       sz={w:ghost.w,d:ghost.d};
     }
+    var ghostGrid=snapRectOriginToGrid(ghost.x,ghost.y,ghost.w,ghost.d,ghost.rot||0);
+    ghost.x=ghostGrid.x; ghost.y=ghostGrid.y;
+    if(ST.shiftKey){
+      var ghostObjectSnap=applyEdgeSnap(ghost.x,ghost.y,ghost.w,ghost.d,null,ghost.rot||0);
+      ghost.x=ghostObjectSnap.x; ghost.y=ghostObjectSnap.y;
+      ST._snapState=ghostObjectSnap;
+    }else ST._snapState=null;
+    mx=ghost.x+ghost.w/2; my=ghost.y+ghost.d/2;
     ctx.save(); ctx.globalAlpha=0.5; drawItem2d(ghost); ctx.restore();
     // Dimension label near ghost
     drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
@@ -5212,7 +5277,7 @@ function draw2d(){
   document.getElementById('st-walls').textContent='壁:'+fw.length;
   syncLockBatchUi();
   // ── Snap guide lines ──
-  if(ST._snapState&&DRAG.active){
+  if(ST._snapState&&(DRAG.active||ST.tool!=='select')){
     var sc3=ST.zoom*0.05;
     ctx.save(); ctx.setLineDash([4,3]); ctx.lineWidth=1.5;
     if(ST._snapState.snapX&&ST._snapState.snapXVal!==null){
@@ -6275,7 +6340,7 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(90,62,28,0.75)';
       ctx.lineWidth=Math.max(1,sc*18);
       ctx.beginPath();
-      if((it.fencePattern||'vertical')==='horizontal'){
+      if((it.fencePattern||'horizontal')==='horizontal'){
         for(var hi=0; hi<4; hi++){
           var yy=-hd+(it.d*sc)*(hi+0.5)/4;
           ctx.moveTo(-hw,yy); ctx.lineTo(hw,yy);
@@ -6285,6 +6350,25 @@ function drawItem2d(it){
         for(var vi=0; vi<count; vi++){
           var xx=-hw+(it.w*sc)*(vi+0.5)/count;
           ctx.moveTo(xx,-hd); ctx.lineTo(xx,hd);
+        }
+      }
+      ctx.stroke();
+    } else if(it.type === 'lattice-screen') {
+      ctx.fillStyle='rgba(176,148,104,0.30)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(107,86,54,0.8)';
+      ctx.lineWidth=Math.max(1,sc*14);
+      ctx.beginPath();
+      if((it.fencePattern||'vertical')==='horizontal'){
+        for(var lh=0; lh<3; lh++){
+          var ly=-hd+(it.d*sc)*(lh+0.5)/3;
+          ctx.moveTo(-hw,ly); ctx.lineTo(hw,ly);
+        }
+      } else {
+        var lsCount=Math.max(4,Math.min(28,Math.round(it.w/95)));
+        for(var li=0; li<lsCount; li++){
+          var lx=-hw+(it.w*sc)*(li+0.5)/lsCount;
+          ctx.moveTo(lx,-hd); ctx.lineTo(lx,hd);
         }
       }
       ctx.stroke();
@@ -6802,10 +6886,11 @@ function applyHandleDrag(cx,cy,e){
 
   if(h==='move'){
     var nx=o.x+dx, ny=o.y+dy;
-    nx=snapV(nx); ny=snapV(ny);
+    var gridSnapped=snapRectOriginToGrid(nx,ny,it.w||0,it.d||0,it.rot||0);
+    nx=gridSnapped.x; ny=gridSnapped.y;
     var useEdgeSnap=isShiftLike(e);
     if(useEdgeSnap&&it.type!=='wall'){
-      var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id);
+      var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id,it.rot||0);
       nx=snapped.x; ny=snapped.y; ST._snapState=snapped;
     } else { ST._snapState=null; }
     it.x=nx; it.y=ny;
@@ -11439,6 +11524,11 @@ function buildItem3D(it){
     _B(grp,fMat,0,0.4-drop/2,0,w3,0.8+drop,Math.max(d3,0.12));
     _B(grp,fCapMat,0,0.82,0,w3+0.04,0.06,Math.max(d3,0.14));
   }
+  else if(it.type==='lattice-screen'){
+    buildLatticeScreen3D(grp,it,w3,d3,getItemHeightValue(it)*U);
+    mark3DSelectable(grp,it,'item'); sc3.add(grp);
+    return;
+  }
   else if(it.type==='wood-fence'){
     buildWoodFence3D(grp,it,w3,d3,h);
   }
@@ -11519,6 +11609,55 @@ function build3DBalcony(grp,it,w3,d3,h){
   // 「バルコニーフェンス」スタイル(手すり壁1100mm+笠木)を使って任意に立てる
 }
 
+// 格子柵(家具): 高さZ(elev)で浮かせてバルコニーのルーバーや室内間仕切りに
+// 使える自立パネル。フェンスと同じく縦格子/横格子・上端の揃い/不揃いを選べる
+function buildLatticeScreen3D(grp,it,w3,d3,h){
+  var baseColor=it.colorCustom?it.color:0xb09468;
+  function slatMat(surfaceW,surfaceH){
+    return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.18}) ||
+      new THREE.MeshStandardMaterial({color:baseColor,roughness:0.82,metalness:0.03});
+  }
+  var railColor=new THREE.Color(it.colorCustom?it.color:'#6b5636');
+  if(it.colorCustom) railColor.multiplyScalar(0.62);
+  var railMat=makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
+    new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04});
+  var depth=Math.max(d3,0.05);
+  var pattern=it.fencePattern||'vertical';
+  var variedTop=(it.fenceTopStyle||'even')==='varied';
+  if(pattern==='horizontal'){
+    // 横格子: 両端の縦框の間に横桟を渡す(不揃い=桟の長さを交互に変える)
+    var stileW=0.06;
+    _B(grp,railMat,-w3/2+stileW/2,h/2,0,stileW,h,depth);
+    _B(grp,railMat, w3/2-stileW/2,h/2,0,stileW,h,depth);
+    var span=w3-stileW*2;
+    var boardH=0.07, gap=0.055;
+    var rows=Math.max(2,Math.floor((h-0.06)/(boardH+gap)));
+    for(var r=0;r<rows;r++){
+      var y=0.05+boardH/2+r*(boardH+gap);
+      if(y+boardH/2>h-0.03) break;
+      var rowSpan=variedTop ? span*(0.9+0.1*((r%3)/2)) : span;
+      _B(grp,slatMat(rowSpan,boardH),0,y,0,rowSpan,boardH,depth*0.8);
+    }
+  } else {
+    // 縦格子: スラット+上下(または背面)の通し枠。不揃い=スラット高を交互に変える
+    var bw=0.055, pitch=0.095;
+    var count=Math.max(3,Math.round(w3/pitch));
+    for(var i=0;i<count;i++){
+      var x=-w3/2+(i+0.5)*w3/count;
+      var slatH=variedTop ? h*(0.9+0.1*((i%3)/2)) : h;
+      _B(grp,slatMat(bw,slatH),x,slatH/2,0,Math.min(bw,w3/count*0.68),slatH,depth*0.8);
+    }
+    if(variedTop){
+      // 上端が不揃いのときは上枠を出さず、背面の桟2本で支持する
+      _B(grp,railMat,0,h*0.24,-depth*0.28,w3,0.05,depth*0.44);
+      _B(grp,railMat,0,h*0.7,-depth*0.28,w3,0.05,depth*0.44);
+    } else {
+      _B(grp,railMat,0,h-0.025,0,w3,0.05,depth);
+      _B(grp,railMat,0,0.025,0,w3,0.05,depth);
+    }
+  }
+}
+
 function buildWoodFence3D(grp,it,w3,d3,h){
   var drop=floorSlabHeightMForFloor(it.floor);
   var baseWoodColor=it.colorCustom?it.color:0x9a7a3a;
@@ -11526,24 +11665,31 @@ function buildWoodFence3D(grp,it,w3,d3,h){
     return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.88,envMapIntensity:0.16}) ||
       new THREE.MeshStandardMaterial({color:baseWoodColor,roughness:0.86,metalness:0.02});
   }
-  var dark=new THREE.MeshStandardMaterial({color:0x5d4320,roughness:0.9});
+  var frameColor=new THREE.Color(it.colorCustom?it.color:'#5d4320');
+  if(it.colorCustom) frameColor.multiplyScalar(0.62);
+  var dark=new THREE.MeshStandardMaterial({color:frameColor,roughness:0.9});
   var postMat=makeItemTextureMaterial(it,0.08,h,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) || dark;
   var railMat=makeItemTextureMaterial(it,w3,0.055,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) || dark;
   var depth=Math.max(d3,0.06);
-  var pattern=it.fencePattern||'vertical';
+  var pattern=it.fencePattern||'horizontal';
   if(pattern==='horizontal'){
-    var boardH=0.11, gap=0.065;
-    var rows=Math.max(2,Math.floor(h/(boardH+gap)));
-    for(var r=0;r<rows;r++){
-      var y=boardH/2+r*(boardH+gap)+0.04;
-      if(y+boardH/2>h) break;
-      if(r===0) _B(grp,boardMat(w3,boardH+drop),0,y-drop/2,0,w3,boardH+drop,depth);
-      else _B(grp,boardMat(w3,boardH),0,y,0,w3,boardH,depth);
+    // 目隠しフェンス風: 地面から80mmのクリアランス+横板(隙間18mm)+
+    // 支柱(キャップ付き)+上端の笠木で「外構フェンス」として読ませる
+    var clear=Math.min(0.08,h*0.1);
+    var boardH=0.14, gap=0.018;
+    var capH=0.045;
+    var yTopMax=h-capH-0.005;
+    for(var y=clear+boardH/2; y+boardH/2<=yTopMax; y+=boardH+gap){
+      _B(grp,boardMat(w3,boardH),0,y,0,w3,boardH,depth*0.55);
     }
+    // 笠木(上端の横通し材)
+    _B(grp,railMat,0,h-capH/2,0,w3+0.02,capH,depth);
     var postCount=Math.max(2,Math.floor(w3/0.9)+1);
     for(var p=0;p<postCount;p++){
-      var x=-w3/2+w3*p/(postCount-1);
-      _B(grp,postMat,x,h/2-drop/2,-depth*0.18,0.08,h+drop,depth*0.72);
+      var x=-w3/2+0.04+(w3-0.08)*p/(postCount-1);
+      _B(grp,postMat,x,(h-0.02)/2-drop/2,-depth*0.16,0.075,h-0.02+drop,depth*0.66);
+      // 支柱キャップ
+      _B(grp,railMat,x,h-0.01,-depth*0.16,0.095,0.02,depth*0.78);
     }
   } else {
     var bw=0.075, pitch=0.105;
@@ -11557,6 +11703,10 @@ function buildWoodFence3D(grp,it,w3,d3,h){
     }
     _B(grp,railMat,0,h*0.28,-depth*0.28,w3,0.055,depth*0.45);
     _B(grp,railMat,0,h*0.72,-depth*0.28,w3,0.055,depth*0.45);
+    // 端部支柱(縦板でも柵として自立して見えるように)
+    [-1,1].forEach(function(s){
+      _B(grp,postMat,s*(w3/2-0.045),h/2-drop/2,-depth*0.2,0.075,h+drop,depth*0.6);
+    });
   }
 }
 
@@ -12136,6 +12286,7 @@ function getItemHeightValue(it){
   if(it && isContextExteriorItemType(it.type)) return getContextExteriorHeight(it);
   if(it && it.type==='balcony') return balconySlabHeightMm();
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
+  if(it && it.type==='lattice-screen') return Math.max(300,Math.min(3000,it.latticeHeight||1600));
   if(it && it.type==='foundation') {
     var fh=Number(it.foundationHeight);
     if(!isFinite(fh)) fh=450;
@@ -12144,8 +12295,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1435,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1435,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -14481,6 +14632,14 @@ function placeItem(type,wx,wy){
   var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly?1:ST.floor);
   if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
   if(openingPreset) applyOpeningModelToItem(it,openingPreset.openingModel);
+  // Final dimensions (including opening presets) determine the visual edges used for placement snap.
+  it.x=wx-it.w/2; it.y=wy-it.d/2;
+  var gridPlaced=snapRectOriginToGrid(it.x,it.y,it.w,it.d,it.rot||0);
+  it.x=gridPlaced.x; it.y=gridPlaced.y;
+  if(ST.shiftKey){
+    var objectPlaced=applyEdgeSnap(it.x,it.y,it.w,it.d,null,it.rot||0);
+    it.x=objectPlaced.x; it.y=objectPlaced.y;
+  }
   applyDefaultPlacementElevation(it);
   DATA.items.push(it);ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
