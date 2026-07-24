@@ -11617,8 +11617,10 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
     return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.18}) ||
       new THREE.MeshStandardMaterial({color:baseColor,roughness:0.82,metalness:0.03});
   }
-  var railColor=new THREE.Color(it.colorCustom?it.color:'#6b5636');
-  if(it.colorCustom) railColor.multiplyScalar(0.62);
+  // 枠・桟はスラットと同系色(わずかに暗いだけ)にして、
+  // 「別部品の黒いフレーム」に見えないよう馴染ませる
+  var railColor=new THREE.Color(it.colorCustom?it.color:'#b09468');
+  railColor.multiplyScalar(0.85);
   var railMat=makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
     new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04});
   var depth=Math.max(d3,0.05);
@@ -11652,8 +11654,9 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
       _B(grp,railMat,0,h*0.24,-depth*0.28,w3,0.05,depth*0.44);
       _B(grp,railMat,0,h*0.7,-depth*0.28,w3,0.05,depth*0.44);
     } else {
-      _B(grp,railMat,0,h-0.025,0,w3,0.05,depth);
-      _B(grp,railMat,0,0.025,0,w3,0.05,depth);
+      // 上下枠はスラットと同面に納め、出っ張った「別部品のフレーム」に見せない
+      _B(grp,railMat,0,h-0.025,0,w3,0.05,depth*0.8);
+      _B(grp,railMat,0,0.025,0,w3,0.05,depth*0.8);
     }
   }
 }
