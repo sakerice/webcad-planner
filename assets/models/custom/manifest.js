@@ -1,0 +1,1 @@
+window.CUSTOM_MODEL_MANIFEST={"items":[{"id":"fmp-AirConditionerWall01","name":"壁掛けエアコン","group":"住設","category":"空調","sourceFolder":"BlenderCustom","model":"assets/models/custom/air_conditioner_wall.glb","top":"assets/models/custom/air_conditioner_wall_top.png","thumb":"assets/models/custom/air_conditioner_wall_thumb.png","w":800,"d":260,"h":295}]};

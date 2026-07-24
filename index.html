@@ -61,6 +61,7 @@ window.dispatchEvent(new Event('three-ready'));
 </script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
+<script src="assets/models/custom/manifest.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -3396,9 +3397,11 @@ var GLTF_MODEL_CONFIG = {
 };
 var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
 var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';
+var CUSTOM_MODEL_MANIFEST_URL = 'assets/models/custom/manifest.json';
 var FMP_MANIFEST_SOURCES = [
   {url:FMP_MANIFEST_URL, globalName:'FMP_MANIFEST'},
-  {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'}
+  {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'},
+  {url:CUSTOM_MODEL_MANIFEST_URL, globalName:'CUSTOM_MODEL_MANIFEST'}
 ];
 var FMP_ITEMS = {};
 var FMP_TOP_IMAGES = {};
@@ -3615,7 +3618,7 @@ function renderOpeningWindowModelToolMenu(){
   mount.innerHTML=html;
 }
 function renderFurnitureMegaLibrary(){
-  var icons={ 'バスルーム':'🛁','洗面台':'🚿','トイレ':'🚽','シャワー':'🚿','キッチン収納':'🍳','キッチン/シンク':'🚰','キッチン/コンロ':'🔥','冷蔵庫':'📦','ソファ':'🛋','チェア':'🪑','テーブル':'🍵','ベッド':'🛏','収納':'👗','引き出し':'👞','キャビネット':'▦','カーペット':'▤','カーテン':'▥','装飾':'◈','ドア':'▯','家電':'▣','キッズ':'☆','キッチン':'🍳','照明':'◉','マットレス':'▰','ミラー':'◇','絵画':'□','ペット':'○','植物':'♧','シェルフ':'▦','テーブルセット':'◫','テレビ':'▣','壁装飾':'▧','窓':'▢' };
+  var icons={ 'バスルーム':'🛁','洗面台':'🚿','トイレ':'🚽','シャワー':'🚿','キッチン収納':'🍳','キッチン/シンク':'🚰','キッチン/コンロ':'🔥','冷蔵庫':'📦','ソファ':'🛋','チェア':'🪑','テーブル':'🍵','ベッド':'🛏','収納':'👗','引き出し':'👞','キャビネット':'▦','カーペット':'▤','カーテン':'▥','装飾':'◈','ドア':'▯','家電':'▣','空調':'❄','キッズ':'☆','キッチン':'🍳','照明':'◉','マットレス':'▰','ミラー':'◇','絵画':'□','ペット':'○','植物':'♧','シェルフ':'▦','テーブルセット':'◫','テレビ':'▣','壁装飾':'▧','窓':'▢' };
   var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture') };
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
@@ -4997,7 +5000,7 @@ function mkItem(type,x,y,rot,floor,w,d){
     item.doorHeight=type==='door-front'?2330:2000;
     if(isDoorPanelType(type)) item.doorOpenState='open';
   }
-  if(canSetItemElevation(item)) item.elev=(type==='meter-box')?1600:0;
+  if(canSetItemElevation(item)) item.elev=(type==='meter-box')?1600:(type==='fmp-AirConditionerWall01'?2000:0);
   if(isFmpItemType(type)){
     item.fmpId=type;
     item.color=null;
