@@ -90,6 +90,9 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
   user-select:none;-webkit-user-select:none;cursor:pointer}
 .wk-btn:active{background:#e94560}
 .wk-fwd{left:62px;top:0}.wk-left{left:0;top:62px}.wk-back{left:62px;top:124px}.wk-right{left:124px;top:62px}
+.wk-height{left:62px;top:62px;font-size:11px;font-weight:700;line-height:1.15;letter-spacing:0;
+  background:rgba(255,255,255,0.94);color:#2d2a27;border-color:rgba(22,33,62,0.22)}
+.wk-height:hover,.wk-height:active{background:var(--hp-primary,#f24a2e);color:#fff}
 @media (max-width:768px){#walk-minimap{width:160px;height:128px}#walk-dpad{right:14px;bottom:14px}}
 /* ── MAIN LAYOUT ───────────────────────── */
 #main{display:flex;flex:1;overflow:hidden;min-height:0}
@@ -2949,6 +2952,7 @@ input[type="reset"]:focus-visible{
         <div id="walk-dpad">
           <button type="button" class="wk-btn wk-fwd"  data-wdir="fwd">▲</button>
           <button type="button" class="wk-btn wk-left" data-wdir="left">◀</button>
+          <button id="walk-height-toggle" type="button" class="wk-btn wk-height" onclick="toggleWalkEyePreset()" aria-label="視点の高さを切り替え" title="視点の高さを切り替え">立ち<br>視点</button>
           <button type="button" class="wk-btn wk-back" data-wdir="back">▼</button>
           <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
         </div>
@@ -3820,6 +3824,7 @@ var EDGE_SNAP_THRESH = 80; // mm — object-edge snap when Shift is held
 var RULER_THICKNESS_MM = 120;
 var WALK_ROUTE_THICKNESS_MM = 140;
 var WALK_EYE_HEIGHT_MM = 1550;
+var WALK_EYE_PRESETS_MM = {sit:1050,stand:1650};
 var WALK_DEFAULT_SPEED_MPS = 1.2;
 var LIGHT_ITEM_TYPES = {'light-ceiling':1,'light-down':1,'light-spot':1};
 var LIGHT_KIND_TO_TYPE = {ceiling:'light-ceiling',down:'light-down',spot:'light-spot'};
@@ -13770,7 +13775,7 @@ function get3DFrameInterval(){
 // ヘッダーから起動し、3Dモデルの中に目線カメラで立つ。右下の十字キー/矢印キーで
 // 前後移動・その場回転、右上のミニマップのタップで移動。閉まっているドアには
 // 接近すると90度まで開くアニメーションが走る
-var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0};
+var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0,eyePreset:'stand'};
 var _doorAnims=[];
 // ドアの開閉希望状態(0=閉/1=開)をプランアイテム単位で保持する。
 // 家具の非同期ロード完了のたびに rebuild3D() が全ドアを作り直すため、
@@ -13778,7 +13783,23 @@ var _doorAnims=[];
 // 近くのドアが連続的にパタパタしてしまう
 var _doorWantByItem=new WeakMap();
 function isWalkView(){ return ST.view==='3d-walk'; }
-function walkEyeY(){ return floorTopY(WALK.floor)+(WALK.groundOff||0)+WALK_EYE_HEIGHT_MM*U; }
+function walkEyeHeightMm(){ return WALK_EYE_PRESETS_MM[WALK.eyePreset]||WALK_EYE_PRESETS_MM.stand; }
+function walkEyeY(){ return floorTopY(WALK.floor)+(WALK.groundOff||0)+walkEyeHeightMm()*U; }
+function updateWalkEyePresetButton(){
+  var b=document.getElementById('walk-height-toggle');
+  if(!b) return;
+  var sitting=WALK.eyePreset==='sit';
+  b.innerHTML=sitting?'座り<br>視点':'立ち<br>視点';
+  b.setAttribute('aria-pressed',sitting?'true':'false');
+  b.title=sitting?'立ち視点に切り替え':'座り視点に切り替え';
+}
+function toggleWalkEyePreset(){
+  WALK.eyePreset=WALK.eyePreset==='sit'?'stand':'sit';
+  updateWalkEyePresetButton();
+  walkApplyCamera();
+  noteCam3DInput();
+  if(typeof invalidate3D==='function') invalidate3D();
+}
 // ── 階段の昇降(坂面近似) ──────────────────────────────
 // プレイヤー位置が階段パーツ(stair / stair-corner)の上にあるとき、
 // パーツ内の進行率tから「そのフロア床からの高さ」を坂面として返す。
@@ -14032,7 +14053,8 @@ function initWalkHud(){
     mm.addEventListener('pointerdown',function(e){e.preventDefault();walkMinimapTap(e);});
     window.addEventListener('resize',positionWalkHud);
   }
-  document.querySelectorAll('.wk-btn').forEach(function(b){
+  updateWalkEyePresetButton();
+  document.querySelectorAll('.wk-btn[data-wdir]').forEach(function(b){
     if(b._wired) return; b._wired=true;
     var dir=b.getAttribute('data-wdir');
     function press(e){e.preventDefault();WALK.keys[dir]=true;noteCam3DInput();if(typeof invalidate3D==='function')invalidate3D();}
