@@ -10380,10 +10380,20 @@ function buildWinFrames(flFilt){
         var pivotWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):pivotDefaultWant;
         pivot.rotation.y=pivotWant?doorOpenY:0;
         if(openingModelReady){
-          var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,panelH,Math.max((openingModel.d||40)*U,leafT),null);
+          // モデル建具は縦に伸ばしすぎるとGLB内蔵の取手・ノブまで比例して
+          // 上に移動してしまう。スラブは実寸2.0mまでの伸縮にとどめ、
+          // それを超える分は欄間(上部パネル)で埋めて取手高さを実物どおりに保つ
+          var slabH=Math.min(panelH,2.0);
+          var modelLeaf=makeGltfBoxFitClone(openingModel.model,ww,slabH,Math.max((openingModel.d||40)*U,leafT),null);
           var modelLeafWrap=new THREE.Group();
           modelLeafWrap.position.set(leafX,panelBottomGap,0);
           modelLeafWrap.add(modelLeaf);
+          if(panelH>slabH+0.01){
+            var transom=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH-slabH,leafT),doorMat);
+            transom.position.set(0,slabH+(panelH-slabH)/2,0);
+            transom.castShadow=true; transom.receiveShadow=true;
+            modelLeafWrap.add(transom);
+          }
           pivot.add(modelLeafWrap);
         } else {
           var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorMat);
