@@ -3212,9 +3212,18 @@ function isGroundLevelItemType(t){
     t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
     t==='fence' || t==='wood-fence';
 }
+// 塀・フェンス・車などはバルコニーの手すり代わり等で2階以上にも置かれるため、
+// 接地(GL=0)は1階配置のときだけ。上階ではその階の床天端に置く
+function isFloorAwareGroundItemType(t){
+  return t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
+    t==='fence' || t==='wood-fence';
+}
 function item3DBaseY(it){
   if(!it) return 0;
-  if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)) return 0;
+  if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
+    if(isFloorAwareGroundItemType(it.type) && (it.floor||1)>1) return floorTopY(it.floor);
+    return 0;
+  }
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
@@ -14141,7 +14150,10 @@ function handleSelectDown(cx,cy,wx,wy,e){
   }
   if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.thick===undefined){
     var h=hitHandle(ST.selected,cx,cy);
-    if(h){
+    // 選択中要素の内部全体を先に「移動」として捕捉すると、最背面へ送った後も
+    // その要素が手前の要素より優先され続ける。リサイズ・回転ハンドルだけは
+    // 直接操作を優先し、内部クリック(move)は下の通常ヒットテストで描画順に選ぶ。
+    if(h && h!=='move'){
       DRAG.active=true;DRAG.saved=false; DRAG.handle=h;
       DRAG.startCX=cx; DRAG.startCY=cy;
       DRAG.origItem=JSON.parse(JSON.stringify(ST.selected));
