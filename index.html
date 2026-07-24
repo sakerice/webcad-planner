@@ -6270,9 +6270,18 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(80,86,94,0.74)';
       ctx.lineWidth=1.2;
       ctx.stroke();
-      var garageW2=Math.min(2600*sc,it.w*sc*0.5);
+      // 3D GLBモデル(ガレージ中心x=-1380/2600・幅2200/5200)に比例させる
+      var garageW2=it.w*sc*(2200/5200);
       var garageD2=Math.min(900*sc,it.d*sc*0.26);
-      var garageX2=Math.min(hw-garageW2/2-4,Math.max(-hw+garageW2/2+4,-hw*0.28));
+      var garageX2=-hw*(1380/2600);
+      // 玄関(3Dモデル: 中心x=+1550/2600・幅1060/5200)
+      var entW2=it.w*sc*(1060/5200);
+      var entX2=hw*(1550/2600);
+      ctx.fillStyle='rgba(226,228,231,0.85)';
+      ctx.fillRect(entX2-entW2/2,-hd,entW2,Math.max(3,garageD2*0.45));
+      ctx.strokeStyle='rgba(120,126,134,0.7)';
+      ctx.lineWidth=1;
+      ctx.strokeRect(entX2-entW2/2,-hd,entW2,Math.max(3,garageD2*0.45));
       ctx.fillStyle='rgba(34,38,42,0.62)';
       ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
       ctx.strokeStyle='rgba(214,217,220,0.76)';
@@ -12227,7 +12236,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 3;
+var MODEL_ASSET_VER = 4;
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
