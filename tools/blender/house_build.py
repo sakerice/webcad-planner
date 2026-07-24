@@ -143,7 +143,7 @@ FASCIA= matp('NhFascia',(0.82, 0.82, 0.80), rough=0.7)
 RAIL  = matp('NhRail',  (0.60, 0.60, 0.62), rough=0.4, metal=0.6)
 
 FW, FD, SH = 5.2, 3.6, 2.7
-ROOF_H, OVER = 1.05, 0.40
+ROOF_H, OVER = 1.05, 0.25
 NICHE = 0.13   # 開口の彫り込み深さ
 
 OPENINGS = {}

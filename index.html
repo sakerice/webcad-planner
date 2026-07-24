@@ -3204,9 +3204,17 @@ function shouldRenderItemInCurrent3DView(it){
   if(isInt && isContextExteriorItemType(it.type)) return false;
   return true;
 }
+// 外構系オブジェクト: 1階配置時も床・基礎の厚み分を足さず地面(GL)に接地させる
+function isGroundLevelItemType(t){
+  return t==='site-rect' || t==='foundation' || t==='exterior-stair' || t==='ramp' ||
+    t==='ac-outdoor' || t==='water-heater' || t==='meter-box' || t==='sewer-pit' ||
+    t==='downspout' || t==='gas-heater' ||
+    t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
+    t==='fence' || t==='wood-fence';
+}
 function item3DBaseY(it){
   if(!it) return 0;
-  if(it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || it.type==='ac-outdoor' || it.type==='water-heater' || it.type==='meter-box' || it.type==='sewer-pit' || it.type==='downspout' || it.type==='gas-heater' || isContextExteriorItemType(it.type)) return 0;
+  if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)) return 0;
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
@@ -6154,10 +6162,11 @@ function drawItem2d(it){
         ctx.moveTo(-hw,ey); ctx.lineTo(hw,ey);
       }
       ctx.stroke();
+      // 上り方向(3Dで高くなる側=ローカル+y)へ矢印を向ける
       ctx.fillStyle='rgba(45,45,45,0.75)';
       ctx.beginPath();
-      ctx.moveTo(0,hd-5*sc); ctx.lineTo(0,-hd+8*sc);
-      ctx.lineTo(-5*sc,-hd+18*sc); ctx.moveTo(0,-hd+8*sc); ctx.lineTo(5*sc,-hd+18*sc);
+      ctx.moveTo(0,-hd+5*sc); ctx.lineTo(0,hd-8*sc);
+      ctx.lineTo(-5*sc,hd-18*sc); ctx.moveTo(0,hd-8*sc); ctx.lineTo(5*sc,hd-18*sc);
       ctx.stroke();
     } else if(it.type === 'ramp') {
       ctx.fillStyle='rgba(184,178,168,0.48)';
@@ -6165,10 +6174,11 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(80,78,72,0.78)';
       ctx.lineWidth=1.2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      // 上り方向(3Dで高くなる側=ローカル+y)へ矢印を向ける
       ctx.beginPath();
-      ctx.moveTo(0,hd*0.72); ctx.lineTo(0,-hd*0.72);
-      ctx.moveTo(0,-hd*0.72); ctx.lineTo(-6*sc,-hd*0.56);
-      ctx.moveTo(0,-hd*0.72); ctx.lineTo(6*sc,-hd*0.56);
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(-6*sc,hd*0.56);
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(6*sc,hd*0.56);
       ctx.stroke();
       ctx.font='bold '+Math.max(9,10*sc)+'px sans-serif';
       ctx.fillStyle='rgba(65,62,56,0.8)';
@@ -8901,7 +8911,10 @@ var ITEM_SURFACE_TYPES = {
   kitchen:1,sink:1,'custom-block':1,closet:1,shoe_cabinet:1
 };
 function isPlacementSurfaceItem(it){
-  if(!it || !canSetItemElevation(it)) return false;
+  if(!it) return false;
+  // 基礎は接地オブジェクト(車・植栽等)を上に載せられる面として扱う
+  if(it.type==='foundation') return true;
+  if(!canSetItemElevation(it)) return false;
   var fmp=getFmpItem(it.type);
   if(fmp && ITEM_SURFACE_CATEGORIES[fmp.category]) return true;
   return !!ITEM_SURFACE_TYPES[it.type];
@@ -8913,15 +8926,17 @@ function findDefaultPlacementSurface(item){
   if(!item || !DATA || !DATA.items || !canSetItemElevation(item)) return null;
   var floor=item.floor||ST.floor||1;
   var cx=item.x+(item.w||0)/2, cy=item.y+(item.d||0)/2;
+  // 接地系(基準0)と床上系(基準=床天端)で基準が異なるため、絶対高さ(mm)で比較する
+  var itemBaseMm=item3DBaseY(item)/U;
   var best=null, bestTop=-Infinity;
   DATA.items.forEach(function(surface){
     if(!surface || surface===item || (surface.floor||1)!==floor) return;
     if(!isPlacementSurfaceItem(surface)) return;
     if(!isInsideItem(surface,cx,cy)) return;
-    var top=getItemTopElevation(surface);
+    var top=item3DBaseY(surface)/U + getItemTopElevation(surface);
     if(top>bestTop){ best=surface; bestTop=top; }
   });
-  return best ? {item:best, top:bestTop} : null;
+  return best ? {item:best, top:bestTop-itemBaseMm} : null;
 }
 function applyDefaultPlacementElevation(item){
   if(item && isLightItemType(item.type)){
@@ -12256,7 +12271,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 4;
+var MODEL_ASSET_VER = 5;
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
@@ -13370,17 +13385,27 @@ function walkUpdateGround(snap){
   if(walkFloorHasData(fl+1)){
     var storyUp=floorTopY(fl+1)-floorTopY(fl);
     var up=walkStairSampleAt(xMm,zMm,fl);
-    // 連続性クランプ: 現在の足元から0.45m超いきなり高くなる坂面は無効。
-    // 階段室が上下階で重なるプラン(2F着地点が2F→3F階段の足元判定内)での
-    // ワープを防ぎ、各フライトは正しい入口からのみ乗れる
-    if(up && (snap || up.frac*storyUp-prevOff<=0.45)){
-      if(up.frac>=0.955){
-        walkSetFloor(fl+1);
-        WALK.groundOff=0;
-      } else {
-        WALK.groundOff=up.frac*storyUp;
+    if(up){
+      var newOff=up.frac*storyUp;
+      var onStairs=prevOff>0.4;
+      // 連続性クランプ: 床から0.45m超いきなり高い坂面には乗れない(階段室が
+      // 上下階で重なるプランでのワープ防止。各フライトは正しい入口からのみ)。
+      // ただし既に階段上にいる間は棄却せず、レート制限付きで高さに追従する。
+      // 廻り階段の内回り(角度パラメータの勾配が急な箇所)で1歩の高低差が
+      // クランプを超えると床高0へ落とされてガクつく不具合があった
+      if(snap || onStairs || newOff-prevOff<=0.45){
+        if(!snap && onStairs){
+          var dOff=newOff-prevOff;
+          newOff=prevOff+Math.max(-0.3,Math.min(0.3,dOff));
+        }
+        if(newOff>=storyUp*0.955){
+          walkSetFloor(fl+1);
+          WALK.groundOff=0;
+        } else {
+          WALK.groundOff=newOff;
+        }
+        return;
       }
-      return;
     }
   }
   // 降下判定はフラットな床にいるときだけ。自フロアの坂面を登っている最中に
@@ -13849,6 +13874,8 @@ function setView(v){
   if(typeof hideWallPanel==='function') hideWallPanel();
   var _lp=document.getElementById('light-panel');
   if(_lp) _lp.style.display='none';
+  // 離れるビューのカメラ位置を記憶(保存対象+ビュー再入時の復元用)
+  if(typeof stashCurrentCamera==='function') stashCurrentCamera();
   if(v!=='3d-ext' && WALKTHROUGH) stopWalkthrough();
   if(v!=='3d-walk' && WALK.active){
     WALK.active=false; WALK.keys={}; WALK.moving=false;
@@ -13901,6 +13928,8 @@ function setView(v){
         camExt.position.set(ibx, floorY+ispan*0.9, ibz+ispan*0.35);
         camExt.lookAt(ibx, floorY, ibz);
         if(orbit){orbit.target.set(ibx,floorY,ibz);orbit.update();}
+        // 保存済み/直前の内観カメラがあれば復元
+        if(ST._camStash&&ST._camStash.int) applyStashedCamera(ST._camStash.int);
         if(composer&&composer.passes[1]) composer.passes[1].strength=0.4;
       } else {
         isInt=false;
@@ -13917,7 +13946,11 @@ function setView(v){
       if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
     }
     build3D();
-    if(v==='3d-ext') setTimeout(fitCameraToScene, 100);
+    // 保存済み/直前の外観カメラがあれば復元、無ければ全体表示
+    if(v==='3d-ext'){
+      if(ST._camStash&&ST._camStash.ext) applyStashedCamera(ST._camStash.ext);
+      else setTimeout(fitCameraToScene, 100);
+    }
     // 2Dで選択中のオブジェクトがあれば、3Dでも設定パネルを引き継いで開く
     // (ウォークスルーはHUDと干渉するため除外)
     if(ST.selected && v!=='3d-walk') updateProps();
@@ -14979,6 +15012,45 @@ function clearFloor(){
   draw2d();if(ren)rebuild3D();
 }
 
+// ─── ビュー/カメラ状態の保存・復元 ─────────────
+// 平面図のズーム・パン、外観3D/内観3Dの最後のカメラ位置を保存データに含める
+function stashCurrentCamera(){
+  if(!ST._camStash) ST._camStash={};
+  if((ST.view==='3d-ext'||ST.view==='3d-int') && camExt && orbit){
+    ST._camStash[ST.view==='3d-ext'?'ext':'int']={
+      pos:[camExt.position.x,camExt.position.y,camExt.position.z],
+      target:[orbit.target.x,orbit.target.y,orbit.target.z]
+    };
+  }
+}
+function captureViewState(){
+  stashCurrentCamera();
+  DATA.viewState={
+    twoD:{zoom:ST.zoom,panX:ST.panX,panY:ST.panY},
+    ext:(ST._camStash&&ST._camStash.ext)||null,
+    int:(ST._camStash&&ST._camStash.int)||null
+  };
+}
+function restoreViewState(){
+  var vs=DATA&&DATA.viewState;
+  ST._camStash={};
+  if(!vs) return;
+  if(vs.twoD&&isFinite(Number(vs.twoD.zoom))){
+    ST.zoom=Math.max(0.05,Math.min(40,Number(vs.twoD.zoom)));
+    if(isFinite(Number(vs.twoD.panX))) ST.panX=Number(vs.twoD.panX);
+    if(isFinite(Number(vs.twoD.panY))) ST.panY=Number(vs.twoD.panY);
+  }
+  if(vs.ext&&vs.ext.pos&&vs.ext.target) ST._camStash.ext=vs.ext;
+  if(vs.int&&vs.int.pos&&vs.int.target) ST._camStash.int=vs.int;
+}
+function applyStashedCamera(s){
+  if(!camExt||!orbit||!s||!s.pos||!s.target) return false;
+  camExt.position.set(Number(s.pos[0])||0,Number(s.pos[1])||0,Number(s.pos[2])||0);
+  orbit.target.set(Number(s.target[0])||0,Number(s.target[1])||0,Number(s.target[2])||0);
+  orbit.update();
+  return true;
+}
+
 function exportPlan(){
   normalizeLegacyFurnitureItems();
   ensureObjectIds();
@@ -14986,6 +15058,7 @@ function exportPlan(){
   ensureInteriorWallSettings();
   ensureRoofAppearance();
   syncExteriorWallSettings();
+  captureViewState();
   var json=JSON.stringify(DATA,null,2);
   var a=document.createElement('a');
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
@@ -15003,6 +15076,7 @@ async function savePlanToStorage(){
   ensureInteriorWallSettings();
   ensureRoofAppearance();
   syncExteriorWallSettings();
+  captureViewState();
   try{
     await StorageAdapter.save(DATA);
     clearDirty();
@@ -15026,6 +15100,7 @@ async function loadPlanFromStorage(){
     ensureRoofAppearance();
     syncExteriorWallSettings();
     normalizeLegacyFurnitureItems();
+    restoreViewState();
   }catch(e){
     // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
     console.error('[WebCAD] saved plan restore failed:', e);
@@ -16061,7 +16136,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); clearEditHistory(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
