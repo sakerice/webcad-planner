@@ -6270,27 +6270,33 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(80,86,94,0.74)';
       ctx.lineWidth=1.2;
       ctx.stroke();
-      // 3D GLBモデル(ガレージ中心x=-1380/2600・幅2200/5200)に比例させる
+      // 3D GLBモデル(ガレージ中心x=-1380/2600・幅2200/5200・奥行3450/3600の貫通型)に比例させる
       var garageW2=it.w*sc*(2200/5200);
-      var garageD2=Math.min(900*sc,it.d*sc*0.26);
+      var garageD2=it.d*sc*(3450/3600);
       var garageX2=-hw*(1380/2600);
-      // 玄関(3Dモデル: 中心x=+1550/2600・幅1060/5200)
+      // 玄関(3Dモデル: 中心x=+1550/2600・幅1060/5200・土間奥行520/3600)
       var entW2=it.w*sc*(1060/5200);
+      var entD2=it.d*sc*(520/3600);
       var entX2=hw*(1550/2600);
       ctx.fillStyle='rgba(226,228,231,0.85)';
-      ctx.fillRect(entX2-entW2/2,-hd,entW2,Math.max(3,garageD2*0.45));
+      ctx.fillRect(entX2-entW2/2,-hd,entW2,entD2);
       ctx.strokeStyle='rgba(120,126,134,0.7)';
       ctx.lineWidth=1;
-      ctx.strokeRect(entX2-entW2/2,-hd,entW2,Math.max(3,garageD2*0.45));
-      ctx.fillStyle='rgba(34,38,42,0.62)';
+      ctx.strokeRect(entX2-entW2/2,-hd,entW2,entD2);
+      // ガレージ土間(貫通ベイ全体は薄いシェード)
+      ctx.fillStyle='rgba(34,38,42,0.22)';
       ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
-      ctx.strokeStyle='rgba(214,217,220,0.76)';
+      ctx.strokeStyle='rgba(120,126,134,0.7)';
       ctx.lineWidth=1;
       ctx.strokeRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
-      ctx.strokeStyle='rgba(130,136,143,0.82)';
+      // シャッター開口(北面)は濃い帯で表現
+      var shutterD=Math.max(3,Math.min(300*sc,garageD2*0.12));
+      ctx.fillStyle='rgba(34,38,42,0.62)';
+      ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,shutterD);
+      ctx.strokeStyle='rgba(214,217,220,0.76)';
       ctx.beginPath();
-      ctx.moveTo(garageX2-garageW2/2+3,-hd+Math.max(3,garageD2*0.18));
-      ctx.lineTo(garageX2+garageW2/2-3,-hd+Math.max(3,garageD2*0.18));
+      ctx.moveTo(garageX2-garageW2/2+3,-hd+shutterD*0.55);
+      ctx.lineTo(garageX2+garageW2/2-3,-hd+shutterD*0.55);
       ctx.stroke();
       ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
       ctx.fillStyle='rgba(62,68,74,0.86)';
