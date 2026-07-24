@@ -2882,6 +2882,7 @@ input[type="reset"]:focus-visible{
     <div class="cat-body">
       <div class="stool" data-tool="custom-block" onclick="setTool('custom-block')"><span class="sicon">▣</span>任意ブロック</div>
       <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><span class="sicon">👘</span>布団セット</div>
+      <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><span class="sicon">▥</span>格子柵</div>
       <div id="fmp-furniture"></div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🌳 庭・外構 <span>+</span></div>
@@ -3795,6 +3796,7 @@ var ILABELS = {
 // ───── STATE ─────
 var ST = {
   floor:1, view:'2d', tool:'select', selected:null,
+  multiSelected:[],
   zoom:1, panX:60, panY:60,
   drawing:false, drawPts:[],
   mouseW:{x:0,y:0}, snap:10, showGrid:true, showDim:true,
@@ -4188,7 +4190,10 @@ function updateProps(){
   var html = '';
   var fmpInfo=getFmpItem(it.type);
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
-  document.getElementById('props-title').textContent = typeName + ' の設定';
+  var selectedCount=explicit2DSelection().length;
+  document.getElementById('props-title').textContent = selectedCount>1
+    ? selectedCount+'件を選択中（'+typeName+'）'
+    : typeName + ' の設定';
   // Update mobile header
   var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪','door-slide-s':'⇢','door-pocket':'⇥',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
@@ -4705,7 +4710,30 @@ function prepareUploadedTexture(src,done){
 }
 
 // DRAG state for handle transform
-var DRAG = {active:false, saved:false, handle:null, startCX:0, startCY:0, origItem:null};
+var DRAG = {active:false, saved:false, handle:null, startCX:0, startCY:0, origItem:null,shiftClick:null};
+
+function explicit2DSelection(){
+  var out=[];
+  (ST.multiSelected||[]).concat(ST.selected?[ST.selected]:[]).forEach(function(obj){
+    if(obj && out.indexOf(obj)<0) out.push(obj);
+  });
+  return out;
+}
+function clearMultiSelection(){ ST.multiSelected=[]; DRAG.shiftClick=null; }
+function beginShiftClickCandidate(picked){
+  DRAG.shiftClick={picked:picked,previous:explicit2DSelection()};
+}
+function finishShiftClickCandidate(){
+  var c=DRAG.shiftClick;
+  DRAG.shiftClick=null;
+  if(!c||!c.picked) return false;
+  var list=c.previous.slice(), idx=list.indexOf(c.picked);
+  if(idx>=0) list.splice(idx,1); else list.push(c.picked);
+  ST.selected=list.length?list[list.length-1]:null;
+  ST.multiSelected=list.slice(0,-1);
+  updateProps(); draw2d();
+  return true;
+}
 var NATURAL_PAN = true;
 var CANVAS_TOUCH_FOLLOWS_FINGER = true;
 var CANVAS_TRACKPAD_USES_NATIVE_SCROLL = true;
@@ -5046,6 +5074,9 @@ function w2c(wx,wy){return{cx:ST.panX+wx*ST.zoom*0.05, cy:ST.panY+wy*ST.zoom*0.0
 function c2w(cx,cy){return{x:(cx-ST.panX)/(ST.zoom*0.05), y:(cy-ST.panY)/(ST.zoom*0.05)};}
 function snapV(v){return ST.snap?Math.round(v/ST.snap)*ST.snap:Math.round(v);}
 function isShiftLike(e){return !!(ST.mobileShift || (e&&e.shiftKey));}
+// 複数選択は物理Shiftキーのみ。仮想Shiftは配置・移動スナップ専用のため、
+// デフォルトONのモバイル環境で通常タップがすべて追加選択になるのを避ける。
+function isMultiSelectModifier(e){return !!(e&&e.shiftKey);}
 function isTouchInputDevice(){
   return !!(('ontouchstart' in window) || (navigator.maxTouchPoints&&navigator.maxTouchPoints>0) || (navigator.msMaxTouchPoints&&navigator.msMaxTouchPoints>0));
 }
@@ -5175,6 +5206,7 @@ function draw2d(){
   drawRoomLbls();
   if(ST.drawing&&ST.drawPts.length>0) drawPreview();
   if(ST.showDim) drawDim();
+  drawMultiSelectionOverlays();
   drawLockOverlays(fw,fi);
   drawBaseSelectionOverlay();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
@@ -5195,6 +5227,38 @@ function draw2d(){
     }
     ctx.setLineDash([]); ctx.restore();
   }
+}
+
+function drawMultiSelectionOverlays(){
+  var selected=(ST.multiSelected||[]).filter(function(obj){return obj && (obj.floor||1)===ST.floor;});
+  if(!selected.length || ST.tool!=='select') return;
+  var sc=ST.zoom*0.05;
+  ctx.save();
+  ctx.strokeStyle='rgba(233,69,96,0.95)';
+  ctx.fillStyle='rgba(233,69,96,0.08)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,4]);
+  selected.forEach(function(obj){
+    if(obj.x1!==undefined && obj.x2!==undefined){
+      var a=w2c(obj.x1,obj.y1), b=w2c(obj.x2,obj.y2);
+      ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
+      return;
+    }
+    if(obj.type==='room'){
+      ctx.fillRect(ST.panX+obj.x*sc,ST.panY+obj.y*sc,obj.w*sc,obj.d*sc);
+      ctx.strokeRect(ST.panX+obj.x*sc,ST.panY+obj.y*sc,obj.w*sc,obj.d*sc);
+      return;
+    }
+    var pose=getItemDisplayPose(obj);
+    var half=getItemSelectionHalfExtentsPx(obj,sc);
+    ctx.save();
+    ctx.translate(ST.panX+pose.x*sc,ST.panY+pose.y*sc);
+    ctx.rotate((pose.rot||0)*Math.PI/180);
+    ctx.fillRect(-half.hw,-half.hd,half.hw*2,half.hd*2);
+    ctx.strokeRect(-half.hw,-half.hd,half.hw*2,half.hd*2);
+    ctx.restore();
+  });
+  ctx.restore();
 }
 
 function drawGrid(){
@@ -14012,7 +14076,7 @@ function setTool(t){
     finishWalkRouteDrawing();
     if(t==='select') return;
   }
-  ST.tool=t;ST.drawing=false;ST.drawPts=[];ST.selected=null;
+  ST.tool=t;ST.drawing=false;ST.drawPts=[];ST.selected=null;clearMultiSelection();
   ST._walkRouteItemId=null;
   syncToolUi();
   draw2d();
@@ -14101,7 +14165,7 @@ function resetView(){
   draw2d();
 }
 function onFloorChange(v){
-  ST.floor=+v; ST.selected=null; DRAG.active=false;
+  ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false;
   document.getElementById('props').classList.remove('show');
   document.getElementById('st-floor').textContent='フロア:'+v+'F';
   draw2d();
@@ -14122,7 +14186,10 @@ canvas.onmousedown=function(e){
   if(e.button!==0) return;
   var w=c2w(cx,cy);
   var wx=snapV(w.x), wy=snapV(w.y);
-  if(ST.tool==='select') handleSelectDown(cx,cy,wx,wy,e);
+  if(ST.tool==='select'){
+    if(!isMultiSelectModifier(e)) clearMultiSelection();
+    handleSelectDown(cx,cy,wx,wy,e);
+  }
   else if(ST.tool==='erase') handleErase(wx,wy);
   else if(ST.tool==='wall') handleWallClick(wx,wy,e);
   else if(isLineAnnotationTool(ST.tool)) handleLineAnnotationClick(ST.tool,w.x,w.y,e);
@@ -14168,6 +14235,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
   }
   if(hits.length){
     var picked=hits[0].item;
+    if(isMultiSelectModifier(e)) beginShiftClickCandidate(picked);
     ST.selected=picked;
     if(!isObjectLocked(picked)){
       DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
@@ -14178,6 +14246,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   for(var i=fr.length-1;i>=0;i--){
     if(isNearRoomLabel(fr[i],cx,cy)){
+      if(isMultiSelectModifier(e)) beginShiftClickCandidate(fr[i]);
       ST.selected=fr[i];
       if(!isObjectLocked(fr[i])){
         DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
@@ -14189,7 +14258,10 @@ function handleSelectDown(cx,cy,wx,wy,e){
   }
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
   for(var i=fw.length-1;i>=0;i--){
-    if(nearWall(wx,wy,fw[i])){ ST.selected=fw[i]; updateProps(); draw2d(); return; }
+    if(nearWall(wx,wy,fw[i])){
+      if(isMultiSelectModifier(e)) beginShiftClickCandidate(fw[i]);
+      ST.selected=fw[i]; updateProps(); draw2d(); return;
+    }
   }
 
   // 4. Sites (1F-only Base Layer)
@@ -14197,6 +14269,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
     var allSites = DATA.items.filter(function(i){return i.type==='site-rect';});
     for(var i=allSites.length-1;i>=0;i--){
       if(isNearItemBorder(allSites[i],wx,wy)){
+        if(isMultiSelectModifier(e)) beginShiftClickCandidate(allSites[i]);
         ST.selected=allSites[i];
         if(!isObjectLocked(allSites[i])){
           DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
@@ -14208,6 +14281,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
     var foundations = DATA.items.filter(function(i){return i.type==='foundation';});
     for(var f=foundations.length-1;f>=0;f--){
       if(isFoundationSelectableHit(foundations[f],wx,wy)){
+        if(isMultiSelectModifier(e)) beginShiftClickCandidate(foundations[f]);
         ST.selected=foundations[f];
         if(!isObjectLocked(foundations[f])){
           DRAG.active=true;DRAG.saved=false; DRAG.handle='move';
@@ -14217,7 +14291,8 @@ function handleSelectDown(cx,cy,wx,wy,e){
       }
     }
   }
-  ST.selected=null; updateProps(); draw2d();
+  if(!isMultiSelectModifier(e)){ ST.selected=null; clearMultiSelection(); }
+  updateProps(); draw2d();
 }
 
 canvas.addEventListener('mousemove',function(e){
@@ -14231,11 +14306,26 @@ canvas.addEventListener('mousemove',function(e){
   ST.shiftKey = isShiftLike(e);
   ST.ctrlKey = e.ctrlKey;
   document.getElementById('coords').textContent='X:'+Math.round(snapV(wc.x))+'mm Y:'+Math.round(snapV(wc.y))+'mm';
-  if(DRAG.active&&e.buttons===1){ applyHandleDrag(cx,cy,e); draw2d(); }
+  if(DRAG.active&&e.buttons===1){
+    if(DRAG.shiftClick){
+      var moved=Math.hypot(cx-DRAG.startCX,cy-DRAG.startCY);
+      if(moved<5) return;
+      // Shift+ドラッグは従来のスナップ移動。複数選択候補にはしない。
+      DRAG.shiftClick=null;
+      ST.multiSelected=[];
+    }
+    applyHandleDrag(cx,cy,e); draw2d();
+  }
   else if(ST.drawing&&isLineAnnotationTool(ST.tool)){ draw2d(); }
 });
 canvas.addEventListener('mouseup',function(){
   if(ST.panning) { ST.panning = false; return; }
+  if(DRAG.shiftClick){
+    DRAG.active=false; ST._snapState=null;
+    finishShiftClickCandidate();
+    if(ren)build3D();
+    return;
+  }
   var wasDragging=DRAG.active;
   DRAG.active=false; ST._snapState=null;
   if(wasDragging) updateProps();
@@ -14953,7 +15043,7 @@ function redoAction(){
 }
 function restoreHistorySnapshot(snapshot){
   DATA = JSON.parse(snapshot);
-  ST.selected=null;ST.selectAll=false;DRAG.active=false;
+  ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');
   markDirty();
