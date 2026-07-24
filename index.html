@@ -2864,6 +2864,8 @@ input[type="reset"]:focus-visible{
     <div class="cat-body">
       <div id="opening-door-model-tools"></div>
       <div class="stool" data-tool="door-slide" onclick="setTool('door-slide')"><span class="sicon">⇔</span>引き戸</div>
+      <div class="stool" data-tool="door-slide-s" onclick="setTool('door-slide-s')"><span class="sicon">⇢</span>片引き戸</div>
+      <div class="stool" data-tool="door-pocket" onclick="setTool('door-pocket')"><span class="sicon">⇥</span>引込み戸</div>
       <div class="stool" data-tool="door-fold" onclick="setTool('door-fold')"><span class="sicon">⧨</span>折戸(片)</div>
       <div class="stool" data-tool="door-fold-w" onclick="setTool('door-fold-w')"><span class="sicon">⧨</span>折戸(両)</div>
       <div id="opening-window-model-tools"></div>
@@ -3228,7 +3230,7 @@ var ISIZES = {
   'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'gas-heater':{w:470,d:240}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
   'downspout':{w:150,d:150},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
-  'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150}, 'door-fold':{w:780,d:420}, 'door-fold-w':{w:1650,d:420},
+  'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150}, 'door-fold':{w:780,d:420}, 'door-fold-w':{w:1650,d:420}, 'door-slide-s':{w:780,d:150}, 'door-pocket':{w:780,d:150},
   window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:940,d:200},
   'door-opening':{w:780,d:160}, 'door-opening-arch':{w:900,d:160},
   'site-rect':{w:10000,d:8000},
@@ -3328,7 +3330,7 @@ var ICOLORS = {
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
-  'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0','door-fold':'#f8e8c0','door-fold-w':'#f8e8c0',
+  'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0','door-fold':'#f8e8c0','door-fold-w':'#f8e8c0','door-slide-s':'#f8e8c0','door-pocket':'#f8e8c0',
   window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
   'door-opening':'#f6efe2','door-opening-arch':'#f6efe2','site-rect':'rgba(100,160,100,0.1)',
   'roof':'rgba(50,50,80,0.12)'
@@ -3768,7 +3770,7 @@ var ILABELS = {
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
-  'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸','door-fold':'折戸(片開き)','door-fold-w':'折戸(両開き)',window:'窓','window-door':'引き違い窓','door-front':'玄関',
+  'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸','door-fold':'折戸(片開き)','door-fold-w':'折戸(両開き)','door-slide-s':'片引き戸','door-pocket':'引込み戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
   'roof':'屋根'
 };
@@ -4171,7 +4173,7 @@ function updateProps(){
   var typeName = (fmpInfo&&fmpInfo.name) || ILABELS[it.type] || (it.type==='room'?'部屋':'要素');
   document.getElementById('props-title').textContent = typeName + ' の設定';
   // Update mobile header
-  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
+  var icons={bath:'🛁',toilet:'🚽',sink:'🚿',kitchen:'🍳',fridge:'📦',sofa:'🛋','bed-d':'🛏','bed-s':'🛏',desk:'🖥',tv:'📺','custom-block':'▣','light-ceiling':'💡','light-down':'💡','light-spot':'💡',memo:'✎',ruler:'↔','walk-route':'↝',closet:'👗',bicycle:'🚲','bicycle-fold':'🚲',stair:'🪜','stair-corner':'↱',room:'⬜','door-swing':'🚪','door-swing-s':'🚪','door-slide':'⇔','door-fold':'🚪','door-fold-w':'🚪','door-slide-s':'⇢','door-pocket':'⇥',window:'🪟','window-door':'⇔','door-opening':'▯','door-opening-arch':'⌒',wall:'━',fence:'🧱','wood-fence':'▥','neighbor-building':'▥','neighbor-house':'⌂',road:'═','utility-pole':'│','ac-outdoor':'❄','water-heater':'♨','gas-heater':'🔥','meter-box':'🔌','sewer-pit':'🕳','downspout':'〡',foundation:'▰','exterior-stair':'▤',ramp:'▱'};
   var icon=icons[it.type]||'⚙';
   var mobIcon=document.getElementById('mob-prop-icon'), mobName=document.getElementById('mob-prop-name'), mobSize=document.getElementById('mob-prop-size');
   if(mobIcon) mobIcon.textContent=icon;
@@ -5907,7 +5909,7 @@ function drawItem2d(it){
   var ccx=ST.panX+drawX*sc, ccy=ST.panY+drawY*sc; 
   ctx.save();
   ctx.translate(ccx,ccy); ctx.rotate(drawRot*Math.PI/180);
-  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'door-slide' || it.type === 'door-fold' || it.type === 'door-fold-w' || it.type === 'window-door' || it.type === 'memo' || it.type === 'ruler' || it.type === 'walk-route');
+  var manualFlipSymbol=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || it.type === 'door-slide' || it.type === 'door-fold' || it.type === 'door-fold-w' || it.type === 'door-slide-s' || it.type === 'door-pocket' || it.type === 'window-door' || it.type === 'memo' || it.type === 'ruler' || it.type === 'walk-route');
   if(!manualFlipSymbol) ctx.scale(it.flipX?-1:1, it.flipY?-1:1);
   if(it.type==='memo'){
     drawMemo2d(it,sc);
@@ -6387,6 +6389,44 @@ function drawItem2d(it){
         ctx.lineTo(ax-dir*8*sc,-5*sc);
         ctx.lineTo(ax-dir*8*sc,5*sc);
         ctx.closePath(); ctx.fill();
+      }
+    } else if(it.type === 'door-slide-s' || it.type === 'door-pocket') {
+      // 片引き戸: 戸を壁面片側の線で示し引き代側へ伸ばす / 引込み戸: 開口内実線+ポケット側破線
+      ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
+      ctx.strokeStyle='#444'; ctx.lineWidth=0.9;
+      ctx.beginPath();
+      ctx.moveTo(-hw,-hd*0.62); ctx.lineTo(hw,-hd*0.62);
+      ctx.moveTo(-hw, hd*0.62); ctx.lineTo(hw, hd*0.62);
+      ctx.stroke();
+      var sDir=it.flipX?-1:1;
+      var sOpen=doorOpenState(it)!=='closed';
+      ctx.strokeStyle='#222'; ctx.lineWidth=1.5;
+      if(it.type==='door-slide-s'){
+        var pz=(it.flipY?1:-1)*hd*1.05;
+        var px0=sOpen?sDir*it.w*sc:0;
+        ctx.beginPath();
+        ctx.moveTo(px0-hw,pz); ctx.lineTo(px0+hw,pz);
+        ctx.stroke();
+        // 引き代(戸が重なる壁範囲)の細線
+        ctx.strokeStyle='rgba(34,34,34,0.35)'; ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(sDir*hw,pz); ctx.lineTo(sDir*hw*3,pz);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        if(sOpen){
+          ctx.setLineDash([5*sc,3*sc]);
+          ctx.moveTo(sDir*hw,0); ctx.lineTo(sDir*hw*3,0);
+        } else {
+          ctx.moveTo(-hw,0); ctx.lineTo(hw,0);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+        // ポケット(戸袋)側の案内破線
+        ctx.strokeStyle='rgba(34,34,34,0.35)'; ctx.lineWidth=1;
+        ctx.setLineDash([4*sc,3*sc]);
+        ctx.beginPath();
+        ctx.moveTo(sDir*hw,0); ctx.lineTo(sDir*hw*3,0);
+        ctx.stroke(); ctx.setLineDash([]);
       }
     } else if(it.type === 'door-fold' || it.type === 'door-fold-w') {
       // 折れ戸: 開口線+山形(折り)のJIS流平面記号。flipYで突出方向、片開きはflipXで吊元
@@ -8817,13 +8857,13 @@ function isWindowLikeType(type){
   return type==='window' || type==='window-door';
 }
 function isDoorLikeOpeningType(type){
-  return ['door-swing','door-swing-s','door-slide','door-front','door-opening','door-opening-arch','door-fold','door-fold-w'].indexOf(type)>=0;
+  return ['door-swing','door-swing-s','door-slide','door-front','door-opening','door-opening-arch','door-fold','door-fold-w','door-slide-s','door-pocket'].indexOf(type)>=0;
 }
 function isSwingDoorType(type){
   return ['door-swing','door-swing-s','door-front'].indexOf(type)>=0;
 }
 function isDoorPanelType(type){
-  return isSwingDoorType(type) || type==='door-slide' || type==='door-fold' || type==='door-fold-w';
+  return isSwingDoorType(type) || type==='door-slide' || type==='door-fold' || type==='door-fold-w' || type==='door-slide-s' || type==='door-pocket';
 }
 function isNoDoorOpeningType(type){
   return type==='door-opening' || type==='door-opening-arch';
@@ -10129,6 +10169,36 @@ function buildWinFrames(flFilt){
       }
 
       if(isNoDoorOpeningType(it.type)){
+        addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(frameDepth+0.55,0.7));
+      } else if(it.type==='door-slide-s'||it.type==='door-pocket'){
+        // 片引き戸: 戸を壁面の片側にアウトセットし、控え壁の上に引き残す。
+        // 引込み戸: 戸は壁厚センターにあり、開けると隣接壁の中(戸袋)へ消える
+        var isPocket=(it.type==='door-pocket');
+        addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,isPocket?frameDepth:0.06);
+        var ssWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):(doorOpenState(it)!=='closed'?1:0);
+        var ssDir=it.flipX?-1:1;
+        var leafW=ww+0.06;
+        var zOffS=isPocket?0:(it.flipY?1:-1)*(((best.thick||120)/2)*U+0.036/2+0.008);
+        var closedXS=0, openXS=ssDir*(ww+0.03);
+        var leafG=new THREE.Group();
+        leafG.position.set(ssWant?openXS:closedXS,0,0);
+        leafG.userData.noMerge=true;
+        grp.add(leafG);
+        var lm=new THREE.Mesh(new THREE.BoxGeometry(leafW,panelH,0.036),doorMat);
+        lm.position.set(0,panelY,zOffS);
+        lm.castShadow=true; lm.receiveShadow=true;
+        leafG.add(lm);
+        // 掘り込み引手(戸先側・両面)
+        var pullMatS=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
+        [-1,1].forEach(function(ss){
+          var pm=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.10,0.004),pullMatS);
+          pm.position.set(-ssDir*(leafW/2-0.05),0.95,zOffS+ss*(0.036/2-0.001));
+          leafG.add(pm);
+        });
+        // 片引き戸: 上吊りレールを控え壁側まで延長
+        if(!isPocket) addBox(railMat,ssDir*ww/2,dh-0.010,zOffS,ww*2+0.08,0.020,0.05);
+        _doorAnims.push({it:it,grp:grp,slideMesh:leafG,openX:openXS,closedX:closedXS,
+          initiallyOpen:doorOpenState(it)!=='closed',_want:ssWant});
         addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(frameDepth+0.55,0.7));
       } else if(it.type==='door-fold'||it.type==='door-fold-w'){
         // 折れ戸(クローゼット用・上吊り): 片開き=2枚1組 / 両開き=2枚組×2。
