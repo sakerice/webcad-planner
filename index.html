@@ -10575,7 +10575,23 @@ function buildWinFrames(flFilt){
           leafG.add(pm);
         });
         // 片引き戸: 上吊りレールを控え壁側まで延長
-        if(!isPocket) addBox(railMat,ssDir*ww/2,dh-0.010,zOffS,ww*2+0.08,0.020,0.05);
+        if(!isPocket){
+          addBox(railMat,ssDir*ww/2,dh-0.010,zOffS,ww*2+0.08,0.020,0.05);
+          // 片引き戸は床面まで壁を開口するが、部屋床は壁芯で分割されているため、
+          // 壁厚内に細い欠落が見えることがある。上吊り戸のフラットな納まりを保ったまま、
+          // 隣接室と同じ床材の面で開口部だけをつなぐ。
+          var sampleMm=Math.max(180,(best.thick||120)/2+80);
+          var bridgeRoom=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===fl;}).find(function(r){
+            return [1,-1].some(function(s){
+              var sx=wallInfo.x+nx*sampleMm*s, sy=wallInfo.y+ny*sampleMm*s;
+              return sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d;
+            });
+          });
+          var bridgeMat=bridgeRoom?makeRoomFloorMaterial(bridgeRoom):new THREE.MeshStandardMaterial({color:0xd8d0c2,roughness:0.95,metalness:0});
+          var bridgeDepth=Math.max(frameDepth,(best.thick||120)*U+0.03);
+          var floorBridge=addBox(bridgeMat,0,0.0025,0,ww+jamb*2,0.005,bridgeDepth);
+          floorBridge.castShadow=false;
+        }
         _doorAnims.push({it:it,grp:grp,slideMesh:leafG,openX:openXS,closedX:closedXS,
           initiallyOpen:doorOpenState(it)!=='closed',_want:ssWant});
         addHitProxy(0,dh/2,0,Math.max(ww+0.4,0.6),Math.max(dh+0.24,0.5),Math.max(frameDepth+0.55,0.7));
@@ -13389,6 +13405,26 @@ function polyAreaAbs(poly){
   }
   return Math.abs(a)/2;
 }
+function makeRoomFloorMaterial(r){
+  var rw=r.w*U, rd=r.d*U;
+  var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
+  var diffName=isWet?'floor_tile_diffuse.jpg':'floor_wood_diffuse.jpg';
+  var normName=isWet?'floor_tile_normal.jpg':'floor_wood_normal.jpg';
+  var roughName=isWet?'floor_tile_roughness.jpg':'floor_wood_roughness.jpg';
+  var repU=Math.max(0.5,rw/0.9), repV=Math.max(0.5,rd/0.9);
+  var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
+  var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
+  var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
+  var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.06};
+  if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
+    var tex=cloneRepeatReadyTexture(getTexture3D(r.texture));
+    if(tex){
+      setTextureRepeatNoDistort(tex,rw,rd,0.9); applyTextureFlip(tex,r);
+      return makeInteriorLightingMaterial({map:tex,color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.06});
+    }
+  }
+  return new THREE.MeshStandardMaterial(matParams);
+}
 // 部屋(ワールドmメートル矩形)に重なる階段の穴を、部屋内にクリップして返す(面積が
 // 無視できるほど小さいものは除外)
 function stairwellHolesForRoom(r,stairQuadsCache){
@@ -13525,24 +13561,7 @@ function buildRooms3D(flFilt){
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
 
-    var isWet = r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
-    var diffName=isWet?'floor_tile_diffuse.jpg':'floor_wood_diffuse.jpg';
-    var normName=isWet?'floor_tile_normal.jpg':'floor_wood_normal.jpg';
-    var roughName=isWet?'floor_tile_roughness.jpg':'floor_wood_roughness.jpg';
-    var repU=Math.max(0.5,r.w*U/0.9), repV=Math.max(0.5,r.d*U/0.9);
-    var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
-    var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
-    var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
-    var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.06};
-    var customRoomTexture=false;
-    if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
-      var baseTex=getTexture3D(r.texture);
-      var tex=cloneRepeatReadyTexture(baseTex);
-      if(tex){setTextureRepeatNoDistort(tex,rw,rd,0.9);applyTextureFlip(tex,r);matParams.map=tex;customRoomTexture=true;}
-    }
-    var matFloor=customRoomTexture
-      ? makeInteriorLightingMaterial({map:matParams.map,color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.06})
-      : new THREE.MeshStandardMaterial(matParams);
+    var matFloor=makeRoomFloorMaterial(r);
     
     var slabH=floorSlabHeightMForFloor(r.floor);
     var stairHoles=stairwellHolesForRoom(r,stairQuadsByFloor);
