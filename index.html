@@ -7138,10 +7138,40 @@ function init3D(){
 
   ren.domElement.addEventListener('mousedown',function(e){if(isInt){_intML.down=true;_intML.lx=e.clientX;_intML.ly=e.clientY;}});
   // ウォークスルー: スワイプ/ドラッグで視点回転(ヨー+ピッチ)。ピック・ギズモは無効
-  var _walkDrag={id:null,lx:0,ly:0};
+  var _walkDrag={id:null,lx:0,ly:0,pointers:{},pinchDist:0,pinchFov:68};
+  function walkPointerCount(){ return Object.keys(_walkDrag.pointers).length; }
+  function walkPinchDistance(){
+    var ids=Object.keys(_walkDrag.pointers);
+    if(ids.length<2) return 0;
+    var a=_walkDrag.pointers[ids[0]], b=_walkDrag.pointers[ids[1]];
+    return Math.hypot(a.x-b.x,a.y-b.y);
+  }
+  function beginWalkPinch(){
+    _walkDrag.pinchDist=walkPinchDistance();
+    _walkDrag.pinchFov=camExt ? camExt.fov : 68;
+  }
+  function endWalkPointer(pointerId){
+    delete _walkDrag.pointers[pointerId];
+    var ids=Object.keys(_walkDrag.pointers);
+    if(ids.length>=2){
+      _walkDrag.id=null;
+      beginWalkPinch();
+    } else if(ids.length===1){
+      var p=_walkDrag.pointers[ids[0]];
+      _walkDrag.id=Number(ids[0]); _walkDrag.lx=p.x; _walkDrag.ly=p.y;
+    } else {
+      _walkDrag.id=null;
+    }
+  }
   ren.domElement.addEventListener('pointerdown',function(e){
     if(isWalkView()){
-      if(_walkDrag.id===null){ _walkDrag.id=e.pointerId; _walkDrag.lx=e.clientX; _walkDrag.ly=e.clientY; }
+      _walkDrag.pointers[e.pointerId]={x:e.clientX,y:e.clientY};
+      if(walkPointerCount()===1){
+        _walkDrag.id=e.pointerId; _walkDrag.lx=e.clientX; _walkDrag.ly=e.clientY;
+      } else if(walkPointerCount()===2){
+        _walkDrag.id=null;
+        beginWalkPinch();
+      }
       e.preventDefault();
       return;
     }
@@ -7152,8 +7182,10 @@ function init3D(){
     _pick3d.x=e.clientX; _pick3d.y=e.clientY; _pick3d.t=Date.now();
   });
   ren.domElement.addEventListener('pointerup',function(e){
-    if(_walkDrag.id===e.pointerId) _walkDrag.id=null;
-    if(isWalkView()) return;
+    if(isWalkView()){
+      endWalkPointer(e.pointerId);
+      return;
+    }
     if(GIZMO_DRAG.active){
       finish3DGizmoDrag();
       e.preventDefault();
@@ -7165,10 +7197,28 @@ function init3D(){
     handle3DPointerPick(e);
   });
   ren.domElement.addEventListener('pointercancel',function(e){
-    if(_walkDrag.id===e.pointerId) _walkDrag.id=null;
+    if(isWalkView()) endWalkPointer(e.pointerId);
+    else if(_walkDrag.id===e.pointerId) _walkDrag.id=null;
   });
   ren.domElement.addEventListener('pointermove',function(e){
     if(isWalkView()){
+      if(_walkDrag.pointers[e.pointerId]){
+        _walkDrag.pointers[e.pointerId].x=e.clientX;
+        _walkDrag.pointers[e.pointerId].y=e.clientY;
+      }
+      if(walkPointerCount()>=2){
+        var dist=walkPinchDistance();
+        if(_walkDrag.pinchDist>0 && dist>0 && camExt){
+          // ピンチアウトは望遠、ピンチインは広角。焦点距離相当の比率でFOVを変える。
+          var scale=dist/_walkDrag.pinchDist;
+          var half=Math.atan(Math.tan(_walkDrag.pinchFov*Math.PI/360)/scale);
+          camExt.fov=Math.max(35,Math.min(100,half*360/Math.PI));
+          camExt.updateProjectionMatrix();
+          if(typeof invalidate3D==='function') invalidate3D();
+        }
+        e.preventDefault();
+        return;
+      }
       if(_walkDrag.id!==e.pointerId) return;
       var dx=e.clientX-_walkDrag.lx, dy=e.clientY-_walkDrag.ly;
       _walkDrag.lx=e.clientX; _walkDrag.ly=e.clientY;
