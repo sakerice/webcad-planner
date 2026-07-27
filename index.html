@@ -230,6 +230,30 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #unity-render-fab.show{display:block}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
+/* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
+.jis-overlay{position:fixed;inset:0;z-index:15000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:12px}
+.jis-dialog{width:100%;height:100%;max-width:1400px;max-height:96vh;background:#fff;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,0.35)}
+.jis-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#16213e;color:#fff}
+.jis-title{font-size:14px;font-weight:700;margin-right:auto}
+.jis-toolbar select{padding:6px 8px;border-radius:6px;border:1px solid #2a4080;background:#0f172a;color:#fff;font-size:12px}
+.jis-toolbar .pbtn{width:auto;padding:7px 12px;margin-top:0}
+.jis-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer;font-size:16px}
+.jis-body{flex:1;display:flex;overflow:hidden;flex-wrap:wrap}
+#jis-sheet-list{width:160px;flex:0 0 160px;overflow-y:auto;background:#f5f6f8;border-right:1px solid #ddd;padding:8px}
+#jis-preview{flex:1;min-width:240px;overflow:auto;background:#888;display:flex;flex-direction:column;align-items:center;padding:24px}
+.jis-paper-sheet{background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.3);width:100%;max-width:900px}
+.jis-paper-sheet svg{display:block;width:100%;height:auto}
+.jis-sheet-group-title{font-size:11px;font-weight:700;color:#888;margin:10px 4px 4px}
+.jis-sheet-btn{display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;border:1px solid transparent;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;color:#222;font-family:inherit}
+.jis-sheet-btn:hover{background:#eef}
+.jis-sheet-btn.active{border-color:#e94560;background:#ffe9ec;color:#e94560;font-weight:700}
+.jis-empty{padding:20px;color:#fff;text-align:center;font-size:13px;max-width:360px;margin:auto}
+@media (max-width:640px){
+  .jis-body{flex-direction:column}
+  #jis-sheet-list{width:100%;flex:0 0 auto;max-height:120px;border-right:none;border-bottom:1px solid #ddd;display:flex;flex-wrap:wrap;gap:6px}
+  .jis-sheet-group-title{width:100%;margin:4px 4px 0}
+  .jis-sheet-btn{width:auto;flex:1 1 auto;margin-bottom:0}
+}
 #app-loading{
   display:none;
   position:fixed;
@@ -3008,6 +3032,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+  <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -3283,6 +3308,32 @@ input[type="reset"]:focus-visible{
       <a id="ai-dl-segmentation" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">セグメント画像保存</a>
     </div>
     <div class="unity-render-cmd">使い方: 一括DLした画像3枚と「AIへの指示文」を、利用したい画像生成AIにまとめて渡してください。JSONは検証用の控えなので、通常はAIへ全文投入しなくて大丈夫です。</div>
+  </div>
+</div>
+
+<div id="jis-drawing-overlay" class="jis-overlay" style="display:none">
+  <div class="jis-dialog">
+    <div class="jis-toolbar">
+      <span class="jis-title">JIS図面出力</span>
+      <select id="jis-scale" onchange="jisRerender()">
+        <option value="auto">縮尺: 自動</option>
+        <option value="50">1:50</option>
+        <option value="100">1:100</option>
+        <option value="200">1:200</option>
+      </select>
+      <select id="jis-paper" onchange="jisRerender()">
+        <option value="a3">A3 横</option>
+        <option value="a4">A4 横</option>
+      </select>
+      <button class="pbtn" onclick="jisPrint()">🖨 印刷/PDF</button>
+      <button class="pbtn sec" onclick="jisDownloadSvg()">⬇ SVG</button>
+      <button class="pbtn sec" onclick="jisDownloadPng()">⬇ PNG</button>
+      <button class="jis-close" onclick="closeJisDrawingDialog()">✕</button>
+    </div>
+    <div class="jis-body">
+      <div id="jis-sheet-list"></div>
+      <div id="jis-preview"></div>
+    </div>
   </div>
 </div>
 
@@ -17696,6 +17747,93 @@ function initTouchPressFeedback(){
     document.querySelectorAll('.touch-pressing').forEach(clear);
   },{passive:true});
 }
+
+// ── JIS図面出力(JIS A 0150準拠の白黒図面SVG生成) ──
+var JISDRAW=(function(){
+  // 紙上の線幅mm × 縮尺 = 実寸mmのstroke-width。SVGのuser unit=実寸mm
+  function lineWidths(scale){
+    return {thick:0.5*scale, mid:0.25*scale, thin:0.13*scale, text:3.0*scale};
+  }
+  function availableSheets(){
+    var sheets=[];
+    [1,2,3,4].forEach(function(f){
+      if(DATA.walls.some(function(w){return (w.floor||1)===f;}))
+        sheets.push({kind:'plan',key:f,label:'平面図 '+f+'F'});
+    });
+    if(sheets.length){
+      [['e','東立面図'],['w','西立面図'],['s','南立面図'],['n','北立面図']].forEach(function(d){
+        sheets.push({kind:'elev',key:d[0],label:d[1]});
+      });
+    }
+    return sheets;
+  }
+  function buildFloorPlanSvg(floor,opts){ return placeholderSvg('平面図 '+floor+'F(実装中)'); }
+  function buildElevationSvg(dir,opts){ return placeholderSvg('立面図(実装中)'); }
+  function placeholderSvg(label){
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297">'
+      +'<rect width="420" height="297" fill="#fff"/>'
+      +'<text x="210" y="148" text-anchor="middle" font-size="12" fill="#000">'+label+'</text></svg>';
+  }
+  return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
+})();
+
+var JIS_UI={sheet:null};
+function openJisDrawingDialog(){
+  var sheets=JISDRAW.availableSheets();
+  var ov=document.getElementById('jis-drawing-overlay');
+  ov.style.display='flex';
+  if(!sheets.length){
+    document.getElementById('jis-preview').innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
+    document.getElementById('jis-sheet-list').innerHTML='';
+    return;
+  }
+  if(!JIS_UI.sheet) JIS_UI.sheet=sheets[0];
+  renderJisSheetList(sheets);
+  jisRerender();
+}
+function closeJisDrawingDialog(){ document.getElementById('jis-drawing-overlay').style.display='none'; }
+function jisSelectSheet(kind,key){
+  JIS_UI.sheet={kind:kind,key:key};
+  renderJisSheetList(JISDRAW.availableSheets());
+  jisRerender();
+}
+function renderJisSheetList(sheets){
+  // リストのHTMLを組み立て、選択中に .active を付ける(平面図/立面図を見出しで区切る)
+  var plans=sheets.filter(function(s){return s.kind==='plan';});
+  var elevs=sheets.filter(function(s){return s.kind==='elev';});
+  function isActive(s){
+    return JIS_UI.sheet && JIS_UI.sheet.kind===s.kind && JIS_UI.sheet.key===s.key;
+  }
+  function btnHtml(s){
+    // keyは数値(階)または1文字の方角コード。onclick属性はダブルクォートで囲むため、
+    // JSON.stringifyの二重引用符文字列をそのまま埋め込むと属性が壊れる → シングルクォートで手組みする
+    var keyLit=(typeof s.key==='number')?String(s.key):("'"+s.key+"'");
+    return '<button type="button" class="jis-sheet-btn'+(isActive(s)?' active':'')+'" onclick="jisSelectSheet(\''+s.kind+'\','+keyLit+')">'+s.label+'</button>';
+  }
+  var html='';
+  if(plans.length){
+    html+='<div class="jis-sheet-group-title">平面図</div>'+plans.map(btnHtml).join('');
+  }
+  if(elevs.length){
+    html+='<div class="jis-sheet-group-title">立面図</div>'+elevs.map(btnHtml).join('');
+  }
+  document.getElementById('jis-sheet-list').innerHTML=html;
+}
+function jisCurrentOpts(){
+  return {scale:document.getElementById('jis-scale').value, paper:document.getElementById('jis-paper').value};
+}
+function jisCurrentSvg(){
+  var s=JIS_UI.sheet;
+  return s.kind==='plan' ? JISDRAW.buildFloorPlanSvg(s.key,jisCurrentOpts())
+                         : JISDRAW.buildElevationSvg(s.key,jisCurrentOpts());
+}
+function jisRerender(){
+  var host=document.getElementById('jis-preview');
+  host.innerHTML='<div class="jis-paper-sheet">'+jisCurrentSvg()+'</div>';
+}
+function jisPrint(){ /* Task 7 */ }
+function jisDownloadSvg(){ /* Task 7 */ }
+function jisDownloadPng(){ /* Task 7 */ }
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
