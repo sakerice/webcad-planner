@@ -17987,6 +17987,140 @@ var JISDRAW=(function(){
     return out;
   }
 
+  // アイテム中心(it.x+it.w/2, it.y+it.d/2)を原点としたローカル座標系のグループ。
+  // it.rot はSVG transform="rotate"にそのまま渡せる(canvasのctx.rotateと同じ時計回り/Y下向き系)。
+  // it.flipX/flipY は既存2D(drawItem2d:6397)のctx.scale(flipX,flipY)と同じ順序(回転の内側)で反映する。
+  function itemGroupOpen(it){
+    var cx=it.x+it.w/2, cy=it.y+it.d/2;
+    var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
+    var t='<g transform="translate('+cx+','+cy+') rotate('+(it.rot||0)+')';
+    if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
+    return t+'">';
+  }
+  function itemGroupClose(){ return '</g>'; }
+  // 親グループのscale(flipX,flipY)を打ち消して文字だけ鏡文字にしない(既存drawStairUpText:6381-6385と同じ二重反転)。
+  function unflipTextGroup(it,x,y){
+    var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
+    var t='<g transform="translate('+x+','+y+')';
+    if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
+    return t+'">';
+  }
+  function escSvgText(s){
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  // 当該階の1つ上の階に何か配置済みなら「上階が存在する」とみなす(stairGroupTotalRiseM:11162-11164と同じ判定)。
+  function floorHasUpper(floor){
+    var nf=(floor||1)+1;
+    return DATA.walls.some(function(w){return (w.floor||1)===nf;}) ||
+           DATA.rooms.some(function(r){return (r.floor||1)===nf;}) ||
+           DATA.items.some(function(i){return (i.floor||1)===nf;});
+  }
+
+  // 直階段: 外形+等間隔の段板線(段数はgetStairStepCount:11206、2D/3Dと同じ関数)+中央の昇り矢印+UP/DNラベル。
+  // 廻りコーナー階段: 外形+内側隅(右下)から放射する2本の段鼻線+L字の昇り歩行線+矢印(既存2D:6545-6574を移植)。
+  function stairSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var label=floorHasUpper(it.floor||1)?'UP':'DN';
+    if(it.type==='stair-corner'){
+      out+='<line x1="'+hw+'" y1="'+hd+'" x2="'+(-hw)+'" y2="0" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      out+='<line x1="'+hw+'" y1="'+hd+'" x2="0" y2="'+(-hd)+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      var aHeadLen=Math.min(Math.min(hw,hd)*0.28,LW.text*3), wTipX=hw*0.96, wAw=Math.min(hw*0.3,LW.text*1.6);
+      out+='<polyline points="0,'+(hd*0.96)+' 0,0 '+(wTipX-aHeadLen)+',0" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+='<polygon points="'+wTipX+',0 '+(wTipX-aHeadLen)+',-'+wAw+' '+(wTipX-aHeadLen)+','+wAw+'" fill="#000"/>';
+      out+=unflipTextGroup(it,wTipX-LW.text*0.3,-LW.text*0.9)
+        +'<text x="0" y="0" text-anchor="end" font-family="\'Noto Sans JP\',sans-serif" font-size="'+LW.text+'" fill="#000">'+label+'</text></g>';
+    } else {
+      var steps=getStairStepCount(it);
+      for(var si=1; si<steps; si++){
+        var sy=-hd+(it.d/steps)*si;
+        out+='<line x1="'+(-hw)+'" y1="'+sy+'" x2="'+hw+'" y2="'+sy+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      }
+      var arrowLen=Math.min(hd*0.17,LW.text*4), arrowHalf=Math.min(hw*0.35,LW.text*2), tipY=hd*0.72;
+      out+='<line x1="0" y1="'+(-tipY)+'" x2="0" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+='<polygon points="0,'+tipY+' '+(-arrowHalf)+','+(tipY-arrowLen)+' '+arrowHalf+','+(tipY-arrowLen)+'" fill="#000"/>';
+      out+=unflipTextGroup(it,LW.text*0.4,tipY-arrowLen*0.15)
+        +'<text x="0" y="0" text-anchor="start" font-family="\'Noto Sans JP\',sans-serif" font-size="'+LW.text+'" fill="#000">'+label+'</text></g>';
+    }
+    out+=itemGroupClose();
+    return out;
+  }
+  function stairsToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor && (it.type==='stair'||it.type==='stair-corner');}).forEach(function(it){
+      out+=stairSymbolSvg(it,LW);
+    });
+    return out;
+  }
+
+  // 設備記号(簡略線画)。build3DKitchen/Bath/Toilet/Sink(:13608-13693)のレイアウトを平面用に単純化した略記。
+  function kitchenSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var sinkW=it.w*0.32, sinkD=it.d*0.55, sinkCx=-hw+it.w*0.06+sinkW/2, rx=Math.min(sinkW,sinkD)*0.18;
+    out+='<rect x="'+(sinkCx-sinkW/2)+'" y="'+(-sinkD/2)+'" width="'+sinkW+'" height="'+sinkD+'" rx="'+rx+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    var stoveCx=hw-it.w*0.24, stoveW=it.w*0.38, stoveD=it.d*0.6, br=Math.min(stoveW,stoveD)*0.16;
+    [[-stoveW/4,-stoveD/4],[stoveW/4,-stoveD/4],[-stoveW/4,stoveD/4],[stoveW/4,stoveD/4]].forEach(function(p){
+      out+='<circle cx="'+(stoveCx+p[0])+'" cy="'+p[1]+'" r="'+br+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+=itemGroupClose();
+    return out;
+  }
+  function bathSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2, margin=Math.min(it.w,it.d)*0.12;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw+margin)+'" y="'+(-hd+margin)+'" width="'+(it.w-margin*2)+'" height="'+(it.d-margin*2)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    var dr=Math.min(it.w,it.d)*0.05;
+    out+='<circle cx="'+(-hw+margin*1.6)+'" cy="'+(-hd+margin*1.6)+'" r="'+dr+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  function toiletSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2, tankW=it.w*0.82, tankH=it.d*0.26;
+    var bowlRy=(it.d-tankH)*0.42, bowlCy=-hd+tankH+bowlRy*0.9;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-tankW/2)+'" y="'+(-hd)+'" width="'+tankW+'" height="'+tankH+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<ellipse cx="0" cy="'+bowlCy+'" rx="'+(it.w*0.42)+'" ry="'+bowlRy+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  function sinkSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<ellipse cx="0" cy="0" rx="'+(it.w*0.36)+'" ry="'+(it.d*0.32)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  function fixturesToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor;}).forEach(function(it){
+      if(it.type==='kitchen') out+=kitchenSymbolSvg(it,LW);
+      else if(it.type==='bath') out+=bathSymbolSvg(it,LW);
+      else if(it.type==='toilet') out+=toiletSymbolSvg(it,LW);
+      else if(it.type==='sink') out+=sinkSymbolSvg(it,LW);
+      // それ以外(ソファ等の可動家具・車・植栽)は平面図では描かない(意図的に対象外)
+    });
+    return out;
+  }
+
+  // 部屋名+畳数(1.62㎡=1帖、既存の換算例:5677と同じ)を部屋中心に2行で描く。
+  function roomLabelsToSvg(floor,LW){
+    var out='';
+    DATA.rooms.filter(function(r){return (r.floor||1)===floor;}).forEach(function(r){
+      var cx=r.x+r.w/2, cy=r.y+r.d/2;
+      var name=escSvgText(r.n||'部屋');
+      var tatami=(r.w*r.d*1e-6/1.62).toFixed(1)+'帖';
+      var fsName=LW.text*1.15, fsArea=LW.text*0.95, gap=fsName*0.7;
+      out+='<text x="'+cx+'" y="'+(cy-gap*0.5)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsName+'" fill="#000">'+name+'</text>';
+      out+='<text x="'+cx+'" y="'+(cy+gap*1.1)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsArea+'" fill="#000">'+tatami+'</text>';
+    });
+    return out;
+  }
+
   function buildFloorPlanSvg(floor,opts){
     opts=opts||{};
     var paper=paperDimsMm(opts.paper);
@@ -17998,7 +18132,9 @@ var JISDRAW=(function(){
     var view={minX:cx-vw/2,minY:cy-vh/2,maxX:cx+vw/2,maxY:cy+vh/2};
     var marginMm=scaleNum*8;
     var titleInfo={label:floor+'F 平面図  S=1:'+scaleNum, x:view.maxX-marginMm, y:view.maxY-marginMm, fontSize:LW.text*1.5};
-    return svgOpen(view,opts)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)+svgClose(titleInfo);
+    // 部屋ラベル・設備・階段は壁の黒塗りより後(手前)に描画し、壁と重なっても隠れないようにする。
+    return svgOpen(view,opts)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)
+      +roomLabelsToSvg(floor,LW)+fixturesToSvg(floor,LW)+stairsToSvg(floor,LW)+svgClose(titleInfo);
   }
 
   return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
