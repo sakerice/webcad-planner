@@ -17767,7 +17767,186 @@ var JISDRAW=(function(){
     }
     return sheets;
   }
-  function buildElevationSvg(dir,opts){ return placeholderSvg('立面図(実装中)'); }
+  // 立面方位軸。u=画面右方向へのワールド(x,y)射影係数、dp=視点に近いほど大きくなる奥行き射影係数。
+  // 座標系(x=東,y=南)から導出: 南立面(南から北向きに見る)は右手=東、北立面は右手=西、
+  // 東立面(東から西向き)は右手=北、西立面(西から東向き)は右手=南。
+  // ブラウザで平面図と見比べて左右が実世界と一致することを確認済み(逆なら u を反転する)。
+  var ELEV_AXES={
+    s:{u:[ 1,0], dp:[0, 1], label:'南立面図'},
+    n:{u:[-1,0], dp:[0,-1], label:'北立面図'},
+    e:{u:[0,-1], dp:[ 1,0], label:'東立面図'},
+    w:{u:[0, 1], dp:[-1,0], label:'西立面図'}
+  };
+  var ELEV_MARGIN_MM=1800; // 平面図PLAN_MARGIN_MMと同じ余白量(印刷余白+将来の寸法線用)
+
+  // 壁1本ぶんの投影レコード。
+  // uMin/uMax = u軸(画面横方向)への両端点射影のレンジ。
+  // base/top = 世界高さ(mm、floorBaseYを基準に上向き正)。floorBaseY/wallDisplayHeightMはm返しなので
+  //   ÷U(=×1000)でmmに変換する点に注意。
+  // depth = dp軸(視点に近いほど大)への両端点射影の最大値。その壁が「どれだけ手前にあるか」を表す代表値。
+  function elevWallRects(dir){
+    var ax=ELEV_AXES[dir];
+    var rects=[];
+    DATA.walls.forEach(function(w){
+      var u1=w.x1*ax.u[0]+w.y1*ax.u[1], u2=w.x2*ax.u[0]+w.y2*ax.u[1];
+      var d1=w.x1*ax.dp[0]+w.y1*ax.dp[1], d2=w.x2*ax.dp[0]+w.y2*ax.dp[1];
+      var f=w.floor||1;
+      var base=floorBaseY(f)/U;
+      var top=base+wallDisplayHeightM(w)/U;
+      rects.push({uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,depth:Math.max(d1,d2),wall:w});
+    });
+    return rects;
+  }
+
+  // 区間(uA→uB)の値(top/base)を隣接区間と結合しながらステップ状の点列にする。
+  // 直前区間と同値(0.5mm未満の差)なら右端だけ延長し、異なる値なら縦の段差点を追加する。
+  function elevStepPoints(segs,field){
+    var out=[];
+    segs.forEach(function(s){
+      var y=s[field];
+      if(out.length && Math.abs(out[out.length-1][1]-y)<0.5){
+        out[out.length-1]=[s.uB,y];
+      } else {
+        out.push([s.uA,y]); out.push([s.uB,y]);
+      }
+    });
+    return out;
+  }
+
+  // rects群のu境界(幅0の妻壁等は外形に寄与しないため除外)で区間分割し、
+  // 各区間を覆う壁のうち最大top・最小baseを集計する(=イベント座標での区間分割)。
+  function elevSegments(rects){
+    var wide=rects.filter(function(r){return r.uMax-r.uMin>0.5;});
+    if(!wide.length) return [];
+    var xs=[];
+    wide.forEach(function(r){ xs.push(r.uMin,r.uMax); });
+    xs.sort(function(a,b){return a-b;});
+    var uniq=[];
+    xs.forEach(function(v){ if(!uniq.length||v-uniq[uniq.length-1]>0.5) uniq.push(v); });
+    var segs=[];
+    for(var i=0;i<uniq.length-1;i++){
+      var uA=uniq[i], uB=uniq[i+1], mid=(uA+uB)/2;
+      var top=-Infinity, base=Infinity, cover=false;
+      wide.forEach(function(r){
+        if(r.uMin<=mid+0.5 && r.uMax>=mid-0.5){ cover=true; top=Math.max(top,r.top); base=Math.min(base,r.base); }
+      });
+      if(cover) segs.push({uA:uA,uB:uB,top:top,base:base});
+    }
+    return segs;
+  }
+
+  // 壁シルエットの外形(スカイライン)点列。上辺(top)を左→右、下辺(base)を右→左でつなぎ、
+  // <polygon>の自動閉路に任せて1本の外形ポリラインにする(塗りなし・LW.thickで描画)。
+  function elevSkyline(rects){
+    var segs=elevSegments(rects);
+    if(!segs.length) return [];
+    var topPts=elevStepPoints(segs,'top');
+    var basePts=elevStepPoints(segs,'base').slice().reverse();
+    return topPts.concat(basePts);
+  }
+
+  // 指定u位置を覆う壁群のうち最も手前(depthが最大)の値。開口の被り判定に使う。
+  function elevFrontDepthAt(rects,uVal){
+    var d=-Infinity;
+    rects.forEach(function(r){
+      if(r.uMin-0.5<=uVal && uVal<=r.uMax+0.5) d=Math.max(d,r.depth);
+    });
+    return d;
+  }
+
+  // 開口(窓・ドア)をこの方位に投影して描く。手前の壁面(=最前面深度)より
+  // 壁厚+150mm以上奥にある開口は「その面に面していない」とみなして描かない。
+  function elevOpenings(dir,LW){
+    var ax=ELEV_AXES[dir];
+    var rects=elevWallRects(dir);
+    var out='';
+    DATA.items.filter(function(it){return isOpeningItemType(it.type);}).forEach(function(it){
+      var info=getOpeningWallInfo(it);
+      if(!info || !info.wall) return; // 対応する壁が見つからない孤立開口は描画対象外
+      var w=info.wall;
+      var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy)||1;
+      var cosU=(dx/len)*ax.u[0]+(dy/len)*ax.u[1];
+      var wallDepth=Math.max(w.x1*ax.dp[0]+w.y1*ax.dp[1], w.x2*ax.dp[0]+w.y2*ax.dp[1]);
+      var uCenter=info.x*ax.u[0]+info.y*ax.u[1];
+      var front=elevFrontDepthAt(rects,uCenter);
+      var wallThick=w.thick||120;
+      if(wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
+      // 開口幅(it.w、壁方向)をu軸へ投影。壁がこの面と直交する(=妻壁)ほどcosUが0に近づき幅も0に潰れる
+      var halfU=Math.abs(cosU)*(it.w||0)/2;
+      if(halfU<1) return; // 直交壁の開口はこの面ではほぼ幅0=表示不要
+      var f=w.floor||1, base=floorBaseY(f)/U;
+      var sill=openingSillMm(it), h=openingHeightMm(it); // 掃き出し窓(window-door)はopeningSillMmが常に0を返す
+      var uL=uCenter-halfU, uR=uCenter+halfU, yB=base+sill, yT=base+sill+h;
+      out+='<rect x="'+uL+'" y="'+yB+'" width="'+(uR-uL)+'" height="'+(yT-yB)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      if(isWindowLikeType(it.type)){
+        // 引違い(既定/sliding): 縦中桟1本。FIX/すべり出し規格(casement扱い): 対角細線。掃き出しは常に引違い扱い。
+        var kind=it.type==='window-door' ? 'sliding' : effectiveWindowKind(it);
+        if(kind==='fix'||kind==='casement'){
+          out+='<line x1="'+uL+'" y1="'+yB+'" x2="'+uR+'" y2="'+yT+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+        } else {
+          out+='<line x1="'+uCenter+'" y1="'+yB+'" x2="'+uCenter+'" y2="'+yT+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+        }
+      } else if(!isNoDoorOpeningType(it.type)){
+        // 建具なし開口(door-opening/door-opening-arch)はノブが無いので点を描かない
+        var knobY=yB+Math.min(1000,(yT-yB)*0.5);
+        var knobSide=it.flipX?-1:1;
+        var knobX=uCenter+knobSide*(uR-uL)*0.41;
+        out+='<circle cx="'+knobX+'" cy="'+knobY+'" r="'+(LW.mid*1.2)+'" fill="#000"/>';
+      }
+    });
+    return out;
+  }
+
+  // 立面全体のu範囲・高さ範囲(GL=0を必ず含む)。壁が無ければ既定の矩形を返す。
+  function elevBounds(dir){
+    var rects=elevWallRects(dir);
+    var uMin=Infinity,uMax=-Infinity,hMax=-Infinity,hMinBase=Infinity;
+    rects.forEach(function(r){
+      uMin=Math.min(uMin,r.uMin); uMax=Math.max(uMax,r.uMax);
+      hMax=Math.max(hMax,r.top); hMinBase=Math.min(hMinBase,r.base);
+    });
+    if(!isFinite(uMin)){ uMin=0; uMax=1000; hMax=1000; hMinBase=0; }
+    var hMin=Math.min(0,hMinBase); // 基礎分の余白でGLより壁基準が高い場合もGL(0)は常に含める
+    return {uMin:uMin-ELEV_MARGIN_MM, uMax:uMax+ELEV_MARGIN_MM, hMin:hMin-ELEV_MARGIN_MM, hMax:hMax+ELEV_MARGIN_MM};
+  }
+
+  // GL(地盤面)線: 常にy=0、建物幅全体+左右延長(JIS図面のGL表記慣習)。
+  // 呼び出し元で<g transform="scale(1,-1)">配下に置かれるため、文字だけ内側でscale(1,-1)を打ち消して
+  // 上下反転(鏡文字)しないようにする(既存unflipTextGroup:17997と同じ考え方)。
+  function elevGlSvg(bounds,LW){
+    var ext=Math.max(600,ELEV_MARGIN_MM*0.4);
+    var x1=bounds.uMin, x2=bounds.uMax;
+    var out='<line x1="'+(x1-ext)+'" y1="0" x2="'+(x2+ext)+'" y2="0" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    var tx=x1-ext, ty=LW.text*1.3;
+    out+='<g transform="translate('+tx+','+ty+') scale(1,-1)">'
+      +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+(LW.text*0.9)+'" fill="#000">GL</text></g>';
+    return out;
+  }
+
+  function buildElevationSvg(dir,opts){
+    opts=opts||{};
+    var ax=ELEV_AXES[dir];
+    if(!ax) return placeholderSvg('立面図(不明な方位)');
+    var rects=elevWallRects(dir);
+    var bounds=elevBounds(dir);
+    var paper=paperDimsMm(opts.paper);
+    // 立面はu軸(横)=建物幅、高さ軸(縦)=建物高さで縮尺判定用の疑似boundsを作る(planBounds同様minX/maxX/minY/maxYの形)
+    var scaleBounds={minX:bounds.uMin,maxX:bounds.uMax,minY:-bounds.hMax,maxY:-bounds.hMin};
+    var scaleNum=(opts.scale==='auto') ? pickAutoScale(scaleBounds,paper) : (parseInt(opts.scale,10)||100);
+    var LW=lineWidths(scaleNum);
+    var cx=(bounds.uMin+bounds.uMax)/2, ch=(bounds.hMin+bounds.hMax)/2;
+    var vw=paper.w*scaleNum, vh=paper.h*scaleNum;
+    // SVGのy軸は下向きなので、高さ(上向き正)はここでまとめて反転する。
+    // 中身(スカイライン・開口・GL)はすべて「y=高さmm(上向き正)」のまま組み立て、
+    // <g transform="scale(1,-1)">で一括反転することで各座標計算での符号ミスを避ける。
+    var view={minX:cx-vw/2, minY:-(ch+vh/2), maxX:cx+vw/2, maxY:-(ch-vh/2)};
+    var skylinePts=elevSkyline(rects).map(function(p){return p[0]+','+p[1];}).join(' ');
+    var body='';
+    if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    body+=elevGlSvg(bounds,LW);
+    body+=elevOpenings(dir,LW);
+    return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
+  }
   function placeholderSvg(label){
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297">'
       +'<rect width="420" height="297" fill="#fff"/>'
