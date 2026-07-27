@@ -2974,6 +2974,43 @@ input[type="reset"]:focus-visible{
     height:50px;
   }
 }
+
+/* ── 外観3D: 立面方向カメラスナップ(東西南北) ─────────
+   外観3D(ST.view==='3d-ext')表示中のみ表示。右上の#unity-render-fabとは
+   反対の右下に置き、右下常設の#app-version(bottom:10px,高さ30px)の
+   上に十分な間隔(bottom:54px)を空けて重ならないようにする。 */
+#elev-snap-fab{
+  position:absolute;
+  right:14px;
+  bottom:54px;
+  z-index:250;
+  display:none;
+  gap:6px;
+  padding:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 4px 12px rgba(24,20,18,.13);
+}
+#elev-snap-fab.show{display:flex}
+.elev-snap-btn{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.96);
+  color:var(--hp-text);
+  font-size:13px;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  touch-action:manipulation;
+  box-shadow:inset 0 0 0 1px rgba(31,27,24,.08);
+}
+.elev-snap-btn:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+.elev-snap-btn:active{background:var(--hp-primary);color:#fff}
+@media (max-width:768px){
+  #elev-snap-fab{right:8px;bottom:8px}
+}
 </style>
 </head>
 <body>
@@ -3191,6 +3228,12 @@ input[type="reset"]:focus-visible{
         </div>
       </div>
       <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+      <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('s')" title="南立面から見る">南</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('w')" title="西立面から見る">西</button>
+      </div>
     </div>
     <div id="int-ctrl">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🚶 内観視点</div>
@@ -7801,6 +7844,26 @@ function fitCameraToScene(){
   orbit.minDistance=span*0.2;
   orbit.maxDistance=span*6;
   orbit.update();
+}
+
+// 立面図出力方向からの見え方を即確認するためのカメラショートカット。
+// 正投影にはせず(パース感はピンチで調整する運用)、以後の操作は通常のOrbitControls。
+function snapCameraToElevation(dir){
+  if(!sc3||!camExt||!orbit) return;
+  var box=new THREE.Box3();
+  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
+  if(box.isEmpty()) return;
+  var center=box.getCenter(new THREE.Vector3());
+  var size=box.getSize(new THREE.Vector3());
+  var span=Math.max(size.x,size.z,4);
+  var fov=camExt.fov*Math.PI/180;
+  var dist=(span/2)/Math.tan(fov/2)*1.25;
+  // 3D座標: x=東, z=南(2Dのy), y=高さ
+  var v={e:[1,0],w:[-1,0],s:[0,1],n:[0,-1]}[dir];
+  camExt.position.set(center.x+v[0]*dist, center.y, center.z+v[1]*dist);
+  orbit.target.copy(center);
+  orbit.update();
+  invalidate3D();
 }
 
 function build3D(){
@@ -14015,6 +14078,15 @@ function getWalkRouteById(id){
 function isWalkthroughRouteActive(it){
   return !!(WALKTHROUGH && it && WALKTHROUGH.routeId===it.id);
 }
+// 立面方向スナップボタンの表示制御: 外観3D表示中のみ、かつルート
+// ウォークスルー再生中(カメラを毎フレーム自動制御)は隠す。
+function updateElevSnapFabVisibility(){
+  var el=document.getElementById('elev-snap-fab');
+  if(!el) return;
+  var show=ST.view==='3d-ext' && !WALKTHROUGH;
+  el.classList.toggle('show', show);
+  if(show) positionElevSnapFab(); // 表示時にレイアウト実測して底上げ量を確定
+}
 function beginWalkthrough(it){
   if(!it || it.type!=='walk-route' || !camExt) return false;
   var ep=getWalkRouteEndpoints(it);
@@ -14039,6 +14111,7 @@ function beginWalkthrough(it){
   remove3DSelectionHelpers();
   updateWalkthroughCamera(performance.now());
   updateProps();
+  updateElevSnapFabVisibility(); // 再生中はカメラを自動制御するためスナップボタンを隠す
   return true;
 }
 function playSelectedWalkthroughRoute(){
@@ -14067,6 +14140,7 @@ function stopWalkthrough(){
   add3DSelectionMarker();
   add3DMoveGizmo();
   updateProps();
+  updateElevSnapFabVisibility(); // 外観3Dに戻ればスナップボタンを再表示
   if(typeof invalidate3D==='function') invalidate3D();
 }
 function updateWalkthroughCamera(now){
@@ -14103,6 +14177,7 @@ function updateWalkthroughCamera(now){
     add3DSelectionMarker();
     add3DMoveGizmo();
     updateProps();
+    updateElevSnapFabVisibility(); // 自然終了時もスナップボタンを再表示
   }
   return true;
 }
@@ -14410,6 +14485,26 @@ function positionWalkHud(){
   if(ex){ ex.style.top=topSafe+'px'; ex.style.left=leftSafe+'px'; }
   if(dp) dp.style.bottom=botSafe+'px';
 }
+// 立面方向スナップボタン: モバイルではフロート表示の#bottom-navが、デスクトップ
+// では常設の#app-version/#statusbarが右下に重なるため、positionWalkHudと同様に
+// 実測して必要なだけ底上げする(CSSの固定値だけだと画面幅次第で重なる)。
+function positionElevSnapFab(){
+  var el=document.getElementById('elev-snap-fab');
+  var wrap=document.getElementById('c3d-wrap');
+  if(!el||!wrap) return;
+  var wr=wrap.getBoundingClientRect();
+  function overlapBottom(id){
+    var e=document.getElementById(id);
+    if(!e) return 0;
+    var r=e.getBoundingClientRect();
+    if(r.height<=0||r.top>=wr.bottom) return 0;
+    return Math.max(0,wr.bottom-r.top);
+  }
+  var gap=window.innerWidth<=768?8:14;
+  var botSafe=Math.max(gap,overlapBottom('bottom-nav')+gap,overlapBottom('app-version')+gap,overlapBottom('statusbar')+gap);
+  el.style.bottom=botSafe+'px';
+}
+window.addEventListener('resize',positionElevSnapFab);
 function initWalkHud(){
   var mm=document.getElementById('walk-minimap');
   if(mm&&!mm._wired){
@@ -14781,6 +14876,7 @@ function setView(v){
   document.getElementById('c3d-wrap').style.display=(v==='2d'?'none':'block');
   document.getElementById('help-box').style.display=(v==='2d'?'block':'none');
   document.getElementById('wasd').style.display='none';  // orbit mode for interior
+  updateElevSnapFabVisibility(); // 立面方向スナップボタン: 外観3D表示中(ルート再生中を除く)のみ
   var modeNames={'2d':'平面図','3d-ext':'外観3D','3d-int':'内観3D','3d-walk':'ウォークスルー'};
   document.getElementById('st-mode').textContent='モード:'+(modeNames[v]||v);
   if(v!=='2d'){
