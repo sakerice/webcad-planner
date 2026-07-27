@@ -17778,6 +17778,7 @@ var JISDRAW=(function(){
     w:{u:[0, 1], dp:[-1,0], label:'西立面図'}
   };
   var ELEV_MARGIN_MM=1800; // 平面図PLAN_MARGIN_MMと同じ余白量(印刷余白+将来の寸法線用)
+  var ELEV_HEIGHT_DIM_EXTRA_MM=1800; // 右側の高さ寸法列(引出線+GL/軒高/最高高さの数値)が収まる追加余白
 
   // 壁1本ぶんの投影レコード。
   // uMin/uMax = u軸(画面横方向)への両端点射影のレンジ。
@@ -17930,7 +17931,10 @@ var JISDRAW=(function(){
     });
     if(!isFinite(uMin)){ uMin=0; uMax=1000; hMax=1000; hMinBase=0; }
     var hMin=Math.min(0,hMinBase); // 基礎分の余白でGLより壁基準が高い場合もGL(0)は常に含める
-    return {uMin:uMin-ELEV_MARGIN_MM, uMax:uMax+ELEV_MARGIN_MM, hMin:hMin-ELEV_MARGIN_MM, hMax:hMax+ELEV_MARGIN_MM};
+    hMin=Math.min(hMin,-foundationHeightMm()); // 基礎帯(GLより下)がviewBoxからはみ出さないよう下方に拡張
+    var apexH=roofMaxApexHeightMm();
+    if(apexH!=null) hMax=Math.max(hMax,apexH); // 屋根の最高高さが壁上端より高い分を反映
+    return {uMin:uMin-ELEV_MARGIN_MM, uMax:uMax+ELEV_MARGIN_MM+ELEV_HEIGHT_DIM_EXTRA_MM, hMin:hMin-ELEV_MARGIN_MM, hMax:hMax+ELEV_MARGIN_MM};
   }
 
   // GL(地盤面)線: 常にy=0、建物幅全体+左右延長(JIS図面のGL表記慣習)。
@@ -17943,6 +17947,176 @@ var JISDRAW=(function(){
     var tx=x1-ext, ty=LW.text*1.3;
     out+='<g transform="translate('+tx+','+ty+') scale(1,-1)">'
       +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+(LW.text*0.9)+'" fill="#000">GL</text></g>';
+    return out;
+  }
+
+  // ─── 屋根プロファイル(Step1: build3DRoofItem:11229〜の読解メモ) ───
+  // ローカル座標はW=it.w*U, D=it.d*U[m]、ローカルX=it.w方向(px)、ローカルZ=it.d方向(pz)。
+  // ワールド変換はroofLocalToWorldMm(:11397、flipX/flipY→回転it.rot→平行移動の順)をそのまま流用する
+  // (stairBounds2D等と同じ正方向の回転規約と一致することを:11397の式展開で確認済み)。
+  // 各typeの実値(pitch=clamp(it.pitch||30,5,60)度):
+  //  - flat: 隆起なし。roofThickness(既定180mm、0.03〜0.6mにクランプ)ぶんの薄い矩形(パラペット)のみ。
+  //  - mono(片流れ): 軒(pz=-D/2,h=0)→高い側(pz=+D/2,h=tan(pitch)*D)。棟はなく、
+  //    px方向(W軸)全域で高さ不変(gableと同じ「不変軸=px」)。
+  //  - gable: 棟はpx方向にフルスパン(x=-W/2〜W/2)・pz=0・高さriseG=tan(pitch)*D/2。
+  //    妻壁(三角形)はpx=±W/2の位置。
+  //  - gable-y: gableのpx/pz入れ替え版。棟はpz方向にフルスパン、高さriseY=tan(pitch)*W/2。
+  //  - hip(寄棟): 頂点は中心1点(0,0,rise)、rise=tan(pitch)*min(W,D)/2。棟線長=0。
+  //  - hip-ridge/hip-ridge-long: hipRidgePoints(:11303)と同じ式(alongX=W>=Dの長辺方向に棟を通す。
+  //    hip-ridge-longはより長い棟)。棟高=hipと同じrise=tan(pitch)*min(W,D)/2。
+  // 上記いずれも「基準面頂点+棟/頂点をu軸へ投影し上側凸包を取る」ことで、
+  // 妻面(棟∥視線)は三角形、平側(棟⊥視線)は台形(棟が全幅なら矩形、棟長0なら三角形に退化)に
+  // 自動的になる(タイプ・方位ごとの場合分け不要)。
+  function roofLocalVertices(it){
+    var type=it.roofType||'gable';
+    var pitch=Math.max(5,Math.min(60,it.pitch||30))*Math.PI/180;
+    var W=it.w*U, D=it.d*U; // メートル(build3DRoofItemと同じ単位)
+    var tanP=Math.tan(pitch);
+    var verts=[];
+    function add(x,z,h){ verts.push({x:x,z:z,h:h}); }
+    if(type==='flat'){
+      var thick=Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U));
+      [[-W/2,-D/2],[W/2,-D/2],[W/2,D/2],[-W/2,D/2]].forEach(function(p){
+        add(p[0],p[1],0); add(p[0],p[1],thick);
+      });
+    } else if(type==='mono'){
+      var riseM=tanP*D;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,riseM); add(-W/2,D/2,riseM);
+    } else if(type==='hip'){
+      var riseH=tanP*Math.min(W,D)/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(0,0,riseH);
+    } else if(type==='hip-ridge' || type==='hip-ridge-long'){
+      var riseHR=tanP*Math.min(W,D)/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      var alongX=W>=D;
+      if(alongX){
+        var len=(type==='hip-ridge-long')?Math.max(W*0.55,W-D*0.45):Math.max(W-D,W*0.18);
+        len=Math.min(len,W*0.82);
+        add(-len/2,0,riseHR); add(len/2,0,riseHR);
+      } else {
+        var lenZ=(type==='hip-ridge-long')?Math.max(D*0.55,D-W*0.45):Math.max(D-W,D*0.18);
+        lenZ=Math.min(lenZ,D*0.82);
+        add(0,-lenZ/2,riseHR); add(0,lenZ/2,riseHR);
+      }
+    } else if(type==='gable-y'){
+      var riseY=tanP*W/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(0,-D/2,riseY); add(0,D/2,riseY);
+    } else { // gable(既定)
+      var riseG=tanP*D/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(-W/2,0,riseG); add(W/2,0,riseG);
+    }
+    return verts;
+  }
+  // (u,height)点群の上側凸包をu昇順で返す(monotone chain簡易版)。
+  // 屋根の全頂点をこの方位のu軸へ投影した点集合に適用することで、
+  // 棟が視線と平行/直交いずれの場合も正しいシルエット(三角形/台形/矩形)が場合分けなしで得られる。
+  function upperHull(pts){
+    var sorted=pts.slice().sort(function(a,b){return a[0]-b[0] || a[1]-b[1];});
+    var hull=[];
+    for(var i=0;i<sorted.length;i++){
+      var p=sorted[i];
+      while(hull.length>=2){
+        var o=hull[hull.length-2], a=hull[hull.length-1];
+        var cr=(a[0]-o[0])*(p[1]-o[1])-(a[1]-o[1])*(p[0]-o[0]);
+        if(cr>=0) hull.pop(); else break;
+      }
+      hull.push(p);
+    }
+    return hull;
+  }
+  // roof1点ぶんの立面プロファイル。{points:[[u,h],...]閉多角形用点列, apex:頂点最高高さmm} を返す。
+  function roofItemProfile(it,dir){
+    var ax=ELEV_AXES[dir];
+    var verts=roofLocalVertices(it);
+    if(!verts.length) return null;
+    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var pts=[], apex=-Infinity;
+    verts.forEach(function(v){
+      var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})。flipX/flipY→回転→平行移動を内包
+      var u=w.x*ax.u[0]+w.y*ax.u[1];
+      var h=baseHeightMm+v.h/U;
+      pts.push([u,h]);
+      if(h>apex) apex=h;
+    });
+    var hull=upperHull(pts);
+    if(hull.length<2) return null;
+    var uFirst=hull[0][0], uLast=hull[hull.length-1][0];
+    // 上側凸包の両端をbaseHeightMmまで下ろして閉多角形にする(棟が全幅に及ぶgable等では
+    // hullが既にbase高さの頂点を含むため冗長点になるが、SVG描画上は無害)
+    var closed=hull.concat([[uLast,baseHeightMm],[uFirst,baseHeightMm]]);
+    return {points:closed, apex:apex};
+  }
+  function roofProfileToSvg(dir,LW){
+    var out='';
+    DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+      var prof=roofItemProfile(it,dir);
+      if(!prof || prof.points.length<3) return;
+      var s=prof.points.map(function(p){return p[0]+','+p[1];}).join(' ');
+      out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    });
+    return out;
+  }
+  // 全roofアイテムの頂点のうち最高高さ(mm、絶対値)。屋根が無ければnull。
+  // 頂点の実高さはどの方位から見ても同じ(uへの投影だけがdirで変わる)ので方位引数は不要。
+  function roofMaxApexHeightMm(){
+    var max=-Infinity;
+    DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+      var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+      roofLocalVertices(it).forEach(function(v){
+        var h=baseHeightMm+v.h/U;
+        if(h>max) max=h;
+      });
+    });
+    return isFinite(max)?max:null;
+  }
+  // 壁群の実u範囲(elevBoundsの余白を含まない生の建物幅)。基礎帯・高さ寸法の配置に使う。
+  function elevRawExtent(rects){
+    var uMin=Infinity,uMax=-Infinity;
+    rects.forEach(function(r){ uMin=Math.min(uMin,r.uMin); uMax=Math.max(uMax,r.uMax); });
+    if(!isFinite(uMin)){ uMin=0; uMax=1000; }
+    return {uMin:uMin,uMax:uMax};
+  }
+  // 基礎: GL(y=0)から下にfoundationHeightMm()ぶんの帯を建物幅で描く(中線=LW.mid)。
+  // foundationHeightMm()は既にmm値(foundationHeightM()/Uと同値)なのでそのまま使う。
+  function foundationToSvg(dir,LW){
+    var h=foundationHeightMm();
+    if(h<=0) return '';
+    var ext=elevRawExtent(elevWallRects(dir));
+    return '<rect x="'+ext.uMin+'" y="'+(-h)+'" width="'+(ext.uMax-ext.uMin)+'" height="'+h
+      +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+  }
+  // 高さ寸法用のティック(elevDimTickはscale(1,-1)配下で使うため、dimTick(:18343)とは
+  // 上下逆の傾きで描き、最終的な画面表示では同じ"/"向きになるようにする)。
+  function elevDimTick(x,y,LW){
+    var d=LW.text*0.35;
+    return '<line x1="'+(x-d)+'" y1="'+(y-d)+'" x2="'+(x+d)+'" y2="'+(y+d)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+  }
+  // 高さ寸法: 図右側にGL(0)・軒高(壁最上端max)・最高高さ(屋根頂点max、屋根がなければ省略=軒高のみ)を
+  // 引出線+ティック+mm整数値で表示する。elevGlSvgと同じscale(1,-1)配下で使われるため、
+  // 文字は個別に<g transform="translate(...) scale(1,-1)">で打ち消して正立させる。
+  function heightDimsToSvg(dir,LW){
+    var rects=elevWallRects(dir);
+    if(!rects.length) return '';
+    var ext=elevRawExtent(rects);
+    var eaveH=-Infinity;
+    rects.forEach(function(r){ eaveH=Math.max(eaveH,r.top); });
+    if(!isFinite(eaveH)) return '';
+    var apexH=roofMaxApexHeightMm();
+    var levels=[0,eaveH];
+    if(apexH!=null && apexH>eaveH+0.5) levels.push(apexH); // 屋根がある(壁上端より高い)場合のみ3段目
+    var xBuild=ext.uMax, xIn=xBuild+700, xLead=xIn+LW.text*0.3;
+    var out='';
+    levels.forEach(function(h){
+      out+='<line x1="'+xBuild+'" y1="'+h+'" x2="'+xLead+'" y2="'+h+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+=elevDimTick(xIn,h,LW);
+      var labelX=xIn+LW.text*0.6, labelY=h-LW.text*0.32;
+      out+='<g transform="translate('+labelX+','+labelY+') scale(1,-1)">'
+        +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+(LW.text*0.85)+'" fill="#000">'+Math.round(h)+'</text></g>';
+    });
+    out+='<line x1="'+xIn+'" y1="0" x2="'+xIn+'" y2="'+levels[levels.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
     return out;
   }
 
@@ -17970,8 +18144,11 @@ var JISDRAW=(function(){
       var skylinePts=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
       if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
     });
+    body+=roofProfileToSvg(dir,LW); // 屋根が無いプランでは中身が空文字列になり壁上端までの立面のまま
+    body+=foundationToSvg(dir,LW);
     body+=elevGlSvg(bounds,LW);
     body+=elevOpenings(dir,LW);
+    body+=heightDimsToSvg(dir,LW);
     return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
   }
   function placeholderSvg(label){
