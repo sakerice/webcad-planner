@@ -17807,12 +17807,8 @@ var JISDRAW=(function(){
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+bounds.minX+' '+bounds.minY+' '+w+' '+h+'">'
       +'<rect x="'+bounds.minX+'" y="'+bounds.minY+'" width="'+w+'" height="'+h+'" fill="#fff"/>';
   }
-  function svgClose(titleInfo){
-    var label='';
-    if(titleInfo){
-      label='<text x="'+titleInfo.x+'" y="'+titleInfo.y+'" font-size="'+titleInfo.fontSize+'" fill="#000" text-anchor="end">'+titleInfo.label+'</text>';
-    }
-    return label+'</svg>';
+  function svgClose(){
+    return '</svg>';
   }
 
   // 壁: drawWall2d(:5715)と同じ4点ポリゴン(壁芯±thick/2)を黒塗り断面(JIS)で描く。
@@ -18121,20 +18117,125 @@ var JISDRAW=(function(){
     return out;
   }
 
+  // 軸平行壁の芯座標をユニーク化(近接1mm以内は同一視して読み捨て)。
+  // axis='x'→x1===x2の垂直壁のx群(下辺の水平寸法用)、axis='y'→y1===y2の水平壁のy群(左辺の垂直寸法用)。
+  function axisWallCoords(floor,axis){
+    var vals=[];
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      if(axis==='x' && Math.abs(w.x1-w.x2)<1e-6) vals.push((w.x1+w.x2)/2);
+      if(axis==='y' && Math.abs(w.y1-w.y2)<1e-6) vals.push((w.y1+w.y2)/2);
+    });
+    vals.sort(function(a,b){return a-b;});
+    var uniq=[];
+    vals.forEach(function(v){
+      if(uniq.length && Math.abs(v-uniq[uniq.length-1])<=1) return;
+      uniq.push(v);
+    });
+    return uniq;
+  }
+  // JIS建築流の寸法線端部記号: 矢印でなく45°の短い斜線を線種によらず同じ向き("/")で描く。
+  function dimTick(x,y,LW){
+    var d=LW.text*0.35;
+    return '<line x1="'+(x-d)+'" y1="'+(y+d)+'" x2="'+(x+d)+'" y2="'+(y-d)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+  }
+  // 寸法値(mm整数)。rotate=trueで90°回転(左辺の縦書き用、下から上に読める向き)。
+  function dimValueText(cx,cy,val,rotate,LW){
+    var fs=LW.text*0.9;
+    return '<text x="'+cx+'" y="'+cy+'" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000" text-anchor="middle"'
+      +(rotate?' transform="rotate(-90 '+cx+' '+cy+')"':'')+'>'+Math.round(val)+'</text>';
+  }
+  // 下辺の水平寸法(2段): xs=垂直壁の芯x座標群(昇順・重複除去済み)、wallMaxY=壁範囲下端(余白を含まない実寸)。
+  // 内段(wallMaxY+700): 隣接芯間の連続寸法。外段(+1400): 全体寸法1本。
+  function bottomDimSvg(xs,wallMaxY,LW){
+    if(xs.length<2) return '';
+    var yIn=wallMaxY+700, yOut=wallMaxY+1400, extReach=LW.text*0.3;
+    var out='';
+    xs.forEach(function(x){
+      out+='<line x1="'+x+'" y1="'+wallMaxY+'" x2="'+x+'" y2="'+(yOut+extReach)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+='<line x1="'+xs[0]+'" y1="'+yIn+'" x2="'+xs[xs.length-1]+'" y2="'+yIn+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    xs.forEach(function(x){ out+=dimTick(x,yIn,LW); });
+    for(var i=0;i<xs.length-1;i++){
+      out+=dimValueText((xs[i]+xs[i+1])/2, yIn-LW.text*0.5, xs[i+1]-xs[i], false, LW);
+    }
+    out+='<line x1="'+xs[0]+'" y1="'+yOut+'" x2="'+xs[xs.length-1]+'" y2="'+yOut+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=dimTick(xs[0],yOut,LW)+dimTick(xs[xs.length-1],yOut,LW);
+    out+=dimValueText((xs[0]+xs[xs.length-1])/2, yOut-LW.text*0.5, xs[xs.length-1]-xs[0], false, LW);
+    return out;
+  }
+  // 左辺の垂直寸法(2段): ys=水平壁の芯y座標群、wallMinX=壁範囲左端(実寸)。文字は90°回転して縦書き配置。
+  function leftDimSvg(ys,wallMinX,LW){
+    if(ys.length<2) return '';
+    var xIn=wallMinX-700, xOut=wallMinX-1400, extReach=LW.text*0.3;
+    var out='';
+    ys.forEach(function(y){
+      out+='<line x1="'+wallMinX+'" y1="'+y+'" x2="'+(xOut-extReach)+'" y2="'+y+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+='<line x1="'+xIn+'" y1="'+ys[0]+'" x2="'+xIn+'" y2="'+ys[ys.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    ys.forEach(function(y){ out+=dimTick(xIn,y,LW); });
+    for(var i=0;i<ys.length-1;i++){
+      out+=dimValueText(xIn-LW.text*0.5, (ys[i]+ys[i+1])/2, ys[i+1]-ys[i], true, LW);
+    }
+    out+='<line x1="'+xOut+'" y1="'+ys[0]+'" x2="'+xOut+'" y2="'+ys[ys.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=dimTick(xOut,ys[0],LW)+dimTick(xOut,ys[ys.length-1],LW);
+    out+=dimValueText(xOut-LW.text*0.5, (ys[0]+ys[ys.length-1])/2, ys[ys.length-1]-ys[0], true, LW);
+    return out;
+  }
+  // 寸法線一式(下辺+左辺)。planBounds(floor)は壁範囲+PLAN_MARGIN_MM済みなので、差し引いて壁範囲そのもの(余白なし)に戻す。
+  function dimensionsToSvg(floor,LW){
+    var b=planBounds(floor);
+    var wallMaxY=b.maxY-PLAN_MARGIN_MM, wallMinX=b.minX+PLAN_MARGIN_MM;
+    var xs=axisWallCoords(floor,'x'), ys=axisWallCoords(floor,'y');
+    return bottomDimSvg(xs,wallMaxY,LW)+leftDimSvg(ys,wallMinX,LW);
+  }
+
+  // 方位記号: 右上に円+上向き矢印+「N」。2D画面の上=北という単純な固定表示(回転データは持たない)。
+  function northMarkSvg(bounds,LW){
+    var r=LW.text*2.6, margin=LW.text*2, textH=LW.text*1.1;
+    var cx=bounds.maxX-margin-r, cy=bounds.minY+margin+textH+r;
+    var out='<text x="'+cx+'" y="'+(bounds.minY+margin+textH*0.8)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+textH+'" fill="#000">N</text>';
+    out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var tipY=cy-r*0.75, tailY=cy+r*0.6, ah=r*0.55, aw=r*0.32;
+    out+='<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<polygon points="'+cx+','+tipY+' '+(cx-aw)+','+(tipY+ah)+' '+(cx+aw)+','+(tipY+ah)+'" fill="#000"/>';
+    return out;
+  }
+
+  function isoDateStr(d){
+    var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
+    return y+'-'+m+'-'+day;
+  }
+  // 表題欄: 右下に枠(紙寸140×20mm相当×縮尺)。1行に図面名・縮尺・日付・アプリ名を「|」区切りで表示。
+  function titleBlockSvg(label,scale,bounds,LW){
+    var boxW=140*scale, boxH=20*scale, margin=LW.text*1.2;
+    var x=bounds.maxX-margin-boxW, y=bounds.maxY-margin-boxH;
+    var text=escSvgText(label)+'  |  縮尺 1:'+scale+'  |  '+isoDateStr(new Date())+'  |  WebCAD Planner';
+    var fs=LW.text*0.9;
+    var out='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="'+boxH+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<text x="'+(x+boxW/2)+'" y="'+(y+boxH/2+fs*0.32)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000">'+text+'</text>';
+    return out;
+  }
+
+  // 表題欄(140×20mm紙寸、右下)・方位記号(右上)の専用領域を自動縮尺の判定にも反映するための紙寸縮小分。
+  // これらは紙寸(mm)そのままの固定サイズなので、判定用の紙寸だけをこの分小さく見せて余裕を確保する
+  // (paperDimsMm/pickAutoScaleの実装自体は変更しない。実際のview/印刷範囲は元の紙寸のまま)。
+  var TITLE_RESERVE_W_MM=150, TITLE_RESERVE_H_MM=26, NORTH_RESERVE_H_MM=30;
   function buildFloorPlanSvg(floor,opts){
     opts=opts||{};
     var paper=paperDimsMm(opts.paper);
     var bounds=planBounds(floor);
-    var scaleNum=(opts.scale==='auto') ? pickAutoScale(bounds,paper) : (parseInt(opts.scale,10)||100);
+    var scalePaper={w:paper.w-TITLE_RESERVE_W_MM, h:paper.h-TITLE_RESERVE_H_MM-NORTH_RESERVE_H_MM};
+    var scaleNum=(opts.scale==='auto') ? pickAutoScale(bounds,scalePaper) : (parseInt(opts.scale,10)||100);
     var LW=lineWidths(scaleNum);
     var cx=(bounds.minX+bounds.maxX)/2, cy=(bounds.minY+bounds.maxY)/2;
     var vw=paper.w*scaleNum, vh=paper.h*scaleNum;
     var view={minX:cx-vw/2,minY:cy-vh/2,maxX:cx+vw/2,maxY:cy+vh/2};
-    var marginMm=scaleNum*8;
-    var titleInfo={label:floor+'F 平面図  S=1:'+scaleNum, x:view.maxX-marginMm, y:view.maxY-marginMm, fontSize:LW.text*1.5};
+    var label=floor+'F 平面図';
     // 部屋ラベル・設備・階段は壁の黒塗りより後(手前)に描画し、壁と重なっても隠れないようにする。
-    return svgOpen(view,opts)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)
-      +roomLabelsToSvg(floor,LW)+fixturesToSvg(floor,LW)+stairsToSvg(floor,LW)+svgClose(titleInfo);
+    // 寸法線は建物外側の余白部分のみに描くため、壁や開口と重なる心配はない。
+    return svgOpen(view,opts)+dimensionsToSvg(floor,LW)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)
+      +roomLabelsToSvg(floor,LW)+fixturesToSvg(floor,LW)+stairsToSvg(floor,LW)
+      +northMarkSvg(view,LW)+titleBlockSvg(label,scaleNum,view,LW)+svgClose();
   }
 
   return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
