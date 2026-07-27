@@ -18763,8 +18763,15 @@ function jisPrint(){
   var opts=jisCurrentOpts();
   var pageSize=(opts.paper==='a4') ? 'A4 landscape' : 'A3 landscape';
   var svgStr=jisCurrentSvg();
+  // 図面本体のフォントはNoto Sans JP指定(:13付近)なので、印刷プレビューでも同じ見た目になるよう
+  // 同じGoogle Fonts <link>をsrcdoc側にも読み込む(無ければOSフォールバック書体で印刷されてしまう)。
+  // ※PNG書き出し側(jisDownloadPng)はSVGをImageとして描画するだけで外部<link>を解決できない
+  // (SVG内<image>/<foreignObject>と違い、SVGルート自体のCSSに外部@font-faceを読み込む仕組みが無い)
+  // ため、フォント埋め込みは対応不要(印刷パスのみで完結する対応)。
   var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>JIS図面</title>'
-    +'<style>@page{size:'+pageSize+';margin:8mm} html,body{margin:0;padding:0} svg{display:block;width:100%;height:auto}</style>'
+    +'<link rel="preconnect" href="https://fonts.googleapis.com">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">'
+    +'<style>@page{size:'+pageSize+';margin:8mm} html,body{margin:0;padding:0;font-family:\'Noto Sans JP\',sans-serif} svg{display:block;width:100%;height:auto}</style>'
     +'</head><body>'+svgStr+'</body></html>';
   var iframe=document.createElement('iframe');
   iframe.style.position='fixed';
@@ -18792,7 +18799,11 @@ function jisPrint(){
     }catch(e){
       jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
     }
-    setTimeout(cleanup,3000); // afterprint未対応環境向けのフォールバック除去
+    // afterprint未対応環境向けのフォールバック除去。print()が非ブロッキングなブラウザ(Firefox/Safari系)では
+    // OS印刷ダイアログの操作中にiframeが消えると印刷失敗・白紙出力になり得るため、
+    // 隠しiframeを長時間残すコストはほぼ無い前提で余裕を持って60秒に設定する
+    // (onafterprintが発火する環境では即時cleanupされるのでこの待ち時間は使われない)。
+    setTimeout(cleanup,60000);
   };
   iframe.srcdoc=html;
 }
