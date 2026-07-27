@@ -248,6 +248,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .jis-sheet-btn:hover{background:#eef}
 .jis-sheet-btn.active{border-color:#e94560;background:#ffe9ec;color:#e94560;font-weight:700}
 .jis-empty{padding:20px;color:#fff;text-align:center;font-size:13px;max-width:360px;margin:auto}
+.jis-status{display:none;padding:8px 14px;font-size:12px;line-height:1.5;background:#fff3cd;color:#7a5c00;border-bottom:1px solid #e2c98a}
+.jis-status.error{background:#fdecea;color:#a2242d;border-bottom-color:#f3b7ba}
 @media (max-width:640px){
   .jis-body{flex-direction:column}
   #jis-sheet-list{width:100%;flex:0 0 auto;max-height:120px;border-right:none;border-bottom:1px solid #ddd;display:flex;flex-wrap:wrap;gap:6px}
@@ -3330,6 +3332,7 @@ input[type="reset"]:focus-visible{
       <button class="pbtn sec" onclick="jisDownloadPng()">⬇ PNG</button>
       <button class="jis-close" onclick="closeJisDrawingDialog()">✕</button>
     </div>
+    <div id="jis-status" class="jis-status"></div>
     <div class="jis-body">
       <div id="jis-sheet-list"></div>
       <div id="jis-preview"></div>
@@ -18677,10 +18680,122 @@ function jisCurrentSvg(){
 function jisRerender(){
   var host=document.getElementById('jis-preview');
   host.innerHTML='<div class="jis-paper-sheet">'+jisCurrentSvg()+'</div>';
+  jisSetStatus(''); // 図面や用紙・縮尺を切り替えたら古いエラー表示は消す
 }
-function jisPrint(){ /* Task 7 */ }
-function jisDownloadSvg(){ /* Task 7 */ }
-function jisDownloadPng(){ /* Task 7 */ }
+// モーダル内の帯でエラー等を通知する(share-status:16161と同じtextContent+classList.toggleパターン)。
+// message空文字なら非表示に戻す。alert()は使わずここに一本化する。
+function jisSetStatus(message,isError){
+  var el=document.getElementById('jis-status');
+  if(!el) return;
+  if(!message){ el.style.display='none'; el.textContent=''; return; }
+  el.textContent=message;
+  el.classList.toggle('error',!!isError);
+  el.style.display='block';
+}
+// ファイル名の共通部分。kind/keyから組み立てる(平面:jis-plan{階}f、立面:jis-elev-{方角コード})+日付(YYYYMMDD, ダッシュ無し)。
+function jisFileBaseName(){
+  var s=JIS_UI.sheet;
+  var kindPart=(s.kind==='plan') ? ('plan'+s.key+'f') : ('elev-'+s.key);
+  var d=new Date();
+  var ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+  return 'jis-'+kindPart+'-'+ymd;
+}
+function jisDownloadSvg(){
+  if(!JIS_UI.sheet) return;
+  // downloadTextFile(:16841)→downloadBlobFile(:16829)は<a download>+objectURL方式で、
+  // 既存のAI一括DL等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
+  downloadTextFile(jisFileBaseName()+'.svg', jisCurrentSvg(), 'image/svg+xml;charset=utf-8');
+}
+function jisDownloadPng(){
+  if(!JIS_UI.sheet) return;
+  jisSetStatus('');
+  var svgStr=jisCurrentSvg();
+  // SVGのviewBoxから紙の縦横比を取り出し、長辺約3000pxになるピクセルサイズを決める
+  // (SVGルートにwidth/height属性が無いため、Imageのnaturalサイズに頼らずviewBoxから直接計算する)。
+  var vb=svgStr.match(/viewBox="\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s*"/);
+  var vw=vb?parseFloat(vb[3]):420, vh=vb?parseFloat(vb[4]):297;
+  if(!(vw>0)||!(vh>0)){ vw=420; vh=297; }
+  var LONG_SIDE_PX=3000;
+  var pxW,pxH;
+  if(vw>=vh){ pxW=LONG_SIDE_PX; pxH=Math.max(1,Math.round(LONG_SIDE_PX*vh/vw)); }
+  else{ pxH=LONG_SIDE_PX; pxW=Math.max(1,Math.round(LONG_SIDE_PX*vw/vh)); }
+  // SVG内に日本語テキストが含まれるため、data URLではなくBlob+object URL経由でImageに読み込む
+  // (WebKit系でdata:image/svg+xmlに多バイト文字が入ると読み込みに失敗することがある既知の問題を回避)。
+  var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var canvas=document.createElement('canvas');
+      canvas.width=pxW; canvas.height=pxH;
+      var ctx=canvas.getContext('2d');
+      ctx.fillStyle='#fff';
+      ctx.fillRect(0,0,pxW,pxH); // 白背景を先に塗ってから図面を重ねる(SVG側は透過が無い想定だが念のため)
+      ctx.drawImage(img,0,0,pxW,pxH);
+      canvas.toBlob(function(pngBlob){
+        URL.revokeObjectURL(url);
+        if(!pngBlob){
+          jisSetStatus('PNGへの変換に失敗しました。ブラウザの制限により生成できない場合があります。',true);
+          return;
+        }
+        downloadBlobFile(jisFileBaseName()+'.png', pngBlob);
+      },'image/png');
+    }catch(e){
+      URL.revokeObjectURL(url);
+      jisSetStatus('PNGへの変換に失敗しました: '+(e&&e.message?e.message:e),true);
+    }
+  };
+  img.onerror=function(){
+    URL.revokeObjectURL(url);
+    jisSetStatus('PNG変換用の画像読み込みに失敗しました。ブラウザやOSの制限が原因の可能性があります。',true);
+  };
+  img.src=url;
+}
+// 印刷用の隠しiframeは1つだけ保持する(連打時に前のiframeを確実に破棄して多重生成を防ぐ)。
+var JIS_PRINT_IFRAME=null;
+function jisRemovePrintIframe(){
+  if(JIS_PRINT_IFRAME && JIS_PRINT_IFRAME.parentNode) JIS_PRINT_IFRAME.parentNode.removeChild(JIS_PRINT_IFRAME);
+  JIS_PRINT_IFRAME=null;
+}
+function jisPrint(){
+  if(!JIS_UI.sheet) return;
+  jisRemovePrintIframe(); // 連続クリックしても前回分が残らないよう先に片付ける
+  var opts=jisCurrentOpts();
+  var pageSize=(opts.paper==='a4') ? 'A4 landscape' : 'A3 landscape';
+  var svgStr=jisCurrentSvg();
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>JIS図面</title>'
+    +'<style>@page{size:'+pageSize+';margin:8mm} html,body{margin:0;padding:0} svg{display:block;width:100%;height:auto}</style>'
+    +'</head><body>'+svgStr+'</body></html>';
+  var iframe=document.createElement('iframe');
+  iframe.style.position='fixed';
+  iframe.style.right='0';
+  iframe.style.bottom='0';
+  iframe.style.width='0';
+  iframe.style.height='0';
+  iframe.style.border='0';
+  iframe.setAttribute('aria-hidden','true');
+  document.body.appendChild(iframe);
+  JIS_PRINT_IFRAME=iframe;
+  var cleaned=false;
+  function cleanup(){
+    if(cleaned) return;
+    cleaned=true;
+    if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    if(JIS_PRINT_IFRAME===iframe) JIS_PRINT_IFRAME=null;
+  }
+  iframe.onload=function(){
+    try{
+      var win=iframe.contentWindow;
+      win.onafterprint=cleanup; // 印刷ダイアログが閉じたタイミングで除去(対応ブラウザ向け)
+      win.focus();
+      win.print();
+    }catch(e){
+      jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
+    }
+    setTimeout(cleanup,3000); // afterprint未対応環境向けのフォールバック除去
+  };
+  iframe.srcdoc=html;
+}
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
