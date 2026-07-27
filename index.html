@@ -4288,6 +4288,18 @@ function selectedTextureFlipControlsHtml(it){
     false
   );
 }
+function selectedTextureUploadHtml(it,label){
+  var applied=!!(it&&it.texture);
+  return '<div class="pr"><div class="pl">'+label+'</div>'
+    + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+    + '<label class="pbtn sec" style="margin-top:0;cursor:pointer">'
+    + (applied?'画像を変更':'画像を選択')
+    + '<input type="file" accept="image/*" style="display:none" onchange="uploadTex(this)">'
+    + '</label>'
+    + '<span style="font-size:10px;color:'+(applied?'#287a4b':'#7a8fb0')+'">'
+    + (applied?'✓ 適用済み':'未適用')
+    + '</span></div></div>';
+}
 
 function faceRuleMode(setting, appearance){
   var mode=setting&&setting.mode;
@@ -4703,15 +4715,18 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
-      html += '<div class="pr"><div class="pl">'+texLabel+'</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+      html += isDoorItemType(it.type)
+        ? selectedTextureUploadHtml(it,texLabel)
+        : '<div class="pr"><div class="pl">'+texLabel+'</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
     }
-    if(!isContextExteriorItemType(it.type)){
-      html += '<div class="ph" style="margin-top:15px">画像トリミング (余白調整)</div>';
-      html += '<div class="pr"><div class="pl">拡大率: '+(it.sScale||1).toFixed(2)+'</div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedProp(\'sScale\',+this.value, true)" onchange="saveState()"></div>';
-      html += '<div class="pr"><div class="pl">位置 X: '+Math.round(it.sX||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedProp(\'sX\',+this.value, true)" onchange="saveState()"></div>';
-      html += '<div class="pr"><div class="pl">位置 Y: '+Math.round(it.sY||0)+'</div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedProp(\'sY\',+this.value, true)" onchange="saveState()"></div>';
+    var isDoorTextureCrop=isDoorItemType(it.type);
+    if(!isContextExteriorItemType(it.type) && (!isDoorTextureCrop || it.texture)){
+      html += '<div class="ph" style="margin-top:15px">'+(isDoorTextureCrop?'テクスチャ画像トリミング':'画像トリミング (余白調整)')+'</div>';
+      html += '<div class="pr"><div class="pl">拡大率: <span class="texture-crop-value">'+(it.sScale||1).toFixed(2)+'</span></div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedTextureCrop(\'sScale\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
+      html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+Math.round(it.sX||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
+      html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
   }
   if(it.type === 'room') {
@@ -4777,6 +4792,26 @@ function updateSelectedProp(p,v,noSave){
     return;
   }
   if(ren) rebuild3D();
+  updateProps();
+}
+var _selectedTextureCropEditing=false;
+function updateSelectedTextureCrop(prop,value,input){
+  if(!ST.selected) return;
+  if(isObjectLocked(ST.selected)){ updateProps(); return; }
+  if(!_selectedTextureCropEditing){
+    saveState();
+    _selectedTextureCropEditing=true;
+  }
+  ST.selected[prop]=value;
+  var row=input&&input.parentElement;
+  var valueEl=row&&row.querySelector('.texture-crop-value');
+  if(valueEl) valueEl.textContent=prop==='sScale'?value.toFixed(2):Math.round(value);
+  draw2d();
+  if(ren) rebuild3D();
+}
+function finishSelectedTextureCrop(){
+  if(!_selectedTextureCropEditing) return;
+  _selectedTextureCropEditing=false;
   updateProps();
 }
 function updateSelectedNoteText(v){
@@ -8195,9 +8230,23 @@ function applyTextureFlip(tex, source){
   if(!tex) return tex;
   var rx=Math.abs((tex.repeat&&tex.repeat.x)||1);
   var ry=Math.abs((tex.repeat&&tex.repeat.y)||1);
+  var ox=(tex.offset&&tex.offset.x)||0;
+  var oy=(tex.offset&&tex.offset.y)||0;
   tex.repeat.set(source&&source.textureFlipX?-rx:rx, source&&source.textureFlipY?-ry:ry);
-  tex.offset.set(source&&source.textureFlipX?1:0, source&&source.textureFlipY?1:0);
+  tex.offset.set(source&&source.textureFlipX?1-ox:ox, source&&source.textureFlipY?1-oy:oy);
   tex.needsUpdate=true;
+  return tex;
+}
+function applyStretchTextureCrop(tex,source,surfaceW,surfaceH){
+  if(!tex) return tex;
+  var scale=Math.max(0.5,Math.min(2,Number(source&&source.sScale)||1));
+  var repeat=1/scale;
+  var width=Math.max(Number(surfaceW)||1,0.001);
+  var height=Math.max(Number(surfaceH)||1,0.001);
+  var offsetX=(1-repeat)/2-((Number(source&&source.sX)||0)*U)/(scale*width);
+  var offsetY=(1-repeat)/2+((Number(source&&source.sY)||0)*U)/(scale*height);
+  tex.repeat.set(repeat,repeat);
+  tex.offset.set(offsetX,offsetY);
   return tex;
 }
 function cloneTextureWithRepeat(base,repX,repY,source){
@@ -8265,8 +8314,7 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
   if(!tc) return null;
   if(mode==='stretch'){
     tc.wrapS=tc.wrapT=THREE.ClampToEdgeWrapping;
-    tc.repeat.set(1,1);
-    tc.offset.set(0,0);
+    applyStretchTextureCrop(tc,it,surfaceW,surfaceH);
   } else {
     tc.wrapS=tc.wrapT=THREE.RepeatWrapping;
     setTextureRepeatNoDistort(tc,surfaceW||1,surfaceH||1,wallTextureTileHeight());
@@ -10428,10 +10476,12 @@ function buildWinFrames(flFilt){
     var frameMat=new THREE.MeshStandardMaterial({color:isWindowLikeType(it.type)?(sashColorHex||0x3a3a3a):0x3a3a3a,roughness:isWindowLikeType(it.type)?0.55:0.5,metalness:isWindowLikeType(it.type)?0.08:0,envMapIntensity:isWindowLikeType(it.type)?0.25:1});
     var glassMat=new THREE.MeshStandardMaterial({color:0x8fbfae,transparent:true,opacity:0.42,roughness:0.05,metalness:0.5,envMapIntensity:1.4});
     var doorBaseColor=customColor||(it.type==='door-front'?0x5c432f:0x8a765c);
-    var doorMat=makeItemTextureMaterial(it,it.w*U,2.0,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
+    var doorMat=makeItemTextureMaterial(it,it.w*U,doorHeightMm(it)*U,'stretch',0xffffff,{lighting:true,roughness:0.72,envMapIntensity:0.16}) || new THREE.MeshStandardMaterial({color:doorBaseColor,roughness:0.58});
     var railMat=new THREE.MeshStandardMaterial({color:0x707070,roughness:0.35,metalness:0.25});
     var openingModel=getOpeningModelItem(it);
-    var openingModelReady=openingModel && ensureGltfModel(openingModel.model);
+    // カスタム画像はGLB内蔵マテリアルより優先する。モデル固有の不定なUVへ
+    // 無理に貼らず標準パネルへ切り替えることで、トリミング結果も一貫させる。
+    var openingModelReady=openingModel && !it.texture && ensureGltfModel(openingModel.model);
     
     function addBox(mat,x,y,z,w,h,d){
       var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
