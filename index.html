@@ -2766,6 +2766,104 @@ input[type="reset"]:focus-visible{
   outline-offset:2px!important;
   box-shadow:inset 0 0 0 1px var(--hp-secondary)!important;
 }
+
+/* ── Walkthrough UI: shared floating-panel rules ─────────────
+   Desktop uses the same 14px screen gutter as the sidebar lane; mobile uses
+   the toolbar's 8px gutter. Cards follow the app's 30px panel radius, while
+   long actions are capsules and icon-only actions are circular. */
+#walk-minimap{
+  top:14px;
+  right:14px;
+  border:0;
+  border-radius:30px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 4px 12px rgba(24,20,18,.13);
+}
+#walk-exit{
+  top:14px;
+  left:14px;
+  min-height:46px;
+  padding:0 18px;
+  border:0;
+  border-radius:999px;
+  background:#fff;
+  color:var(--hp-text);
+  box-shadow:0 4px 12px rgba(24,20,18,.13);
+}
+#walk-exit:hover,
+#walk-exit:active{
+  background:var(--hp-primary);
+  color:#fff;
+  box-shadow:0 4px 10px rgba(255,63,39,.34);
+}
+#walk-dpad{
+  right:14px;
+  bottom:14px;
+  width:auto;
+  height:auto;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(3,52px);
+  grid-template-rows:repeat(3,52px);
+  gap:6px;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.wk-btn{
+  position:static;
+  width:52px;
+  height:52px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.96);
+  color:var(--hp-text);
+  box-shadow:0 4px 12px rgba(24,20,18,.13),inset 0 0 0 1px rgba(31,27,24,.05);
+}
+.wk-btn:hover{
+  background:var(--hp-secondary-soft);
+  color:var(--hp-secondary-dark);
+}
+.wk-btn:active{
+  background:var(--hp-primary);
+  color:#fff;
+  box-shadow:0 4px 10px rgba(255,63,39,.30);
+}
+.wk-fwd{grid-column:2;grid-row:1}
+.wk-left{grid-column:1;grid-row:2}
+.wk-height{grid-column:2;grid-row:2;background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+.wk-right{grid-column:3;grid-row:2}
+.wk-back{grid-column:2;grid-row:3}
+.wk-height:hover,
+.wk-height:active{
+  background:var(--hp-primary);
+  color:#fff;
+}
+@media (max-width:768px){
+  #walk-minimap{
+    top:8px;
+    right:8px;
+    border-radius:24px;
+  }
+  #walk-exit{
+    top:8px;
+    left:8px;
+    min-height:44px;
+    padding:0 16px;
+  }
+  #walk-dpad{
+    right:8px;
+    bottom:8px;
+    padding:0;
+    grid-template-columns:repeat(3,50px);
+    grid-template-rows:repeat(3,50px);
+    gap:6px;
+  }
+  .wk-btn{
+    width:50px;
+    height:50px;
+  }
+}
 </style>
 </head>
 <body>
@@ -3451,8 +3549,10 @@ function escHtml(s){
   return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
 function isAppearanceColorInput(inp){
-  return !!(inp && inp.matches && inp.matches('input[type="color"]') &&
-    ((inp.closest && inp.closest('#wall-panel')) || (inp.getAttribute('onblur')||'').indexOf('finishAppearanceColorInput')>=0));
+  // Every native color input must keep the same DOM node for as long as the
+  // browser's picker is open. Replacing the node from an onchange handler
+  // dismisses the picker on iOS (and some Android browsers) after one tap.
+  return !!(inp && inp.matches && inp.matches('input[type="color"]') && !inp.disabled);
 }
 var _activeAppearanceColorInput = null;
 function beginAppearanceColorInput(inp){
@@ -3487,7 +3587,10 @@ function initNativeColorInputs(){
   document.addEventListener('change',function(e){
     if(isAppearanceColorInput(e.target)){
       beginAppearanceColorInput(e.target);
-      setTimeout(commitAppearanceColorEdits,0);
+      // Do not commit/render here. Mobile browsers can emit `change` for each
+      // sampled color while their picker is still open; rendering would remove
+      // the input node and force-close that picker. The edit is committed when
+      // the user returns to the page and interacts with a non-color control.
     }
   },true);
 }
@@ -4631,7 +4734,9 @@ function updateProps(){
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
   if(isObjectLocked(ST.selected) && p!=='locked'){ updateProps(); return; }
-  if(!noSave) saveState();
+  var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
+  if(keepColorPickerOpen) markAppearanceColorDirty();
+  else if(!noSave) saveState();
   if(p==='locked'){
     setObjectLocked(ST.selected,!!v);
     syncLockBatchUi();
@@ -4666,7 +4771,12 @@ function updateSelectedProp(p,v,noSave){
     if(p==='exteriorColor') ws.color=v||null;
     if(p==='exteriorTexture') ws.texture=v||null;
   }
-  draw2d(); if(ren) rebuild3D();
+  draw2d();
+  if(keepColorPickerOpen){
+    scheduleAppearancePreviewUpdate();
+    return;
+  }
+  if(ren) rebuild3D();
   updateProps();
 }
 function updateSelectedNoteText(v){
@@ -13953,7 +14063,8 @@ function walkMapTransform(){
   ws.forEach(function(w){mnX=Math.min(mnX,w.x1,w.x2);mnY=Math.min(mnY,w.y1,w.y2);mxX=Math.max(mxX,w.x1,w.x2);mxY=Math.max(mxY,w.y1,w.y2);});
   if(!isFinite(mnX)){mnX=0;mnY=0;mxX=9100;mxY=9100;}
   var cv=document.getElementById('walk-minimap');
-  var pad=14, sw=cv.width-pad*2, sh=cv.height-pad*2;
+  // 30px角丸カード内で線やラベルが角へ寄りすぎない共通内余白。
+  var pad=24, sw=cv.width-pad*2, sh=cv.height-pad*2;
   var sc=Math.min(sw/Math.max(1,mxX-mnX),sh/Math.max(1,mxY-mnY));
   var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=pad+(sh-(mxY-mnY)*sc)/2;
   return {sc:sc,ox:ox,oy:oy,mnX:mnX,mnY:mnY};
@@ -13994,7 +14105,7 @@ function drawWalkMinimap(){
   ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
   // 階表示
   ctx.fillStyle='#33415e'; ctx.font='bold 11px sans-serif';
-  ctx.fillText(fl+'F タップで移動',8,13);
+  ctx.fillText(fl+'F タップで移動',24,29);
 }
 function walkMinimapTap(ev){
   var cv=document.getElementById('walk-minimap');
@@ -14039,9 +14150,13 @@ function positionWalkHud(){
     if(r.width<=0||r.right<=wr.left) return 0;
     return Math.max(0,r.right-wr.left);
   }
-  var topSafe=Math.max(12,overlapTop('toolbar')+10);
-  var botSafe=Math.max(16,overlapBottom('bottom-nav')+12,overlapBottom('statusbar')+12);
-  var leftSafe=Math.max(12,overlapLeft('sidebar')+10);
+  // フローティングUI共通の画面端余白: PC 14px / モバイル 8px。
+  // ヘッダーや下部ナビが重なる場合も、同じ余白を足して配置する。
+  var hudGap=window.innerWidth<=768?8:14;
+  var topSafe=Math.max(hudGap,overlapTop('toolbar')+hudGap);
+  var botSafe=Math.max(hudGap,overlapBottom('bottom-nav')+hudGap,overlapBottom('statusbar')+hudGap);
+  // モバイルのサイドバーは非表示時も全幅の矩形を持つため、左余白計算には使わない。
+  var leftSafe=window.innerWidth<=768?hudGap:Math.max(hudGap,overlapLeft('sidebar')+hudGap);
   var mm=document.getElementById('walk-minimap');
   var ex=document.getElementById('walk-exit');
   var dp=document.getElementById('walk-dpad');
