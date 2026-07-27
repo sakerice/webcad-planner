@@ -12719,8 +12719,23 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
     var treadT=Math.min(0.036,Math.max(0.028,stepRise*0.18));
     var riserT=Math.min(0.018,Math.max(0.012,Math.min(w,d)*0.012));
     var jointOverlap=0.0015;
-    _PRISM(grp,mat,treadPolys[s],treadT,baseRise+h-treadT);
-    addStairRiserPanel(grp,riserMat||mat,riserEdges[s][0],riserEdges[s][1],baseRise+prevH-jointOverlap,Math.max(0.01,stepRise-treadT+jointOverlap),riserT);
+    var a=riserEdges[s][0],b=riserEdges[s][1];
+    var edgeDx=b[0]-a[0],edgeDz=b[1]-a[1],edgeLen=Math.hypot(edgeDx,edgeDz)||1;
+    // ポリゴンは反時計回りなので、前縁の右法線が下段側。踏板を蹴込み板厚ぶん
+    // だけ下段側へ延長し、直線階段と同じ隠れた接合代を作る。
+    var outX=edgeDz/edgeLen,outZ=-edgeDx/edgeLen;
+    var aFront=[a[0]+outX*riserT,a[1]+outZ*riserT];
+    var bFront=[b[0]+outX*riserT,b[1]+outZ*riserT];
+    var treadPoly=treadPolys[s].slice();
+    treadPoly[0]=aFront;
+    treadPoly[1]=bFront;
+    _PRISM(grp,mat,treadPoly,treadT,baseRise+h-treadT);
+
+    // 蹴込み板を元の段境界から下段側へ収める。下端は1.5mmだけ下段踏板へ
+    // 食い込ませ、上端は延長した上段踏板の下面へ面で接合する。
+    var panelA=[a[0]+outX*riserT/2,a[1]+outZ*riserT/2];
+    var panelB=[b[0]+outX*riserT/2,b[1]+outZ*riserT/2];
+    addStairRiserPanel(grp,riserMat||mat,panelA,panelB,baseRise+prevH-jointOverlap,Math.max(0.01,stepRise-treadT+jointOverlap),riserT);
   }
 }
 function applySelectableColor(mat,color){
