@@ -17793,7 +17793,7 @@ var JISDRAW=(function(){
       var f=w.floor||1;
       var base=floorBaseY(f)/U;
       var top=base+wallDisplayHeightM(w)/U;
-      rects.push({uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,depth:Math.max(d1,d2),wall:w});
+      rects.push({uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,depth:Math.max(d1,d2),floor:f,wall:w});
     });
     return rects;
   }
@@ -17835,20 +17835,42 @@ var JISDRAW=(function(){
     return segs;
   }
 
-  // 壁シルエットの外形(スカイライン)点列。上辺(top)を左→右、下辺(base)を右→左でつなぎ、
-  // <polygon>の自動閉路に任せて1本の外形ポリラインにする(塗りなし・LW.thickで描画)。
+  // elevSegmentsはカバーなし区間(隙間)を単に読み飛ばすため、segs配列は連続しているとは限らない
+  // (母屋+離れのように離れた壁グループがあると、間に隙間区間が挟まる)。
+  // 隣接区間のuB→uAが連続(0.5mm未満の差)しているものだけを1グループにまとめ、
+  // グループが変わったところで外形ポリラインを分離する(離れた棟を直線で橋渡ししないため)。
+  function elevSegmentGroups(segs){
+    var groups=[], cur=[];
+    segs.forEach(function(s){
+      if(cur.length && Math.abs(s.uA-cur[cur.length-1].uB)>0.5){
+        groups.push(cur); cur=[];
+      }
+      cur.push(s);
+    });
+    if(cur.length) groups.push(cur);
+    return groups;
+  }
+
+  // 壁シルエットの外形(スカイライン)。各連続グループごとに独立したポリライン点列を返す(配列の配列)。
+  // グループ内は上辺(top)を左→右、下辺(base)を右→左でつなぎ、<polygon>の自動閉路に任せて
+  // そのグループ両端でbaseまで降ろした1本の外形ポリラインにする(塗りなし・LW.thickで描画)。
   function elevSkyline(rects){
     var segs=elevSegments(rects);
     if(!segs.length) return [];
-    var topPts=elevStepPoints(segs,'top');
-    var basePts=elevStepPoints(segs,'base').slice().reverse();
-    return topPts.concat(basePts);
+    return elevSegmentGroups(segs).map(function(group){
+      var topPts=elevStepPoints(group,'top');
+      var basePts=elevStepPoints(group,'base').slice().reverse();
+      return topPts.concat(basePts);
+    });
   }
 
   // 指定u位置を覆う壁群のうち最も手前(depthが最大)の値。開口の被り判定に使う。
-  function elevFrontDepthAt(rects,uVal){
+  // floorを渡した場合は同じ階のrectsのみを比較対象にする(セットバックした上階の窓が、
+  // 下階の前面壁の深度と混同されて誤って「隠れている」と判定されるのを防ぐ)。
+  function elevFrontDepthAt(rects,uVal,floor){
     var d=-Infinity;
     rects.forEach(function(r){
+      if(floor!=null && r.floor!==floor) return;
       if(r.uMin-0.5<=uVal && uVal<=r.uMax+0.5) d=Math.max(d,r.depth);
     });
     return d;
@@ -17868,13 +17890,14 @@ var JISDRAW=(function(){
       var cosU=(dx/len)*ax.u[0]+(dy/len)*ax.u[1];
       var wallDepth=Math.max(w.x1*ax.dp[0]+w.y1*ax.dp[1], w.x2*ax.dp[0]+w.y2*ax.dp[1]);
       var uCenter=info.x*ax.u[0]+info.y*ax.u[1];
-      var front=elevFrontDepthAt(rects,uCenter);
+      var wallFloor=w.floor||1;
+      var front=elevFrontDepthAt(rects,uCenter,wallFloor); // 同じ階のrectsのみと比較(セットバックした上階が誤って隠れないように)
       var wallThick=w.thick||120;
       if(wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
       // 開口幅(it.w、壁方向)をu軸へ投影。壁がこの面と直交する(=妻壁)ほどcosUが0に近づき幅も0に潰れる
       var halfU=Math.abs(cosU)*(it.w||0)/2;
       if(halfU<1) return; // 直交壁の開口はこの面ではほぼ幅0=表示不要
-      var f=w.floor||1, base=floorBaseY(f)/U;
+      var base=floorBaseY(wallFloor)/U;
       var sill=openingSillMm(it), h=openingHeightMm(it); // 掃き出し窓(window-door)はopeningSillMmが常に0を返す
       var uL=uCenter-halfU, uR=uCenter+halfU, yB=base+sill, yT=base+sill+h;
       out+='<rect x="'+uL+'" y="'+yB+'" width="'+(uR-uL)+'" height="'+(yT-yB)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
@@ -17940,9 +17963,13 @@ var JISDRAW=(function(){
     // 中身(スカイライン・開口・GL)はすべて「y=高さmm(上向き正)」のまま組み立て、
     // <g transform="scale(1,-1)">で一括反転することで各座標計算での符号ミスを避ける。
     var view={minX:cx-vw/2, minY:-(ch+vh/2), maxX:cx+vw/2, maxY:-(ch-vh/2)};
-    var skylinePts=elevSkyline(rects).map(function(p){return p[0]+','+p[1];}).join(' ');
     var body='';
-    if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    // 母屋+離れのように壁群がu方向に分離している場合、elevSkylineはグループごとに独立した点列を返すので、
+    // 棟ごとに別の<polygon>として描く(離れた棟の間を直線で橋渡ししないため)。
+    elevSkyline(rects).forEach(function(pts){
+      var skylinePts=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
+      if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    });
     body+=elevGlSvg(bounds,LW);
     body+=elevOpenings(dir,LW);
     return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
