@@ -17852,19 +17852,20 @@ var JISDRAW=(function(){
     return '<polygon points="'+[frameStr(fr,-halfW,-halfT),frameStr(fr,halfW,-halfT),frameStr(fr,halfW,halfT),frameStr(fr,-halfW,halfT)].join(' ')+'" fill="#fff"/>';
   }
 
-  // 引違い窓(未指定/sliding)・FIX窓('fix'/'casement')・掃き出し窓(window-door)。
-  // effectiveWindowKindはwindow-door(windowKind未設定)にも自然に'sliding'を返す。
+  // 引違い窓(未指定/sliding)・FIX窓('fix'/'casement')・掃き出し窓(window-door、常に引違い記号)。
   function windowSymbolSvg(it,info,LW){
     var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
     var fr=openingFrame(info);
     var out=rectCutSvg(fr,halfW,halfT);
     out+=lineTag(fr,-halfW,-halfT,halfW,-halfT,LW.thin);
     out+=lineTag(fr,-halfW, halfT,halfW, halfT,LW.thin);
-    var kind=effectiveWindowKind(it);
+    // 掃き出し窓(window-door)は常に引違い記号(3D側の前例: :10803 "it.type==='window-door' || effectiveWindowKind(it)==='sliding'")。
+    // windowKind未設定のwindow-doorにcasementプリセット(縦すべり出し規格)を適用してもFIX風にはしない。
+    var kind=it.type==='window-door' ? 'sliding' : effectiveWindowKind(it);
     if(kind==='fix'||kind==='casement'){
       out+=lineTag(fr,-halfW,0,halfW,0,LW.thin);
     } else {
-      // 既存2D(:6885-6912の簡略化)を踏襲: 互い違いにオフセットした2枚の建具線
+      // 既存2D(:6970-6997)の簡略化を踏襲: 互い違いにオフセットした2枚の建具線
       var openW=it.w||0, panelW=openW*0.56, off=halfT*0.5;
       var leftOpen=!!it.flipX;
       var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
@@ -17976,7 +17977,7 @@ var JISDRAW=(function(){
     var out='';
     DATA.items.filter(function(it){return (it.floor||1)===floor && isOpeningItemType(it.type);}).forEach(function(it){
       var info=getOpeningWallInfo(it);
-      if(!info || !info.wall) return;
+      if(!info || !info.wall) return; // 対応する壁が見つからない孤立開口は意図的にスキップ(描画対象外)
       if(isWindowLikeType(it.type)) out+=windowSymbolSvg(it,info,LW);
       else if(isSwingDoorType(it.type)) out+=swingDoorSymbolSvg(it,info,LW);
       else if(it.type==='door-slide'||it.type==='door-slide-s'||it.type==='door-pocket') out+=slideDoorSymbolSvg(it,info,LW);
