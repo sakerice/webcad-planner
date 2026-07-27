@@ -1,6 +1,22 @@
 name = "webcad-planner"
-compatibility_date = "2025-01-01"
+main = "worker.mjs"
+compatibility_date = "2026-07-26"
 
 [assets]
 directory = "dist"
 not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = [ "/api/*" ]
+
+[[r2_buckets]]
+binding = "PLANS"
+bucket_name = "webcad-shared-plans"
+preview_bucket_name = "webcad-shared-plans-preview"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "CollaborationRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "CollaborationRoom" ]

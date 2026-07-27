@@ -144,6 +144,36 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .snap-shift-btn.active{background:#e94560!important;border-color:#e94560!important;color:#fff!important}
 #save-btn{position:relative}
 #save-btn.dirty::after{content:'*';position:absolute;top:2px;right:4px;font-size:10px;color:#e94560;font-weight:bold;line-height:1}
+#save-btn.saving{opacity:.72;cursor:wait}
+#save-btn.saved{color:#bfe9ff;border-color:#2a5b83}
+#collab-indicator{display:none;align-items:center;gap:5px;max-width:150px}
+#collab-indicator.show{display:inline-flex}
+#collab-dot{width:7px;height:7px;border-radius:50%;background:#9aa4b2;flex:none}
+#collab-indicator.connected #collab-dot{background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.14)}
+#collab-count{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-overlay{position:fixed;inset:0;z-index:15000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(19,30,45,.42);backdrop-filter:blur(4px)}
+.share-overlay.show{display:flex}
+.share-card{width:min(480px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(12,27,48,.28);padding:22px;color:#243247}
+.share-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:15px}
+.share-title{font-size:18px;font-weight:800;margin:0 0 4px}
+.share-copy{font-size:12px;line-height:1.6;color:#627187;margin:0}
+.share-close{border:0;background:#eef2f7;border-radius:9px;width:32px;height:32px;font-size:19px;cursor:pointer;color:#455468}
+.share-label{display:block;font-size:11px;font-weight:700;margin:13px 0 5px;color:#526176}
+.share-input{box-sizing:border-box;width:100%;border:1px solid #d5dce6;border-radius:9px;padding:10px 11px;font:inherit;color:#26364b;background:#fff}
+.share-url-row{display:flex;gap:7px;align-items:center}
+.share-url-row .share-input{min-width:0}
+.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.share-primary,.share-secondary,.share-danger{border:0;border-radius:9px;padding:10px 14px;font-weight:750;cursor:pointer;font-size:13px}
+.share-primary{background:#1769e0;color:#fff}
+.share-secondary{background:#edf3fb;color:#24507f}
+.share-danger{background:#fff0f0;color:#b4232d}
+.share-primary:disabled,.share-secondary:disabled{opacity:.5;cursor:wait}
+.share-status{margin-top:12px;padding:9px 11px;border-radius:9px;background:#f3f6fa;color:#59687c;font-size:12px;line-height:1.5}
+.share-status.error{background:#fff0f0;color:#a2242d}
+.share-people{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.share-person{background:#eaf4ff;color:#285c8e;border-radius:999px;padding:5px 9px;font-size:11px}
+.share-expiry{font-size:11px;color:#778599;margin-top:8px}
+@media(max-width:720px){#collab-indicator{display:none!important}.share-card{padding:18px}.share-url-row{align-items:stretch;flex-direction:column}}
 @media (max-width:1180px), (pointer:coarse){
   .mobile-only{display:block}
 }
@@ -2743,6 +2773,60 @@ input[type="color"]::-moz-color-swatch{
   }
 }
 
+/* ── Mobile property sheet header containment ─────
+   The final card treatment gives panels 20px padding. The collapsed property
+   sheet is only 52px tall, so that shared padding pushed its header below the
+   clipping edge on phones. Keep the sheet itself flush and let the header own
+   its touch-friendly inset instead. */
+@media (max-width:768px){
+  #props{
+    padding:0!important;
+    box-sizing:border-box!important;
+  }
+  #mob-prop-hdr{
+    width:100%;
+    height:52px!important;
+    min-height:52px;
+    padding:0 14px!important;
+    box-sizing:border-box;
+    gap:8px;
+  }
+  .mob-prop-left{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .mob-prop-info{
+    min-width:0;
+  }
+  .mob-prop-name,
+  .mob-prop-size{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mob-prop-actions{
+    gap:6px;
+  }
+}
+@media (max-width:380px){
+  #mob-prop-hdr{
+    padding:0 10px!important;
+  }
+  .mob-prop-icon{
+    font-size:18px;
+  }
+  .mob-prop-chevron{
+    padding:6px 7px;
+    font-size:11px;
+  }
+  .mob-prop-close-btn{
+    width:32px;
+    height:32px;
+  }
+}
+
 /* ── フォーカスリングの全体統一 ──────────────────
    アプリ内のあらゆるボタン/リンクボタンが、これまでブラウザ既定の
    フォーカスリング(重い黒/青の縁取り)にフォールバックし、フラットな
@@ -2873,6 +2957,27 @@ input[type="reset"]:focus-visible{
     <span id="app-loading-text">読み込み中</span>
   </div>
 </div>
+<div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
+  <div class="share-card">
+    <div class="share-head">
+      <div><h2 id="share-title" class="share-title">共同編集</h2><p class="share-copy">同じURLを開いたメンバーと、壁・部屋・家具の変更をリアルタイムで共有します。</p></div>
+      <button class="share-close" type="button" aria-label="閉じる" onclick="closeShareDialog()">×</button>
+    </div>
+    <label class="share-label" for="share-name">表示名</label>
+    <input id="share-name" class="share-input" maxlength="32" placeholder="例：田中" onchange="saveSharedDisplayName(this.value)">
+    <div id="share-connected-section" style="display:none">
+      <label class="share-label" for="share-url">共同編集URL</label>
+      <div class="share-url-row"><input id="share-url" class="share-input" readonly><button class="share-secondary" type="button" onclick="copySharedUrl()">URLをコピー</button></div>
+      <div class="share-label">参加中</div><div id="share-people" class="share-people"></div>
+      <div id="share-expiry" class="share-expiry"></div>
+    </div>
+    <div id="share-status" class="share-status">共同編集を開始すると、現在のプランがクラウドへ保存されます。</div>
+    <div class="share-actions">
+      <button id="share-create-btn" class="share-primary" type="button" onclick="createSharedRoom()">共同編集を開始</button>
+      <button id="share-leave-btn" class="share-danger" type="button" style="display:none" onclick="leaveSharedRoom()">共同編集を終了</button>
+    </div>
+  </div>
+</div>
 <div id="toolbar">
   <b class="brand-mark" aria-label="house-planner mobile">
     <img class="brand-logo" src="assets/brand/house-planner-mobile-icon.png?v=3" alt="" aria-hidden="true">
@@ -2900,6 +3005,8 @@ input[type="reset"]:focus-visible{
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
+  <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
+  <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
@@ -2941,10 +3048,11 @@ input[type="reset"]:focus-visible{
       <div class="mobile-only mobile-data-tools">
         <div class="mobile-data-title">データ管理</div>
         <div class="mobile-data-grid">
-          <button class="pbtn sec" type="button" onclick="savePlanToStorage()">💾 ブラウザ保存</button>
+          <button class="pbtn sec" type="button" onclick="savePlanToStorage()">💾 保存</button>
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()">↥ 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()">↓ JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()">📂 JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="openShareDialog()">🔗 共同編集</button>
         </div>
       </div>
     </div>
@@ -4077,6 +4185,7 @@ function getLockCategoryObjects(category){
 function setLockOnObjects(list,locked){
   var changed=list.filter(function(obj){return isObjectLocked(obj)!==!!locked;});
   if(!changed.length){ syncLockBatchUi(); return; }
+  sharedMarkObjectsDirty(changed);
   saveState();
   changed.forEach(function(obj){ setObjectLocked(obj,locked); });
   if(ST.selected && changed.indexOf(ST.selected)>=0) updateProps();
@@ -4153,6 +4262,7 @@ function clearAll3DHidden(){
   DATA.items.forEach(function(it){ if(it.hidden3D){ delete it.hidden3D; n++; } });
   DATA.rooms.forEach(function(r){ if(r.hidden3D){ delete r.hidden3D; n++; } });
   if(!n){ alert('3D非表示・表示上書きの設定はありません。'); return; }
+  sharedForceFullSync();
   saveState();
   draw2d(); if(ren) rebuild3D();
   if(ST.selected) updateProps();
@@ -5012,11 +5122,15 @@ function markDirty(){
   DIRTY=true;
   var btn=document.getElementById('save-btn');
   if(btn) btn.classList.add('dirty');
+  renderSaveButtonState();
+  queueSharedSync(700);
+  queueSharedLocalAutoSave();
 }
 function clearDirty(){
   DIRTY=false;
   var btn=document.getElementById('save-btn');
   if(btn) btn.classList.remove('dirty');
+  renderSaveButtonState();
 }
 var CLIPBOARD = null;
 function serializeDataSnapshot(){
@@ -5031,6 +5145,7 @@ function clearEditHistory(){
   REDO_HISTORY.length=0;
 }
 function saveState(){
+  sharedRememberEditTargets();
   pushHistorySnapshot(HISTORY,serializeDataSnapshot());
   REDO_HISTORY.length=0;
   markDirty();
@@ -8072,6 +8187,7 @@ function finish3DGizmoDrag(){
   draw2d();
   if(!usedPartial) rebuild3D();
   else if(typeof invalidate3D==='function') invalidate3D();
+  queueSharedSync(80);
 }
 
 function getSelectionBox3D(ref){
@@ -14669,6 +14785,7 @@ function setView(v){
       if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
     }
     build3D();
+    if(typeof SHARED!=='undefined') SHARED.needs3DRebuild=false;
     // 保存済み/直前の外観カメラがあれば復元、無ければ全体表示
     if(v==='3d-ext'){
       if(ST._camStash&&ST._camStash.ext) applyStashedCamera(ST._camStash.ext);
@@ -14970,6 +15087,7 @@ canvas.addEventListener('mouseup',function(){
   DRAG.active=false; ST._snapState=null;
   if(wasDragging) updateProps();
   if(ren)build3D();
+  if(wasDragging) queueSharedSync(80);
 });
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -15694,7 +15812,7 @@ function restoreHistorySnapshot(snapshot){
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');
-  markDirty();
+  sharedForceFullSync();markDirty();
   draw2d();if(ren)rebuild3D();
 }
 
@@ -15737,8 +15855,8 @@ window.addEventListener('keydown', function(e){
   }
   if(e.key === 'Backspace' || e.key === 'Delete'){ if(ST.selected){ e.preventDefault(); delSel(); } }
   if(e.key.toLowerCase() === 'r') { ST.placingRot = (ST.placingRot + 90) % 360; draw2d(); }
-  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
-  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
 });
 window.addEventListener('keyup', function(e){
   if(e.key==='Shift'){ST.shiftKey=false; ST.ctrlKey=false; draw2d();}
@@ -15837,11 +15955,35 @@ async function savePlanToStorage(){
   ensureRoofAppearance();
   syncExteriorWallSettings();
   captureViewState();
+  setSaveButtonBusy(true);
+  var browserSaved=false;
   try{
     await StorageAdapter.save(DATA);
+    browserSaved=true;
+    if(SHARED.roomId){
+      await flushSharedChanges();
+      var response=await fetch('/api/rooms/'+SHARED.roomId+'/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:sharedClientId(),baseVersion:SHARED.version,plan:DATA},function(k,v){return k==='_texObj'?undefined:v;})});
+      if(!response.ok) throw new Error(response.status===413?'プランが10MBを超えています。':'クラウド保存に失敗しました（'+response.status+'）');
+      var result=await response.json();
+      SHARED.version=Math.max(SHARED.version,Number(result.version||0));
+      SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;
+      SHARED.savedAt=result.savedAt||Date.now();
+      SHARED.baseline=sharedBaselineFrom(DATA);
+      sharedResetDirtyTracking();
+      sharedSetStatus('ブラウザとクラウドへ保存しました。');
+      renderSharedUi();
+    }
     clearDirty();
   }catch(e){
-    alert('ブラウザ保存に失敗しました: '+(e&&e.message?e.message:e));
+    var message=(e&&e.message?e.message:e);
+    if(browserSaved&&SHARED.roomId){
+      sharedSetStatus('ブラウザには保存しましたが、クラウド保存に失敗しました。',true);
+      alert('ブラウザには保存しましたが、クラウド保存に失敗しました: '+message);
+    }else{
+      alert('保存に失敗しました: '+message);
+    }
+  }finally{
+    setSaveButtonBusy(false);
   }
 }
 async function loadPlanFromStorage(){
@@ -15896,6 +16038,250 @@ async function checkStorageOnInit(){
       if(ren) rebuild3D();
     }
   }
+}
+
+// ─── URL共同編集 ───────────────────────────────
+// プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
+// 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
+var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0};
+var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail'];
+function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
+function sharedFastSignature(value){
+  return JSON.stringify(value,function(k,v){
+    if(k==='_texObj')return undefined;
+    if(typeof v==='string'&&v.length>2048)return '[large:'+v.length+':'+v.slice(0,24)+':'+v.slice(-24)+']';
+    return v;
+  });
+}
+function renderSaveButtonState(){
+  var btn=document.getElementById('save-btn');if(!btn)return;
+  btn.disabled=!!SHARED.saveBusy;btn.classList.toggle('saving',!!SHARED.saveBusy);btn.classList.toggle('saved',!!SHARED.roomId&&!DIRTY&&!SHARED.saveBusy);
+  if(SHARED.saveBusy){btn.textContent='↻ 保存中';btn.title='ブラウザとクラウドへ保存しています';return;}
+  if(SHARED.roomId){
+    btn.textContent=DIRTY?'💾 今すぐ保存':'✓ 保存済み';
+    btn.title=DIRTY?'未保存の変更をブラウザとクラウドへ保存します':(SHARED.savedAt?'最終保存: '+new Date(SHARED.savedAt).toLocaleString('ja-JP'):'ブラウザとクラウドへ保存済み');
+  }else{btn.textContent='💾 保存';btn.title='このブラウザへ保存します';}
+}
+function setSaveButtonBusy(busy){SHARED.saveBusy=!!busy;renderSaveButtonState();}
+function sharedCollectionNameFor(obj){
+  if(!obj)return null;
+  if(DATA.walls&&DATA.walls.indexOf(obj)>=0)return 'walls';
+  if(DATA.rooms&&DATA.rooms.indexOf(obj)>=0)return 'rooms';
+  if(DATA.items&&DATA.items.indexOf(obj)>=0)return 'items';
+  return null;
+}
+function sharedMarkObjectsDirty(list){
+  (list||[]).forEach(function(obj){var name=sharedCollectionNameFor(obj);if(name&&obj&&obj.id!==undefined&&obj.id!==null)SHARED.dirtyIds[name][String(obj.id)]=true;});
+}
+function sharedRememberEditTargets(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  var targets=[];
+  if(ST.selected)targets.push(ST.selected);
+  if(Array.isArray(ST.multiSelected))targets=targets.concat(ST.multiSelected);
+  if(targets.length)sharedMarkObjectsDirty(targets);else SHARED.forceScan=true;
+}
+function sharedForceFullSync(){if(SHARED.roomId&&!SHARED.applying)SHARED.forceScan=true;}
+function sharedResetDirtyTracking(){SHARED.forceScan=false;SHARED.dirtyIds={walls:{},items:{},rooms:{}};SHARED.pending=false;}
+function sharedHasTrackedChanges(){return SHARED.forceScan||Object.keys(SHARED.dirtyIds.walls).length||Object.keys(SHARED.dirtyIds.items).length||Object.keys(SHARED.dirtyIds.rooms).length;}
+function sharedClientId(){
+  if(SHARED.clientId) return SHARED.clientId;
+  try{SHARED.clientId=sessionStorage.getItem('webcad-collab-client')||'';}catch(e){}
+  if(!SHARED.clientId){
+    var bytes=new Uint8Array(12);crypto.getRandomValues(bytes);
+    SHARED.clientId=Array.from(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+    try{sessionStorage.setItem('webcad-collab-client',SHARED.clientId);}catch(e){}
+  }
+  return SHARED.clientId;
+}
+function sharedDisplayName(){
+  var value='';try{value=localStorage.getItem('webcad-collab-name')||'';}catch(e){}
+  return value.trim()||'ゲスト';
+}
+function saveSharedDisplayName(value){try{localStorage.setItem('webcad-collab-name',(value||'').trim().slice(0,32));}catch(e){} if(SHARED.roomId&&SHARED.socket){connectSharedSocket();}}
+function sharedRoomFromLocation(){
+  var hash=(location.hash||'').replace(/^#/,'');
+  var id=new URLSearchParams(hash).get('room')||new URLSearchParams(location.search||'').get('room');
+  return /^[A-Za-z0-9_-]{22}$/.test(id||'')?id:null;
+}
+function sharedUrl(){
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash=SHARED.roomId?'room='+SHARED.roomId:'';return url.toString();
+}
+function sharedSetStatus(message,isError){
+  var el=document.getElementById('share-status');if(!el)return;el.textContent=message;el.classList.toggle('error',!!isError);
+}
+function sharedFormatExpiry(){
+  if(!SHARED.expiresAt)return '';
+  return '最終更新がなければ '+new Date(SHARED.expiresAt).toLocaleString('ja-JP')+' に削除されます（更新ごとに60日延長）';
+}
+function renderSharedUi(){
+  var connected=!!SHARED.roomId;
+  var section=document.getElementById('share-connected-section');if(section)section.style.display=connected?'block':'none';
+  var create=document.getElementById('share-create-btn');if(create)create.style.display=connected?'none':'inline-block';
+  var leave=document.getElementById('share-leave-btn');if(leave)leave.style.display=connected?'inline-block':'none';
+  var url=document.getElementById('share-url');if(url)url.value=connected?sharedUrl():'';
+  var expiry=document.getElementById('share-expiry');if(expiry)expiry.textContent=sharedFormatExpiry();
+  var people=document.getElementById('share-people');
+  if(people)people.innerHTML=(SHARED.people.length?SHARED.people:[{name:sharedDisplayName()}]).map(function(p){return '<span class="share-person">'+escHtml(p.name||'ゲスト')+'</span>';}).join('');
+  var indicator=document.getElementById('collab-indicator');
+  if(indicator){indicator.classList.toggle('show',connected);indicator.classList.toggle('connected',!!(SHARED.socket&&SHARED.socket.readyState===1));}
+  var count=document.getElementById('collab-count');if(count)count.textContent=(SHARED.people.length||1)+'人で編集中';
+  renderSaveButtonState();
+}
+function openShareDialog(){
+  var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.add('show');
+  var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
+  renderSharedUi();
+}
+function closeShareDialog(){var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.remove('show');}
+function closeShareDialogOnBackdrop(e){if(e.target&&e.target.id==='share-overlay')closeShareDialog();}
+async function copySharedUrl(){
+  var value=sharedUrl();
+  try{await navigator.clipboard.writeText(value);sharedSetStatus('共同編集URLをコピーしました。');}
+  catch(e){var input=document.getElementById('share-url');if(input){input.select();document.execCommand('copy');sharedSetStatus('共同編集URLをコピーしました。');}}
+}
+function sharedBaselineFrom(plan){
+  var base={collections:{},fields:{}};
+  ['walls','items','rooms'].forEach(function(name){
+    base.collections[name]={};(plan[name]||[]).forEach(function(item){base.collections[name][String(item.id)]=sharedFastSignature(item);});
+  });
+  SHARED_FIELDS.forEach(function(key){base.fields[key]=sharedFastSignature(plan[key]===undefined?null:plan[key]);});
+  return base;
+}
+function buildSharedPatch(plan,baseline){
+  var patch={collections:{},fields:{}};var changed=false;
+  ['walls','items','rooms'].forEach(function(name){
+    var before=(baseline&&baseline.collections&&baseline.collections[name])||{};var now={};var byId={};var upserts=[];
+    (plan[name]||[]).forEach(function(item){var id=String(item.id);now[id]=true;byId[id]=item;});
+    var candidates={};Object.keys(SHARED.dirtyIds[name]||{}).forEach(function(id){candidates[id]=true;});
+    Object.keys(now).forEach(function(id){if(before[id]===undefined||SHARED.forceScan)candidates[id]=true;});
+    Object.keys(candidates).forEach(function(id){var item=byId[id];if(item&&before[id]!==sharedFastSignature(item))upserts.push(sharedClone(item));});
+    var removes=Object.keys(before).filter(function(id){return now[id]===undefined;});
+    if(upserts.length||removes.length){patch.collections[name]={upserts:upserts,removes:removes};changed=true;}
+  });
+  SHARED_FIELDS.forEach(function(key){var encoded=sharedFastSignature(plan[key]===undefined?null:plan[key]);if(!baseline||baseline.fields[key]!==encoded){patch.fields[key]=sharedClone(plan[key]===undefined?null:plan[key]);changed=true;}});
+  return changed?patch:null;
+}
+function markDirtyUiOnly(){DIRTY=true;var btn=document.getElementById('save-btn');if(btn)btn.classList.add('dirty');renderSaveButtonState();queueSharedLocalAutoSave();}
+function sharedSchedule3DRefresh(){
+  SHARED.needs3DRebuild=true;
+  if(ST.view==='2d')return;
+  clearTimeout(SHARED.rebuildTimer);
+  SHARED.rebuildTimer=setTimeout(function(){if(SHARED.needs3DRebuild&&ren){SHARED.needs3DRebuild=false;rebuild3D();}},500);
+}
+function applySharedPatch(patch,isOwn){
+  if(!patch)return;SHARED.applying=true;
+  var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
+  try{
+    ['walls','items','rooms'].forEach(function(name){
+      if(!Array.isArray(DATA[name]))DATA[name]=[];var change=patch.collections&&patch.collections[name];if(!change)return;
+      var removed={};(change.removes||[]).forEach(function(id){removed[String(id)]=true;});var upserts={};(change.upserts||[]).forEach(function(item){if(item)upserts[String(item.id)]=sharedClone(item);});
+      DATA[name]=DATA[name].filter(function(item){return !removed[String(item&&item.id)];}).map(function(item){return upserts[String(item&&item.id)]||item;});
+      Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
+    });
+    if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
+    ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
+    clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
+    if(!isOwn)sharedSchedule3DRefresh();
+    SHARED.baseline=sharedBaselineFrom(DATA);if(!isOwn)markDirtyUiOnly();
+  }finally{SHARED.applying=false;}
+}
+function queueSharedSync(delay){
+  if(!SHARED.roomId||SHARED.applying)return;
+  clearTimeout(SHARED.timer);SHARED.timer=setTimeout(function(){SHARED.timer=null;sharedSyncNow();},delay===undefined?500:delay);
+}
+async function sharedSyncNow(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  if(SHARED.sending){SHARED.pending=true;return SHARED.sendPromise;}
+  var patch=buildSharedPatch(DATA,SHARED.baseline);if(!patch)return;
+  sharedResetDirtyTracking();SHARED.sending=true;
+  SHARED.sendPromise=(async function(){try{
+    var response=await fetch('/api/rooms/'+SHARED.roomId+'/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'patch',clientId:sharedClientId(),baseVersion:SHARED.version,patch:patch})});
+    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'同期できませんでした（'+response.status+'）');
+    var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;SHARED.baseline=sharedBaselineFrom(DATA);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
+  }catch(e){SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
+  finally{SHARED.sending=false;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
+  return SHARED.sendPromise;
+}
+async function flushSharedChanges(){
+  clearTimeout(SHARED.timer);SHARED.timer=null;
+  if(SHARED.sending)await SHARED.sendPromise;
+  await sharedSyncNow();
+  if(SHARED.sending)await SHARED.sendPromise;
+  if(sharedHasTrackedChanges())await sharedSyncNow();
+}
+function queueSharedLocalAutoSave(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  clearTimeout(SHARED.localAutoTimer);
+  SHARED.localAutoTimer=setTimeout(function(){SHARED.localAutoTimer=null;sharedAutoSaveLocal();},10000);
+}
+async function sharedAutoSaveLocal(){
+  if(!SHARED.roomId)return;
+  try{await StorageAdapter.save(DATA);}catch(e){sharedSetStatus('ブラウザへの自動保存に失敗しました。保存ボタンを押してください。',true);}
+}
+function closeSharedSocket(){
+  clearTimeout(SHARED.reconnectTimer);SHARED.reconnectTimer=null;
+  if(SHARED.socket){var socket=SHARED.socket;SHARED.socket=null;try{socket.close(1000,'leave');}catch(e){}}renderSharedUi();
+}
+function connectSharedSocket(){
+  if(!SHARED.roomId)return;closeSharedSocket();
+  var protocol=location.protocol==='https:'?'wss:':'ws:';var socket=new WebSocket(protocol+'//'+location.host+'/api/rooms/'+SHARED.roomId+'/socket?client='+encodeURIComponent(sharedClientId())+'&name='+encodeURIComponent(sharedDisplayName()));SHARED.socket=socket;
+  socket.onopen=function(){sharedSetStatus('共同編集に接続中です。変更は自動保存されます。');renderSharedUi();};
+  socket.onmessage=function(event){
+    var message;try{message=JSON.parse(event.data);}catch(e){return;}
+    if(message.type==='welcome'){
+      SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      SHARED.savedAt=message.savedAt||SHARED.savedAt;
+      if(Number(message.version||0)>SHARED.version+1)refreshSharedPlan();
+      else SHARED.version=Math.max(SHARED.version,Number(message.version||0));
+      sharedSetStatus(message.checkpointPending?'変更を同期済みです。操作が止まると自動保存します。':'共同編集に接続しました。自動保存済みです。');renderSharedUi();return;
+    }
+    if(message.type==='presence'){SHARED.people=message.people||[];renderSharedUi();return;}
+    if(message.type==='patch'&&Number(message.version||0)>SHARED.version){
+      SHARED.version=Number(message.version);SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      var own=message.clientId===sharedClientId();if(own)SHARED.lastLocalVersion=SHARED.version;
+      applySharedPatch(message.patch,own);renderSharedUi();return;
+    }
+    if(message.type==='checkpoint'){
+      SHARED.version=Math.max(SHARED.version,Number(message.version||0));SHARED.savedAt=message.savedAt||SHARED.savedAt;SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      sharedAutoSaveLocal().then(function(){if(!sharedHasTrackedChanges()&&!SHARED.sending&&!SHARED.timer){clearDirty();sharedSetStatus('自動保存しました。');renderSharedUi();}});return;
+    }
+    if(message.type==='snapshot'&&Number(message.version||0)>=SHARED.version){
+      SHARED.version=Number(message.version);SHARED.savedAt=message.savedAt||SHARED.savedAt;SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      if(message.clientId!==sharedClientId())refreshSharedPlan();else{clearDirty();sharedSetStatus('ブラウザとクラウドへ保存しました。');renderSharedUi();}return;
+    }
+  };
+  socket.onclose=function(){if(SHARED.socket!==socket)return;SHARED.socket=null;renderSharedUi();if(SHARED.roomId)SHARED.reconnectTimer=setTimeout(connectSharedSocket,1800);};
+  socket.onerror=function(){renderSharedUi();};
+}
+async function fetchSharedPlan(roomId){
+  var response=await fetch('/api/rooms/'+roomId,{cache:'no-store'});
+  if(!response.ok)throw new Error(response.status===410?'この共同編集プランは期限切れです。':'共同編集プランを読み込めませんでした。');
+  var plan=await response.json();return {plan:plan,version:Number(response.headers.get('x-room-version')||1),expiresAt:Number(response.headers.get('x-room-expires-at')||0),savedAt:Number(response.headers.get('x-room-saved-at')||0)};
+}
+function installSharedPlan(loaded,roomId){
+  _defaultPlanPending=false;DATA=loaded.plan;SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
+  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();connectSharedSocket();renderSharedUi();
+}
+async function refreshSharedPlan(){if(!SHARED.roomId)return;try{installSharedPlan(await fetchSharedPlan(SHARED.roomId),SHARED.roomId);}catch(e){sharedSetStatus(e.message,true);}}
+async function initSharedRoomFromUrl(){
+  var roomId=sharedRoomFromLocation();if(!roomId)return false;
+  try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
+  catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
+}
+async function createSharedRoom(){
+  var button=document.getElementById('share-create-btn');if(button)button.disabled=true;sharedSetStatus('共同編集ルームを作成しています…');
+  try{
+    normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
+    var response=await fetch('/api/rooms',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;})});
+    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
+    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
+  }catch(e){sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
+  finally{if(button)button.disabled=false;}
+}
+function leaveSharedRoom(){
+  if(!confirm('この端末で共同編集を終了しますか？\nクラウド上のプランと、ほかの参加者の接続は維持されます。'))return;
+  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);clearTimeout(SHARED.rebuildTimer);SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();sharedSetStatus('共同編集を終了しました。現在の内容はこのブラウザに残っています。');
 }
 function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';
@@ -16896,7 +17282,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -17311,8 +17697,9 @@ function initTouchPressFeedback(){
   },{passive:true});
 }
 
-// ─── Init storage ─────────────────────────────────
-checkStorageOnInit();
+// ─── Init storage / shared room ───────────────────
+// URLの共同編集プランを、端末内の保存データより優先する。
+initSharedRoomFromUrl().then(function(joined){if(!joined)checkStorageOnInit();});
 initNativeColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
