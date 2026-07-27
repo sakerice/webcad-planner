@@ -17767,13 +17767,239 @@ var JISDRAW=(function(){
     }
     return sheets;
   }
-  function buildFloorPlanSvg(floor,opts){ return placeholderSvg('平面図 '+floor+'F(実装中)'); }
   function buildElevationSvg(dir,opts){ return placeholderSvg('立面図(実装中)'); }
   function placeholderSvg(label){
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297">'
       +'<rect width="420" height="297" fill="#fff"/>'
       +'<text x="210" y="148" text-anchor="middle" font-size="12" fill="#000">'+label+'</text></svg>';
   }
+
+  // 用紙寸法(横向き固定、mm)。A3/A4以外の値が来た場合はA3扱いにする。
+  function paperDimsMm(paper){
+    return paper==='a4' ? {w:297,h:210} : {w:420,h:297};
+  }
+  var AUTO_SCALES=[50,100,200];
+  var PLAN_MARGIN_MM=1800; // 寸法線用の四周余白
+
+  // 壁の実寸バウンディングボックス(四周に寸法余白を加算)。壁が無い階は原点付近の既定値。
+  function planBounds(floor){
+    var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      var t=(w.thick||120)/2;
+      minX=Math.min(minX,w.x1-t,w.x2-t); maxX=Math.max(maxX,w.x1+t,w.x2+t);
+      minY=Math.min(minY,w.y1-t,w.y2-t); maxY=Math.max(maxY,w.y1+t,w.y2+t);
+    });
+    if(!isFinite(minX)){ minX=0; minY=0; maxX=1000; maxY=1000; }
+    return {minX:minX-PLAN_MARGIN_MM,minY:minY-PLAN_MARGIN_MM,maxX:maxX+PLAN_MARGIN_MM,maxY:maxY+PLAN_MARGIN_MM};
+  }
+  // 建物範囲(+余白)が収まる最小の縮尺を50→100→200の順で判定。200でも収まらなければ200のまま。
+  function pickAutoScale(bounds,paper){
+    var reqW=bounds.maxX-bounds.minX, reqH=bounds.maxY-bounds.minY;
+    for(var i=0;i<AUTO_SCALES.length;i++){
+      var s=AUTO_SCALES[i];
+      if(paper.w*s>=reqW && paper.h*s>=reqH) return s;
+    }
+    return AUTO_SCALES[AUTO_SCALES.length-1];
+  }
+
+  function svgOpen(bounds,opts){
+    var w=bounds.maxX-bounds.minX, h=bounds.maxY-bounds.minY;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+bounds.minX+' '+bounds.minY+' '+w+' '+h+'">'
+      +'<rect x="'+bounds.minX+'" y="'+bounds.minY+'" width="'+w+'" height="'+h+'" fill="#fff"/>';
+  }
+  function svgClose(titleInfo){
+    var label='';
+    if(titleInfo){
+      label='<text x="'+titleInfo.x+'" y="'+titleInfo.y+'" font-size="'+titleInfo.fontSize+'" fill="#000" text-anchor="end">'+titleInfo.label+'</text>';
+    }
+    return label+'</svg>';
+  }
+
+  // 壁: drawWall2d(:5715)と同じ4点ポリゴン(壁芯±thick/2)を黒塗り断面(JIS)で描く。
+  function wallsToSvg(floor,LW){
+    var out='';
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
+      if(len<1) return;
+      var nx=-dy/len, ny=dx/len, t=(w.thick||120)/2;
+      var pts=[
+        (w.x1+nx*t)+','+(w.y1+ny*t),
+        (w.x2+nx*t)+','+(w.y2+ny*t),
+        (w.x2-nx*t)+','+(w.y2-ny*t),
+        (w.x1-nx*t)+','+(w.y1-ny*t)
+      ].join(' ');
+      out+='<polygon points="'+pts+'" fill="#000" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    return out;
+  }
+
+  // 開口シンボル用ローカル座標系: lx=壁方向(中心0、±開口幅/2)、ly=壁厚方向(中心0)。
+  // getOpeningWallInfo().rot(壁方向の角度)による回転+平行移動のみなので円弧はワールドでも同半径のまま使える。
+  function openingFrame(info){
+    var rad=info.rot*Math.PI/180;
+    var uxx=Math.cos(rad), uxy=Math.sin(rad), uyx=-Math.sin(rad), uyy=Math.cos(rad);
+    return {
+      pt:function(lx,ly){ return {x:info.x+lx*uxx+ly*uyx, y:info.y+lx*uxy+ly*uyy}; }
+    };
+  }
+  function frameStr(fr,lx,ly){ var p=fr.pt(lx,ly); return p.x+','+p.y; }
+  function lineTag(fr,x1,y1,x2,y2,sw,dash){
+    var p1=fr.pt(x1,y1),p2=fr.pt(x2,y2);
+    return '<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="#000" stroke-width="'+sw+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  }
+  // 開口幅ぶん壁の黒塗りを白抜きする(壁と同角度で重ねる矩形)
+  function rectCutSvg(fr,halfW,halfT){
+    return '<polygon points="'+[frameStr(fr,-halfW,-halfT),frameStr(fr,halfW,-halfT),frameStr(fr,halfW,halfT),frameStr(fr,-halfW,halfT)].join(' ')+'" fill="#fff"/>';
+  }
+
+  // 引違い窓(未指定/sliding)・FIX窓('fix'/'casement')・掃き出し窓(window-door)。
+  // effectiveWindowKindはwindow-door(windowKind未設定)にも自然に'sliding'を返す。
+  function windowSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT,halfW,-halfT,LW.thin);
+    out+=lineTag(fr,-halfW, halfT,halfW, halfT,LW.thin);
+    var kind=effectiveWindowKind(it);
+    if(kind==='fix'||kind==='casement'){
+      out+=lineTag(fr,-halfW,0,halfW,0,LW.thin);
+    } else {
+      // 既存2D(:6885-6912の簡略化)を踏襲: 互い違いにオフセットした2枚の建具線
+      var openW=it.w||0, panelW=openW*0.56, off=halfT*0.5;
+      var leftOpen=!!it.flipX;
+      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
+      var movingX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
+      out+=lineTag(fr,fixedX,-off,fixedX+panelW,-off,LW.mid);
+      out+=lineTag(fr,movingX,off,movingX+panelW,off,LW.mid);
+    }
+    return out;
+  }
+
+  // 開き戸(door-swing系)・玄関ドア(door-front): 吊元から開口幅の1/4円弧+扉線1本。
+  // 円の中心=吊元なので、回転(等長変換)後もワールド座標上で半径rは不変。
+  function swingDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    var hingeLX=it.flipX?halfW:-halfW;
+    var leafDir=it.flipX?-1:1;
+    var swingDir=it.flipY?-1:1;
+    var r=it.w||0;
+    var arcStart=leafDir>0?0:Math.PI;
+    var openAngle=swingDir*Math.PI/2;
+    var arcEnd=arcStart+openAngle;
+    var p0=fr.pt(hingeLX+r*Math.cos(arcStart), r*Math.sin(arcStart));
+    var p1=fr.pt(hingeLX+r*Math.cos(arcEnd), r*Math.sin(arcEnd));
+    var hinge=fr.pt(hingeLX,0);
+    var sweep=openAngle>0?1:0;
+    out+='<path d="M'+p0.x+','+p0.y+' A'+r+','+r+' 0 0,'+sweep+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<line x1="'+hinge.x+'" y1="'+hinge.y+'" x2="'+p1.x+'" y2="'+p1.y+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    return out;
+  }
+
+  // 引戸(door-slide/door-slide-s/door-pocket): 既存2D表現(:6885-6949)をSVGへ移植。
+  function slideDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
+    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
+    var isOpen=(it.doorOpenState!=='closed');
+    var dash=(LW.thin*3)+' '+(LW.thin*2);
+    if(it.type==='door-slide'){
+      var openW=it.w||0, panelW=openW*0.56;
+      var leftOpen=!!it.flipX;
+      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
+      var movingClosedX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
+      var movingX=isOpen?fixedX:movingClosedX;
+      out+=lineTag(fr,fixedX,-halfT*0.28,fixedX+panelW,-halfT*0.28,LW.mid);
+      out+=lineTag(fr,movingX, halfT*0.28,movingX+panelW, halfT*0.28,LW.mid);
+    } else if(it.type==='door-slide-s'){
+      var sDir=it.flipX?-1:1;
+      var openW2=it.w||0;
+      var px0=isOpen?sDir*openW2:0;
+      var pz=(it.flipY?1:-1)*halfT*1.05;
+      out+=lineTag(fr,px0-halfW,pz,px0+halfW,pz,LW.mid);
+      out+=lineTag(fr,sDir*halfW,pz,sDir*halfW*3,pz,LW.thin,dash);
+    } else { // door-pocket(引込み戸)
+      var sDir2=it.flipX?-1:1;
+      if(isOpen){
+        out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.mid,dash);
+      } else {
+        out+=lineTag(fr,-halfW,0,halfW,0,LW.mid);
+      }
+      out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.thin,dash);
+    }
+    return out;
+  }
+
+  // 折戸(door-fold/door-fold-w): 既存2D表現(:6951-6969)の山形記号をSVGへ移植。
+  function foldDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
+    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
+    var peak=(it.flipY?1:-1)*Math.max((info.wall.thick||120)*1.6,300);
+    var pts;
+    if(it.type==='door-fold'){
+      var f0=it.flipX?halfW:-halfW, f1=it.flipX?-halfW:halfW;
+      pts=[frameStr(fr,f0,0),frameStr(fr,(f0+f1)/2,peak),frameStr(fr,f1,0)];
+    } else {
+      pts=[frameStr(fr,-halfW,0),frameStr(fr,-halfW/2,peak),frameStr(fr,0,0),frameStr(fr,halfW/2,peak),frameStr(fr,halfW,0)];
+    }
+    out+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    return out;
+  }
+
+  // 開口(door-opening/door-opening-arch): 既存2D表現(:6868-6884)の建具なし開口線+破線をSVGへ移植。
+  function openingSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT,-halfW,halfT,LW.mid);
+    out+=lineTag(fr, halfW,-halfT, halfW,halfT,LW.mid);
+    if(it.type==='door-opening-arch'){
+      var p0=fr.pt(-halfW,0), p1=fr.pt(halfW,0);
+      var apex=fr.pt(0,-Math.max(halfT,halfW*0.35));
+      out+='<path d="M'+p0.x+','+p0.y+' Q'+apex.x+','+apex.y+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    } else {
+      out+=lineTag(fr,-halfW,-halfT,halfW,-halfT,LW.mid);
+    }
+    var dash=(LW.thin*3)+' '+(LW.thin*2);
+    out+='<polygon points="'+[frameStr(fr,-halfW,-halfT),frameStr(fr,halfW,-halfT),frameStr(fr,halfW,halfT),frameStr(fr,-halfW,halfT)].join(' ')
+      +'" fill="none" stroke="#000" stroke-width="'+(LW.thin*0.7)+'" stroke-dasharray="'+dash+'"/>';
+    return out;
+  }
+
+  function openingsToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor && isOpeningItemType(it.type);}).forEach(function(it){
+      var info=getOpeningWallInfo(it);
+      if(!info || !info.wall) return;
+      if(isWindowLikeType(it.type)) out+=windowSymbolSvg(it,info,LW);
+      else if(isSwingDoorType(it.type)) out+=swingDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-slide'||it.type==='door-slide-s'||it.type==='door-pocket') out+=slideDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-fold'||it.type==='door-fold-w') out+=foldDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-opening'||it.type==='door-opening-arch') out+=openingSymbolSvg(it,info,LW);
+    });
+    return out;
+  }
+
+  function buildFloorPlanSvg(floor,opts){
+    opts=opts||{};
+    var paper=paperDimsMm(opts.paper);
+    var bounds=planBounds(floor);
+    var scaleNum=(opts.scale==='auto') ? pickAutoScale(bounds,paper) : (parseInt(opts.scale,10)||100);
+    var LW=lineWidths(scaleNum);
+    var cx=(bounds.minX+bounds.maxX)/2, cy=(bounds.minY+bounds.maxY)/2;
+    var vw=paper.w*scaleNum, vh=paper.h*scaleNum;
+    var view={minX:cx-vw/2,minY:cy-vh/2,maxX:cx+vw/2,maxY:cy+vh/2};
+    var marginMm=scaleNum*8;
+    var titleInfo={label:floor+'F 平面図  S=1:'+scaleNum, x:view.maxX-marginMm, y:view.maxY-marginMm, fontSize:LW.text*1.5};
+    return svgOpen(view,opts)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)+svgClose(titleInfo);
+  }
+
   return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
 })();
 
