@@ -18917,9 +18917,13 @@ function jisDownloadPng(){
   var pxW,pxH;
   if(vw>=vh){ pxW=LONG_SIDE_PX; pxH=Math.max(1,Math.round(LONG_SIDE_PX*vh/vw)); }
   else{ pxH=LONG_SIDE_PX; pxW=Math.max(1,Math.round(LONG_SIDE_PX*vw/vh)); }
+  // WebKit(iPad Safari)は内在サイズ(width/height)の無いSVGをImageとして描画する際、
+  // ラスタライズ解像度が不定になり得る(ぼやけ・空白のリスク)。canvasと同じ出力px数を
+  // ルート<svg>へ注入する(viewBoxはそのまま維持するため見た目・縮尺は変わらない)。
+  var svgWithSize=svgStr.replace('<svg ', '<svg width="'+pxW+'" height="'+pxH+'" ');
   // SVG内に日本語テキストが含まれるため、data URLではなくBlob+object URL経由でImageに読み込む
   // (WebKit系でdata:image/svg+xmlに多バイト文字が入ると読み込みに失敗することがある既知の問題を回避)。
-  var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
+  var blob=new Blob([svgWithSize],{type:'image/svg+xml;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var img=new Image();
   img.onload=function(){
@@ -18989,19 +18993,38 @@ function jisPrint(){
     if(JIS_PRINT_IFRAME===iframe) JIS_PRINT_IFRAME=null;
   }
   iframe.onload=function(){
-    try{
-      var win=iframe.contentWindow;
-      win.onafterprint=cleanup; // 印刷ダイアログが閉じたタイミングで除去(対応ブラウザ向け)
-      win.focus();
-      win.print();
-    }catch(e){
-      jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
+    var win=iframe.contentWindow;
+    var printed=false; // fonts.ready完了とタイムアウトのどちらか早い方で発火するため、二重print()呼び出しを防ぐガード
+    function doPrint(){
+      if(printed) return;
+      printed=true;
+      try{
+        win.onafterprint=cleanup; // 印刷ダイアログが閉じたタイミングで除去(対応ブラウザ向け)
+        win.focus();
+        win.print();
+      }catch(e){
+        jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
+      }
+      // afterprint未対応環境向けのフォールバック除去。print()が非ブロッキングなブラウザ(Firefox/Safari系)では
+      // OS印刷ダイアログの操作中にiframeが消えると印刷失敗・白紙出力になり得るため、
+      // 隠しiframeを長時間残すコストはほぼ無い前提で余裕を持って60秒に設定する
+      // (onafterprintが発火する環境では即時cleanupされるのでこの待ち時間は使われない)。
+      setTimeout(cleanup,60000);
     }
-    // afterprint未対応環境向けのフォールバック除去。print()が非ブロッキングなブラウザ(Firefox/Safari系)では
-    // OS印刷ダイアログの操作中にiframeが消えると印刷失敗・白紙出力になり得るため、
-    // 隠しiframeを長時間残すコストはほぼ無い前提で余裕を持って60秒に設定する
-    // (onafterprintが発火する環境では即時cleanupされるのでこの待ち時間は使われない)。
-    setTimeout(cleanup,60000);
+    // stylesheetは即ロードされてもフォント本体はdisplay=swapのため遅延取得され、
+    // その間にprint()するとOSフォールバック書体で刷られてしまう競合がある。
+    // document.fonts.readyでフォント本体のロード完了を待ってから印刷する(未対応環境や
+    // 読み込みが遅い環境向けに約2秒でタイムアウトし、印刷自体は必ず行われるようにする)。
+    try{
+      if(win.document && win.document.fonts && win.document.fonts.ready){
+        win.document.fonts.ready.then(doPrint);
+      } else {
+        doPrint();
+      }
+    }catch(e){
+      doPrint();
+    }
+    setTimeout(doPrint,2000);
   };
   iframe.srcdoc=html;
 }
