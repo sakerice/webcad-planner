@@ -18020,6 +18020,40 @@ var JISDRAW=(function(){
     return out;
   }
 
+  // バルコニー・フェンス簡略輪郭(Spec §立面図仕様「バルコニー・フェンスは簡略輪郭のみ」)。
+  // 高さ・基準面は3D実装(getItemHeightValue:12829, item3DBaseY:3535)の実値をそのまま使い、
+  // ここで別の数値を持たない(3D側と食い違わないため)。
+  // it.rot(度)の向き(width軸方向)をワールド(cos,sin)へ変換する式はstairBounds2D(:11185)と同じ規約。
+  function elevBalconyFenceToSvg(dir,LW){
+    var ax=ELEV_AXES[dir];
+    var rects=elevWallRects(dir);
+    var out='';
+    DATA.items.filter(function(it){
+      return it.type==='balcony' || it.type==='fence' || it.type==='wood-fence';
+    }).forEach(function(it){
+      var rad=(it.rot||0)*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
+      // it.rot方向(幅軸)とu軸の整列度。elevOpeningsのcosU(:17990)と同じ考え方で、
+      // この面とほぼ直交する(妻側を向いた)アイテムは幅がほぼ0に潰れるため描かない
+      var cosU=cos*ax.u[0]+sin*ax.u[1];
+      var halfU=Math.abs(cosU)*(it.w||0)/2;
+      if(halfU<1) return;
+      var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+      var uCenter=cx*ax.u[0]+cy*ax.u[1];
+      var floor=it.floor||1;
+      // 同じ階の前面壁(elevFrontDepthAt:17970と同じ考え方)より奥にあるアイテムは
+      // 建物本体に隠れてこの面からは見えないとみなし描かない
+      var front=elevFrontDepthAt(rects,uCenter,floor);
+      var itemDepth=cx*ax.dp[0]+cy*ax.dp[1];
+      if(isFinite(front) && itemDepth<front-300) return;
+      var base=item3DBaseY(it)/U; // バルコニー=その階の床天端、フェンス=GL(1F)/階天端(2F以上)
+      var h=getItemHeightValue(it); // バルコニー=スラブ厚、フェンス=800mm既定、木製フェンス=it.fenceHeight(既定1600)mm
+      var uL=uCenter-halfU, uR=uCenter+halfU;
+      out+='<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
+        +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    });
+    return out;
+  }
+
   // 立面全体のu範囲・高さ範囲(GL=0を必ず含む)。壁が無ければ既定の矩形を返す。
   function elevBounds(dir){
     var rects=elevWallRects(dir);
@@ -18178,13 +18212,15 @@ var JISDRAW=(function(){
     if(!isFinite(uMin)){ uMin=0; uMax=1000; }
     return {uMin:uMin,uMax:uMax};
   }
-  // 基礎: GL(y=0)から下にfoundationHeightMm()ぶんの帯を建物幅で描く(中線=LW.mid)。
+  // 基礎: GL(y=0)から上にfoundationHeightMm()ぶんの帯を建物幅で描く(中線=LW.mid)。
+  // floorBaseY(1)=foundationHeightM()(:3500)なので1F壁の基部はy=+hから始まる。
+  // 帯をy=[0,h]に描くことでGL線→基礎帯→壁が隙間なく積み上がる(build3DFoundation:13551と同じくy=0起点)。
   // foundationHeightMm()は既にmm値(foundationHeightM()/Uと同値)なのでそのまま使う。
   function foundationToSvg(dir,LW){
     var h=foundationHeightMm();
     if(h<=0) return '';
     var ext=elevRawExtent(elevWallRects(dir));
-    return '<rect x="'+ext.uMin+'" y="'+(-h)+'" width="'+(ext.uMax-ext.uMin)+'" height="'+h
+    return '<rect x="'+ext.uMin+'" y="0" width="'+(ext.uMax-ext.uMin)+'" height="'+h
       +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
   }
   // 高さ寸法用のティック(elevDimTickはscale(1,-1)配下で使うため、dimTick(:18343)とは
@@ -18246,6 +18282,7 @@ var JISDRAW=(function(){
     body+=roofProfileToSvg(dir,LW); // 屋根が無いプランでは中身が空文字列になり壁上端までの立面のまま
     body+=foundationToSvg(dir,LW);
     body+=elevGlSvg(bounds,LW);
+    body+=elevBalconyFenceToSvg(dir,LW);
     body+=elevOpenings(dir,LW);
     body+=heightDimsToSvg(dir,LW);
     return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
