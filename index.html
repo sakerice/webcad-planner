@@ -18486,12 +18486,19 @@ var JISDRAW=(function(){
   function escSvgText(s){
     return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
-  // 当該階の1つ上の階に何か配置済みなら「上階が存在する」とみなす(stairGroupTotalRiseM:11162-11164と同じ判定)。
+  // 屋根(roof)は最上階の1つ上のフロア番号に配置される設計であり、また外構・バルコニー等は
+  // 「居室」ではないため、これらのアイテムだけがfloor+1にあっても「上階が存在する」とはみなさない
+  // (既存のisGroundLevelItemType/isContextExteriorItemTypeによる外構判定と一貫させる。
+  //  stairGroupTotalRiseM内のhasUpper:11228-11230は階高計算用の別判定でJISDRAW外のため変更しない)。
+  function isRoofOrOutdoorOnlyItemType(t){
+    return t==='roof' || t==='balcony' || isGroundLevelItemType(t) || isContextExteriorItemType(t);
+  }
+  // 当該階の1つ上の階に居室性のある壁・部屋・アイテムが配置済みなら「上階が存在する」とみなす。
   function floorHasUpper(floor){
     var nf=(floor||1)+1;
     return DATA.walls.some(function(w){return (w.floor||1)===nf;}) ||
            DATA.rooms.some(function(r){return (r.floor||1)===nf;}) ||
-           DATA.items.some(function(i){return (i.floor||1)===nf;});
+           DATA.items.some(function(i){return (i.floor||1)===nf && !isRoofOrOutdoorOnlyItemType(i.type);});
   }
 
   // 直階段: 外形+等間隔の段板線(段数はgetStairStepCount:11206、2D/3Dと同じ関数)+中央の昇り矢印+UP/DNラベル。
@@ -18573,28 +18580,74 @@ var JISDRAW=(function(){
     out+=itemGroupClose();
     return out;
   }
+  // FMP_ITEMS(住設アセットパネル)のcategoryをkitchen/bath/toilet/sinkの4分類へ正規化する。
+  // legacy type('kitchen'/'bath'/'toilet'/'sink')はそのまま扱い、現行UIの'fmp-*'型はカタログの
+  // category(実測値。バスルーム/シャワー/トイレ/洗面台/キッチン収納/キッチン・シンク/キッチン・コンロ/冷蔵庫)
+  // から分類する(getLockFmpItem:4252-4254と同じfmpId優先の解決順序)。
+  // 冷蔵庫や可動家具(group:'家具')等、分類不能なものはnullを返し呼び出し側でスキップする。
+  function fmpFixtureKind(it){
+    if(!it || !it.type) return null;
+    var fmp=getFmpItem(it.fmpId||it.type) || getFmpItem(bestFmpType(it.type));
+    if(!fmp || fmp.group!=='住設') return null;
+    var cat=fmp.category;
+    if(cat==='トイレ') return 'toilet';
+    if(cat==='バスルーム' || cat==='シャワー') return 'bath';
+    if(cat==='洗面台') return 'sink';
+    if(cat==='キッチン収納' || cat==='キッチン/シンク' || cat==='キッチン/コンロ') return 'kitchen';
+    return null; // 冷蔵庫等、平面記号を持たない住設は対象外(従来通り描かない)
+  }
+  function fixtureKind(it){
+    if(it && (it.type==='kitchen'||it.type==='bath'||it.type==='toilet'||it.type==='sink')) return it.type;
+    return fmpFixtureKind(it);
+  }
   function fixturesToSvg(floor,LW){
     var out='';
     DATA.items.filter(function(it){return (it.floor||1)===floor;}).forEach(function(it){
-      if(it.type==='kitchen') out+=kitchenSymbolSvg(it,LW);
-      else if(it.type==='bath') out+=bathSymbolSvg(it,LW);
-      else if(it.type==='toilet') out+=toiletSymbolSvg(it,LW);
-      else if(it.type==='sink') out+=sinkSymbolSvg(it,LW);
-      // それ以外(ソファ等の可動家具・車・植栽)は平面図では描かない(意図的に対象外)
+      var kind=fixtureKind(it);
+      if(kind==='kitchen') out+=kitchenSymbolSvg(it,LW);
+      else if(kind==='bath') out+=bathSymbolSvg(it,LW);
+      else if(kind==='toilet') out+=toiletSymbolSvg(it,LW);
+      else if(kind==='sink') out+=sinkSymbolSvg(it,LW);
+      // それ以外(ソファ等の可動家具・車・植栽・分類不能な住設)は平面図では描かない(意図的に対象外)
     });
     return out;
   }
 
+  // 全角文字想定の概算文字幅係数(安全側に大きめの見積り。半角混じりの文字列でも幅超過しない側に倒す)。
+  var ROOM_LABEL_CHAR_W=0.95;
+  function estRoomLabelWidth(text,fs){ return String(text).length*fs*ROOM_LABEL_CHAR_W; }
+  // 文字列がmaxWidthに収まるようfontSizeを縮小する(下限minFsまで)。1:100/1:200等、自動より粗い縮尺で
+  // LW.text(紙上3mm相当)が部屋幅を超えて破綻するのを防ぐ(下限を割ってもなお収まらない場合は
+  // 呼び出し側でラベル自体を省略する)。
+  function clampFsToWidth(text,fs,maxWidth,minFs){
+    if(estRoomLabelWidth(text,fs)<=maxWidth) return fs;
+    return Math.max(minFs,maxWidth/(String(text).length*ROOM_LABEL_CHAR_W));
+  }
   // 部屋名+畳数(1.62㎡=1帖、既存の換算例:5677と同じ)を部屋中心に2行で描く。
+  // JIS図面は縮尺を1:100/1:200等「自動」より粗く手動選択できるため、部屋の内寸(r.w)に対して
+  // フォントサイズが収まるようクランプする。下限を割ってもなお部屋名が収まらない極小の部屋では
+  // 部屋名を省略し畳数のみを表示する(判読不能な文字の重なりより情報量を減らす方を優先)。
   function roomLabelsToSvg(floor,LW){
     var out='';
     DATA.rooms.filter(function(r){return (r.floor||1)===floor;}).forEach(function(r){
       var cx=r.x+r.w/2, cy=r.y+r.d/2;
       var name=escSvgText(r.n||'部屋');
       var tatami=(r.w*r.d*1e-6/1.62).toFixed(1)+'帖';
-      var fsName=LW.text*1.15, fsArea=LW.text*0.95, gap=fsName*0.7;
-      out+='<text x="'+cx+'" y="'+(cy-gap*0.5)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsName+'" fill="#000">'+name+'</text>';
-      out+='<text x="'+cx+'" y="'+(cy+gap*1.1)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsArea+'" fill="#000">'+tatami+'</text>';
+      var maxTextW=r.w*0.9;
+      var minFs=LW.text*0.35; // これ未満は紙面上判読困難とみなす下限
+      var fsNameRaw=LW.text*1.15, fsAreaRaw=LW.text*0.95;
+      var fsName=clampFsToWidth(name,fsNameRaw,maxTextW,minFs);
+      var nameOmit=(fsName<=minFs+1e-9) && estRoomLabelWidth(name,minFs)>maxTextW;
+      if(nameOmit){
+        // 下限まで縮めても部屋名が収まらないほど狭小な部屋: 部屋名を省略し畳数のみ中央に表示
+        var fsAreaOnly=clampFsToWidth(tatami,fsAreaRaw,maxTextW,minFs);
+        out+='<text x="'+cx+'" y="'+(cy+fsAreaOnly*0.35)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsAreaOnly+'" fill="#000">'+tatami+'</text>';
+      } else {
+        var fsArea=clampFsToWidth(tatami,fsAreaRaw,maxTextW,minFs);
+        var gap=fsName*0.7;
+        out+='<text x="'+cx+'" y="'+(cy-gap*0.5)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsName+'" fill="#000">'+name+'</text>';
+        out+='<text x="'+cx+'" y="'+(cy+gap*1.1)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsArea+'" fill="#000">'+tatami+'</text>';
+      }
     });
     return out;
   }
