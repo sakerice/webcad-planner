@@ -144,6 +144,36 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .snap-shift-btn.active{background:#e94560!important;border-color:#e94560!important;color:#fff!important}
 #save-btn{position:relative}
 #save-btn.dirty::after{content:'*';position:absolute;top:2px;right:4px;font-size:10px;color:#e94560;font-weight:bold;line-height:1}
+#save-btn.saving{opacity:.72;cursor:wait}
+#save-btn.saved{color:#bfe9ff;border-color:#2a5b83}
+#collab-indicator{display:none;align-items:center;gap:5px;max-width:150px}
+#collab-indicator.show{display:inline-flex}
+#collab-dot{width:7px;height:7px;border-radius:50%;background:#9aa4b2;flex:none}
+#collab-indicator.connected #collab-dot{background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.14)}
+#collab-count{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-overlay{position:fixed;inset:0;z-index:15000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(19,30,45,.42);backdrop-filter:blur(4px)}
+.share-overlay.show{display:flex}
+.share-card{width:min(480px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(12,27,48,.28);padding:22px;color:#243247}
+.share-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:15px}
+.share-title{font-size:18px;font-weight:800;margin:0 0 4px}
+.share-copy{font-size:12px;line-height:1.6;color:#627187;margin:0}
+.share-close{border:0;background:#eef2f7;border-radius:9px;width:32px;height:32px;font-size:19px;cursor:pointer;color:#455468}
+.share-label{display:block;font-size:11px;font-weight:700;margin:13px 0 5px;color:#526176}
+.share-input{box-sizing:border-box;width:100%;border:1px solid #d5dce6;border-radius:9px;padding:10px 11px;font:inherit;color:#26364b;background:#fff}
+.share-url-row{display:flex;gap:7px;align-items:center}
+.share-url-row .share-input{min-width:0}
+.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.share-primary,.share-secondary,.share-danger{border:0;border-radius:9px;padding:10px 14px;font-weight:750;cursor:pointer;font-size:13px}
+.share-primary{background:#1769e0;color:#fff}
+.share-secondary{background:#edf3fb;color:#24507f}
+.share-danger{background:#fff0f0;color:#b4232d}
+.share-primary:disabled,.share-secondary:disabled{opacity:.5;cursor:wait}
+.share-status{margin-top:12px;padding:9px 11px;border-radius:9px;background:#f3f6fa;color:#59687c;font-size:12px;line-height:1.5}
+.share-status.error{background:#fff0f0;color:#a2242d}
+.share-people{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.share-person{background:#eaf4ff;color:#285c8e;border-radius:999px;padding:5px 9px;font-size:11px}
+.share-expiry{font-size:11px;color:#778599;margin-top:8px}
+@media(max-width:720px){#collab-indicator{display:none!important}.share-card{padding:18px}.share-url-row{align-items:stretch;flex-direction:column}}
 @media (max-width:1180px), (pointer:coarse){
   .mobile-only{display:block}
 }
@@ -200,6 +230,32 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #unity-render-fab.show{display:block}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
+/* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
+.jis-overlay{position:fixed;inset:0;z-index:15000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:12px}
+.jis-dialog{width:100%;height:100%;max-width:1400px;max-height:96vh;background:#fff;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,0.35)}
+.jis-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#16213e;color:#fff}
+.jis-title{font-size:14px;font-weight:700;margin-right:auto}
+.jis-toolbar select{padding:6px 8px;border-radius:6px;border:1px solid #2a4080;background:#0f172a;color:#fff;font-size:12px}
+.jis-toolbar .pbtn{width:auto;padding:7px 12px;margin-top:0}
+.jis-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer;font-size:16px}
+.jis-body{flex:1;display:flex;overflow:hidden;flex-wrap:wrap}
+#jis-sheet-list{width:160px;flex:0 0 160px;overflow-y:auto;background:#f5f6f8;border-right:1px solid #ddd;padding:8px}
+#jis-preview{flex:1;min-width:240px;overflow:auto;background:#888;display:flex;flex-direction:column;align-items:center;padding:24px}
+.jis-paper-sheet{background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.3);width:100%;max-width:900px}
+.jis-paper-sheet svg{display:block;width:100%;height:auto}
+.jis-sheet-group-title{font-size:11px;font-weight:700;color:#888;margin:10px 4px 4px}
+.jis-sheet-btn{display:block;width:100%;text-align:left;padding:8px 10px;margin-bottom:4px;border:1px solid transparent;border-radius:5px;background:#fff;cursor:pointer;font-size:12px;color:#222;font-family:inherit}
+.jis-sheet-btn:hover{background:#eef}
+.jis-sheet-btn.active{border-color:#e94560;background:#ffe9ec;color:#e94560;font-weight:700}
+.jis-empty{padding:20px;color:#fff;text-align:center;font-size:13px;max-width:360px;margin:auto}
+.jis-status{display:none;padding:8px 14px;font-size:12px;line-height:1.5;background:#fff3cd;color:#7a5c00;border-bottom:1px solid #e2c98a}
+.jis-status.error{background:#fdecea;color:#a2242d;border-bottom-color:#f3b7ba}
+@media (max-width:640px){
+  .jis-body{flex-direction:column}
+  #jis-sheet-list{width:100%;flex:0 0 auto;max-height:120px;border-right:none;border-bottom:1px solid #ddd;display:flex;flex-wrap:wrap;gap:6px}
+  .jis-sheet-group-title{width:100%;margin:4px 4px 0}
+  .jis-sheet-btn{width:auto;flex:1 1 auto;margin-bottom:0}
+}
 #app-loading{
   display:none;
   position:fixed;
@@ -2743,6 +2799,60 @@ input[type="color"]::-moz-color-swatch{
   }
 }
 
+/* ── Mobile property sheet header containment ─────
+   The final card treatment gives panels 20px padding. The collapsed property
+   sheet is only 52px tall, so that shared padding pushed its header below the
+   clipping edge on phones. Keep the sheet itself flush and let the header own
+   its touch-friendly inset instead. */
+@media (max-width:768px){
+  #props{
+    padding:0!important;
+    box-sizing:border-box!important;
+  }
+  #mob-prop-hdr{
+    width:100%;
+    height:52px!important;
+    min-height:52px;
+    padding:0 14px!important;
+    box-sizing:border-box;
+    gap:8px;
+  }
+  .mob-prop-left{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .mob-prop-info{
+    min-width:0;
+  }
+  .mob-prop-name,
+  .mob-prop-size{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mob-prop-actions{
+    gap:6px;
+  }
+}
+@media (max-width:380px){
+  #mob-prop-hdr{
+    padding:0 10px!important;
+  }
+  .mob-prop-icon{
+    font-size:18px;
+  }
+  .mob-prop-chevron{
+    padding:6px 7px;
+    font-size:11px;
+  }
+  .mob-prop-close-btn{
+    width:32px;
+    height:32px;
+  }
+}
+
 /* ── フォーカスリングの全体統一 ──────────────────
    アプリ内のあらゆるボタン/リンクボタンが、これまでブラウザ既定の
    フォーカスリング(重い黒/青の縁取り)にフォールバックし、フラットな
@@ -2864,6 +2974,43 @@ input[type="reset"]:focus-visible{
     height:50px;
   }
 }
+
+/* ── 外観3D: 立面方向カメラスナップ(東西南北) ─────────
+   外観3D(ST.view==='3d-ext')表示中のみ表示。右上の#unity-render-fabとは
+   反対の右下に置き、右下常設の#app-version(bottom:10px,高さ30px)の
+   上に十分な間隔(bottom:54px)を空けて重ならないようにする。 */
+#elev-snap-fab{
+  position:absolute;
+  right:14px;
+  bottom:54px;
+  z-index:250;
+  display:none;
+  gap:6px;
+  padding:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 4px 12px rgba(24,20,18,.13);
+}
+#elev-snap-fab.show{display:flex}
+.elev-snap-btn{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.96);
+  color:var(--hp-text);
+  font-size:13px;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  touch-action:manipulation;
+  box-shadow:inset 0 0 0 1px rgba(31,27,24,.08);
+}
+.elev-snap-btn:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+.elev-snap-btn:active{background:var(--hp-primary);color:#fff}
+@media (max-width:768px){
+  #elev-snap-fab{right:8px;bottom:8px}
+}
 </style>
 </head>
 <body>
@@ -2871,6 +3018,27 @@ input[type="reset"]:focus-visible{
   <div class="app-loading-pill" role="status">
     <span class="app-loading-spinner" aria-hidden="true"></span>
     <span id="app-loading-text">読み込み中</span>
+  </div>
+</div>
+<div id="share-overlay" class="share-overlay" role="dialog" aria-modal="true" aria-labelledby="share-title" onclick="closeShareDialogOnBackdrop(event)">
+  <div class="share-card">
+    <div class="share-head">
+      <div><h2 id="share-title" class="share-title">共同編集</h2><p class="share-copy">同じURLを開いたメンバーと、壁・部屋・家具の変更をリアルタイムで共有します。</p></div>
+      <button class="share-close" type="button" aria-label="閉じる" onclick="closeShareDialog()">×</button>
+    </div>
+    <label class="share-label" for="share-name">表示名</label>
+    <input id="share-name" class="share-input" maxlength="32" placeholder="例：田中" onchange="saveSharedDisplayName(this.value)">
+    <div id="share-connected-section" style="display:none">
+      <label class="share-label" for="share-url">共同編集URL</label>
+      <div class="share-url-row"><input id="share-url" class="share-input" readonly><button class="share-secondary" type="button" onclick="copySharedUrl()">URLをコピー</button></div>
+      <div class="share-label">参加中</div><div id="share-people" class="share-people"></div>
+      <div id="share-expiry" class="share-expiry"></div>
+    </div>
+    <div id="share-status" class="share-status">共同編集を開始すると、現在のプランがクラウドへ保存されます。</div>
+    <div class="share-actions">
+      <button id="share-create-btn" class="share-primary" type="button" onclick="createSharedRoom()">共同編集を開始</button>
+      <button id="share-leave-btn" class="share-danger" type="button" style="display:none" onclick="leaveSharedRoom()">共同編集を終了</button>
+    </div>
   </div>
 </div>
 <div id="toolbar">
@@ -2900,7 +3068,10 @@ input[type="reset"]:focus-visible{
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
+  <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
+  <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+  <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
@@ -2941,10 +3112,11 @@ input[type="reset"]:focus-visible{
       <div class="mobile-only mobile-data-tools">
         <div class="mobile-data-title">データ管理</div>
         <div class="mobile-data-grid">
-          <button class="pbtn sec" type="button" onclick="savePlanToStorage()">💾 ブラウザ保存</button>
+          <button class="pbtn sec" type="button" onclick="savePlanToStorage()">💾 保存</button>
           <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()">↥ 保存読込</button>
           <button class="pbtn sec" type="button" onclick="exportPlan()">↓ JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()">📂 JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="openShareDialog()">🔗 共同編集</button>
         </div>
       </div>
     </div>
@@ -3056,6 +3228,12 @@ input[type="reset"]:focus-visible{
         </div>
       </div>
       <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+      <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('s')" title="南立面から見る">南</button>
+        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('w')" title="西立面から見る">西</button>
+      </div>
     </div>
     <div id="int-ctrl">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">🚶 内観視点</div>
@@ -3175,6 +3353,33 @@ input[type="reset"]:focus-visible{
       <a id="ai-dl-segmentation" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">セグメント画像保存</a>
     </div>
     <div class="unity-render-cmd">使い方: 一括DLした画像3枚と「AIへの指示文」を、利用したい画像生成AIにまとめて渡してください。JSONは検証用の控えなので、通常はAIへ全文投入しなくて大丈夫です。</div>
+  </div>
+</div>
+
+<div id="jis-drawing-overlay" class="jis-overlay" style="display:none">
+  <div class="jis-dialog">
+    <div class="jis-toolbar">
+      <span class="jis-title">JIS図面出力</span>
+      <select id="jis-scale" onchange="jisRerender()">
+        <option value="auto">縮尺: 自動</option>
+        <option value="50">1:50</option>
+        <option value="100">1:100</option>
+        <option value="200">1:200</option>
+      </select>
+      <select id="jis-paper" onchange="jisRerender()">
+        <option value="a3">A3 横</option>
+        <option value="a4">A4 横</option>
+      </select>
+      <button class="pbtn" onclick="jisPrint()">🖨 印刷/PDF</button>
+      <button class="pbtn sec" onclick="jisDownloadSvg()">⬇ SVG</button>
+      <button class="pbtn sec" onclick="jisDownloadPng()">⬇ PNG</button>
+      <button class="jis-close" onclick="closeJisDrawingDialog()">✕</button>
+    </div>
+    <div id="jis-status" class="jis-status"></div>
+    <div class="jis-body">
+      <div id="jis-sheet-list"></div>
+      <div id="jis-preview"></div>
+    </div>
   </div>
 </div>
 
@@ -4077,6 +4282,7 @@ function getLockCategoryObjects(category){
 function setLockOnObjects(list,locked){
   var changed=list.filter(function(obj){return isObjectLocked(obj)!==!!locked;});
   if(!changed.length){ syncLockBatchUi(); return; }
+  sharedMarkObjectsDirty(changed);
   saveState();
   changed.forEach(function(obj){ setObjectLocked(obj,locked); });
   if(ST.selected && changed.indexOf(ST.selected)>=0) updateProps();
@@ -4153,6 +4359,7 @@ function clearAll3DHidden(){
   DATA.items.forEach(function(it){ if(it.hidden3D){ delete it.hidden3D; n++; } });
   DATA.rooms.forEach(function(r){ if(r.hidden3D){ delete r.hidden3D; n++; } });
   if(!n){ alert('3D非表示・表示上書きの設定はありません。'); return; }
+  sharedForceFullSync();
   saveState();
   draw2d(); if(ren) rebuild3D();
   if(ST.selected) updateProps();
@@ -5012,11 +5219,15 @@ function markDirty(){
   DIRTY=true;
   var btn=document.getElementById('save-btn');
   if(btn) btn.classList.add('dirty');
+  renderSaveButtonState();
+  queueSharedSync(700);
+  queueSharedLocalAutoSave();
 }
 function clearDirty(){
   DIRTY=false;
   var btn=document.getElementById('save-btn');
   if(btn) btn.classList.remove('dirty');
+  renderSaveButtonState();
 }
 var CLIPBOARD = null;
 function serializeDataSnapshot(){
@@ -5031,6 +5242,7 @@ function clearEditHistory(){
   REDO_HISTORY.length=0;
 }
 function saveState(){
+  sharedRememberEditTargets();
   pushHistorySnapshot(HISTORY,serializeDataSnapshot());
   REDO_HISTORY.length=0;
   markDirty();
@@ -7634,6 +7846,26 @@ function fitCameraToScene(){
   orbit.update();
 }
 
+// 立面図出力方向からの見え方を即確認するためのカメラショートカット。
+// 正投影にはせず(パース感はピンチで調整する運用)、以後の操作は通常のOrbitControls。
+function snapCameraToElevation(dir){
+  if(!sc3||!camExt||!orbit) return;
+  var box=new THREE.Box3();
+  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
+  if(box.isEmpty()) return;
+  var center=box.getCenter(new THREE.Vector3());
+  var size=box.getSize(new THREE.Vector3());
+  var span=Math.max(size.x,size.z,4);
+  var fov=camExt.fov*Math.PI/180;
+  var dist=(span/2)/Math.tan(fov/2)*1.25;
+  // 3D座標: x=東, z=南(2Dのy), y=高さ
+  var v={e:[1,0],w:[-1,0],s:[0,1],n:[0,-1]}[dir];
+  camExt.position.set(center.x+v[0]*dist, center.y, center.z+v[1]*dist);
+  orbit.target.copy(center);
+  orbit.update();
+  invalidate3D();
+}
+
 function build3D(){
   if(!sc3) return;
   // 2D編集中は3Dキャンバスが非表示。ここで裏のシーンを作り直さず、
@@ -8072,6 +8304,7 @@ function finish3DGizmoDrag(){
   draw2d();
   if(!usedPartial) rebuild3D();
   else if(typeof invalidate3D==='function') invalidate3D();
+  queueSharedSync(80);
 }
 
 function getSelectionBox3D(ref){
@@ -13845,6 +14078,15 @@ function getWalkRouteById(id){
 function isWalkthroughRouteActive(it){
   return !!(WALKTHROUGH && it && WALKTHROUGH.routeId===it.id);
 }
+// 立面方向スナップボタンの表示制御: 外観3D表示中のみ、かつルート
+// ウォークスルー再生中(カメラを毎フレーム自動制御)は隠す。
+function updateElevSnapFabVisibility(){
+  var el=document.getElementById('elev-snap-fab');
+  if(!el) return;
+  var show=ST.view==='3d-ext' && !WALKTHROUGH;
+  el.classList.toggle('show', show);
+  if(show) positionElevSnapFab(); // 表示時にレイアウト実測して底上げ量を確定
+}
 function beginWalkthrough(it){
   if(!it || it.type!=='walk-route' || !camExt) return false;
   var ep=getWalkRouteEndpoints(it);
@@ -13869,6 +14111,7 @@ function beginWalkthrough(it){
   remove3DSelectionHelpers();
   updateWalkthroughCamera(performance.now());
   updateProps();
+  updateElevSnapFabVisibility(); // 再生中はカメラを自動制御するためスナップボタンを隠す
   return true;
 }
 function playSelectedWalkthroughRoute(){
@@ -13897,6 +14140,7 @@ function stopWalkthrough(){
   add3DSelectionMarker();
   add3DMoveGizmo();
   updateProps();
+  updateElevSnapFabVisibility(); // 外観3Dに戻ればスナップボタンを再表示
   if(typeof invalidate3D==='function') invalidate3D();
 }
 function updateWalkthroughCamera(now){
@@ -13933,6 +14177,7 @@ function updateWalkthroughCamera(now){
     add3DSelectionMarker();
     add3DMoveGizmo();
     updateProps();
+    updateElevSnapFabVisibility(); // 自然終了時もスナップボタンを再表示
   }
   return true;
 }
@@ -14240,6 +14485,26 @@ function positionWalkHud(){
   if(ex){ ex.style.top=topSafe+'px'; ex.style.left=leftSafe+'px'; }
   if(dp) dp.style.bottom=botSafe+'px';
 }
+// 立面方向スナップボタン: モバイルではフロート表示の#bottom-navが、デスクトップ
+// では常設の#app-version/#statusbarが右下に重なるため、positionWalkHudと同様に
+// 実測して必要なだけ底上げする(CSSの固定値だけだと画面幅次第で重なる)。
+function positionElevSnapFab(){
+  var el=document.getElementById('elev-snap-fab');
+  var wrap=document.getElementById('c3d-wrap');
+  if(!el||!wrap) return;
+  var wr=wrap.getBoundingClientRect();
+  function overlapBottom(id){
+    var e=document.getElementById(id);
+    if(!e) return 0;
+    var r=e.getBoundingClientRect();
+    if(r.height<=0||r.top>=wr.bottom) return 0;
+    return Math.max(0,wr.bottom-r.top);
+  }
+  var gap=window.innerWidth<=768?8:14;
+  var botSafe=Math.max(gap,overlapBottom('bottom-nav')+gap,overlapBottom('app-version')+gap,overlapBottom('statusbar')+gap);
+  el.style.bottom=botSafe+'px';
+}
+window.addEventListener('resize',positionElevSnapFab);
 function initWalkHud(){
   var mm=document.getElementById('walk-minimap');
   if(mm&&!mm._wired){
@@ -14611,6 +14876,7 @@ function setView(v){
   document.getElementById('c3d-wrap').style.display=(v==='2d'?'none':'block');
   document.getElementById('help-box').style.display=(v==='2d'?'block':'none');
   document.getElementById('wasd').style.display='none';  // orbit mode for interior
+  updateElevSnapFabVisibility(); // 立面方向スナップボタン: 外観3D表示中(ルート再生中を除く)のみ
   var modeNames={'2d':'平面図','3d-ext':'外観3D','3d-int':'内観3D','3d-walk':'ウォークスルー'};
   document.getElementById('st-mode').textContent='モード:'+(modeNames[v]||v);
   if(v!=='2d'){
@@ -14669,6 +14935,7 @@ function setView(v){
       if(composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
     }
     build3D();
+    if(typeof SHARED!=='undefined') SHARED.needs3DRebuild=false;
     // 保存済み/直前の外観カメラがあれば復元、無ければ全体表示
     if(v==='3d-ext'){
       if(ST._camStash&&ST._camStash.ext) applyStashedCamera(ST._camStash.ext);
@@ -14970,6 +15237,7 @@ canvas.addEventListener('mouseup',function(){
   DRAG.active=false; ST._snapState=null;
   if(wasDragging) updateProps();
   if(ren)build3D();
+  if(wasDragging) queueSharedSync(80);
 });
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -15694,7 +15962,7 @@ function restoreHistorySnapshot(snapshot){
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');
-  markDirty();
+  sharedForceFullSync();markDirty();
   draw2d();if(ren)rebuild3D();
 }
 
@@ -15737,8 +16005,8 @@ window.addEventListener('keydown', function(e){
   }
   if(e.key === 'Backspace' || e.key === 'Delete'){ if(ST.selected){ e.preventDefault(); delSel(); } }
   if(e.key.toLowerCase() === 'r') { ST.placingRot = (ST.placingRot + 90) % 360; draw2d(); }
-  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
-  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
 });
 window.addEventListener('keyup', function(e){
   if(e.key==='Shift'){ST.shiftKey=false; ST.ctrlKey=false; draw2d();}
@@ -15837,11 +16105,35 @@ async function savePlanToStorage(){
   ensureRoofAppearance();
   syncExteriorWallSettings();
   captureViewState();
+  setSaveButtonBusy(true);
+  var browserSaved=false;
   try{
     await StorageAdapter.save(DATA);
+    browserSaved=true;
+    if(SHARED.roomId){
+      await flushSharedChanges();
+      var response=await fetch('/api/rooms/'+SHARED.roomId+'/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:sharedClientId(),baseVersion:SHARED.version,plan:DATA},function(k,v){return k==='_texObj'?undefined:v;})});
+      if(!response.ok) throw new Error(response.status===413?'プランが10MBを超えています。':'クラウド保存に失敗しました（'+response.status+'）');
+      var result=await response.json();
+      SHARED.version=Math.max(SHARED.version,Number(result.version||0));
+      SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;
+      SHARED.savedAt=result.savedAt||Date.now();
+      SHARED.baseline=sharedBaselineFrom(DATA);
+      sharedResetDirtyTracking();
+      sharedSetStatus('ブラウザとクラウドへ保存しました。');
+      renderSharedUi();
+    }
     clearDirty();
   }catch(e){
-    alert('ブラウザ保存に失敗しました: '+(e&&e.message?e.message:e));
+    var message=(e&&e.message?e.message:e);
+    if(browserSaved&&SHARED.roomId){
+      sharedSetStatus('ブラウザには保存しましたが、クラウド保存に失敗しました。',true);
+      alert('ブラウザには保存しましたが、クラウド保存に失敗しました: '+message);
+    }else{
+      alert('保存に失敗しました: '+message);
+    }
+  }finally{
+    setSaveButtonBusy(false);
   }
 }
 async function loadPlanFromStorage(){
@@ -15896,6 +16188,250 @@ async function checkStorageOnInit(){
       if(ren) rebuild3D();
     }
   }
+}
+
+// ─── URL共同編集 ───────────────────────────────
+// プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
+// 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
+var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0};
+var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail'];
+function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
+function sharedFastSignature(value){
+  return JSON.stringify(value,function(k,v){
+    if(k==='_texObj')return undefined;
+    if(typeof v==='string'&&v.length>2048)return '[large:'+v.length+':'+v.slice(0,24)+':'+v.slice(-24)+']';
+    return v;
+  });
+}
+function renderSaveButtonState(){
+  var btn=document.getElementById('save-btn');if(!btn)return;
+  btn.disabled=!!SHARED.saveBusy;btn.classList.toggle('saving',!!SHARED.saveBusy);btn.classList.toggle('saved',!!SHARED.roomId&&!DIRTY&&!SHARED.saveBusy);
+  if(SHARED.saveBusy){btn.textContent='↻ 保存中';btn.title='ブラウザとクラウドへ保存しています';return;}
+  if(SHARED.roomId){
+    btn.textContent=DIRTY?'💾 今すぐ保存':'✓ 保存済み';
+    btn.title=DIRTY?'未保存の変更をブラウザとクラウドへ保存します':(SHARED.savedAt?'最終保存: '+new Date(SHARED.savedAt).toLocaleString('ja-JP'):'ブラウザとクラウドへ保存済み');
+  }else{btn.textContent='💾 保存';btn.title='このブラウザへ保存します';}
+}
+function setSaveButtonBusy(busy){SHARED.saveBusy=!!busy;renderSaveButtonState();}
+function sharedCollectionNameFor(obj){
+  if(!obj)return null;
+  if(DATA.walls&&DATA.walls.indexOf(obj)>=0)return 'walls';
+  if(DATA.rooms&&DATA.rooms.indexOf(obj)>=0)return 'rooms';
+  if(DATA.items&&DATA.items.indexOf(obj)>=0)return 'items';
+  return null;
+}
+function sharedMarkObjectsDirty(list){
+  (list||[]).forEach(function(obj){var name=sharedCollectionNameFor(obj);if(name&&obj&&obj.id!==undefined&&obj.id!==null)SHARED.dirtyIds[name][String(obj.id)]=true;});
+}
+function sharedRememberEditTargets(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  var targets=[];
+  if(ST.selected)targets.push(ST.selected);
+  if(Array.isArray(ST.multiSelected))targets=targets.concat(ST.multiSelected);
+  if(targets.length)sharedMarkObjectsDirty(targets);else SHARED.forceScan=true;
+}
+function sharedForceFullSync(){if(SHARED.roomId&&!SHARED.applying)SHARED.forceScan=true;}
+function sharedResetDirtyTracking(){SHARED.forceScan=false;SHARED.dirtyIds={walls:{},items:{},rooms:{}};SHARED.pending=false;}
+function sharedHasTrackedChanges(){return SHARED.forceScan||Object.keys(SHARED.dirtyIds.walls).length||Object.keys(SHARED.dirtyIds.items).length||Object.keys(SHARED.dirtyIds.rooms).length;}
+function sharedClientId(){
+  if(SHARED.clientId) return SHARED.clientId;
+  try{SHARED.clientId=sessionStorage.getItem('webcad-collab-client')||'';}catch(e){}
+  if(!SHARED.clientId){
+    var bytes=new Uint8Array(12);crypto.getRandomValues(bytes);
+    SHARED.clientId=Array.from(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');
+    try{sessionStorage.setItem('webcad-collab-client',SHARED.clientId);}catch(e){}
+  }
+  return SHARED.clientId;
+}
+function sharedDisplayName(){
+  var value='';try{value=localStorage.getItem('webcad-collab-name')||'';}catch(e){}
+  return value.trim()||'ゲスト';
+}
+function saveSharedDisplayName(value){try{localStorage.setItem('webcad-collab-name',(value||'').trim().slice(0,32));}catch(e){} if(SHARED.roomId&&SHARED.socket){connectSharedSocket();}}
+function sharedRoomFromLocation(){
+  var hash=(location.hash||'').replace(/^#/,'');
+  var id=new URLSearchParams(hash).get('room')||new URLSearchParams(location.search||'').get('room');
+  return /^[A-Za-z0-9_-]{22}$/.test(id||'')?id:null;
+}
+function sharedUrl(){
+  var url=new URL(location.href);url.searchParams.delete('room');url.hash=SHARED.roomId?'room='+SHARED.roomId:'';return url.toString();
+}
+function sharedSetStatus(message,isError){
+  var el=document.getElementById('share-status');if(!el)return;el.textContent=message;el.classList.toggle('error',!!isError);
+}
+function sharedFormatExpiry(){
+  if(!SHARED.expiresAt)return '';
+  return '最終更新がなければ '+new Date(SHARED.expiresAt).toLocaleString('ja-JP')+' に削除されます（更新ごとに60日延長）';
+}
+function renderSharedUi(){
+  var connected=!!SHARED.roomId;
+  var section=document.getElementById('share-connected-section');if(section)section.style.display=connected?'block':'none';
+  var create=document.getElementById('share-create-btn');if(create)create.style.display=connected?'none':'inline-block';
+  var leave=document.getElementById('share-leave-btn');if(leave)leave.style.display=connected?'inline-block':'none';
+  var url=document.getElementById('share-url');if(url)url.value=connected?sharedUrl():'';
+  var expiry=document.getElementById('share-expiry');if(expiry)expiry.textContent=sharedFormatExpiry();
+  var people=document.getElementById('share-people');
+  if(people)people.innerHTML=(SHARED.people.length?SHARED.people:[{name:sharedDisplayName()}]).map(function(p){return '<span class="share-person">'+escHtml(p.name||'ゲスト')+'</span>';}).join('');
+  var indicator=document.getElementById('collab-indicator');
+  if(indicator){indicator.classList.toggle('show',connected);indicator.classList.toggle('connected',!!(SHARED.socket&&SHARED.socket.readyState===1));}
+  var count=document.getElementById('collab-count');if(count)count.textContent=(SHARED.people.length||1)+'人で編集中';
+  renderSaveButtonState();
+}
+function openShareDialog(){
+  var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.add('show');
+  var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
+  renderSharedUi();
+}
+function closeShareDialog(){var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.remove('show');}
+function closeShareDialogOnBackdrop(e){if(e.target&&e.target.id==='share-overlay')closeShareDialog();}
+async function copySharedUrl(){
+  var value=sharedUrl();
+  try{await navigator.clipboard.writeText(value);sharedSetStatus('共同編集URLをコピーしました。');}
+  catch(e){var input=document.getElementById('share-url');if(input){input.select();document.execCommand('copy');sharedSetStatus('共同編集URLをコピーしました。');}}
+}
+function sharedBaselineFrom(plan){
+  var base={collections:{},fields:{}};
+  ['walls','items','rooms'].forEach(function(name){
+    base.collections[name]={};(plan[name]||[]).forEach(function(item){base.collections[name][String(item.id)]=sharedFastSignature(item);});
+  });
+  SHARED_FIELDS.forEach(function(key){base.fields[key]=sharedFastSignature(plan[key]===undefined?null:plan[key]);});
+  return base;
+}
+function buildSharedPatch(plan,baseline){
+  var patch={collections:{},fields:{}};var changed=false;
+  ['walls','items','rooms'].forEach(function(name){
+    var before=(baseline&&baseline.collections&&baseline.collections[name])||{};var now={};var byId={};var upserts=[];
+    (plan[name]||[]).forEach(function(item){var id=String(item.id);now[id]=true;byId[id]=item;});
+    var candidates={};Object.keys(SHARED.dirtyIds[name]||{}).forEach(function(id){candidates[id]=true;});
+    Object.keys(now).forEach(function(id){if(before[id]===undefined||SHARED.forceScan)candidates[id]=true;});
+    Object.keys(candidates).forEach(function(id){var item=byId[id];if(item&&before[id]!==sharedFastSignature(item))upserts.push(sharedClone(item));});
+    var removes=Object.keys(before).filter(function(id){return now[id]===undefined;});
+    if(upserts.length||removes.length){patch.collections[name]={upserts:upserts,removes:removes};changed=true;}
+  });
+  SHARED_FIELDS.forEach(function(key){var encoded=sharedFastSignature(plan[key]===undefined?null:plan[key]);if(!baseline||baseline.fields[key]!==encoded){patch.fields[key]=sharedClone(plan[key]===undefined?null:plan[key]);changed=true;}});
+  return changed?patch:null;
+}
+function markDirtyUiOnly(){DIRTY=true;var btn=document.getElementById('save-btn');if(btn)btn.classList.add('dirty');renderSaveButtonState();queueSharedLocalAutoSave();}
+function sharedSchedule3DRefresh(){
+  SHARED.needs3DRebuild=true;
+  if(ST.view==='2d')return;
+  clearTimeout(SHARED.rebuildTimer);
+  SHARED.rebuildTimer=setTimeout(function(){if(SHARED.needs3DRebuild&&ren){SHARED.needs3DRebuild=false;rebuild3D();}},500);
+}
+function applySharedPatch(patch,isOwn){
+  if(!patch)return;SHARED.applying=true;
+  var selectedName=sharedCollectionNameFor(ST.selected),selectedId=ST.selected&&ST.selected.id!==undefined?String(ST.selected.id):null;
+  try{
+    ['walls','items','rooms'].forEach(function(name){
+      if(!Array.isArray(DATA[name]))DATA[name]=[];var change=patch.collections&&patch.collections[name];if(!change)return;
+      var removed={};(change.removes||[]).forEach(function(id){removed[String(id)]=true;});var upserts={};(change.upserts||[]).forEach(function(item){if(item)upserts[String(item.id)]=sharedClone(item);});
+      DATA[name]=DATA[name].filter(function(item){return !removed[String(item&&item.id)];}).map(function(item){return upserts[String(item&&item.id)]||item;});
+      Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
+    });
+    if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
+    ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
+    clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
+    if(!isOwn)sharedSchedule3DRefresh();
+    SHARED.baseline=sharedBaselineFrom(DATA);if(!isOwn)markDirtyUiOnly();
+  }finally{SHARED.applying=false;}
+}
+function queueSharedSync(delay){
+  if(!SHARED.roomId||SHARED.applying)return;
+  clearTimeout(SHARED.timer);SHARED.timer=setTimeout(function(){SHARED.timer=null;sharedSyncNow();},delay===undefined?500:delay);
+}
+async function sharedSyncNow(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  if(SHARED.sending){SHARED.pending=true;return SHARED.sendPromise;}
+  var patch=buildSharedPatch(DATA,SHARED.baseline);if(!patch)return;
+  sharedResetDirtyTracking();SHARED.sending=true;
+  SHARED.sendPromise=(async function(){try{
+    var response=await fetch('/api/rooms/'+SHARED.roomId+'/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'patch',clientId:sharedClientId(),baseVersion:SHARED.version,patch:patch})});
+    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'同期できませんでした（'+response.status+'）');
+    var result=await response.json();SHARED.expiresAt=result.expiresAt||SHARED.expiresAt;SHARED.baseline=sharedBaselineFrom(DATA);sharedSetStatus('変更を同期しました。操作が止まると自動保存します。');renderSharedUi();
+  }catch(e){SHARED.forceScan=true;sharedSetStatus(e.message||'共同編集の同期に失敗しました。',true);SHARED.pending=true;}
+  finally{SHARED.sending=false;if(SHARED.pending||sharedHasTrackedChanges()){SHARED.pending=false;queueSharedSync(600);}}})();
+  return SHARED.sendPromise;
+}
+async function flushSharedChanges(){
+  clearTimeout(SHARED.timer);SHARED.timer=null;
+  if(SHARED.sending)await SHARED.sendPromise;
+  await sharedSyncNow();
+  if(SHARED.sending)await SHARED.sendPromise;
+  if(sharedHasTrackedChanges())await sharedSyncNow();
+}
+function queueSharedLocalAutoSave(){
+  if(!SHARED.roomId||SHARED.applying)return;
+  clearTimeout(SHARED.localAutoTimer);
+  SHARED.localAutoTimer=setTimeout(function(){SHARED.localAutoTimer=null;sharedAutoSaveLocal();},10000);
+}
+async function sharedAutoSaveLocal(){
+  if(!SHARED.roomId)return;
+  try{await StorageAdapter.save(DATA);}catch(e){sharedSetStatus('ブラウザへの自動保存に失敗しました。保存ボタンを押してください。',true);}
+}
+function closeSharedSocket(){
+  clearTimeout(SHARED.reconnectTimer);SHARED.reconnectTimer=null;
+  if(SHARED.socket){var socket=SHARED.socket;SHARED.socket=null;try{socket.close(1000,'leave');}catch(e){}}renderSharedUi();
+}
+function connectSharedSocket(){
+  if(!SHARED.roomId)return;closeSharedSocket();
+  var protocol=location.protocol==='https:'?'wss:':'ws:';var socket=new WebSocket(protocol+'//'+location.host+'/api/rooms/'+SHARED.roomId+'/socket?client='+encodeURIComponent(sharedClientId())+'&name='+encodeURIComponent(sharedDisplayName()));SHARED.socket=socket;
+  socket.onopen=function(){sharedSetStatus('共同編集に接続中です。変更は自動保存されます。');renderSharedUi();};
+  socket.onmessage=function(event){
+    var message;try{message=JSON.parse(event.data);}catch(e){return;}
+    if(message.type==='welcome'){
+      SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      SHARED.savedAt=message.savedAt||SHARED.savedAt;
+      if(Number(message.version||0)>SHARED.version+1)refreshSharedPlan();
+      else SHARED.version=Math.max(SHARED.version,Number(message.version||0));
+      sharedSetStatus(message.checkpointPending?'変更を同期済みです。操作が止まると自動保存します。':'共同編集に接続しました。自動保存済みです。');renderSharedUi();return;
+    }
+    if(message.type==='presence'){SHARED.people=message.people||[];renderSharedUi();return;}
+    if(message.type==='patch'&&Number(message.version||0)>SHARED.version){
+      SHARED.version=Number(message.version);SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      var own=message.clientId===sharedClientId();if(own)SHARED.lastLocalVersion=SHARED.version;
+      applySharedPatch(message.patch,own);renderSharedUi();return;
+    }
+    if(message.type==='checkpoint'){
+      SHARED.version=Math.max(SHARED.version,Number(message.version||0));SHARED.savedAt=message.savedAt||SHARED.savedAt;SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      sharedAutoSaveLocal().then(function(){if(!sharedHasTrackedChanges()&&!SHARED.sending&&!SHARED.timer){clearDirty();sharedSetStatus('自動保存しました。');renderSharedUi();}});return;
+    }
+    if(message.type==='snapshot'&&Number(message.version||0)>=SHARED.version){
+      SHARED.version=Number(message.version);SHARED.savedAt=message.savedAt||SHARED.savedAt;SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
+      if(message.clientId!==sharedClientId())refreshSharedPlan();else{clearDirty();sharedSetStatus('ブラウザとクラウドへ保存しました。');renderSharedUi();}return;
+    }
+  };
+  socket.onclose=function(){if(SHARED.socket!==socket)return;SHARED.socket=null;renderSharedUi();if(SHARED.roomId)SHARED.reconnectTimer=setTimeout(connectSharedSocket,1800);};
+  socket.onerror=function(){renderSharedUi();};
+}
+async function fetchSharedPlan(roomId){
+  var response=await fetch('/api/rooms/'+roomId,{cache:'no-store'});
+  if(!response.ok)throw new Error(response.status===410?'この共同編集プランは期限切れです。':'共同編集プランを読み込めませんでした。');
+  var plan=await response.json();return {plan:plan,version:Number(response.headers.get('x-room-version')||1),expiresAt:Number(response.headers.get('x-room-expires-at')||0),savedAt:Number(response.headers.get('x-room-saved-at')||0)};
+}
+function installSharedPlan(loaded,roomId){
+  _defaultPlanPending=false;DATA=loaded.plan;SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
+  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();connectSharedSocket();renderSharedUi();
+}
+async function refreshSharedPlan(){if(!SHARED.roomId)return;try{installSharedPlan(await fetchSharedPlan(SHARED.roomId),SHARED.roomId);}catch(e){sharedSetStatus(e.message,true);}}
+async function initSharedRoomFromUrl(){
+  var roomId=sharedRoomFromLocation();if(!roomId)return false;
+  try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
+  catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
+}
+async function createSharedRoom(){
+  var button=document.getElementById('share-create-btn');if(button)button.disabled=true;sharedSetStatus('共同編集ルームを作成しています…');
+  try{
+    normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
+    var response=await fetch('/api/rooms',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;})});
+    if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
+    var result=await response.json();SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();history.replaceState(null,'',result.url);connectSharedSocket();clearDirty();renderSharedUi();sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
+  }catch(e){sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
+  finally{if(button)button.disabled=false;}
+}
+function leaveSharedRoom(){
+  if(!confirm('この端末で共同編集を終了しますか？\nクラウド上のプランと、ほかの参加者の接続は維持されます。'))return;
+  closeSharedSocket();clearTimeout(SHARED.localAutoTimer);clearTimeout(SHARED.rebuildTimer);SHARED.roomId=null;SHARED.version=0;SHARED.expiresAt=0;SHARED.savedAt=0;SHARED.baseline=null;SHARED.people=[];sharedResetDirtyTracking();var url=new URL(location.href);url.searchParams.delete('room');url.hash='';history.replaceState(null,'',url.toString());renderSharedUi();sharedSetStatus('共同編集を終了しました。現在の内容はこのブラウザに残っています。');
 }
 function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';
@@ -16896,7 +17432,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -17311,8 +17847,1191 @@ function initTouchPressFeedback(){
   },{passive:true});
 }
 
-// ─── Init storage ─────────────────────────────────
-checkStorageOnInit();
+// ── JIS図面出力(JIS A 0150準拠の白黒図面SVG生成) ──
+var JISDRAW=(function(){
+  // 紙上の線幅mm × 縮尺 = 実寸mmのstroke-width。SVGのuser unit=実寸mm
+  function lineWidths(scale){
+    return {thick:0.5*scale, mid:0.25*scale, thin:0.13*scale, text:3.0*scale};
+  }
+  function availableSheets(){
+    var sheets=[];
+    [1,2,3,4].forEach(function(f){
+      if(DATA.walls.some(function(w){return (w.floor||1)===f;}))
+        sheets.push({kind:'plan',key:f,label:'平面図 '+f+'F'});
+    });
+    if(sheets.length){
+      [['e','東立面図'],['w','西立面図'],['s','南立面図'],['n','北立面図']].forEach(function(d){
+        sheets.push({kind:'elev',key:d[0],label:d[1]});
+      });
+    }
+    return sheets;
+  }
+  // 立面方位軸。u=画面右方向へのワールド(x,y)射影係数、dp=視点に近いほど大きくなる奥行き射影係数。
+  // 座標系(x=東,y=南)から導出: 南立面(南から北向きに見る)は右手=東、北立面は右手=西、
+  // 東立面(東から西向き)は右手=北、西立面(西から東向き)は右手=南。
+  // ブラウザで平面図と見比べて左右が実世界と一致することを確認済み(逆なら u を反転する)。
+  var ELEV_AXES={
+    s:{u:[ 1,0], dp:[0, 1], label:'南立面図'},
+    n:{u:[-1,0], dp:[0,-1], label:'北立面図'},
+    e:{u:[0,-1], dp:[ 1,0], label:'東立面図'},
+    w:{u:[0, 1], dp:[-1,0], label:'西立面図'}
+  };
+  var ELEV_MARGIN_MM=1800; // 平面図PLAN_MARGIN_MMと同じ余白量(印刷余白+将来の寸法線用)
+  var ELEV_HEIGHT_DIM_EXTRA_MM=1800; // 右側の高さ寸法列(引出線+GL/軒高/最高高さの数値)が収まる追加余白
+
+  // 壁1本ぶんの投影レコード。
+  // uMin/uMax = u軸(画面横方向)への両端点射影のレンジ。
+  // base/top = 世界高さ(mm、floorBaseYを基準に上向き正)。floorBaseY/wallDisplayHeightMはm返しなので
+  //   ÷U(=×1000)でmmに変換する点に注意。
+  // depth = dp軸(視点に近いほど大)への両端点射影の最大値。その壁が「どれだけ手前にあるか」を表す代表値。
+  function elevWallRects(dir){
+    var ax=ELEV_AXES[dir];
+    var rects=[];
+    DATA.walls.forEach(function(w){
+      var u1=w.x1*ax.u[0]+w.y1*ax.u[1], u2=w.x2*ax.u[0]+w.y2*ax.u[1];
+      var d1=w.x1*ax.dp[0]+w.y1*ax.dp[1], d2=w.x2*ax.dp[0]+w.y2*ax.dp[1];
+      var f=w.floor||1;
+      var base=floorBaseY(f)/U;
+      var top=base+wallDisplayHeightM(w)/U;
+      rects.push({uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,depth:Math.max(d1,d2),floor:f,wall:w});
+    });
+    return rects;
+  }
+
+  // 区間(uA→uB)の値(top/base)を隣接区間と結合しながらステップ状の点列にする。
+  // 直前区間と同値(0.5mm未満の差)なら右端だけ延長し、異なる値なら縦の段差点を追加する。
+  function elevStepPoints(segs,field){
+    var out=[];
+    segs.forEach(function(s){
+      var y=s[field];
+      if(out.length && Math.abs(out[out.length-1][1]-y)<0.5){
+        out[out.length-1]=[s.uB,y];
+      } else {
+        out.push([s.uA,y]); out.push([s.uB,y]);
+      }
+    });
+    return out;
+  }
+
+  // rects群のu境界(幅0の妻壁等は外形に寄与しないため除外)で区間分割し、
+  // 各区間を覆う壁のうち最大top・最小baseを集計する(=イベント座標での区間分割)。
+  function elevSegments(rects){
+    var wide=rects.filter(function(r){return r.uMax-r.uMin>0.5;});
+    if(!wide.length) return [];
+    var xs=[];
+    wide.forEach(function(r){ xs.push(r.uMin,r.uMax); });
+    xs.sort(function(a,b){return a-b;});
+    var uniq=[];
+    xs.forEach(function(v){ if(!uniq.length||v-uniq[uniq.length-1]>0.5) uniq.push(v); });
+    var segs=[];
+    for(var i=0;i<uniq.length-1;i++){
+      var uA=uniq[i], uB=uniq[i+1], mid=(uA+uB)/2;
+      var top=-Infinity, base=Infinity, cover=false;
+      wide.forEach(function(r){
+        if(r.uMin<=mid+0.5 && r.uMax>=mid-0.5){ cover=true; top=Math.max(top,r.top); base=Math.min(base,r.base); }
+      });
+      if(cover) segs.push({uA:uA,uB:uB,top:top,base:base});
+    }
+    return segs;
+  }
+
+  // elevSegmentsはカバーなし区間(隙間)を単に読み飛ばすため、segs配列は連続しているとは限らない
+  // (母屋+離れのように離れた壁グループがあると、間に隙間区間が挟まる)。
+  // 隣接区間のuB→uAが連続(0.5mm未満の差)しているものだけを1グループにまとめ、
+  // グループが変わったところで外形ポリラインを分離する(離れた棟を直線で橋渡ししないため)。
+  function elevSegmentGroups(segs){
+    var groups=[], cur=[];
+    segs.forEach(function(s){
+      if(cur.length && Math.abs(s.uA-cur[cur.length-1].uB)>0.5){
+        groups.push(cur); cur=[];
+      }
+      cur.push(s);
+    });
+    if(cur.length) groups.push(cur);
+    return groups;
+  }
+
+  // 壁シルエットの外形(スカイライン)。各連続グループごとに独立したポリライン点列を返す(配列の配列)。
+  // グループ内は上辺(top)を左→右、下辺(base)を右→左でつなぎ、<polygon>の自動閉路に任せて
+  // そのグループ両端でbaseまで降ろした1本の外形ポリラインにする(塗りなし・LW.thickで描画)。
+  function elevSkyline(rects){
+    var segs=elevSegments(rects);
+    if(!segs.length) return [];
+    return elevSegmentGroups(segs).map(function(group){
+      var topPts=elevStepPoints(group,'top');
+      var basePts=elevStepPoints(group,'base').slice().reverse();
+      return topPts.concat(basePts);
+    });
+  }
+
+  // 指定u位置を覆う壁群のうち最も手前(depthが最大)の値。開口の被り判定に使う。
+  // floorを渡した場合は同じ階のrectsのみを比較対象にする(セットバックした上階の窓が、
+  // 下階の前面壁の深度と混同されて誤って「隠れている」と判定されるのを防ぐ)。
+  function elevFrontDepthAt(rects,uVal,floor){
+    var d=-Infinity;
+    rects.forEach(function(r){
+      if(floor!=null && r.floor!==floor) return;
+      if(r.uMin-0.5<=uVal && uVal<=r.uMax+0.5) d=Math.max(d,r.depth);
+    });
+    return d;
+  }
+
+  // 開口(窓・ドア)をこの方位に投影して描く。手前の壁面(=最前面深度)より
+  // 壁厚+150mm以上奥にある開口は「その面に面していない」とみなして描かない。
+  function elevOpenings(dir,LW){
+    var ax=ELEV_AXES[dir];
+    var rects=elevWallRects(dir);
+    var out='';
+    DATA.items.filter(function(it){return isOpeningItemType(it.type);}).forEach(function(it){
+      var info=getOpeningWallInfo(it);
+      if(!info || !info.wall) return; // 対応する壁が見つからない孤立開口は描画対象外
+      var w=info.wall;
+      var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy)||1;
+      var cosU=(dx/len)*ax.u[0]+(dy/len)*ax.u[1];
+      var wallDepth=Math.max(w.x1*ax.dp[0]+w.y1*ax.dp[1], w.x2*ax.dp[0]+w.y2*ax.dp[1]);
+      var uCenter=info.x*ax.u[0]+info.y*ax.u[1];
+      var wallFloor=w.floor||1;
+      var front=elevFrontDepthAt(rects,uCenter,wallFloor); // 同じ階のrectsのみと比較(セットバックした上階が誤って隠れないように)
+      var wallThick=w.thick||120;
+      if(wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
+      // 開口幅(it.w、壁方向)をu軸へ投影。壁がこの面と直交する(=妻壁)ほどcosUが0に近づき幅も0に潰れる
+      var halfU=Math.abs(cosU)*(it.w||0)/2;
+      if(halfU<1) return; // 直交壁の開口はこの面ではほぼ幅0=表示不要
+      var base=floorBaseY(wallFloor)/U;
+      var sill=openingSillMm(it), h=openingHeightMm(it); // 掃き出し窓(window-door)はopeningSillMmが常に0を返す
+      var uL=uCenter-halfU, uR=uCenter+halfU, yB=base+sill, yT=base+sill+h;
+      out+='<rect x="'+uL+'" y="'+yB+'" width="'+(uR-uL)+'" height="'+(yT-yB)+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      if(isWindowLikeType(it.type)){
+        // 引違い(既定/sliding): 縦中桟1本。FIX/すべり出し規格(casement扱い): 対角細線。掃き出しは常に引違い扱い。
+        var kind=it.type==='window-door' ? 'sliding' : effectiveWindowKind(it);
+        if(kind==='fix'||kind==='casement'){
+          out+='<line x1="'+uL+'" y1="'+yB+'" x2="'+uR+'" y2="'+yT+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+        } else {
+          out+='<line x1="'+uCenter+'" y1="'+yB+'" x2="'+uCenter+'" y2="'+yT+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+        }
+      } else if(!isNoDoorOpeningType(it.type)){
+        // 建具なし開口(door-opening/door-opening-arch)はノブが無いので点を描かない
+        var knobY=yB+Math.min(1000,(yT-yB)*0.5);
+        var knobSide=it.flipX?-1:1;
+        var knobX=uCenter+knobSide*(uR-uL)*0.41;
+        out+='<circle cx="'+knobX+'" cy="'+knobY+'" r="'+(LW.mid*1.2)+'" fill="#000"/>';
+      }
+    });
+    return out;
+  }
+
+  // バルコニー・フェンス簡略輪郭(Spec §立面図仕様「バルコニー・フェンスは簡略輪郭のみ」)。
+  // 高さ・基準面は3D実装(getItemHeightValue:12829, item3DBaseY:3535)の実値をそのまま使い、
+  // ここで別の数値を持たない(3D側と食い違わないため)。
+  // it.rot(度)の向き(width軸方向)をワールド(cos,sin)へ変換する式はstairBounds2D(:11185)と同じ規約。
+  function elevBalconyFenceToSvg(dir,LW){
+    var ax=ELEV_AXES[dir];
+    var rects=elevWallRects(dir);
+    var out='';
+    DATA.items.filter(function(it){
+      return it.type==='balcony' || it.type==='fence' || it.type==='wood-fence';
+    }).forEach(function(it){
+      var rad=(it.rot||0)*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
+      // it.rot方向(幅軸)とu軸の整列度。elevOpeningsのcosU(:17990)と同じ考え方で、
+      // この面とほぼ直交する(妻側を向いた)アイテムは幅がほぼ0に潰れるため描かない
+      var cosU=cos*ax.u[0]+sin*ax.u[1];
+      var halfU=Math.abs(cosU)*(it.w||0)/2;
+      if(halfU<1) return;
+      var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+      var uCenter=cx*ax.u[0]+cy*ax.u[1];
+      var floor=it.floor||1;
+      // 同じ階の前面壁(elevFrontDepthAt:17970と同じ考え方)より奥にあるアイテムは
+      // 建物本体に隠れてこの面からは見えないとみなし描かない
+      var front=elevFrontDepthAt(rects,uCenter,floor);
+      var itemDepth=cx*ax.dp[0]+cy*ax.dp[1];
+      if(isFinite(front) && itemDepth<front-300) return;
+      var base=item3DBaseY(it)/U; // バルコニー=その階の床天端、フェンス=GL(1F)/階天端(2F以上)
+      var h=getItemHeightValue(it); // バルコニー=スラブ厚、フェンス=800mm既定、木製フェンス=it.fenceHeight(既定1600)mm
+      var uL=uCenter-halfU, uR=uCenter+halfU;
+      out+='<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
+        +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    });
+    return out;
+  }
+
+  // 立面全体のu範囲・高さ範囲(GL=0を必ず含む)。壁が無ければ既定の矩形を返す。
+  function elevBounds(dir){
+    var rects=elevWallRects(dir);
+    var uMin=Infinity,uMax=-Infinity,hMax=-Infinity,hMinBase=Infinity;
+    rects.forEach(function(r){
+      uMin=Math.min(uMin,r.uMin); uMax=Math.max(uMax,r.uMax);
+      hMax=Math.max(hMax,r.top); hMinBase=Math.min(hMinBase,r.base);
+    });
+    if(!isFinite(uMin)){ uMin=0; uMax=1000; hMax=1000; hMinBase=0; }
+    var hMin=Math.min(0,hMinBase); // 基礎分の余白でGLより壁基準が高い場合もGL(0)は常に含める
+    hMin=Math.min(hMin,-foundationHeightMm()); // 基礎帯(GLより下)がviewBoxからはみ出さないよう下方に拡張
+    var apexH=roofMaxApexHeightMm();
+    if(apexH!=null) hMax=Math.max(hMax,apexH); // 屋根の最高高さが壁上端より高い分を反映
+    return {uMin:uMin-ELEV_MARGIN_MM, uMax:uMax+ELEV_MARGIN_MM+ELEV_HEIGHT_DIM_EXTRA_MM, hMin:hMin-ELEV_MARGIN_MM, hMax:hMax+ELEV_MARGIN_MM};
+  }
+
+  // GL(地盤面)線: 常にy=0、建物幅全体+左右延長(JIS図面のGL表記慣習)。
+  // 呼び出し元で<g transform="scale(1,-1)">配下に置かれるため、文字だけ内側でscale(1,-1)を打ち消して
+  // 上下反転(鏡文字)しないようにする(既存unflipTextGroup:17997と同じ考え方)。
+  function elevGlSvg(bounds,LW){
+    var ext=Math.max(600,ELEV_MARGIN_MM*0.4);
+    var x1=bounds.uMin, x2=bounds.uMax;
+    var out='<line x1="'+(x1-ext)+'" y1="0" x2="'+(x2+ext)+'" y2="0" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    var tx=x1-ext, ty=LW.text*1.3;
+    out+='<g transform="translate('+tx+','+ty+') scale(1,-1)">'
+      +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+(LW.text*0.9)+'" fill="#000">GL</text></g>';
+    return out;
+  }
+
+  // ─── 屋根プロファイル(Step1: build3DRoofItem:11229〜の読解メモ) ───
+  // ローカル座標はW=it.w*U, D=it.d*U[m]、ローカルX=it.w方向(px)、ローカルZ=it.d方向(pz)。
+  // ワールド変換はroofLocalToWorldMm(:11397、flipX/flipY→回転it.rot→平行移動の順)をそのまま流用する
+  // (stairBounds2D等と同じ正方向の回転規約と一致することを:11397の式展開で確認済み)。
+  // 各typeの実値(pitch=clamp(it.pitch||30,5,60)度):
+  //  - flat: 隆起なし。roofThickness(既定180mm、0.03〜0.6mにクランプ)ぶんの薄い矩形(パラペット)のみ。
+  //  - mono(片流れ): 軒(pz=-D/2,h=0)→高い側(pz=+D/2,h=tan(pitch)*D)。棟はなく、
+  //    px方向(W軸)全域で高さ不変(gableと同じ「不変軸=px」)。
+  //  - gable: 棟はpx方向にフルスパン(x=-W/2〜W/2)・pz=0・高さriseG=tan(pitch)*D/2。
+  //    妻壁(三角形)はpx=±W/2の位置。
+  //  - gable-y: gableのpx/pz入れ替え版。棟はpz方向にフルスパン、高さriseY=tan(pitch)*W/2。
+  //  - hip(寄棟): 頂点は中心1点(0,0,rise)、rise=tan(pitch)*min(W,D)/2。棟線長=0。
+  //  - hip-ridge/hip-ridge-long: hipRidgePoints(:11303)と同じ式(alongX=W>=Dの長辺方向に棟を通す。
+  //    hip-ridge-longはより長い棟)。棟高=hipと同じrise=tan(pitch)*min(W,D)/2。
+  // 上記いずれも「基準面頂点+棟/頂点をu軸へ投影し上側凸包を取る」ことで、
+  // 妻面(棟∥視線)は三角形、平側(棟⊥視線)は台形(棟が全幅なら矩形、棟長0なら三角形に退化)に
+  // 自動的になる(タイプ・方位ごとの場合分け不要)。
+  function roofLocalVertices(it){
+    var type=it.roofType||'gable';
+    var pitch=Math.max(5,Math.min(60,it.pitch||30))*Math.PI/180;
+    var W=it.w*U, D=it.d*U; // メートル(build3DRoofItemと同じ単位)
+    var tanP=Math.tan(pitch);
+    var verts=[];
+    function add(x,z,h){ verts.push({x:x,z:z,h:h}); }
+    if(type==='flat'){
+      var thick=Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U));
+      [[-W/2,-D/2],[W/2,-D/2],[W/2,D/2],[-W/2,D/2]].forEach(function(p){
+        add(p[0],p[1],0); add(p[0],p[1],thick);
+      });
+    } else if(type==='mono'){
+      var riseM=tanP*D;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,riseM); add(-W/2,D/2,riseM);
+    } else if(type==='hip'){
+      var riseH=tanP*Math.min(W,D)/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(0,0,riseH);
+    } else if(type==='hip-ridge' || type==='hip-ridge-long'){
+      var riseHR=tanP*Math.min(W,D)/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      var alongX=W>=D;
+      if(alongX){
+        var len=(type==='hip-ridge-long')?Math.max(W*0.55,W-D*0.45):Math.max(W-D,W*0.18);
+        len=Math.min(len,W*0.82);
+        add(-len/2,0,riseHR); add(len/2,0,riseHR);
+      } else {
+        var lenZ=(type==='hip-ridge-long')?Math.max(D*0.55,D-W*0.45):Math.max(D-W,D*0.18);
+        lenZ=Math.min(lenZ,D*0.82);
+        add(0,-lenZ/2,riseHR); add(0,lenZ/2,riseHR);
+      }
+    } else if(type==='gable-y'){
+      var riseY=tanP*W/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(0,-D/2,riseY); add(0,D/2,riseY);
+    } else { // gable(既定)
+      var riseG=tanP*D/2;
+      add(-W/2,-D/2,0); add(W/2,-D/2,0); add(W/2,D/2,0); add(-W/2,D/2,0);
+      add(-W/2,0,riseG); add(W/2,0,riseG);
+    }
+    return verts;
+  }
+  // (u,height)点群の上側凸包をu昇順で返す(monotone chain簡易版)。
+  // 屋根の全頂点をこの方位のu軸へ投影した点集合に適用することで、
+  // 棟が視線と平行/直交いずれの場合も正しいシルエット(三角形/台形/矩形)が場合分けなしで得られる。
+  function upperHull(pts){
+    var sorted=pts.slice().sort(function(a,b){return a[0]-b[0] || a[1]-b[1];});
+    var hull=[];
+    for(var i=0;i<sorted.length;i++){
+      var p=sorted[i];
+      while(hull.length>=2){
+        var o=hull[hull.length-2], a=hull[hull.length-1];
+        var cr=(a[0]-o[0])*(p[1]-o[1])-(a[1]-o[1])*(p[0]-o[0]);
+        if(cr>=0) hull.pop(); else break;
+      }
+      hull.push(p);
+    }
+    return hull;
+  }
+  // roof1点ぶんの立面プロファイル。{points:[[u,h],...]閉多角形用点列, apex:頂点最高高さmm} を返す。
+  function roofItemProfile(it,dir){
+    var ax=ELEV_AXES[dir];
+    var verts=roofLocalVertices(it);
+    if(!verts.length) return null;
+    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var pts=[], apex=-Infinity;
+    verts.forEach(function(v){
+      var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})。flipX/flipY→回転→平行移動を内包
+      var u=w.x*ax.u[0]+w.y*ax.u[1];
+      var h=baseHeightMm+v.h/U;
+      pts.push([u,h]);
+      if(h>apex) apex=h;
+    });
+    var hull=upperHull(pts);
+    if(hull.length<2) return null;
+    var uFirst=hull[0][0], uLast=hull[hull.length-1][0];
+    // 上側凸包の両端をbaseHeightMmまで下ろして閉多角形にする(棟が全幅に及ぶgable等では
+    // hullが既にbase高さの頂点を含むため冗長点になるが、SVG描画上は無害)
+    var closed=hull.concat([[uLast,baseHeightMm],[uFirst,baseHeightMm]]);
+    return {points:closed, apex:apex};
+  }
+  function roofProfileToSvg(dir,LW){
+    var out='';
+    DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+      var prof=roofItemProfile(it,dir);
+      if(!prof || prof.points.length<3) return;
+      var s=prof.points.map(function(p){return p[0]+','+p[1];}).join(' ');
+      out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    });
+    return out;
+  }
+  // 全roofアイテムの頂点のうち最高高さ(mm、絶対値)。屋根が無ければnull。
+  // 頂点の実高さはどの方位から見ても同じ(uへの投影だけがdirで変わる)ので方位引数は不要。
+  function roofMaxApexHeightMm(){
+    var max=-Infinity;
+    DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+      var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+      roofLocalVertices(it).forEach(function(v){
+        var h=baseHeightMm+v.h/U;
+        if(h>max) max=h;
+      });
+    });
+    return isFinite(max)?max:null;
+  }
+  // 壁群の実u範囲(elevBoundsの余白を含まない生の建物幅)。基礎帯・高さ寸法の配置に使う。
+  function elevRawExtent(rects){
+    var uMin=Infinity,uMax=-Infinity;
+    rects.forEach(function(r){ uMin=Math.min(uMin,r.uMin); uMax=Math.max(uMax,r.uMax); });
+    if(!isFinite(uMin)){ uMin=0; uMax=1000; }
+    return {uMin:uMin,uMax:uMax};
+  }
+  // 基礎: GL(y=0)から上にfoundationHeightMm()ぶんの帯を建物幅で描く(中線=LW.mid)。
+  // floorBaseY(1)=foundationHeightM()(:3500)なので1F壁の基部はy=+hから始まる。
+  // 帯をy=[0,h]に描くことでGL線→基礎帯→壁が隙間なく積み上がる(build3DFoundation:13551と同じくy=0起点)。
+  // foundationHeightMm()は既にmm値(foundationHeightM()/Uと同値)なのでそのまま使う。
+  function foundationToSvg(dir,LW){
+    var h=foundationHeightMm();
+    if(h<=0) return '';
+    var ext=elevRawExtent(elevWallRects(dir));
+    return '<rect x="'+ext.uMin+'" y="0" width="'+(ext.uMax-ext.uMin)+'" height="'+h
+      +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+  }
+  // 高さ寸法用のティック(elevDimTickはscale(1,-1)配下で使うため、dimTick(:18343)とは
+  // 上下逆の傾きで描き、最終的な画面表示では同じ"/"向きになるようにする)。
+  function elevDimTick(x,y,LW){
+    var d=LW.text*0.35;
+    return '<line x1="'+(x-d)+'" y1="'+(y-d)+'" x2="'+(x+d)+'" y2="'+(y+d)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+  }
+  // 高さ寸法: 図右側にGL(0)・軒高(壁最上端max)・最高高さ(屋根頂点max、屋根がなければ省略=軒高のみ)を
+  // 引出線+ティック+mm整数値で表示する。elevGlSvgと同じscale(1,-1)配下で使われるため、
+  // 文字は個別に<g transform="translate(...) scale(1,-1)">で打ち消して正立させる。
+  function heightDimsToSvg(dir,LW){
+    var rects=elevWallRects(dir);
+    if(!rects.length) return '';
+    var ext=elevRawExtent(rects);
+    var eaveH=-Infinity;
+    rects.forEach(function(r){ eaveH=Math.max(eaveH,r.top); });
+    if(!isFinite(eaveH)) return '';
+    var apexH=roofMaxApexHeightMm();
+    var levels=[0,eaveH];
+    if(apexH!=null && apexH>eaveH+0.5) levels.push(apexH); // 屋根がある(壁上端より高い)場合のみ3段目
+    var xBuild=ext.uMax, xIn=xBuild+700, xLead=xIn+LW.text*0.3;
+    var out='';
+    levels.forEach(function(h){
+      out+='<line x1="'+xBuild+'" y1="'+h+'" x2="'+xLead+'" y2="'+h+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+=elevDimTick(xIn,h,LW);
+      var labelX=xIn+LW.text*0.6, labelY=h-LW.text*0.32;
+      out+='<g transform="translate('+labelX+','+labelY+') scale(1,-1)">'
+        +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+(LW.text*0.85)+'" fill="#000">'+Math.round(h)+'</text></g>';
+    });
+    out+='<line x1="'+xIn+'" y1="0" x2="'+xIn+'" y2="'+levels[levels.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    return out;
+  }
+
+  function buildElevationSvg(dir,opts){
+    opts=opts||{};
+    var ax=ELEV_AXES[dir];
+    if(!ax) return placeholderSvg('立面図(不明な方位)');
+    var rects=elevWallRects(dir);
+    var bounds=elevBounds(dir);
+    var paper=paperDimsMm(opts.paper);
+    // 立面はu軸(横)=建物幅、高さ軸(縦)=建物高さで縮尺判定用の疑似boundsを作る(planBounds同様minX/maxX/minY/maxYの形)
+    var scaleBounds={minX:bounds.uMin,maxX:bounds.uMax,minY:-bounds.hMax,maxY:-bounds.hMin};
+    var scaleNum=(opts.scale==='auto') ? pickAutoScale(scaleBounds,paper) : (parseInt(opts.scale,10)||100);
+    var LW=lineWidths(scaleNum);
+    var cx=(bounds.uMin+bounds.uMax)/2, ch=(bounds.hMin+bounds.hMax)/2;
+    var vw=paper.w*scaleNum, vh=paper.h*scaleNum;
+    // SVGのy軸は下向きなので、高さ(上向き正)はここでまとめて反転する。
+    // 中身(スカイライン・開口・GL)はすべて「y=高さmm(上向き正)」のまま組み立て、
+    // <g transform="scale(1,-1)">で一括反転することで各座標計算での符号ミスを避ける。
+    var view={minX:cx-vw/2, minY:-(ch+vh/2), maxX:cx+vw/2, maxY:-(ch-vh/2)};
+    var body='';
+    // 母屋+離れのように壁群がu方向に分離している場合、elevSkylineはグループごとに独立した点列を返すので、
+    // 棟ごとに別の<polygon>として描く(離れた棟の間を直線で橋渡ししないため)。
+    elevSkyline(rects).forEach(function(pts){
+      var skylinePts=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
+      if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    });
+    body+=roofProfileToSvg(dir,LW); // 屋根が無いプランでは中身が空文字列になり壁上端までの立面のまま
+    body+=foundationToSvg(dir,LW);
+    body+=elevGlSvg(bounds,LW);
+    body+=elevBalconyFenceToSvg(dir,LW);
+    body+=elevOpenings(dir,LW);
+    body+=heightDimsToSvg(dir,LW);
+    return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
+  }
+  function placeholderSvg(label){
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297">'
+      +'<rect width="420" height="297" fill="#fff"/>'
+      +'<text x="210" y="148" text-anchor="middle" font-size="12" fill="#000">'+label+'</text></svg>';
+  }
+
+  // 用紙寸法(横向き固定、mm)。A3/A4以外の値が来た場合はA3扱いにする。
+  function paperDimsMm(paper){
+    return paper==='a4' ? {w:297,h:210} : {w:420,h:297};
+  }
+  var AUTO_SCALES=[50,100,200];
+  var PLAN_MARGIN_MM=1800; // 寸法線用の四周余白
+
+  // 壁の実寸バウンディングボックス(四周に寸法余白を加算)。壁が無い階は原点付近の既定値。
+  function planBounds(floor){
+    var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      var t=(w.thick||120)/2;
+      minX=Math.min(minX,w.x1-t,w.x2-t); maxX=Math.max(maxX,w.x1+t,w.x2+t);
+      minY=Math.min(minY,w.y1-t,w.y2-t); maxY=Math.max(maxY,w.y1+t,w.y2+t);
+    });
+    if(!isFinite(minX)){ minX=0; minY=0; maxX=1000; maxY=1000; }
+    return {minX:minX-PLAN_MARGIN_MM,minY:minY-PLAN_MARGIN_MM,maxX:maxX+PLAN_MARGIN_MM,maxY:maxY+PLAN_MARGIN_MM};
+  }
+  // 建物範囲(+余白)が収まる最小の縮尺を50→100→200の順で判定。200でも収まらなければ200のまま。
+  function pickAutoScale(bounds,paper){
+    var reqW=bounds.maxX-bounds.minX, reqH=bounds.maxY-bounds.minY;
+    for(var i=0;i<AUTO_SCALES.length;i++){
+      var s=AUTO_SCALES[i];
+      if(paper.w*s>=reqW && paper.h*s>=reqH) return s;
+    }
+    return AUTO_SCALES[AUTO_SCALES.length-1];
+  }
+
+  function svgOpen(bounds,opts){
+    var w=bounds.maxX-bounds.minX, h=bounds.maxY-bounds.minY;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+bounds.minX+' '+bounds.minY+' '+w+' '+h+'">'
+      +'<rect x="'+bounds.minX+'" y="'+bounds.minY+'" width="'+w+'" height="'+h+'" fill="#fff"/>';
+  }
+  function svgClose(){
+    return '</svg>';
+  }
+
+  // 壁: drawWall2d(:5715)と同じ4点ポリゴン(壁芯±thick/2)を黒塗り断面(JIS)で描く。
+  function wallsToSvg(floor,LW){
+    var out='';
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
+      if(len<1) return;
+      var nx=-dy/len, ny=dx/len, t=(w.thick||120)/2;
+      var pts=[
+        (w.x1+nx*t)+','+(w.y1+ny*t),
+        (w.x2+nx*t)+','+(w.y2+ny*t),
+        (w.x2-nx*t)+','+(w.y2-ny*t),
+        (w.x1-nx*t)+','+(w.y1-ny*t)
+      ].join(' ');
+      out+='<polygon points="'+pts+'" fill="#000" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    return out;
+  }
+
+  // 開口シンボル用ローカル座標系: lx=壁方向(中心0、±開口幅/2)、ly=壁厚方向(中心0)。
+  // getOpeningWallInfo().rot(壁方向の角度)による回転+平行移動のみなので円弧はワールドでも同半径のまま使える。
+  function openingFrame(info){
+    var rad=info.rot*Math.PI/180;
+    var uxx=Math.cos(rad), uxy=Math.sin(rad), uyx=-Math.sin(rad), uyy=Math.cos(rad);
+    return {
+      pt:function(lx,ly){ return {x:info.x+lx*uxx+ly*uyx, y:info.y+lx*uxy+ly*uyy}; }
+    };
+  }
+  function frameStr(fr,lx,ly){ var p=fr.pt(lx,ly); return p.x+','+p.y; }
+  function lineTag(fr,x1,y1,x2,y2,sw,dash){
+    var p1=fr.pt(x1,y1),p2=fr.pt(x2,y2);
+    return '<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="#000" stroke-width="'+sw+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  }
+  // 開口幅ぶん壁の黒塗りを白抜きする(壁と同角度で重ねる矩形)
+  function rectCutSvg(fr,halfW,halfT){
+    return '<polygon points="'+[frameStr(fr,-halfW,-halfT),frameStr(fr,halfW,-halfT),frameStr(fr,halfW,halfT),frameStr(fr,-halfW,halfT)].join(' ')+'" fill="#fff"/>';
+  }
+
+  // 引違い窓(未指定/sliding)・FIX窓('fix'/'casement')・掃き出し窓(window-door、常に引違い記号)。
+  function windowSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT,halfW,-halfT,LW.thin);
+    out+=lineTag(fr,-halfW, halfT,halfW, halfT,LW.thin);
+    // 掃き出し窓(window-door)は常に引違い記号(3D側の前例: :10803 "it.type==='window-door' || effectiveWindowKind(it)==='sliding'")。
+    // windowKind未設定のwindow-doorにcasementプリセット(縦すべり出し規格)を適用してもFIX風にはしない。
+    var kind=it.type==='window-door' ? 'sliding' : effectiveWindowKind(it);
+    if(kind==='fix'||kind==='casement'){
+      out+=lineTag(fr,-halfW,0,halfW,0,LW.thin);
+    } else {
+      // 既存2D(:6970-6997)の簡略化を踏襲: 互い違いにオフセットした2枚の建具線
+      var openW=it.w||0, panelW=openW*0.56, off=halfT*0.5;
+      var leftOpen=!!it.flipX;
+      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
+      var movingX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
+      out+=lineTag(fr,fixedX,-off,fixedX+panelW,-off,LW.mid);
+      out+=lineTag(fr,movingX,off,movingX+panelW,off,LW.mid);
+    }
+    return out;
+  }
+
+  // 開き戸(door-swing系)・玄関ドア(door-front): 吊元から開口幅の1/4円弧+扉線1本。
+  // 円の中心=吊元なので、回転(等長変換)後もワールド座標上で半径rは不変。
+  function swingDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    var hingeLX=it.flipX?halfW:-halfW;
+    var leafDir=it.flipX?-1:1;
+    var swingDir=it.flipY?-1:1;
+    var r=it.w||0;
+    var arcStart=leafDir>0?0:Math.PI;
+    var openAngle=swingDir*Math.PI/2;
+    var arcEnd=arcStart+openAngle;
+    var p0=fr.pt(hingeLX+r*Math.cos(arcStart), r*Math.sin(arcStart));
+    var p1=fr.pt(hingeLX+r*Math.cos(arcEnd), r*Math.sin(arcEnd));
+    var hinge=fr.pt(hingeLX,0);
+    var sweep=openAngle>0?1:0;
+    out+='<path d="M'+p0.x+','+p0.y+' A'+r+','+r+' 0 0,'+sweep+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<line x1="'+hinge.x+'" y1="'+hinge.y+'" x2="'+p1.x+'" y2="'+p1.y+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    return out;
+  }
+
+  // 引戸(door-slide/door-slide-s/door-pocket): 既存2D表現(:6885-6949)をSVGへ移植。
+  function slideDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
+    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
+    var isOpen=(it.doorOpenState!=='closed');
+    var dash=(LW.thin*3)+' '+(LW.thin*2);
+    if(it.type==='door-slide'){
+      var openW=it.w||0, panelW=openW*0.56;
+      var leftOpen=!!it.flipX;
+      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
+      var movingClosedX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
+      var movingX=isOpen?fixedX:movingClosedX;
+      out+=lineTag(fr,fixedX,-halfT*0.28,fixedX+panelW,-halfT*0.28,LW.mid);
+      out+=lineTag(fr,movingX, halfT*0.28,movingX+panelW, halfT*0.28,LW.mid);
+    } else if(it.type==='door-slide-s'){
+      var sDir=it.flipX?-1:1;
+      var openW2=it.w||0;
+      var px0=isOpen?sDir*openW2:0;
+      var pz=(it.flipY?1:-1)*halfT*1.05;
+      out+=lineTag(fr,px0-halfW,pz,px0+halfW,pz,LW.mid);
+      out+=lineTag(fr,sDir*halfW,pz,sDir*halfW*3,pz,LW.thin,dash);
+    } else { // door-pocket(引込み戸)
+      var sDir2=it.flipX?-1:1;
+      if(isOpen){
+        out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.mid,dash);
+      } else {
+        out+=lineTag(fr,-halfW,0,halfW,0,LW.mid);
+      }
+      out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.thin,dash);
+    }
+    return out;
+  }
+
+  // 折戸(door-fold/door-fold-w): 既存2D表現(:6951-6969)の山形記号をSVGへ移植。
+  function foldDoorSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
+    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
+    var peak=(it.flipY?1:-1)*Math.max((info.wall.thick||120)*1.6,300);
+    var pts;
+    if(it.type==='door-fold'){
+      var f0=it.flipX?halfW:-halfW, f1=it.flipX?-halfW:halfW;
+      pts=[frameStr(fr,f0,0),frameStr(fr,(f0+f1)/2,peak),frameStr(fr,f1,0)];
+    } else {
+      pts=[frameStr(fr,-halfW,0),frameStr(fr,-halfW/2,peak),frameStr(fr,0,0),frameStr(fr,halfW/2,peak),frameStr(fr,halfW,0)];
+    }
+    out+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    return out;
+  }
+
+  // 開口(door-opening/door-opening-arch): 既存2D表現(:6868-6884)の建具なし開口線+破線をSVGへ移植。
+  function openingSymbolSvg(it,info,LW){
+    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
+    var fr=openingFrame(info);
+    var out=rectCutSvg(fr,halfW,halfT);
+    out+=lineTag(fr,-halfW,-halfT,-halfW,halfT,LW.mid);
+    out+=lineTag(fr, halfW,-halfT, halfW,halfT,LW.mid);
+    if(it.type==='door-opening-arch'){
+      var p0=fr.pt(-halfW,0), p1=fr.pt(halfW,0);
+      var apex=fr.pt(0,-Math.max(halfT,halfW*0.35));
+      out+='<path d="M'+p0.x+','+p0.y+' Q'+apex.x+','+apex.y+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    } else {
+      out+=lineTag(fr,-halfW,-halfT,halfW,-halfT,LW.mid);
+    }
+    var dash=(LW.thin*3)+' '+(LW.thin*2);
+    out+='<polygon points="'+[frameStr(fr,-halfW,-halfT),frameStr(fr,halfW,-halfT),frameStr(fr,halfW,halfT),frameStr(fr,-halfW,halfT)].join(' ')
+      +'" fill="none" stroke="#000" stroke-width="'+(LW.thin*0.7)+'" stroke-dasharray="'+dash+'"/>';
+    return out;
+  }
+
+  function openingsToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor && isOpeningItemType(it.type);}).forEach(function(it){
+      var info=getOpeningWallInfo(it);
+      if(!info || !info.wall) return; // 対応する壁が見つからない孤立開口は意図的にスキップ(描画対象外)
+      if(isWindowLikeType(it.type)) out+=windowSymbolSvg(it,info,LW);
+      else if(isSwingDoorType(it.type)) out+=swingDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-slide'||it.type==='door-slide-s'||it.type==='door-pocket') out+=slideDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-fold'||it.type==='door-fold-w') out+=foldDoorSymbolSvg(it,info,LW);
+      else if(it.type==='door-opening'||it.type==='door-opening-arch') out+=openingSymbolSvg(it,info,LW);
+    });
+    return out;
+  }
+
+  // アイテム中心(it.x+it.w/2, it.y+it.d/2)を原点としたローカル座標系のグループ。
+  // it.rot はSVG transform="rotate"にそのまま渡せる(canvasのctx.rotateと同じ時計回り/Y下向き系)。
+  // it.flipX/flipY は既存2D(drawItem2d:6397)のctx.scale(flipX,flipY)と同じ順序(回転の内側)で反映する。
+  function itemGroupOpen(it){
+    var cx=it.x+it.w/2, cy=it.y+it.d/2;
+    var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
+    var t='<g transform="translate('+cx+','+cy+') rotate('+(it.rot||0)+')';
+    if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
+    return t+'">';
+  }
+  function itemGroupClose(){ return '</g>'; }
+  // 親グループのscale(flipX,flipY)を打ち消して文字だけ鏡文字にしない(既存drawStairUpText:6381-6385と同じ二重反転)。
+  function unflipTextGroup(it,x,y){
+    var fx=it.flipX?-1:1, fy=it.flipY?-1:1;
+    var t='<g transform="translate('+x+','+y+')';
+    if(fx!==1||fy!==1) t+=' scale('+fx+','+fy+')';
+    return t+'">';
+  }
+  function escSvgText(s){
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  // 屋根(roof)は最上階の1つ上のフロア番号に配置される設計であり、また外構・バルコニー等は
+  // 「居室」ではないため、これらのアイテムだけがfloor+1にあっても「上階が存在する」とはみなさない
+  // (既存のisGroundLevelItemType/isContextExteriorItemTypeによる外構判定と一貫させる。
+  //  stairGroupTotalRiseM内のhasUpper:11228-11230は階高計算用の別判定でJISDRAW外のため変更しない)。
+  function isRoofOrOutdoorOnlyItemType(t){
+    return t==='roof' || t==='balcony' || isGroundLevelItemType(t) || isContextExteriorItemType(t);
+  }
+  // 当該階の1つ上の階に居室性のある壁・部屋・アイテムが配置済みなら「上階が存在する」とみなす。
+  function floorHasUpper(floor){
+    var nf=(floor||1)+1;
+    return DATA.walls.some(function(w){return (w.floor||1)===nf;}) ||
+           DATA.rooms.some(function(r){return (r.floor||1)===nf;}) ||
+           DATA.items.some(function(i){return (i.floor||1)===nf && !isRoofOrOutdoorOnlyItemType(i.type);});
+  }
+
+  // 直階段: 外形+等間隔の段板線(段数はgetStairStepCount:11206、2D/3Dと同じ関数)+中央の昇り矢印+UP/DNラベル。
+  // 廻りコーナー階段: 外形+内側隅(右下)から放射する2本の段鼻線+L字の昇り歩行線+矢印(既存2D:6545-6574を移植)。
+  function stairSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var label=floorHasUpper(it.floor||1)?'UP':'DN';
+    if(it.type==='stair-corner'){
+      out+='<line x1="'+hw+'" y1="'+hd+'" x2="'+(-hw)+'" y2="0" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      out+='<line x1="'+hw+'" y1="'+hd+'" x2="0" y2="'+(-hd)+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      var aHeadLen=Math.min(Math.min(hw,hd)*0.28,LW.text*3), wTipX=hw*0.96, wAw=Math.min(hw*0.3,LW.text*1.6);
+      out+='<polyline points="0,'+(hd*0.96)+' 0,0 '+(wTipX-aHeadLen)+',0" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+='<polygon points="'+wTipX+',0 '+(wTipX-aHeadLen)+',-'+wAw+' '+(wTipX-aHeadLen)+','+wAw+'" fill="#000"/>';
+      out+=unflipTextGroup(it,wTipX-LW.text*0.3,-LW.text*0.9)
+        +'<text x="0" y="0" text-anchor="end" font-family="\'Noto Sans JP\',sans-serif" font-size="'+LW.text+'" fill="#000">'+label+'</text></g>';
+    } else {
+      var steps=getStairStepCount(it);
+      for(var si=1; si<steps; si++){
+        var sy=-hd+(it.d/steps)*si;
+        out+='<line x1="'+(-hw)+'" y1="'+sy+'" x2="'+hw+'" y2="'+sy+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      }
+      var arrowLen=Math.min(hd*0.17,LW.text*4), arrowHalf=Math.min(hw*0.35,LW.text*2), tipY=hd*0.72;
+      out+='<line x1="0" y1="'+(-tipY)+'" x2="0" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+      out+='<polygon points="0,'+tipY+' '+(-arrowHalf)+','+(tipY-arrowLen)+' '+arrowHalf+','+(tipY-arrowLen)+'" fill="#000"/>';
+      out+=unflipTextGroup(it,LW.text*0.4,tipY-arrowLen*0.15)
+        +'<text x="0" y="0" text-anchor="start" font-family="\'Noto Sans JP\',sans-serif" font-size="'+LW.text+'" fill="#000">'+label+'</text></g>';
+    }
+    out+=itemGroupClose();
+    return out;
+  }
+  function stairsToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor && (it.type==='stair'||it.type==='stair-corner');}).forEach(function(it){
+      out+=stairSymbolSvg(it,LW);
+    });
+    return out;
+  }
+
+  // 設備記号(簡略線画)。build3DKitchen/Bath/Toilet/Sink(:13608-13693)のレイアウトを平面用に単純化した略記。
+  function kitchenSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var sinkW=it.w*0.32, sinkD=it.d*0.55, sinkCx=-hw+it.w*0.06+sinkW/2, rx=Math.min(sinkW,sinkD)*0.18;
+    out+='<rect x="'+(sinkCx-sinkW/2)+'" y="'+(-sinkD/2)+'" width="'+sinkW+'" height="'+sinkD+'" rx="'+rx+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    var stoveCx=hw-it.w*0.24, stoveW=it.w*0.38, stoveD=it.d*0.6, br=Math.min(stoveW,stoveD)*0.16;
+    [[-stoveW/4,-stoveD/4],[stoveW/4,-stoveD/4],[-stoveW/4,stoveD/4],[stoveW/4,stoveD/4]].forEach(function(p){
+      out+='<circle cx="'+(stoveCx+p[0])+'" cy="'+p[1]+'" r="'+br+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+=itemGroupClose();
+    return out;
+  }
+  function bathSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2, margin=Math.min(it.w,it.d)*0.12;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<rect x="'+(-hw+margin)+'" y="'+(-hd+margin)+'" width="'+(it.w-margin*2)+'" height="'+(it.d-margin*2)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    var dr=Math.min(it.w,it.d)*0.05;
+    out+='<circle cx="'+(-hw+margin*1.6)+'" cy="'+(-hd+margin*1.6)+'" r="'+dr+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  function toiletSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2, tankW=it.w*0.82, tankH=it.d*0.26;
+    var bowlRy=(it.d-tankH)*0.42, bowlCy=-hd+tankH+bowlRy*0.9;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-tankW/2)+'" y="'+(-hd)+'" width="'+tankW+'" height="'+tankH+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<ellipse cx="0" cy="'+bowlCy+'" rx="'+(it.w*0.42)+'" ry="'+bowlRy+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  function sinkSymbolSvg(it,LW){
+    var hw=it.w/2, hd=it.d/2;
+    var out=itemGroupOpen(it);
+    out+='<rect x="'+(-hw)+'" y="'+(-hd)+'" width="'+it.w+'" height="'+it.d+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<ellipse cx="0" cy="0" rx="'+(it.w*0.36)+'" ry="'+(it.d*0.32)+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=itemGroupClose();
+    return out;
+  }
+  // FMP_ITEMS(住設アセットパネル)のcategoryをkitchen/bath/toilet/sinkの4分類へ正規化する。
+  // legacy type('kitchen'/'bath'/'toilet'/'sink')はそのまま扱い、現行UIの'fmp-*'型はカタログの
+  // category(実測値。バスルーム/シャワー/トイレ/洗面台/キッチン収納/キッチン・シンク/キッチン・コンロ/冷蔵庫)
+  // から分類する(getLockFmpItem:4252-4254と同じfmpId優先の解決順序)。
+  // 冷蔵庫や可動家具(group:'家具')等、分類不能なものはnullを返し呼び出し側でスキップする。
+  function fmpFixtureKind(it){
+    if(!it || !it.type) return null;
+    var fmp=getFmpItem(it.fmpId||it.type) || getFmpItem(bestFmpType(it.type));
+    if(!fmp || fmp.group!=='住設') return null;
+    var cat=fmp.category;
+    if(cat==='トイレ') return 'toilet';
+    if(cat==='バスルーム' || cat==='シャワー') return 'bath';
+    if(cat==='洗面台') return 'sink';
+    if(cat==='キッチン収納' || cat==='キッチン/シンク' || cat==='キッチン/コンロ') return 'kitchen';
+    return null; // 冷蔵庫等、平面記号を持たない住設は対象外(従来通り描かない)
+  }
+  function fixtureKind(it){
+    if(it && (it.type==='kitchen'||it.type==='bath'||it.type==='toilet'||it.type==='sink')) return it.type;
+    return fmpFixtureKind(it);
+  }
+  function fixturesToSvg(floor,LW){
+    var out='';
+    DATA.items.filter(function(it){return (it.floor||1)===floor;}).forEach(function(it){
+      var kind=fixtureKind(it);
+      if(kind==='kitchen') out+=kitchenSymbolSvg(it,LW);
+      else if(kind==='bath') out+=bathSymbolSvg(it,LW);
+      else if(kind==='toilet') out+=toiletSymbolSvg(it,LW);
+      else if(kind==='sink') out+=sinkSymbolSvg(it,LW);
+      // それ以外(ソファ等の可動家具・車・植栽・分類不能な住設)は平面図では描かない(意図的に対象外)
+    });
+    return out;
+  }
+
+  // 全角文字想定の概算文字幅係数(安全側に大きめの見積り。半角混じりの文字列でも幅超過しない側に倒す)。
+  var ROOM_LABEL_CHAR_W=0.95;
+  function estRoomLabelWidth(text,fs){ return String(text).length*fs*ROOM_LABEL_CHAR_W; }
+  // 文字列がmaxWidthに収まるようfontSizeを縮小する(下限minFsまで)。1:100/1:200等、自動より粗い縮尺で
+  // LW.text(紙上3mm相当)が部屋幅を超えて破綻するのを防ぐ(下限を割ってもなお収まらない場合は
+  // 呼び出し側でラベル自体を省略する)。
+  function clampFsToWidth(text,fs,maxWidth,minFs){
+    if(estRoomLabelWidth(text,fs)<=maxWidth) return fs;
+    return Math.max(minFs,maxWidth/(String(text).length*ROOM_LABEL_CHAR_W));
+  }
+  // 部屋名+畳数(1.62㎡=1帖、既存の換算例:5677と同じ)を部屋中心に2行で描く。
+  // JIS図面は縮尺を1:100/1:200等「自動」より粗く手動選択できるため、部屋の内寸(r.w)に対して
+  // フォントサイズが収まるようクランプする。下限を割ってもなお部屋名が収まらない極小の部屋では
+  // 部屋名を省略し畳数のみを表示する(判読不能な文字の重なりより情報量を減らす方を優先)。
+  function roomLabelsToSvg(floor,LW){
+    var out='';
+    DATA.rooms.filter(function(r){return (r.floor||1)===floor;}).forEach(function(r){
+      var cx=r.x+r.w/2, cy=r.y+r.d/2;
+      var name=escSvgText(r.n||'部屋');
+      var tatami=(r.w*r.d*1e-6/1.62).toFixed(1)+'帖';
+      var maxTextW=r.w*0.9;
+      var minFs=LW.text*0.35; // これ未満は紙面上判読困難とみなす下限
+      var fsNameRaw=LW.text*1.15, fsAreaRaw=LW.text*0.95;
+      var fsName=clampFsToWidth(name,fsNameRaw,maxTextW,minFs);
+      var nameOmit=(fsName<=minFs+1e-9) && estRoomLabelWidth(name,minFs)>maxTextW;
+      if(nameOmit){
+        // 下限まで縮めても部屋名が収まらないほど狭小な部屋: 部屋名を省略し畳数のみ中央に表示
+        var fsAreaOnly=clampFsToWidth(tatami,fsAreaRaw,maxTextW,minFs);
+        out+='<text x="'+cx+'" y="'+(cy+fsAreaOnly*0.35)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsAreaOnly+'" fill="#000">'+tatami+'</text>';
+      } else {
+        var fsArea=clampFsToWidth(tatami,fsAreaRaw,maxTextW,minFs);
+        var gap=fsName*0.7;
+        out+='<text x="'+cx+'" y="'+(cy-gap*0.5)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsName+'" fill="#000">'+name+'</text>';
+        out+='<text x="'+cx+'" y="'+(cy+gap*1.1)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsArea+'" fill="#000">'+tatami+'</text>';
+      }
+    });
+    return out;
+  }
+
+  // 軸平行壁の芯座標をユニーク化(近接1mm以内は同一視して読み捨て)。
+  // axis='x'→x1===x2の垂直壁のx群(下辺の水平寸法用)、axis='y'→y1===y2の水平壁のy群(左辺の垂直寸法用)。
+  function axisWallCoords(floor,axis){
+    var vals=[];
+    DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
+      if(axis==='x' && Math.abs(w.x1-w.x2)<1e-6) vals.push((w.x1+w.x2)/2);
+      if(axis==='y' && Math.abs(w.y1-w.y2)<1e-6) vals.push((w.y1+w.y2)/2);
+    });
+    vals.sort(function(a,b){return a-b;});
+    var uniq=[];
+    vals.forEach(function(v){
+      if(uniq.length && Math.abs(v-uniq[uniq.length-1])<=1) return;
+      uniq.push(v);
+    });
+    return uniq;
+  }
+  // JIS建築流の寸法線端部記号: 矢印でなく45°の短い斜線を線種によらず同じ向き("/")で描く。
+  function dimTick(x,y,LW){
+    var d=LW.text*0.35;
+    return '<line x1="'+(x-d)+'" y1="'+(y+d)+'" x2="'+(x+d)+'" y2="'+(y-d)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+  }
+  // 寸法値(mm整数)。rotate=trueで90°回転(左辺の縦書き用、下から上に読める向き)。
+  function dimValueText(cx,cy,val,rotate,LW){
+    var fs=LW.text*0.9;
+    return '<text x="'+cx+'" y="'+cy+'" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000" text-anchor="middle"'
+      +(rotate?' transform="rotate(-90 '+cx+' '+cy+')"':'')+'>'+Math.round(val)+'</text>';
+  }
+  // 下辺の水平寸法(2段): xs=垂直壁の芯x座標群(昇順・重複除去済み)、wallMaxY=壁範囲下端(余白を含まない実寸)。
+  // 内段(wallMaxY+700): 隣接芯間の連続寸法。外段(+1400): 全体寸法1本。
+  function bottomDimSvg(xs,wallMaxY,LW){
+    if(xs.length<2) return '';
+    var yIn=wallMaxY+700, yOut=wallMaxY+1400, extReach=LW.text*0.3;
+    var out='';
+    xs.forEach(function(x){
+      out+='<line x1="'+x+'" y1="'+wallMaxY+'" x2="'+x+'" y2="'+(yOut+extReach)+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+='<line x1="'+xs[0]+'" y1="'+yIn+'" x2="'+xs[xs.length-1]+'" y2="'+yIn+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    xs.forEach(function(x){ out+=dimTick(x,yIn,LW); });
+    for(var i=0;i<xs.length-1;i++){
+      out+=dimValueText((xs[i]+xs[i+1])/2, yIn-LW.text*0.5, xs[i+1]-xs[i], false, LW);
+    }
+    out+='<line x1="'+xs[0]+'" y1="'+yOut+'" x2="'+xs[xs.length-1]+'" y2="'+yOut+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=dimTick(xs[0],yOut,LW)+dimTick(xs[xs.length-1],yOut,LW);
+    out+=dimValueText((xs[0]+xs[xs.length-1])/2, yOut-LW.text*0.5, xs[xs.length-1]-xs[0], false, LW);
+    return out;
+  }
+  // 左辺の垂直寸法(2段): ys=水平壁の芯y座標群、wallMinX=壁範囲左端(実寸)。文字は90°回転して縦書き配置。
+  function leftDimSvg(ys,wallMinX,LW){
+    if(ys.length<2) return '';
+    var xIn=wallMinX-700, xOut=wallMinX-1400, extReach=LW.text*0.3;
+    var out='';
+    ys.forEach(function(y){
+      out+='<line x1="'+wallMinX+'" y1="'+y+'" x2="'+(xOut-extReach)+'" y2="'+y+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    });
+    out+='<line x1="'+xIn+'" y1="'+ys[0]+'" x2="'+xIn+'" y2="'+ys[ys.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    ys.forEach(function(y){ out+=dimTick(xIn,y,LW); });
+    for(var i=0;i<ys.length-1;i++){
+      out+=dimValueText(xIn-LW.text*0.5, (ys[i]+ys[i+1])/2, ys[i+1]-ys[i], true, LW);
+    }
+    out+='<line x1="'+xOut+'" y1="'+ys[0]+'" x2="'+xOut+'" y2="'+ys[ys.length-1]+'" stroke="#000" stroke-width="'+LW.thin+'"/>';
+    out+=dimTick(xOut,ys[0],LW)+dimTick(xOut,ys[ys.length-1],LW);
+    out+=dimValueText(xOut-LW.text*0.5, (ys[0]+ys[ys.length-1])/2, ys[ys.length-1]-ys[0], true, LW);
+    return out;
+  }
+  // 寸法線一式(下辺+左辺)。planBounds(floor)は壁範囲+PLAN_MARGIN_MM済みなので、差し引いて壁範囲そのもの(余白なし)に戻す。
+  function dimensionsToSvg(floor,LW){
+    var b=planBounds(floor);
+    var wallMaxY=b.maxY-PLAN_MARGIN_MM, wallMinX=b.minX+PLAN_MARGIN_MM;
+    var xs=axisWallCoords(floor,'x'), ys=axisWallCoords(floor,'y');
+    return bottomDimSvg(xs,wallMaxY,LW)+leftDimSvg(ys,wallMinX,LW);
+  }
+
+  // 方位記号: 右上に円+上向き矢印+「N」。2D画面の上=北という単純な固定表示(回転データは持たない)。
+  function northMarkSvg(bounds,LW){
+    var r=LW.text*2.6, margin=LW.text*2, textH=LW.text*1.1;
+    var cx=bounds.maxX-margin-r, cy=bounds.minY+margin+textH+r;
+    var out='<text x="'+cx+'" y="'+(bounds.minY+margin+textH*0.8)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+textH+'" fill="#000">N</text>';
+    out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    var tipY=cy-r*0.75, tailY=cy+r*0.6, ah=r*0.55, aw=r*0.32;
+    out+='<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<polygon points="'+cx+','+tipY+' '+(cx-aw)+','+(tipY+ah)+' '+(cx+aw)+','+(tipY+ah)+'" fill="#000"/>';
+    return out;
+  }
+
+  function isoDateStr(d){
+    var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
+    return y+'-'+m+'-'+day;
+  }
+  // 表題欄: 右下に枠(紙寸140×20mm相当×縮尺)。1行に図面名・縮尺・日付・アプリ名を「|」区切りで表示。
+  function titleBlockSvg(label,scale,bounds,LW){
+    var boxW=140*scale, boxH=20*scale, margin=LW.text*1.2;
+    var x=bounds.maxX-margin-boxW, y=bounds.maxY-margin-boxH;
+    var text=escSvgText(label)+'  |  縮尺 1:'+scale+'  |  '+isoDateStr(new Date())+'  |  WebCAD Planner';
+    var fs=LW.text*0.9;
+    var out='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="'+boxH+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<text x="'+(x+boxW/2)+'" y="'+(y+boxH/2+fs*0.32)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000">'+text+'</text>';
+    return out;
+  }
+
+  // 表題欄(140×20mm紙寸、右下)・方位記号(右上)の専用領域を自動縮尺の判定にも反映するための紙寸縮小分。
+  // これらは紙寸(mm)そのままの固定サイズなので、判定用の紙寸だけをこの分小さく見せて余裕を確保する
+  // (paperDimsMm/pickAutoScaleの実装自体は変更しない。実際のview/印刷範囲は元の紙寸のまま)。
+  var TITLE_RESERVE_W_MM=150, TITLE_RESERVE_H_MM=26, NORTH_RESERVE_H_MM=30;
+  function buildFloorPlanSvg(floor,opts){
+    opts=opts||{};
+    var paper=paperDimsMm(opts.paper);
+    var bounds=planBounds(floor);
+    var scalePaper={w:paper.w-TITLE_RESERVE_W_MM, h:paper.h-TITLE_RESERVE_H_MM-NORTH_RESERVE_H_MM};
+    var scaleNum=(opts.scale==='auto') ? pickAutoScale(bounds,scalePaper) : (parseInt(opts.scale,10)||100);
+    var LW=lineWidths(scaleNum);
+    var cx=(bounds.minX+bounds.maxX)/2, cy=(bounds.minY+bounds.maxY)/2;
+    var vw=paper.w*scaleNum, vh=paper.h*scaleNum;
+    var view={minX:cx-vw/2,minY:cy-vh/2,maxX:cx+vw/2,maxY:cy+vh/2};
+    var label=floor+'F 平面図';
+    // 部屋ラベル・設備・階段は壁の黒塗りより後(手前)に描画し、壁と重なっても隠れないようにする。
+    // 寸法線は建物外側の余白部分のみに描くため、壁や開口と重なる心配はない。
+    return svgOpen(view,opts)+dimensionsToSvg(floor,LW)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)
+      +roomLabelsToSvg(floor,LW)+fixturesToSvg(floor,LW)+stairsToSvg(floor,LW)
+      +northMarkSvg(view,LW)+titleBlockSvg(label,scaleNum,view,LW)+svgClose();
+  }
+
+  return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
+})();
+
+var JIS_UI={sheet:null};
+function openJisDrawingDialog(){
+  var sheets=JISDRAW.availableSheets();
+  var ov=document.getElementById('jis-drawing-overlay');
+  ov.style.display='flex';
+  if(!sheets.length){
+    // 空プラン分岐: JIS_UI.sheetをクリアしないと、直後に閉じずに縮尺/用紙selectを操作した際
+    // jisRerenderがstaleなsheetでの偽図面/古い階の出力に上書きしてしまう(印刷・DLも同様)。
+    document.getElementById('jis-preview').innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
+    document.getElementById('jis-sheet-list').innerHTML='';
+    JIS_UI.sheet=null;
+    return;
+  }
+  // 記憶しているsheetが今回のavailableSheetsに存在するか再検証する(前回開いていた階/方位が
+  // その後の編集で消えているとstaleなまま印刷・SVG/PNG出力されてしまうため)。無ければ先頭にフォールバック。
+  var stillValid=JIS_UI.sheet && sheets.some(function(s){return s.kind===JIS_UI.sheet.kind && s.key===JIS_UI.sheet.key;});
+  if(!stillValid) JIS_UI.sheet=sheets[0];
+  renderJisSheetList(sheets);
+  jisRerender();
+}
+function closeJisDrawingDialog(){ document.getElementById('jis-drawing-overlay').style.display='none'; }
+function jisSelectSheet(kind,key){
+  JIS_UI.sheet={kind:kind,key:key};
+  renderJisSheetList(JISDRAW.availableSheets());
+  jisRerender();
+}
+function renderJisSheetList(sheets){
+  // リストのHTMLを組み立て、選択中に .active を付ける(平面図/立面図を見出しで区切る)
+  var plans=sheets.filter(function(s){return s.kind==='plan';});
+  var elevs=sheets.filter(function(s){return s.kind==='elev';});
+  function isActive(s){
+    return JIS_UI.sheet && JIS_UI.sheet.kind===s.kind && JIS_UI.sheet.key===s.key;
+  }
+  function btnHtml(s){
+    // keyは数値(階)または1文字の方角コード。onclick属性はダブルクォートで囲むため、
+    // JSON.stringifyの二重引用符文字列をそのまま埋め込むと属性が壊れる → シングルクォートで手組みする
+    var keyLit=(typeof s.key==='number')?String(s.key):("'"+s.key+"'");
+    return '<button type="button" class="jis-sheet-btn'+(isActive(s)?' active':'')+'" onclick="jisSelectSheet(\''+s.kind+'\','+keyLit+')">'+s.label+'</button>';
+  }
+  var html='';
+  if(plans.length){
+    html+='<div class="jis-sheet-group-title">平面図</div>'+plans.map(btnHtml).join('');
+  }
+  if(elevs.length){
+    html+='<div class="jis-sheet-group-title">立面図</div>'+elevs.map(btnHtml).join('');
+  }
+  document.getElementById('jis-sheet-list').innerHTML=html;
+}
+function jisCurrentOpts(){
+  return {scale:document.getElementById('jis-scale').value, paper:document.getElementById('jis-paper').value};
+}
+function jisCurrentSvg(){
+  var s=JIS_UI.sheet;
+  return s.kind==='plan' ? JISDRAW.buildFloorPlanSvg(s.key,jisCurrentOpts())
+                         : JISDRAW.buildElevationSvg(s.key,jisCurrentOpts());
+}
+function jisRerender(){
+  var host=document.getElementById('jis-preview');
+  // sheetがnull(空プラン、またはstale検証で消えた)なら偽図面で上書きせず空メッセージのまま何もしない。
+  if(!JIS_UI.sheet){
+    host.innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
+    jisSetStatus('');
+    return;
+  }
+  host.innerHTML='<div class="jis-paper-sheet">'+jisCurrentSvg()+'</div>';
+  jisSetStatus(''); // 図面や用紙・縮尺を切り替えたら古いエラー表示は消す
+}
+// モーダル内の帯でエラー等を通知する(share-status:16161と同じtextContent+classList.toggleパターン)。
+// message空文字なら非表示に戻す。alert()は使わずここに一本化する。
+function jisSetStatus(message,isError){
+  var el=document.getElementById('jis-status');
+  if(!el) return;
+  if(!message){ el.style.display='none'; el.textContent=''; return; }
+  el.textContent=message;
+  el.classList.toggle('error',!!isError);
+  el.style.display='block';
+}
+// ファイル名の共通部分。kind/keyから組み立てる(平面:jis-plan{階}f、立面:jis-elev-{方角コード})+日付(YYYYMMDD, ダッシュ無し)。
+function jisFileBaseName(){
+  var s=JIS_UI.sheet;
+  var kindPart=(s.kind==='plan') ? ('plan'+s.key+'f') : ('elev-'+s.key);
+  var d=new Date();
+  var ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+  return 'jis-'+kindPart+'-'+ymd;
+}
+function jisDownloadSvg(){
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  // downloadTextFile(:16841)→downloadBlobFile(:16829)は<a download>+objectURL方式で、
+  // 既存のAI一括DL等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
+  downloadTextFile(jisFileBaseName()+'.svg', jisCurrentSvg(), 'image/svg+xml;charset=utf-8');
+}
+function jisDownloadPng(){
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  jisSetStatus('');
+  var svgStr=jisCurrentSvg();
+  // SVGのviewBoxから紙の縦横比を取り出し、長辺約3000pxになるピクセルサイズを決める
+  // (SVGルートにwidth/height属性が無いため、Imageのnaturalサイズに頼らずviewBoxから直接計算する)。
+  var vb=svgStr.match(/viewBox="\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s*"/);
+  var vw=vb?parseFloat(vb[3]):420, vh=vb?parseFloat(vb[4]):297;
+  if(!(vw>0)||!(vh>0)){ vw=420; vh=297; }
+  var LONG_SIDE_PX=3000;
+  var pxW,pxH;
+  if(vw>=vh){ pxW=LONG_SIDE_PX; pxH=Math.max(1,Math.round(LONG_SIDE_PX*vh/vw)); }
+  else{ pxH=LONG_SIDE_PX; pxW=Math.max(1,Math.round(LONG_SIDE_PX*vw/vh)); }
+  // WebKit(iPad Safari)は内在サイズ(width/height)の無いSVGをImageとして描画する際、
+  // ラスタライズ解像度が不定になり得る(ぼやけ・空白のリスク)。canvasと同じ出力px数を
+  // ルート<svg>へ注入する(viewBoxはそのまま維持するため見た目・縮尺は変わらない)。
+  var svgWithSize=svgStr.replace('<svg ', '<svg width="'+pxW+'" height="'+pxH+'" ');
+  // SVG内に日本語テキストが含まれるため、data URLではなくBlob+object URL経由でImageに読み込む
+  // (WebKit系でdata:image/svg+xmlに多バイト文字が入ると読み込みに失敗することがある既知の問題を回避)。
+  var blob=new Blob([svgWithSize],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var canvas=document.createElement('canvas');
+      canvas.width=pxW; canvas.height=pxH;
+      var ctx=canvas.getContext('2d');
+      ctx.fillStyle='#fff';
+      ctx.fillRect(0,0,pxW,pxH); // 白背景を先に塗ってから図面を重ねる(SVG側は透過が無い想定だが念のため)
+      ctx.drawImage(img,0,0,pxW,pxH);
+      canvas.toBlob(function(pngBlob){
+        URL.revokeObjectURL(url);
+        if(!pngBlob){
+          jisSetStatus('PNGへの変換に失敗しました。ブラウザの制限により生成できない場合があります。',true);
+          return;
+        }
+        downloadBlobFile(jisFileBaseName()+'.png', pngBlob);
+      },'image/png');
+    }catch(e){
+      URL.revokeObjectURL(url);
+      jisSetStatus('PNGへの変換に失敗しました: '+(e&&e.message?e.message:e),true);
+    }
+  };
+  img.onerror=function(){
+    URL.revokeObjectURL(url);
+    jisSetStatus('PNG変換用の画像読み込みに失敗しました。ブラウザやOSの制限が原因の可能性があります。',true);
+  };
+  img.src=url;
+}
+// 印刷用の隠しiframeは1つだけ保持する(連打時に前のiframeを確実に破棄して多重生成を防ぐ)。
+var JIS_PRINT_IFRAME=null;
+function jisRemovePrintIframe(){
+  if(JIS_PRINT_IFRAME && JIS_PRINT_IFRAME.parentNode) JIS_PRINT_IFRAME.parentNode.removeChild(JIS_PRINT_IFRAME);
+  JIS_PRINT_IFRAME=null;
+}
+function jisPrint(){
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  jisRemovePrintIframe(); // 連続クリックしても前回分が残らないよう先に片付ける
+  var opts=jisCurrentOpts();
+  var pageSize=(opts.paper==='a4') ? 'A4 landscape' : 'A3 landscape';
+  var svgStr=jisCurrentSvg();
+  // 図面本体のフォントはNoto Sans JP指定(:13付近)なので、印刷プレビューでも同じ見た目になるよう
+  // 同じGoogle Fonts <link>をsrcdoc側にも読み込む(無ければOSフォールバック書体で印刷されてしまう)。
+  // ※PNG書き出し側(jisDownloadPng)はSVGをImageとして描画するだけで外部<link>を解決できない
+  // (SVG内<image>/<foreignObject>と違い、SVGルート自体のCSSに外部@font-faceを読み込む仕組みが無い)
+  // ため、フォント埋め込みは対応不要(印刷パスのみで完結する対応)。
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>JIS図面</title>'
+    +'<link rel="preconnect" href="https://fonts.googleapis.com">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">'
+    +'<style>@page{size:'+pageSize+';margin:8mm} html,body{margin:0;padding:0;font-family:\'Noto Sans JP\',sans-serif} svg{display:block;width:100%;height:auto}</style>'
+    +'</head><body>'+svgStr+'</body></html>';
+  var iframe=document.createElement('iframe');
+  iframe.style.position='fixed';
+  iframe.style.right='0';
+  iframe.style.bottom='0';
+  iframe.style.width='0';
+  iframe.style.height='0';
+  iframe.style.border='0';
+  iframe.setAttribute('aria-hidden','true');
+  document.body.appendChild(iframe);
+  JIS_PRINT_IFRAME=iframe;
+  var cleaned=false;
+  function cleanup(){
+    if(cleaned) return;
+    cleaned=true;
+    if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    if(JIS_PRINT_IFRAME===iframe) JIS_PRINT_IFRAME=null;
+  }
+  iframe.onload=function(){
+    var win=iframe.contentWindow;
+    var printed=false; // fonts.ready完了とタイムアウトのどちらか早い方で発火するため、二重print()呼び出しを防ぐガード
+    function doPrint(){
+      if(printed) return;
+      printed=true;
+      try{
+        win.onafterprint=cleanup; // 印刷ダイアログが閉じたタイミングで除去(対応ブラウザ向け)
+        win.focus();
+        win.print();
+      }catch(e){
+        jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
+      }
+      // afterprint未対応環境向けのフォールバック除去。print()が非ブロッキングなブラウザ(Firefox/Safari系)では
+      // OS印刷ダイアログの操作中にiframeが消えると印刷失敗・白紙出力になり得るため、
+      // 隠しiframeを長時間残すコストはほぼ無い前提で余裕を持って60秒に設定する
+      // (onafterprintが発火する環境では即時cleanupされるのでこの待ち時間は使われない)。
+      setTimeout(cleanup,60000);
+    }
+    // stylesheetは即ロードされてもフォント本体はdisplay=swapのため遅延取得され、
+    // その間にprint()するとOSフォールバック書体で刷られてしまう競合がある。
+    // document.fonts.readyでフォント本体のロード完了を待ってから印刷する(未対応環境や
+    // 読み込みが遅い環境向けに約2秒でタイムアウトし、印刷自体は必ず行われるようにする)。
+    try{
+      if(win.document && win.document.fonts && win.document.fonts.ready){
+        win.document.fonts.ready.then(doPrint);
+      } else {
+        doPrint();
+      }
+    }catch(e){
+      doPrint();
+    }
+    setTimeout(doPrint,2000);
+  };
+  iframe.srcdoc=html;
+}
+
+// ─── Init storage / shared room ───────────────────
+// URLの共同編集プランを、端末内の保存データより優先する。
+initSharedRoomFromUrl().then(function(joined){if(!joined)checkStorageOnInit();});
 initNativeColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();

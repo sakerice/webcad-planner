@@ -8,12 +8,16 @@ dist/
 
 # Runtime and tool logs
 *.log
+.wrangler/
 
 # Generated sprite analysis output
 assets/japanese_floorplan_parts_sprite_gpt_cropped.json
 
 # Local scratch workspace
 scratch/
+
+# Manufacturer texture references (personal dev reference only — never commit/deploy)
+reference-textures/
 
 # Dependency installs
 node_modules/
