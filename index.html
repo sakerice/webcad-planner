@@ -18819,11 +18819,17 @@ function openJisDrawingDialog(){
   var ov=document.getElementById('jis-drawing-overlay');
   ov.style.display='flex';
   if(!sheets.length){
+    // 空プラン分岐: JIS_UI.sheetをクリアしないと、直後に閉じずに縮尺/用紙selectを操作した際
+    // jisRerenderがstaleなsheetでの偽図面/古い階の出力に上書きしてしまう(印刷・DLも同様)。
     document.getElementById('jis-preview').innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
     document.getElementById('jis-sheet-list').innerHTML='';
+    JIS_UI.sheet=null;
     return;
   }
-  if(!JIS_UI.sheet) JIS_UI.sheet=sheets[0];
+  // 記憶しているsheetが今回のavailableSheetsに存在するか再検証する(前回開いていた階/方位が
+  // その後の編集で消えているとstaleなまま印刷・SVG/PNG出力されてしまうため)。無ければ先頭にフォールバック。
+  var stillValid=JIS_UI.sheet && sheets.some(function(s){return s.kind===JIS_UI.sheet.kind && s.key===JIS_UI.sheet.key;});
+  if(!stillValid) JIS_UI.sheet=sheets[0];
   renderJisSheetList(sheets);
   jisRerender();
 }
@@ -18865,6 +18871,12 @@ function jisCurrentSvg(){
 }
 function jisRerender(){
   var host=document.getElementById('jis-preview');
+  // sheetがnull(空プラン、またはstale検証で消えた)なら偽図面で上書きせず空メッセージのまま何もしない。
+  if(!JIS_UI.sheet){
+    host.innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
+    jisSetStatus('');
+    return;
+  }
   host.innerHTML='<div class="jis-paper-sheet">'+jisCurrentSvg()+'</div>';
   jisSetStatus(''); // 図面や用紙・縮尺を切り替えたら古いエラー表示は消す
 }
@@ -18887,13 +18899,13 @@ function jisFileBaseName(){
   return 'jis-'+kindPart+'-'+ymd;
 }
 function jisDownloadSvg(){
-  if(!JIS_UI.sheet) return;
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
   // downloadTextFile(:16841)→downloadBlobFile(:16829)は<a download>+objectURL方式で、
   // 既存のAI一括DL等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
   downloadTextFile(jisFileBaseName()+'.svg', jisCurrentSvg(), 'image/svg+xml;charset=utf-8');
 }
 function jisDownloadPng(){
-  if(!JIS_UI.sheet) return;
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
   jisSetStatus('');
   var svgStr=jisCurrentSvg();
   // SVGのviewBoxから紙の縦横比を取り出し、長辺約3000pxになるピクセルサイズを決める
@@ -18944,7 +18956,7 @@ function jisRemovePrintIframe(){
   JIS_PRINT_IFRAME=null;
 }
 function jisPrint(){
-  if(!JIS_UI.sheet) return;
+  if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
   jisRemovePrintIframe(); // 連続クリックしても前回分が残らないよう先に片付ける
   var opts=jisCurrentOpts();
   var pageSize=(opts.paper==='a4') ? 'A4 landscape' : 'A3 landscape';
