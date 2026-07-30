@@ -3036,6 +3036,7 @@ input[type="reset"]:focus-visible{
     </div>
     <div id="share-status" class="share-status">共同編集を開始すると、現在のプランがクラウドへ保存されます。</div>
     <div class="share-actions">
+      <button id="share-retry-btn" class="share-primary" type="button" style="display:none" onclick="retrySharedJoin()">共有URLに再接続</button>
       <button id="share-create-btn" class="share-primary" type="button" onclick="createSharedRoom()">共同編集を開始</button>
       <button id="share-leave-btn" class="share-danger" type="button" style="display:none" onclick="leaveSharedRoom()">共同編集を終了</button>
     </div>
@@ -16193,7 +16194,7 @@ async function checkStorageOnInit(){
 // ─── URL共同編集 ───────────────────────────────
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
-var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0};
+var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
 var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail'];
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
 function sharedFastSignature(value){
@@ -16268,6 +16269,9 @@ function renderSharedUi(){
   var section=document.getElementById('share-connected-section');if(section)section.style.display=connected?'block':'none';
   var create=document.getElementById('share-create-btn');if(create)create.style.display=connected?'none':'inline-block';
   var leave=document.getElementById('share-leave-btn');if(leave)leave.style.display=connected?'inline-block':'none';
+  // URLに共有ルームがあるのに未参加＝参加に失敗した状態。新規作成ではなく再接続を促す。
+  var pendingJoin=!connected&&!!sharedRoomFromLocation();
+  var retry=document.getElementById('share-retry-btn');if(retry)retry.style.display=pendingJoin?'inline-block':'none';
   var url=document.getElementById('share-url');if(url)url.value=connected?sharedUrl():'';
   var expiry=document.getElementById('share-expiry');if(expiry)expiry.textContent=sharedFormatExpiry();
   var people=document.getElementById('share-people');
@@ -16382,7 +16386,10 @@ function connectSharedSocket(){
     if(message.type==='welcome'){
       SHARED.expiresAt=message.expiresAt||SHARED.expiresAt;
       SHARED.savedAt=message.savedAt||SHARED.savedAt;
-      if(Number(message.version||0)>SHARED.version+1)refreshSharedPlan();
+      // 接続中はサーバと版が一致するので、welcomeの版が自分より進んでいたら
+      // 切断中のパッチを取りこぼしている。そのパッチはもう再送されないため全体を取り直す。
+      // (以前は version+1 まで許容しており、欠落が1件のときだけ静かに同期が壊れていた)
+      if(Number(message.version||0)>SHARED.version)refreshSharedPlan();
       else SHARED.version=Math.max(SHARED.version,Number(message.version||0));
       sharedSetStatus(message.checkpointPending?'変更を同期済みです。操作が止まると自動保存します。':'共同編集に接続しました。自動保存済みです。');renderSharedUi();return;
     }
@@ -16405,21 +16412,50 @@ function connectSharedSocket(){
   socket.onerror=function(){renderSharedUi();};
 }
 async function fetchSharedPlan(roomId){
-  var response=await fetch('/api/rooms/'+roomId,{cache:'no-store'});
+  var response;
+  try{response=await fetch('/api/rooms/'+roomId,{cache:'no-store'});}
+  catch(e){throw new Error('通信に失敗しました。接続を確認して「共有URLに再接続」を押してください。');}
   if(!response.ok)throw new Error(response.status===410?'この共同編集プランは期限切れです。':'共同編集プランを読み込めませんでした。');
   var plan=await response.json();return {plan:plan,version:Number(response.headers.get('x-room-version')||1),expiresAt:Number(response.headers.get('x-room-expires-at')||0),savedAt:Number(response.headers.get('x-room-saved-at')||0)};
 }
-function installSharedPlan(loaded,roomId){
+// resuming=true は「既に参加中のセッションで取り直しただけ」の意味。
+// 生きているソケットを張り直さず、編集中の視点も動かさない。
+function installSharedPlan(loaded,roomId,resuming){
   _defaultPlanPending=false;DATA=loaded.plan;SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
-  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();connectSharedSocket();renderSharedUi();
+  ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
-async function refreshSharedPlan(){if(!SHARED.roomId)return;try{installSharedPlan(await fetchSharedPlan(SHARED.roomId),SHARED.roomId);}catch(e){sharedSetStatus(e.message,true);}}
+async function refreshSharedPlan(){
+  if(!SHARED.roomId)return;
+  if(SHARED.refreshing)return SHARED.refreshPromise; // 再接続のたびに全体取得が重ならないようにする
+  var roomId=SHARED.roomId;
+  SHARED.refreshing=true;
+  SHARED.refreshPromise=(async function(){try{
+    var loaded=await fetchSharedPlan(roomId);
+    if(SHARED.roomId!==roomId)return;                    // 取得中に退出／別ルームへ移動した
+    if(Number(loaded.version||0)<SHARED.version)return;  // 取得中にソケットで新しいパッチを適用済み
+    installSharedPlan(loaded,roomId,!!(SHARED.socket&&SHARED.socket.readyState===1));
+  }catch(e){sharedSetStatus(e.message,true);}
+  finally{SHARED.refreshing=false;}})();
+  return SHARED.refreshPromise;
+}
 async function initSharedRoomFromUrl(){
   var roomId=sharedRoomFromLocation();if(!roomId)return false;
   try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
   catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
 }
+// 参加に失敗したときの復帰導線。新規ルームを作らずに、共有されたURLへもう一度つなぐ。
+async function retrySharedJoin(){
+  var button=document.getElementById('share-retry-btn');if(button)button.disabled=true;
+  sharedSetStatus('共有されたプランに再接続しています…');
+  try{
+    if(await initSharedRoomFromUrl())sharedSetStatus('共有されたプランに接続しました。');
+  }finally{if(button)button.disabled=false;renderSharedUi();}
+}
 async function createSharedRoom(){
+  // URLに共有ルームが載ったままここへ来るのは「参加に失敗した人が新規作成を押した」状態。
+  // そのまま作るとURLが差し替わり、共有相手と永久につながらなくなるので必ず確認する。
+  var pending=sharedRoomFromLocation();
+  if(pending&&pending!==SHARED.roomId&&!confirm('共有されたURLのプランにまだ参加できていません。\n\nこのまま新規に開始すると、URLは別のものへ置き換わり、共有相手とはつながりません。\n先に「共有URLに再接続」をお試しください。\n\nそれでも新規に開始しますか？'))return;
   var button=document.getElementById('share-create-btn');if(button)button.disabled=true;sharedSetStatus('共同編集ルームを作成しています…');
   try{
     normalizeLegacyFurnitureItems();ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();captureViewState();
