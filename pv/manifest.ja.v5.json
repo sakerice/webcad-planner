@@ -1,0 +1,52 @@
+{
+  "video": {
+    "title": "house-planner mobile PV v5 — exact-first layered master",
+    "purpose": "正確な製品映像だけで物語を完結させ、承認済み生成素材を交換可能な品質向上層として使う32秒PV",
+    "audience": "日本で戸建て住宅を検討する生活者、および住宅・設計実務者",
+    "channel": "本サイト / YouTube",
+    "aspect_ratio": "16:9",
+    "total_duration_seconds": 32
+  },
+  "references": [
+    {"id":"plan_1f","path":"pv/references/v4/ui/01-plan-1f-live.jpg","status":"approved","role":"現行1F平面図"},
+    {"id":"plan_2f","path":"pv/references/v4/ui/02-plan-2f-live.jpg","status":"approved","role":"現行2F平面図"},
+    {"id":"ext_3q","path":"pv/references/v4/ui/03-exterior-3q-live.jpg","status":"approved","role":"正確な斜め外観"},
+    {"id":"ext_north","path":"pv/references/v4/ui/04-exterior-north-live.jpg","status":"approved","role":"正確な北外観"},
+    {"id":"ext_east","path":"pv/references/v4/ui/05-exterior-east-live.jpg","status":"approved","role":"正確な東外観"},
+    {"id":"interior_overhead","path":"pv/references/v4/ui/08-interior-3d-baseline-live.jpg","status":"approved","role":"正確な2F内観俯瞰"},
+    {"id":"interior_oblique","path":"pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg","status":"approved","role":"正確な2F内観斜め視点"},
+    {"id":"walk_foyer","path":"pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg","status":"approved","role":"座り視点の玄関・階段"},
+    {"id":"walk_utility","path":"pv/references/v4/ui/16-walkthrough-seated-map-b-live.jpg","status":"approved","role":"座り視点の洗面側"},
+    {"id":"walk_utility_look","path":"pv/references/v4/ui/18-walkthrough-seated-map-b-look-live.jpg","status":"approved","role":"同位置の別方向"},
+    {"id":"beauty_foyer","path":"pv/approved/iteration-04/S06-foyer-stair-approved-v1.png","status":"approved","role":"同一玄関・階段の承認済み高品質画像"},
+    {"id":"beauty_ldk","path":"pv/approved/iteration-04/S07-final-ldk-approved-v1.png","status":"approved","role":"同一2F LDKの承認済み高品質画像"},
+    {"id":"official_logo","path":"assets/brand/house-planner-mobile-icon.png","status":"approved","role":"公式ロゴ"},
+    {"id":"capture_real_edit","path":"pv/capture/v5/C01-plan-1f-real-edit-take-approved.mp4","status":"missing","role":"S01の実編集収録"},
+    {"id":"capture_floor_switch","path":"pv/capture/v5/C02-plan-1f-to-2f-take-approved.mp4","status":"missing","role":"S02の実階切替収録"},
+    {"id":"exterior_v2_approved","path":"pv/approved/iteration-05/exterior-v2-approved.png","status":"missing","role":"任意の品質向上差替え用。基幹版の完成条件ではない"}
+  ],
+  "global_instructions": {
+    "brand": "house-planner mobile。暖かなオフホワイト、コーラル、スカイブルー、チャコール。ロゴと文字は最終編集でのみ正確に合成する。",
+    "continuity": "assets/default_plan.jsonの同一住宅を全ショットで維持する。設計不一致のexterior-beauty-candidate-01〜04は使用・参照禁止。",
+    "text_policy": "生成フレーム内にUI、文字、ロゴ、QRコード、透かしを作らせない。",
+    "audio": "抑制した現代的パルス、実UIクリック、積層の軽い上昇音、内観の静かなルームトーン、3音のブランド解決。"
+  },
+  "shots": [
+    {"id":"S01","story_phase":"hook","duration_seconds":2.5,"purpose":"実際の1F編集で始める","incoming_state":"現行1F平面図","visible_change":"壁または開口を一度だけ実編集","outgoing_handoff":"編集線を2Fの主要線へ合わせる","references":["plan_1f","capture_real_edit"],"source_status":"missing","generation_route":"direct_screen_recording","camera":"実画面固定","action":"編集前・操作中・確定後を収録","on_screen_text":"住まいは、一本の線から。","prompt":"生成なし","negative_prompt":"生成UI、生成図面"},
+    {"id":"S02","story_phase":"build","duration_seconds":2.5,"purpose":"1Fから2Fへ計画が続くことを示す","incoming_state":"S01の確定状態","visible_change":"実フロア操作で2Fへ一度だけ切替","outgoing_handoff":"1F・2F線を積層へ","references":["plan_2f","capture_floor_switch"],"source_status":"missing","generation_route":"direct_screen_recording","camera":"実画面固定","action":"1F表示・操作・2F確定を画面内で証明","on_screen_text":"","prompt":"生成なし","negative_prompt":"静止画で実操作を装うこと、生成UI"},
+    {"id":"S03","story_phase":"build_up","duration_seconds":4,"purpose":"家が作り上がる因果を見せる","incoming_state":"承認済み1F・2F図面","visible_change":"1F→2F→積層線→正確な現行3D","outgoing_handoff":"同じ屋根線で外観へ","references":["plan_1f","plan_2f","ext_east"],"source_status":"approved","generation_route":"deterministic_composite","camera":"東方向の建築軸を固定","action":"図面と現行3Dだけで構成。exterior_v2_approvedが合格した場合のみ末尾を差替え","on_screen_text":"描く。","prompt":"生成なし","negative_prompt":"設計不一致外観、生成図面、別住宅"},
+    {"id":"S04","story_phase":"exterior_proof","duration_seconds":4,"purpose":"複数角度から外観を確認できることを示す","incoming_state":"正確な東外観","visible_change":"斜め・東・北の異なる3角度","outgoing_handoff":"外壁線を内観の間仕切りへ","references":["ext_3q","ext_east","ext_north"],"source_status":"approved","generation_route":"direct_capture_plus_deterministic_edit","camera":"各角度1.2〜1.5秒","action":"短いマッチカット。承認済みv2外観がある場合だけ最大2カットを差替え","on_screen_text":"角度を変えて、確かめる。","prompt":"生成なし","negative_prompt":"同じファーストビューの反復、別住宅"},
+    {"id":"S05","story_phase":"interior_proof","duration_seconds":4,"purpose":"内観3Dで空間関係を理解させる","incoming_state":"2F俯瞰内観","visible_change":"斜め俯瞰へ切替し階段・キッチン・ソファ・ダイニングを見せる","outgoing_handoff":"階段と床線を座り視点へ","references":["interior_overhead","interior_oblique"],"source_status":"approved","generation_route":"direct_capture_plus_optional_approved_i2v","camera":"俯瞰と斜め俯瞰","action":"基幹版は正確な実画面。Topview結果は合格区間のみ差替え","on_screen_text":"","prompt":"正確な製品3Dを維持する","negative_prompt":"階段・壁・開口・家具の変形"},
+    {"id":"S06","story_phase":"inhabit","duration_seconds":5,"purpose":"座り視点で足元と距離感を見せる","incoming_state":"玄関・階段の座り視点","visible_change":"玄関・洗面側・同位置別方向へ切替","outgoing_handoff":"玄関のオーク床を高品質画像へ","references":["walk_foyer","walk_utility","walk_utility_look"],"source_status":"approved","generation_route":"direct_capture_plus_deterministic_edit","camera":"座り視点固定、床を常に表示","action":"検証済み3位置を短く切替","on_screen_text":"暮らしの目線で。","prompt":"生成なし","negative_prompt":"立ち視点、壁内・家具内カメラ"},
+    {"id":"S07","story_phase":"visualize","duration_seconds":3.5,"purpose":"同じ玄関を高品質に想像する","incoming_state":"座り視点の正確な玄関","visible_change":"暖色白ディップ後に承認済み玄関画像へ","outgoing_handoff":"オーク床と白壁をLDKへ","references":["walk_foyer","beauty_foyer"],"source_status":"approved","generation_route":"deterministic_dip_plus_optional_approved_omni","camera":"座り視点、上昇なし","action":"基幹版は静止画。T51合格時のみ微動へ差替え","on_screen_text":"","prompt":"承認済み玄関を唯一の美術基準にし、30cm未満の前進だけを許可","negative_prompt":"階段数変更、廊下幅変更、ドア移動、人物、文字"},
+    {"id":"S08","story_phase":"imagine","duration_seconds":3.5,"purpose":"完成後のLDKを想像させる","incoming_state":"玄関のオーク床と白壁","visible_change":"承認済みLDKへ切替し静かに保持","outgoing_handoff":"窓光をエンドカードへ","references":["beauty_ldk","interior_oblique"],"source_status":"approved","generation_route":"deterministic_hold_plus_optional_approved_omni","camera":"固定または最大3%の前進","action":"基幹版は静止画。T52合格時のみ微動へ差替え","on_screen_text":"暮らしを、想像する。","prompt":"間仕切り、階段、キッチン、ソファ、ダイニング、開口を固定し、ごく小さい視差だけを加える","negative_prompt":"別間取り、家具移動、階段変形、一般的な高級住宅への置換"},
+    {"id":"S09","story_phase":"brand","duration_seconds":3,"purpose":"ブランドを正確に締める","incoming_state":"LDKの窓光","visible_change":"オフホワイト背景へ持ち上げ公式ロゴとコピーを合成","outgoing_handoff":"終了","references":["official_logo"],"source_status":"approved","generation_route":"deterministic_edit","camera":"固定","action":"公式アセットと正確な文字を編集合成","on_screen_text":"house-planner mobile / 描く。確かめる。暮らしが見える。","prompt":"生成なし","negative_prompt":"生成ロゴ、生成文字"}
+  ],
+  "edit": {
+    "shot_order": ["S01","S02","S03","S04","S05","S06","S07","S08","S09"],
+    "transition_notes": "基幹版は未承認外観に依存しない。生成素材はS03末尾、S04の一部、S05、S07、S08だけ交換可能。",
+    "music_notes": "S03で積み上がり、S05で空間が開き、S07〜S08で最も温かく解決し、S09で3音着地。",
+    "end_card": "公式ロゴと日本語コピーを最終編集で正確に合成する。"
+  },
+  "negative_prompt": "別住宅、設計不一致外観、生成UI、生成図面、生成文字、ロゴ改変、壁・開口・階段・屋根・家具のドリフト、壁内または家具内カメラ"
+}
