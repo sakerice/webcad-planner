@@ -1,0 +1,76 @@
+name: Deploy PV storyboard
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-pv-storyboard.yml
+      - pv/storyboard/pages-index.html
+      - pv/storyboard/v5/**
+      - pv/storyboard/v5.md
+      - pv/manifest.ja.v5.json
+      - pv/manifest.en.v5.json
+      - pv/references/v4/ui/03-exterior-3q-live.jpg
+      - pv/references/v4/ui/05-exterior-east-live.jpg
+      - pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg
+      - pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg
+      - pv/approved/iteration-04/S06-foyer-stair-approved-v1.png
+      - pv/approved/iteration-04/S07-final-ldk-approved-v1.png
+      - assets/brand/house-planner-mobile-icon.png
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble storyboard site
+        run: |
+          mkdir -p _site/pv/storyboard/v5
+          mkdir -p _site/pv/references/v4/ui
+          mkdir -p _site/pv/approved/iteration-04
+          mkdir -p _site/assets/brand
+          cp pv/storyboard/pages-index.html _site/index.html
+          cp pv/storyboard/v5/index.html _site/pv/storyboard/v5/index.html
+          cp pv/storyboard/v5.md _site/pv/storyboard/v5.md
+          cp pv/manifest.ja.v5.json _site/pv/manifest.ja.v5.json
+          cp pv/manifest.en.v5.json _site/pv/manifest.en.v5.json
+          cp pv/references/v4/ui/03-exterior-3q-live.jpg _site/pv/references/v4/ui/
+          cp pv/references/v4/ui/05-exterior-east-live.jpg _site/pv/references/v4/ui/
+          cp pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg _site/pv/references/v4/ui/
+          cp pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg _site/pv/references/v4/ui/
+          cp pv/approved/iteration-04/S06-foyer-stair-approved-v1.png _site/pv/approved/iteration-04/
+          cp pv/approved/iteration-04/S07-final-ldk-approved-v1.png _site/pv/approved/iteration-04/
+          cp assets/brand/house-planner-mobile-icon.png _site/assets/brand/
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

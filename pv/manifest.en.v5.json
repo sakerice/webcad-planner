@@ -1,0 +1,70 @@
+{
+  "video": {
+    "title": "house-planner mobile PV v5 — exact-first layered master",
+    "purpose": "A 32-second product film that completes its story with exact product footage and uses approved generative material only as replaceable quality-enhancement layers.",
+    "audience": "Japanese prospective detached-home owners and, secondarily, housing and design professionals",
+    "channel": "Main website / YouTube",
+    "aspect_ratio": "16:9",
+    "total_duration_seconds": 32
+  },
+  "references": [
+    {"id":"plan_1f","path":"pv/references/v4/ui/01-plan-1f-live.jpg","status":"approved","role":"current exact 1F plan UI"},
+    {"id":"plan_2f","path":"pv/references/v4/ui/02-plan-2f-live.jpg","status":"approved","role":"current exact 2F plan UI"},
+    {"id":"ext_3q","path":"pv/references/v4/ui/03-exterior-3q-live.jpg","status":"approved","role":"exact three-quarter exterior"},
+    {"id":"ext_north","path":"pv/references/v4/ui/04-exterior-north-live.jpg","status":"approved","role":"exact north exterior"},
+    {"id":"ext_east","path":"pv/references/v4/ui/05-exterior-east-live.jpg","status":"approved","role":"exact east exterior"},
+    {"id":"interior_overhead","path":"pv/references/v4/ui/08-interior-3d-baseline-live.jpg","status":"approved","role":"exact 2F overhead interior"},
+    {"id":"interior_oblique","path":"pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg","status":"approved","role":"exact 2F oblique interior"},
+    {"id":"walk_foyer","path":"pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg","status":"approved","role":"exact seated-eye foyer and stair"},
+    {"id":"walk_utility","path":"pv/references/v4/ui/16-walkthrough-seated-map-b-live.jpg","status":"approved","role":"exact seated-eye utility-side position"},
+    {"id":"walk_utility_look","path":"pv/references/v4/ui/18-walkthrough-seated-map-b-look-live.jpg","status":"approved","role":"same position with another look direction"},
+    {"id":"beauty_foyer","path":"pv/approved/iteration-04/S06-foyer-stair-approved-v1.png","status":"approved","role":"approved same-house high-quality foyer and stair image"},
+    {"id":"beauty_ldk","path":"pv/approved/iteration-04/S07-final-ldk-approved-v1.png","status":"approved","role":"approved same-house high-quality 2F LDK image"},
+    {"id":"official_logo","path":"assets/brand/house-planner-mobile-icon.png","status":"approved","role":"official logo"},
+    {"id":"capture_real_edit","path":"pv/capture/v5/C01-plan-1f-real-edit-take-approved.mp4","status":"missing","role":"required real S01 plan-edit capture"},
+    {"id":"capture_floor_switch","path":"pv/capture/v5/C02-plan-1f-to-2f-take-approved.mp4","status":"missing","role":"required real S02 floor-switch capture"},
+    {"id":"exterior_v2_approved","path":"pv/approved/iteration-05/exterior-v2-approved.png","status":"missing","role":"optional enhancement replacement; not required for the base master"}
+  ],
+  "global_instructions": {
+    "brand": "house-planner mobile. Use warm off-white, coral, sky blue and charcoal. Composite exact logo and typography only in deterministic editing.",
+    "continuity": "Preserve the exact assets/default_plan.json house in every shot. Never use or reference exterior-beauty-candidate-01 through 04 because they do not match the designed building.",
+    "text_policy": "Do not generate UI, text, logos, QR codes or watermarks inside generative frames.",
+    "audio": "Restrained modern pulse, real UI clicks, a light cumulative stacking rise, quiet interior room tone, and a three-note brand resolve."
+  },
+  "shots": [
+    {
+      "id":"S01","story_phase":"hook","duration_seconds":2.5,"purpose":"Begin with a real 1F plan edit","incoming_state":"Current exact 1F plan","visible_change":"Edit one wall or opening once in the actual product","outgoing_handoff":"Match the edited line into the main 2F line","references":["plan_1f","capture_real_edit"],"source_status":"missing","generation_route":"direct_screen_recording","camera":"Locked real screen","action":"Record the before state, one action and settled result","on_screen_text":"A home begins with one line.","prompt":"No generation.","negative_prompt":"Generated UI, generated plan, fake cursor action"
+    },
+    {
+      "id":"S02","story_phase":"build","duration_seconds":2.5,"purpose":"Show that the plan continues from 1F to 2F","incoming_state":"Settled S01 result","visible_change":"Use the real floor control once and settle on 2F","outgoing_handoff":"Carry 1F and 2F linework into a stacked composition","references":["plan_2f","capture_floor_switch"],"source_status":"missing","generation_route":"direct_screen_recording","camera":"Locked real screen","action":"Prove 1F, the actual control action, and settled 2F inside the recorded pixels","on_screen_text":"","prompt":"No generation.","negative_prompt":"Pretending a still change is product interaction, generated UI"
+    },
+    {
+      "id":"S03","story_phase":"build_up","duration_seconds":4,"purpose":"Make the house-building causality visible","incoming_state":"Approved exact 1F and 2F plans","visible_change":"1F plan to 2F plan to stacked lines to the exact live 3D house","outgoing_handoff":"Carry the same roof edge into exterior review","references":["plan_1f","plan_2f","ext_east"],"source_status":"approved","generation_route":"deterministic_composite","camera":"Lock the east architectural axis","action":"Use only exact plans and live 3D. Replace the final 0.8–1.2 seconds only if exterior_v2_approved later passes review.","on_screen_text":"Draw.","prompt":"No generation in the base master.","negative_prompt":"Different house, invalid generated exterior, generated plan text"
+    },
+    {
+      "id":"S04","story_phase":"exterior_proof","duration_seconds":4,"purpose":"Prove meaningful exterior viewpoint variety","incoming_state":"Exact east exterior","visible_change":"Cut between three-quarter, east and north views","outgoing_handoff":"Match a dark facade line into the interior divider","references":["ext_3q","ext_east","ext_north"],"source_status":"approved","generation_route":"direct_capture_plus_deterministic_edit","camera":"1.2–1.5 seconds per materially different angle","action":"Use short exact-product match cuts. Replace no more than two cuts only after exact v2 exterior approval.","on_screen_text":"Check it from every angle.","prompt":"No generation in the base master.","negative_prompt":"Repeated first view, different house, altered roof or openings"
+    },
+    {
+      "id":"S05","story_phase":"interior_proof","duration_seconds":4,"purpose":"Explain spatial relationships in interior 3D","incoming_state":"Exact 2F overhead interior","visible_change":"Reveal the oblique view while keeping stair, kitchen, sofa and dining legible","outgoing_handoff":"Match stair and oak-floor lines into seated walkthrough","references":["interior_overhead","interior_oblique"],"source_status":"approved","generation_route":"direct_capture_plus_optional_approved_i2v","camera":"Overhead and oblique exact-product views","action":"The base master uses exact captures. Use a Topview section only if all geometry remains fixed.","on_screen_text":"","prompt":"Treat the current product captures as exact architectural evidence. Preserve every wall, stair, opening, kitchen component, sofa, table and floor boundary. If motion is added, lower the camera only slightly with less than an 8-degree arc and no geometry morph.","negative_prompt":"Altered stair, wall, opening, kitchen, furniture, generated UI, people, text"
+    },
+    {
+      "id":"S06","story_phase":"inhabit","duration_seconds":5,"purpose":"Show floor and distance from a seated living viewpoint","incoming_state":"Exact seated foyer and stair","visible_change":"Cut to the utility side and a second direction from the same validated position","outgoing_handoff":"Carry the foyer oak floor into the high-quality foyer","references":["walk_foyer","walk_utility","walk_utility_look"],"source_status":"approved","generation_route":"direct_capture_plus_deterministic_edit","camera":"Lock seated eye height and keep the floor visible","action":"Use three spatially validated positions","on_screen_text":"At the eye level of everyday life.","prompt":"No generation.","negative_prompt":"Standing-height rise, camera inside walls or furniture, arbitrary minimap teleport"
+    },
+    {
+      "id":"S07","story_phase":"visualize","duration_seconds":3.5,"purpose":"Resolve the same exact foyer into an approved high-quality view","incoming_state":"Exact seated product view of the foyer","visible_change":"Dip briefly through warm white and reveal the approved foyer beauty image","outgoing_handoff":"Match oak floor and white walls into the LDK","references":["walk_foyer","beauty_foyer"],"source_status":"approved","generation_route":"deterministic_dip_plus_optional_approved_omni","camera":"Seated height; never rise or tilt","action":"The base master uses the approved still. Replace with T51 only after review.","on_screen_text":"","prompt":"Use beauty_foyer as the sole final architectural truth and walk_foyer as exact seated-camera evidence. Preserve the exact stair count and turn, corridor width, door locations, cabinet, floor, walls and lighting relationship. Make only a stabilized seated-eye dolly forward under 30 centimeters. No camera rise, no tilt, no object motion, no cuts.","negative_prompt":"Changed stair count, wider corridor, moved door, moved cabinet, people, added objects, text, logo, UI, morphing"
+    },
+    {
+      "id":"S08","story_phase":"imagine","duration_seconds":3.5,"purpose":"Imagine the completed 2F LDK","incoming_state":"Warm oak and white-wall palette from S07","visible_change":"Cut to the approved LDK and hold calmly","outgoing_handoff":"Carry window light into the end card","references":["beauty_ldk","interior_oblique"],"source_status":"approved","generation_route":"deterministic_hold_plus_optional_approved_omni","camera":"Locked or less than a 3% push","action":"The base master uses the approved still. Replace with T52 only after review.","on_screen_text":"Imagine living there.","prompt":"Use beauty_ldk as the sole final architectural truth and interior_oblique as exact spatial evidence. Lock the stair divider, stair turn, kitchen sink and hob order, sofa and chaise, coffee table, dining set, balcony opening and all walls. Add only less than a 3% stabilized push and very subtle daylight breathing. No furniture or object motion.","negative_prompt":"Different plan, moved furniture, changed divider, changed stair, shifted opening, generic luxury-house replacement, people, text, logo, UI"
+    },
+    {
+      "id":"S09","story_phase":"brand","duration_seconds":3,"purpose":"Resolve the brand exactly","incoming_state":"LDK window light","visible_change":"Lift into warm off-white and composite the official logo and exact Japanese copy","outgoing_handoff":"End","references":["official_logo"],"source_status":"approved","generation_route":"deterministic_edit","camera":"Locked","action":"Composite the official asset and exact typography","on_screen_text":"house-planner mobile / 描く。確かめる。暮らしが見える。","prompt":"No generation.","negative_prompt":"Generated logo, generated text, altered brand mark"
+    }
+  ],
+  "edit": {
+    "shot_order": ["S01","S02","S03","S04","S05","S06","S07","S08","S09"],
+    "transition_notes": "The base master never depends on an unapproved exterior. Generative material may replace only the end of S03, part of S04, and approved motion slots in S05, S07 and S08.",
+    "music_notes": "Build cumulatively in S03, open spatially in S05, reach the warmest point in S07–S08, and land the brand with three restrained notes in S09.",
+    "end_card": "Composite the official logo and exact Japanese copy in deterministic post-production."
+  },
+  "negative_prompt": "Different house, invalid generated exterior, generated UI, generated plans, generated text, altered logo, wall/opening/stair/roof/furniture drift, camera inside walls or furniture"
+}
