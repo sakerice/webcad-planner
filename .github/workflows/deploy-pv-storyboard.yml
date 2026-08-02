@@ -15,8 +15,6 @@ on:
       - pv/references/v4/ui/05-exterior-east-live.jpg
       - pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg
       - pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg
-      - pv/approved/iteration-04/S06-foyer-stair-approved-v1.png
-      - pv/approved/iteration-04/S07-final-ldk-approved-v1.png
       - assets/brand/house-planner-mobile-icon.png
   workflow_dispatch:
 
@@ -43,7 +41,6 @@ jobs:
         run: |
           mkdir -p _site/pv/storyboard/v5
           mkdir -p _site/pv/references/v4/ui
-          mkdir -p _site/pv/approved/iteration-04
           mkdir -p _site/assets/brand
           cp pv/storyboard/pages-index.html _site/index.html
           cp pv/storyboard/v5/index.html _site/pv/storyboard/v5/index.html
@@ -54,8 +51,6 @@ jobs:
           cp pv/references/v4/ui/05-exterior-east-live.jpg _site/pv/references/v4/ui/
           cp pv/references/v4/ui/09-interior-3d-oblique-a-live.jpg _site/pv/references/v4/ui/
           cp pv/references/v4/ui/14-walkthrough-seated-baseline-live.jpg _site/pv/references/v4/ui/
-          cp pv/approved/iteration-04/S06-foyer-stair-approved-v1.png _site/pv/approved/iteration-04/
-          cp pv/approved/iteration-04/S07-final-ldk-approved-v1.png _site/pv/approved/iteration-04/
           cp assets/brand/house-planner-mobile-icon.png _site/assets/brand/
           touch _site/.nojekyll
 
