@@ -1,5 +1,6 @@
 import http.client
 import shutil
+import socket
 import tempfile
 import threading
 import unittest
@@ -23,6 +24,7 @@ class CaptureServerTest(unittest.TestCase):
     def tearDown(self):
         self.server.shutdown()
         self.server.server_close()
+        self.thread.join(timeout=5)
         shutil.rmtree(self.root, ignore_errors=True)
 
     def post(self, path, body=b"", headers=None):
@@ -64,6 +66,22 @@ class CaptureServerTest(unittest.TestCase):
         status = self.post("/done", b"", {"X-PV-Shot": "S08"})
         self.assertEqual(status, 200)
         self.assertTrue((self.root / "S08" / "DONE").exists())
+
+    def test_malformed_content_length_is_rejected(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(("127.0.0.1", self.port))
+        request = b"POST /frame HTTP/1.1\r\n"
+        request += b"Host: 127.0.0.1\r\n"
+        request += b"X-PV-Shot: S08\r\n"
+        request += b"X-PV-Kind: base\r\n"
+        request += b"X-PV-Index: 0\r\n"
+        request += b"Content-Length: not_a_number\r\n"
+        request += b"\r\n"
+        sock.sendall(request)
+        response = sock.recv(1024)
+        sock.close()
+        self.assertIn(b"400", response)
+        self.assertEqual(list(self.root.rglob("*.png")), [])
 
 
 if __name__ == "__main__":

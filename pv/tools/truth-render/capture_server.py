@@ -10,11 +10,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 KINDS = {"base", "segmentation", "instance", "edge", "depth", "normal", "probe"}
-SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 MAX_BODY = 64 * 1024 * 1024
 
 
-def make_server(root: Path, port: int = 8932) -> ThreadingHTTPServer:
+def make_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
     root = Path(root)
 
     class Handler(BaseHTTPRequestHandler):
@@ -61,7 +61,10 @@ def make_server(root: Path, port: int = 8932) -> ThreadingHTTPServer:
             if not index.isdigit():
                 return self._reply(400, "bad index")
 
-            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                return self._reply(400, "bad length")
             if length <= 0 or length > MAX_BODY:
                 return self._reply(400, "bad length")
             body = self.rfile.read(length)
