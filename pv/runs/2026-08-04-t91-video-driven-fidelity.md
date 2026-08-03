@@ -15,7 +15,18 @@ T91 reproduces that angle, but the camera move is now rendered deterministically
 
 **The hob and range hood sit at the far west end of the 2F LDK (plan x ≈ 1480–1550 mm) and stay off-frame for the entire move.** They are exactly what T63 fabricated. If they reappear, the route fails again and the design switches to dense keyframes.
 
-## Truth render — complete
+## Truth render — must be re-run before the gate
+
+> **The render described below predates the Layer 1 fixes and is incomplete.**
+> It has no `instance-legend.json` (the capture hook discarded the legend) and
+> no `shot.json`. `report.py` now refuses to run when `instance/` frames exist
+> without a legend, because a run that checks no furniture must not be able to
+> report PASS. Re-run the capture with the current code — the determinism probe
+> first (`pv/tools/truth-render/specs/probe-determinism.json`, now selected by
+> `"mode": "determinism-probe"` rather than by its filename), then the shot —
+> and confirm `pv/renders/T91-ldk-push/` contains `shot.json` and
+> `instance-legend.json` alongside the frame directories. The upload bundle
+> below has to be rebuilt from the new render.
 
 Spec: `pv/tools/truth-render/specs/T91-ldk-push.json`
 
@@ -61,28 +72,103 @@ Total 6.8 MB.
 ## After the generation returns
 
 1. Download the mp4 to `/tmp/T91.mp4`.
-2. Extract frames at the guide times:
-   ```
-   swift pv/tools/extract_video_frames.swift /tmp/T91.mp4 /tmp/T91-frames \
-     0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 3.9583334
-   ```
-3. Rename the extracted files to the truth indices `0000, 0012, 0024, 0036, 0048, 0060, 0072, 0084, 0095` so `report.py` can pair them.
-4. Run the gate:
-   ```
-   python3 pv/tools/fidelity-qa/report.py \
-     --truth pv/renders/T91-ldk-push --generated /tmp/T91-frames \
-     --min-recall 0.90 --min-precision 0.85 --json pv/runs/T91-fidelity.json
-   ```
+2. Extract the frames and give them the truth frame indices. `report.py` pairs
+   frames purely by filename, but `extract_video_frames.swift` names its output
+   by **centisecond** (`frame_0050.png` for t=0.5 s) while the truth frames are
+   named by frame index (`0012.png`). Run the mapping rather than renaming by
+   hand — the two conventions coincide only at index 0, so a hand rename
+   matches exactly one file. Run the block below from the repository root.
+3. Run the gate (command further down).
 
-`--min-recall 0.90 --min-precision 0.85` are provisional. Set the final values from the measured distribution in `rows`, choosing a cut that separates frames that are visibly broken from frames that are not, and record the chosen values and the reasoning here.
+```sh
+python3 - <<'PY'
+import pathlib, subprocess
+shot = pathlib.Path('pv/renders/T91-ldk-push')
+out  = pathlib.Path('/tmp/T91-frames')
+fps  = 24
+# The indices come from the truth render itself, so this cannot drift from
+# the shot spec's guideStride.
+idx   = sorted(int(p.stem) for p in (shot / 'edge').glob('*.png'))
+times = [i / fps for i in idx]
+out.mkdir(parents=True, exist_ok=True)
+subprocess.run(['swift', 'pv/tools/extract_video_frames.swift',
+                '/tmp/T91.mp4', str(out)] + [f'{t:.7f}' for t in times],
+               check=True)
+for i, t in zip(idx, times):
+    # extract_video_frames.swift names by centisecond: round(second * 100), %04d
+    (out / f'frame_{round(t * 100):04d}.png').rename(out / f'{i:04d}.png')
+print(f'mapped {len(idx)} frames: {idx}')
+PY
+```
 
-Reference points measured on truth frames, for calibration: two byte-identical frames score recall 1.0000 / precision 1.0000; two genuinely different camera poses in the same room score recall 0.3228 / precision 0.5316.
+For this shot that is indices `0 12 24 36 48 60 72 84 95` at times
+`0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 3.9583334`, i.e. the extractor writes
+`frame_0000 frame_0050 frame_0100 frame_0150 frame_0200 frame_0250
+frame_0300 frame_0350 frame_0396`, which the loop renames to
+`0000 0012 0024 0036 0048 0060 0072 0084 0095`. `report.py` now refuses to
+run unless every truth edge frame found a counterpart, so a bad mapping fails
+loudly instead of printing `PASS — 1 frames compared`.
+
+Then the gate:
+
+```
+python3 pv/tools/fidelity-qa/report.py \
+  --truth pv/renders/T91-ldk-push --generated /tmp/T91-frames \
+  --min-recall 0.90 --min-precision 0.85 --json pv/runs/T91-fidelity.json
+```
+
+The generated frames are 1280x720 and the truth frames are 2560x1440;
+`report.py` upscales the generated frame to the truth size and says so once on
+stderr. That note is expected, not a warning sign.
+
+### Thresholds — NOT CALIBRATED
+
+`--min-recall 0.90 --min-precision 0.85` are placeholders. **Neither number is
+calibrated, and `--min-precision 0.85` in particular does not transfer.**
+
+It was derived from truth-versus-truth pairs — the same synthetic line drawing
+on both sides of the comparison. Precision no longer measures that. It now
+measures the generated frame's edges against the edges of the **truth base
+render for the same frame**, and a photorealistic generation adds material and
+lighting detail beyond any render, so its precision is expected to sit well
+below 1.0 even when the architecture is perfect. A truth-versus-truth
+measurement says nothing about where that floor lies.
+
+**The real value has to come from the first real generated output.** Run the
+gate with deliberately permissive thresholds (`--min-recall 0.50
+--min-precision 0.10`), read the distribution in `rows`, look at the frames
+by eye, and choose a cut that separates the frames that are visibly broken
+from the frames that are not. Record the chosen values and the reasoning here
+before any production shot is gated on them. Until that is done, a PASS from
+this gate means only "the comparison ran", not "the thresholds were met in a
+meaningful sense".
+
+Reference points measured on truth frames only, kept for context and **not**
+usable as thresholds: two byte-identical frames score recall 1.0000 /
+precision 1.0000; two genuinely different camera poses in the same room score
+recall 0.3228 / precision 0.5316. Both were measured under the old
+truth-versus-truth precision definition.
 
 ## Result
 
 PENDING — nothing has been submitted to Topview yet.
 
-Recall falling ⇒ design structure went missing. Precision falling ⇒ structure was invented; this is the number that catches a fabricated hob or hood.
+How to read the two numbers:
+
+- **Recall falling** ⇒ designed structure went missing. Measured against the
+  truth line drawing `edge/<index>.png`, which is the design itself. This is
+  the number that catches a vanished sofa.
+- **Precision falling** ⇒ the generated frame contains structure with no
+  counterpart in the truth base render of the same camera pose. It does *not*
+  detect a fabricated hob directly — a hob and a rug texture are both "edges
+  the base render does not have", and only the magnitude and the per-instance
+  numbers distinguish them. Treat a precision drop as a pointer to which
+  frames to look at, and confirm a fabricated hob or hood by eye on those
+  frames.
+- **Per-instance recall** (`rows[].instances`) is what names a specific piece
+  of designed furniture that the generator dropped. It requires
+  `instance-legend.json`, which the truth render now writes; `report.py`
+  refuses to run if the instance frames are there without it.
 
 Branch decision once the verdict is in:
 

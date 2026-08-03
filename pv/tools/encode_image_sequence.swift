@@ -104,10 +104,20 @@ input.requestMediaDataWhenReady(on: queue) {
     }
 }
 
+// 失敗して抜けるときに、書きかけ(多くは0バイト)の mp4 を出力パスへ残さない。
+// 残すと後段は「mp4 は出来ている」と見なして進み、空のファイルを Layer 2 へ
+// 渡してしまう。cancelWriting() は writer 側の後始末で、ファイル自体は
+// 念のため明示的に消す。
+func abort(_ message: String) -> Never {
+    if writer.status == .writing { writer.cancelWriting() }
+    try? FileManager.default.removeItem(at: outputURL)
+    fputs(message + "\n", stderr)
+    exit(1)
+}
+
 done.wait()
 if let failure {
-    fputs(failure + "\n", stderr)
-    exit(1)
+    abort(failure)
 }
 
 let finished = DispatchSemaphore(value: 0)
@@ -115,7 +125,6 @@ writer.finishWriting { finished.signal() }
 finished.wait()
 
 if writer.status != .completed {
-    fputs("writer failed: \(writer.error?.localizedDescription ?? "unknown")\n", stderr)
-    exit(1)
+    abort("writer failed: \(writer.error?.localizedDescription ?? "unknown")")
 }
 print("wrote \(outputURL.path) — \(frameIndex) frames @ \(fps)fps, \(width)x\(height)")
