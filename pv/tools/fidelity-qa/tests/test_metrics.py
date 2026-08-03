@@ -89,15 +89,41 @@ class EdgeMetricTest(unittest.TestCase):
 
 class InstanceRecallTest(unittest.TestCase):
     def test_reports_per_instance_and_names_the_missing_one(self):
-        # Use non-square, asymmetric boxes to ensure test breaks if y/x convention is transposed.
-        # sofa box: rows 2-8, cols 3-10 (6 rows x 7 cols)
-        # table box: rows 11-18, cols 13-19 (7 rows x 6 cols)
-        # If transposed to (x0,y0,x1,y1), the test would use wrong slices and fail.
-        t = blank(20, 20); t[2:8, 3:10] = True; t[11:18, 13:19] = True
-        g = blank(20, 20); g[2:8, 3:10] = True                     # sofa は残り table は消えた
-        boxes = {"sofa": (2, 3, 8, 10), "table": (11, 13, 18, 19)}
+        """Test per-instance recall with asymmetric structure inside boxes.
+
+        Box structure:
+        - sofa box: (1, 2, 9, 11) = 8 rows × 9 cols
+          Truth structure at rows 1-3, cols 2-4 (top-left corner: 3×3=9 pixels)
+          Generated structure at rows 2-3, cols 3-4 (overlaps: 2×2=4 pixels)
+          Correct recall: 4/9 = 0.444...
+          Transposed recall would be 4/6 = 0.666... (different!)
+
+        - table box: (11, 12, 19, 21) = 8 rows × 9 cols
+          Truth structure at rows 11-15, cols 12-14 (left side: 5×3=15 pixels)
+          Generated has NO structure (all 0)
+          Correct recall: 0/15 = 0.0
+          Transposed recall: 0/? (still 0 because both are empty in transposed window)
+
+        Transposing the y/x convention would change sofa's recall from 0.444 to 0.666,
+        causing the test to fail.
+        """
+        t = blank(20, 20)
+        g = blank(20, 20)
+
+        # Sofa: asymmetrically positioned structure in top-left of box
+        t[1:4, 2:5] = True    # 3 rows × 3 cols = 9 pixels
+        g[2:4, 3:5] = True    # 2 rows × 2 cols = 4 pixels (partial overlap)
+
+        # Table: structure on left side of box
+        t[11:16, 12:15] = True  # 5 rows × 3 cols = 15 pixels
+        # g has no table (all False)
+
+        boxes = {"sofa": (1, 2, 9, 11), "table": (11, 12, 19, 21)}
         got = instance_recall(t, g, boxes, radius=0)
-        self.assertEqual(got["sofa"], 1.0)
+
+        # sofa recall: 4 overlapping pixels / 9 truth pixels in sofa box
+        self.assertAlmostEqual(got["sofa"], 4/9, places=5)
+        # table recall: 0 overlapping pixels / 15 truth pixels in table box
         self.assertEqual(got["table"], 0.0)
 
 
