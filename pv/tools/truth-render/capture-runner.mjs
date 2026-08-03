@@ -2,12 +2,17 @@
 // window.__PV_CAPTURE__ が既に露出している前提。
 
 import { sampleCameraPath } from './camera-path.mjs';
-import { validateShotSpec, frameTimes, guideFrameIndices } from './shot-spec.mjs';
+import { validateShotSpec, frameTimes, guideFrameIndices, shotMode } from './shot-spec.mjs';
 
-const params = new URLSearchParams(location.search || '');
-const shotName = params.get('pvShot');
-const serverPort = params.get('pvServer') || '8932';
-const server = `http://127.0.0.1:${serverPort}`;
+// URL パラメータは読み取り時に評価する。モジュール読み込み時に固定すると、
+// ブラウザ外(node --test)からこのモジュールを import しただけで location
+// 参照が落ち、キャプチャ手順そのものをテストできなくなる。
+function pvParams() {
+  return new URLSearchParams((typeof location !== 'undefined' && location.search) || '');
+}
+function serverBase() {
+  return `http://127.0.0.1:${pvParams().get('pvServer') || '8932'}`;
+}
 
 const log = (...a) => console.log('[pv-capture]', ...a);
 
@@ -21,12 +26,52 @@ function dataUrlToBlob(dataUrl) {
 }
 
 async function postFrame(shot, kind, index, dataUrl) {
-  const res = await fetch(`${server}/frame`, {
+  const res = await fetch(`${serverBase()}/frame`, {
     method: 'POST',
     headers: { 'X-PV-Shot': shot, 'X-PV-Kind': kind, 'X-PV-Index': String(index) },
     body: dataUrlToBlob(dataUrl),
   });
   if (!res.ok) throw new Error(`frame ${kind}/${index} rejected: ${res.status}`);
+}
+
+async function postJson(shot, path, value) {
+  const res = await fetch(`${serverBase()}${path}`, {
+    method: 'POST',
+    headers: { 'X-PV-Shot': shot, 'Content-Type': 'application/json' },
+    body: JSON.stringify(value),
+  });
+  if (!res.ok) throw new Error(`${path} rejected: ${res.status}`);
+}
+
+// instance-legend.json は Layer 3 が「どの家具が消えたか」を名指しするための
+// 唯一の手がかりである。これが書かれないと report.py は部材チェックを一つも
+// 行わないまま PASS を出しうる（そのため report.py 側でも欠落を致命扱いに
+// している）。instance ガイドを撮るショットでは必ず1回書く。
+async function postInstanceLegend(spec) {
+  const legend = window.__PV_CAPTURE__.getInstanceLegend();
+  if (!Array.isArray(legend) || legend.length === 0) {
+    throw new Error(
+      'instance legend is empty after capturing the instance guide — ' +
+      'Layer 3 would be unable to name which furniture vanished');
+  }
+  await postJson(spec.id, '/instance-legend', { version: 2, instances: legend });
+  log(`instance-legend.json written (${legend.length} instances)`);
+}
+
+// spec が指すプランが実際にアプリへ読み込まれているかを確かめる。
+// アプリは IndexedDB の保存プラン・共同編集プラン・取り込みファイルのいずれかを
+// 復元していることがあり、その場合 spec が名指しした家とは**別の家**が
+// レンダされる。走り切ってファイルも揃い、ゲートも通り、しかし検証したのは
+// 別の建物、という最悪の失敗になるため、撮り始める前に必ず突き合わせる。
+function assertPlanMatchesSpec(spec) {
+  const actual = window.__PV_CAPTURE__.getPlanId();
+  if (actual !== spec.plan) {
+    throw new Error(
+      `plan mismatch: shot spec asks for "${spec.plan}" but the app has ` +
+      `"${actual}" loaded. The truth render would be of a different house. ` +
+      'Clear the saved plan (or open the capture page in a fresh profile) and retry.');
+  }
+  log(`plan verified: ${actual}`);
 }
 
 // PNG の IHDR チャンクから width/height を読む。PNG は先頭8バイトの署名の直後に
@@ -164,9 +209,29 @@ async function captureAt(spec, t, index, kinds, assertFrameSize) {
   }
 }
 
+function sameVec3(a, b) {
+  return a.length === b.length && a.every((n, i) => n === b[i]);
+}
+
 async function runDeterminismProbe(spec, assertFrameSize) {
   log('determinism probe: pose A -> B -> A');
-  const times = [0, 1, 2];
+  // 時刻は spec の camera.keys から取る。以前は [0,1,2] を直書きしていたため、
+  // fps・duration・キー時刻をどう書いてもプローブは同じ3枚しか撮らなかった。
+  // check_determinism.py は 0000 と 0002 の byte 一致・0001 との相違を見るので、
+  // 「1枚目と3枚目が同一姿勢、2枚目が別姿勢」という前提そのものをここで検査する。
+  const keys = spec.camera.keys;
+  if (keys.length !== 3) {
+    throw new Error(
+      `determinism probe needs exactly 3 camera keys (A, B, A), got ${keys.length}`);
+  }
+  if (!sameVec3(keys[0].pos, keys[2].pos) || !sameVec3(keys[0].target, keys[2].target) ||
+      keys[0].fov !== keys[2].fov) {
+    throw new Error('determinism probe: the first and last camera keys must be the same pose');
+  }
+  if (sameVec3(keys[0].pos, keys[1].pos) && sameVec3(keys[0].target, keys[1].target)) {
+    throw new Error('determinism probe: the middle camera key must be a different pose');
+  }
+  const times = keys.map(k => k.t);
   for (let i = 0; i < times.length; i++) {
     const pose = sampleCameraPath(spec.camera.keys, times[i]);
     window.__PV_CAPTURE__.setPose(pose.pos, pose.target, pose.fov);
@@ -176,48 +241,85 @@ async function runDeterminismProbe(spec, assertFrameSize) {
     assertFrameSize('probe', i, dataUrl);
     await postFrame(spec.id, 'probe', i, dataUrl);
   }
-  await fetch(`${server}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
+  await fetch(`${serverBase()}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
   log('determinism probe complete');
 }
 
 async function runSequence(spec, assertFrameSize) {
   const times = frameTimes(spec);
   const guideAt = new Set(guideFrameIndices(spec));
+  // base を撮るかどうかも spec.guides に従う。以前は spec が base を挙げて
+  // いなくても常に撮っていたため、spec がキャプチャ内容の記述として信用
+  // できなかった。
+  const wantsBase = spec.guides.includes('base');
   const extraGuides = spec.guides.filter(g => g !== 'base');
+  if (!wantsBase && extraGuides.length === 0) {
+    throw new Error('shot spec: guides is empty; there is nothing to capture');
+  }
   for (let i = 0; i < times.length; i++) {
-    const kinds = guideAt.has(i) ? ['base', ...extraGuides] : ['base'];
-    await captureAt(spec, times[i], i, kinds, assertFrameSize);
+    const kinds = [];
+    if (wantsBase) kinds.push('base');
+    if (guideAt.has(i)) kinds.push(...extraGuides);
+    if (kinds.length) await captureAt(spec, times[i], i, kinds, assertFrameSize);
     if (i % 10 === 0) log(`frame ${i + 1}/${times.length}`);
   }
-  await fetch(`${server}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
+  if (spec.guides.includes('instance')) await postInstanceLegend(spec);
+  await fetch(`${serverBase()}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
   log(`complete: ${times.length} frames`);
 }
 
-async function main() {
+export async function main() {
+  const shotName = pvParams().get('pvShot');
   if (!shotName) { log('no pvShot given; idle'); return; }
   const res = await fetch(`/pv/tools/truth-render/specs/${shotName}.json`);
   if (!res.ok) throw new Error(`spec not found: ${shotName}`);
   const spec = validateShotSpec(await res.json());
 
-  await ensureViewRenderable(spec);
+  // キャプチャはアプリの状態を作り変える。どこで失敗しても finally で
+  // 元に戻せるよう、触る前に全部控えておく。
+  const prevFloor = window.__PV_CAPTURE__.getFloor();
+  const prevView = window.__PV_CAPTURE__.getView();
+  const prevOrbit = window.__PV_CAPTURE__.captureOrbitState();
 
-  // spec.resolution が実際に消費されるのはここだけ。#c3d-wrap の見た目サイズは
-  // ブラウザウィンドウ任せなので、固定しないとフレームのアスペクト比・寸法が
-  // ショット中に揺れ、狙った画角も再現できない。setCaptureViewport 自体が
-  // 途中で失敗してもユーザーの画面をリサイズしたまま残さないよう、
-  // 呼び出しごと try に入れて必ず finally で元に戻す。
   let prevViewport;
   const assertFrameSize = createFrameSizeGuard();
   try {
+    await ensureViewRenderable(spec);
+    assertPlanMatchesSpec(spec);
+
+    // 設計どおり、検証済み spec の実体を出力ディレクトリへ複写する。
+    // これが無いと pv/renders/<shot>/ を後から見ても、どの spec・どの階・
+    // どのカメラキーで撮ったものかがディスク上のどこにも残らない。
+    await postJson(spec.id, '/shot', spec);
+
+    // spec.resolution が実際に消費されるのはここだけ。#c3d-wrap の見た目サイズは
+    // ブラウザウィンドウ任せなので、固定しないとフレームのアスペクト比・寸法が
+    // ショット中に揺れ、狙った画角も再現できない。setCaptureViewport 自体が
+    // 途中で失敗してもユーザーの画面をリサイズしたまま残さないよう、
+    // 呼び出しごと try に入れて必ず finally で元に戻す。
     prevViewport = window.__PV_CAPTURE__.setCaptureViewport(
       spec.resolution.width,
       spec.resolution.height
     );
-    if (spec.id === 'probe-determinism') await runDeterminismProbe(spec, assertFrameSize);
+    // モードは spec に明示させる。以前は spec.id === 'probe-determinism' で
+    // 判定していたため、spec ファイルの改名だけで再現性ゲートが黙って
+    // ただの連番キャプチャに化けた。
+    if (shotMode(spec) === 'determinism-probe') await runDeterminismProbe(spec, assertFrameSize);
     else await runSequence(spec, assertFrameSize);
   } finally {
     if (prevViewport) window.__PV_CAPTURE__.restoreCaptureViewport(prevViewport);
+    window.__PV_CAPTURE__.restoreOrbitState(prevOrbit);
+    if (prevView !== undefined && prevView !== window.__PV_CAPTURE__.getView()) {
+      window.__PV_CAPTURE__.setView(prevView);
+    }
+    if (prevFloor !== undefined && prevFloor !== window.__PV_CAPTURE__.getFloor()) {
+      window.__PV_CAPTURE__.setFloor(prevFloor);
+    }
   }
 }
 
-main().catch(e => { console.error('[pv-capture] failed', e); });
+// ブラウザで ?pvCapture=1 が付いているときだけ自動起動する。テストからは
+// main() を直接呼ぶ。
+if (typeof location !== 'undefined' && pvParams().get('pvCapture') === '1') {
+  main().catch(e => { console.error('[pv-capture] failed', e); });
+}

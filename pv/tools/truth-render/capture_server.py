@@ -4,6 +4,7 @@
 使い方: python3 pv/tools/truth-render/capture_server.py [root] [port]
 既定の root は pv/renders、port は 8932。127.0.0.1 にのみバインドする。
 """
+import json
 import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -12,6 +13,15 @@ from pathlib import Path
 KINDS = {"base", "segmentation", "instance", "edge", "depth", "normal", "probe"}
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 MAX_BODY = 64 * 1024 * 1024
+
+# POST path -> filename written under <root>/<shot>/. Both carry a JSON body.
+# The filenames are fixed constants here, never taken from the request, so the
+# only attacker-controlled path component remains <shot> — which SAFE_NAME
+# already constrains.
+JSON_DOCS = {
+    "/instance-legend": "instance-legend.json",
+    "/shot": "shot.json",
+}
 
 
 def make_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
@@ -29,6 +39,24 @@ def make_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+
+        def _read_body(self):
+            """Read a bounded request body, or reply 400 and return None.
+
+            Deliberately a separate helper rather than a refactor of the
+            /frame branch below: /frame's inline validation is load-bearing
+            and was signed off as-is, so it is left byte for byte alone. The
+            bounds here are the same ones.
+            """
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                self._reply(400, "bad length")
+                return None
+            if length <= 0 or length > MAX_BODY:
+                self._reply(400, "bad length")
+                return None
+            return self.rfile.read(length)
 
         def do_OPTIONS(self):
             self._reply(200)
@@ -48,6 +76,19 @@ def make_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
                 target = root / shot
                 target.mkdir(parents=True, exist_ok=True)
                 (target / "DONE").write_text("done\n")
+                return self._reply(200, "ok")
+
+            if self.path in JSON_DOCS:
+                body = self._read_body()
+                if body is None:
+                    return
+                try:
+                    json.loads(body.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    return self._reply(400, "body is not valid JSON")
+                target = root / shot
+                target.mkdir(parents=True, exist_ok=True)
+                (target / JSON_DOCS[self.path]).write_bytes(body)
                 return self._reply(200, "ok")
 
             if self.path != "/frame":

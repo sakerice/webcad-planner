@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateShotSpec, frameTimes, guideFrameIndices, GUIDE_KINDS } from '../shot-spec.mjs';
+import { validateShotSpec, frameTimes, guideFrameIndices, shotMode, GUIDE_KINDS, MODES } from '../shot-spec.mjs';
 
 const valid = () => ({
   id: 'S08-ldk-push',
@@ -78,6 +78,74 @@ test('floor が正の整数なら通る', () => {
   assert.equal(validateShotSpec(s), s);
 });
 
+// ── 型検査 ─────────────────────────────────────────────
+// JSON の "24" は数値比較で黙って 24 になるため、範囲だけ見る検査は素通りする。
+
+test('fps が文字列なら例外（"24" > 0 は true なので範囲検査では捕まらない）', () => {
+  const s = valid(); s.fps = '24';
+  assert.throws(() => validateShotSpec(s), /fps must be a number/);
+});
+
+test('duration が文字列なら例外', () => {
+  const s = valid(); s.duration = '4';
+  assert.throws(() => validateShotSpec(s), /duration must be a number/);
+});
+
+test('resolution.width が文字列なら例外', () => {
+  const s = valid(); s.resolution.width = '1280';
+  assert.throws(() => validateShotSpec(s), /resolution\.width must be a positive integer/);
+});
+
+test('resolution.height が小数なら例外', () => {
+  const s = valid(); s.resolution.height = 1080.5;
+  assert.throws(() => validateShotSpec(s), /resolution\.height/);
+});
+
+test('plan が文字列でなければ例外', () => {
+  const s = valid(); s.plan = 42;
+  assert.throws(() => validateShotSpec(s), /plan must be a string/);
+});
+
+test('fps が NaN なら例外', () => {
+  const s = valid(); s.fps = NaN;
+  assert.throws(() => validateShotSpec(s), /fps must be a number/);
+});
+
+test('guideStride が小数なら例外（>= 1 は満たすが索引にならない）', () => {
+  const s = valid(); s.guideStride = 1.5;
+  assert.throws(() => validateShotSpec(s), /guideStride must be an integer/);
+});
+
+test('guideStride が文字列なら例外', () => {
+  const s = valid(); s.guideStride = '12';
+  assert.throws(() => validateShotSpec(s), /guideStride must be an integer/);
+});
+
+test('guides が配列でなければ例外', () => {
+  const s = valid(); s.guides = 'base';
+  assert.throws(() => validateShotSpec(s), /guides must be an array/);
+});
+
+// ── mode ───────────────────────────────────────────────
+
+test('mode 未指定なら sequence', () => {
+  assert.equal(shotMode(validateShotSpec(valid())), 'sequence');
+});
+
+test('mode は既知の値のみ', () => {
+  const s = valid(); s.mode = 'probe';
+  assert.throws(() => validateShotSpec(s), /mode must be one of/);
+});
+
+test('mode determinism-probe は通り、そのまま読める', () => {
+  const s = valid(); s.mode = 'determinism-probe';
+  assert.equal(shotMode(validateShotSpec(s)), 'determinism-probe');
+});
+
+test('MODES は2種', () => {
+  assert.deepEqual(MODES, ['sequence', 'determinism-probe']);
+});
+
 test('frameTimes は duration*fps 本で 0 始まり', () => {
   const ts = frameTimes(valid());
   assert.equal(ts.length, 96);
@@ -92,4 +160,24 @@ test('guideFrameIndices は stride 刻みで末尾を必ず含む', () => {
 
 test('GUIDE_KINDS は6種', () => {
   assert.deepEqual(GUIDE_KINDS, ['base', 'segmentation', 'instance', 'edge', 'depth', 'normal']);
+});
+
+// 同梱している spec ファイルそのものが検証を通ること。バリデータを厳しくした
+// のに実ファイルを直し忘れる、という取り違えをここで止める。
+import { readFileSync, readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const specsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'specs');
+
+for (const name of readdirSync(specsDir).filter(f => f.endsWith('.json'))) {
+  test(`同梱 spec ${name} は検証を通る`, () => {
+    const s = JSON.parse(readFileSync(join(specsDir, name), 'utf8'));
+    assert.equal(validateShotSpec(s), s);
+  });
+}
+
+test('determinism プローブの spec は mode で明示されている', () => {
+  const s = JSON.parse(readFileSync(join(specsDir, 'probe-determinism.json'), 'utf8'));
+  assert.equal(shotMode(validateShotSpec(s)), 'determinism-probe');
 });

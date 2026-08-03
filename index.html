@@ -19457,10 +19457,30 @@ updateMobileShiftButton();
 (function(){
   try{
     if(new URLSearchParams(location.search||'').get('pvCapture')!=='1') return;
+    // captureInstance3DData() は画像と legend を同時に返す。legend
+    // (部材ID -> 色 -> 種別・寸法) が無いと Layer 3 は「どの家具が消えたか」を
+    // 一切名指しできないので、captureGuide の呼び出しで得たものを保持し、
+    // runner が取り出して instance-legend.json として書き出せるようにする。
+    var lastInstanceLegend=null;
     window.__PV_CAPTURE__={
-      version:1,
+      version:2,
       ensure3D:function(){ return ensureAiRenderable3D(); },
       setView:function(v){ return setView(v); },
+      getView:function(){ return ST.view; },
+      // 実行中のプランを識別する。shot spec の "plan" と突き合わせるためのもの。
+      // アプリはプラン名を持たないが、「デフォルトプランが効いているか」は
+      // 判定できる: _defaultPlanPending は起動時 true で、IndexedDB 復元・
+      // 共同編集参加・ファイル取り込みのいずれかが起きたときだけ false になる
+      // (loadPreset は成功しても true のまま)。したがって true は
+      // 「assets/default_plan.json 以外は読まれていない」と同値である。
+      // 一致しない場合に runner 側で落とせるよう、正体の分かる文字列を返す。
+      getPlanId:function(){
+        var hasPlan=!!(DATA&&((DATA.walls&&DATA.walls.length)||(DATA.items&&DATA.items.length)||(DATA.rooms&&DATA.rooms.length)));
+        if(!hasPlan) return '(no plan loaded yet)';
+        if(typeof SHARED!=='undefined' && SHARED && SHARED.roomId) return 'shared-room:'+SHARED.roomId;
+        if(!_defaultPlanPending) return '(a saved or imported plan, not the default plan)';
+        return 'assets/default_plan.json';
+      },
       // フロア切替はアプリ自身の既存経路(#floor-sel の onchange と同じ onFloorChange)
       // に委譲する。ST.floor を直接書き換えると、選択解除・#st-floor 表示更新・
       // 用途セレクタ同期(syncFloorUseControl)・draw2d 再描画が一切走らず、
@@ -19512,10 +19532,23 @@ updateMobileShiftButton();
           invalidate3D();
         }
       },
+      // OrbitControls の damping / autoRotate はキャプチャ中は切る必要があるが、
+      // 切りっぱなしにするとキャプチャ後のユーザー操作の手触りが恒久的に変わる。
+      // 呼び出し前の値を返し、runner の finally で戻せるようにする。
+      captureOrbitState:function(){
+        if(typeof orbit==='undefined' || !orbit) return null;
+        return {enableDamping:orbit.enableDamping,autoRotate:orbit.autoRotate};
+      },
+      restoreOrbitState:function(prev){
+        if(!prev || typeof orbit==='undefined' || !orbit) return;
+        orbit.enableDamping=prev.enableDamping;
+        orbit.autoRotate=prev.autoRotate;
+      },
       setPose:function(pos,target,fov){
         var cam=getActive3DCamera();
         if(!cam) throw new Error('no active 3D camera');
         // OrbitControls の damping / autoRotate は再現性を壊すので必ず切る。
+        // 元の値は captureOrbitState() で先に控えてある前提。
         if(typeof orbit!=='undefined' && orbit){
           orbit.enableDamping=false;
           orbit.autoRotate=false;
@@ -19543,10 +19576,20 @@ updateMobileShiftButton();
         if(kind==='segmentation') return Promise.resolve(captureSegmentation3DDataUrl());
         if(kind==='depth') return Promise.resolve(captureAiOverrideGuideDataUrl('depth'));
         if(kind==='normal') return Promise.resolve(captureAiOverrideGuideDataUrl('normal'));
-        if(kind==='instance') return Promise.resolve(captureInstance3DData().dataUrl);
-        if(kind==='edge') return makeEdgeDataUrlFromSegmentation(captureInstance3DData().dataUrl);
+        if(kind==='instance'){
+          var inst=captureInstance3DData();
+          lastInstanceLegend=inst.legend;
+          return Promise.resolve(inst.dataUrl);
+        }
+        if(kind==='edge'){
+          var forEdge=captureInstance3DData();
+          lastInstanceLegend=forEdge.legend;
+          return makeEdgeDataUrlFromSegmentation(forEdge.dataUrl);
+        }
         return Promise.reject(new Error('unknown guide kind: '+kind));
-      }
+      },
+      // 直近の instance / edge キャプチャで得た legend。まだ一度も撮っていなければ null。
+      getInstanceLegend:function(){ return lastInstanceLegend; }
     };
     import('/pv/tools/truth-render/capture-runner.mjs').catch(function(e){
       console.error('[pv-capture] runner failed to load',e);

@@ -4,9 +4,39 @@ export const GUIDE_KINDS = ['base', 'segmentation', 'instance', 'edge', 'depth',
 
 const VIEWS = ['3d-int', '3d-ext'];
 
+// キャプチャの走らせ方。id から推測せず spec に明示させる。
+// 'sequence'          通常の連番キャプチャ。
+// 'determinism-probe' 同一姿勢 -> 別姿勢 -> 同一姿勢 を撮り、1枚目と3枚目が
+//                     バイト一致するかを見る再現性ゲート。
+export const MODES = ['sequence', 'determinism-probe'];
+
 function req(spec, field) {
   if (spec[field] === undefined || spec[field] === null || spec[field] === '') {
     throw new Error(`shot spec: required field "${field}" is missing`);
+  }
+}
+
+// JSON は "24" と 24 を区別せず、JS は比較で黙って数値へ変換する。
+// ("24" > 0) は true なので、型を見ずに範囲だけ検査すると文字列がそのまま
+// 通り、Math.round(duration * fps) や wrap.style.width の計算で初めて
+// おかしくなる。値の意味ごとに型そのものを検査する。
+function reqNumber(spec, field, value) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`shot spec: ${field} must be a number, got ${JSON.stringify(value)}`);
+  }
+  if (!(value > 0)) throw new Error(`shot spec: ${field} must be positive, got ${value}`);
+}
+
+function reqPositiveInteger(spec, field, value) {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `shot spec: ${field} must be a positive integer, got ${JSON.stringify(value)}`);
+  }
+}
+
+function reqString(spec, field, value) {
+  if (typeof value !== 'string') {
+    throw new Error(`shot spec: ${field} must be a string, got ${JSON.stringify(value)}`);
   }
 }
 
@@ -18,18 +48,27 @@ export function validateShotSpec(spec) {
   if (!spec || typeof spec !== 'object') throw new Error('shot spec: must be an object');
   ['id', 'plan', 'view', 'fps', 'duration', 'resolution', 'camera', 'guides', 'floor'].forEach(f => req(spec, f));
 
+  reqString(spec, 'id', spec.id);
+  reqString(spec, 'plan', spec.plan);
   if (!VIEWS.includes(spec.view)) {
     throw new Error(`shot spec: view must be one of ${VIEWS.join(', ')}, got "${spec.view}"`);
+  }
+  if (spec.mode !== undefined && !MODES.includes(spec.mode)) {
+    throw new Error(
+      `shot spec: mode must be one of ${MODES.join(', ')}, got ${JSON.stringify(spec.mode)}`);
   }
   if (!Number.isInteger(spec.floor) || spec.floor <= 0) {
     throw new Error(`shot spec: floor must be a positive integer, got ${JSON.stringify(spec.floor)}`);
   }
-  if (!(spec.fps > 0)) throw new Error('shot spec: fps must be positive');
-  if (!(spec.duration > 0)) throw new Error('shot spec: duration must be positive');
-  if (!(spec.resolution.width > 0) || !(spec.resolution.height > 0)) {
-    throw new Error('shot spec: resolution.width and resolution.height must be positive');
+  reqNumber(spec, 'fps', spec.fps);
+  reqNumber(spec, 'duration', spec.duration);
+  if (!spec.resolution || typeof spec.resolution !== 'object') {
+    throw new Error('shot spec: resolution must be an object');
   }
+  reqPositiveInteger(spec, 'resolution.width', spec.resolution.width);
+  reqPositiveInteger(spec, 'resolution.height', spec.resolution.height);
 
+  if (!Array.isArray(spec.guides)) throw new Error('shot spec: guides must be an array');
   spec.guides.forEach(g => {
     if (!GUIDE_KINDS.includes(g)) throw new Error(`shot spec: unknown guide kind "${g}"`);
   });
@@ -49,10 +88,15 @@ export function validateShotSpec(spec) {
   if (Math.abs(keys[keys.length - 1].t - spec.duration) > 1e-9) {
     throw new Error('shot spec: last camera key time must equal duration');
   }
-  if (spec.guideStride !== undefined && !(spec.guideStride >= 1)) {
-    throw new Error('shot spec: guideStride must be >= 1');
+  if (spec.guideStride !== undefined && (!Number.isInteger(spec.guideStride) || spec.guideStride < 1)) {
+    throw new Error(
+      `shot spec: guideStride must be an integer >= 1, got ${JSON.stringify(spec.guideStride)}`);
   }
   return spec;
+}
+
+export function shotMode(spec) {
+  return spec.mode || 'sequence';
 }
 
 export function frameTimes(spec) {
