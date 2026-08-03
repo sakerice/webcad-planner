@@ -52,13 +52,13 @@ from metrics import (
     edge_mask,
     edge_precision,
     edge_recall,
-    instance_boxes,
     instance_recall,
+    instance_regions,
 )
 
 # 真実ベースレンダを生成フレームの寸法へ縮小するときの再標本化。
 # LANCZOS を選ぶのは通常の写真的画像の縮小に適した高品質フィルタだから。
-# (instance guide はこれとは別に NEAREST 固定 — metrics.instance_boxes 参照。
+# (instance guide はこれとは別に NEAREST 固定 — metrics.instance_regions 参照。
 # あちらは flat な ID カラーなので、平滑化フィルタは色を壊す。)
 RESAMPLE_BASE = Image.LANCZOS
 
@@ -70,6 +70,14 @@ def load_truth_base(truth_base_png, target_size, on_resize=None):
     ぼかしを生み、輝度段差が `edge_mask` の閾値を割り込んで実在するエッジが
     消える。縮小方向に直した後は、ピクセル完全な生成が全フレームで
     recall/precision とも厳密に 1.000 になることを測定で確認した。
+
+    生成フレームが真実より **大きい** 場合は縮小の逆（真実の拡大）になって
+    しまうので、ここで即座に拒否する。かつての「生成側を真実の解像度へ拡大」
+    バグが recall 0.255〜0.752 まで落としたのと鏡写しの失敗が、真実側を
+    拡大する形で再現するだけだからである。真実の 2560x1440 はディスプレイの
+    devicePixelRatio から来ており spec.resolution (1280x720) 由来ではない
+    ため、1倍ディスプレイや Topview の自動アップスケールが有効なままだと
+    生成側の方が大きくなり得る — これは実際に起こり得る入力である。
 
     アスペクト比が違う場合は解像度差ではなく別画角の取り違えなので、
     引き伸ばして辻褄を合わせず即座に落とす。
@@ -85,6 +93,18 @@ def load_truth_base(truth_base_png, target_size, on_resize=None):
             f"truth {tw}x{th} ({tw / th:.4f}) vs generated {gw}x{gh} ({gw / gh:.4f}). "
             "This is a mismatched shot, not a resolution difference."
         )
+    if gw > tw or gh > th:
+        raise SystemExit(
+            f"error: generated frame {gw}x{gh} is larger than the truth render {tw}x{th} "
+            f"for {truth_base_png}. Comparison always downscales the truth down to the "
+            "generated frame's size, never the reverse — upscaling the truth would blur "
+            "it and push real edges below edge_mask's detection threshold, invalidating "
+            "the comparison (this is the exact failure mode that scored a pixel-perfect "
+            "generation 0.255-0.752, in mirror image: here it would be the truth losing "
+            "its edges instead of the generated side). Re-capture the truth render at a "
+            "resolution at least as large as the generated frames, or check whether "
+            "Topview's auto-upscale produced an oversized generated frame."
+        )
     if on_resize:
         on_resize(f"truth frames are {tw}x{th}; downscaling to the generated size "
                   f"{gw}x{gh} before edge extraction")
@@ -97,8 +117,10 @@ def compare_frame(index, truth_base_png, generated_png, radius, instance_png=Non
 
     真実側の参照はどちらの指標も同じ `base_edges`（真実ベースレンダのエッジ、
     生成フレームの解像度へ縮小済み）。`instance_png` と `legend` が渡された
-    場合、instance guide も同じ解像度へ (NEAREST で) 縮小してから bbox を
-    読む — recall/precision の参照と同じグリッド上でないと bbox がずれる。
+    場合、instance guide も同じ解像度へ (NEAREST で) 縮小してから
+    (bbox, mask) を読む — recall/precision の参照と同じグリッド上でないと
+    ずれる。`instance_recall` は bbox の中身全部ではなく、この mask で
+    絞った部材自身の画素だけを採点する（`metrics.instance_regions` 参照）。
     """
     generated_img = Image.open(generated_png)
     truth_img = load_truth_base(truth_base_png, generated_img.size, on_resize=on_resize)
@@ -106,15 +128,15 @@ def compare_frame(index, truth_base_png, generated_png, radius, instance_png=Non
     base_edges = edge_mask(truth_img)
     generated = edge_mask(generated_img)
 
-    boxes = {}
+    regions = {}
     if instance_png is not None and legend is not None:
-        boxes = instance_boxes(instance_png, legend, target_size=generated_img.size)
+        regions = instance_regions(instance_png, legend, target_size=generated_img.size)
 
     return {
         "index": index,
         "recall": edge_recall(base_edges, generated, radius),
         "precision": edge_precision(base_edges, generated, radius),
-        "instances": instance_recall(base_edges, generated, boxes, radius) if boxes else {},
+        "instances": instance_recall(base_edges, generated, regions, radius) if regions else {},
     }
 
 
@@ -141,23 +163,58 @@ def evaluate(rows, min_recall, min_precision, min_instance_recall):
     失敗理由は per-instance の名指しを先頭に、whole-frame の数値を副次的な
     文脈として後ろに置く。whole-frame の数値が「主な判定根拠」であるかの
     ような書き方をしないこと。
+
+    未検証 (unverifiable) の扱い: `metrics.edge_recall`/`instance_recall` は
+    真実側にその範囲の検出可能なエッジが1つも無いとき、1.0 ではなく `None`
+    を返す（同色の壁同士が接する境界、フラットな壁面、深い陰影など —
+    物体は設計上なお存在し得るが、このレンダではその存在を確認しようが
+    ない）。`None` は:
+      - PASS の根拠には数えない（`< min_instance_recall` の比較対象にしない
+        — 検証できていない数値と閾値を比べても意味がない）。
+      - しかし黙って捨てもしない。名前ごとに数え上げ、`rows[].instances` の
+        値としても（None のまま、JSON では null になる）、`evaluate` の
+        戻り値の `unverifiable` フィールドとしても残す。呼び出し側
+        (`main`) はこれを stdout に必ず出す。
+      - run 全体で instance チェックの過半数が unverifiable なら、それ
+        自体を run 全体の FAIL 理由にする。「ほとんど検証できていないのに
+        PASS と読める」状態を防ぐため。実データでは 111 instance のうち
+        3 件（`wall#2` が3フレーム）が unverifiable であり、これは
+        「過半数」には遠く及ばないので、実データの PASS 判定はこの規則
+        では変わらない。
     """
     if not rows:
         return {"verdict": "FAIL", "failures": [
-            {"index": -1, "reasons": ["no frames were compared"]}]}
+            {"index": -1, "reasons": ["no frames were compared"]}],
+            "unverifiable": {"count": 0, "total_checks": 0, "frames": []}}
 
     failures = []
+    unverifiable_frames = []
+    unverifiable_count = 0
+    total_instance_checks = 0
     for r in rows:
         reasons = []
+        unverifiable_here = []
         # Primary signal first: named per-instance regressions.
         for name, score in sorted(r.get("instances", {}).items()):
+            total_instance_checks += 1
+            if score is None:
+                unverifiable_here.append(name)
+                unverifiable_count += 1
+                continue
             if score < min_instance_recall:
                 reasons.append(
                     f"instance '{name}' recall {score:.3f} < {min_instance_recall:.3f} "
                     "(this specific designed object went missing or was altered — "
                     "the primary signal)")
+        if unverifiable_here:
+            unverifiable_frames.append({"index": r["index"], "instances": sorted(unverifiable_here)})
         # Secondary, coarser context: whole-frame guards.
-        if r["recall"] < min_recall:
+        if r["recall"] is None:
+            reasons.append(
+                "whole-frame recall unverifiable (the truth base render has no "
+                "detectable edge anywhere in this frame — cannot check for missing "
+                "structure; not counted toward PASS)")
+        elif r["recall"] < min_recall:
             reasons.append(
                 f"whole-frame recall {r['recall']:.3f} < {min_recall:.3f} "
                 "(coarse guard; design structure went missing somewhere in the frame)")
@@ -169,7 +226,28 @@ def evaluate(rows, min_recall, min_precision, min_instance_recall):
         if reasons:
             failures.append({"index": r["index"], "reasons": reasons})
 
-    return {"verdict": "FAIL" if failures else "PASS", "failures": failures}
+    # A run whose instances are largely unverifiable must not read as a clean
+    # PASS — if we could not actually check most of what we were asked to
+    # check, that is not the same thing as everything being intact. This is
+    # a run-wide guard, separate from the per-frame `None` handling above
+    # (which only excludes individual unverifiable checks from the pass
+    # computation without failing the run over a handful of them).
+    if total_instance_checks and unverifiable_count / total_instance_checks > 0.5:
+        failures.append({"index": -1, "reasons": [
+            f"{unverifiable_count} of {total_instance_checks} instance-checks across "
+            "this run were unverifiable (no detectable truth edge in the region) — "
+            "too little of the design could actually be checked for this run to read "
+            "as a clean PASS"]})
+
+    return {
+        "verdict": "FAIL" if failures else "PASS",
+        "failures": failures,
+        "unverifiable": {
+            "count": unverifiable_count,
+            "total_checks": total_instance_checks,
+            "frames": unverifiable_frames,
+        },
+    }
 
 
 def _load_legend(truth_dir: Path):
@@ -332,6 +410,15 @@ def main():
     print(f"{result['verdict']} — {len(rows)} frames compared")
     print("  (per-instance recall is the primary signal; whole-frame recall/precision "
           "are coarse secondary context)")
+    uv = result.get("unverifiable", {"count": 0, "total_checks": 0, "frames": []})
+    if uv["count"]:
+        print(f"  note: {uv['count']} of {uv['total_checks']} instance-check(s) were "
+              "unverifiable — the truth base render has no detectable edge in that "
+              "region (e.g. two same-tone surfaces meeting), so whether the object "
+              "survived generation could not be scored. These do NOT count toward "
+              f"PASS ({result['verdict']} above reflects only what could be checked):")
+        for entry in uv["frames"]:
+            print(f"    frame {entry['index']:>4}: " + ", ".join(entry["instances"]))
     for f in result["failures"]:
         print(f"  frame {f['index']:>4}: " + "; ".join(f["reasons"]))
 

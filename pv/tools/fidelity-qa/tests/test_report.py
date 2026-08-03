@@ -95,6 +95,78 @@ class EvaluateTest(unittest.TestCase):
         self.assertIn("precision", got["failures"][0]["reasons"][0])
 
 
+class UnverifiableInstanceTest(unittest.TestCase):
+    """Finding 1 regression at the evaluate() level: metrics.py now reports a
+    zero-truth-edge region as None ("unverifiable"), never as a perfect 1.0.
+    evaluate() must never conflate the two -- a None must not count toward a
+    clean PASS, must be named and counted, and a run that is LARGELY
+    unverifiable must not read as clean even though nothing measurable
+    failed."""
+
+    def test_a_single_unverifiable_instance_does_not_fail_and_is_named(self):
+        # sofa is measured and clean; wall2 could not be measured at all
+        # (its truth-side edges are zero, e.g. two same-tone walls meeting).
+        # A wrong implementation that reverted to scoring None-cases as 1.0
+        # would also PASS here, but would report zero unverifiable instances
+        # -- this test's second half (the unverifiable count) is what a
+        # reverted implementation would fail.
+        rows = [row(0, 0.99, 0.99, {"sofa": 0.97, "wall2": None})]
+        got = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(got["verdict"], "PASS")
+        self.assertEqual(got["unverifiable"]["count"], 1)
+        self.assertEqual(got["unverifiable"]["total_checks"], 2)
+        self.assertEqual(got["unverifiable"]["frames"],
+                         [{"index": 0, "instances": ["wall2"]}])
+
+    def test_unverifiable_instance_is_not_compared_against_the_threshold(self):
+        # None must never reach a "score < threshold" comparison (which would
+        # raise TypeError in Python) and must never itself appear as a named
+        # per-instance regression -- it is a distinct state, not a failing
+        # score of 0. A verified instance is included alongside it so this
+        # run is not itself majority-unverifiable (that has its own test
+        # above) -- this test isolates only "does None crash or get treated
+        # as a failing score".
+        rows = [row(0, 0.99, 0.99, {"wall2": None, "sofa": 0.97})]
+        got = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(got["verdict"], "PASS")
+        self.assertEqual(got["failures"], [])
+
+    def test_majority_unverifiable_instances_fail_the_whole_run(self):
+        # 2 of 3 instance-checks in this run are unverifiable -- too little
+        # of the design could actually be checked for this to read as clean,
+        # even though the one instance that WAS measured passed cleanly and
+        # nothing else in the run measured a failure.
+        rows = [row(0, 0.99, 0.99, {"a": None, "b": None, "c": 0.97})]
+        got = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(got["verdict"], "FAIL")
+        joined = " ".join(r for f in got["failures"] for r in f["reasons"])
+        self.assertIn("2 of 3", joined)
+        self.assertIn("unverifiable", joined)
+
+    def test_a_few_unverifiable_instances_among_many_do_not_fail_the_run(self):
+        # Mirrors the real T91 measurement: 3 of 111 instance-checks
+        # (wall#2 on three frames) were unverifiable -- nowhere near a
+        # majority, so the run-wide guard above must not fire.
+        instances = {f"obj{i}": 0.95 for i in range(8)}
+        instances["wall2"] = None
+        rows = [row(0, 0.99, 0.99, instances)]
+        got = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(got["verdict"], "PASS")
+
+    def test_whole_frame_recall_none_is_reported_not_silently_passed(self):
+        # A frame whose truth base render has literally no detectable edge
+        # anywhere is a degenerate case distinct from a single unverifiable
+        # instance (some instances legitimately cast no edge; an entire real
+        # render frame doing so is essentially only possible if the capture
+        # itself is broken). It must not silently PASS at 1.0, and unlike a
+        # single unverifiable instance this is treated as a run failure --
+        # the safer default for something this anomalous.
+        rows = [row(0, None, 0.99)]
+        got = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(got["verdict"], "FAIL")
+        self.assertIn("unverifiable", got["failures"][0]["reasons"][0])
+
+
 # ---------------------------------------------------------------------------
 # Fixture builders.
 #
@@ -368,6 +440,43 @@ class ResolutionTest(unittest.TestCase):
                 collect_rows(truth, gen, radius=2)
         self.assertIn("aspect ratio mismatch", str(ctx.exception))
 
+    def test_generated_larger_than_truth_refuses_to_upscale_the_truth(self):
+        """Finding 3 regression: report.py always downscales the truth down
+        to the generated frame's size, never the reverse. If the generated
+        frame is LARGER than the truth (e.g. the truth's 2560x1440 capture
+        actually came out smaller than expected, or Topview's auto-upscale
+        was left on), resizing the truth UP would blur it and push real
+        edges below edge_mask's threshold -- the same failure mode that
+        scored a pixel-perfect generation 0.255-0.752, in mirror image. This
+        must be refused with a clear error, not silently upscaled.
+
+        A wrong implementation that resizes unconditionally (no direction
+        check) would not raise here at all -- it would return a blurred,
+        upscaled truth image and let the run proceed."""
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._fixture(tmp, (1024, 576))   # double the truth's 512x288
+            with self.assertRaises(SystemExit) as ctx:
+                collect_rows(truth, gen, radius=2)
+        message = str(ctx.exception)
+        self.assertIn("1024x576", message)
+        self.assertIn("512x288", message)
+        self.assertIn("larger than the truth", message)
+
+    def test_the_logged_note_always_matches_what_actually_happened(self):
+        """Finding 3's second half: report.py's note text must not just
+        unconditionally say "downscaling" regardless of what happened. This
+        is already implicitly covered by the tests above (the upscale case
+        raises instead of ever reaching the note-printing code at all), but
+        this test pins it directly: a genuine downscale is the ONLY case
+        that logs a "downscaling" note, and it correctly names both sizes
+        involved."""
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._fixture(tmp, (256, 144))   # half the truth's 512x288
+            notes = []
+            collect_rows(truth, gen, radius=2, warn=notes.append)
+        self.assertTrue(any("512x288" in n and "downscaling" in n and "256x144" in n
+                             for n in notes), notes)
+
 
 class CoverageTest(unittest.TestCase):
     def test_unmatched_truth_frames_fail_instead_of_reporting_a_one_frame_pass(self):
@@ -559,6 +668,84 @@ class PixelPerfectDifferentResolutionTest(unittest.TestCase):
             self.assertEqual(r["recall"], 1.0, r)
             self.assertEqual(r["precision"], 1.0, r)
         self.assertTrue(any("downscaling" in n for n in notes), notes)
+
+
+class SameToneInstanceIsUnverifiableEndToEndTest(unittest.TestCase):
+    """Finding 1's end-to-end regression, through the real collect_rows path
+    (not just evaluate() with hand-built rows): an instance whose truth-side
+    edges are entirely zero because it meets a same-tone neighbour --
+    `wall2` here, mirroring the real `wall#2` measured on T91-ldk-push --
+    must score None, never 1.0, even on an otherwise pixel-perfect
+    generation. A reverted `_recall_ratio` (i.e. the old `_ratio` behaviour)
+    would make this instance read as a perfect, fully-verified 1.0 instead."""
+
+    SIZE = 300
+
+    def _regions(self):
+        r = np.zeros((self.SIZE, self.SIZE), dtype=np.uint8)
+        r[100:280, 100:280] = ROOM
+        # wall2 sits entirely INSIDE the room block, away from the sofa and
+        # the rug (rows 200:270, cols 120:170 in _render) -- every side of
+        # its footprint borders ROOM, which renders at the identical grey
+        # level (WALL2's LEVELS entry equals ROOM's) plus the same
+        # column-only daylight gradient on both sides of every seam. So
+        # nothing about crossing into/out of wall2 changes the rendered
+        # pixel value: this footprint has zero detectable truth edges on
+        # any side, mirroring the real wall#2 (an interior wall meeting
+        # same-tone surfaces on all sides visible in that frame).
+        r[150:200, 190:210] = WALL2
+        r[120:140, 150:175] = SOFA
+        return r
+
+    def _instance_png(self):
+        arr = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)
+        arr[150:200, 190:210] = (0, 0, 255)   # wall2
+        arr[120:140, 150:175] = (255, 0, 0)   # sofa
+        return arr
+
+    def _build(self, root: Path):
+        truth = root / "truth"
+        (truth / "edge").mkdir(parents=True)
+        (truth / "base").mkdir(parents=True)
+        (truth / "instance").mkdir(parents=True)
+        gen = root / "generated"
+        gen.mkdir(parents=True)
+
+        (truth / "instance-legend.json").write_text(json.dumps({
+            "version": 2,
+            "instances": [
+                {"id": 1, "color": "#0000ff", "label": "wall2"},
+                {"id": 2, "color": "#ff0000", "label": "sofa"},
+            ],
+        }))
+
+        regions = self._regions()
+        _save(truth / "edge" / "0000.png", _line_drawing(regions))
+        _save(truth / "base" / "0000.png", _render(regions))
+        _save(truth / "instance" / "0000.png", self._instance_png())
+        # Pixel-perfect generation -- nothing vanished, nothing was invented.
+        _save(gen / "0000.png", _appearance_upgrade(regions))
+        return truth, gen
+
+    def test_same_tone_instance_scores_none_not_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._build(Path(tmp))
+            rows, expected = collect_rows(truth, gen, radius=1)
+        self.assertEqual((len(rows), expected), (1, 1))
+        instances = rows[0]["instances"]
+        self.assertIsNone(instances["wall2"], instances)
+        # The sofa is a real, detectable object and must still score cleanly
+        # -- this is not "everything unverifiable", only the same-tone wall.
+        self.assertGreater(instances["sofa"], 0.9, instances)
+
+    def test_run_still_passes_and_names_the_unverifiable_instance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._build(Path(tmp))
+            rows, _ = collect_rows(truth, gen, radius=1)
+        result = evaluate(rows, min_recall=0.90, min_precision=0.90, min_instance_recall=0.90)
+        self.assertEqual(result["verdict"], "PASS")
+        self.assertEqual(result["unverifiable"]["count"], 1)
+        self.assertEqual(result["unverifiable"]["frames"][0]["instances"], ["wall2"])
 
 
 class InstanceErasureRegressionTest(unittest.TestCase):

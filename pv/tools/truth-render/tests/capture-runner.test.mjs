@@ -65,12 +65,21 @@ function probeSpec(overrides = {}) {
 
 function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                    legend = [{ id: 1, color: '#ff0000', type: 'fmp-Sofa02' }],
+                   // legendAt(n), if given, returns the legend snapshot for the
+                   // n-th (0-indexed) instance/edge capture in the run --
+                   // mirrors how the real captureGuide('instance'|'edge')
+                   // reassigns window.__PV_CAPTURE__'s internal legend on every
+                   // such call, which is what lets a mid-shot id->colour remap
+                   // happen at all.
+                   legendAt = null,
                    failAtGuide = null } = {}) {
   const initial = { view: '2d', floor: 1, orbit: { enableDamping: true, autoRotate: true } };
   const state = { view: initial.view, floor: initial.floor, orbit: { ...initial.orbit } };
   const captured = [];
   const requests = [];
   const poses = [];
+  let instanceCaptureCount = 0;
+  let currentLegend = legend;
 
   window.__PV_CAPTURE__ = {
     ensure3D: () => state.view.startsWith('3d'),
@@ -93,9 +102,13 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
     captureGuide: kind => {
       captured.push(kind);
       if (failAtGuide && kind === failAtGuide) return Promise.reject(new Error('capture blew up'));
+      if (kind === 'instance' || kind === 'edge') {
+        currentLegend = legendAt ? legendAt(instanceCaptureCount) : legend;
+        instanceCaptureCount++;
+      }
       return Promise.resolve(pngDataUrl());
     },
-    getInstanceLegend: () => legend,
+    getInstanceLegend: () => currentLegend,
   };
 
   globalThis.fetch = async (url, init = {}) => {
@@ -136,6 +149,32 @@ test('instance ガイドを撮るなら instance-legend が1回だけ POST さ�
   const body = JSON.parse(legendPosts[0].body);
   assert.equal(body.instances.length, 1);
   assert.equal(body.instances[0].type, 'fmp-Sofa02');
+});
+
+test('instance id->色対応が撮影中に変わったら落ちる（サイレントな remap を防ぐ）', async () => {
+  // id=1 の色がフレーム0の 'edge'/'instance' キャプチャ (0,1回目) では赤、
+  // フレーム1 (2,3回目) では青に変わる -- 三.js のトラバース順が撮影中に
+  // ずれた、という想定のシナリオ。これを検出できなければ、フレーム1以降の
+  // instance PNG は全く別の id->色対応で焼かれているのに、runner の最後で
+  // POST される legend はどちらか一方しか語らない。
+  const h = harness({
+    legendAt: n => [{ id: 1, color: n < 2 ? '#ff0000' : '#0000ff', type: 'fmp-Sofa02' }],
+  });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /id->colour mapping changed mid-shot/);
+    assert.match(err.message, /id 1/);
+    return true;
+  });
+  // 壊れた対応のまま legend が書き出されてはならない。
+  assert.equal(posts(h.requests, '/instance-legend').length, 0);
+});
+
+test('instance id->色対応が撮影中ずっと同じなら通る（回帰ガードの偽陽性がないことの確認）', async () => {
+  const h = harness({
+    legendAt: () => [{ id: 1, color: '#ff0000', type: 'fmp-Sofa02' }],
+  });
+  await main();
+  assert.equal(posts(h.requests, '/instance-legend').length, 1);
 });
 
 test('instance ガイドを撮らないショットでは legend を書かない', async () => {

@@ -197,7 +197,51 @@ async function ensureViewRenderable(spec) {
   }
 }
 
-async function captureAt(spec, t, index, kinds, assertFrameSize) {
+// instance / edge のキャプチャは呼ぶたびに window.__PV_CAPTURE__.getInstanceLegend()
+// を更新する (index.html の captureGuide 参照)。runner はショットの最後に
+// getInstanceLegend() を1回だけ読んで instance-legend.json として POST する
+// (postInstanceLegend)。つまり実際に書き出される legend は「最後に instance/edge
+// を撮ったときの id→色対応」であり、途中のフレームで撮った instance guide
+// PNG 群がその対応と食い違っていないという保証は、これまでコード上どこにも
+// 無かった。instance id は three.js シーンを traverse した順に採番されるため、
+// シーングラフの構成が撮影中に変わる（フロア切替の副作用、非決定的な走査順、
+// 将来的なコード変更など）と、途中のフレームだけ別の id→色対応で焼かれた
+// instance PNG が残り、最後に POST される legend はそれを正しく読めない —
+// 全 per-instance スコアが黙って壊れる、という誰も気づけない失敗になる。
+// そのためここで、instance/edge を撮るたびに得られる legend を直前までの
+// ものと突き合わせ、id→色の対応が変わっていたら即座に例外で止める。
+function legendColourMap(legend) {
+  const map = {};
+  for (const entry of legend) map[entry.id] = entry.color;
+  return map;
+}
+
+function createLegendGuard() {
+  let expected = null;
+  return function assertLegendStable(index, legend) {
+    if (!Array.isArray(legend) || legend.length === 0) return; // まだ何も撮っていない
+    const map = legendColourMap(legend);
+    if (!expected) { expected = map; return; }
+    const expectedIds = Object.keys(expected);
+    const gotIds = Object.keys(map);
+    if (expectedIds.length !== gotIds.length) {
+      throw new Error(
+        `instance id->colour mapping changed mid-shot at frame ${index}: ` +
+        `expected ${expectedIds.length} instances, got ${gotIds.length}. ` +
+        'A silent remap would corrupt every per-instance fidelity score.');
+    }
+    for (const id of expectedIds) {
+      if (map[id] !== expected[id]) {
+        throw new Error(
+          `instance id->colour mapping changed mid-shot at frame ${index}: ` +
+          `id ${id} was ${expected[id]}, is now ${map[id]}. ` +
+          'A silent remap would corrupt every per-instance fidelity score.');
+      }
+    }
+  };
+}
+
+async function captureAt(spec, t, index, kinds, assertFrameSize, assertLegendStable) {
   const pose = sampleCameraPath(spec.camera.keys, t);
   window.__PV_CAPTURE__.setPose(pose.pos, pose.target, pose.fov);
   window.__PV_CAPTURE__.renderNow();
@@ -205,6 +249,9 @@ async function captureAt(spec, t, index, kinds, assertFrameSize) {
   for (const kind of kinds) {
     const dataUrl = await window.__PV_CAPTURE__.captureGuide(kind);
     assertFrameSize(kind, index, dataUrl);
+    if (kind === 'instance' || kind === 'edge') {
+      assertLegendStable(index, window.__PV_CAPTURE__.getInstanceLegend());
+    }
     await postFrame(spec.id, kind, index, dataUrl);
   }
 }
@@ -256,11 +303,12 @@ async function runSequence(spec, assertFrameSize) {
   if (!wantsBase && extraGuides.length === 0) {
     throw new Error('shot spec: guides is empty; there is nothing to capture');
   }
+  const assertLegendStable = createLegendGuard();
   for (let i = 0; i < times.length; i++) {
     const kinds = [];
     if (wantsBase) kinds.push('base');
     if (guideAt.has(i)) kinds.push(...extraGuides);
-    if (kinds.length) await captureAt(spec, times[i], i, kinds, assertFrameSize);
+    if (kinds.length) await captureAt(spec, times[i], i, kinds, assertFrameSize, assertLegendStable);
     if (i % 10 === 0) log(`frame ${i + 1}/${times.length}`);
   }
   if (spec.guides.includes('instance')) await postInstanceLegend(spec);

@@ -255,6 +255,61 @@ Branch decision once the verdict is in:
 - **Structure held** — keep this architecture and move production shots to 無制限モード (cost 0).
 - **Structure did not hold** — drop `@Video1` as the primary constraint and switch to dense keyframes (`@Image1`–`@Image9` at ~0.5 s spacing).
 
+## What this gate cannot catch
+
+A re-review (2026-08-04) found and fixed a false-PASS path (a zero-truth-edge
+region — same-tone surfaces meeting, e.g. `wall#2` — scored a perfect 1.0
+instead of being reported as unverifiable) and a scoring-dilution path
+(per-instance recall was measured against the whole bounding box instead of
+the object's own pixels, letting a large, mostly-empty box dilute an erased
+object's score). Both are fixed and covered by tests
+(`pv/tools/fidelity-qa/tests/`). This is **still not calibrated** (see above)
+and there are failure modes it structurally cannot catch, confirmed by
+measurement:
+
+- **Small rigid displacements of large surfaces are visible only in the
+  coarse whole-frame numbers, not per-instance.** A wall displaced 2 px moves
+  whole-frame recall/precision to 0.896/0.896, while an unrelated sofa's own
+  per-instance recall stays exactly 1.000 — the sofa didn't move, so its own
+  check has nothing to flag. Nothing per-instance names "the wall shifted";
+  only the coarse whole-frame guard sees it, and a real generation's ordinary
+  appearance-only changes already move that same coarse number by a similar
+  handful of points, so a small, genuine shift is not cleanly distinguishable
+  from normal Layer 2 variance by the whole-frame number alone.
+- **A replaced object of a different shape is caught, but only by the
+  per-instance signal, and not perfectly.** A sofa replaced by a
+  differently-shaped sofa scores instance recall 0.658 — comfortably below a
+  0.90 floor, so this case *is* caught, but only because per-instance recall
+  exists; whole-frame recall/precision alone would not reliably distinguish
+  "same sofa, redrawn" from "different sofa, same room".
+- **Per-instance recall's positional tolerance (`--radius`) is now confined
+  to the object's own footprint, which is stricter but not unlimited.** Fixing
+  the dilution bug required masking the *generated* side to the object's own
+  mask too, not just the truth side (see the fidelity-qa change report) — a
+  truth-only mask left a second loophole where a large object's own
+  boundary could be "rescued" by an untouched *neighbour's* edge one or two
+  pixels away, because edge detection marks both sides of every seam. With
+  both sides masked, a truly vanished object scores exactly 0.0 regardless of
+  radius, but genuinely legitimate small (`--radius`-sized) drift of the
+  *same* object is now scored more strictly than before, since a neighbour's
+  edge can no longer stand in for it either. This is the intended trade-off,
+  not a known bug, but it is a real behaviour change worth knowing if a
+  future generation shows lower per-instance recall than expected for an
+  object that only shifted slightly.
+- **Unverifiable regions are surfaced but not "solved."** A region with zero
+  detectable truth edges (measured: 3 of 111 instance-checks on this exact
+  render — `wall#2` at frames 72/84/95) is now reported as unverifiable and
+  excluded from the PASS computation instead of silently scoring a perfect
+  1.0. That is honest, but it is still not a check: nothing tells you whether
+  the generator actually kept that wall intact. A run whose instances are
+  *largely* unverifiable is failed outright rather than allowed to read as
+  clean, but a small number of unverifiable instances (as on this render) is
+  and remains a real gap in coverage, not a pass.
+
+The pixel-perfect reproduction anchor (whole-frame recall/precision and every
+named instance = 1.000/1.000, `PixelPerfectDifferentResolutionTest`) still
+holds and must not regress.
+
 ## Not changed by this run
 
 S07 and S08 remain `missing`. A pass here validates the pipeline, not those shots, and must not promote them to `approved`.

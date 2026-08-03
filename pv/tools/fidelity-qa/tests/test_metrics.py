@@ -14,6 +14,7 @@ from metrics import (
     edge_recall,
     instance_boxes,
     instance_recall,
+    instance_regions,
     line_edge_mask,
 )
 
@@ -95,8 +96,23 @@ class EdgeMetricTest(unittest.TestCase):
         t = blank(); t[3:12, 7] = True
         self.assertEqual(edge_recall(t, blank(), 1), 0.0)
 
-    def test_empty_truth_scores_one_recall(self):
-        self.assertEqual(edge_recall(blank(), blank(), 1), 1.0)
+    def test_empty_truth_is_unverifiable_not_a_perfect_score(self):
+        """Finding 1 regression: a region with zero truth edges must report
+        as unverifiable (None), never as a perfect 1.0. The object may still
+        exist in the design -- it simply casts no detectable edge in this
+        particular render (same-tone surfaces meeting, a flat wall face, deep
+        shade). Measured on the real T91 render: 3 of 111 instance-boxes
+        (`wall#2` on frames 72/84/95) have zero truth edges and, under the old
+        `1.0 if total==0` behaviour, scored a perfect recall no matter what
+        the generator drew there -- a silent false PASS. A reverted
+        implementation returning 1.0 here would pass the old assertion but
+        must fail this one."""
+        self.assertIsNone(edge_recall(blank(), blank(), 1))
+        # Even when the generated side has content, an empty truth reference
+        # still cannot be scored -- the score must not depend on what the
+        # generated side happens to contain.
+        nonempty_generated = blank(); nonempty_generated[3:12, 7] = True
+        self.assertIsNone(edge_recall(blank(), nonempty_generated, 1))
 
     def test_empty_generated_scores_one_precision(self):
         t = blank(); t[3:12, 7] = True
@@ -104,6 +120,14 @@ class EdgeMetricTest(unittest.TestCase):
 
     def test_empty_truth_scores_one_precision(self):
         self.assertEqual(edge_precision(blank(), blank(), 1), 1.0)
+
+
+def _full_box_region(box):
+    """A region whose mask covers the entire bbox (no restriction) -- used by
+    tests that want to exercise bbox cropping/axis-order without exercising
+    the mask-restriction behaviour itself."""
+    y0, x0, y1, x1 = box
+    return box, np.ones((y1 - y0, x1 - x0), dtype=bool)
 
 
 class InstanceRecallTest(unittest.TestCase):
@@ -125,9 +149,18 @@ class InstanceRecallTest(unittest.TestCase):
 
         Transposing the y/x convention would change sofa's recall from 0.444 to 0.666,
         causing the test to fail.
+
+        The regions here use a mask that covers the whole bbox (no
+        restriction) -- this test is about bbox cropping and axis order, not
+        about mask restriction, which gets its own dedicated test below.
+
+        The array is sized 22x22, not 20x20: the table box's x1=21 must fit
+        inside the array or numpy silently clips the slice, which would make
+        the (fixed-shape) all-True mask below mismatch the (silently
+        narrower) truth/generated crop.
         """
-        t = blank(20, 20)
-        g = blank(20, 20)
+        t = blank(22, 22)
+        g = blank(22, 22)
 
         # Sofa: asymmetrically positioned structure in top-left of box
         t[1:4, 2:5] = True    # 3 rows × 3 cols = 9 pixels
@@ -137,13 +170,148 @@ class InstanceRecallTest(unittest.TestCase):
         t[11:16, 12:15] = True  # 5 rows × 3 cols = 15 pixels
         # g has no table (all False)
 
-        boxes = {"sofa": (1, 2, 9, 11), "table": (11, 12, 19, 21)}
-        got = instance_recall(t, g, boxes, radius=0)
+        regions = {
+            "sofa": _full_box_region((1, 2, 9, 11)),
+            "table": _full_box_region((11, 12, 19, 21)),
+        }
+        got = instance_recall(t, g, regions, radius=0)
 
         # sofa recall: 4 overlapping pixels / 9 truth pixels in sofa box
         self.assertAlmostEqual(got["sofa"], 4/9, places=5)
         # table recall: 0 overlapping pixels / 15 truth pixels in table box
         self.assertEqual(got["table"], 0.0)
+
+    def test_mask_restricts_scoring_to_the_objects_own_pixels_not_the_whole_box(self):
+        """Finding 2 regression: instance_recall must score only the pixels
+        that belong to the object itself, not everything inside its bounding
+        rectangle.
+
+        A 'window' sits in a box that also contains a busy neighbour (a wall
+        seam) elsewhere in the same rectangle -- exactly the real-render
+        shape of the bug: `window#70` at frame 0000 reached a bbox-based
+        recall of 0.968 after being fully erased, because its own edges were
+        only ~3% of the edges inside its bounding box; the rest belonged to
+        the wall around it.
+
+        Box (1, 2, 9, 11): 8 rows x 9 cols.
+          Window's own footprint (the mask): rows 1-3, cols 2-4 (9 px) --
+          truth has edges here, generated does NOT (the window was erased).
+          A neighbour's edges, OUTSIDE the mask but INSIDE the box: rows 5-7,
+          cols 6-9 (12 px) -- truth and generated agree here (untouched).
+
+        A bbox-only implementation scores hit=12 (the surviving neighbour
+        edges only, since the window's own edges are erased in generated),
+        total=21 (9 window + 12 neighbour) -> recall 12/21 ~= 0.571, i.e. an
+        erased window would still look mostly intact. Restricting to the
+        window's own mask must score hit=0, total=9 -> recall 0.0: this
+        implementation must give the second number, not the first. If
+        instance_recall regressed back to using the whole bbox, this
+        assertion would see ~0.571 instead of 0.0 and fail.
+        """
+        t = blank(20, 20)
+        g = blank(20, 20)
+
+        # Window's own edges in truth, erased in generated.
+        t[1:4, 2:5] = True
+        # g leaves this region False -- the window vanished.
+
+        # A neighbouring wall seam: inside the box but outside the window's
+        # own mask. Present and correctly reproduced in both truth and
+        # generated -- the bug is that this alone used to be enough to make
+        # the erased window look recalled.
+        t[5:8, 6:10] = True
+        g[5:8, 6:10] = True
+
+        box = (1, 2, 9, 11)
+        mask = np.zeros((8, 9), dtype=bool)
+        mask[0:3, 0:3] = True   # covers only the window's own footprint
+
+        regions = {"window": (box, mask)}
+        got = instance_recall(t, g, regions, radius=0)
+
+        self.assertEqual(got["window"], 0.0, got)
+
+    def test_a_bbox_only_implementation_would_have_passed_the_above_at_0_571(self):
+        """Companion proof that the fixture above is not vacuous: directly
+        confirms what the OLD bbox-only computation would have scored for
+        the identical truth/generated arrays, so the 0.0 assertion above is
+        known to discriminate against a real (not hypothetical) prior
+        behaviour rather than an number nobody would ever have produced."""
+        t = blank(20, 20)
+        g = blank(20, 20)
+        t[1:4, 2:5] = True
+        t[5:8, 6:10] = True
+        g[5:8, 6:10] = True
+
+        box = (1, 2, 9, 11)
+        bbox_only_region = _full_box_region(box)
+        got = instance_recall(t, g, {"window": bbox_only_region}, radius=0)
+        self.assertAlmostEqual(got["window"], 12 / 21, places=5)
+
+    def test_a_neighbours_untouched_edge_cannot_stand_in_for_the_erased_object(self):
+        """Second-order dilution regression, found while re-measuring after
+        the mask fix above: masking only the TRUTH side is not enough for an
+        object whose own edge is a SHARED boundary with a stationary
+        neighbour -- which is what a wall or room's own silhouette usually
+        is. `edge_mask` marks BOTH sides of every intensity transition, so
+        the object's own boundary pixel sits immediately next to the
+        neighbour's boundary pixel on the other side of the very same seam.
+        If only truth is restricted to the object's mask while generated is
+        left unmasked, erasing the object's own edge pixels still leaves the
+        neighbour's untouched pixel one step away, and any radius >= 1
+        dilation lets that untouched neighbour edge "stand in" for the
+        vanished object.
+
+        Measured on the real T91 render: erasing `wall#6` entirely (its own
+        edges only, mask-restricted on the truth side only) scored recall
+        0.0 at radius=0 but rebounded to 0.968 at radius=1 and 1.000 at
+        radius=2 -- the exact loophole this test pins in miniature.
+
+        Object's own footprint (the mask): rows 1-3, cols 2-4 -- erased in
+        generated. Neighbour's own edge, one column outside the mask (col 5,
+        the far side of the very same physical seam): present and untouched
+        in both truth and generated. At radius=1, a truth-only mask lets
+        that neighbour pixel dilate one step leftward into the mask's own
+        column 4 and register as a "hit" for the erased object.
+        """
+        t = blank(20, 20)
+        g = blank(20, 20)
+
+        t[1:4, 2:5] = True     # the object's own edge (its footprint == the mask)
+        # g leaves rows1-3, cols2-4 False -- the object's own edge is erased.
+
+        t[1:4, 5] = True       # the neighbour's edge, one column past the mask
+        g[1:4, 5] = True       # untouched -- this object was never erased
+
+        box = (1, 2, 9, 11)
+        mask = np.zeros((8, 9), dtype=bool)
+        mask[0:3, 0:3] = True  # the object's own footprint only (cols 2-4 -> offset 0-2)
+
+        regions = {"wall": (box, mask)}
+        got = instance_recall(t, g, regions, radius=1)
+        self.assertEqual(got["wall"], 0.0, got)
+
+    def test_masking_only_truth_would_have_let_the_neighbour_rescue_the_score(self):
+        """Companion proof: confirms what a truth-only mask (generated left
+        as the full bbox, unmasked) would have scored for the identical
+        fixture -- 3 of the object's own 9 truth-edge pixels (column 4,
+        rows 1-3) falsely register as recalled because the neighbour's
+        untouched edge one column over dilates into them at radius=1."""
+        t = blank(20, 20)
+        g = blank(20, 20)
+        t[1:4, 2:5] = True
+        t[1:4, 5] = True
+        g[1:4, 5] = True
+
+        box = (1, 2, 9, 11)
+        y0, x0, y1, x1 = box
+        mask = np.zeros((y1 - y0, x1 - x0), dtype=bool)
+        mask[0:3, 0:3] = True
+
+        truth_masked_only = t[y0:y1, x0:x1] & mask
+        generated_unmasked = g[y0:y1, x0:x1]  # the old (insufficient) design
+        self.assertAlmostEqual(edge_recall(truth_masked_only, generated_unmasked, 1),
+                               3 / 9, places=5)
 
 
 class EdgeMaskTest(unittest.TestCase):
@@ -388,6 +556,49 @@ class InstanceBoxesTest(unittest.TestCase):
         legend = {"instances": [{"id": 7, "color": "#FF0000", "type": "fmp-Sofa02"}]}
         boxes = instance_boxes(buf, legend)
         self.assertIn("fmp-Sofa02#7", boxes)
+
+
+class InstanceRegionsTest(unittest.TestCase):
+    """instance_regions() is what instance_recall() actually consumes: bbox
+    AND the object's own pixel mask, cropped to the bbox. The mask must be
+    exactly the object's own footprint, not the whole box -- an L-shaped
+    (non-rectangular) object is used here specifically because a rectangle
+    fixture cannot tell "mask == bbox interior" apart from "mask == object's
+    real shape"; both would look identical for a filled rectangle."""
+
+    def test_mask_matches_the_objects_own_shape_not_the_bbox_interior(self):
+        img_array = np.zeros((20, 20, 3), dtype=np.uint8)
+        # An L-shaped instance: bbox is rows 5-15, cols 5-15 (10x10), but the
+        # object only occupies the top row-band and the left col-band of
+        # that box -- an actual rectangle fixture would make "mask covers
+        # the whole bbox" indistinguishable from "mask covers the object".
+        img_array[5:8, 5:15] = [255, 0, 0]     # top band of the L
+        img_array[5:15, 5:8] = [255, 0, 0]     # left band of the L
+
+        img = Image.fromarray(img_array)
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+
+        legend = {"instances": [{"id": 1, "color": "#FF0000", "label": "bracket"}]}
+        regions = instance_regions(buf, legend)
+
+        self.assertIn("bracket", regions)
+        (y0, x0, y1, x1), mask = regions["bracket"]
+        self.assertEqual((y0, x0, y1, x1), (5, 5, 15, 15))
+        self.assertEqual(mask.shape, (10, 10))
+
+        # The mask must be True on the L and False in the box's empty corner
+        # (bottom-right of the bbox, rows 8-15 / cols 8-15 in original
+        # coordinates -- rows 3-10 / cols 3-10 within the crop).
+        self.assertTrue(mask[0:3, :].all())     # top band
+        self.assertTrue(mask[:, 0:3].all())     # left band
+        self.assertFalse(mask[5:, 5:].any())    # empty corner of the L's bbox
+
+        # And the mask must have strictly fewer True pixels than the full
+        # bbox -- otherwise this fixture would not discriminate a regression
+        # back to "mask == bbox interior" at all.
+        self.assertLess(int(mask.sum()), mask.size)
 
 
 class InstanceBoxesResizeTest(unittest.TestCase):
