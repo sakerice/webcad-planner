@@ -121,11 +121,26 @@ function settle() {
 
 const VIEW_READY_TIMEOUT_MS = 5000;
 
+// spec.floor はアプリ自身のフロア切替経路(setFloor -> onFloorChange)に委譲する。
+// setView('3d-int') は内観のカメラ位置・境界ボックスを ST.floor から算出するため
+// (index.html の setView 内 `flWalls=DATA.walls.filter(w=>w.floor===ST.floor)` 参照)、
+// フロアが正しく切り替わっていないと 3D ビュー自体が別の階を映してしまう。
+// そのため必ずビュー切替より前にフロアを確定させる。setFloor の呼び出しが
+// 実際に反映されたかどうかは戻り値を信用せず、getFloor で改めて読み返して確認する。
+function ensureFloorApplied(spec) {
+  window.__PV_CAPTURE__.setFloor(spec.floor);
+  const actual = window.__PV_CAPTURE__.getFloor();
+  if (actual !== spec.floor) {
+    throw new Error(`floor did not take effect: requested ${spec.floor}, app is at ${actual}`);
+  }
+}
+
 // アプリは 2D 平面図で起動することがあり、その状態では ensure3D() は
 // ビューを切り替えず即座に false を返す。まず spec.view へ明示的に
 // 切り替え、その上でレンダリング可能になるまで実際の状態をポーリングする。
 // 固定 setTimeout の代わりに settle() を挟んで rAF ベースで待つ。
 async function ensureViewRenderable(spec) {
+  ensureFloorApplied(spec);
   window.__PV_CAPTURE__.setView(spec.view);
   const start = Date.now();
   for (;;) {

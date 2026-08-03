@@ -16,10 +16,13 @@ function isVec3(v) {
 
 export function validateShotSpec(spec) {
   if (!spec || typeof spec !== 'object') throw new Error('shot spec: must be an object');
-  ['id', 'plan', 'view', 'fps', 'duration', 'resolution', 'camera', 'guides'].forEach(f => req(spec, f));
+  ['id', 'plan', 'view', 'fps', 'duration', 'resolution', 'camera', 'guides', 'floor'].forEach(f => req(spec, f));
 
   if (!VIEWS.includes(spec.view)) {
     throw new Error(`shot spec: view must be one of ${VIEWS.join(', ')}, got "${spec.view}"`);
+  }
+  if (!Number.isInteger(spec.floor) || spec.floor <= 0) {
+    throw new Error(`shot spec: floor must be a positive integer, got ${JSON.stringify(spec.floor)}`);
   }
   if (!(spec.fps > 0)) throw new Error('shot spec: fps must be positive');
   if (!(spec.duration > 0)) throw new Error('shot spec: duration must be positive');

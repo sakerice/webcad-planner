@@ -19461,6 +19461,14 @@ updateMobileShiftButton();
       version:1,
       ensure3D:function(){ return ensureAiRenderable3D(); },
       setView:function(v){ return setView(v); },
+      // フロア切替はアプリ自身の既存経路(#floor-sel の onchange と同じ onFloorChange)
+      // に委譲する。ST.floor を直接書き換えると、選択解除・#st-floor 表示更新・
+      // 用途セレクタ同期(syncFloorUseControl)・draw2d 再描画が一切走らず、
+      // アプリの他部分が古いフロアの状態を参照し続ける恐れがあるため。
+      // getFloor は ST.floor をそのまま読み返す — setFloor の戻り値を信用せず、
+      // 呼び出し元(capture-runner.mjs)が実際に反映されたかを別途確認できるようにする。
+      setFloor:function(floor){ onFloorChange(floor); },
+      getFloor:function(){ return ST.floor; },
       // #c3d-wrap を厳密な CSS px サイズへ固定し、既存の window resize ハンドラ
       // (下記 window.addEventListener('resize',...) 参照)と同じ手順で
       // ren/composer/camExt/camInt を追従させる。captureCurrent3DDataUrl 等は

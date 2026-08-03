@@ -18,6 +18,7 @@ const valid = () => ({
   },
   guides: ['base', 'edge', 'instance'],
   guideStride: 24,
+  floor: 2,
 });
 
 test('妥当な spec はそのまま返る', () => {
@@ -53,6 +54,28 @@ test('最後のキーの時刻は duration と一致しなければ例外', () =
 test('未知の guide 種別は例外', () => {
   const s = valid(); s.guides = ['base', 'bogus'];
   assert.throws(() => validateShotSpec(s), /bogus/);
+});
+
+test('floor が無ければフィールド名を含む例外', () => {
+  const s = valid(); delete s.floor;
+  assert.throws(() => validateShotSpec(s), /floor/);
+});
+
+test('floor が整数でなければ例外', () => {
+  const s = valid(); s.floor = 1.5;
+  assert.throws(() => validateShotSpec(s), /floor/);
+});
+
+test('floor が0以下なら例外', () => {
+  const s = valid(); s.floor = 0;
+  assert.throws(() => validateShotSpec(s), /floor/);
+  s.floor = -1;
+  assert.throws(() => validateShotSpec(s), /floor/);
+});
+
+test('floor が正の整数なら通る', () => {
+  const s = valid(); s.floor = 3;
+  assert.equal(validateShotSpec(s), s);
 });
 
 test('frameTimes は duration*fps 本で 0 始まり', () => {
