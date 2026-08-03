@@ -130,30 +130,56 @@ class InstanceRecallTest(unittest.TestCase):
 class EdgeMaskTest(unittest.TestCase):
     def test_edge_mask_detects_hard_edges(self):
         """Synthetic image: white rectangle on black background.
-        Edges should be detected at the boundary; flat regions should not."""
-        # Create image array directly and wrap in PIL.Image
+        Edges should be detected at the boundary; flat regions should not.
+
+        Rectangle is at rows 10-30, cols 10-30. The edges at row 10 and row 29
+        (top and bottom) should be detected. Interior at row 20 should be flat (few edges).
+        """
         arr = np.zeros((40, 40, 3), dtype=np.uint8)
         arr[10:30, 10:30] = [255, 255, 255]  # white rectangle
         img = Image.fromarray(arr)
 
         mask = edge_mask(img, threshold=32)
-        # Edges should be detected at the boundary
-        # Interior should mostly be False (flat region)
-        interior = mask[15:25, 15:25]
-        # Allow some edge pixels due to filtering artifacts, but most interior should be False
-        self.assertLess(interior.sum(), 5,
+
+        # Boundary rows should have edge pixels detected
+        boundary_top = mask[10:12, 10:30]  # Rows at top edge
+        boundary_bot = mask[28:30, 10:30]  # Rows at bottom edge
+        # At least one boundary row should have significant edge pixels
+        self.assertGreater(
+            max(boundary_top.sum(), boundary_bot.sum()), 5,
+            "Boundary rows should detect edge pixels"
+        )
+
+        # Interior row should be flat (few edges)
+        interior = mask[20:21, 10:30]
+        self.assertLess(interior.sum(), 3,
                         "Interior of flat region should have few edge pixels")
 
     def test_edge_mask_threshold_effect(self):
-        """Higher threshold -> fewer edge pixels."""
+        """Higher threshold -> fewer edge pixels (strict monotonicity).
+
+        Create an image with a gradient to produce a range of edge values.
+        Low threshold detects weaker edges, high threshold rejects them.
+        """
         arr = np.zeros((40, 40, 3), dtype=np.uint8)
-        arr[10:30, 10:30] = [255, 255, 255]
+        # Create a gradient from black to white that will produce anti-aliased edges
+        # with values spanning 0-255 range
+        for i in range(40):
+            intensity = int(i * 255 / 39)
+            arr[i, :] = [intensity, intensity, intensity]
         img = Image.fromarray(arr)
 
-        low_threshold = edge_mask(img, threshold=10)
-        high_threshold = edge_mask(img, threshold=200)
-        # High threshold should reject weak edges
-        self.assertGreaterEqual(low_threshold.sum(), high_threshold.sum())
+        # Apply FIND_EDGES to the gradient to get intermediate edge values
+        low_threshold = edge_mask(img, threshold=50)
+        high_threshold = edge_mask(img, threshold=150)
+
+        # Low threshold must find edges
+        self.assertGreater(low_threshold.sum(), 0,
+                           "Low threshold (50) must detect at least one edge pixel")
+        # High threshold must strictly have fewer edges than low threshold
+        self.assertLess(high_threshold.sum(), low_threshold.sum(),
+                        f"High threshold (150) must reject more edges than low threshold (50): "
+                        f"low={low_threshold.sum()}, high={high_threshold.sum()}")
 
     def test_edge_mask_accepts_pil_image(self):
         """Verify that edge_mask can accept a PIL.Image directly."""
@@ -167,11 +193,20 @@ class EdgeMaskTest(unittest.TestCase):
 
 class InstanceBoxesTest(unittest.TestCase):
     def test_instance_boxes_from_synthetic_png(self):
-        """Create synthetic instance PNG with two colored rectangles."""
-        # Create image with two rectangles: red and blue
+        """Create synthetic instance PNG with two colored rectangles.
+
+        Use rectangles with different row and column extents to catch axis-swap bugs.
+        Sofa: rows 5-15 (10 rows) × cols 5-20 (15 cols)
+        Table: rows 20-30 (10 rows) × cols 20-35 (15 cols)
+
+        If (y0,x0,y1,x1) is transposed to (x0,y0,x1,y1), sofa would be (5,5,20,15),
+        which does not match the expected (5,5,15,20), and the test fails.
+        """
         img_array = np.zeros((40, 40, 3), dtype=np.uint8)
-        img_array[5:15, 5:15] = [255, 0, 0]    # Red rectangle (rows 5-15, cols 5-15)
-        img_array[20:35, 20:35] = [0, 0, 255]  # Blue rectangle (rows 20-35, cols 20-35)
+        # Sofa: rows 5-15, cols 5-20 (non-square: 10 rows × 15 cols)
+        img_array[5:15, 5:20] = [255, 0, 0]
+        # Table: rows 20-30, cols 20-35 (non-square: 10 rows × 15 cols, but positioned differently)
+        img_array[20:30, 20:35] = [0, 0, 255]
 
         img = Image.fromarray(img_array)
         buf = BytesIO()
@@ -186,14 +221,16 @@ class InstanceBoxesTest(unittest.TestCase):
         }
 
         boxes = instance_boxes(buf, legend)
-        # Red rectangle should be detected
+        # Sofa: (y0, x0, y1, x1) = (5, 5, 15, 20)
         self.assertIn("sofa", boxes)
         y0, x0, y1, x1 = boxes["sofa"]
-        self.assertEqual((y0, x0, y1, x1), (5, 5, 15, 15))
-        # Blue rectangle should be detected
+        self.assertEqual((y0, x0, y1, x1), (5, 5, 15, 20),
+                         "Sofa box must be (y0=5, x0=5, y1=15, x1=20)")
+        # Table: (y0, x0, y1, x1) = (20, 20, 30, 35)
         self.assertIn("table", boxes)
         y0, x0, y1, x1 = boxes["table"]
-        self.assertEqual((y0, x0, y1, x1), (20, 20, 35, 35))
+        self.assertEqual((y0, x0, y1, x1), (20, 20, 30, 35),
+                         "Table box must be (y0=20, x0=20, y1=30, x1=35)")
 
     def test_instance_boxes_skips_null_color(self):
         """Malformed entry with null color should be skipped gracefully."""
