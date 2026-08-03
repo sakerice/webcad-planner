@@ -7,7 +7,26 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from metrics import dilate, edge_mask, edge_precision, edge_recall, instance_boxes, instance_recall
+from metrics import (
+    dilate,
+    edge_mask,
+    edge_precision,
+    edge_recall,
+    instance_boxes,
+    instance_recall,
+    line_edge_mask,
+)
+
+
+def edge_guide_png(size=40, stroke_cols=(10, 25), stroke_rows=(8,)):
+    """An edge guide PNG exactly as index.html emits it: white paper, 1px
+    strokes at rgb(20,24,30)."""
+    arr = np.full((size, size, 3), 255, dtype=np.uint8)
+    for c in stroke_cols:
+        arr[:, c] = [20, 24, 30]
+    for r in stroke_rows:
+        arr[r, :] = [20, 24, 30]
+    return Image.fromarray(arr)
 
 
 def blank(h=20, w=20):
@@ -158,28 +177,46 @@ class EdgeMaskTest(unittest.TestCase):
     def test_edge_mask_threshold_effect(self):
         """Higher threshold -> fewer edge pixels (strict monotonicity).
 
-        Create an image with a gradient to produce a range of edge values.
-        Low threshold detects weaker edges, high threshold rejects them.
+        Two vertical steps of different contrast: a weak one (40 levels) and a
+        strong one (150 levels). A low threshold must find both, a high
+        threshold only the strong one -- and the weak step must be the part
+        that disappears, not an arbitrary subset.
         """
-        arr = np.zeros((40, 40, 3), dtype=np.uint8)
-        # Create a gradient from black to white that will produce anti-aliased edges
-        # with values spanning 0-255 range
-        for i in range(40):
-            intensity = int(i * 255 / 39)
-            arr[i, :] = [intensity, intensity, intensity]
+        arr = np.zeros((40, 60, 3), dtype=np.uint8)
+        arr[:, :20] = 20            # |  step of 40 at col 20
+        arr[:, 20:40] = 60          # |  step of 150 at col 40
+        arr[:, 40:] = 210
         img = Image.fromarray(arr)
 
-        # Apply FIND_EDGES to the gradient to get intermediate edge values
-        low_threshold = edge_mask(img, threshold=50)
-        high_threshold = edge_mask(img, threshold=150)
+        low_threshold = edge_mask(img, threshold=30)
+        high_threshold = edge_mask(img, threshold=80)
 
-        # Low threshold must find edges
         self.assertGreater(low_threshold.sum(), 0,
-                           "Low threshold (50) must detect at least one edge pixel")
-        # High threshold must strictly have fewer edges than low threshold
+                           "Low threshold (30) must detect at least one edge pixel")
         self.assertLess(high_threshold.sum(), low_threshold.sum(),
-                        f"High threshold (150) must reject more edges than low threshold (50): "
+                        f"High threshold (80) must reject more edges than low threshold (30): "
                         f"low={low_threshold.sum()}, high={high_threshold.sum()}")
+        # The weak step is the one that must vanish, and the strong one must survive.
+        self.assertTrue(low_threshold[:, 19].all() and low_threshold[:, 20].all())
+        self.assertFalse(high_threshold[:, 19].any() or high_threshold[:, 20].any())
+        self.assertTrue(high_threshold[:, 39].all() and high_threshold[:, 40].all())
+
+    def test_edge_mask_marks_both_sides_of_a_transition(self):
+        """The operator must mark the pixels on BOTH sides of an intensity
+        step. PIL's FIND_EDGES does not: on a 1px dark line it leaves the line
+        itself False and fires only on the two flanking columns, which is what
+        made a pixel-perfect reproduction score 0.0 at radius 0."""
+        arr = np.full((20, 20, 3), 255, dtype=np.uint8)
+        arr[:, 10] = [20, 24, 30]        # the stroke index.html actually draws
+        mask = edge_mask(Image.fromarray(arr), threshold=32)
+        np.testing.assert_array_equal(np.nonzero(mask[5])[0], np.array([9, 10, 11]))
+
+    def test_edge_mask_does_not_invent_edges_on_a_uniform_image(self):
+        """FIND_EDGES fires along the outermost 1px border of any image,
+        including a perfectly uniform one. Those are pure artefacts and they
+        counted towards both metrics."""
+        arr = np.full((20, 20, 3), 180, dtype=np.uint8)
+        self.assertEqual(edge_mask(Image.fromarray(arr), threshold=32).sum(), 0)
 
     def test_edge_mask_accepts_pil_image(self):
         """Verify that edge_mask can accept a PIL.Image directly."""
@@ -189,6 +226,45 @@ class EdgeMaskTest(unittest.TestCase):
         # Should not raise; should return a boolean array
         self.assertEqual(mask.dtype, bool)
         self.assertEqual(mask.shape, (20, 20))
+
+
+class LineEdgeMaskTest(unittest.TestCase):
+    def test_dark_stroke_is_the_mask_not_its_flanks(self):
+        img = edge_guide_png()
+        mask = line_edge_mask(img)
+        np.testing.assert_array_equal(np.nonzero(mask[5])[0], np.array([10, 25]))
+        self.assertTrue(mask[8].all())
+
+    def test_pixel_perfect_reproduction_scores_one_at_radius_zero(self):
+        """I6. The truth side is an edge-guide line drawing; the generated
+        side is an image the generator produced. When the generated image
+        reproduces the guide pixel for pixel, recall must be 1.0 with NO
+        neighbourhood tolerance at all.
+
+        Before the fix the truth side re-derived edges from the line drawing
+        with FIND_EDGES, landing on the two columns flanking each stroke while
+        the stroke column itself read False. Truth (stroke) and generated
+        (flanks) were then disjoint and this scored 0.0, recovering only at
+        radius >= 1 -- i.e. the radius was silently papering over a defect in
+        the mask, not tolerating real sub-pixel drift.
+        """
+        img = edge_guide_png(stroke_rows=())
+        truth = line_edge_mask(img)
+        generated = edge_mask(img)
+        # Guard against the symmetric-fixture trap: scoring 1.0 must not come
+        # from both sides being processed by the same operator into the same
+        # mask. They are different kinds of image and are read differently.
+        self.assertFalse(np.array_equal(truth, generated),
+                         "truth and generated must not reduce to an identical mask")
+        self.assertEqual(edge_recall(truth, generated, 0), 1.0)
+
+    def test_a_stroke_that_moved_is_still_caught_at_radius_zero(self):
+        """The mirror of the above: scoring 1.0 must come from the structure
+        matching, not from the mask being permissive. A guide whose strokes
+        the generator shifted by 4px must NOT score 1.0."""
+        truth = line_edge_mask(edge_guide_png(stroke_cols=(10, 25), stroke_rows=()))
+        generated = edge_mask(edge_guide_png(stroke_cols=(14, 29), stroke_rows=()))
+        self.assertLess(edge_recall(truth, generated, 0), 0.6)
 
 
 class InstanceBoxesTest(unittest.TestCase):
@@ -295,6 +371,23 @@ class InstanceBoxesTest(unittest.TestCase):
         boxes = instance_boxes(buf, legend)
         # Should use id as name
         self.assertIn("42", boxes)
+
+    def test_instance_boxes_names_by_type_when_label_missing(self):
+        """The legend index.html actually writes (aiInstanceSummary) has no
+        "label" field at all -- the member kind is in "type". Falling back
+        straight to the bare id would make every failure read "instance '7'",
+        which does not name which piece of furniture vanished."""
+        img_array = np.zeros((20, 20, 3), dtype=np.uint8)
+        img_array[5:15, 5:15] = [255, 0, 0]
+
+        img = Image.fromarray(img_array)
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+
+        legend = {"instances": [{"id": 7, "color": "#FF0000", "type": "fmp-Sofa02"}]}
+        boxes = instance_boxes(buf, legend)
+        self.assertIn("fmp-Sofa02#7", boxes)
 
 
 if __name__ == "__main__":
