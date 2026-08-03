@@ -31,7 +31,34 @@ async function postFrame(shot, kind, index, dataUrl) {
 
 // レンダラの状態が確実に落ち着くまで待つ。1フレームでは shadowMap の
 // 更新が間に合わないことがあるため2フレーム分待つ。
-const settle = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+//
+// ブラウザはページが hidden（他タブに切り替わった/最小化された等）のとき
+// requestAnimationFrame を一切呼ばない。renderNow() はここで明示的・同期的に
+// 呼んでいるので、rAF の発火自体には依存していない — rAF は「表示中なら
+// 正確なフレーム間隔で待てる」という最適化に過ぎない。そのため、2連続 rAF と
+// タイムアウトを競走させ、どちらか早い方で解決する。表示中は rAF が勝ち、
+// 非表示（無人運用中の長尺ショットで起こりうる）ではタイマーが勝って進行が
+// 止まらない。片方が解決したらもう片方は捨てる（タイマーは clearTimeout、
+// 二重解決は resolved フラグで防ぐ）。
+const FRAME_SETTLE_FALLBACK_MS = 100; // 2フレーム分を安全側に見た時間。60fpsなら2フレームは約33msだが、
+                                       // 低速な環境でも確実に賄えるよう2〜3倍の余裕を持たせている。
+function settle() {
+  return new Promise(resolve => {
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    };
+    const timer = setTimeout(finish, FRAME_SETTLE_FALLBACK_MS);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        clearTimeout(timer);
+        finish();
+      });
+    });
+  });
+}
 
 const VIEW_READY_TIMEOUT_MS = 5000;
 
