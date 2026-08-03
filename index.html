@@ -19471,13 +19471,23 @@ updateMobileShiftButton();
         var prev={width:wrap.style.width,height:wrap.style.height};
         wrap.style.width=width+'px';
         wrap.style.height=height+'px';
-        if(ren){
-          ren.setSize(wrap.clientWidth,wrap.clientHeight);
-          if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
-          [camExt,camInt].forEach(function(c){
-            if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
-          });
-          invalidate3D();
+        try{
+          if(ren){
+            ren.setSize(wrap.clientWidth,wrap.clientHeight);
+            if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+            [camExt,camInt].forEach(function(c){
+              if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
+            });
+            invalidate3D();
+          }
+        }catch(e){
+          // ren/composer/camera 側の適用に失敗しても、wrap の inline サイズだけは
+          // 必ず呼び出し前の状態へ戻してから再送出する。呼び出し元
+          // (capture-runner.mjs) の finally 節は、この関数が prev を return
+          // して初めて復元できるため、途中で投げた場合はここで自前に戻す。
+          wrap.style.width=prev.width;
+          wrap.style.height=prev.height;
+          throw e;
         }
         return prev;
       },
