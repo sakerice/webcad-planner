@@ -1589,6 +1589,12 @@ git commit -m "Record T91 video-driven fidelity validation result"
 
 ---
 
+## Deferred to the next phase (T91 の結果を待つ)
+
+**クリップ間の継ぎ目.** 本計画は4秒クリップ1本の忠実度検証までを扱う。複数クリップを連結する段では、ショット N の最終フレームとショット N+1 の初期フレームが同一ポーズであることを shot spec レベルで強制する必要がある（`camera.keys` の末尾と次 spec の先頭の一致検証）。Layer 1 が両方を3Dから厳密にレンダできるため、`scroll-world` の seam rule のように「生成済みフレームを次の境界へ流用する」必要はない。継ぎ目は合わせにいくのではなく最初から同一にできる。T91 が PASS した後に、`validateShotChain(specs)` として Task 2 のモジュールへ追加する。
+
+**スクロール同期再生.** `scroll-world` の `scrub-engine.js`（vanilla JS、blob-seek / lazy load / seam crossfade）は、完成した mp4 を本サイト上でスクロール連動再生する用途でのみ再検討する価値がある。生成バックエンド（Monid / Higgsfield、有料）は本設計と衝突するため採用しない。導入は PV 完成後に、独立した判断として行う。
+
 ## Self-Review
 
 **Spec coverage:**
