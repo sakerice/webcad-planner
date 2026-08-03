@@ -125,8 +125,22 @@ async function main() {
 
   await ensureViewRenderable(spec);
 
-  if (spec.id === 'probe-determinism') await runDeterminismProbe(spec);
-  else await runSequence(spec);
+  // spec.resolution が実際に消費されるのはここだけ。#c3d-wrap の見た目サイズは
+  // ブラウザウィンドウ任せなので、固定しないとフレームのアスペクト比・寸法が
+  // ショット中に揺れ、狙った画角も再現できない。setCaptureViewport 自体が
+  // 途中で失敗してもユーザーの画面をリサイズしたまま残さないよう、
+  // 呼び出しごと try に入れて必ず finally で元に戻す。
+  let prevViewport;
+  try {
+    prevViewport = window.__PV_CAPTURE__.setCaptureViewport(
+      spec.resolution.width,
+      spec.resolution.height
+    );
+    if (spec.id === 'probe-determinism') await runDeterminismProbe(spec);
+    else await runSequence(spec);
+  } finally {
+    if (prevViewport) window.__PV_CAPTURE__.restoreCaptureViewport(prevViewport);
+  }
 }
 
 main().catch(e => { console.error('[pv-capture] failed', e); });

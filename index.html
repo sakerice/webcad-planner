@@ -19461,6 +19461,39 @@ updateMobileShiftButton();
       version:1,
       ensure3D:function(){ return ensureAiRenderable3D(); },
       setView:function(v){ return setView(v); },
+      // #c3d-wrap を厳密な CSS px サイズへ固定し、既存の window resize ハンドラ
+      // (下記 window.addEventListener('resize',...) 参照)と同じ手順で
+      // ren/composer/camExt/camInt を追従させる。captureCurrent3DDataUrl 等は
+      // wrap.clientWidth/clientHeight から解像度を導出するため、これでショット
+      // 全体を通じて出力アスペクト比とピクセル寸法を固定できる。
+      setCaptureViewport:function(width,height){
+        var wrap=document.getElementById('c3d-wrap');
+        var prev={width:wrap.style.width,height:wrap.style.height};
+        wrap.style.width=width+'px';
+        wrap.style.height=height+'px';
+        if(ren){
+          ren.setSize(wrap.clientWidth,wrap.clientHeight);
+          if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+          [camExt,camInt].forEach(function(c){
+            if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
+          });
+          invalidate3D();
+        }
+        return prev;
+      },
+      restoreCaptureViewport:function(prev){
+        var wrap=document.getElementById('c3d-wrap');
+        wrap.style.width=(prev&&prev.width)||'';
+        wrap.style.height=(prev&&prev.height)||'';
+        if(ren){
+          ren.setSize(wrap.clientWidth,wrap.clientHeight);
+          if(typeof composer!=='undefined' && composer) composer.setSize(wrap.clientWidth,wrap.clientHeight);
+          [camExt,camInt].forEach(function(c){
+            if(c){ c.aspect=wrap.clientWidth/wrap.clientHeight; c.updateProjectionMatrix(); }
+          });
+          invalidate3D();
+        }
+      },
       setPose:function(pos,target,fov){
         var cam=getActive3DCamera();
         if(!cam) throw new Error('no active 3D camera');
