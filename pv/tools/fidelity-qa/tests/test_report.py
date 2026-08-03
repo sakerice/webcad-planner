@@ -9,7 +9,8 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from report import assert_coverage, collect_rows, compare_frame, evaluate
+from report import assert_coverage, collect_rows, evaluate
+from metrics import edge_mask, edge_precision, line_edge_mask
 
 
 def row(index, recall, precision, instances=None):
@@ -20,13 +21,13 @@ def row(index, recall, precision, instances=None):
 class EvaluateTest(unittest.TestCase):
     def test_all_above_threshold_passes(self):
         rows = [row(0, 0.97, 0.97), row(1, 0.96, 0.85)]
-        got = evaluate(rows, min_recall=0.95, min_precision=0.80)
+        got = evaluate(rows, min_recall=0.95, min_precision=0.80, min_instance_recall=0.90)
         self.assertEqual(got["verdict"], "PASS")
         self.assertEqual(got["failures"], [])
 
     def test_low_recall_fails_and_names_the_frame(self):
         rows = [row(0, 0.97, 0.90), row(7, 0.40, 0.90)]
-        got = evaluate(rows, min_recall=0.90, min_precision=0.70)
+        got = evaluate(rows, min_recall=0.90, min_precision=0.70, min_instance_recall=0.90)
         self.assertEqual(got["verdict"], "FAIL")
         self.assertEqual(len(got["failures"]), 1)
         self.assertEqual(got["failures"][0]["index"], 7)
@@ -34,7 +35,7 @@ class EvaluateTest(unittest.TestCase):
 
     def test_low_precision_fails(self):
         rows = [row(3, 0.99, 0.30)]
-        got = evaluate(rows, min_recall=0.90, min_precision=0.70)
+        got = evaluate(rows, min_recall=0.90, min_precision=0.70, min_instance_recall=0.90)
         self.assertEqual(got["verdict"], "FAIL")
         self.assertIn("precision", got["failures"][0]["reasons"][0])
 
@@ -43,25 +44,35 @@ class EvaluateTest(unittest.TestCase):
         # directly. It measures structure with no counterpart in the truth
         # render of the same camera pose.
         rows = [row(3, 0.99, 0.30)]
-        got = evaluate(rows, min_recall=0.90, min_precision=0.70)
+        got = evaluate(rows, min_recall=0.90, min_precision=0.70, min_instance_recall=0.90)
         reason = got["failures"][0]["reasons"][0]
         self.assertIn("no counterpart in the truth render", reason)
         self.assertIn("same camera pose", reason)
 
     def test_missing_instance_is_named_in_the_failure(self):
         # dining_table (0.80) sits strictly between min_precision (0.60) and
-        # min_recall (0.95): it only fails if the per-instance loop is gated
-        # by min_recall, as the design requires (instance recall measures
-        # missingness, the same direction as the frame-level recall check).
+        # min_instance_recall (0.95): it only fails if the per-instance loop
+        # is gated by min_instance_recall, its own dedicated threshold, not by
+        # min_recall or min_precision.
         rows = [row(2, 0.99, 0.99, {"sofa": 0.97, "dining_table": 0.80})]
-        got = evaluate(rows, min_recall=0.95, min_precision=0.60)
+        got = evaluate(rows, min_recall=0.95, min_precision=0.60, min_instance_recall=0.95)
         self.assertEqual(got["verdict"], "FAIL")
         joined = " ".join(got["failures"][0]["reasons"])
         self.assertIn("dining_table", joined)
         self.assertNotIn("sofa", joined)
 
+    def test_instance_regression_is_reported_before_whole_frame_reasons(self):
+        # Per-instance recall is the primary signal; whole-frame numbers are
+        # coarse secondary context. The failure text must lead with the named
+        # instance, not with the whole-frame recall/precision figures.
+        rows = [row(2, 0.80, 0.80, {"dining_table": 0.10})]
+        got = evaluate(rows, min_recall=0.85, min_precision=0.85, min_instance_recall=0.90)
+        reasons = got["failures"][0]["reasons"]
+        self.assertIn("dining_table", reasons[0])
+        self.assertTrue(any("whole-frame" in r for r in reasons[1:]))
+
     def test_empty_rows_fail_rather_than_silently_pass(self):
-        got = evaluate([], min_recall=0.90, min_precision=0.70)
+        got = evaluate([], min_recall=0.90, min_precision=0.70, min_instance_recall=0.90)
         self.assertEqual(got["verdict"], "FAIL")
 
     def test_recall_only_failure_would_flip_to_pass_if_thresholds_were_swapped(self):
@@ -70,7 +81,7 @@ class EvaluateTest(unittest.TestCase):
         # so if evaluate() ever compared recall to the wrong threshold
         # variable, this row's failure would silently disappear.
         rows = [row(0, 0.85, 0.99)]
-        got = evaluate(rows, min_recall=0.95, min_precision=0.75)
+        got = evaluate(rows, min_recall=0.95, min_precision=0.75, min_instance_recall=0.95)
         self.assertEqual(got["verdict"], "FAIL")
         self.assertIn("recall", got["failures"][0]["reasons"][0])
 
@@ -79,7 +90,7 @@ class EvaluateTest(unittest.TestCase):
         # (0.95) is now the stricter one. precision=0.85 fails against
         # min_precision but would PASS against min_recall (0.75).
         rows = [row(0, 0.99, 0.85)]
-        got = evaluate(rows, min_recall=0.75, min_precision=0.95)
+        got = evaluate(rows, min_recall=0.75, min_precision=0.95, min_instance_recall=0.75)
         self.assertEqual(got["verdict"], "FAIL")
         self.assertIn("precision", got["failures"][0]["reasons"][0])
 
@@ -119,6 +130,20 @@ def _save(path: Path, arr: np.ndarray):
 # Region ids used by the fixtures below.
 FIELD, ROOM, SOFA, INVENTED = 0, 1, 2, 3
 LEVELS = {FIELD: 30, ROOM: 200, SOFA: 110, INVENTED: 160}
+
+# WALL2 renders at the exact same grey level as ROOM. A boundary between a
+# ROOM region and a WALL2 region is a real seam the line drawing marks
+# (region ids differ) but that no shaded render can show (same tone on both
+# sides) -- the `wall#2` failure mode: recall 0.000 against a pixel-perfect
+# reproduction when recall was still measured against the line drawing.
+WALL2 = 6
+LEVELS[WALL2] = LEVELS[ROOM]
+
+# FENCE is a second, independent furniture-like instance used by the
+# per-instance erasure test below -- a distinct id/level from SOFA so the
+# two instances can be told apart and erased independently.
+FENCE = 7
+LEVELS[FENCE] = 140
 
 
 SOFA_H, SOFA_W = 20, 25
@@ -262,25 +287,28 @@ class LayerPairingTest(unittest.TestCase):
         self.assertGreater(got["recall"], 0.95)
         self.assertGreater(got["precision"], 0.95)
 
-    def test_appearance_detail_would_wreck_precision_if_measured_against_the_line_drawing(self):
-        """The regression C3 fixes. Scoring the same appearance-only
-        generation against the truth LINE DRAWING instead of the truth BASE
-        RENDER collapses precision, failing a correct generation."""
+    def test_precision_against_the_line_drawing_would_still_collapse(self):
+        """Guardrail for the precision fix that predates this change (C3):
+        scoring an appearance-only generation against the truth LINE DRAWING
+        instead of the truth BASE RENDER collapses precision, because Layer
+        2's legitimate material/lighting detail (rug weave, daylight
+        falloff) has no counterpart in a line drawing.
+
+        compare_frame() no longer accepts a line-drawing reference at all --
+        recall was moved onto the same base-render reference in this change
+        (see PixelPerfectDifferentResolutionTest for recall's own regression
+        guard, which needs a same-tone-boundary fixture that this generic
+        `_regions` fixture does not have). This test exercises the
+        underlying metrics.py functions directly to keep the historical
+        precision guardrail alive now that compare_frame's signature can no
+        longer express "reference the line drawing" at all."""
         regions = _regions(sofa=(120, 200))
-        with tempfile.TemporaryDirectory() as tmp:
-            truth, gen = self._dirs(tmp)
-            edge_png = truth / "edge" / "0000.png"
-            base_png = truth / "base" / "0000.png"
-            gen_png = gen / "0000.png"
-            _save(edge_png, _line_drawing(regions))
-            _save(base_png, _render(regions))
-            _save(gen_png, _appearance_upgrade(regions))
+        line = line_edge_mask(Image.fromarray(_line_drawing(regions)))
+        base_edges = edge_mask(Image.fromarray(_render(regions)))
+        generated = edge_mask(Image.fromarray(_appearance_upgrade(regions)))
 
-            against_base = compare_frame(edge_png, base_png, gen_png, 1, {})
-            against_line = compare_frame(edge_png, edge_png, gen_png, 1, {})
-
-        self.assertGreater(against_base["precision"], 0.95)
-        self.assertLess(against_line["precision"], 0.6)
+        self.assertGreater(edge_precision(base_edges, generated, 1), 0.95)
+        self.assertLess(edge_precision(line, generated, 1), 0.6)
 
     def test_invented_wall_still_drops_precision(self):
         """Precision must keep its job: a wall the design never had, added by
@@ -313,14 +341,14 @@ class ResolutionTest(unittest.TestCase):
         shaded.resize(gen_size, Image.BICUBIC).save(gen / "0000.png")
         return truth, gen
 
-    def test_half_resolution_generated_frame_is_upscaled_and_still_scores_high(self):
+    def test_half_resolution_generated_frame_is_matched_by_downscaling_truth_and_still_scores_high(self):
         with tempfile.TemporaryDirectory() as tmp:
             truth, gen = self._fixture(tmp, (256, 144))
             notes = []
             rows, expected = collect_rows(truth, gen, radius=2, warn=notes.append)
         self.assertEqual((len(rows), expected), (1, 1))
         self.assertGreater(rows[0]["recall"], 0.9)
-        self.assertTrue(any("upscaling" in n for n in notes), notes)
+        self.assertTrue(any("downscaling" in n for n in notes), notes)
 
     def test_resize_is_logged_once_per_run(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -331,7 +359,7 @@ class ResolutionTest(unittest.TestCase):
             notes = []
             rows, _ = collect_rows(truth, gen, radius=2, warn=notes.append)
         self.assertEqual(len(rows), 2)
-        self.assertEqual(len([n for n in notes if "upscaling" in n]), 1, notes)
+        self.assertEqual(len([n for n in notes if "downscaling" in n]), 1, notes)
 
     def test_mismatched_aspect_ratio_fails_loudly_instead_of_being_stretched(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -385,7 +413,7 @@ class CollectRowsTest(unittest.TestCase):
             self.assertGreater(r["recall"], 0.85)
             self.assertGreater(r["precision"], 0.85)
 
-        result = evaluate(rows, min_recall=0.85, min_precision=0.50)
+        result = evaluate(rows, min_recall=0.85, min_precision=0.50, min_instance_recall=0.85)
         self.assertEqual(result["verdict"], "FAIL")
         self.assertEqual(result["failures"][0]["index"], 1)
         self.assertIn("sofa", " ".join(result["failures"][0]["reasons"]))
@@ -466,6 +494,167 @@ class LegendGateTest(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 collect_rows(truth_dir, gen_dir, radius=1)
         self.assertIn("instances", str(ctx.exception))
+
+
+class PixelPerfectDifferentResolutionTest(unittest.TestCase):
+    """The regression test for both causes fixed in this change, together.
+
+    Cause A: recall's truth reference moved from the synthetic line drawing
+    `edge/<index>.png` to the truth base render `base/<index>.png` (the same
+    move precision already had). `WALL2` below renders at the exact same
+    grey level as `ROOM`; their shared boundary is a real seam the line
+    drawing marks (region ids differ) but that no shaded render, however
+    perfect, can show (same tone both sides) -- this is the `wall#2` failure
+    mode measured on the real render: recall 0.000 against a pixel-perfect
+    reproduction, because recall was still checking a boundary nothing could
+    ever show. If recall regressed back to referencing the line drawing,
+    this fixture's perfect reproduction would score below 1.0, not exactly
+    1.0.
+
+    Cause B: the resize direction. This fixture's "generated" frame is the
+    truth base render downscaled with LANCZOS to a lower resolution --
+    exactly the experiment that was run on the real render (truth base
+    renders downscaled to imitate Topview's 720p output and fed back as a
+    "perfect generation"). If report.py still upscaled the generated frame
+    up to the truth's resolution instead of downscaling the truth down to
+    the generated's, the upscale blur would push real edges below
+    edge_mask's threshold and recall/precision would fall below 1.0
+    (measured on the real data: 0.255-0.752), not read exactly 1.000.
+    """
+
+    TRUTH_SIZE = (480, 270)   # (w, h)
+    GEN_SIZE = (240, 135)     # half resolution, simulating a 720p-style output
+
+    def _regions(self):
+        w, h = self.TRUTH_SIZE
+        regions = np.zeros((h, w), dtype=np.uint8)
+        regions[40:230, 40:220] = ROOM
+        regions[40:230, 220:440] = WALL2   # same render level as ROOM
+        regions[100:140, 60:140] = SOFA
+        return regions
+
+    def _build(self, root: Path, indices):
+        truth = root / "truth"
+        (truth / "edge").mkdir(parents=True)
+        (truth / "base").mkdir(parents=True)
+        gen = root / "generated"
+        gen.mkdir(parents=True)
+
+        regions = self._regions()
+        base = _render(regions)
+        for i in indices:
+            name = f"{i:04d}.png"
+            _save(truth / "edge" / name, _line_drawing(regions))
+            _save(truth / "base" / name, base)
+            Image.fromarray(base).resize(self.GEN_SIZE, Image.LANCZOS).save(gen / name)
+        return truth, gen
+
+    def test_perfect_generation_at_a_different_resolution_scores_one_on_both_metrics(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._build(Path(tmp), [0, 12, 24])
+            notes = []
+            rows, expected = collect_rows(truth, gen, radius=0, warn=notes.append)
+        self.assertEqual((len(rows), expected), (3, 3))
+        for r in rows:
+            self.assertEqual(r["recall"], 1.0, r)
+            self.assertEqual(r["precision"], 1.0, r)
+        self.assertTrue(any("downscaling" in n for n in notes), notes)
+
+
+class InstanceErasureRegressionTest(unittest.TestCase):
+    """Erasing one instance's designed structure must crater that instance's
+    own recall while every other instance stays high, and evaluate()'s
+    failure text must name it -- the measurement behind this change: erasing
+    one object's bbox moved whole-frame recall only 1.000 -> 0.942 (six
+    points) but that object's own per-instance recall from 1.000 -> 0.173,
+    while every other instance stayed at 0.770-0.971. Whole-frame recall
+    alone cannot be the primary gate: a legitimate appearance-only
+    generation will move it by a similar handful of points, so it cannot
+    tell a vanished object from ordinary Layer 2 texture work. Per-instance
+    recall separates the two cleanly.
+    """
+
+    SIZE = 300
+
+    def _regions(self, fence_present=True):
+        r = np.zeros((self.SIZE, self.SIZE), dtype=np.uint8)
+        r[100:280, 100:280] = ROOM
+        r[120:140, 150:175] = SOFA                     # instance 1
+        if fence_present:
+            # Instance 2, standing outside the room block (cols 100-280) in
+            # the plain FIELD background -- disjoint from the rug (cols
+            # 120-170) and the sofa above. Its erasure below must replace it
+            # with FIELD, the material actually surrounding it; replacing it
+            # with anything else (e.g. ROOM) manufactures a *different*
+            # boundary of similar strength instead of removing one.
+            r[200:230, 60:90] = FENCE
+        return r
+
+    def _instance_png(self):
+        arr = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)
+        arr[120:140, 150:175] = (255, 0, 0)   # sofa
+        arr[200:230, 60:90] = (0, 255, 0)     # fence
+        return arr
+
+    def _build(self, root: Path):
+        truth = root / "truth"
+        (truth / "edge").mkdir(parents=True)
+        (truth / "base").mkdir(parents=True)
+        (truth / "instance").mkdir(parents=True)
+        gen = root / "generated"
+        gen.mkdir(parents=True)
+
+        (truth / "instance-legend.json").write_text(json.dumps({
+            "version": 2,
+            "instances": [
+                {"id": 1, "color": "#ff0000", "label": "sofa"},
+                {"id": 2, "color": "#00ff00", "label": "fence"},
+            ],
+        }))
+
+        regions = self._regions(fence_present=True)
+        _save(truth / "edge" / "0000.png", _line_drawing(regions))
+        _save(truth / "base" / "0000.png", _render(regions))
+        _save(truth / "instance" / "0000.png", self._instance_png())
+
+        # The generated frame is a correct appearance-only upgrade EXCEPT the
+        # fence's designed structure has been erased -- replaced by the
+        # FIELD background material actually surrounding it, exactly as if
+        # the generator dropped it and painted over the gap.
+        erased_regions = regions.copy()
+        erased_regions[200:230, 60:90] = FIELD
+        _save(gen / "0000.png", _appearance_upgrade(erased_regions))
+
+        return truth, gen
+
+    def test_erasing_one_instance_craters_only_that_instances_recall(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._build(Path(tmp))
+            rows, expected = collect_rows(truth, gen, radius=1)
+        self.assertEqual((len(rows), expected), (1, 1))
+        instances = rows[0]["instances"]
+
+        self.assertLess(instances["fence"], 0.3, instances)
+        self.assertGreater(instances["sofa"], 0.7, instances)
+
+        # Whole-frame recall is the coarse guard: it moves, but nowhere near
+        # as far as the vanished instance's own recall -- the room outline
+        # dominates the pixel count.
+        self.assertGreater(rows[0]["recall"], 0.85, rows[0])
+
+    def test_the_erased_instance_is_named_in_the_failure_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._build(Path(tmp))
+            rows, _ = collect_rows(truth, gen, radius=1)
+
+        # Thresholds chosen so only the per-instance check can fail this run:
+        # whole-frame recall/precision stay well above their floors.
+        result = evaluate(rows, min_recall=0.80, min_precision=0.80,
+                          min_instance_recall=0.90)
+        self.assertEqual(result["verdict"], "FAIL")
+        reasons = result["failures"][0]["reasons"]
+        self.assertIn("fence", reasons[0])
+        self.assertNotIn("sofa", " ".join(reasons))
 
 
 if __name__ == "__main__":

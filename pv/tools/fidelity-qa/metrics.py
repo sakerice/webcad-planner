@@ -73,11 +73,24 @@ def _ratio(hit: int, total: int) -> float:
 
 
 def edge_recall(truth: np.ndarray, generated: np.ndarray, radius: int) -> float:
-    """設計側のエッジのうち、生成側の近傍に対応が見つかった割合。消失の検出。
+    """`truth` のエッジのうち、生成側の近傍に対応が見つかった割合。消失の検出。
 
-    `truth` は Layer 1 の線画 (`edge/<index>.png` を `line_edge_mask` で取ったもの)
-    を想定する。設計された構造が生成側に残っているかを直接測る指標であり、
-    「消えたソファ」を捕まえるのはこちら。
+    `truth` は呼び出し側が用意した参照マスクを受け取るだけの汎用関数だが、
+    report.py での実際の使われ方には注意が要る。かつては **同一カメラ姿勢の
+    真実ベースレンダ** ではなく Layer 1 の合成線画 (`edge/<index>.png` を
+    `line_edge_mask` で取ったもの) を truth として渡していた。それは
+    precision が線画を基準にしてはいけない理由 (`edge_precision` 参照) と
+    まったく同じ理由で誤りだった。線画は instance map から導かれた輪郭線で
+    あり、**どのシェーディング済みレンダにも写りようがない境界**（同色の壁
+    同士が接する境界、遮蔽されて見えない輪郭）まで律儀に引く。ピクセル完全
+    な再現を Topview 相当の解像度に落として測ったところ、線画を truth に
+    使うと whole-frame recall が 0.35–0.43 まで落ち、`wall#2` のような
+    インスタンスは 0.000 になった — そこには最初から見るべきものが無いから
+    落としようがないのに、である。したがって report.py は precision と
+    同じく **真実ベースレンダのエッジ** (`edge_mask(base/<index>.png)`) を
+    truth として渡す。設計された構造（＝ベースレンダに実在するエッジ）が
+    生成側に残っているかを測る指標であり、「消えたソファ」を捕まえるのは
+    こちら。
     """
     near = dilate(generated, radius)
     return _ratio(int((truth & near).sum()), int(truth.sum()))
@@ -102,12 +115,17 @@ def edge_precision(reference: np.ndarray, generated: np.ndarray, radius: int) ->
     注: 生成側が完全に空の場合、precision は 1.0 を返す（対応物のない構造が
     無いことは真）。つまり precision だけで「生成側が何かを出した」とは判定
     できない。recall と併せてこそ有効。
+
+    recall と precision がいま同じ `reference`（真実ベースレンダのエッジ）を
+    見ている点は意図的である。両者は同じ画像を異なる向き（truth を膨張して
+    generated と重ねるか、generated を膨張して reference と重ねるか）で
+    比べており、"何が消えたか" と "何が余分に現れたか" を別の許容度で測る。
     """
     near = dilate(reference, radius)
     return _ratio(int((generated & near).sum()), int(generated.sum()))
 
 
-def instance_boxes(instance_png, legend: dict) -> dict:
+def instance_boxes(instance_png, legend: dict, target_size=None) -> dict:
     """instance_guide.png と legend から、部材名 -> (y0,x0,y1,x1) を作る。
 
     legend は index.html の instance-legend.json 形式:
@@ -120,8 +138,25 @@ def instance_boxes(instance_png, legend: dict) -> dict:
     「どの家具が消えたかを名指しする」という設計の約束を満たせない。
 
     Malformed entries (null color, invalid hex, missing label) are skipped gracefully.
+
+    `target_size`, if given, is an (width, height) pair the loaded guide is
+    resized to *before* colours are read, using `Image.NEAREST` — never a
+    smoothing filter. report.py now scores recall/precision at the
+    *generated* frame's resolution (the truth base render is downscaled
+    to match, see report.py's `load_truth_base`), so the instance guide has
+    to be downscaled to that same grid to keep its boxes aligned with the
+    masks being compared. The instance guide is flat per-object ID colour,
+    not a photograph: any smoothing resample (LANCZOS, BILINEAR, BOX, ...)
+    blends two neighbouring objects' colours at their shared boundary into a
+    value that appears nowhere in the legend, and the exact-RGB match below
+    then finds nothing for the blended rows/columns — measured directly:
+    an 8px-tall test stripe downscaled 10x keeps 16 exact-colour pixels
+    under NEAREST and exactly 0 under LANCZOS, BILINEAR or BOX alike.
     """
-    arr = np.asarray(Image.open(instance_png).convert("RGB"))
+    img = Image.open(instance_png).convert("RGB")
+    if target_size is not None and img.size != target_size:
+        img = img.resize(target_size, Image.NEAREST)
+    arr = np.asarray(img)
     boxes = {}
     for entry in legend.get("instances", []):
         # Handle null or missing color field
@@ -152,7 +187,16 @@ def instance_boxes(instance_png, legend: dict) -> dict:
 
 
 def instance_recall(truth: np.ndarray, generated: np.ndarray, boxes: dict, radius: int) -> dict:
-    """部材ごとに、その bbox 内でのエッジ再現率を出す。どの家具が消えたかを名指しできる。"""
+    """部材ごとに、その bbox 内でのエッジ再現率を出す。どの家具が消えたかを名指しできる。
+
+    report.py はここに `edge_recall` と同じ `truth`（真実ベースレンダのエッジ）
+    を渡す。この per-instance の数値が Layer 3 の主指標である: bbox 一個分の
+    構造が消えても whole-frame recall は数点しか動かない（ルーム全体の輪郭が
+    支配的なので）が、その instance 自身の recall は 1.0 から 0.1〜0.2 程度
+    まで落ちる — 測定値: フレームからある物体の bbox を丸ごと消したところ、
+    whole-frame recall は 1.000→0.942（6 ポイント）しか動かなかったのに対し、
+    その物体自身の recall は 1.000→0.173 まで落ち、他の全 instance は
+    0.770〜0.971 のまま残った。"""
     out = {}
     for name, (y0, x0, y1, x1) in boxes.items():
         out[name] = edge_recall(truth[y0:y1, x0:x1], generated[y0:y1, x0:x1], radius)

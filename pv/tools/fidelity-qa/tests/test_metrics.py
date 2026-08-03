@@ -390,5 +390,61 @@ class InstanceBoxesTest(unittest.TestCase):
         self.assertIn("fmp-Sofa02#7", boxes)
 
 
+class InstanceBoxesResizeTest(unittest.TestCase):
+    """report.py now scores recall/precision at the generated frame's own
+    resolution rather than the truth's (the truth base render is downscaled
+    to match). The instance guide has to follow onto that same grid, and it
+    must be resized with NEAREST -- a smoothing filter blends the flat
+    per-object ID colour into values that appear nowhere in the legend.
+
+    The fixture below is chosen so this actually discriminates: an 8px-tall
+    coloured stripe downscaled 10x keeps exact-colour pixels under NEAREST
+    but is fully destroyed (zero exact-colour pixels) under LANCZOS,
+    BILINEAR or BOX alike, measured directly in
+    test_a_smoothing_resample_would_have_destroyed_the_colour below. A
+    fixture where every filter happens to survive the resize would not pin
+    the NEAREST choice at all.
+    """
+
+    SIZE = 300
+    TARGET_SIZE = (30, 30)   # exact 10x downscale
+    STRIPE = ((100, 108), (100, 260))   # (row_range, col_range): 8px tall
+
+    def _stripe_array(self):
+        arr = np.zeros((self.SIZE, self.SIZE, 3), dtype=np.uint8)
+        (r0, r1), (c0, c1) = self.STRIPE
+        arr[r0:r1, c0:c1] = (255, 0, 0)
+        return arr
+
+    def test_downscaling_instance_guide_with_nearest_preserves_id_colours(self):
+        img = Image.fromarray(self._stripe_array())
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+
+        legend = {"instances": [{"id": 1, "color": "#ff0000", "label": "rail"}]}
+        boxes = instance_boxes(buf, legend, target_size=self.TARGET_SIZE)
+
+        self.assertIn("rail", boxes)
+        y0, x0, y1, x1 = boxes["rail"]
+        self.assertGreater(y1, y0)
+        self.assertGreater(x1, x0)
+        self.assertLessEqual(y1, self.TARGET_SIZE[1])
+        self.assertLessEqual(x1, self.TARGET_SIZE[0])
+
+    def test_a_smoothing_resample_would_have_destroyed_the_colour(self):
+        """Companion proof that the fixture above is not vacuous: directly
+        confirms LANCZOS, BILINEAR and BOX all find zero exact-colour pixels
+        at this stripe height and downscale factor, so a hypothetical
+        regression from NEAREST to any of them would make instance_boxes
+        miss the object entirely rather than merely shrink its box."""
+        img = Image.fromarray(self._stripe_array())
+        for resample in (Image.LANCZOS, Image.BILINEAR, Image.BOX):
+            out = img.resize(self.TARGET_SIZE, resample)
+            arr = np.asarray(out)
+            exact = np.all(arr == np.array([255, 0, 0]), axis=-1)
+            self.assertEqual(exact.sum(), 0, resample)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -114,61 +114,141 @@ Then the gate:
 ```
 python3 pv/tools/fidelity-qa/report.py \
   --truth pv/renders/T91-ldk-push --generated /tmp/T91-frames \
-  --min-recall 0.90 --min-precision 0.85 --json pv/runs/T91-fidelity.json
+  --min-recall 0.90 --min-precision 0.85 --min-instance-recall 0.90 \
+  --json pv/runs/T91-fidelity.json
 ```
 
-The generated frames are 1280x720 and the truth frames are 2560x1440;
-`report.py` upscales the generated frame to the truth size and says so once on
-stderr. That note is expected, not a warning sign.
+`report.py` now requires a third threshold, `--min-instance-recall`, in
+addition to `--min-recall`/`--min-precision` (see "Thresholds" below for why
+it is separate). The generated frames are 1280x720 and the truth frames are
+2560x1440; `report.py` **downscales the truth base render down** to the
+generated frame's resolution and says so once on stderr. That note is
+expected, not a warning sign. (Earlier revisions of this tool did the reverse
+— upscaled the generated frame up to the truth's resolution — which was
+wrong: see "Comparison basis changed" below.)
+
+### Comparison basis changed (2026-08-04)
+
+The controller ran this gate end to end against real render output for the
+first time and it failed a generation that was **pixel-perfect** (the truth
+`base/` renders themselves, downscaled to 1280x720 to imitate Topview's 720p
+output, fed back in as the "generated" frames). Two bugs, now fixed:
+
+1. **Recall's reference was wrong.** Recall compared generated edges against
+   `edge/<index>.png` — a synthetic line drawing derived from the instance
+   map. That drawing marks silhouette boundaries that are invisible in any
+   shaded render (a same-tone wall meeting another wall, an occluded
+   outline). An instance like `wall#2` scored recall 0.000 against a
+   pixel-perfect reproduction because there was nothing to see there in the
+   first place. (Precision had already been moved off the line drawing onto
+   the truth `base/` render in an earlier fix; recall needed the same move,
+   for the same reason.) Recall is now measured against the truth **base**
+   render's edges, exactly like precision. `edge/` is no longer read as a
+   comparison reference by either metric — it is only used to enumerate
+   which frame indices carry guide data (`instance/`, `segmentation/`,
+   `depth/`, `normal/` are all written at the same guideStride-thinned
+   indices). `instance/` + `instance-legend.json` keep their existing job of
+   defining per-instance bounding boxes; that did not change.
+2. **The resize direction was backwards.** The gate upscaled the 720p
+   generated frame up to the truth's 2560x1440. Upscaling blurs it, real
+   intensity steps fall below `edge_mask`'s threshold, and real edges
+   disappear. Measured on the perfect generation: upscaling generation to
+   truth size scored recall 0.255–0.752 across the guide frames; downscaling
+   truth to generated size scored 1.000 on every frame. The gate now
+   downscales the truth base render down to the generated frame's
+   resolution (`Image.LANCZOS`), never the reverse.
+
+With both fixes, the perfect generation (truth `base/` renders downscaled to
+1280x720 and fed back in) scores exactly:
+
+```
+ frame  recall  precision   worst per-instance recall
+     0   1.000      1.000                       1.000
+    12   1.000      1.000                       1.000
+    24   1.000      1.000                       1.000
+    36   1.000      1.000                       1.000
+    48   1.000      1.000                       1.000
+    60   1.000      1.000                       1.000
+    72   1.000      1.000                       1.000
+    84   1.000      1.000                       1.000
+    95   1.000      1.000                       1.000
+```
+
+**This is the calibration anchor.** A correct implementation of this gate
+must score 1.000/1.000 (whole-frame and every named instance) on a
+pixel-perfect reproduction at a different resolution — that is now pinned by
+a regression test (`pv/tools/fidelity-qa/tests/test_report.py`,
+`PixelPerfectDifferentResolutionTest`) and must never regress.
 
 ### Thresholds — NOT CALIBRATED
 
-`--min-recall 0.90 --min-precision 0.85` are placeholders. **Neither number is
-calibrated, and `--min-precision 0.85` in particular does not transfer.**
+`--min-recall 0.90 --min-precision 0.85 --min-instance-recall 0.90` are
+placeholders. **None of the three numbers is calibrated.**
 
-It was derived from truth-versus-truth pairs — the same synthetic line drawing
-on both sides of the comparison. Precision no longer measures that. It now
-measures the generated frame's edges against the edges of the **truth base
-render for the same frame**, and a photorealistic generation adds material and
-lighting detail beyond any render, so its precision is expected to sit well
-below 1.0 even when the architecture is perfect. A truth-versus-truth
-measurement says nothing about where that floor lies.
+Whole-frame recall/precision and per-instance recall are now on the same
+comparison basis (both reference the truth base render), so the old
+"truth-versus-truth line drawing" caveat no longer applies — but the
+distribution a *real* photorealistic generation produces is still unknown.
+Layer 2 legitimately adds material and lighting detail beyond any render, so
+whole-frame precision is expected to sit below 1.0 even when the
+architecture is perfect. A perfect-generation measurement only proves the
+gate can reach 1.000; it says nothing about where a real generation's floor
+sits.
 
-**The real value has to come from the first real generated output.** Run the
-gate with deliberately permissive thresholds (`--min-recall 0.50
---min-precision 0.10`), read the distribution in `rows`, look at the frames
-by eye, and choose a cut that separates the frames that are visibly broken
-from the frames that are not. Record the chosen values and the reasoning here
+**The real values have to come from the first real generated output.** Run
+the gate with deliberately permissive thresholds (`--min-recall 0.50
+--min-precision 0.10 --min-instance-recall 0.50`), read the distribution in
+`rows` (including every `rows[].instances` entry), look at the frames by eye,
+and choose cuts that separate the frames/instances that are visibly broken
+from the ones that are not. Record the chosen values and the reasoning here
 before any production shot is gated on them. Until that is done, a PASS from
 this gate means only "the comparison ran", not "the thresholds were met in a
 meaningful sense".
 
+**Two thresholds to discover, not one.** Per-instance recall and whole-frame
+recall have very different sensitivity and should not share a cut point.
+Measured directly: erasing one object's designed bounding box from an
+otherwise-perfect frame moved whole-frame recall only 1.000 → 0.942 (six
+points — the room's own outline dominates the pixel count), while that
+object's own per-instance recall fell 1.000 → 0.173, and every other instance
+stayed at 0.770–0.971. A real generation's legitimate appearance changes will
+move the whole-frame number by a similar handful of points, so whole-frame
+recall cannot be the primary gate — it cannot tell "Layer 2 did its normal
+job" from "an object vanished". `--min-instance-recall` should end up
+stricter than `--min-recall`; discover both from the real distribution
+before setting either.
+
 Reference points measured on truth frames only, kept for context and **not**
-usable as thresholds: two byte-identical frames score recall 1.0000 /
-precision 1.0000; two genuinely different camera poses in the same room score
-recall 0.3228 / precision 0.5316. Both were measured under the old
-truth-versus-truth precision definition.
+usable as thresholds: two byte-identical frames (old truth-versus-truth line
+drawing basis) scored recall 1.0000 / precision 1.0000; two genuinely
+different camera poses in the same room scored recall 0.3228 / precision
+0.5316. Both were measured under the old truth-versus-truth precision
+definition and predate the comparison-basis change above — kept here only so
+they are not confused with the new anchor.
 
 ## Result
 
 PENDING — nothing has been submitted to Topview yet.
 
-How to read the two numbers:
+How to read the numbers:
 
-- **Recall falling** ⇒ designed structure went missing. Measured against the
-  truth line drawing `edge/<index>.png`, which is the design itself. This is
-  the number that catches a vanished sofa.
-- **Precision falling** ⇒ the generated frame contains structure with no
-  counterpart in the truth base render of the same camera pose. It does *not*
-  detect a fabricated hob directly — a hob and a rug texture are both "edges
-  the base render does not have", and only the magnitude and the per-instance
-  numbers distinguish them. Treat a precision drop as a pointer to which
-  frames to look at, and confirm a fabricated hob or hood by eye on those
-  frames.
-- **Per-instance recall** (`rows[].instances`) is what names a specific piece
-  of designed furniture that the generator dropped. It requires
-  `instance-legend.json`, which the truth render now writes; `report.py`
-  refuses to run if the instance frames are there without it.
+- **Per-instance recall** (`rows[].instances`) is the **primary signal**. It
+  names a specific piece of designed furniture the generator dropped or
+  altered, and separates cleanly from ordinary appearance-only changes (see
+  "Two thresholds to discover" above). It requires `instance-legend.json`,
+  which the truth render now writes; `report.py` refuses to run if the
+  instance frames are there without it.
+- **Whole-frame recall falling** ⇒ design structure went missing somewhere in
+  the frame. Measured against the truth **base render**'s edges (not the
+  line drawing — see "Comparison basis changed"). This is a coarse guard, not
+  the primary verdict: a single vanished object barely moves it.
+- **Whole-frame precision falling** ⇒ the generated frame contains structure
+  with no counterpart in the truth base render of the same camera pose. It
+  does *not* detect a fabricated hob directly — a hob and a rug texture are
+  both "edges the base render does not have", and only the magnitude and the
+  per-instance numbers distinguish them. Treat a precision drop as a pointer
+  to which frames to look at, and confirm a fabricated hob or hood by eye on
+  those frames. Also a coarse guard, not the primary verdict.
 
 Branch decision once the verdict is in:
 
