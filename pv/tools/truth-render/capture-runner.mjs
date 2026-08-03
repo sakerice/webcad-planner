@@ -33,6 +33,24 @@ async function postFrame(shot, kind, index, dataUrl) {
 // 更新が間に合わないことがあるため2フレーム分待つ。
 const settle = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+const VIEW_READY_TIMEOUT_MS = 5000;
+
+// アプリは 2D 平面図で起動することがあり、その状態では ensure3D() は
+// ビューを切り替えず即座に false を返す。まず spec.view へ明示的に
+// 切り替え、その上でレンダリング可能になるまで実際の状態をポーリングする。
+// 固定 setTimeout の代わりに settle() を挟んで rAF ベースで待つ。
+async function ensureViewRenderable(spec) {
+  window.__PV_CAPTURE__.setView(spec.view);
+  const start = Date.now();
+  for (;;) {
+    if (window.__PV_CAPTURE__.ensure3D()) return;
+    if (Date.now() - start > VIEW_READY_TIMEOUT_MS) {
+      throw new Error(`view "${spec.view}" never became renderable within ${VIEW_READY_TIMEOUT_MS}ms`);
+    }
+    await settle();
+  }
+}
+
 async function captureAt(spec, t, index, kinds) {
   const pose = sampleCameraPath(spec.camera.keys, t);
   window.__PV_CAPTURE__.setPose(pose.pos, pose.target, pose.fov);
@@ -78,8 +96,7 @@ async function main() {
   if (!res.ok) throw new Error(`spec not found: ${shotName}`);
   const spec = validateShotSpec(await res.json());
 
-  await window.__PV_CAPTURE__.ensure3D();
-  await settle();
+  await ensureViewRenderable(spec);
 
   if (spec.id === 'probe-determinism') await runDeterminismProbe(spec);
   else await runSequence(spec);

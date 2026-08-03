@@ -19460,6 +19460,7 @@ updateMobileShiftButton();
     window.__PV_CAPTURE__={
       version:1,
       ensure3D:function(){ return ensureAiRenderable3D(); },
+      setView:function(v){ return setView(v); },
       setPose:function(pos,target,fov){
         var cam=getActive3DCamera();
         if(!cam) throw new Error('no active 3D camera');
