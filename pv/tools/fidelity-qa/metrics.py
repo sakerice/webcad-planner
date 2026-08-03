@@ -41,7 +41,12 @@ def edge_recall(truth: np.ndarray, generated: np.ndarray, radius: int) -> float:
 
 
 def edge_precision(truth: np.ndarray, generated: np.ndarray, radius: int) -> float:
-    """生成側のエッジのうち、設計側の近傍に根拠がある割合。新規生成の検出。"""
+    """生成側のエッジのうち、設計側の近傍に根拠がある割合。新規生成の検出。
+
+    注: 生成側が完全に空の場合、precision は 1.0 を返す（発明がないことは真）。
+    つまり precision だけで「生成側が何かを出した」とは判定できない。
+    recall で捕捉してこそ有効。
+    """
     near = dilate(truth, radius)
     return _ratio(int((generated & near).sum()), int(generated.sum()))
 
@@ -51,14 +56,27 @@ def instance_boxes(instance_png, legend: dict) -> dict:
 
     legend は index.html の instance-legend.json 形式:
       {"instances": [{"id": ..., "color": "#rrggbb", "label": "sofa"}, ...]}
+
+    Malformed entries (null color, invalid hex, missing label) are skipped gracefully.
     """
     arr = np.asarray(Image.open(instance_png).convert("RGB"))
     boxes = {}
     for entry in legend.get("instances", []):
-        color = entry.get("color", "").lstrip("#")
+        # Handle null or missing color field
+        color = entry.get("color")
+        if color is None:
+            continue
+        color = str(color).lstrip("#")
         if len(color) != 6:
             continue
-        rgb = tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
+
+        # Attempt to parse hex; skip if invalid
+        try:
+            rgb = tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
+        except ValueError:
+            # Invalid hex string
+            continue
+
         hit = np.all(arr == np.array(rgb, dtype=arr.dtype), axis=-1)
         if not hit.any():
             continue
