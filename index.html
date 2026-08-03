@@ -19452,6 +19452,55 @@ initNativeColorInputs();
 initTouchPressFeedback();
 applyMobileUI();
 updateMobileShiftButton();
+
+/* ===== PV capture hook (guarded; no effect unless ?pvCapture=1) ===== */
+(function(){
+  try{
+    if(new URLSearchParams(location.search||'').get('pvCapture')!=='1') return;
+    window.__PV_CAPTURE__={
+      version:1,
+      ensure3D:function(){ return ensureAiRenderable3D(); },
+      setPose:function(pos,target,fov){
+        var cam=getActive3DCamera();
+        if(!cam) throw new Error('no active 3D camera');
+        // OrbitControls の damping / autoRotate は再現性を壊すので必ず切る。
+        if(typeof orbit!=='undefined' && orbit){
+          orbit.enableDamping=false;
+          orbit.autoRotate=false;
+        }
+        cam.position.set(pos[0],pos[1],pos[2]);
+        if(typeof fov==='number' && fov>0){ cam.fov=fov; }
+        cam.updateProjectionMatrix();
+        if(typeof orbit!=='undefined' && orbit && orbit.object===cam){
+          orbit.target.set(target[0],target[1],target[2]);
+          orbit.update();
+        }else{
+          cam.lookAt(new THREE.Vector3(target[0],target[1],target[2]));
+        }
+        cam.updateMatrixWorld(true);
+      },
+      renderNow:function(){
+        if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+        var cam=getActive3DCamera();
+        if(typeof composer!=='undefined' && composer) composer.render();
+        else ren.render(sc3,cam);
+      },
+      captureBase:function(){ return Promise.resolve(captureCurrent3DDataUrl()); },
+      captureGuide:function(kind){
+        if(kind==='base') return Promise.resolve(captureCurrent3DDataUrl());
+        if(kind==='segmentation') return Promise.resolve(captureSegmentation3DDataUrl());
+        if(kind==='depth') return Promise.resolve(captureAiOverrideGuideDataUrl('depth'));
+        if(kind==='normal') return Promise.resolve(captureAiOverrideGuideDataUrl('normal'));
+        if(kind==='instance') return Promise.resolve(captureInstance3DData().dataUrl);
+        if(kind==='edge') return makeEdgeDataUrlFromSegmentation(captureInstance3DData().dataUrl);
+        return Promise.reject(new Error('unknown guide kind: '+kind));
+      }
+    };
+    import('/pv/tools/truth-render/capture-runner.mjs').catch(function(e){
+      console.error('[pv-capture] runner failed to load',e);
+    });
+  }catch(e){ console.error('[pv-capture] hook init failed',e); }
+})();
 </script>
 </body>
 </html>
