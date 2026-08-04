@@ -10,6 +10,14 @@ import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+# check_scene_readiness.py は常にこのファイルと同じディレクトリにある。直接
+# 実行時 (python3 capture_server.py) はスクリプト自身のディレクトリが
+# sys.path[0] に自動追加されるため素の import で足りるが、他モジュールから
+# import capture_server された場合 (test_capture_server.py 等) はその保証が
+# ないため、ここで明示的に自分のディレクトリを足しておく。
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_scene_readiness import check_scene_readiness  # noqa: E402
+
 KINDS = {"base", "segmentation", "instance", "edge", "depth", "normal", "probe"}
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
 MAX_BODY = 64 * 1024 * 1024
@@ -75,6 +83,21 @@ def make_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
             if self.path == "/done":
                 target = root / shot
                 target.mkdir(parents=True, exist_ok=True)
+                # capture-runner.mjs 側の待ち(furniture GLBのロード完了待ち)は
+                # 二度と踏み外さない保証ではない -- ここは、その待ちが何であれ
+                # 出力そのものが実際に揃っていたかを見る独立した最後の砦。
+                # 失敗した場合は DONE を書かず FAIL を書く。DONE の有無だけを
+                # 見る下流の消費者が、壊れたレンダを良いレンダと取り違えない
+                # ようにするため。
+                ok, message = check_scene_readiness(target)
+                # 同じ shot id を撮り直したとき、前回の結果を示すマーカーが
+                # 残ったままだと「今回」の判定と食い違って見える。常に片方
+                # だけが残るようにする。
+                (target / "DONE").unlink(missing_ok=True)
+                (target / "FAIL").unlink(missing_ok=True)
+                if not ok:
+                    (target / "FAIL").write_text(message + "\n")
+                    return self._reply(422, message)
                 (target / "DONE").write_text("done\n")
                 return self._reply(200, "ok")
 

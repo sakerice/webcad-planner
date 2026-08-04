@@ -19463,8 +19463,18 @@ updateMobileShiftButton();
     // runner が取り出して instance-legend.json として書き出せるようにする。
     var lastInstanceLegend=null;
     window.__PV_CAPTURE__={
-      version:2,
+      version:3,
       ensure3D:function(){ return ensureAiRenderable3D(); },
+      // 家具GLBは ensureGltfModel() が GLTFLoader で非同期に読み込む。
+      // ロード中は _modelLoading[url]===true、完了で _modelCache[url] に
+      // 入って _modelLoading から false に落ちる(index.html 内 ensureGltfModel
+      // 参照)。この2つは three.js 本体が読み書きする唯一の権威的な状態で、
+      // 「まだ読み込み中の家具モデルURLの一覧」を過不足なく表す。
+      // ここではその2つを直接読むだけで、キャプチャ側の推測(タイマー等)を
+      // 一切足さない。何も読み込み中でなければ空配列を返す。
+      pendingModelLoads:function(){
+        return Object.keys(_modelLoading).filter(function(url){ return !!_modelLoading[url]; });
+      },
       setView:function(v){ return setView(v); },
       getView:function(){ return ST.view; },
       // 実行中のプランを識別する。shot spec の "plan" と突き合わせるためのもの。

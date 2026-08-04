@@ -1,4 +1,5 @@
 import http.client
+import io
 import json
 import shutil
 import socket
@@ -8,10 +9,34 @@ import unittest
 from pathlib import Path
 import sys
 
+from PIL import Image
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from capture_server import MAX_BODY, make_server
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
+
+WALL_COLOR = (198, 242, 93)
+FURNITURE_COLOR = (182, 93, 242)
+
+
+def solid_png(colors, size=(32, 32)):
+    """各色を最低16px以上塗った実PNGバイト列を作る(check_scene_readinessの
+    MIN_PIXELS判定をまたぐテストのため、ダミーの8バイトPNGでは代用できない)。"""
+    im = Image.new("RGB", size, (255, 255, 255))
+    px = im.load()
+    x = y = 0
+    w, h = size
+    for color in colors:
+        for _ in range(20):
+            px[x, y] = color
+            x += 1
+            if x >= w:
+                x = 0
+                y += 1
+    buf = io.BytesIO()
+    im.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 class CaptureServerTest(unittest.TestCase):
@@ -67,6 +92,69 @@ class CaptureServerTest(unittest.TestCase):
         status = self.post("/done", b"", {"X-PV-Shot": "S08"})
         self.assertEqual(status, 200)
         self.assertTrue((self.root / "S08" / "DONE").exists())
+
+    def test_done_is_gated_on_scene_readiness_when_furniture_never_appears(self):
+        # 実際の事故と同じ形: legend は家具を宣言しているが、instance フレーム
+        # のどこにも一切描かれていない。/done はこれを検出し、DONE ではなく
+        # FAIL を書いて 200 以外を返さなければならない -- でなければ DONE の
+        # 有無だけを見る下流の消費者が、壊れたレンダを良いレンダと取り違える。
+        legend = json.dumps({"version": 2, "instances": [
+            {"id": 1, "color": "#c6f25d", "type": "wall"},
+            {"id": 2, "color": "#b65df2", "type": "fmp-Sofa02"},
+        ]}).encode()
+        self.post("/instance-legend", legend, {"X-PV-Shot": "S09-broken"})
+        # 家具色を一切含まない instance フレームを1枚だけ書く。
+        png = solid_png([WALL_COLOR])
+        self.post("/frame", png, {
+            "X-PV-Shot": "S09-broken", "X-PV-Kind": "instance", "X-PV-Index": "0"})
+
+        status = self.post("/done", b"", {"X-PV-Shot": "S09-broken"})
+
+        self.assertEqual(status, 422)
+        self.assertFalse((self.root / "S09-broken" / "DONE").exists())
+        fail_marker = self.root / "S09-broken" / "FAIL"
+        self.assertTrue(fail_marker.exists())
+        self.assertIn("0/1", fail_marker.read_text())
+
+    def test_done_succeeds_when_declared_furniture_actually_appears(self):
+        legend = json.dumps({"version": 2, "instances": [
+            {"id": 1, "color": "#c6f25d", "type": "wall"},
+            {"id": 2, "color": "#b65df2", "type": "fmp-Sofa02"},
+        ]}).encode()
+        self.post("/instance-legend", legend, {"X-PV-Shot": "S10-good"})
+        png = solid_png([WALL_COLOR, FURNITURE_COLOR])
+        self.post("/frame", png, {
+            "X-PV-Shot": "S10-good", "X-PV-Kind": "instance", "X-PV-Index": "0"})
+
+        status = self.post("/done", b"", {"X-PV-Shot": "S10-good"})
+
+        self.assertEqual(status, 200)
+        self.assertTrue((self.root / "S10-good" / "DONE").exists())
+        self.assertFalse((self.root / "S10-good" / "FAIL").exists())
+
+    def test_a_later_done_replaces_a_stale_marker_from_an_earlier_attempt(self):
+        # 同じ shot id を撮り直したときに、前回の結果のマーカーが残って今回の
+        # 判定と食い違って見えないこと(FAIL -> DONE の両方向)。
+        legend = json.dumps({"version": 2, "instances": [
+            {"id": 1, "color": "#c6f25d", "type": "wall"},
+            {"id": 2, "color": "#b65df2", "type": "fmp-Sofa02"},
+        ]}).encode()
+        self.post("/instance-legend", legend, {"X-PV-Shot": "S11-retry"})
+        broken_png = solid_png([WALL_COLOR])
+        self.post("/frame", broken_png, {
+            "X-PV-Shot": "S11-retry", "X-PV-Kind": "instance", "X-PV-Index": "0"})
+        first_status = self.post("/done", b"", {"X-PV-Shot": "S11-retry"})
+        self.assertEqual(first_status, 422)
+        self.assertTrue((self.root / "S11-retry" / "FAIL").exists())
+
+        good_png = solid_png([WALL_COLOR, FURNITURE_COLOR])
+        self.post("/frame", good_png, {
+            "X-PV-Shot": "S11-retry", "X-PV-Kind": "instance", "X-PV-Index": "0"})
+        second_status = self.post("/done", b"", {"X-PV-Shot": "S11-retry"})
+
+        self.assertEqual(second_status, 200)
+        self.assertTrue((self.root / "S11-retry" / "DONE").exists())
+        self.assertFalse((self.root / "S11-retry" / "FAIL").exists())
 
     def test_instance_legend_is_written_next_to_the_frames(self):
         body = json.dumps({"version": 2, "instances": [

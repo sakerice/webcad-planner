@@ -43,6 +43,25 @@ async function postJson(shot, path, value) {
   if (!res.ok) throw new Error(`${path} rejected: ${res.status}`);
 }
 
+// /done はサーバ側 (capture_server.py) が instance-legend.json + instance/ の
+// 中身から独立に読み直し、シーンが本当に揃っていたか (check_scene_readiness)
+// を検査したうえで応答する。ここで res.ok を見ずに握り潰すと、まさに今回の
+// 事故 (家具未ロードのまま完走・DONE 発行) と同じ形で「サーバは検知したのに
+// runner が黙って success 扱いする」経路が残ってしまう。DONE マーカーは
+// このリクエストが成功したときしかサーバ側で書かれない。
+async function postDone(spec) {
+  const res = await fetch(`${serverBase()}/done`, {
+    method: 'POST',
+    headers: { 'X-PV-Shot': spec.id },
+  });
+  if (!res.ok) {
+    const detail = (typeof res.text === 'function') ? await res.text().catch(() => '') : '';
+    throw new Error(
+      `shot "${spec.id}": server rejected /done (status ${res.status}) -- ` +
+      `the post-capture scene-readiness check failed` + (detail ? `: ${detail}` : ''));
+  }
+}
+
 // instance-legend.json は Layer 3 が「どの家具が消えたか」を名指しするための
 // 唯一の手がかりである。これが書かれないと report.py は部材チェックを一つも
 // 行わないまま PASS を出しうる（そのため report.py 側でも欠落を致命扱いに
@@ -197,6 +216,33 @@ async function ensureViewRenderable(spec) {
   }
 }
 
+// 家具はGLTFLoaderで非同期に読み込まれる。ensureViewRenderable() が見ている
+// 「ビューが描画可能」は three.js のレンダラ/シーン自体の準備でしかなく、
+// 個々の家具モデルのダウンロード完了とは無関係 -- 実際、これが原因で空の部屋を
+// 撮り切ってしまう事故が起きた(furniture未ロードのまま10秒でDONEが出た)。
+// window.__PV_CAPTURE__.pendingModelLoads() はアプリ本体が持つ唯一の権威的な
+// 保留リスト(_modelLoading)をそのまま返す。ここではそれが空になるまで待つ
+// だけで、何が「揃った」と見なすかの判断はアプリ側に委ねる。
+// ビュー待ちより長いタイムアウトを与える: GLBは数MB単位でネットワーク越しに
+// 落ちてくることがあり、レンダラの初期化より一桁遅くて当然のため。
+// timeoutMs を引数化してテストから短縮できるようにしている(既定値は本番用の
+// export MODEL_LOAD_TIMEOUT_MS のまま)。
+export const MODEL_LOAD_TIMEOUT_MS = 30000;
+
+export async function ensureModelsLoaded(spec, timeoutMs = MODEL_LOAD_TIMEOUT_MS) {
+  const start = Date.now();
+  for (;;) {
+    const pending = window.__PV_CAPTURE__.pendingModelLoads();
+    if (!pending.length) return;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(
+        `shot "${spec.id}": furniture models still loading after ${timeoutMs}ms: ` +
+        pending.join(', '));
+    }
+    await settle();
+  }
+}
+
 // instance / edge のキャプチャは呼ぶたびに window.__PV_CAPTURE__.getInstanceLegend()
 // を更新する (index.html の captureGuide 参照)。runner はショットの最後に
 // getInstanceLegend() を1回だけ読んで instance-legend.json として POST する
@@ -288,8 +334,8 @@ async function runDeterminismProbe(spec, assertFrameSize) {
     assertFrameSize('probe', i, dataUrl);
     await postFrame(spec.id, 'probe', i, dataUrl);
   }
-  await fetch(`${serverBase()}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
   log('determinism probe complete');
+  return times.length;
 }
 
 async function runSequence(spec, assertFrameSize) {
@@ -312,8 +358,8 @@ async function runSequence(spec, assertFrameSize) {
     if (i % 10 === 0) log(`frame ${i + 1}/${times.length}`);
   }
   if (spec.guides.includes('instance')) await postInstanceLegend(spec);
-  await fetch(`${serverBase()}/done`, { method: 'POST', headers: { 'X-PV-Shot': spec.id } });
   log(`complete: ${times.length} frames`);
+  return times.length;
 }
 
 export async function main() {
@@ -334,6 +380,12 @@ export async function main() {
   try {
     await ensureViewRenderable(spec);
     assertPlanMatchesSpec(spec);
+    // ビューが「描画可能」になっただけでは、build3D() が投げた家具GLBの
+    // 非同期ロードが終わっている保証は無い -- これが直った理由: この待ちが
+    // 無かったせいで、空の部屋を10秒で撮り切ってDONEを出す事故が実際に起きた
+    // (105秒かかるはずの spec が10秒で完走した)。plan照合より後に置くのは、
+    // 別の家がロード中のモデルを待っても無意味なため。
+    await ensureModelsLoaded(spec);
 
     // 設計どおり、検証済み spec の実体を出力ディレクトリへ複写する。
     // これが無いと pv/renders/<shot>/ を後から見ても、どの spec・どの階・
@@ -352,8 +404,22 @@ export async function main() {
     // モードは spec に明示させる。以前は spec.id === 'probe-determinism' で
     // 判定していたため、spec ファイルの改名だけで再現性ゲートが黙って
     // ただの連番キャプチャに化けた。
-    if (shotMode(spec) === 'determinism-probe') await runDeterminismProbe(spec, assertFrameSize);
-    else await runSequence(spec, assertFrameSize);
+    //
+    // 所要時間とフレーム数を控えて shot.json に残す。この2つこそが、今回の
+    // 事故を誰にでも見える形で示せたはずの数値 -- 同じ spec が以前は105秒
+    // かかっていたのに、家具未ロードのまま10秒で完走した。人間が動画を
+    // 見比べて初めて気づいたが、本来は成果物を見るだけで分かるべきだった。
+    const startedAt = Date.now();
+    const frameCount = (shotMode(spec) === 'determinism-probe')
+      ? await runDeterminismProbe(spec, assertFrameSize)
+      : await runSequence(spec, assertFrameSize);
+    const tookMs = Date.now() - startedAt;
+    log(`capture took ${tookMs}ms for ${frameCount} frame(s)`);
+    await postJson(spec.id, '/shot', { ...spec, capture: { tookMs, frameCount } });
+
+    // DONE はここで初めて要求する。サーバ側がシーン完全性を検査した後で
+    // なければ、"完走してDONEが出た" こと自体を安全とみなせない。
+    await postDone(spec);
   } finally {
     if (prevViewport) window.__PV_CAPTURE__.restoreCaptureViewport(prevViewport);
     window.__PV_CAPTURE__.restoreOrbitState(prevOrbit);

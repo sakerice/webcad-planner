@@ -11,7 +11,7 @@ globalThis.requestAnimationFrame = cb => setTimeout(cb, 0);
 globalThis.location = { search: '' };
 globalThis.window = globalThis;
 
-const { main } = await import('../capture-runner.mjs');
+const { main, ensureModelsLoaded } = await import('../capture-runner.mjs');
 
 function be32(n) {
   return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
@@ -72,7 +72,17 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                    // such call, which is what lets a mid-shot id->colour remap
                    // happen at all.
                    legendAt = null,
-                   failAtGuide = null } = {}) {
+                   failAtGuide = null,
+                   // pendingModelLoads() が空になるまでの呼び出し回数。実物の
+                   // _modelLoading と同じく、呼ぶたびに読み直す配列を返す。
+                   pendingModelUrls = [],
+                   pendingModelCallsBeforeReady = 0,
+                   // /done へのサーバ応答を差し替える。scene readiness check が
+                   // サーバ側で落ちたケースを模す。
+                   doneOk = true,
+                   doneStatus = 422,
+                   doneText = 'scene readiness FAIL: only 0/1 (0%) declared GLB furniture instances ever appear',
+                 } = {}) {
   const initial = { view: '2d', floor: 1, orbit: { enableDamping: true, autoRotate: true } };
   const state = { view: initial.view, floor: initial.floor, orbit: { ...initial.orbit } };
   const captured = [];
@@ -80,9 +90,14 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
   const poses = [];
   let instanceCaptureCount = 0;
   let currentLegend = legend;
+  let pendingModelCalls = 0;
 
   window.__PV_CAPTURE__ = {
     ensure3D: () => state.view.startsWith('3d'),
+    pendingModelLoads: () => {
+      pendingModelCalls++;
+      return pendingModelCalls <= pendingModelCallsBeforeReady ? [...pendingModelUrls] : [];
+    },
     setView: v => { state.view = v; },
     getView: () => state.view,
     setFloor: f => { state.floor = f; },
@@ -116,6 +131,10 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                     headers: init.headers || {}, body: init.body };
     requests.push(entry);
     if (entry.url.includes('/specs/')) return { ok: true, json: async () => shotSpec };
+    if (entry.url.endsWith('/done')) {
+      if (doneOk) return { ok: true };
+      return { ok: false, status: doneStatus, text: async () => doneText };
+    }
     return { ok: true };
   };
 
@@ -129,16 +148,93 @@ const posts = (requests, path) =>
 const frameKinds = requests =>
   posts(requests, '/frame').map(r => r.headers['X-PV-Kind']);
 
-test('shot.json は検証済み spec の実体として1回だけ POST される', async () => {
+test('shot.json は検証済み spec の実体としてまず1回 POST される', async () => {
   const h = harness();
   await main();
   const shotPosts = posts(h.requests, '/shot');
-  assert.equal(shotPosts.length, 1);
+  // 撮影開始前に spec そのものを1回、撮影完了後に capture メタデータ付きで
+  // もう1回 -- 合計2回になる(次のテストが2回目の中身を見る)。
+  assert.equal(shotPosts.length, 2);
   const written = JSON.parse(shotPosts[0].body);
   assert.equal(written.id, 'T-test');
   assert.equal(written.floor, 2);
   assert.deepEqual(written.camera.keys[0].pos, [0, 1, 0]);
   assert.equal(shotPosts[0].headers['X-PV-Shot'], 'T-test');
+});
+
+test('shot.json は完走後に所要時間とフレーム数を添えてもう一度 POST される', async () => {
+  // 「105秒かかるはずが10秒で完走した」を人間が見比べずに artefact だけで
+  // 気づけるようにするための2つの数値。
+  const h = harness();
+  await main();
+  const shotPosts = posts(h.requests, '/shot');
+  assert.equal(shotPosts.length, 2);
+  const final = JSON.parse(shotPosts[1].body);
+  assert.equal(final.id, 'T-test');
+  assert.ok(Number.isInteger(final.capture.tookMs) && final.capture.tookMs >= 0,
+    `capture.tookMs should be a non-negative integer, got ${JSON.stringify(final.capture)}`);
+  // spec: fps=2, duration=1 -> frameTimes は2枚。
+  assert.equal(final.capture.frameCount, 2);
+});
+
+test('プローブのフレーム数も shot.json の capture.frameCount に残る', async () => {
+  const h = harness({ shotSpec: probeSpec() });
+  await main();
+  const shotPosts = posts(h.requests, '/shot');
+  const final = JSON.parse(shotPosts[1].body);
+  assert.equal(final.capture.frameCount, 3); // A, B, A の3ポーズ
+});
+
+test('家具モデルがロード中のあいだはフレームを撮り始めない', async () => {
+  // pendingModelLoads() が2回 non-empty を返してから空になる -- ensure3D の
+  // ポーリングと同じ「揃うまで待つ」構造で、固定 sleep には依存しない。
+  const h = harness({ pendingModelUrls: ['assets/models/fmp-Sofa02.glb'], pendingModelCallsBeforeReady: 2 });
+  await main();
+  // 待ち終えたあとは通常どおり完走する。
+  assert.equal(posts(h.requests, '/frame').length > 0, true);
+  assert.equal(posts(h.requests, '/done').length, 1);
+});
+
+test('家具モデルのロードが規定時間内に終わらなければ、何が未完了かを名指しして落ちる', async () => {
+  // main() 経由だと本番用の30秒タイムアウトをそのまま実時間で待つことになり
+  // テストが重くなるので、ensureModelsLoaded を直接、短いタイムアウトで呼ぶ。
+  // main() からの呼び出し経路自体は次のテスト(pendingModelCallsBeforeReady
+  // 付きの harness 経由)で確認済み。
+  window.__PV_CAPTURE__ = {
+    pendingModelLoads: () => ['assets/models/fmp-Sofa02.glb', 'assets/models/fmp-Chair14.glb'],
+  };
+  await assert.rejects(
+    ensureModelsLoaded({ id: 'T-timeout' }, 30),
+    err => {
+      assert.match(err.message, /furniture models still loading/);
+      assert.match(err.message, /fmp-Sofa02\.glb/);
+      assert.match(err.message, /fmp-Chair14\.glb/);
+      return true;
+    });
+});
+
+test('家具モデルが揃えばタイムアウト前に抜ける（待ちすぎない）', async () => {
+  let calls = 0;
+  window.__PV_CAPTURE__ = {
+    pendingModelLoads: () => { calls++; return calls <= 2 ? ['assets/models/fmp-Sofa02.glb'] : []; },
+  };
+  const start = Date.now();
+  await ensureModelsLoaded({ id: 'T-ready' }, 30000);
+  assert.ok(Date.now() - start < 1000, 'should resolve as soon as pending list empties, not wait for the timeout');
+  assert.ok(calls >= 3);
+});
+
+test('サーバが /done を拒否したら(シーン完全性チェック失敗)呼び出し元へ理由付きで伝わる', async () => {
+  // capture_server.py 側の check_scene_readiness が FAIL を返したケース。
+  // DONE を信用できる形でクライアント側にも「失敗」として見えることを保証する。
+  const h = harness({ doneOk: false, doneStatus: 422,
+    doneText: 'scene readiness FAIL: only 1/32 (3%) declared GLB furniture instances ever appear' });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /server rejected \/done/);
+    assert.match(err.message, /422/);
+    assert.match(err.message, /scene readiness FAIL/);
+    return true;
+  });
 });
 
 test('instance ガイドを撮るなら instance-legend が1回だけ POST される', async () => {
