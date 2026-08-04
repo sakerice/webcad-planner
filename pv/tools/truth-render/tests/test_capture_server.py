@@ -20,15 +20,15 @@ WALL_COLOR = (198, 242, 93)
 FURNITURE_COLOR = (182, 93, 242)
 
 
-def solid_png(colors, size=(32, 32)):
-    """各色を最低16px以上塗った実PNGバイト列を作る(check_scene_readinessの
-    MIN_PIXELS判定をまたぐテストのため、ダミーの8バイトPNGでは代用できない)。"""
+def solid_png(colors, size=(32, 32), pixels_per_color=20):
+    """各色を pixels_per_color 塗った実PNGバイト列を作る(check_scene_readiness
+    の面積しきい値をまたぐテストのため、ダミーの8バイトPNGでは代用できない)。"""
     im = Image.new("RGB", size, (255, 255, 255))
     px = im.load()
     x = y = 0
     w, h = size
     for color in colors:
-        for _ in range(20):
+        for _ in range(pixels_per_color):
             px[x, y] = color
             x += 1
             if x >= w:
@@ -114,7 +114,7 @@ class CaptureServerTest(unittest.TestCase):
         self.assertFalse((self.root / "S09-broken" / "DONE").exists())
         fail_marker = self.root / "S09-broken" / "FAIL"
         self.assertTrue(fail_marker.exists())
-        self.assertIn("0/1", fail_marker.read_text())
+        self.assertIn("scene readiness FAIL", fail_marker.read_text())
 
     def test_done_succeeds_when_declared_furniture_actually_appears(self):
         legend = json.dumps({"version": 2, "instances": [
@@ -122,7 +122,7 @@ class CaptureServerTest(unittest.TestCase):
             {"id": 2, "color": "#b65df2", "type": "fmp-Sofa02"},
         ]}).encode()
         self.post("/instance-legend", legend, {"X-PV-Shot": "S10-good"})
-        png = solid_png([WALL_COLOR, FURNITURE_COLOR])
+        png = solid_png([WALL_COLOR, FURNITURE_COLOR], pixels_per_color=100)
         self.post("/frame", png, {
             "X-PV-Shot": "S10-good", "X-PV-Kind": "instance", "X-PV-Index": "0"})
 
@@ -147,7 +147,7 @@ class CaptureServerTest(unittest.TestCase):
         self.assertEqual(first_status, 422)
         self.assertTrue((self.root / "S11-retry" / "FAIL").exists())
 
-        good_png = solid_png([WALL_COLOR, FURNITURE_COLOR])
+        good_png = solid_png([WALL_COLOR, FURNITURE_COLOR], pixels_per_color=100)
         self.post("/frame", good_png, {
             "X-PV-Shot": "S11-retry", "X-PV-Kind": "instance", "X-PV-Index": "0"})
         second_status = self.post("/done", b"", {"X-PV-Shot": "S11-retry"})
