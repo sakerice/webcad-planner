@@ -236,10 +236,14 @@ for (const name of readdirSync(specsDir).filter(f => f.endsWith('.json'))) {
 
 // 内観の俯瞰ショットは「窓から入る日射」を撮るためのものなので、spec が
 // 採光を要求していなければ実装が入っていても効かない。ファイル側の取り違えを止める。
+// 倍率そのものは実測で決めた値なので固定はしない(sunScale 2 で床のコントラスト
+// 2.85、既定の 1 では 1.65 だった)。ここが守るのは「採光が要求として残っていること」。
 test('T92-ldk-overhead は内観採光を要求している', () => {
   const s = validateShotSpec(JSON.parse(readFileSync(join(specsDir, 'T92-ldk-overhead.json'), 'utf8')));
   assert.equal(s.view, '3d-int');
-  assert.deepEqual(daylightRequest(s), { sunScale: 1 });
+  const d = daylightRequest(s);
+  assert.ok(d, 'daylight request must survive in the committed spec');
+  assert.ok(d.sunScale >= 1, `sunScale must not dim the sun, got ${d.sunScale}`);
 });
 
 test('determinism プローブの spec は mode で明示されている', () => {
