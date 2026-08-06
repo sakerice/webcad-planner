@@ -1,0 +1,19 @@
+{
+  "id": "T92-ldk-overhead",
+  "mode": "sequence",
+  "plan": "assets/default_plan.json",
+  "view": "3d-int",
+  "floor": 2,
+  "fps": 24,
+  "duration": 12,
+  "resolution": { "width": 1280, "height": 720 },
+  "camera": {
+    "keys": [
+      { "t": 0,  "pos": [3.64, 11.0, 2.06], "target": [3.64, 3.4, 2.06], "fov": 50 },
+      { "t": 6,  "pos": [3.64, 11.0, 2.06], "target": [3.64, 3.4, 2.06], "fov": 50 },
+      { "t": 12, "pos": [3.64, 11.0, 2.06], "target": [3.64, 3.4, 2.06], "fov": 50 }
+    ]
+  },
+  "guides": ["base", "edge", "instance", "segmentation", "depth", "normal"],
+  "guideStride": 36
+}
