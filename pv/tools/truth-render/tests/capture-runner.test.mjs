@@ -87,6 +87,10 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                    daylightState = null,
                    // setInteriorDaylight を持たない古い index.html を模す。
                    omitDaylightHook = false,
+                   // 有効化した後に、非同期の再構築(GLB完了 -> scheduleGltfRebuild3D)
+                   // が天井のオクルーダー化を巻き戻した状況を模す。この時点以降の
+                   // 観測は「天井はあるがオクルーダーは0枚」を返す。
+                   revertOccludersAt = null,
                  } = {}) {
   const initial = { view: '2d', floor: 1, orbit: { enableDamping: true, autoRotate: true } };
   const state = { view: initial.view, floor: initial.floor, orbit: { ...initial.orbit } };
@@ -136,28 +140,42 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
   };
 
   if (!omitDaylightHook) {
+    // 観測は「その瞬間のシーン」を読む。撮影の途中で巻き戻ったかどうかを
+    // 時点ごとに変えられるようにしておく(本物の失敗はまさにこれだった)。
+    const WHENS = ['right after enabling', 'before the first frame', 'after the last frame'];
+    const revertedBy = when =>
+      revertOccludersAt !== null && WHENS.indexOf(when) >= WHENS.indexOf(revertOccludersAt);
+    const sceneState = (cfg, when) => ({
+      enabled: true,
+      sunScale: cfg.sunScale,
+      timeOfDay: 'day',
+      sunSim: false,
+      sunIntensity: 0.78 * cfg.sunScale,
+      sunCastShadow: true,
+      sunPosition: [13.9, 24.6, 12.1],
+      shadowMapSize: [2048, 2048],
+      shadowCameraSpanM: 15.74,
+      ceilings: 2,
+      ceilingOccluders: revertedBy(when) ? 0 : 2,
+      ...(daylightState || {}),
+    });
     // 本物と同じく、要求(cfg)を受けて「実際にシーンへ効いた状態」を返す。
     window.__PV_CAPTURE__.setInteriorDaylight = cfg => {
       if (!cfg) {
         state.daylight = null;
         events.push('daylight:off');
-        return { enabled: false, sunScale: 0, sunIntensity: 0, sunCastShadow: false, ceilingOccluders: 0 };
+        return { enabled: false, sunScale: 0, sunIntensity: 0, sunCastShadow: false, ceilings: 0, ceilingOccluders: 0 };
       }
       state.daylight = { ...cfg };
       events.push('daylight:on');
-      return {
-        enabled: true,
-        sunScale: cfg.sunScale,
-        timeOfDay: 'day',
-        sunSim: false,
-        sunIntensity: 0.78 * cfg.sunScale,
-        sunCastShadow: true,
-        sunPosition: [13.9, 24.6, 12.1],
-        shadowMapSize: [2048, 2048],
-        shadowCameraSpanM: 15.74,
-        ceilingOccluders: 2,
-        ...(daylightState || {}),
-      };
+      return sceneState(cfg, 'right after enabling');
+    };
+    // 状態を変えずに測り直す。runner は最初のフレームの直前と最後のフレームの
+    // 直後に呼ぶ。
+    window.__PV_CAPTURE__.inspectInteriorDaylight = when => {
+      events.push(`daylight:inspect:${when}`);
+      if (!state.daylight) return { enabled: false, sunScale: 0, sunIntensity: 0, sunCastShadow: false, ceilings: 0, ceilingOccluders: 0 };
+      return sceneState(state.daylight, when);
     };
   }
 
@@ -437,6 +455,56 @@ test('天井オクルーダーが1枚も無ければ落ちる（真上から日�
 test('採光が有効化されなかった(enabled:false)ら落ちる', async () => {
   harness({ shotSpec: daylightSpec(), daylightState: { enabled: false } });
   await assert.rejects(main(), /not enabled/);
+});
+
+// 実際に起きた事故そのもの: 有効化の瞬間は正しく、そのあと非同期の再構築
+// (GLB読み込み完了 -> scheduleGltfRebuild3D -> rebuild3D)が天井のオクルーダー化を
+// 巻き戻し、ゲートは通ったのに「部屋全体が不透明な天井で覆われた俯瞰」が
+// 撮れてしまった。有効化時の1回だけの検査では絶対に捕まらない。
+test('有効化のあと再構築で巻き戻ったら、1枚も撮らずに落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec(), revertOccludersAt: 'before the first frame' });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /no ceiling occluders/);
+    return true;
+  });
+  assert.equal(posts(h.requests, '/frame').length, 0);
+  assert.equal(posts(h.requests, '/done').length, 0);
+});
+
+test('撮影中に巻き戻ったら、DONE を出さずに落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec(), revertOccludersAt: 'after the last frame' });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /no ceiling occluders/);
+    return true;
+  });
+  // フレームは撮れてしまうが、信用できない列として DONE は出さない。
+  assert.ok(posts(h.requests, '/frame').length > 0);
+  assert.equal(posts(h.requests, '/done').length, 0);
+});
+
+test('巻き戻りが無ければ、撮影前後の測り直しは両方とも通る', async () => {
+  const h = harness({ shotSpec: daylightSpec() });
+  await main();
+  assert.deepEqual(
+    h.events.filter(e => e.startsWith('daylight:inspect')),
+    ['daylight:inspect:before the first frame', 'daylight:inspect:after the last frame']);
+  assert.equal(posts(h.requests, '/done').length, 1);
+});
+
+test('天井はあるのにオクルーダーが0枚なら、矛盾として名指しで落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec(), daylightState: { ceilings: 2, ceilingOccluders: 0 } });
+  await assert.rejects(main(), /no ceiling occluders/);
+  assert.equal(posts(h.requests, '/frame').length, 0);
+});
+
+test('inspectInteriorDaylight を持たない古いページなら名指しで落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec() });
+  delete window.__PV_CAPTURE__.inspectInteriorDaylight;
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /does not expose inspectInteriorDaylight/);
+    return true;
+  });
+  assert.equal(posts(h.requests, '/frame').length, 0);
 });
 
 test('setInteriorDaylight を持たない古いページなら名指しで落ちる', async () => {

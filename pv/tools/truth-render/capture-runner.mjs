@@ -122,6 +122,27 @@ function assertDaylightApplied(spec, applied) {
       `${head} no ceiling occluders were built. Daylight would pour straight down ` +
       'into a room whose ceiling is not drawn — exactly the defect this guards against.');
   }
+  // 天井はあるのにオクルーダーが1枚も無い = 部屋が不透明な板で覆われた絵になる。
+  // アプリ側でも同じ矛盾を弾いているが、こちらでも独立に見る。
+  if (applied.ceilings > 0 && applied.ceilingOccluders === 0) {
+    throw new Error(
+      `${head} ${applied.ceilings} ceiling mesh(es) exist and none of them is a ` +
+      'shadow-only occluder. The frame would be an opaque slab covering the room.');
+  }
+}
+
+// 採光は「入れた瞬間」だけ正しくても意味がない。GLBの読み込み完了は
+// scheduleGltfRebuild3D() 経由の setTimeout で rebuild3D() を呼ぶため、有効化と
+// 撮影開始のあいだに非同期の再構築が挟まりうる。以前の実装はまさにそこで
+// 天井のオクルーダー化を巻き戻され、ゲートは通ったのに部屋が不透明な天井で
+// 覆われた俯瞰が撮れた。撮り始める直前と撮り終えた直後に測り直す。
+function verifyDaylightStillApplied(spec, want, when) {
+  if (!want) return null;
+  const state = window.__PV_CAPTURE__.inspectInteriorDaylight(when);
+  assertDaylightApplied(spec, state);
+  log(`interior daylight verified ${when}: sun ${state.sunIntensity}, ` +
+      `${state.ceilingOccluders}/${state.ceilings} ceiling(s) are shadow-only occluders`);
+  return state;
 }
 
 function applyDaylight(spec) {
@@ -131,6 +152,11 @@ function applyDaylight(spec) {
     throw new Error(
       `shot "${spec.id}" asks for interior daylight, but the capture hook in index.html ` +
       'does not expose setInteriorDaylight (stale page or older build).');
+  }
+  if (typeof window.__PV_CAPTURE__.inspectInteriorDaylight !== 'function') {
+    throw new Error(
+      `shot "${spec.id}" asks for interior daylight, but the capture hook in index.html ` +
+      'does not expose inspectInteriorDaylight (stale page or older build).');
   }
   const applied = window.__PV_CAPTURE__.setInteriorDaylight(want);
   assertDaylightApplied(spec, applied);
@@ -469,12 +495,21 @@ export async function main() {
     // 事故を誰にでも見える形で示せたはずの数値 -- 同じ spec が以前は105秒
     // かかっていたのに、家具未ロードのまま10秒で完走した。人間が動画を
     // 見比べて初めて気づいたが、本来は成果物を見るだけで分かるべきだった。
+    // 撮り始める直前にもう一度測る。有効化からここまでのあいだに
+    // 非同期の再構築(GLB完了 -> scheduleGltfRebuild3D)が挟まっていれば、
+    // ここで初めて分かる。1枚も撮る前に落とす。
+    const want = daylightRequest(spec);
+    daylight = verifyDaylightStillApplied(spec, want, 'before the first frame') || daylight;
+
     const startedAt = Date.now();
     const frameCount = (shotMode(spec) === 'determinism-probe')
       ? await runDeterminismProbe(spec, assertFrameSize)
       : await runSequence(spec, assertFrameSize);
     const tookMs = Date.now() - startedAt;
     log(`capture took ${tookMs}ms for ${frameCount} frame(s)`);
+    // 撮り終えた直後にも測る。途中で巻き戻っていたなら、そのフレーム列は
+    // 信用できない -- DONE を出す前にここで止める。
+    daylight = verifyDaylightStillApplied(spec, want, 'after the last frame') || daylight;
     await postJson(spec.id, '/shot', shotDoc(spec, daylight, { capture: { tookMs, frameCount } }));
 
     // DONE はここで初めて要求する。サーバ側がシーン完全性を検査した後で

@@ -14023,6 +14023,29 @@ function roomHasCoverAbove(r){
   }
   return false;
 }
+// 天井面の材質。
+// 通常(外観・ウォークスルー)は見える天井。PVキャプチャの内観採光時だけは
+// 「カメラには何も描かないが、シャドウマップには普通に入る」オクルーダーにする。
+// 内観は上から間取りを見るビューなので天井が描かれては困る一方、日射を窓と
+// 階段の吹き抜けからだけ入れるには遮蔽そのものは要るため。
+//
+// three.js r169 のシャドウパスは depth マテリアルへ visible / side / alphaMap /
+// alphaTest / map しか写さず、colorWrite・depthWrite・opacity・transparent を見ない
+// (assets/vendor/three/build/three.module.js の WebGLShadowMap)。
+// visible=false は使えない(シャドウパス冒頭の visible 判定で影ごと消える)。
+// レイヤー分離も使えない(シャドウパスの layers 判定の相手は影カメラではなく
+// ビューカメラなので、カメラから外すと影も消える)。
+// transparent+opacity<=0.03 は、このアプリが既に「ガイド画像(segmentation/depth/
+// normal/instance)には存在しないものとして扱う」印として使っている
+// (aiGuideObjectShouldHide、内観カットアウェイ壁)ので、同じ印を付けておく。
+function makeCeilingMaterial(){
+  if(PV_INTERIOR_DAYLIGHT && isInt){
+    return new THREE.MeshBasicMaterial({
+      colorWrite:false, depthWrite:false, transparent:true, opacity:0, side:THREE.DoubleSide
+    });
+  }
+  return new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+}
 // 実体の天井面。編集用の内観3Dでは上から部屋を操作できるよう生成せず、
 // ウォークスルー／外観でのみ表示する。階段位置には床と同じ開口を設ける。
 function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
@@ -14046,8 +14069,12 @@ function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
     ceiling=new THREE.Mesh(geo,matCeiling);
     ceiling.position.y=ceilY-0.012;
   }
-  ceiling.castShadow=false; ceiling.receiveShadow=true;
-  ceiling.userData={b:true,ceiling:true,roomId:r.id};
+  // 影の設定も生成時に確定させる。再構築(GLB読み込み完了後の
+  // scheduleGltfRebuild3D など)でメッシュは作り直されるため、後から
+  // 差し替える方式では静かに元へ戻ってしまう。
+  var pvOccluder=!!(PV_INTERIOR_DAYLIGHT&&isInt);
+  ceiling.castShadow=pvOccluder; ceiling.receiveShadow=!pvOccluder;
+  ceiling.userData={b:true,ceiling:true,ceilingOccluder:pvOccluder,roomId:r.id};
   return ceiling;
 }
 function buildRooms3D(flFilt){
@@ -14068,9 +14095,9 @@ function buildRooms3D(flFilt){
   var showAutoLightFixtures=!isIndoorView;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
   // 内観は上から間取りを見るため天井を作らない。PVキャプチャの内観採光時だけは
-  // 生成し、フック側(__PV_CAPTURE__.setInteriorDaylight)が「描かないが影は落とす」
-  // オクルーダーへ差し替える。日射が窓と階段吹き抜けからだけ入るようにするため。
-  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT) ? new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}) : null;
+  // 生成する(makeCeilingMaterial が「描かないが影は落とす」材質を返す)。
+  // 日射が窓と階段吹き抜けからだけ入るようにするため。
+  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT) ? makeCeilingMaterial() : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
   var ceilingStairQuadsByFloor={};
@@ -19482,62 +19509,33 @@ updateMobileShiftButton();
     // ── 内観の実採光 ───────────────────────────────────────────────
     // 内観3D(3d-int)は上から間取りを読めるよう天井を作らず、太陽も消灯している。
     // そのまま太陽だけ点けると、天井の無い部屋へ真上から日射が降り注ぐ物理的に
-    // あり得ない絵になる。ここでは天井を
-    //   ・カメラには一切描かれない (colorWrite:false / depthWrite:false)
-    //   ・シャドウマップには入る   (castShadow:true)
-    // オクルーダーとして残し、日射が窓と階段の吹き抜けからだけ入るようにする。
+    // あり得ない絵になる。天井を「カメラには描かれないがシャドウマップには入る」
+    // オクルーダーとして生成することで、日射が窓と階段の吹き抜けからだけ入る。
     //
-    // three.js r169 のシャドウパス(assets/vendor/three/build/three.module.js の
-    // WebGLShadowMap)は、depth マテリアルへ visible / side / alphaMap /
-    // alphaTest / map しか写さない。colorWrite・depthWrite・opacity・transparent は
-    // 一切見ないので、「通常描画では何も描かないが影は普通に落ちる」が成立する。
-    //   - visible=false は使えない: シャドウパス冒頭で同じ visible を見て丸ごと
-    //     飛ばすため、影も一緒に消える。
-    //   - レイヤー分離も使えない: シャドウパスの可視判定は object.layers.test() の
-    //     相手が「影カメラ」ではなく「ビューカメラ」なので、カメラから外した
-    //     時点で影も消える(r169 で実装を確認済み)。
-    //
-    // マテリアルは呼び出しごとに作り直す。build3D() は作り直しの前に
-    // disposeObj() で天井メッシュのマテリアルを dispose するため、使い回しの
-    // 1個を持ち続けると次回は dispose 済みのものを貼ることになる。
-    function pvOccluderMaterial(){
-      return new THREE.MeshBasicMaterial({
-        colorWrite:false,
-        depthWrite:false,
-        // transparent かつ opacity<=0.03 は、このアプリが既に
-        // 「ガイド画像(segmentation/depth/normal/instance)では存在しないものとして
-        //  扱う」印として使っている(aiGuideObjectShouldHide、内観カットアウェイ壁)。
-        // 同じ印を付けることで、天井オクルーダーがガイド画像へ写り込まない。
-        transparent:true,
-        opacity:0,
-        // 天井面の向きに依存せず遮蔽させる(ShapeGeometry の面法線は上向き)。
-        side:THREE.DoubleSide
-      });
-    }
-    // buildRooms3D が作った天井メッシュ(userData.ceiling)をオクルーダーへ差し替える。
-    // 戻り値は差し替えた枚数 — 0 なら「天井が1枚も無い=真上から日射が入る」ので、
-    // 呼び出し側(capture-runner.mjs)はここで撮影を止められる。
-    function pvApplyCeilingOccluders(){
-      var n=0, retired=[];
-      var occ=pvOccluderMaterial();
+    // オクルーダー化は**生成時**に決まる(makeCeilingMaterial /
+    // buildRoomCeilingMesh)。ここフックから後付けで差し替えてはならない:
+    // GLBの読み込み完了で scheduleGltfRebuild3D() が setTimeout 経由で
+    // rebuild3D() を呼ぶため、後付けの差し替えは撮影開始前に静かに巻き戻る。
+    // 実際にそれで「部屋全体が不透明な天井で覆われた俯瞰」が撮れてしまった。
+    // ここで行うのは**観測だけ**で、状態を変えない。
+    function pvCeilingCensus(){
+      var ceilings=0, occluders=0;
       sc3.traverse(function(o){
         if(!o.isMesh || !o.userData || !o.userData.ceiling) return;
-        if(o.material && o.material!==occ && retired.indexOf(o.material)<0) retired.push(o.material);
-        o.material=occ;
-        o.castShadow=true;
-        o.receiveShadow=false; // 描かれないので受け側の計算は不要
-        n++;
+        ceilings++;
+        var m=o.material;
+        // 「本当に描かれないか」をマテリアルの実値で見る。userData のフラグを
+        // 信用すると、材質だけ差し替わった場合に嘘をつく。
+        if(m && m.colorWrite===false && m.depthWrite===false && o.castShadow===true) occluders++;
       });
-      // 差し替えで参照を失った本来の天井材(1回の再構築につき1つ)を解放する。
-      retired.forEach(function(m){ if(m&&m.dispose) m.dispose(); });
-      if(!n) occ.dispose(); // 天井が1枚も無ければ、作ったオクルーダー材も未使用のまま
-      return n;
+      return {ceilings:ceilings,occluders:occluders};
     }
     // 実際にシーンへ効いた採光状態。runner はこれを検査し、shot.json にも残す。
-    function pvDaylightState(occluders){
+    function pvDaylightState(){
       var sun=null;
       sc3.traverse(function(o){ if(o.isDirectionalLight) sun=o; });
       var cam=sun&&sun.shadow?sun.shadow.camera:null;
+      var census=pvCeilingCensus();
       return {
         enabled:!!PV_INTERIOR_DAYLIGHT,
         sunScale:PV_INTERIOR_DAYLIGHT?PV_INTERIOR_DAYLIGHT.sunScale:0,
@@ -19548,12 +19546,24 @@ updateMobileShiftButton();
         sunPosition:sun?[sun.position.x,sun.position.y,sun.position.z]:null,
         shadowMapSize:(sun&&sun.shadow)?[sun.shadow.mapSize.x,sun.shadow.mapSize.y]:null,
         shadowCameraSpanM:cam?(cam.right-cam.left):null,
-        ceilingOccluders:occluders
+        ceilings:census.ceilings,
+        ceilingOccluders:census.occluders
       };
+    }
+    // 「天井はあるのにオクルーダーが1枚も無い」= 部屋が不透明な板で覆われた絵に
+    // なる、という自己矛盾。黙って描かず、その場で落とす。
+    function pvAssertNoCoveredRoom(state,when){
+      if(!state.enabled) return state;
+      if(state.ceilings>0 && state.ceilingOccluders===0){
+        throw new Error('[pv-capture] interior daylight is on and '+state.ceilings+
+          ' ceiling mesh(es) exist, but none of them is a shadow-only occluder ('+when+'). '+
+          'The overhead frame would be an opaque slab covering the room.');
+      }
+      return state;
     }
 
     window.__PV_CAPTURE__={
-      version:4,
+      version:5,
       // 内観の実採光を入れる/戻す。cfg が falsy なら元の内観(天井なし・太陽消灯)へ戻す。
       // 戻り値は実際にシーンへ効いた状態で、太陽が点いたか・天井オクルーダーが
       // 何枚できたかを呼び出し側が独立に検査できるようにしている。
@@ -19572,11 +19582,18 @@ updateMobileShiftButton();
         // rebuild3D() ではなく perform3DRebuild() を直接呼ぶ。rebuild3D は
         // タブレット判定に当たると requestAnimationFrame まで再構築を遅らせるため、
         // 戻った時点でまだ天井が無いことがある。ここは同期的に作り切る。
+        // 天井のオクルーダー化はこの再構築の中(生成時)で完了しており、
+        // ここから後付けで触ることは無い。
         perform3DRebuild();
-        var occluders=PV_INTERIOR_DAYLIGHT?pvApplyCeilingOccluders():0;
         if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
         if(typeof invalidate3D==='function') invalidate3D();
-        return pvDaylightState(occluders);
+        return pvAssertNoCoveredRoom(pvDaylightState(),'right after enabling');
+      },
+      // 今この瞬間のシーンを測り直す(状態は変えない)。runner は最初のフレームの
+      // 直前と最後のフレームの直後に呼び、撮影中に非同期の再構築が採光を
+      // 巻き戻していないことを確かめる。以前の実装はまさにそこで壊れた。
+      inspectInteriorDaylight:function(when){
+        return pvAssertNoCoveredRoom(pvDaylightState(),when||'on inspection');
       },
       ensure3D:function(){ return ensureAiRenderable3D(); },
       // 家具GLBは ensureGltfModel() が GLTFLoader で非同期に読み込む。
