@@ -41,10 +41,16 @@ from metrics import edge_mask, edge_precision, line_edge_mask
 
 def thresholds(min_locked_recall=0.75, max_locked_contradiction=0.20,
                min_locked_instance_recall=0.50, min_soft_recall=0.75,
-               min_soft_instance_recall=0.50, max_unverifiable_fraction=0.50):
-    """テスト用の閾値。**production には既定値は無い** — CLI は6つすべてを
+               min_soft_instance_recall=0.50, max_unverifiable_fraction=0.50,
+               max_locked_finish_drift=200.0):
+    """テスト用の閾値。**production には既定値は無い** — CLI は7つすべてを
     必須引数として要求する。ここで既定値を持たせているのはテストの記述量を
-    減らすためだけであり、各テストは自分が動かしたい閾値だけを明示する。"""
+    減らすためだけであり、各テストは自分が動かしたい閾値だけを明示する。
+
+    `max_locked_finish_drift` の既定 200.0 は「色味 L1 の理論最大」であり、
+    仕上げドリフトを **一切効かせない** 値である。他のテストの verdict を
+    後から足した検査が黙って動かさないための中立値であり、production の
+    推奨値ではない。仕上げドリフトを見るテストは自分で値を渡す。"""
     return Thresholds(
         min_locked_recall=min_locked_recall,
         max_locked_contradiction=max_locked_contradiction,
@@ -52,6 +58,7 @@ def thresholds(min_locked_recall=0.75, max_locked_contradiction=0.20,
         min_soft_recall=min_soft_recall,
         min_soft_instance_recall=min_soft_instance_recall,
         max_unverifiable_fraction=max_unverifiable_fraction,
+        max_locked_finish_drift=max_locked_finish_drift,
     )
 
 
@@ -80,8 +87,15 @@ def row(index, categories=None, instances=None, added_px=0):
     }
 
 
-def instance(tier, recall, category_key=None):
+def instance(tier, recall, category_key=None, finish_drift=0.0):
+    """テスト用の instance 行。
+
+    `finish_drift` の既定 0.0 は「指定した仕上げがそのまま戻ってきた」であり、
+    仕上げ以外を見るテストの verdict を汚さない。部材1件につき検査は2件
+    (recall と finish) 数えられる点に注意 — `max_unverifiable_fraction` の
+    分母がその分増える。"""
     return {"recall": recall, "whole_mask_recall": recall,
+            "finish_drift": finish_drift, "finish_drift_ungraded": finish_drift,
             "category": category_key or ("walls" if tier == cat.LOCKED else "furniture"),
             "tier": tier}
 
@@ -265,7 +279,8 @@ class UnverifiableTest(unittest.TestCase):
         got = evaluate(rows, thresholds())
         self.assertEqual(got["verdict"], "PASS")
         self.assertEqual(got["unverifiable"]["count"], 1)
-        self.assertEqual(got["unverifiable"]["total_checks"], 2)
+        # 3 = カテゴリ 'walls' の recall + sofa#3 の recall + sofa#3 の仕上げ
+        self.assertEqual(got["unverifiable"]["total_checks"], 3)
         self.assertEqual(got["unverifiable"]["frames"],
                          [{"index": 0, "checks": ["category 'walls'"]}])
 
@@ -300,7 +315,8 @@ class UnverifiableTest(unittest.TestCase):
         got = evaluate([row(0)], thresholds(min_locked_recall=0.61))
         self.assertEqual(got["thresholds"]["min_locked_recall"], 0.61)
         self.assertEqual(sorted(got["thresholds"]), [
-            "max_locked_contradiction", "max_unverifiable_fraction",
+            "max_locked_contradiction", "max_locked_finish_drift",
+            "max_unverifiable_fraction",
             "min_locked_instance_recall", "min_locked_recall",
             "min_soft_instance_recall", "min_soft_recall"])
 
@@ -964,3 +980,177 @@ class SameToneInstanceIsUnverifiableEndToEndTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# 仕上げ(色味)ドリフト
+# ---------------------------------------------------------------------------
+
+class FinishDriftGateTest(unittest.TestCase):
+    """指定した仕上げが変わったら run は FAIL し、どの部材かを名指しする。
+
+    ここは `evaluate` の配線だけを見る（画像からの計測は
+    `test_metrics.FinishDriftTest` と下の end-to-end が受け持つ）。
+    """
+
+    def test_a_drifted_finish_fails_the_run_and_names_the_object(self):
+        rows = [row(0, {}, {"stair#22": instance(cat.SOFT, 0.99, finish_drift=17.8),
+                            "wall#4": instance(cat.LOCKED, 0.99, finish_drift=7.4)})]
+        got = evaluate(rows, thresholds(max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "FAIL")
+        joined = " ".join(got["locked"]["failures"][0]["reasons"])
+        self.assertIn("stair#22", joined)
+        self.assertNotIn("wall#4", joined)
+        self.assertIn("finish", joined)
+
+    def test_the_finish_threshold_is_a_real_knob_not_a_constant(self):
+        rows = [row(0, {}, {"stair#22": instance(cat.SOFT, 0.99, finish_drift=17.8)})]
+        self.assertEqual(evaluate(rows, thresholds(max_locked_finish_drift=20.0))
+                         ["verdict"], "PASS")
+        self.assertEqual(evaluate(rows, thresholds(max_locked_finish_drift=15.0))
+                         ["verdict"], "FAIL")
+
+    def test_finish_drift_is_gated_on_every_tier_not_only_locked_categories(self):
+        """実測の根拠: T92 で本当に仕上げが変わっていた上位は
+        lattice-screen#35 (69.5) と balcony#20 (19.4) で、どちらもカテゴリは
+        exterior=CONTEXT。stair#22 (12.7) と stair-corner#23 (17.8) は
+        furniture=SOFT。LOCKED カテゴリの部材だけを見る実装は、実在した
+        仕上げ変化を1件も捕まえられない。"""
+        for tier, key in [(cat.CONTEXT, "exterior"), (cat.SOFT, "furniture"),
+                          (cat.LOCKED, "walls")]:
+            rows = [row(0, {}, {"thing#1": instance(tier, 0.99, category_key=key,
+                                                    finish_drift=69.5)})]
+            got = evaluate(rows, thresholds(max_locked_finish_drift=12.0))
+            self.assertEqual(got["verdict"], "FAIL", f"tier={tier}")
+            self.assertEqual(got["locked"]["verdict"], "FAIL", f"tier={tier}")
+
+    def test_a_soft_recall_regression_does_not_borrow_the_finish_verdict(self):
+        """仕上げは無傷で recall だけ落ちた部材は SOFT_REGRESSION のまま。
+        仕上げ検査を recall と同じバケツに入れる実装はここで落ちる。"""
+        rows = [row(0, {}, {"sofa#3": instance(cat.SOFT, 0.05, finish_drift=0.4)})]
+        got = evaluate(rows, thresholds(min_soft_instance_recall=0.50,
+                                        max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "SOFT_REGRESSION")
+        self.assertEqual(got["locked"]["verdict"], "PASS")
+
+    def test_an_undefined_finish_is_unverifiable_not_a_pass(self):
+        rows = [row(0, {}, {"sofa#3": instance(cat.SOFT, 0.99, finish_drift=None)})]
+        got = evaluate(rows, thresholds(max_locked_finish_drift=0.0,
+                                        max_unverifiable_fraction=1.0))
+        self.assertEqual(got["verdict"], "PASS")
+        self.assertEqual(got["locked"]["failures"], [])
+        self.assertEqual(got["unverifiable"]["count"], 1)
+        self.assertEqual(got["unverifiable"]["frames"],
+                         [{"index": 0, "checks": ["instance 'sofa#3' finish"]}])
+
+    def test_a_missing_finish_field_is_loud_not_silently_skipped(self):
+        """`compare_frame` が finish_drift を落とした日に、ゲートが黙って
+        無効化されたまま PASS を出さないこと。"""
+        broken = instance(cat.LOCKED, 0.99)
+        del broken["finish_drift"]
+        with self.assertRaises(KeyError):
+            evaluate([row(0, {}, {"wall#4": broken})], thresholds())
+
+
+# 色つきの end-to-end フィクスチャ。既存の `_render` はグレースケールなので、
+# 色味 L1 は定義上つねに 0 になる — 仕上げドリフトを実際に動かすには色が要る。
+FINISH_PALETTE = {FIELD: (30, 32, 36), ROOM: (198, 194, 188), SOFA: (100, 117, 142)}
+
+
+def _colour_render(regions, recolour=None, gain=(1.0, 1.0, 1.0)):
+    """材質と照明つきの色付きレンダ。平坦なペイント・バイ・ナンバーではない
+    （面内に木目と採光の傾斜を入れてある）。"""
+    palette = dict(FINISH_PALETTE)
+    palette.update(recolour or {})
+    out = np.zeros(regions.shape + (3,), dtype=np.float64)
+    for rid, colour in palette.items():
+        out[regions == rid] = colour
+    out[200:270:6, 120:170] += 45                       # 木目
+    gradient = np.linspace(-20, 20, regions.shape[1])   # 採光の傾斜
+    inside = regions != FIELD
+    out[inside] += gradient[None, :, None].repeat(regions.shape[0], 0)[inside]
+    out *= np.array(gain, dtype=np.float64)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+class FinishDriftEndToEndTest(unittest.TestCase):
+    """instance guide を実際に読み、色味の変わった部材を名指しできること。"""
+
+    SOFA_BOX = (120, 200)
+
+    def _run(self, generated):
+        regions = _regions(sofa=self.SOFA_BOX)
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = _make_truth_dirs(Path(tmp), with_instance=True)
+            (truth / "instance-legend.json").write_text(json.dumps({
+                "version": 2,
+                "instances": [{"id": 1, "color": "#ff0000", "label": "sofa#1"}],
+            }))
+            _save(truth / "edge" / "0000.png", _line_drawing(regions))
+            _save(truth / "segmentation" / "0000.png", _segmentation(regions))
+            _save(truth / "base" / "0000.png", _colour_render(regions))
+            guide = np.zeros((300, 300, 3), dtype=np.uint8)
+            y, x = self.SOFA_BOX
+            guide[y:y + SOFA_H, x:x + SOFA_W] = (255, 0, 0)
+            _save(truth / "instance" / "0000.png", guide)
+            _save(gen / "0000.png", generated(regions))
+            rows, _ = collect_rows(truth, gen, radius=1)
+        return rows
+
+    def test_every_instance_carries_a_finish_number(self):
+        rows = self._run(lambda r: _colour_render(r))
+        self.assertIn("finish_drift", rows[0]["instances"]["sofa#1"])
+        self.assertIn("finish_drift_ungraded", rows[0]["instances"]["sofa#1"])
+        self.assertIn("colour_grade", rows[0])
+
+    def test_a_faithful_reproduction_has_no_finish_drift(self):
+        rows = self._run(lambda r: _colour_render(r))
+        self.assertLess(rows[0]["instances"]["sofa#1"]["finish_drift"], 0.5)
+        self.assertEqual(evaluate(rows, thresholds(min_locked_recall=0.75,
+                                                   max_locked_finish_drift=12.0))
+                         ["verdict"], "PASS")
+
+    def test_a_brighter_generation_still_passes_the_finish_gate(self):
+        """正当に明るいだけの生成で仕上げ違反を出してはならない。"""
+        rows = self._run(lambda r: _colour_render(r, gain=(1.25, 1.25, 1.25)))
+        self.assertLess(rows[0]["instances"]["sofa#1"]["finish_drift"], 2.0)
+        self.assertEqual(evaluate(rows, thresholds(min_locked_recall=0.75,
+                                                   max_locked_finish_drift=12.0))
+                         ["verdict"], "PASS")
+
+    def test_a_recoloured_sofa_fails_locked_and_is_named(self):
+        """青灰色 [100,117,142] がクリーム色の木 [230,217,196] に化けた
+        — 実データ (stair-corner#23) で起きたのと同じ変化。"""
+        rows = self._run(lambda r: _colour_render(r, recolour={SOFA: (230, 217, 196)}))
+        self.assertGreater(rows[0]["instances"]["sofa#1"]["finish_drift"], 12.0)
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "FAIL")
+        reason = " ".join(got["locked"]["failures"][0]["reasons"])
+        self.assertIn("sofa#1", reason)
+        self.assertIn("finish", reason)
+
+    def test_a_recolour_at_the_same_brightness_is_invisible_to_edge_recall(self):
+        """これが仕上げ検査の存在理由。
+
+        青灰 [100,117,142] を **輝度をほぼ揃えた** 木の茶 [150,105,62]
+        (輝度 115.3 -> 105.6) に置き換える。周囲との明暗差はほぼそのままなので
+        シルエットのエッジは残り、recall は満点のまま — 色味だけが 40 近く
+        動く。仕上げドリフトを足さない限り、この変化はゲートを素通りする。
+
+        (明るいクリーム色に振った上のテストでは、床とのコントラストごと
+        消えるので recall も落ちる。仕上げ検査が要るのは、そうならない
+        「同じ明るさで色だけ違う」置き換えのほうである。)"""
+        rows = self._run(lambda r: _colour_render(r, recolour={SOFA: (150, 105, 62)}))
+        self.assertGreater(rows[0]["instances"]["sofa#1"]["finish_drift"], 12.0)
+        self.assertGreater(rows[0]["instances"]["sofa#1"]["recall"], 0.9)
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        min_soft_instance_recall=0.45,
+                                        max_locked_finish_drift=200.0))
+        self.assertEqual(got["verdict"], "PASS")
+
+    def test_the_narrative_says_which_finish_moved(self):
+        rows = self._run(lambda r: _colour_render(r, recolour={SOFA: (230, 217, 196)}))
+        text = " ".join(rows[0]["narrative"])
+        self.assertIn("[FINISH]", text)
+        self.assertIn("sofa#1", text)

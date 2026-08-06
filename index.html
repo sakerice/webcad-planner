@@ -16995,11 +16995,36 @@ function captureAiOverrideGuideDataUrl(kind){
   }
   return dataUrl;
 }
-function aiInstanceColorHex(id){
+// instance guide の色を作る (id 1,2,3,... に対して黄金角で色相を回す)。
+// variant 0 は従来の値そのままで、legend の色は変わらない。
+// 8bit に量子化すると黄金角の色相列はいずれ衝突する(実測: id=11 と id=388 が
+// どちらも #dd5df2)。legend は「この色はこの部材」と言い切る約束なので、
+// 衝突したら明度/彩度の段を1つずらして別の色を取る — そのための variant。
+var AI_INSTANCE_COLOR_VARIANTS=[[0.78,0.5],[0.78,0.32],[0.78,0.68],[0.45,0.5],
+                                [1,0.5],[0.45,0.32],[1,0.68],[0.45,0.68],
+                                [0.62,0.4],[0.62,0.6],[0.9,0.42],[0.9,0.6]];
+function aiInstanceColorHex(id,variant){
+  var sl=AI_INSTANCE_COLOR_VARIANTS[Math.max(0,Math.floor(Number(variant)||0))%AI_INSTANCE_COLOR_VARIANTS.length];
   var hue=(Number(id)*0.618033988749895)%1;
   var c=new THREE.Color();
-  c.setHSL(hue,0.78,0.5);
+  c.setHSL(hue,sl[0],sl[1]);
   return '#'+c.getHexString();
+}
+// variant を使い切ってもなお空きが無いとき用の、決定的な総当たり。
+// 24bit 空間を大きな奇数ストライドで歩くので、used が空間を埋め尽くさない
+// 限り必ず未使用色に当たる。白(背景)と黒は返さない。
+function aiInstanceFallbackColorHex(id,used){
+  // 奇数ストライドは 2^24 と互いに素なので、この加算列は 24bit 空間を
+  // ちょうど一周する。空きがあれば必ず見つかる。
+  var STRIDE=10368889, v=(Math.floor(Number(id)||0)*STRIDE)&0xffffff;
+  for(var i=0;i<0x1000000;i++){
+    if(v!==0&&v!==0xffffff){
+      var hex='#'+('000000'+v.toString(16)).slice(-6);
+      if(!used.has(hex)) return hex;
+    }
+    v=(v+STRIDE)&0xffffff;
+  }
+  return '';
 }
 function aiRefSource(ref,kind){
   var collections=[['walls',DATA.walls],['rooms',DATA.rooms],['items',DATA.items]];
@@ -17021,12 +17046,21 @@ function captureInstance3DData(){
   if(!ensureAiRenderable3D()) return {dataUrl:'',legend:[]};
   var cam=getActive3DCamera();
   var resolutionState=beginAiGuideCaptureResolution();
-  var states=[], legend=[], refEntries=new Map(), nextId=1;
+  var states=[], legend=[], refEntries=new Map(), usedColors=new Set(), nextId=1;
   var oldBg=sc3.background, oldFog=sc3.fog;
   function entryFor(ref,kind){
     var key=ref||kind;
     if(refEntries.has(key)) return refEntries.get(key);
-    var id=nextId++, color=aiInstanceColorHex(id);
+    // 2つの部材に同じ色を割り当てると、legend が「この色はどの物体か」に
+    // 答えられなくなる(照合側は色の厳密一致で部材を切り出す)。背景の白と、
+    // 「塗られなかった画素」と見分けが付かない黒も避ける。
+    var id=nextId++, color='';
+    for(var v=0;v<AI_INSTANCE_COLOR_VARIANTS.length;v++){
+      var cand=aiInstanceColorHex(id,v);
+      if(cand!=='#ffffff'&&cand!=='#000000'&&!usedColors.has(cand)){color=cand;break;}
+    }
+    if(!color) color=aiInstanceFallbackColorHex(id,usedColors);
+    usedColors.add(color);
     var entry={id:id,color:color,ref:ref,summary:aiInstanceSummary(ref,kind,id,color)};
     refEntries.set(key,entry);
     legend.push(entry.summary);
@@ -17046,12 +17080,31 @@ function captureInstance3DData(){
       if(!o.isMesh) return;
       o.visible=true;
       if(o.isInstancedMesh&&o.userData&&o.userData.instanceRefs&&o.userData.instanceRefs.length){
-        o.instanceColor=null;
+        // guide 用の instanceColor は毎回作り直さず1本を使い回す。three の
+        // WebGLAttributes は WeakMap + 明示 remove でしか GL バッファを解放
+        // しないので、捨てた BufferAttribute のバッファは回収されない。
+        // PV キャプチャはフレームごとにここを通るため、作り直すと
+        // 「フレーム数 × インスタンスメッシュ数」本のバッファが積み上がる。
+        var guideColor=o.userData._aiGuideInstanceColor;
+        if(!guideColor||guideColor.count!==o.count){
+          // fill(1) は three の setColorAt が自前で作るときと同じ初期値。
+          guideColor=new THREE.InstancedBufferAttribute(new Float32Array(o.count*3).fill(1),3);
+          o.userData._aiGuideInstanceColor=guideColor;
+        }
+        o.instanceColor=guideColor;
         o.userData.instanceRefs.forEach(function(ref,idx){
           o.setColorAt(idx,new THREE.Color(entryFor(ref,o.userData.selectKind).color));
         });
-        if(o.instanceColor) o.instanceColor.needsUpdate=true;
-        o.material=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,toneMapped:false});
+        guideColor.needsUpdate=true;
+        // vertexColors は付けてはならない。three は instanceColor が居るだけで
+        // フラグメント側に USE_COLOR を立てて instanceColor を効かせるが、
+        // material.vertexColors を true にすると **頂点側にも** USE_COLOR が
+        // 立ち、`attribute vec3 color;` が宣言されて vColor *= color が走る。
+        // GLB 由来のジオメトリに COLOR_0 は無い(同梱736点すべてに無い)ので、
+        // WebGL は未束縛属性の既定値 (0,0,0,1) を渡し、instance の色は 0 倍
+        // されて真っ黒になる。実測: T92 で declared 73 / 発色 36、
+        // 黒画素 13.9%、家具 36点が丸ごと欠落していた。
+        o.material=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,toneMapped:false});
       }else{
         var ref=o.userData&&o.userData.selectRef;
         var kind=(o.userData&&o.userData.selectKind)||(o===_gndMesh?'outside-ground':'render-object');

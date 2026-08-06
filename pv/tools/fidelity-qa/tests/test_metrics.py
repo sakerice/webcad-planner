@@ -8,12 +8,16 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from metrics import (
+    colour_character,
     dilate,
     edge_mask,
     edge_precision,
     edge_recall,
+    frame_colour_grade,
     instance_boxes,
+    instance_finish_drift,
     instance_recall,
+    instance_region_means,
     instance_regions,
     line_edge_mask,
 )
@@ -659,3 +663,160 @@ class InstanceBoxesResizeTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# 仕上げ(色味)ドリフト
+# ---------------------------------------------------------------------------
+#
+# フィクスチャの作り方の注意: 3つの部材は **色相も明度も互いに違う** ように
+# する。すべて同じ色にすると、マスクを無視して画面全体の平均を取る実装でも
+# 同じ数値が出てしまい、テストが何も検証しない。同じ理由で、階調のグラデー
+# ションを乗せて「部材の中も一様ではない」状態にしてある。
+
+FINISH_SIZE = 60
+FINISH_OBJECTS = {
+    # name: (slice, truth colour) — 色相も明るさも別物にする
+    "stair#1": ((slice(5, 25), slice(5, 25)), (100, 117, 142)),   # 青灰
+    "door#2": ((slice(30, 50), slice(5, 25)), (150, 150, 150)),   # 無彩色の灰
+    "sofa#3": ((slice(5, 25), slice(30, 55)), (60, 130, 70)),     # 緑
+}
+FINISH_LEGEND = {"version": 2, "instances": [
+    {"id": 1, "color": "#ff0000", "label": "stair#1"},
+    {"id": 2, "color": "#00ff00", "label": "door#2"},
+    {"id": 3, "color": "#0000ff", "label": "sofa#3"},
+]}
+FINISH_GUIDE_COLOURS = {"stair#1": (255, 0, 0), "door#2": (0, 255, 0), "sofa#3": (0, 0, 255)}
+
+
+def finish_guide_png():
+    arr = np.full((FINISH_SIZE, FINISH_SIZE, 3), 255, dtype=np.uint8)
+    for name, (box, _colour) in FINISH_OBJECTS.items():
+        arr[box] = FINISH_GUIDE_COLOURS[name]
+    buf = BytesIO()
+    Image.fromarray(arr).save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+def finish_render(overrides=None):
+    """部材ごとに色を持ち、面内にも階調がある「レンダ」。"""
+    arr = np.full((FINISH_SIZE, FINISH_SIZE, 3), 40, dtype=np.int16)
+    colours = {name: (overrides or {}).get(name, colour)
+               for name, (_box, colour) in FINISH_OBJECTS.items()}
+    shade = np.linspace(-12, 12, FINISH_SIZE).astype(np.int16)
+    for name, (box, _colour) in FINISH_OBJECTS.items():
+        arr[box] = colours[name]
+    arr += np.broadcast_to(shade[None, :, None], arr.shape).astype(np.int16)
+    return np.clip(arr, 0, 255).astype(np.uint8)
+
+
+def finish_regions():
+    return instance_regions(finish_guide_png(), FINISH_LEGEND)
+
+
+class ColourCharacterTest(unittest.TestCase):
+    def test_a_grey_of_any_brightness_has_the_same_colour_character(self):
+        np.testing.assert_allclose(colour_character(np.array([10.0, 10.0, 10.0])),
+                                   colour_character(np.array([200.0, 200.0, 200.0])))
+
+    def test_pure_black_is_undefined_not_zero(self):
+        """真っ黒に色味は無い。0 を返すと「完全一致」と見分けが付かなくなる。"""
+        self.assertIsNone(colour_character(np.array([0.0, 0.0, 0.0])))
+
+
+class FinishDriftTest(unittest.TestCase):
+    def test_identical_frames_have_no_drift(self):
+        regions = finish_regions()
+        truth = finish_render()
+        got = instance_finish_drift(truth, truth.copy(), regions)
+        self.assertEqual(sorted(got), ["door#2", "sofa#3", "stair#1"])
+        for name, value in got.items():
+            self.assertAlmostEqual(value, 0.0, places=9, msg=name)
+
+    def test_a_uniformly_brighter_frame_is_not_a_finish_change(self):
+        """この層の要求そのもの: 生成側が正当に明るいだけで仕上げが変わった
+        ことにしてはならない。平均 RGB を素で引き算する実装はここで落ちる
+        (実測: 素の L1 は stair#1 で 47.9 になる)。"""
+        regions = finish_regions()
+        truth = finish_render()
+        brighter = np.clip(truth.astype(np.float64) * 1.35, 0, 255).astype(np.uint8)
+        for name, value in instance_finish_drift(truth, brighter, regions).items():
+            self.assertLess(value, 0.5, msg=f"{name} drifted on brightness alone")
+
+    def test_a_darker_frame_is_not_a_finish_change_either(self):
+        regions = finish_regions()
+        truth = finish_render()
+        darker = (truth.astype(np.float64) * 0.5).astype(np.uint8)
+        for name, value in instance_finish_drift(truth, darker, regions).items():
+            self.assertLess(value, 0.5, msg=name)
+
+    def test_one_object_changing_finish_is_named_and_the_others_are_not(self):
+        """青灰色の階段がクリーム色の木に化けたケース。マスクを使わず bbox や
+        画面全体で平均を取る実装は、隣の部材まで巻き添えにするか、逆に薄まって
+        検出できなくなる。"""
+        regions = finish_regions()
+        truth = finish_render()
+        generated = finish_render({"stair#1": (230, 217, 196)})
+        got = instance_finish_drift(truth, generated, regions)
+        self.assertGreater(got["stair#1"], 10.0)
+        self.assertLess(got["door#2"], 0.5)
+        self.assertLess(got["sofa#3"], 0.5)
+
+    def test_a_black_louvre_turning_brown_is_caught(self):
+        regions = finish_regions()
+        truth = finish_render({"stair#1": (2, 3, 4)})
+        generated = finish_render({"stair#1": (60, 40, 30)})
+        self.assertGreater(instance_finish_drift(truth, generated, regions)["stair#1"], 20.0)
+
+    def test_a_totally_black_region_is_unverifiable_not_perfect(self):
+        """色味の定義できない領域を 0.0 (=完全一致) と報告すると、消し飛んだ
+        部材が満点で通ってしまう。"""
+        regions = finish_regions()
+        black = np.zeros((FINISH_SIZE, FINISH_SIZE, 3), dtype=np.uint8)
+        got = instance_finish_drift(black, finish_render(), regions)
+        self.assertIsNone(got["stair#1"])
+        self.assertIsNone(got["door#2"])
+
+    def test_mismatched_grids_are_refused_rather_than_silently_compared(self):
+        regions = finish_regions()
+        smaller = finish_render()[:30, :30]
+        with self.assertRaises(ValueError):
+            instance_finish_drift(finish_render(), smaller, regions)
+
+    def test_region_means_come_from_the_object_pixels_not_the_bounding_box(self):
+        means = instance_region_means(finish_render(), finish_regions())
+        # 階調ぶんは動くが、緑の部材の平均は緑のまま(隣の灰色は混ざらない)
+        r, g, b = means["sofa#3"]
+        self.assertGreater(g, r + 40)
+        self.assertGreater(g, b + 40)
+
+    def test_neutralising_the_grade_removes_a_frame_wide_colour_cast(self):
+        """フレーム全体に暖色を掛けただけの生成。素の指標は全部材を等しく
+        持ち上げるが、grade を打ち消すと消える — 「1つの原因が全部材ぶん
+        報告されている」のを読み手が見分けるための診断値。"""
+        regions = finish_regions()
+        truth = finish_render()
+        warm = np.clip(truth.astype(np.float64) * np.array([1.25, 1.0, 0.8]),
+                       0, 255).astype(np.uint8)
+        plain = instance_finish_drift(truth, warm, regions)
+        ungraded = instance_finish_drift(truth, warm, regions, neutralise_grade=True)
+        for name in regions:
+            self.assertGreater(plain[name], 3.0, msg=name)
+            self.assertLess(ungraded[name], plain[name] / 2.0, msg=name)
+
+    def test_frame_colour_grade_reports_the_shared_shift(self):
+        truth = finish_render()
+        warm = np.clip(truth.astype(np.float64) * np.array([1.25, 1.0, 0.8]),
+                       0, 255).astype(np.uint8)
+        self.assertGreater(frame_colour_grade(truth, warm), 3.0)
+        self.assertAlmostEqual(frame_colour_grade(truth, truth.copy()), 0.0, places=9)
+
+    def test_the_scale_is_the_one_the_reference_table_uses(self):
+        """報告に載る参照値 (lattice-screen#35 = 69.5 など) と同じ ×100 スケール。
+        0..2 の生値で返す実装に変わると、運用側が閾値を 100 倍間違える。"""
+        regions = finish_regions()
+        truth = finish_render({"stair#1": (255, 0, 0)})
+        generated = finish_render({"stair#1": (0, 0, 255)})
+        # 純赤 -> 純青 は色味 L1 で 2.0、×100 で 200。周囲の階調ぶん少し下がる。
+        self.assertGreater(instance_finish_drift(truth, generated, regions)["stair#1"], 150.0)

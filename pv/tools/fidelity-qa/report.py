@@ -6,6 +6,7 @@
         --min-locked-recall 0.55 --max-locked-contradiction 0.20 \
         --min-locked-instance-recall 0.45 --min-soft-recall 0.55 \
         --min-soft-instance-recall 0.45 --max-unverifiable-fraction 0.5 \
+        --max-locked-finish-drift 12 \
         [--radius 2] [--json out.json]
 
 閾値はすべて必須引数で既定値を持たない。ショットと生成系列ごとに実測から
@@ -20,6 +21,12 @@
   LOCKED  壁・窓/ガラス・建具/開口・屋根・部屋の床スラブ。間取りを定義する。
           消失・変位・すり替えは run 全体の FAIL。カテゴリ名とフレームを
           名指しする。
+          **部材ごとの仕上げ(色味)ドリフトもここに入る。** 設計が指定した
+          仕上げは変わってはならない。これはカテゴリのティアで分けない —
+          実測で本当に仕上げが変わっていた部材(黒いルーバー→茶色の木、
+          青灰色の階段→クリーム色の木)はカテゴリ上 CONTEXT / SOFT に落ちて
+          おり、LOCKED カテゴリだけを見ると1件も捕まらないためである
+          (`Thresholds.max_locked_finish_drift` のコメントに実測値)。
   SOFT    設備機器・家具。在るべきだが描画は変わってよい。独自の閾値で
           別枠に出し、LOCKED の verdict を汚さない。
   FREE    真実側のどのカテゴリにも対応物を持たない、生成側の追加構造。
@@ -68,6 +75,8 @@ from metrics import (
     edge_mask,
     edge_precision,
     edge_recall,
+    frame_colour_grade,
+    instance_finish_drift,
     instance_recall,
     instance_regions,
 )
@@ -173,6 +182,22 @@ def describe_frame(row) -> list:
                  for k, v in sorted(free["by_category"].items(),
                                     key=lambda kv: -kv[1]["pixels"])[:5]]
         lines.append("       sitting over: " + ", ".join(parts) + ".")
+
+    drifts = [(name, info) for name, info in row.get("instances", {}).items()
+              if info.get("finish_drift") is not None]
+    if drifts:
+        drifts.sort(key=lambda kv: -kv[1]["finish_drift"])
+        parts = []
+        for name, info in drifts[:5]:
+            ungraded = info.get("finish_drift_ungraded")
+            tail = f"/{ungraded:.1f} ungraded" if ungraded is not None else ""
+            parts.append(f"{name} {info['finish_drift']:.1f}{tail}")
+        lines.append(
+            "[FINISH] colour character drift, worst first (0 = the designed finish came "
+            f"back unchanged; brightness is normalised out): {', '.join(parts)}. "
+            f"The frame's own overall colour grade shifted {row.get('colour_grade', 0.0):.1f} "
+            "— when every object drifts together, that shared grade is the likelier cause "
+            "than each finish changing on its own.")
     return lines
 
 
@@ -222,6 +247,12 @@ def compare_frame(index, truth_base_png, truth_segmentation_png, generated_png, 
         # `metrics.instance_recall`（マスク全体版）は素の値として併記する。
         scores = cat.instance_silhouette_recall(base_edges, generated, regions, radius)
         whole_mask_scores = instance_recall(base_edges, generated, regions, radius)
+        # 仕上げ(色味)のドリフト。エッジ recall は「まだ在るか」しか言わない
+        # ので、青灰色の階段がクリーム色の木に化けても満点になる。ここは
+        # 「指定した仕上げのまま描かれているか」を別に測る。
+        finish = instance_finish_drift(truth_img, generated_img, regions)
+        finish_ungraded = instance_finish_drift(truth_img, generated_img, regions,
+                                                neutralise_grade=True)
         for name, (box, mask) in regions.items():
             y0, x0, y1, x1 = box
             full = np.zeros_like(base_edges)
@@ -230,6 +261,8 @@ def compare_frame(index, truth_base_png, truth_segmentation_png, generated_png, 
             instances[name] = {
                 "recall": scores[name],
                 "whole_mask_recall": whole_mask_scores[name],
+                "finish_drift": finish[name],
+                "finish_drift_ungraded": finish_ungraded[name],
                 "category": key,
                 "tier": cat.TIER_OF.get(key, cat.CONTEXT),
             }
@@ -247,6 +280,10 @@ def compare_frame(index, truth_base_png, truth_segmentation_png, generated_png, 
         },
         "categories": entries,
         "instances": instances,
+        # フレーム全体に掛かった色調のずれ。部材ごとの finish_drift と同じ
+        # ×100 スケール。判定には使わない — 仕上げドリフトが並んだときに
+        # 「1つの原因が何度も報告されている」のかを読み手が見分けるための数値。
+        "colour_grade": frame_colour_grade(truth_img, generated_img),
         "added": {
             "total_px": total_added,
             "share_of_frame": total_added / base_edges.size,
@@ -262,13 +299,23 @@ class Thresholds:
 
     def __init__(self, min_locked_recall, max_locked_contradiction,
                  min_locked_instance_recall, min_soft_recall,
-                 min_soft_instance_recall, max_unverifiable_fraction):
+                 min_soft_instance_recall, max_unverifiable_fraction,
+                 max_locked_finish_drift):
         self.min_locked_recall = min_locked_recall
         self.max_locked_contradiction = max_locked_contradiction
         self.min_locked_instance_recall = min_locked_instance_recall
         self.min_soft_recall = min_soft_recall
         self.min_soft_instance_recall = min_soft_instance_recall
         self.max_unverifiable_fraction = max_unverifiable_fraction
+        # 仕上げドリフトは **全ティアの部材** に掛かり、割れると run は FAIL。
+        # カテゴリのティアで分けない理由は実測にある: T92 で実際に仕上げが
+        # 変わっていた上位は lattice-screen#35 (69.5) と balcony#20 (19.4) で
+        # どちらもカテゴリは exterior=CONTEXT、stair#22 (12.7) と
+        # stair-corner#23 (17.8) は furniture=SOFT だった。LOCKED カテゴリの
+        # 部材だけを対象にすると、実在した仕上げ変化を1件も捕まえられない。
+        # 仕上げは物体の構造ティアと無関係に設計が指定するものなので、
+        # 「指定した仕上げは変わってはならない」を LOCKED 相当として扱う。
+        self.max_locked_finish_drift = max_locked_finish_drift
 
     def as_dict(self):
         return dict(self.__dict__)
@@ -376,6 +423,31 @@ def evaluate(rows, thresholds: Thresholds):
                         f"SOFT instance '{name}' (category '{info['category']}') recall "
                         f"{info['recall']:.3f} < {thresholds.min_soft_instance_recall:.3f} — "
                         "this designed object looks absent or heavily reworked.")
+
+        # 仕上げドリフトは recall とは独立の検査であり、ティアで分けない
+        # (`Thresholds.max_locked_finish_drift` のコメント参照)。
+        for name, info in sorted(r.get("instances", {}).items()):
+            total_checks += 1
+            # 添字アクセスにしてあるのは意図的。`.get()` にすると
+            # `compare_frame` が finish_drift を落とした日に、ゲートが黙って
+            # 無効化されたまま PASS を出す。落ちるなら大声で落ちるべき。
+            drift = info["finish_drift"]
+            if drift is None:
+                unverifiable_here.append(f"instance '{name}' finish")
+                unverifiable_count += 1
+                continue
+            if drift > thresholds.max_locked_finish_drift:
+                ungraded = info.get("finish_drift_ungraded")
+                msg = (f"LOCKED finish: instance '{name}' (category '{info['category']}') "
+                       f"colour character drifted {drift:.1f} > "
+                       f"{thresholds.max_locked_finish_drift:.1f} — the designed finish was "
+                       "not reproduced (this is measured on colour character alone, "
+                       "normalised for brightness, so it is not a lighting difference).")
+                if ungraded is not None:
+                    msg += (f" With the frame-wide colour grade neutralised it is "
+                            f"{ungraded:.1f}; the frame's own grade shift is "
+                            f"{r.get('colour_grade', 0.0):.1f}.")
+                locked_reasons.append(msg)
 
         if unverifiable_here:
             unverifiable_frames.append({"index": r["index"],
@@ -563,6 +635,14 @@ def main():
                          "別枠報告で、LOCKED の verdict は汚さない。")
     ap.add_argument("--min-soft-instance-recall", type=float, required=True,
                     help="SOFT カテゴリに属する個別部材の recall 下限。")
+    ap.add_argument("--max-locked-finish-drift", type=float, required=True,
+                    help="部材ごとの仕上げ(色味)ドリフトの上限。0 = 指定した仕上げが"
+                         "そのまま戻ってきた、200 = 正反対の色味 (×100 スケール)。"
+                         "明るさは正規化して落としてあるので、単に明るい/暗い生成では"
+                         "上がらない。全ティアの部材に掛かり、割れると run は FAIL。"
+                         "実測の目安 (T92-ldk-overhead / t=6s): 黒いルーバーが茶色の木に"
+                         "化けた lattice-screen#35 が 69.5/55.9、動いていない wall#4 が "
+                         "7.4/7.2。")
     ap.add_argument("--max-unverifiable-fraction", type=float, required=True,
                     help="run 全体で「検証不能」だった検査の割合の上限。超えると FAIL。")
     ap.add_argument("--radius", type=int, default=2)
@@ -587,6 +667,7 @@ def main():
         min_soft_recall=args.min_soft_recall,
         min_soft_instance_recall=args.min_soft_instance_recall,
         max_unverifiable_fraction=args.max_unverifiable_fraction,
+        max_locked_finish_drift=args.max_locked_finish_drift,
     )
     result = evaluate(rows, thresholds)
     result["compared"] = len(rows)

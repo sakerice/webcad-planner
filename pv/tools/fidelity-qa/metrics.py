@@ -330,3 +330,130 @@ def instance_recall(truth: np.ndarray, generated: np.ndarray, regions: dict, rad
         generated_region = generated[y0:y1, x0:x1] & mask
         out[name] = edge_recall(truth_region, generated_region, radius)
     return out
+
+
+# ── Layer 3: 仕上げ(質感・色味)のドリフト ────────────────────────────
+#
+# エッジ recall は「その物体がまだそこに在るか」しか言わない。青灰色の階段が
+# クリーム色の木に、灰色の扉が赤茶に、黒いルーバーが茶色の木に化けても、
+# 輪郭さえ残っていれば満点になる。設計側は仕上げを指定しているのだから、
+# それは実際の欠陥である。ここはそれを名指しするための層。
+#
+# 明るさではなく **色味** を測る。生成側が正当に明るい/暗いだけで仕上げが
+# 変わったと騒いではならないからである。そこで各平均 RGB を **自分自身の
+# 総和で正規化** してから比べる (chromaticity)。全画素を一律にスケールする
+# 変換はこの正規化で完全に消える — 実測: 真実フレームを 0.7 倍したコピーを
+# 自分自身と比べた全35部材のドリフトは厳密に 0.0000、1.4 倍では最大 2.61
+# (8bit の 255 飽和ぶんだけ残る) であり、実際に見つけたい 7〜70 の帯には
+# 遠く届かない。
+
+def _rgb_array(source) -> np.ndarray:
+    """Path でも PIL.Image でも既に読んだ配列でも受けて float の RGB 配列にする。"""
+    if isinstance(source, np.ndarray):
+        return source.astype(np.float64, copy=False)
+    img = Image.open(source) if isinstance(source, (str, Path)) else source
+    return np.asarray(img.convert("RGB")).astype(np.float64)
+
+
+def colour_character(mean_rgb):
+    """平均 RGB を総和で割った色味ベクトル。総和 0 なら `None`（判定不能）。
+
+    総和 0 は「その部材の画素が真っ黒」という意味で、色味という概念が
+    そもそも定義されない。0 を返すと「完全に一致」と見分けが付かなくなる
+    ので、`_recall_ratio` と同じ方針で `None`（検証不能）を返す。
+    """
+    total = float(np.sum(mean_rgb))
+    if total <= 0:
+        return None
+    return np.asarray(mean_rgb, dtype=np.float64) / total
+
+
+def _finish_drift(truth_mean, generated_mean):
+    a = colour_character(truth_mean)
+    b = colour_character(generated_mean)
+    if a is None or b is None:
+        return None
+    return float(np.abs(a - b).sum() * 100.0)
+
+
+def instance_region_means(rgb, regions: dict) -> dict:
+    """部材名 -> その部材自身の画素の平均 RGB。
+
+    平均を取る画素は `instance_regions()` が返すマスク（＝instance guide が
+    その部材の色で塗った画素）そのものであり、bbox の中身全部ではない。
+    bbox を使うと隣接物体や床の色が混ざり、仕上げの比較が意味を失う。
+    """
+    arr = _rgb_array(rgb)
+    out = {}
+    for name, (box, mask) in regions.items():
+        y0, x0, y1, x1 = box
+        out[name] = arr[y0:y1, x0:x1][mask].mean(axis=0)
+    return out
+
+
+def instance_finish_drift(truth_rgb, generated_rgb, regions: dict,
+                          neutralise_grade: bool = False) -> dict:
+    """部材ごとの仕上げドリフト。0 = 同じ色味、200 = 正反対（×100 スケール）。
+
+    真実側・生成側とも **その部材自身の画素** の平均 RGB を取り、それぞれを
+    自分の総和で正規化してから L1 距離を取る。値は ×100。参照値（実測、
+    T92-ldk-overhead / t=6s、送信した静止画 vs 生成2系列）:
+
+        lattice-screen#35   69.5 / 55.9   黒いルーバー -> 茶色の木
+        balcony#20          19.4 /  9.7
+        stair-corner#23     17.8 / 14.7   [100,117,142] -> [230,217,196]
+        stair#22            12.7 /  5.3
+        wall#4               7.4 /  7.2   （動いていない側の目安）
+
+    `neutralise_grade=True` にすると、各平均 RGB を **そのフレーム全体の
+    平均 RGB** で割ってから色味を取る（von Kries 型の白色順応）。これは
+    生成側がフレーム全体に掛けた色調（ホワイトバランス）を打ち消すので、
+    「全部材が同じ向きにずれている」のか「この部材だけ仕上げが変わった」
+    のかを切り分けられる。ゲートに使うのは既定（False）の側であり、こちらは
+    診断用に併記する — 実測で両者は順位を入れ替えないが、Seedance と
+    MiniMax の差は既定側で 34/35 部材、grade を抜くと 15/35 に落ちる
+    （＝両者の差の大半は全体の色調であって部材ごとの仕上げではない）。
+
+    どちらかの平均が真っ黒（総和 0）の部材は `None`（検証不能）。
+
+    ### 正直な限界
+
+    色味は平均が暗いほど条件が悪くなる。8bit で平均 [1,3,2] のような領域の
+    色味は量子化1段で大きく振れる。実測でドリフトと平均輝度の相関は
+    Pearson -0.81 / -0.76（2系列）で、上位を占めるのは暗い部材である。
+    その暗い部材で実際に仕上げが変わっていた（黒いルーバー -> 茶色の木）
+    ことは人間が確認しているが、**数値の大きさそのものは暗部で過大に出る**
+    と考えるべきで、閾値は明部・暗部を混ぜた実測分布から決めるほかない。
+    """
+    truth_arr = _rgb_array(truth_rgb)
+    generated_arr = _rgb_array(generated_rgb)
+    if truth_arr.shape != generated_arr.shape:
+        raise ValueError(
+            f"finish drift needs both frames on the same grid: truth {truth_arr.shape} "
+            f"vs generated {generated_arr.shape}")
+
+    truth_means = instance_region_means(truth_arr, regions)
+    generated_means = instance_region_means(generated_arr, regions)
+    if neutralise_grade:
+        truth_grade = truth_arr.reshape(-1, 3).mean(axis=0)
+        generated_grade = generated_arr.reshape(-1, 3).mean(axis=0)
+        truth_means = {k: v / np.maximum(truth_grade, 1e-9) for k, v in truth_means.items()}
+        generated_means = {k: v / np.maximum(generated_grade, 1e-9)
+                           for k, v in generated_means.items()}
+
+    return {name: _finish_drift(truth_means[name], generated_means[name])
+            for name in regions}
+
+
+def frame_colour_grade(truth_rgb, generated_rgb):
+    """フレーム全体の色調のずれ。部材ごとのドリフトと同じ ×100 スケール。
+
+    生成側が画面全体に暖色/寒色を掛けると、部材ごとのドリフトは全員が同じ
+    向きに動く。その共通成分の大きさをここで別に出しておくと、ドリフト
+    失敗が並んだときに「1つの原因が35回報告されている」のか「本当に個々の
+    仕上げが変わった」のかを読み手が判断できる。判定には使わない。
+    """
+    truth_arr = _rgb_array(truth_rgb)
+    generated_arr = _rgb_array(generated_rgb)
+    return _finish_drift(truth_arr.reshape(-1, 3).mean(axis=0),
+                         generated_arr.reshape(-1, 3).mean(axis=0))
