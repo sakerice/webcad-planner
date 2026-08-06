@@ -420,6 +420,65 @@ async function runDeterminismProbe(spec, assertFrameSize) {
   return times.length;
 }
 
+// frame 0 だけ家具が明るく写っていた。実測 (T96-ldk-overhead-descend):
+// frame0 の平均輝度 150.2 に対し frame1 以降は 145.0。ずれた画素は 13.3% で、
+// 壁でも床でもなく**家具の上に集中**し、frame0 側が明るい (117.0 -> 85.4)。
+// 落ちる影ではなく、家具に乗る接触影/AO が1枚目に間に合っていない。通常の
+// フレーム間変化は 3.09 なので一桁違う。
+//
+// pendingModelLoads が空になっても終わりではない。GLB のロード完了後にシーンの
+// 再構築が非同期で走り、それが済むまで絵は変わり続ける。実測でこう切り分けた:
+//   * 姿勢を変えずに1枚捨て描き        -> 28.76 のまま(1ビットも動かない)
+//   * frame 0 と同じ姿勢で1枚捨て描き  -> 24.19 (効くが足りない)
+//   * ロード完了後に1秒待ってから描画  -> 1枚目から 144.98 (完全に一致)
+// つまり必要なのは「描画回数」ではなく「再構築が終わるまで待つこと」。
+// ただし固定待ちは環境が変われば足りなくなる。ここでは frame 0 の姿勢に
+// 据えたまま、**連続する2枚が一致するまで**描き続けて安定を確認する。
+// 一致を見ているので、速い環境では即座に抜け、遅い環境では必要なだけ待つ。
+const FIRST_FRAME_MAX_SETTLE_RENDERS = 40;
+const FIRST_FRAME_STABLE_EPSILON = 0.05; // 平均輝度(0-255)の差。同一フレームなら 0。
+async function frameMeanLuminance() {
+  // 撮影本体と同じ経路 (captureGuide('base')) を通す。captureBase は同じ絵を
+  // 返す別入口だが、2つ使うと「安定を見た絵」と「実際に保存する絵」が別経路に
+  // なる。同じものを見て安定を判定する。
+  const dataUrl = await window.__PV_CAPTURE__.captureGuide('base');
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onerror = () => reject(new Error('settle: could not decode the captured frame'));
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = 160; c.height = 90;
+      const cx = c.getContext('2d');
+      cx.drawImage(img, 0, 0, c.width, c.height);
+      const d = cx.getImageData(0, 0, c.width, c.height).data;
+      let s = 0;
+      for (let i = 0; i < d.length; i += 4) s += (d[i] + d[i + 1] + d[i + 2]) / 3;
+      resolve(s / (d.length / 4));
+    };
+    img.src = dataUrl;
+  });
+}
+async function settleFirstFrame(spec, t0) {
+  const warm = sampleCameraPath(spec.camera.keys, t0);
+  window.__PV_CAPTURE__.setPose(warm.pos, warm.target, warm.fov);
+  let prev = null;
+  for (let i = 0; i < FIRST_FRAME_MAX_SETTLE_RENDERS; i++) {
+    window.__PV_CAPTURE__.renderNow();
+    await settle();
+    const now = await frameMeanLuminance();
+    if (prev !== null && Math.abs(now - prev) < FIRST_FRAME_STABLE_EPSILON) {
+      log(`first frame settled after ${i + 1} render(s)`);
+      return i + 1;
+    }
+    prev = now;
+  }
+  throw new Error(
+    `shot "${spec.id}": the scene never stopped changing at the first camera pose ` +
+    `(${FIRST_FRAME_MAX_SETTLE_RENDERS} renders, mean luminance still moving by ` +
+    `>= ${FIRST_FRAME_STABLE_EPSILON}). Capturing now would put an unsettled frame ` +
+    `first, which is exactly the frame the generator anchors on.`);
+}
+
 async function runSequence(spec, assertFrameSize) {
   const times = frameTimes(spec);
   const guideAt = new Set(guideFrameIndices(spec));
@@ -432,6 +491,7 @@ async function runSequence(spec, assertFrameSize) {
     throw new Error('shot spec: guides is empty; there is nothing to capture');
   }
   const assertLegendStable = createLegendGuard();
+  await settleFirstFrame(spec, times[0]);
   for (let i = 0; i < times.length; i++) {
     const kinds = [];
     if (wantsBase) kinds.push('base');

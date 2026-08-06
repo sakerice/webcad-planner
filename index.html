@@ -19785,7 +19785,13 @@ updateMobileShiftButton();
       // 直近の instance / edge キャプチャで得た legend。まだ一度も撮っていなければ null。
       getInstanceLegend:function(){ return lastInstanceLegend; }
     };
-    import('/pv/tools/truth-render/capture-runner.mjs').catch(function(e){
+    // 毎回モジュールを取り直す。ここは ?pvCapture=1 のときだけ通る撮影専用の
+    // 経路で、ランナーは開発中に何度も書き換わる。実際、ランナーを直した直後の
+    // 撮影2回がどちらもブラウザのキャッシュ(304)で古い実装を読み込み、出力が
+    // 1ビットも変わらないまま「修正が効かなかった」と誤読しかけた。
+    // 撮影は決定論的なので、古い実装で撮り直しても結果が同一になり、
+    // キャッシュ事故と「修正が無効」が見分けられない。
+    import('/pv/tools/truth-render/capture-runner.mjs?v='+Date.now()).catch(function(e){
       console.error('[pv-capture] runner failed to load',e);
     });
   }catch(e){ console.error('[pv-capture] hook init failed',e); }

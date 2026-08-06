@@ -11,6 +11,35 @@ globalThis.requestAnimationFrame = cb => setTimeout(cb, 0);
 globalThis.location = { search: '' };
 globalThis.window = globalThis;
 
+// 1枚目の安定待ち (settleFirstFrame) はキャプチャ結果の平均輝度を読む。ここは
+// three の実描画ではなく「手順」を見る場なので、Image と canvas を最小限だけ
+// 用意し、輝度は data URL ごとに決まる固定値として返す。既定では同じ絵が
+// 返る = 即座に安定する。安定しない状況を作りたいテストは luminanceSeq を
+// 差し替える。
+globalThis.__testLuminance = { seq: null, calls: 0 };
+globalThis.Image = class {
+  set src(v) {
+    this._src = v;
+    setTimeout(() => this.onload && this.onload(), 0);
+  }
+};
+globalThis.document = {
+  createElement: () => ({
+    width: 0, height: 0,
+    getContext: () => ({
+      drawImage: () => {},
+      getImageData: (x, y, w, h) => {
+        const L = globalThis.__testLuminance;
+        const seq = L.seq;
+        const v = seq ? seq[Math.min(L.calls++, seq.length - 1)] : 128;
+        const d = new Uint8ClampedArray(w * h * 4);
+        for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+        return { data: d };
+      },
+    }),
+  }),
+};
+
 const { main, ensureModelsLoaded } = await import('../capture-runner.mjs');
 
 function be32(n) {
@@ -125,7 +154,7 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
       state.orbit.enableDamping = false;
       state.orbit.autoRotate = false;
     },
-    renderNow: () => {},
+    renderNow: () => { events.push('render'); },
     captureGuide: kind => {
       captured.push(kind);
       events.push(`guide:${kind}`);
@@ -183,6 +212,7 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
     const entry = { url: String(url), method: init.method || 'GET',
                     headers: init.headers || {}, body: init.body };
     requests.push(entry);
+    if (entry.url.endsWith('/frame')) events.push('post:frame');
     if (entry.url.includes('/specs/')) return { ok: true, json: async () => shotSpec };
     if (entry.url.endsWith('/done')) {
       if (doneOk) return { ok: true };
@@ -563,4 +593,37 @@ test('プローブの1枚目と3枚目が同一姿勢でなければ落ちる', 
     }),
   });
   await assert.rejects(main(), /first and last camera keys must be the same pose/);
+});
+
+// frame 0 だけ影が乗り切らず明るく出ていた (実測 T96-ldk-overhead-descend:
+// frame0 の平均輝度 150.2 / frame1 以降 145.0、画素の 18.6% が 10 以上ずれる。
+// 通常のフレーム間変化は 3.09 / 3.3%)。シャドウマップは needsUpdate を立てた
+// 次の描画で埋まるので、1枚目の前に捨て描きが要る。frame 0 は生成側が見た目の
+// 基準に使う最初の絵なので、ここが素通りすると成果物に直接効く。
+test('1枚目を保存する前に、その姿勢のまま絵が安定するまで描き直す', async () => {
+  const h = harness();
+  await main();
+  const firstPost = h.events.indexOf('post:frame');
+  assert.ok(firstPost >= 0, 'no frame was ever posted');
+  const rendersBefore = h.events.slice(0, firstPost).filter(e => e === 'render').length;
+  assert.ok(rendersBefore >= 2,
+    'expected the settle renders plus the frame\'s own render before the first saved frame, got ' +
+    rendersBefore + ' (events: ' + h.events.slice(0, firstPost + 1).join(', ') + ')');
+  // 別姿勢での描き直しは効かない (実測: カメラを動かさない捨て描きでは frame0->1 の
+  // 差が 28.76 のまま1ビットも動かなかった)。安定待ちは frame 0 の姿勢で行う。
+  assert.ok(h.poses.length >= 2, 'expected at least a settle pose and the frame-0 pose');
+  assert.deepEqual(h.poses[0], h.poses[1],
+    'the settle must run at frame 0\'s pose, not wherever the camera happened to be');
+});
+
+test('絵が安定しないまま上限に達したら、黙って撮らずに落ちる', async () => {
+  // 毎回違う輝度を返す = 永遠に安定しない。以前の実装は「何枚か描いたら撮る」
+  // だったので、この状況でも未確定のフレームを1枚目として保存してしまう。
+  globalThis.__testLuminance = { seq: Array.from({ length: 200 }, (_, i) => i % 199), calls: 0 };
+  try {
+    harness();
+    await assert.rejects(() => main(), /never stopped changing at the first camera pose/);
+  } finally {
+    globalThis.__testLuminance = { seq: null, calls: 0 };
+  }
 });

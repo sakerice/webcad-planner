@@ -250,3 +250,39 @@ test('determinism プローブの spec は mode で明示されている', () =>
   const s = JSON.parse(readFileSync(join(specsDir, 'probe-determinism.json'), 'utf8'));
   assert.equal(shotMode(validateShotSpec(s)), 'determinism-probe');
 });
+
+// 真上から見下ろすカットで実際に起きた事故: 中間キーの pos と target が x/z で
+// 完全一致していたため、three の lookAt が up=(0,1,0) と平行になりロールが
+// 決まらず、frame 60→61 で絵が180度回転した(フレーム間差分 2.97 -> 174.7)。
+// spec の段階で止める。
+function overheadSpec(keys) {
+  return {
+    id: 'roll-flip-probe', plan: 'assets/default_plan.json', view: '3d-int', floor: 2,
+    fps: 24, duration: 4, resolution: { width: 1280, height: 720 },
+    camera: { keys }, guides: ['base'],
+  };
+}
+
+test('真下ちょうどを向くカメラキーは弾かれる', () => {
+  const spec = overheadSpec([
+    { t: 0, pos: [3.64, 11, 2.06], target: [3.64, 3.4, 2.06], fov: 50 },
+    { t: 4, pos: [3.64, 10, 2.06], target: [3.64, 3.4, 2.06], fov: 50 },
+  ]);
+  assert.throws(() => validateShotSpec(spec), /looks straight down/);
+});
+
+test('target の反対側へ抜ける経路は弾かれる(途中で真下を通るため)', () => {
+  const spec = overheadSpec([
+    { t: 0, pos: [3.90, 11, 2.30], target: [3.64, 3.4, 2.06], fov: 50 },
+    { t: 4, pos: [3.40, 9, 1.85], target: [3.64, 3.4, 2.06], fov: 50 },
+  ]);
+  assert.throws(() => validateShotSpec(spec), /opposite sides/);
+});
+
+test('同じ側に留まったまま真下へ寄っていく俯瞰は通る', () => {
+  const spec = overheadSpec([
+    { t: 0, pos: [4.30, 11, 2.75], target: [3.64, 3.4, 2.06], fov: 50 },
+    { t: 4, pos: [3.85, 9, 2.30], target: [3.64, 3.4, 2.06], fov: 50 },
+  ]);
+  assert.equal(validateShotSpec(spec), spec);
+});

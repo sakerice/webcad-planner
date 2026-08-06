@@ -77,6 +77,40 @@ export function daylightRequest(spec) {
   return { sunScale: d.sunScale === undefined ? 1 : d.sunScale };
 }
 
+// 俯瞰ショットの「ロール反転」を spec の段階で止める。
+//
+// three の lookAt は up=(0,1,0) を使って姿勢を決めるので、視線が真下
+// (0,-1,0) に一致すると up と平行になり、ロールが決まらなくなる。実測:
+// T96 の中間キーが pos と target で x/z が完全一致していたため、frame 60→61
+// で絵が180度回転した(フレーム間差分 2.97 が 174.7 に跳ねる)。
+//
+// 単に「真下ちょうどを禁止」では足りない。キーが真下を挟んで反対側へ抜けると、
+// 補間の途中で必ず真下を通る。そのため水平オフセットの向きが経路上で反転して
+// いないことまで見る。閾値の 0.05m は、床から 5m 上のカメラなら約0.6度に相当し、
+// 意図した俯瞰の構図を制約しない一方で、真下ちょうどは確実に弾く。
+const MIN_HORIZONTAL_OFFSET_M = 0.05;
+function validateNoRollFlip(keys) {
+  const h = keys.map(k => ({ x: k.pos[0] - k.target[0], z: k.pos[2] - k.target[2] }));
+  h.forEach((v, i) => {
+    const len = Math.hypot(v.x, v.z);
+    if (len < MIN_HORIZONTAL_OFFSET_M) {
+      throw new Error(
+        `shot spec: camera.keys[${i}] looks straight down (horizontal offset ${len.toFixed(3)}m ` +
+        `< ${MIN_HORIZONTAL_OFFSET_M}m). three's lookAt has no defined roll there and the image ` +
+        `flips. Offset pos from target horizontally.`);
+    }
+  });
+  for (let i = 1; i < h.length; i++) {
+    const dot = h[i - 1].x * h[i].x + h[i - 1].z * h[i].z;
+    if (dot <= 0) {
+      throw new Error(
+        `shot spec: camera.keys[${i - 1}] and camera.keys[${i}] sit on opposite sides of the ` +
+        `target horizontally, so the path passes through straight-down and the image rolls 180°. ` +
+        `Keep every key on the same side of the target.`);
+    }
+  }
+}
+
 export function validateShotSpec(spec) {
   if (!spec || typeof spec !== 'object') throw new Error('shot spec: must be an object');
   ['id', 'plan', 'view', 'fps', 'duration', 'resolution', 'camera', 'guides', 'floor'].forEach(f => req(spec, f));
@@ -121,6 +155,7 @@ export function validateShotSpec(spec) {
   if (Math.abs(keys[keys.length - 1].t - spec.duration) > 1e-9) {
     throw new Error('shot spec: last camera key time must equal duration');
   }
+  validateNoRollFlip(keys);
   if (spec.guideStride !== undefined && (!Number.isInteger(spec.guideStride) || spec.guideStride < 1)) {
     throw new Error(
       `shot spec: guideStride must be an integer >= 1, got ${JSON.stringify(spec.guideStride)}`);
