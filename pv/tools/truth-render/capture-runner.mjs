@@ -369,18 +369,53 @@ function createLegendGuard() {
   };
 }
 
-async function captureAt(spec, t, index, kinds, assertFrameSize, assertLegendStable) {
+// 姿勢が変わったのに、書き出したフレームが直前のフレームとバイト単位で完全に
+// 一致することがある。実測 (T94-exterior, 96フレーム): frame 24 / 48 / 62 の3枚が
+// 直前と同一の PNG で、sha256 まで一致した。カメラはその間も動いており
+// (frame 23->24 で pos が 19.083 -> 19.000)、絵が変わらないことはあり得ない。
+// つまり描画が反映される前のバッファを読み出している。
+//
+// 起きる頻度は 3/96 と低いが、これは黙って通ってはいけない種類の不具合である。
+// 参照動画に静止した区間があると、生成側はそこで追従をやめて即興を始める
+// (末尾5秒が静止画だった前回がまさにそれ)。
+// 「姿勢が変わったなら絵も変わらねばならない」は撮影中にその場で検査できるので、
+// 一致したら描き直して撮り直し、それでも直らなければ黙って保存せず落とす。
+const STALE_FRAME_MAX_RETRIES = 3;
+function samePose(a, b) {
+  if (!a || !b) return false;
+  return a.fov === b.fov &&
+    a.pos.every((v, i) => v === b.pos[i]) &&
+    a.target.every((v, i) => v === b.target[i]);
+}
+async function captureAt(spec, t, index, kinds, assertFrameSize, assertLegendStable, prev) {
   const pose = sampleCameraPath(spec.camera.keys, t);
   window.__PV_CAPTURE__.setPose(pose.pos, pose.target, pose.fov);
   window.__PV_CAPTURE__.renderNow();
   await settle();
   for (const kind of kinds) {
-    const dataUrl = await window.__PV_CAPTURE__.captureGuide(kind);
+    let dataUrl = await window.__PV_CAPTURE__.captureGuide(kind);
+    if (kind === 'base' && prev && prev.dataUrl && !samePose(pose, prev.pose)) {
+      let tries = 0;
+      while (dataUrl === prev.dataUrl) {
+        if (++tries > STALE_FRAME_MAX_RETRIES) {
+          throw new Error(
+            `shot "${spec.id}": frame ${index} came back byte-identical to frame ${index - 1} ` +
+            `even though the camera moved (pos ${prev.pose.pos.join(',')} -> ${pose.pos.join(',')}), ` +
+            `and ${STALE_FRAME_MAX_RETRIES} re-renders did not change it. The capture is reading ` +
+            `the canvas before the new frame is in it. Refusing to save a duplicate frame.`);
+        }
+        window.__PV_CAPTURE__.renderNow();
+        await settle();
+        dataUrl = await window.__PV_CAPTURE__.captureGuide(kind);
+      }
+      if (tries) log(`frame ${index}: base was stale, re-rendered ${tries} time(s)`);
+    }
     assertFrameSize(kind, index, dataUrl);
     if (kind === 'instance' || kind === 'edge') {
       assertLegendStable(index, window.__PV_CAPTURE__.getInstanceLegend());
     }
     await postFrame(spec.id, kind, index, dataUrl);
+    if (kind === 'base' && prev) { prev.dataUrl = dataUrl; prev.pose = pose; }
   }
 }
 
@@ -491,12 +526,13 @@ async function runSequence(spec, assertFrameSize) {
     throw new Error('shot spec: guides is empty; there is nothing to capture');
   }
   const assertLegendStable = createLegendGuard();
+  const prevBase = { dataUrl: null, pose: null };
   await settleFirstFrame(spec, times[0]);
   for (let i = 0; i < times.length; i++) {
     const kinds = [];
     if (wantsBase) kinds.push('base');
     if (guideAt.has(i)) kinds.push(...extraGuides);
-    if (kinds.length) await captureAt(spec, times[i], i, kinds, assertFrameSize, assertLegendStable);
+    if (kinds.length) await captureAt(spec, times[i], i, kinds, assertFrameSize, assertLegendStable, prevBase);
     if (i % 10 === 0) log(`frame ${i + 1}/${times.length}`);
   }
   if (spec.guides.includes('instance')) await postInstanceLegend(spec);

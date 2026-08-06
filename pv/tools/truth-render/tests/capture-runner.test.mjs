@@ -46,10 +46,15 @@ function be32(n) {
   return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
 }
 
-function pngDataUrl(width = 1280, height = 720) {
+// nonce は IHDR の後ろに置く。assertFrameSize が読むのは先頭 24 バイトだけなので
+// 寸法の検査には影響せず、「カメラが動けばフレームのバイト列も変わる」という
+// 実物の性質だけを模せる。nonce を同じ値に固定すれば「動いたのに絵が変わらない」
+// 実際の不具合を再現できる。
+function pngDataUrl(width = 1280, height = 720, nonce = 0) {
   const bytes = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
     ...be32(13), 0x49, 0x48, 0x44, 0x52, ...be32(width), ...be32(height)];
-  while (bytes.length < 48) bytes.push(0);
+  while (bytes.length < 44) bytes.push(0);
+  bytes.push(...be32(nonce));
   return 'data:image/png;base64,' + Buffer.from(Uint8Array.from(bytes)).toString('base64');
 }
 
@@ -115,6 +120,9 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                    // 太陽が点かなかった / 天井オクルーダーが0枚だった等を模す。
                    daylightState = null,
                    // setInteriorDaylight を持たない古い index.html を模す。
+                   // true にすると captureGuide が毎回同じバイト列を返す =
+                   // 「カメラは動いたのに絵が変わらない」実際の不具合の再現。
+                   freezeFrames = false,
                    omitDaylightHook = false,
                    // 有効化した後に、非同期の再構築(GLB完了 -> scheduleGltfRebuild3D)
                    // が天井のオクルーダー化を巻き戻した状況を模す。この時点以降の
@@ -132,6 +140,7 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
   let instanceCaptureCount = 0;
   let currentLegend = legend;
   let pendingModelCalls = 0;
+  let frameNonce = 0;
 
   window.__PV_CAPTURE__ = {
     ensure3D: () => state.view.startsWith('3d'),
@@ -163,7 +172,7 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
         currentLegend = legendAt ? legendAt(instanceCaptureCount) : legend;
         instanceCaptureCount++;
       }
-      return Promise.resolve(pngDataUrl());
+      return Promise.resolve(pngDataUrl(1280, 720, freezeFrames ? 0 : ++frameNonce));
     },
     getInstanceLegend: () => currentLegend,
   };
@@ -626,4 +635,28 @@ test('絵が安定しないまま上限に達したら、黙って撮らずに�
   } finally {
     globalThis.__testLuminance = { seq: null, calls: 0 };
   }
+});
+
+// 実測 (T94-exterior, 96フレーム): frame 24 / 48 / 62 の3枚が直前のフレームと
+// sha256 まで一致した。カメラはその間も動いている (frame 23->24 で pos が
+// 19.083 -> 19.000)。描画が反映される前のバッファを読み出している。
+// 参照動画に静止区間があると生成側はそこで追従をやめて即興を始めるので
+// (末尾5秒が静止画だった前回がまさにそれ)、黙って保存させない。
+test('姿勢が変わったのに絵が変わらないフレームは、撮り直しても直らなければ落とす', async () => {
+  harness({ freezeFrames: true });
+  await assert.rejects(() => main(), /byte-identical to frame/);
+});
+
+test('固定カメラのショットでは同一フレームが続いても落とさない', async () => {
+  // T92 のような意図的な固定カメラは、絵が同じなのが正しい。姿勢が変わって
+  // いないので検査対象外でなければならない。
+  const still = spec({ guides: ['base'], duration: 1, fps: 2 });
+  still.camera.keys = [
+    { t: 0, pos: [0, 1, 0], target: [0, 1, -1], fov: 60 },
+    { t: 1, pos: [0, 1, 0], target: [0, 1, -1], fov: 60 },
+  ];
+  const h = harness({ shotSpec: still, freezeFrames: true });
+  await main();
+  const frames = h.requests.filter(r => r.url.endsWith('/frame'));
+  assert.equal(frames.length, 2, 'both frames of the still shot should be saved');
 });

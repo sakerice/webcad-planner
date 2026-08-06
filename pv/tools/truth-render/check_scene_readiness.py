@@ -113,6 +113,25 @@ GLB_FURNITURE_TYPE_RE = re.compile(r'^(fmp-|im0261-)')
 BACKGROUND_RGB = (255, 255, 255)  # index.html captureInstance3DData(): sc3.background = 0xffffff
 FURNITURE_MASS_THRESHOLD = 0.05  # 根拠はモジュール docstring 参照(ノイズ床の約36倍上、実測家具面積の約1/5)。
 EARLY_WINDOW_FRACTION = 0.2  # 撮影全体の先頭何割を「開始時点」とみなすか。根拠はモジュール docstring 参照。
+# 外観ショット用。家具は外皮の内側なので絶対面積では見られない(下の分岐参照)。
+# 早期の面積が全体のピークのこの割合以上あれば「開始時点で既に居た」とみなす。
+# 0.5 は、途中でロードが完了した場合(早期がほぼ0で全体だけ立ち上がる)と、
+# カメラが寄って窓越しの面積が自然に増える場合とを分ける水準。
+EXTERIOR_EARLY_RATIO = 0.5
+# 縁のアンチエイリアスだけで立つ面積の上限(モジュール docstring の実測値より)。
+# これを下回るなら「何も写っていない」であって、判定材料にならない。
+NOISE_FLOOR = 0.0014
+
+
+def shot_view(shot_dir):
+    """撮影時に保存された shot.json から view を読む。無ければ None。"""
+    p = Path(shot_dir) / 'shot.json'
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text()).get('view')
+    except (ValueError, OSError):
+        return None
 
 
 def furniture_entries(legend):
@@ -177,19 +196,51 @@ def check_scene_readiness(shot_dir, mass_threshold=FURNITURE_MASS_THRESHOLD,
     early_peak = max(early_fractions)
     run_peak = max(fractions)
 
-    if early_peak < mass_threshold:
-        return False, (
-            f'scene readiness FAIL: GLB furniture pixel coverage reaches only {early_peak:.1%} of '
-            f'frame area across the first {early_count}/{len(frames)} captured instance frame(s) '
-            f'(threshold {mass_threshold:.0%}), even though the legend declares {len(furniture)} '
-            f'GLB furniture instance(s) for this run (run-wide peak coverage: {run_peak:.1%}). This '
-            f'matches the signature of furniture GLBs that had not finished loading when capture began.')
+    # まず絶対面積で見る。これを満たすなら視点に関係なく「開始時点で居た」と
+    # 言い切れるので、外観ショットでも強い方の判定をそのまま使う(内観に相当する
+    # 画角を 3d-ext で撮ることがあるため、view で分岐すると弱い判定に落ちる)。
+    if early_peak >= mass_threshold:
+        return True, (
+            f'scene readiness OK: GLB furniture pixel coverage reaches {early_peak:.1%} of frame area '
+            f'within the first {early_count}/{len(frames)} captured instance frame(s) (threshold '
+            f'{mass_threshold:.0%}), consistent with {len(furniture)} declared GLB furniture instance(s) '
+            f'having finished loading before capture began (run-wide peak coverage: {run_peak:.1%}).')
 
-    return True, (
-        f'scene readiness OK: GLB furniture pixel coverage reaches {early_peak:.1%} of frame area '
-        f'within the first {early_count}/{len(frames)} captured instance frame(s) (threshold '
-        f'{mass_threshold:.0%}), consistent with {len(furniture)} declared GLB furniture instance(s) '
-        f'having finished loading before capture began (run-wide peak coverage: {run_peak:.1%}).')
+    # 面積が閾値に届かない。外観なら家具は外皮の内側にあり、ガラス越しにしか
+    # 写らないので、これは正常な状態でも起きる。実測: T94-exterior は家具が
+    # ロード済みでも早期 0.56% / 全体 0.70%。絶対面積の前提がここでは成り立たない。
+    #
+    # ただし問う内容は変わらない —「撮影開始時点でロードが終わっていたか」。
+    # それは **早期と全体の比** で答えられる: 途中でロードが完了したなら、
+    # 早期はほぼ0で全体だけが立ち上がる。
+    if shot_view(shot_dir) == '3d-ext':
+        if run_peak <= NOISE_FLOOR:
+            return True, (
+                f'scene readiness UNVERIFIABLE: this is an exterior shot and GLB furniture covers '
+                f'at most {run_peak:.2%} of the frame across the whole run — at or below the '
+                f'measurement noise floor ({NOISE_FLOOR:.2%}). Nothing is visible through the '
+                f'glazing, so this check cannot tell "loaded but hidden" from "never loaded". '
+                f'Not treated as a failure, and not treated as evidence either.')
+        ratio = early_peak / run_peak
+        if ratio < EXTERIOR_EARLY_RATIO:
+            return False, (
+                f'scene readiness FAIL: exterior shot, GLB furniture covers {early_peak:.2%} of the '
+                f'frame early but {run_peak:.2%} at its run-wide peak (ratio {ratio:.2f} < '
+                f'{EXTERIOR_EARLY_RATIO}). Furniture appearing only later is the signature of GLBs '
+                f'that had not finished loading when capture began.')
+        return True, (
+            f'scene readiness OK: exterior shot, GLB furniture covers {early_peak:.2%} of the frame '
+            f'early against a run-wide peak of {run_peak:.2%} (ratio {ratio:.2f} >= '
+            f'{EXTERIOR_EARLY_RATIO}), so the {len(furniture)} declared GLB furniture instance(s) '
+            f'were already loaded when capture began. The interior area threshold does not apply '
+            f'here — furniture sits behind the envelope.')
+
+    return False, (
+        f'scene readiness FAIL: GLB furniture pixel coverage reaches only {early_peak:.1%} of '
+        f'frame area across the first {early_count}/{len(frames)} captured instance frame(s) '
+        f'(threshold {mass_threshold:.0%}), even though the legend declares {len(furniture)} '
+        f'GLB furniture instance(s) for this run (run-wide peak coverage: {run_peak:.1%}). This '
+        f'matches the signature of furniture GLBs that had not finished loading when capture began.')
 
 
 def main():

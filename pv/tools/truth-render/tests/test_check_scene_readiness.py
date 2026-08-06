@@ -328,3 +328,72 @@ class CheckSceneReadinessTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ExteriorShotTest(unittest.TestCase):
+    """外観ショットでは家具は外皮の内側にあり、ガラス越しにしか写らない。
+
+    面積5%は内観で較正した閾値なので、そのまま当てると正しいレンダを落とす。
+    実測 (T94-exterior): 家具がロード済みでも早期 0.56% / 全体 0.70% で、
+    判定器はこれを FAIL にし、正しい撮影を弾いていた。
+    """
+
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        (self.root / 'instance-legend.json').write_text(
+            json.dumps(make_legend(FURNITURE_COLORS[:1])))
+        self.inst = self.root / 'instance'
+        self.inst.mkdir()
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def write_shot(self, view):
+        (self.root / 'shot.json').write_text(json.dumps({'id': 'T-test', 'view': view}))
+
+    def write_run(self, furniture_px_per_frame):
+        for i, n in enumerate(furniture_px_per_frame):
+            make_frame(self.inst / f'{i:04d}.png',
+                       [(WALL_COLOR, 40), (FURNITURE_COLORS[0], n)])
+
+    # 400px 中 2px = 0.5%, 3px = 0.75% -- 実測の T94 と同じ桁で、5% を大きく下回る。
+    def test_exterior_with_furniture_present_from_the_start_passes(self):
+        self.write_shot('3d-ext')
+        self.write_run([2, 2, 3, 3, 3])
+        ok, msg = check_scene_readiness(self.root)
+        self.assertTrue(ok, msg)
+        self.assertIn('exterior shot', msg)
+
+    def test_exterior_with_furniture_arriving_late_still_fails(self):
+        # ここを見逃したら外観分岐は何も守っていない: 早期ほぼ0 -> 終盤で立ち上がる、
+        # というのがまさに「撮影開始に間に合わなかった」の署名。
+        self.write_shot('3d-ext')
+        self.write_run([0, 0, 0, 0, 12])
+        ok, msg = check_scene_readiness(self.root)
+        self.assertFalse(ok, msg)
+        self.assertIn('had not finished loading', msg)
+
+    def test_exterior_with_nothing_visible_is_reported_as_unverifiable(self):
+        self.write_shot('3d-ext')
+        self.write_run([0, 0, 0, 0, 0])
+        ok, msg = check_scene_readiness(self.root)
+        self.assertTrue(ok, msg)
+        self.assertIn('UNVERIFIABLE', msg)
+
+    def test_same_pixel_counts_would_fail_an_interior_shot(self):
+        # 外観分岐が「面積が小さい run を無条件に通す」ものになっていないことの確認。
+        # 同じフレーム列でも view が 3d-int なら従来どおり落ちる。
+        self.write_shot('3d-int')
+        self.write_run([2, 2, 3, 3, 3])
+        ok, msg = check_scene_readiness(self.root)
+        self.assertFalse(ok, msg)
+        self.assertIn(f'threshold {FURNITURE_MASS_THRESHOLD:.0%}', msg)
+
+    def test_exterior_above_the_area_threshold_takes_the_strong_verdict(self):
+        # 3d-ext で撮った内観相当の画角 (T93-ldk-eye がまさにこれ) が、
+        # view だけで弱い判定に落ちないこと。
+        self.write_shot('3d-ext')
+        self.write_run([120, 120, 130, 130, 130])
+        ok, msg = check_scene_readiness(self.root)
+        self.assertTrue(ok, msg)
+        self.assertNotIn('exterior shot', msg)
