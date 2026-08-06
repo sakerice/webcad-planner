@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateShotSpec, frameTimes, guideFrameIndices, shotMode, GUIDE_KINDS, MODES } from '../shot-spec.mjs';
+import { validateShotSpec, frameTimes, guideFrameIndices, shotMode, daylightRequest, GUIDE_KINDS, MODES } from '../shot-spec.mjs';
 
 const valid = () => ({
   id: 'S08-ldk-push',
@@ -162,6 +162,63 @@ test('GUIDE_KINDS は6種', () => {
   assert.deepEqual(GUIDE_KINDS, ['base', 'segmentation', 'instance', 'edge', 'depth', 'normal']);
 });
 
+// ── 内観採光 (daylight) ────────────────────────────────────────────
+// 既定は「要求なし」。書いていない spec の挙動が変わってはいけない。
+test('daylight を書かない spec は採光を要求しない', () => {
+  const s = valid();
+  assert.equal(validateShotSpec(s), s);
+  assert.equal(daylightRequest(s), null);
+});
+
+test('daylight.interiorSun:false も採光を要求しない', () => {
+  const s = valid(); s.daylight = { interiorSun: false };
+  validateShotSpec(s);
+  assert.equal(daylightRequest(s), null);
+});
+
+test('daylight.interiorSun:true は sunScale 既定 1 で要求になる', () => {
+  const s = valid(); s.daylight = { interiorSun: true };
+  validateShotSpec(s);
+  assert.deepEqual(daylightRequest(s), { sunScale: 1 });
+});
+
+test('daylight.sunScale はそのまま渡る', () => {
+  const s = valid(); s.daylight = { interiorSun: true, sunScale: 1.4 };
+  validateShotSpec(s);
+  assert.deepEqual(daylightRequest(s), { sunScale: 1.4 });
+});
+
+test('daylight.interiorSun が boolean でなければ例外', () => {
+  for (const bad of ['true', 1, null, undefined]) {
+    const s = valid(); s.daylight = { interiorSun: bad };
+    assert.throws(() => validateShotSpec(s), /daylight\.interiorSun must be a boolean/,
+      `interiorSun=${JSON.stringify(bad)} should be rejected`);
+  }
+});
+
+test('daylight.sunScale は正の数でなければ例外', () => {
+  for (const bad of [0, -1, '1', NaN, Infinity]) {
+    const s = valid(); s.daylight = { interiorSun: true, sunScale: bad };
+    assert.throws(() => validateShotSpec(s), /daylight\.sunScale must be a positive number/,
+      `sunScale=${JSON.stringify(bad)} should be rejected`);
+  }
+});
+
+test('daylight がオブジェクトでなければ例外', () => {
+  for (const bad of [true, 'on', [], 3]) {
+    const s = valid(); s.daylight = bad;
+    assert.throws(() => validateShotSpec(s), /daylight must be an object/,
+      `daylight=${JSON.stringify(bad)} should be rejected`);
+  }
+});
+
+test('外観ショットに interiorSun:true と書いたら例外(何も起きない設定を黙って許さない)', () => {
+  const s = valid();
+  s.view = '3d-ext';
+  s.daylight = { interiorSun: true };
+  assert.throws(() => validateShotSpec(s), /interior view only/);
+});
+
 // 同梱している spec ファイルそのものが検証を通ること。バリデータを厳しくした
 // のに実ファイルを直し忘れる、という取り違えをここで止める。
 import { readFileSync, readdirSync } from 'node:fs';
@@ -176,6 +233,14 @@ for (const name of readdirSync(specsDir).filter(f => f.endsWith('.json'))) {
     assert.equal(validateShotSpec(s), s);
   });
 }
+
+// 内観の俯瞰ショットは「窓から入る日射」を撮るためのものなので、spec が
+// 採光を要求していなければ実装が入っていても効かない。ファイル側の取り違えを止める。
+test('T92-ldk-overhead は内観採光を要求している', () => {
+  const s = validateShotSpec(JSON.parse(readFileSync(join(specsDir, 'T92-ldk-overhead.json'), 'utf8')));
+  assert.equal(s.view, '3d-int');
+  assert.deepEqual(daylightRequest(s), { sunScale: 1 });
+});
 
 test('determinism プローブの spec は mode で明示されている', () => {
   const s = JSON.parse(readFileSync(join(specsDir, 'probe-determinism.json'), 'utf8'));

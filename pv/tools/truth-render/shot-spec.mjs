@@ -44,6 +44,39 @@ function isVec3(v) {
   return Array.isArray(v) && v.length === 3 && v.every(n => typeof n === 'number' && Number.isFinite(n));
 }
 
+// 内観採光。省略時は従来どおり内観3Dの太陽は消灯のままで、キャプチャは
+// これまでと1バイトも変わらない。明示的に interiorSun:true と書いたショット
+// だけが、天井のシャドウオクルーダーと実光源の太陽を得る。
+function validateDaylight(spec) {
+  const d = spec.daylight;
+  if (d === undefined) return;
+  if (!d || typeof d !== 'object' || Array.isArray(d)) {
+    throw new Error(`shot spec: daylight must be an object, got ${JSON.stringify(d)}`);
+  }
+  if (typeof d.interiorSun !== 'boolean') {
+    throw new Error(
+      `shot spec: daylight.interiorSun must be a boolean, got ${JSON.stringify(d.interiorSun)}`);
+  }
+  if (d.sunScale !== undefined &&
+      (typeof d.sunScale !== 'number' || !Number.isFinite(d.sunScale) || d.sunScale <= 0)) {
+    throw new Error(
+      `shot spec: daylight.sunScale must be a positive number, got ${JSON.stringify(d.sunScale)}`);
+  }
+  // 外観3Dの太陽は元から点いている。そこへ内観用のスイッチを書いても何も
+  // 起きないので、spec が嘘をつく前に落とす。
+  if (d.interiorSun && spec.view !== '3d-int') {
+    throw new Error(
+      `shot spec: daylight.interiorSun applies to the interior view only, but view is "${spec.view}"`);
+  }
+}
+
+// spec が要求する内観採光。要求が無ければ null。
+export function daylightRequest(spec) {
+  const d = spec && spec.daylight;
+  if (!d || d.interiorSun !== true) return null;
+  return { sunScale: d.sunScale === undefined ? 1 : d.sunScale };
+}
+
 export function validateShotSpec(spec) {
   if (!spec || typeof spec !== 'object') throw new Error('shot spec: must be an object');
   ['id', 'plan', 'view', 'fps', 'duration', 'resolution', 'camera', 'guides', 'floor'].forEach(f => req(spec, f));
@@ -92,6 +125,7 @@ export function validateShotSpec(spec) {
     throw new Error(
       `shot spec: guideStride must be an integer >= 1, got ${JSON.stringify(spec.guideStride)}`);
   }
+  validateDaylight(spec);
   return spec;
 }
 

@@ -82,12 +82,20 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
                    doneOk = true,
                    doneStatus = 422,
                    doneText = 'scene readiness FAIL: only 0/1 (0%) declared GLB furniture instances ever appear',
+                   // setInteriorDaylight が返す「実際に効いた状態」の上書き。
+                   // 太陽が点かなかった / 天井オクルーダーが0枚だった等を模す。
+                   daylightState = null,
+                   // setInteriorDaylight を持たない古い index.html を模す。
+                   omitDaylightHook = false,
                  } = {}) {
   const initial = { view: '2d', floor: 1, orbit: { enableDamping: true, autoRotate: true } };
   const state = { view: initial.view, floor: initial.floor, orbit: { ...initial.orbit } };
   const captured = [];
   const requests = [];
   const poses = [];
+  // 呼び出し順そのものを見るための時系列。採光を入れるのがフレーム取得より
+  // 前でなければ、光の無いフレームが混ざる。
+  const events = [];
   let instanceCaptureCount = 0;
   let currentLegend = legend;
   let pendingModelCalls = 0;
@@ -116,6 +124,7 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
     renderNow: () => {},
     captureGuide: kind => {
       captured.push(kind);
+      events.push(`guide:${kind}`);
       if (failAtGuide && kind === failAtGuide) return Promise.reject(new Error('capture blew up'));
       if (kind === 'instance' || kind === 'edge') {
         currentLegend = legendAt ? legendAt(instanceCaptureCount) : legend;
@@ -125,6 +134,32 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
     },
     getInstanceLegend: () => currentLegend,
   };
+
+  if (!omitDaylightHook) {
+    // 本物と同じく、要求(cfg)を受けて「実際にシーンへ効いた状態」を返す。
+    window.__PV_CAPTURE__.setInteriorDaylight = cfg => {
+      if (!cfg) {
+        state.daylight = null;
+        events.push('daylight:off');
+        return { enabled: false, sunScale: 0, sunIntensity: 0, sunCastShadow: false, ceilingOccluders: 0 };
+      }
+      state.daylight = { ...cfg };
+      events.push('daylight:on');
+      return {
+        enabled: true,
+        sunScale: cfg.sunScale,
+        timeOfDay: 'day',
+        sunSim: false,
+        sunIntensity: 0.78 * cfg.sunScale,
+        sunCastShadow: true,
+        sunPosition: [13.9, 24.6, 12.1],
+        shadowMapSize: [2048, 2048],
+        shadowCameraSpanM: 15.74,
+        ceilingOccluders: 2,
+        ...(daylightState || {}),
+      };
+    };
+  }
 
   globalThis.fetch = async (url, init = {}) => {
     const entry = { url: String(url), method: init.method || 'GET',
@@ -139,8 +174,11 @@ function harness({ shotSpec = spec(), planId = 'assets/default_plan.json',
   };
 
   location.search = '?pvCapture=1&pvShot=T-test&pvServer=8932';
-  return { state, initial, captured, requests, poses };
+  return { state, initial, captured, requests, poses, events };
 }
+
+const daylightSpec = (overrides = {}) =>
+  spec({ daylight: { interiorSun: true, sunScale: 1 }, ...overrides });
 
 const posts = (requests, path) =>
   requests.filter(r => r.method === 'POST' && r.url.endsWith(path));
@@ -325,6 +363,96 @@ test('途中で失敗しても状態は元へ戻る', async () => {
   assert.equal(h.state.floor, h.initial.floor);
   assert.deepEqual(h.state.orbit, h.initial.orbit);
   assert.equal(h.state.viewportRestored, true);
+});
+
+// ── 内観採光 ───────────────────────────────────────────────────────
+// 内観3Dは天井を作らず太陽も消していた。窓からの日射が1枚も写っていない
+// フレーム列に対して映像生成へ「窓から差し込む光」を頼んだ結果、モデルが
+// 勝手に光源を発明した。以下は「頼んだ採光が本当に効いてから撮り始める」
+// ことを、呼び出し順と失敗経路の両方で固定する。
+test('採光を要求しないショットでは setInteriorDaylight を一切呼ばない', async () => {
+  const h = harness();
+  await main();
+  assert.deepEqual(h.events.filter(e => e.startsWith('daylight')), []);
+  assert.equal(h.state.daylight, undefined);
+});
+
+test('採光を要求したら、最初のフレームより前に入り、最後に戻る', async () => {
+  const h = harness({ shotSpec: daylightSpec() });
+  await main();
+  const marks = h.events.filter(e => e.startsWith('daylight') || e === 'guide:base');
+  assert.equal(marks[0], 'daylight:on', `採光は撮影開始前に入るべき: ${h.events.join(' ')}`);
+  assert.equal(marks[marks.length - 1], 'daylight:off', `採光は撮影後に戻すべき: ${h.events.join(' ')}`);
+  assert.ok(marks.includes('guide:base'));
+  assert.equal(h.state.daylight, null);
+});
+
+test('実際に効いた採光が shot.json に残る', async () => {
+  // 動画を見比べずに、成果物のファイルだけで日射の有無が判るようにする。
+  const h = harness({ shotSpec: daylightSpec() });
+  await main();
+  const shotPosts = posts(h.requests, '/shot');
+  assert.equal(shotPosts.length, 2);
+  for (const p of shotPosts) {
+    const doc = JSON.parse(p.body);
+    assert.equal(doc.daylight.interiorSun, true);
+    assert.equal(doc.daylight.applied.sunIntensity, 0.78);
+    assert.equal(doc.daylight.applied.sunCastShadow, true);
+    assert.equal(doc.daylight.applied.ceilingOccluders, 2);
+  }
+});
+
+test('sunScale はそのままアプリへ渡る', async () => {
+  const h = harness({ shotSpec: daylightSpec({ daylight: { interiorSun: true, sunScale: 1.5 } }) });
+  await main();
+  const doc = JSON.parse(posts(h.requests, '/shot')[0].body);
+  assert.equal(doc.daylight.applied.sunScale, 1.5);
+  assert.equal(doc.daylight.applied.sunIntensity, 0.78 * 1.5);
+});
+
+test('太陽が点かなかったら1枚も撮らずに落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec(), daylightState: { sunIntensity: 0 } });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /the sun is still off/);
+    return true;
+  });
+  assert.equal(posts(h.requests, '/frame').length, 0);
+});
+
+test('太陽が影を落とさない設定なら落ちる（光が天井と壁を素通りする）', async () => {
+  const h = harness({ shotSpec: daylightSpec(), daylightState: { sunCastShadow: false } });
+  await assert.rejects(main(), /casts no shadows/);
+  assert.equal(posts(h.requests, '/frame').length, 0);
+});
+
+test('天井オクルーダーが1枚も無ければ落ちる（真上から日射が降る絵になる）', async () => {
+  const h = harness({ shotSpec: daylightSpec(), daylightState: { ceilingOccluders: 0 } });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /no ceiling occluders/);
+    return true;
+  });
+  assert.equal(posts(h.requests, '/frame').length, 0);
+});
+
+test('採光が有効化されなかった(enabled:false)ら落ちる', async () => {
+  harness({ shotSpec: daylightSpec(), daylightState: { enabled: false } });
+  await assert.rejects(main(), /not enabled/);
+});
+
+test('setInteriorDaylight を持たない古いページなら名指しで落ちる', async () => {
+  const h = harness({ shotSpec: daylightSpec(), omitDaylightHook: true });
+  await assert.rejects(main(), err => {
+    assert.match(err.message, /does not expose setInteriorDaylight/);
+    return true;
+  });
+  assert.equal(posts(h.requests, '/frame').length, 0);
+});
+
+test('撮影中に失敗しても採光は戻される', async () => {
+  const h = harness({ shotSpec: daylightSpec(), failAtGuide: 'edge' });
+  await assert.rejects(main(), /capture blew up/);
+  assert.equal(h.state.daylight, null);
+  assert.equal(h.events[h.events.length - 1], 'daylight:off');
 });
 
 test('モードは spec.mode で決まる — id を変えてもプローブのまま', async () => {

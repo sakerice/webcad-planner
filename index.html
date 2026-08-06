@@ -3447,6 +3447,11 @@ var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
 var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.12, exposure:0.93, env:0.42,
   sunSim:false, hour:13, season:'equinox', northDeg:0};
+// PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
+// null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
+// 通常の利用者から見た挙動は一切変わらない。値を入れるのはファイル末尾の
+// PVフック(__PV_CAPTURE__.setInteriorDaylight)だけ。形は {sunScale:<倍率>}。
+var PV_INTERIOR_DAYLIGHT=null;
 var LIGHT_PRESETS = {
   morning:{
     label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.14,exposure:0.9,env:0.34,
@@ -7987,7 +7992,11 @@ function build3D(){
   add3DMoveGizmo();
   var _sunLight=null;
   sc3.traverse(function(o){if(o.isDirectionalLight)_sunLight=o;});
-  if(_sunLight && !isInt) fitShadowCamera(_sunLight);
+  // 内観は太陽を消灯しているため影カメラを合わせる必要が無い。PVキャプチャの
+  // 内観採光時だけは実際に太陽が点くので、外観と同じく建物へフィットさせる
+  // (合わせないと初期値のままの ±150m / 2048px = 146mm/texel になり、
+  //  窓の開口が影の解像度に埋もれてしまう)。
+  if(_sunLight && (!isInt || PV_INTERIOR_DAYLIGHT)) fitShadowCamera(_sunLight);
   syncExteriorWallPanel();
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -8903,15 +8912,19 @@ function applyLightingToScene(refreshSky){
         o.intensity=LIGHT_SETTINGS.ambient*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?0.6:1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
-        var interiorMode=(ST.view==='3d-int'||isInt);
+        // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
+        // 通常は PV_INTERIOR_DAYLIGHT が null なので interiorMode の値も
+        // sunScale(=1、乗算しても値が変わらない)も従来と同一。
+        var pvSunScale=PV_INTERIOR_DAYLIGHT?(PV_INTERIOR_DAYLIGHT.sunScale||1):1;
+        var interiorMode=(ST.view==='3d-int'||isInt) && !PV_INTERIOR_DAYLIGHT;
         o.castShadow=!interiorMode;
         if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
           var sp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
           o.position.set(sp.x,sp.y,sp.z);
           if(o.color) o.color.set(sunColorForAltitude(sp.altitude));
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude);
+          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale;
         } else {
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun;
+          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*pvSunScale;
           if(o.color) o.color.set(preset.sunColor||'#ffffff');
           var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
           o.position.set(p.x,p.y,p.z);
@@ -14054,7 +14067,10 @@ function buildRooms3D(flFilt){
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isIndoorView;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
-  var matCeiling=!isInt ? new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}) : null;
+  // 内観は上から間取りを見るため天井を作らない。PVキャプチャの内観採光時だけは
+  // 生成し、フック側(__PV_CAPTURE__.setInteriorDaylight)が「描かないが影は落とす」
+  // オクルーダーへ差し替える。日射が窓と階段吹き抜けからだけ入るようにするため。
+  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT) ? new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}) : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
   var ceilingStairQuadsByFloor={};
@@ -19462,8 +19478,106 @@ updateMobileShiftButton();
     // 一切名指しできないので、captureGuide の呼び出しで得たものを保持し、
     // runner が取り出して instance-legend.json として書き出せるようにする。
     var lastInstanceLegend=null;
+
+    // ── 内観の実採光 ───────────────────────────────────────────────
+    // 内観3D(3d-int)は上から間取りを読めるよう天井を作らず、太陽も消灯している。
+    // そのまま太陽だけ点けると、天井の無い部屋へ真上から日射が降り注ぐ物理的に
+    // あり得ない絵になる。ここでは天井を
+    //   ・カメラには一切描かれない (colorWrite:false / depthWrite:false)
+    //   ・シャドウマップには入る   (castShadow:true)
+    // オクルーダーとして残し、日射が窓と階段の吹き抜けからだけ入るようにする。
+    //
+    // three.js r169 のシャドウパス(assets/vendor/three/build/three.module.js の
+    // WebGLShadowMap)は、depth マテリアルへ visible / side / alphaMap /
+    // alphaTest / map しか写さない。colorWrite・depthWrite・opacity・transparent は
+    // 一切見ないので、「通常描画では何も描かないが影は普通に落ちる」が成立する。
+    //   - visible=false は使えない: シャドウパス冒頭で同じ visible を見て丸ごと
+    //     飛ばすため、影も一緒に消える。
+    //   - レイヤー分離も使えない: シャドウパスの可視判定は object.layers.test() の
+    //     相手が「影カメラ」ではなく「ビューカメラ」なので、カメラから外した
+    //     時点で影も消える(r169 で実装を確認済み)。
+    //
+    // マテリアルは呼び出しごとに作り直す。build3D() は作り直しの前に
+    // disposeObj() で天井メッシュのマテリアルを dispose するため、使い回しの
+    // 1個を持ち続けると次回は dispose 済みのものを貼ることになる。
+    function pvOccluderMaterial(){
+      return new THREE.MeshBasicMaterial({
+        colorWrite:false,
+        depthWrite:false,
+        // transparent かつ opacity<=0.03 は、このアプリが既に
+        // 「ガイド画像(segmentation/depth/normal/instance)では存在しないものとして
+        //  扱う」印として使っている(aiGuideObjectShouldHide、内観カットアウェイ壁)。
+        // 同じ印を付けることで、天井オクルーダーがガイド画像へ写り込まない。
+        transparent:true,
+        opacity:0,
+        // 天井面の向きに依存せず遮蔽させる(ShapeGeometry の面法線は上向き)。
+        side:THREE.DoubleSide
+      });
+    }
+    // buildRooms3D が作った天井メッシュ(userData.ceiling)をオクルーダーへ差し替える。
+    // 戻り値は差し替えた枚数 — 0 なら「天井が1枚も無い=真上から日射が入る」ので、
+    // 呼び出し側(capture-runner.mjs)はここで撮影を止められる。
+    function pvApplyCeilingOccluders(){
+      var n=0, retired=[];
+      var occ=pvOccluderMaterial();
+      sc3.traverse(function(o){
+        if(!o.isMesh || !o.userData || !o.userData.ceiling) return;
+        if(o.material && o.material!==occ && retired.indexOf(o.material)<0) retired.push(o.material);
+        o.material=occ;
+        o.castShadow=true;
+        o.receiveShadow=false; // 描かれないので受け側の計算は不要
+        n++;
+      });
+      // 差し替えで参照を失った本来の天井材(1回の再構築につき1つ)を解放する。
+      retired.forEach(function(m){ if(m&&m.dispose) m.dispose(); });
+      if(!n) occ.dispose(); // 天井が1枚も無ければ、作ったオクルーダー材も未使用のまま
+      return n;
+    }
+    // 実際にシーンへ効いた採光状態。runner はこれを検査し、shot.json にも残す。
+    function pvDaylightState(occluders){
+      var sun=null;
+      sc3.traverse(function(o){ if(o.isDirectionalLight) sun=o; });
+      var cam=sun&&sun.shadow?sun.shadow.camera:null;
+      return {
+        enabled:!!PV_INTERIOR_DAYLIGHT,
+        sunScale:PV_INTERIOR_DAYLIGHT?PV_INTERIOR_DAYLIGHT.sunScale:0,
+        timeOfDay:LIGHT_SETTINGS.timeOfDay,
+        sunSim:!!LIGHT_SETTINGS.sunSim,
+        sunIntensity:sun?sun.intensity:0,
+        sunCastShadow:!!(sun&&sun.castShadow),
+        sunPosition:sun?[sun.position.x,sun.position.y,sun.position.z]:null,
+        shadowMapSize:(sun&&sun.shadow)?[sun.shadow.mapSize.x,sun.shadow.mapSize.y]:null,
+        shadowCameraSpanM:cam?(cam.right-cam.left):null,
+        ceilingOccluders:occluders
+      };
+    }
+
     window.__PV_CAPTURE__={
-      version:3,
+      version:4,
+      // 内観の実採光を入れる/戻す。cfg が falsy なら元の内観(天井なし・太陽消灯)へ戻す。
+      // 戻り値は実際にシーンへ効いた状態で、太陽が点いたか・天井オクルーダーが
+      // 何枚できたかを呼び出し側が独立に検査できるようにしている。
+      setInteriorDaylight:function(cfg){
+        if(!cfg){
+          PV_INTERIOR_DAYLIGHT=null;
+        }else{
+          var s=Number(cfg.sunScale);
+          PV_INTERIOR_DAYLIGHT={sunScale:(isFinite(s)&&s>0)?s:1};
+        }
+        // 順序が重要: applyLightingToScene は太陽をプリセットの絶対座標
+        // (昼なら 100,200,100)へ置き直す。影カメラを建物へフィットさせる
+        // build3D(fitShadowCamera)より先に呼ばないと、太陽が影カメラの far の
+        // 外側に残り、影が一枚も出ない状態になる。
+        applyLightingToScene(false);
+        // rebuild3D() ではなく perform3DRebuild() を直接呼ぶ。rebuild3D は
+        // タブレット判定に当たると requestAnimationFrame まで再構築を遅らせるため、
+        // 戻った時点でまだ天井が無いことがある。ここは同期的に作り切る。
+        perform3DRebuild();
+        var occluders=PV_INTERIOR_DAYLIGHT?pvApplyCeilingOccluders():0;
+        if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+        if(typeof invalidate3D==='function') invalidate3D();
+        return pvDaylightState(occluders);
+      },
       ensure3D:function(){ return ensureAiRenderable3D(); },
       // 家具GLBは ensureGltfModel() が GLTFLoader で非同期に読み込む。
       // ロード中は _modelLoading[url]===true、完了で _modelCache[url] に

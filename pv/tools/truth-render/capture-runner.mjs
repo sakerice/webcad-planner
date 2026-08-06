@@ -2,7 +2,7 @@
 // window.__PV_CAPTURE__ が既に露出している前提。
 
 import { sampleCameraPath } from './camera-path.mjs';
-import { validateShotSpec, frameTimes, guideFrameIndices, shotMode } from './shot-spec.mjs';
+import { validateShotSpec, frameTimes, guideFrameIndices, shotMode, daylightRequest } from './shot-spec.mjs';
 
 // URL パラメータは読み取り時に評価する。モジュール読み込み時に固定すると、
 // ブラウザ外(node --test)からこのモジュールを import しただけで location
@@ -91,6 +91,62 @@ function assertPlanMatchesSpec(spec) {
       'Clear the saved plan (or open the capture page in a fresh profile) and retry.');
   }
   log(`plan verified: ${actual}`);
+}
+
+// 内観3D(3d-int)は間取りを上から読ませるため天井を作らず、太陽も消灯している。
+// つまり「窓から入る日射」はレンダに一切含まれていない。それを知らずに映像生成へ
+// 「窓から差し込む午後の光」を頼んだ結果、モデルが好きな場所に光源を発明した。
+// spec が内観採光を要求したら、アプリ側フックに天井のシャドウオクルーダーと
+// 実光源の太陽を入れさせ、**本当に効いたか**を戻り値で確かめる。ここで確かめないと、
+// 太陽が点かないまま(=以前と同じ光の無い絵で)全フレームを撮り切ってしまう。
+function assertDaylightApplied(spec, applied) {
+  const head = `shot "${spec.id}": interior daylight was requested but`;
+  if (!applied || typeof applied !== 'object') {
+    throw new Error(`${head} the app returned no daylight state at all`);
+  }
+  if (applied.enabled !== true) {
+    throw new Error(`${head} the app reports it is not enabled`);
+  }
+  if (!(applied.sunIntensity > 0)) {
+    throw new Error(
+      `${head} the sun is still off (intensity ${JSON.stringify(applied.sunIntensity)}). ` +
+      'Every frame would again contain no daylight.');
+  }
+  if (applied.sunCastShadow !== true) {
+    throw new Error(
+      `${head} the sun casts no shadows. Sunlight would pass straight through the ` +
+      'ceiling and walls instead of entering through the windows.');
+  }
+  if (!(applied.ceilingOccluders > 0)) {
+    throw new Error(
+      `${head} no ceiling occluders were built. Daylight would pour straight down ` +
+      'into a room whose ceiling is not drawn — exactly the defect this guards against.');
+  }
+}
+
+function applyDaylight(spec) {
+  const want = daylightRequest(spec);
+  if (!want) return null;
+  if (typeof window.__PV_CAPTURE__.setInteriorDaylight !== 'function') {
+    throw new Error(
+      `shot "${spec.id}" asks for interior daylight, but the capture hook in index.html ` +
+      'does not expose setInteriorDaylight (stale page or older build).');
+  }
+  const applied = window.__PV_CAPTURE__.setInteriorDaylight(want);
+  assertDaylightApplied(spec, applied);
+  log(`interior daylight on: sun intensity ${applied.sunIntensity} (scale ${applied.sunScale}), ` +
+      `${applied.ceilingOccluders} ceiling occluder(s), shadow camera span ${applied.shadowCameraSpanM}m`);
+  return applied;
+}
+
+// shot.json の中身。spec そのものに加え、内観採光を使ったショットでは
+// 「実際にシーンへ効いた採光」(太陽の強度・向き・天井オクルーダー枚数)を
+// daylight.applied として残す。動画を見比べなくても、成果物のファイルだけで
+// 日射があったかどうかが判る状態にしておくため。
+function shotDoc(spec, daylight, extra) {
+  const doc = { ...spec, ...(extra || {}) };
+  if (daylight) doc.daylight = { ...spec.daylight, applied: daylight };
+  return doc;
 }
 
 // PNG の IHDR チャンクから width/height を読む。PNG は先頭8バイトの署名の直後に
@@ -376,10 +432,14 @@ export async function main() {
   const prevOrbit = window.__PV_CAPTURE__.captureOrbitState();
 
   let prevViewport;
+  let daylight = null;
   const assertFrameSize = createFrameSizeGuard();
   try {
     await ensureViewRenderable(spec);
     assertPlanMatchesSpec(spec);
+    // 採光の適用はシーンを作り直す(天井の生成)。GLBの待ちより先に置き、
+    // 再構築で発生しうるモデル読み込みも下の ensureModelsLoaded が拾えるようにする。
+    daylight = applyDaylight(spec);
     // ビューが「描画可能」になっただけでは、build3D() が投げた家具GLBの
     // 非同期ロードが終わっている保証は無い -- これが直った理由: この待ちが
     // 無かったせいで、空の部屋を10秒で撮り切ってDONEを出す事故が実際に起きた
@@ -390,7 +450,7 @@ export async function main() {
     // 設計どおり、検証済み spec の実体を出力ディレクトリへ複写する。
     // これが無いと pv/renders/<shot>/ を後から見ても、どの spec・どの階・
     // どのカメラキーで撮ったものかがディスク上のどこにも残らない。
-    await postJson(spec.id, '/shot', spec);
+    await postJson(spec.id, '/shot', shotDoc(spec, daylight));
 
     // spec.resolution が実際に消費されるのはここだけ。#c3d-wrap の見た目サイズは
     // ブラウザウィンドウ任せなので、固定しないとフレームのアスペクト比・寸法が
@@ -415,12 +475,15 @@ export async function main() {
       : await runSequence(spec, assertFrameSize);
     const tookMs = Date.now() - startedAt;
     log(`capture took ${tookMs}ms for ${frameCount} frame(s)`);
-    await postJson(spec.id, '/shot', { ...spec, capture: { tookMs, frameCount } });
+    await postJson(spec.id, '/shot', shotDoc(spec, daylight, { capture: { tookMs, frameCount } }));
 
     // DONE はここで初めて要求する。サーバ側がシーン完全性を検査した後で
     // なければ、"完走してDONEが出た" こと自体を安全とみなせない。
     await postDone(spec);
   } finally {
+    // 採光はアプリの見た目そのものを変える(天井を作り、太陽を点ける)。
+    // 途中で落ちた場合も含め、ユーザーの画面へは必ず元の内観を返す。
+    if (daylight) window.__PV_CAPTURE__.setInteriorDaylight(null);
     if (prevViewport) window.__PV_CAPTURE__.restoreCaptureViewport(prevViewport);
     window.__PV_CAPTURE__.restoreOrbitState(prevOrbit);
     if (prevView !== undefined && prevView !== window.__PV_CAPTURE__.getView()) {
