@@ -77,3 +77,24 @@ test('sloped のラベルは範囲と向きの矢印', () => {
   const room = { ceiling: { type: 'sloped', lowMm: 2200, highMm: 3600, direction: 0 } };
   assert.equal(HeightModel.ceilingLabel({}, room), 'CH 2200-3600 ↑');
 });
+
+// Task 2b のレビューで見つかった潜在的な罠。天井高を明示していない部屋は階高を
+// そのまま天井にするが、外壁は階高を下限として立つ。階高が (既定天井高 + 床スラブ)
+// を下回ると天井が外壁の下限より下に来て、Task 2b で外壁に開いたスリットの
+// 内外を裏返した隙間が開く。まだ storyHeight を書き込む経路は無いが、
+// 書けるようになってから気づくのでは遅いので、ここで下限を持たせる。
+test('階高には下限がある（既定天井高 + 床スラブ）', () => {
+  assert.equal(HeightModel.MIN_STORY_HEIGHT_MM, 2580);
+  assert.equal(HeightModel.storyHeightMm({ floors: { 1: { storyHeight: 100 } } }, 1), 2580);
+  assert.equal(HeightModel.storyHeightMm({ floors: { 1: { storyHeight: 2579 } } }, 1), 2580);
+});
+
+test('下限以上の階高はそのまま通る（下限が正当な値を潰さない）', () => {
+  assert.equal(HeightModel.storyHeightMm({ floors: { 1: { storyHeight: 2580 } } }, 1), 2580);
+  assert.equal(HeightModel.storyHeightMm({ floors: { 1: { storyHeight: 3200 } } }, 1), 3200);
+});
+
+test('既定の階高は下限より上（既定が下限に丸められていないこと）', () => {
+  assert.ok(HeightModel.DEFAULTS.storyHeightMm > HeightModel.MIN_STORY_HEIGHT_MM);
+  assert.equal(HeightModel.storyHeightMm({}, 1), 2700);
+});

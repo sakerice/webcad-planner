@@ -30,11 +30,18 @@
     return (typeof v === 'number' && isFinite(v)) ? v : fallback;
   }
 
+  // 階高には下限がある。天井高を明示していない部屋は階高をそのまま天井とするが、
+  // 外壁は「階高」を下限として立つ。階高が (既定天井高 + 床スラブ) を下回ると、
+  // 天井が外壁の下限より下に来て、内側から隙間が開く -- Task 2b で外壁に開いた
+  // スリットの、内外を裏返した形。まだこの値を書き込む経路は無いが、
+  // 書けるようになってから気づくのでは遅い。
+  var MIN_STORY_HEIGHT_MM = DEFAULTS.ceilingHeightMm + DEFAULTS.floorSlabMm; // 2580
   function storyHeightMm(plan, floor) {
     var floors = plan && plan.floors;
     var entry = floors ? floors[floor] : undefined;
     var raw = entry ? entry.storyHeight : undefined;
-    return num(raw, DEFAULTS.storyHeightMm);
+    var v = num(raw, DEFAULTS.storyHeightMm);
+    return v < MIN_STORY_HEIGHT_MM ? MIN_STORY_HEIGHT_MM : v;
   }
 
   function ceilingHeightMm(plan, room) {
@@ -79,6 +86,7 @@
 
   return {
     DEFAULTS: DEFAULTS,
+    MIN_STORY_HEIGHT_MM: MIN_STORY_HEIGHT_MM,
     storyHeightMm: storyHeightMm,
     ceilingHeightMm: ceilingHeightMm,
     ceilingShape: ceilingShape,
