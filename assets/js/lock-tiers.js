@@ -32,6 +32,16 @@
     'lattice-screen': LOCKED,
     ramp: LOCKED,
     'exterior-stair': LOCKED, // stair* の接頭辞に一致しないため個別に列挙
+    // 任意ブロック。ユーザーが設計として置いた体積であって、質感を作り直してよい
+    // 家具ではない。実データ (instance-legend) に現れるが表に無かったため明示する。
+    'custom-block': LOCKED,
+
+    // 屋外設備。設計として置かれた実在の物なので、消えても増えても困る。
+    // ただし建具ではないので、質感や経年はAIに作らせてよい -> SOFT。
+    // いずれも実データに現れるが表に無かったため明示する。
+    'ac-outdoor': SOFT,
+    'gas-heater': SOFT,
+    'meter-box': SOFT,
 
     // 什器・造作 -- 同じ場所に同じ種類のものが要るが、質感はAI任せ
     closet: SOFT,
@@ -76,6 +86,18 @@
       if (type.indexOf(rule.prefix) === 0) return rule.tier;
     }
     return LOCKED; // 未知の type は LOCKED に倒す
+  }
+
+  // 「明示的に分類されているか」と「未知の既定で LOCKED になったか」を区別する。
+  // 両者は tierOf の戻り値では見分けられないが、意味はまるで違う。分類漏れを
+  // 探すとき、実データの type をこれに通せば漏れだけが残る。
+  function isKnownType(type) {
+    if (typeof type !== 'string' || type === '') return false;
+    if (Object.prototype.hasOwnProperty.call(EXACT, type)) return true;
+    for (var i = 0; i < PREFIXES.length; i++) {
+      if (type.indexOf(PREFIXES[i].prefix) === 0) return true;
+    }
+    return false;
   }
 
   // instance-legend.json と同じ形の配列から、色→階層の表を作る。
@@ -128,6 +150,7 @@
     SOFT: SOFT,
     FREE: FREE,
     tierOf: tierOf,
+    isKnownType: isKnownType,
     tableFor: tableFor,
     summarize: summarize
   };

@@ -57,3 +57,26 @@ test('summarize は階層ごとの種別と個数を返す', () => {
   assert.equal(s.counts.SOFT, 1);
   assert.deepEqual(s.LOCKED, ['window']);
 });
+
+// 実データ (pv/renders/*/instance-legend.json) に現れるのに表に無かった type。
+// 未知の既定でも LOCKED にはなるが、既定に頼っていると「意図してLOCKEDにした」のか
+// 「分類し忘れている」のかが区別できない。明示しておく。
+test('custom-block は明示的に LOCKED（未知の既定に頼らない）', () => {
+  assert.equal(LockTiers.tierOf('custom-block'), 'LOCKED');
+  // 明示されていることを、未知の型と区別できる形で確かめる
+  assert.ok(LockTiers.isKnownType('custom-block'),
+    'custom-block should be an explicit rule, not the unknown-type fallback');
+  // door* のワイルドカードに一致する名前は「未知」ではない。既定に頼っている型を
+  // 探すときは、どの規則にも当たらない名前を使う。
+  assert.ok(!LockTiers.isKnownType('plumbing-riser-2027'));
+  assert.equal(LockTiers.tierOf('plumbing-riser-2027'), 'LOCKED');
+});
+
+// 屋外設備。実データに現れるのに表に無く、未知の既定で LOCKED になっていた。
+// 建具ではないので凍結する理由が無く、消えられても困る -> SOFT。
+test('屋外設備は SOFT として明示されている', () => {
+  for (const t of ['ac-outdoor', 'gas-heater', 'meter-box']) {
+    assert.equal(LockTiers.tierOf(t), 'SOFT', t);
+    assert.ok(LockTiers.isKnownType(t), t + ' should be an explicit rule');
+  }
+});
