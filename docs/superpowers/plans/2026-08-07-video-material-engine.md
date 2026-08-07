@@ -23,6 +23,42 @@
 - 暗部持ち上げの閾値は平均輝度 30/255。
 - テストは `node --test "tools/tests/*.test.cjs"` で走る。
 
+### 幾何の指紋の取り方（本体の3Dに触るタスクは必ずこれを使う）
+
+素朴な `Box3` とメッシュ数では、高さの変化を**検出できない**。実測で確認済み:
+1800m の `_sky` ドームが bbox を ±900 に固定し、メッシュ数は高さに反応しない。
+以下を使うこと。
+
+```js
+// ?pvCapture=1&nocache=<毎回ちがう値> で開き、家具のロード完了を待ってから
+(function(){
+  var box=new THREE.Box3(), meshes=0, verts=0, ySum=0, ceilYs=[];
+  sc3.traverse(function(o){
+    if(!o.isMesh) return;
+    if(o===_sky||(o.name&&o.name.indexOf('sky')>=0)) return; // 空は除く。bboxを支配してしまう
+    meshes++;
+    var g=o.geometry; if(g&&g.attributes&&g.attributes.position) verts+=g.attributes.position.count;
+    o.updateWorldMatrix(true,false);
+    ySum+=o.matrixWorld.elements[13];
+    box.expandByObject(o);
+    if(o.userData&&o.userData.isCeiling) ceilYs.push(+o.position.y.toFixed(4));
+  });
+  return {meshes:meshes, verts:verts, ySum:+ySum.toFixed(4),
+          min:box.min.toArray().map(function(v){return +v.toFixed(4);}),
+          max:box.max.toArray().map(function(v){return +v.toFixed(4);}),
+          ceilYs:ceilYs.sort()};
+})()
+```
+
+外観(`3d-ext`)・内観(`3d-int`)それぞれ、1階と2階で取る。**`nocache` を毎回変えること** —
+index.html もモジュールも強くキャッシュされ、古い実装のまま「一致」して見える事故が
+このプロジェクトで既に2回起きている。
+
+**さらに、変えたつもりの経路が本当に生きていることを別途示すこと。** 「変わらなかった」
+だけでは、配線が繋がっていない場合と区別できない。Task 2 では対象関数を差し替えて
+呼び出し回数を数え、1部屋だけ値を変えてその部屋の天井だけが動くことを確認した。
+同じ形の確認を行う。
+
 ---
 
 ### Task 1: 高さモデル — データと既定値
@@ -277,14 +313,9 @@ Expected: FAIL — script タグが無い
 デフォルトプランを開き、置き換え前後で**3Dの頂点数と建物のバウンディングボックスが
 一致すること**を確認する。ブラウザで:
 
-```js
-// ?pvCapture=1 で開き、コンソールで
-(function(){
-  var box=new THREE.Box3().setFromObject(sc3);
-  var n=0; sc3.traverse(function(o){ if(o.isMesh) n++; });
-  return { meshes:n, min:box.min.toArray(), max:box.max.toArray() };
-})()
-```
+**この指紋は下の「幾何の指紋の取り方」に従うこと。素朴な Box3 + メッシュ数では
+検出できない**（Task 2 実測: 1800m の `_sky` ドームが bbox を ±900 に固定してしまい、
+メッシュ数は高さの変化に反応しない。置き換えすぎた編集でも「一致」してしまう）。
 
 Expected: 変更前後で完全に一致。一致しなければ置き換えすぎている。
 
@@ -298,6 +329,89 @@ Expected: すべて PASS
 ```bash
 git add index.html tools/tests/height-wiring.test.cjs
 git commit -m "Read room ceiling height through the height model"
+```
+
+---
+
+### Task 2b: 天井面を階高から切り離す
+
+**Files:**
+- Modify: `index.html`（`roomCeilingHeightM()` のクランプ、壁の高さ、`floorTopY` 系）
+- Test: `tools/tests/height-wiring.test.cjs`（追記）
+
+**Interfaces:**
+- Consumes: Task 1 の `HeightModel.ceilingHeightMm` / `storyHeightMm`
+- Produces: なし（本体の幾何）
+
+**なぜ必要か（Task 2 の実測）:** 現在の `roomCeilingHeightM()` は
+`Math.max(天井高 + 床スラブ, 階高)` で終わる。床スラブ 180mm・階高 2700mm のため、
+**2520mm 以下の天井高は 2700mm にクランプされて効かない。** 仕様の
+「水回り 2200」「下がり天井 2100」は現状まったく実現できず、2701mm 以上だけが効く。
+
+このクランプ自体は既存の挙動であり、Task 2 が寸法を1ビットも変えずに済んだ理由でもある。
+ここで初めて、意図して外す。
+
+**この改修は勾配天井が必要とする幾何とまったく同じもの**である。天井面が壁の頂部に
+縛られている限り、下げることも傾けることもできない。ここで切り離しておけば、
+勾配天井（Task 2c）は同じ土台の上に載る。
+
+**やること:**
+1. 天井面の高さを「床レベル + その部屋の天井高」で決める。階高でクランプしない。
+2. 天井高が階高より低い部屋では、**壁が天井面まで届いていること**を保証する
+   （現状は天井面だけが動き、壁は階高のままなので隙間が開く）。
+   壁は2つの部屋の境界にあるので、**壁の高さはその壁が接する部屋の天井高の最大値**を採る。
+   これは「低い方に合わせて壁を切ると、高い側の部屋に穴が開く」ことを避ける唯一の選び方。
+3. 階高そのものを `HeightModel.storyHeightMm(DATA, floor)` から読む。
+4. 天井高が階高を超える場合は、**階高の側を上げるのではなく天井高を階高に丸める**。
+   上げると上階の床が持ち上がり、家全体が変わる。丸めたことを警告として残す。
+
+**やらないこと:** 勾配天井そのもの（Task 2c）。ここは flat のみ。
+
+- [ ] **Step 1: 失敗するテストを書く**
+
+構造テストに加え、**幾何そのものを見るブラウザ実測**をこのタスクの検証の中心に置く。
+
+```js
+// tools/tests/height-wiring.test.cjs に追記
+test('天井面は階高でクランプされない', () => {
+  const src = html.slice(html.indexOf('function roomCeilingHeightM'));
+  const body = src.slice(0, src.indexOf('\n}') + 2);
+  assert.doesNotMatch(body, /Math\.max\([^)]*FLOOR_H/,
+    'the storey clamp is what makes ceilings below 2520mm unreachable');
+});
+
+test('階高は HeightModel から読まれる', () => {
+  assert.match(html, /HeightModel\.storyHeightMm\(/);
+});
+
+test('壁の高さは接する部屋の天井高の最大値を採る', () => {
+  assert.match(html, /wallCeilingHeightM|maxAdjacentCeiling/);
+});
+```
+
+- [ ] **Step 2: テストが落ちることを確認する**
+
+- [ ] **Step 3: 実装する**
+
+- [ ] **Step 4: 幾何を実測する（このタスクの本体）**
+
+「Global Constraints / 幾何の指紋の取り方」の手順で、次の4つを測る:
+
+| 条件 | 期待 |
+|---|---|
+| 高さフィールドなしのデフォルトプラン | **変更前と完全一致**（既存ユーザーの家が変わらないこと） |
+| 1部屋だけ `ceilingHeight: 2200` | **その部屋の天井だけ**が下がる。他室の `ceilYs` は不変 |
+| 1部屋だけ `ceilingHeight: 3000` | その部屋の天井だけが上がり、**壁との隙間が開かない** |
+| 1部屋だけ `ceilingHeight: 9000`（階高超え） | 階高に丸められ、上階の床が動かない |
+
+3番目の「隙間が開かない」は指紋では見えない。**内観3Dで実際にレンダして目視すること。**
+壁と天井のあいだに背景が透けていれば失敗。
+
+- [ ] **Step 5: 全テストとリンタを通してコミット**
+
+```bash
+git add index.html tools/tests/height-wiring.test.cjs
+git commit -m "Let a room's ceiling sit below the storey height"
 ```
 
 ---
