@@ -166,3 +166,18 @@ test('instance legend の type に three.js のクラス名が漏れない', () 
   // ref が three.js の Object3D のときは .type を読まない（'Mesh' はクラス名）。
   assert.match(s, /isObject3D/);
 });
+
+// 色→階層の表だけでは「#a1b2c3 が変わった」としか言えない。判定器の指摘も、
+// ユーザーに見せる要約 (設計 §10) も部材名で語る必要がある。既定パッケージには
+// instance-legend.json を入れない方針なので、名前の対応は package.json が持つ。
+test('package.json は色だけでなく部材名も持つ', () => {
+  assert.match(html, /instances:packageInstances/,
+    'package.json must carry an instance list, not just the colour->tier table');
+  const build = html.slice(html.indexOf('var packageInstances='),
+                           html.indexOf('var packageInstances=') + 500);
+  for (const field of ['id', 'color', 'type', 'floor', 'tier']) {
+    assert.match(build, new RegExp('\\b' + field + ':'), 'missing field: ' + field);
+  }
+  assert.match(build, /toLowerCase\(\)/,
+    'colours must be normalised the same way LockTiers.tableFor normalises them');
+});

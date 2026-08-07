@@ -18281,6 +18281,12 @@ function videoPackageJson(state){
     heightModel:state.heightModel,
     // Task 4: 色→階層の表。判定器はこれを見て階層ごとに閾値を変える。
     lockTiers:state.lockTiers,
+    // 部材の一覧。lockTiers だけだと「#a1b2c3 が変わった」としか言えず、
+    // 「バルコニーのルーバーが変わった」と言えない。ユーザーに見せる要約
+    // (設計 §10) も判定器の指摘も、色ではなく部材名で語る必要がある。
+    // 既定パッケージに instance-legend.json を入れない方針(設計 §12.3)なので、
+    // 名前の対応はここに畳んで持たせる。
+    instances:state.instances,
     // Task 6: reference.png に実際に適用したトーンカーブ。
     shadowLift:state.shadowLift,
     capture:state.capture,
@@ -18312,6 +18318,13 @@ async function generateVideoRenderPackage(options){
 
   // 2) 暗部の持ち上げ (設計 §12.1)。測る→カーブを決める→適用する→記録する。
   var lockTiers=LockTiers.tableFor(instanceData.legend);
+  // 色だけでは「何が変わったか」を言えない。判定器の指摘も、ユーザーに見せる
+  // 要約も部材名で語るので、id/色/種別/階層/フロアだけを畳んで持たせる。
+  // 位置や寸法は instance-legend.json 側にあり、ここには重複させない。
+  var packageInstances=(instanceData.legend||[]).map(function(e){
+    return {id:e.id,color:String(e.color||'').toLowerCase(),type:e.type,
+            floor:e.floor,tier:LockTiers.tierOf(e.type)};
+  });
   var baseIm=await decodePngDataUrlToImageData(base);
   var instIm=await decodePngDataUrlToImageData(instanceData.dataUrl);
   var measurements=ShadowLift.measure(baseIm,instIm,lockTiers);
@@ -18368,6 +18381,7 @@ async function generateVideoRenderPackage(options){
     camera:camera,daylight:daylight,
     heightModel:videoHeightModelRecord(floor),
     lockTiers:lockTiers,
+    instances:packageInstances,
     shadowLift:videoShadowLiftRecord(curve,measurements.length),
     capture:{width:baseIm.width,height:baseIm.height,
       instances:instanceData.legend.length,
