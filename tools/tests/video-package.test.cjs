@@ -1,11 +1,13 @@
 // 動画AIレンダー用パッケージの組み立て (Task 7)。
 //
-// ここのテストはすべて index.html の**ソース文字列**を見る grep である。
-// 「絵が正しく出るか」「ZIP に本当に4ファイル入るか」は見ていない。
-// この計画では既に3回、未変更のコードに対して通ってしまう検査があった。
-// grep は必要だが十分ではない。実質的な検証はレポートのブラウザ実測であって、
-// このファイルではない。ここが守るのは「経路を二重化しない」「既定を絞る」
-// 「記録を落とさない」という構造だけである。
+// このファイルは2層になっている。
+//   前半 (Task 7 当時): index.html の**ソース文字列**を見る grep。守るのは
+//     「経路を二重化しない」「既定を絞る」という構造だけで、挙動は見ていない。
+//   後半 (Task 10-5): generateVideoRenderPackage を node:vm で**実際に走らせ**、
+//     出てきた ZIP の中身と package.json の値を測る。
+// 後半を足した理由は、全体レビューの実測で 22 の変異のうち 16 が全テスト緑のまま
+// 生き残ったこと。grep は必要だが十分ではない。判断を下す側（ShadowLift・
+// LockTiers・VideoPrompt・構図の検査・高さの解決）は後半では本物を通す。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
@@ -168,9 +170,9 @@ test('package.json はカメラ・時刻・フロア・尺・プリセットid�
 test('package.json は撮影に使われた階高・天井高を持つ', () => {
   const j = bodyOf('function videoPackageJson', 3000);
   assert.match(j, /heightModel/);
-  const hm = bodyOf('function videoHeightModelRecord', 2000);
-  assert.match(hm, /HeightModel\.storyHeightMm\(/);
-  assert.match(hm, /HeightModel\.ceilingShape\(|HeightModel\.ceilingLabel\(/);
+  // 中身が正しいか（レンダの実寸と一致するか）は height-wiring.test.cjs が
+  // videoHeightModelRecord を実際に走らせて測る。ここは配線だけを見る。
+  assert.match(pkg, /videoHeightModelRecord\(/);
 });
 
 test('尺は15秒を超えない', () => {
@@ -290,8 +292,8 @@ const LockTiers = require('../../assets/js/lock-tiers.js');
 const VideoPrompt = require('../../assets/js/video-prompt.js');
 
 function topLevelFunction2(name) {
-  const sig = '\nfunction ' + name + '(';
-  const at = html.indexOf(sig);
+  let at = html.indexOf('\nfunction ' + name + '(');
+  if (at === -1) at = html.indexOf('\nasync function ' + name + '(');
   assert.notEqual(at, -1, 'function ' + name + ' が index.html に無い');
   const start = at + 1;
   let i = html.indexOf('{', start);
@@ -420,15 +422,450 @@ test('平面図経路の package.json の instances は null ではない', () =
   assert.match(state, /instances:/);
 });
 
-test('構図が小さすぎるパッケージは書き出されずに投げる', () => {
-  const branch = planBranch();
-  assert.match(branch, /PLAN_SUBJECT_MIN_FRAME_RATIO/);
-  assert.match(branch, /planSubjectFrameRatio\(|planSubjectFrameRatio/);
-  assert.match(branch, /throw new Error/);
+test('構図の検査は両経路で同じ1か所を通る（文面と閾値を2つ持たない）', () => {
+  assert.match(html, /function planCompositionRefusal\(/);
+  // 実際に投げるかどうかは、下の「実行する検査」が
+  // generateVideoRenderPackage を走らせて測る。
+  assert.equal((pkg.match(/planCompositionRefusal\(/g) || []).length, 2,
+    'plan 経路と 3D 経路の両方が同じ検査を通っていない');
 });
 
 test('平面図の参照は3D経路と同じ画素数で撮る', () => {
   const branch = planBranch();
   assert.match(branch, /fit:true/, '撮る前に構図を作っていない');
   assert.match(branch, /scale:/, '3D と同じ画素数で撮っていない');
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// Task 10-5: 消しても緑のまま出荷される挙動に、**実行する**回帰テストを。
+//
+// 全体レビューの実測: index.html 側に当てた 22 の変異のうち 16 が全テスト緑のまま
+// 生き残った。上の grep 群は「文字列が在るか」しか見ていないためである。
+// （最悪の例: reference.png を持ち上げずに出荷し package.json にはガンマを書く、が
+//  /ShadowLift\.(curveFor|apply)/ という grep を curveFor だけで満たして通った。）
+//
+// 以下は generateVideoRenderPackage を node:vm で**実際に走らせ**、出てきた
+// ZIP の中身と package.json を測る。撮影・復号・ZIP 化だけを最小のスタブに置き換え、
+// 判断を下す側（ShadowLift・LockTiers・VideoPrompt・構図の検査・高さの解決）は
+// すべて本物を通す。
+// ════════════════════════════════════════════════════════════════════════════
+const ShadowLift = require('../../assets/js/shadow-lift.js');
+const HeightModel = require('../../assets/js/height-model.js');
+
+const FRAME = { w: 1400, h: 900 };            // Task 7b が実測に使ったビューポート
+const SAVED_VIEW = PLAN_DATA.viewState.twoD;  // ユーザーが眺めていたパン・ズーム
+
+function imageOf(w, h, fill) {
+  const d = new Uint8ClampedArray(w * h * 4);
+  for (let i = 0; i < w * h; i++) {
+    const px = fill(i % w, Math.floor(i / w));
+    d[i * 4] = px[0]; d[i * 4 + 1] = px[1]; d[i * 4 + 2] = px[2]; d[i * 4 + 3] = 255;
+  }
+  return { data: d, width: w, height: h };
+}
+// 左半分が潰れた LOCKED 部材、右半分が明るい部材。持ち上げが必要な絵。
+const DARK_RGB = [3, 3, 3];
+const LIT = { legend: [
+  { id: 'W1', color: '#ff0000', type: 'wall', floor: 2, ref: null },
+  { id: 'I2', color: '#00ff00', type: 'sofa', floor: 2, ref: null }
+] };
+function meanLeftHalf(im) {
+  let sum = 0, n = 0;
+  for (let y = 0; y < im.height; y++) {
+    for (let x = 0; x < im.width / 2; x++) {
+      const p = (y * im.width + x) * 4;
+      sum += im.data[p] + im.data[p + 1] + im.data[p + 2];
+      n += 3;
+    }
+  }
+  return sum / n;
+}
+
+const VIDEO_FNS = [
+  'isContextExteriorItemType', 'isPlanAnnotationType', 'isFiniteCanvasValue',
+  'getObjBounds', 'objectIdLabel',
+  'isPlanSubjectObject', 'planSubjectBoundsMm', 'planFitViewFor',
+  'planSubjectFrameRatio', 'planSubjectClipped', 'planCompositionRefusal',
+  'videoRenderViewRefusalText', 'planPlaceholderError',
+  'videoSourceLabel', 'resolveVideoPreset', 'composeVideoPromptOrThrow',
+  'videoShadowLiftRecord', 'videoPlanWithheldRecord', 'videoPackageJson',
+  'planInstanceList',
+  // 高さ（package.json の heightModel はレンダと同じ経路で解く）
+  'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
+  'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
+  'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
+  'videoHeightModelRecord',
+  'generateVideoRenderPackage'
+];
+const VIDEO_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
+  'CONTEXT_EXTERIOR_TYPES', 'PLAN_FIT_MARGIN', 'PLAN_SUBJECT_MIN_FRAME_RATIO'];
+
+// 撮影・復号・ZIP だけを置き換えた実行環境。
+// capturePlan2dDataUrl は本物の planFitViewFor を使って「fit:true なら構図を作る、
+// でなければユーザーの保存視点のまま」という現実の振る舞いを再現する。
+// これで「3D経路から fit:true を外す」変異が本物の構図の検査に当たる。
+function harness(opts) {
+  const o = opts || {};
+  const data = o.data || PLAN_DATA;
+  const registry = new Map();
+  const log = { captures: [], overlays: [], downloads: [], zips: [] };
+  const baseIm = imageOf(20, 10, (x) => (x < 10 ? DARK_RGB : [180, 180, 180]));
+  const instIm = imageOf(20, 10, (x) => (x < 10 ? [255, 0, 0] : [0, 255, 0]));
+  registry.set('url:base', baseIm);
+  registry.set('url:instance', instIm);
+  let outN = 0;
+
+  const ctx = vm.createContext({
+    console: console, TextEncoder: TextEncoder,
+    DATA: data, ST: { view: o.view || '3d-ext', floor: o.floor === undefined ? 2 : o.floor },
+    LockTiers: LockTiers, ShadowLift: ShadowLift, VideoPrompt: VideoPrompt, HeightModel: HeightModel,
+    waitFrame: function () { return Promise.resolve(); },
+    isUnityRenderableView: function () { return ctx.ST.view === '3d-ext' || ctx.ST.view === '3d-int'; },
+    videoDaylightDescriptor: function () { return o.daylight || { timeOfDay: 'day' }; },
+    waitForPlanFloorTopImages: function () {
+      return Promise.resolve({ images: 12, pending: 0, waitedMs: 0 });
+    },
+    planCaptureScaleForVideo: function () { return 1; },
+    capturePlan2dDataUrl: function (co) {
+      let view = { panX: SAVED_VIEW.panX, panY: SAVED_VIEW.panY, zoom: SAVED_VIEW.zoom };
+      if (co.fit) {
+        const fv = ctx.planFitViewFor(ctx.planSubjectBoundsMm(co.floor), FRAME.w, FRAME.h);
+        if (fv) view = fv;      // 本物と同じ: fit できないときは触らない
+      }
+      log.captures.push({ floor: co.floor, fit: !!co.fit, ceilingLabels: co.ceilingLabels });
+      ctx.PLAN_CAPTURE_VIEW = {
+        panX: view.panX, panY: view.panY, zoom: view.zoom,
+        width: FRAME.w, height: FRAME.h, floor: co.floor, scale: 1
+      };
+      const url = 'url:plan' + log.captures.length;
+      registry.set(url, imageOf(4, 4, () => [200, 200, 200]));
+      registry.get(url).width = FRAME.w;
+      registry.get(url).height = FRAME.h;
+      return url;
+    },
+    captureCurrent3DDataUrl: function () { return 'url:base'; },
+    captureInstance3DData: function () { return { dataUrl: 'url:instance', legend: LIT.legend }; },
+    captureSegmentation3DDataUrl: function () { return 'url:seg'; },
+    captureAiOverrideGuideDataUrl: function (k) { return 'url:' + k; },
+    makeEdgeDataUrlFromSegmentation: function () { return Promise.resolve('url:edge'); },
+    aiSegmentationLegend: function () { return []; },
+    decodePngDataUrlToImageData: function (u) {
+      const im = registry.get(u);
+      if (!im) return Promise.reject(new Error('unknown image ' + u));
+      return Promise.resolve(im);
+    },
+    imageDataToPngDataUrl: function (im) {
+      const u = 'url:out' + (++outN);
+      registry.set(u, im);
+      return u;
+    },
+    findPlanPlaceholderInstances: function () { return o.placeholders || []; },
+    videoCameraDescriptor: function (floor) {
+      return { mode: 'exterior', floor: floor, posM: [20, 6, 6], targetM: [5, 4, 1],
+               hFovDeg: 60, aspect: 1.5, eyeHeightM: 1.5, floorBaseYM: 0 };
+    },
+    drawPlanCameraOverlay: function (url, camera, view) {
+      log.overlays.push({ url: url, view: view });
+      return Promise.resolve('url:planctx');
+    },
+    dataUrlToBytes: function (u) { return Promise.resolve(new Uint8Array(Buffer.from(u, 'utf8'))); },
+    makeZipBlob: function (files) { log.zips.push(files.map((f) => f.name)); return { zip: true }; },
+    downloadBlobFile: function (name) { log.downloads.push(name); }
+  });
+  vm.runInContext(VIDEO_VARS.map(topLevelVar2)
+    .concat(VIDEO_FNS.map(topLevelFunction2)).join('\n'), ctx);
+  ctx.$log = log;
+  ctx.$registry = registry;
+  ctx.$baseIm = baseIm;
+  return ctx;
+}
+// 出来上がった ZIP から、名前でファイルの中身（文字列）を取り出す。
+function fileText(pkg, name) {
+  const f = pkg.filesRaw.filter((e) => e.name === name)[0];
+  assert.ok(f, name + ' が ZIP に入っていない');
+  return Buffer.from(f.bytes).toString('utf8');
+}
+async function build(ctx, options) {
+  const pkg = await ctx.generateVideoRenderPackage(Object.assign({ download: false }, options || {}));
+  // files は {name,size} に畳まれているので、中身は VIDEO_RENDER_PACKAGE から取れない。
+  // 代わりに dataUrlToBytes / TextEncoder の結果をそのまま持つ配列を組み直す。
+  return pkg;
+}
+
+// ── 1. reference.png は本当に持ち上げられて出荷されるか ──────────────────
+// 生き残った変異: `var reference=base;`（持ち上げずに出荷し、package.json には
+// ガンマを書く）。grep /ShadowLift\.(curveFor|apply)/ は curveFor だけで満たされる。
+test('reference.png は package.json が記録したカーブを実際に適用した画素である', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  const json = pkg.packageJson;
+  assert.equal(json.shadowLift.applied, true, 'カーブが適用されたと記録されていない');
+  assert.ok(json.shadowLift.gamma < 1, 'ガンマが 1 のまま: ' + json.shadowLift.gamma);
+
+  // ZIP に入った reference.png の中身は dataUrlToBytes(url) の結果＝url の文字列
+  // そのもの。その url が指す ImageData を取り出して、画素を直接測る。
+  assert.ok(pkg.files.filter((f) => f.name === 'reference.png').length,
+    'reference.png が ZIP に入っていない');
+  const shipped = c.$registry.get(c.VIDEO_RENDER_PACKAGE.images.reference);
+  assert.ok(shipped, '出荷された reference が画像として辿れない: '
+    + c.VIDEO_RENDER_PACKAGE.images.reference);
+  const before = meanLeftHalf(c.$baseIm);
+  const after = meanLeftHalf(shipped);
+  assert.ok(before < 5, '前提が壊れている（元画像が暗くない）: ' + before);
+  assert.ok(after > before,
+    'package.json はガンマ ' + json.shadowLift.gamma + ' を記録しているのに、'
+    + '出荷された画素は持ち上がっていない (' + before.toFixed(2) + ' -> ' + after.toFixed(2) + ')');
+  // 記録したガンマで元画像を持ち上げた結果と一致すること（別のカーブでもない）。
+  const expected = meanLeftHalf(ShadowLift.apply(c.$baseIm, json.shadowLift));
+  assert.ok(Math.abs(after - expected) < 1e-6,
+    '出荷された画素が記録のカーブと一致しない: ' + after + ' vs ' + expected);
+});
+
+test('持ち上げきれなかった部材は名指しで package.json に残る', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  const rec = pkg.packageJson.shadowLift;
+  assert.ok(Array.isArray(rec.unliftableColors));
+  const shipped = c.$registry.get(c.VIDEO_RENDER_PACKAGE.images.reference);
+  // 床に届いたか、届かなかったものとして名前が残っているか、のどちらか。
+  assert.ok(meanLeftHalf(shipped) >= rec.floorLuminance
+    || rec.unliftableColors.indexOf('#ff0000') >= 0,
+    '暗いまま、記録もされずに通っている');
+});
+
+// ── 2. 家具プレースホルダの拒否 ──────────────────────────────────────────
+test('灰色のプレースホルダが残っていたら3D経路は書き出さずに投げる', async () => {
+  const c = harness({ view: '3d-ext', floor: 2,
+    placeholders: [{ id: 9, type: 'sofa', color: '#c8c8c8', x: 0, y: 0, w: 10, h: 10 }] });
+  await assert.rejects(() => build(c), (e) => {
+    assert.match(e.message, /プレースホルダ/);
+    return true;
+  });
+  assert.equal(c.$log.zips.length, 0, '拒否したのに ZIP を組んでいる');
+  assert.equal(c.$log.downloads.length, 0);
+});
+
+test('灰色のプレースホルダが残っていたら平面図経路も書き出さずに投げる', async () => {
+  const c = harness({ view: '2d', floor: 2,
+    placeholders: [{ id: 9, type: 'sofa', color: '#c8c8c8', x: 0, y: 0, w: 10, h: 10 }] });
+  await assert.rejects(() => build(c, { source: 'plan' }), /プレースホルダ/);
+  assert.equal(c.$log.zips.length, 0);
+});
+
+// ── 3. 構図の拒否・見切れの拒否 ──────────────────────────────────────────
+test('主題の無い階は構図の検査で止まる（両経路とも、その絵の名前で言う）', async () => {
+  const a = harness({ view: '3d-ext', floor: 9 });
+  await assert.rejects(() => build(a), (e) => {
+    assert.match(e.message, /占めていません/, e.message);
+    assert.match(e.message, /plan_context\.png/, e.message);
+    return true;
+  });
+  const b = harness({ view: '2d', floor: 9 });
+  await assert.rejects(() => build(b, { source: 'plan' }), (e) => {
+    assert.match(e.message, /占めていません/);
+    assert.match(e.message, /平面図/);
+    return true;
+  });
+});
+
+test('フレームからはみ出した構図は、大きく写っていても拒否される', () => {
+  const c = harness({});
+  const bounds = c.planSubjectBoundsMm(2);
+  const fit = c.planFitViewFor(bounds, FRAME.w, FRAME.h);
+  const shifted = { panX: fit.panX + FRAME.w * 0.5, panY: fit.panY, zoom: fit.zoom };
+  assert.equal(c.planCompositionRefusal(bounds, fit, FRAME.w, FRAME.h, 'reference.png'), null,
+    '収まっているのに拒否された');
+  const err = c.planCompositionRefusal(bounds, shifted, FRAME.w, FRAME.h, 'reference.png');
+  assert.ok(err, '半分はみ出しているのに通った');
+  assert.match(err.message, /はみ出しています/);
+});
+
+// ── 3b. Task 10-2: 3D経路の plan_context.png も構図を作ってから撮る ────────
+// 実測（既定プラン 2F・保存視点）: 占有率 0.462（1400x900）で下限 0.6 を割る。
+// fit を通すと 0.909。fit:true を外すと、この経路は自分の下限を割った絵を出荷する。
+test('3D経路の plan_context.png は fit を通してから撮られる', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  assert.equal(c.$log.captures.length, 1);
+  assert.equal(c.$log.captures[0].fit, true, 'fit:true が渡っていない');
+
+  // 出荷された絵の占有率を実際に測る。下限を上回っていること。
+  const bounds = c.planSubjectBoundsMm(2);
+  const view = c.PLAN_CAPTURE_VIEW;
+  const ratio = c.planSubjectFrameRatio(bounds, view, view.width, view.height);
+  assert.ok(ratio >= c.PLAN_SUBJECT_MIN_FRAME_RATIO,
+    'plan_context.png が自分の下限を割っている: ' + ratio.toFixed(3));
+  assert.ok(!c.planSubjectClipped(bounds, view, view.width, view.height));
+  assert.ok(Array.from(pkg.files).some((f) => f.name === 'plan_context.png'));
+
+  // 保存視点のままだと下限を割ること（＝これが直した不良）
+  const bad = c.planSubjectFrameRatio(bounds, SAVED_VIEW, FRAME.w, FRAME.h);
+  assert.ok(bad < c.PLAN_SUBJECT_MIN_FRAME_RATIO, '不良を再現できていない: ' + bad);
+});
+
+test('カメラの三角は「撮ったときの」座標系で重ねられる（ST ではなく）', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  await build(c);
+  assert.equal(c.$log.overlays.length, 1);
+  const passed = c.$log.overlays[0].view;
+  assert.ok(passed, 'drawPlanCameraOverlay に撮影時の視点が渡っていない');
+  assert.equal(passed.zoom, c.PLAN_CAPTURE_VIEW.zoom);
+  assert.notEqual(Math.round(passed.zoom * 1e6), Math.round(SAVED_VIEW.zoom * 1e6),
+    'fit した構図ではなくユーザーの保存視点が渡っている');
+});
+
+// ── 4. プリセットと素材の不一致の拒否 ────────────────────────────────────
+test('平面図用プリセットで3Dを撮ろうとしたら投げる（黙って差し替えない）', async () => {
+  const planId = VideoPrompt.presetsFor('plan')[0].id;
+  const c = harness({ view: '3d-ext', floor: 2 });
+  await assert.rejects(() => build(c, { presetId: planId }), (e) => {
+    assert.match(e.message, new RegExp(planId));
+    assert.match(e.message, /平面図/);
+    return true;
+  });
+  assert.equal(c.$log.zips.length, 0, '取り違えたまま ZIP を組んでいる');
+});
+
+test('3D用プリセットで平面図を撮ろうとしても投げる（逆向きも塞ぐ）', async () => {
+  const d3Id = VideoPrompt.presetsFor('3d')[0].id;
+  const c = harness({ view: '2d', floor: 2 });
+  await assert.rejects(() => build(c, { source: 'plan', presetId: d3Id }),
+    new RegExp(d3Id));
+  assert.equal(c.$log.zips.length, 0);
+});
+
+test('存在しないプリセットidは既定へ倒れずに投げる', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  await assert.rejects(() => build(c, { presetId: 'no-such-preset' }), /存在しません/);
+});
+
+// ── 5. 光の文が入らなかったときの拒否 ────────────────────────────────────
+test('プロンプトに光の文を書けなかったら、黙って続けずに投げる', async () => {
+  const c = harness({ view: '3d-ext', floor: 2, daylight: { timeOfDay: 'no-such-hour' } });
+  await assert.rejects(() => build(c), (e) => {
+    assert.match(e.message, /光の状態/);
+    assert.match(e.message, /no-such-hour/);
+    return true;
+  });
+  assert.equal(c.$log.zips.length, 0);
+});
+
+test('光の文が書けたときは、その文がプロンプトに実際に入っている', async () => {
+  const c = harness({ view: '3d-ext', floor: 2, daylight: { timeOfDay: 'day' } });
+  const pkg = await build(c);
+  const withoutLight = VideoPrompt.compose({
+    preset: VideoPrompt.presetsFor('3d')[0], legend: LIT.legend,
+    camera: c.videoCameraDescriptor(2)
+  });
+  assert.notEqual(pkg.prompt, withoutLight, '光の文が入っていない');
+  assert.ok(pkg.prompt.length > withoutLight.length);
+});
+
+// ── 6. ウォークスルーからは撮らない（Task 10-4）──────────────────────────
+test('ウォークスルーから押すと、理由を言って拒否する（黙って外観へ寄せない）', async () => {
+  const c = harness({ view: '3d-walk', floor: 2 });
+  await assert.rejects(() => build(c), (e) => {
+    assert.match(e.message, /ウォークスルー/);
+    assert.match(e.message, /外観3D/);
+    return true;
+  });
+  assert.equal(c.ST.view, '3d-walk', 'ユーザーのビューを勝手に切り替えている');
+  assert.equal(c.$log.captures.length, 0, '拒否したのに撮っている');
+  assert.equal(c.$log.zips.length, 0);
+});
+
+// ── 7. 高さの記録（Task 10-1 の package.json 側）──────────────────────────
+test('package.json の天井高は、レンダが置いた実寸と一致する', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  const hm = pkg.packageJson.heightModel;
+  assert.equal(hm.storyHeightMm, 2700);
+  assert.ok(hm.rooms.length > 0);
+  hm.rooms.forEach(function (r) {
+    assert.equal(r.ceiling.type, 'flat');
+    assert.equal(r.ceiling.heightMm, 2520,
+      '2階の実寸は 2520（階高 2700 - 床スラブ 180）。' + r.id + ' は ' + r.ceiling.heightMm);
+    assert.equal(r.label, 'CH 2520', r.id + ' のラベル: ' + r.label);
+  });
+});
+
+// ── 8. 通ったときは4ファイルが揃う（拒否のテストの対照）────────────────
+test('通れば既定の4ファイルが揃い、ZIP に入る', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  assert.equal(Array.from(pkg.files).map((f) => f.name).join(','),
+    'reference.png,plan_context.png,prompt.txt,package.json');
+  assert.equal(Array.from(c.$log.zips[0]).join(','),
+    'reference.png,plan_context.png,prompt.txt,package.json');
+  assert.equal(JSON.parse(pkg.packageJsonText).source, '3d');
+});
+
+test('平面図経路は平面図そのものを参照にし、3Dを1枚も撮らない', async () => {
+  const c = harness({ view: '2d', floor: 2 });
+  const pkg = await build(c, { source: 'plan' });
+  assert.equal(Array.from(pkg.files).map((f) => f.name).join(','),
+    'reference.png,prompt.txt,package.json');
+  assert.equal(pkg.packageJson.source, 'plan');
+  assert.equal(pkg.packageJson.shadowLift.applied, false);
+  assert.equal(c.$log.captures[0].fit, true);
+});
+
+// ── 9. カメラの三角は「撮ったときの」座標系で重なるか（実際に描かせて測る）──
+// 上の「渡っているか」の検査は引数しか見ない。ここは drawPlanCameraOverlay を
+// 本当に走らせ、キャンバスに打たれた頂点の座標を測る。fit した構図は撮影後に
+// finally で戻るので、ST を読むと三角は絵と無関係な場所に出る。
+function overlayHarness(view) {
+  const ops = [];
+  const cx = {
+    drawImage: function () {}, save: function () {}, restore: function () {},
+    beginPath: function () { ops.push(['beginPath']); },
+    moveTo: function (x, y) { ops.push(['moveTo', x, y]); },
+    lineTo: function (x, y) { ops.push(['lineTo', x, y]); },
+    closePath: function () {}, fill: function () {}, stroke: function () {},
+    arc: function (x, y) { ops.push(['arc', x, y]); },
+    fillStyle: '', strokeStyle: '', lineWidth: 0
+  };
+  const ctx = vm.createContext({
+    console: console,
+    ST: { panX: 999999, panY: 999999, zoom: 40 },     // 「戻ったあとの」ユーザー視点
+    PLAN_CAPTURE_VIEW: view,
+    document: { createElement: function () {
+      return { width: 0, height: 0, getContext: function () { return cx; },
+               toDataURL: function () { return 'url:overlaid'; } };
+    } },
+    Image: function () {
+      const self = this;
+      Object.defineProperty(this, 'src', {
+        set: function () { setTimeout(function () { self.onload(); }, 0); }
+      });
+      this.naturalWidth = FRAME.w;
+      this.naturalHeight = FRAME.h;
+    }
+  });
+  vm.runInContext([topLevelVar2('U'), topLevelFunction2('drawPlanCameraOverlay')].join('\n'), ctx);
+  ctx.$ops = ops;
+  return ctx;
+}
+
+test('カメラの三角は、撮影時のパン・ズームで打たれる（ST を読んでいない）', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const bounds = c.planSubjectBoundsMm(2);
+  const view = c.planFitViewFor(bounds, FRAME.w, FRAME.h);
+  const o = overlayHarness(view);
+  const camera = { posM: [5, 1.5, 3], targetM: [8, 1.5, 6], hFovDeg: 60 };
+  const url = await o.drawPlanCameraOverlay('url:plan', camera, view);
+  assert.equal(url, 'url:overlaid');
+
+  const apex = o.$ops.filter((op) => op[0] === 'arc')[0];
+  assert.ok(apex, 'カメラ位置の点が打たれていない');
+  const sc = view.zoom * 0.05;
+  const wantX = view.panX + (camera.posM[0] / 0.001) * sc;
+  const wantY = view.panY + (camera.posM[2] / 0.001) * sc;
+  assert.ok(Math.abs(apex[1] - wantX) < 1e-6 && Math.abs(apex[2] - wantY) < 1e-6,
+    'カメラ位置が撮影時の座標系で打たれていない: ' + apex[1] + ',' + apex[2]
+    + ' expected ' + wantX + ',' + wantY);
+  // 打たれた位置が絵の中にあること（ST を読むと 999999 側へ飛ぶ）
+  assert.ok(apex[1] >= 0 && apex[1] <= FRAME.w && apex[2] >= 0 && apex[2] <= FRAME.h,
+    'カメラ位置がフレームの外に出ている: ' + apex[1] + ',' + apex[2]);
 });

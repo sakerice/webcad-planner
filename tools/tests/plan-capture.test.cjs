@@ -282,3 +282,74 @@ test('縦長フレームに横長の家を正しく合わせた構図は、下�
     '正しく合わせた縦持ちの構図が下限を下回った: ' + r.toFixed(4) +
     '（面積比で測るとここが落ちる）');
 });
+
+// ── Task 10-1: 図面に描かれる天井高ラベル ────────────────────────────────
+// 上の grep（HeightModel.ceilingLabel が html に在る）は、drawCeilingLabel2d が
+// それを呼んでいなくても通る。ここは描画関数を実際に走らせ、キャンバスに
+// **何という文字列が置かれたか**を測る。
+// 設計 §12.2: このラベルは生成AIが空間の高さを知る唯一の手がかり。
+const HeightModel = require('../../assets/js/height-model.js');
+
+function drawLabelsOn(data, floor) {
+  const drawn = [];
+  const ctx2d = {
+    save: function () {}, restore: function () {}, beginPath: function () {},
+    roundRect: function () {}, fill: function () {},
+    measureText: function (t) { return { width: t.length * 6 }; },
+    fillText: function (t, x, y) { drawn.push({ text: t, x: x, y: y }); },
+    font: '', textAlign: '', textBaseline: '', fillStyle: ''
+  };
+  const c = sandbox([
+    topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'),
+    topLevelVar('FLOOR_SLAB_H'), topLevelVar('_ceilingClampWarned'),
+    topLevelVar('PLAN_CAPTURE'), topLevelVar('PLAN_CAPTURE_SCALE'),
+    topLevelFunction('w2c'),
+    topLevelFunction('isFiniteCanvasValue'),
+    topLevelFunction('planCaptureShows'),
+    topLevelFunction('planCaptureCeilingLabels'),
+    topLevelFunction('planCaptureMinFont'),
+    topLevelFunction('foundationHeightMm'), topLevelFunction('foundationHeightM'),
+    topLevelFunction('storyHeightMmForFloor'), topLevelFunction('storyHeightM'),
+    topLevelFunction('floorSlabHeightM'), topLevelFunction('floorSlabHeightMForFloor'),
+    topLevelFunction('isPositiveNumber'),
+    topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
+    topLevelFunction('roomRenderedCeilingMm'), topLevelFunction('roomRenderedCeilingShape'),
+    topLevelFunction('roomRenderedCeilingLabel'),
+    topLevelFunction('drawCeilingLabel2d')
+  ], {
+    DATA: data, HeightModel: HeightModel, ctx: ctx2d,
+    ST: { floor: floor, zoom: 1, panX: 0, panY: 0 }
+  });
+  c.PLAN_CAPTURE = { ceilingLabels: true };   // キャプチャ中だけラベルを描く
+  data.rooms.filter((r) => r.floor === floor).forEach((r) => c.drawCeilingLabel2d(r));
+  return drawn.map((d) => d.text);
+}
+
+test('図面に描かれる天井高ラベルは、レンダが置いた天井の実寸を言う', () => {
+  // 既定プランの部屋はどれも天井高を明示していない。実測: 1F 2700 / 2F 2520。
+  assert.deepEqual(new Set(drawLabelsOn(PLAN, 1)), new Set(['CH 2700']));
+  assert.deepEqual(new Set(drawLabelsOn(PLAN, 2)), new Set(['CH 2520']));
+  // HeightModel の既定をそのまま描くと 2400 になる（＝これが直した不良）。
+  assert.equal(HeightModel.ceilingLabel(PLAN, PLAN.rooms.filter((r) => r.floor === 1)[0]),
+    'CH 2400');
+});
+
+test('天井高を明示した部屋では、図面もその値を描く', () => {
+  const house = {
+    floors: {}, walls: [], items: [],
+    rooms: [{ id: 'a', floor: 1, x: 0, y: 0, w: 4000, d: 3000, ceiling: { heightMm: 2200 } },
+            { id: 'b', floor: 1, x: 5000, y: 0, w: 4000, d: 3000, ceilingHeight: 3000 }]
+  };
+  assert.deepEqual(drawLabelsOn(house, 1), ['CH 2200', 'CH 2700']);
+});
+
+test('通常の2D表示ではラベルを描かない（キャプチャ中だけ）', () => {
+  const c = sandbox([
+    topLevelVar('PLAN_CAPTURE'), topLevelFunction('planCaptureCeilingLabels')
+  ], {});
+  assert.equal(c.planCaptureCeilingLabels(), false);
+  c.PLAN_CAPTURE = { ceilingLabels: false };
+  assert.equal(c.planCaptureCeilingLabels(), false);
+  c.PLAN_CAPTURE = { ceilingLabels: true };
+  assert.equal(c.planCaptureCeilingLabels(), true);
+});
