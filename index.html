@@ -3528,9 +3528,27 @@ function foundationHeightMm(){
 function foundationHeightM(){
   return foundationHeightMm()*U;
 }
+// 階高(mm)。plan.floors[階].storyHeight が無ければ既定 2700(=FLOOR_H)へ落ちる。
+// 高さフィールドを持たない保存済みプランでは FLOOR_H 定数と完全に同値。
+function storyHeightMmForFloor(floor){
+  if(typeof HeightModel==='undefined'||!HeightModel||typeof DATA==='undefined'||!DATA) return FLOOR_H;
+  return HeightModel.storyHeightMm(DATA,floor);
+}
+function storyHeightM(floor){
+  return storyHeightMmForFloor(floor)*U;
+}
 function floorBaseY(floor){
-  // FLOOR_H は階を積む間隔(階高)であって部屋の天井高ではないので、置き換えない。
-  return ((floor||1)-1)*FLOOR_H*U + foundationHeightM();
+  // 階は「その階より下の階の階高の合計」だけ持ち上がる。階高がすべて既定(2700)の
+  // ときは従来式 ((floor-1)*FLOOR_H*U) と1ビットも変わらない。
+  var f=(floor||1), y=foundationHeightM(), i;
+  if(f>=1){
+    for(i=1;i+1<=f;i++) y+=storyHeightM(i);
+    if(i<f) y+=storyHeightM(i)*(f-i);        // 端数階(通常は無い)も従来式と同じ比例
+  }else{
+    for(i=1;i-1>=f;i--) y-=storyHeightM(i-1);
+    if(i>f) y-=storyHeightM(i-1)*(i-f);
+  }
+  return y;
 }
 function floorSlabHeightM(){
   // FLOOR_SLAB_H は床スラブの厚みで、部屋の天井高とは無関係なので置き換えない。
@@ -3574,24 +3592,97 @@ function item3DBaseY(it){
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
-// 壁の高さ。部屋ではなく「その階の壁」の高さなので WALL_H のまま残す:
-// 壁は2つの部屋の境界にあり、どちらの部屋の天井高を採るべきかがここでは決まらない。
-// 部屋ごとの天井高は roomCeilingHeightM() を使うこと。
+// 外皮としての壁の高さ(m)。部屋ではなく「その階の壁」の高さ = 階高まで。
+// ここを下げると外壁と上階の床のあいだが外から素通しになるので、下限として使う。
 function wallFullHeightM(floor){
-  return Math.max(WALL_H*U+floorSlabHeightMForFloor(floor),FLOOR_H*U);
+  return Math.max(WALL_H*U+floorSlabHeightMForFloor(floor),storyHeightM(floor));
 }
+function isPositiveNumber(v){
+  return typeof v==='number'&&isFinite(v)&&v>0;
+}
+// 部屋に「明示された」天井高(mm)。指定が無ければ null を返す。
+// 保存済みプランは高さフィールドを持たないので必ず null になり、天井は従来どおり
+// 階高いっぱいに置かれる = 既存ユーザーの家の寸法が1mmも動かない。
+// 正の数値だけを指定ありとみなす(HeightModel の num() と同じ門。null や 0 や
+// 文字列は既定へ落ちるので、ここで拾うと逆に家が変わってしまう)。
+function roomExplicitCeilingMm(room){
+  if(!room||typeof HeightModel==='undefined'||!HeightModel) return null;
+  var c=room.ceiling;
+  var sloped=!!(c&&c.type==='sloped');
+  if(!sloped&&!isPositiveNumber(c&&c.heightMm)&&!isPositiveNumber(room.ceilingHeight)) return null;
+  if(sloped){
+    // 勾配天井そのものは Task 2c。ここでは高い側の高さで平らに置く。
+    var shape=HeightModel.ceilingShape(DATA,room);
+    if(shape&&isPositiveNumber(shape.highMm)) return shape.highMm;
+  }
+  return HeightModel.ceilingHeightMm(DATA,room);
+}
+var _ceilingClampWarned={};
 // 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
-// 高さフィールドを持たない既存プランでは HeightModel.ceilingHeightMm が WALL_H と
-// 同じ 2400 を返すため、従来の wallFullHeightM(r.floor) と完全に同値になり、
-// 保存済みの家の寸法は変わらない。
-// FLOOR_H とのクランプは残す: ここでの FLOOR_H は「階と階のあいだに隙間を作らない」
-// ための階高であって部屋の天井高ではなく、置き換えると既存プランの天井が 2700→2400 へ
-// 下がってしまうため。
+// 階高でクランプしない: それが「2520mm 以下の天井高がまったく効かない」原因だった。
+// 天井高が階高を超えるときだけ階高へ丸める。階高の側を上げると上階の床が持ち上がり
+// 家全体が変わるため、丸めるのは天井の側。丸めたことは黙らせず警告に残す。
 function roomCeilingHeightM(room){
-  var mm=(typeof HeightModel!=='undefined'&&HeightModel)
-    ? HeightModel.ceilingHeightMm(DATA,room)
-    : WALL_H;
-  return Math.max(mm*U+floorSlabHeightMForFloor(room&&room.floor),FLOOR_H*U);
+  var floor=room&&room.floor;
+  var storyM=storyHeightM(floor);
+  var mm=roomExplicitCeilingMm(room);
+  if(mm===null) return storyM;
+  var h=mm*U+floorSlabHeightMForFloor(floor);
+  if(h>storyM){
+    var key=((room&&room.id)||'?')+'@'+mm;
+    if(!_ceilingClampWarned[key]){
+      _ceilingClampWarned[key]=1;
+      console.warn('[height] room "'+((room&&(room.n||room.id))||'?')+'" asks for a '+mm+
+        'mm ceiling but the storey is only '+storyHeightMmForFloor(floor)+
+        'mm; the ceiling was clamped to the storey height.');
+    }
+    return storyM;
+  }
+  return h;
+}
+function roomAtPointOnFloor(floor,x,y){
+  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
+  var rooms=DATA.rooms, i, r;
+  for(i=0;i<rooms.length;i++){
+    r=rooms[i];
+    if(!r||r.floor!==floor||r.hidden3D) continue;
+    if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d) return r;
+  }
+  return null;
+}
+// 壁の両側を数点サンプリングし、接する部屋の天井高の最大値と、
+// 「両側とも部屋に囲まれているか(=内部間仕切りか)」を返す。
+function wallAdjacentRoomsCeiling(w){
+  var res={maxM:0,found:false,enclosed:true};
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1){ res.enclosed=false; return res; }
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r,h;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(!r){ res.enclosed=false; continue; }
+      res.found=true;
+      h=roomCeilingHeightM(r);
+      if(h>res.maxM) res.maxM=h;
+    }
+  }
+  return res;
+}
+// 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
+// 最大値を採る。低い方に合わせて切ると高い側の部屋に穴が開くので、最大値以外は
+// 選べない。ただし片側でも部屋に面していない壁(=外皮に面する壁)は階高まで伸ばす:
+// そこを天井高まで下げると、外壁と上階の床のあいだに家の外まで抜ける穴が開く。
+function wallCeilingHeightM(w){
+  var envelopeM=wallFullHeightM(w&&w.floor);
+  if(!w) return envelopeM;
+  var adj=wallAdjacentRoomsCeiling(w);
+  if(!adj.found) return envelopeM;
+  return adj.enclosed ? adj.maxM : Math.max(adj.maxM,envelopeM);
 }
 
 var ISIZES = {
@@ -9773,7 +9864,7 @@ function wallHeightMm(w){
 }
 function wallDisplayHeightM(w){
   // ここの WALL_H は「既定値のまま=個別指定なし」を判定する番兵で、高さの取得ではないので置き換えない。
-  if(!w || w.wallHeight===undefined || isNaN(Number(w.wallHeight)) || Number(w.wallHeight)===WALL_H) return wallFullHeightM(w&&w.floor);
+  if(!w || w.wallHeight===undefined || isNaN(Number(w.wallHeight)) || Number(w.wallHeight)===WALL_H) return wallCeilingHeightM(w);
   return Math.max(0.3,wallHeightMm(w)*U+floorSlabHeightMForFloor(w.floor));
 }
 function hasWallTopShape(w){
