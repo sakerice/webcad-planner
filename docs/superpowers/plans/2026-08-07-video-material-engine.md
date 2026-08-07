@@ -932,6 +932,69 @@ git commit -m "Build the video material package from the shared guide path"
 
 ---
 
+### Task 7b: 平面図を参照そのものにする経路
+
+**Files:**
+- Modify: `index.html`（`generateVideoRenderPackage` に平面図ソースを足す）
+- Test: `tools/tests/video-package.test.cjs`（追記）
+
+**なぜ必要か:** 設計 §4.1 と §8.1 は「平面図を参照として渡し、それが家に変わっていく」
+表現を柱の一つに置いている。Task 7 が作ったのは**3Dビューを参照にする経路だけ**で、
+平面図は `plan_context.png`（構図を人間が把握するための添え物）として入るだけ。
+
+このままだと Task 8 で `plan-to-life` プリセットを出した瞬間、
+**参照は3Dレンダなのにプロンプトは「図面から始めよ」と言う**組み合わせが作れてしまう。
+実測では、その組み合わせは生成AIに渡した映像を捨てさせ、線画を描き直させる。
+Task 8 の前にここを塞ぐ。
+
+**やること:**
+1. `generateVideoRenderPackage({source:'plan'})` で、`reference.png` を**平面図**にする
+   （Task 3 の `capturePlan2dDataUrl` を使う。注記抜き・天井高ラベルあり）
+2. そのとき `VideoPrompt.presetsFor('plan')` を使う（`'3d'` ではなく）
+3. 平面図が参照のときガイド類（depth/normal/segmentation/instance）は3Dのものと
+   **構図が一致しない**。既定オフのままとし、**opt-in してもこの経路では入れない**。
+   構図の合わないガイドは生成AIを誤らせるだけで、無い方が良い。
+4. `package.json` の `source` に `'plan'` / `'3d'` を記録する
+
+**やらないこと:** 平面図に対する暗部の持ち上げ。平面図は元から明るく、
+`ShadowLift` は3Dレンダの潰れた影のためのもの。この経路では適用しない
+（適用しないことを `shadowLift: {applied:false, reason:'plan source'}` として記録する）。
+
+- [ ] **Step 1: 失敗するテストを書き、赤を確認する**
+
+```js
+test('平面図ソースでは reference.png が平面図で、プリセットは図面系になる', () => {
+  const fn = html.slice(html.indexOf('function generateVideoRenderPackage'));
+  const body = fn.slice(0, fn.indexOf('\nfunction '));
+  assert.match(body, /capturePlan2dDataUrl/);
+  assert.match(body, /presetsFor\(\s*['"]plan['"]/);
+});
+
+test('平面図ソースでは構図の合わないガイドを同梱しない', () => {
+  const fn = html.slice(html.indexOf('function generateVideoRenderPackage'));
+  const body = fn.slice(0, fn.indexOf('\nfunction '));
+  // opt-in していても plan ソースではガイドを入れない
+  assert.match(body, /source\s*===\s*['"]plan['"]/);
+});
+
+test('package.json は参照の出どころを記録する', () => {
+  assert.match(html, /source:\s*(source|state\.source)/);
+});
+```
+
+- [ ] **Step 2〜4: 実装 → 実際にパッケージを1つ書き出して中身を見る → コミット**
+
+平面図ソースで生成し、`reference.png` が注記抜きの平面図（天井高ラベルあり）で、
+`prompt.txt` が図面系プリセットの本文になっていること、ガイドが入っていないことを
+実物で確認する。
+
+```bash
+git add index.html tools/tests/video-package.test.cjs
+git commit -m "Let the plan drawing itself be the reference"
+```
+
+---
+
 ### Task 8: UI — 動画AIレンダーのボタンとダイアログ
 
 **Files:**
