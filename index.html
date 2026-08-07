@@ -63,6 +63,10 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
 <script src="assets/models/custom/manifest.js"></script>
 <script src="assets/js/height-model.js"></script>
+<!-- video-prompt.js は LockTiers を読むので、lock-tiers.js より後に置くこと -->
+<script src="assets/js/lock-tiers.js"></script>
+<script src="assets/js/video-prompt.js"></script>
+<script src="assets/js/shadow-lift.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -4108,6 +4112,12 @@ function toggleAssetCat(el){
   wrap.classList.toggle('open');
   if(mark) mark.textContent=wrap.classList.contains('open')?'-':'+';
 }
+// 上面画像がまだ読めていない家具の代替表示（drawItem2d）。数値をここに置くのは、
+// 動画パッケージ側の事後検証 findPlanPlaceholderInstances が同じ値から
+// 「この画素はプレースホルダでありうるか」を逆算するため。表を2つ持たない。
+var PLAN_PLACEHOLDER_RGB=[210,215,225];
+var PLAN_PLACEHOLDER_ALPHA=0.72;
+var PLAN_PLACEHOLDER_FILL='rgba('+PLAN_PLACEHOLDER_RGB.join(',')+','+PLAN_PLACEHOLDER_ALPHA+')';
 function getFmpTopImage(item){
   if(!item||!item.top) return null;
   if(!FMP_TOP_IMAGES[item.id]){
@@ -6776,7 +6786,9 @@ function drawItem2d(it){
     if(topImg && topImg.complete && topImg.naturalWidth>0){
       drawFmpTopImageOriented(topImg,fmp,it.w*sc,it.d*sc);
     } else {
-      ctx.fillStyle='rgba(210,215,225,0.72)';
+      // 色は PLAN_PLACEHOLDER_* に置いてある。findPlanPlaceholderInstances が
+      // 「この画素はプレースホルダでありうるか」を逆算するのに同じ値を要るため。
+      ctx.fillStyle=PLAN_PLACEHOLDER_FILL;
       ctx.fillRect(-hwF,-hdF,it.w*sc,it.d*sc);
       ctx.strokeStyle='rgba(0,0,0,0.35)';
       ctx.strokeRect(-hwF,-hdF,it.w*sc,it.d*sc);
@@ -17258,7 +17270,14 @@ function aiRefSource(ref,kind){
 }
 function aiInstanceSummary(ref,kind,id,color){
   var src=aiRefSource(ref,kind);
-  var out={id:id,color:color,source:src.collection,index:src.index,type:(ref&&ref.type)||kind||'unclassified'};
+  // 設計要素を持たないメッシュは entryFor(ref||o, kind) で three.js のオブジェクトが
+  // ref に入る。その .type は Object3D のクラス名 ('Mesh') であって設計上の種別では
+  // ないので、legend にそのまま書くと「Mesh」という部材が実在するように見える
+  // (実データで35件)。クラス名に分類規則を当てるのは漏れを隠すことなので、
+  // 呼び出し側が既に知っている意味のある名前 (kind: 'outside-ground' /
+  // 'render-object' / selectKind) を使う。
+  var isThreeObject=!!(ref&&ref.isObject3D);
+  var out={id:id,color:color,source:src.collection,index:src.index,type:(!isThreeObject&&ref&&ref.type)||kind||'unclassified'};
   ['floor','x','y','w','d','h','rotation'].forEach(function(key){
     if(ref&&ref[key]!==undefined&&ref[key]!==null) out[key]=ref[key];
   });
@@ -17998,6 +18017,393 @@ async function downloadAiRenderBundle(){
     '- normal_guide.png\n'+
     '- instance_guide.png'
   );
+}
+// ═══ 動画生成AI向け素材パッケージ (設計 §5 / §12.3) ════════════════════════
+// 既存の静止画パッケージ generateAiRenderPackage() と**ガイド生成経路を共有する**
+// (設計 §11)。動画版のために2本目のキャプチャ経路は作らない。二重化は必ず
+// 片方が腐る。ここにあるのは「撮る」コードではなく「並べて詰める」コードである。
+var VIDEO_RENDER_PACKAGE=null;
+
+// ── 2D家具の上面画像のレース ───────────────────────────────────────────
+// 家具の上面画像は getFmpTopImage が非同期に読む。まだ読めていない家具は
+// drawItem2d が灰色の矩形 rgba(210,215,225,0.72) で代替する。静止画版は
+// 画面に出ている階しか撮らないのでここに当たらないが、動画版は階を指定して
+// 平面図を撮るので当たる。GLBのロード待ちを入れ忘れて PV を1本まるごと
+// 撮り直した事故の、2D側の双子である。
+function planFloorTopImageEntries(floor){
+  var out=[];
+  (DATA.items||[]).forEach(function(it){
+    if(it.floor!==floor) return;
+    var fmp=getFmpItem(it.type);
+    if(!fmp||!fmp.top) return;
+    var img=getFmpTopImage(fmp); // 呼ぶこと自体が読み込みの開始でもある
+    if(img) out.push({item:it,img:img});
+  });
+  return out;
+}
+async function waitForPlanFloorTopImages(floor,timeoutMs){
+  var limit=(typeof timeoutMs==='number'&&timeoutMs>0)?timeoutMs:8000;
+  var started=Date.now();
+  var entries=planFloorTopImageEntries(floor);
+  var pending=entries.length, i;
+  for(;;){
+    pending=0;
+    for(i=0;i<entries.length;i++){
+      var im=entries[i].img;
+      // 読み込みに失敗した画像も complete になる。naturalWidth まで見る。
+      if(!(im.complete&&im.naturalWidth>0)) pending++;
+    }
+    if(pending===0||Date.now()-started>=limit) break;
+    await waitFrame(60);
+  }
+  return {floor:floor,images:entries.length,pending:pending,waitedMs:Date.now()-started};
+}
+// 待った「つもり」を信じない。出力された画素だけを見て、家具が本当に描かれたかを
+// 事後検証する。考え方は pv/tools/truth-render/check_scene_readiness.py と同じで、
+// 待ちの成否とは独立に、出てきたものを測る。
+// プレースホルダは単色の塗りつぶし矩形なので、部材の中心に取った小さな正方形の
+// 中に色が1つしか無ければ、上面写真に差し替わっていない候補になる。
+//
+// ただし「単色」だけでは足りない。実測: 読み込みが**終わった**後の
+// fmp-CabinetD03 / D04 の天板は真っ白 (#ffffff) の単色で、これを数えると
+// 正常なパッケージが弾かれる。そこで色そのものも見る。プレースホルダは
+// 不透明な背景 B の上に rgba(210,215,225,0.72) を重ねた結果なので、B を逆算して
+// 0..255 に収まるかを問う。収まらなければ、どんな背景からも作れない色＝
+// プレースホルダではない。実測で #ffffff は落ち (B_r=370.7)、読み込み前の
+// #dde1e7 / #d5dae3 は通る。
+function planPlaceholderCouldBe(r,g,b){
+  var a=PLAN_PLACEHOLDER_ALPHA, inv=1-a, c=[r,g,b], i;
+  for(i=0;i<3;i++){
+    var back=(c[i]-a*PLAN_PLACEHOLDER_RGB[i])/inv;
+    if(back<-1.5||back>256.5) return false; // 丸め1段ぶんの余裕
+  }
+  return true;
+}
+function findPlanPlaceholderInstances(imageData,floor){
+  var found=[];
+  if(!imageData||!imageData.data) return found;
+  var d=imageData.data, W=imageData.width, H=imageData.height;
+  var sc=ST.zoom*0.05;
+  planFloorTopImageEntries(floor).forEach(function(e){
+    var it=e.item;
+    var pose=getItemDisplayPose(it);
+    var ccx=ST.panX+pose.x*sc, ccy=ST.panY+pose.y*sc;
+    // どの回転角でも矩形の内側に収まる正方形の半辺 (0.35 < 1/(2*sqrt2))
+    var half=Math.floor(Math.min(it.w,it.d)*sc*0.35);
+    if(half<3) return;                       // 数画素の部材は判定材料にならない
+    var x0=Math.max(0,Math.round(ccx-half)), x1=Math.min(W-1,Math.round(ccx+half));
+    var y0=Math.max(0,Math.round(ccy-half)), y1=Math.min(H-1,Math.round(ccy+half));
+    if(x1-x0<5||y1-y0<5) return;             // 画面外・見切れは判定しない
+    var first=-1, distinct=1, x, y;
+    for(y=y0;y<=y1&&distinct<2;y++){
+      for(x=x0;x<=x1;x++){
+        var p=(y*W+x)*4;
+        var v=(d[p]<<16)|(d[p+1]<<8)|d[p+2];
+        if(first<0){ first=v; continue; }
+        if(v!==first){ distinct=2; break; }
+      }
+    }
+    if(distinct<2&&planPlaceholderCouldBe((first>>16)&255,(first>>8)&255,first&255)){
+      found.push({id:it.id,type:it.type,color:'#'+('000000'+first.toString(16)).slice(-6),
+        x:x0,y:y0,w:x1-x0+1,h:y1-y0+1});
+    }
+  });
+  return found;
+}
+function decodePngDataUrlToImageData(dataUrl){
+  return new Promise(function(resolve,reject){
+    var img=new Image();
+    img.onload=function(){
+      var cv=document.createElement('canvas');
+      cv.width=img.naturalWidth||img.width;
+      cv.height=img.naturalHeight||img.height;
+      var cx=cv.getContext('2d',{willReadFrequently:true});
+      cx.drawImage(img,0,0);
+      try{ resolve(cx.getImageData(0,0,cv.width,cv.height)); }
+      catch(err){ reject(err); }
+    };
+    img.onerror=function(){ reject(new Error('画像のデコードに失敗しました')); };
+    img.src=dataUrl;
+  });
+}
+function imageDataToPngDataUrl(im){
+  var cv=document.createElement('canvas');
+  cv.width=im.width; cv.height=im.height;
+  // ShadowLift は node に ImageData が無いため素の {data,width,height} を返す。
+  // canvas へ戻すときに包むのは呼び出し側の仕事。
+  cv.getContext('2d').putImageData(new ImageData(im.data,im.width,im.height),0,0);
+  return cv.toDataURL('image/png');
+}
+// 判定器は「生成結果 vs モデルが実際に見た絵」を比べる。カーブを記録しないと
+// 持ち上げ前のレンダと比べてしまい、我々自身の補正がドリフトとして数えられる。
+// 不適用でも gamma:1 を書くのは、読む側に「無い＝1」を推測させないため。
+function videoShadowLiftRecord(curve,measuredParts){
+  var c=curve||{applied:false};
+  return {
+    applied:!!c.applied,
+    gamma:(typeof c.gamma==='number')?c.gamma:1,
+    liftedFrom:(typeof c.liftedFrom==='number')?c.liftedFrom:null,
+    floorLuminance:(typeof c.floorLuminance==='number')?c.floorLuminance:ShadowLift.FLOOR_LUMINANCE,
+    minGamma:ShadowLift.MIN_GAMMA,
+    // 下限のガンマでも床に届かなかった部材。モデルが本当に見えていない場所なので、
+    // 判定器がここを普通の部材として測ると必ず落ちる。名前ごと運ぶ。
+    unliftableColors:(c.unliftableColors||[]).slice(),
+    measuredParts:measuredParts
+  };
+}
+// 光の形をここで確定する。VideoPrompt が読むのは timeOfDay ただ1つなので、
+// それを最上位に置いた {timeOfDay:...} を唯一の形とする。他の3つは
+// package.json に残すためのもので、compose は見ない。
+function videoDaylightDescriptor(){
+  return {
+    timeOfDay:LIGHT_SETTINGS.timeOfDay||'day',
+    sunSim:!!LIGHT_SETTINGS.sunSim,
+    hour:LIGHT_SETTINGS.hour,
+    season:LIGHT_SETTINGS.season
+  };
+}
+// compose は読めない daylight の光の文を黙って落とす。落ちたことをここで捕まえる。
+// 光の描写が消えたまま渡すのは、生成に自前の光源を発明させた実測の失敗そのもの。
+// 検出は「daylight を渡さずに組んだ文と一致するか」で行う。LIGHT の鍵の表を
+// こちら側へ写し取ると表が2つに増え、必ず片方が腐る。
+function composeVideoPromptOrThrow(opts){
+  var text=VideoPrompt.compose(opts);
+  if(!text) throw new Error('プロンプトを組み立てられませんでした（表現プリセットも入力文もありません）。');
+  var user=(typeof opts.userText==='string')?opts.userText.replace(/^\s+|\s+$/g,''):'';
+  // ユーザーが本文を書いたときは光の描写もユーザーのもの。compose は意図的に
+  // 光の文を足さない（Task 5 の決定）ので、ここでも要求しない。
+  if(user!=='') return text;
+  var withoutLight=VideoPrompt.compose({preset:opts.preset,legend:opts.legend,camera:opts.camera});
+  if(text===withoutLight){
+    throw new Error('光の状態をプロンプトに書けませんでした（時刻プリセット "'+
+      (opts.daylight&&opts.daylight.timeOfDay)+'"）。このまま渡すと生成AIが'+
+      '自分で光源を作ります。VideoPrompt の LIGHT にこの時刻を足してください。');
+  }
+  return text;
+}
+function videoCameraDescriptor(floor){
+  var cam=getActive3DCamera();
+  var target=(orbit&&orbit.target)?orbit.target:new THREE.Vector3();
+  var base=floorBaseY(floor);
+  var vFov=(cam&&cam.fov)||45;
+  var aspect=(cam&&cam.aspect)||1;
+  return {
+    // three.js と同じ Y-up の並び [x, 高さ, z]。VideoPrompt は添字1を高さと読む。
+    posM:[cam.position.x,cam.position.y,cam.position.z],
+    targetM:[target.x,target.y,target.z],
+    fovDeg:vFov,
+    // 水平画角。平面図に重ねる三角形はこちらで開く。
+    hFovDeg:2*Math.atan(Math.tan(vFov*Math.PI/360)*aspect)*180/Math.PI,
+    aspect:aspect,
+    // 目線の高さは「床からの高さ」であって世界座標の y ではない
+    // （2階の目線は世界座標では 4.2m になる）。
+    eyeHeightM:cam.position.y-base,
+    floorBaseYM:base
+  };
+}
+function videoHeightModelRecord(floor){
+  var rooms=[];
+  (DATA.rooms||[]).forEach(function(r){
+    if(r.floor!==floor) return;
+    rooms.push({
+      id:r.id,
+      name:r.name||'',
+      ceiling:HeightModel.ceilingShape(DATA,r),
+      label:HeightModel.ceilingLabel(DATA,r)
+    });
+  });
+  return {
+    storyHeightMm:HeightModel.storyHeightMm(DATA,floor),
+    floorSlabMm:HeightModel.DEFAULTS.floorSlabMm,
+    firstFloorLevelMm:HeightModel.DEFAULTS.firstFloorLevelMm,
+    rooms:rooms
+  };
+}
+// 平面図にカメラの位置と画角を三角形で重ねる。draw2d は分岐させない
+// （設計 §11）。撮った絵の上に別キャンバスで重ねるだけにする。
+function drawPlanCameraOverlay(planDataUrl,camera){
+  return new Promise(function(resolve,reject){
+    var img=new Image();
+    img.onload=function(){
+      var cv=document.createElement('canvas');
+      cv.width=img.naturalWidth||img.width;
+      cv.height=img.naturalHeight||img.height;
+      var cx=cv.getContext('2d');
+      cx.drawImage(img,0,0);
+      var sc=ST.zoom*0.05;
+      // 3Dの世界座標[m] は平面の座標[mm] を U 倍したもの。x→x, z→y。
+      function planX(xm){ return ST.panX+(xm/U)*sc; }
+      function planY(zm){ return ST.panY+(zm/U)*sc; }
+      var ex=planX(camera.posM[0]), ey=planY(camera.posM[2]);
+      var tx=planX(camera.targetM[0]), ty=planY(camera.targetM[2]);
+      var dx=tx-ex, dy=ty-ey, len=Math.sqrt(dx*dx+dy*dy);
+      if(!isFinite(len)||len<1){ resolve(cv.toDataURL('image/png')); return; }
+      var reach=Math.max(len,Math.min(cv.width,cv.height)*0.22);
+      var ux=dx/len, uy=dy/len;
+      var t=Math.tan((camera.hFovDeg||45)*Math.PI/360)*reach;
+      var nx=-uy*t, ny=ux*t;
+      cx.save();
+      cx.beginPath();
+      cx.moveTo(ex,ey);
+      cx.lineTo(ex+ux*reach+nx,ey+uy*reach+ny);
+      cx.lineTo(ex+ux*reach-nx,ey+uy*reach-ny);
+      cx.closePath();
+      cx.fillStyle='rgba(233,69,96,0.16)';
+      cx.fill();
+      cx.strokeStyle='rgba(233,69,96,0.85)';
+      cx.lineWidth=2;
+      cx.stroke();
+      cx.beginPath();
+      cx.arc(ex,ey,5,0,Math.PI*2);
+      cx.fillStyle='rgba(233,69,96,0.95)';
+      cx.fill();
+      cx.restore();
+      resolve(cv.toDataURL('image/png'));
+    };
+    img.onerror=function(){ reject(new Error('平面図にカメラを重ねられませんでした')); };
+    img.src=planDataUrl;
+  });
+}
+function videoPackageJson(state){
+  return {
+    version:1,
+    app:'house-planner mobile',
+    createdAt:state.createdAt,
+    view:state.view,
+    floor:state.floor,
+    durationSec:state.durationSec,
+    presetId:state.presetId,
+    presetLabel:state.presetLabel,
+    promptFile:'prompt.txt',
+    referenceFile:'reference.png',
+    camera:state.camera,
+    daylight:state.daylight,
+    heightModel:state.heightModel,
+    // Task 4: 色→階層の表。判定器はこれを見て階層ごとに閾値を変える。
+    lockTiers:state.lockTiers,
+    // Task 6: reference.png に実際に適用したトーンカーブ。
+    shadowLift:state.shadowLift,
+    capture:state.capture,
+    files:state.files
+  };
+}
+async function generateVideoRenderPackage(options){
+  var opt=options||{};
+  if(!(await ensureAiRenderableView())){
+    throw new Error('外観3Dまたは内観3Dを表示してから動画AIレンダー用パッケージを生成してください。');
+  }
+  var floor=ST.floor;
+  var view=ST.view==='3d-int'?'interior':'exterior';
+  var includeGuides=!!opt.includeGuides;   // 設計 §12.3: 詳細ガイドは既定オフ
+  var duration=Math.max(4,Math.min(VideoPrompt.MAX_DURATION_SEC,
+    Number(opt.durationSec)||VideoPrompt.DEFAULT_DURATION_SEC));
+  var presets=VideoPrompt.presetsFor('3d');
+  var preset=null, i;
+  for(i=0;i<presets.length;i++) if(presets[i].id===opt.presetId) preset=presets[i];
+  if(!preset&&!opt.userText) preset=presets[0];
+
+  await waitFrame(50);
+  // 1) 参照の本体と、部材ごとのマスク。既存の静止画版とまったく同じ関数を呼ぶ。
+  var base=captureCurrent3DDataUrl();
+  if(!base) throw new Error('3Dビューの撮影に失敗しました。');
+  await waitFrame(30);
+  var instanceData=captureInstance3DData();
+  if(!instanceData.dataUrl) throw new Error('部材IDガイドの撮影に失敗しました。');
+
+  // 2) 暗部の持ち上げ (設計 §12.1)。測る→カーブを決める→適用する→記録する。
+  var lockTiers=LockTiers.tableFor(instanceData.legend);
+  var baseIm=await decodePngDataUrlToImageData(base);
+  var instIm=await decodePngDataUrlToImageData(instanceData.dataUrl);
+  var measurements=ShadowLift.measure(baseIm,instIm,lockTiers);
+  var curve=ShadowLift.curveFor(measurements);
+  var reference=imageDataToPngDataUrl(ShadowLift.apply(baseIm,curve));
+
+  // 3) 平面図。撮る前に家具の上面画像を待ち、撮った後に画素で確かめる。
+  var topImages=await waitForPlanFloorTopImages(floor);
+  var plan=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:floor});
+  if(!plan) throw new Error('平面図の撮影に失敗しました。');
+  var placeholders=findPlanPlaceholderInstances(await decodePngDataUrlToImageData(plan),floor);
+  if(placeholders.length){
+    throw new Error('平面図の家具 '+placeholders.length+' 件が灰色のプレースホルダのままです'+
+      '（上面画像 '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
+      'ms 待っても読めていません）。このまま渡すと、生成AIは家具の無い部屋を見ます。');
+  }
+  var camera=videoCameraDescriptor(floor);
+  var planContext=await drawPlanCameraOverlay(plan,camera);
+
+  // 4) プロンプト。光を書けなかったら黙って続けない。
+  var daylight=videoDaylightDescriptor();
+  var prompt=composeVideoPromptOrThrow({
+    preset:preset,legend:instanceData.legend,camera:camera,
+    daylight:daylight,userText:opt.userText
+  });
+
+  // 5) 詳細ガイド。既定では撮らない（撮らないものは同梱もされない）。
+  var guides=null;
+  if(includeGuides){
+    await waitFrame(30);
+    var seg=captureSegmentation3DDataUrl();
+    await waitFrame(30);
+    var depth=captureAiOverrideGuideDataUrl('depth');
+    await waitFrame(30);
+    var normal=captureAiOverrideGuideDataUrl('normal');
+    guides={
+      segmentation:seg,depth:depth,normal:normal,
+      edge:await makeEdgeDataUrlFromSegmentation(instanceData.dataUrl)
+    };
+  }
+
+  var enc=new TextEncoder();
+  var names=['reference.png','plan_context.png','prompt.txt','package.json'];
+  if(guides){
+    names=names.concat(['edge_guide.png','depth_guide.png','normal_guide.png',
+      'segmentation_guide.png','instance_guide.png','instance-legend.json',
+      'segmentation-legend.json']);
+  }
+  var json=videoPackageJson({
+    createdAt:new Date().toISOString(),
+    view:view,floor:floor,durationSec:duration,
+    presetId:preset?preset.id:null,
+    presetLabel:preset?preset.label:null,
+    camera:camera,daylight:daylight,
+    heightModel:videoHeightModelRecord(floor),
+    lockTiers:lockTiers,
+    shadowLift:videoShadowLiftRecord(curve,measurements.length),
+    capture:{width:baseIm.width,height:baseIm.height,
+      instances:instanceData.legend.length,
+      topImages:topImages,includeGuides:includeGuides},
+    files:names
+  });
+  var jsonText=JSON.stringify(json,null,2);
+  var files=[
+    {name:'reference.png',bytes:await dataUrlToBytes(reference)},
+    {name:'plan_context.png',bytes:await dataUrlToBytes(planContext)},
+    {name:'prompt.txt',bytes:enc.encode(prompt)},
+    {name:'package.json',bytes:enc.encode(jsonText)}
+  ];
+  if(guides){
+    files.push({name:'edge_guide.png',bytes:await dataUrlToBytes(guides.edge)});
+    files.push({name:'depth_guide.png',bytes:await dataUrlToBytes(guides.depth)});
+    files.push({name:'normal_guide.png',bytes:await dataUrlToBytes(guides.normal)});
+    files.push({name:'segmentation_guide.png',bytes:await dataUrlToBytes(guides.segmentation)});
+    files.push({name:'instance_guide.png',bytes:await dataUrlToBytes(instanceData.dataUrl)});
+    files.push({name:'instance-legend.json',bytes:enc.encode(
+      JSON.stringify({version:2,instances:instanceData.legend},null,2))});
+    files.push({name:'segmentation-legend.json',bytes:enc.encode(
+      JSON.stringify({version:2,legend:aiSegmentationLegend()},null,2))});
+  }
+  VIDEO_RENDER_PACKAGE={
+    packageJson:json,
+    packageJsonText:jsonText,
+    prompt:prompt,
+    files:files.map(function(f){return {name:f.name,size:f.bytes.length};}),
+    images:{reference:reference,planContext:planContext},
+    zipBlob:makeZipBlob(files)
+  };
+  if(opt.download!==false){
+    downloadBlobFile('house-planner-video-package.zip',VIDEO_RENDER_PACKAGE.zipBlob);
+  }
+  return VIDEO_RENDER_PACKAGE;
 }
 var UNITY_RENDER_SERVER_KEY='webcadUnityRenderServer';
 var unityRenderBusy=false, unityRenderTimer=null;
