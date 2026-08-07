@@ -428,5 +428,141 @@ class DominantCategoryTest(unittest.TestCase):
         self.assertIsNone(cat.dominant_category(m, masks))
 
 
+# ---------------------------------------------------------------------------
+# package.json が持ち込む階層表 (Task 9)
+#
+# アプリ側 (`assets/js/lock-tiers.js`) は設計そのものから階層を決める:
+# 開口部と建具はハードロック、家具はソフトロック、周辺環境と注記は計測しない。
+# こちらの組み込み分類はセグメンテーション画像の色から推測する **発見的手法**
+# でしかない。両者が食い違ったら設計側が正しい。
+#
+# 語彙について: package.json は 'LOCKED' / 'SOFT' / 'FREE' と大文字で書く。
+# このモジュールは前から 'locked' / 'soft' / 'context' を使っている。
+# **語彙は1つに畳む**（`tier_for` は常にこのモジュールの定数を返す）。
+# 2つのまま流すと `evaluate()` の `info["tier"] == cat.LOCKED` が 'LOCKED' に
+# 対して静かに False になり、ロックされた部材が黙って無検査になる。
+# ---------------------------------------------------------------------------
+class PackageTierTableTest(unittest.TestCase):
+    def test_tier_table_from_package_overrides_the_builtin_classification(self):
+        # package.json が階層を宣言していれば、それが優先される。
+        table = {"#aabbcc": "SOFT"}
+        self.assertEqual(cat.TIER_OF["walls"], cat.LOCKED)   # 組み込みは LOCKED
+        self.assertEqual(cat.tier_for("#aabbcc", "walls", table), cat.SOFT)
+
+    def test_without_a_tier_table_the_builtin_classification_is_used(self):
+        # 既存の PV 実行は package.json を持たない。壊さない。
+        self.assertEqual(cat.tier_for("#aabbcc", "walls", None), cat.LOCKED)
+        # 定数を返すだけの実装を落とすため、同じ関数を別の入力でもう一度叩く。
+        self.assertEqual(cat.tier_for("#aabbcc", "furniture", None), cat.SOFT)
+        self.assertEqual(cat.tier_for("#aabbcc", "neighbour", None), cat.CONTEXT)
+
+    def test_an_instance_with_no_category_keeps_falling_back_to_context(self):
+        # `dominant_category` はどのカテゴリとも重ならない部材に None を返す。
+        # 今日それは CONTEXT (= 判定しない) に落ちる。表が無いときの挙動は
+        # 1ミリも動かしてはならない。
+        self.assertEqual(cat.tier_for(None, None, None), cat.CONTEXT)
+        self.assertEqual(cat.tier_for("#aabbcc", "no-such-category", None), cat.CONTEXT)
+
+    def test_a_colour_the_table_does_not_mention_keeps_its_builtin_tier(self):
+        table = {"#aabbcc": "SOFT"}
+        self.assertEqual(cat.tier_for("#ddeeff", "walls", table), cat.LOCKED)
+        self.assertEqual(cat.tier_for(None, "walls", table), cat.LOCKED)
+
+    def test_the_table_is_matched_without_caring_about_hex_case(self):
+        # legend の色は小文字、package.json の色は書き手次第。大文字小文字で
+        # 取りこぼすと、階層が黙って組み込み分類へ落ちる。
+        self.assertEqual(cat.tier_for("#AABBCC", "walls", {"#aabbcc": "SOFT"}), cat.SOFT)
+        self.assertEqual(cat.tier_for("#aabbcc", "walls", {"#AABBCC": "SOFT"}), cat.SOFT)
+
+    def test_free_is_a_tier_the_builtin_classification_can_never_produce(self):
+        # FREE は設計側の宣言でしか現れない。組み込み分類は CONTEXT どまり
+        # (報告はするが判定しない) で、「一切測らない」とは意味が違う。
+        self.assertNotIn(cat.FREE, set(cat.TIER_OF.values()))
+        self.assertEqual(cat.tier_for("#aabbcc", "walls", {"#aabbcc": "FREE"}), cat.FREE)
+
+    def test_an_unknown_tier_word_is_an_error_not_a_silent_fallback(self):
+        # 綴り違いを組み込み分類へ黙って落とすと、設計が LOCKED と言った部材が
+        # 無検査で通り得る。読めない表は読めないと言う。
+        with self.assertRaises(ValueError):
+            cat.tier_for("#aabbcc", "walls", {"#aabbcc": "HARD-LOCKED"})
+
+
+class LockTierTableFromPackageTest(unittest.TestCase):
+    def _package(self, **over):
+        pkg = {"version": 1, "source": "3d",
+               "lockTiers": {"#5D9DF2": "LOCKED", "#c6f25d": "SOFT",
+                             "#f25de6": "FREE"}}
+        pkg.update(over)
+        return pkg
+
+    def test_the_table_is_read_and_normalised_to_this_modules_vocabulary(self):
+        table = cat.lock_tier_table(self._package())
+        self.assertEqual(table, {"#5d9df2": cat.LOCKED, "#c6f25d": cat.SOFT,
+                                 "#f25de6": cat.FREE})
+
+    def test_no_package_at_all_means_no_table(self):
+        # 既存の PV 実行。組み込み分類へそのまま落ちる。
+        self.assertIsNone(cat.lock_tier_table(None))
+        self.assertIsNone(cat.lock_tier_table({}))
+
+    def test_a_plan_source_package_has_no_colour_keyed_table(self):
+        # 平面図経路は色→階層の表を持たない (`lockTiers: null`)。色を持たない
+        # `instances` は載っているが、ガイド画像の色と突き合わせられないので
+        # 判定には使えない。
+        plan = {"source": "plan", "lockTiers": None,
+                "instances": [{"id": "W86", "type": "wall", "floor": 2,
+                               "tier": "LOCKED"}]}
+        self.assertIsNone(cat.lock_tier_table(plan))
+        self.assertEqual(cat.package_source(plan), cat.PACKAGE_SOURCE_PLAN)
+
+    def test_the_source_defaults_to_3d_when_the_package_predates_the_field(self):
+        # Task 7 が書き出したパッケージには `source` が無い。すべて3D経路。
+        self.assertEqual(cat.package_source({"lockTiers": {}}), cat.PACKAGE_SOURCE_3D)
+
+    def test_a_malformed_tier_word_in_the_package_is_loud(self):
+        with self.assertRaises(ValueError):
+            cat.lock_tier_table(self._package(lockTiers={"#aabbcc": "sort-of-locked"}))
+
+
+class UnmeasurableFinishColoursTest(unittest.TestCase):
+    """`shadowLift.unliftableColors` は「モデルが本当に見られなかった部材」。"""
+
+    def test_the_unliftable_colours_are_taken_from_the_shadow_lift_record(self):
+        pkg = {"shadowLift": {"applied": True, "gamma": 0.7, "floorLuminance": 30,
+                              "unliftableColors": ["#E65DF2", "#5df2c5"]}}
+        self.assertEqual(cat.unmeasurable_finish_colours(pkg),
+                         {"#e65df2", "#5df2c5"})
+
+    def test_a_package_without_a_shadow_lift_record_names_nothing(self):
+        self.assertEqual(cat.unmeasurable_finish_colours(None), set())
+        self.assertEqual(cat.unmeasurable_finish_colours({}), set())
+        self.assertEqual(cat.unmeasurable_finish_colours(
+            {"shadowLift": {"applied": False, "unliftableColors": []}}), set())
+
+
+class LegendColourJoinTest(unittest.TestCase):
+    """色→階層の表と、判定器が使う部材名を結ぶのは legend の色である。"""
+
+    def test_names_match_the_names_the_instance_regions_are_keyed_by(self):
+        legend = {"version": 2, "instances": [
+            {"id": 2, "color": "#C6F25D", "type": "wall", "floor": 1},
+            {"id": 9, "color": "#ff0000", "label": "sofa#9", "type": "sofa"},
+        ]}
+        colours = cat.legend_colours(legend)
+        # metrics._legend_name と同じ規則 (label -> "type#id" -> id)。
+        # ここで規則を写し取ると、metrics 側が変わった日に階層だけが黙って
+        # 別の部材へ付く。
+        self.assertEqual(colours, {"wall#2": "#c6f25d", "sofa#9": "#ff0000"})
+
+    def test_a_legend_entry_without_a_colour_is_skipped_not_crashed(self):
+        legend = {"instances": [{"id": 1, "type": "wall"},
+                                {"id": 2, "color": None, "type": "wall"},
+                                {"id": 3, "color": "#abcdef", "type": "wall"}]}
+        self.assertEqual(cat.legend_colours(legend), {"wall#3": "#abcdef"})
+
+    def test_no_legend_means_no_colours(self):
+        self.assertEqual(cat.legend_colours(None), {})
+
+
 if __name__ == "__main__":
     unittest.main()

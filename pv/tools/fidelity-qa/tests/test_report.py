@@ -27,10 +27,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import categories as cat
 from report import (
     EXIT_CODE,
+    PackageTiering,
     Thresholds,
     assert_coverage,
     collect_rows,
     evaluate,
+    load_package,
 )
 from metrics import edge_mask, edge_precision, line_edge_mask
 
@@ -42,7 +44,7 @@ from metrics import edge_mask, edge_precision, line_edge_mask
 def thresholds(min_locked_recall=0.75, max_locked_contradiction=0.20,
                min_locked_instance_recall=0.50, min_soft_recall=0.75,
                min_soft_instance_recall=0.50, max_unverifiable_fraction=0.50,
-               max_locked_finish_drift=200.0):
+               max_locked_finish_drift=200.0, max_soft_finish_drift=None):
     """テスト用の閾値。**production には既定値は無い** — CLI は7つすべてを
     必須引数として要求する。ここで既定値を持たせているのはテストの記述量を
     減らすためだけであり、各テストは自分が動かしたい閾値だけを明示する。
@@ -50,7 +52,12 @@ def thresholds(min_locked_recall=0.75, max_locked_contradiction=0.20,
     `max_locked_finish_drift` の既定 200.0 は「色味 L1 の理論最大」であり、
     仕上げドリフトを **一切効かせない** 値である。他のテストの verdict を
     後から足した検査が黙って動かさないための中立値であり、production の
-    推奨値ではない。仕上げドリフトを見るテストは自分で値を渡す。"""
+    推奨値ではない。仕上げドリフトを見るテストは自分で値を渡す。
+
+    `max_soft_finish_drift` の既定 None は「SOFT 専用の上限を持たない」——
+    すなわち全ティアが `max_locked_finish_drift` 1本で測られる **今日の挙動**
+    である。package.json に階層表があってもこれは変わらない: 緩める値は
+    運用者が明示しない限り存在しない。"""
     return Thresholds(
         min_locked_recall=min_locked_recall,
         max_locked_contradiction=max_locked_contradiction,
@@ -59,6 +66,7 @@ def thresholds(min_locked_recall=0.75, max_locked_contradiction=0.20,
         min_soft_instance_recall=min_soft_instance_recall,
         max_unverifiable_fraction=max_unverifiable_fraction,
         max_locked_finish_drift=max_locked_finish_drift,
+        max_soft_finish_drift=max_soft_finish_drift,
     )
 
 
@@ -1154,3 +1162,394 @@ class FinishDriftEndToEndTest(unittest.TestCase):
         text = " ".join(rows[0]["narrative"])
         self.assertIn("[FINISH]", text)
         self.assertIn("sofa#1", text)
+
+
+# ---------------------------------------------------------------------------
+# package.json の階層表を読む (Task 9)
+#
+# アプリが動画生成モデルに渡すパッケージには、設計そのものから決めた階層が
+# 入っている (`lockTiers`: 色→LOCKED/SOFT/FREE)。判定器の組み込み分類は
+# セグメンテーション色からの発見的手法でしかないので、宣言があればそちらが
+# 優先される。**package.json を持たない既存の PV 実行は1ミリも変わらない。**
+# ---------------------------------------------------------------------------
+
+def pkg_instance(tier, recall, category_key="furniture", finish_drift=0.0, **extra):
+    """package.json で階層が付いた instance 行。
+
+    `builtin_tier` は「表が無ければこうなっていた」を記録する欄。テストは
+    毎回それを明示して、宣言が実際に判定を動かしたことを示す。"""
+    row = instance(tier, recall, category_key=category_key, finish_drift=finish_drift)
+    row["tier"] = tier
+    row["builtin_tier"] = cat.TIER_OF.get(category_key, cat.CONTEXT)
+    row.update(extra)
+    return row
+
+
+class FreeTierIsNotMeasuredAtAllTest(unittest.TestCase):
+    """FREE は「緩く測る」ではない。**測らない。**
+
+    隣家・道路・空・電柱は生成AIの領分であり、そこを測れば必ず何かが鳴る。"""
+
+    def test_a_free_tier_instance_cannot_fail_the_run(self):
+        r = row(0, instances={"neighbor-house#40": pkg_instance(
+            cat.FREE, 0.0, category_key="neighbour", finish_drift=180.0)})
+        got = evaluate([r], thresholds(min_locked_instance_recall=0.5,
+                                       min_soft_instance_recall=0.5,
+                                       max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "PASS")
+
+    def test_the_very_same_numbers_under_a_soft_tier_would_have_been_a_finding(self):
+        """対照。FREE の読み飛ばしが効いていることを、同じ数値で示す。"""
+        r = row(0, instances={"neighbor-house#40": pkg_instance(
+            cat.SOFT, 0.0, category_key="neighbour", finish_drift=180.0)})
+        got = evaluate([r], thresholds(min_locked_instance_recall=0.5,
+                                       min_soft_instance_recall=0.5,
+                                       max_locked_finish_drift=12.0))
+        self.assertNotEqual(got["verdict"], "PASS")
+
+    def test_a_free_instance_is_not_counted_as_unverifiable_either(self):
+        """「検証不能」に流すと、検証不能率の閾値が空と隣家で run を落とす
+        裏口になる。FREE は分母にも分子にも入れない。"""
+        r = row(0, instances={
+            "neighbor-house#40": pkg_instance(cat.FREE, 0.0, category_key="neighbour"),
+            "road#41": pkg_instance(cat.FREE, 0.0, category_key="road"),
+            "wall#2": pkg_instance(cat.LOCKED, 1.0, category_key="walls"),
+        })
+        got = evaluate([r], thresholds(max_unverifiable_fraction=0.0))
+        self.assertEqual(got["verdict"], "PASS")
+        self.assertEqual(got["unverifiable"]["count"], 0)
+        # wall#2 の recall と finish の2件だけが数えられている。
+        self.assertEqual(got["unverifiable"]["total_checks"], 2)
+
+    def test_not_measured_is_named_never_silent(self):
+        r = row(0, instances={"neighbor-house#40": pkg_instance(
+            cat.FREE, 0.0, category_key="neighbour")})
+        got = evaluate([r], thresholds())
+        named = json.dumps(got["free"])
+        self.assertIn("neighbor-house#40", named)
+
+
+class PackageTierChangesTheVerdictTest(unittest.TestCase):
+    """宣言された階層が、組み込み分類とは違う判定を出すこと。
+
+    **正直な記録: この3本は実装前の `report.py` に対しても通った。**
+    `evaluate()` は元から `info["tier"]` だけを見て閾値を選んでおり、その欄を
+    誰が埋めたか（セグメンテーション由来か package.json 由来か）を問わない。
+    したがってここが実際に守っているのは「階層が閾値を選ぶ」という既存の性質
+    だけである。**宣言が本当に欄へ届くか** を測っているのは
+    `PackageTieringEndToEndTest`（instance guide と legend を実際に読む）の方で、
+    そちらは実装前に赤かった。"""
+
+    def test_a_declared_locked_tier_gates_what_the_builtin_left_ungated(self):
+        """実測の根拠: T92 で本当に仕上げが変わっていた lattice-screen#35 は
+        カテゴリ上 exterior = CONTEXT で、recall の判定を1つも受けていない。
+        設計側 (`lock-tiers.js`) では lattice-screen は LOCKED である。"""
+        numbers = dict(recall=0.10, category_key="exterior")
+        builtin = row(0, instances={"lattice-screen#35": instance(
+            cat.CONTEXT, numbers["recall"], category_key="exterior")})
+        declared = row(0, instances={"lattice-screen#35": pkg_instance(
+            cat.LOCKED, numbers["recall"], category_key="exterior")})
+        th = thresholds(min_locked_instance_recall=0.45)
+
+        self.assertEqual(evaluate([builtin], th)["verdict"], "PASS")
+        got = evaluate([declared], th)
+        self.assertEqual(got["verdict"], "FAIL")
+        self.assertIn("lattice-screen#35",
+                      " ".join(got["locked"]["failures"][0]["reasons"]))
+
+    def test_a_declared_soft_tier_turns_a_locked_failure_into_a_soft_regression(self):
+        """逆向きも動くこと。セグメンテーション上は walls に乗っているが、
+        設計側が SOFT と言った部材は run を落とさない。"""
+        builtin = row(0, instances={"fmp-Closet48": instance(
+            cat.LOCKED, 0.30, category_key="walls")})
+        declared = row(0, instances={"fmp-Closet48": pkg_instance(
+            cat.SOFT, 0.30, category_key="walls")})
+        th = thresholds(min_locked_instance_recall=0.45, min_soft_instance_recall=0.45)
+
+        self.assertEqual(evaluate([builtin], th)["verdict"], "FAIL")
+        got = evaluate([declared], th)
+        self.assertEqual(got["verdict"], "SOFT_REGRESSION")
+        self.assertIn("fmp-Closet48", " ".join(got["soft"]["findings"][0]["reasons"]))
+
+    def test_a_locked_declaration_is_never_measured_more_leniently(self):
+        """LOCKED の必須閾値は宣言では緩まない。ゲートの仕事は設計が
+        変わったときに落ちることである。"""
+        r = row(0, instances={"wall#2": pkg_instance(cat.LOCKED, 0.44,
+                                                     category_key="walls")})
+        got = evaluate([r], thresholds(min_locked_instance_recall=0.45))
+        self.assertEqual(got["verdict"], "FAIL")
+
+
+class SoftFinishDriftThresholdTest(unittest.TestCase):
+    """仕上げドリフトの階層別閾値。**既定は今日の挙動そのまま。**"""
+
+    def test_without_the_soft_knob_every_tier_keeps_todays_single_limit(self):
+        r = row(0, instances={"sofa#9": pkg_instance(cat.SOFT, 1.0,
+                                                     finish_drift=40.0)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "FAIL")
+
+    def test_the_threshold_record_gains_no_field_when_the_knob_is_unused(self):
+        self.assertEqual(set(thresholds().as_dict()), {
+            "min_locked_recall", "max_locked_contradiction",
+            "min_locked_instance_recall", "min_soft_recall",
+            "min_soft_instance_recall", "max_unverifiable_fraction",
+            "max_locked_finish_drift"})
+
+    def test_with_the_knob_a_soft_finish_breach_is_a_finding_not_a_failure(self):
+        r = row(0, instances={"sofa#9": pkg_instance(cat.SOFT, 1.0,
+                                                     finish_drift=40.0)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0,
+                                       max_soft_finish_drift=60.0))
+        self.assertEqual(got["verdict"], "PASS")
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0,
+                                       max_soft_finish_drift=30.0))
+        self.assertEqual(got["verdict"], "SOFT_REGRESSION")
+        self.assertIn("sofa#9", " ".join(got["soft"]["findings"][0]["reasons"]))
+
+    def test_the_soft_knob_never_touches_a_locked_finish(self):
+        r = row(0, instances={"lattice-screen#35": pkg_instance(
+            cat.LOCKED, 1.0, category_key="exterior", finish_drift=40.0)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0,
+                                       max_soft_finish_drift=90.0))
+        self.assertEqual(got["verdict"], "FAIL")
+
+    def test_the_knob_is_recorded_when_it_is_used(self):
+        self.assertEqual(thresholds(max_soft_finish_drift=30.0)
+                         .as_dict()["max_soft_finish_drift"], 30.0)
+
+
+class UnliftableFinishIsUnverifiableTest(unittest.TestCase):
+    """`shadowLift.unliftableColors` は、モデルが本当に見られなかった部材。
+
+    暗すぎて仕上げが写らなかった面を、見えていた面と同じ閾値で罰するのは
+    こちらのレンダの落ち度をモデルに付け替えることになる。かといって黙って
+    通せば「調べて問題なし」と見分けが付かない。既にあるユーザーの語彙
+    ——検証不能——へ入れる。"""
+
+    UNSEEN = ("the reference could not show this part: it stayed below the "
+              "floor luminance even after the shadow lift")
+
+    def test_a_part_the_reference_could_not_show_is_not_a_finish_failure(self):
+        r = row(0, instances={"fmp-Closet48": pkg_instance(
+            cat.SOFT, 1.0, finish_drift=180.0, finish_unmeasurable=self.UNSEEN)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "PASS")
+
+    def test_it_is_named_as_unverifiable_with_the_reason(self):
+        r = row(0, instances={"fmp-Closet48": pkg_instance(
+            cat.SOFT, 1.0, finish_drift=180.0, finish_unmeasurable=self.UNSEEN)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0))
+        self.assertEqual(got["unverifiable"]["count"], 1)
+        named = json.dumps(got["unverifiable"]["frames"])
+        self.assertIn("fmp-Closet48", named)
+        self.assertIn("shadow lift", named)
+
+    def test_the_same_drift_without_that_flag_still_fails(self):
+        """対照。免除しているのは「見えなかった」と記録された部材だけ。"""
+        r = row(0, instances={"fmp-Closet48": pkg_instance(
+            cat.SOFT, 1.0, finish_drift=180.0)})
+        got = evaluate([r], thresholds(max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "FAIL")
+
+    def test_the_geometry_of_an_unseen_part_is_still_measured(self):
+        """免除するのは色だけ。輪郭が消えたかどうかは真実レンダで測れる。"""
+        r = row(0, instances={"fmp-Closet48": pkg_instance(
+            cat.SOFT, 0.05, finish_drift=180.0, finish_unmeasurable=self.UNSEEN)})
+        got = evaluate([r], thresholds(min_soft_instance_recall=0.45,
+                                       max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "SOFT_REGRESSION")
+
+
+class PlanSourcePackageTest(unittest.TestCase):
+    """平面図ソースのパッケージには色→階層の表もガイド画像も無い。
+
+    色で切り出す照合はそもそも走れない。黙って通せば「調べて問題なし」と
+    区別が付かないので、既にある検証不能として名指しで残す。"""
+
+    NOTE = ("plan-source package: it carries no colour to tier table, so this "
+            "instance cannot be tiered by the design")
+
+    def test_an_instance_with_no_applicable_tier_is_unverifiable_not_passed(self):
+        r = row(0, instances={"wall#2": pkg_instance(None, 0.02, category_key="walls",
+                                                     finish_drift=180.0,
+                                                     tier_note=self.NOTE)})
+        got = evaluate([r], thresholds(max_unverifiable_fraction=1.0))
+        self.assertEqual(got["verdict"], "PASS")     # 落とすでも通すでもない
+        self.assertEqual(got["unverifiable"]["count"], 2)   # recall と finish
+        named = json.dumps(got["unverifiable"]["frames"])
+        self.assertIn("wall#2", named)
+        self.assertIn("plan-source", named)
+
+    def test_a_run_that_could_not_be_tiered_at_all_cannot_report_pass(self):
+        """既にある検証不能率の閾値がそのまま効く。"""
+        r = row(0, instances={f"wall#{i}": pkg_instance(
+            None, 1.0, category_key="walls", tier_note=self.NOTE) for i in range(4)})
+        got = evaluate([r], thresholds(max_unverifiable_fraction=0.5))
+        self.assertEqual(got["verdict"], "FAIL")
+        self.assertIn("unverifiable", " ".join(got["locked"]["failures"][0]["reasons"]))
+
+    def test_the_tiering_object_says_a_plan_package_is_not_applicable(self):
+        legend = {"instances": [{"id": 2, "color": "#c6f25d", "type": "wall"}]}
+        tiering = PackageTiering({"source": "plan", "lockTiers": None}, legend)
+        self.assertTrue(tiering.plan_source)
+        self.assertIsNone(tiering.tier_of("wall#2", "walls"))
+        self.assertIn("plan", " ".join(tiering.notes).lower())
+
+    def test_a_3d_package_tiers_by_colour(self):
+        legend = {"instances": [{"id": 2, "color": "#c6f25d", "type": "wall"}]}
+        tiering = PackageTiering(
+            {"source": "3d", "lockTiers": {"#c6f25d": "SOFT"}}, legend)
+        self.assertFalse(tiering.plan_source)
+        self.assertEqual(tiering.tier_of("wall#2", "walls"), cat.SOFT)
+        # 表に無い部材は組み込み分類のまま。
+        self.assertEqual(tiering.tier_of("window#9", "windows"), cat.LOCKED)
+
+
+class PackageLoadingTest(unittest.TestCase):
+    def test_a_missing_package_file_fails_loudly(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(SystemExit) as ctx:
+                load_package(Path(tmp) / "package.json")
+        self.assertIn("package.json", str(ctx.exception))
+
+    def test_malformed_json_fails_clean_instead_of_a_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "package.json"
+            path.write_text("{ not json")
+            with self.assertRaises(SystemExit) as ctx:
+                load_package(path)
+        self.assertIn(str(path), str(ctx.exception))
+
+    def test_valid_json_that_is_not_an_object_fails_clean(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "package.json"
+            path.write_text("[1, 2, 3]")
+            with self.assertRaises(SystemExit) as ctx:
+                load_package(path)
+        self.assertIn("object", str(ctx.exception))
+
+    def test_a_real_shaped_package_loads(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "package.json"
+            path.write_text(json.dumps({"version": 1, "source": "3d",
+                                        "lockTiers": {"#ff0000": "SOFT"}}))
+            self.assertEqual(load_package(path)["lockTiers"], {"#ff0000": "SOFT"})
+
+
+class NoPackageIsUnchangedTest(unittest.TestCase):
+    """既存の PV 実行は package.json を持たない。**壊さない。**"""
+
+    HISTORICAL_INSTANCE_FIELDS = {"recall", "whole_mask_recall", "finish_drift",
+                                  "finish_drift_ungraded", "category", "tier"}
+    HISTORICAL_RESULT_BLOCKS = {"verdict", "locked", "soft", "unverifiable",
+                                "free", "thresholds"}
+
+    def _rows(self):
+        regions = _regions(sofa=(120, 200))
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = _make_truth_dirs(Path(tmp), with_instance=True)
+            (truth / "instance-legend.json").write_text(json.dumps({
+                "version": 2,
+                "instances": [{"id": 1, "color": "#ff0000", "label": "sofa#1"}]}))
+            _write_truth_frame(truth, "0000.png", regions)
+            guide = np.zeros((300, 300, 3), dtype=np.uint8)
+            guide[120:120 + SOFA_H, 200:200 + SOFA_W] = (255, 0, 0)
+            _save(truth / "instance" / "0000.png", guide)
+            _save(gen / "0000.png", _appearance_upgrade(regions))
+            rows, _ = collect_rows(truth, gen, radius=1)
+        return rows
+
+    def test_instance_rows_gain_no_new_fields_without_a_package(self):
+        rows = self._rows()
+        self.assertEqual(set(rows[0]["instances"]["sofa#1"]),
+                         self.HISTORICAL_INSTANCE_FIELDS)
+
+    def test_the_result_gains_no_new_blocks_without_a_package(self):
+        got = evaluate(self._rows(), thresholds())
+        self.assertEqual(set(got), self.HISTORICAL_RESULT_BLOCKS)
+
+    def test_the_free_block_gains_no_new_field_without_a_package(self):
+        got = evaluate(self._rows(), thresholds())
+        self.assertEqual(set(got["free"]), {"total_added_px", "note"})
+
+
+class PackageTieringEndToEndTest(unittest.TestCase):
+    """実際に instance guide と legend を読み、package.json の宣言で判定が
+    変わること。fixture の sofa はセグメンテーション上 furniture = SOFT。"""
+
+    SOFA_BOX = (120, 200)
+    LEGEND = {"version": 2,
+              "instances": [{"id": 1, "color": "#ff0000", "label": "sofa#1"}]}
+
+    def _rows(self, package, generated_regions=None):
+        regions = _regions(sofa=self.SOFA_BOX)
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = _make_truth_dirs(Path(tmp), with_instance=True)
+            (truth / "instance-legend.json").write_text(json.dumps(self.LEGEND))
+            _save(truth / "edge" / "0000.png", _line_drawing(regions))
+            _save(truth / "segmentation" / "0000.png", _segmentation(regions))
+            _save(truth / "base" / "0000.png", _colour_render(regions))
+            guide = np.zeros((300, 300, 3), dtype=np.uint8)
+            y, x = self.SOFA_BOX
+            guide[y:y + SOFA_H, x:x + SOFA_W] = (255, 0, 0)
+            _save(truth / "instance" / "0000.png", guide)
+            # 青灰 [100,117,142] -> 木の茶 [150,105,62]。**輝度をほぼ揃えた**
+            # 置き換えなので、シルエットのエッジは残り recall は落ちない
+            # (`FinishDriftEndToEndTest` で実測済み)。動くのは仕上げだけ——
+            # 階層表が仕上げ検査に効いているかを、recall の巻き添えなしに測る。
+            _save(gen / "0000.png", _colour_render(
+                generated_regions if generated_regions is not None else regions,
+                recolour={SOFA: (150, 105, 62)}))
+            rows, _ = collect_rows(truth, gen, radius=1, package=package)
+        return rows
+
+    def test_a_free_declaration_stops_the_object_being_measured_at_all(self):
+        th = thresholds(min_locked_recall=0.75, max_locked_finish_drift=12.0)
+        # 対照: パッケージ無しなら、この生成は仕上げドリフトで落ちる。
+        self.assertEqual(evaluate(self._rows(None), th)["verdict"], "FAIL")
+        free = {"source": "3d", "lockTiers": {"#ff0000": "FREE"}}
+        self.assertEqual(evaluate(self._rows(free), th)["verdict"], "PASS")
+
+    def test_a_locked_declaration_outranks_the_segmentation_tier(self):
+        """sofa はセグメンテーション上 furniture (SOFT) だが、設計が LOCKED と
+        言えば LOCKED の閾値で測る。"""
+        declared = {"source": "3d", "lockTiers": {"#ff0000": "LOCKED"}}
+        rows = self._rows(declared, generated_regions=_regions(sofa=None))
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        min_locked_instance_recall=0.45,
+                                        min_soft_instance_recall=0.45))
+        self.assertEqual(got["verdict"], "FAIL")
+        self.assertIn("sofa#1", " ".join(got["locked"]["failures"][0]["reasons"]))
+        self.assertEqual(rows[0]["instances"]["sofa#1"]["builtin_tier"], cat.SOFT)
+
+        # 同じフレームを組み込み分類のまま測れば SOFT どまり。
+        plain = evaluate(self._rows(None, generated_regions=_regions(sofa=None)),
+                         thresholds(min_locked_recall=0.75,
+                                    min_locked_instance_recall=0.45,
+                                    min_soft_instance_recall=0.45,
+                                    max_locked_finish_drift=200.0))
+        self.assertEqual(plain["verdict"], "SOFT_REGRESSION")
+
+    def test_an_unliftable_colour_exempts_only_the_finish_check(self):
+        pkg = {"source": "3d", "lockTiers": {"#ff0000": "SOFT"},
+               "shadowLift": {"applied": True, "gamma": 0.7, "floorLuminance": 30,
+                              "unliftableColors": ["#FF0000"]}}
+        rows = self._rows(pkg)
+        self.assertGreater(rows[0]["instances"]["sofa#1"]["finish_drift"], 12.0)
+        self.assertIn("finish_unmeasurable", rows[0]["instances"]["sofa#1"])
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "PASS")
+
+    def test_a_plan_source_package_makes_the_instance_checks_not_applicable(self):
+        plan = {"source": "plan", "lockTiers": None,
+                "instances": [{"id": "I97", "type": "sofa", "floor": 2,
+                               "tier": "SOFT"}]}
+        rows = self._rows(plan)
+        self.assertIsNone(rows[0]["instances"]["sofa#1"]["tier"])
+        self.assertIn("plan", rows[0]["instances"]["sofa#1"]["tier_note"].lower())
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        max_locked_finish_drift=12.0,
+                                        max_unverifiable_fraction=0.0))
+        self.assertEqual(got["verdict"], "FAIL")

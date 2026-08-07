@@ -93,11 +93,15 @@ Layer 3 の旧実装は差分を一律に減点した。壁が消えたことと
 import numpy as np
 from PIL import Image
 
-from metrics import dilate
+from metrics import _legend_name, dilate
 
 LOCKED = "locked"
 SOFT = "soft"
 CONTEXT = "context"
+# FREE は **組み込み分類が決して出さない** 階層である。設計側 (package.json)
+# が宣言したときにだけ現れ、「測らない」を意味する。CONTEXT (報告はするが
+# 判定しない) とは別物: CONTEXT の部材も仕上げドリフトは測られる。
+FREE = "free"
 
 # index.html の aiSegmentationLegend() が出す色 -> (キー, ティア, 説明)。
 # index.html は読み取り専用なのでここに写しを持つ。色が食い違ったら
@@ -386,6 +390,134 @@ def instance_silhouette_recall(truth_edges: np.ndarray, generated: np.ndarray,
             out[name] = None
             continue
         out[name] = int((truth_region & dilate(generated_region, radius)).sum()) / total
+    return out
+
+
+# ---------------------------------------------------------------------------
+# package.json が持ち込む階層 (Task 9)
+#
+# アプリが動画生成モデルへ渡すパッケージには、**設計そのものから決めた** 階層が
+# 入っている (`assets/js/lock-tiers.js`: 開口部と建具はハードロック、家具は
+# ソフトロック、周辺環境と注記は計測しない)。上の `CATEGORIES` はセグメン
+# テーション画像の色からティアを当てる発見的手法でしかないので、宣言がある
+# 部材については宣言が優先される。
+#
+# なぜ発見的手法では足りないか、実測で言える: T92 で本当に仕上げが変わって
+# いた lattice-screen#35 と balcony#20 はセグメンテーション上 exterior=CONTEXT、
+# stair#22 / stair-corner#23 は furniture=SOFT に落ちていた。設計側の表では
+# 4件とも LOCKED である。ここを取り違えると、間取りを定義する部材が
+# 「文脈」として報告だけされて終わる。
+#
+# 語彙は1つに畳む。package.json は 'LOCKED'/'SOFT'/'FREE' と大文字で書くが、
+# このモジュールの外へは常に上の定数 (小文字) だけを出す。2つのまま流すと
+# `report.evaluate` の `info["tier"] == LOCKED` が 'LOCKED' に対して静かに
+# False になり、ロックされた部材が黙って無検査で通る。
+# ---------------------------------------------------------------------------
+PACKAGE_SOURCE_3D = "3d"
+PACKAGE_SOURCE_PLAN = "plan"
+
+# package.json の階層語 -> このモジュールの定数。
+PACKAGE_TIER_WORDS = {"LOCKED": LOCKED, "SOFT": SOFT, "FREE": FREE}
+
+
+def normalise_package_tier(word):
+    """'LOCKED' -> LOCKED。既にこのモジュールの定数ならそのまま返す。
+
+    知らない語は **例外**。組み込み分類へ黙って落とすと、綴りを間違えた表の
+    せいで設計が LOCKED と言った部材が無検査で通り得る。読めない表は読めない
+    と言う方が安全側に倒れる。
+    """
+    if word in (LOCKED, SOFT, FREE, CONTEXT):
+        return word
+    key = str(word).upper()
+    if key in PACKAGE_TIER_WORDS:
+        return PACKAGE_TIER_WORDS[key]
+    raise ValueError(
+        f"unknown lock tier {word!r} in the video material package: expected one of "
+        f"{sorted(PACKAGE_TIER_WORDS)}. Refusing to guess — a tier this gate cannot "
+        "read would silently leave the part ungated.")
+
+
+def package_source(package) -> str:
+    """パッケージの素材の種類。`'3d'` か `'plan'`。
+
+    欄が無いパッケージ (Task 7 が最初に書き出した版) はすべて3D経路なので
+    `'3d'` に落とす。
+    """
+    if not package:
+        return PACKAGE_SOURCE_3D
+    return str(package.get("source") or PACKAGE_SOURCE_3D).lower()
+
+
+def lock_tier_table(package):
+    """package.json -> `{'#rrggbb': tier}`。無ければ `None`。
+
+    `None` は「このパッケージは色→階層の宣言を持たない」であって
+    「階層が無い」ではない。呼び出し側は組み込み分類へそのまま落ちる
+    ——既存の PV 実行 (package.json 自体が無い) と同じ道である。
+
+    平面図経路のパッケージは `lockTiers: null` を持つ。色は instance ガイドの
+    画素と対にして初めて意味を持つのに、その画素が存在しないからである
+    (パッケージの `instances` は階層を持つが色を持たないので、判定器が
+    ガイド画像から切り出した部材とは結べない)。
+    """
+    if not package:
+        return None
+    tiers = package.get("lockTiers")
+    if not isinstance(tiers, dict) or not tiers:
+        return None
+    return {str(colour).lower(): normalise_package_tier(tier)
+            for colour, tier in tiers.items()}
+
+
+def tier_for(colour, builtin_key, table):
+    """部材の階層。表があればそれが優先、無ければ組み込み分類。
+
+    `colour` はその部材の instance ガイド色、`builtin_key` は
+    `dominant_category()` が返したカテゴリキー。**表が `None` のときの戻り値は
+    従来の `TIER_OF.get(builtin_key, CONTEXT)` と1ミリも違わない** —
+    package.json を持たない既存の PV 実行がここを通っても何も変わらない。
+    """
+    if table and colour:
+        text = str(colour)
+        # `lock_tier_table()` は鍵を小文字へ正規化するが、この関数は生の
+        # `package['lockTiers']` を直接渡されても正しく答える必要がある
+        # (呼び出し側が正規化を1つ忘れただけで階層が黙って組み込み分類へ
+        # 落ちる、という形の事故を作らないため)。
+        for candidate in (text.lower(), text.upper(), text):
+            declared = table.get(candidate)
+            if declared is not None:
+                return normalise_package_tier(declared)
+    return TIER_OF.get(builtin_key, CONTEXT)
+
+
+def unmeasurable_finish_colours(package) -> set:
+    """`shadowLift.unliftableColors` — モデルが本当に見られなかった部材の色。
+
+    暗部持ち上げをかけてもなお床の輝度を割ったまま残った面である。実測
+    (Task 7 §3.3) では 73色中4件で、最大のものは黒いTV画面 —— 「影」ではなく
+    「情報がそもそも無い面」なのでトーンカーブで直す対象ではない。
+
+    こういう面の仕上げドリフトを、見えていた面と同じ閾値で罰するのは、
+    こちらのレンダの落ち度をモデルに付け替えることになる。
+    """
+    lift = (package or {}).get("shadowLift") or {}
+    return {str(c).lower() for c in (lift.get("unliftableColors") or []) if c}
+
+
+def legend_colours(legend) -> dict:
+    """instance-legend.json -> 部材名 -> ガイド色 (小文字)。
+
+    色→階層の表と、判定器が使う部材名を結ぶ唯一の輪である。名前は
+    `metrics._legend_name` をそのまま呼んで付ける: ここに命名規則を写し取ると、
+    metrics 側が変わった日に **階層だけが黙って別の部材へ付く**。
+    """
+    out = {}
+    for entry in ((legend or {}).get("instances") or []):
+        colour = entry.get("color")
+        if not colour:
+            continue
+        out[_legend_name(entry)] = str(colour).lower()
     return out
 
 

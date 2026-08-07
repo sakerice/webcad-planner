@@ -7,10 +7,36 @@
         --min-locked-instance-recall 0.45 --min-soft-recall 0.55 \
         --min-soft-instance-recall 0.45 --max-unverifiable-fraction 0.5 \
         --max-locked-finish-drift 12 \
+        [--package .../package.json] [--max-soft-finish-drift 30] \
         [--radius 2] [--json out.json]
 
 閾値はすべて必須引数で既定値を持たない。ショットと生成系列ごとに実測から
 決めるものであり、コードに埋めた数字が黙って判定を左右してはならない。
+
+## 階層はどこから来るか (Task 9)
+
+既定では下の3ティアを **セグメンテーション画像の色から推測** する。これは
+発見的手法であって、設計の宣言ではない。
+
+`--package` に動画素材パッケージの `package.json` を渡すと、アプリが
+**設計そのものから決めた** 色→階層の宣言 (`lockTiers`) を読み、宣言のある
+部材についてはそちらを使う。宣言が優先されるのは、それが設計から来ている
+からである。実測でこれが効く形: T92 で本当に仕上げが変わっていた
+lattice-screen / balcony / stair / stair-corner は、セグメンテーション上は
+CONTEXT と SOFT に落ちるが、設計側の表では4件とも LOCKED である。
+
+宣言が持ち込む状態は2つ。
+
+  FREE   設計が「測らない」と言った部材 (隣家・道路・空・注記)。**一切
+         測らない。** 緩く測るのでもなく、検証不能に数えるのでもない
+         (どちらも空と隣家に verdict を握らせることになる)。名前だけ残す。
+  照合不能  平面図ソースのパッケージ。色→階層の表もガイド画像も無いので、
+         色で切り出す照合が原理的に走れない。部材ごとの検査を **検証不能**
+         として名指しし、既にある `--max-unverifiable-fraction` に判断を
+         委ねる。黙って通せば「調べて問題なし」と見分けが付かない。
+
+`--package` を渡さなければ、この道は1行も通らない。既存の PV 実行の出力は
+標準出力・標準エラー・JSON まで含めて1バイトも変わらない (実測で確認済み)。
 
 ## 判定の形
 
@@ -127,6 +153,107 @@ def load_truth_base(truth_base_png, target_size, on_resize=None):
     return img.resize(target_size, RESAMPLE_BASE)
 
 
+def load_package(path):
+    """動画素材パッケージの `package.json` を読む。
+
+    明示的に渡されたのに読めないなら、黙って「無かったこと」にはしない。
+    パッケージ **有り** で走らせたつもりの run が、実は組み込み分類で
+    判定されていた、という取り違えを作らないため。
+    """
+    path = Path(path)
+    if not path.exists():
+        raise SystemExit(
+            f"error: no package.json at {path}. The gate was asked to read the video "
+            "material package but the file is not there; refusing to fall back to the "
+            "built-in classification silently, because the two can give different "
+            "verdicts for the same frames.")
+    try:
+        package = json.loads(path.read_text())
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
+        raise SystemExit(f"error: unreadable video material package {path}: {exc}")
+    if not isinstance(package, dict):
+        raise SystemExit(
+            f"error: malformed video material package {path}: expected a JSON object, "
+            f"got {type(package).__name__}")
+    return package
+
+
+class PackageTiering:
+    """package.json が判定へ持ち込むもの。**無ければ `None` を渡す。**
+
+    持ち込むのは3つだけである。
+
+    1. **色→階層の宣言** (`lockTiers`)。設計そのものから決まっているので、
+       セグメンテーション色からの組み込み分類より優先される。表に無い色は
+       組み込み分類のまま。
+    2. **モデルが見られなかった部材** (`shadowLift.unliftableColors`)。
+       仕上げ検査だけを検証不能に落とす。輪郭は真実レンダで測れるので測る。
+    3. **素材の種類** (`source`)。平面図経路のパッケージは色→階層の表も
+       ガイド画像も持たないので、色で切り出す照合が原理的に走れない。
+       黙って通すと「調べて問題なし」と見分けが付かないため、部材ごとの
+       検査を **検証不能** として名指しで残す（既にあるユーザーの語彙を使い、
+       新しい状態を発明しない）。既存の検証不能率の閾値がそのまま効くので、
+       階層を1件も確かめられなかった run は PASS と読めない。
+    """
+
+    # フレームごと・部材ごとに1行として印字されるので短く保つ。長い説明は
+    # `notes` に run で1度だけ出る。
+    TIER_NOT_APPLICABLE = "plan-source package: no colour to tier table, cannot be tiered"
+
+    def __init__(self, package, legend=None):
+        self.package = package or {}
+        self.source = cat.package_source(package)
+        self.plan_source = self.source == cat.PACKAGE_SOURCE_PLAN
+        self.table = cat.lock_tier_table(package)
+        self.unmeasurable_finish = cat.unmeasurable_finish_colours(package)
+        self.colours = cat.legend_colours(legend)
+        self.notes = []
+        if self.plan_source:
+            self.notes.append(
+                "the package's source is the floor plan: it carries no colour to tier "
+                "table and no guide images, so nothing can be sliced by colour and no "
+                "instance can be tiered by the design — every per-instance check is "
+                "reported as unverifiable, not as passing")
+        elif self.table is None:
+            self.notes.append(
+                "the package carries no lockTiers table; the gate's own segmentation "
+                "based classification is used, exactly as for a run with no package")
+        else:
+            self.notes.append(
+                f"{len(self.table)} colours carry a declared tier; the declaration "
+                "overrides the gate's segmentation based classification for those parts")
+        if self.unmeasurable_finish:
+            self.notes.append(
+                f"{len(self.unmeasurable_finish)} colour(s) stayed below the floor "
+                "luminance even after the shadow lift, so the reference never showed "
+                "the model their finish; their finish drift is reported but not gated "
+                "— holding them to the same threshold as a visible part would charge "
+                "the model for our own render. Their geometry is still measured")
+
+    def tier_of(self, name, builtin_key):
+        """部材名 -> 階層。平面図経路では `None`（＝照合不能）。"""
+        if self.plan_source:
+            return None
+        return cat.tier_for(self.colours.get(name), builtin_key, self.table)
+
+    def finish_note(self, name):
+        """その部材の仕上げが測れない理由。測れるなら `None`。"""
+        colour = self.colours.get(name)
+        if colour and colour in self.unmeasurable_finish:
+            lift = self.package.get("shadowLift") or {}
+            # 短く保つ: これはフレームごと・部材ごとに1行として印字される。
+            # 「なぜ測らないか」は `notes` に run で1度だけ出る。
+            return (f"the reference could not show it (still below floor luminance "
+                    f"{lift.get('floorLuminance')} after the shadow lift, "
+                    f"gamma {lift.get('gamma')})")
+        return None
+
+    def describe(self):
+        return {"source": self.source, "notes": list(self.notes),
+                "declared_colours": 0 if self.table is None else len(self.table),
+                "unmeasurable_finish_colours": sorted(self.unmeasurable_finish)}
+
+
 def _fmt(value):
     return "n/a" if value is None else f"{value:.3f}"
 
@@ -202,8 +329,13 @@ def describe_frame(row) -> list:
 
 
 def compare_frame(index, truth_base_png, truth_segmentation_png, generated_png, radius,
-                  instance_png=None, legend=None, on_resize=None):
-    """1フレーム分のカテゴリ別・instance 別の数値と記述を作る。"""
+                  instance_png=None, legend=None, on_resize=None, tiering=None):
+    """1フレーム分のカテゴリ別・instance 別の数値と記述を作る。
+
+    `tiering` は `PackageTiering` か `None`。**`None` のとき、この関数の出力は
+    package.json を読む前と1バイトも変わらない** — 新しい欄は宣言があった
+    ときにだけ足す。既存の PV 実行は全部この道を通る。
+    """
     generated_img = Image.open(generated_png)
     size = generated_img.size
     truth_img = load_truth_base(truth_base_png, size, on_resize=on_resize)
@@ -258,14 +390,27 @@ def compare_frame(index, truth_base_png, truth_segmentation_png, generated_png, 
             full = np.zeros_like(base_edges)
             full[y0:y1, x0:x1] = mask
             key = cat.dominant_category(full, masks)
-            instances[name] = {
+            builtin_tier = cat.TIER_OF.get(key, cat.CONTEXT)
+            entry = {
                 "recall": scores[name],
                 "whole_mask_recall": whole_mask_scores[name],
                 "finish_drift": finish[name],
                 "finish_drift_ungraded": finish_ungraded[name],
                 "category": key,
-                "tier": cat.TIER_OF.get(key, cat.CONTEXT),
+                "tier": builtin_tier,
             }
+            if tiering is not None:
+                # 設計側の宣言が組み込み分類を上書きする。上書きされたことを
+                # 読む側が見えるよう、元の値も残す (判定には使わない)。
+                entry["tier"] = tiering.tier_of(name, key)
+                entry["builtin_tier"] = builtin_tier
+                if entry["tier"] is None:
+                    entry["tier_note"] = tiering.TIER_NOT_APPLICABLE
+                note = tiering.finish_note(name)
+                if note:
+                    # 数値そのものは残す。人間には有用で、判定には使わない。
+                    entry["finish_unmeasurable"] = note
+            instances[name] = entry
 
     row = {
         "index": index,
@@ -300,7 +445,7 @@ class Thresholds:
     def __init__(self, min_locked_recall, max_locked_contradiction,
                  min_locked_instance_recall, min_soft_recall,
                  min_soft_instance_recall, max_unverifiable_fraction,
-                 max_locked_finish_drift):
+                 max_locked_finish_drift, max_soft_finish_drift=None):
         self.min_locked_recall = min_locked_recall
         self.max_locked_contradiction = max_locked_contradiction
         self.min_locked_instance_recall = min_locked_instance_recall
@@ -316,12 +461,32 @@ class Thresholds:
         # 仕上げは物体の構造ティアと無関係に設計が指定するものなので、
         # 「指定した仕上げは変わってはならない」を LOCKED 相当として扱う。
         self.max_locked_finish_drift = max_locked_finish_drift
+        # SOFT 専用の仕上げ上限。**既定は None = 持たない**、すなわち全ティアが
+        # `max_locked_finish_drift` 1本で測られる今日の挙動そのまま。
+        # package.json に階層表があってもこれは変わらない: 緩める値は運用者が
+        # 明示しない限り存在しない。ブリーフの表は SOFT の仕上げを「緩い」と
+        # 言うが、実測で本当に仕上げが変わっていた4件 (lattice-screen / balcony /
+        # stair / stair-corner) は **設計側の表では全部 LOCKED** である。
+        # 階層表を読むこと自体が、その4件を CONTEXT/SOFT から LOCKED へ引き上げる。
+        # ここを既定で緩めると、引き上げたそばから別の穴を開けることになる。
+        self.max_soft_finish_drift = max_soft_finish_drift
+
+    def finish_limit_for(self, tier):
+        """その階層の仕上げ上限と、破ったときの行き先 (`"locked"`/`"soft"`)。"""
+        if tier == cat.SOFT and self.max_soft_finish_drift is not None:
+            return self.max_soft_finish_drift, "soft"
+        return self.max_locked_finish_drift, "locked"
 
     def as_dict(self):
-        return dict(self.__dict__)
+        out = dict(self.__dict__)
+        if out.get("max_soft_finish_drift") is None:
+            # 使われていない knob は記録に出さない。既存 run の JSON を
+            # 1バイトも動かさないため。
+            out.pop("max_soft_finish_drift", None)
+        return out
 
 
-def evaluate(rows, thresholds: Thresholds):
+def evaluate(rows, thresholds: Thresholds, tiering=None):
     """カテゴリ・ティア別に PASS / SOFT_REGRESSION / FAIL を出す。
 
     LOCKED だけが run の合否を決める。SOFT は自分の閾値で別枠に出す —
@@ -337,6 +502,22 @@ def evaluate(rows, thresholds: Thresholds):
     検証不能 (`None`) の扱いは従来どおり: 1.0 とは区別し、PASS の根拠には
     数えず、しかし黙って捨てず名指しで残す。run 全体で検証可能な検査の
     割合が足りなければ、それ自体を FAIL 理由にする。
+
+    ## package.json が階層を宣言していたとき (Task 9)
+
+    `info["tier"]` に何が入るかだけが変わり、閾値の選び方は変わらない。
+    追加されるのは2つの状態である。
+
+      FREE      設計が「測らない」と言った部材。周辺環境・道路・空・注記。
+                **検証不能にも数えない。** 数えると検証不能率の閾値が、
+                空と隣家で run を落とす裏口になる。名前だけ `free` に残す。
+      None      階層を確かめられなかった部材 (平面図ソースのパッケージ)。
+                検証不能として数える。既にある検証不能率の閾値がそのまま
+                効くので、階層を1件も確かめられなかった run は PASS と
+                読めない。**「調べて問題なし」と区別が付く形で落とす。**
+
+    LOCKED の必須閾値は宣言では緩まない。緩むのは SOFT の仕上げだけで、
+    それも運用者が `--max-soft-finish-drift` を明示したときに限る。
     """
     if not rows:
         return {
@@ -356,6 +537,7 @@ def evaluate(rows, thresholds: Thresholds):
     unverifiable_count = 0
     total_checks = 0
     total_added = 0
+    free_not_measured = []
 
     for r in rows:
         locked_reasons = []
@@ -406,7 +588,19 @@ def evaluate(rows, thresholds: Thresholds):
                     "this does not fail the locked structure.")
 
         for name, info in sorted(r.get("instances", {}).items()):
+            if info["tier"] == cat.FREE:
+                # 設計が「測らない」と言った部材。隣家・道路・空・注記。
+                # **検証不能にも数えない** — 数えると検証不能率の閾値が、
+                # 空と隣家で run を落とす裏口になる。それは「一切減点しない」
+                # を別の扉から破ることに等しい。黙って消えないよう名前は残す。
+                free_not_measured.append({"index": r["index"], "instance": name})
+                continue
             total_checks += 1
+            if info["tier"] is None:
+                unverifiable_here.append(
+                    f"instance '{name}' recall — {info.get('tier_note', 'no tier')}")
+                unverifiable_count += 1
+                continue
             if info["recall"] is None:
                 unverifiable_here.append(f"instance '{name}'")
                 unverifiable_count += 1
@@ -427,7 +621,21 @@ def evaluate(rows, thresholds: Thresholds):
         # 仕上げドリフトは recall とは独立の検査であり、ティアで分けない
         # (`Thresholds.max_locked_finish_drift` のコメント参照)。
         for name, info in sorted(r.get("instances", {}).items()):
+            if info["tier"] == cat.FREE:
+                continue        # 上の loop で名前は残してある
             total_checks += 1
+            if info["tier"] is None:
+                unverifiable_here.append(
+                    f"instance '{name}' finish — {info.get('tier_note', 'no tier')}")
+                unverifiable_count += 1
+                continue
+            if info.get("finish_unmeasurable"):
+                # モデルが見られなかった面。数値は出ているが、それは
+                # こちらのレンダの暗さを測っているだけなので判定に使わない。
+                unverifiable_here.append(
+                    f"instance '{name}' finish — {info['finish_unmeasurable']}")
+                unverifiable_count += 1
+                continue
             # 添字アクセスにしてあるのは意図的。`.get()` にすると
             # `compare_frame` が finish_drift を落とした日に、ゲートが黙って
             # 無効化されたまま PASS を出す。落ちるなら大声で落ちるべき。
@@ -436,18 +644,20 @@ def evaluate(rows, thresholds: Thresholds):
                 unverifiable_here.append(f"instance '{name}' finish")
                 unverifiable_count += 1
                 continue
-            if drift > thresholds.max_locked_finish_drift:
+            limit, bucket = thresholds.finish_limit_for(info["tier"])
+            if drift > limit:
                 ungraded = info.get("finish_drift_ungraded")
-                msg = (f"LOCKED finish: instance '{name}' (category '{info['category']}') "
+                label = "SOFT" if bucket == "soft" else "LOCKED"
+                msg = (f"{label} finish: instance '{name}' (category '{info['category']}') "
                        f"colour character drifted {drift:.1f} > "
-                       f"{thresholds.max_locked_finish_drift:.1f} — the designed finish was "
+                       f"{limit:.1f} — the designed finish was "
                        "not reproduced (this is measured on colour character alone, "
                        "normalised for brightness, so it is not a lighting difference).")
                 if ungraded is not None:
                     msg += (f" With the frame-wide colour grade neutralised it is "
                             f"{ungraded:.1f}; the frame's own grade shift is "
                             f"{r.get('colour_grade', 0.0):.1f}.")
-                locked_reasons.append(msg)
+                (soft_reasons if bucket == "soft" else locked_reasons).append(msg)
 
         if unverifiable_here:
             unverifiable_frames.append({"index": r["index"],
@@ -473,7 +683,24 @@ def evaluate(rows, thresholds: Thresholds):
     else:
         verdict = "PASS"
 
-    return {
+    free = {
+        "total_added_px": total_added,
+        "note": "FREE-tier additions (a person walking through, a meal on the table, "
+                "a book, a mug, a throw over the sofa) are measured and described but "
+                "never penalised — they demonstrate how the home would be lived in",
+    }
+    if free_not_measured:
+        # 宣言で FREE になった部材。**測っていない** ことを名指しで残す。
+        # 空の欄は作らない — package.json を持たない run の JSON を動かさない
+        # ため (組み込み分類は FREE を決して出さないので、無い run では常に空)。
+        free["not_measured"] = free_not_measured
+        free["not_measured_note"] = (
+            "the package declares these parts FREE: the neighbouring houses, the road, "
+            "the sky and the annotation layers are the model's to invent. They are not "
+            "measured at all — not leniently measured, and not counted as unverifiable "
+            "either, because either one would let them decide a verdict")
+
+    result = {
         "verdict": verdict,
         "locked": {"verdict": locked_verdict, "failures": locked_failures},
         "soft": {"verdict": soft_verdict, "findings": soft_findings},
@@ -482,14 +709,12 @@ def evaluate(rows, thresholds: Thresholds):
             "total_checks": total_checks,
             "frames": unverifiable_frames,
         },
-        "free": {
-            "total_added_px": total_added,
-            "note": "FREE-tier additions (a person walking through, a meal on the table, "
-                    "a book, a mug, a throw over the sofa) are measured and described but "
-                    "never penalised — they demonstrate how the home would be lived in",
-        },
+        "free": free,
         "thresholds": thresholds.as_dict(),
     }
+    if tiering is not None:
+        result["package"] = tiering.describe()
+    return result
 
 
 EXIT_CODE = {"PASS": 0, "FAIL": 1, "SOFT_REGRESSION": 3}
@@ -526,7 +751,7 @@ def _load_legend(truth_dir: Path):
     return legend, instance_dir
 
 
-def collect_rows(truth_dir: Path, gen_dir: Path, radius: int, warn=None):
+def collect_rows(truth_dir: Path, gen_dir: Path, radius: int, warn=None, package=None):
     """真実の edge フレームごとに1行を作る。
 
     `truth_dir / "edge"` は guideStride で間引かれた索引集合の列挙にだけ使う。
@@ -544,6 +769,14 @@ def collect_rows(truth_dir: Path, gen_dir: Path, radius: int, warn=None):
     if legend is None:
         warn(f"no instance/ guide frames under {truth_dir} — "
              "per-instance checks skipped for the whole run")
+
+    # `package` が None なら `tiering` も None のまま。そのとき下流は
+    # package.json を読む前と1バイトも変わらない道を通る。
+    tiering = None
+    if package is not None:
+        tiering = PackageTiering(package, legend)
+        for note in tiering.notes:
+            warn(f"video material package ({tiering.source}): {note}")
 
     seg_dir = truth_dir / "segmentation"
     if not (seg_dir.is_dir() and any(seg_dir.glob("*.png"))):
@@ -595,7 +828,7 @@ def collect_rows(truth_dir: Path, gen_dir: Path, radius: int, warn=None):
 
         rows.append(compare_frame(int(truth_png.stem), base_png, seg_png, generated_png,
                                   radius, instance_png=instance_png, legend=legend,
-                                  on_resize=on_resize))
+                                  on_resize=on_resize, tiering=tiering))
     return rows, len(truth_pngs)
 
 
@@ -645,6 +878,18 @@ def main():
                          "7.4/7.2。")
     ap.add_argument("--max-unverifiable-fraction", type=float, required=True,
                     help="run 全体で「検証不能」だった検査の割合の上限。超えると FAIL。")
+    ap.add_argument("--max-soft-finish-drift", type=float, default=None,
+                    help="SOFT と宣言された部材だけの仕上げドリフト上限 (任意)。"
+                         "渡さなければ全ティアが --max-locked-finish-drift 1本で"
+                         "測られる (＝この引数が無かった頃と同じ)。渡したときだけ、"
+                         "SOFT の仕上げ違反は run を落とさず SOFT_REGRESSION になる。")
+    ap.add_argument("--package", default=None,
+                    help="動画素材パッケージの package.json。設計そのものから決めた"
+                         "色→階層の宣言 (lockTiers) を読み、組み込みのセグメン"
+                         "テーション由来分類より優先する。FREE と宣言された部材は"
+                         "一切測らない。平面図ソースのパッケージは色→階層の表を"
+                         "持たないので、部材ごとの検査は検証不能として名指しされる。"
+                         "渡さなければ従来どおり組み込み分類で判定する。")
     ap.add_argument("--radius", type=int, default=2)
     ap.add_argument("--json", default=None)
     ap.add_argument("--quiet-narrative", action="store_true",
@@ -657,8 +902,13 @@ def main():
     def warn(msg):
         print(f"note: {msg}", file=sys.stderr)
 
-    rows, expected = collect_rows(truth_dir, gen_dir, args.radius, warn=warn)
+    package = load_package(args.package) if args.package else None
+    rows, expected = collect_rows(truth_dir, gen_dir, args.radius, warn=warn,
+                                  package=package)
     assert_coverage(rows, expected, truth_dir, gen_dir)
+    # 判定に使うのは collect_rows が組んだものと同一の導出。ここで作り直すのは
+    # 結果 JSON に「どのパッケージで測ったか」を書くためだけである。
+    tiering = PackageTiering(package, _load_legend(truth_dir)[0]) if package else None
 
     thresholds = Thresholds(
         min_locked_recall=args.min_locked_recall,
@@ -668,8 +918,9 @@ def main():
         min_soft_instance_recall=args.min_soft_instance_recall,
         max_unverifiable_fraction=args.max_unverifiable_fraction,
         max_locked_finish_drift=args.max_locked_finish_drift,
+        max_soft_finish_drift=args.max_soft_finish_drift,
     )
-    result = evaluate(rows, thresholds)
+    result = evaluate(rows, thresholds, tiering=tiering)
     result["compared"] = len(rows)
     result["rows"] = rows
 
@@ -681,6 +932,18 @@ def main():
     print(f"  FREE   additions: {result['free']['total_added_px']:,} px of generated structure "
           "with no counterpart in the truth — never penalised")
 
+    if "package" in result:
+        pkg = result["package"]
+        print(f"  PACKAGE ({pkg['source']} source): "
+              f"{pkg['declared_colours']} colour(s) carry a tier declared by the design")
+        for note in pkg["notes"]:
+            print(f"    - {note}")
+    not_measured = result["free"].get("not_measured")
+    if not_measured:
+        names = sorted({e["instance"] for e in not_measured})
+        print(f"  note: {len(names)} instance(s) were NOT MEASURED at all because the "
+              "package declares them FREE (the model's to invent): " + ", ".join(names))
+
     if not args.quiet_narrative:
         for r in rows:
             print(f"  frame {r['index']:>4}:")
@@ -689,11 +952,15 @@ def main():
 
     uv = result["unverifiable"]
     if uv["count"]:
+        # パッケージ有りのときだけ理由が増える。無い run の出力は1文字も
+        # 変わらない (この文面そのものが後方互換の一部である)。
+        extra = ("; with a package, also that the package could not tier the part, or "
+                 "that the reference could not show its finish") if "package" in result else ""
         print(f"  note: {uv['count']} of {uv['total_checks']} check(s) were unverifiable — "
               "the truth base render has no detectable edge in that region (e.g. two "
               "same-tone surfaces meeting), so whether the structure survived generation "
-              f"could not be scored. These do NOT count toward PASS ({result['verdict']} "
-              "above reflects only what could be checked):")
+              f"could not be scored{extra}. These do NOT count toward PASS "
+              f"({result['verdict']} above reflects only what could be checked):")
         for entry in uv["frames"]:
             print(f"    frame {entry['index']:>4}: " + ", ".join(entry["checks"]))
 
