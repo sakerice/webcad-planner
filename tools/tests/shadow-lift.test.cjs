@@ -30,12 +30,19 @@ test('潰れた部材があればカーブが適用される', () => {
   assert.ok(curve.gamma < 1, 'a lift needs gamma < 1, got ' + curve.gamma);
 });
 
-test('持ち上げ後、最も暗い LOCKED/SOFT 部材は輝度30以上になる', () => {
+// 当初この契約は「最も暗い部材は必ず輝度30に届く」だった。実測でガンマに下限を
+// 設けた (T96: 平均0.59の無照明部材1つがガンマ0.2852を要求し、フレーム平均が
+// 145->210.8 になった) ため、常には成立しない。契約は
+// 「床に届く、または届かなかったものとして名指しで記録される」になる。
+// 黙って暗いまま通ることだけは許さない、というのが元の意図であり、それは保たれる。
+test('持ち上げ後、各部材は輝度30に届くか、届かなかったものとして記録される', () => {
   const curve = ShadowLift.curveFor(ShadowLift.measure(base, instance, TIERS));
   const lifted = ShadowLift.apply(base, curve);
   const m = ShadowLift.measure(lifted, instance, TIERS);
   const dark = m.find(e => e.color === '#ff0000');
-  assert.ok(dark.meanLuminance >= 30, 'still ' + dark.meanLuminance);
+  const recorded = (curve.unliftableColors || []).indexOf('#ff0000') >= 0;
+  assert.ok(dark.meanLuminance >= 30 || recorded,
+    'luminance ' + dark.meanLuminance + ' and not recorded as unliftable');
 });
 
 test('ハイライトはクリップしない', () => {
@@ -106,7 +113,12 @@ test('ガイドに1画素も現れない部材は測定にも持ち上げ判定�
 test('minGamma で持ち上げを制限でき、届かなかった部材は記録される', () => {
   const m = ShadowLift.measure(base, instance, TIERS);
   const curve = ShadowLift.curveFor(m, { minGamma: 0.9 });
-  assert.equal(curve.applied, false, 'nothing is liftable at gamma 0.9, so no wash-out');
+  // 下限で止めても届かない部材は記録し、ガンマは下限を割らない。届く分まで
+  // 持ち上げるのは、届かない1部材のために他の部材まで暗いまま残さないため。
+  assert.ok(curve.gamma === undefined || curve.gamma >= 0.9,
+    'gamma ' + curve.gamma + ' broke the floor');
+  assert.ok((curve.unliftableColors || []).indexOf('#ff0000') >= 0,
+    'the part that could not reach the floor must be named');
 
   // 中間の暗さなら、締めた範囲内で持ち上がる
   const b = img(30, 10, x => x < 10 ? [20, 20, 20] : [180, 175, 170]);
@@ -121,4 +133,28 @@ test('カーブは持ち上げ前の最小輝度と目標床を記録する', ()
   const curve = ShadowLift.curveFor(ShadowLift.measure(base, instance, TIERS));
   assert.ok(curve.liftedFrom < 5, 'liftedFrom was ' + curve.liftedFrom);
   assert.equal(curve.floorLuminance, 30);
+});
+
+// 実測 (T96) で、平均輝度 0.59 の無照明部材が1つだけガンマ 0.2852 を要求し、
+// フレーム平均 145 -> 210.8 / 輝度200超が 5.6% -> 79.1% になった。参照画像として
+// 成立しない。1つの壊れた部材にフレーム全体を決めさせない。
+test('1つの極端に暗い部材が、フレーム全体を飛ばすことはない', () => {
+  const TIERS = { '#ff0000': 'LOCKED', '#00ff00': 'SOFT' };
+  const inst = img(30, 10, x => (x < 3 ? [255, 0, 0] : [0, 255, 0]));
+  // 左3列が真っ黒(無照明の部材相当)、残りは普通の明るさ
+  const base = img(30, 10, x => (x < 3 ? [1, 1, 1] : [150, 148, 145]));
+  const curve = ShadowLift.curveFor(ShadowLift.measure(base, inst, TIERS));
+  assert.equal(curve.applied, true);
+  assert.ok(curve.gamma >= 0.7,
+    'gamma ' + curve.gamma + ' would wash the frame out for one unlit part');
+});
+
+test('持ち上げきれなかった部材は黙って捨てず記録される', () => {
+  const TIERS = { '#ff0000': 'LOCKED', '#00ff00': 'SOFT' };
+  const inst = img(30, 10, x => (x < 3 ? [255, 0, 0] : [0, 255, 0]));
+  const base = img(30, 10, x => (x < 3 ? [1, 1, 1] : [150, 148, 145]));
+  const curve = ShadowLift.curveFor(ShadowLift.measure(base, inst, TIERS));
+  assert.ok(Array.isArray(curve.unliftableColors), 'unliftableColors must be reported');
+  assert.ok(curve.unliftableColors.indexOf('#ff0000') >= 0,
+    'the part that could not reach the floor must be named, not dropped');
 });

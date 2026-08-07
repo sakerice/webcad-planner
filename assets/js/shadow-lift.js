@@ -40,7 +40,20 @@
   // なった。ここを締めたい場合は curveFor(..., {minGamma: n}) で明示的に締めること。
   // 締めた結果として床に届かなかった部材は unliftableColors に残るので、
   // 「持ち上げで誤魔化す」のではなく「その部材の照明を直す」判断ができる。
-  var MIN_GAMMA = 0.2;
+  // ガンマの下限。実測 (T96-ldk-overhead-descend, 可視 66部材) で決めた。
+  // 輝度30未満は11部材。全部を30まで持ち上げるとガンマ 0.2852 が要求され、
+  // フレーム平均 145 -> 210.8、輝度200超の面積が 5.6% -> 79.1% になる。
+  // それは「暗部を見せる」ではなく「絵を飛ばす」であり、参照として成立しない。
+  //
+  // 0.65 と 0.70 のあいだに崖がある(200超の面積が 55.9% -> 9.9%)。広い明るい面が
+  // ちょうどそこを跨ぐため。0.70 なら 11部材のうち9部材が30を超え、フレームは
+  // 145 -> 167.9 / 200超は 9.9% に収まる。残る2部材は unliftableColors に残す。
+  //
+  // 持ち上げきれない筆頭は lattice-screen で、平均 0.59・最大チャンネル値 7・
+  // 44%が完全な0。これは影ではなく無照明のマテリアル不具合であり、
+  // トーンカーブで直す対象ではない。1つの壊れた部材にフレーム全体を
+  // 決めさせないことが、この下限の目的である。
+  var MIN_GAMMA = 0.7;
 
   // 床ちょうどを狙うと、解いた平均と測り直した平均が浮動小数の最終桁でずれて
   // 30 をわずかに割ることがある。整数値の LUT に対する余白としては十分小さい。
@@ -210,23 +223,26 @@
       if (entry.meanLuminance < darkest) darkest = entry.meanLuminance;
       if (entry.meanLuminance >= floor) continue;
       var g = gammaToLift(entry, floor, minGamma);
-      if (g < 0) unliftable.push(entry.color);
-      else if (g < gamma) gamma = g;
+      if (g < 0) {
+        // 下限のガンマでも床に届かない部材。ここで諦めて何もしないと、
+        // **他の届く部材まで巻き添えで暗いまま**になる。届く分は持ち上げ、
+        // 届かなかった部材は名前を残す。実測 (T96): 11部材のうち
+        // lattice-screen だけが届かず、下限で止めれば残り9部材は床を超える。
+        unliftable.push(entry.color);
+        if (minGamma < gamma) gamma = minGamma;
+      } else if (g < gamma) gamma = g;
     }
 
     if (darkest === Infinity || darkest >= floor) return { applied: false };
 
-    if (gamma >= 1) {
-      // 床を割った部材はあるのに、どのガンマでも届かない。真っ黒 (情報ゼロ) の
-      // 部材にガンマは効かない -- 無い情報は作れない。ここで絵全体を白茶けさせても
-      // 得るものが無いので何もしないが、黙って見逃すのは事故なので警告する。
-      if (typeof console !== 'undefined' && console.warn) {
-        console.warn('ShadowLift.curveFor: ' + unliftable.length +
-          ' locked/soft part(s) are too black for any gamma to reach luminance ' + floor +
-          ' (' + unliftable.join(', ') + ') -- fix the lighting, not the curve');
-      }
-      return { applied: false };
+    // 届かなかった部材があるなら、黙って見逃さない。トーンカーブで直せる話では
+    // ないので (無い情報は作れない)、レンダの照明側を直すべきだと名指しで言う。
+    if (unliftable.length && typeof console !== 'undefined' && console.warn) {
+      console.warn('ShadowLift.curveFor: ' + unliftable.length +
+        ' locked/soft part(s) stay below luminance ' + floor + ' even at gamma ' +
+        minGamma + ' (' + unliftable.join(', ') + ') -- fix the lighting, not the curve');
     }
+    if (gamma >= 1) return { applied: false };
 
     return {
       applied: true,
