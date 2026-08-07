@@ -62,6 +62,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
 <script src="assets/models/custom/manifest.js"></script>
+<script src="assets/js/height-model.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -3213,6 +3214,7 @@ input[type="reset"]:focus-visible{
         <div class="sidebar-settings-note">ONで回転角度/近接オブジェクトスナップを有効化</div>
       </div>
       <div class="sidebar-settings-label wall-height-label">壁高さ(mm)</div>
+      <!-- 新規の壁に使う既定値(グローバル)を書き換える設定UI。部屋ごとの天井高ではないので HeightModel は通さない。 -->
       <input class="pi" type="number" value="2400" min="1800" max="4000" step="100" onchange="WALL_H=+this.value">
     </div>
   </div>
@@ -3527,9 +3529,11 @@ function foundationHeightM(){
   return foundationHeightMm()*U;
 }
 function floorBaseY(floor){
+  // FLOOR_H は階を積む間隔(階高)であって部屋の天井高ではないので、置き換えない。
   return ((floor||1)-1)*FLOOR_H*U + foundationHeightM();
 }
 function floorSlabHeightM(){
+  // FLOOR_SLAB_H は床スラブの厚みで、部屋の天井高とは無関係なので置き換えない。
   return Math.max(0,FLOOR_SLAB_H||0)*U;
 }
 function floorSlabHeightMForFloor(floor){
@@ -3570,8 +3574,24 @@ function item3DBaseY(it){
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
 }
+// 壁の高さ。部屋ではなく「その階の壁」の高さなので WALL_H のまま残す:
+// 壁は2つの部屋の境界にあり、どちらの部屋の天井高を採るべきかがここでは決まらない。
+// 部屋ごとの天井高は roomCeilingHeightM() を使うこと。
 function wallFullHeightM(floor){
   return Math.max(WALL_H*U+floorSlabHeightMForFloor(floor),FLOOR_H*U);
+}
+// 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
+// 高さフィールドを持たない既存プランでは HeightModel.ceilingHeightMm が WALL_H と
+// 同じ 2400 を返すため、従来の wallFullHeightM(r.floor) と完全に同値になり、
+// 保存済みの家の寸法は変わらない。
+// FLOOR_H とのクランプは残す: ここでの FLOOR_H は「階と階のあいだに隙間を作らない」
+// ための階高であって部屋の天井高ではなく、置き換えると既存プランの天井が 2700→2400 へ
+// 下がってしまうため。
+function roomCeilingHeightM(room){
+  var mm=(typeof HeightModel!=='undefined'&&HeightModel)
+    ? HeightModel.ceilingHeightMm(DATA,room)
+    : WALL_H;
+  return Math.max(mm*U+floorSlabHeightMForFloor(room&&room.floor),FLOOR_H*U);
 }
 
 var ISIZES = {
@@ -4210,6 +4230,7 @@ function ensureLightDefaults(it){
   return it;
 }
 function contextStoryHeightMm(){
+  // 隣家・周辺ビルの階高。設計対象の建物の階高とは別概念なので、高さモデルを通さない。
   return Math.round(Math.max(FLOOR_H||2700,WALL_H||2400,2700));
 }
 function contextStoryHeightM(){
@@ -5379,6 +5400,7 @@ function setCurrentFloorUse(role){
   setAiInstructionsPreview('');
   syncFloorUseControl();
 }
+// wallHeight:WALL_H は新規の壁に入れる既定値。部屋の天井高ではないので置き換えない。
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
     thick:thick||120,color:color||'#888888',texture:null,textureFlipX:false,textureFlipY:false,texScale:1,_texObj:null,
@@ -9744,11 +9766,13 @@ function openingHeightMm(it){
   if(!it) return 2000;
   return isWindowLikeType(it.type) ? windowHeightMm(it) : doorHeightMm(it);
 }
+// 壁1枚の高さ。引数は壁で、部屋が特定できない(壁は2部屋の境界)ため置き換えない。
 function wallHeightMm(w){
   var v=Number(w&&w.wallHeight);
   return isFinite(v)?Math.max(300,Math.min(6000,v)):WALL_H;
 }
 function wallDisplayHeightM(w){
+  // ここの WALL_H は「既定値のまま=個別指定なし」を判定する番兵で、高さの取得ではないので置き換えない。
   if(!w || w.wallHeight===undefined || isNaN(Number(w.wallHeight)) || Number(w.wallHeight)===WALL_H) return wallFullHeightM(w&&w.floor);
   return Math.max(0.3,wallHeightMm(w)*U+floorSlabHeightMForFloor(w.floor));
 }
@@ -11322,6 +11346,7 @@ function stairGroupTotalRiseM(floor){
   var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
                DATA.rooms.some(function(r){return r.floor===nf;}) ||
                DATA.items.some(function(i){return i.floor===nf;});
+  // 上階が無いときの階段の上り高さ。階高であって天井高ではないので置き換えない。
   if(!hasUpper) return FLOOR_H*U;
   return Math.max(0.5,floorTopY(nf)-floorTopY(fl));
 }
@@ -11366,6 +11391,7 @@ function stairRiseInfo(it){
 function getStairStepCount(it){
   if(!it) return 3;
   if(it.type==='stair-corner') return 3;
+  // 段数の元になるのは階高。天井高ではないので置き換えない。
   return stairStepCount(FLOOR_H, it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
 }
 // 建築基準法整合の段数算出:
@@ -12221,6 +12247,7 @@ function buildItem3D(it){
 }
 
 function balconySlabHeightMm(){
+  // バルコニーのスラブ厚。天井高とは無関係なので置き換えない。
   return Math.max(80,Math.min(400,FLOOR_SLAB_H||180));
 }
 function build3DBalcony(grp,it,w3,d3,h){
@@ -14108,7 +14135,9 @@ function buildRooms3D(flFilt){
   DATA.rooms.filter(function(r){return !r.hidden3D&&(!flFilt||r.floor===flFilt);}).forEach(function(r){
     var ry=floorBaseY(r.floor);
     var floorY=floorTopY(r.floor);
-    var ceilY=ry+wallFullHeightM(r.floor);
+    // ここだけが「部屋そのものの天井高」。部屋オブジェクト r が手元にあるので
+    // HeightModel 経由(roomCeilingHeightM)で読む。
+    var ceilY=ry+roomCeilingHeightM(r);
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
 
@@ -17980,6 +18009,8 @@ function normalizeLegacyFurnitureItems(){
       it.d=Math.max(30,fmpCurrent.d||150);
       it.x=winCx-it.w/2;
       it.y=winCy-it.d/2;
+      // 窓を差し替えたときの寸法クランプ上限。壁の既定高であって部屋の天井高ではなく、
+      // ここでは窓がどの部屋に属するかも決まらないので置き換えない。
       it.windowHeight=Math.max(200,Math.min(WALL_H,fmpCurrent.h||1200));
       it.windowSill=Math.max(0,Math.min(it.windowSill||900,Math.max(0,WALL_H-it.windowHeight)));
       it.color=ICOLORS[it.type]||'#c0e4f8';
