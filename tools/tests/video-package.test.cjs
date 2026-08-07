@@ -280,3 +280,155 @@ test('平面図ソースでも家具の上面画像を待ち、画素で確か�
   assert.match(branch, /waitForPlanFloorTopImages\(/);
   assert.match(branch, /findPlanPlaceholderInstances\(/);
 });
+
+// ── Task 7c-2: 平面図経路にも部材の名指しを戻す ─────────────────────────
+// 以下は grep ではなく**出力**を見る。index.html から planInstanceList を切り出して
+// node で走らせ、実データ (assets/default_plan.json) を食わせ、その戻り値を
+// 本物の VideoPrompt.compose に渡して、出てきた文に窓の数が入っているかを測る。
+const vm = require('node:vm');
+const LockTiers = require('../../assets/js/lock-tiers.js');
+const VideoPrompt = require('../../assets/js/video-prompt.js');
+
+function topLevelFunction2(name) {
+  const sig = '\nfunction ' + name + '(';
+  const at = html.indexOf(sig);
+  assert.notEqual(at, -1, 'function ' + name + ' が index.html に無い');
+  const start = at + 1;
+  let i = html.indexOf('{', start);
+  let depth = 0, mode = null;
+  for (; i < html.length; i++) {
+    const c = html[i], n = html[i + 1];
+    if (mode === 'line') { if (c === '\n') mode = null; continue; }
+    if (mode === 'block') { if (c === '*' && n === '/') { mode = null; i++; } continue; }
+    if (mode) {
+      if (c === '\\') { i++; continue; }
+      if (c === mode) mode = null;
+      continue;
+    }
+    if (c === '/' && n === '/') { mode = 'line'; i++; continue; }
+    if (c === '/' && n === '*') { mode = 'block'; i++; continue; }
+    if (c === '"' || c === "'" || c === '`') { mode = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) return html.slice(start, i + 1); }
+  }
+  throw new Error(name + ' の本体が閉じていない');
+}
+function topLevelVar2(name) {
+  const m = html.match(new RegExp('\\nvar ' + name + '\\s*=[^;\\n]*;'));
+  assert.notEqual(m, null, 'var ' + name + ' が index.html に無い');
+  return m[0];
+}
+const PLAN_DATA = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
+function planListFor(data) {
+  const src = [
+    topLevelVar2('CONTEXT_EXTERIOR_TYPES'),
+    topLevelFunction2('isContextExteriorItemType'),
+    topLevelFunction2('isPlanAnnotationType'),
+    topLevelFunction2('objectIdLabel'),
+    topLevelFunction2('isPlanSubjectObject'),
+    topLevelFunction2('planInstanceList')
+  ].join('\n');
+  const ctx = vm.createContext({ console: console, DATA: data || PLAN_DATA, LockTiers: LockTiers });
+  vm.runInContext(src, ctx);
+  return ctx.planInstanceList;
+}
+function planPreset() {
+  const p = VideoPrompt.presetsFor('plan');
+  assert.ok(p.length > 0);
+  return p[0];
+}
+
+test('planInstanceList は DATA から、その階の部材を数える', () => {
+  const list = planInstanceListOf(2);
+  // 期待値はテスト側で独立に数える（実装の規則を写さない）
+  const expect = [].concat(PLAN_DATA.walls, PLAN_DATA.rooms, PLAN_DATA.items).filter(function (o) {
+    if (o.floor !== 2) return false;
+    return ['memo', 'ruler', 'walk-route', 'site-rect', 'road',
+            'neighbor-house', 'neighbor-building', 'utility-pole'].indexOf(o.type) === -1;
+  }).length;
+  assert.ok(expect > 0);
+  assert.equal(list.length, expect);
+});
+function planInstanceListOf(floor) { return planListFor(null)(floor); }
+
+test('planInstanceList の各件は id / type / floor / tier を持ち、色は持たない', () => {
+  const list = planInstanceListOf(2);
+  list.forEach(function (e) {
+    assert.ok(e.id !== undefined && e.id !== null && String(e.id) !== '', 'id が無い');
+    assert.equal(typeof e.type, 'string');
+    assert.equal(e.floor, 2);
+    // ガイド画像が無い経路なので、色で切り出す相手が居ない。色は嘘になる。
+    assert.ok(!Object.prototype.hasOwnProperty.call(e, 'color'), 'color を持ってはいけない');
+  });
+  const ids = list.map(function (e) { return String(e.id); });
+  assert.equal(new Set(ids).size, ids.length, 'id が重複している（部材を指せない）');
+});
+
+test('階層は LockTiers.tierOf の戻り値そのもの（分類規則を書き写さない）', () => {
+  const list = planInstanceListOf(2);
+  list.forEach(function (e) {
+    assert.equal(e.tier, LockTiers.tierOf(e.type), e.type + ' の階層が違う');
+  });
+  const body = topLevelFunction2('planInstanceList');
+  assert.match(body, /LockTiers\.tierOf\(/);
+  assert.doesNotMatch(body, /'LOCKED'|"LOCKED"|'SOFT'|"SOFT"/,
+    '階層の文字列を書き写している（分類が2か所になる）');
+});
+
+test('平面図経路のプロンプトが、この家の窓・階段・バルコニーを数えて名指しする', () => {
+  const text = VideoPrompt.compose({
+    preset: planPreset(), legend: planInstanceListOf(2),
+    camera: null, daylight: { timeOfDay: 'day' }
+  });
+  // 2F の実データ: window 7 / stair+stair-corner / balcony 1
+  assert.match(text, /seven windows/, '窓の数を名指ししていない: ' + text);
+  assert.match(text, /a staircase/, '階段を名指ししていない');
+  assert.match(text, /a balcony/, 'バルコニーを名指ししていない');
+  // 名指しできないときの総称形に落ちていないこと
+  assert.doesNotMatch(text, /The house is the one the reference draws/);
+});
+
+test('1F でも建具を数えて名指しする（階ごとに中身が変わる）', () => {
+  const text = VideoPrompt.compose({
+    preset: planPreset(), legend: planInstanceListOf(1),
+    camera: null, daylight: { timeOfDay: 'day' }
+  });
+  assert.match(text, /four windows/, text);
+  assert.match(text, /three sliding doors/);
+  assert.match(text, /a front door/);
+});
+
+test('compose は色を必要としない（色は composer の要件ではない）', () => {
+  const list = planInstanceListOf(2);
+  const withColor = list.map(function (e) {
+    return { id: e.id, color: '#abcdef', type: e.type, floor: e.floor, tier: e.tier };
+  });
+  const a = VideoPrompt.compose({ preset: planPreset(), legend: list, camera: null, daylight: 'day' });
+  const b = VideoPrompt.compose({ preset: planPreset(), legend: withColor, camera: null, daylight: 'day' });
+  assert.equal(a, b, '色の有無で文が変わる＝composer が色に結合している');
+});
+
+test('平面図経路の package.json の instances は null ではない', () => {
+  const branch = planBranch();
+  assert.match(branch, /planInstanceList\(/);
+  // videoPackageJson に渡す state の instances だけを見る（capture.instances は
+  // ガイド画像の中の件数なので、ガイドの無いこの経路では null が正しい）。
+  const state = branch.slice(branch.indexOf('videoPackageJson({'), branch.indexOf('capture:'));
+  assert.ok(state.length > 0);
+  assert.doesNotMatch(state, /instances:\s*null/,
+    'plan 経路は部材一覧を持てる。null を書き込むのは Task 7b の欠落そのもの');
+  assert.match(state, /instances:/);
+});
+
+test('構図が小さすぎるパッケージは書き出されずに投げる', () => {
+  const branch = planBranch();
+  assert.match(branch, /PLAN_SUBJECT_MIN_FRAME_RATIO/);
+  assert.match(branch, /planSubjectFrameRatio\(|planSubjectFrameRatio/);
+  assert.match(branch, /throw new Error/);
+});
+
+test('平面図の参照は3D経路と同じ画素数で撮る', () => {
+  const branch = planBranch();
+  assert.match(branch, /fit:true/, '撮る前に構図を作っていない');
+  assert.match(branch, /scale:/, '3D と同じ画素数で撮っていない');
+});

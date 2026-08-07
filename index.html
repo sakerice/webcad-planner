@@ -5786,8 +5786,87 @@ function planCaptureDefaults(){
   };
 }
 var PLAN_CAPTURE_KEYS=['annotations','selection','grid','ghostFloor','toolOverlays','ceilingLabels'];
+
+// ── 構図 ─────────────────────────────────────────────────────────────
+// 主題 = その階の設計そのもの（壁・部屋・建具・階段・家具）。敷地・道路・隣家・
+// 電柱は文脈であって主題ではない。実測(assets/default_plan.json 1F, 1400x900):
+// 文脈込みの箱に合わせて撮ると、家はフレームの **5.1%** しか占めない。
+// 主題だけの箱なら 72.2%。文脈を箱に入れることが、家が小さく写る原因そのものである。
+function isPlanSubjectObject(o,floor){
+  if(!o || o.floor!==floor) return false;
+  var t=o.type;
+  if(t==='site-rect') return false;                 // 敷地
+  if(isPlanAnnotationType(t)) return false;         // メモ・定規・ウォークルート
+  if(isContextExteriorItemType(t)) return false;    // 隣家・道路・電柱
+  return true;
+}
+// 主題のバウンディングボックス(mm)。撮る対象が無ければ null。
+function planSubjectBoundsMm(floor){
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,n=0;
+  [].concat(DATA.walls,DATA.rooms,DATA.items).forEach(function(o){
+    if(!isPlanSubjectObject(o,floor)) return;
+    // DATA の壁は type を持たない（線分としてだけ在る）。getObjBounds の 'wall'
+    // 分岐は 3D 側の ref 用なので、ここでは端点を直接読む。
+    var pts=(o.x1!==undefined&&o.x2!==undefined)?
+      [{x:o.x1,y:o.y1},{x:o.x2,y:o.y2}]:getObjBounds(o);
+    pts.forEach(function(p){
+      if(!isFiniteCanvasValue(p.x)||!isFiniteCanvasValue(p.y)) return;
+      n++;
+      minX=Math.min(minX,p.x); minY=Math.min(minY,p.y);
+      maxX=Math.max(maxX,p.x); maxY=Math.max(maxY,p.y);
+    });
+  });
+  if(!n||maxX<=minX||maxY<=minY) return null;
+  return {minX:minX,minY:minY,maxX:maxX,maxY:maxY};
+}
+// 主題の周りに足す余白。1割。
+var PLAN_FIT_MARGIN=0.10;
+// 主題を W×H の中央に、余白1割で収めるパン・ズーム。
+function planFitViewFor(bounds,W,H){
+  if(!bounds||!(W>0)||!(H>0)) return null;
+  var bw=bounds.maxX-bounds.minX, bh=bounds.maxY-bounds.minY;
+  if(!(bw>0)||!(bh>0)) return null;
+  var pxPerMm=Math.min(W/bw,H/bh)/(1+PLAN_FIT_MARGIN);
+  var zoom=Math.max(0.05,Math.min(40,pxPerMm/0.05));
+  var sc=zoom*0.05;
+  return {
+    zoom:zoom,
+    panX:W/2-(bounds.minX+bounds.maxX)/2*sc,
+    panY:H/2-(bounds.minY+bounds.maxY)/2*sc
+  };
+}
+// 主題がフレームの何割を占めるか。**画面外は数えない** — 見切れた分は参照に
+// 写っておらず、生成AIには存在しない。
+function planSubjectFrameRatio(bounds,view,W,H){
+  if(!bounds||!view||!(W>0)||!(H>0)) return 0;
+  var sc=view.zoom*0.05;
+  var x0=view.panX+bounds.minX*sc, x1=view.panX+bounds.maxX*sc;
+  var y0=view.panY+bounds.minY*sc, y1=view.panY+bounds.maxY*sc;
+  var w=Math.max(0,Math.min(W,x1)-Math.max(0,x0));
+  var h=Math.max(0,Math.min(H,y1)-Math.max(0,y0));
+  return (w*h)/(W*H);
+}
+// 生成AIに渡してよい下限。**実測で決めた**（assets/default_plan.json / 1400x900）:
+//   直す前（保存されたパン・ズームのまま）  1F 0.199 / 2F 0.173 / 3F 0.175
+//   fit した後                              1F 0.722 / 2F 0.714 / 3F 0.795
+// 0.35 は不良の最大 (0.199) の約1.8倍、正常の最小 (0.714) の約半分。
+// 縦長のフレーム（スマホ縦持ち）に横長の家を fit すると、正しく合わせても
+// この線に近づく。そのときは**落とす方を選ぶ**: 生成のやり直しは1回ぶんだが、
+// 主題が2割の参照は生成そのものを無駄にする。
+var PLAN_SUBJECT_MIN_FRAME_RATIO=0.35;
+// 最後に撮った平面図の座標系。撮影中だけ変えたパン・ズーム・倍率を、撮った画像を
+// 画素で調べる側（プレースホルダ検出・構図の検査）へ渡すために残す。
+var PLAN_CAPTURE_VIEW=null;
+// 撮影中の倍率。文字の大きさの**下限**だけがこれを見る。下限（10px 等）は
+// 「画面で読める大きさ」のための値で、画素を増やしただけで図の中の文字が
+// 相対的に縮むのは倍率の副作用でしかない。通常表示と等倍キャプチャでは 1 で、
+// 何も変わらない。
+var PLAN_CAPTURE_SCALE=1;
+function planCaptureMinFont(px){ return px*PLAN_CAPTURE_SCALE; }
 // options = {annotations:false, ceilingLabels:true, selection:false, grid:false, ghostFloor:false}
 // floor を渡すと、その階を一時的に描いて撮る。撮り終えたら必ず元の表示へ戻す。
+// fit:true は主題に構図を合わせ、scale はその倍率で撮る。どちらも**撮影中だけ**の
+// 変更で、finally でパン・ズーム・キャンバス寸法まで戻す（ユーザーの画面は動かない）。
 function capturePlan2dDataUrl(options){
   var opt=options||{};
   var cfg=planCaptureDefaults();
@@ -5796,15 +5875,40 @@ function capturePlan2dDataUrl(options){
   });
   var prevCapture=PLAN_CAPTURE;
   var prevFloor=ST.floor;
+  var prevPanX=ST.panX, prevPanY=ST.panY, prevZoom=ST.zoom;
+  var prevW=canvas.width, prevH=canvas.height;
+  var scale=Number(opt.scale)||1;
+  if(!(scale>0)||!isFinite(scale)) scale=1;
   try{
     if(opt.floor!==undefined && opt.floor!==null) ST.floor=opt.floor;
+    if(opt.fit){
+      // 撮る前に構図を作る。ユーザーが眺めていた倍率は、生成AIに渡す絵の
+      // 解像度とは何の関係もない。
+      var fitView=planFitViewFor(planSubjectBoundsMm(ST.floor),prevW,prevH);
+      if(fitView){ ST.panX=fitView.panX; ST.panY=fitView.panY; ST.zoom=fitView.zoom; }
+    }
+    if(scale!==1){
+      // 画素だけを増やす。パン・ズームを同じ倍率で引き伸ばすので、フレームに
+      // 対する構図は1倍のときと同じままになる。
+      canvas.width=Math.round(prevW*scale);
+      canvas.height=Math.round(prevH*scale);
+      ST.panX*=scale; ST.panY*=scale; ST.zoom*=scale;
+      PLAN_CAPTURE_SCALE=scale;
+    }
     PLAN_CAPTURE=cfg;
+    // 撮った画像を画素で調べる側は、この座標系で読む必要がある。
+    PLAN_CAPTURE_VIEW={panX:ST.panX,panY:ST.panY,zoom:ST.zoom,
+      width:canvas.width,height:canvas.height,floor:ST.floor,scale:scale};
     draw2d();
     return canvas.toDataURL(opt.mimeType||'image/png');
   }finally{
     // 途中で落ちても、ユーザーが見ている画面を欠けたまま放置しない。
     PLAN_CAPTURE=prevCapture;
+    PLAN_CAPTURE_SCALE=1;
     ST.floor=prevFloor;
+    ST.panX=prevPanX; ST.panY=prevPanY; ST.zoom=prevZoom;
+    if(canvas.width!==prevW) canvas.width=prevW;
+    if(canvas.height!==prevH) canvas.height=prevH;
     if(!prevCapture){
       try{ draw2d(); }catch(e){}
     }
@@ -5991,7 +6095,7 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
   var tatami = sqm / 1.62;
   var areaStr = tatami.toFixed(1) + '畳 / ' + sqm.toFixed(2) + '㎡';
   var showArea = ST.zoom >= 0.4;
-  var szN=Math.max(10,ST.zoom*0.8), szA=Math.max(8,ST.zoom*0.55);
+  var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   ctx.font='bold '+szN+'px "Noto Sans JP",sans-serif';
   var tw=Math.max(ctx.measureText(name).width, showArea?ctx.measureText(areaStr).width:0)+18;
   var th=showArea?szN+szA+14:szN+12;
@@ -6035,9 +6139,9 @@ function drawCeilingLabel2d(room){
   if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
   var text=HeightModel.ceilingLabel(DATA,room);
   var p=w2c(room.x+room.w/2,room.y+room.d/2);
-  var szN=Math.max(10,ST.zoom*0.8), szA=Math.max(8,ST.zoom*0.55);
+  var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);
-  var sz=Math.max(9,ST.zoom*0.5);
+  var sz=Math.max(planCaptureMinFont(9),ST.zoom*0.5);
   var cy=p.cy+tagH/2+sz*0.85;
   // 部屋からはみ出すなら部屋の内側に収める
   var bottom=w2c(room.x,room.y+room.d).cy-sz*0.7;
@@ -16016,23 +16120,25 @@ function drawPreview(){
   var dx=mx-last.x,dy=my-last.y,len=Math.round(Math.sqrt(dx*dx+dy*dy));
   if(len>20){ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#333';ctx.fillText(len+'mm',(a.cx+b.cx)/2,(a.cy+b.cy)/2-10);}
 }
+// オブジェクトの平面上の四隅（回転込み）。寸法線と、キャプチャの構図合わせ
+// (planSubjectBoundsMm) が同じ1つを使う。形の計算を2つ持つと必ず片方が腐る。
+function getObjBounds(o){
+  if(!o) return [];
+  if(o.type==='wall') return [{x:o.x1,y:o.y1},{x:o.x2,y:o.y2}];
+  if(!isFiniteCanvasValue(o.x) || !isFiniteCanvasValue(o.y) || !isFiniteCanvasValue(o.w) || !isFiniteCanvasValue(o.d)) return [];
+  var cx=o.x+o.w/2, cy=o.y+o.d/2, rad=(o.rot||0)*Math.PI/180;
+  if(o.type==='room' || o.type==='site-rect') rad=0;
+  var hw=o.w/2, hd=o.d/2;
+  return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
+    return {
+      x: cx + p[0]*Math.cos(rad) - p[1]*Math.sin(rad),
+      y: cy + p[0]*Math.sin(rad) + p[1]*Math.cos(rad)
+    };
+  });
+}
 function drawDim(){
   if(!ST.showDim||ST.zoom<0.3) return;
-  
-  function getObjBounds(o){
-    if(!o) return [];
-    if(o.type==='wall') return [{x:o.x1,y:o.y1},{x:o.x2,y:o.y2}];
-    if(!isFiniteCanvasValue(o.x) || !isFiniteCanvasValue(o.y) || !isFiniteCanvasValue(o.w) || !isFiniteCanvasValue(o.d)) return [];
-    var cx=o.x+o.w/2, cy=o.y+o.d/2, rad=(o.rot||0)*Math.PI/180;
-    if(o.type==='room' || o.type==='site-rect') rad=0;
-    var hw=o.w/2, hd=o.d/2;
-    return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
-      return {
-        x: cx + p[0]*Math.cos(rad) - p[1]*Math.sin(rad),
-        y: cy + p[0]*Math.sin(rad) + p[1]*Math.cos(rad)
-      };
-    });
-  }
+
   function drawBoxDim(minX, minY, maxX, maxY, col, off, label){
     if(!isFiniteCanvasValue(minX) || !isFiniteCanvasValue(minY) || !isFiniteCanvasValue(maxX) || !isFiniteCanvasValue(maxY)) return;
     if(maxX<=minX || maxY<=minY) return;
@@ -17010,16 +17116,21 @@ function ensureAiRenderable3D(){
   updateInteriorCutawayWalls();
   return !!cam;
 }
+// 画像生成AIの入力品質を上げるため高解像度でキャプチャする。ただし iOS/iPadOS は
+// canvasの上限(約16.7MP・1辺4096px)を超えると toDataURL が空になりプレビューが
+// 表示されないため、辺長と面積の両方でブースト倍率を制限する。
+// 3D経路と平面図経路が**同じ画素数**で撮るために、この式は1か所にしか持たない。
+function aiCaptureBoostedRatio(baseRatio,w,h){
+  var boosted=Math.min(baseRatio*2, 4, 4096/w, 4096/h, Math.sqrt(12000000/(w*h)));
+  if(!isFinite(boosted)||boosted<baseRatio) boosted=baseRatio;
+  return boosted;
+}
 function captureCurrent3DDataUrl(){
   if(!ensureAiRenderable3D()) return '';
   var wrap=document.getElementById('c3d-wrap');
   var w=Math.max(1,wrap.clientWidth), h=Math.max(1,wrap.clientHeight);
   var prevRatio=ren.getPixelRatio();
-  // 画像生成AIの入力品質を上げるため高解像度でキャプチャする。ただし iOS/iPadOS は
-  // canvasの上限(約16.7MP・1辺4096px)を超えると toDataURL が空になりプレビューが
-  // 表示されないため、辺長と面積の両方でブースト倍率を制限する
-  var boosted=Math.min(prevRatio*2, 4, 4096/w, 4096/h, Math.sqrt(12000000/(w*h)));
-  if(!isFinite(boosted)||boosted<prevRatio) boosted=prevRatio;
+  var boosted=aiCaptureBoostedRatio(prevRatio,w,h);
   function captureAt(ratio){
     ren.setPixelRatio(ratio);
     if(composer&&composer.setPixelRatio) composer.setPixelRatio(ratio);
@@ -18079,15 +18190,19 @@ function planPlaceholderCouldBe(r,g,b){
   }
   return true;
 }
-function findPlanPlaceholderInstances(imageData,floor){
+// view は「その画像を撮ったときの座標系」。撮影中にパン・ズーム・倍率を変えた
+// なら、それを渡さないと判定は画像の別の場所を見る（＝黙って何も検出しなくなる）。
+// 省略時は現在の表示 = 撮影時と同じ、という Task 3 以来の前提のまま。
+function findPlanPlaceholderInstances(imageData,floor,view){
   var found=[];
   if(!imageData||!imageData.data) return found;
   var d=imageData.data, W=imageData.width, H=imageData.height;
-  var sc=ST.zoom*0.05;
+  var vw=view||ST;
+  var sc=vw.zoom*0.05;
   planFloorTopImageEntries(floor).forEach(function(e){
     var it=e.item;
     var pose=getItemDisplayPose(it);
-    var ccx=ST.panX+pose.x*sc, ccy=ST.panY+pose.y*sc;
+    var ccx=vw.panX+pose.x*sc, ccy=vw.panY+pose.y*sc;
     // どの回転角でも矩形の内側に収まる正方形の半辺 (0.35 < 1/(2*sqrt2))
     var half=Math.floor(Math.min(it.w,it.d)*sc*0.35);
     if(half<3) return;                       // 数画素の部材は判定材料にならない
@@ -18316,6 +18431,31 @@ function drawPlanCameraOverlay(planDataUrl,camera){
     img.src=planDataUrl;
   });
 }
+// 平面図経路の部材一覧。3Dの instance legend と同じ形だが、**DATA から直接作る**。
+// legend はガイド画像を撮った副産物であって、真実源は DATA の方である。
+// 色は持たない: 色で切り出す相手（instance ガイドの画素）がこの経路には無いので、
+// 色を書けばそれは読む側への嘘になる。
+// id は objectIdLabel（W82 / R12 / I26）。DATA の id は collection をまたぐと
+// 重複しうる（実データ 211件中ユニーク194件）ので、そのままでは部材を指せない。
+// 階層は必ず LockTiers.tierOf を通す。分類規則をここに書き写さない。
+function planInstanceList(floor){
+  var out=[];
+  [].concat(DATA.walls,DATA.rooms,DATA.items).forEach(function(o){
+    if(!isPlanSubjectObject(o,floor)) return;
+    // DATA の壁は type を持たない。未知扱いで LOCKED に倒れるのではなく、
+    // 'wall' として明示的に LOCKED になるべきなので、ここで名前を与える。
+    var type=(o.x1!==undefined&&o.x2!==undefined)?'wall':(o.type||'unclassified');
+    out.push({id:objectIdLabel(o),type:type,floor:floor,tier:LockTiers.tierOf(type)});
+  });
+  return out;
+}
+// 平面図を3D経路と同じ画素数で撮るための倍率。2Dキャンバスの裏地は等倍
+// (resize2d が clientWidth をそのまま使う) なので、3D側が devicePixelRatio に
+// 掛けるのと同じブーストをそのまま倍率にすれば、両経路の画素数が揃う。
+function planCaptureScaleForVideo(){
+  var base=Math.min((window.devicePixelRatio||1),2);   // ren.setPixelRatio と同じ基準
+  return aiCaptureBoostedRatio(base,canvas.width,canvas.height);
+}
 function videoPackageJson(state){
   return {
     version:1,
@@ -18376,15 +18516,32 @@ async function generateVideoRenderPackage(options){
     // 再検査は3D経路とまったく同じ。このレースは平面図の側の問題である。
     var planFloor=ST.floor;
     var planTop=await waitForPlanFloorTopImages(planFloor);
-    var planRef=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:planFloor});
+    // 構図はユーザーのパン・ズームに任せない。参照そのものが平面図である以上、
+    // 主題が小さければ生成に渡る絵の解像度がそのまま落ちる（Task 7b 実測 15%）。
+    // 画素数は3D経路と揃える。
+    var planRef=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:planFloor,
+      fit:true,scale:planCaptureScaleForVideo()});
     if(!planRef) throw new Error('平面図の撮影に失敗しました。');
+    var planView=PLAN_CAPTURE_VIEW;
     var planIm=await decodePngDataUrlToImageData(planRef);
-    var planPh=findPlanPlaceholderInstances(planIm,planFloor);
+    // 撮ったものを測る。fit を通してなお小さいなら、それは fit では直せない構図
+    // （空の階、極端に細長い家、極端に細長いフレーム）なので、黙って出荷しない。
+    var planBounds=planSubjectBoundsMm(planFloor);
+    var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
+    if(planRatio<PLAN_SUBJECT_MIN_FRAME_RATIO){
+      throw new Error('平面図の中で家がフレームの '+Math.round(planRatio*1000)/10+
+        '% しか占めていません（下限 '+Math.round(PLAN_SUBJECT_MIN_FRAME_RATIO*100)+
+        '%）。主題が小さい参照を渡すと、生成AIはほとんど空の映像を返します。'+
+        'ウィンドウを横長に広げるか、この階に設計要素があるか確かめてください。');
+    }
+    var planPh=findPlanPlaceholderInstances(planIm,planFloor,planView);
     if(planPh.length) throw planPlaceholderError(planPh,planTop);
-    // legend も camera も渡さない。3Dの部材色は参照に写っておらず、3Dの目線の
-    // 高さは平面図の構図と無関係（「床から1.5m」と書けば参照と矛盾する）。
+    // 部材の名指しは DATA から作る（真実源は DATA で、legend の方が派生物）。
+    // camera は渡さない。3Dの目線の高さは平面図の構図と無関係で、
+    // 「床から1.5m」と書けば真上からの参照と矛盾する。
+    var planInstances=planInstanceList(planFloor);
     var planPrompt=composeVideoPromptOrThrow({
-      preset:preset,legend:[],camera:null,daylight:daylight,userText:opt.userText
+      preset:preset,legend:planInstances,camera:null,daylight:daylight,userText:opt.userText
     });
     var planNames=['reference.png','prompt.txt','package.json'];
     var planJson=videoPackageJson({
@@ -18394,7 +18551,9 @@ async function generateVideoRenderPackage(options){
       presetLabel:preset?preset.label:null,
       camera:null,daylight:daylight,
       heightModel:videoHeightModelRecord(planFloor),
-      lockTiers:null,instances:null,
+      // 色→階層の表はガイド画像の画素と対でしか意味を持たないので持たせない。
+      // 部材一覧は色を要らないので、この経路でも埋まる。
+      lockTiers:null,instances:planInstances,
       // 平面図は元から明るい。ShadowLift は3Dレンダの潰れた影のためのもの。
       shadowLift:videoShadowLiftRecord(null,0,'plan source'),
       capture:{width:planIm.width,height:planIm.height,instances:null,
