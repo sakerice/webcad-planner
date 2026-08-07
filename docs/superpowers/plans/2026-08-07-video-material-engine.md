@@ -995,6 +995,76 @@ git commit -m "Let the plan drawing itself be the reference"
 
 ---
 
+### Task 7c: 平面図経路を成果物として成立させる
+
+**Files:**
+- Modify: `index.html`（`capturePlan2dDataUrl`、`generateVideoRenderPackage`、新規の部材一覧関数）
+- Test: `tools/tests/plan-capture.test.cjs`、`tools/tests/video-package.test.cjs`（追記）
+
+**なぜ必要か:** Task 7b で平面図が参照になったが、実測で3つの欠落が出た。
+どれも「動くが成果物にならない」種類のもので、UI (Task 8) を載せる前に潰す。
+
+#### 7c-1 構図を検査する
+
+平面図はユーザーの現在のパン・ズームのまま撮られる。実測では**家がフレームの15%**
+しか占めていなかった。主題が15%の参照画像は生成の材料にならない。
+
+- `capturePlan2dDataUrl` に `fit:true` を足す。設計対象（壁・部屋・建具・家具、
+  敷地と隣家は除く）のバウンディングボックスを求め、余白を1割足して収める。
+  **パン・ズームは撮影中だけ変え、`finally` で必ず戻す**（Task 3 と同じ形）。
+- パッケージ生成は、主題のバウンディングボックスがフレーム面積の
+  **一定割合を下回ったら例外**を投げる。閾値は実測して決め、根拠をコメントに残す。
+  検出できない不良を出荷しないことが目的で、静かに小さい絵を通す方が悪い。
+
+#### 7c-2 平面図経路にも部材の名指しを戻す
+
+現状、平面図経路のプロンプトは第2節（LOCKED の名指し）を丸ごと欠く。
+これは仕様が固定した構成比の 20〜30% にあたり、**仕様を満たさないプロンプトを
+出荷している**状態。
+
+原因はインスタンスレジェンドが3Dレンダの副産物であること。ただし
+**`DATA` こそが真実源で、レジェンドの方が派生物**である。
+
+- `planInstanceList(floor)` を1つ作る。`DATA.walls` / `DATA.rooms` / `DATA.items`
+  から、レジェンドと同じ形（`{id, type, floor, tier}`）の配列を作る。
+  階層は `LockTiers.tierOf` を通す — **分類規則をここに書き写さない**。
+- 平面図経路はこれを `VideoPrompt.compose` に渡す。色は無い（ガイド画像が無いので
+  色で切り出す相手がいない）ので `color` は省略し、composer が色を必要としない
+  ことを確かめる。必要としていたなら、それは composer 側の直すべき結合。
+- `package.json` の `instances` も、この一覧で埋める（現在は `null`）。
+
+#### 7c-3 解像度を揃える
+
+平面図 1400×900 に対し3Dは 2800×1800。`capturePlan2dDataUrl` に `scale` を足し、
+パッケージ生成は3D経路と同じ画素数で撮る。
+
+- [ ] **Step 1: 失敗するテストを書き、赤を1つずつ確認する**
+
+**この計画では grep のアサーションが4回、未修正のコードに対して通っている。**
+テストは grep ではなく**出力の性質**を見ること。例:
+
+```js
+// 構図: 主題がフレームの一定割合を占めること。実画像から測る。
+test('fit:true の平面図は主題がフレームの相当割合を占める', () => { /* 実画像を測る */ });
+test('主題が小さすぎる参照は例外になり、出荷されない', () => { /* ... */ });
+// 名指し: 平面図経路のプロンプトが第2節を持つこと
+test('平面図経路のプロンプトも LOCKED を名指しする', () => { /* compose の出力を見る */ });
+test('平面図経路の package.json の instances が null でない', () => { /* ... */ });
+```
+
+- [ ] **Step 2〜4: 実装 → 実画像で確認 → コミット**
+
+実際にパッケージを平面図経路で1つ書き出し、`reference.png` を**見て**、
+家がフレームを十分に占めていること、`prompt.txt` が窓や階段を名指ししていること、
+画素数が3D経路と揃っていることを確認する。
+
+```bash
+git add index.html tools/tests/plan-capture.test.cjs tools/tests/video-package.test.cjs
+git commit -m "Make the plan path ship something usable"
+```
+
+---
+
 ### Task 8: UI — 動画AIレンダーのボタンとダイアログ
 
 **Files:**
