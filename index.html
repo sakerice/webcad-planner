@@ -18137,10 +18137,13 @@ function imageDataToPngDataUrl(im){
 // 判定器は「生成結果 vs モデルが実際に見た絵」を比べる。カーブを記録しないと
 // 持ち上げ前のレンダと比べてしまい、我々自身の補正がドリフトとして数えられる。
 // 不適用でも gamma:1 を書くのは、読む側に「無い＝1」を推測させないため。
-function videoShadowLiftRecord(curve,measuredParts){
+function videoShadowLiftRecord(curve,measuredParts,reason){
   var c=curve||{applied:false};
   return {
     applied:!!c.applied,
+    // 適用しなかったときは「なぜ」まで書く。フィールドごと落とすと、読む側は
+    // 「持ち上げが要らなかった」と「誰も記録しなかった」を区別できない。
+    reason:reason||null,
     gamma:(typeof c.gamma==='number')?c.gamma:1,
     liftedFrom:(typeof c.liftedFrom==='number')?c.liftedFrom:null,
     floorLuminance:(typeof c.floorLuminance==='number')?c.floorLuminance:ShadowLift.FLOOR_LUMINANCE,
@@ -18180,6 +18183,55 @@ function composeVideoPromptOrThrow(opts){
       '自分で光源を作ります。VideoPrompt の LIGHT にこの時刻を足してください。');
   }
   return text;
+}
+// ── 素材の種類とプリセットは一対である ───────────────────────────────────
+// 実測: 3Dレンダに「供給されたフラットな未着色の図面から始めよ」と書くと、
+// モデルは渡した映像を捨てて線画を描き直した。逆に平面図へ「この映像を運べ」と
+// 書けば、参照は図面のままで生活に変わらない。どちらも参照そのものが壊れる。
+// 取り違えを黙って別のプリセットへ差し替えるのは、壊れたことにユーザーが
+// 気づけないまま渡すことなので、ここでは必ず投げる。
+function videoSourceLabel(source){ return source==='plan'?'平面図':'3Dレンダ'; }
+function resolveVideoPreset(source,presetId,userText){
+  var presets=VideoPrompt.presetsFor(source), i;
+  if(!presets.length){
+    throw new Error('素材の種類 "'+source+'" には表現プリセットがありません（"plan" か "3d"）。');
+  }
+  if(presetId){
+    for(i=0;i<presets.length;i++) if(presets[i].id===presetId) return presets[i];
+    var other=(source==='plan')?'3d':'plan';
+    var alt=VideoPrompt.presetsFor(other);
+    for(i=0;i<alt.length;i++) if(alt[i].id===presetId){
+      throw new Error('表現プリセット "'+presetId+'" は'+videoSourceLabel(other)+
+        'を参照にする前提の文です。参照が'+videoSourceLabel(source)+'のまま渡すと、'+
+        '生成AIは渡した参照を捨てて描き直します（実測）。'+
+        '参照の種類かプリセットのどちらかを選び直してください。');
+    }
+    throw new Error('表現プリセット "'+presetId+'" は存在しません。');
+  }
+  // 既定へ倒すのは presetId を指定されなかったときだけ。指定されたidが見つからない
+  // まま既定へ落ちる経路は、上で全部投げ切ってある。
+  return userText?null:presets[0];
+}
+// 同梱しなかったものは、理由ごと書き残す。黙って欠けたパッケージは、開いた人には
+// バグに見える。「入れなかった」と「入れ忘れた」を読む側が区別できるようにする。
+function videoPlanWithheldRecord(guidesRequested){
+  return [
+    {what:'plan_context.png',
+     requested:false,
+     reason:'参照そのものが平面図なので、plan_context.png は reference.png と同じ絵になる。'+
+       '同じ画素を2つの名前で入れない。参照の平面図は reference.png である。'},
+    {what:'guides',
+     files:['edge_guide.png','depth_guide.png','normal_guide.png',
+       'segmentation_guide.png','instance_guide.png','instance-legend.json',
+       'segmentation-legend.json'],
+     requested:!!guidesRequested,
+     reason:'depth / normal / segmentation / instance は3Dカメラの構図で撮る。'+
+       '平面図とは構図が一致せず、生成AIを誤らせるだけなので、opt-in されても入れない。'},
+    {what:'lockTiers / instances',
+     requested:false,
+     reason:'色→部材の対応は instance ガイドの画素と対にして初めて意味を持つ。'+
+       '平面図の参照にはその画素が無いので、色の表だけを運んでも読む側は使えない。'}
+  ];
 }
 function videoCameraDescriptor(floor){
   var cam=getActive3DCamera();
@@ -18269,6 +18321,9 @@ function videoPackageJson(state){
     version:1,
     app:'house-planner mobile',
     createdAt:state.createdAt,
+    // 参照の出どころ。'plan' なら reference.png は図面そのもの、'3d' ならレンダ。
+    // プリセットの本文はこれと一対でしか成立しない (resolveVideoPreset)。
+    source:state.source,
     view:state.view,
     floor:state.floor,
     durationSec:state.durationSec,
@@ -18290,23 +18345,89 @@ function videoPackageJson(state){
     // Task 6: reference.png に実際に適用したトーンカーブ。
     shadowLift:state.shadowLift,
     capture:state.capture,
+    // この経路では入れられなかったものと、その理由。空の配列は「全部入っている」。
+    withheld:state.withheld||[],
     files:state.files
   };
 }
+// 平面図に灰色のプレースホルダが残ったまま渡すのは、生成AIに家具の無い部屋を
+// 見せること。文面は1か所にしか持たない（平面図ソースでも3Dソースでも同じ事故）。
+function planPlaceholderError(placeholders,topImages){
+  return new Error('平面図の家具 '+placeholders.length+' 件が灰色のプレースホルダのままです'+
+    '（上面画像 '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
+    'ms 待っても読めていません）。このまま渡すと、生成AIは家具の無い部屋を見ます。');
+}
 async function generateVideoRenderPackage(options){
   var opt=options||{};
+  // 素材の種類は呼び出し側が宣言する。既定は Task 7 のまま 3D。
+  var source=opt.source||'3d';
+  var includeGuides=!!opt.includeGuides;   // 設計 §12.3: 詳細ガイドは既定オフ
+  var duration=Math.max(4,Math.min(VideoPrompt.MAX_DURATION_SEC,
+    Number(opt.durationSec)||VideoPrompt.DEFAULT_DURATION_SEC));
+  // プリセットの候補は素材の種類だけが決める。噛み合わない組み合わせはここで死ぬ。
+  var preset=resolveVideoPreset(source,opt.presetId,opt.userText);
+  var enc=new TextEncoder();
+  var daylight=videoDaylightDescriptor();
+
+  if(source==='plan'){
+    // 参照そのものが図面。3Dは1枚も撮らない。撮れば構図の合わない素材が生まれ、
+    // 「図面から始めよ」と言いながら別構図の絵を渡すことになる。
+    // 階は表示中のものを撮る（暗黙に切り替えない）。上面画像の待ちと画素の
+    // 再検査は3D経路とまったく同じ。このレースは平面図の側の問題である。
+    var planFloor=ST.floor;
+    var planTop=await waitForPlanFloorTopImages(planFloor);
+    var planRef=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:planFloor});
+    if(!planRef) throw new Error('平面図の撮影に失敗しました。');
+    var planIm=await decodePngDataUrlToImageData(planRef);
+    var planPh=findPlanPlaceholderInstances(planIm,planFloor);
+    if(planPh.length) throw planPlaceholderError(planPh,planTop);
+    // legend も camera も渡さない。3Dの部材色は参照に写っておらず、3Dの目線の
+    // 高さは平面図の構図と無関係（「床から1.5m」と書けば参照と矛盾する）。
+    var planPrompt=composeVideoPromptOrThrow({
+      preset:preset,legend:[],camera:null,daylight:daylight,userText:opt.userText
+    });
+    var planNames=['reference.png','prompt.txt','package.json'];
+    var planJson=videoPackageJson({
+      createdAt:new Date().toISOString(),
+      source:'plan',view:'plan',floor:planFloor,durationSec:duration,
+      presetId:preset?preset.id:null,
+      presetLabel:preset?preset.label:null,
+      camera:null,daylight:daylight,
+      heightModel:videoHeightModelRecord(planFloor),
+      lockTiers:null,instances:null,
+      // 平面図は元から明るい。ShadowLift は3Dレンダの潰れた影のためのもの。
+      shadowLift:videoShadowLiftRecord(null,0,'plan source'),
+      capture:{width:planIm.width,height:planIm.height,instances:null,
+        topImages:planTop,includeGuides:false},
+      withheld:videoPlanWithheldRecord(includeGuides),
+      files:planNames
+    });
+    var planJsonText=JSON.stringify(planJson,null,2);
+    var planFiles=[
+      {name:'reference.png',bytes:await dataUrlToBytes(planRef)},
+      {name:'prompt.txt',bytes:enc.encode(planPrompt)},
+      {name:'package.json',bytes:enc.encode(planJsonText)}
+    ];
+    VIDEO_RENDER_PACKAGE={
+      packageJson:planJson,
+      packageJsonText:planJsonText,
+      prompt:planPrompt,
+      files:planFiles.map(function(f){return {name:f.name,size:f.bytes.length};}),
+      images:{reference:planRef,planContext:null},
+      zipBlob:makeZipBlob(planFiles)
+    };
+    if(opt.download!==false){
+      downloadBlobFile('house-planner-video-package.zip',VIDEO_RENDER_PACKAGE.zipBlob);
+    }
+    return VIDEO_RENDER_PACKAGE;
+  }
+
+  // ── 3Dソース (Task 7)。平面図ソースはここへ来ない（上で return 済み）。──
   if(!(await ensureAiRenderableView())){
     throw new Error('外観3Dまたは内観3Dを表示してから動画AIレンダー用パッケージを生成してください。');
   }
   var floor=ST.floor;
   var view=ST.view==='3d-int'?'interior':'exterior';
-  var includeGuides=!!opt.includeGuides;   // 設計 §12.3: 詳細ガイドは既定オフ
-  var duration=Math.max(4,Math.min(VideoPrompt.MAX_DURATION_SEC,
-    Number(opt.durationSec)||VideoPrompt.DEFAULT_DURATION_SEC));
-  var presets=VideoPrompt.presetsFor('3d');
-  var preset=null, i;
-  for(i=0;i<presets.length;i++) if(presets[i].id===opt.presetId) preset=presets[i];
-  if(!preset&&!opt.userText) preset=presets[0];
 
   await waitFrame(50);
   // 1) 参照の本体と、部材ごとのマスク。既存の静止画版とまったく同じ関数を呼ぶ。
@@ -18336,16 +18457,11 @@ async function generateVideoRenderPackage(options){
   var plan=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:floor});
   if(!plan) throw new Error('平面図の撮影に失敗しました。');
   var placeholders=findPlanPlaceholderInstances(await decodePngDataUrlToImageData(plan),floor);
-  if(placeholders.length){
-    throw new Error('平面図の家具 '+placeholders.length+' 件が灰色のプレースホルダのままです'+
-      '（上面画像 '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
-      'ms 待っても読めていません）。このまま渡すと、生成AIは家具の無い部屋を見ます。');
-  }
+  if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var camera=videoCameraDescriptor(floor);
   var planContext=await drawPlanCameraOverlay(plan,camera);
 
   // 4) プロンプト。光を書けなかったら黙って続けない。
-  var daylight=videoDaylightDescriptor();
   var prompt=composeVideoPromptOrThrow({
     preset:preset,legend:instanceData.legend,camera:camera,
     daylight:daylight,userText:opt.userText
@@ -18366,7 +18482,6 @@ async function generateVideoRenderPackage(options){
     };
   }
 
-  var enc=new TextEncoder();
   var names=['reference.png','plan_context.png','prompt.txt','package.json'];
   if(guides){
     names=names.concat(['edge_guide.png','depth_guide.png','normal_guide.png',
@@ -18375,7 +18490,7 @@ async function generateVideoRenderPackage(options){
   }
   var json=videoPackageJson({
     createdAt:new Date().toISOString(),
-    view:view,floor:floor,durationSec:duration,
+    source:'3d',view:view,floor:floor,durationSec:duration,
     presetId:preset?preset.id:null,
     presetLabel:preset?preset.label:null,
     camera:camera,daylight:daylight,

@@ -18,8 +18,25 @@ function bodyOf(signature, length) {
   return html.slice(at, at + (length || 8000));
 }
 
-const pkg = html.slice(html.indexOf('function generateVideoRenderPackage'),
-                      html.indexOf('function generateVideoRenderPackage') + 8000);
+// 関数の本体は「次の行頭 function まで」で切る。固定長で切ると、関数が育った日に
+// 検査が静かに本体の外を見なくなる（この計画で既に3回起きた形）。
+function functionBody(name) {
+  const at = html.indexOf('function ' + name);
+  assert.notEqual(at, -1, name + ' が index.html に無い');
+  const rest = html.slice(at + 1);
+  const end = rest.indexOf('\nfunction ');
+  return rest.slice(0, end === -1 ? undefined : end);
+}
+const pkg = functionBody('generateVideoRenderPackage');
+// 平面図ソースの枝だけを切り出す。3Dの撮影がこの枝に紛れ込んでいないことを見るため、
+// 枝の終わりの目印はソース側にコメントとして置いてある。
+function planBranch() {
+  const at = pkg.indexOf("source==='plan'");
+  assert.notEqual(at, -1, 'plan ソースの分岐が無い');
+  const end = pkg.indexOf('平面図ソースはここへ来ない');
+  assert.notEqual(end, -1, '3D経路の始まりを示す目印が無い');
+  return pkg.slice(at, end);
+}
 
 test('generateVideoRenderPackage が存在する', () => {
   assert.match(html, /function generateVideoRenderPackage\(/);
@@ -180,4 +197,86 @@ test('package.json は色だけでなく部材名も持つ', () => {
   }
   assert.match(build, /toLowerCase\(\)/,
     'colours must be normalised the same way LockTiers.tableFor normalises them');
+});
+
+// ── Task 7b: 平面図そのものを参照にする経路 ──────────────────────────────
+// 「図面が家になる」は素材が本当に図面のときだけ成立する。3Dレンダに図面用の文を
+// 当てると、実測でモデルは渡した映像を捨てて線画を描き直した。素材とプリセットが
+// 一対であることを、ユーザーの注意力ではなくコードで保証する。
+
+test('平面図ソースでは reference.png が平面図で、プリセットは図面系になる', () => {
+  assert.match(pkg, /capturePlan2dDataUrl\(/);
+  assert.match(pkg, /source===['"]plan['"]/);
+  // プリセットの候補は素材の種類から引く。'3d' を直書きしない。
+  const resolver = functionBody('resolveVideoPreset');
+  assert.match(resolver, /VideoPrompt\.presetsFor\(source\)/);
+  assert.match(pkg, /resolveVideoPreset\(/);
+  assert.doesNotMatch(pkg, /presetsFor\(\s*['"]3d['"]\s*\)/,
+    'preset list must come from the source, not a hardcoded 3d');
+});
+
+test('素材とプリセットを取り違えたら、黙って差し替えずに投げる', () => {
+  const resolver = functionBody('resolveVideoPreset');
+  // 逆側の候補を引いて「なぜ噛み合わないか」を言う。
+  assert.match(resolver, /presetsFor\(other\)/);
+  assert.match(resolver, /throw new Error/);
+  // 既定へ倒すのは presetId が指定されなかったときだけ。指定されたidが見つからない
+  // まま presets[0] へ落ちるのが、参照を壊すプロンプトを黙って渡す経路である。
+  assert.ok(resolver.lastIndexOf('throw new Error') < resolver.indexOf('presets[0]'),
+    'the default preset must be reachable only after every mismatch has thrown');
+});
+
+test('平面図ソースでは構図の合わないガイドを同梱しない', () => {
+  const branch = planBranch();
+  for (const fn of ['captureSegmentation3DDataUrl', 'captureAiOverrideGuideDataUrl',
+                    'makeEdgeDataUrlFromSegmentation', 'instance_guide.png']) {
+    assert.ok(branch.indexOf(fn) === -1, 'plan branch must not ship ' + fn);
+  }
+});
+
+test('平面図ソースでは3Dを1枚も撮らない（構図の合わない素材を作らない）', () => {
+  const branch = planBranch();
+  for (const fn of ['captureCurrent3DDataUrl', 'captureInstance3DData',
+                    'ShadowLift.apply', 'ensureAiRenderableView']) {
+    assert.ok(branch.indexOf(fn) === -1, 'plan branch must not call ' + fn);
+  }
+});
+
+test('package.json は参照の出どころを記録する', () => {
+  assert.match(html, /source:\s*(source|state\.source)/);
+});
+
+test('平面図ソースは同じ画像を2つの名前で入れない', () => {
+  const branch = planBranch();
+  assert.match(branch, /reference\.png/);
+  assert.ok(branch.indexOf('plan_context.png') === -1,
+    'reference.png IS the plan here; shipping the same bytes as plan_context.png is a duplicate');
+});
+
+test('持ち上げを「しなかった」ことも理由ごと記録される', () => {
+  const rec = functionBody('videoShadowLiftRecord');
+  assert.match(rec, /reason/);
+  assert.match(planBranch(), /plan source/);
+});
+
+test('同梱しなかったものは理由ごと package.json に残る', () => {
+  assert.match(html, /function videoPlanWithheldRecord\(/);
+  const j = functionBody('videoPackageJson');
+  assert.match(j, /withheld/);
+  const w = functionBody('videoPlanWithheldRecord');
+  assert.match(w, /reason/);
+  assert.match(w, /requested/);
+});
+
+test('平面図ソースは表示中の階を撮り、暗黙に切り替えない', () => {
+  const branch = planBranch();
+  assert.match(branch, /ST\.floor/);
+  assert.ok(branch.indexOf('setView(') === -1 && branch.indexOf('onFloorChange(') === -1,
+    'plan branch must not switch view or floor behind the user');
+});
+
+test('平面図ソースでも家具の上面画像を待ち、画素で確かめる', () => {
+  const branch = planBranch();
+  assert.match(branch, /waitForPlanFloorTopImages\(/);
+  assert.match(branch, /findPlanPlaceholderInstances\(/);
 });
