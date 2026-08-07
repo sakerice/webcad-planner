@@ -127,10 +127,10 @@ function geometryWith(data) {
     topLevelFunction('getObjBounds'),
     topLevelFunction('isPlanSubjectObject'),
     topLevelFunction('planSubjectBoundsMm'),
+    topLevelFunction('planContextBoundsMm'),
     topLevelFunction('planFitViewFor'),
-    topLevelFunction('planSubjectFrameRatio'),
-    topLevelFunction('planSubjectClipped')
-  ], { DATA: data });
+    topLevelFunction('planSubjectFrameRatio')
+  ], { DATA: data, U: 0.001 });
 }
 const PLAN = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
 const FRAME = { w: 1400, h: 900 };   // Task 7b が実測に使ったビューポート
@@ -189,32 +189,50 @@ test('保存されたパン・ズームのままでは主題が下限を下回�
   assert.ok(r < 0.6, '保存視点の占有率が高すぎる（不良を再現できていない）: ' + r);
 });
 
-test('小さすぎるを判定する閾値が、実測の失敗と実測の成功の間にある', () => {
-  const m = html.match(/var PLAN_SUBJECT_MIN_FRAME_RATIO\s*=\s*([0-9.]+)\s*;/);
-  assert.notEqual(m, null, 'PLAN_SUBJECT_MIN_FRAME_RATIO が無い');
-  const t = Number(m[1]);
-  const g = geometryWith(PLAN);
-  const b = g.planSubjectBoundsMm(2);
-  const bad = g.planSubjectFrameRatio(b, PLAN.viewState.twoD, FRAME.w, FRAME.h);
-  const good = g.planSubjectFrameRatio(b, g.planFitViewFor(b, FRAME.w, FRAME.h), FRAME.w, FRAME.h);
-  assert.ok(t > bad, '閾値が実測の不良 (' + bad.toFixed(4) + ') を通してしまう');
-  assert.ok(t < good, '閾値が実測の正常 (' + good.toFixed(4) + ') を落としてしまう');
+// Task 11-1: 占有率による拒否は撤回した。閾値そのものがソースに残っていないこと
+// を固定する（消したつもりで別名で復活する形を止める）。
+test('占有率の下限はどこにも残っていない（拒否を撤回した）', () => {
+  assert.doesNotMatch(html, /PLAN_SUBJECT_MIN_FRAME_RATIO/,
+    '占有率の下限が残っている。fit 後は 0.909 に固定されるので、これは構図の門ではない');
+  assert.doesNotMatch(html, /function planSubjectClipped\(/,
+    '見切れの拒否が残っている。fit 後は構造上 false であり、守っていない');
 });
 
-test('フレームからはみ出していれば、大きく写っていても見切れとして弾く', () => {
-  const g = geometryWith({
-    walls: [], items: [],
-    rooms: [{ id: 'r', type: 'room', x: 0, y: 0, w: 10000, d: 10000, floor: 1 }]
-  });
-  const b = g.planSubjectBoundsMm(1);
-  // 主題がちょうどフレーム全面を覆う視点を作り、そこから右へ半分ずらす。
-  const full = g.planFitViewFor(b, 1000, 1000);
-  const shifted = { panX: full.panX + 500, panY: full.panY, zoom: full.zoom };
-  // 軸の占有率では見切れを検出できない: 縦は埋まったままなので値が動かない。
-  // だからこそ見切れは独立に判定する。片方だけに任せるとどちらかを見逃す。
-  assert.ok(!g.planSubjectClipped(b, full, 1000, 1000), '収まっているのに見切れ判定');
-  assert.ok(g.planSubjectClipped(b, shifted, 1000, 1000),
-    '半分はみ出しているのに見切れと判定されない');
+// plan_context.png の役目は「どこから撮っているか」を示すこと。カメラが画面外なら
+// 役目を果たさない。実測（既定プラン 2F・保存視点 1400x900）ではカメラの立ち位置が
+// フレームの外にあった。
+test('plan_context.png の箱は主題とカメラの両方を含む', () => {
+  const g = geometryWith(PLAN);
+  const subject = g.planSubjectBoundsMm(2);
+  // 家の外・南側に立つカメラ（3Dの世界座標[m]。x→x, z→y、U=0.001）
+  const camera = { posM: [3.5, 6.0, (subject.maxY + 9000) / 1000], targetM: [3.5, 1.5, 2.0] };
+  const camX = camera.posM[0] / 0.001, camY = camera.posM[2] / 0.001;
+  const ctx = g.planContextBoundsMm(2, camera);
+  assert.ok(ctx.maxY >= camY, 'カメラが箱に入っていない: ' + ctx.maxY + ' < ' + camY);
+  assert.ok(ctx.minX <= subject.minX && ctx.maxX >= subject.maxX, '主題が箱から出た');
+  // その箱に fit した構図では、カメラの点が実際にフレームの中に来ること
+  const v = g.planFitViewFor(ctx, FRAME.w, FRAME.h);
+  const sc = v.zoom * 0.05;
+  const px = v.panX + camX * sc, py = v.panY + camY * sc;
+  assert.ok(px >= 0 && px <= FRAME.w && py >= 0 && py <= FRAME.h,
+    'カメラがフレームの外: ' + px.toFixed(1) + ',' + py.toFixed(1));
+  // 主題だけに fit した構図では、同じカメラは外へ出る（＝これが直した不良）
+  const sv = g.planFitViewFor(subject, FRAME.w, FRAME.h);
+  const ssc = sv.zoom * 0.05;
+  const spy = sv.panY + camY * ssc;
+  assert.ok(spy > FRAME.h, '不良を再現できていない（主題 fit でもカメラが入る）: ' + spy);
+});
+
+test('カメラを渡さなければ箱は主題そのもの（reference.png はこちら）', () => {
+  const g = geometryWith(PLAN);
+  assert.deepEqual(g.planContextBoundsMm(2, null), g.planSubjectBoundsMm(2));
+  assert.deepEqual(g.planContextBoundsMm(2, { posM: [NaN, 0, NaN] }), g.planSubjectBoundsMm(2));
+});
+
+test('主題の無い階では箱が作れない（カメラがあっても null）', () => {
+  const g = geometryWith(PLAN);
+  assert.equal(g.planSubjectBoundsMm(9), null);
+  assert.equal(g.planContextBoundsMm(9, { posM: [1, 2, 3] }), null);
 });
 
 test('fit は主題をフレームの中央に置く', () => {
@@ -232,6 +250,68 @@ test('キャプチャは主題に合わせた構図と倍率を受け取れる',
   const body = captureFnBody();
   assert.match(body, /opt\.fit/);
   assert.match(body, /opt\.scale|planCaptureScale/);
+});
+
+// grep では「opt.fitBounds を読んでいるか」までしか言えない。ここは
+// capturePlan2dDataUrl を実際に走らせ、draw2d が呼ばれた瞬間の ST を測る。
+function runCapture(data, opt) {
+  const seen = [];
+  const canvas = {
+    width: 1400, height: 900,
+    toDataURL: function () { return 'url:captured'; }
+  };
+  const c = sandbox([
+    topLevelVar('CONTEXT_EXTERIOR_TYPES'),
+    topLevelVar('PLAN_FIT_MARGIN'),
+    topLevelVar('PLAN_CAPTURE'),
+    topLevelVar('PLAN_CAPTURE_KEYS'),
+    topLevelVar('PLAN_CAPTURE_VIEW'),
+    topLevelVar('PLAN_CAPTURE_SCALE'),
+    topLevelFunction('isContextExteriorItemType'),
+    topLevelFunction('isPlanAnnotationType'),
+    topLevelFunction('isFiniteCanvasValue'),
+    topLevelFunction('getObjBounds'),
+    topLevelFunction('isPlanSubjectObject'),
+    topLevelFunction('planSubjectBoundsMm'),
+    topLevelFunction('planFitViewFor'),
+    topLevelFunction('planCaptureDefaults'),
+    topLevelFunction('capturePlan2dDataUrl')
+  ], {
+    DATA: data, U: 0.001, canvas: canvas,
+    ST: { floor: 1, panX: 7777, panY: 8888, zoom: 3 }
+  });
+  c.draw2d = function () {
+    seen.push({ panX: c.ST.panX, panY: c.ST.panY, zoom: c.ST.zoom,
+                floor: c.ST.floor, width: canvas.width, height: canvas.height });
+  };
+  const url = c.capturePlan2dDataUrl(opt);
+  return { url: url, drawn: seen[0], after: { panX: c.ST.panX, panY: c.ST.panY, zoom: c.ST.zoom },
+           ctx: c };
+}
+
+test('fitBounds を渡すと、その箱に合わせた構図で描かれる（主題の箱ではなく）', () => {
+  const r1 = runCapture(PLAN, { floor: 2, fit: true });
+  const g = geometryWith(PLAN);
+  const subject = g.planSubjectBoundsMm(2);
+  const want = g.planFitViewFor(subject, 1400, 900);
+  assert.ok(Math.abs(r1.drawn.zoom - want.zoom) < 1e-9, '主題に fit していない');
+
+  // カメラを南へ 9m 押し出した箱
+  const camY = subject.maxY + 9000;
+  const box = { minX: subject.minX, minY: subject.minY,
+                maxX: subject.maxX, maxY: camY };
+  const r2 = runCapture(PLAN, { floor: 2, fit: true, fitBounds: box });
+  const want2 = g.planFitViewFor(box, 1400, 900);
+  assert.ok(Math.abs(r2.drawn.zoom - want2.zoom) < 1e-9,
+    'fitBounds が無視されている: zoom ' + r2.drawn.zoom + ' expected ' + want2.zoom);
+  assert.ok(r2.drawn.zoom < r1.drawn.zoom,
+    'カメラ込みの箱の方が引きの絵になるはず: ' + r2.drawn.zoom + ' >= ' + r1.drawn.zoom);
+  // 箱の下端（カメラの位置）がフレームの中に来ること
+  const sc = r2.drawn.zoom * 0.05;
+  const py = r2.drawn.panY + camY * sc;
+  assert.ok(py >= 0 && py <= 900, 'カメラの位置がフレームの外: ' + py.toFixed(1));
+  // 撮り終えたらユーザーの視点へ戻す
+  assert.deepEqual(r2.after, { panX: 7777, panY: 8888, zoom: 3 });
 });
 
 test('構図と倍率とキャンバス寸法は finally で必ず戻す', () => {
@@ -277,7 +357,6 @@ test('縦長フレームに横長の家を正しく合わせた構図は、下�
   const W = 400, H = 900;                    // スマホ縦持ち相当
   const view = g.planFitViewFor(b, W, H);
   const r = g.planSubjectFrameRatio(b, view, W, H);
-  assert.ok(!g.planSubjectClipped(b, view, W, H), 'fit したのに見切れ判定');
   assert.ok(r >= 0.6,
     '正しく合わせた縦持ちの構図が下限を下回った: ' + r.toFixed(4) +
     '（面積比で測るとここが落ちる）');

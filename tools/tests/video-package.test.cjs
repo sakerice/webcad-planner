@@ -422,11 +422,11 @@ test('平面図経路の package.json の instances は null ではない', () =
   assert.match(state, /instances:/);
 });
 
-test('構図の検査は両経路で同じ1か所を通る（文面と閾値を2つ持たない）', () => {
-  assert.match(html, /function planCompositionRefusal\(/);
+test('空の階の検査は両経路で同じ1か所を通る（文面を2つ持たない）', () => {
+  assert.match(html, /function planEmptyFloorRefusal\(/);
   // 実際に投げるかどうかは、下の「実行する検査」が
   // generateVideoRenderPackage を走らせて測る。
-  assert.equal((pkg.match(/planCompositionRefusal\(/g) || []).length, 2,
+  assert.equal((pkg.match(/planEmptyFloorRefusal\(/g) || []).length, 2,
     'plan 経路と 3D 経路の両方が同じ検査を通っていない');
 });
 
@@ -484,8 +484,8 @@ function meanLeftHalf(im) {
 const VIDEO_FNS = [
   'isContextExteriorItemType', 'isPlanAnnotationType', 'isFiniteCanvasValue',
   'getObjBounds', 'objectIdLabel',
-  'isPlanSubjectObject', 'planSubjectBoundsMm', 'planFitViewFor',
-  'planSubjectFrameRatio', 'planSubjectClipped', 'planCompositionRefusal',
+  'isPlanSubjectObject', 'planSubjectBoundsMm', 'planContextBoundsMm', 'planFitViewFor',
+  'planSubjectFrameRatio', 'planEmptyFloorRefusal',
   'videoRenderViewRefusalText', 'planPlaceholderError',
   'videoSourceLabel', 'resolveVideoPreset', 'composeVideoPromptOrThrow',
   'videoShadowLiftRecord', 'videoPlanWithheldRecord', 'videoPackageJson',
@@ -499,7 +499,7 @@ const VIDEO_FNS = [
   'generateVideoRenderPackage'
 ];
 const VIDEO_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
-  'CONTEXT_EXTERIOR_TYPES', 'PLAN_FIT_MARGIN', 'PLAN_SUBJECT_MIN_FRAME_RATIO'];
+  'CONTEXT_EXTERIOR_TYPES', 'PLAN_FIT_MARGIN'];
 
 // 撮影・復号・ZIP だけを置き換えた実行環境。
 // capturePlan2dDataUrl は本物の planFitViewFor を使って「fit:true なら構図を作る、
@@ -530,10 +530,13 @@ function harness(opts) {
     capturePlan2dDataUrl: function (co) {
       let view = { panX: SAVED_VIEW.panX, panY: SAVED_VIEW.panY, zoom: SAVED_VIEW.zoom };
       if (co.fit) {
-        const fv = ctx.planFitViewFor(ctx.planSubjectBoundsMm(co.floor), FRAME.w, FRAME.h);
+        // 本物と同じ: fitBounds があればその箱、なければ主題そのもの
+        const fv = ctx.planFitViewFor(co.fitBounds || ctx.planSubjectBoundsMm(co.floor),
+          FRAME.w, FRAME.h);
         if (fv) view = fv;      // 本物と同じ: fit できないときは触らない
       }
-      log.captures.push({ floor: co.floor, fit: !!co.fit, ceilingLabels: co.ceilingLabels });
+      log.captures.push({ floor: co.floor, fit: !!co.fit, fitBounds: co.fitBounds || null,
+        ceilingLabels: co.ceilingLabels });
       ctx.PLAN_CAPTURE_VIEW = {
         panX: view.panX, panY: view.panY, zoom: view.zoom,
         width: FRAME.w, height: FRAME.h, floor: co.floor, scale: 1
@@ -653,55 +656,92 @@ test('灰色のプレースホルダが残っていたら平面図経路も書�
   assert.equal(c.$log.zips.length, 0);
 });
 
-// ── 3. 構図の拒否・見切れの拒否 ──────────────────────────────────────────
-test('主題の無い階は構図の検査で止まる（両経路とも、その絵の名前で言う）', async () => {
+// ── 3. Task 11-1: 拒否するのは「空の階」だけ ─────────────────────────────
+test('設計要素の無い階は、そう名乗って止まる（両経路とも、その絵の名前で言う）', async () => {
   const a = harness({ view: '3d-ext', floor: 9 });
   await assert.rejects(() => build(a), (e) => {
-    assert.match(e.message, /占めていません/, e.message);
+    assert.match(e.message, /描くものがありません/, e.message);
     assert.match(e.message, /plan_context\.png/, e.message);
+    // 撤回した理屈（占有率・空の映像）を名乗り直していないこと
+    assert.doesNotMatch(e.message, /占めていません|空の映像/, e.message);
     return true;
   });
+  assert.equal(a.$log.captures.length, 0, '空だと分かっているのに撮っている');
+  assert.equal(a.$log.zips.length, 0);
   const b = harness({ view: '2d', floor: 9 });
   await assert.rejects(() => build(b, { source: 'plan' }), (e) => {
-    assert.match(e.message, /占めていません/);
+    assert.match(e.message, /描くものがありません/);
     assert.match(e.message, /平面図/);
     return true;
   });
+  assert.equal(b.$log.zips.length, 0);
 });
 
-test('フレームからはみ出した構図は、大きく写っていても拒否される', () => {
-  const c = harness({});
-  const bounds = c.planSubjectBoundsMm(2);
-  const fit = c.planFitViewFor(bounds, FRAME.w, FRAME.h);
-  const shifted = { panX: fit.panX + FRAME.w * 0.5, panY: fit.panY, zoom: fit.zoom };
-  assert.equal(c.planCompositionRefusal(bounds, fit, FRAME.w, FRAME.h, 'reference.png'), null,
-    '収まっているのに拒否された');
-  const err = c.planCompositionRefusal(bounds, shifted, FRAME.w, FRAME.h, 'reference.png');
-  assert.ok(err, '半分はみ出しているのに通った');
-  assert.match(err.message, /はみ出しています/);
-});
-
-// ── 3b. Task 10-2: 3D経路の plan_context.png も構図を作ってから撮る ────────
-// 実測（既定プラン 2F・保存視点）: 占有率 0.462（1400x900）で下限 0.6 を割る。
-// fit を通すと 0.909。fit:true を外すと、この経路は自分の下限を割った絵を出荷する。
-test('3D経路の plan_context.png は fit を通してから撮られる', async () => {
+// 撤回そのものの回帰テスト。占有率が低い構図でも ZIP は出る。
+// 「家が小さいと生成AIは空の映像を返す」は一度も測っていない主張だった。
+test('家が小さく写る構図でも、拒否せずに書き出す（占有率に下限は無い）', async () => {
   const c = harness({ view: '3d-ext', floor: 2 });
   const pkg = await build(c);
+  const view = c.PLAN_CAPTURE_VIEW;
+  const ratio = c.planSubjectFrameRatio(c.planSubjectBoundsMm(2), view, view.width, view.height);
+  // カメラ（世界座標 x=20m, z=6m）まで入れた箱に fit するので、家そのものは
+  // 主題だけに fit したとき (0.909) よりずっと小さく写る。
+  assert.ok(ratio < 0.6,
+    'この構図では家が小さく写るはずだが ' + ratio.toFixed(3) + ' だった（前提が壊れている）');
+  assert.ok(Array.from(pkg.files).some((f) => f.name === 'plan_context.png'),
+    '小さく写ることを理由に plan_context.png が落とされている');
+  // 測った値は捨てずに package.json へ残す（拒否ではなく開示）
+  assert.ok(Math.abs(pkg.packageJson.capture.subjectFrameRatio - ratio) < 1e-9,
+    '占有率が記録されていない: ' + pkg.packageJson.capture.subjectFrameRatio);
+});
+
+// ── 3b. Task 11-1: plan_context.png はカメラごと写す ──────────────────────
+// この図の役目は「どこから撮っているか」を示すこと。カメラが画面外なら役目を
+// 果たさない。実測（既定プラン 2F・保存視点 1400x900）ではカメラの三角が
+// フレームの下へ出ていた。
+test('plan_context.png はカメラの立ち位置がフレームに入るよう fit される', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  await build(c);
   assert.equal(c.$log.captures.length, 1);
   assert.equal(c.$log.captures[0].fit, true, 'fit:true が渡っていない');
+  assert.ok(c.$log.captures[0].fitBounds, 'カメラ込みの箱が渡っていない');
 
-  // 出荷された絵の占有率を実際に測る。下限を上回っていること。
-  const bounds = c.planSubjectBoundsMm(2);
+  const cam = c.videoCameraDescriptor(2);
+  const camX = cam.posM[0] / 0.001, camY = cam.posM[2] / 0.001;
   const view = c.PLAN_CAPTURE_VIEW;
-  const ratio = c.planSubjectFrameRatio(bounds, view, view.width, view.height);
-  assert.ok(ratio >= c.PLAN_SUBJECT_MIN_FRAME_RATIO,
-    'plan_context.png が自分の下限を割っている: ' + ratio.toFixed(3));
-  assert.ok(!c.planSubjectClipped(bounds, view, view.width, view.height));
-  assert.ok(Array.from(pkg.files).some((f) => f.name === 'plan_context.png'));
+  const sc = view.zoom * 0.05;
+  const px = view.panX + camX * sc, py = view.panY + camY * sc;
+  assert.ok(px >= 0 && px <= view.width && py >= 0 && py <= view.height,
+    'カメラがフレームの外にいる: ' + px.toFixed(1) + ',' + py.toFixed(1));
 
-  // 保存視点のままだと下限を割ること（＝これが直した不良）
-  const bad = c.planSubjectFrameRatio(bounds, SAVED_VIEW, FRAME.w, FRAME.h);
-  assert.ok(bad < c.PLAN_SUBJECT_MIN_FRAME_RATIO, '不良を再現できていない: ' + bad);
+  // 主題だけに fit した構図では、同じカメラは外へ出る（＝これが直した不良）
+  const sv = c.planFitViewFor(c.planSubjectBoundsMm(2), FRAME.w, FRAME.h);
+  const ssc = sv.zoom * 0.05;
+  const spx = sv.panX + camX * ssc;
+  assert.ok(spx > FRAME.w, '不良を再現できていない（主題 fit でもカメラが入る）: ' + spx);
+
+  // 家も一緒に入っていること（カメラだけの図では文脈にならない）
+  const b = c.planSubjectBoundsMm(2);
+  [[b.minX, b.minY], [b.maxX, b.maxY]].forEach(function (p) {
+    const x = view.panX + p[0] * sc, y = view.panY + p[1] * sc;
+    assert.ok(x >= 0 && x <= view.width && y >= 0 && y <= view.height,
+      '家がフレームから出ている: ' + x.toFixed(1) + ',' + y.toFixed(1));
+  });
+});
+
+// reference.png（平面図ソース）は参照画像であり、カメラは描かれない。
+// カメラ込みの箱で fit すると、参照そのものが無駄に小さくなる。
+test('平面図ソースの reference.png は家だけに fit する（カメラの箱を使わない）', async () => {
+  const c = harness({ view: '2d', floor: 2 });
+  await build(c, { source: 'plan' });
+  assert.equal(c.$log.captures.length, 1);
+  assert.equal(c.$log.captures[0].fitBounds, null,
+    'reference.png にカメラ込みの箱が渡っている');
+  const view = c.PLAN_CAPTURE_VIEW;
+  const ratio = c.planSubjectFrameRatio(c.planSubjectBoundsMm(2), view, view.width, view.height);
+  assert.ok(ratio > 0.9, '家に fit していない: ' + ratio.toFixed(3));
+  assert.ok(Math.abs(c.VIDEO_RENDER_PACKAGE.packageJson.capture.subjectFrameRatio - ratio) < 1e-9,
+    '平面図経路が占有率を記録していない');
 });
 
 test('カメラの三角は「撮ったときの」座標系で重ねられる（ST ではなく）', async () => {

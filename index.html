@@ -5937,6 +5937,21 @@ function planSubjectBoundsMm(floor){
   if(!n||maxX<=minX||maxY<=minY) return null;
   return {minX:minX,minY:minY,maxX:maxX,maxY:maxY};
 }
+// plan_context.png が収めるべき箱 = 主題 ∪ カメラの立ち位置。
+// この図の役目は「どこから撮っているか」を示すことなので、カメラの marker が
+// フレームの外にあれば図は役目を果たさない。実測（既定プラン・保存視点）では
+// カメラの三角が下へはみ出していた。reference.png（平面図ソース）はこの箱を
+// 使わない: あちらは参照画像であり、カメラは描かれない。
+function planContextBoundsMm(floor,camera){
+  var b=planSubjectBoundsMm(floor);
+  if(!b||!camera||!camera.posM) return b;
+  // 3Dの世界座標[m] は平面の座標[mm] を U 倍したもの。x→x, z→y
+  // （drawPlanCameraOverlay の planX / planY と同じ換算）。
+  var cx=camera.posM[0]/U, cy=camera.posM[2]/U;
+  if(!isFiniteCanvasValue(cx)||!isFiniteCanvasValue(cy)) return b;
+  return {minX:Math.min(b.minX,cx),minY:Math.min(b.minY,cy),
+          maxX:Math.max(b.maxX,cx),maxY:Math.max(b.maxY,cy)};
+}
 // 主題の周りに足す余白。1割。
 var PLAN_FIT_MARGIN=0.10;
 // 主題を W×H の中央に、余白1割で収めるパン・ズーム。
@@ -5955,6 +5970,11 @@ function planFitViewFor(bounds,W,H){
 }
 // 主題がフレームの何割を占めるか。**画面外は数えない** — 見切れた分は参照に
 // 写っておらず、生成AIには存在しない。
+// これは**測るだけ**の関数である。かつてここに下限を設けて ZIP を作らない規則が
+// あったが、「主題が小さいと生成AIは空の映像を返す」という根拠は一度も測って
+// いなかった。余白が大きければ生成AIの描く余地が増えるだけで、空になるとは
+// 限らない。値は package.json (capture.subjectFrameRatio) に**記録する**。
+// 拒否ではなく開示にする。
 function planSubjectFrameRatio(bounds,view,W,H){
   if(!bounds||!view||!(W>0)||!(H>0)) return 0;
   var sc=view.zoom*0.05;
@@ -5970,25 +5990,9 @@ function planSubjectFrameRatio(bounds,view,W,H){
   // 埋めるので、長い方の軸の占有率で「大きさが足りているか」を判定できる。
   return Math.max(w/W,h/H);
 }
-// 「大きさが足りているか」と「切れていないか」は別の問いである。軸の占有率だけ
-// では、縦いっぱいに写っていて横が半分切れている絵を通してしまう。壁が切れた
-// 平面図は、大きく写っていても参照として成立しない。投影した箱がフレームから
-// はみ出していないかを独立に見る。
-function planSubjectClipped(bounds,view,W,H){
-  if(!bounds||!view||!(W>0)||!(H>0)) return true;
-  var sc=view.zoom*0.05;
-  var x0=view.panX+bounds.minX*sc, x1=view.panX+bounds.maxX*sc;
-  var y0=view.panY+bounds.minY*sc, y1=view.panY+bounds.maxY*sc;
-  var EPS=0.5; // 端ちょうどを切れ扱いにしない
-  return x0<-EPS||y0<-EPS||x1>W+EPS||y1>H+EPS;
-}
-// 生成AIに渡してよい下限。長い方の軸の占有率で見る（planSubjectFrameRatio 参照）。
-// fit した主題はどちらかの軸をほぼ埋めるので、fit が効いていれば 0.9 前後になる。
-// 逆に、保存されたパン・ズームのままだと軸方向でも大きく下回る。
-// 0.6 は「fit が効いている」と「合っていない」を分ける線として取る。
-// 面積比の頃の実測値（1400x900・面積比）: 未 fit 1F 0.199 / 2F 0.173 / 3F 0.175、
-// fit 後 1F 0.722 / 2F 0.714 / 3F 0.795。軸で測ればどちらの側もさらに離れる。
-var PLAN_SUBJECT_MIN_FRAME_RATIO=0.6;
+// 見切れの拒否はここにあったが撤去した。fit を通したあとは構造上 false であり、
+// 守っていたのは「fit が構図を作れなかったとき」だけ。それは見切れではなく
+// 空の階の話なので、そう名乗る検査 (planEmptyFloorRefusal) に一本化した。
 // 最後に撮った平面図の座標系。撮影中だけ変えたパン・ズーム・倍率を、撮った画像を
 // 画素で調べる側（プレースホルダ検出・構図の検査）へ渡すために残す。
 var PLAN_CAPTURE_VIEW=null;
@@ -6019,7 +6023,9 @@ function capturePlan2dDataUrl(options){
     if(opt.fit){
       // 撮る前に構図を作る。ユーザーが眺めていた倍率は、生成AIに渡す絵の
       // 解像度とは何の関係もない。
-      var fitView=planFitViewFor(planSubjectBoundsMm(ST.floor),prevW,prevH);
+      // fitBounds を渡せばその箱に合わせる（plan_context.png はカメラ込みの箱）。
+      // 省略時は主題そのもの（reference.png はこちら）。
+      var fitView=planFitViewFor(opt.fitBounds||planSubjectBoundsMm(ST.floor),prevW,prevH);
       if(fitView){ ST.panX=fitView.panX; ST.panY=fitView.panY; ST.zoom=fitView.zoom; }
     }
     if(scale!==1){
@@ -18640,32 +18646,24 @@ function videoPackageJson(state){
 }
 // 平面図に灰色のプレースホルダが残ったまま渡すのは、生成AIに家具の無い部屋を
 // 見せること。文面は1か所にしか持たない（平面図ソースでも3Dソースでも同じ事故）。
-// 撮った平面図の構図を検査する。両経路で同じ検査を通すので、文面は1か所にしか
-// 持たない。label は「その絵がパッケージの中で何と呼ばれているか」:
+// 撮った平面図を検査する。両経路で同じ検査を通すので、文面は1か所にしか持たない。
+// label は「その絵がパッケージの中で何と呼ばれているか」:
 // 平面図ソースでは reference.png そのもの、3Dソースでは plan_context.png。
 //
-// **この2つの拒否が実際に何を守るか**（正直に書いておく）:
-// fit:true を通した後は、planFitViewFor が構図を作れるかぎり占有率は
-// 1/(1+PLAN_FIT_MARGIN)=0.909 に固定され、見切れは構造上 false になる。
-// つまり到達可能な発火条件は「planSubjectBoundsMm が null = その階に主題が
-// 1つも無い」だけであり、これは**構図の門ではなく空の階の門**である。
-// 構図そのものは fit が作っている。ここは、fit が構図を作れなかったとき
-// （空の階・退化した箱）と、fit の側が将来壊れたときの、最後の検査にあたる。
-function planCompositionRefusal(bounds,view,W,H,label){
-  var ratio=planSubjectFrameRatio(bounds,view,W,H);
-  if(ratio<PLAN_SUBJECT_MIN_FRAME_RATIO){
-    return new Error(label+'の中で家が長い方の軸の '+Math.round(ratio*1000)/10+
-      '% しか占めていません（下限 '+Math.round(PLAN_SUBJECT_MIN_FRAME_RATIO*100)+
-      '%）。主題が小さい参照を渡すと、生成AIはほとんど空の映像を返します。'+
-      'この階に設計要素があるか確かめてください。');
-  }
-  // 大きさが足りていても、切れていれば参照にならない。壁が切れた平面図から
-  // 生成すると、生成AIはそこに無い壁を発明する。
-  if(planSubjectClipped(bounds,view,W,H)){
-    return new Error(label+'の中で家がフレームからはみ出しています。'+
-      '切れた壁のある参照を渡すと、生成AIは切れた先を自分で作ります。');
-  }
-  return null;
+// **ここが拒否するのは「その階に設計要素が1つも無いこと」だけである。**
+// 以前は「家がフレームの60%未満」で拒否していたが、その根拠（主題が小さいと
+// 生成AIは空の映像を返す）は一度も測っていない主張だった。余白が大きければ
+// 生成AIの描く余地が増えるだけである。しかも fit:true を通したあとの占有率は
+// 1/(1+PLAN_FIT_MARGIN)=0.909 に固定されるので、その規則が実際に発火できたのは
+// 「fit が構図を作れなかったとき」= planSubjectBoundsMm が null のときだけで、
+// 名前（構図の門）と中身（空の階の門）が食い違っていた。名乗りを中身に合わせる。
+// 構図そのものは fit が作る。占有率は測って package.json に記録する（開示）。
+function planEmptyFloorRefusal(bounds,floor,label){
+  if(bounds) return null;
+  return new Error(label+'に描くものがありません。'+
+    (floor===undefined||floor===null?'この階':floor+'階')+
+    'には壁・部屋・建具・家具が1つもないため、家の形を持つ絵を作れません。'+
+    '設計要素のある階に切り替えてから、もう一度押してください。');
 }
 // 撮れないビュー（ウォークスルー）から押されたときの文面。
 // 黙って外観3Dへ寄せない理由まで書く: 寄せた結果を見たユーザーは、
@@ -18705,6 +18703,11 @@ async function generateVideoRenderPackage(options){
     // 階は表示中のものを撮る（暗黙に切り替えない）。上面画像の待ちと画素の
     // 再検査は3D経路とまったく同じ。このレースは平面図の側の問題である。
     var planFloor=ST.floor;
+    // 描くものが無い階は、撮る前に止める。撮ってから測っても同じことが言えるが、
+    // 「空だ」は箱が null かどうかで確定しており、画素を待つ理由が無い。
+    var planBounds=planSubjectBoundsMm(planFloor);
+    var planEmpty=planEmptyFloorRefusal(planBounds,planFloor,'平面図');
+    if(planEmpty) throw planEmpty;
     var planTop=await waitForPlanFloorTopImages(planFloor);
     // 構図はユーザーのパン・ズームに任せない。参照そのものが平面図である以上、
     // 主題が小さければ生成に渡る絵の解像度がそのまま落ちる（Task 7b 実測 15%）。
@@ -18714,11 +18717,8 @@ async function generateVideoRenderPackage(options){
     if(!planRef) throw new Error('平面図の撮影に失敗しました。');
     var planView=PLAN_CAPTURE_VIEW;
     var planIm=await decodePngDataUrlToImageData(planRef);
-    // 撮ったものを測る。fit を通してなお小さいなら、それは fit では直せない構図
-    // （空の階、極端に細長い家、極端に細長いフレーム）なので、黙って出荷しない。
-    var planRefusal=planCompositionRefusal(planSubjectBoundsMm(planFloor),planView,
-      planIm.width,planIm.height,'平面図');
-    if(planRefusal) throw planRefusal;
+    // 撮ったものを測る。値は記録するだけで、下限は設けない（拒否は撤回した）。
+    var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
     var planPh=findPlanPlaceholderInstances(planIm,planFloor,planView);
     if(planPh.length) throw planPlaceholderError(planPh,planTop);
     // 部材の名指しは DATA から作る（真実源は DATA で、legend の方が派生物）。
@@ -18742,6 +18742,7 @@ async function generateVideoRenderPackage(options){
       // 平面図は元から明るい。ShadowLift は3Dレンダの潰れた影のためのもの。
       shadowLift:videoShadowLiftRecord(null,0,'plan source'),
       capture:{width:planIm.width,height:planIm.height,instances:null,
+        subjectFrameRatio:planRatio,
         topImages:planTop,includeGuides:false},
       withheld:videoPlanWithheldRecord(includeGuides),
       files:planNames
@@ -18803,24 +18804,28 @@ async function generateVideoRenderPackage(options){
 
   // 3) 平面図。撮る前に家具の上面画像を待ち、撮った後に画素で確かめる。
   // 構図はユーザーの生のパン・ズームに任せない。plan_context.png は既定4ファイルの
-  // 1つで、設計 §5.2 が与えた2つの役割（家の全体像・カメラの立ち位置）は、家が
-  // フレームに収まって初めて果たせる。実測（既定プラン 495x503・保存視点）:
-  // 1F 0.346 / 2F 0.325 と下限 0.6 を大きく割り、家が下寄りに沈んで
-  // カメラの三角がフレームからはみ出していた。平面図ソースと同じ fit と
-  // 同じ検査を通す（Task 7c をこちらの枝にも入れる）。
+  // 1つで、設計 §5.2 が与えた2つの役割（家の全体像・**カメラの立ち位置**）は、
+  // 家とカメラの両方がフレームに収まって初めて果たせる。カメラが画面外なら
+  // この図は役目を果たさない。だから fit する箱は主題だけでなく
+  // 「主題 ∪ カメラ」(planContextBoundsMm) にする。占有率の下限は設けない。
+  var camera=videoCameraDescriptor(floor);
+  var contextBounds=planContextBoundsMm(floor,camera);
+  var contextEmpty=planEmptyFloorRefusal(contextBounds,floor,'plan_context.png');
+  if(contextEmpty) throw contextEmpty;
   var topImages=await waitForPlanFloorTopImages(floor);
-  var plan=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:floor,fit:true});
+  var plan=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:floor,
+    fit:true,fitBounds:contextBounds});
   if(!plan) throw new Error('平面図の撮影に失敗しました。');
   // 撮影中だけ変えた構図は finally で戻っているので、撮った絵を画素で読む側にも
   // 重ねる側にも、ST ではなく「撮ったときの座標系」を渡す。
   var planView=PLAN_CAPTURE_VIEW;
   var planIm=await decodePngDataUrlToImageData(plan);
-  var contextRefusal=planCompositionRefusal(planSubjectBoundsMm(floor),planView,
-    planIm.width,planIm.height,'plan_context.png');
-  if(contextRefusal) throw contextRefusal;
+  // 家がこの図の何割を占めるかは測って記録するだけ（カメラを入れた分だけ主題は
+  // 小さく写る。それはこの図の目的が家の描写ではないからで、不良ではない）。
+  var contextRatio=planSubjectFrameRatio(planSubjectBoundsMm(floor),planView,
+    planIm.width,planIm.height);
   var placeholders=findPlanPlaceholderInstances(planIm,floor,planView);
   if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
-  var camera=videoCameraDescriptor(floor);
   var planContext=await drawPlanCameraOverlay(plan,camera,planView);
 
   // 4) プロンプト。光を書けなかったら黙って続けない。
@@ -18862,6 +18867,8 @@ async function generateVideoRenderPackage(options){
     shadowLift:videoShadowLiftRecord(curve,measurements.length),
     capture:{width:baseIm.width,height:baseIm.height,
       instances:instanceData.legend.length,
+      // plan_context.png の中で家が長い方の軸の何割を占めるか。門ではなく開示。
+      subjectFrameRatio:contextRatio,
       topImages:topImages,includeGuides:includeGuides},
     files:names
   });
