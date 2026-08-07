@@ -3338,6 +3338,10 @@ input[type="reset"]:focus-visible{
           <input id="ai-render-life-check" type="checkbox" checked>
           生活感を加える(通行人・自転車・植栽など。建物の形は変えない)
         </label>
+        <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px">
+          <input id="ai-render-plan-check" type="checkbox">
+          現在階の平面図(注記なし・天井高つき)も同梱する
+        </label>
       </div>
       <div class="ai-floor-use-field">
         <label id="ai-floor-use-label" for="ai-floor-use-select">現在階の用途</label>
@@ -3377,6 +3381,7 @@ input[type="reset"]:focus-visible{
       <a id="ai-dl-depth" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">深度画像保存</a>
       <a id="ai-dl-normal" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">法線画像保存</a>
       <a id="ai-dl-instance" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">部材ID画像保存</a>
+      <a id="ai-dl-plan" class="pbtn sec disabled" style="width:auto;padding:7px 12px;display:none" href="#" onclick="return handleAiDownloadLinkClick(event)">平面図保存</a>
     </div>
     <div class="unity-render-cmd">使い方: 一括DLした制御画像6枚と「AIへの指示文」を、利用したい画像生成AIにまとめて渡してください。凡例JSONはカテゴリと部材IDの対応確認に使います。</div>
   </div>
@@ -5744,19 +5749,71 @@ function updateMobileShiftButton(){
 
 var FOOTPRINTS={1:{w:11830,h:7280},2:{w:11830,h:7280},3:{w:11830,h:7280}};
 
+// ── 平面図キャプチャ ────────────────────────────────────────────────
+// 画像生成AIに「この図が家になる」と渡すための平面図は、設計以外を含んではいけない。
+// メモ・定規・ウォークルート・選択枠・グリッド・下階ゴーストは、AI側が実在する物として
+// 描き起こしてしまうノイズになる。ただし描画関数は分岐(=複製)させない。複製した側は
+// いずれ本体と食い違い、どちらかが黙って腐る。代わりにキャプチャ中だけ有効な
+// オプションを1つ持ち、既存の描画呼び出しがそれを見て対象を絞る。
+// 通常描画では PLAN_CAPTURE は null で、すべての判定が「描く」に倒れる。
+var PLAN_CAPTURE=null;
+function planCaptureShows(key){
+  return !PLAN_CAPTURE || PLAN_CAPTURE[key]!==false;
+}
+// 天井高ラベルだけは既定が逆。通常の 2D 表示の見た目を変えないため、
+// キャプチャ中に明示的に要求されたときのみ描く。
+function planCaptureCeilingLabels(){
+  return !!(PLAN_CAPTURE && PLAN_CAPTURE.ceilingLabels);
+}
+function planCaptureDefaults(){
+  return {
+    annotations:false,   // メモ・定規・ウォークルート・寸法線・ロックバッジ
+    selection:false,     // 選択ハイライトとハンドル
+    grid:false,
+    ghostFloor:false,    // 下階のゴースト
+    toolOverlays:false,  // 配置ゴースト・作図プレビュー・スナップ補助線
+    ceilingLabels:true
+  };
+}
+var PLAN_CAPTURE_KEYS=['annotations','selection','grid','ghostFloor','toolOverlays','ceilingLabels'];
+// options = {annotations:false, ceilingLabels:true, selection:false, grid:false, ghostFloor:false}
+// floor を渡すと、その階を一時的に描いて撮る。撮り終えたら必ず元の表示へ戻す。
+function capturePlan2dDataUrl(options){
+  var opt=options||{};
+  var cfg=planCaptureDefaults();
+  PLAN_CAPTURE_KEYS.forEach(function(k){
+    if(opt[k]!==undefined) cfg[k]=!!opt[k];
+  });
+  var prevCapture=PLAN_CAPTURE;
+  var prevFloor=ST.floor;
+  try{
+    if(opt.floor!==undefined && opt.floor!==null) ST.floor=opt.floor;
+    PLAN_CAPTURE=cfg;
+    draw2d();
+    return canvas.toDataURL(opt.mimeType||'image/png');
+  }finally{
+    // 途中で落ちても、ユーザーが見ている画面を欠けたまま放置しない。
+    PLAN_CAPTURE=prevCapture;
+    ST.floor=prevFloor;
+    if(!prevCapture){
+      try{ draw2d(); }catch(e){}
+    }
+  }
+}
+
 function draw2d(){
   ensureObjectIds();
   var W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle='#f2f4f7'; ctx.fillRect(0,0,W,H);
-  if(ST.showGrid) drawGrid();
+  if(ST.showGrid && planCaptureShows('grid')) drawGrid();
   var sc=ST.zoom*0.05;
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
   var fi=DATA.items.filter(function(i){return i.floor===ST.floor;});
 
   // 0. Floor below ghost – 1つ下のフロアをうっすら表示（2F編集時に1Fが見える）
   var ghostFloor = ST.floor - 1;
-  if(ghostFloor >= 1) {
+  if(ghostFloor >= 1 && planCaptureShows('ghostFloor')) {
     ctx.save(); ctx.globalAlpha = 0.22;
     DATA.rooms.filter(function(r){return r.floor===ghostFloor;}).forEach(function(r){
       var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
@@ -5780,7 +5837,7 @@ function draw2d(){
   // 3. Rooms
   DATA.rooms.filter(function(r){return r.floor===ST.floor;}).forEach(function(r){
     var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
-    var sel=ST.selected===r || (ST.selectAll && r.floor===ST.floor);
+    var sel=planCaptureShows('selection') && (ST.selected===r || (ST.selectAll && r.floor===ST.floor));
     ctx.save();
     ctx.shadowBlur=12; ctx.shadowColor='rgba(0,0,0,0.06)';
     ctx.fillStyle='rgba(252,251,248,0.95)';
@@ -5798,7 +5855,7 @@ function draw2d(){
   fi.filter(function(i){return i.type!=='site-rect' && i.type!=='foundation';}).forEach(drawItem2d);
 
   // Ghost Previews
-  if(ST.drawing && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var x1=Math.min(p1.x,p2.x), y1=Math.min(p1.y,p2.y), rw=Math.abs(p1.x-p2.x), rd=Math.abs(p1.y-p2.y);
     ctx.strokeStyle='rgba(48,128,232,0.5)'; ctx.setLineDash([5,5]);
@@ -5808,7 +5865,7 @@ function draw2d(){
   // ── Ghost preview + placement dimensions ──
   var openingGhostPreset=getOpeningModelToolPreset(ST.tool);
   var ghostToolType=openingGhostPreset?openingGhostPreset.baseType:ST.tool;
-  if(!ST.drawing && (ISIZES[ghostToolType]||isFmpItemType(ghostToolType)||openingGhostPreset) && ghostToolType!=='site-rect' && !(ST.floor!==1 && (ghostToolType==='foundation'||ghostToolType==='exterior-stair'||ghostToolType==='ramp')) && ST.view === '2d') {
+  if(!ST.drawing && planCaptureShows('toolOverlays') && (ISIZES[ghostToolType]||isFmpItemType(ghostToolType)||openingGhostPreset) && ghostToolType!=='site-rect' && !(ST.floor!==1 && (ghostToolType==='foundation'||ghostToolType==='exterior-stair'||ghostToolType==='ramp')) && ST.view === '2d') {
     var mx = snapV(ST.mouseW.x), my = snapV(ST.mouseW.y);
     var sz = getItemDefaultSize(ghostToolType);
     var ghost = {type:ghostToolType, x:mx - sz.w/2, y:my - sz.d/2, w:sz.w, d:sz.d, rot:ST.placingRot||0, floor:ST.floor, flipX:false, flipY:false, sScale:1, sX:0, sY:0};
@@ -5831,22 +5888,23 @@ function draw2d(){
     drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
   }
   // ── Room-rect preview dimensions ──
-  if(ST.drawing && (ST.tool==='room-rect'||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect'||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var rw=Math.abs(snapV(p2.x)-p1.x), rd=Math.abs(snapV(p2.y)-p1.y);
     if(rw>50&&rd>50) drawRectDim(Math.min(p1.x,snapV(p2.x)), Math.min(p1.y,snapV(p2.y)), rw, rd);
   }
 
   drawRoomLbls();
-  if(ST.drawing&&ST.drawPts.length>0) drawPreview();
-  if(ST.showDim) drawDim();
+  if(ST.drawing&&ST.drawPts.length>0&&planCaptureShows('toolOverlays')) drawPreview();
+  // 寸法線は設計そのものではなく図面上の注記なので、キャプチャでは注記側に含める
+  if(ST.showDim && planCaptureShows('annotations')) drawDim();
   drawMultiSelectionOverlays();
   drawLockOverlays(fw,fi);
   drawBaseSelectionOverlay();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
   syncLockBatchUi();
   // ── Snap guide lines ──
-  if(ST._snapState&&(DRAG.active||ST.tool!=='select')){
+  if(ST._snapState&&planCaptureShows('toolOverlays')&&(DRAG.active||ST.tool!=='select')){
     var sc3=ST.zoom*0.05;
     ctx.save(); ctx.setLineDash([4,3]); ctx.lineWidth=1.5;
     if(ST._snapState.snapX&&ST._snapState.snapXVal!==null){
@@ -5864,6 +5922,7 @@ function draw2d(){
 }
 
 function drawMultiSelectionOverlays(){
+  if(!planCaptureShows('selection')) return;
   var selected=(ST.multiSelected||[]).filter(function(obj){return obj && (obj.floor||1)===ST.floor;});
   if(!selected.length || ST.tool!=='select') return;
   var sc=ST.zoom*0.05;
@@ -5950,11 +6009,38 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
 function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
-    drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',ST.selected===l);
+    drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l);
+    drawCeilingLabel2d(l);
   });
   DATA.items.filter(function(i){return i.floor===ST.floor && i.type==='balcony';}).forEach(function(it){
-    drawAreaTag(it.x+it.w/2,it.y+it.d/2,it.w,it.d,it.n||ILABELS[it.type]||'バルコニー',ST.selected===it);
+    drawAreaTag(it.x+it.w/2,it.y+it.d/2,it.w,it.d,it.n||ILABELS[it.type]||'バルコニー',planCaptureShows('selection')&&ST.selected===it);
   });
+}
+// 天井高は、生成AIが「その空間がどれだけ高いか」を知る唯一の手がかりなので、
+// 注記を落としたキャプチャでも残す。部屋名タグの真下に小さく置いて重ねない。
+// 明示の天井高が無い部屋にも出す -- HeightModel が必ず解決値を返し、
+// AIが必要とするのは入力の有無ではなく解決後の値だから。
+function drawCeilingLabel2d(room){
+  if(!planCaptureCeilingLabels()) return;
+  if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
+  var text=HeightModel.ceilingLabel(DATA,room);
+  var p=w2c(room.x+room.w/2,room.y+room.d/2);
+  var szN=Math.max(10,ST.zoom*0.8), szA=Math.max(8,ST.zoom*0.55);
+  var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);
+  var sz=Math.max(9,ST.zoom*0.5);
+  var cy=p.cy+tagH/2+sz*0.85;
+  // 部屋からはみ出すなら部屋の内側に収める
+  var bottom=w2c(room.x,room.y+room.d).cy-sz*0.7;
+  if(cy>bottom) cy=Math.max(p.cy+tagH/2+2,bottom);
+  ctx.save();
+  ctx.font=sz+'px "Noto Sans JP",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  var tw=ctx.measureText(text).width+10;
+  ctx.fillStyle='rgba(255,255,255,0.82)';
+  ctx.beginPath(); ctx.roundRect(p.cx-tw/2,cy-sz*0.75,tw,sz*1.5,4); ctx.fill();
+  ctx.fillStyle='#555';
+  ctx.fillText(text,p.cx,cy);
+  ctx.restore();
 }
 
 function drawWall2d(w){
@@ -5971,7 +6057,7 @@ function drawWall2d(w){
   ctx.moveTo(a.cx+nx*t,a.cy+ny*t); ctx.lineTo(b.cx+nx*t,b.cy+ny*t);
   ctx.lineTo(b.cx-nx*t,b.cy-ny*t); ctx.lineTo(a.cx-nx*t,a.cy-ny*t);
   ctx.closePath();
-  if(sel||(ST.selectAll && w.floor===ST.floor)){
+  if(planCaptureShows('selection') && (sel||(ST.selectAll && w.floor===ST.floor))){
     ctx.fillStyle='rgba(233,69,96,0.95)'; ctx.fill();
     ctx.strokeStyle='#e94560'; ctx.lineWidth=2.6; ctx.stroke();
   } else {
@@ -5998,6 +6084,8 @@ function drawLockBadgePx(cx,cy){
 }
 
 function drawLockOverlays(fw,fi){
+  // 施錠バッジは編集用の目印であって設計要素ではない
+  if(!planCaptureShows('annotations')) return;
   DATA.rooms.filter(function(r){return r.floor===ST.floor && isObjectLocked(r);}).forEach(function(r){
     var p=w2c(r.x+r.w/2,r.y+r.d/2);
     drawLockBadgePx(p.cx,p.cy);
@@ -6012,6 +6100,7 @@ function drawLockOverlays(fw,fi){
   });
 }
 function drawBaseSelectionOverlay(){
+  if(!planCaptureShows('selection')) return;
   if(ST.tool!=='select' || ST.floor!==1 || !ST.selected || ST.selected.type!=='foundation') return;
   var it=ST.selected;
   var sc=ST.zoom*0.05;
@@ -6630,6 +6719,8 @@ function drawStairUpText(it,sc,x,y,align){
 }
 
 function drawItem2d(it){
+  // メモ・定規・ウォークルートは注記。判定は isPlanAnnotationType に一本化する
+  if(isPlanAnnotationType(it.type) && !planCaptureShows('annotations')) return;
   var sc=ST.zoom*0.05;
   var pose=getItemDisplayPose(it);
   var drawX=pose.x;
@@ -7269,6 +7360,8 @@ function getItemSelectionHalfExtentsPx(it,sc){
 }
 
 function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
+  // 呼び出し側が多数あるので、選択表示の抑止はここ1か所で行う
+  if(!planCaptureShows('selection')) return;
   ctx.save();
   ctx.translate(ccx,ccy); ctx.rotate((rotOverride!==undefined?rotOverride:(o.rot||0))*Math.PI/180);
   ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.setLineDash([4,2]);
@@ -7293,6 +7386,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
 }
 
 function drawWallHandles(w){
+  if(!planCaptureShows('selection')) return;
   if(isObjectLocked(w)) return;
   var a=w2c(w.x1,w.y1), b=w2c(w.x2,w.y2);
   ctx.save();
@@ -16873,9 +16967,17 @@ function setAiDownloadLink(id,href,filename){
 }
 function clearAiRenderDownloadLinks(){
   revokeAiRenderDownloadUrls();
-  ['ai-dl-bundle','ai-dl-json','ai-dl-prompt','ai-dl-base','ai-dl-edge','ai-dl-segmentation','ai-dl-depth','ai-dl-normal','ai-dl-instance'].forEach(function(id){
+  ['ai-dl-bundle','ai-dl-json','ai-dl-prompt','ai-dl-base','ai-dl-edge','ai-dl-segmentation','ai-dl-depth','ai-dl-normal','ai-dl-instance','ai-dl-plan'].forEach(function(id){
     setAiDownloadLink(id,null,'');
   });
+  var planLink=document.getElementById('ai-dl-plan');
+  if(planLink) planLink.style.display='none';
+}
+// 平面図の同梱は明示的に選んだときだけ。既定オフなので、
+// 既存ユーザーの出力(指示文・ファイル一覧)はこれまでと1バイトも変わらない。
+function aiRenderIncludesPlan(){
+  var c=document.getElementById('ai-render-plan-check');
+  return !!(c&&c.checked);
 }
 function getActive3DCamera(){
   // AI package captures must match the currently visible 3D canvas.
@@ -17393,7 +17495,7 @@ function buildAiRenderMetadata(instanceLegend){
     ]
   };
 }
-function buildAiRenderPrompt(metadata){
+function buildAiRenderPrompt(metadata,includePlan){
   var styleInput=document.getElementById('ai-render-style-input');
   var style=(styleInput&&styleInput.value.trim())||'photorealistic architectural visualization, natural daylight, clean modern Japanese residential presentation';
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
@@ -17440,6 +17542,8 @@ function buildAiRenderPrompt(metadata){
     '- segmentation-legend.json: machine-readable map of every segment color to its object/category meaning.',
     '- instance_guide.png: unique-color map for individual designed elements. Translucent neighboring-building context is intentionally omitted and remains identified only in segmentation_guide.png. Do not merge, split, add, remove, or move colored instances.',
     '- instance-legend.json: machine-readable ID, source collection, type, floor, position, and dimensions for each instance color.',
+    // 平面図は既定では同梱しない。false のときこの行は null になり、既存の指示文と完全に一致する。
+    includePlan ? '- plan_guide.png: top-down 2D floor plan of floor '+metadata.floor+'F with editing annotations removed. Room names and "CH <millimetres>" ceiling heights are design data. Use it only to keep room layout, openings, and ceiling heights consistent. It is a drawing, not a camera view: never render it, and never change the camera to match it.' : null,
     '',
     'Strict requirements:',
     '- Do not add, remove, or move walls, windows, doors, roof parts, stairs, rooms, furniture, fixtures, fences, balconies, or cars.',
@@ -17672,6 +17776,11 @@ function syncAiRenderDownloadLinks(){
   if(imgs.depth) setAiDownloadLink('ai-dl-depth',imgs.depth.dataUrl,imgs.depth.filename);
   if(imgs.normal) setAiDownloadLink('ai-dl-normal',imgs.normal.dataUrl,imgs.normal.filename);
   if(imgs.instance) setAiDownloadLink('ai-dl-instance',imgs.instance.dataUrl,imgs.instance.filename);
+  if(imgs.plan){
+    setAiDownloadLink('ai-dl-plan',imgs.plan.dataUrl,imgs.plan.filename);
+    var planLink=document.getElementById('ai-dl-plan');
+    if(planLink) planLink.style.display='';
+  }
 }
 function handleAiDownloadLinkClick(e){
   var a=e&&e.currentTarget;
@@ -17711,8 +17820,14 @@ async function generateAiRenderPackage(){
     setUnityRenderStatus('面方向を固定する法線画像を生成しています...');
     await waitFrame(30);
     var normal=captureAiOverrideGuideDataUrl('normal');
+    var plan='';
+    if(aiRenderIncludesPlan()){
+      setUnityRenderStatus('注記を外した平面図を撮影しています...');
+      await waitFrame(30);
+      plan=capturePlan2dDataUrl({annotations:false});
+    }
     var metadata=buildAiRenderMetadata(instanceData.legend);
-    var prompt=buildAiRenderPrompt(metadata);
+    var prompt=buildAiRenderPrompt(metadata,!!plan);
     setUnityRenderStatus('一括DL用ZIPを準備しています...');
     var enc=new TextEncoder();
     var legendText=JSON.stringify({version:2,legend:metadata.segmentationLegend,siteContext:metadata.siteContext},null,2);
@@ -17729,6 +17844,7 @@ async function generateAiRenderPackage(){
       {name:'normal_guide.png',bytes:await dataUrlToBytes(normal)},
       {name:'instance_guide.png',bytes:await dataUrlToBytes(instance)}
     ];
+    if(plan) zipFiles.push({name:'plan_guide.png',bytes:await dataUrlToBytes(plan)});
     AI_RENDER_PACKAGE={
       version:2,
       createdAt:metadata.createdAt,
@@ -17744,6 +17860,7 @@ async function generateAiRenderPackage(){
       },
       zipBlob:makeZipBlob(zipFiles)
     };
+    if(plan) AI_RENDER_PACKAGE.images.plan={filename:'plan_guide.png',dataUrl:plan};
     setAiPackagePreview(AI_RENDER_PACKAGE);
     setAiInstructionsPreview(AI_RENDER_PACKAGE.prompt);
     syncAiRenderDownloadLinks();
