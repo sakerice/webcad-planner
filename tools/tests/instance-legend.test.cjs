@@ -89,6 +89,10 @@ function ceilingCtx(extra) {
   }, extra || {}));
   vm.runInContext([
     topLevelFunction('makeAutoLightFixtureMesh'),
+    topLevelFunction('ceilingSlopeUnit'),
+    topLevelFunction('ceilingSlopeSpan'),
+    topLevelFunction('buildSlopedCeilingGeometry'),
+    topLevelFunction('buildRoomCeilingShapeGeometry'),
     topLevelFunction('buildRoomCeilingMesh')
   ].join('\n'), ctx);
   return ctx;

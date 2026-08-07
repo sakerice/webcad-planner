@@ -3743,6 +3743,21 @@ function roomRenderedCeilingMm(room){
   var floor=room&&room.floor;
   return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U);
 }
+// 部屋が勾配天井なら、レンダが実際に置く低い側・高い側の高さ(m, floorBaseY 基準)を返す。
+// 高い側は roomCeilingHeightM をそのまま使う（階高でのクランプを2か所に書かない）。
+// 低い側も高い側で抑え、クランプで高い側が下がったときに低い側が上を越えないようにする。
+// 勾配を宣言していない部屋では null を返す。既存プランはこの関数の外側を通らない。
+function roomCeilingSlopeM(room){
+  if(!room||typeof HeightModel==='undefined'||!HeightModel) return null;
+  var c=room.ceiling;
+  if(!c||c.type!=='sloped') return null;
+  var shape=HeightModel.ceilingShape(DATA,room);
+  if(!shape||shape.type!=='sloped') return null;
+  var highY=roomCeilingHeightM(room);
+  var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
+  if(lowY>highY) lowY=highY;
+  return {lowY:lowY,highY:highY,direction:shape.direction};
+}
 // 平面図のラベルと package.json の記録は、**レンダと同じ経路**で高さを解決する。
 // HeightModel.ceilingShape / ceilingLabel をそのまま呼ぶと、天井高を明示していない
 // 部屋には既定の 2400 が返る。レンダはそういう部屋に階高をそのまま与える
@@ -3753,12 +3768,18 @@ function roomRenderedCeilingMm(room){
 // HeightModel の1か所に任せ、**数値だけ**をレンダ側から取る。
 function roomRenderedCeilingShape(room){
   var mm=roomRenderedCeilingMm(room);
-  // 勾配天井をレンダはまだ作れず、高い側の高さで**平らに**置く(Task 2c 未了)。
-  // それでも 'sloped' と書くと、ラベルは「CH 2200-2520 ↗」のように
-  // **存在しない傾き**を生成AIへ約束することになる。低い側 2200 はどこにも
-  // 無い。レンダが平らにしか作れないあいだは、平らな高さだけを言う。
-  // (A) で実際に傾けられるようになったら、この抑制を外して範囲と向きへ戻す。
-  return {type:'flat',heightMm:mm};
+  // 勾配天井は 3D で実際に傾く (roomCeilingSlopeM / buildSlopedCeilingGeometry)
+  // ようになったので、ラベルは範囲と向きを言ってよい。数値はどちらも
+  // **レンダが置いた面**から取る: 高い側は roomRenderedCeilingMm、低い側も
+  // 同じ経路 (roomCeilingSlopeM) が階高でクランプした後の値。
+  // 11-3(B) の抑制はここにあった。存在しない傾きを書かないためのもので、
+  // 傾きが実在するようになったので外した。
+  var slope=roomCeilingSlopeM(room);
+  if(!slope) return {type:'flat',heightMm:mm};
+  return {type:'sloped',
+    lowMm:Math.round((slope.lowY-floorSlabHeightMForFloor(room&&room.floor))/U),
+    highMm:mm,
+    direction:slope.direction};
 }
 function roomRenderedCeilingLabel(room){
   var shape=roomRenderedCeilingShape(room);
@@ -14528,27 +14549,89 @@ function makeAutoLightFixtureMesh(fixMat,x,y,z){
   fix.userData={b:true,aiInstanceType:'auto-light-fixture'};
   return fix;
 }
+// ── 勾配天井 (Task 11-3 A) ───────────────────────────────────────────────
+// 傾いた天井面の高さは (x,z) の一次関数 y = a*x + b*z + c である。だから面を
+// 分割する必要が無く、既存の四隅（穴があれば輪郭の全頂点）を上下に動かすだけで
+// **正確に**傾く。分割すると平らなプランのジオメトリまで変わってしまう。
+//
+// 斜線制限（道路斜線・北側斜線・隣地斜線）はここでは実装しない。ただし
+// 「ある方向へ向かって上がる/下がる平面で天井や屋根を抑える」という幾何は
+// 同じもので、実装するときはこの投影（ceilingSlopeUnit / 四隅の射影の min-max）を
+// 共有できる。違いは基準面が部屋の床か敷地境界かだけである。
+//
+// direction は HeightModel.ceilingArrow と同じ方位角[度]。0=北、90=東。
+// 矢印は**高い側**を指す。平面図の +Y は南なので、北は -Z（3Dの世界座標）。
+function ceilingSlopeUnit(direction){
+  var t=((typeof direction==='number'&&isFinite(direction))?direction:0)*Math.PI/180;
+  return {x:Math.sin(t),z:-Math.cos(t)};
+}
+// 部屋の外周を勾配方向へ射影したときの、低い端と高い端。
+function ceilingSlopeSpan(r,u){
+  var xs=[r.x*U,(r.x+r.w)*U], zs=[r.y*U,(r.y+r.d)*U];
+  var min=Infinity, max=-Infinity, i, j, s;
+  for(i=0;i<2;i++) for(j=0;j<2;j++){
+    s=xs[i]*u.x+zs[j]*u.z;
+    if(s<min) min=s;
+    if(s>max) max=s;
+  }
+  return {min:min,max:max};
+}
+// 勾配天井の面。平らな枝とは別の道を通る（平らなプランのジオメトリを動かさない）。
+function buildSlopedCeilingGeometry(r,holes,slope,baseY){
+  var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+  var geo;
+  if(!holes||!holes.length){
+    geo=new THREE.PlaneGeometry(rw,rd);
+    geo.rotateX(-Math.PI/2);
+    geo.translate(rcx,0,rcz);           // 頂点を世界の x/z へ揃える
+  } else {
+    geo=buildRoomCeilingShapeGeometry(r,holes);   // こちらは既に世界の x/z
+  }
+  var u=ceilingSlopeUnit(slope.direction);
+  var span=ceilingSlopeSpan(r,u);
+  var range=span.max-span.min;
+  var pos=geo.attributes.position, i, s, t;
+  for(i=0;i<pos.count;i++){
+    s=pos.getX(i)*u.x+pos.getZ(i)*u.z;
+    t=range>1e-9?(s-span.min)/range:1;
+    if(t<0) t=0; else if(t>1) t=1;
+    pos.setY(i,baseY+slope.lowY+(slope.highY-slope.lowY)*t);
+  }
+  pos.needsUpdate=true;
+  geo.computeVertexNormals();
+  return geo;
+}
+// 階段の吹き抜けを持つ天井の輪郭。平らな枝と勾配の枝が同じ1つを使う。
+function buildRoomCeilingShapeGeometry(r,holes){
+  var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
+  var outline=new THREE.Shape();
+  outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
+  holes.forEach(function(hole){
+    var path=new THREE.Path();
+    hole.forEach(function(p,i){if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z);});
+    path.closePath(); outline.holes.push(path);
+  });
+  var geo=new THREE.ShapeGeometry(outline);
+  geo.rotateX(-Math.PI/2);
+  return geo;
+}
 // 実体の天井面。編集用の内観3Dでは上から部屋を操作できるよう生成せず、
 // ウォークスルー／外観でのみ表示する。階段位置には床と同じ開口を設ける。
-function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
-  var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
+// slope が渡された部屋だけが勾配の枝を通る。渡されなければ従来の経路そのままで、
+// 高さフィールドを持たないプランのジオメトリは1頂点も動かない。
+function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,slope){
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   var ceiling;
-  if(!holes||!holes.length){
+  if(slope){
+    // ceilY は高い側（roomCeilingHeightM）なので、床の基準面へ戻して渡す。
+    ceiling=new THREE.Mesh(
+      buildSlopedCeilingGeometry(r,holes,slope,ceilY-slope.highY-0.012),matCeiling);
+  } else if(!holes||!holes.length){
     ceiling=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeiling);
     ceiling.rotation.x=-Math.PI/2;
     ceiling.position.set(rcx,ceilY-0.012,rcz);
   } else {
-    var outline=new THREE.Shape();
-    outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
-    holes.forEach(function(hole){
-      var path=new THREE.Path();
-      hole.forEach(function(p,i){if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z);});
-      path.closePath(); outline.holes.push(path);
-    });
-    var geo=new THREE.ShapeGeometry(outline);
-    geo.rotateX(-Math.PI/2);
-    ceiling=new THREE.Mesh(geo,matCeiling);
+    ceiling=new THREE.Mesh(buildRoomCeilingShapeGeometry(r,holes),matCeiling);
     ceiling.position.y=ceilY-0.012;
   }
   // 影の設定も生成時に確定させる。再構築(GLB読み込み完了後の
@@ -14619,7 +14702,8 @@ function buildRooms3D(flFilt){
         ceilingStairQuadsByFloor[r.floor]=stairwellQuadsForFloor(r.floor+1);
       }
       var ceilingHoles=stairwellHolesForRoom(r,ceilingStairQuadsByFloor);
-      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles));
+      // 勾配を宣言していない部屋では null。従来の平らな枝をそのまま通る。
+      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles,roomCeilingSlopeM(r)));
     }
 
 	    // Ceiling downlights

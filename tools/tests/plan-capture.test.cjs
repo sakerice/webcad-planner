@@ -392,6 +392,7 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('floorSlabHeightM'), topLevelFunction('floorSlabHeightMForFloor'),
     topLevelFunction('isPositiveNumber'),
     topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
+    topLevelFunction('roomCeilingSlopeM'),
     topLevelFunction('roomRenderedCeilingMm'), topLevelFunction('roomRenderedCeilingShape'),
     topLevelFunction('roomRenderedCeilingLabel'),
     topLevelFunction('drawCeilingLabel2d')
