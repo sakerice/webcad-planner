@@ -494,12 +494,17 @@ const VIDEO_FNS = [
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+  'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
+  'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
   'videoHeightModelRecord',
   'generateVideoRenderPackage'
 ];
 const VIDEO_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
+  'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache',
   'CONTEXT_EXTERIOR_TYPES', 'PLAN_FIT_MARGIN'];
 
 // 撮影・復号・ZIP だけを置き換えた実行環境。

@@ -102,6 +102,11 @@ const HEIGHT_FNS = [
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  // Task 12-1: 屋根から天井を導く経路。宣言していない部屋はここを通らない。
+  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+  'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
+  'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
   'roomAtPointOnFloor', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
@@ -114,7 +119,8 @@ function heights(data) {
   const ctx = vm.createContext({ console: console, HeightModel: HeightModel, DATA: data });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
-    topLevelVar('U'), topLevelVar('_ceilingClampWarned')
+    topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
   ].concat(HEIGHT_FNS.map(topLevelFunction)).join('\n'), ctx);
   return ctx;
 }
@@ -311,7 +317,8 @@ function ceilingYsFor(data, floor) {
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
-    topLevelVar('U'), topLevelVar('_ceilingClampWarned')
+    topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
    .concat([topLevelFunction('buildRooms3D')]).join('\n'), ctx);
   ctx.buildRooms3D(floor);
@@ -414,7 +421,8 @@ function ceilingBuilder(data) {
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
-    topLevelVar('U'), topLevelVar('_ceilingClampWarned')
+    topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
   ].concat(HEIGHT_FNS.map(topLevelFunction)).concat([
     topLevelFunction('ceilingSlopeUnit'),
     topLevelFunction('ceilingSlopeSpan'),

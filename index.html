@@ -3712,12 +3712,143 @@ function roomExplicitCeilingMm(room){
   }
   return HeightModel.ceilingHeightMm(DATA,room);
 }
+// ── 屋根が天井を決める (Task 12-1) ──────────────────────────────────────
+// 在来工法の勾配天井は「天井を吊るのをやめ、垂木の下端を仕上げ面にする」ことである。
+// だから天井の勾配は屋根の勾配そのもので、独立に決めるものではない。天井面と屋根
+// 下面の間隔は 垂木せい(45〜105mm) + 断熱材 + 通気層(30mm以上) で、実務では合計
+// 200〜300mm。その中央値を既定とする。
+var CEILING_UNDER_ROOF_OFFSET_MM=250;
+// 天井面を屋根から導くのは **ceiling.type==='sloped' を宣言した部屋だけ**。
+// 既存の部屋は屋根の下でも平天井(階高)として描かれてきたので、宣言していない
+// 部屋まで屋根から導くと保存済みの家の天井が全戸で動く。
+function roomDeclaresSlopedCeiling(room){
+  return !!(room&&room.ceiling&&room.ceiling.type==='sloped');
+}
+// 屋根アイテムの footprint が平面上のこの点を覆っているか。回転・フリップは
+// roofLocalPoint が既に持っているので、ローカル座標で矩形に入るかだけを見る
+// (isInsideItem は建具の当たり判定の余白を持っており、屋根の輪郭とは別物)。
+function roofCoversPlanPoint(it,xMm,yMm){
+  var lp=roofLocalPoint(it,xMm,yMm);
+  return Math.abs(lp.x)<=it.w*U/2+1e-6 && Math.abs(lp.z)<=it.d*U/2+1e-6;
+}
+// この部屋の上に載っている roof アイテム。無ければ null。
+// 「載っている」= 部屋の中心が屋根の footprint に入り、かつその屋根の下面(天井面)の
+// 最高点が部屋の床より上にあること(下の階の庇に天井を引きずり下ろさせない)。
+// 複数該当するときは棟が低い方を採る -- 先に頭を押さえるのはそちらだから。
+function roofItemOverRoom(room){
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.items) return null;
+  var cx=room.x+room.w/2, cy=room.y+room.d/2;
+  var floorY=floorTopY(room.floor);
+  var best=null, bestApex=Infinity;
+  DATA.items.forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    if(!roofCoversPlanPoint(it,cx,cy)) return;
+    var apex=roofCeilingWorldYAt(it,cx,cy);
+    // 中心だけでは軒先を掴んでしまうので、部屋の四隅も見て一番高いところで判定する。
+    [[room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]]
+      .forEach(function(p){
+        var v=roofCeilingWorldYAt(it,p[0],p[1]);
+        if(v>apex) apex=v;
+      });
+    if(apex<=floorY) return;
+    if(apex<bestApex){ bestApex=apex; best=it; }
+  });
+  return best;
+}
+// 屋根下面から CEILING_UNDER_ROOF_OFFSET_MM だけ下げた面の、ワールド Y(m)。
+// **屋根の形の計算はここに書かない**。3D 側が既に使っている roofSurfaceHeightAt
+// (屋根ローカル座標での屋根面高さ) と roofLocalPoint をそのまま呼ぶ。屋根アイテムの
+// 世界での据え付け方 (floorBaseY(floor)+elev) も既存の竪樋判定と同じ式である。
+function roofCeilingWorldYAt(roofItem,xMm,yMm){
+  var lp=roofLocalPoint(roofItem,xMm,yMm);
+  return floorBaseY(roofItem.floor)+((roofItem.elev||0)*U)
+    +roofSurfaceHeightAt(roofItem,lp.x,lp.z)
+    -CEILING_UNDER_ROOF_OFFSET_MM*U;
+}
+// 部屋の天井の形。**宣言していない部屋では必ず null**を返し、呼び出し側は従来の
+// 平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ手書きの
+// low/high/direction から形を得る(屋根が載っていない部屋のための上書き)。
+function roomCeilingProfile(room){
+  if(!roomDeclaresSlopedCeiling(room)) return null;
+  if(typeof HeightModel==='undefined'||!HeightModel) return null;
+  var shape=HeightModel.ceilingShape(DATA,room);
+  if(!shape||shape.type!=='sloped') return null;
+  var baseY=floorBaseY(room.floor);
+  var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
+  var roof=roofItemOverRoom(room);
+  if(roof) return {source:'roof',roof:roof,lowY:lowY,baseY:baseY};
+  var highY=roomCeilingHeightM(room);
+  if(lowY>highY) lowY=highY;
+  return {source:'manual',lowY:lowY,highY:highY,direction:shape.direction,baseY:baseY};
+}
+// 天井面のワールド Y(m)。引数は平面座標(mm)。profile が null の部屋は
+// 従来どおり平らな roomCeilingHeightM。
+function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
+  var baseY=floorBaseY(room&&room.floor);
+  if(!profile) return baseY+roomCeilingHeightM(room);
+  if(profile.source==='roof'){
+    var y=roofCeilingWorldYAt(profile.roof,xMm,yMm);
+    var lowWorld=baseY+profile.lowY;
+    // 軒先側では屋根下面が低い側の天井高より下へ来る。そこは天井を吊ったまま
+    // (平らな部分)にする -- だから勾配は壁の途中から始まり、上辺は折れ線になる。
+    return y<lowWorld?lowWorld:y;
+  }
+  // 手書きの勾配: 高さは (x,z) の一次関数。既存 buildSlopedCeilingGeometry と同式。
+  var u=ceilingSlopeUnit(profile.direction);
+  var span=ceilingSlopeSpan(room,u);
+  var range=span.max-span.min;
+  var s=xMm*U*u.x+yMm*U*u.z;
+  var t=range>1e-9?(s-span.min)/range:1;
+  if(t<0) t=0; else if(t>1) t=1;
+  return baseY+profile.lowY+(profile.highY-profile.lowY)*t;
+}
+// 部屋の天井面をグリッドで実測し、最低/最高と「高い側が指す方位」を返す。
+// 屋根由来の天井は棟で折り返すので、式から最高点を解くのではなく面を測る。
+var _roofCeilingExtentCache={};
+function roomRoofCeilingExtent(room){
+  var roof=roomDeclaresSlopedCeiling(room)?roofItemOverRoom(room):null;
+  if(!roof) return null;
+  if(typeof HeightModel==='undefined'||!HeightModel) return null;
+  var shape=HeightModel.ceilingShape(DATA,room);
+  if(!shape||shape.type!=='sloped') return null;
+  // 鍵は結果を決めるものを全部含める。含め忘れると古い天井高が残る。
+  var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
+    roof.id,roof.x,roof.y,roof.w,roof.d,roof.floor,roof.rot,roof.elev,
+    roof.roofType,roof.pitch,roof.flipX?1:0,roof.flipY?1:0,
+    floorBaseY(room.floor),floorBaseY(roof.floor)].join(':');
+  if(_roofCeilingExtentCache[key]) return _roofCeilingExtentCache[key];
+  var profile={source:'roof',roof:roof,lowY:shape.lowMm*U+floorSlabHeightMForFloor(room.floor),
+    baseY:floorBaseY(room.floor)};
+  var baseY=floorBaseY(room.floor);
+  var N=12, i, j, px, py, y;
+  var lowY=Infinity, highY=-Infinity, loPt=null, hiPt=null;
+  for(i=0;i<=N;i++) for(j=0;j<=N;j++){
+    px=room.x+room.w*i/N; py=room.y+room.d*j/N;
+    y=roomCeilingWorldYAtMm(room,profile,px,py)-baseY;
+    if(y<lowY){ lowY=y; loPt=[px,py]; }
+    if(y>highY){ highY=y; hiPt=[px,py]; }
+  }
+  // 矢印は高い側を指す。0=北。平面の +Y は南なので北は -y。
+  var dir=0;
+  if(loPt&&hiPt&&(hiPt[0]!==loPt[0]||hiPt[1]!==loPt[1])){
+    dir=Math.atan2(hiPt[0]-loPt[0],-(hiPt[1]-loPt[1]))*180/Math.PI;
+    if(dir<0) dir+=360;
+  }
+  var res={lowY:lowY,highY:highY,direction:dir,profile:profile};
+  _roofCeilingExtentCache[key]=res;
+  return res;
+}
 var _ceilingClampWarned={};
 // 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
 // 階高でクランプしない: それが「2520mm 以下の天井高がまったく効かない」原因だった。
 // 天井高が階高を超えるときだけ階高へ丸める。階高の側を上げると上階の床が持ち上がり
 // 家全体が変わるため、丸めるのは天井の側。丸めたことは黙らせず警告に残す。
 function roomCeilingHeightM(room){
+  // 屋根から導いた勾配天井は、定義からして階高より上へ伸びる(小屋裏を使うのが
+  // 勾配天井の目的)。ここで階高へ丸めると屋根と天井がまた食い違うので丸めない。
+  // roomCeilingProfile を経由すると手書きの枝から再帰するため、屋根の枝だけを見る。
+  var roofExt=roomRoofCeilingExtent(room);
+  if(roofExt) return roofExt.highY;
   var floor=room&&room.floor;
   var storyM=storyHeightM(floor);
   var mm=roomExplicitCeilingMm(room);
@@ -3748,15 +3879,12 @@ function roomRenderedCeilingMm(room){
 // 低い側も高い側で抑え、クランプで高い側が下がったときに低い側が上を越えないようにする。
 // 勾配を宣言していない部屋では null を返す。既存プランはこの関数の外側を通らない。
 function roomCeilingSlopeM(room){
-  if(!room||typeof HeightModel==='undefined'||!HeightModel) return null;
-  var c=room.ceiling;
-  if(!c||c.type!=='sloped') return null;
-  var shape=HeightModel.ceilingShape(DATA,room);
-  if(!shape||shape.type!=='sloped') return null;
-  var highY=roomCeilingHeightM(room);
-  var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
-  if(lowY>highY) lowY=highY;
-  return {lowY:lowY,highY:highY,direction:shape.direction};
+  var p=roomCeilingProfile(room);
+  if(!p) return null;
+  if(p.source==='manual') return {lowY:p.lowY,highY:p.highY,direction:p.direction,source:'manual'};
+  var ext=roomRoofCeilingExtent(room);
+  if(!ext) return null;
+  return {lowY:ext.lowY,highY:ext.highY,direction:ext.direction,source:'roof'};
 }
 // 平面図のラベルと package.json の記録は、**レンダと同じ経路**で高さを解決する。
 // HeightModel.ceilingShape / ceilingLabel をそのまま呼ぶと、天井高を明示していない
@@ -3776,10 +3904,14 @@ function roomRenderedCeilingShape(room){
   // 傾きが実在するようになったので外した。
   var slope=roomCeilingSlopeM(room);
   if(!slope) return {type:'flat',heightMm:mm};
+  // どちらが効いたか(屋根か、屋根が載っていない部屋のための手書きの上書きか)を
+  // package.json へそのまま残す。判定器と生成AIが天井の出どころを追えるように。
   return {type:'sloped',
     lowMm:Math.round((slope.lowY-floorSlabHeightMForFloor(room&&room.floor))/U),
     highMm:mm,
-    direction:slope.direction};
+    direction:slope.direction,
+    source:slope.source||'manual',
+    roofOffsetMm:slope.source==='roof'?CEILING_UNDER_ROOF_OFFSET_MM:undefined};
 }
 function roomRenderedCeilingLabel(room){
   var shape=roomRenderedCeilingShape(room);
@@ -3821,6 +3953,69 @@ function wallAdjacentRoomsCeiling(w){
     }
   }
   return res;
+}
+// ── 壁の上辺を勾配に沿わせる (Task 12-2) ────────────────────────────────
+// 上辺は**折れ線**である。勾配は壁の途中から始まることがあり(軒側の平天井が
+// 終わるところ)、切妻なら棟で折り返して山形になる。だから台形では足りず、
+// 長さ方向にサンプリングして各点で天井面の高さを引く。
+//
+// この壁が勾配天井の部屋に接しているか。接していなければ null を返し、
+// 呼び出し側は従来の「まっすぐな上辺」の枝をそのまま通る。
+function wallTouchesSlopedCeiling(w){
+  if(!w) return false;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return false;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(r&&roomCeilingProfile(r)) return true;
+    }
+  }
+  return false;
+}
+// 壁の長さ方向の位置 t(0..1) における上辺の高さ(m、その階の floorBaseY 基準)。
+// 両側の部屋のうち**高い方**を採る(既存規則。低い方に合わせると高い側の部屋に
+// 穴が開く)。minH は「これ以上は下げない」下限で、外壁には外皮の高さを渡す
+// -- 外壁を勾配で切ると、下げた部屋の上でファサードに水平のスリットが貫通する。
+function wallTopHeightAtM(w,t,fallbackH,minH){
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var lenMm=Math.sqrt(dx*dx+dy*dy);
+  if(lenMm<1) return fallbackH;
+  var nx=-dy/lenMm, ny=dx/lenMm;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var fy=floorBaseY(w.floor);
+  function sampleAt(tt){
+    var px=w.x1+dx*tt, py=w.y1+dy*tt, best=null, s, r, qx, qy, h;
+    for(s=-1;s<=1;s+=2){
+      qx=px+nx*off*s; qy=py+ny*off*s;
+      r=roomAtPointOnFloor(w.floor,qx,qy);
+      if(!r) continue;
+      h=roomCeilingWorldYAtMm(r,roomCeilingProfile(r),qx,qy)-fy;
+      if(best===null||h>best) best=h;
+    }
+    return best;
+  }
+  var best=sampleAt(t);
+  // 壁は交点(センターライン)まで伸びているので、両端の数十mmはどの部屋にも
+  // 入らない。そこで壁の高さいっぱいへ戻すと、間仕切りの両端に天井を突き抜ける
+  // 出っ張りが残る。内側へ歩いて最初に見つかった部屋の値を延長する。
+  if(best===null){
+    var step=1/32, k, tt;
+    for(k=1;k<=16&&best===null;k++){
+      tt=t+(t<0.5?step*k:-step*k);
+      if(tt<0||tt>1) break;
+      best=sampleAt(tt);
+    }
+  }
+  if(best===null) best=fallbackH;
+  if(minH!==undefined&&best<minH) best=minH;
+  return best;
 }
 // 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
 // 最大値を採る。低い方に合わせて切ると高い側の部屋に穴が開くので、最大値以外は
@@ -10911,6 +11106,25 @@ function makeWallGlassMaterial(){
   });
 }
 
+// ── 壁コアと仕上げ面の隙間 (Task 12-3) ──────────────────────────────────
+// 壁は「コア(Box)」+「外装の板」+「内装の板」で出来ている。板はコアの表面より
+// 外へ出して置く。理由は2つあり、どちらも壊してはいけない:
+//   (1) 板をコアの面とぴったり同一平面に置くと、深度バッファの丸めでZファイト
+//       (ちらつく縞)が出る。 → 板とコアの間に必ず「ゼロでない」間隔が要る。
+//   (2) 重なって描かれた**別の壁同士**の外装面が同一平面に来ると、やはり
+//       Zファイト(白い破線)が出る。 → 壁ごとに極小のジッタを足す。
+var WALL_EXT_FACE_GAP_M=0.006;
+var WALL_INT_FACE_GAP_M=0.012;
+var WALL_FACE_JITTER_M=0.0004;              // 壁ごとのジッタ1段
+function wallFaceJitterM(w){
+  return ((w&&w.id||0)%7)*WALL_FACE_JITTER_M;
+}
+function wallExteriorFaceOffsetM(w){
+  return w.thick*U/2+WALL_EXT_FACE_GAP_M+wallFaceJitterM(w);
+}
+function wallInteriorFaceOffsetM(w){
+  return w.thick*U/2+WALL_INT_FACE_GAP_M+wallFaceJitterM(w);
+}
 function getWallBandRange(w){
   var band=w.wallBand||'full';
   var fullH=wallDisplayHeightM(w);
@@ -10956,6 +11170,29 @@ function buildWall3D(w){
   var bandRange=getWallBandRange(w);
   var wallH=wallDisplayHeightM(w);
   var baseNormalX=-dirZ, baseNormalZ=dirX;
+  // 上辺を勾配に沿わせるのは、勾配天井を宣言した部屋に接している壁だけ。
+  // 宣言していないプランでは slopedTop が false のまま = ジオメトリは1頂点も動かない。
+  var slopedTop=wallTouchesSlopedCeiling(w);
+  // 外壁は下げない。外皮の高さ(階高)を下限にして、上へ(切妻の妻壁のように)しか
+  // 動かさない。過去の実測で、下げた部屋の上でファサードに水平のスリットが貫通した。
+  var slopedTopMinH=isOuter?wallFullHeightM(fl):undefined;
+  // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
+  // 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
+  // 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
+  var WALL_TOP_SAMPLE_STEP_M=0.06;
+  // さらに上へ少しだけ伸ばして、刻みの食い違いで壁と天井のあいだにスリットが
+  // 開く可能性を消す。上へ出た分は天井面に隠れる(下から見えるのは天井の側)。
+  var WALL_TOP_OVERSHOOT_M=0.015;
+  function slopedTopAt(alongM,yBase,h){
+    var t=len>0?alongM/len:0;
+    if(t<0) t=0; else if(t>1) t=1;
+    var top=wallTopHeightAtM(w,t,yBase+h,slopedTopMinH)+WALL_TOP_OVERSHOOT_M;
+    // ピース自身の天端は超えない。まぐさ上の小壁など、天井より下で完結する
+    // ピースはこれで一切影響を受けない。
+    if(top>yBase+h) top=yBase+h;
+    if(top<yBase+0.001) top=yBase+0.001;
+    return top;
+  }
   function addExteriorFace(a,b,yBase,h){
     if(!extMat || !extSpans.length) return;
     extSpans.forEach(function(sp){
@@ -10968,9 +11205,7 @@ function buildWall3D(w){
       applyWallFaceUv(faceGeo,aa,bb,yBase,h,len,wallH);
       var face=new THREE.Mesh(faceGeo,faceMat);
       face.castShadow=true; face.receiveShadow=true;
-      // 壁ごとに面オフセットを僅かにずらし、重なって描かれた壁同士の
-      // 外装面が同一平面でZファイト(白い破線)しないようにする
-      var extOff=w.thick*U/2+0.006+((w.id||0)%7)*0.0004;
+      var extOff=wallExteriorFaceOffsetM(w);
       face.position.set(
         x1+dirX*mid+normalX*extOff,
         fy+yBase+h/2,
@@ -11006,7 +11241,7 @@ function buildWall3D(w){
       applyWallFaceUv(faceGeo,aa,bb,yBase,h,len,wallH);
       var face=new THREE.Mesh(faceGeo,faceMat);
       face.castShadow=true; face.receiveShadow=true;
-      var intOff=w.thick*U/2+0.012+((w.id||0)%7)*0.0004;
+      var intOff=wallInteriorFaceOffsetM(w);
       face.position.set(
         x1+dirX*mid+normalX*intOff,
         fy+yBase+h/2,
@@ -11048,6 +11283,96 @@ function buildWall3D(w){
     kasa.castShadow=true; kasa.receiveShadow=true;
     wallGroup.add(kasa);
   }
+  // 上辺が折れ線になる壁の1ピース。ピースの天端(yBase+h)は超えず、勾配天井が
+  // そこまで下りてきているところだけを切る。開口が天井からはみ出しても検出も
+  // 警告もしない(見れば分かる異常なので、検出の実装ごと省く)。
+  function slopedFaceMesh(aa,bb,yBase,h,offsetM,sign,faceMat){
+    var segs=Math.max(2,Math.min(160,Math.ceil((bb-aa)/WALL_TOP_SAMPLE_STEP_M)));
+    var verts=[], uvs=[], idx=[], i, lx, along, top, p, n;
+    var lz=sign*offsetM;
+    for(i=0;i<=segs;i++){
+      lx=(bb-aa)*i/segs;
+      along=aa+lx;
+      top=slopedTopAt(along,yBase,h);
+      verts.push(lx,yBase,lz, lx,top,lz);
+      // UV は applyWallFaceUv と同じ規約: u=壁の全長に対する位置、v=壁の全高に対する高さ
+      uvs.push(along/len,yBase/wallH, along/len,top/wallH);
+    }
+    for(i=0;i<segs;i++){
+      p=i*2; n=(i+1)*2;
+      if(sign>0) idx.push(p,n,n+1, p,n+1,p+1);
+      else       idx.push(p,n+1,n, p,p+1,n+1);
+    }
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    var face=new THREE.Mesh(geo,faceMat);
+    face.castShadow=true; face.receiveShadow=true;
+    face.position.set(x1+dirX*aa,fy,z1+dirZ*aa);
+    face.rotation.y=rotY;
+    return face;
+  }
+  function addSlopedTopWallPiece(a,b,yBase,h){
+    var thick=w.thick*U;
+    // 端の6mm延長は箱の枝と同じ理由(突き付け接合の浮動小数点誤差でスリットが透ける)
+    var coreA=a, coreB=b;
+    if(a<=0.002) coreA-=0.006;
+    if(b>=len-0.002) coreB+=0.006;
+    var segs=Math.max(2,Math.min(160,Math.ceil((coreB-coreA)/WALL_TOP_SAMPLE_STEP_M)));
+    var verts=[], idxBody=[], idxTop=[], si, lx, top, p, n;
+    for(si=0;si<=segs;si++){
+      lx=(coreB-coreA)*si/segs;
+      top=slopedTopAt(coreA+lx,yBase,h);
+      verts.push(lx,yBase,-thick/2, lx,yBase,thick/2, lx,top,-thick/2, lx,top,thick/2);
+    }
+    for(si=0;si<segs;si++){
+      p=si*4; n=(si+1)*4;
+      idxBody.push(p+0,n+0,n+1, p+0,n+1,p+1);   // 底
+      idxBody.push(p+0,p+2,n+2, p+0,n+2,n+0);   // -側面
+      idxBody.push(p+1,n+1,n+3, p+1,n+3,p+3);   // +側面
+      idxTop.push(p+2,p+3,n+3, p+2,n+3,n+2);    // 天端は断面材(箱の枝の capMat と同じ理由)
+    }
+    var first=0, last=segs*4;
+    idxBody.push(first+0,first+1,first+3, first+0,first+3,first+2);
+    idxBody.push(last+0,last+2,last+3, last+0,last+3,last+1);
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    geo.setIndex(idxBody.concat(idxTop));
+    geo.addGroup(0,idxBody.length,0);
+    geo.addGroup(idxBody.length,idxTop.length,1);
+    geo.computeVertexNormals();
+    var mesh=new THREE.Mesh(geo,[mat,capMat]);
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    mesh.position.set(x1+dirX*coreA,fy,z1+dirZ*coreA);
+    mesh.rotation.y=rotY;
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
+    wallGroup.add(mesh);
+    if(extMat&&extSpans.length){
+      extSpans.forEach(function(sp){
+        var aa=Math.max(a,sp.a), bb=Math.min(b,sp.b);
+        if(bb-aa<0.004) return;
+        var face=slopedFaceMesh(aa,bb,yBase,h,wallExteriorFaceOffsetM(w),sp.sign,
+          makeExteriorWallMaterial(w,fl,len,sp));
+        face.userData.exteriorFace=true;
+        markInteriorCutawayCandidate(face,w,sp.sign,0);
+        face.userData.noMerge=true;
+        wallGroup.add(face);
+      });
+    }
+    getWallInteriorFaces(w).forEach(function(faceInfo){
+      var aa=Math.max(a,faceInfo.a), bb=Math.min(b,faceInfo.b);
+      if(bb-aa<0.004) return;
+      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=faceInfo.fillStartM;
+      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=faceInfo.fillEndM;
+      var face=slopedFaceMesh(aa,bb,yBase,h,wallInteriorFaceOffsetM(w),faceInfo.sign,
+        makeInteriorWallMaterial(w,len,faceInfo));
+      face.userData.interiorFace=true;
+      if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
+      wallGroup.add(face);
+    });
+  }
   function addWallPiece(a,b,yBase,h){
     var segLen=b-a;
     if(segLen<0.03||h<0.03) return;
@@ -11063,6 +11388,11 @@ function buildWall3D(w){
     }
     if(hasWallTopShape(w) && yBase<=0.001 && Math.abs(h-bandRange.height)<0.001){
       addShapedWallPiece(a,b,yBase,h);
+      return;
+    }
+    // 勾配天井の部屋に接している壁だけ、上辺を折れ線にする枝へ入る。
+    if(slopedTop){
+      addSlopedTopWallPiece(a,b,yBase,h);
       return;
     }
     // BoxGeometry の材質配列は [+x,-x,+y(上面),-y(底面),+z,-z] の順。上下面だけ capMat にする
@@ -14577,25 +14907,32 @@ function ceilingSlopeSpan(r,u){
   return {min:min,max:max};
 }
 // 勾配天井の面。平らな枝とは別の道を通る（平らなプランのジオメトリを動かさない）。
-function buildSlopedCeilingGeometry(r,holes,slope,baseY){
+// 屋根から導いた天井は棟で折り返す(=一次関数ではない)ので、面を格子に割って
+// 各頂点で天井面の高さを引く。手書きの勾配は今までどおり一次関数なので分割しない
+// -- 分割すると既に勾配天井を宣言しているプランのジオメトリまで変わる。
+// 天井面のサンプリング間隔(m)。屋根の折れ(棟・隅棟)をこの刻みで近似する。
+var CEILING_SAMPLE_STEP_M=0.12;
+function buildSlopedCeilingGeometry(r,holes,profile){
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   var geo;
   if(!holes||!holes.length){
-    geo=new THREE.PlaneGeometry(rw,rd);
+    var segX=1, segZ=1;
+    if(profile.source==='roof'){
+      segX=Math.max(1,Math.min(96,Math.ceil(rw/CEILING_SAMPLE_STEP_M)));
+      segZ=Math.max(1,Math.min(96,Math.ceil(rd/CEILING_SAMPLE_STEP_M)));
+    }
+    geo=new THREE.PlaneGeometry(rw,rd,segX,segZ);
     geo.rotateX(-Math.PI/2);
     geo.translate(rcx,0,rcz);           // 頂点を世界の x/z へ揃える
   } else {
+    // 吹き抜けの穴があるときは ShapeGeometry の頂点を上下させるだけに留める
+    // (輪郭と穴の角でしか屋根を拾えない近似)。勾配天井 + 階段の吹き抜けは稀で、
+    // ここに三角形分割を持ち込むと平らな枝と輪郭生成を共有できなくなる。
     geo=buildRoomCeilingShapeGeometry(r,holes);   // こちらは既に世界の x/z
   }
-  var u=ceilingSlopeUnit(slope.direction);
-  var span=ceilingSlopeSpan(r,u);
-  var range=span.max-span.min;
-  var pos=geo.attributes.position, i, s, t;
+  var pos=geo.attributes.position, i;
   for(i=0;i<pos.count;i++){
-    s=pos.getX(i)*u.x+pos.getZ(i)*u.z;
-    t=range>1e-9?(s-span.min)/range:1;
-    if(t<0) t=0; else if(t>1) t=1;
-    pos.setY(i,baseY+slope.lowY+(slope.highY-slope.lowY)*t);
+    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-0.012);
   }
   pos.needsUpdate=true;
   geo.computeVertexNormals();
@@ -14619,13 +14956,12 @@ function buildRoomCeilingShapeGeometry(r,holes){
 // ウォークスルー／外観でのみ表示する。階段位置には床と同じ開口を設ける。
 // slope が渡された部屋だけが勾配の枝を通る。渡されなければ従来の経路そのままで、
 // 高さフィールドを持たないプランのジオメトリは1頂点も動かない。
-function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,slope){
+function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,profile){
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   var ceiling;
-  if(slope){
-    // ceilY は高い側（roomCeilingHeightM）なので、床の基準面へ戻して渡す。
-    ceiling=new THREE.Mesh(
-      buildSlopedCeilingGeometry(r,holes,slope,ceilY-slope.highY-0.012),matCeiling);
+  if(profile){
+    // 頂点は世界座標で組み立てるので mesh 自体は原点のまま。
+    ceiling=new THREE.Mesh(buildSlopedCeilingGeometry(r,holes,profile),matCeiling);
   } else if(!holes||!holes.length){
     ceiling=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeiling);
     ceiling.rotation.x=-Math.PI/2;
@@ -14703,7 +15039,7 @@ function buildRooms3D(flFilt){
       }
       var ceilingHoles=stairwellHolesForRoom(r,ceilingStairQuadsByFloor);
       // 勾配を宣言していない部屋では null。従来の平らな枝をそのまま通る。
-      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles,roomCeilingSlopeM(r)));
+      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles,roomCeilingProfile(r)));
     }
 
 	    // Ceiling downlights
