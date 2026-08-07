@@ -5844,16 +5844,33 @@ function planSubjectFrameRatio(bounds,view,W,H){
   var y0=view.panY+bounds.minY*sc, y1=view.panY+bounds.maxY*sc;
   var w=Math.max(0,Math.min(W,x1)-Math.max(0,x0));
   var h=Math.max(0,Math.min(H,y1)-Math.max(0,y0));
-  return (w*h)/(W*H);
+  // 面積比ではなく**長い方の軸の占有率**で見る。面積比は縦横比に引きずられる:
+  // 縦長のフレーム(スマホ縦持ち)に横長の家を正しく fit しても、面積では
+  // 2〜3割にしかならず、正しく合わせた構図まで落としてしまう。
+  // このアプリは house-planner **mobile** であり、縦持ちは主要な使い方なので、
+  // そこで必ず失敗する検査は使えない。fit すれば主題はどちらかの軸をほぼ
+  // 埋めるので、長い方の軸の占有率で「大きさが足りているか」を判定できる。
+  return Math.max(w/W,h/H);
 }
-// 生成AIに渡してよい下限。**実測で決めた**（assets/default_plan.json / 1400x900）:
-//   直す前（保存されたパン・ズームのまま）  1F 0.199 / 2F 0.173 / 3F 0.175
-//   fit した後                              1F 0.722 / 2F 0.714 / 3F 0.795
-// 0.35 は不良の最大 (0.199) の約1.8倍、正常の最小 (0.714) の約半分。
-// 縦長のフレーム（スマホ縦持ち）に横長の家を fit すると、正しく合わせても
-// この線に近づく。そのときは**落とす方を選ぶ**: 生成のやり直しは1回ぶんだが、
-// 主題が2割の参照は生成そのものを無駄にする。
-var PLAN_SUBJECT_MIN_FRAME_RATIO=0.35;
+// 「大きさが足りているか」と「切れていないか」は別の問いである。軸の占有率だけ
+// では、縦いっぱいに写っていて横が半分切れている絵を通してしまう。壁が切れた
+// 平面図は、大きく写っていても参照として成立しない。投影した箱がフレームから
+// はみ出していないかを独立に見る。
+function planSubjectClipped(bounds,view,W,H){
+  if(!bounds||!view||!(W>0)||!(H>0)) return true;
+  var sc=view.zoom*0.05;
+  var x0=view.panX+bounds.minX*sc, x1=view.panX+bounds.maxX*sc;
+  var y0=view.panY+bounds.minY*sc, y1=view.panY+bounds.maxY*sc;
+  var EPS=0.5; // 端ちょうどを切れ扱いにしない
+  return x0<-EPS||y0<-EPS||x1>W+EPS||y1>H+EPS;
+}
+// 生成AIに渡してよい下限。長い方の軸の占有率で見る（planSubjectFrameRatio 参照）。
+// fit した主題はどちらかの軸をほぼ埋めるので、fit が効いていれば 0.9 前後になる。
+// 逆に、保存されたパン・ズームのままだと軸方向でも大きく下回る。
+// 0.6 は「fit が効いている」と「合っていない」を分ける線として取る。
+// 面積比の頃の実測値（1400x900・面積比）: 未 fit 1F 0.199 / 2F 0.173 / 3F 0.175、
+// fit 後 1F 0.722 / 2F 0.714 / 3F 0.795。軸で測ればどちらの側もさらに離れる。
+var PLAN_SUBJECT_MIN_FRAME_RATIO=0.6;
 // 最後に撮った平面図の座標系。撮影中だけ変えたパン・ズーム・倍率を、撮った画像を
 // 画素で調べる側（プレースホルダ検出・構図の検査）へ渡すために残す。
 var PLAN_CAPTURE_VIEW=null;
@@ -18529,10 +18546,16 @@ async function generateVideoRenderPackage(options){
     var planBounds=planSubjectBoundsMm(planFloor);
     var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
     if(planRatio<PLAN_SUBJECT_MIN_FRAME_RATIO){
-      throw new Error('平面図の中で家がフレームの '+Math.round(planRatio*1000)/10+
+      throw new Error('平面図の中で家が長い方の軸の '+Math.round(planRatio*1000)/10+
         '% しか占めていません（下限 '+Math.round(PLAN_SUBJECT_MIN_FRAME_RATIO*100)+
         '%）。主題が小さい参照を渡すと、生成AIはほとんど空の映像を返します。'+
-        'ウィンドウを横長に広げるか、この階に設計要素があるか確かめてください。');
+        'この階に設計要素があるか確かめてください。');
+    }
+    // 大きさが足りていても、切れていれば参照にならない。壁が切れた平面図から
+    // 生成すると、生成AIはそこに無い壁を発明する。
+    if(planSubjectClipped(planBounds,planView,planIm.width,planIm.height)){
+      throw new Error('平面図の中で家がフレームからはみ出しています。'+
+        '切れた壁のある参照を渡すと、生成AIは切れた先を自分で作ります。');
     }
     var planPh=findPlanPlaceholderInstances(planIm,planFloor,planView);
     if(planPh.length) throw planPlaceholderError(planPh,planTop);

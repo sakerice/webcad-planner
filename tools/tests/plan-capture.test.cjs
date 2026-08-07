@@ -128,7 +128,8 @@ function geometryWith(data) {
     topLevelFunction('isPlanSubjectObject'),
     topLevelFunction('planSubjectBoundsMm'),
     topLevelFunction('planFitViewFor'),
-    topLevelFunction('planSubjectFrameRatio')
+    topLevelFunction('planSubjectFrameRatio'),
+    topLevelFunction('planSubjectClipped')
   ], { DATA: data });
 }
 const PLAN = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
@@ -177,13 +178,15 @@ test('fit した構図では、実データの主題がフレームの過半を�
   });
 });
 
-test('保存されたパン・ズームのままでは主題は2割弱しか占めない（＝これが直す不良）', () => {
+test('保存されたパン・ズームのままでは主題が下限を下回る（＝これが直す不良）', () => {
   const g = geometryWith(PLAN);
   const saved = PLAN.viewState.twoD;
   const b = g.planSubjectBoundsMm(2);
   const r = g.planSubjectFrameRatio(b, saved, FRAME.w, FRAME.h);
-  // Task 7b の実測は 15%。同じ視点から幾何で測ると 17.3%。
-  assert.ok(r < 0.25, '保存視点の占有率が高すぎる（不良を再現できていない）: ' + r);
+  // 面積比では 17.3%、長い方の軸では 46.2%。どちらでも下限 (0.6) を下回るが、
+  // 軸で測るのは面積比が縦横比に引きずられるため（縦持ちのフレームに横長の家を
+  // 正しく合わせても面積では2〜3割にしかならず、正しい構図まで落としてしまう）。
+  assert.ok(r < 0.6, '保存視点の占有率が高すぎる（不良を再現できていない）: ' + r);
 });
 
 test('小さすぎるを判定する閾値が、実測の失敗と実測の成功の間にある', () => {
@@ -198,7 +201,7 @@ test('小さすぎるを判定する閾値が、実測の失敗と実測の成�
   assert.ok(t < good, '閾値が実測の正常 (' + good.toFixed(4) + ') を落としてしまう');
 });
 
-test('フレームからはみ出した分は主題の面積に数えない', () => {
+test('フレームからはみ出していれば、大きく写っていても見切れとして弾く', () => {
   const g = geometryWith({
     walls: [], items: [],
     rooms: [{ id: 'r', type: 'room', x: 0, y: 0, w: 10000, d: 10000, floor: 1 }]
@@ -206,10 +209,12 @@ test('フレームからはみ出した分は主題の面積に数えない', ()
   const b = g.planSubjectBoundsMm(1);
   // 主題がちょうどフレーム全面を覆う視点を作り、そこから右へ半分ずらす。
   const full = g.planFitViewFor(b, 1000, 1000);
-  const inside = g.planSubjectFrameRatio(b, full, 1000, 1000);
-  const half = g.planSubjectFrameRatio(b, { panX: full.panX + 500, panY: full.panY, zoom: full.zoom }, 1000, 1000);
-  assert.ok(Math.abs(half - inside / 2) < 0.01,
-    '見切れを数えている: 全体 ' + inside.toFixed(4) + ' / 半分 ' + half.toFixed(4));
+  const shifted = { panX: full.panX + 500, panY: full.panY, zoom: full.zoom };
+  // 軸の占有率では見切れを検出できない: 縦は埋まったままなので値が動かない。
+  // だからこそ見切れは独立に判定する。片方だけに任せるとどちらかを見逃す。
+  assert.ok(!g.planSubjectClipped(b, full, 1000, 1000), '収まっているのに見切れ判定');
+  assert.ok(g.planSubjectClipped(b, shifted, 1000, 1000),
+    '半分はみ出しているのに見切れと判定されない');
 });
 
 test('fit は主題をフレームの中央に置く', () => {
