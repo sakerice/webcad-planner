@@ -261,3 +261,24 @@ test('平面図の撮影倍率は3D経路と同じ計算から出る（表を2�
                          html.indexOf('function captureCurrent3DDataUrl') + 1600);
   assert.match(cap, /aiCaptureBoostedRatio\(/);
 });
+
+// 変異テストで見つかった穴。「未 fit なら下限を下回る」だけを見ていると、
+// 面積比に戻しても同じ値域なのでテストが通ってしまう(実測: 面積 0.173 /
+// 軸 0.462、下限 0.6 のどちら側でもない)。軸で測ることの意味は
+// **縦横比に引きずられないこと**にあるので、そこを直接固定する。
+// このアプリは house-planner mobile であり、縦持ちのフレームに横長の家を
+// 正しく合わせた構図が落とされてはならない。
+test('縦長フレームに横長の家を正しく合わせた構図は、下限を超える', () => {
+  const g = geometryWith({
+    walls: [], items: [],
+    rooms: [{ id: 'r', type: 'room', x: 0, y: 0, w: 9000, d: 3000, floor: 1 }]
+  });
+  const b = g.planSubjectBoundsMm(1);
+  const W = 400, H = 900;                    // スマホ縦持ち相当
+  const view = g.planFitViewFor(b, W, H);
+  const r = g.planSubjectFrameRatio(b, view, W, H);
+  assert.ok(!g.planSubjectClipped(b, view, W, H), 'fit したのに見切れ判定');
+  assert.ok(r >= 0.6,
+    '正しく合わせた縦持ちの構図が下限を下回った: ' + r.toFixed(4) +
+    '（面積比で測るとここが落ちる）');
+});
