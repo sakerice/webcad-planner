@@ -7872,13 +7872,27 @@ function drawWallHandles(w){
   ctx.restore();
 }
 
+// 端点を掴んでいれば端点だけ、線上を掴んでいれば壁1本の平行移動。
+// 端点の判定を先に見るので、端の近くでは今までどおり端点が勝つ。
 function hitWallHandle(w,cx,cy){
   var a=w2c(w.x1,w.y1), b=w2c(w.x2,w.y2);
   if(Math.hypot(cx-a.cx,cy-a.cy)<12) return 'wall-a';
   if(Math.hypot(cx-b.cx,cy-b.cy)<12) return 'wall-b';
+  var dx=b.cx-a.cx, dy=b.cy-a.cy;
+  var l2=dx*dx+dy*dy;
+  if(l2<1) return null;
+  var t=((cx-a.cx)*dx+(cy-a.cy)*dy)/l2;
+  if(t<0) t=0; else if(t>1) t=1;
+  var px=a.cx+dx*t, py=a.cy+dy*t;
+  // しきい値は「線の見た目の太さ」に合わせる。壁厚は画面上で ST.zoom*0.05 px/mm。
+  var halfPx=wallThicknessMm(w)/2*(ST.zoom*0.05);
+  if(Math.hypot(cx-px,cy-py)<=Math.max(10,halfPx+4)) return 'wall-move';
   return null;
 }
 
+// 壁を置ける角度の刻み[度]。直角(0/90/180/270)はこの刻みの倍数なので、
+// 直角だけを使ってきたプランの操作感は変わらない。
+var WALL_ANGLE_STEP_DEG=15;
 function getWallAxisSnapThreshold(){
   return Math.max(EDGE_SNAP_THRESH||80, ST.snap ? ST.snap*3 : 30);
 }
@@ -7943,16 +7957,36 @@ function snapWallAnglePoint(anchor, point, e, opts){
   var p={x:sx.snapped?sx.value:point.x,y:sy.snapped?sy.value:point.y};
   var dx=p.x-anchor.x, dy=p.y-anchor.y;
   if(Math.abs(dx)<1 && Math.abs(dy)<1) return p;
-  if(Math.abs(dx)>=Math.abs(dy)){
+  // 角度は WALL_ANGLE_STEP_DEG 刻み。直角(0/90/180/270)はその刻みに含まれるので、
+  // 直角に置きたいときの操作感は変わらない。直角のときだけは従来どおり
+  // 「相手の壁の端点へ吸い付く」処理を通す -- 通し柱の芯を合わせるための機能で、
+  // 斜めの壁には対応する候補が無い。
+  var deg=Math.atan2(dy,dx)*180/Math.PI;
+  var stepped=Math.round(deg/WALL_ANGLE_STEP_DEG)*WALL_ANGLE_STEP_DEG;
+  var norm=((stepped%360)+360)%360;
+  if(norm===0||norm===180){
     var ex=snapNumberToWallCandidates(point.x,cands.endpointX,thresh);
     p.x=ex.snapped?ex.value:snapV(point.x);
     p.y=anchor.y;
-  } else {
+    return p;
+  }
+  if(norm===90||norm===270){
     p.x=anchor.x;
     var ey=snapNumberToWallCandidates(point.y,cands.endpointY,thresh);
     p.y=ey.snapped?ey.value:snapV(point.y);
+    return p;
   }
-  return p;
+  // 斜め: 長さだけをグリッドに乗せ、角度は刻みちょうどに保つ。
+  // 座標を丸めてから角度を作ると刻みからずれるので、丸めるのは長さの側。
+  var rad=norm*Math.PI/180;
+  var len=Math.max(0,snapV(Math.sqrt(dx*dx+dy*dy)));
+  return {x:anchor.x+len*Math.cos(rad),y:anchor.y+len*Math.sin(rad)};
+}
+// 壁1本を平行移動する。端点ではなく線上を掴んでいるときのドラッグ。
+function applyWallTranslate(w,orig,dxMm,dyMm){
+  var sx=snapV(dxMm), sy=snapV(dyMm);
+  w.x1=orig.x1+sx; w.y1=orig.y1+sy;
+  w.x2=orig.x2+sx; w.y2=orig.y2+sy;
 }
 
 function applyWallDrag(cx,cy,e){
@@ -7960,6 +7994,13 @@ function applyWallDrag(cx,cy,e){
   if(!w||!DRAG.origItem) return;
   if(isObjectLocked(w)){ DRAG.active=false; return; }
   if(!DRAG.saved){saveState();DRAG.saved=true;}
+  if(DRAG.handle==='wall-move'){
+    var scale=ST.zoom*0.05;
+    applyWallTranslate(w,DRAG.origItem,(cx-DRAG.startCX)/scale,(cy-DRAG.startCY)/scale);
+    ST._snapState=null;
+    updateProps();
+    return;
+  }
   var p=c2w(cx,cy), sx=snapV(p.x), sy=snapV(p.y);
   var fixed=DRAG.handle==='wall-a'?{x:DRAG.origItem.x2,y:DRAG.origItem.y2}:{x:DRAG.origItem.x1,y:DRAG.origItem.y1};
   var snapped=snapWallAnglePoint(fixed,{x:sx,y:sy},e,{floor:w.floor,excludeWall:w,thickness:wallThicknessMm(w)});
@@ -8018,7 +8059,7 @@ function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
   if(isObjectLocked(it)){ DRAG.active=false; return; }
-  if(h==='wall-a'||h==='wall-b'){applyWallDrag(cx,cy,e);return;}
+  if(h==='wall-a'||h==='wall-b'||h==='wall-move'){applyWallDrag(cx,cy,e);return;}
   if(!DRAG.saved){saveState(); DRAG.saved=true;}
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
   var onMobile=isMobileLayout();
