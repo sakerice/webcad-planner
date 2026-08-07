@@ -14517,6 +14517,16 @@ function makeCeilingMaterial(){
   }
   return new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide});
 }
+// 部屋に照明が1つも置かれていないときにレンダが自動で足す天井器具。
+// ユーザーが設計として置いたものではないので、部材ガイドの legend でもそう名乗る
+// （名乗らないと 'render-object' = 未分類のまま LOCKED に落ち、生成AIは
+// 「光はAIの裁量」という原則に反してこの器具を固定させられる）。
+function makeAutoLightFixtureMesh(fixMat,x,y,z){
+  var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
+  fix.position.set(x,y,z);
+  fix.userData={b:true,aiInstanceType:'auto-light-fixture'};
+  return fix;
+}
 // 実体の天井面。編集用の内観3Dでは上から部屋を操作できるよう生成せず、
 // ウォークスルー／外観でのみ表示する。階段位置には床と同じ開口を設ける。
 function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
@@ -14545,7 +14555,13 @@ function buildRoomCeilingMesh(r,ceilY,matCeiling,holes){
   // 差し替える方式では静かに元へ戻ってしまう。
   var pvOccluder=!!(PV_INTERIOR_DAYLIGHT&&isInt);
   ceiling.castShadow=pvOccluder; ceiling.receiveShadow=!pvOccluder;
-  ceiling.userData={b:true,ceiling:true,ceilingOccluder:pvOccluder,roomId:r.id};
+  // 部材ガイドの legend に載る種別。設計要素を指す selectRef を持たないメッシュは
+  // 既定で 'render-object' (=未分類) として legend へ出ていた。天井面は
+  // 「部屋の上面」という設計そのものなので、発生源で名乗らせる。
+  // selectKind ではなく専用の鍵にするのは、selectKind が選択・移動の意味を持つ
+  // ためで、天井をクリックで掴めるようにするのはここでの意図ではない。
+  ceiling.userData={b:true,ceiling:true,ceilingOccluder:pvOccluder,roomId:r.id,
+    aiInstanceType:'ceiling'};
   return ceiling;
 }
 function buildRooms3D(flFilt){
@@ -14619,8 +14635,7 @@ function buildRooms3D(flFilt){
 	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
 	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
 	        if(showAutoLightFixtures){
-	          var fix=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.025,12),fixMat);
-	          fix.position.set(lx,ceilY-0.013,lz); fix.userData={b:true}; sc3.add(fix);
+	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,ceilY-0.013,lz));
 	        }
 	        var pl=new THREE.PointLight(0xffffff,roomInt*autoDim*Math.PI,6.0,1.8);
 	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
@@ -17525,6 +17540,20 @@ function aiRefSource(ref,kind){
   }
   return {collection:kind||'render-object',index:-1};
 }
+// 部材ガイドの legend に載る「この物体は何か」。設計要素を指す selectRef を持つ
+// メッシュはそちらから種別が取れるので、ここは ref を持たないメッシュのための道。
+// aiInstanceType は「ref は無いが何であるかは分かっている」ものが発生源で名乗る鍵
+// （部屋の天井面・自動照明器具）。selectKind を使わないのは、あれが選択・移動の
+// 意味を持つためで、天井をクリックで掴めるようにするのはここでの意図ではない。
+// ここまで来て何も名乗らなかったものだけが 'render-object' = **未分類** であり、
+// LockTiers の未知の既定 (LOCKED) に落ちる。この名前に札を付けてはならない。
+function aiInstanceKindFor(o,groundMesh){
+  var ud=o&&o.userData;
+  if(ud&&ud.aiInstanceType) return ud.aiInstanceType;
+  if(ud&&ud.selectKind) return ud.selectKind;
+  if(groundMesh&&o===groundMesh) return 'outside-ground';
+  return 'render-object';
+}
 function aiInstanceSummary(ref,kind,id,color){
   var src=aiRefSource(ref,kind);
   // 設計要素を持たないメッシュは entryFor(ref||o, kind) で three.js のオブジェクトが
@@ -17605,7 +17634,7 @@ function captureInstance3DData(){
         o.material=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,toneMapped:false});
       }else{
         var ref=o.userData&&o.userData.selectRef;
-        var kind=(o.userData&&o.userData.selectKind)||(o===_gndMesh?'outside-ground':'render-object');
+        var kind=aiInstanceKindFor(o,_gndMesh);
         o.material=new THREE.MeshBasicMaterial({color:entryFor(ref||o,kind).color,side:THREE.DoubleSide,toneMapped:false});
       }
     });

@@ -263,6 +263,7 @@ function ceilingYsFor(data, floor) {
     stairwellQuadsForFloor: function () { return []; },
     stairwellHolesForRoom: function () { return []; },
     mark3DSelectable: function () {},
+    makeAutoLightFixtureMesh: noop,
     sc3: { add: function () {} },
     THREE: {
       Mesh: noop, PointLight: noop, CylinderGeometry: noop,
