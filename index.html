@@ -3752,11 +3752,12 @@ function roomRenderedCeilingMm(room){
 // いるので、このずれはそのまま嘘になる。形(平ら/勾配)と文字の組み立ては
 // HeightModel の1か所に任せ、**数値だけ**をレンダ側から取る。
 function roomRenderedCeilingShape(room){
-  var shape=HeightModel.ceilingShape(DATA,room);
   var mm=roomRenderedCeilingMm(room);
-  // 勾配天井はレンダが今なお高い側で平らに置く(Task 2c 未了)。低い側は
-  // HeightModel の値のまま残し、レンダが実際に置いた高い側だけ実寸に直す。
-  if(shape.type==='sloped') return {type:'sloped',lowMm:shape.lowMm,highMm:mm,direction:shape.direction};
+  // 勾配天井をレンダはまだ作れず、高い側の高さで**平らに**置く(Task 2c 未了)。
+  // それでも 'sloped' と書くと、ラベルは「CH 2200-2520 ↗」のように
+  // **存在しない傾き**を生成AIへ約束することになる。低い側 2200 はどこにも
+  // 無い。レンダが平らにしか作れないあいだは、平らな高さだけを言う。
+  // (A) で実際に傾けられるようになったら、この抑制を外して範囲と向きへ戻す。
   return {type:'flat',heightMm:mm};
 }
 function roomRenderedCeilingLabel(room){

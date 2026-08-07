@@ -227,18 +227,33 @@ test('天井高を明示した部屋では、ラベルはその値を言う（�
   assert.equal(b.roomRenderedCeilingLabel(b.DATA.rooms[0]), 'CH 2300');
 });
 
-test('勾配天井は形を保ったまま、高い側だけレンダの実寸に直る', () => {
-  const g = heights({
+// Task 11-3(B): レンダが平らにしか作れないあいだ、ラベルは平らな高さだけを言う。
+// これは以前ここで固定していた 'CH 2200-2700 ↑' の**撤回**である。低い側の 2200 は
+// 3Dのどこにも無く、矢印が指す傾きも存在しなかった。設計 §12.2 はこのラベルを
+// 「生成AIが空間の高さを知る唯一の手がかり」と定義しているので、そのずれは嘘になる。
+function slopedHouse(lowMm, highMm, direction, floor) {
+  return {
     floors: {}, items: [], walls: [],
-    rooms: [{ id: 's', floor: 1, x: 0, y: 0, w: 4000, d: 3000,
-              ceiling: { type: 'sloped', lowMm: 2200, highMm: 4000, direction: 0 } }]
-  });
-  const shape = g.roomRenderedCeilingShape(g.DATA.rooms[0]);
-  assert.equal(shape.type, 'sloped');
-  assert.equal(shape.lowMm, 2200);
-  // 4000 は階高 2700 を超えるのでレンダは 2700 に丸める。ラベルもそう言う。
-  assert.equal(shape.highMm, 2700);
-  assert.equal(g.roomRenderedCeilingLabel(g.DATA.rooms[0]), 'CH 2200-2700 ↑');
+    rooms: [{ id: 's', floor: floor || 1, x: 0, y: 0, w: 4000, d: 3000,
+              ceiling: { type: 'sloped', lowMm: lowMm, highMm: highMm,
+                         direction: direction } }]
+  };
+}
+
+test('勾配天井のラベルは、平らに作られているあいだ範囲と矢印を書かない', () => {
+  const g = heights(slopedHouse(2200, 4000, 0));
+  const room = g.DATA.rooms[0];
+  const shape = g.roomRenderedCeilingShape(room);
+  const label = g.roomRenderedCeilingLabel(room);
+  // データ側は依然として勾配を宣言している（宣言を消したのではない）
+  assert.equal(HeightModel.ceilingShape(g.DATA, room).type, 'sloped');
+  assert.equal(HeightModel.ceilingLabel(g.DATA, room), 'CH 2200-4000 ↑');
+  // レンダが実際に置いた形は平ら。ラベルもそう言う。
+  assert.equal(shape.type, 'flat', 'レンダは平らにしか作れないのに sloped と書いている');
+  assert.equal(shape.heightMm, 2700, '4000 は階高 2700 を超えるのでレンダは丸める');
+  assert.equal(label, 'CH 2700');
+  assert.doesNotMatch(label, /-/, '存在しない低い側を書いている: ' + label);
+  assert.doesNotMatch(label, /[↑↗→↘↓↙←↖]/, '存在しない傾きの向きを書いている: ' + label);
 });
 
 // ── Task 2: buildRooms3D が置く天井の高さ ────────────────────────────────
