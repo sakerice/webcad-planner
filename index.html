@@ -3724,6 +3724,42 @@ var CEILING_UNDER_ROOF_OFFSET_MM=250;
 function roomDeclaresSlopedCeiling(room){
   return !!(room&&room.ceiling&&room.ceiling.type==='sloped');
 }
+// ── 勾配天井が成立する階 (Task 14) ──────────────────────────────────────
+// 勾配天井は「天井を吊るのをやめ、屋根裏側へ抜ける」形である。だから上に床が
+// 載っている階では作れない。3階建ての1階に勾配天井は無い -- そこにあるのは屋根
+// ではなく2階の床だから。
+//
+// 「最上階」を **階番号の最大** で決めてはいけない。2階建てに平屋の下屋が付いた
+// 家では、下屋(1階)の部屋の上には何も無いので勾配天井が成立する。判定は必ず
+// **その部屋の真上に部屋があるか** で行う。部屋は床スラブそのもの
+// (buildRoomFloorMeshes が部屋ごとにスラブを建てる)なので、部屋を見れば床を見た
+// ことになる。部屋は回転を持たない(すべて軸平行の矩形)ので重なりは矩形交差でよい。
+//
+// 少しでも重なっていれば「上に部屋がある」とみなす。一部だけ覆われた部屋に勾配を
+// 許すと、覆われた側で天井が上階の床を突き抜ける。
+var ROOM_OVERLAP_EPS_MM=1;
+function roomsOverlapInPlan(a,b){
+  return a.x+a.w>b.x+ROOM_OVERLAP_EPS_MM && b.x+b.w>a.x+ROOM_OVERLAP_EPS_MM &&
+         a.y+a.d>b.y+ROOM_OVERLAP_EPS_MM && b.y+b.d>a.y+ROOM_OVERLAP_EPS_MM;
+}
+// この部屋を覆っている上階の部屋。無ければ null(=その部屋の上は屋根裏)。
+// 複数該当するときは一番下の階のものを返す -- 画面で理由を言うときに、
+// すぐ上に何があるかを名指しできるように。
+function roomAboveRoom(room){
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
+  var f=(room.floor||1), best=null, i, r;
+  for(i=0;i<DATA.rooms.length;i++){
+    r=DATA.rooms[i];
+    if(!r||r===room||r.hidden3D) continue;
+    if((r.floor||1)<=f) continue;
+    if(!roomsOverlapInPlan(room,r)) continue;
+    if(!best||(r.floor||1)<(best.floor||1)) best=r;
+  }
+  return best;
+}
+function roomHasRoomAbove(room){
+  return !!roomAboveRoom(room);
+}
 // 屋根アイテムの footprint が平面上のこの点を覆っているか。回転・フリップは
 // roofLocalPoint が既に持っているので、ローカル座標で矩形に入るかだけを見る
 // (isInsideItem は建具の当たり判定の余白を持っており、屋根の輪郭とは別物)。
@@ -3737,6 +3773,10 @@ function roofCoversPlanPoint(it,xMm,yMm){
 // 複数該当するときは棟が低い方を採る -- 先に頭を押さえるのはそちらだから。
 function roofItemOverRoom(room){
   if(!room||typeof DATA==='undefined'||!DATA||!DATA.items) return null;
+  // 上に部屋がある階では、屋根は「上にある」ものではない -- あいだに床がある。
+  // これが無いと、屋根の階だけを見ていないせいで、既定プラン(部屋1〜3階・屋根3階と
+  // 4階)の1階の部屋が2階分上の屋根から天井をもらう。
+  if(roomHasRoomAbove(room)) return null;
   var cx=room.x+room.w/2, cy=room.y+room.d/2;
   var floorY=floorTopY(room.floor);
   var best=null, bestApex=Infinity;
@@ -3855,6 +3895,14 @@ function roomCeilingHeightM(room){
   if(mm===null) return storyM;
   var h=mm*U+floorSlabHeightMForFloor(floor);
   if(h>storyM){
+    // 手書きの勾配天井は、上に何も載っていない部屋に限り階高を超えてよい (Task 14-2)。
+    // 超えても持ち上がる床が無い -- 小屋裏へ抜けるのが勾配天井の実体だからである。
+    // これが無いと既定の 低2200/高3600 が階高2700で 2700 に丸められ、勾配を選んで
+    // 何も入力しない人には必ず平天井が出る。
+    // 緩めるのは **勾配を宣言した部屋だけ**。平天井を階高より上へ置くと、壁は階高
+    // までしか建たないので天井が宙に浮く。上に部屋がある階では従来どおり丸める
+    // (階高の側を上げると上階の床ごと家全体が動くので、丸めるのは天井の側)。
+    if(roomDeclaresSlopedCeiling(room)&&!roomHasRoomAbove(room)) return h;
     var key=((room&&room.id)||'?')+'@'+mm;
     if(!_ceilingClampWarned[key]){
       _ceilingClampWarned[key]=1;
@@ -4877,15 +4925,33 @@ function roofTypeLabel(roofItem){
   roofTypeOptions().forEach(function(o){ if(o[0]===t) name=o[1]; });
   return name;
 }
+// 部屋の名前を画面で名指しするときの文字列。名前が無い部屋は ID で呼ぶ。
+function roomDisplayLabel(room){
+  if(!room) return '';
+  return (room.floor||1)+'階の'+(room.n?'「'+room.n+'」':objectIdLabel(room));
+}
+// 勾配天井が作れない理由。作れるなら空文字を返す (Task 14-3)。
+// 黙って平らにするのが最悪なので、選べない側にも必ず理由を添える。
+function roomSlopedCeilingBlockReason(room){
+  var above=roomAboveRoom(room);
+  if(!above) return '';
+  return 'この部屋の上には'+roomDisplayLabel(above)+
+    'が載っています。勾配天井は天井を張らずに屋根裏側へ抜ける形なので、上に床がある階では作れません（成立するのは上に部屋が無い部屋だけです）。';
+}
 function selectedRoomCeilingHtml(it){
   if(!it||it.type!=='room') return '';
   if(typeof HeightModel==='undefined'||!HeightModel) return '';
   var type=roomCeilingTypeValue(it);
+  var blocked=roomSlopedCeilingBlockReason(it);
   var html='<div class="ph" style="margin-top:12px">天井</div>';
   html+='<div class="pr"><div class="pl">天井の種類</div><select class="pi" onchange="updateSelectedCeilingType(this.value)">';
   html+='<option value="flat"'+(type==='flat'?' selected':'')+'>平ら</option>';
-  html+='<option value="sloped"'+(type==='sloped'?' selected':'')+'>勾配</option>';
+  // 選べないときは選択肢を残したまま無効にする。消してしまうと「勾配という考えが
+  // 無い」ように見え、なぜ作れないのかを言う場所も無くなる。
+  html+='<option value="sloped"'+(type==='sloped'?' selected':'')+
+    ((blocked&&type!=='sloped')?' disabled':'')+'>勾配'+(blocked?'（この部屋では作れません）':'')+'</option>';
   html+='</select></div>';
+  if(blocked) html+='<div class="lock-status-note">'+blocked+'</div>';
   // 「レンダが実際に置いた面」から取る。入力値をそのまま書き返すと、階高で
   // 丸められたときに欄が嘘をつく。
   var renderedMm=roomRenderedCeilingMm(it);
@@ -4932,7 +4998,12 @@ function selectedRoomCeilingHtml(it){
     html+='<div class="pr"><div class="pl">向き (°)</div><input class="pi" type="number" step="15" value="'+dir+'" onchange="updateSelectedSlopedCeiling(\'direction\',this.value)"></div>';
     html+='<div class="lock-status-note">向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
     if(shape&&shape.type==='sloped'&&shape.highMm<highMm){
-      html+='<div class="lock-status-note">高い側 '+highMm+'mm は階高 '+storyMm+'mm を超えるため、'+shape.highMm+'mm に丸めて描いています。</div>';
+      // 丸めが起きるのは上に部屋がある階だけになった (Task 14-2)。なぜ丸まったのかを
+      // 「階高を超えたから」で止めず、上に何が載っているかまで言う。
+      html+='<div class="lock-status-note">高い側 '+highMm+'mm は階高 '+storyMm+'mm を超えるため、'+shape.highMm+'mm に丸めて描いています。'+
+        (blocked?'上に部屋がある階なので、階高より上へは伸ばせません（理由は上のとおり）。':'')+'</div>';
+    } else if(shape&&shape.type==='sloped'&&shape.highMm>storyMm&&!blocked){
+      html+='<div class="lock-status-note">高い側 '+shape.highMm+'mm は階高 '+storyMm+'mm を超えていますが、この部屋の上には部屋がないので丸めずにそのまま描いています（小屋裏へ抜ける形です）。</div>';
     }
   }
   html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
@@ -4946,6 +5017,9 @@ function updateSelectedCeilingType(v){
     updateSelectedProp('ceiling',null);
     return;
   }
+  // 上に部屋がある階では勾配天井は成立しない (Task 14-3)。選択肢を無効にしてある
+  // ので普通は届かないが、書き込む側でも止める -- 黙って平天井になるのが最悪。
+  if(roomSlopedCeilingBlockReason(room)) return;
   var c={type:'sloped',lowMm:HeightModel.DEFAULTS.slopedLowMm};
   // 屋根が載っているなら高い側と向きは屋根が決める。使われない数字を書き残すと、
   // 後で屋根を消したときに身に覚えのない値が効きはじめる。

@@ -135,7 +135,8 @@ const HEIGHT_FNS = [
   'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
-  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
+    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
   'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
@@ -151,6 +152,7 @@ const HEIGHT_FNS = [
 ];
 const HEIGHT_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache',
+  'ROOM_OVERLAP_EPS_MM',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M'];
 
 // 壁は「両側とも部屋」の内部間仕切りか、外皮に面するかを exteriorSpans で決める。

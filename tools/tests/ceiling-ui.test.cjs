@@ -77,6 +77,7 @@ const FNS = [
   'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'isPositiveNumber',
+  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
   'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
@@ -86,12 +87,14 @@ const FNS = [
   'roofTypeOptions', 'objectIdLabel',
   // Task 13 で足したもの
   'roomCeilingTypeValue', 'roomFlatCeilingInputMm', 'roofTypeLabel',
+  // Task 14 で足したもの
+  'roomDisplayLabel', 'roomSlopedCeilingBlockReason',
   'selectedRoomCeilingHtml',
   'updateSelectedCeilingType', 'updateSelectedFlatCeilingMm', 'updateSelectedSlopedCeiling',
   'updateSelectedProp'
 ];
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
-  'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache',
+  'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
   'CEILING_HEIGHT_PRESETS_MM'];
 
 // ── 家 ────────────────────────────────────────────────────────────────────
@@ -274,9 +277,11 @@ test('UIから低い側・高い側・向きを変えると、レンダの傾き
   const slope = ctx.roomCeilingSlopeM(room);
   assert.equal(slope.source, 'manual');
   assert.equal(slope.direction, 90);
-  // 低い側は入力どおり(2000mm + スラブ180mm)。高い側は階高で丸められる。
+  // 低い側は入力どおり(2000mm + スラブ180mm)。高い側は 3600 のまま
+  // ── rmB の上には部屋が無いので階高で丸めない (Task 14-2)。
   assert.ok(Math.abs(slope.lowY - (2000 * ctx.U + ctx.floorSlabHeightMForFloor(2))) < 1e-9);
-  assert.equal(ctx.roomRenderedCeilingLabel(room), 'CH 2000-2520 →');
+  assert.ok(Math.abs(slope.highY - (3600 * ctx.U + ctx.floorSlabHeightMForFloor(2))) < 1e-9);
+  assert.equal(ctx.roomRenderedCeilingLabel(room), 'CH 2000-3600 →');
 });
 
 test('向きに 0（北）を入れても既定へ落ちない', () => {
@@ -365,14 +370,36 @@ test('1階（スラブなし）でも丸めの境目を正しく言う', () => {
     .indexOf('2900mm は階高 2700mm を超えるため、2700mm に丸めて描いています') !== -1);
 });
 
-test('手書きの勾配で高い側が階高を超えたときも、丸めたことを言う', () => {
+// Task 14-2: 丸めが起きるのは「上に部屋がある階」だけになった。
+// rmG(1階) の上には rmA(2階) が載っているので、そこでは従来どおり丸め、
+// 丸めたことを画面で言う。宣言そのものはUIからは作れない(=14-3で止まる)ので、
+// 昔コンソールから書かれたプランを開いた状況として直接置く。
+test('上に部屋がある階では、手書きの勾配は従来どおり丸められ、丸めたことを言う', () => {
   const data = house();
   const ctx = makeCtx(data);
-  const room = select(ctx, data.rooms[1]);
-  ctx.updateSelectedCeilingType('sloped');   // 既定の高い側 3600 は階高 2700 を超える
+  const room = select(ctx, data.rooms[2]);   // 1階。上に rmA が載っている
+  room.ceiling = { type: 'sloped', lowMm: 2200, highMm: 3600, direction: 0 };
+  assert.equal(ctx.roomRenderedCeilingMm(room), 2700, '1階の階高で丸められていない');
   const h = ctx.selectedRoomCeilingHtml(room);
-  assert.ok(h.indexOf('高い側 3600mm は階高 2700mm を超えるため、2520mm に丸めて描いています') !== -1,
+  assert.ok(h.indexOf('高い側 3600mm は階高 2700mm を超えるため、2700mm に丸めて描いています') !== -1,
     '黙って丸めている: ' + h);
+  assert.ok(h.indexOf('上に部屋がある階なので、階高より上へは伸ばせません') !== -1,
+    'なぜ丸まったのか(上に部屋がある)を言っていない: ' + h);
+  assert.ok(h.indexOf('この部屋の上には2階の「屋根のある部屋」が載っています') !== -1,
+    '上に何が載っているかを言っていない: ' + h);
+});
+
+test('最上階では、手書きの高い側 3600 は丸められず、丸めたとも言わない', () => {
+  const data = house();
+  const ctx = makeCtx(data);
+  const room = select(ctx, data.rooms[1]);   // 2階・屋根なし・上に部屋なし
+  ctx.updateSelectedCeilingType('sloped');   // 既定 2200/3600
+  assert.equal(ctx.roomRenderedCeilingMm(room), 3600,
+    '既定値のままで平天井になっている(=手動経路が使えない): ' + ctx.roomRenderedCeilingMm(room));
+  const h = ctx.selectedRoomCeilingHtml(room);
+  assert.equal(h.indexOf('丸めて描いています'), -1, '丸めていないのに丸めたと言っている');
+  assert.ok(h.indexOf('丸めずにそのまま描いています') !== -1,
+    '階高を超えていることを伝えていない: ' + h);
 });
 
 // ── 5. 空欄へ戻すと、既存プランと同じ形に戻る ────────────────────────────
@@ -454,6 +481,58 @@ test('部屋以外を選んでいるときは、天井の欄を出さない', ()
   select(ctx, wall);
   ctx.updateSelectedCeilingType('sloped');
   assert.equal(Object.prototype.hasOwnProperty.call(wall, 'ceiling'), false);
+});
+
+// ── 6.5 Task 14-3: 作れない部屋には、理由を添えて作らせない ───────────────
+// 黙って平天井になるのが最悪。rmG(1階) の上には rmA(2階) が載っている。
+test('14-3: 上に部屋がある階では、勾配の選択肢が無効になり、理由が出る', () => {
+  const data = house();
+  const ctx = makeCtx(data);
+  const room = select(ctx, data.rooms[2]);        // 1階。上に rmA
+  assert.equal(ctx.roomHasRoomAbove(room), true, '前提が崩れている');
+  const h = ctx.selectedRoomCeilingHtml(room);
+  assert.ok(h.indexOf('<option value="sloped" disabled>') !== -1,
+    '勾配が選べてしまう: ' + h);
+  assert.ok(h.indexOf('この部屋の上には2階の「屋根のある部屋」が載っています') !== -1,
+    '上に何が載っているかを言っていない: ' + h);
+  assert.ok(h.indexOf('勾配天井は天井を張らずに屋根裏側へ抜ける形なので') !== -1,
+    'なぜ作れないのかを言っていない: ' + h);
+});
+
+test('14-3: 最上階の部屋では、勾配の選択肢は無効にならないし理由も出ない', () => {
+  const data = house();
+  const ctx = makeCtx(data);
+  [data.rooms[0], data.rooms[1]].forEach(function (room) {
+    select(ctx, room);
+    const h = ctx.selectedRoomCeilingHtml(room);
+    assert.equal(h.indexOf('disabled'), -1, room.id + ' で勾配が塞がれた: ' + h);
+    assert.equal(h.indexOf('作れません'), -1, room.id + ' で作れないと言っている');
+  });
+});
+
+test('14-3: 上に部屋がある階では、勾配を選んでも書き込まれない（黙って平らにしない）', () => {
+  const data = house();
+  const ctx = makeCtx(data);
+  const room = select(ctx, data.rooms[2]);
+  const before = JSON.stringify(data);
+  ctx.updateSelectedCeilingType('sloped');
+  assert.equal(Object.prototype.hasOwnProperty.call(room, 'ceiling'), false,
+    '作れない部屋に勾配が書き込まれた');
+  assert.equal(JSON.stringify(data), before, 'プランが変わった');
+  assert.equal(ctx.__log.save, 0, 'undo が積まれた');
+  assert.equal(ctx.roomCeilingSlopeM(room), null);
+});
+
+test('14-3: 上階の部屋が消えれば、その日から勾配が選べるようになる', () => {
+  const data = house();
+  const ctx = makeCtx(data);
+  const room = select(ctx, data.rooms[2]);
+  assert.ok(ctx.selectedRoomCeilingHtml(room).indexOf('disabled') !== -1);
+  data.rooms.splice(0, 1);                       // rmA を消す = 1階の上が空く
+  assert.equal(ctx.roomHasRoomAbove(room), false);
+  assert.equal(ctx.selectedRoomCeilingHtml(room).indexOf('disabled'), -1);
+  ctx.updateSelectedCeilingType('sloped');
+  assert.notEqual(ctx.roomCeilingSlopeM(room), null, '勾配が効いていない');
 });
 
 // ── 7. 配線（欄が updateProps の部屋の枝から呼ばれていること）────────────

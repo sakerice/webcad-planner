@@ -103,7 +103,8 @@ const HEIGHT_FNS = [
   'wallFullHeightM', 'isPositiveNumber',
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
   // Task 12-1: 屋根から天井を導く経路。宣言していない部屋はここを通らない。
-  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
+    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
   'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
@@ -120,7 +121,7 @@ function heights(data) {
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM')
   ].concat(HEIGHT_FNS.map(topLevelFunction)).join('\n'), ctx);
   return ctx;
 }
@@ -238,20 +239,23 @@ test('天井高を明示した部屋では、ラベルはその値を言う（�
 // これは以前ここで固定していた 'CH 2200-2700 ↑' の**撤回**である。低い側の 2200 は
 // 3Dのどこにも無く、矢印が指す傾きも存在しなかった。設計 §12.2 はこのラベルを
 // 「生成AIが空間の高さを知る唯一の手がかり」と定義しているので、そのずれは嘘になる。
-function slopedHouse(lowMm, highMm, direction, floor) {
-  return {
-    floors: {}, items: [], walls: [],
-    rooms: [{ id: 's', floor: floor || 1, x: 0, y: 0, w: 4000, d: 3000,
-              ceiling: { type: 'sloped', lowMm: lowMm, highMm: highMm,
-                         direction: direction } }]
-  };
+// Task 14: 上に部屋があるかどうかで階高クランプの有無が変わるので、家の側で
+// 「上階の部屋を載せるか」を選べるようにする。載せなければ最上階の部屋である。
+function slopedHouse(lowMm, highMm, direction, floor, roomAbove) {
+  const f = floor || 1;
+  const rooms = [{ id: 's', floor: f, x: 0, y: 0, w: 4000, d: 3000,
+                   ceiling: { type: 'sloped', lowMm: lowMm, highMm: highMm,
+                              direction: direction } }];
+  if (roomAbove) rooms.push({ id: 'up', floor: f + 1, x: 0, y: 0, w: 4000, d: 3000 });
+  return { floors: {}, items: [], walls: [], rooms: rooms };
 }
 
 // Task 11-3(A): 3D が実際に傾けられるようになったので、(B) の抑制を外して
 // 範囲と向きへ戻した。ただし**数値はどちらもレンダが置いた面から取る**。
 // HeightModel の宣言値をそのまま書くと、階高でクランプされた分だけ嘘になる。
+// Task 14-2: 上に部屋がある階でだけ丸める。丸めたときはラベルも丸めた値を言う。
 test('勾配天井のラベルは範囲と向きを言い、数値はレンダが置いた面から取る', () => {
-  const g = heights(slopedHouse(2200, 4000, 0));
+  const g = heights(slopedHouse(2200, 4000, 0, 1, true));   // 上に2階の部屋がある
   const room = g.DATA.rooms[0];
   const shape = g.roomRenderedCeilingShape(room);
   assert.equal(shape.type, 'sloped', '3D は傾けられるのに flat と書いている');
@@ -265,7 +269,7 @@ test('勾配天井のラベルは範囲と向きを言い、数値はレンダ�
 
 // クランプで高い側が低い側を下回るとき、低い側が上を越えないこと。
 test('階高が低い側にも足りなければ、低い側は高い側で止まる（範囲が反転しない）', () => {
-  const g = heights(slopedHouse(3000, 4000, 0, 1));   // 階高 2700
+  const g = heights(slopedHouse(3000, 4000, 0, 1, true));   // 階高 2700 / 上に部屋あり
   const shape = g.roomRenderedCeilingShape(g.DATA.rooms[0]);
   assert.equal(shape.highMm, 2700);
   assert.equal(shape.lowMm, 2700, '低い側が高い側を越えている: ' + shape.lowMm);
@@ -318,7 +322,7 @@ function ceilingYsFor(data, floor) {
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
    .concat([topLevelFunction('buildRooms3D')]).join('\n'), ctx);
   ctx.buildRooms3D(floor);
@@ -422,7 +426,7 @@ function ceilingBuilder(data) {
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache')
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM')
   ].concat(HEIGHT_FNS.map(topLevelFunction)).concat([
     topLevelFunction('ceilingSlopeUnit'),
     topLevelFunction('ceilingSlopeSpan'),

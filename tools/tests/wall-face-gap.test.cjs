@@ -103,14 +103,15 @@ function ctxFor(walls) {
   });
   vm.runInContext([
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
-    topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'),
+    topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('_roofCeilingExtentCache'),
     topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'),
     topLevelVar('WALL_FACE_JITTER_M')
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
     'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-    'wallFullHeightM', 'isPositiveNumber', 'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint',
+    'wallFullHeightM', 'isPositiveNumber', 'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
+    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint',
     'roofItemOverRoom', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
     'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomExplicitCeilingMm', 'roomCeilingHeightM',

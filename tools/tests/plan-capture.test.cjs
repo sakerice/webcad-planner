@@ -381,7 +381,7 @@ function drawLabelsOn(data, floor) {
   const c = sandbox([
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'),
     topLevelVar('FLOOR_SLAB_H'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'),
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('PLAN_CAPTURE'), topLevelVar('PLAN_CAPTURE_SCALE'),
     topLevelFunction('w2c'),
     topLevelFunction('isFiniteCanvasValue'),
@@ -394,6 +394,8 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('floorBaseY'), topLevelFunction('floorTopY'),
     topLevelFunction('isPositiveNumber'),
     topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
+    topLevelFunction('roomsOverlapInPlan'), topLevelFunction('roomAboveRoom'),
+    topLevelFunction('roomHasRoomAbove'),
     topLevelFunction('roomDeclaresSlopedCeiling'), topLevelFunction('roofCoversPlanPoint'),
     topLevelFunction('roofItemOverRoom'), topLevelFunction('roofCeilingWorldYAt'),
     topLevelFunction('roofLocalPoint'), topLevelFunction('roofSurfaceHeightAt'),
