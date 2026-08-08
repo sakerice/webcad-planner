@@ -4844,6 +4844,137 @@ function selectedVisibilityControlHtml(it){
   }
   return '';
 }
+// ── 部屋の天井の設定 (Task 13) ─────────────────────────────────────────────
+// 受け口 (room.ceiling / room.ceilingHeight) も、屋根から勾配天井を導く実装も
+// 入っていたのに、触る手段がコンソールしか無かった。ここが唯一の入口になる。
+//
+// **空欄が既定**である。保存済みプランは ceiling も ceilingHeight も持たないので、
+// この欄を開いて何も触らなければプランは1バイトも変わらない。**描画しただけで
+// フィールドを書き込まないこと**。書き込みは onchange から updateSelectedProp
+// を通る経路だけ(=ロック判定・undo・再描画を既存と共有する)。
+//
+// 日本の注文住宅の実務値。2400 が標準、2500 がゆとり、2200 は水回り・廊下、
+// 2100 は下がり天井で、建築基準法施行令21条の居室天井高の下限でもある。
+var CEILING_HEIGHT_PRESETS_MM=[
+  [2400,'2400mm（標準）'],
+  [2500,'2500mm（ゆとり）'],
+  [2200,'2200mm（水回り・廊下）'],
+  [2100,'2100mm（下がり天井・居室の下限）']
+];
+function roomCeilingTypeValue(room){
+  return roomDeclaresSlopedCeiling(room)?'sloped':'flat';
+}
+// 明示された平天井高(mm)。指定が無ければ空文字を返す = 入力欄が空欄になる。
+// 空欄と 0 を混ぜないこと。0 を書くと既定へ落ちて「指定なし」と区別できなくなる。
+function roomFlatCeilingInputMm(room){
+  var c=room&&room.ceiling;
+  if(c&&isPositiveNumber(c.heightMm)) return Math.round(c.heightMm);
+  if(room&&isPositiveNumber(room.ceilingHeight)) return Math.round(room.ceilingHeight);
+  return '';
+}
+function roofTypeLabel(roofItem){
+  var t=(roofItem&&roofItem.roofType)||'gable', name=t;
+  roofTypeOptions().forEach(function(o){ if(o[0]===t) name=o[1]; });
+  return name;
+}
+function selectedRoomCeilingHtml(it){
+  if(!it||it.type!=='room') return '';
+  if(typeof HeightModel==='undefined'||!HeightModel) return '';
+  var type=roomCeilingTypeValue(it);
+  var html='<div class="ph" style="margin-top:12px">天井</div>';
+  html+='<div class="pr"><div class="pl">天井の種類</div><select class="pi" onchange="updateSelectedCeilingType(this.value)">';
+  html+='<option value="flat"'+(type==='flat'?' selected':'')+'>平ら</option>';
+  html+='<option value="sloped"'+(type==='sloped'?' selected':'')+'>勾配</option>';
+  html+='</select></div>';
+  // 「レンダが実際に置いた面」から取る。入力値をそのまま書き返すと、階高で
+  // 丸められたときに欄が嘘をつく。
+  var renderedMm=roomRenderedCeilingMm(it);
+  var storyMm=storyHeightMmForFloor(it.floor);
+  if(type==='flat'){
+    var cur=roomFlatCeilingInputMm(it);
+    html+='<div class="pr"><div class="pl">天井高プリセット</div><select class="pi" onchange="updateSelectedFlatCeilingMm(this.value)">';
+    html+='<option value=""'+(cur===''?' selected':'')+'>指定なし（階高をそのまま天井にする）</option>';
+    CEILING_HEIGHT_PRESETS_MM.forEach(function(p){
+      html+='<option value="'+p[0]+'"'+(cur===p[0]?' selected':'')+'>'+p[1]+'</option>';
+    });
+    html+='</select></div>';
+    html+='<div class="pr"><div class="pl">天井高 (mm)</div><input class="pi" type="number" min="0" step="10" placeholder="空欄=指定なし" value="'+cur+'" onchange="updateSelectedFlatCeilingMm(this.value)"></div>';
+    if(cur===''){
+      html+='<div class="lock-status-note">指定なしです。この部屋の天井は今までどおり階高いっぱい（現在 '+renderedMm+'mm）に置かれます。</div>';
+    } else if(renderedMm<cur){
+      html+='<div class="lock-status-note">'+cur+'mm は階高 '+storyMm+'mm を超えるため、'+renderedMm+'mm に丸めて描いています（階高を上げると上階の床ごと家全体が動くので、丸めるのは天井の側）。</div>';
+    }
+    return html;
+  }
+  var shape=roomRenderedCeilingShape(it);
+  var roof=roofItemOverRoom(it);
+  if(shape&&shape.type==='sloped'){
+    html+='<div class="pr"><div class="pl">平面図のラベル</div><input class="pi" type="text" value="'+roomRenderedCeilingLabel(it)+'" readonly></div>';
+  }
+  if(roof){
+    // 屋根が載っている部屋では、高さを決めるのは屋根である。手で書ける欄を
+    // 出すと画面の数字と描かれる天井が食い違う。読み取り専用で見せるだけにする。
+    html+='<div class="pr"><div class="pl">天井の決まり方</div><input class="pi" type="text" value="屋根から自動（屋根 '+objectIdLabel(roof)+'）" readonly></div>';
+    html+='<div class="pr"><div class="pl">屋根の形状</div><input class="pi" type="text" value="'+roofTypeLabel(roof)+'" readonly></div>';
+    html+='<div class="pr"><div class="pl">屋根の勾配 (°)</div><input class="pi" type="text" value="'+Math.round(roof.pitch||30)+'" readonly></div>';
+    if(shape&&shape.type==='sloped'){
+      html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="text" value="'+shape.lowMm+'" readonly></div>';
+      html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="text" value="'+shape.highMm+'" readonly></div>';
+    }
+    html+='<div class="lock-status-note">高さは屋根が決めます（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。屋根の勾配や形を変えると天井もついてきます。</div>';
+  } else {
+    var c2=it.ceiling||{};
+    var lowMm=isPositiveNumber(c2.lowMm)?Math.round(c2.lowMm):HeightModel.DEFAULTS.slopedLowMm;
+    var highMm=isPositiveNumber(c2.highMm)?Math.round(c2.highMm):HeightModel.DEFAULTS.slopedHighMm;
+    var dir=(typeof c2.direction==='number'&&isFinite(c2.direction))?Math.round(c2.direction):0;
+    html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+lowMm+'" onchange="updateSelectedSlopedCeiling(\'lowMm\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+highMm+'" onchange="updateSelectedSlopedCeiling(\'highMm\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">向き (°)</div><input class="pi" type="number" step="15" value="'+dir+'" onchange="updateSelectedSlopedCeiling(\'direction\',this.value)"></div>';
+    html+='<div class="lock-status-note">向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
+    if(shape&&shape.type==='sloped'&&shape.highMm<highMm){
+      html+='<div class="lock-status-note">高い側 '+highMm+'mm は階高 '+storyMm+'mm を超えるため、'+shape.highMm+'mm に丸めて描いています。</div>';
+    }
+  }
+  html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
+  return html;
+}
+function updateSelectedCeilingType(v){
+  var room=ST.selected;
+  if(!room||room.type!=='room') return;
+  if(v!=='sloped'){
+    // 「平ら」は空欄へ戻す = 受け口ごと消す。既存プランと同じ状態。
+    updateSelectedProp('ceiling',null);
+    return;
+  }
+  var c={type:'sloped',lowMm:HeightModel.DEFAULTS.slopedLowMm};
+  // 屋根が載っているなら高い側と向きは屋根が決める。使われない数字を書き残すと、
+  // 後で屋根を消したときに身に覚えのない値が効きはじめる。
+  if(!roofItemOverRoom(room)){
+    c.highMm=HeightModel.DEFAULTS.slopedHighMm;
+    c.direction=0;
+  }
+  updateSelectedProp('ceiling',c);
+}
+function updateSelectedFlatCeilingMm(v){
+  var room=ST.selected;
+  if(!room||room.type!=='room') return;
+  var mm=Number(v);
+  if(!isPositiveNumber(mm)){ updateSelectedProp('ceiling',null); return; }
+  updateSelectedProp('ceiling',{type:'flat',heightMm:Math.round(mm)});
+}
+function updateSelectedSlopedCeiling(field,v){
+  var room=ST.selected;
+  if(!room||room.type!=='room') return;
+  var cur=room.ceiling||{};
+  var c={type:'sloped',
+    lowMm:isPositiveNumber(cur.lowMm)?Math.round(cur.lowMm):HeightModel.DEFAULTS.slopedLowMm,
+    highMm:isPositiveNumber(cur.highMm)?Math.round(cur.highMm):HeightModel.DEFAULTS.slopedHighMm,
+    direction:(typeof cur.direction==='number'&&isFinite(cur.direction))?cur.direction:0};
+  var n=Number(v);
+  if(field==='direction'){ if(isFinite(n)) c.direction=n; }
+  else if(isPositiveNumber(n)) c[field]=Math.round(n);
+  updateSelectedProp('ceiling',c);
+}
 function clearAll3DHidden(){
   var n=0;
   DATA.walls.forEach(function(w){ if(w.vis3D){ delete w.vis3D; n++; } });
@@ -5432,6 +5563,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
+    html += selectedRoomCeilingHtml(it);
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
@@ -5477,6 +5609,14 @@ function updateSelectedProp(p,v,noSave){
   } else {
     ST.selected[p]=v;
     if(isWindowLikeType(ST.selected.type) && (p==='windowSill'||p==='windowHeight')) normalizeWindowVerticalProps(ST.selected,p);
+  }
+  // 天井を「指定なし」へ戻したときは受け口ごと消す。undefined を残すと保存 JSON
+  // には出ないのにメモリ上のプランは「指定あり」に見え、判定が食い違う。
+  // 天井を書いたときは旧フィールド(ceilingHeight)も消す: HeightModel が
+  // ceiling.heightMm を優先するので、残しても効かない古い値が居座るだけ。
+  if(p==='ceiling'){
+    if(!v) delete ST.selected.ceiling;
+    delete ST.selected.ceilingHeight;
   }
   if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
   if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
