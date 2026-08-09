@@ -4198,9 +4198,9 @@ function clampContextFloors(type,floors){
   var max=type==='neighbor-building'?12:(type==='neighbor-house'?3:1);
   return Math.max(1,Math.min(max,Math.round(Number(floors)||defaultContextFloors(type))));
 }
-// 隣家の屋根は寄棟・4寸勾配・軒の出455mmで、フットプリントから高さが決まる。
-// 一定値のままだと、大きな隣家ほど勾配が寝て日本の住宅らしくなくなるため、
-// アイテムが分かる場合は実寸から算出する。
+// 隣家の屋根(寄棟・軒の出200mm)の高さ。
+// 基本は固定値だが、小さい隣家では勾配がきつくなりすぎるため実寸から抑える。
+// 建物の高さ表示と3Dモデルを一致させるので、アイテムが分かる場合は実寸から算出する。
 function contextRoofExtraHeightMm(type,it){
   if(type==='neighbor-building') return 450;
   if(type==='neighbor-house'){
@@ -12529,8 +12529,9 @@ var CONTEXT_HOUSE_KIT_GLB='assets/models/context/neighbor_house_kit.glb';
 var NH_P=0.910;            // 1P(3尺)
 var NH_SEG_H=2.700;        // キットの外壁セグメント高さ(アプリの最小階高)
 var NH_WALL_T=0.120;       // 外壁の見付け厚
-var NH_ROOF_PITCH=0.40;    // 4寸勾配(化粧スレートの標準的な勾配)
-var NH_EAVE=0.455;         // 軒の出/ケラバ(半間)
+var NH_ROOF_H=1.30;        // 屋根の高さ(棟までの立ち上がり)。建物サイズに追従させない
+var NH_ROOF_MAX_PITCH=0.55;// 5.5寸。小さい家で屋根がとがりすぎないための上限
+var NH_EAVE=0.200;         // 軒の出/ケラバ。軒の出を抑えた現代の建売に合わせる
 var NH_ROOF_TILE=1.456;    // スレートUVタイル(働き幅182mm×8段)
 var NH_WALL_MAT_NAMES={NhWall:1,NhWall2:1};
 var NH_FAINT_MAT_NAMES={NhDark:1,NhGarage:1,NhGarageFloor:1};
@@ -12551,11 +12552,13 @@ function nhHash(s){
   for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
   return h>>>0;
 }
-// 寄棟・4寸勾配・軒の出455から屋根の高さ(m)を求める。
-// フットプリントに追従させることで、家を大きくしても勾配が寝ない。
+// 寄棟屋根の高さ(m)。
+// 勾配を一定にすると建物を大きくするほど屋根が高く・大きくなってしまうため、
+// 高さは固定とする。ただし小さい家では勾配がきつくなりすぎるので、
+// 5.5寸相当を上限にしてそこだけ低く抑える(=拡大方向では完全に一定)。
 function nhRoofHeightM(w3,d3){
   var run=Math.min(w3,d3)/2+NH_EAVE;
-  return Math.max(0.85,Math.min(2.40,run*NH_ROOF_PITCH));
+  return Math.min(NH_ROOF_H,run*NH_ROOF_MAX_PITCH);
 }
 // 1辺のベイ割り。中間ベイは正確に910mmとし、端数は両端ベイだけで吸収する。
 // これにより開口(窓・玄関・シャッター)は常に910の整数倍に載り、実寸を保てる。
