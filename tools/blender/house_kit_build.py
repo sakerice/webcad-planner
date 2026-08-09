@@ -19,7 +19,7 @@
 
 ■ 準拠させた主な寸法(日本の住宅規格)
   - モジュール 910mm(1P) / 半間 455mm
-  - 外壁: 窯業系サイディング 働き幅 455mm、出隅役物 90mm
+  - 外壁: 目地の無いフラットな塗り壁仕上げ(粒状感のみ)、出隅役物 90mm
   - 基礎立上り GL+400、土台水切り
   - サッシ(LIXIL等の呼称寸法):
       16520 掃き出し窓 W1690×H2030 (FL±0)
@@ -54,8 +54,8 @@ import bmesh
 P = 0.910          # 1P(1間の半分=3尺)
 HP = 0.455         # 半P
 SEG_H = 2.700      # 1階分の外壁高さ(アプリの最小階高に一致)
-WALL_T = 0.120     # 外壁の見付け厚(通気層+サイディング)
-TILE = 1.820       # サイディングUVタイル = 455mm×4段
+WALL_T = 0.120     # 外壁の見付け厚(通気層+外装材)
+TILE = 1.820       # 外壁・屋根のUVタイル基準(1.82m = 2P)
 RECESS = 0.045     # サッシの引っ込み(外壁面からの奥行)
 CASING = 0.022     # 額縁(窓枠化粧材)の出
 
@@ -83,27 +83,24 @@ def _new_image(name, n):
     return bpy.data.images.new(name, n, n, alpha=False)
 
 
-def make_siding_image(name, base, groove=0.70, seed=42):
-    """働き幅455mmの横張りサイディング。TILE(1.82m)に4段入る。"""
-    n = 256
+def make_wall_image(name, base, seed=42):
+    """フラットな外壁(塗り壁/フラットサイディング)。
+
+    横張りサイディングの目地(横縞)は入れない。方向性のある模様を持たせると
+    パネルの継ぎ目や端数吸収でスケールした端部ベイで縞のピッチが揃わず、
+    かえって不自然に見えるため、等方な微粒子のムラだけを入れる。
+    純粋なノイズなのでUVタイルの繰り返しも視認されない。
+    """
+    n = 128        # 構造の無いノイズなので解像度は低くてよい(GLBを軽く保つ)
     img = _new_image(name, n)
-    planks = 4
-    ph = n // planks
     rng = random.Random(seed)
-    tones = [1.0 + rng.uniform(-0.035, 0.035) for _ in range(planks)]
     px = [0.0] * (n * n * 4)
     for y in range(n):
-        plank = min(planks - 1, y // ph)
-        inp = y % ph
-        tone = tones[plank]
-        if inp < 2:
-            tone *= groove              # 目地(実部の影)
-        elif inp < 4:
-            tone *= 1.05                # 目地上の水切り光沢
-        row = 1.0 + rng.uniform(-0.010, 0.010)
         for x in range(n):
             i = (y * n + x) * 4
-            g = tone * row * (1.0 + rng.uniform(-0.007, 0.007))
+            # 完全にランダムな粒状感(±2.2%)のみ。
+            # 三角関数などで濃淡のうねりを足すと周期的な縞に見えてしまうので入れない。
+            g = 1.0 + rng.uniform(-0.022, 0.022)
             px[i] = min(1.0, base[0] * g)
             px[i + 1] = min(1.0, base[1] * g)
             px[i + 2] = min(1.0, base[2] * g)
@@ -194,9 +191,9 @@ def tex_mat(name, image, rough=0.9, metal=0.0):
 
 def build_materials():
     mats = {}
-    mats['WALL'] = tex_mat('NhWall', make_siding_image('NhWallImg', (0.86, 0.845, 0.80)))
-    mats['WALL2'] = tex_mat('NhWall2', make_siding_image(
-        'NhWall2Img', (0.42, 0.405, 0.385), groove=0.76, seed=7))
+    mats['WALL'] = tex_mat('NhWall', make_wall_image('NhWallImg', (0.86, 0.845, 0.80)))
+    mats['WALL2'] = tex_mat('NhWall2', make_wall_image(
+        'NhWall2Img', (0.42, 0.405, 0.385), seed=7))
     mats['ROOF'] = tex_mat('NhRoof', make_slate_image('NhRoofImg', (0.215, 0.215, 0.235)), rough=0.72)
     mats['SHUT'] = tex_mat('NhShutter', make_shutter_image('NhShutterImg', (0.60, 0.61, 0.63)),
                            rough=0.5, metal=0.55)
@@ -265,7 +262,8 @@ def join_as(name, obs):
 
 def planar_uv(ob, tile=TILE, v_offset=0.0):
     """面の主法線に応じた平面投影UV。
-    Z を絶対高さとして使うのでパーツ間で横目地が必ず通る。"""
+    ワールド座標をそのまま使うので、隣り合うパーツ間でテクスチャが連続し、
+    端数吸収で横方向にスケールしたパネルでも継ぎ目が出ない。"""
     me = ob.data
     bm = bmesh.new()
     bm.from_mesh(me)
@@ -458,7 +456,7 @@ def build_parts(M):
     # 10) 胴差見切り(階間の水切り、1P)
     reg(build_band(M))
 
-    # 11) 充填用サイディング帯(階高が2700を超える分、1P×455)
+    # 11) 充填用の外壁帯(階高が2700を超える分、1P×455)
     reg(build_fill(M))
 
     # 12) バルコニー(幅1820 出910 手すり高1100)
@@ -601,7 +599,7 @@ def build_band(M):
 
 
 def build_fill(M):
-    """階高が2700を超える分を埋めるサイディング帯(1P×455)。"""
+    """階高が2700を超える分を埋める外壁帯(1P×455)。"""
     ob = box(M['WALL'], 0, WALL_T / 2, HP / 2, P, WALL_T, HP)
     planar_uv(ob)
     shade_flat(ob)
@@ -621,7 +619,7 @@ def build_balcony(M):
     ex.append(box(M['TRIM'], 0, -bd / 2, -0.008, bw + 0.02, bd + 0.02, 0.026))
     # 手すり壁(正面+両側面) H1100。
     # 本体と同色だと正面視でバルコニーが壁に溶けて見えなくなるため、
-    # 日本の建売で一般的な「アクセント色のサイディング」で張る。
+    # 日本の建売で一般的な「アクセント色の外壁」で仕上げる。
     ex.append(box(M['WALL2'], 0, -bd + t / 2, 0.130 + 0.550, bw, t, 1.100))
     ex.append(box(M['WALL2'], -bw / 2 + t / 2, -bd / 2 - 0.01, 0.130 + 0.550, t, bd - 0.02, 1.100))
     ex.append(box(M['WALL2'], bw / 2 - t / 2, -bd / 2 - 0.01, 0.130 + 0.550, t, bd - 0.02, 1.100))

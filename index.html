@@ -12838,7 +12838,7 @@ function buildNeighborHouseKit(grp,it,w3,d3){
   var storyH=contextStoryHeightM();
   var L=neighborHouseLayout(it,w3,d3,floors,storyH);
   var bodyH=floors*storyH;
-  var accent=(L.seed&1)?1:0;   // 1階を濃色サイディングにするかどうかの外観バリエーション
+  var accent=(L.seed&1)?1:0;   // 1階を濃色の外壁にするかどうかの外観バリエーション
 
   // ── 半透明(ゴースト)表示 ──────────────────────────────────
   // 「計画建物を見やすくする」ための表示なので、部材を全部半透明で重ねない。
@@ -12873,7 +12873,7 @@ function buildNeighborHouseKit(grp,it,w3,d3){
   ];
   for(var f=0;f<floors;f++){
     var y=f*storyH;
-    // 1階だけ色を変える2色張りは日本の建売で最も一般的な外観のひとつ
+    // 1階だけ色を変える2色使いは日本の建売で最も一般的な外観のひとつ
     var variant=(accent&&f===0)?1:0;
     for(var fi=0;fi<faces.length;fi++){
       var fd=faces[fi], row=fd.row;
@@ -12890,7 +12890,7 @@ function buildNeighborHouseKit(grp,it,w3,d3){
         nhAttach(grp,nhInstance(kit,NH_SEG_PART.plain[variant],mats),fd.face,
                  nhBayCenter(row,b,1),y,w3,d3);
       }
-      // 両端ベイ(端数吸収)。横方向のみのスケールなので横目地は乱れない
+      // 両端ベイ(端数吸収)。外壁は無地仕上げなので横スケールしても模様は乱れない
       if(row.end>0.02){
         [-1,1].forEach(function(s){
           var n=nhInstance(kit,NH_SEG_PART.plain[variant],mats);
@@ -12899,7 +12899,7 @@ function buildNeighborHouseKit(grp,it,w3,d3){
           nhAttach(grp,n,fd.face,s*(fd.len/2-row.end/2),y,w3,d3);
         });
       }
-      // 階高が2700を超える分をサイディング帯で充填(見切り材の下に隠れる)
+      // 階高が2700を超える分を外壁帯で充填(見切り材の下に隠れる)
       if(storyH-NH_SEG_H>0.005){
         var fill=nhInstance(kit,'nh_fill',mats);
         if(fill){
@@ -13592,7 +13592,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 6;
+var MODEL_ASSET_VER = 7;
 var _gltfRebuildTimer=null;
 var _gltfRebuildBatchStartedAt=0;
 function scheduleGltfRebuild3D(){
