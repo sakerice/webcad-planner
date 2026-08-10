@@ -72,6 +72,10 @@ const COLOR_FN = sourceFunction('function aiInstanceColorHex(');
 const FALLBACK_FN = sourceFunction('function aiInstanceFallbackColorHex(');
 const REF_SOURCE_FN = sourceFunction('function aiRefSource(');
 const SUMMARY_FN = sourceFunction('function aiInstanceSummary(');
+// Task 11 で aiInstanceSummary が three.js の Object3D.type を読むのをやめ、
+// この関数から意味のある種別を取るようになった。抜き出す一覧に足さないと
+// 「aiInstanceKindFor is not defined」で落ちる。
+const KIND_FN = sourceFunction('function aiInstanceKindFor(');
 const CAPTURE_FN = sourceFunction('function captureInstance3DData(');
 
 // ── THREE スタブ ────────────────────────────────────────────────
@@ -192,7 +196,7 @@ function runCapture(objects, { data } = {}) {
     'THREE', 'sc3', 'ren', 'DATA', '_gndMesh', 'ensureAiRenderable3D', 'getActive3DCamera',
     'beginAiGuideCaptureResolution', 'endAiGuideCaptureResolution',
     'aiGuideObjectShouldHide', 'aiGuideObjectIsNeighborContext',
-    `${VARIANTS}\n${COLOR_FN}\n${FALLBACK_FN}\n${REF_SOURCE_FN}\n${SUMMARY_FN}\n${CAPTURE_FN}\n` +
+    `${VARIANTS}\n${COLOR_FN}\n${FALLBACK_FN}\n${REF_SOURCE_FN}\n${KIND_FN}\n${SUMMARY_FN}\n${CAPTURE_FN}\n` +
     'return captureInstance3DData;');
   const capture = build(THREE, scene, renderer, DATA, { sentinel: 'ground' },
     () => true, () => ({}), () => ({}), () => { }, () => false, () => false);

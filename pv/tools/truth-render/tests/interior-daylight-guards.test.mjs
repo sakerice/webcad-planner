@@ -56,11 +56,26 @@ const SHADOW_FIT = sourceLine('if(_sunLight && (!isInt');
 const CEILING_MAT_FN = sourceFunction('function makeCeilingMaterial()');
 const CENSUS_FN = sourceFunction('function pvCeilingCensus()');
 const NO_COVERED_ROOM_FN = sourceFunction('function pvAssertNoCoveredRoom(');
-// buildRoomCeilingMesh が影の設定と userData を確定させる3行。
+// buildRoomCeilingMesh が影の設定と userData を確定させる3つの文。
+// **1行ずつ抜き出してはいけない。** userData の代入は行が伸びれば折り返され、
+// 1行だけ取ると閉じ括弧の無い断片になって SyntaxError になる。実際に起きた:
+// aiInstanceType を足した時点で2行になり、このテスト群が5件落ちたまま
+// 数日気づかれなかった（このファイルを走らせていなかったため）。
+// 文の終わり(;)まで読む。
+function sourceStatement(prefix) {
+  const start = LINES.findIndex(l => l.trim().startsWith(prefix));
+  assert.ok(start >= 0, `index.html に "${prefix}" が見つからない`);
+  const out = [];
+  for (let i = start; i < LINES.length && i < start + 20; i++) {
+    out.push(LINES[i]);
+    if (LINES[i].trimEnd().endsWith(';')) return out.join('\n');
+  }
+  assert.fail(`"${prefix}" の文が ; で終わらない`);
+}
 const CEILING_FLAGS = [
-  sourceLine('var pvOccluder=!!('),
-  sourceLine('ceiling.castShadow=pvOccluder;'),
-  sourceLine('ceiling.userData={b:true,ceiling:true,'),
+  sourceStatement('var pvOccluder=!!('),
+  sourceStatement('ceiling.castShadow=pvOccluder;'),
+  sourceStatement('ceiling.userData={b:true,ceiling:true,'),
 ].join('\n');
 
 function Mat(kind) {
