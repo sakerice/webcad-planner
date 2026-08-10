@@ -931,3 +931,21 @@ test('動画パッケージの daylight は敷地の方位を持つ', () => {
   assert.doesNotMatch(body, /northDeg:\s*LIGHT_SETTINGS/,
     'reading the mirror would go stale the moment the plan is reloaded');
 });
+
+// 方位の定義。地図と同じく、既定ではキャンバスの上が北。
+// スライダのラベルは「北の方角」で、値は **北がどちらを向いているか** を表す
+// （0度=上、90度=右）。したがって北が45度回れば、上を向いた面は北から
+// 反時計回りに45度、つまり **北西** を向く。
+// この定義は太陽の位置・斜線制限の面・立面図の呼称が共有しており、
+// どれか1つだけ符号を変えると図面が法的な制限面と矛盾する。
+test('方位の既定はキャンバスの上が北', () => {
+  const i = html.indexOf('function computeSunPosition');
+  assert.notEqual(i, -1);
+  const body = html.slice(i, html.indexOf('\n}', i));
+  // 画面奥(-Z)を北とし、northDeg ぶん回す。符号が反転すると太陽が逆から差す。
+  assert.match(body, /az\s*\+\s*Math\.PI\s*\+\s*\(northDeg\s*\|\|\s*0\)/,
+    'the bearing must ADD to the azimuth; negating it swings the sun the wrong way');
+  const slider = html.slice(html.indexOf('id="sun-north"') - 260, html.indexOf('id="sun-north"') + 120);
+  assert.match(slider, /value="0"/, 'the default bearing is north-up, like a map');
+  assert.match(slider, /北の方角/, 'the label states what the value means');
+});
