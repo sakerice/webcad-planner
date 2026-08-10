@@ -3277,10 +3277,10 @@ input[type="reset"]:focus-visible{
       </div>
       <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
-        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
-        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
-        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('s')" title="南立面から見る">南</button>
-        <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('w')" title="西立面から見る">西</button>
+        <button type="button" class="elev-snap-btn" data-elev-dir="n" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
+        <button type="button" class="elev-snap-btn" data-elev-dir="e" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
+        <button type="button" class="elev-snap-btn" data-elev-dir="s" onclick="snapCameraToElevation('s')" title="南立面から見る">南</button>
+        <button type="button" class="elev-snap-btn" data-elev-dir="w" onclick="snapCameraToElevation('w')" title="西立面から見る">西</button>
       </div>
     </div>
     <div id="int-ctrl">
@@ -5232,8 +5232,9 @@ function siteSetbackPanelHtml(it){
   h+='<div class="lock-status-note">これは法令適合の判定ではありません。素の条文どおりの面だけを引いており、'+
     '道路斜線のセットバックによる緩和（法56条2項）・天空率（同7項）・2項道路の中心後退・高低差の緩和を'+
     '<b>1つも見ていません</b>。そのため実際の審査より<b>厳しい側</b>に出ます（本当は建てられる形まで削られます）。'+
-    '真北は<b>光の設定の「北の方角」（現在 '+setbackNorthDeg()+'°）</b>から取っています。'+
-    '敷地が真北を向いていないときは、そちらを実際の方位に合わせてください。'+
+    '真北は<b>このプランに保存されている方位（現在 '+setbackNorthDeg()+'°）</b>から取っています。'+
+    '光の設定の「北の方角」スライダがその方位で、動かすとプランに保存されます。'+
+    '敷地が真北を向いていないときは、実際の方位に合わせてください。'+
     '設計中に当たりを見るための面であって、確認申請に使える判定ではありません。</div>';
   return h;
 }
@@ -6107,6 +6108,103 @@ var CANVAS_TRACKPAD_USES_NATIVE_SCROLL = true;
 
 var DATA = {walls:[], items:[], rooms:[], floorMetadata:{}, exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
 var nextId = 1;
+
+// ══ 敷地の方位（真北） ═══════════════════════════════════════════════
+//
+// **真実源は DATA.northDeg**。方位は照明の都合ではなく設計に属する情報なので、
+// プランが持ち、保存・共同編集・ファイル取り込みのすべての経路で往復する。
+// `LIGHT_SETTINGS.northDeg` は互換のために残した **写し** であって真実源ではない。
+// 写しを更新してよいのは syncNorthFromPlan() ただ1つで、そこ以外から
+// LIGHT_SETTINGS.northDeg へ代入すると、次にプランが届いた瞬間に黙って捨てられる。
+// 方位を変える入口は setPlanNorthDeg() ただ1つ。
+//
+// **方位を持たないプラン（＝これまでに保存された全プラン）は 0 度**。
+// 0 度のときは値が無いときとまったく同じ結果になるので、既存プランの
+// レンダ・立面図・呼称・書き出し名は1バイトも変わらない。
+// 読み込み時に DATA.northDeg を 0 で埋めることはしない（保存内容を勝手に太らせ、
+// 共同編集の差分にも出てしまうため）。
+//
+// 角度の意味は computeSunPosition から読んだものと同じ:
+//   真北の平面ベクトル = (sin θ, -cos θ)。θ=0 で (0,-1) = 平面図の上。
+//   θ が増えると、平面図の上から見て北の矢印は時計回りに回る。
+function normalizeNorthDeg(v){
+  var n=Number(v);
+  if(!isFinite(n)) return 0;
+  return ((n%360)+360)%360;
+}
+function planNorthDeg(){
+  if(typeof DATA==='undefined' || !DATA) return 0;
+  if(DATA.northDeg===undefined || DATA.northDeg===null) return 0;
+  return normalizeNorthDeg(DATA.northDeg);
+}
+// プラン側の値を照明設定の写しへ流す。プランが届くすべての経路から呼ぶ
+// （保存プランの復元・共同編集の参加/パッチ・ファイル取り込み・取り消し/やり直し・
+//   デフォルトプラン）。呼び忘れると太陽だけが前のプランの方位を向く。
+function syncNorthFromPlan(){
+  var deg=planNorthDeg();
+  if(typeof LIGHT_SETTINGS!=='undefined' && LIGHT_SETTINGS) LIGHT_SETTINGS.northDeg=deg;
+  if(typeof syncNorthUi==='function') syncNorthUi();
+  return deg;
+}
+// 方位を変えるただ1つの入口。写しもここで揃える。
+function setPlanNorthDeg(v){
+  var deg=normalizeNorthDeg(v);
+  if(typeof DATA!=='undefined' && DATA) DATA.northDeg=deg;
+  return syncNorthFromPlan();
+}
+
+// ── 8方位の呼称 ──────────────────────────────────────────────────────
+// 真北±22.5度が「北」、その外は「北東」…。境界（22.5度ちょうど）は次の方位へ倒す。
+var COMPASS_8_JA=['北','北東','東','南東','南','南西','西','北西'];
+var COMPASS_8_CODE=['n','ne','e','se','s','sw','w','nw'];
+function compassSector(bearingDeg){
+  return Math.round(normalizeNorthDeg(bearingDeg)/45)%8;
+}
+function compassNameJa(bearingDeg){ return COMPASS_8_JA[compassSector(bearingDeg)]; }
+function compassCode(bearingDeg){ return COMPASS_8_CODE[compassSector(bearingDeg)]; }
+
+// 図面の軸が実際に向いている方位（度）。
+// 立面図の軸（ELEV_AXES）と外観3Dのスナップは **建物に正対したまま** 動かさない。
+// 動かすのは呼称だけである（振れた敷地で真北投影にすると、何も平行でなく
+// 寸法の読めない図面になる。実務どおり「図面は建物に正対して描き、方位を添える」）。
+//
+// 平面図の向き d の画面角 φ（上=0、時計回りに増える）は n:0 / e:90 / s:180 / w:270。
+// 真北の画面角は方位 θ そのものなので、d が指す実際の方位 = φ − θ。
+// θ=0 では n→0°(北)・e→90°(東)・s→180°(南)・w→270°(西) と、これまでの呼称に一致する。
+var ELEV_DIR_SCREEN_DEG={n:0,e:90,s:180,w:270};
+function planDirBearingDeg(dir){
+  var base=ELEV_DIR_SCREEN_DEG[dir];
+  if(base===undefined) return 0;
+  return normalizeNorthDeg(base-planNorthDeg());
+}
+function elevationDirNameJa(dir){ return compassNameJa(planDirBearingDeg(dir)); }
+function elevationSheetLabel(dir){ return elevationDirNameJa(dir)+'立面図'; }
+// 書き出しファイル名の方角コード。方位0度では 'n'/'e'/'s'/'w' のままである。
+function elevationDirCode(dir){ return compassCode(planDirBearingDeg(dir)); }
+
+// 方位が変わったら画面の呼称も追う（方位スライダの数値と、外観3Dの方向スナップボタン）。
+// ボタンの並び順・押したときのカメラ位置は変えない。変えるのは文字だけ。
+function syncNorthUi(){
+  if(typeof document==='undefined' || !document.getElementById) return;
+  var deg=planNorthDeg();
+  var northInput=document.getElementById('sun-north');
+  var northVal=document.getElementById('sun-north-val');
+  if(northInput) northInput.value=deg;
+  if(northVal) northVal.textContent=deg+'°';
+  var fab=document.getElementById('elev-snap-fab');
+  if(fab){
+    var btns=fab.querySelectorAll('button[data-elev-dir]');
+    Array.prototype.forEach.call(btns,function(b){
+      var d=b.getAttribute('data-elev-dir');
+      b.textContent=elevationDirNameJa(d);
+      b.title=elevationSheetLabel(d).replace('立面図','立面')+'から見る';
+    });
+  }
+  // JIS図面ダイアログを開いたまま方位を回したら、シート名と方位記号を作り直す。
+  // 開いていなければ何もしない（次に開いたときに新しい呼称で作られる）。
+  var ov=document.getElementById('jis-drawing-overlay');
+  if(ov && ov.style.display==='flex' && typeof openJisDrawingDialog==='function') openJisDrawingDialog();
+}
 var HISTORY = [];
 var REDO_HISTORY = [];
 var HISTORY_LIMIT = 50;
@@ -6405,6 +6503,9 @@ function loadPreset(attempt){
     DATA.exteriorWallSettings=plan.exteriorWallSettings||null;
     DATA.interiorWallSettings=plan.interiorWallSettings||null;
     DATA.roofAppearance=plan.roofAppearance||null;
+    // 方位を持たないプランは 0 度。持っていないものを 0 で埋めない（保存内容が太る）。
+    DATA.northDeg=plan.northDeg;
+    syncNorthFromPlan();
     ensureFloorMetadata();
     if(plan.exteriorDetail) DATA.exteriorDetail=plan.exteriorDetail;
     var maxId=0;
@@ -9175,8 +9276,10 @@ function snapCameraToElevation(dir){
 //   3Dの x = 平面図の x（東が +）、3Dの z = 平面図の y（南が +）、y = 高さ（GL が 0）。
 //   （敷地矩形の回転は getObjBounds が 2D/3D 共通で 0 とみなしているのでここでも同じ。）
 //
-// 真北は **日照シミュレーションの方位（LIGHT_SETTINGS.northDeg）から取る**（Task 18-2）。
-// 意味は推測ではなく computeSunPosition から読んだ:
+// 真北は **プランが持っている方位（DATA.northDeg = planNorthDeg()）から取る**
+// （Task 18-2 では LIGHT_SETTINGS.northDeg を読んでいたが、Task 19 で真実源が
+//   プラン側へ移った。LIGHT_SETTINGS.northDeg はその写しである）。
+// 角度の意味は推測ではなく computeSunPosition から読んだ:
 //   azWorld = az + PI + northDeg*PI/180、az は 0=南・+が西回り、
 //   太陽の向き = (sin(azWorld), -cos(azWorld)) → 真南 = (-sin θ, cos θ)（θ=northDeg）。
 //   よって真北 = (sin θ, -cos θ)。θ=0 で (0,-1) = 平面図の上（従来の固定値と一致）。
@@ -9314,12 +9417,12 @@ function setbackLimitHeightMmAt(pl,xMm,yMm){ return pl.baseMm+pl.slope*setbackDi
 function setbackPointAt(pl,t,s){
   return {x:(pl.d0+t)*pl.nx+s*pl.px, y:(pl.d0+t)*pl.ny+s*pl.py};
 }
-// 真北の方位（度）。日照シミュレーションの方位スライダ（#sun-north）そのもの。
+// 真北の方位（度）。**プランが持っている方位**（DATA.northDeg、真実源）そのもの。
+// 照明設定の LIGHT_SETTINGS.northDeg はその写しなので、ここでは読まない
+// （読むと、プランを開き直したときに斜線制限の向きだけが前のセッションの
+//   値へ引きずられる、という食い違いが起きうる）。方位を持たないプランは 0 度。
 function setbackNorthDeg(){
-  if(typeof LIGHT_SETTINGS==='undefined' || !LIGHT_SETTINGS) return 0;
-  var v=Number(LIGHT_SETTINGS.northDeg);
-  if(!isFinite(v)) return 0;
-  return ((v%360)+360)%360;
+  return planNorthDeg();
 }
 // 真北の単位ベクトル（平面 x,y）。導出はこの節の冒頭コメントに書いてある。
 // northDeg=0 で (0,-1) = 平面図の上。
@@ -11156,7 +11259,11 @@ function updateSunSim(key,val){
   if(key==='sunSim') LIGHT_SETTINGS.sunSim=!!val;
   else if(key==='hour') LIGHT_SETTINGS.hour=Math.max(5,Math.min(19,Number(val)||13));
   else if(key==='season') LIGHT_SETTINGS.season=(val==='summer'||val==='winter')?val:'equinox';
-  else if(key==='northDeg') LIGHT_SETTINGS.northDeg=((Number(val)||0)%360+360)%360;
+  // 方位はプランに属する（真実源は DATA.northDeg）。ここは入口を1つに保つため
+  // setPlanNorthDeg へ委譲し、LIGHT_SETTINGS.northDeg へ直接は書かない。
+  // markDirty で保存対象・共同編集の同期対象になる（saveState は使わない。
+  // スライダは1目盛ごとに発火するので、取り消し履歴が埋まってしまう）。
+  else if(key==='northDeg'){ setPlanNorthDeg(val); markDirty(); }
   // 太陽シミュレーション中に夜プリセットだったら昼プリセットへ完全復帰(光量値も同期)
   if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay==='night'){
     applyLightPreset('day'); // 内部で applyLightingToScene + rebuild3D(影フィット含む)
@@ -19008,6 +19115,7 @@ function redoAction(){
 }
 function restoreHistorySnapshot(snapshot){
   DATA = JSON.parse(snapshot);
+  syncNorthFromPlan();
   ensureFloorMetadata();
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
@@ -19199,6 +19307,7 @@ async function loadPlanFromStorage(){
   _defaultPlanPending=false;
   DATA=d;
   try{
+    syncNorthFromPlan();   // 方位はプランの持ち物。写し(LIGHT_SETTINGS)をここで揃える
     ensureObjectIds();
     ensureExteriorWallSettings();
     ensureInteriorWallSettings();
@@ -19212,6 +19321,7 @@ async function loadPlanFromStorage(){
     // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
     console.error('[WebCAD] saved plan restore failed:', e);
     DATA={walls:[], items:[], rooms:[], floorMetadata:{}, exteriorWallSettings:null, interiorWallSettings:null, roofAppearance:null};
+    syncNorthFromPlan();
     _defaultPlanPending=true;
     loadPreset();
     return false;
@@ -19249,7 +19359,9 @@ async function checkStorageOnInit(){
 // プラン本体はR2、ルーム調停と参加者通知はDurable Objectsが担当する。
 // 同期はオブジェクトID単位の差分で行い、別オブジェクトの同時編集を保持する。
 var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
-var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata'];
+// northDeg（敷地の方位）もここに入れる。入れないと、共同編集の相手が方位を回しても
+// 手元には届かず、同じプランを見ているのに斜線制限の向きと立面図の呼称だけが食い違う。
+var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata','northDeg'];
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
 function sharedFastSignature(value){
   return JSON.stringify(value,function(k,v){
@@ -19387,6 +19499,7 @@ function applySharedPatch(patch,isOwn){
       Object.keys(upserts).forEach(function(id){if(!DATA[name].some(function(item){return String(item&&item.id)===id;}))DATA[name].push(upserts[id]);});
     });
     if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
+    syncNorthFromPlan();
     ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();ensureFloorMetadata();syncExteriorWallSettings();normalizeLegacyFurnitureItems();syncFloorUseControl();
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
     clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
@@ -19475,7 +19588,7 @@ async function fetchSharedPlan(roomId){
 // resuming=true は「既に参加中のセッションで取り直しただけ」の意味。
 // 生きているソケットを張り直さず、編集中の視点も動かさない。
 function installSharedPlan(loaded,roomId,resuming){
-  _defaultPlanPending=false;DATA=loaded.plan;SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
+  _defaultPlanPending=false;DATA=loaded.plan;syncNorthFromPlan();SHARED.roomId=roomId;SHARED.version=loaded.version;SHARED.expiresAt=loaded.expiresAt;SHARED.savedAt=loaded.savedAt||0;SHARED.baseline=sharedBaselineFrom(DATA);sharedResetDirtyTracking();
   ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();syncExteriorWallSettings();normalizeLegacyFurnitureItems();if(!resuming)restoreViewState();clearEditHistory();clearDirty();draw2d();if(ren)rebuild3D();if(!resuming)connectSharedSocket();renderSharedUi();
 }
 async function refreshSharedPlan(){
@@ -21735,7 +21848,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); syncFloorUseControl(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); syncFloorUseControl(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -22165,8 +22278,10 @@ var JISDRAW=(function(){
         sheets.push({kind:'plan',key:f,label:'平面図 '+f+'F'});
     });
     if(sheets.length){
-      [['e','東立面図'],['w','西立面図'],['s','南立面図'],['n','北立面図']].forEach(function(d){
-        sheets.push({kind:'elev',key:d[0],label:d[1]});
+      // 呼称は方位から作る（elevationSheetLabel）。軸そのものは ELEV_AXES のまま動かさない。
+      // 方位0度では '東立面図' '西立面図' '南立面図' '北立面図' と、これまでと同じ文字列になる。
+      ['e','w','s','n'].forEach(function(d){
+        sheets.push({kind:'elev',key:d,label:elevationSheetLabel(d)});
       });
     }
     return sheets;
@@ -22175,11 +22290,14 @@ var JISDRAW=(function(){
   // 座標系(x=東,y=南)から導出: 南立面(南から北向きに見る)は右手=東、北立面は右手=西、
   // 東立面(東から西向き)は右手=北、西立面(西から東向き)は右手=南。
   // ブラウザで平面図と見比べて左右が実世界と一致することを確認済み(逆なら u を反転する)。
+  // 呼称はここに持たない。軸は建物に正対したまま（=このテーブルは方位で動かさない）、
+  // 「北立面図/北東立面図…」の文字は elevationSheetLabel(dir) が方位から作る。
+  // 名前を2か所に持つと、方位を回したときに片方だけ古いまま残る。
   var ELEV_AXES={
-    s:{u:[ 1,0], dp:[0, 1], label:'南立面図'},
-    n:{u:[-1,0], dp:[0,-1], label:'北立面図'},
-    e:{u:[0,-1], dp:[ 1,0], label:'東立面図'},
-    w:{u:[0, 1], dp:[-1,0], label:'西立面図'}
+    s:{u:[ 1,0], dp:[0, 1]},
+    n:{u:[-1,0], dp:[0,-1]},
+    e:{u:[0,-1], dp:[ 1,0]},
+    w:{u:[0, 1], dp:[-1,0]}
   };
   var ELEV_MARGIN_MM=1800; // 平面図PLAN_MARGIN_MMと同じ余白量(印刷余白+将来の寸法線用)
   var ELEV_HEIGHT_DIM_EXTRA_MM=1800; // 右側の高さ寸法列(引出線+GL/軒高/最高高さの数値)が収まる追加余白
@@ -23198,7 +23316,9 @@ function jisSetStatus(message,isError){
 // ファイル名の共通部分。kind/keyから組み立てる(平面:jis-plan{階}f、立面:jis-elev-{方角コード})+日付(YYYYMMDD, ダッシュ無し)。
 function jisFileBaseName(){
   var s=JIS_UI.sheet;
-  var kindPart=(s.kind==='plan') ? ('plan'+s.key+'f') : ('elev-'+s.key);
+  // 立面は「軸のコード」ではなく **実際の方位のコード** で書き出す(elev-n / elev-ne …)。
+  // 方位0度では従来どおり elev-n / elev-e / elev-s / elev-w になる。
+  var kindPart=(s.kind==='plan') ? ('plan'+s.key+'f') : ('elev-'+elevationDirCode(s.key));
   var d=new Date();
   var ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
   return 'jis-'+kindPart+'-'+ymd;

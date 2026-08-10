@@ -134,6 +134,7 @@ const SETBACK_FNS = [
   'escHtml', 'isFiniteCanvasValue', 'getObjBounds',
   'isContextExteriorItemType', 'isGroundLevelItemType',
   'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
+  'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
   'setbackPlanesForSite', 'makeSetbackPlane',

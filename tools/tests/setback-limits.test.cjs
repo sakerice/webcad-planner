@@ -143,6 +143,7 @@ const FNS = [
   'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',
+  'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
@@ -169,7 +170,7 @@ function makeCtx(data, opts) {
     Array: Array, Object: Object, JSON: JSON, String: String,
     SetbackLaw: Law, HeightModel: HeightModel, THREE: THREE,
     DATA: data, ST: { showDim: true, selected: null }, sc3: sc3,
-    LIGHT_SETTINGS: { northDeg: o.northDeg || 0, hour: 13, season: 'equinox', sunSim: false },
+    LIGHT_SETTINGS: { northDeg: 0, hour: 13, season: 'equinox', sunSim: false },
     isInt: false, isWalkView: function () { return false; },
     exteriorDetailEnabled: function () { return false; },
     build3DRoofGutters: function () {},
@@ -183,6 +184,8 @@ function makeCtx(data, opts) {
     __sc3: sc3
   });
   vm.runInContext(VARS.map(topLevelVar).concat(FNS.map(topLevelFunction)).join('\n'), ctx);
+  // 方位はプランの持ち物(Task 19)。LIGHT_SETTINGS へ直接書かず、アプリと同じ入口を通す。
+  if (o.northDeg !== undefined) vm.runInContext('setPlanNorthDeg(' + o.northDeg + ')', ctx);
   return ctx;
 }
 function run(ctx, src) { return vm.runInContext(src, ctx); }
@@ -306,7 +309,7 @@ test('18(最重要): 斜線を設定していないプランでは、方位を�
   const ctx = makeCtx(cornerPlan({ setback: null }));
   run(ctx, 'DATA.items[0].setback=undefined; delete DATA.items[0].setback;');
   [0, 45, 90, 180, 270].forEach((deg) => {
-    run(ctx, 'LIGHT_SETTINGS.northDeg=' + deg);
+    run(ctx, 'setPlanNorthDeg(' + deg + ')');
     assert.deepEqual(plain(run(ctx, 'setbackPlanes()')), [], 'northDeg=' + deg);
     assert.deepEqual(plain(run(ctx, 'setbackRoofItems()')), []);
   });
@@ -497,11 +500,11 @@ test('18-2(最重要): 方位を回すと片流れ屋根も追随する（キャ
   const ctx = makeCtx(rectPlan(LOW1_N), { northDeg: 0 });
   const a = plain(run(ctx, 'setbackRoofItems()'))[0];
   assert.ok(a, '0° で屋根ができている');
-  run(ctx, 'LIGHT_SETTINGS.northDeg=90');
+  run(ctx, 'setPlanNorthDeg(90)');
   const b = plain(run(ctx, 'setbackRoofItems()'))[0];
   assert.ok(b, '90° でも屋根ができている');
   assert.notEqual(a.rot, b.rot, '屋根の向きが回っている: ' + a.rot + ' → ' + b.rot);
-  run(ctx, 'LIGHT_SETTINGS.northDeg=0');
+  run(ctx, 'setPlanNorthDeg(0)');
   const c = plain(run(ctx, 'setbackRoofItems()'))[0];
   assert.equal(c.rot, a.rot, '0° に戻すと元の向きに戻る');
   assert.ok(Math.abs(c.w - a.w) < 1e-6 && Math.abs(c.d - a.d) < 1e-6, '寸法も戻る');
@@ -510,7 +513,7 @@ test('18-2(最重要): 方位を回すと片流れ屋根も追随する（キャ
 test('18-2: 道路斜線は方位を回しても動かない（道路の向きで決まる）', () => {
   const ctx = makeCtx(cornerPlan({ eastOnly: true }), { northDeg: 0 });
   const a = plain(run(ctx, 'setbackPlanes()'))[0];
-  run(ctx, 'LIGHT_SETTINGS.northDeg=137');
+  run(ctx, 'setPlanNorthDeg(137)');
   const b = plain(run(ctx, 'setbackPlanes()'))[0];
   assert.deepEqual([b.nx, b.ny, b.d0], [a.nx, a.ny, a.d0]);
 });
