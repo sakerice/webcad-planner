@@ -137,12 +137,12 @@ const HEIGHT_FNS = [
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
-  'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
-  'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'wallTopHeightAtM',
+  'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
   'wallHeightMm', 'wallDisplayHeightM',
   'buildRoomCeilingShapeGeometry', 'buildSlopedCeilingGeometry', 'buildRoomCeilingMesh',
@@ -505,4 +505,253 @@ test('12-1(最重要): 既定プランの部屋は、屋根から天井を導く
   PLAN.rooms.forEach((r) => {
     assert.equal(ctx.roomRoofCeilingExtent(r), null, r.id + ' が屋根由来の天井を持った');
   });
+});
+
+// ── Task 15: 壁は天井ではなく「屋根の下面」で切られる ──────────────────
+//
+// 屋根を elev=-400 だけ下げる。すると軒側の屋根下面が階高(外皮の高さ)より下へ
+// 来る -- Task 12 が入れた「外壁は階高を割らない」規則が、そこで壁を屋根の上へ
+// 突き出させていた。屋根の y は 1000 から始まるので、部屋の y<1000 の部分には
+// 屋根が無い。そこは従来どおり階高のまま = Task 2b のスリット対策が生きている
+// ことを同じ家の中で同時に見られる。
+const ROOF_DROP_MM = -400;
+function house15(roomCeiling, opts) {
+  const o = opts || {};
+  const data = house(roomCeiling, o);
+  data.items = [Object.assign({}, ROOF, { elev: ROOF_DROP_MM })];
+  // 3: 東西に走る壁(y=1300)。**屋根の勾配を横切る向き**なので、壁の厚み方向へ
+  // 63mm ずれると屋根面が 44mm 下がる。芯だけで切ると外面がそこを突き抜ける。
+  // y=1300 は軒に近く、屋根下面が階高より下に来る帯(y<1571)の中にある。
+  data.walls = data.walls.concat([
+    { id: 4, floor: 2, x1: -100, y1: 1300, x2: 4100, y2: 1300, thick: 120 }
+  ]);
+  return data;
+}
+// テスト側で独立に解いた屋根**下面**の高さ(m, ワールド)。index.html の式は写さない。
+function expectedUndersideWorldY(ctx, roofItem, yMm) {
+  const U = ctx.U;
+  const D = roofItem.d * U;
+  const tanP = Math.tan(PITCH * Math.PI / 180);
+  const lz = (yMm - (roofItem.y + roofItem.d / 2)) * U;
+  const h = Math.min(tanP * D / 2, tanP * Math.max(0, D / 2 - Math.abs(lz)));
+  return ctx.floorBaseY(roofItem.floor) + (roofItem.elev || 0) * U + h;
+}
+// 屋根がその平面点を覆っているか（テスト側の独立判定）。
+function roofCoversY(roofItem, yMm) {
+  return yMm >= roofItem.y - 1e-6 && yMm <= roofItem.y + roofItem.d + 1e-6;
+}
+// buildWall3D を走らせ、建った全ピースの頂点を (world x, world z, world y) で返す。
+function builtVertices(ctx, data, wallIndex) {
+  ctx.__built.length = 0;
+  vm.runInContext('buildWall3D(DATA.walls[' + wallIndex + ']);', ctx);
+  assert.ok(ctx.__built.length > 0, '壁が1つも建っていない');
+  const wall = data.walls[wallIndex];
+  const dx = wall.x2 - wall.x1, dy = wall.y2 - wall.y1;
+  const len = Math.sqrt(dx * dx + dy * dy) * ctx.U;
+  const dirX = dx * ctx.U / len, dirZ = dy * ctx.U / len;
+  const nX = -dirZ, nZ = dirX;                       // 壁の法線(水平)
+  const out = [];
+  function walk(o) {
+    if (o.children) { o.children.forEach(walk); return; }
+    if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+    const p = o.geometry.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      // ローカル(x=長さ方向, y=高さ, z=法線方向) を rotation.y と position で世界へ
+      const lx = p.getX(i), ly = p.getY(i), lz = p.getZ(i);
+      out.push({
+        x: o.position.x + dirX * lx + nX * lz,
+        z: o.position.z + dirZ * lx + nZ * lz,
+        y: o.position.y + ly
+      });
+    }
+  }
+  ctx.__built.forEach(walk);
+  return out;
+}
+
+test('15: 建った外壁の頂点は、どれも屋根の下面より上に出ない（buildWall3D 経由）', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  const ctx = makeCtx(data, { outer: true });
+  const roof = data.items[0];
+  const verts = builtVertices(ctx, data, 1);            // 西の外壁
+  let worst = -Infinity, at = null, covered = 0;
+  verts.forEach((v) => {
+    const yMm = v.z / ctx.U;
+    if (!roofCoversY(roof, yMm)) return;
+    covered++;
+    const d = v.y - expectedUndersideWorldY(ctx, roof, yMm);
+    if (d > worst) { worst = d; at = v; }
+  });
+  assert.ok(covered > 50, '屋根の下の頂点が足りない: ' + covered);
+  assert.ok(worst <= 1e-6,
+    '外壁が屋根を ' + Math.round(worst * 1000) + 'mm 突き抜けた ' + JSON.stringify(at));
+});
+
+test('15: 妻側の外壁は屋根なりの三角形になる（軒側で階高より下へ切られ、棟で上がる）', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  const ctx = makeCtx(data, { outer: true });
+  const roof = data.items[0];
+  const wall = data.walls[1];
+  const env = ctx.wallFullHeightM(2);
+  const fy = ctx.floorBaseY(2);
+  const roofs = ctx.wallLimitingRoofs(wall);
+  assert.equal(roofs.length, 1, 'この壁の頭を押さえる屋根が見つかっていない');
+  const ys = [], atRoof = [];
+  for (let i = 0; i <= 32; i++) {
+    const t = i / 32, yMm = wall.y1 + (wall.y2 - wall.y1) * t;
+    const top = ctx.wallTopHeightAtM(wall, t, ctx.wallDisplayHeightM(wall), env, roofs);
+    ys.push(top);
+    if (roofCoversY(roof, yMm)) atRoof.push({ yMm: yMm, top: fy + top,
+      roof: expectedUndersideWorldY(ctx, roof, yMm) });
+  }
+  // 軒側: 階高より **下** へ切られている（Task 12 の規則ではここが切られなかった）
+  const cut = ys.filter((v) => v < env - 1e-9).length;
+  assert.ok(cut >= 3, '軒側で階高より下へ切られていない: ' + JSON.stringify(ys.map((v) => Math.round(v * 1000))));
+  // 棟側: 階高より上へ伸びている = 三角形
+  assert.ok(Math.max.apply(null, ys) > env + 0.2, '棟に向かって上がっていない');
+  // 切られた点はぴったり屋根の下面（壁厚のぶんだけ低いことは許す)
+  atRoof.filter((r) => r.top < fy + env - 1e-9).forEach((r) => {
+    assert.ok(r.top <= r.roof + 1e-6 && r.top > r.roof - 0.06,
+      'y=' + Math.round(r.yMm) + ' で屋根の下面(' + r.roof + ')に乗っていない: ' + r.top);
+  });
+  // 上がって下がる（棟で折り返す）
+  const d = ys.slice(1).map((v, i) => v - ys[i]);
+  assert.ok(d.some((v) => v > 1e-9) && d.some((v) => v < -1e-9), '山になっていない');
+});
+
+test('15(最重要): 屋根が無い位置では切らない -- 階高の下限がそのまま効く（Task 2b の再発防止）', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  const ctx = makeCtx(data, { outer: true });
+  const roof = data.items[0];
+  const wall = data.walls[1];
+  const env = ctx.wallFullHeightM(2);
+  const roofs = ctx.wallLimitingRoofs(wall);
+  let checked = 0;
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40, yMm = wall.y1 + (wall.y2 - wall.y1) * t;
+    if (roofCoversY(roof, yMm)) continue;             // 屋根の下は別のテスト
+    const top = ctx.wallTopHeightAtM(wall, t, ctx.wallDisplayHeightM(wall), env, roofs);
+    assert.ok(top >= env - 1e-9,
+      '屋根の無い y=' + Math.round(yMm) + ' で外壁が階高(' + env + ')より下へ切られた: ' + top);
+    checked++;
+  }
+  assert.ok(checked >= 5, '屋根の外側の点が足りない: ' + checked);
+  // 建ったメッシュでも同じこと（配線を素通りしないため）
+  const verts = builtVertices(ctx, data, 1).filter((v) => !roofCoversY(roof, v.z / ctx.U));
+  const fy = ctx.floorBaseY(2);
+  const topsOut = verts.map((v) => v.y - fy).filter((h) => h > 0.1);
+  assert.ok(Math.max.apply(null, topsOut) >= env - 1e-9,
+    '屋根の外側で建った外壁が階高に届いていない');
+});
+
+test('15: 内部間仕切りも同じ屋根の下面で切られる（内外で分けない）', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  const ctx = makeCtx(data, { outer: false });
+  const roof = data.items[0];
+  const verts = builtVertices(ctx, data, 0);            // 内部間仕切り
+  let worst = -Infinity, covered = 0;
+  verts.forEach((v) => {
+    const yMm = v.z / ctx.U;
+    if (!roofCoversY(roof, yMm)) return;
+    covered++;
+    const d = v.y - expectedUndersideWorldY(ctx, roof, yMm);
+    if (d > worst) worst = d;
+  });
+  assert.ok(covered > 50);
+  assert.ok(worst <= 1e-6, '内部間仕切りが屋根を ' + Math.round(worst * 1000) + 'mm 突き抜けた');
+});
+
+test('15: 壁の厚みぶん（外面・内面）も屋根を突き抜けない -- 芯だけで切らない', () => {
+  // 勾配を横切る東西の壁(walls[3], y=1300)。lowMm は屋根下面より上に取り、
+  // 天井ではなく屋根が上端を決める状態にしてから測る。
+  const data = house15({ type: 'sloped', lowMm: 2600 });
+  const ctx = makeCtx(data, { outer: true });
+  const roof = data.items[0];
+  const wall = data.walls[3];
+  // 前提: この壁の芯で屋根下面が階高より下に来ている（切られる状態）
+  const centre = ctx.roofUndersideWorldYAt(roof, 2000, wall.y1);
+  assert.ok(centre < ctx.floorBaseY(2) + ctx.wallFullHeightM(2),
+    '前提が崩れている(屋根が階高より上にある): ' + centre);
+  const verts = builtVertices(ctx, data, 3);
+  // 芯から厚み方向へ出ている頂点(=外面/内面)だけを見る
+  const off = verts.filter((v) => Math.abs(v.z - wall.y1 * ctx.U) > 0.03);
+  assert.ok(off.length > 50, '厚み方向にずれた頂点が拾えていない: ' + off.length);
+  let worst = -Infinity, at = null;
+  off.forEach((v) => {
+    const yMm = v.z / ctx.U;
+    if (!roofCoversY(roof, yMm)) return;
+    const d = v.y - expectedUndersideWorldY(ctx, roof, yMm);
+    if (d > worst) { worst = d; at = v; }
+  });
+  assert.ok(worst <= 1e-6,
+    '壁の面が屋根を ' + Math.round(worst * 1000) + 'mm 突き抜けた ' + JSON.stringify(at));
+});
+
+test('15: 天井面も屋根の下面を超えない（低い側の指定が屋根より高くても）', () => {
+  // lowMm 2600 は軒側の屋根下面(階高より 400mm 下)より上にある。
+  const data = house15({ type: 'sloped', lowMm: 2600 });
+  const ctx = makeCtx(data);
+  const room = data.rooms[0];
+  const roof = data.items[0];
+  const p = ctx.roomCeilingProfile(room);
+  assert.equal(p.source, 'roof');
+  let checked = 0, capped = 0;
+  for (let i = 0; i <= 16; i++) {
+    const yMm = room.y + room.d * i / 16;
+    if (!roofCoversY(roof, yMm)) continue;
+    const got = ctx.roomCeilingWorldYAtMm(room, p, room.x + room.w / 2, yMm);
+    const lim = expectedUndersideWorldY(ctx, roof, yMm);
+    assert.ok(got <= lim + 1e-9,
+      'y=' + Math.round(yMm) + ' で天井が屋根を突き抜けた got=' + got + ' roof=' + lim);
+    if (Math.abs(got - lim) < 1e-9) capped++;
+    checked++;
+  }
+  assert.ok(checked >= 8);
+  assert.ok(capped >= 1, '屋根で頭を押さえた点が1つも無い(前提が崩れている)');
+});
+
+test('15: 頭を押さえる屋根が複数あれば、その点で低い方が勝つ', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  // attic を覆う高い屋根と、attic2 を覆う低い屋根。間仕切り(壁0)は両方を持つ。
+  const high = Object.assign({}, ROOF, { id: 21, x: -500, w: 4800, elev: 0 });
+  const low = Object.assign({}, ROOF, { id: 22, x: 4000, w: 3600, elev: -900 });
+  data.items = [high, low];
+  const ctx = makeCtx(data, { outer: false });
+  const wall = data.walls[0];                          // x=4100、両方の屋根の下
+  const roofs = ctx.wallLimitingRoofs(wall);
+  assert.equal(roofs.length, 2, '2枚の屋根が集まっていない: ' + roofs.length);
+  let checked = 0;
+  for (let i = 0; i <= 20; i++) {
+    const t = i / 20, yMm = wall.y1 + (wall.y2 - wall.y1) * t;
+    if (!roofCoversY(high, yMm)) continue;
+    const lim = ctx.roofTopLimitAtPlanPoint(roofs, wall.x1, yMm);
+    const want = Math.min(expectedUndersideWorldY(ctx, high, yMm),
+      expectedUndersideWorldY(ctx, low, yMm));
+    assert.ok(Math.abs(lim - want) < 1e-9,
+      'y=' + Math.round(yMm) + ' で低い方の屋根を採っていない got=' + lim + ' want=' + want);
+    checked++;
+  }
+  assert.ok(checked >= 8);
+});
+
+test('15(最重要): 勾配を宣言していない既定プランでは、頭を押さえる屋根が1枚も集まらない', () => {
+  const ctx = makeCtx(PLAN);
+  PLAN.walls.forEach((w) => {
+    assert.equal(ctx.wallLimitingRoofs(w).length, 0,
+      'wall ' + w.id + ' に屋根の上限がついた(保存済みプランのジオメトリが動く)');
+  });
+});
+
+test('15: roofCeilingWorldYAt は roofUndersideWorldYAt から 250mm 下がった面である', () => {
+  const data = house15({ type: 'sloped', lowMm: 2200 });
+  const ctx = makeCtx(data);
+  const roof = data.items[0];
+  for (let i = 0; i <= 8; i++) {
+    const yMm = 1000 + 7000 * i / 8;
+    const u = ctx.roofUndersideWorldYAt(roof, 2000, yMm);
+    assert.ok(Math.abs(u - expectedUndersideWorldY(ctx, roof, yMm)) < 1e-9,
+      '屋根下面が独立に解いた値と合わない y=' + yMm);
+    assert.ok(Math.abs((u - ctx.roofCeilingWorldYAt(roof, 2000, yMm)) - 250 * ctx.U) < 1e-12,
+      '天井面が屋根下面から 250mm 下がっていない');
+  }
 });

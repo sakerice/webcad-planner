@@ -496,7 +496,7 @@ const VIDEO_FNS = [
   'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
-  'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',

@@ -112,10 +112,10 @@ function ctxFor(walls) {
     'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
     'wallFullHeightM', 'isPositiveNumber', 'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint',
-    'roofItemOverRoom', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+    'roofItemOverRoom', 'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
     'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
-    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'wallTopHeightAtM',
+    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallHeightMm', 'wallDisplayHeightM',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
     'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'

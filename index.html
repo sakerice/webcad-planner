@@ -3795,15 +3795,20 @@ function roofItemOverRoom(room){
   });
   return best;
 }
-// 屋根下面から CEILING_UNDER_ROOF_OFFSET_MM だけ下げた面の、ワールド Y(m)。
+// 屋根の下面(=垂木の載る基準面)の、ワールド Y(m)。
 // **屋根の形の計算はここに書かない**。3D 側が既に使っている roofSurfaceHeightAt
 // (屋根ローカル座標での屋根面高さ) と roofLocalPoint をそのまま呼ぶ。屋根アイテムの
 // 世界での据え付け方 (floorBaseY(floor)+elev) も既存の竪樋判定と同じ式である。
-function roofCeilingWorldYAt(roofItem,xMm,yMm){
+// この面が「家の中のものが超えられない天井(=屋根裏の底)」であり、天井面も壁の
+// 上端もここで頭を押さえられる。
+function roofUndersideWorldYAt(roofItem,xMm,yMm){
   var lp=roofLocalPoint(roofItem,xMm,yMm);
   return floorBaseY(roofItem.floor)+((roofItem.elev||0)*U)
-    +roofSurfaceHeightAt(roofItem,lp.x,lp.z)
-    -CEILING_UNDER_ROOF_OFFSET_MM*U;
+    +roofSurfaceHeightAt(roofItem,lp.x,lp.z);
+}
+// 屋根下面から CEILING_UNDER_ROOF_OFFSET_MM だけ下げた面の、ワールド Y(m)。
+function roofCeilingWorldYAt(roofItem,xMm,yMm){
+  return roofUndersideWorldYAt(roofItem,xMm,yMm)-CEILING_UNDER_ROOF_OFFSET_MM*U;
 }
 // 部屋の天井の形。**宣言していない部屋では必ず null**を返し、呼び出し側は従来の
 // 平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ手書きの
@@ -3831,7 +3836,12 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
     var lowWorld=baseY+profile.lowY;
     // 軒先側では屋根下面が低い側の天井高より下へ来る。そこは天井を吊ったまま
     // (平らな部分)にする -- だから勾配は壁の途中から始まり、上辺は折れ線になる。
-    return y<lowWorld?lowWorld:y;
+    if(y<lowWorld) y=lowWorld;
+    // ただし吊った天井が屋根下面より上へ出ることは無い(低い側に大きい値を
+    // 入れると軒先で起きる)。壁は屋根下面で切られるので、天井だけ上へ抜けさせると
+    // 壁と天井のあいだに隙間が開く。同じ面で両方の頭を押さえる。
+    var roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
+    return y>roofLim?roofLim:y;
   }
   // 手書きの勾配: 高さは (x,z) の一次関数。既存 buildSlopedCeilingGeometry と同式。
   var u=ceilingSlopeUnit(profile.direction);
@@ -4027,11 +4037,84 @@ function wallTouchesSlopedCeiling(w){
   }
   return false;
 }
+// ── 壁の上端を屋根の下面で切る (Task 15) ──────────────────────────────
+// 在来工法では外壁は桁(軒の高さ)まで立ち、その上の妻壁は屋根なりの三角形になる。
+// **壁が屋根を突き抜けることはない。** だから壁の頭を押さえるのは天井ではなく
+// 屋根の下面である。天井はそこから CEILING_UNDER_ROOF_OFFSET_MM だけ下がった面
+// なので、壁はその 250mm ぶん上、屋根の裏側まで立ってよい。
+//
+// Task 2b の「外皮に面する壁は階高を下限にする」はそのまま残す。あれは
+// **屋根が無い**(平らな屋根の下で天井だけ下げた)場合の規則で、外壁と上階の床の
+// あいだに家の外まで抜けるスリットが開くのを塞いでいる。屋根がある位置では
+// 屋根下面が上限になり、下限より先に上限が効く。そこにスリットは開かない --
+// 空いた分は屋根そのものが塞ぐからである(実測で確かめること)。
+// 屋根が無い位置では上限が無く、従来どおり下限だけが効く。
+//
+// その点を覆っている屋根が複数あれば **低い方** が勝つ。先に頭を押さえるのは
+// そちらだから(roofItemOverRoom が棟の低い屋根を採るのと同じ理由)。
+function roofTopLimitAtPlanPoint(roofs,xMm,yMm){
+  if(!roofs||!roofs.length) return null;
+  var best=null, i, it, y;
+  for(i=0;i<roofs.length;i++){
+    it=roofs[i];
+    // 屋根が覆っていない位置では切らない(= 従来どおり)。
+    if(!it||!roofCoversPlanPoint(it,xMm,yMm)) continue;
+    y=roofUndersideWorldYAt(it,xMm,yMm);
+    if(best===null||y<best) best=y;
+  }
+  return best;
+}
+// 壁は厚みを持つ。上端を芯の位置だけで切ると、勾配を横切る向きの壁では外面/内面の
+// 上端が屋根面より上に出る(120mm厚・30度勾配で 36.6mm 実測した)。芯と両面の3点で
+// 見て、いちばん低い屋根面に合わせる。屋根が覆っていない点は数に入れない。
+function wallRoofTopLimitWorldY(w,roofs,xMm,yMm){
+  if(!roofs||!roofs.length) return null;
+  var best=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return best;
+  var nx=-dy/len, ny=dx/len;
+  var halfMm=Math.max(wallExteriorFaceOffsetM(w),wallInteriorFaceOffsetM(w))/U;
+  var s,v;
+  for(s=-1;s<=1;s+=2){
+    v=roofTopLimitAtPlanPoint(roofs,xMm+nx*halfMm*s,yMm+ny*halfMm*s);
+    if(v!==null&&(best===null||v<best)) best=v;
+  }
+  return best;
+}
+// この壁の頭を押さえる屋根。壁の両側をサンプリングし、天井を屋根から導いている
+// 部屋(roomCeilingProfile の source==='roof')の屋根だけを集める。
+// 勾配を宣言していないプランでは常に空になるので、切る処理そのものが起きない
+// = 保存済みの家のジオメトリは1頂点も動かない。
+function wallLimitingRoofs(w){
+  var out=[];
+  if(!w) return out;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return out;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r,p;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(!r) continue;
+      p=roomCeilingProfile(r);
+      if(!p||p.source!=='roof'||!p.roof) continue;
+      if(out.indexOf(p.roof)<0) out.push(p.roof);
+    }
+  }
+  return out;
+}
 // 壁の長さ方向の位置 t(0..1) における上辺の高さ(m、その階の floorBaseY 基準)。
 // 両側の部屋のうち**高い方**を採る(既存規則。低い方に合わせると高い側の部屋に
 // 穴が開く)。minH は「これ以上は下げない」下限で、外壁には外皮の高さを渡す
-// -- 外壁を勾配で切ると、下げた部屋の上でファサードに水平のスリットが貫通する。
-function wallTopHeightAtM(w,t,fallbackH,minH){
+// -- 屋根が無いところで外壁を天井まで切ると、下げた部屋の上でファサードに
+// 水平のスリットが貫通する(Task 2b の実測)。
+// roofs はその壁の頭を押さえる屋根(wallLimitingRoofs)。渡さなければ切らない。
+function wallTopHeightAtM(w,t,fallbackH,minH,roofs){
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
   var lenMm=Math.sqrt(dx*dx+dy*dy);
   if(lenMm<1) return fallbackH;
@@ -4063,6 +4146,9 @@ function wallTopHeightAtM(w,t,fallbackH,minH){
   }
   if(best===null) best=fallbackH;
   if(minH!==undefined&&best<minH) best=minH;
+  // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
+  var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
+  if(lim!==null&&best>lim-fy) best=lim-fy;
   return best;
 }
 // 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
@@ -11442,9 +11528,13 @@ function buildWall3D(w){
   // 上辺を勾配に沿わせるのは、勾配天井を宣言した部屋に接している壁だけ。
   // 宣言していないプランでは slopedTop が false のまま = ジオメトリは1頂点も動かない。
   var slopedTop=wallTouchesSlopedCeiling(w);
-  // 外壁は下げない。外皮の高さ(階高)を下限にして、上へ(切妻の妻壁のように)しか
-  // 動かさない。過去の実測で、下げた部屋の上でファサードに水平のスリットが貫通した。
+  // 外壁は**屋根が無いところでは**下げない。外皮の高さ(階高)を下限にして、
+  // 上へ(切妻の妻壁のように)しか動かさない。過去の実測で、下げた部屋の上で
+  // ファサードに水平のスリットが貫通した(Task 2b)。
   var slopedTopMinH=isOuter?wallFullHeightM(fl):undefined;
+  // 屋根がある位置では、内外の区別なく屋根の下面が上端になる(Task 15)。
+  // 壁1本につき一度だけ集める。
+  var slopedTopRoofs=slopedTop?wallLimitingRoofs(w):null;
   // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
   // 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
   // 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
@@ -11455,7 +11545,11 @@ function buildWall3D(w){
   function slopedTopAt(alongM,yBase,h){
     var t=len>0?alongM/len:0;
     if(t<0) t=0; else if(t>1) t=1;
-    var top=wallTopHeightAtM(w,t,yBase+h,slopedTopMinH)+WALL_TOP_OVERSHOOT_M;
+    var top=wallTopHeightAtM(w,t,yBase+h,slopedTopMinH,slopedTopRoofs)+WALL_TOP_OVERSHOOT_M;
+    // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
+    var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
+      w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t);
+    if(roofLim!==null&&top>roofLim-fy) top=roofLim-fy;
     // ピース自身の天端は超えない。まぐさ上の小壁など、天井より下で完結する
     // ピースはこれで一切影響を受けない。
     if(top>yBase+h) top=yBase+h;

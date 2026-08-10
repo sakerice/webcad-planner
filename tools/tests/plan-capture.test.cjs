@@ -397,7 +397,7 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('roomsOverlapInPlan'), topLevelFunction('roomAboveRoom'),
     topLevelFunction('roomHasRoomAbove'),
     topLevelFunction('roomDeclaresSlopedCeiling'), topLevelFunction('roofCoversPlanPoint'),
-    topLevelFunction('roofItemOverRoom'), topLevelFunction('roofCeilingWorldYAt'),
+    topLevelFunction('roofItemOverRoom'), topLevelFunction('roofUndersideWorldYAt'), topLevelFunction('roofCeilingWorldYAt'),
     topLevelFunction('roofLocalPoint'), topLevelFunction('roofSurfaceHeightAt'),
     topLevelFunction('roomCeilingProfile'), topLevelFunction('roomCeilingWorldYAtMm'),
     topLevelFunction('roomRoofCeilingExtent'),
