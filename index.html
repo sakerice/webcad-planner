@@ -3140,6 +3140,11 @@ input[type="reset"]:focus-visible{
         <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
+        <!-- 「↔ 寸法」はツールバーにしか無く、ツールバーは mob-hide でスマホでは
+             丸ごと消える。スマホ前提のアプリでデスクトップにしか無い操作は操作では
+             ないので、共通操作(スマホでもハンバーガーから開く)にも同じ toggleDim を
+             置く。新しい状態は作らない -- 押すのは既存の ST.showDim そのものである。 -->
+        <div class="stool active" id="stool-dim" onclick="toggleDim()" title="寸法の表示切替"><span class="sicon">⇥</span>寸法</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -3811,21 +3816,45 @@ function roofUndersideWorldYAt(roofItem,xMm,yMm){
 function roofCeilingWorldYAt(roofItem,xMm,yMm){
   return roofUndersideWorldYAt(roofItem,xMm,yMm)-CEILING_UNDER_ROOF_OFFSET_MM*U;
 }
-// 部屋の天井の形。**宣言していない部屋では必ず null**を返し、呼び出し側は従来の
-// 平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ手書きの
-// low/high/direction から形を得る(屋根が載っていない部屋のための上書き)。
+// 部屋の天井の形。**宣言しておらず斜線にも当たっていない部屋では必ず null**を返し、
+// 呼び出し側は従来の平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ
+// 手書きの low/high/direction から形を得る(屋根が載っていない部屋のための上書き)。
+//
+// Task 17: 斜線制限で削られた部屋は、宣言が無くても勾配天井になる。勾配天井は
+// 設計者が宣言するものではなく **切り取りの結果として現れる** ものだからである。
+// ただし別経路は作らない -- 斜線の切り口に架かる片流れ屋根を roof アイテムとして
+// 作り(setbackRoofItems)、ここでは従来どおり「屋根から天井が決まる」枝を通す。
+// reason で「宣言が効いたのか、斜線が効いたのか」を必ず判別できるようにする。
+// 斜線由来の片流れ屋根は斜線制限の節(setbackRoofItems)で作られる。高さモデルだけを
+// 切り出して走らせる経路のために、無ければ「斜線は無い」として通す。
+function setbackRoofsForRoom(room){
+  if(typeof setbackRoofsOverRoom!=='function') return [];
+  return setbackRoofsOverRoom(room);
+}
 function roomCeilingProfile(room){
-  if(!roomDeclaresSlopedCeiling(room)) return null;
+  var sbRoofs=setbackRoofsForRoom(room);
+  if(!roomDeclaresSlopedCeiling(room)){
+    if(!sbRoofs.length) return null;
+    // 斜線由来。低い側は持ち上げない(lowY=0)。制限に当たっていない場所の天井は
+    // 元の平天井のまま動かさない(maxY) -- 当たっていない所まで天井を下げない、
+    // というのがこの仕組みの要点である。
+    return {source:'roof',reason:'setback',roof:sbRoofs[0],roofs:sbRoofs,
+      lowY:0,baseY:floorBaseY(room.floor),
+      maxY:floorBaseY(room.floor)+roomCeilingHeightM(room)};
+  }
   if(typeof HeightModel==='undefined'||!HeightModel) return null;
   var shape=HeightModel.ceilingShape(DATA,room);
   if(!shape||shape.type!=='sloped') return null;
   var baseY=floorBaseY(room.floor);
   var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
   var roof=roofItemOverRoom(room);
-  if(roof) return {source:'roof',roof:roof,lowY:lowY,baseY:baseY};
+  if(roof) return {source:'roof',reason:'declared',roof:roof,
+    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],lowY:lowY,baseY:baseY};
+  if(sbRoofs.length) return {source:'roof',reason:'setback',roof:sbRoofs[0],
+    roofs:sbRoofs,lowY:lowY,baseY:baseY};
   var highY=roomCeilingHeightM(room);
   if(lowY>highY) lowY=highY;
-  return {source:'manual',lowY:lowY,highY:highY,direction:shape.direction,baseY:baseY};
+  return {source:'manual',reason:'declared',lowY:lowY,highY:highY,direction:shape.direction,baseY:baseY};
 }
 // 天井面のワールド Y(m)。引数は平面座標(mm)。profile が null の部屋は
 // 従来どおり平らな roomCeilingHeightM。
@@ -3833,16 +3862,30 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
   var baseY=floorBaseY(room&&room.floor);
   if(!profile) return baseY+roomCeilingHeightM(room);
   if(profile.source==='roof'){
-    var y=roofCeilingWorldYAt(profile.roof,xMm,yMm);
+    // 頭を押さえるのは「この点を覆っている屋根のうち一番低い下面」。屋根が1枚
+    // (＝斜線を使っていない従来のプラン)なら roofTopLimitAtPlanPoint はその屋根の
+    // 値をそのまま返すので、式は 1 ビットも変わらない。斜線の片流れ屋根が重なる
+    // ときだけ、点ごとに低い方が勝つ。
+    var roofs=profile.roofs||[profile.roof];
+    var roofLim=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
+    if(roofLim===null){
+      // どの屋根も覆っていない位置。斜線由来の勾配は「削られていない位置」なので
+      // 元の平天井のまま。宣言由来は従来どおりその屋根の面を延長する。
+      if(profile.reason==='setback'&&profile.maxY!==undefined) return profile.maxY;
+      roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
+    }
+    var y=roofLim-CEILING_UNDER_ROOF_OFFSET_MM*U;
     var lowWorld=baseY+profile.lowY;
     // 軒先側では屋根下面が低い側の天井高より下へ来る。そこは天井を吊ったまま
     // (平らな部分)にする -- だから勾配は壁の途中から始まり、上辺は折れ線になる。
     if(y<lowWorld) y=lowWorld;
-    // ただし吊った天井が屋根下面より上へ出ることは無い(低い側に大きい値を
-    // 入れると軒先で起きる)。壁は屋根下面で切られるので、天井だけ上へ抜けさせると
-    // 壁と天井のあいだに隙間が開く。同じ面で両方の頭を押さえる。
-    var roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
-    return y>roofLim?roofLim:y;
+    // ただし吊った天井が屋根下面より上へ出ることは無い(低い値を入れると軒先で
+    // 起きる)。壁は屋根下面で切られるので、天井だけ上へ抜けさせると壁と天井の
+    // あいだに隙間が開く。同じ面で両方の頭を押さえる。
+    if(y>roofLim) y=roofLim;
+    // 斜線由来のときだけ、元の平天井より上へは行かせない。
+    if(profile.maxY!==undefined&&y>profile.maxY) y=profile.maxY;
+    return y;
   }
   // 手書きの勾配: 高さは (x,z) の一次関数。既存 buildSlopedCeilingGeometry と同式。
   var u=ceilingSlopeUnit(profile.direction);
@@ -3862,13 +3905,17 @@ function roomRoofCeilingExtent(room){
   if(typeof HeightModel==='undefined'||!HeightModel) return null;
   var shape=HeightModel.ceilingShape(DATA,room);
   if(!shape||shape.type!=='sloped') return null;
+  var sbRoofs=setbackRoofsForRoom(room);
   // 鍵は結果を決めるものを全部含める。含め忘れると古い天井高が残る。
   var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
     roof.id,roof.x,roof.y,roof.w,roof.d,roof.floor,roof.rot,roof.elev,
     roof.roofType,roof.pitch,roof.flipX?1:0,roof.flipY?1:0,
-    floorBaseY(room.floor),floorBaseY(roof.floor)].join(':');
+    floorBaseY(room.floor),floorBaseY(roof.floor),
+    sbRoofs.map(function(r){return r.key;}).join('|')].join(':');
   if(_roofCeilingExtentCache[key]) return _roofCeilingExtentCache[key];
-  var profile={source:'roof',roof:roof,lowY:shape.lowMm*U+floorSlabHeightMForFloor(room.floor),
+  var profile={source:'roof',reason:'declared',roof:roof,
+    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],
+    lowY:shape.lowMm*U+floorSlabHeightMForFloor(room.floor),
     baseY:floorBaseY(room.floor)};
   var baseY=floorBaseY(room.floor);
   var N=12, i, j, px, py, y;
@@ -4104,7 +4151,11 @@ function wallLimitingRoofs(w){
       if(!r) continue;
       p=roomCeilingProfile(r);
       if(!p||p.source!=='roof'||!p.roof) continue;
-      if(out.indexOf(p.roof)<0) out.push(p.roof);
+      // 斜線の片流れ屋根も同じ「壁の頭を押さえる屋根」として渡す。屋根が1枚の
+      // 従来のプランでは p.roofs===[p.roof] なので集まる中身は変わらない。
+      (p.roofs||[p.roof]).forEach(function(rf){
+        if(rf&&out.indexOf(rf)<0) out.push(rf);
+      });
     }
   }
   return out;
@@ -5043,6 +5094,7 @@ function selectedRoomCeilingHtml(it){
   // 丸められたときに欄が嘘をつく。
   var renderedMm=roomRenderedCeilingMm(it);
   var storyMm=storyHeightMmForFloor(it.floor);
+  html+=roomSetbackCeilingNoteHtml(it);
   if(type==='flat'){
     var cur=roomFlatCeilingInputMm(it);
     html+='<div class="pr"><div class="pl">天井高プリセット</div><select class="pi" onchange="updateSelectedFlatCeilingMm(this.value)">';
@@ -5096,6 +5148,21 @@ function selectedRoomCeilingHtml(it){
   html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
 }
+// 「宣言が効いたのか、斜線が効いたのか」を画面で言い分ける。斜線由来の勾配天井は
+// 部屋の ceiling 宣言を必要としないので、宣言欄だけを見ていると理由が読めなくなる。
+function roomSetbackCeilingNoteHtml(room){
+  var rs=setbackRoofsForRoom(room);
+  if(!rs.length) return '';
+  var p=roomCeilingProfile(room);
+  var kinds=rs.map(function(r){ return r.setbackKind==='north'?'北側斜線':'道路斜線'; }).join('・');
+  var declared=roomDeclaresSlopedCeiling(room);
+  return '<div class="lock-status-note">この部屋は<b>'+kinds+'で削られています</b>。'+
+    (declared
+      ? '勾配は手動で宣言されており、そのうえで斜線の面でも頭を押さえられています（低い方が勝ちます）。'
+      : '勾配天井は宣言ではなく<b>削った結果として</b>現れています（下の「天井の種類」は宣言欄で、ここでは効いていません）。')+
+    '当たっていない場所の天井高は動かしていません。'+
+    ((p&&p.reason)?'（適用: '+(p.reason==='setback'?'斜線':'宣言')+'）':'')+'</div>';
+}
 // ── 斜線制限（建築基準法56条）の設定UI。既存の選択プロパティ欄の中に置く ──
 // 数値（勾配・基準高さ）は assets/js/setback-law.js からしか読まない。
 function setbackZoneOptionsHtml(cur){
@@ -5137,7 +5204,14 @@ function siteSetbackPanelHtml(it){
   if(law.hasNorthLimit(cur.zone)){
     h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示（基準高さ '+law.northBaseMm(cur.zone)+'mm ＋ 勾配 '+law.NORTH_SLOPE+'）</label></div>';
   }
-  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ている部分を赤で示します。この段階では建物を削りません。寸法は「↔ 寸法」ボタンで出し入れします。</div>';
+  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ていた部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。壁の上端も同じ屋根で切られます。家具は削りません（制限面から飛び出した家具は置き方の問題として見えます）。寸法は「寸法」ボタンで出し入れします。</div>';
+  // 誤解されると危険なので、何を見ていないのかまで書く。「参考です」だけでは
+  // 「だいたい合っている」と読まれる。実際には **緩和を1つも見ていないので実際より
+  // 厳しく出る**。厳しく出る側だと分かっていることは、必ずそう書く。
+  h+='<div class="lock-status-note">これは法令適合の判定ではありません。素の条文どおりの面だけを引いており、'+
+    '道路斜線のセットバックによる緩和（法56条2項）・天空率（同7項）・2項道路の中心後退・高低差の緩和を'+
+    '<b>1つも見ていません</b>。そのため実際の審査より<b>厳しい側</b>に出ます（本当は建てられる形まで削られます）。'+
+    '真北は平面図の上（−Y）に固定で、敷地の振れも見ていません。設計中に当たりを見るための面であって、確認申請に使える判定ではありません。</div>';
   return h;
 }
 function updateSelectedSetback(key,val){
@@ -9039,8 +9113,10 @@ function snapCameraToElevation(dir){
 }
 
 // ══ 斜線制限（建築基準法56条）: 制限面・寸法・はみ出しの表示 ═══════════════
-// このタスクでは建物を1mmも削らない。削る前に「どこに・どれだけかかっているか」を
-// 目に見える形にするだけである。
+// ここは「面をどこに引くか」と「何がはみ出しているか」だけを扱う。
+// 実際に削るのと切り口に屋根を架けるのは、下の「斜線制限で建物を削り…」の節。
+// 削る判定はここの splitTriangleBySetbackPlane 1本を共有する（別のクリッパを
+// 書くと、赤く見えている量と実際に削れる量が食い違いはじめる）。
 //
 // 法の数値（道路斜線の勾配 1.25 / 1.5、北側斜線の基準高さ 5m / 10m、勾配 1.25）は
 // assets/js/setback-law.js に1か所だけ置いてある。ここには数値を書かない。
@@ -9197,29 +9273,56 @@ function setbackDimStations(pl){
 function setbackPlaneWorldCoef(pl){
   return {a:pl.slope*pl.nx, b:pl.slope*pl.ny, c:(pl.baseMm-pl.slope*pl.d0)*U};
 }
-// 三角形のうち「面より上」だけを残す。f(p)=p.y-(a*p.x+b*p.z+c) は座標の一次式なので、
+// 三角形を制限面で2つに割る。f(p)=p.y-(a*p.x+b*p.z+c) は座標の一次式なので、
 // 辺を線形補間で切れば近似ではなく厳密な切断になる。
-// 全部下なら [] を返す = はみ出していないものを赤くしない。
-function clipTriangleAboveSetbackPlane(tri,co){
-  function f(p){ return p[1]-(co.a*p[0]+co.b*p[2]+co.c); }
-  var pts=[[tri[0],tri[1],tri[2]],[tri[3],tri[4],tri[5]],[tri[6],tri[7],tri[8]]];
-  var poly=[], i, cur, nxt, fc, fn, t;
+//
+// **上側(赤く見せるはみ出し)と下側(削ったあとに残る形)は必ずこの1本から出す。**
+// 別々のクリッパを2本書くと、赤く見えている量と実際に削れる量が食い違いはじめる。
+// 返すのは座標ではなく「どの頂点をどう作るか」の指示である
+//   {i:k}          … 元の頂点 k をそのまま
+//   {i:k,j:m,t:t}  … 辺 k→m を t で内分した点
+// 座標を作るのは呼び出し側。はみ出し表示は位置だけを、削りは位置と一緒に法線・UV も
+// **同じ t で** 内分する(位置だけ切ると仕上げが置いていかれる)。
+function setbackTriSide(fv,keepAbove){
+  var poly=[], i, ni, fc, fn, t;
   for(i=0;i<3;i++){
-    cur=pts[i]; nxt=pts[(i+1)%3];
-    fc=f(cur); fn=f(nxt);
-    if(fc>=0) poly.push(cur);
+    ni=(i+1)%3; fc=fv[i]; fn=fv[ni];
+    if(keepAbove?(fc>=0):(fc<=0)) poly.push({i:i});
     if((fc>0&&fn<0)||(fc<0&&fn>0)){
       t=fc/(fc-fn);
-      poly.push([cur[0]+(nxt[0]-cur[0])*t,cur[1]+(nxt[1]-cur[1])*t,cur[2]+(nxt[2]-cur[2])*t]);
+      poly.push({i:i,j:ni,t:t});
     }
   }
   var out=[];
-  for(i=2;i<poly.length;i++){
-    out.push([poly[0][0],poly[0][1],poly[0][2],
-              poly[i-1][0],poly[i-1][1],poly[i-1][2],
-              poly[i][0],poly[i][1],poly[i][2]]);
-  }
+  for(i=2;i<poly.length;i++) out.push([poly[0],poly[i-1],poly[i]]);
   return out;
+}
+function splitTriangleBySetbackPlane(fv){
+  return {above:setbackTriSide(fv,true),below:setbackTriSide(fv,false)};
+}
+// 三角形の3頂点それぞれの f(= 面からの符号付き高さ、m)。
+function setbackTriF(tri,co){
+  return [tri[1]-(co.a*tri[0]+co.b*tri[2]+co.c),
+          tri[4]-(co.a*tri[3]+co.b*tri[5]+co.c),
+          tri[7]-(co.a*tri[6]+co.b*tri[8]+co.c)];
+}
+// 指示 src を、stride 幅の数値配列 rows[] から作る。位置でも UV でも同じ式。
+function setbackLerpVert(src,rows,stride,out){
+  var a=rows[src.i], b, k;
+  if(src.j===undefined){ for(k=0;k<stride;k++) out.push(a[k]); return; }
+  b=rows[src.j];
+  for(k=0;k<stride;k++) out.push(a[k]+(b[k]-a[k])*src.t);
+}
+// 三角形のうち「面より上」だけを残す。全部下なら [] = はみ出していないものを赤くしない。
+function clipTriangleAboveSetbackPlane(tri,co){
+  var rows=[[tri[0],tri[1],tri[2]],[tri[3],tri[4],tri[5]],[tri[6],tri[7],tri[8]]];
+  return splitTriangleBySetbackPlane(setbackTriF(tri,co)).above.map(function(t){
+    var v=[];
+    setbackLerpVert(t[0],rows,3,v);
+    setbackLerpVert(t[1],rows,3,v);
+    setbackLerpVert(t[2],rows,3,v);
+    return v;
+  });
 }
 // 斜線制限がかかる対象 = 建物として建っているメッシュ。
 // 道路・隣家・電柱などの周辺物と、地面に置く外構（敷地・基礎・車・樹木・塀…）は
@@ -9318,31 +9421,46 @@ function addSetbackDims(grp,pl){
   });
   grp.add(dg);
 }
-// 制限面より上に出ている部分を赤で示す。削らない — 見せるだけである。
-function addSetbackOverhang(grp,planes){
+// 斜線制限の対象メッシュ。はみ出しの計測も、実際の削りも、同じ集合を見る。
+function setbackSubjectMeshes(){
+  var out=[];
+  if(!sc3) return out;
+  sc3.traverse(function(o){ if(isSetbackSubjectMesh(o)) out.push(o); });
+  return out;
+}
+// 世界バウンディングボックスの8隅で「この面を超えているか」を先に見る。
+// 超えていない面は三角形を1枚も触らない(既定プランで build3D の所要時間が動かない)。
+var SETBACK_CUT_EPS_M=0.0005;   // 0.5mm 以下の食い込みは数えないし削らない
+function setbackLiveCoefsForMesh(o,coefs){
+  var geo=o.geometry;
+  var posAttr=geo && geo.attributes && geo.attributes.position;
+  if(!posAttr || !posAttr.count) return [];
+  if(!geo.boundingBox) geo.computeBoundingBox();
+  var bb=geo.boundingBox;
+  if(!bb) return [];
+  var mw=o.matrixWorld;
+  var corners=[], ci, cj, ck;
+  for(ci=0;ci<2;ci++) for(cj=0;cj<2;cj++) for(ck=0;ck<2;ck++){
+    corners.push(new THREE.Vector3(ci?bb.max.x:bb.min.x,cj?bb.max.y:bb.min.y,ck?bb.max.z:bb.min.z).applyMatrix4(mw));
+  }
+  var live=[];
+  coefs.forEach(function(co){
+    var maxF=-Infinity;
+    corners.forEach(function(c){ maxF=Math.max(maxF,c.y-(co.a*c.x+co.b*c.z+co.c)); });
+    if(maxF>SETBACK_CUT_EPS_M) live.push(co);
+  });
+  return live;
+}
+// 制限面より上に残っている三角形を世界座標で集める。削る前は「はみ出し」の実体で、
+// 削ったあとは **空でなければならない**。表示も検証も同じここを通る。
+function collectSetbackOverhangTris(planes){
   var coefs=planes.map(setbackPlaneWorldCoef);
   var tris=[];
-  var meshes=[];
-  sc3.traverse(function(o){ if(isSetbackSubjectMesh(o)) meshes.push(o); });
-  meshes.forEach(function(o){
-    var geo=o.geometry;
-    var posAttr=geo && geo.attributes && geo.attributes.position;
-    if(!posAttr || !posAttr.count) return;
-    if(!geo.boundingBox) geo.computeBoundingBox();
-    var bb=geo.boundingBox;
-    if(!bb) return;
-    var mw=o.matrixWorld;
-    var corners=[], ci, cj, ck;
-    for(ci=0;ci<2;ci++) for(cj=0;cj<2;cj++) for(ck=0;ck<2;ck++){
-      corners.push(new THREE.Vector3(ci?bb.max.x:bb.min.x,cj?bb.max.y:bb.min.y,ck?bb.max.z:bb.min.z).applyMatrix4(mw));
-    }
-    var live=[];
-    coefs.forEach(function(co){
-      var maxF=-Infinity;
-      corners.forEach(function(c){ maxF=Math.max(maxF,c.y-(co.a*c.x+co.b*c.z+co.c)); });
-      if(maxF>0.0005) live.push(co);   // 0.5mm 以下の食い込みは数えない
-    });
+  setbackSubjectMeshes().forEach(function(o){
+    var live=setbackLiveCoefsForMesh(o,coefs);
     if(!live.length) return;   // このメッシュはどの面も超えていない
+    var geo=o.geometry, posAttr=geo.attributes.position;
+    var mw=o.matrixWorld;
     var idx=geo.index, n=idx?idx.count:posAttr.count, i;
     var va=new THREE.Vector3(), vb=new THREE.Vector3(), vc=new THREE.Vector3();
     for(i=0;i+2<n;i+=3){
@@ -9352,12 +9470,50 @@ function addSetbackOverhang(grp,planes){
       vc.set(posAttr.getX(i2),posAttr.getY(i2),posAttr.getZ(i2)).applyMatrix4(mw);
       var tri=[va.x,va.y,va.z,vb.x,vb.y,vb.z,vc.x,vc.y,vc.z];
       live.forEach(function(co){
+        // 面の上に載っているだけの三角形(切り口・斜線の片流れ屋根そのもの)は
+        // 「はみ出し」ではない。メッシュ単位と同じ 0.5mm の物差しで先に落とす。
+        var fv=setbackTriF(tri,co);
+        if(Math.max(fv[0],fv[1],fv[2])<=SETBACK_CUT_EPS_M) return;
         clipTriangleAboveSetbackPlane(tri,co).forEach(function(t){
           tris.push(t[0],t[1],t[2],t[3],t[4],t[5],t[6],t[7],t[8]);
         });
       });
     }
   });
+  return tris;
+}
+// 検証用。今のシーンに制限面より上の建物が残っているかを数える。
+// 削ったあとは tris:0 でなければならない(ブリーフの「削り残しが無いこと」)。
+function setbackOverhangAudit(){
+  var planes=setbackPlanes();
+  // overVerts が本命である。削ったあとの切り口はちょうど面の上に乗るので、
+  // tris には面積 0 の縁の三角形が残る(頂点が f>=0 の側にも数えられるため)。
+  // 「面より上に建物の頂点が1つも無い」は overVerts===0 で見る。
+  var res={planes:planes.length,meshes:0,tris:0,overVerts:0,maxOverMm:0,subjects:0};
+  if(!planes.length) return res;
+  var coefs=planes.map(setbackPlaneWorldCoef);
+  var meshes=setbackSubjectMeshes();
+  res.subjects=meshes.length;
+  var v=new THREE.Vector3();
+  meshes.forEach(function(o){
+    if(!setbackLiveCoefsForMesh(o,coefs).length) return;
+    res.meshes++;
+    var posAttr=o.geometry.attributes.position, i, k, f;
+    for(i=0;i<posAttr.count;i++){
+      v.set(posAttr.getX(i),posAttr.getY(i),posAttr.getZ(i)).applyMatrix4(o.matrixWorld);
+      for(k=0;k<coefs.length;k++){
+        f=v.y-(coefs[k].a*v.x+coefs[k].b*v.z+coefs[k].c);
+        if(f>SETBACK_CUT_EPS_M) res.overVerts++;
+        if(f/U>res.maxOverMm) res.maxOverMm=f/U;
+      }
+    }
+  });
+  res.tris=collectSetbackOverhangTris(planes).length/9;
+  return res;
+}
+// 制限面より上に出ている部分を赤で示す。削ったあとは何も残らないので出ない。
+function addSetbackOverhang(grp,planes){
+  var tris=collectSetbackOverhangTris(planes);
   if(!tris.length) return;
   var g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(tris,3));
@@ -9368,6 +9524,316 @@ function addSetbackOverhang(grp,planes){
   m.castShadow=false; m.receiveShadow=false;
   m.userData={b:true,setbackHelper:true,setbackOverhang:true};
   grp.add(m);
+}
+// ══ 斜線制限で建物を削り、切り口に片流れ屋根を架ける (Task 17) ═══════════════
+// 日本の実務では、斜線に当たったからといって天井全体を下げることはしない。制限から
+// はみ出した空間部を **切り取り**、そこに **斜線に沿った片流れ屋根** を架ける。
+// 勾配天井はその切り取りの結果として現れるものであって、設計者が宣言するものではない。
+//
+// **設定が無ければ setbackPlanes() が空を返し、以下は1つも動かない。**
+// 削り取る判定は Task 16 の splitTriangleBySetbackPlane そのもので、赤く見えている
+// 面と削れる面は同じ1本から出る。
+
+// 建物の平面範囲(mm)。部屋と屋根アイテムだけを見る(外構・周辺物は建物ではない)。
+function setbackBuildingPlanBoundsMm(){
+  if(typeof DATA==='undefined'||!DATA) return null;
+  var b=null;
+  function ext(x0,y0,x1,y1){
+    if(!b) b={minX:x0,minY:y0,maxX:x1,maxY:y1};
+    else {
+      b.minX=Math.min(b.minX,x0); b.minY=Math.min(b.minY,y0);
+      b.maxX=Math.max(b.maxX,x1); b.maxY=Math.max(b.maxY,y1);
+    }
+  }
+  (DATA.rooms||[]).forEach(function(r){
+    if(!r||r.hidden3D) return;
+    ext(r.x,r.y,r.x+r.w,r.y+r.d);
+  });
+  (DATA.items||[]).forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    var pts=(typeof getObjBounds==='function')?getObjBounds(it):null;
+    if(!pts||!pts.length) return;
+    pts.forEach(function(p){ ext(p.x,p.y,p.x,p.y); });
+  });
+  return b;
+}
+// その平面位置での建物の頂部(ワールド Y、m)。建物が無ければ null。
+// 屋根アイテムの屋根面と、部屋がある階の外皮上端(=壁の頭)の高い方。
+function setbackBuildingTopWorldYAt(xMm,yMm){
+  if(typeof DATA==='undefined'||!DATA) return null;
+  var top=null, y;
+  (DATA.items||[]).forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    if(!roofCoversPlanPoint(it,xMm,yMm)) return;
+    y=roofUndersideWorldYAt(it,xMm,yMm);
+    if(top===null||y>top) top=y;
+  });
+  (DATA.rooms||[]).forEach(function(r){
+    if(!r||r.hidden3D) return;
+    if(xMm<r.x||xMm>r.x+r.w||yMm<r.y||yMm>r.y+r.d) return;
+    y=floorBaseY(r.floor)+wallFullHeightM(r.floor);
+    if(top===null||y>top) top=y;
+  });
+  return top;
+}
+var SETBACK_CUT_SAMPLES=64;   // 切り取り範囲を測る格子(建物の平面範囲を分割する)
+// 制限面より上に建物がある平面領域の (t,s) 範囲。無ければ null = 削るものが無い。
+// t は境界からの水平距離、s は境界線に沿った位置(makeSetbackPlane と同じ取り方)。
+function setbackCutSpanMm(pl){
+  var bb=setbackBuildingPlanBoundsMm();
+  if(!bb) return null;
+  var N=SETBACK_CUT_SAMPLES, i, j, x, y, top, lim, t, s;
+  var dx=(bb.maxX-bb.minX)/N, dy=(bb.maxY-bb.minY)/N;
+  var tLo=Infinity,tHi=-Infinity,sLo=Infinity,sHi=-Infinity,hit=false;
+  for(i=0;i<=N;i++) for(j=0;j<=N;j++){
+    x=bb.minX+dx*i; y=bb.minY+dy*j;
+    top=setbackBuildingTopWorldYAt(x,y);
+    if(top===null) continue;
+    lim=setbackLimitHeightMmAt(pl,x,y)*U;
+    if(top<=lim+SETBACK_CUT_EPS_M) continue;
+    hit=true;
+    t=setbackDistanceMm(pl,x,y); s=pl.px*x+pl.py*y;
+    if(t<tLo) tLo=t;
+    if(t>tHi) tHi=t;
+    if(s<sLo) sLo=s;
+    if(s>sHi) sHi=s;
+  }
+  if(!hit) return null;
+  // 格子の目の粗さぶんだけ外へ広げる。狭く採ると切り口の縁が屋根から食み出す。
+  var m=Math.max(Math.abs(dx),Math.abs(dy),1);
+  return {tLo:tLo-m,tHi:tHi+m,sLo:sLo-m,sHi:sHi+m,cellMm:m};
+}
+// 仕上げを合わせるための見本にする既存の屋根(いちばん高い階のもの)。無ければ null。
+function setbackRoofTemplateItem(){
+  if(typeof DATA==='undefined'||!DATA) return null;
+  var best=null;
+  (DATA.items||[]).forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    if(!best||(it.floor||1)>(best.floor||1)) best=it;
+  });
+  return best;
+}
+// 制限面 pl の切り口に架ける片流れ屋根を、**普通の roof アイテムとして**作る。
+//
+//   roofSurfaceHeightAt の 'mono' は  高さ = tan(pitch) × (lz + D/2)
+//   制限面は                          高さ = baseMm + slope × 距離
+//
+// どちらも距離の一次式である。だから pitch=atan(slope) とし、屋根ローカルの +z を
+// 「境界からの距離が増える向き」へ合わせ、elev を低い側の軒の高さに置けば、屋根面は
+// 制限面に **厳密に一致** する。屋根の描き方も高さの計算も新しくは書いていない。
+function setbackRoofItemForPlane(pl,span,key){
+  if(!span) return null;
+  var tpl=setbackRoofTemplateItem();
+  var floor=tpl?(tpl.floor||1):1;
+  // 屋根ローカル +z を平面上の (nx,ny) へ向ける。roofLocalPoint の a=-rot*PI/180 で
+  //   zl = sin(a)*dx + cos(a)*dz  なので (sin a, cos a) = (nx, ny)。
+  var a=Math.atan2(pl.nx,pl.ny);
+  var rot=-a*180/Math.PI;
+  if(rot===0) rot=0;   // -0 を残さない(保存値・比較で嘘をつく)
+  var w=Math.max(1,span.sHi-span.sLo), d=Math.max(1,span.tHi-span.tLo);
+  var c=setbackPointAt(pl,(span.tLo+span.tHi)/2,(span.sLo+span.sHi)/2);
+  var lowMm=pl.baseMm+pl.slope*span.tLo;      // 低い側の軒の高さ(GL 基準 mm)
+  var it={
+    type:'roof', roofType:'mono', setbackRoof:true, setbackKind:pl.kind, key:key,
+    id:'setback-roof-'+pl.kind,
+    x:c.x-w/2, y:c.y-d/2, w:w, d:d, rot:rot, floor:floor,
+    elev:(lowMm*U-floorBaseY(floor))/U,
+    pitch:Math.atan(pl.slope)*180/Math.PI,
+    flipX:false, flipY:false,
+    roofThickness:(tpl&&tpl.roofThickness)||180,
+    roofSkirt:(tpl&&tpl.roofSkirt)||0,
+    roofEdgeColor:(tpl&&tpl.roofEdgeColor)||undefined,
+    color:tpl?tpl.color:undefined, texture:tpl?tpl.texture:undefined,
+    gutterMode:'off'   // 制限面に沿った切り口。樋を自動生成する対象ではない。
+  };
+  return it;
+}
+var _setbackRoofCache=null;
+var _setbackRoofCacheKey=null;
+// 斜線由来の片流れ屋根。設定が無ければ **必ず空配列**。
+function setbackRoofItems(){
+  var planes=setbackPlanes();
+  if(!planes.length){ _setbackRoofCache=[]; _setbackRoofCacheKey=''; return _setbackRoofCache; }
+  var sig=[];
+  planes.forEach(function(pl){
+    sig.push(pl.kind,pl.baseMm,pl.slope,pl.nx,pl.ny,pl.d0);
+  });
+  (DATA.rooms||[]).forEach(function(r){ if(r&&!r.hidden3D) sig.push('r',r.x,r.y,r.w,r.d,r.floor); });
+  (DATA.items||[]).forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    sig.push('f',it.x,it.y,it.w,it.d,it.floor,it.rot,it.elev,it.roofType,it.pitch,
+      it.flipX?1:0,it.flipY?1:0,it.roofThickness);
+  });
+  var key=sig.join(':');
+  if(_setbackRoofCacheKey===key&&_setbackRoofCache) return _setbackRoofCache;
+  var out=[];
+  planes.forEach(function(pl){
+    var it=setbackRoofItemForPlane(pl,setbackCutSpanMm(pl),key+'#'+pl.kind);
+    if(it) out.push(it);
+  });
+  _setbackRoofCacheKey=key; _setbackRoofCache=out;
+  return out;
+}
+// この部屋に架かる斜線由来の屋根。上に部屋がある階には架からない(あいだに床がある)。
+// 部屋の一部でも覆っていれば返す -- そこだけ天井が下がるのが斜線の効き方である。
+function setbackRoofsOverRoom(room){
+  var out=[];
+  if(!room||room.hidden3D) return out;
+  if(roomHasRoomAbove(room)) return out;
+  var pts=[[room.x+room.w/2,room.y+room.d/2],
+    [room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]];
+  var floorY=floorTopY(room.floor);
+  setbackRoofItems().forEach(function(it){
+    var covers=false, i;
+    for(i=0;i<pts.length;i++) if(roofCoversPlanPoint(it,pts[i][0],pts[i][1])){ covers=true; break; }
+    if(!covers) return;
+    // 下の階の頭の上を通り過ぎるだけの面には天井を引き下げさせない。
+    var apex=-Infinity;
+    for(i=0;i<pts.length;i++) apex=Math.max(apex,roofCeilingWorldYAt(it,pts[i][0],pts[i][1]));
+    if(apex<=floorY) return;
+    out.push(it);
+  });
+  return out;
+}
+// 切り口の片流れ屋根を3Dに建てる。屋根の描画は既存の build3DRoofItem をそのまま呼ぶ。
+function build3DSetbackRoofs(flFilt){
+  if(!sc3) return;
+  setbackRoofItems().forEach(function(it){
+    if(flFilt&&it.floor!==flFilt) return;
+    var grp=new THREE.Group();
+    grp.position.set((it.x+it.w/2)*U, floorBaseY(it.floor)+(it.elev||0)*U, (it.y+it.d/2)*U);
+    grp.rotation.y=-it.rot*Math.PI/180;
+    build3DRoofItem(grp,it,it.w*U,it.d*U);
+    // DATA に無いアイテムなので選択対象にはしない(掴めない物を掴ませない)。
+    // b:true は build3D の作り直しで消えるため、そして斜線の検査対象になるため。
+    grp.userData={b:true,setbackRoof:true};
+    grp.traverse(function(o){ o.userData=o.userData||{}; o.userData.b=true; o.userData.setbackRoof=true; });
+    sc3.add(grp);
+  });
+}
+
+// ── 実際に削る ────────────────────────────────────────────────────────
+// 位置だけを切ると UV と法線が置いていかれるので、**同じ t で全属性を内分**する。
+// 家具(InstancedMesh)は isSetbackSubjectMesh が最初から外している。制限面から
+// 飛び出した椅子は、切る対象ではなく置き方の問題として見えるべきものである。
+function setbackCutGeometry(o,coefs){
+  var geo=o.geometry, posAttr=geo.attributes.position;
+  var names=Object.keys(geo.attributes), keep=[], stride=3, k, at;
+  for(k=0;k<names.length;k++){
+    at=geo.attributes[names[k]];
+    if(!at||at.count!==posAttr.count) continue;
+    if(!(at.itemSize>=1&&at.itemSize<=4)) continue;
+    keep.push({name:names[k],attr:at,size:at.itemSize,off:stride});
+    stride+=at.itemSize;
+  }
+  function readVert(i,out){
+    var v=new THREE.Vector3(posAttr.getX(i),posAttr.getY(i),posAttr.getZ(i)).applyMatrix4(o.matrixWorld);
+    out.push(v.x,v.y,v.z);
+    for(var q=0;q<keep.length;q++){
+      var a=keep[q].attr, sz=keep[q].size;
+      out.push(a.getX(i));
+      if(sz>1) out.push(a.getY(i));
+      if(sz>2) out.push(a.getZ(i));
+      if(sz>3) out.push(a.getW(i));
+    }
+    return out;
+  }
+  var groups=(geo.groups&&geo.groups.length)?geo.groups:null;
+  var idx=geo.index, n=idx?idx.count:posAttr.count, i, g;
+  var buckets={}, order=[], changed=false, kept=0;
+  function bucket(mi){
+    if(!buckets[mi]){ buckets[mi]=[]; order.push(mi); }
+    return buckets[mi];
+  }
+  function groupOf(i){
+    if(!groups) return 0;
+    for(var q=0;q<groups.length;q++){
+      if(i>=groups[q].start&&i<groups[q].start+groups[q].count) return groups[q].materialIndex||0;
+    }
+    return 0;
+  }
+  for(i=0;i+2<n;i+=3){
+    var i0=idx?idx.getX(i):i, i1=idx?idx.getX(i+1):i+1, i2=idx?idx.getX(i+2):i+2;
+    var rows=[readVert(i0,[]),readVert(i1,[]),readVert(i2,[])];
+    var tris=[rows];
+    for(k=0;k<coefs.length&&tris.length;k++){
+      var co=coefs[k], next=[], q;
+      for(q=0;q<tris.length;q++){
+        var r=tris[q];
+        var fv=[r[0][1]-(co.a*r[0][0]+co.b*r[0][2]+co.c),
+                r[1][1]-(co.a*r[1][0]+co.b*r[1][2]+co.c),
+                r[2][1]-(co.a*r[2][0]+co.b*r[2][2]+co.c)];
+        if(Math.max(fv[0],fv[1],fv[2])<=SETBACK_CUT_EPS_M){ next.push(r); continue; }
+        changed=true;
+        splitTriangleBySetbackPlane(fv).below.forEach(function(t){
+          var nv=[];
+          setbackLerpVert(t[0],r,stride,nv);
+          setbackLerpVert(t[1],r,stride,nv);
+          setbackLerpVert(t[2],r,stride,nv);
+          next.push([nv.slice(0,stride),nv.slice(stride,stride*2),nv.slice(stride*2)]);
+        });
+      }
+      tris=next;
+    }
+    if(!tris.length){ changed=true; continue; }
+    g=bucket(groupOf(i));
+    for(k=0;k<tris.length;k++){ g.push(tris[k]); kept++; }
+  }
+  if(!changed) return null;
+  var arrays={}, q2;
+  for(q2=0;q2<keep.length;q2++) arrays[keep[q2].name]=[];
+  var newGroups=[], at3=0;
+  order.forEach(function(mi){
+    var list=buckets[mi], start=at3;
+    list.forEach(function(t){
+      t.forEach(function(v){
+        for(var q=0;q<keep.length;q++){
+          var kk=keep[q], arr=arrays[kk.name], c2;
+          for(c2=0;c2<kk.size;c2++) arr.push(v[kk.off+c2]);
+        }
+      });
+      at3+=3;
+    });
+    if(groups) newGroups.push({start:start,count:at3-start,materialIndex:mi});
+  });
+  var ng=new THREE.BufferGeometry();
+  for(q2=0;q2<keep.length;q2++){
+    ng.setAttribute(keep[q2].name,new THREE.Float32BufferAttribute(arrays[keep[q2].name],keep[q2].size));
+  }
+  // 切る判定は世界座標で行うが、内分の係数 t は座標系に依らない(行列は一次変換)。
+  // 出す頂点は**ローカルのまま**内分したものなので、メッシュの行列はそのままでよい。
+  // ここで逆行列を掛けてはならない -- 掛けると回転・移動を持つ壁が二重に戻る。
+  if(groups) newGroups.forEach(function(gr){ ng.addGroup(gr.start,gr.count,gr.materialIndex); });
+  ng.userData={setbackCut:true,tris:kept};
+  return ng;
+}
+// 建物を制限面で削る。設定が無ければ1つも触らない = 保存済みの家は1ビットも動かない。
+function applySetbackCut(){
+  if(!sc3) return null;
+  var planes=setbackPlanes();
+  if(!planes.length) return null;
+  var coefs=planes.map(setbackPlaneWorldCoef);
+  var meshes=setbackSubjectMeshes();
+  // 同じジオメトリを複数のメッシュが共有していることがある。差し替えたあとに
+  // 元を dispose してよいのは、そのメッシュしか使っていないときだけ。
+  var uses={}, i;
+  meshes.forEach(function(o){
+    var u=o.geometry&&o.geometry.uuid;
+    if(u) uses[u]=(uses[u]||0)+1;
+  });
+  var cut=0, dropped=0;
+  meshes.forEach(function(o){
+    var live=setbackLiveCoefsForMesh(o,coefs);
+    if(!live.length) return;
+    var ng=setbackCutGeometry(o,live);
+    if(!ng) return;
+    var old=o.geometry;
+    o.geometry=ng;
+    if(ng.userData.tris===0) dropped++;
+    cut++;
+    if(old&&old.uuid&&uses[old.uuid]===1&&old.dispose) old.dispose();
+  });
+  return {planes:planes.length,subjects:meshes.length,cut:cut,emptied:dropped};
 }
 function build3DSetback(){
   if(!sc3 || isInt) return;
@@ -9423,12 +9889,17 @@ function build3D(){
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
   buildRooms3D(flFilt);
   DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){buildItem3D(it);});
+  // 斜線の切り口に架かる片流れ屋根。設定が無ければ setbackRoofItems() が空を返す。
+  build3DSetbackRoofs(flFilt);
   finalizeFmpInstancePools();
   buildWinFrames(flFilt);
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
-  // 斜線制限。設定が無ければ setbackPlanes() が空を返して何も作らない。
-  // 建物のはみ出しを実測するので、matrixWorld を更新したあとに置く。
+  // 斜線制限で実際に削る。設定が無ければ setbackPlanes() が空を返して何も触らない。
+  // 世界座標で切るので matrixWorld を更新したあとに置く。
+  applySetbackCut();
+  sc3.updateMatrixWorld(true);
+  // 制限面・寸法・(削り残しがあれば)はみ出しの表示。削ったあとなので赤は出ない。
   build3DSetback();
   _cutawayViewKey='';
   add3DSelectionMarker();
@@ -16858,7 +17329,12 @@ function chooseOpeningDoorModelTool(t){
 }
 
 function toggleGrid(){ST.showGrid=!ST.showGrid;draw2d();}
-function toggleDim(){ST.showDim=!ST.showDim;draw2d();applySetbackDimVisibility();}
+// 共通操作の「寸法」ボタン(スマホから押せる唯一の入口)の on/off 表示を合わせる。
+function syncDimToolButton(){
+  var b=(typeof document!=='undefined')?document.getElementById('stool-dim'):null;
+  if(b) b.className='stool'+(ST.showDim?' active':'');
+}
+function toggleDim(){ST.showDim=!ST.showDim;draw2d();applySetbackDimVisibility();syncDimToolButton();}
 function resetView(){
   var fp=FOOTPRINTS[ST.floor], area=document.getElementById('canvas-area');
   var isMobile=window.matchMedia&&window.matchMedia('(max-width:768px)').matches;

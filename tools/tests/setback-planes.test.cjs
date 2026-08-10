@@ -127,7 +127,8 @@ function fakeCanvas() {
   return { width: 0, height: 0, getContext: function () { return ctx; } };
 }
 
-const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_NORTH_COLOR',
+const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
+  'CEILING_UNDER_ROOF_OFFSET_MM', 'SETBACK_NORTH_COLOR',
   'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR', 'CONTEXT_EXTERIOR_TYPES'];
 const SETBACK_FNS = [
   'escHtml', 'isFiniteCanvasValue', 'getObjBounds',
@@ -136,7 +137,10 @@ const SETBACK_FNS = [
   'setbackRoadItem', 'setbackRoadWidthMm', 'makeSetbackPlane',
   'setbackDistanceMm', 'setbackLimitHeightMmAt', 'setbackPointAt',
   'setbackPlanes', 'setbackPlaneQuadMm', 'setbackDimStations',
-  'setbackPlaneWorldCoef', 'clipTriangleAboveSetbackPlane', 'isSetbackSubjectMesh',
+  'setbackPlaneWorldCoef', 'setbackTriSide', 'splitTriangleBySetbackPlane',
+  'setbackTriF', 'setbackLerpVert', 'clipTriangleAboveSetbackPlane',
+  'isSetbackSubjectMesh', 'setbackSubjectMeshes', 'setbackLiveCoefsForMesh',
+  'collectSetbackOverhangTris',
   'addSetbackLine', 'makeSetbackLabelSprite', 'addSetbackPlaneMesh',
   'addSetbackDims', 'addSetbackOverhang', 'build3DSetback', 'applySetbackDimVisibility',
   'setbackZoneOptionsHtml', 'siteSetbackRaw', 'siteSetbackPanelHtml', 'updateSelectedSetback'
