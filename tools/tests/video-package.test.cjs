@@ -495,7 +495,7 @@ const VIDEO_FNS = [
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
-    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',

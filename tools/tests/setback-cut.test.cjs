@@ -119,7 +119,7 @@ const THREE = {
 
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', 'ROOM_OVERLAP_EPS_MM',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', '_ceilingClampWarned',
-  'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_CUT_SAMPLES',
+  'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'SETBACK_NORTH_COLOR', 'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR',
   'CONTEXT_EXTERIOR_TYPES', '_setbackRoofCache', '_setbackRoofCacheKey',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M'];
@@ -130,7 +130,7 @@ const FNS = [
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
-  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'roofItemOverRoom',
+  'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
@@ -141,8 +141,10 @@ const FNS = [
   // 斜線（Task 16）
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',
-  'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'setbackBoundsMm',
-  'setbackRoadItem', 'setbackRoadWidthMm', 'makeSetbackPlane',
+  'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
+  'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
+  'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
+  'setbackPlanesForSite', 'makeSetbackPlane',
   'setbackDistanceMm', 'setbackLimitHeightMmAt', 'setbackPointAt',
   'setbackPlanes', 'setbackPlaneQuadMm', 'setbackPlaneWorldCoef',
   'setbackTriSide', 'splitTriangleBySetbackPlane', 'setbackTriF', 'setbackLerpVert',

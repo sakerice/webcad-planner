@@ -3761,7 +3761,19 @@ function roomHasRoomAbove(room){
 // (isInsideItem は建具の当たり判定の余白を持っており、屋根の輪郭とは別物)。
 function roofCoversPlanPoint(it,xMm,yMm){
   var lp=roofLocalPoint(it,xMm,yMm);
+  // 斜線由来の屋根が凹みのある輪郭を持つとき(Task 18-3)は、その輪郭で見る。
+  // setbackOutline を持たない屋根 -- つまり既存の屋根すべて -- は従来の矩形のまま。
+  if(it.setbackOutline) return setbackOutlineCoversLocal(it.setbackOutline,lp.x,lp.z);
   return Math.abs(lp.x)<=it.w*U/2+1e-6 && Math.abs(lp.z)<=it.d*U/2+1e-6;
+}
+// 屋根ローカル(m)の点が輪郭の中か。輪郭は重ならない矩形の集まりである。
+function setbackOutlineCoversLocal(ol,x,z){
+  var rs=(ol&&ol.rects)||[], i, r;
+  for(i=0;i<rs.length;i++){
+    r=rs[i];
+    if(x>=r.x0-1e-6&&x<=r.x1+1e-6&&z>=r.z0-1e-6&&z<=r.z1+1e-6) return true;
+  }
+  return false;
 }
 // この部屋の上に載っている roof アイテム。無ければ null。
 // 「載っている」= 部屋の中心が屋根の footprint に入り、かつその屋根の下面(天井面)の
@@ -5193,10 +5205,19 @@ function siteSetbackPanelHtml(it){
     return h;
   }
   // 前面道路が無ければ道路斜線は成立しない。成立しない設定は出さない。
-  var road=setbackRoadItem(it), width=setbackRoadWidthMm(road);
+  // 角地では前面道路が2本以上ある。**全部**の幅員を出す（1本だけ出すと、
+  // 出ていない道路の斜線が効いていないように読める）。
+  var roads=setbackRoadItems(it).filter(function(r){ return setbackRoadWidthMm(r)>0; });
+  var road=roads.length?roads[0]:null, width=setbackRoadWidthMm(road);
   if(road && width>0){
     h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線を表示（勾配 '+law.roadSlope(cur.zone)+'）</label></div>';
-    h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" value="'+Math.round(width)+'mm（道路アイテムの奥行 D）" readonly></div>';
+    h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" value="'+
+      roads.map(function(r){ return Math.round(setbackRoadWidthMm(r))+'mm'; }).join(' / ')+
+      '（道路アイテムの奥行 D'+(roads.length>1?'・前面道路 '+roads.length+'本':'')+'）" readonly></div>';
+    if(roads.length>1){
+      h+='<div class="lock-status-note">この敷地は<b>'+roads.length+'本の道路に接しています（角地）</b>。'+
+        'それぞれの道路から制限面を引き、どの点でも<b>いちばん低い制限</b>が効きます。</div>';
+    }
   } else {
     h+='<div class="lock-status-note">前面道路が置かれていないので道路斜線は出せません。「道路」ツールで道路を置いてください。</div>';
   }
@@ -5211,7 +5232,9 @@ function siteSetbackPanelHtml(it){
   h+='<div class="lock-status-note">これは法令適合の判定ではありません。素の条文どおりの面だけを引いており、'+
     '道路斜線のセットバックによる緩和（法56条2項）・天空率（同7項）・2項道路の中心後退・高低差の緩和を'+
     '<b>1つも見ていません</b>。そのため実際の審査より<b>厳しい側</b>に出ます（本当は建てられる形まで削られます）。'+
-    '真北は平面図の上（−Y）に固定で、敷地の振れも見ていません。設計中に当たりを見るための面であって、確認申請に使える判定ではありません。</div>';
+    '真北は<b>光の設定の「北の方角」（現在 '+setbackNorthDeg()+'°）</b>から取っています。'+
+    '敷地が真北を向いていないときは、そちらを実際の方位に合わせてください。'+
+    '設計中に当たりを見るための面であって、確認申請に使える判定ではありません。</div>';
   return h;
 }
 function updateSelectedSetback(key,val){
@@ -9150,8 +9173,14 @@ function snapCameraToElevation(dir){
 //
 // 平面の向きの約束（既存コードと同じ。snapCameraToElevation のコメントと同一）:
 //   3Dの x = 平面図の x（東が +）、3Dの z = 平面図の y（南が +）、y = 高さ（GL が 0）。
-//   よって「真北」は平面図の -y 方向で、北側境界線は敷地矩形の最小 y の辺である。
 //   （敷地矩形の回転は getObjBounds が 2D/3D 共通で 0 とみなしているのでここでも同じ。）
+//
+// 真北は **日照シミュレーションの方位（LIGHT_SETTINGS.northDeg）から取る**（Task 18-2）。
+// 意味は推測ではなく computeSunPosition から読んだ:
+//   azWorld = az + PI + northDeg*PI/180、az は 0=南・+が西回り、
+//   太陽の向き = (sin(azWorld), -cos(azWorld)) → 真南 = (-sin θ, cos θ)（θ=northDeg）。
+//   よって真北 = (sin θ, -cos θ)。θ=0 で (0,-1) = 平面図の上（従来の固定値と一致）。
+//   θ が増えると北の矢印は平面図上で時計回りに回る。
 var SETBACK_PLANE_MARGIN_MM = 2000;   // 面を敷地よりどれだけ外へ出すか（無限には伸ばさない）
 var SETBACK_NORTH_COLOR = 0x3f7fd0;
 var SETBACK_ROAD_COLOR  = 0xd9822b;
@@ -9175,13 +9204,25 @@ function siteSetbackConfig(it){
   if(!road && !north) return null;
   return {zone:z.id, road:road, north:north};
 }
-function activeSetbackSite(){
-  if(typeof DATA==='undefined' || !DATA || !DATA.items) return null;
-  var found=null;
+// 斜線制限を設定してある敷地。**複数あれば全部**。
+//
+// Task 18 の判断: 敷地矩形が複数あるとき、設定を持つものは全部効かせる。
+// (1) 設定欄は敷地ごとに画面へ出る。1枚しか見ないと、画面に出ている設定が黙って
+//     無視され、画面が嘘をつく。(2) 面が増える方向にしか動かないので、判定は
+//     必ず厳しい側へ寄る。斜線制限で最悪なのは「実際より緩く出る」ことである。
+// どの点でも効くのは **いちばん低い制限** で、これは面ごとに独立に削る既存の
+// 仕組みがそのまま与える（面を1枚でも超えていれば削られる）。
+function activeSetbackSites(){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return [];
+  var out=[];
   DATA.items.forEach(function(it){
-    if(!found && siteSetbackConfig(it)) found=it;
+    if(siteSetbackConfig(it)) out.push(it);
   });
-  return found;
+  return out;
+}
+function activeSetbackSite(){
+  var all=activeSetbackSites();
+  return all.length?all[0]:null;
 }
 function setbackBoundsMm(it){
   var pts=(typeof getObjBounds==='function')?getObjBounds(it):null;
@@ -9193,20 +9234,55 @@ function setbackBoundsMm(it){
   }
   return b;
 }
-// 前面道路: 敷地の中心にいちばん近い road アイテム。無ければ道路斜線は成立しない。
-function setbackRoadItem(site){
-  if(typeof DATA==='undefined' || !DATA || !DATA.items) return null;
+// 道路アイテムの幅方向の単位ベクトル（ローカル +z）。buildItem3D の
+// grp.rotation.y=-rot と同じ回し方。長さ方向はこれに直交する (-wy, wx)。
+function setbackRoadWidthDir(road){
+  var r=(Number(road.rot)||0)*Math.PI/180;
+  return {x:-Math.sin(r), y:Math.cos(r)};
+}
+// 前面道路: 敷地に接する **すべての** road アイテム（Task 18-1）。
+//
+// 「接する」の判定は距離ではなく **道路の長さ方向で敷地と重なっているか** で採る。
+//   - 距離のしきい値を置くと、側溝や歩道の分だけ離して描いた道路が黙って落ちる。
+//     角地で1本落ちると「実際より緩く出る」——この計画がいちばん避けたい壊れ方である。
+//   - 遠い道路を拾っても危険側には倒れない。道路斜線の制限高さは
+//     「反対側の境界からの水平距離 × 勾配」なので、遠いほど **緩い** 面になり、
+//     どの点でも効くのは低い方（＝近い道路）だからである。
+// 1本も重ならなければ、従来どおり「いちばん近い1本」へ落とす（既存プランで
+// 道路斜線が消えないため）。
+function setbackRoadItems(site){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return [];
   var sb=setbackBoundsMm(site);
-  if(!sb) return null;
+  if(!sb) return [];
   var scx=(sb.minX+sb.maxX)/2, scy=(sb.minY+sb.maxY)/2;
-  var best=null, bestD=Infinity;
+  var cs=[{x:sb.minX,y:sb.minY},{x:sb.maxX,y:sb.minY},{x:sb.maxX,y:sb.maxY},{x:sb.minX,y:sb.maxY}];
+  var hits=[], near=null, nearD=Infinity;
   DATA.items.forEach(function(it){
     if(!it || it.type!=='road') return;
     var cx=it.x+it.w/2, cy=it.y+it.d/2;
-    var d=(cx-scx)*(cx-scx)+(cy-scy)*(cy-scy);
-    if(d<bestD){ bestD=d; best=it; }
+    var dd=(cx-scx)*(cx-scx)+(cy-scy)*(cy-scy);
+    if(dd<nearD){ nearD=dd; near=it; }
+    var wv=setbackRoadWidthDir(it);
+    var ux=-wv.y, uy=wv.x;                       // 道路の長さ方向
+    var half=Math.abs(Number(it.w)||0)/2;        // 長さの半分（w が道路の長さ）
+    var c=ux*cx+uy*cy;
+    var lo=Infinity, hi=-Infinity;
+    cs.forEach(function(p){
+      var v=ux*p.x+uy*p.y;
+      if(v<lo) lo=v;
+      if(v>hi) hi=v;
+    });
+    if(hi>c-half && lo<c+half) hits.push({it:it,d:dd});   // 長さ方向で敷地と重なる
   });
-  return best;
+  hits.sort(function(a,b){ return a.d-b.d; });   // 近い順（代表の1本は従来と同じ）
+  var out=hits.map(function(h){ return h.it; });
+  if(!out.length && near) out.push(near);
+  return out;
+}
+// 画面表示や既存の呼び出しのための「代表の1本」。中身は前面道路の先頭。
+function setbackRoadItem(site){
+  var rs=setbackRoadItems(site);
+  return rs.length?rs[0]:null;
 }
 // 幅員は road アイテムの d（短辺＝道路を横切る向き）そのもの。推測ではない:
 // build3DRoad が d を幅員として側溝・外側線・センターライン(5.5m以上)を引いている。
@@ -9238,39 +9314,84 @@ function setbackLimitHeightMmAt(pl,xMm,yMm){ return pl.baseMm+pl.slope*setbackDi
 function setbackPointAt(pl,t,s){
   return {x:(pl.d0+t)*pl.nx+s*pl.px, y:(pl.d0+t)*pl.ny+s*pl.py};
 }
-// 設定が無ければ空配列。ここが空なら面も寸法もはみ出しも1つも作られない。
-function setbackPlanes(){
+// 真北の方位（度）。日照シミュレーションの方位スライダ（#sun-north）そのもの。
+function setbackNorthDeg(){
+  if(typeof LIGHT_SETTINGS==='undefined' || !LIGHT_SETTINGS) return 0;
+  var v=Number(LIGHT_SETTINGS.northDeg);
+  if(!isFinite(v)) return 0;
+  return ((v%360)+360)%360;
+}
+// 真北の単位ベクトル（平面 x,y）。導出はこの節の冒頭コメントに書いてある。
+// northDeg=0 で (0,-1) = 平面図の上。
+function setbackNorthVecPlan(){
+  var a=setbackNorthDeg()*Math.PI/180;
+  return {x:Math.sin(a), y:-Math.cos(a)};
+}
+// 1つの敷地から出る制限面。
+function setbackPlanesForSite(site){
   var law=setbackLawApi();
-  var site=activeSetbackSite();
   if(!law || !site) return [];
   var cfg=siteSetbackConfig(site);
   var sb=setbackBoundsMm(site);
   if(!cfg || !sb) return [];
   var out=[];
+  var cs=[{x:sb.minX,y:sb.minY},{x:sb.maxX,y:sb.minY},{x:sb.maxX,y:sb.maxY},{x:sb.minX,y:sb.maxY}];
   if(cfg.north){
-    // 北側境界線 = 敷地の最小 y の辺。面は境界(距離0・基準高さ)から南へ立ち上がる。
+    // 北側境界線 = 敷地を真北の側から支える辺。面はそこ(距離0・基準高さ)から
+    // 真南へ立ち上がる。北 = (sin θ, -cos θ) なので、面の法線(敷地の側を向く)は
+    // 真南 = (-sin θ, cos θ)。θ=0 では (0,1)・d0=最小 y で、従来と完全に同じ。
+    var nv=setbackNorthVecPlan();
+    var nnx=-nv.x+0, nny=-nv.y+0;   // +0 は -0 を残さないため（保存値・比較で嘘をつく）
+    var d0=Infinity;
+    cs.forEach(function(p){ d0=Math.min(d0,nnx*p.x+nny*p.y); });
     out.push(makeSetbackPlane('north',cfg.zone,law.northBaseMm(cfg.zone),law.NORTH_SLOPE,
-      0,1,sb.minY,sb));
+      nnx,nny,d0,sb));
   }
   if(cfg.road){
-    var road=setbackRoadItem(site);
-    var width=setbackRoadWidthMm(road);
-    if(road && width>0){
-      var r=(Number(road.rot)||0)*Math.PI/180;
-      // road のローカル +z（幅方向）が平面上でどちらを向くか。
-      // buildItem3D の grp.rotation.y=-rot と同じ回し方。
-      var wx=-Math.sin(r), wy=Math.cos(r);
+    var scx=(sb.minX+sb.maxX)/2, scy=(sb.minY+sb.maxY)/2;
+    var roads=setbackRoadItems(site);
+    var made=[];
+    roads.forEach(function(road){
+      var width=setbackRoadWidthMm(road);
+      if(!road || !(width>0)) return;
+      var wv=setbackRoadWidthDir(road);
+      var wx=wv.x, wy=wv.y;
       var cx=road.x+road.w/2, cy=road.y+road.d/2;
-      var scx=(sb.minX+sb.maxX)/2, scy=(sb.minY+sb.maxY)/2;
       var sgn=((scx-cx)*wx+(scy-cy)*wy)>=0?1:-1;   // 敷地はどちら側か
       var half=Math.abs(Number(road.d)||0)/2;
       var nearX=cx+sgn*half*wx, nearY=cy+sgn*half*wy;   // 敷地側の路肩
       var nx=sgn*wx, ny=sgn*wy;                          // 反対側の境界 → 敷地 の向き
       var farX=nearX-width*nx, farY=nearY-width*ny;      // 道路の反対側の境界線
+      made.push({nx:nx,ny:ny,d0:nx*farX+ny*farY});
+    });
+    // 同じ向きの面が2枚以上あれば、**低い方（＝ d0 の大きい方）だけ**を残す。
+    // 制限高さは slope*(n·p - d0) なので d0 が大きいほど低い。分割して置かれた
+    // 1本の道路や、同じ側の並行道路で面が重なるのを防ぐ。厳しい側は捨てない。
+    var kept=[];
+    made.forEach(function(m){
+      var i, k;
+      for(i=0;i<kept.length;i++){
+        k=kept[i];
+        if(Math.abs(k.nx-m.nx)<1e-9 && Math.abs(k.ny-m.ny)<1e-9){
+          if(m.d0>k.d0) kept[i]=m;
+          return;
+        }
+      }
+      kept.push(m);
+    });
+    kept.forEach(function(m){
       out.push(makeSetbackPlane('road',cfg.zone,0,law.roadSlope(cfg.zone),
-        nx,ny,nx*farX+ny*farY,sb));
-    }
+        m.nx,m.ny,m.d0,sb));
+    });
   }
+  return out;
+}
+// 設定が無ければ空配列。ここが空なら面も寸法もはみ出しも1つも作られない。
+function setbackPlanes(){
+  var out=[];
+  activeSetbackSites().forEach(function(site){
+    setbackPlanesForSite(site).forEach(function(pl){ out.push(pl); });
+  });
   return out;
 }
 // 描く四隅(mm)。敷地の範囲＋余裕まで。無限には伸ばさない。
@@ -9604,31 +9725,122 @@ function setbackBuildingTopWorldYAt(xMm,yMm){
   return top;
 }
 var SETBACK_CUT_SAMPLES=64;   // 切り取り範囲を測る格子(建物の平面範囲を分割する)
-// 制限面より上に建物がある平面領域の (t,s) 範囲。無ければ null = 削るものが無い。
+var SETBACK_ROOF_MAX_RECTS=96; // 輪郭が細切れになりすぎたら外接矩形へ落とす保険
+// 制限面より上に建物がある平面領域を (t,s) で測る。無ければ null = 削るものが無い。
 // t は境界からの水平距離、s は境界線に沿った位置(makeSetbackPlane と同じ取り方)。
+//
+// Task 18-3: 外接矩形1枚ではなく **その領域の実際の輪郭** を返す。返り値の
+// rects は互いに重ならない矩形の集まりで、その和が屋根を架ける範囲である。
+// tLo/tHi/sLo/sHi はその外接矩形（屋根アイテムの w/d と据付位置に使う）。
+//
+// 領域の定義は「当たった格子点を中心とする一辺 2m の正方形の和」である
+// (m = 格子の目の粗さ。狭く採ると切り口の縁が屋根から食み出す)。
+// **当たった点が矩形にびっしり並ぶ（＝凹みの無い間取り）ときは、その和は
+// ちょうど外接矩形＋m になり、rects は1枚・値も従来と完全に同じになる。**
 function setbackCutSpanMm(pl){
   var bb=setbackBuildingPlanBoundsMm();
   if(!bb) return null;
-  var N=SETBACK_CUT_SAMPLES, i, j, x, y, top, lim, t, s;
-  var dx=(bb.maxX-bb.minX)/N, dy=(bb.maxY-bb.minY)/N;
-  var tLo=Infinity,tHi=-Infinity,sLo=Infinity,sHi=-Infinity,hit=false;
+  var N=SETBACK_CUT_SAMPLES, i, j, k, p, top, lim;
+  // 建物の平面範囲を (t,s) へ写した外接箱。面の法線が軸に平行なとき（従来の
+  // 北側斜線・rot 0/90 の道路）この格子は従来の x,y 格子と同じ点を通る。
+  var cs=[{x:bb.minX,y:bb.minY},{x:bb.maxX,y:bb.minY},{x:bb.maxX,y:bb.maxY},{x:bb.minX,y:bb.maxY}];
+  var tMin=Infinity,tMax=-Infinity,sMin=Infinity,sMax=-Infinity;
+  cs.forEach(function(c){
+    var t=setbackDistanceMm(pl,c.x,c.y), s=pl.px*c.x+pl.py*c.y;
+    if(t<tMin) tMin=t;
+    if(t>tMax) tMax=t;
+    if(s<sMin) sMin=s;
+    if(s>sMax) sMax=s;
+  });
+  var dt=(tMax-tMin)/N, ds=(sMax-sMin)/N;
+  var m=Math.max(Math.abs(dt),Math.abs(ds),1);
+  var hitT=[], hitS=[];
   for(i=0;i<=N;i++) for(j=0;j<=N;j++){
-    x=bb.minX+dx*i; y=bb.minY+dy*j;
-    top=setbackBuildingTopWorldYAt(x,y);
+    p=setbackPointAt(pl,tMin+dt*i,sMin+ds*j);
+    top=setbackBuildingTopWorldYAt(p.x,p.y);
     if(top===null) continue;
-    lim=setbackLimitHeightMmAt(pl,x,y)*U;
+    lim=setbackLimitHeightMmAt(pl,p.x,p.y)*U;
     if(top<=lim+SETBACK_CUT_EPS_M) continue;
-    hit=true;
-    t=setbackDistanceMm(pl,x,y); s=pl.px*x+pl.py*y;
-    if(t<tLo) tLo=t;
-    if(t>tHi) tHi=t;
-    if(s<sLo) sLo=s;
-    if(s>sHi) sHi=s;
+    hitT.push(i); hitS.push(j);
   }
-  if(!hit) return null;
-  // 格子の目の粗さぶんだけ外へ広げる。狭く採ると切り口の縁が屋根から食み出す。
-  var m=Math.max(Math.abs(dx),Math.abs(dy),1);
-  return {tLo:tLo-m,tHi:tHi+m,sLo:sLo-m,sHi:sHi+m,cellMm:m};
+  if(!hitT.length) return null;
+  // 正方形の和を、切れ目の座標だけを軸に採った不等間隔の格子の上で塗る。
+  var tvMap={}, svMap={}, tv=[], sv=[];
+  function addV(map,arr,v){ if(map[v]===undefined){ map[v]=1; arr.push(v); } }
+  for(k=0;k<hitT.length;k++){
+    addV(tvMap,tv,tMin+dt*hitT[k]-m); addV(tvMap,tv,tMin+dt*hitT[k]+m);
+    addV(svMap,sv,sMin+ds*hitS[k]-m); addV(svMap,sv,sMin+ds*hitS[k]+m);
+  }
+  function asc(a,b){ return a-b; }
+  tv.sort(asc); sv.sort(asc);
+  for(k=0;k<tv.length;k++) tvMap[tv[k]]=k;
+  for(k=0;k<sv.length;k++) svMap[sv[k]]=k;
+  var nt=tv.length-1, ns=sv.length-1;
+  var W=ns+1, diff=[], cov=[];
+  for(k=0;k<(nt+1)*W;k++) diff.push(0);
+  for(k=0;k<hitT.length;k++){
+    var a=tvMap[tMin+dt*hitT[k]-m], b=tvMap[tMin+dt*hitT[k]+m];
+    var c=svMap[sMin+ds*hitS[k]-m], d=svMap[sMin+ds*hitS[k]+m];
+    diff[a*W+c]++; diff[b*W+c]--; diff[a*W+d]--; diff[b*W+d]++;
+  }
+  for(i=0;i<nt;i++){
+    cov.push([]);
+    for(j=0;j<ns;j++){
+      var acc=diff[i*W+j];
+      if(i>0) acc+=diff[(i-1)*W+j];
+      if(j>0) acc+=diff[i*W+j-1];
+      if(i>0&&j>0) acc-=diff[(i-1)*W+j-1];
+      diff[i*W+j]=acc;
+      cov[i].push(acc>0);
+    }
+  }
+  function covered(a,b){ return a>=0&&a<nt&&b>=0&&b<ns&&cov[a][b]; }
+  // 貪欲に矩形へまとめる（右へ伸ばしてから下へ伸ばす）。
+  var used=[], rects=[];
+  for(i=0;i<nt;i++){ used.push([]); for(j=0;j<ns;j++) used[i].push(false); }
+  for(i=0;i<nt;i++) for(j=0;j<ns;j++){
+    if(!cov[i][j]||used[i][j]) continue;
+    var j2=j;
+    while(j2+1<ns&&cov[i][j2+1]&&!used[i][j2+1]) j2++;
+    var i2=i, ok=true;
+    while(ok&&i2+1<nt){
+      for(k=j;k<=j2;k++) if(!cov[i2+1][k]||used[i2+1][k]){ ok=false; break; }
+      if(ok) i2++;
+    }
+    var a2,b2;
+    for(a2=i;a2<=i2;a2++) for(b2=j;b2<=j2;b2++) used[a2][b2]=true;
+    rects.push({tLo:tv[i],tHi:tv[i2+1],sLo:sv[j],sHi:sv[j2+1]});
+  }
+  var bt0=Infinity,bt1=-Infinity,bs0=Infinity,bs1=-Infinity;
+  rects.forEach(function(r){
+    if(r.tLo<bt0) bt0=r.tLo;
+    if(r.tHi>bt1) bt1=r.tHi;
+    if(r.sLo<bs0) bs0=r.sLo;
+    if(r.sHi>bs1) bs1=r.sHi;
+  });
+  // 輪郭の縁（隣に覆いが無いセル境界）。屋根の見付け(鼻隠し)を出す位置である。
+  var edges=[];
+  for(i=0;i<=nt;i++){
+    var run=-1;
+    for(j=0;j<=ns;j++){
+      var on=(j<ns)&&(covered(i-1,j)!==covered(i,j));
+      if(on&&run<0) run=j;
+      if(!on&&run>=0){ edges.push({tLo:tv[i],tHi:tv[i],sLo:sv[run],sHi:sv[j]}); run=-1; }
+    }
+  }
+  for(j=0;j<=ns;j++){
+    var run2=-1;
+    for(i=0;i<=nt;i++){
+      var on2=(i<nt)&&(covered(i,j-1)!==covered(i,j));
+      if(on2&&run2<0) run2=i;
+      if(!on2&&run2>=0){ edges.push({tLo:tv[run2],tHi:tv[i],sLo:sv[j],sHi:sv[j]}); run2=-1; }
+    }
+  }
+  if(rects.length>SETBACK_ROOF_MAX_RECTS){
+    rects=[{tLo:bt0,tHi:bt1,sLo:bs0,sHi:bs1}];
+    edges=[];
+  }
+  return {tLo:bt0,tHi:bt1,sLo:bs0,sHi:bs1,cellMm:m,rects:rects,edges:edges};
 }
 // 仕上げを合わせるための見本にする既存の屋根(いちばん高い階のもの)。無ければ null。
 function setbackRoofTemplateItem(){
@@ -9673,6 +9885,21 @@ function setbackRoofItemForPlane(pl,span,key){
     color:tpl?tpl.color:undefined, texture:tpl?tpl.texture:undefined,
     gutterMode:'off'   // 制限面に沿った切り口。樋を自動生成する対象ではない。
   };
+  // Task 18-3: 削った範囲が矩形1枚に収まらない（L字などで凹んでいる）ときだけ、
+  // 屋根ローカルの輪郭を持たせる。**矩形1枚のときは付けない**ので、凹みの無い
+  // 間取りの屋根アイテムは 1 プロパティも増えず、今までと同じ物のままである。
+  if(span.rects && span.rects.length>1){
+    var tMid=(span.tLo+span.tHi)/2, sMid=(span.sLo+span.sHi)/2;
+    // 屋根ローカル: z = (t - tMid)、x = -(s - sMid)（roofLocalPoint の逆）。単位は m。
+    var toLocal=function(r){
+      return {x0:-(r.sHi-sMid)*U, x1:-(r.sLo-sMid)*U,
+              z0:(r.tLo-tMid)*U,  z1:(r.tHi-tMid)*U};
+    };
+    it.setbackOutline={
+      rects:span.rects.map(toLocal),
+      edges:(span.edges||[]).map(toLocal)
+    };
+  }
   return it;
 }
 var _setbackRoofCache=null;
@@ -10940,6 +11167,12 @@ function updateSunSim(key,val){
     var sun=null;
     sc3.traverse(function(o){if(o.isDirectionalLight)sun=o;});
     if(sun && !isInt) fitShadowCamera(sun);
+  }
+  // 斜線制限の「北」はこの方位そのものなので、回したら制限面も作り直す(Task 18-2)。
+  // 斜線制限を設定していないプランでは面が0枚なので、ここは素通りする。
+  if(key==='northDeg' && sc3 && typeof setbackPlanes==='function' && setbackPlanes().length){
+    rebuild3D();
+    return;
   }
   if(typeof invalidate3D==='function') invalidate3D();
 }
@@ -13582,6 +13815,21 @@ function build3DRoofItem(grp,it,w3,d3){
   }
   if(type==='mono'){
     var rise=Math.tan(pitch)*D;
+    // 斜線由来の屋根が凹みのある輪郭を持つとき(Task 18-3)。面も見付けも作り方は
+    // 下の矩形と同じ(quad / edge / skirtEdge)で、輪郭だけが矩形でない。
+    // setbackOutline を持たない屋根 -- 既存の屋根すべて -- は下の矩形をそのまま通る。
+    if(it.setbackOutline && it.setbackOutline.rects && it.setbackOutline.rects.length){
+      var oh=function(z){ return baseY+Math.tan(pitch)*(z+D/2); };
+      it.setbackOutline.rects.forEach(function(r){
+        quad([r.x0,oh(r.z0),r.z0],[r.x1,oh(r.z0),r.z0],
+             [r.x1,oh(r.z1),r.z1],[r.x0,oh(r.z1),r.z1],mat);
+      });
+      (it.setbackOutline.edges||[]).forEach(function(e){
+        var ea=[e.x0,oh(e.z0),e.z0], eb=[e.x1,oh(e.z1),e.z1];
+        edge(ea,eb); skirtEdge(ea,eb);
+      });
+      return;
+    }
     var m1=[-W/2,baseY,-D/2], m2=[W/2,baseY,-D/2], m3=[W/2,baseY+rise,D/2], m4=[-W/2,baseY+rise,D/2];
     quad(m1,m2,m3,m4,mat);
     edgeLoop([m1,m2,m3,m4]);
