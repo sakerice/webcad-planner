@@ -358,14 +358,15 @@ test('19-3(最重要): シート一覧の呼称は方位から作られる。0 �
 test('19-3(最重要): 立面図の中身は方位を回しても同一（軸は建物に正対したまま）', () => {
   const ctx = withDrawing(makeCtx(plan()));
   const opts = '{scale:"100",paper:"a3"}';
+  // 比べるのは図形の本体。方位記号（19-4）は方位で回るので、そこは切り離す。
+  const body = (d) => splitNorthMark(run(ctx, 'JISDRAW.buildElevationSvg("' + d + '",' + opts + ')')).before;
   const base = {};
-  ['n', 'e', 's', 'w'].forEach((d) => { base[d] = run(ctx, 'JISDRAW.buildElevationSvg("' + d + '",' + opts + ')'); });
+  ['n', 'e', 's', 'w'].forEach((d) => { base[d] = body(d); });
   assert.ok(base.n.length > 200, '中身のある SVG が出ている: ' + base.n.length);
   [45, 90, 137, 270].forEach((deg) => {
     run(ctx, 'setPlanNorthDeg(' + deg + ')');
     ['n', 'e', 's', 'w'].forEach((d) => {
-      const now = run(ctx, 'JISDRAW.buildElevationSvg("' + d + '",' + opts + ')');
-      assert.equal(now, base[d], deg + '° の ' + d + ' 面の SVG が変わっている（軸が動いた）');
+      assert.equal(body(d), base[d], deg + '° の ' + d + ' 面の図形が変わっている（軸が動いた）');
     });
   });
   // 東西の面と南北の面は別物である（比較そのものが空振りしていないことの確認）。
@@ -375,10 +376,12 @@ test('19-3(最重要): 立面図の中身は方位を回しても同一（軸は
 test('19-3(最重要): 平面図の SVG は方位を回しても同一', () => {
   const ctx = withDrawing(makeCtx(plan()));
   const opts = '{scale:"100",paper:"a3"}';
-  const base = run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')');
+  // 方位記号（19-4）だけは方位で回る。図形の本体はまったく動かない。
+  const body = () => splitNorthMark(run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')')).before;
+  const base = body();
   [45, 90, 180].forEach((deg) => {
     run(ctx, 'setPlanNorthDeg(' + deg + ')');
-    assert.equal(run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')'), base, deg + '° で平面図が変わった');
+    assert.equal(body(), base, deg + '° で平面図の図形が変わった');
   });
 });
 
@@ -455,4 +458,61 @@ test('19-3(最重要): 立面図の書き出しファイル名は方位のコー
   assert.equal(nameFor('elev', 'n'), 'jis-elev-w', '90度では平面図の上は西を向く');
   run(ctx, 'setPlanNorthDeg(0)');
   assert.equal(nameFor('elev', 'n'), 'jis-elev-n', '0度に戻すと元のファイル名へ戻る');
+});
+
+// ══ 19-4 方位記号 ═════════════════════════════════════════════════════
+
+// 方位記号は本体のいちばん後ろに付く。'N' の文字から後ろが記号ぶん。
+function splitNorthMark(svg) {
+  const at = svg.indexOf('text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="330" fill="#000">N</text>');
+  assert.notEqual(at, -1, '方位記号の N が見つからない: ' + svg.slice(-300));
+  const head = svg.lastIndexOf('<text', at);
+  return { before: svg.slice(0, head), mark: svg.slice(head) };
+}
+
+test('19-4(最重要): 平面図の方位記号は方位ぶん回る。0度では回転を付けない', () => {
+  const ctx = withDrawing(makeCtx(plan()));
+  const opts = '{scale:"100",paper:"a3"}';
+  const at0 = run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')');
+  const m0 = splitNorthMark(at0);
+  assert.equal(/<g transform="rotate\(/.test(m0.mark), false,
+    '0度では針に回転を付けない（これまでの出力と1バイトも変わらない）');
+
+  run(ctx, 'setPlanNorthDeg(45)');
+  const at45 = run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')');
+  const m45 = splitNorthMark(at45);
+  assert.equal(m45.before, m0.before, '図面の中身は方位で変わらない（変わるのは記号だけ）');
+  const g = m45.mark.match(/<g transform="rotate\(([-\d.]+) ([-\d.]+) ([-\d.]+)\)">/);
+  assert.ok(g, '45度では針が回る: ' + m45.mark);
+  assert.equal(Number(g[1]), 45, '回転角は保存された方位そのもの');
+  // 回転の中心は記号の円の中心。
+  const circle = m45.mark.match(/<circle cx="([-\d.]+)" cy="([-\d.]+)"/);
+  assert.equal(g[2], circle[1], '回転の中心x = 円の中心x');
+  assert.equal(g[3], circle[2], '回転の中心y = 円の中心y');
+  // 針の <g> を外すと 0 度の記号に戻る = 針以外は何も動いていない。
+  assert.equal(m45.mark.replace(/<g transform="rotate\([^)]*\)">/, '').replace('</g>', ''), m0.mark);
+
+  [90, 180, 270, 137.5].forEach((deg) => {
+    run(ctx, 'setPlanNorthDeg(' + deg + ')');
+    const s = splitNorthMark(run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')')).mark;
+    assert.equal(Number(s.match(/rotate\(([-\d.]+) /)[1]), deg, deg + '度');
+  });
+
+  run(ctx, 'setPlanNorthDeg(0)');
+  assert.equal(run(ctx, 'JISDRAW.buildFloorPlanSvg(1,' + opts + ')'), at0, '0度へ戻すと元の図面へ戻る');
+});
+
+test('19-4(最重要): 立面図にも方位記号が入る（0度でも出る＝立面図の出力は変わる）', () => {
+  const ctx = withDrawing(makeCtx(plan()));
+  const opts = '{scale:"100",paper:"a3"}';
+  const at0 = run(ctx, 'JISDRAW.buildElevationSvg("n",' + opts + ')');
+  const m0 = splitNorthMark(at0);
+  // 記号は上下反転グループの外側にある（中に入れると記号ごと裏返る）。
+  assert.ok(m0.before.endsWith('</g>'), '記号の直前で scale(1,-1) のグループが閉じている');
+  assert.equal(/<g transform="rotate\(/.test(m0.mark), false, '0度では針に回転を付けない');
+
+  run(ctx, 'setPlanNorthDeg(45)');
+  const m45 = splitNorthMark(run(ctx, 'JISDRAW.buildElevationSvg("n",' + opts + ')'));
+  assert.equal(m45.before, m0.before, '記号を除いた立面図は方位で変わらない（軸は動いていない）');
+  assert.equal(Number(m45.mark.match(/rotate\(([-\d.]+) /)[1]), 45, '立面図の方位記号も回る');
 });

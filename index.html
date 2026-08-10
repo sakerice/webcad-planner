@@ -22708,7 +22708,11 @@ var JISDRAW=(function(){
     body+=elevBalconyFenceToSvg(dir,LW);
     body+=elevOpenings(dir,LW);
     body+=heightDimsToSvg(dir,LW);
-    return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'+svgClose();
+    // 方位記号は反転グループの **外** に置く（中に入れると記号ごと上下が裏返る）。
+    // これは立面図にとって新しい出力である: 方位0度でも記号は出るので、
+    // 立面図の SVG はこの1つぶんだけ、これまでと違うバイト列になる。
+    return svgOpen(view,opts)+'<g transform="scale(1,-1)">'+body+'</g>'
+      +northMarkSvg(view,LW)+svgClose();
   }
   function placeholderSvg(label){
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 297">'
@@ -23184,15 +23188,25 @@ var JISDRAW=(function(){
     return bottomDimSvg(xs,wallMaxY,LW)+leftDimSvg(ys,wallMinX,LW);
   }
 
-  // 方位記号: 右上に円+上向き矢印+「N」。2D画面の上=北という単純な固定表示(回転データは持たない)。
+  // 方位記号: 右上に円+矢印+「N」。矢印は **プランに保存されている方位ぶん回す**。
+  // 立面図の軸も平面図の向きも建物に正対したままなので、回さないと
+  // 「上が真北」と読める図面になり、振れた敷地でそのまま嘘になる。
+  //
+  // 回す向き: 平面図の上から時計回りに θ 度が真北（setbackNorthVecPlan と同じ約束。
+  // 真北 = (sin θ, -cos θ)）。SVG の座標は y が下向きなので、rotate に渡す正の角が
+  // そのまま画面上の時計回りになり、θ をそのまま渡せばよい。
+  // **方位0度では回転を付けない** ので、これまでの出力と1バイトも変わらない。
   function northMarkSvg(bounds,LW){
     var r=LW.text*2.6, margin=LW.text*2, textH=LW.text*1.1;
     var cx=bounds.maxX-margin-r, cy=bounds.minY+margin+textH+r;
     var out='<text x="'+cx+'" y="'+(bounds.minY+margin+textH*0.8)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+textH+'" fill="#000">N</text>';
     out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
     var tipY=cy-r*0.75, tailY=cy+r*0.6, ah=r*0.55, aw=r*0.32;
-    out+='<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
-    out+='<polygon points="'+cx+','+tipY+' '+(cx-aw)+','+(tipY+ah)+' '+(cx+aw)+','+(tipY+ah)+'" fill="#000"/>';
+    // 針だけを回す。「N」の字と円は向きを持たないので回さない（字が逆さまになる）。
+    var needle='<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+tipY+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    needle+='<polygon points="'+cx+','+tipY+' '+(cx-aw)+','+(tipY+ah)+' '+(cx+aw)+','+(tipY+ah)+'" fill="#000"/>';
+    var deg=planNorthDeg();
+    out+=deg ? ('<g transform="rotate('+deg+' '+cx+' '+cy+')">'+needle+'</g>') : needle;
     return out;
   }
 
