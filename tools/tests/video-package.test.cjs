@@ -917,3 +917,17 @@ test('カメラの三角は、撮影時のパン・ズームで打たれる（ST
   assert.ok(apex[1] >= 0 && apex[1] <= FRAME.w && apex[2] >= 0 && apex[2] <= FRAME.h,
     'カメラ位置がフレームの外に出ている: ' + apex[1] + ',' + apex[2]);
 });
+
+// 敷地の方位を伝えないと、生成AIは光の向きを自分で決める。実測で一度、
+// 光の無いレンダに対して「窓から差す午後の光」を頼み、モデルが好きな場所に
+// 光源を発明したことがある。方位はその再発の芽になる。
+// 方位はプランが持つ (DATA.northDeg)。照明側 (LIGHT_SETTINGS) は写しなので読まない。
+test('動画パッケージの daylight は敷地の方位を持つ', () => {
+  const i = html.indexOf('function videoDaylightDescriptor');
+  assert.notEqual(i, -1);
+  const body = html.slice(i, html.indexOf('\n}', i));
+  assert.match(body, /northDeg:\s*planNorthDeg\(\)/,
+    'the bearing must come from the plan, not from the lighting mirror');
+  assert.doesNotMatch(body, /northDeg:\s*LIGHT_SETTINGS/,
+    'reading the mirror would go stale the moment the plan is reloaded');
+});

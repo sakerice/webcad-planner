@@ -20999,7 +20999,11 @@ function videoDaylightDescriptor(){
     timeOfDay:LIGHT_SETTINGS.timeOfDay||'day',
     sunSim:!!LIGHT_SETTINGS.sunSim,
     hour:LIGHT_SETTINGS.hour,
-    season:LIGHT_SETTINGS.season
+    season:LIGHT_SETTINGS.season,
+    // 敷地の方位。太陽がどちらから差すかはこれで決まるので、方位を伝えずに
+    // 「午後の光が窓から入る」とだけ書くと、生成AIは光の向きを自分で決める。
+    // 方位はプランが持つ (DATA.northDeg)。照明側は写しなので、そちらを読まない。
+    northDeg:planNorthDeg()
   };
 }
 // compose は読めない daylight の光の文を黙って落とす。落ちたことをここで捕まえる。
