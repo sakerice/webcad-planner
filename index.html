@@ -63,6 +63,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
 <script src="assets/models/custom/manifest.js"></script>
 <script src="assets/js/height-model.js"></script>
+<script src="assets/js/setback-law.js"></script>
 <!-- video-prompt.js は LockTiers を読むので、lock-tiers.js より後に置くこと -->
 <script src="assets/js/lock-tiers.js"></script>
 <script src="assets/js/video-prompt.js"></script>
@@ -5095,6 +5096,63 @@ function selectedRoomCeilingHtml(it){
   html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
 }
+// ── 斜線制限（建築基準法56条）の設定UI。既存の選択プロパティ欄の中に置く ──
+// 数値（勾配・基準高さ）は assets/js/setback-law.js からしか読まない。
+function setbackZoneOptionsHtml(cur){
+  var law=setbackLawApi();
+  var h='<option value=""'+(!cur?' selected':'')+'>未設定（斜線制限を使わない）</option>';
+  if(!law) return h;
+  law.ZONES.forEach(function(z){
+    h+='<option value="'+z.id+'"'+(cur===z.id?' selected':'')+'>'+escHtml(z.label)+'</option>';
+  });
+  return h;
+}
+// 画面に出すための素の値。siteSetbackConfig と違い「用途地域だけ選んで
+// まだ何も有効にしていない」途中の状態も返す。
+function siteSetbackRaw(it){
+  var s=(it && it.setback && typeof it.setback==='object')?it.setback:null;
+  var law=setbackLawApi();
+  var zone=(s && law && law.zone(s.zone))?s.zone:'';
+  return {zone:zone, road:!!(s&&s.road), north:!!(s&&s.north)};
+}
+function siteSetbackPanelHtml(it){
+  var law=setbackLawApi();
+  if(!law) return '';
+  var cur=siteSetbackRaw(it);
+  var h='<div class="ph" style="margin-top:12px">斜線制限（建築基準法56条）</div>';
+  h+='<div class="pr"><div class="pl">用途地域</div><select class="pi" onchange="updateSelectedSetback(\'zone\',this.value)">'+setbackZoneOptionsHtml(cur.zone)+'</select></div>';
+  if(!cur.zone){
+    h+='<div class="lock-status-note">用途地域を選ぶまで、制限面も寸法も出ません。</div>';
+    return h;
+  }
+  // 前面道路が無ければ道路斜線は成立しない。成立しない設定は出さない。
+  var road=setbackRoadItem(it), width=setbackRoadWidthMm(road);
+  if(road && width>0){
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線を表示（勾配 '+law.roadSlope(cur.zone)+'）</label></div>';
+    h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" value="'+Math.round(width)+'mm（道路アイテムの奥行 D）" readonly></div>';
+  } else {
+    h+='<div class="lock-status-note">前面道路が置かれていないので道路斜線は出せません。「道路」ツールで道路を置いてください。</div>';
+  }
+  // 北側斜線は低層住専・中高層住専にしか無い。無い用途地域では欄ごと出さない。
+  if(law.hasNorthLimit(cur.zone)){
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示（基準高さ '+law.northBaseMm(cur.zone)+'mm ＋ 勾配 '+law.NORTH_SLOPE+'）</label></div>';
+  }
+  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ている部分を赤で示します。この段階では建物を削りません。寸法は「↔ 寸法」ボタンで出し入れします。</div>';
+  return h;
+}
+function updateSelectedSetback(key,val){
+  var it=ST.selected;
+  if(!it || it.type!=='site-rect') return;
+  var law=setbackLawApi();
+  var cur=siteSetbackRaw(it);
+  if(key==='zone') cur.zone=(law && law.zone(val))?val:'';
+  else if(key==='road') cur.road=!!val;
+  else if(key==='north') cur.north=!!val;
+  // 効かない用途地域の北側斜線は書き残さない。使われない値が後で効きはじめるのが最悪。
+  if(!cur.zone || !law || !law.hasNorthLimit(cur.zone)) cur.north=false;
+  if(!cur.zone){ updateSelectedProp('setback',null); return; }
+  updateSelectedProp('setback',{zone:cur.zone, road:cur.road, north:cur.north});
+}
 function updateSelectedCeilingType(v){
   var room=ST.selected;
   if(!room||room.type!=='room') return;
@@ -5489,6 +5547,7 @@ function updateProps(){
   if(it.type==='site-rect'){
     html += '<div class="ph" style="margin-top:12px">敷地設定</div>';
     html += '<div class="pr"><div class="pl">敷地表面</div><select class="pi" onchange="updateSelectedProp(\'siteSurface\',this.value)">'+siteSurfaceOptionsHtml(it.siteSurface)+'</select></div>';
+    html += siteSetbackPanelHtml(it);
   }
   if(isWindowLikeType(it.type)){
     ensureWindowProps(it);
@@ -5778,6 +5837,9 @@ function updateSelectedProp(p,v,noSave){
     if(!v) delete ST.selected.ceiling;
     delete ST.selected.ceilingHeight;
   }
+  // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
+  // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
+  if(p==='setback' && !v) delete ST.selected.setback;
   if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
   if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
     var ws=getExteriorWallSetting(ST.selected);
@@ -8942,7 +9004,7 @@ function fitCameraToScene(){
   if(!sc3||!camExt||!orbit) return;
   if(WALKTHROUGH) return;
   var box=new THREE.Box3();
-  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
+  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b&&!obj.userData.setbackHelper) box.expandByObject(obj); });
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
   var size=box.getSize(new THREE.Vector3());
@@ -8961,7 +9023,7 @@ function fitCameraToScene(){
 function snapCameraToElevation(dir){
   if(!sc3||!camExt||!orbit) return;
   var box=new THREE.Box3();
-  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b) box.expandByObject(obj); });
+  sc3.traverse(function(obj){ if(obj.isMesh&&obj.userData.b&&!obj.userData.setbackHelper) box.expandByObject(obj); });
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
   var size=box.getSize(new THREE.Vector3());
@@ -8974,6 +9036,360 @@ function snapCameraToElevation(dir){
   orbit.target.copy(center);
   orbit.update();
   invalidate3D();
+}
+
+// ══ 斜線制限（建築基準法56条）: 制限面・寸法・はみ出しの表示 ═══════════════
+// このタスクでは建物を1mmも削らない。削る前に「どこに・どれだけかかっているか」を
+// 目に見える形にするだけである。
+//
+// 法の数値（道路斜線の勾配 1.25 / 1.5、北側斜線の基準高さ 5m / 10m、勾配 1.25）は
+// assets/js/setback-law.js に1か所だけ置いてある。ここには数値を書かない。
+//
+// 平面の向きの約束（既存コードと同じ。snapCameraToElevation のコメントと同一）:
+//   3Dの x = 平面図の x（東が +）、3Dの z = 平面図の y（南が +）、y = 高さ（GL が 0）。
+//   よって「真北」は平面図の -y 方向で、北側境界線は敷地矩形の最小 y の辺である。
+//   （敷地矩形の回転は getObjBounds が 2D/3D 共通で 0 とみなしているのでここでも同じ。）
+var SETBACK_PLANE_MARGIN_MM = 2000;   // 面を敷地よりどれだけ外へ出すか（無限には伸ばさない）
+var SETBACK_NORTH_COLOR = 0x3f7fd0;
+var SETBACK_ROAD_COLOR  = 0xd9822b;
+var SETBACK_OVER_COLOR  = 0xe94560;
+
+function setbackLawApi(){
+  return (typeof SetbackLaw!=='undefined' && SetbackLaw) ? SetbackLaw : null;
+}
+// 保存済みプランは setback を持たない。持たなければ null を返し、以降は何も起きない。
+// 「効かない用途地域の北側斜線」はここで黙って落とす（UI にも出さないが、
+//  古い保存データが持っていた場合の受け口としても効かせない）。
+function siteSetbackConfig(it){
+  var law=setbackLawApi();
+  if(!law || !it || it.type!=='site-rect') return null;
+  var s=it.setback;
+  if(!s || typeof s!=='object') return null;
+  var z=law.zone(s.zone);
+  if(!z) return null;
+  var road=!!s.road;
+  var north=!!s.north && law.hasNorthLimit(z.id);
+  if(!road && !north) return null;
+  return {zone:z.id, road:road, north:north};
+}
+function activeSetbackSite(){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return null;
+  var found=null;
+  DATA.items.forEach(function(it){
+    if(!found && siteSetbackConfig(it)) found=it;
+  });
+  return found;
+}
+function setbackBoundsMm(it){
+  var pts=(typeof getObjBounds==='function')?getObjBounds(it):null;
+  if(!pts || pts.length<3) return null;
+  var b={minX:pts[0].x,maxX:pts[0].x,minY:pts[0].y,maxY:pts[0].y}, i;
+  for(i=1;i<pts.length;i++){
+    b.minX=Math.min(b.minX,pts[i].x); b.maxX=Math.max(b.maxX,pts[i].x);
+    b.minY=Math.min(b.minY,pts[i].y); b.maxY=Math.max(b.maxY,pts[i].y);
+  }
+  return b;
+}
+// 前面道路: 敷地の中心にいちばん近い road アイテム。無ければ道路斜線は成立しない。
+function setbackRoadItem(site){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return null;
+  var sb=setbackBoundsMm(site);
+  if(!sb) return null;
+  var scx=(sb.minX+sb.maxX)/2, scy=(sb.minY+sb.maxY)/2;
+  var best=null, bestD=Infinity;
+  DATA.items.forEach(function(it){
+    if(!it || it.type!=='road') return;
+    var cx=it.x+it.w/2, cy=it.y+it.d/2;
+    var d=(cx-scx)*(cx-scx)+(cy-scy)*(cy-scy);
+    if(d<bestD){ bestD=d; best=it; }
+  });
+  return best;
+}
+// 幅員は road アイテムの d（短辺＝道路を横切る向き）そのもの。推測ではない:
+// build3DRoad が d を幅員として側溝・外側線・センターライン(5.5m以上)を引いている。
+// ここで別の数値を持ち込むと、同じ道路が2つの幅を持つことになる。
+function setbackRoadWidthMm(road){
+  if(!road) return 0;
+  var d=Math.abs(Number(road.d)||0);
+  return isFinite(d)?d:0;
+}
+// 制限面1枚。distance(x,y)=nx*x+ny*y-d0（境界からの水平距離 mm）、
+// limit(x,y)=baseMm+slope*distance（その位置での高さの限度 mm、GL 基準）。
+// nx,ny は単位ベクトルなので distance は素直な水平距離になる。
+function makeSetbackPlane(kind,zone,baseMm,slope,nx,ny,d0,sb){
+  var px=-ny, py=nx;   // 境界線に沿う向き
+  var cs=[{x:sb.minX,y:sb.minY},{x:sb.maxX,y:sb.minY},{x:sb.maxX,y:sb.maxY},{x:sb.minX,y:sb.maxY}];
+  var tMin=Infinity,tMax=-Infinity,sMin=Infinity,sMax=-Infinity;
+  cs.forEach(function(c){
+    var t=nx*c.x+ny*c.y-d0, s=px*c.x+py*c.y;
+    tMin=Math.min(tMin,t); tMax=Math.max(tMax,t);
+    sMin=Math.min(sMin,s); sMax=Math.max(sMax,s);
+  });
+  return {kind:kind, zone:zone, baseMm:baseMm, slope:slope,
+    nx:nx, ny:ny, d0:d0, px:px, py:py,
+    siteTMin:tMin, siteTMax:tMax, siteSMin:sMin, siteSMax:sMax};
+}
+function setbackDistanceMm(pl,xMm,yMm){ return pl.nx*xMm+pl.ny*yMm-pl.d0; }
+function setbackLimitHeightMmAt(pl,xMm,yMm){ return pl.baseMm+pl.slope*setbackDistanceMm(pl,xMm,yMm); }
+// (t,s) から平面座標へ戻す。nx,ny と px,py は正規直交なのでこれで一意に決まる。
+function setbackPointAt(pl,t,s){
+  return {x:(pl.d0+t)*pl.nx+s*pl.px, y:(pl.d0+t)*pl.ny+s*pl.py};
+}
+// 設定が無ければ空配列。ここが空なら面も寸法もはみ出しも1つも作られない。
+function setbackPlanes(){
+  var law=setbackLawApi();
+  var site=activeSetbackSite();
+  if(!law || !site) return [];
+  var cfg=siteSetbackConfig(site);
+  var sb=setbackBoundsMm(site);
+  if(!cfg || !sb) return [];
+  var out=[];
+  if(cfg.north){
+    // 北側境界線 = 敷地の最小 y の辺。面は境界(距離0・基準高さ)から南へ立ち上がる。
+    out.push(makeSetbackPlane('north',cfg.zone,law.northBaseMm(cfg.zone),law.NORTH_SLOPE,
+      0,1,sb.minY,sb));
+  }
+  if(cfg.road){
+    var road=setbackRoadItem(site);
+    var width=setbackRoadWidthMm(road);
+    if(road && width>0){
+      var r=(Number(road.rot)||0)*Math.PI/180;
+      // road のローカル +z（幅方向）が平面上でどちらを向くか。
+      // buildItem3D の grp.rotation.y=-rot と同じ回し方。
+      var wx=-Math.sin(r), wy=Math.cos(r);
+      var cx=road.x+road.w/2, cy=road.y+road.d/2;
+      var scx=(sb.minX+sb.maxX)/2, scy=(sb.minY+sb.maxY)/2;
+      var sgn=((scx-cx)*wx+(scy-cy)*wy)>=0?1:-1;   // 敷地はどちら側か
+      var half=Math.abs(Number(road.d)||0)/2;
+      var nearX=cx+sgn*half*wx, nearY=cy+sgn*half*wy;   // 敷地側の路肩
+      var nx=sgn*wx, ny=sgn*wy;                          // 反対側の境界 → 敷地 の向き
+      var farX=nearX-width*nx, farY=nearY-width*ny;      // 道路の反対側の境界線
+      out.push(makeSetbackPlane('road',cfg.zone,0,law.roadSlope(cfg.zone),
+        nx,ny,nx*farX+ny*farY,sb));
+    }
+  }
+  return out;
+}
+// 描く四隅(mm)。敷地の範囲＋余裕まで。無限には伸ばさない。
+function setbackPlaneQuadMm(pl){
+  var m=SETBACK_PLANE_MARGIN_MM;
+  var t0=0, t1=Math.max(pl.siteTMax,0)+m;
+  var s0=pl.siteSMin-m, s1=pl.siteSMax+m;
+  return [setbackPointAt(pl,t0,s0),setbackPointAt(pl,t0,s1),
+          setbackPointAt(pl,t1,s1),setbackPointAt(pl,t1,s0)];
+}
+// 出す寸法の位置。北側は「基準高さ(距離0)」＋敷地の中ほど＋敷地の南端、
+// 道路は敷地の手前端と奥端。どれも「境界からの水平距離」と「その位置の制限高さ」を出す。
+function setbackDimStations(pl){
+  var out=[];
+  if(pl.kind==='north'){
+    var far=Math.max(pl.siteTMax,0);
+    out.push({t:0,base:true});
+    if(far>0){ out.push({t:far/2}); out.push({t:far}); }
+  } else {
+    var a=Math.max(pl.siteTMin,0), b=Math.max(pl.siteTMax,0);
+    if(b>0) out.push({t:a});
+    if(b>a) out.push({t:b});
+  }
+  return out;
+}
+// 世界(m)での面: limitY = a*x + b*z + c。x,z は 3D の座標。
+function setbackPlaneWorldCoef(pl){
+  return {a:pl.slope*pl.nx, b:pl.slope*pl.ny, c:(pl.baseMm-pl.slope*pl.d0)*U};
+}
+// 三角形のうち「面より上」だけを残す。f(p)=p.y-(a*p.x+b*p.z+c) は座標の一次式なので、
+// 辺を線形補間で切れば近似ではなく厳密な切断になる。
+// 全部下なら [] を返す = はみ出していないものを赤くしない。
+function clipTriangleAboveSetbackPlane(tri,co){
+  function f(p){ return p[1]-(co.a*p[0]+co.b*p[2]+co.c); }
+  var pts=[[tri[0],tri[1],tri[2]],[tri[3],tri[4],tri[5]],[tri[6],tri[7],tri[8]]];
+  var poly=[], i, cur, nxt, fc, fn, t;
+  for(i=0;i<3;i++){
+    cur=pts[i]; nxt=pts[(i+1)%3];
+    fc=f(cur); fn=f(nxt);
+    if(fc>=0) poly.push(cur);
+    if((fc>0&&fn<0)||(fc<0&&fn>0)){
+      t=fc/(fc-fn);
+      poly.push([cur[0]+(nxt[0]-cur[0])*t,cur[1]+(nxt[1]-cur[1])*t,cur[2]+(nxt[2]-cur[2])*t]);
+    }
+  }
+  var out=[];
+  for(i=2;i<poly.length;i++){
+    out.push([poly[0][0],poly[0][1],poly[0][2],
+              poly[i-1][0],poly[i-1][1],poly[i-1][2],
+              poly[i][0],poly[i][1],poly[i][2]]);
+  }
+  return out;
+}
+// 斜線制限がかかる対象 = 建物として建っているメッシュ。
+// 道路・隣家・電柱などの周辺物と、地面に置く外構（敷地・基礎・車・樹木・塀…）は
+// 計画建物ではないので外す。GLB のインスタンス描画は1メッシュに複数配置が入って
+// いるためここでは扱わない（家具であって外皮ではない）。
+function isSetbackSubjectMesh(o){
+  if(!o || !o.isMesh || o.isInstancedMesh) return false;
+  var ud=o.userData||{};
+  if(!ud.b) return false;
+  if(ud.setbackHelper || ud.selectionHelper || ud.hitProxy || ud.shadowHelper) return false;
+  if(o.name==='_sky') return false;
+  var ref=ud.selectRef;
+  if(ref && ref.type){
+    if(isContextExteriorItemType(ref.type)) return false;
+    if(isGroundLevelItemType(ref.type)) return false;
+  }
+  return true;
+}
+function addSetbackLine(grp,col,a,b,noDepth){
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute([a[0],a[1],a[2],b[0],b[1],b[2]],3));
+  var ln=new THREE.LineSegments(geo,new THREE.LineBasicMaterial({
+    color:col,transparent:true,opacity:0.95,depthTest:noDepth?false:true}));
+  ln.userData={b:true,setbackHelper:true};
+  grp.add(ln);
+  return ln;
+}
+function makeSetbackLabelSprite(text,col,worldW){
+  var hex='#'+('000000'+col.toString(16)).slice(-6);
+  var c=document.createElement('canvas');
+  c.width=256; c.height=64;
+  var g=c.getContext('2d');
+  g.fillStyle='rgba(255,255,255,0.93)';
+  g.strokeStyle=hex; g.lineWidth=3;
+  if(g.roundRect){ g.beginPath(); g.roundRect(3,7,250,50,10); g.fill(); g.stroke(); }
+  else { g.fillRect(3,7,250,50); g.strokeRect(3,7,250,50); }
+  g.font='bold 28px sans-serif';
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillStyle=hex;
+  g.fillText(text,128,33);
+  var tex=new THREE.CanvasTexture(c);
+  tex.colorSpace=THREE.SRGBColorSpace;
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+  var w=worldW||1.8;
+  sp.scale.set(w,w*0.25,1);
+  sp.userData={b:true,setbackHelper:true};
+  return sp;
+}
+function addSetbackPlaneMesh(grp,pl){
+  var q=setbackPlaneQuadMm(pl);
+  var v=q.map(function(p){ return [p.x*U, setbackLimitHeightMmAt(pl,p.x,p.y)*U, p.y*U]; });
+  var pos=[], lp=[], i;
+  [0,1,2,0,2,3].forEach(function(k){ pos.push(v[k][0],v[k][1],v[k][2]); });
+  for(i=0;i<4;i++){
+    var a=v[i], b=v[(i+1)%4];
+    lp.push(a[0],a[1],a[2],b[0],b[1],b[2]);
+  }
+  var col=(pl.kind==='north')?SETBACK_NORTH_COLOR:SETBACK_ROAD_COLOR;
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.computeVertexNormals();
+  var mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({
+    color:col,transparent:true,opacity:0.2,side:THREE.DoubleSide,depthWrite:false}));
+  mesh.castShadow=false; mesh.receiveShadow=false;
+  mesh.userData={b:true,setbackHelper:true};
+  grp.add(mesh);
+  var lgeo=new THREE.BufferGeometry();
+  lgeo.setAttribute('position',new THREE.Float32BufferAttribute(lp,3));
+  var line=new THREE.LineSegments(lgeo,new THREE.LineBasicMaterial({
+    color:col,transparent:true,opacity:0.9}));
+  line.userData={b:true,setbackHelper:true};
+  grp.add(line);
+}
+// 寸法は既存の「↔ 寸法」ボタン(ST.showDim)に従う。新しいボタンは作らない。
+function addSetbackDims(grp,pl){
+  var col=(pl.kind==='north')?SETBACK_NORTH_COLOR:SETBACK_ROAD_COLOR;
+  var sMid=(pl.siteSMin+pl.siteSMax)/2;
+  var dg=new THREE.Group();
+  dg.userData={b:true,setbackHelper:true,setbackDim:true};
+  dg.visible=!!(typeof ST!=='undefined' && ST && ST.showDim);
+  var org=setbackPointAt(pl,0,sMid);
+  setbackDimStations(pl).forEach(function(st){
+    var p=setbackPointAt(pl,st.t,sMid);
+    var hMm=setbackLimitHeightMmAt(pl,p.x,p.y);
+    addSetbackLine(dg,col,[p.x*U,0,p.y*U],[p.x*U,hMm*U,p.y*U],true);
+    var hs=makeSetbackLabelSprite(
+      (st.base?'基準高さ ':'制限高さ ')+Math.round(hMm)+'mm',col,2.0);
+    hs.position.set(p.x*U,hMm*U+0.34,p.y*U);
+    dg.add(hs);
+    if(st.t>1){
+      addSetbackLine(dg,col,[org.x*U,0.02,org.y*U],[p.x*U,0.02,p.y*U],true);
+      var ls=makeSetbackLabelSprite('水平距離 '+Math.round(st.t)+'mm',col,2.0);
+      ls.position.set((org.x+p.x)/2*U,0.34,(org.y+p.y)/2*U);
+      dg.add(ls);
+    }
+  });
+  grp.add(dg);
+}
+// 制限面より上に出ている部分を赤で示す。削らない — 見せるだけである。
+function addSetbackOverhang(grp,planes){
+  var coefs=planes.map(setbackPlaneWorldCoef);
+  var tris=[];
+  var meshes=[];
+  sc3.traverse(function(o){ if(isSetbackSubjectMesh(o)) meshes.push(o); });
+  meshes.forEach(function(o){
+    var geo=o.geometry;
+    var posAttr=geo && geo.attributes && geo.attributes.position;
+    if(!posAttr || !posAttr.count) return;
+    if(!geo.boundingBox) geo.computeBoundingBox();
+    var bb=geo.boundingBox;
+    if(!bb) return;
+    var mw=o.matrixWorld;
+    var corners=[], ci, cj, ck;
+    for(ci=0;ci<2;ci++) for(cj=0;cj<2;cj++) for(ck=0;ck<2;ck++){
+      corners.push(new THREE.Vector3(ci?bb.max.x:bb.min.x,cj?bb.max.y:bb.min.y,ck?bb.max.z:bb.min.z).applyMatrix4(mw));
+    }
+    var live=[];
+    coefs.forEach(function(co){
+      var maxF=-Infinity;
+      corners.forEach(function(c){ maxF=Math.max(maxF,c.y-(co.a*c.x+co.b*c.z+co.c)); });
+      if(maxF>0.0005) live.push(co);   // 0.5mm 以下の食い込みは数えない
+    });
+    if(!live.length) return;   // このメッシュはどの面も超えていない
+    var idx=geo.index, n=idx?idx.count:posAttr.count, i;
+    var va=new THREE.Vector3(), vb=new THREE.Vector3(), vc=new THREE.Vector3();
+    for(i=0;i+2<n;i+=3){
+      var i0=idx?idx.getX(i):i, i1=idx?idx.getX(i+1):i+1, i2=idx?idx.getX(i+2):i+2;
+      va.set(posAttr.getX(i0),posAttr.getY(i0),posAttr.getZ(i0)).applyMatrix4(mw);
+      vb.set(posAttr.getX(i1),posAttr.getY(i1),posAttr.getZ(i1)).applyMatrix4(mw);
+      vc.set(posAttr.getX(i2),posAttr.getY(i2),posAttr.getZ(i2)).applyMatrix4(mw);
+      var tri=[va.x,va.y,va.z,vb.x,vb.y,vb.z,vc.x,vc.y,vc.z];
+      live.forEach(function(co){
+        clipTriangleAboveSetbackPlane(tri,co).forEach(function(t){
+          tris.push(t[0],t[1],t[2],t[3],t[4],t[5],t[6],t[7],t[8]);
+        });
+      });
+    }
+  });
+  if(!tris.length) return;
+  var g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(tris,3));
+  g.computeVertexNormals();
+  var m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({
+    color:SETBACK_OVER_COLOR,transparent:true,opacity:0.62,side:THREE.DoubleSide,
+    depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
+  m.castShadow=false; m.receiveShadow=false;
+  m.userData={b:true,setbackHelper:true,setbackOverhang:true};
+  grp.add(m);
+}
+function build3DSetback(){
+  if(!sc3 || isInt) return;
+  var planes=setbackPlanes();
+  if(!planes.length) return;
+  var grp=new THREE.Group();
+  grp.userData={b:true,setbackHelper:true};
+  planes.forEach(function(pl){
+    addSetbackPlaneMesh(grp,pl);
+    addSetbackDims(grp,pl);
+  });
+  addSetbackOverhang(grp,planes);
+  sc3.add(grp);
+}
+// 「↔ 寸法」ボタンから呼ぶ。3Dを作り直さずに寸法だけ出し入れする。
+function applySetbackDimVisibility(){
+  if(!sc3) return;
+  var on=!!(typeof ST!=='undefined' && ST && ST.showDim), hit=false;
+  sc3.traverse(function(o){
+    if(o.userData && o.userData.setbackDim){ o.visible=on; hit=true; }
+  });
+  if(hit && typeof invalidate3D==='function') invalidate3D();
 }
 
 function build3D(){
@@ -9011,6 +9427,9 @@ function build3D(){
   buildWinFrames(flFilt);
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
+  // 斜線制限。設定が無ければ setbackPlanes() が空を返して何も作らない。
+  // 建物のはみ出しを実測するので、matrixWorld を更新したあとに置く。
+  build3DSetback();
   _cutawayViewKey='';
   add3DSelectionMarker();
   add3DMoveGizmo();
@@ -16439,7 +16858,7 @@ function chooseOpeningDoorModelTool(t){
 }
 
 function toggleGrid(){ST.showGrid=!ST.showGrid;draw2d();}
-function toggleDim(){ST.showDim=!ST.showDim;draw2d();}
+function toggleDim(){ST.showDim=!ST.showDim;draw2d();applySetbackDimVisibility();}
 function resetView(){
   var fp=FOOTPRINTS[ST.floor], area=document.getElementById('canvas-area');
   var isMobile=window.matchMedia&&window.matchMedia('(max-width:768px)').matches;
