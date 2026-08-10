@@ -3033,13 +3033,6 @@ input[type="reset"]:focus-visible{
   background:rgba(45,39,33,0.38);backdrop-filter:blur(3px);
 }
 #video-render-modal.show{display:flex}
-#video-render-fab{
-  display:none;position:absolute;right:14px;top:60px;z-index:260;
-  border:1px solid var(--hp-secondary,#00a8ef);background:var(--hp-secondary,#00a8ef);
-  color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;
-  box-shadow:0 4px 12px rgba(24,20,18,0.13);cursor:pointer;touch-action:manipulation;
-}
-#video-render-fab.show{display:block}
 .video-field{display:grid;gap:4px;min-width:0;margin-top:10px}
 .video-field > label{font-size:11px;font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
 .video-field small{font-size:10px;color:var(--hp-muted,#7a8fb0);line-height:1.45}
@@ -3054,9 +3047,7 @@ input[type="reset"]:focus-visible{
 @media (max-width:768px){
   /* スマホ: 縦持ちでも中身が全部見えること。カードは端まで使い、
      入力欄のタップ標的は 44px を割らない。 */
-  #video-render-modal{padding:8px}
-  #video-render-fab{right:10px;top:52px;padding:9px 11px;font-size:11px}
-  .video-prompt-input{min-height:92px;font-size:13px}
+  #video-render-modal{padding:8px}  .video-prompt-input{min-height:92px;font-size:13px}
   #video-render-preset{min-height:44px}
   #video-render-duration{height:34px}
 }
@@ -3285,7 +3276,6 @@ input[type="reset"]:focus-visible{
         </div>
       </div>
       <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
-      <button id="video-render-fab" type="button" onclick="openVideoRenderDialog()">🎬 動画AI</button>
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
         <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
         <button type="button" class="elev-snap-btn" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
@@ -18783,7 +18773,10 @@ function isUnityRenderFeatureEnabled(){
 }
 function updateUnityRenderControls(){
   var show=isUnityRenderFeatureEnabled();
-  ['unity-render-toolbar-btn','unity-render-fab','video-render-toolbar-btn','video-render-fab'].forEach(function(id){
+  // 動画AIには右上の浮きボタンを置かない。入口はヘッダーのツールバー(デスクトップ)と
+  // ボトムナビ(スマホ)の2つで足りており、3つ目は静止画AIレンダーの浮きボタンの
+  // 真下に重なって並ぶだけだった。静止画側の浮きボタンは既存の挙動なので残す。
+  ['unity-render-toolbar-btn','unity-render-fab','video-render-toolbar-btn'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.classList.toggle('show',show);
   });
@@ -20739,7 +20732,7 @@ function setVideoRenderFileList(files){
 }
 function setVideoRenderBusy(busy){
   VIDEO_RENDER_UI.busy=!!busy;
-  var els=document.querySelectorAll('#video-render-modal button,#video-render-fab,#video-render-toolbar-btn,#bnav-video');
+  var els=document.querySelectorAll('#video-render-modal button,#video-render-toolbar-btn,#bnav-video');
   for(var i=0;i<els.length;i++){
     var btn=els[i];
     if(!btn) continue;
