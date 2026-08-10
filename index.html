@@ -4217,7 +4217,9 @@ var ISIZES = {
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
-  'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:5200,d:3600}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
+  // 隣家の既定は 8P×7P(7280×6370) = 1階46.4m² / 2階建て延べ約28坪。
+  // 日本の建売住宅の最も標準的な規模で、910モジュールにも正確に載る。
+  'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:7280,d:6370}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
   'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'gas-heater':{w:470,d:240}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
   'downspout':{w:150,d:150},
   foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
@@ -4862,21 +4864,29 @@ function clampContextFloors(type,floors){
   var max=type==='neighbor-building'?12:(type==='neighbor-house'?3:1);
   return Math.max(1,Math.min(max,Math.round(Number(floors)||defaultContextFloors(type))));
 }
-function contextRoofExtraHeightMm(type){
+// 隣家の屋根(寄棟・軒の出200mm)の高さ。
+// 基本は固定値だが、小さい隣家では勾配がきつくなりすぎるため実寸から抑える。
+// 建物の高さ表示と3Dモデルを一致させるので、アイテムが分かる場合は実寸から算出する。
+function contextRoofExtraHeightMm(type,it){
   if(type==='neighbor-building') return 450;
-  if(type==='neighbor-house') return 1050;
+  if(type==='neighbor-house'){
+    if(it&&isFinite(Number(it.w))&&isFinite(Number(it.d))&&it.w>0&&it.d>0){
+      return Math.round(nhRoofHeightM(Number(it.w)*U,Number(it.d)*U)/U);
+    }
+    return Math.round(nhRoofHeightM(ISIZES['neighbor-house'].w*U,ISIZES['neighbor-house'].d*U)/U);
+  }
   return 0;
 }
-function contextHeightFromFloors(type,floors){
+function contextHeightFromFloors(type,floors,it){
   floors=clampContextFloors(type,floors);
-  return Math.round(floors*contextStoryHeightMm()+contextRoofExtraHeightMm(type));
+  return Math.round(floors*contextStoryHeightMm()+contextRoofExtraHeightMm(type,it));
 }
 function getContextFloors(it){
   if(!it || (it.type!=='neighbor-building' && it.type!=='neighbor-house')) return 1;
   if(isFinite(Number(it.contextFloors))) return clampContextFloors(it.type,it.contextFloors);
   var h=Number(it.contextHeight);
   if(isFinite(h)){
-    return clampContextFloors(it.type,(h-contextRoofExtraHeightMm(it.type))/Math.max(1,contextStoryHeightMm()));
+    return clampContextFloors(it.type,(h-contextRoofExtraHeightMm(it.type,it))/Math.max(1,contextStoryHeightMm()));
   }
   return defaultContextFloors(it.type);
 }
@@ -4888,7 +4898,7 @@ function defaultContextExteriorHeight(type){
 }
 function getContextExteriorHeight(it){
   if(!it || !isContextExteriorItemType(it.type)) return 400;
-  if(it.type==='neighbor-building' || it.type==='neighbor-house') return contextHeightFromFloors(it.type,getContextFloors(it));
+  if(it.type==='neighbor-building' || it.type==='neighbor-house') return contextHeightFromFloors(it.type,getContextFloors(it),it);
   var h=Number(it.contextHeight);
   if(!isFinite(h)) h=defaultContextExteriorHeight(it.type);
   var max=it.type==='road'?200:30000;
@@ -7975,35 +7985,35 @@ function drawItem2d(it){
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('ビル',0,0);
     } else if(it.type === 'neighbor-house') {
-      ctx.fillStyle='rgba(185,188,194,0.68)';
-      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
-      ctx.strokeStyle='rgba(96,103,110,0.78)';
-      ctx.lineWidth=1.2;
-      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
-      var roofOver=Math.max(3,Math.min(14,Math.min(hw,hd)*0.08));
-      var roofX0=-hw-roofOver, roofY0=-hd-roofOver;
-      var roofX1=hw+roofOver, roofY1=hd+roofOver;
+      // 3Dモデル(隣家キット)と同じ共有レイアウトから2D記号を描く。
+      // 910mmグリッドのベイ割り・開口位置・軒の出が3Dと必ず一致する。
+      var nhFloors=getContextFloors(it);
+      var nhL=neighborHouseLayout(it,it.w*U,it.d*U,nhFloors,contextStoryHeightM());
+      var m2p=function(v){ return v/U*sc; };           // メートル → 画面px
+      var eave=m2p(NH_EAVE);
+      var roofX0=-hw-eave, roofY0=-hd-eave, roofX1=hw+eave, roofY1=hd+eave;
       var roofW=roofX1-roofX0, roofD=roofY1-roofY0;
-      ctx.fillStyle='rgba(120,126,134,0.12)';
+      // 屋根伏せ(寄棟)。軒の出は実寸455mmなので建物を大きくしても太らない
+      ctx.fillStyle='rgba(120,126,134,0.14)';
       ctx.fillRect(roofX0,roofY0,roofW,roofD);
       ctx.strokeStyle='rgba(88,94,101,0.72)';
       ctx.lineWidth=1.1;
       ctx.strokeRect(roofX0,roofY0,roofW,roofD);
       ctx.beginPath();
       if(roofW>roofD+4){
-        var rh=(roofW-roofD)/2;
-        ctx.moveTo(-rh,0); ctx.lineTo(rh,0);
-        ctx.moveTo(roofX0,roofY0); ctx.lineTo(-rh,0);
-        ctx.moveTo(roofX0,roofY1); ctx.lineTo(-rh,0);
-        ctx.moveTo(roofX1,roofY0); ctx.lineTo(rh,0);
-        ctx.moveTo(roofX1,roofY1); ctx.lineTo(rh,0);
+        var nhRidge=(roofW-roofD)/2;
+        ctx.moveTo(-nhRidge,0); ctx.lineTo(nhRidge,0);
+        ctx.moveTo(roofX0,roofY0); ctx.lineTo(-nhRidge,0);
+        ctx.moveTo(roofX0,roofY1); ctx.lineTo(-nhRidge,0);
+        ctx.moveTo(roofX1,roofY0); ctx.lineTo(nhRidge,0);
+        ctx.moveTo(roofX1,roofY1); ctx.lineTo(nhRidge,0);
       } else if(roofD>roofW+4){
-        var rv=(roofD-roofW)/2;
-        ctx.moveTo(0,-rv); ctx.lineTo(0,rv);
-        ctx.moveTo(roofX0,roofY0); ctx.lineTo(0,-rv);
-        ctx.moveTo(roofX1,roofY0); ctx.lineTo(0,-rv);
-        ctx.moveTo(roofX0,roofY1); ctx.lineTo(0,rv);
-        ctx.moveTo(roofX1,roofY1); ctx.lineTo(0,rv);
+        var nhRidgeV=(roofD-roofW)/2;
+        ctx.moveTo(0,-nhRidgeV); ctx.lineTo(0,nhRidgeV);
+        ctx.moveTo(roofX0,roofY0); ctx.lineTo(0,-nhRidgeV);
+        ctx.moveTo(roofX1,roofY0); ctx.lineTo(0,-nhRidgeV);
+        ctx.moveTo(roofX0,roofY1); ctx.lineTo(0,nhRidgeV);
+        ctx.moveTo(roofX1,roofY1); ctx.lineTo(0,nhRidgeV);
       } else {
         ctx.moveTo(roofX0,roofY0); ctx.lineTo(0,0);
         ctx.moveTo(roofX1,roofY0); ctx.lineTo(0,0);
@@ -8013,34 +8023,61 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(80,86,94,0.74)';
       ctx.lineWidth=1.2;
       ctx.stroke();
-      // 3D GLBモデル(ガレージ中心x=-1380/2600・幅2200/5200・奥行3450/3600の貫通型)に比例させる
-      var garageW2=it.w*sc*(2200/5200);
-      var garageD2=it.d*sc*(3450/3600);
-      var garageX2=-hw*(1380/2600);
-      // 玄関(3Dモデル: 中心x=+1550/2600・幅1060/5200・土間奥行520/3600)
-      var entW2=it.w*sc*(1060/5200);
-      var entD2=it.d*sc*(520/3600);
-      var entX2=hw*(1550/2600);
-      ctx.fillStyle='rgba(226,228,231,0.85)';
-      ctx.fillRect(entX2-entW2/2,-hd,entW2,entD2);
-      ctx.strokeStyle='rgba(120,126,134,0.7)';
-      ctx.lineWidth=1;
-      ctx.strokeRect(entX2-entW2/2,-hd,entW2,entD2);
-      // ガレージ土間(貫通ベイ全体は薄いシェード)
-      ctx.fillStyle='rgba(34,38,42,0.22)';
-      ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
-      ctx.strokeStyle='rgba(120,126,134,0.7)';
-      ctx.lineWidth=1;
-      ctx.strokeRect(garageX2-garageW2/2,-hd,garageW2,garageD2);
-      // シャッター開口(北面)は濃い帯で表現
-      var shutterD=Math.max(3,Math.min(300*sc,garageD2*0.12));
-      ctx.fillStyle='rgba(34,38,42,0.62)';
-      ctx.fillRect(garageX2-garageW2/2,-hd,garageW2,shutterD);
-      ctx.strokeStyle='rgba(214,217,220,0.76)';
-      ctx.beginPath();
-      ctx.moveTo(garageX2-garageW2/2+3,-hd+shutterD*0.55);
-      ctx.lineTo(garageX2+garageW2/2-3,-hd+shutterD*0.55);
-      ctx.stroke();
+      // 躯体
+      ctx.fillStyle='rgba(185,188,194,0.68)';
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(96,103,110,0.78)';
+      ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      // 1階の開口を各面に描く(面に沿ってt、面から内側へdepth)
+      var nhWallT=Math.max(1.5,m2p(NH_WALL_T));
+      var nhGround=(nhL.floorsData&&nhL.floorsData[0])||{};
+      ['front','back','left','right'].forEach(function(face){
+        (nhGround[face]||[]).forEach(function(p){
+          var half=m2p(p.width)/2, cen=m2p(p.center);
+          var isEntry=(p.part==='entry'), isGarage=(p.part==='garage');
+          var ox,oy,ow,od;
+          if(face==='front'){ ox=cen-half; oy=-hd; ow=half*2; od=nhWallT; }
+          else if(face==='back'){ ox=cen-half; oy=hd-nhWallT; ow=half*2; od=nhWallT; }
+          else if(face==='left'){ ox=-hw; oy=cen-half; ow=nhWallT; od=half*2; }
+          else { ox=hw-nhWallT; oy=cen-half; ow=nhWallT; od=half*2; }
+          if(isGarage){
+            // インナーガレージ: 土間を建物内側へ2.1m伸ばす(貫通しない)
+            var gd=m2p(2.10);
+            ctx.fillStyle='rgba(34,38,42,0.22)';
+            if(face==='front') ctx.fillRect(ox,-hd,ow,Math.min(gd,it.d*sc));
+            ctx.fillStyle='rgba(34,38,42,0.62)';
+            ctx.fillRect(ox,oy,ow,Math.max(2,nhWallT*1.6));
+          } else if(isEntry){
+            // 玄関: ポーチ土間を建物外側へ910mm
+            var pd=m2p(0.91);
+            ctx.fillStyle='rgba(226,228,231,0.85)';
+            if(face==='front') ctx.fillRect(ox,-hd-pd,ow,pd);
+            ctx.strokeStyle='rgba(120,126,134,0.7)';
+            ctx.lineWidth=1;
+            if(face==='front') ctx.strokeRect(ox,-hd-pd,ow,pd);
+            ctx.fillStyle='rgba(120,90,58,0.75)';
+            ctx.fillRect(ox,oy,ow,Math.max(2,nhWallT));
+          } else {
+            // 窓: 開口部を白抜きし、ガラス線を1本引く
+            ctx.fillStyle='rgba(244,247,250,0.92)';
+            ctx.fillRect(ox,oy,ow,od);
+            ctx.strokeStyle='rgba(96,103,110,0.7)';
+            ctx.lineWidth=0.9;
+            ctx.strokeRect(ox,oy,ow,od);
+          }
+        });
+      });
+      // バルコニー(上階)を破線で示す
+      if(nhL.balcony){
+        var bw2=m2p(1.82)/2, bd2=m2p(0.91), bx2=m2p(nhL.balcony.x);
+        ctx.save();
+        ctx.setLineDash([Math.max(3,4*sc),Math.max(2,3*sc)]);
+        ctx.strokeStyle='rgba(88,94,101,0.7)';
+        ctx.lineWidth=1;
+        ctx.strokeRect(bx2-bw2,-hd-bd2,bw2*2,bd2);
+        ctx.restore();
+      }
       ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
       ctx.fillStyle='rgba(62,68,74,0.86)';
       ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -14239,8 +14276,10 @@ function buildItem3D(it){
     finalizeContextGroup(grp,it);
   }
   else if(it.type==='neighbor-house'){
-    if(!buildContextGlbStack(grp,it,w3,d3)) build3DNeighborHouse(grp,it,w3,d3,h);
-    finalizeContextGroup(grp,it);
+    // キット未読込・読込失敗時のみ簡易ジオメトリで代替する
+    var kitOk=buildNeighborHouseKit(grp,it,w3,d3);
+    if(!kitOk) build3DNeighborHouse(grp,it,w3,d3,h);
+    finalizeContextGroup(grp,it,kitOk);
   }
   else if(it.type==='road'){
     build3DRoad(grp,it,w3,d3,h);
@@ -14423,26 +14462,53 @@ function isContextGhost(it){
 // そのままだと1棟あたり数十〜百超のメッシュ=ドローコールになる。
 // マテリアル+影設定が同じもの同士でジオメトリを統合し、数メッシュに圧縮する。
 // 単色マテリアルのみでUVは未使用のため破棄してよい。
-function finalizeContextGroup(grp,it){
+// keepUV: テクスチャ付きモデル(隣家キット)ではUVを捨てられないため保持する。
+// その場合はグループ配下の子ノード(GLBクローン)も再帰的に取り込む。
+function finalizeContextGroup(grp,it,keepUV){
   var merge=window.THREE&&THREE.BufferGeometryUtils&&THREE.BufferGeometryUtils.mergeGeometries;
   if(merge){
-    var buckets={}, meshes=[];
-    grp.children.slice().forEach(function(o){
-      if(!o.isMesh||!o.geometry) return;
+    var buckets={}, meshes=[], owners=[];
+    var collect=[];
+    if(keepUV){
+      grp.traverse(function(o){ if(o.isMesh&&o.geometry) collect.push(o); });
+    } else {
+      grp.children.slice().forEach(function(o){ if(o.isMesh&&o.geometry) collect.push(o); });
+    }
+    collect.forEach(function(o){
+      if(Array.isArray(o.material)) return; // マルチマテリアルは統合対象外
       var key=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0);
       buckets[key]=buckets[key]||{mat:o.material,cast:o.castShadow,recv:o.receiveShadow,geos:[]};
       var g=o.geometry.clone();
-      o.updateMatrix();
-      g.applyMatrix4(o.matrix);
-      g.deleteAttribute('uv');
+      o.updateWorldMatrix(true,false);
+      g.applyMatrix4(keepUV?grp.matrixWorld.clone().invert().multiply(o.matrixWorld):o.matrix);
+      if(keepUV){
+        if(!g.getAttribute('uv')){
+          // UV未設定のジオメトリが混ざるとmergeが失敗するのでゼロUVを補う
+          g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count*2),2));
+        }
+      } else {
+        g.deleteAttribute('uv');
+      }
       if(g.getAttribute('uv1')) g.deleteAttribute('uv1');
+      if(g.getAttribute('tangent')) g.deleteAttribute('tangent');
+      if(g.getAttribute('color')) g.deleteAttribute('color');
       if(g.index) g=g.toNonIndexed(); // indexed/non-indexed混在はmerge不可のため統一
       buckets[key].geos.push(g);
       meshes.push(o);
+      owners.push(o.parent);
     });
     var keys=Object.keys(buckets);
     if(meshes.length>keys.length){
-      meshes.forEach(function(o){ grp.remove(o); o.geometry.dispose(); });
+      meshes.forEach(function(o,i){
+        var owner=owners[i]||grp;
+        owner.remove(o);
+        // GLBクローンのジオメトリはキャッシュ済みモデルと共有しているため破棄しない
+        if(!keepUV) o.geometry.dispose();
+      });
+      // 空になったGLBクローンのグループノードを取り除く
+      grp.children.slice().forEach(function(o){
+        if(!o.isMesh&&!o.isLine&&!o.isLineSegments&&o.children.length===0) grp.remove(o);
+      });
       keys.forEach(function(k){
         var b=buckets[k];
         var merged=merge(b.geos,false);
@@ -14459,10 +14525,14 @@ function finalizeContextGroup(grp,it){
   if(isContextGhost(it)){
     grp.traverse(function(o){
       if(o.isMesh&&o.material){
+        var mu=o.material.userData||{};
+        // 隣家キットは部材点数が多く、全部を半透明で重ねると輪郭が濁って
+        // 「計画建物を見やすくする」という目的に反する。
+        // ゴースト時は外壁と屋根だけを残し、サッシ・樋・設備などは描かない。
+        if(keepUV&&!mu.ghostBody&&!mu.ghostRoof){ o.visible=false; return; }
         o.material.transparent=true;
         // 躯体(基本の箱)は20%、インナーガレージ部は5%、その他ディテールは10%
-        var mu=o.material.userData||{};
-        o.material.opacity=mu.ghostBody?0.2:(mu.ghostFaint?0.05:0.1);
+        o.material.opacity=mu.ghostRoof?0.22:(mu.ghostBody?0.2:(mu.ghostFaint?0.05:0.1));
         o.material.depthWrite=false;
         o.castShadow=false; // 半透明の建物が濃い影を落とすと不自然なため
       }
@@ -14525,11 +14595,13 @@ function addHouseSidingLines(grp,mat,w3,d3,bodyH){
     addContextFacadeBox(grp,mat,'right',0,y,d3+0.02,0.018,w3,d3,0.012,false,true);
   }
 }
-// ── Blender製コンテキストモデル(隣家・ビル・車) ──────────────────
-// 隣家/ビルは base(1F)+mid(中間階)+roof/top(屋根・パラペット) の
-// 名前付きノードを持つGLBで、階数に応じてmidを積み上げる。
+// ── Blender製コンテキストモデル(周辺ビル・車) ────────────────────
+// 周辺ビルは base(1F)+mid(中間階)+top(パラペット) の名前付きノードを持つGLBで、
+// 階数に応じてmidを積み上げる。
+// ※隣家は寸法可変のため、一体モデルではなく実寸パーツキット
+//   (neighbor_house_kit.glb)を910mmグリッドに並べる方式に置き換えた。
+//   → NEIGHBOR HOUSE KIT セクションを参照。
 var CONTEXT_GLB_SPECS={
-  'neighbor-house':{url:'assets/models/context/neighbor_house.glb',base:'nh_base',mid:'nh_mid',roof:'nh_roof',balc:'nh_balc',fw:5.2,fd:3.6,sh:2.7,roofH:1.05,wallMats:{NhWall:1,NhWall2:1}},
   'neighbor-building':{url:'assets/models/context/neighbor_building.glb',base:'bd_base',mid:'bd_mid',roof:'bd_top',fw:5.2,fd:3.6,sh:2.7,roofH:0.45,wallMats:{BdPanel:1,BdPanelDark:1}}
 };
 var CONTEXT_CAR_GLB='assets/models/context/car_sedan.glb';
@@ -14598,28 +14670,470 @@ function buildContextGlbStack(grp,it,w3,d3){
     prepCloneMats(c);
     grp.add(c);
   }
-  // バルコニー等の「実寸を保つべき付属ノード」: フットプリント拡大に持ち出し寸法を
-  // 追従させない(拡大時は実寸維持・縮小時のみ追従)。原点=取付壁面なので
-  // 奥行き非スケールでも壁面への取り付き位置はズレない
-  var balcNode=spec.balc?model.getObjectByName(spec.balc):null;
-  function addBalcony(floorIdx){
-    if(!balcNode) return;
-    var bc=balcNode.clone(true);
-    var t=balcNode.position;
-    bc.position.set(-t.x*sx, floorIdx*storyH + t.y*syStory, -t.z*sz);
-    bc.rotation.y=Math.PI;
-    bc.scale.set(sx, syStory, Math.min(sz,1));
-    prepCloneMats(bc);
-    grp.add(bc);
-  }
   addModule(nodes.base,0,syStory);
   for(var f=1;f<floors;f++){
     addModule(nodes.mid,f*storyH,syStory);
-    addBalcony(f);
   }
   addModule(nodes.roof,floors*storyH,syRoof);
   return true;
 }
+// ══ NEIGHBOR HOUSE KIT ════════════════════════════════════════════════
+// 隣家は「実寸パーツを910mm(1P)グリッドに並べる」方式で組み立てる。
+// 旧実装は 5.2m×3.6m の一体GLBを scale(w/5.2, storyH/2.7, d/3.6) と
+// 非等方スケールしていたため、隣家を大きくすると窓が3m幅・玄関ドアが2m幅と
+// なるなど日本の住宅では有り得ない意匠になっていた。
+// キット方式ではサイズをどれだけ変えても、サッシ・玄関ドア・シャッター・
+// バルコニー・軒の出・出隅役物はすべて実寸(規格寸法)のまま保たれる。
+var CONTEXT_HOUSE_KIT_GLB='assets/models/context/neighbor_house_kit.glb';
+var NH_P=0.910;            // 1P(3尺)
+var NH_SEG_H=2.700;        // キットの外壁セグメント高さ(アプリの最小階高)
+var NH_WALL_T=0.120;       // 外壁の見付け厚
+var NH_ROOF_H=1.30;        // 屋根の高さ(棟までの立ち上がり)。建物サイズに追従させない
+var NH_ROOF_MAX_PITCH=0.55;// 5.5寸。小さい家で屋根がとがりすぎないための上限
+var NH_EAVE=0.200;         // 軒の出/ケラバ。軒の出を抑えた現代の建売に合わせる
+var NH_ROOF_TILE=1.456;    // スレートUVタイル(働き幅182mm×8段)
+var NH_WALL_MAT_NAMES={NhWall:1,NhWall2:1};
+var NH_FAINT_MAT_NAMES={NhDark:1,NhGarage:1,NhGarageFloor:1};
+// パーツ名: セグメントは「外壁面の下端中央」が原点、+Zが屋外向き
+var NH_SEG_PART={
+  plain:['nh_seg_plain','nh_seg_plain2'],
+  win_l:['nh_seg_win_l','nh_seg_win_l2'],
+  win_s:['nh_seg_win_s','nh_seg_win_s2'],
+  win_t:['nh_seg_win_t','nh_seg_win_t2'],
+  door_l:['nh_seg_door_l','nh_seg_door_l2'],
+  entry:['nh_seg_entry','nh_seg_entry2'],
+  garage:['nh_seg_garage','nh_seg_garage2']
+};
+
+function nhHash(s){
+  var h=2166136261;
+  s=String(s==null?'':s);
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  return h>>>0;
+}
+// 寄棟屋根の高さ(m)。
+// 勾配を一定にすると建物を大きくするほど屋根が高く・大きくなってしまうため、
+// 高さは固定とする。ただし小さい家では勾配がきつくなりすぎるので、
+// 5.5寸相当を上限にしてそこだけ低く抑える(=拡大方向では完全に一定)。
+function nhRoofHeightM(w3,d3){
+  var run=Math.min(w3,d3)/2+NH_EAVE;
+  return Math.min(NH_ROOF_H,run*NH_ROOF_MAX_PITCH);
+}
+// 1辺のベイ割り。中間ベイは正確に910mmとし、端数は両端ベイだけで吸収する。
+// これにより開口(窓・玄関・シャッター)は常に910の整数倍に載り、実寸を保てる。
+function nhBayRow(len){
+  var n=Math.max(2,Math.round(len/NH_P));
+  var end=(len-(n-2)*NH_P)/2;
+  var guard=0;
+  while(end>NH_P*1.5&&n<80&&guard++<80){ n++; end=(len-(n-2)*NH_P)/2; }
+  guard=0;
+  while(end<NH_P*0.45&&n>2&&guard++<80){ n--; end=(len-(n-2)*NH_P)/2; }
+  var mid=Math.max(0,n-2);
+  if(mid===0) end=len/2;
+  return {mid:mid,end:end,len:len};
+}
+// 中間ベイ s..s+span の中心座標(辺の中央を0とする)
+function nhBayCenter(row,s,span){
+  return -row.len/2+row.end+(s+span/2)*NH_P;
+}
+// 開口リクエストを中間ベイへ均等配置する(最低1ベイの壁を挟む)
+function nhLayoutRow(mid,reqs){
+  var picked=[],used=0;
+  for(var i=0;i<reqs.length;i++){
+    var need=used+reqs[i].span+(picked.length?1:0);
+    if(need<=mid){ used=need; picked.push(reqs[i]); }
+  }
+  if(!picked.length) return [];
+  var occupied=0;
+  picked.forEach(function(r){ occupied+=r.span; });
+  var slots=picked.length+1;
+  var free=mid-occupied;
+  var base=Math.floor(free/slots), extra=free-base*slots;
+  var out=[],cur=0;
+  for(var j=0;j<picked.length;j++){
+    cur+=base+(j<extra?1:0);
+    out.push({start:cur,span:picked[j].span,part:picked[j].part,balcony:!!picked[j].balcony});
+    cur+=picked[j].span;
+  }
+  return out;
+}
+// インナーガレージは狭小3階建てのパターンに限定する。
+// 一般的な2階建て建売の1階正面は「玄関+腰窓」が標準形。
+function nhAllowGarage(w3,d3,floors,mid){
+  return floors>=3&&mid>=5&&d3>=3.2;
+}
+// 間口が広いほど開口を増やす。広い家で無地の壁が延々と続くのを防ぐ。
+function nhExtraOpenings(reqs,mid,base){
+  var extra=Math.max(0,Math.min(4,Math.floor((mid-(base||6))/3)));
+  for(var i=0;i<extra;i++) reqs.push(i%2?{part:'win_s',span:1}:{part:'win_l',span:2});
+  return reqs;
+}
+function nhFrontGroundRow(mid,w3,d3,floors,seed){
+  var out=[],reserved=0;
+  if(nhAllowGarage(w3,d3,floors,mid)&&mid>=5){
+    // 狭小3階建てのインナーガレージ: 右端にシャッター、その隣に玄関
+    out.push({start:mid-5,span:2,part:'entry'});
+    out.push({start:mid-3,span:3,part:'garage'});
+    reserved=5;
+  } else if(mid>=4){
+    out.push({start:mid-2,span:2,part:'entry'});
+    reserved=2;
+  } else if(mid>=2){
+    out.push({start:mid-2,span:2,part:'entry'});
+    return out;
+  } else {
+    if(mid>=1) out.push({start:0,span:1,part:'win_s'});
+    return out;
+  }
+  // 玄関(+ガレージ)より左の残りベイに掃き出し窓・腰窓を配置する
+  var free=mid-reserved-1;    // 玄関との間は1ベイあける
+  if(free<=0) return out;
+  var reqs=nhExtraOpenings([{part:'win_l',span:2}],free,4);
+  nhLayoutRow(free,reqs).forEach(function(p){ out.push(p); });
+  return out;
+}
+function nhFacadeRow(face,floor,floors,mid,w3,d3,seed){
+  if(face==='front'&&floor===0) return nhFrontGroundRow(mid,w3,d3,floors,seed);
+  var reqs=[];
+  if(face==='front'){
+    if(floor===1){
+      // 2階正面: バルコニーに面した掃き出し窓 + 腰窓/小窓
+      reqs.push({part:'door_l',span:2,balcony:true});
+      if(mid>=6) reqs.push({part:'win_l',span:2});
+      else if(mid>=4) reqs.push({part:'win_s',span:1});
+    } else {
+      reqs.push({part:'win_l',span:2});
+      if(mid>=5) reqs.push({part:'win_s',span:1});
+    }
+  } else if(face==='back'){
+    if(floor===0){
+      // 庭側の1階はリビングの掃き出し窓+浴室の型ガラス窓が定番の構成
+      reqs.push({part:'win_t',span:1});
+      reqs.push({part:(mid>=4?'door_l':'win_l'),span:2});
+    } else {
+      reqs.push({part:'win_l',span:2});
+      if(mid>=5) reqs.push({part:'win_s',span:1});
+    }
+  } else {
+    if(floor===0){
+      reqs.push({part:'win_t',span:1});
+      if(mid>=4) reqs.push({part:'win_s',span:1});
+    } else {
+      reqs.push({part:'win_s',span:1});
+      if(mid>=6) reqs.push({part:'win_l',span:2});
+    }
+  }
+  nhExtraOpenings(reqs,mid,6);
+  // 同じ隣家が並んだときに全戸同一にならないよう、開口の順序だけ入れ替える
+  if(reqs.length>1&&((seed>>(floor*3+(face==='back'?1:face==='left'?2:face==='right'?3:0)))&1)) reqs.reverse();
+  return nhLayoutRow(mid,reqs);
+}
+// 2D記号と3Dモデルで同じ配置を使うための共有レイアウト。
+// キャッシュはWeakMapに持つ。アイテム自身に持たせると保存JSON・共同編集の
+// 差分・Undoスナップショットにレイアウト全体が載ってしまうため。
+var _nhLayoutCache=(typeof WeakMap==='function')?new WeakMap():null;
+function neighborHouseLayout(it,w3,d3,floors,storyH){
+  var key=[Math.round(w3*1000),Math.round(d3*1000),floors,Math.round(storyH*1000)].join('/');
+  var hit=(it&&_nhLayoutCache)?_nhLayoutCache.get(it):null;
+  if(hit&&hit.key===key) return hit.layout;
+  var seed=nhHash((it&&(it.id||it.uid))||'nh');
+  var rowW=nhBayRow(w3), rowD=nhBayRow(d3);
+  var faces=[
+    {face:'front',row:rowW},{face:'back',row:rowW},
+    {face:'left',row:rowD},{face:'right',row:rowD}
+  ];
+  var out={w:w3,d:d3,floors:floors,storyH:storyH,seed:seed,rowW:rowW,rowD:rowD,
+           roofH:nhRoofHeightM(w3,d3),garage:null,entry:null,balcony:null,floorsData:[]};
+  for(var f=0;f<floors;f++){
+    var per={};
+    faces.forEach(function(fd){
+      var placed=nhFacadeRow(fd.face,f,floors,fd.row.mid,w3,d3,seed);
+      placed.forEach(function(p){
+        p.center=nhBayCenter(fd.row,p.start,p.span);
+        p.width=p.span*NH_P;
+        if(fd.face==='front'&&f===0&&p.part==='garage') out.garage={x:p.center,w:p.width};
+        if(fd.face==='front'&&f===0&&p.part==='entry') out.entry={x:p.center,w:p.width};
+        if(fd.face==='front'&&p.balcony&&!out.balcony) out.balcony={x:p.center,floor:f};
+      });
+      per[fd.face]=placed;
+    });
+    out.floorsData.push(per);
+  }
+  if(it&&_nhLayoutCache) _nhLayoutCache.set(it,{key:key,layout:out});
+  return out;
+}
+
+var _nhKitMats=null;
+function nhKitBaseMaterials(kit){
+  if(_nhKitMats) return _nhKitMats;
+  var m={};
+  kit.traverse(function(o){
+    if(!o.isMesh) return;
+    var list=Array.isArray(o.material)?o.material:[o.material];
+    list.forEach(function(mm){
+      if(!mm||!mm.name||m[mm.name]) return;
+      tameMaterialBrightness(mm);
+      mm.userData=mm.userData||{};
+      if(NH_WALL_MAT_NAMES[mm.name]) mm.userData.ghostBody=true;
+      if(mm.name==='NhRoof') mm.userData.ghostRoof=true;
+      if(NH_FAINT_MAT_NAMES[mm.name]) mm.userData.ghostFaint=true;
+      m[mm.name]=mm;
+    });
+  });
+  _nhKitMats=m;
+  return m;
+}
+function nhKitMaterials(kit,it){
+  var base=nhKitBaseMaterials(kit);
+  if(!base.NhWall) return null;
+  // ゴースト表示のopacity変更やカスタム色がキャッシュ共有マテリアルを汚さないよう、
+  // 必要なときだけアイテム専用に「名前ごとに1つ」クローンする(統合の妨げにならない)
+  if(!isContextGhost(it)&&!it.colorCustom) return base;
+  var out={};
+  Object.keys(base).forEach(function(k){
+    var m=base[k].clone();
+    m.userData=Object.assign({},base[k].userData||{});
+    if(NH_WALL_MAT_NAMES[k]&&it.colorCustom&&m.color) m.color.set(it.color);
+    out[k]=m;
+  });
+  return out;
+}
+function nhInstance(kit,name,mats){
+  var src=kit.getObjectByName(name);
+  if(!src) return null;
+  var c=src.clone(true);
+  c.traverse(function(o){
+    if(!o.isMesh) return;
+    o.castShadow=true; o.receiveShadow=true;
+    if(Array.isArray(o.material)) o.material=o.material.map(function(m){ return (m&&mats[m.name])||m; });
+    else if(o.material) o.material=mats[o.material.name]||o.material;
+  });
+  return c;
+}
+// 面ごとの配置。t は辺に沿った座標(辺の中央が0)。
+function nhAttach(grp,node,face,t,y,w3,d3){
+  if(!node) return null;
+  if(face==='front'){ node.position.set(t,y,-d3/2); node.rotation.y=Math.PI; }
+  else if(face==='back'){ node.position.set(t,y,d3/2); node.rotation.y=0; }
+  else if(face==='left'){ node.position.set(-w3/2,y,t); node.rotation.y=-Math.PI/2; }
+  else { node.position.set(w3/2,y,t); node.rotation.y=Math.PI/2; }
+  grp.add(node);
+  return node;
+}
+function nhApplyRoofUv(geo){
+  var pos=geo.getAttribute('position');
+  if(!pos) return;
+  var uv=new Float32Array(pos.count*2);
+  for(var i=0;i<pos.count;i+=3){
+    // 三角形の法線から「軒先に平行な向き」を判定し、段(働き幅)が水平に流れるようにする
+    var ax=pos.getX(i),ay=pos.getY(i),az=pos.getZ(i);
+    var bx=pos.getX(i+1),by=pos.getY(i+1),bz=pos.getZ(i+1);
+    var cx=pos.getX(i+2),cy=pos.getY(i+2),cz=pos.getZ(i+2);
+    var nx=(by-ay)*(cz-az)-(bz-az)*(cy-ay);
+    var nz=(bx-ax)*(cy-ay)-(by-ay)*(cx-ax);
+    var alongX=Math.abs(nx)<=Math.abs(nz);
+    var tri=[[ax,ay,az],[bx,by,bz],[cx,cy,cz]];
+    for(var k=0;k<3;k++){
+      var p=tri[k];
+      uv[(i+k)*2]  =(alongX?p[0]:p[2])/NH_ROOF_TILE;
+      uv[(i+k)*2+1]=(alongX?p[2]:p[0])/NH_ROOF_TILE;
+    }
+  }
+  geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+}
+function buildNhKitRoof(grp,mats,kit,w3,d3,baseY){
+  var rw=w3+NH_EAVE*2, rd=d3+NH_EAVE*2;
+  var rh=nhRoofHeightM(w3,d3);
+  var roof=createHipRoofMesh(rw,rd,baseY,rh,mats.NhRoof||mats.NhWall);
+  nhApplyRoofUv(roof.geometry);
+  grp.add(roof);
+  var F=mats.NhFascia||mats.NhWall, T=mats.NhRidge||mats.NhTrim||F, R=mats.NhRail||F;
+  // 軒天(見上げたときに屋根裏が見えないよう白い天井板を張る)
+  addContextBox(grp,F,0,baseY-0.012,0,rw,0.024,rd,false,true);
+  // 鼻隠し・破風(成210)
+  var fh=0.21;
+  addContextBox(grp,F,0,baseY-fh/2+0.03,-rd/2+0.015,rw+0.03,fh,0.030,true,true);
+  addContextBox(grp,F,0,baseY-fh/2+0.03, rd/2-0.015,rw+0.03,fh,0.030,true,true);
+  addContextBox(grp,F,-rw/2+0.015,baseY-fh/2+0.03,0,0.030,fh,rd+0.03,true,true);
+  addContextBox(grp,F, rw/2-0.015,baseY-fh/2+0.03,0,0.030,fh,rd+0.03,true,true);
+  // 軒樋 φ105(平側の軒先)
+  var gy=baseY-fh+0.075;
+  addContextBox(grp,R,0,gy,-rd/2-0.045,rw+0.02,0.105,0.105,false,true);
+  addContextBox(grp,R,0,gy, rd/2+0.045,rw+0.02,0.105,0.105,false,true);
+  // 棟包み
+  var ridge=getHipRoofRidgeSpec(rw,rd);
+  var topY=baseY+rh;
+  if(ridge.half>0.04){
+    if(ridge.axis==='x') addContextBox(grp,T,0,topY+0.035,0,ridge.half*2+0.30,0.075,0.26,true,true);
+    else addContextBox(grp,T,0,topY+0.035,0,0.26,0.075,ridge.half*2+0.30,true,true);
+  } else {
+    addContextBox(grp,T,0,topY+0.035,0,0.26,0.075,0.26,true,true);
+  }
+  // 隅棟包み(寄棟の稜線)
+  var hipLen=Math.sqrt(Math.pow(Math.min(rw,rd)/2,2)+rh*rh);
+  var hipAng=Math.atan2(rh,Math.min(rw,rd)/2);
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s){
+    var ex=s[0]*rw/2, ez=s[1]*rd/2;
+    var tx=(ridge.axis==='x')?s[0]*ridge.half:0;
+    var tz=(ridge.axis==='x')?0:s[1]*ridge.half;
+    if(ridge.half<0.04){ tx=0; tz=0; }
+    var dx=tx-ex, dz=tz-ez;
+    var run=Math.sqrt(dx*dx+dz*dz);
+    if(run<0.05) return;
+    var len=Math.sqrt(run*run+rh*rh);
+    var m=new THREE.Mesh(new THREE.BoxGeometry(len+0.12,0.055,0.17),T);
+    m.position.set((ex+tx)/2,baseY+rh/2+0.06,(ez+tz)/2);
+    m.rotation.y=Math.atan2(-dz,dx);
+    m.rotateZ(Math.atan2(rh,run));
+    m.castShadow=true; m.receiveShadow=true;
+    m.updateMatrix(); m.matrixAutoUpdate=false;
+    grp.add(m);
+  });
+  return rh;
+}
+function buildNeighborHouseKit(grp,it,w3,d3){
+  if(!ensureGltfModel(CONTEXT_HOUSE_KIT_GLB)) return false;
+  var kit=_modelCache[CONTEXT_HOUSE_KIT_GLB];
+  var mats=nhKitMaterials(kit,it);
+  if(!mats||!kit.getObjectByName('nh_seg_plain')) return false;
+  var floors=getContextFloors(it);
+  var storyH=contextStoryHeightM();
+  var L=neighborHouseLayout(it,w3,d3,floors,storyH);
+  var bodyH=floors*storyH;
+  var accent=(L.seed&1)?1:0;   // 1階を濃色の外壁にするかどうかの外観バリエーション
+
+  // ── 半透明(ゴースト)表示 ──────────────────────────────────
+  // 「計画建物を見やすくする」ための表示なので、部材を全部半透明で重ねない。
+  // 910mmごとの外壁パネルを透過で重ねると小口の線が無数に走って輪郭が濁るため、
+  // ゴースト時は単純な躯体ボリューム+屋根+稜線だけを描く。
+  if(isContextGhost(it)){
+    var gWall=mats.NhWall, gRoof=mats.NhRoof||mats.NhWall;
+    gWall.map=null; gWall.needsUpdate=true;
+    if(gRoof!==gWall){ gRoof.map=null; gRoof.needsUpdate=true; }
+    addContextBox(grp,gWall,0,bodyH/2,0,w3,bodyH,d3,true,true);
+    var gRoofMesh=createHipRoofMesh(w3+NH_EAVE*2,d3+NH_EAVE*2,bodyH,nhRoofHeightM(w3,d3),gRoof);
+    grp.add(gRoofMesh);
+    for(var gf=0;gf<floors;gf++){
+      addContextEdges(grp,w3,storyH,d3,gf*storyH+storyH/2,0x4f5862,0.30);
+    }
+    // 半透明でも「箱」ではなく家形に見えるよう、軒先と稜線を線で出す
+    var gEdges=new THREE.LineSegments(
+      new THREE.EdgesGeometry(gRoofMesh.geometry,20),
+      new THREE.LineBasicMaterial({color:0x4f5862,transparent:true,opacity:0.34}));
+    gEdges.matrixAutoUpdate=false;
+    grp.add(gEdges);
+    return true;
+  }
+
+  // 室内(開口の奥)。中まで作り込まず、暗い箱で「抜け」を止める
+  addContextBox(grp,mats.NhDark,0,bodyH/2,0,Math.max(0.2,w3-NH_WALL_T*2),bodyH,
+                Math.max(0.2,d3-NH_WALL_T*2),false,false);
+
+  var faces=[
+    {face:'front',row:L.rowW,len:w3},{face:'back',row:L.rowW,len:w3},
+    {face:'left',row:L.rowD,len:d3},{face:'right',row:L.rowD,len:d3}
+  ];
+  for(var f=0;f<floors;f++){
+    var y=f*storyH;
+    // 1階だけ色を変える2色使いは日本の建売で最も一般的な外観のひとつ
+    var variant=(accent&&f===0)?1:0;
+    for(var fi=0;fi<faces.length;fi++){
+      var fd=faces[fi], row=fd.row;
+      var placed=L.floorsData[f][fd.face];
+      var occupied={};
+      placed.forEach(function(p){
+        for(var k=0;k<p.span;k++) occupied[p.start+k]=1;
+        var names=NH_SEG_PART[p.part]||NH_SEG_PART.plain;
+        nhAttach(grp,nhInstance(kit,names[variant]||names[0],mats),fd.face,p.center,y,w3,d3);
+      });
+      // 開口の無い中間ベイ(実寸910)を無開口パネルで埋める
+      for(var b=0;b<row.mid;b++){
+        if(occupied[b]) continue;
+        nhAttach(grp,nhInstance(kit,NH_SEG_PART.plain[variant],mats),fd.face,
+                 nhBayCenter(row,b,1),y,w3,d3);
+      }
+      // 両端ベイ(端数吸収)。外壁は無地仕上げなので横スケールしても模様は乱れない
+      if(row.end>0.02){
+        [-1,1].forEach(function(s){
+          var n=nhInstance(kit,NH_SEG_PART.plain[variant],mats);
+          if(!n) return;
+          n.scale.x=row.end/NH_P;
+          nhAttach(grp,n,fd.face,s*(fd.len/2-row.end/2),y,w3,d3);
+        });
+      }
+      // 階高が2700を超える分を外壁帯で充填(見切り材の下に隠れる)
+      if(storyH-NH_SEG_H>0.005){
+        var fill=nhInstance(kit,'nh_fill',mats);
+        if(fill){
+          fill.scale.set(fd.len/NH_P,(storyH-NH_SEG_H)/0.455,1);
+          nhAttach(grp,fill,fd.face,0,y+NH_SEG_H,w3,d3);
+        }
+      }
+      // 基礎立上り+水切り(1階)/胴差見切り(2階以上)
+      var trimName=(f===0)?'nh_plinth':'nh_band';
+      var skip={};
+      if(f===0) placed.forEach(function(p){
+        if(p.part==='entry'||p.part==='garage'||p.part==='door_l'){
+          for(var k=0;k<p.span;k++) skip[p.start+k]=1;
+        }
+      });
+      for(var b2=0;b2<row.mid;b2++){
+        if(skip[b2]) continue;
+        nhAttach(grp,nhInstance(kit,trimName,mats),fd.face,nhBayCenter(row,b2,1),y,w3,d3);
+      }
+      if(row.end>0.02){
+        [-1,1].forEach(function(s){
+          var t=nhInstance(kit,trimName,mats);
+          if(!t) return;
+          t.scale.x=row.end/NH_P;
+          nhAttach(grp,t,fd.face,s*(fd.len/2-row.end/2),y,w3,d3);
+        });
+      }
+    }
+    // 出隅役物(4隅)
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s){
+      var c=nhInstance(kit,'nh_corner',mats);
+      if(!c) return;
+      // 外壁面と面一だとZファイティングするため、実物の出隅役物どおり少し前に出す
+      c.position.set(s[0]*(w3/2-0.037),y,s[1]*(d3/2-0.037));
+      if(storyH>NH_SEG_H) c.scale.y=storyH/NH_SEG_H;
+      grp.add(c);
+    });
+  }
+  // バルコニー(実寸1820×910・手すり高1100。建物を大きくしても伸びない)
+  if(L.balcony){
+    var b=nhInstance(kit,'nh_balcony',mats);
+    if(b) nhAttach(grp,b,'front',L.balcony.x,L.balcony.floor*storyH,w3,d3);
+  }
+  // 1階掃き出し窓の前のテラス土間
+  (L.floorsData[0]&&L.floorsData[0].back||[]).forEach(function(p){
+    if(p.part!=='door_l') return;
+    var t=new THREE.Mesh(new THREE.BoxGeometry(p.width+0.30,0.14,0.80),mats.NhBase||mats.NhFascia);
+    t.position.set(p.center,0.07,d3/2+0.40);
+    t.receiveShadow=true; t.updateMatrix(); t.matrixAutoUpdate=false;
+    grp.add(t);
+  });
+  // 屋根
+  buildNhKitRoof(grp,mats,kit,w3,d3,bodyH);
+  // 竪樋(4隅)。高さ1000の単位パーツを縦方向にだけ伸ばす
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s,i){
+    if(i===1&&L.entry) return;   // 玄関側は納まり上つけない
+    var p=nhInstance(kit,'nh_downpipe',mats);
+    if(!p) return;
+    p.scale.y=bodyH;
+    p.position.set(s[0]*(w3/2-0.16),0,s[1]*(d3/2+0.030));
+    grp.add(p);
+  });
+  // 設備(室外機・メーターボックス・換気フード)
+  var acX=nhBayCenter(L.rowD,Math.max(0,L.rowD.mid-1),1);
+  nhAttach(grp,nhInstance(kit,'nh_ac',mats),'right',acX,0,w3,d3);
+  if(floors>=2) nhAttach(grp,nhInstance(kit,'nh_ac',mats),'left',
+                         nhBayCenter(L.rowD,0,1),storyH,w3,d3);
+  nhAttach(grp,nhInstance(kit,'nh_meter',mats),'left',nhBayCenter(L.rowD,Math.max(0,L.rowD.mid-1),1),0,w3,d3);
+  nhAttach(grp,nhInstance(kit,'nh_vent',mats),'back',nhBayCenter(L.rowW,0,1)+0.35,2.30,w3,d3);
+  return true;
+}
+// ══════════════════════════════════════════════════════════════════════
 function build3DNeighborBuilding(grp,it,w3,d3,h){
   var floors=getContextFloors(it);
   var storyH=contextStoryHeightM();
@@ -14768,7 +15282,7 @@ function build3DNeighborHouse(grp,it,w3,d3,h){
   var floors=getContextFloors(it);
   var storyH=contextStoryHeightM();
   var bodyH=floors*storyH;
-  var roofH=contextRoofExtraHeightMm('neighbor-house')*U;
+  var roofH=contextRoofExtraHeightMm('neighbor-house',it)*U;
   var wallColor=it.colorCustom?it.color:0xb9bcc2;
   var wallMat=makeExteriorLightingMaterial({color:wallColor,roughness:0.9,envMapIntensity:0.14});
   wallMat.userData.ghostBody=true; // 半透明表示時に躯体だけ濃度を上げる
@@ -15240,7 +15754,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 5;
+var MODEL_ASSET_VER = 7;
 var _gltfRebuildTimer=null;
 var _gltfRebuildBatchStartedAt=0;
 function scheduleGltfRebuild3D(){
