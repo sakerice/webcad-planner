@@ -148,7 +148,7 @@ const HEIGHT_FNS = [
   'wallHeightMm', 'wallDisplayHeightM',
   'buildRoomCeilingShapeGeometry', 'buildSlopedCeilingGeometry', 'buildRoomCeilingMesh',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
-  'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
+  'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   'buildWall3D'
 ];
 const HEIGHT_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',

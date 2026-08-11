@@ -119,7 +119,7 @@ function ctxFor(walls) {
     'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallHeightMm', 'wallDisplayHeightM',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
-    'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'
+    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'
   ].map(topLevelFunction)).join('\n'), ctx);
   return ctx;
 }

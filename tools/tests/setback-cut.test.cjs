@@ -137,7 +137,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
-  'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
+  'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   // 斜線（Task 16）
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',

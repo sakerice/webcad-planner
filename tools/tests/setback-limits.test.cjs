@@ -140,7 +140,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
-  'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
+  'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',
   'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',

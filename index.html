@@ -12728,8 +12728,29 @@ function makeWallGlassMaterial(){
 var WALL_EXT_FACE_GAP_M=0.001;
 var WALL_INT_FACE_GAP_M=0.001;
 var WALL_FACE_JITTER_M=0.0004;              // 壁ごとのジッタ1段
+// ジッタの段数。id は「その壁を1つに定める記号」であって、数だとは限らない。
+// ensureObjectIds() は **欠けている id を埋めるだけ** で、取り込んだファイルや
+// 共同編集の相手が持ち込んだ文字列の id はそのまま残る(同じ関数の scanId が
+// String(v).match(/(\d+)$/) を掛けているのが、数でない id を実際に想定している証拠)。
+// 数として読めない id に % を掛けると NaN になり、その NaN は面のオフセットを
+// 通って**仕上げ面の頂点座標そのもの**へ入る。壁コアは w.thick から作るので無傷の
+// まま、外装面と内装面だけが壊れる — これが「壁4枚に対して壊れるのは8枚」という
+// 壊れ方の正体である(実測: 上辺が折れ線になる経路 slopedFaceMesh では
+// オフセットが頂点の z 座標そのものなので position 属性が丸ごと NaN になり、
+// three.js が computeBoundingBox / computeBoundingSphere で8件のエラーを出す。
+// 箱の枝ではオフセットはメッシュの position に入るので、面が NaN の位置へ飛ぶ)。
+// 数として読める id は今までどおり id%7 -- **既存プランの座標は1ビットも動かない。**
+function wallFaceJitterStep(id){
+  var n=(id||0)%7;
+  if(isFinite(n)) return n;
+  // 数として読めない id は文字から決める。ジッタに要るのは「壁ごとに違う小さな段」
+  // だけで、値そのものに意味は無い。決定的であればよい。
+  var s=String(id), h=0, i;
+  for(i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%7;
+  return h;
+}
 function wallFaceJitterM(w){
-  return ((w&&w.id||0)%7)*WALL_FACE_JITTER_M;
+  return wallFaceJitterStep(w&&w.id)*WALL_FACE_JITTER_M;
 }
 function wallExteriorFaceOffsetM(w){
   return w.thick*U/2+WALL_EXT_FACE_GAP_M+wallFaceJitterM(w);
