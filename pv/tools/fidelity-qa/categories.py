@@ -449,6 +449,62 @@ def package_source(package) -> str:
     return str(package.get("source") or PACKAGE_SOURCE_3D).lower()
 
 
+def package_instances(package):
+    """package.json の `instances` を、色を持つものだけ取り出して返す。
+
+    アプリが書き出す1件は `{id, color, type, floor, tier}`
+    (`index.html` の `videoPackageJson` / `packageInstances`)。**色を持たない
+    entry は落とす** — 色は instance ガイドの画素と対でしか意味を持たず、
+    平面図経路の一覧 (`planInstanceList`) は色を持たないので、そのまま legend に
+    仕立てると「切り出せない部材の名前」だけが並ぶ嘘になる。
+
+    `instances` を持たないパッケージ (Task 4 が最初に書き出した版) では空配列。
+    """
+    out = []
+    for entry in ((package or {}).get("instances") or []):
+        if not isinstance(entry, dict):
+            continue
+        colour = entry.get("color")
+        if not colour:
+            continue
+        out.append(entry)
+    return out
+
+
+def package_legend(package):
+    """package.json の `instances` から instance-legend.json と同じ形を作る。
+
+    真値ディレクトリに `instance-legend.json` が無い場合 —— ユーザーが手元で
+    判定を回すとき —— でも、**パッケージだけで部材名が出せる**ようにするための
+    ものである。名前を付けるのは `metrics._legend_name` そのもので、命名規則を
+    ここへ写し取らない (写すと metrics 側が変わった日に、名前だけが黙ってずれる)。
+
+    色を持つ entry が1つも無ければ `None`。呼び出し側は「パッケージからは
+    legend を作れなかった」として従来どおり振る舞う。
+    """
+    entries = package_instances(package)
+    if not entries:
+        return None
+    return {"version": 2, "instances": entries}
+
+
+def package_instance_tier_table(package):
+    """package.json の `instances` -> `{'#rrggbb': tier}`。無ければ `None`。
+
+    `lockTiers` と同じ色→階層の表だが、出どころは部材の一覧の方である。
+    両方ともアプリ側の `LockTiers.tierOf(type)` から出るので中身は一致する。
+    それでも両方読むのは、`instances` の方が **部材名と対で** 来るからで、
+    ここを読まないと「色の表はあるが名前が無い」状態が残る。
+    """
+    out = {}
+    for entry in package_instances(package):
+        tier = entry.get("tier")
+        if tier is None:
+            continue
+        out[str(entry["color"]).lower()] = normalise_package_tier(tier)
+    return out or None
+
+
 def lock_tier_table(package):
     """package.json -> `{'#rrggbb': tier}`。無ければ `None`。
 
@@ -463,11 +519,18 @@ def lock_tier_table(package):
     """
     if not package:
         return None
+    declared = package_instance_tier_table(package)
     tiers = package.get("lockTiers")
     if not isinstance(tiers, dict) or not tiers:
-        return None
-    return {str(colour).lower(): normalise_package_tier(tier)
-            for colour, tier in tiers.items()}
+        # `lockTiers` が無くても部材の一覧が階層を持っていれば読む。両方無い
+        # ときだけ `None`（＝組み込み分類へ落ちる）。
+        return declared
+    table = dict(declared or {})
+    # `lockTiers` は判定器が実際に画素を切り出す色でそのまま引かれる表なので、
+    # 食い違ったときはこちらを採る。`instances` は表に無い色を埋めるために読む。
+    table.update({str(colour).lower(): normalise_package_tier(tier)
+                  for colour, tier in tiers.items()})
+    return table
 
 
 def tier_for(colour, builtin_key, table):

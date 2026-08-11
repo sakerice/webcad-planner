@@ -35,6 +35,18 @@ CONTEXT と SOFT に落ちるが、設計側の表では4件とも LOCKED であ
          として名指しし、既にある `--max-unverifiable-fraction` に判断を
          委ねる。黙って通せば「調べて問題なし」と見分けが付かない。
 
+## 部材の名前はどこから来るか (Task 20)
+
+パッケージは `instances` に **部材の一覧** (id・色・種別・フロア・階層) を
+持っている。判定器はこれを読み、
+
+  * `lockTiers` に無い色の階層をここから補う、
+  * 真値ディレクトリに `instance-legend.json` が **無くても**、この一覧から
+    legend を組んで部材を色で切り出し、**部材名で指摘する**。
+
+後者はユーザーが手元で判定を回す場合のためのものである。真値側の legend が
+無いときにここで落ちると、「#a1b2c3 が変わった」すら言えない。
+
 `--package` を渡さなければ、この道は1行も通らない。既存の PV 実行の出力は
 標準出力・標準エラー・JSON まで含めて1バイトも変わらない (実測で確認済み)。
 
@@ -96,6 +108,7 @@ import numpy as np
 from PIL import Image
 
 import categories as cat
+from summary import summarise
 from metrics import (
     dilate,
     edge_mask,
@@ -181,11 +194,14 @@ def load_package(path):
 class PackageTiering:
     """package.json が判定へ持ち込むもの。**無ければ `None` を渡す。**
 
-    持ち込むのは3つだけである。
+    持ち込むのは4つだけである。
 
     1. **色→階層の宣言** (`lockTiers`)。設計そのものから決まっているので、
        セグメンテーション色からの組み込み分類より優先される。表に無い色は
        組み込み分類のまま。
+    1b. **部材の一覧** (`instances`)。色→階層を補い、そして **部材名** を
+       与える。真値側の `instance-legend.json` が無い run では、これが名前の
+       唯一の出どころになる。
     2. **モデルが見られなかった部材** (`shadowLift.unliftableColors`)。
        仕上げ検査だけを検証不能に落とす。輪郭は真実レンダで測れるので測る。
     3. **素材の種類** (`source`)。平面図経路のパッケージは色→階層の表も
@@ -206,7 +222,14 @@ class PackageTiering:
         self.plan_source = self.source == cat.PACKAGE_SOURCE_PLAN
         self.table = cat.lock_tier_table(package)
         self.unmeasurable_finish = cat.unmeasurable_finish_colours(package)
-        self.colours = cat.legend_colours(legend)
+        # 部材名 -> ガイド色。真値側の legend があればそれを使い、無い分は
+        # **パッケージ自身の部材一覧** で埋める。ユーザーが手元で判定を回すとき
+        # 真値ディレクトリの instance-legend.json は無いことがあり、そのとき
+        # パッケージだけで部材名を出せなければ、宣言された階層は名前の無い色に
+        # しか付かない (それが「書いたのに誰も読んでいない」の実体だった)。
+        self.colours = dict(cat.legend_colours(cat.package_legend(package)))
+        self.package_named = len(self.colours)
+        self.colours.update(cat.legend_colours(legend))
         self.notes = []
         if self.plan_source:
             self.notes.append(
@@ -222,6 +245,11 @@ class PackageTiering:
             self.notes.append(
                 f"{len(self.table)} colours carry a declared tier; the declaration "
                 "overrides the gate's segmentation based classification for those parts")
+        if self.package_named:
+            self.notes.append(
+                f"the package names {self.package_named} part(s); findings can say which "
+                "part changed by name even when the truth render carries no "
+                "instance-legend.json of its own")
         if self.unmeasurable_finish:
             self.notes.append(
                 f"{len(self.unmeasurable_finish)} colour(s) stayed below the floor "
@@ -251,6 +279,7 @@ class PackageTiering:
     def describe(self):
         return {"source": self.source, "notes": list(self.notes),
                 "declared_colours": 0 if self.table is None else len(self.table),
+                "named_instances": self.package_named,
                 "unmeasurable_finish_colours": sorted(self.unmeasurable_finish)}
 
 
@@ -720,10 +749,18 @@ def evaluate(rows, thresholds: Thresholds, tiering=None):
 EXIT_CODE = {"PASS": 0, "FAIL": 1, "SOFT_REGRESSION": 3}
 
 
-def _load_legend(truth_dir: Path):
+def _load_legend(truth_dir: Path, package=None):
     """instance-legend.json を読む。instance guide があるのに legend が無い/
     壊れている場合は綺麗に落ちる。家具を一切検査せずに PASS と読める run を
     作らないため。instance が丸ごと無いショットは (None, None)。
+
+    真値側に legend が無くても、**動画素材パッケージが部材の一覧を持っていれば
+    そちらから作る**。パッケージの `instances` は id・色・種別・フロア・階層を
+    持つので、色で切り出すのにも部材名で指摘するのにも足りる。ユーザーが手元で
+    判定を回すとき、真値ディレクトリの legend は無いことがある——そこで落ちると
+    「パッケージだけで部材名が出せる」という約束が成り立たない。
+
+    `package` を渡さない呼び出し (＝既存の PV 実行) は、この道を1行も通らない。
     """
     legend_path = truth_dir / "instance-legend.json"
     instance_dir = truth_dir / "instance"
@@ -732,10 +769,16 @@ def _load_legend(truth_dir: Path):
         return None, None
 
     if not legend_path.exists():
+        from_package = cat.package_legend(package)
+        if from_package is not None:
+            return from_package, instance_dir
         raise SystemExit(
             f"error: {instance_dir} has instance guide frames but {legend_path} is missing. "
             "Per-instance checks cannot run, and a run that cannot check the designed "
-            "objects must not be allowed to report PASS.")
+            "objects must not be allowed to report PASS."
+            + (" The video material package was read but carries no instances with a "
+               "colour, so the parts cannot be sliced out of the guide by it either."
+               if package else ""))
     try:
         legend = json.loads(legend_path.read_text())
     except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
@@ -765,7 +808,7 @@ def collect_rows(truth_dir: Path, gen_dir: Path, radius: int, warn=None, package
     この層の仕事であり、それができない run が PASS と読めてはならない。
     """
     warn = warn or (lambda msg: None)
-    legend, instance_dir = _load_legend(truth_dir)
+    legend, instance_dir = _load_legend(truth_dir, package)
     if legend is None:
         warn(f"no instance/ guide frames under {truth_dir} — "
              "per-instance checks skipped for the whole run")
@@ -890,6 +933,10 @@ def main():
                          "一切測らない。平面図ソースのパッケージは色→階層の表を"
                          "持たないので、部材ごとの検査は検証不能として名指しされる。"
                          "渡さなければ従来どおり組み込み分類で判定する。")
+    ap.add_argument("--summary", action="store_true",
+                    help="ユーザーに見せる日本語の要約を先頭に出す (設計 §10)。"
+                         "--package を渡した run では自動で出る。渡さない既存の "
+                         "PV 実行の出力を動かさないため、既定は off。")
     ap.add_argument("--radius", type=int, default=2)
     ap.add_argument("--json", default=None)
     ap.add_argument("--quiet-narrative", action="store_true",
@@ -908,7 +955,7 @@ def main():
     assert_coverage(rows, expected, truth_dir, gen_dir)
     # 判定に使うのは collect_rows が組んだものと同一の導出。ここで作り直すのは
     # 結果 JSON に「どのパッケージで測ったか」を書くためだけである。
-    tiering = PackageTiering(package, _load_legend(truth_dir)[0]) if package else None
+    tiering = PackageTiering(package, _load_legend(truth_dir, package)[0]) if package else None
 
     thresholds = Thresholds(
         min_locked_recall=args.min_locked_recall,
@@ -923,6 +970,16 @@ def main():
     result = evaluate(rows, thresholds, tiering=tiering)
     result["compared"] = len(rows)
     result["rows"] = rows
+
+    # 設計 §10 の「判定器をそのまま見せない」要約。**パッケージ有りの run と、
+    # 明示的に頼まれたときだけ** 出す。既存の PV 実行 (package.json を持たない)
+    # の標準出力と JSON を1バイトも動かさないためである。
+    if args.summary or package is not None:
+        result["summary_ja"] = summarise(result)
+        print("要約（ユーザーに見せる文）:")
+        for line in result["summary_ja"]:
+            print(f"  {line}")
+        print()
 
     print(f"{result['verdict']} — {len(rows)} frames compared")
     print(f"  LOCKED (walls, windows, doors, roof, floor slabs): {result['locked']['verdict']}"

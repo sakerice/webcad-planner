@@ -1553,3 +1553,106 @@ class PackageTieringEndToEndTest(unittest.TestCase):
                                         max_locked_finish_drift=12.0,
                                         max_unverifiable_fraction=0.0))
         self.assertEqual(got["verdict"], "FAIL")
+
+
+class PackageNamesThePartsTest(unittest.TestCase):
+    """Task 20-2: 判定器が package.json の `instances` を読む。
+
+    `instances` は id・色・種別・フロア・階層を持つ部材の一覧である。
+    書いてあるのに誰も読んでいなかったので、部材名は真値側の
+    `instance-legend.json` からしか出せず、それが無い run では
+    「調べられない」でも「色で言う」でもなく **落ちて** いた。
+    """
+
+    SOFA_BOX = (120, 200)
+    # アプリが実際に書き出す形 (index.html の packageInstances)。
+    PACKAGE = {"source": "3d",
+               "instances": [{"id": 1, "color": "#FF0000", "type": "sofa",
+                              "floor": 2, "tier": "LOCKED"}]}
+
+    def _dirs(self, root, legend=None):
+        regions = _regions(sofa=self.SOFA_BOX)
+        truth, gen = _make_truth_dirs(root, with_instance=True)
+        if legend is not None:
+            (truth / "instance-legend.json").write_text(json.dumps(legend))
+        _save(truth / "edge" / "0000.png", _line_drawing(regions))
+        _save(truth / "segmentation" / "0000.png", _segmentation(regions))
+        _save(truth / "base" / "0000.png", _colour_render(regions))
+        guide = np.zeros((300, 300, 3), dtype=np.uint8)
+        y, x = self.SOFA_BOX
+        guide[y:y + SOFA_H, x:x + SOFA_W] = (255, 0, 0)
+        _save(truth / "instance" / "0000.png", guide)
+        # 仕上げだけを変えた生成 (輝度は揃えてあるので recall は落ちない)。
+        _save(gen / "0000.png", _colour_render(regions, recolour={SOFA: (150, 105, 62)}))
+        return truth, gen
+
+    def test_a_package_alone_names_the_part_with_no_truth_side_legend(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._dirs(Path(tmp))          # legend を書かない
+            self.assertFalse((truth / "instance-legend.json").exists())
+            rows, _ = collect_rows(truth, gen, radius=1, package=self.PACKAGE)
+        # 名前は metrics._legend_name の規約 (label -> type#id -> id)。
+        self.assertIn("sofa#1", rows[0]["instances"])
+        got = evaluate(rows, thresholds(min_locked_recall=0.75,
+                                        max_locked_finish_drift=12.0))
+        self.assertEqual(got["verdict"], "FAIL")
+        named = " ".join(r for f in got["locked"]["failures"] for r in f["reasons"])
+        self.assertIn("sofa#1", named, "指摘が部材名で語っていない: " + named)
+        # 色そのものを指摘文に出さない (「#ff0000 が変わった」では読めない)。
+        self.assertNotIn("#ff0000", named.lower())
+
+    def test_without_a_package_the_same_shot_still_refuses_to_guess(self):
+        """legend が無く、名前の出どころも無い run は今までどおり落ちる。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._dirs(Path(tmp))
+            with self.assertRaises(SystemExit) as ctx:
+                collect_rows(truth, gen, radius=1)
+        self.assertIn("instance-legend.json", str(ctx.exception))
+
+    def test_the_declared_tier_comes_from_the_instances_list_alone(self):
+        """`lockTiers` が無くても、部材一覧の階層が組み込み分類より優先される。
+
+        fixture の sofa はセグメンテーション上 furniture = SOFT。設計側の表は
+        LOCKED と言っている。"""
+        pkg = dict(self.PACKAGE)
+        self.assertNotIn("lockTiers", pkg)
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._dirs(Path(tmp))
+            rows, _ = collect_rows(truth, gen, radius=1, package=pkg)
+        self.assertEqual(rows[0]["instances"]["sofa#1"]["tier"], cat.LOCKED)
+        self.assertEqual(rows[0]["instances"]["sofa#1"]["builtin_tier"], cat.SOFT)
+
+    def test_a_lock_tiers_entry_still_wins_over_the_instances_list(self):
+        """判定器が実際に画素を切り出す色の表を優先する。食い違いは握りつぶさない。"""
+        pkg = dict(self.PACKAGE, lockTiers={"#ff0000": "FREE"})
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._dirs(Path(tmp), legend={
+                "version": 2, "instances": [{"id": 1, "color": "#ff0000", "type": "sofa"}]})
+            rows, _ = collect_rows(truth, gen, radius=1, package=pkg)
+        self.assertEqual(rows[0]["instances"]["sofa#1"]["tier"], cat.FREE)
+
+    def test_the_truth_legend_still_wins_for_naming_when_it_exists(self):
+        """真値側に legend があれば名前はそちらから。ガイドの画素はその色である。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            truth, gen = self._dirs(Path(tmp), legend={
+                "version": 2,
+                "instances": [{"id": 7, "color": "#ff0000", "label": "リビングのソファ"}]})
+            rows, _ = collect_rows(truth, gen, radius=1, package=self.PACKAGE)
+        self.assertIn("リビングのソファ", rows[0]["instances"])
+        self.assertNotIn("sofa#1", rows[0]["instances"])
+
+    def test_the_run_says_how_many_parts_the_package_named(self):
+        tiering = PackageTiering(self.PACKAGE, None)
+        self.assertEqual(tiering.describe()["named_instances"], 1)
+        self.assertIn("names 1 part", " ".join(tiering.notes))
+
+    def test_a_plan_source_instances_list_carries_no_colour_and_names_nothing(self):
+        """平面図経路の一覧は色を持たない。名前だけ並べて「切り出せる」と嘘を
+        つかない — この経路は今までどおり照合不能のままである。"""
+        plan = {"source": "plan", "lockTiers": None,
+                "instances": [{"id": "I97", "type": "sofa", "floor": 2, "tier": "SOFT"}]}
+        self.assertIsNone(cat.package_legend(plan))
+        self.assertIsNone(cat.lock_tier_table(plan))
+        tiering = PackageTiering(plan, None)
+        self.assertEqual(tiering.describe()["named_instances"], 0)
+        self.assertIsNone(tiering.tier_of("sofa#I97", "furniture"))
