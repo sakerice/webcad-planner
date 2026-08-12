@@ -10052,21 +10052,370 @@ function setbackRoofsOverRoom(room){
   });
   return out;
 }
-// 切り口の片流れ屋根を3Dに建てる。屋根の描画は既存の build3DRoofItem をそのまま呼ぶ。
-function build3DSetbackRoofs(flFilt){
-  if(!sc3) return;
-  setbackRoofItems().forEach(function(it){
-    if(flFilt&&it.floor!==flFilt) return;
-    var grp=new THREE.Group();
-    grp.position.set((it.x+it.w/2)*U, floorBaseY(it.floor)+(it.elev||0)*U, (it.y+it.d/2)*U);
-    grp.rotation.y=-it.rot*Math.PI/180;
-    build3DRoofItem(grp,it,it.w*U,it.d*U);
-    // DATA に無いアイテムなので選択対象にはしない(掴めない物を掴ませない)。
-    // b:true は build3D の作り直しで消えるため、そして斜線の検査対象になるため。
-    grp.userData={b:true,setbackRoof:true};
-    grp.traverse(function(o){ o.userData=o.userData||{}; o.userData.b=true; o.userData.setbackRoof=true; });
-    sc3.add(grp);
+// ══ 斜線の切り口そのものを屋根にする (Task 21-1) ═══════════════════════════
+// **屋根アイテム(切妻・寄棟)の形状生成は一切通さない。** 既存の屋根は断面が三角形の
+// 角柱として作られるので、それを流用すると斜めの板の下に直角三角柱がぶら下がる。
+// ここで作るのは「制限面と建物が交わる断面＝斜めの板＋厚み＋周囲を塞ぐ面」だけである。
+//
+// 断面の範囲は **実際に建っているメッシュから測る**。以前は DATA 上の部屋と屋根
+// アイテムから組み立てた高さの近似(setbackBuildingTopWorldYAt)を 64x64 の格子で
+// 拾っていたが、**削るのは本物の三角形**なので、両者が食い違ったところが
+// そのまま屋根の穴になっていた(既定プランで制限超えの 6699 セル中 175 セル)。
+// 食い違いの正体は3つある:
+//   ・屋根アイテムの矩形の外へ出ている実際の軒・樋を近似が見ていない。
+//     矩形の外では部屋の壁頭まで落ちるので、最大 2502mm 低く報告する。
+//   ・roofSurfaceHeightAt は「竪樋を勾配面に刺さらせない」ための近似であって
+//     実形状ではない。寄棟＋棟のある屋根では棟の伸びを持たず、最大 269mm 低い。
+//   ・格子の目(既定プランで 71x119mm)より細い帯には格子点が1つも乗らないので、
+//     その帯は丸ごと落ちる。
+// 近似を作り直すのではなく、**削るのと同じ三角形**を制限面へ落として範囲にする。
+// 落とし方は「三角形が触れたセルは必ず塗る」なので、開いた所が塗られないことが
+// 起こり得ない(塞ぐガードではなく、範囲の定義そのものである)。
+var SETBACK_SECTION_CELL_MM=20;     // 断面をなぞる目の細かさ(斜めの境界の段の大きさ)
+var SETBACK_SECTION_MAX_CELLS=768;  // 1辺のセル数の上限(細かすぎて重くならないように)
+// ワールド(m)の点を、その制限面の (t,s) mm へ。t は境界からの水平距離。
+function setbackWorldToTS(pl,x,z){
+  var px=x/U, py=z/U;
+  return {t:pl.nx*px+pl.ny*py-pl.d0, s:pl.px*px+pl.py*py};
+}
+// 制限面より上(＋面に載っているぶん)にある三角形を、(t,s) 平面の三角形として集める。
+// 切り方は削りと同じ setbackTriSide。位置の内分も同じ setbackLerpVert を (t,s) の
+// 2要素で回すだけ -- 射影は一次変換なので、切ってから射影しても射影してから切っても同じ。
+function setbackSectionTris(pl){
+  var co=setbackPlaneWorldCoef(pl);
+  var out=[];
+  var va=new THREE.Vector3(), vb=new THREE.Vector3(), vc=new THREE.Vector3();
+  setbackSubjectMeshes().forEach(function(o){
+    if(!setbackLiveCoefsForMesh(o,[co]).length) return;
+    var geo=o.geometry, posAttr=geo&&geo.attributes&&geo.attributes.position;
+    if(!posAttr) return;
+    var mw=o.matrixWorld, idx=geo.index, n=idx?idx.count:posAttr.count, i;
+    for(i=0;i+2<n;i+=3){
+      var i0=idx?idx.getX(i):i, i1=idx?idx.getX(i+1):i+1, i2=idx?idx.getX(i+2):i+2;
+      va.set(posAttr.getX(i0),posAttr.getY(i0),posAttr.getZ(i0)).applyMatrix4(mw);
+      vb.set(posAttr.getX(i1),posAttr.getY(i1),posAttr.getZ(i1)).applyMatrix4(mw);
+      vc.set(posAttr.getX(i2),posAttr.getY(i2),posAttr.getZ(i2)).applyMatrix4(mw);
+      var tri=[va.x,va.y,va.z,vb.x,vb.y,vb.z,vc.x,vc.y,vc.z];
+      var fv=setbackTriF(tri,co);
+      if(Math.max(fv[0],fv[1],fv[2])<-SETBACK_CUT_EPS_M) continue;
+      // 「面より上」だけでなく「面に載っているだけ」も断面である(高さモデルで
+      //  既に頭を押さえられた壁は、削られないまま面にぴったり接している)。
+      var fs=[fv[0]+SETBACK_CUT_EPS_M,fv[1]+SETBACK_CUT_EPS_M,fv[2]+SETBACK_CUT_EPS_M];
+      var a=setbackWorldToTS(pl,va.x,va.z), b=setbackWorldToTS(pl,vb.x,vb.z), c=setbackWorldToTS(pl,vc.x,vc.z);
+      var rows=[[a.t,a.s],[b.t,b.s],[c.t,c.s]];
+      setbackTriSide(fs,true).forEach(function(t){
+        var v=[];
+        setbackLerpVert(t[0],rows,2,v);
+        setbackLerpVert(t[1],rows,2,v);
+        setbackLerpVert(t[2],rows,2,v);
+        out.push(v);
+      });
+    }
   });
+  return out;
+}
+// 三角形が帯 [ba,bb] (t方向)と重なる範囲の s の最小・最大。三角形は凸なので、
+// 帯の中に入っている頂点と、帯の境界と辺の交点だけを見れば厳密に決まる。
+function setbackTriSRangeInBand(v,ba,bb){
+  var lo=Infinity, hi=-Infinity, k, q;
+  for(k=0;k<3;k++){
+    if(v[k*2]>=ba && v[k*2]<=bb){
+      if(v[k*2+1]<lo) lo=v[k*2+1];
+      if(v[k*2+1]>hi) hi=v[k*2+1];
+    }
+  }
+  for(k=0;k<3;k++){
+    var ta=v[k*2], sa=v[k*2+1], tb=v[((k+1)%3)*2], sb=v[((k+1)%3)*2+1];
+    if(ta===tb) continue;
+    for(q=0;q<2;q++){
+      var tc=q?bb:ba;
+      if((tc-ta)*(tc-tb)>0) continue;   // 帯の境界がこの辺の外
+      var s=sa+(sb-sa)*((tc-ta)/(tb-ta));
+      if(s<lo) lo=s;
+      if(s>hi) hi=s;
+    }
+  }
+  if(lo>hi) return null;
+  return [lo,hi];
+}
+// 断面を (t,s) の格子へ塗る。**触れたセルは必ず塗る**（外側へ最大1セルはみ出す
+// ことはあっても、内側が欠けることは無い）。返り値が null なら断面が無い。
+function setbackSectionFootprint(pl,planes){
+  var tris=setbackSectionTris(pl);
+  if(!tris.length) return null;
+  var tMin=Infinity,tMax=-Infinity,sMin=Infinity,sMax=-Infinity, i, j, k;
+  tris.forEach(function(v){
+    for(k=0;k<3;k++){
+      if(v[k*2]<tMin) tMin=v[k*2];
+      if(v[k*2]>tMax) tMax=v[k*2];
+      if(v[k*2+1]<sMin) sMin=v[k*2+1];
+      if(v[k*2+1]>sMax) sMax=v[k*2+1];
+    }
+  });
+  var cell=Math.max(SETBACK_SECTION_CELL_MM,
+    (tMax-tMin)/SETBACK_SECTION_MAX_CELLS,(sMax-sMin)/SETBACK_SECTION_MAX_CELLS);
+  var t0=Math.floor(tMin/cell)*cell, s0=Math.floor(sMin/cell)*cell;
+  var nt=Math.max(1,Math.ceil((tMax-t0)/cell)), ns=Math.max(1,Math.ceil((sMax-s0)/cell));
+  var cov=[];
+  for(i=0;i<nt*ns;i++) cov.push(0);
+  var fp={t0:t0,s0:s0,cell:cell,nt:nt,ns:ns,cov:cov};
+  tris.forEach(function(v){
+    var lo=Math.min(v[0],v[2],v[4]), hi=Math.max(v[0],v[2],v[4]);
+    var i0=Math.max(0,Math.floor((lo-t0)/cell)), i1=Math.min(nt-1,Math.floor((hi-t0)/cell));
+    for(i=i0;i<=i1;i++){
+      var sr=setbackTriSRangeInBand(v,t0+i*cell,t0+(i+1)*cell);
+      if(!sr) continue;
+      var j0=Math.max(0,Math.floor((sr[0]-s0)/cell)), j1=Math.min(ns-1,Math.floor((sr[1]-s0)/cell));
+      for(j=j0;j<=j1;j++) cov[i*ns+j]=1;
+    }
+  });
+  // 面が2枚以上あっても、ここでは**間引かない**。どちらの面が効くかは格子ではなく
+  // 谷の線そのもので切る(setbackOtherPlaneClips)。格子のセル単位で相手に譲ると、
+  // 面ごとに格子の切り方が違うぶん、谷をまたぐセル同士が両方とも譲って両方落ちたり
+  // (穴)、両方が残って同じ面を二重に張ったり(縞状のちらつき)する。
+  for(i=0;i<nt*ns;i++) if(cov[i]) return fp;
+  return null;
+}
+// 他の制限面ごとに「この面のほうが低い(＝この面が効く)側」を表す (t,s) の一次式。
+// 制限高さは平面座標の一次式で、(t,s)→平面座標も一次なので、差もまた一次式になる。
+// 値が正の側だけを残せば、谷の線で過不足なく切れる。
+var SETBACK_VALLEY_LAP_MM=1;   // 谷で1mmだけ重ねる(継ぎ目に髪の毛ほどの隙間も出さない)
+function setbackOtherPlaneClips(pl,planes){
+  var out=[];
+  (planes||[]).forEach(function(b){
+    if(b===pl) return;
+    var g=function(t,s){
+      var p=setbackPointAt(pl,t,s);
+      return setbackLimitHeightMmAt(b,p.x,p.y)-setbackLimitHeightMmAt(pl,p.x,p.y);
+    };
+    var g0=g(0,0);
+    out.push({c:g0+SETBACK_VALLEY_LAP_MM,ct:(g(1000,0)-g0)/1000,cs:(g(0,1000)-g0)/1000});
+  });
+  return out;
+}
+function setbackClipValue(cl,t,s){ return cl.c+cl.ct*t+cl.cs*s; }
+// 線分が矩形そのものの辺の上に乗っているか。乗っていないなら谷で切った断口である。
+function setbackRectHasEdge(r,a,b){
+  var e=1e-6;
+  if(Math.abs(a[0]-b[0])<e && (Math.abs(a[0]-r.tLo)<e||Math.abs(a[0]-r.tHi)<e)) return true;
+  if(Math.abs(a[1]-b[1])<e && (Math.abs(a[1]-r.sLo)<e||Math.abs(a[1]-r.sHi)<e)) return true;
+  return false;
+}
+// 凸多角形を「値が0以上」の側で切る(Sutherland-Hodgman)。矩形を切るので結果も凸。
+function setbackClipPolygon(poly,clips){
+  var k, i;
+  for(k=0;k<clips.length&&poly.length;k++){
+    var cl=clips[k], out=[];
+    for(i=0;i<poly.length;i++){
+      var a=poly[i], b=poly[(i+1)%poly.length];
+      var fa=setbackClipValue(cl,a[0],a[1]), fb=setbackClipValue(cl,b[0],b[1]);
+      if(fa>=0) out.push(a);
+      if((fa>0&&fb<0)||(fa<0&&fb>0)){
+        var u=fa/(fa-fb);
+        out.push([a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]);
+      }
+    }
+    poly=out;
+  }
+  return poly;
+}
+// 線分を同じ側で切る。全部外なら null。
+function setbackClipSegment(a,b,clips){
+  var u0=0, u1=1, k;
+  for(k=0;k<clips.length;k++){
+    var fa=setbackClipValue(clips[k],a[0],a[1]), fb=setbackClipValue(clips[k],b[0],b[1]);
+    var d=fb-fa;
+    if(Math.abs(d)<1e-12){ if(fa<0) return null; continue; }
+    var u=-fa/d;
+    if(d>0){ if(u>u0) u0=u; } else if(u<u1) u1=u;
+    if(u0>=u1) return null;
+  }
+  return [[a[0]+(b[0]-a[0])*u0,a[1]+(b[1]-a[1])*u0],
+          [a[0]+(b[0]-a[0])*u1,a[1]+(b[1]-a[1])*u1]];
+}
+// 塗ったセルを重ならない矩形へまとめる(右へ伸ばしてから下へ伸ばす貪欲法)。
+// 板の上面・下面はこの矩形で張る。セル単位の四角を全部並べるより頂点が桁で減る。
+function setbackFootprintRects(fp){
+  var used=[], rects=[], i, j, k;
+  for(i=0;i<fp.nt*fp.ns;i++) used.push(0);
+  for(i=0;i<fp.nt;i++) for(j=0;j<fp.ns;j++){
+    if(!fp.cov[i*fp.ns+j]||used[i*fp.ns+j]) continue;
+    var j2=j;
+    while(j2+1<fp.ns&&fp.cov[i*fp.ns+j2+1]&&!used[i*fp.ns+j2+1]) j2++;
+    var i2=i, ok=true;
+    while(ok&&i2+1<fp.nt){
+      for(k=j;k<=j2;k++) if(!fp.cov[(i2+1)*fp.ns+k]||used[(i2+1)*fp.ns+k]){ ok=false; break; }
+      if(ok) i2++;
+    }
+    var a,b;
+    for(a=i;a<=i2;a++) for(b=j;b<=j2;b++) used[a*fp.ns+b]=1;
+    rects.push({tLo:fp.t0+i*fp.cell,tHi:fp.t0+(i2+1)*fp.cell,
+                sLo:fp.s0+j*fp.cell,sHi:fp.s0+(j2+1)*fp.cell});
+  }
+  return rects;
+}
+// 塗った領域の輪郭(片側だけが塗られているセル境界)。ここに見付け(鼻隠し)を立てる。
+// 直交格子の輪郭は必ず閉じた輪になるので、上面・下面と合わせて板は必ず塞がる。
+function setbackFootprintEdges(fp){
+  var edges=[], i, j, run;
+  function cov(a,b){ return (a>=0&&a<fp.nt&&b>=0&&b<fp.ns)?fp.cov[a*fp.ns+b]:0; }
+  for(i=0;i<=fp.nt;i++){          // t 一定の線(境界と平行・水平)
+    run=-1;
+    for(j=0;j<=fp.ns;j++){
+      var on=(j<fp.ns)&&(cov(i-1,j)!==cov(i,j));
+      if(on&&run<0) run=j;
+      if(!on&&run>=0){
+        edges.push({tLo:fp.t0+i*fp.cell,tHi:fp.t0+i*fp.cell,
+                    sLo:fp.s0+run*fp.cell,sHi:fp.s0+j*fp.cell});
+        run=-1;
+      }
+    }
+  }
+  for(j=0;j<=fp.ns;j++){          // s 一定の線(勾配なりに斜め)
+    run=-1;
+    for(i=0;i<=fp.nt;i++){
+      var on2=(i<fp.nt)&&(cov(i,j-1)!==cov(i,j));
+      if(on2&&run<0) run=i;
+      if(!on2&&run>=0){
+        edges.push({tLo:fp.t0+run*fp.cell,tHi:fp.t0+i*fp.cell,
+                    sLo:fp.s0+j*fp.cell,sHi:fp.s0+j*fp.cell});
+        run=-1;
+      }
+    }
+  }
+  return edges;
+}
+// 板の仕上げ。**形は一切もらわない**。色・テクスチャ・厚み・鼻隠しの色だけを
+// いちばん高い階の屋根から借りる(斜線の板だけ別の材料になると嘘に見えるため)。
+function setbackSlabAppearanceItem(){
+  var tpl=setbackRoofTemplateItem();
+  return {
+    type:'roof', floor:tpl?(tpl.floor||1):1,
+    color:tpl?tpl.color:undefined, texture:tpl?tpl.texture:undefined,
+    textureFlipX:tpl?tpl.textureFlipX:false, textureFlipY:tpl?tpl.textureFlipY:false,
+    roofThickness:(tpl&&tpl.roofThickness)||180,
+    roofEdgeColor:(tpl&&tpl.roofEdgeColor)||undefined
+  };
+}
+// 断面から斜めの板を建てる。上面はぴったり制限面の上、下面はそこから板厚ぶん
+// **面に垂直に**下がった平行な面(勾配なりの厚みであって、垂直に切った角柱ではない)。
+// 面に垂直な厚み thick は、高さで見ると thick*sqrt(1+勾配^2) 下がることに等しい。
+// その平面位置で **いちばん低い制限**の高さ(mm)。面が1枚ならその面そのもの。
+// 板の上面はこれで張る。谷(2枚の面が交わる線)では両側の板が同じ高さを取るので、
+// 継ぎ目に隙間も突き抜けも出ない。
+function setbackLowestLimitMmAt(planes,xMm,yMm){
+  var h=Infinity, k;
+  for(k=0;k<planes.length;k++) h=Math.min(h,setbackLimitHeightMmAt(planes[k],xMm,yMm));
+  return h;
+}
+function build3DSetbackRoofSlab(pl,fp,planes){
+  var it=setbackSlabAppearanceItem();
+  var thick=Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U));
+  var drop=thick*Math.sqrt(1+pl.slope*pl.slope);
+  var rects=setbackFootprintRects(fp), edges=setbackFootprintEdges(fp);
+  if(!rects.length) return;
+  var bt0=Infinity,bt1=-Infinity,bs0=Infinity,bs1=-Infinity;
+  rects.forEach(function(r){
+    if(r.tLo<bt0) bt0=r.tLo;
+    if(r.tHi>bt1) bt1=r.tHi;
+    if(r.sLo<bs0) bs0=r.sLo;
+    if(r.sHi>bs1) bs1=r.sHi;
+  });
+  var Wm=Math.max(0.001,(bs1-bs0)*U), Dm=Math.max(0.001,(bt1-bt0)*U);
+  var ap=resolveRoofAppearance(it);
+  var matParams={color:ap.color||'#2a2a30'};
+  var roofTex=ap.texture?getTexture3D(ap.texture):null;
+  if(roofTex){
+    var rtc=cloneRepeatReadyTexture(roofTex);
+    if(rtc){
+      rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping;
+      setTextureRepeatNoDistort(rtc,Wm,Dm,0.8);
+      applyTextureFlip(rtc,ap);
+      matParams.map=rtc;
+      matParams.color=0xffffff;
+    }
+  }
+  var topMat=makeExteriorLightingMaterial({map:matParams.map||null,color:matParams.color,
+    side:THREE.DoubleSide,roughness:0.92,metalness:0.0,envMapIntensity:0.06});
+  var edgeMat=makeExteriorLightingMaterial({color:it.roofEdgeColor||'#3a2f2a',
+    side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
+  // (t,s) と上下の別からワールド頂点へ。上面はいちばん低い制限面そのもの。
+  var pls=(planes&&planes.length)?planes:[pl];
+  function vtx(t,s,lower){
+    var p=setbackPointAt(pl,t,s);
+    return [p.x*U,setbackLowestLimitMmAt(pls,p.x,p.y)*U-(lower?drop:0),p.y*U];
+  }
+  var faces=[[],[]];   // 0: 屋根面, 1: 鼻隠し・軒天
+  function pushTri(fi,a,b,c){
+    faces[fi].push(a[0],a[1],a[2],b[0],b[1],b[2],c[0],c[1],c[2]);
+  }
+  function pushQuad(fi,a,b,c,d){ pushTri(fi,a,b,c); pushTri(fi,a,c,d); }
+  // 面が2枚以上あるときは、谷の線で切ってから張る。切ってから張るので、
+  // 隣の面の板と重ならない(重ねると同じ高さの面が二重になって縞に見える)。
+  var clips=setbackOtherPlaneClips(pl,pls);
+  rects.forEach(function(r){
+    var poly=setbackClipPolygon(
+      [[r.tLo,r.sLo],[r.tLo,r.sHi],[r.tHi,r.sHi],[r.tHi,r.sLo]],clips);
+    if(poly.length<3) return;
+    var k;
+    for(k=2;k<poly.length;k++){
+      pushTri(0,vtx(poly[0][0],poly[0][1],false),
+                vtx(poly[k-1][0],poly[k-1][1],false),
+                vtx(poly[k][0],poly[k][1],false));
+      pushTri(1,vtx(poly[k][0],poly[k][1],true),
+                vtx(poly[k-1][0],poly[k-1][1],true),
+                vtx(poly[0][0],poly[0][1],true));
+    }
+    // 谷で切り落とした断口も塞ぐ。隣の板がぴったり付くので外からは見えないが、
+    // 塞がずに開けておく理由が無い。
+    for(k=0;k<poly.length;k++){
+      var a=poly[k], b=poly[(k+1)%poly.length];
+      if(setbackRectHasEdge(r,a,b)) continue;
+      pushQuad(1,vtx(a[0],a[1],false),vtx(b[0],b[1],false),
+                 vtx(b[0],b[1],true),vtx(a[0],a[1],true));
+    }
+  });
+  edges.forEach(function(e){
+    var seg=setbackClipSegment([e.tLo,e.sLo],[e.tHi,e.sHi],clips);
+    if(!seg) return;
+    pushQuad(1,vtx(seg[0][0],seg[0][1],false),vtx(seg[1][0],seg[1][1],false),
+               vtx(seg[1][0],seg[1][1],true),vtx(seg[0][0],seg[0][1],true));
+  });
+  var grp=new THREE.Group();
+  [{pos:faces[0],mat:topMat},{pos:faces[1],mat:edgeMat}].forEach(function(f){
+    if(!f.pos.length) return;
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(f.pos,3));
+    var uvs=[], ui;
+    for(ui=0;ui<f.pos.length;ui+=3){
+      var ts=setbackWorldToTS(pl,f.pos[ui],f.pos[ui+2]);
+      uvs.push((ts.s-bs0)*U/Wm,(ts.t-bt0)*U/Dm);
+    }
+    geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+    geo.computeVertexNormals();
+    var mesh=new THREE.Mesh(geo,f.mat);
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    mesh.userData={b:true,setbackRoof:true};
+    grp.add(mesh);
+  });
+  grp.userData={b:true,setbackRoof:true};
+  sc3.add(grp);
+}
+// 削る**前**に断面を測っておく。削ったあとでは、開いた所が消えてしまって測れない。
+function setbackSectionsForBuild(){
+  var planes=(typeof setbackPlanes==='function')?setbackPlanes():[];
+  if(!planes.length) return [];
+  var out=[];
+  planes.forEach(function(pl){
+    var fp=setbackSectionFootprint(pl,planes);
+    if(fp) out.push({plane:pl,fp:fp,planes:planes});
+  });
+  return out;
+}
+// 切り口の斜めの板を3Dに建てる。設定が無ければ sections が空で1枚も建たない。
+function build3DSetbackRoofs(sections){
+  if(!sc3||!sections||!sections.length) return;
+  sections.forEach(function(sec){ build3DSetbackRoofSlab(sec.plane,sec.fp,sec.planes); });
 }
 
 // ── 実際に削る ────────────────────────────────────────────────────────
@@ -10246,15 +10595,18 @@ function build3D(){
   DATA.walls.filter(function(w){return !flFilt||w.floor===flFilt;}).forEach(function(w){buildWall3D(w);});
   buildRooms3D(flFilt);
   DATA.items.filter(function(it){return (!flFilt||it.floor===flFilt) && shouldRenderItemInCurrent3DView(it);}).forEach(function(it){buildItem3D(it);});
-  // 斜線の切り口に架かる片流れ屋根。設定が無ければ setbackRoofItems() が空を返す。
-  build3DSetbackRoofs(flFilt);
   finalizeFmpInstancePools();
   buildWinFrames(flFilt);
   if(!flFilt){buildLandscape();}
   sc3.updateMatrixWorld(true);
+  // 斜線の切り口に架かる斜めの板。**削る前に**断面を測る -- 削ったあとでは、
+  // 開いた所そのものが消えていて測れない。設定が無ければ空配列。
+  var _sbSections=setbackSectionsForBuild();
   // 斜線制限で実際に削る。設定が無ければ setbackPlanes() が空を返して何も触らない。
   // 世界座標で切るので matrixWorld を更新したあとに置く。
   applySetbackCut();
+  // 板は断面そのものなので、削り直す必要が無い(面の上に載っているだけである)。
+  build3DSetbackRoofs(_sbSections);
   sc3.updateMatrixWorld(true);
   // 制限面・寸法・(削り残しがあれば)はみ出しの表示。削ったあとなので赤は出ない。
   build3DSetback();
@@ -13943,21 +14295,9 @@ function build3DRoofItem(grp,it,w3,d3){
   }
   if(type==='mono'){
     var rise=Math.tan(pitch)*D;
-    // 斜線由来の屋根が凹みのある輪郭を持つとき(Task 18-3)。面も見付けも作り方は
-    // 下の矩形と同じ(quad / edge / skirtEdge)で、輪郭だけが矩形でない。
-    // setbackOutline を持たない屋根 -- 既存の屋根すべて -- は下の矩形をそのまま通る。
-    if(it.setbackOutline && it.setbackOutline.rects && it.setbackOutline.rects.length){
-      var oh=function(z){ return baseY+Math.tan(pitch)*(z+D/2); };
-      it.setbackOutline.rects.forEach(function(r){
-        quad([r.x0,oh(r.z0),r.z0],[r.x1,oh(r.z0),r.z0],
-             [r.x1,oh(r.z1),r.z1],[r.x0,oh(r.z1),r.z1],mat);
-      });
-      (it.setbackOutline.edges||[]).forEach(function(e){
-        var ea=[e.x0,oh(e.z0),e.z0], eb=[e.x1,oh(e.z1),e.z1];
-        edge(ea,eb); skirtEdge(ea,eb);
-      });
-      return;
-    }
+    // 斜線由来の板はここを通らない(Task 21-1)。斜めの板は制限面との断面から
+    // build3DSetbackRoofSlab が作る -- 断面が三角形の角柱である既存の屋根の
+    // 作りを流用すると、斜めの面の下に直角三角柱がぶら下がるためである。
     var m1=[-W/2,baseY,-D/2], m2=[W/2,baseY,-D/2], m3=[W/2,baseY+rise,D/2], m4=[-W/2,baseY+rise,D/2];
     quad(m1,m2,m3,m4,mat);
     edgeLoop([m1,m2,m3,m4]);

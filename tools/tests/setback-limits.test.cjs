@@ -122,6 +122,7 @@ const THREE = {
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', 'ROOM_OVERLAP_EPS_MM',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', '_ceilingClampWarned',
   'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
+  'SETBACK_SECTION_CELL_MM', 'SETBACK_SECTION_MAX_CELLS', 'SETBACK_VALLEY_LAP_MM',
   'SETBACK_NORTH_COLOR', 'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR',
   'CONTEXT_EXTERIOR_TYPES', '_setbackRoofCache', '_setbackRoofCacheKey',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M'];
@@ -156,7 +157,13 @@ const FNS = [
   'collectSetbackOverhangTris', 'setbackOverhangAudit',
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
   'setbackRoofTemplateItem', 'setbackRoofItemForPlane', 'setbackRoofItems',
-  'setbackRoofsOverRoom', 'build3DSetbackRoofs',
+  'setbackRoofsOverRoom',
+  'setbackWorldToTS', 'setbackSectionTris', 'setbackTriSRangeInBand', 'setbackSectionFootprint',
+  'setbackOtherPlaneClips', 'setbackClipValue', 'setbackRectHasEdge',
+  'setbackClipPolygon', 'setbackClipSegment',
+  'setbackFootprintRects', 'setbackFootprintEdges',
+  'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',
+  'build3DSetbackRoofSlab', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
   'setbackCutGeometry', 'applySetbackCut',
   'build3DRoofItem'
 ];
@@ -584,42 +591,64 @@ test('18-3(最重要): L字でも削り残しはゼロ', () => {
   assert.equal(bad, 0);
 });
 
-test('18-3(最重要): 3D に建つ屋根の面も、凹みの上には1枚も無い', () => {
-  const ctx = makeCtx(lPlan(LOW1_N));
-  run(ctx, 'build3DSetbackRoofs(null)');
-  // 屋根グループの三角形を屋根ローカル(x,z)で読み、平面上の点がその三角形の
-  // 中に入るかを数える。頂点の近さではなく **面が覆っているか** を見る。
-  const tris = plain(run(ctx,
-    'var out=[]; sc3.traverse(function(o){ if(!o.isMesh||!o.geometry||!o.geometry.attributes.position) return;' +
+// 屋根の板は Task 21-1 から **実際に建っているメッシュと制限面の断面**で作る。
+// だから DATA だけでなく、その形の屋根がシーンに建っている状態を作って確かめる。
+// 天端 8100mm の平らな板を、間取りと同じ平面形で置く。
+function addTopSlab(ctx, x0, x1, y0, y1) {
+  const v = [x0, 8.1, y0, x1, 8.1, y0, x1, 8.1, y1, x0, 8.1, y0, x1, 8.1, y1, x0, 8.1, y1];
+  run(ctx, 'var __g=new THREE.BufferGeometry();' +
+    '__g.setAttribute("position",new THREE.Float32BufferAttribute(' + JSON.stringify(v) + ',3));' +
+    'var __m=new THREE.Mesh(__g,null); __m.userData={b:true}; sc3.add(__m);');
+}
+// 板の三角形を世界の (x,z) で読む(板は世界座標で建つ)。
+function slabTrisXZ(ctx) {
+  return plain(run(ctx,
+    'var out=[]; sc3.traverse(function(o){ if(!o.isMesh||!o.userData||!o.userData.setbackRoof) return;' +
     'var p=o.geometry.attributes.position, i;' +
     'for(i=0;i+2<p.count;i+=3) out.push([[p.getX(i),p.getZ(i)],[p.getX(i+1),p.getZ(i+1)],[p.getX(i+2),p.getZ(i+2)]]); }); out;'));
-  assert.ok(tris.length >= 2, '屋根メッシュが建っている: ' + tris.length);
-  function inTri(p, t) {
-    const s = (a, b, c) => (a[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (a[1] - c[1]);
-    const d1 = s(p, t[0], t[1]), d2 = s(p, t[1], t[2]), d3 = s(p, t[2], t[0]);
-    const neg = (d1 < -1e-9) || (d2 < -1e-9) || (d3 < -1e-9);
-    const pos = (d1 > 1e-9) || (d2 > 1e-9) || (d3 > 1e-9);
-    return !(neg && pos);
-  }
-  function coverCount(xMm, yMm) {
-    const lp = plain(run(ctx, 'roofLocalPoint(setbackRoofItems()[0],' + xMm + ',' + yMm + ')'));
+}
+function inTriXZ(p, t) {
+  const s = (a, b, c) => (a[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (a[1] - c[1]);
+  const d1 = s(p, t[0], t[1]), d2 = s(p, t[1], t[2]), d3 = s(p, t[2], t[0]);
+  const neg = (d1 < -1e-9) || (d2 < -1e-9) || (d3 < -1e-9);
+  const pos = (d1 > 1e-9) || (d2 > 1e-9) || (d3 > 1e-9);
+  return !(neg && pos);
+}
+
+test('18-3(最重要): 3D に建つ屋根の面も、凹みの上には1枚も無い', () => {
+  const ctx = makeCtx(lPlan(LOW1_N));
+  addTopSlab(ctx, 0, 6.0, 1.0, 1.8);      // L字の長い腕
+  addTopSlab(ctx, 0, 2.0, 1.8, 4.0);      // L字の短い腕
+  run(ctx, 'build3DSetbackRoofs(setbackSectionsForBuild())');
+  const tris = slabTrisXZ(ctx);
+  assert.ok(tris.length >= 2, '屋根の板が建っている: ' + tris.length);
+  const cover = (xMm, yMm) => {
     let n = 0;
-    tris.forEach((t) => { if (inTri([lp.x, lp.z], t)) n++; });
+    tris.forEach((t) => { if (inTriXZ([xMm / 1000, yMm / 1000], t)) n++; });
     return n;
-  }
-  assert.ok(coverCount(1000, 1200) > 0, '建物のある腕の上には屋根面がある');
-  assert.ok(coverCount(5000, 1200) > 0, '建物のある腕の上には屋根面がある');
-  assert.equal(coverCount(4500, 2220), 0, '凹みの真上に屋根の面が張り出している');
-  assert.equal(coverCount(5500, 2300), 0, '凹みの真上に屋根の面が張り出している');
+  };
+  assert.ok(cover(1000, 1200) > 0, '建物のある腕の上には屋根面がある');
+  assert.ok(cover(5000, 1200) > 0, '建物のある腕の上には屋根面がある');
+  assert.equal(cover(4500, 2220), 0, '凹みの真上に屋根の面が張り出している');
+  assert.equal(cover(5500, 2300), 0, '凹みの真上に屋根の面が張り出している');
 });
 
-test('18-3: 凹みの無い屋根の3Dメッシュは、今までと同じ4隅の1枚である', () => {
+test('18-3: 凹みの無い間取りの板は、外形どおりの1枚の矩形になる', () => {
   const ctx = makeCtx(rectPlan(LOW1_N));
-  run(ctx, 'build3DSetbackRoofs(null)');
-  const top = run(ctx,
-    'var n=0; sc3.traverse(function(o){ if(o.isMesh&&o.geometry&&o.geometry.attributes.position) n++; }); n;');
-  // 片流れ矩形: 屋根面 2三角形(=2メッシュ) + 見付け4辺 × 2三角形 = 10 メッシュ
-  assert.equal(top, 10, '矩形の片流れ屋根が作るメッシュの数が今までと違う: ' + top);
+  addTopSlab(ctx, 0, 6.0, 1.0, 5.0);
+  const fp = run(ctx, 'setbackSectionFootprint(setbackPlanes()[0],setbackPlanes())');
+  assert.ok(fp, '断面が測れる');
+  const rects = plain(run(ctx, 'setbackFootprintRects(setbackSectionFootprint(setbackPlanes()[0],setbackPlanes()))'));
+  assert.equal(rects.length, 1, '凹みが無いのに矩形が ' + rects.length + ' 枚に割れた');
+  // 天端 8100mm が制限 5000+1.25y を超えるのは y<2480。s は北側斜線では -x。
+  const cell = fp.cell;
+  assert.ok(Math.abs(rects[0].tLo - 1000) <= cell, 'tLo=' + rects[0].tLo);
+  assert.ok(Math.abs(rects[0].tHi - 2480) <= cell, 'tHi=' + rects[0].tHi);
+  assert.ok(Math.abs(-rects[0].sHi - 0) <= cell, 'sHi=' + rects[0].sHi);
+  assert.ok(Math.abs(-rects[0].sLo - 6000) <= cell, 'sLo=' + rects[0].sLo);
+  // 上面2三角形＋下面2三角形＋見付け4辺×2三角形 = 12 三角形。角柱は1枚も足さない。
+  run(ctx, 'build3DSetbackRoofs(setbackSectionsForBuild())');
+  assert.equal(slabTrisXZ(ctx).length, 12, '矩形の板が作る三角形の数が違う');
 });
 
 test('18-3: 輪郭の縁は、覆いのある側と無い側の境目にだけ立つ', () => {
