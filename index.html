@@ -5225,7 +5225,7 @@ function siteSetbackPanelHtml(it){
   if(law.hasNorthLimit(cur.zone)){
     h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示（基準高さ '+law.northBaseMm(cur.zone)+'mm ＋ 勾配 '+law.NORTH_SLOPE+'）</label></div>';
   }
-  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ていた部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。壁の上端も同じ屋根で切られます。家具は削りません（制限面から飛び出した家具は置き方の問題として見えます）。寸法は「寸法」ボタンで出し入れします。</div>';
+  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ていた部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。壁の上端も同じ屋根で切られます。家具は削りません（制限面から飛び出した家具は置き方の問題として見えます）。<b>制限面と寸法の表示</b>は「寸法」ボタンで出し入れします（消しても削りは効いたままです）。</div>';
   // 誤解されると危険なので、何を見ていないのかまで書く。「参考です」だけでは
   // 「だいたい合っている」と読まれる。実際には **緩和を1つも見ていないので実際より
   // 厳しく出る**。厳しく出る側だと分かっていることは、必ずそう書く。
@@ -9622,7 +9622,15 @@ function makeSetbackLabelSprite(text,col,worldW){
   sp.userData={b:true,setbackHelper:true};
   return sp;
 }
+// 制限面そのものの半透明な板と縁。**寸法と同じ「↔ 寸法」ボタンに従う** (Task 21-2)。
+// AI レンダに渡すときやスクリーンショットを撮るときに邪魔になるためで、
+// 削る動作はこの表示とは無関係に効く(applySetbackCut は build3DSetback を見ていない)。
 function addSetbackPlaneMesh(grp,pl){
+  var pg=new THREE.Group();
+  pg.userData={b:true,setbackHelper:true,setbackDim:true};
+  pg.visible=!!(typeof ST!=='undefined' && ST && ST.showDim);
+  grp.add(pg);
+  grp=pg;
   var q=setbackPlaneQuadMm(pl);
   var v=q.map(function(p){ return [p.x*U, setbackLimitHeightMmAt(pl,p.x,p.y)*U, p.y*U]; });
   var pos=[], lp=[], i;
@@ -10554,7 +10562,8 @@ function build3DSetback(){
   addSetbackOverhang(grp,planes);
   sc3.add(grp);
 }
-// 「↔ 寸法」ボタンから呼ぶ。3Dを作り直さずに寸法だけ出し入れする。
+// 「↔ 寸法」ボタンから呼ぶ。3Dを作り直さずに制限面と寸法だけ出し入れする。
+// **削りには一切触らない** -- 消えるのは表示だけで、建物は削られたままである。
 function applySetbackDimVisibility(){
   if(!sc3) return;
   var on=!!(typeof ST!=='undefined' && ST && ST.showDim), hit=false;

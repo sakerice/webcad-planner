@@ -146,6 +146,7 @@ const SETBACK_FNS = [
   'collectSetbackOverhangTris',
   'addSetbackLine', 'makeSetbackLabelSprite', 'addSetbackPlaneMesh',
   'addSetbackDims', 'addSetbackOverhang', 'build3DSetback', 'applySetbackDimVisibility',
+  'setbackCutGeometry', 'applySetbackCut',
   'setbackZoneOptionsHtml', 'siteSetbackRaw', 'siteSetbackPanelHtml', 'updateSelectedSetback'
 ];
 
@@ -387,10 +388,49 @@ test('16(最重要): 3Dの寸法は既存の寸法トグル(ST.showDim)にその
   ctx.ST.showDim = true;
   vm.runInContext('applySetbackDimVisibility()', ctx);
   assert.ok(dims.every((d) => d.visible === true), '寸法が戻る');
-  // 面そのものは寸法トグルで消えない
-  const planeMeshes = [];
-  ctx.__sc3.traverse(function (o) { if (o.isMesh) planeMeshes.push(o); });
-  assert.ok(planeMeshes.length > 0 && planeMeshes.every((m) => m.visible === true));
+});
+
+// Task 21-2: 制限面の板と縁も同じトグルに従う。AI レンダやスクリーンショットで
+// 邪魔になるからで、**削りはこの表示とは無関係に効く**。
+test('21-2(最重要): 制限面の板も「↔ 寸法」で消える', () => {
+  const ctx = makeCtx([siteWith({ zone: 'low1', road: false, north: true }), road()], { showDim: true });
+  vm.runInContext('build3DSetback()', ctx);
+  // 板そのものの visible ではなく、**画面に出るか**（先祖まで辿った可視）を見る。
+  function shownMeshes() {
+    const out = [];
+    (function walk(o, vis) {
+      const v = vis && o.visible !== false;
+      if (o.isMesh) out.push({ mesh: o, shown: v });
+      (o.children || []).forEach((c) => walk(c, v));
+    }(ctx.__sc3, true));
+    return out;
+  }
+  assert.ok(shownMeshes().length > 0, '制限面の板が出来ている');
+  assert.ok(shownMeshes().every((m) => m.shown), '寸法ONで面が出ている');
+  ctx.ST.showDim = false;
+  vm.runInContext('applySetbackDimVisibility()', ctx);
+  assert.ok(shownMeshes().every((m) => !m.shown), '寸法OFFでも面が残っている');
+  ctx.ST.showDim = true;
+  vm.runInContext('applySetbackDimVisibility()', ctx);
+  assert.ok(shownMeshes().every((m) => m.shown), '寸法ONに戻しても面が戻らない');
+});
+
+test('21-2(最重要): 寸法OFFでも削りは効く（消えるのは表示だけ）', () => {
+  const ctx = makeCtx([siteWith({ zone: 'low1', road: false, north: true }), road()], { showDim: false });
+  // 制限面より遥かに上へ出ている板を建て、削ってから頂点を読む。
+  vm.runInContext('var m=new THREE.Mesh(new THREE.BufferGeometry(),null);' +
+    'm.geometry.setAttribute("position",new THREE.Float32BufferAttribute(' +
+    '[0,30,1, 6,30,1, 6,30,5, 0,30,1, 6,30,5, 0,30,5],3));' +
+    'm.userData={b:true}; sc3.add(m);', ctx);
+  vm.runInContext('build3DSetback()', ctx);
+  const res = vm.runInContext('applySetbackCut()', ctx);
+  assert.ok(res && res.cut > 0, '寸法OFFなのに1つも削っていない: ' + JSON.stringify(res));
+  const over = vm.runInContext(
+    'var co=setbackPlanes().map(setbackPlaneWorldCoef);' +
+    'var g=sc3.children[0].geometry, p=g.attributes.position, n=0, i, k, c;' +
+    'for(i=0;i<p.count;i++) for(k=0;k<co.length;k++){ c=co[k];' +
+    'if(p.getY(i)-(c.a*p.getX(i)+c.b*p.getZ(i)+c.c)>SETBACK_CUT_EPS_M) n++; } n;', ctx);
+  assert.equal(over, 0, '寸法OFFのとき削り残しが出た');
 });
 
 test('16: 寸法トグルが切れた状態で作り直しても、寸法は消えたまま', () => {
