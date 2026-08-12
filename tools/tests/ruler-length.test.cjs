@@ -1,4 +1,5 @@
-// Task 21-4: 定規ツールの数値をあとから入れ直せることを、**実行して**確かめる。
+// Task 21-4 / 21-5: 定規ツールの数値をあとから入れ直せること、
+// そして寸法の表記に角丸四角の下敷きが付かないことを、**実行して**確かめる。
 //
 // grep ではない。index.html から関数を切り出して node:vm で走らせ、
 // 定規アイテムの座標と、描画で呼ばれた canvas の操作を読む。
@@ -41,7 +42,9 @@ function topLevelVar(name) {
 }
 
 const VARS = ['RULER_THICKNESS_MM', 'RULER_MIN_LEN_MM', 'RULER_MAX_LEN_MM'];
-const FNS = ['rulerLengthMm', 'rulerEndPointsMm', 'updateSelectedRulerLength'];
+const FNS = ['rulerLengthMm', 'rulerEndPointsMm', 'updateSelectedRulerLength',
+  'isFiniteCanvasValue', 'isFiniteCanvasText', 'drawPlainDimLabel', 'drawDimLabel',
+  'rulerTickStepMm', 'drawRuler2d'];
 
 function makeCtx(item, opts) {
   const o = opts || {};
@@ -139,4 +142,25 @@ test('21-4: ロックした定規は数値でも動かない', () => {
   run(h, 'updateSelectedRulerLength(9000)');
   assert.equal(Math.round(run(h, 'rulerLengthMm(ST.selected)')), 3000);
   assert.equal(h.saved.length, 0);
+});
+
+// ══ 21-5 寸法の表記に下敷きを付けない ═════════════════════════════════
+test('21-5(最重要): 定規の寸法値は角丸四角で囲まない', () => {
+  const it = ruler(1000, 2000, 4000, 2000);
+  const h = makeCtx(it);
+  run(h, 'drawRuler2d(ST.selected,0.05,false)');
+  ['roundRect', 'fillRect', 'strokeRect', 'rect'].forEach((bad) => {
+    assert.equal(h.ops.indexOf(bad), -1, bad + ' で下敷きを描いている: ' + h.ops.join(','));
+  });
+  assert.ok(h.ops.indexOf('fillText') >= 0, '寸法値そのものが出ていない');
+  assert.ok(h.ops.indexOf('strokeText') >= 0, '縁取りが無いと図面の線の上で読めない');
+});
+
+test('21-5: 下敷きの無い寸法値は、数でない値では何も描かない', () => {
+  const it = ruler(1000, 2000, 4000, 2000);
+  const h = makeCtx(it);
+  run(h, 'drawPlainDimLabel(NaN,0,"1000mm","#2f80ed")');
+  assert.equal(h.ops.indexOf('fillText'), -1, 'NaN の座標に描いた');
+  run(h, 'drawPlainDimLabel(0,0,"NaNmm","#2f80ed")');
+  assert.equal(h.ops.indexOf('fillText'), -1, 'NaN を含む文字を描いた');
 });

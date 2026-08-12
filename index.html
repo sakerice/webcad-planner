@@ -7500,7 +7500,10 @@ function drawRuler2d(it,sc,preview){
     ctx.stroke();
   }
   var labelOffset=Math.max(18,Math.min(28,180*sc));
-  drawDimLabel(0,-labelOffset,Math.round(len)+'mm',preview?'rgba(47,128,237,0.72)':(selected?'rgba(233,69,96,0.9)':'rgba(47,128,237,0.84)'),'#fff');
+  // 角丸四角で囲まない（デザインルールに無い表記・Task 21-5）。読めるようにするのは
+  // 囲みではなく縁取りで、線と同じ色の文字をそのまま寸法線の外側へ置く。
+  drawPlainDimLabel(0,-labelOffset,Math.round(len)+'mm',
+    preview?'rgba(47,128,237,0.85)':(selected?'#e94560':'#2f80ed'));
   ctx.restore();
 }
 function drawWalkRoute2d(it,sc,preview){
@@ -9696,17 +9699,19 @@ function addSetbackLine(grp,col,a,b,noDepth){
   grp.add(ln);
   return ln;
 }
+// 寸法の表記に **角丸四角の下敷きは付けない**（デザインルールに無い表記・Task 21-5）。
+// 空の上でも暗い屋根の上でも読めるようにするのは、囲みではなく文字の縁取りである。
 function makeSetbackLabelSprite(text,col,worldW){
   var hex='#'+('000000'+col.toString(16)).slice(-6);
   var c=document.createElement('canvas');
   c.width=256; c.height=64;
   var g=c.getContext('2d');
-  g.fillStyle='rgba(255,255,255,0.93)';
-  g.strokeStyle=hex; g.lineWidth=3;
-  if(g.roundRect){ g.beginPath(); g.roundRect(3,7,250,50,10); g.fill(); g.stroke(); }
-  else { g.fillRect(3,7,250,50); g.strokeRect(3,7,250,50); }
   g.font='bold 28px sans-serif';
   g.textAlign='center'; g.textBaseline='middle';
+  g.lineJoin='round'; g.miterLimit=2;
+  g.lineWidth=6;
+  g.strokeStyle='rgba(255,255,255,0.92)';
+  g.strokeText(text,128,33);
   g.fillStyle=hex;
   g.fillText(text,128,33);
   var tex=new THREE.CanvasTexture(c);
@@ -9750,30 +9755,120 @@ function addSetbackPlaneMesh(grp,pl){
   line.userData={b:true,setbackHelper:true};
   grp.add(line);
 }
+var SETBACK_DIM_CLEAR_MM=900;   // 建物の外形からどれだけ外へ逃がすか
+// 寸法を出す s 座標（境界線に沿った位置）。**建物の平面の外形より外**へ置く。
+// 中ほどに置くと、寸法線も文字も建物に被って読めないし、レンダの邪魔になる
+// (Task 21-5)。敷地の余白が広いほうへ逃がす。建物が読めないときだけ中ほど。
+function setbackDimSMm(pl){
+  var b=(typeof setbackBuildingPlanBoundsMm==='function')?setbackBuildingPlanBoundsMm():null;
+  if(!b) return (pl.siteSMin+pl.siteSMax)/2;
+  var lo=Infinity, hi=-Infinity;
+  [{x:b.minX,y:b.minY},{x:b.maxX,y:b.minY},{x:b.maxX,y:b.maxY},{x:b.minX,y:b.maxY}]
+    .forEach(function(c){
+      var s=pl.px*c.x+pl.py*c.y;
+      if(s<lo) lo=s;
+      if(s>hi) hi=s;
+    });
+  return ((pl.siteSMax-hi)>=(lo-pl.siteSMin))?(hi+SETBACK_DIM_CLEAR_MM):(lo-SETBACK_DIM_CLEAR_MM);
+}
 // 寸法は既存の「↔ 寸法」ボタン(ST.showDim)に従う。新しいボタンは作らない。
 function addSetbackDims(grp,pl){
   var col=(pl.kind==='north')?SETBACK_NORTH_COLOR:SETBACK_ROAD_COLOR;
-  var sMid=(pl.siteSMin+pl.siteSMax)/2;
+  var sMid=setbackDimSMm(pl);
   var dg=new THREE.Group();
   dg.userData={b:true,setbackHelper:true,setbackDim:true};
   dg.visible=!!(typeof ST!=='undefined' && ST && ST.showDim);
   var org=setbackPointAt(pl,0,sMid);
+  // 文字は「そこにある位置(anchor)」を覚えておき、画面の上で建物に被るときだけ
+  // 外へ逃がす(layoutSetbackDimLabels)。逃がした分は引き出し線で結ぶ。
+  function label(text,x,y,z){
+    var sp=makeSetbackLabelSprite(text,col,2.0);
+    sp.position.set(x,y,z);
+    sp.userData.setbackDimAnchor=[x,y,z];
+    dg.add(sp);
+    sp.userData.setbackDimLead=addSetbackLine(dg,col,[x,y,z],[x,y,z],true);
+    sp.userData.setbackDimLead.visible=false;
+  }
   setbackDimStations(pl).forEach(function(st){
     var p=setbackPointAt(pl,st.t,sMid);
     var hMm=setbackLimitHeightMmAt(pl,p.x,p.y);
     addSetbackLine(dg,col,[p.x*U,0,p.y*U],[p.x*U,hMm*U,p.y*U],true);
-    var hs=makeSetbackLabelSprite(
-      (st.base?'基準高さ ':'制限高さ ')+Math.round(hMm)+'mm',col,2.0);
-    hs.position.set(p.x*U,hMm*U+0.34,p.y*U);
-    dg.add(hs);
+    label((st.base?'基準高さ ':'制限高さ ')+Math.round(hMm)+'mm',p.x*U,hMm*U+0.34,p.y*U);
     if(st.t>1){
       addSetbackLine(dg,col,[org.x*U,0.02,org.y*U],[p.x*U,0.02,p.y*U],true);
-      var ls=makeSetbackLabelSprite('水平距離 '+Math.round(st.t)+'mm',col,2.0);
-      ls.position.set((org.x+p.x)/2*U,0.34,(org.y+p.y)/2*U);
-      dg.add(ls);
+      label('水平距離 '+Math.round(st.t)+'mm',(org.x+p.x)/2*U,0.34,(org.y+p.y)/2*U);
     }
   });
   grp.add(dg);
+}
+// 建物の世界バウンディングボックス。毎フレーム測り直すと 900 個のメッシュを
+// 舐めることになるので、シーンを作り直したときだけ測る。
+var _setbackBuildingBox=null;
+function measureSetbackBuildingBox(){
+  _setbackBuildingBox=null;
+  if(!sc3 || typeof THREE==='undefined' || !THREE.Box3) return null;
+  var box=new THREE.Box3(), any=false;
+  setbackSubjectMeshes().forEach(function(o){
+    var geo=o.geometry;
+    if(!geo) return;
+    if(!geo.boundingBox) geo.computeBoundingBox();
+    if(!geo.boundingBox) return;
+    var bb=geo.boundingBox.clone().applyMatrix4(o.matrixWorld);
+    if(!any){ box.copy(bb); any=true; }
+    else box.union(bb);
+  });
+  if(any) _setbackBuildingBox=box;
+  return _setbackBuildingBox;
+}
+var SETBACK_DIM_LABEL_GAP_NDC=0.055;  // 建物の輪郭から画面上でどれだけ離すか
+var SETBACK_DIM_LABEL_MAX_M=14;       // 逃がす距離の上限(遠くへ飛ばさない)
+// 寸法の文字を **画面の上で建物の輪郭の外**へ逃がす (Task 21-5)。
+// 平面の上で建物の外へ置いても、視点によっては建物の手前や奥に重なって見える。
+// 見る向きは毎フレーム変わるので、逃がす向きもここで毎フレーム決める。
+function layoutSetbackDimLabels(cam){
+  if(!sc3 || !cam || !_setbackBuildingBox) return;
+  var tmp=new THREE.Vector3(), view=new THREE.Vector3();
+  function inFront(x,y,z){
+    view.set(x,y,z).applyMatrix4(cam.matrixWorldInverse);
+    return view.z < -0.05;
+  }
+  function ndcX(x,y,z){ return tmp.set(x,y,z).project(cam).x; }
+  var b=_setbackBuildingBox, i, j, k, x0=Infinity, x1=-Infinity;
+  for(i=0;i<2;i++) for(j=0;j<2;j++) for(k=0;k<2;k++){
+    var cx=i?b.max.x:b.min.x, cy=j?b.max.y:b.min.y, cz=k?b.max.z:b.min.z;
+    if(!inFront(cx,cy,cz)) return;   // 建物が視野の後ろに掛かっている: 逃がし先を測れない
+    var nx=ndcX(cx,cy,cz);
+    if(nx<x0) x0=nx;
+    if(nx>x1) x1=nx;
+  }
+  // カメラの右向き(世界)。文字はこの向きに動かす = 画面では真横に動く。
+  var right=new THREE.Vector3(1,0,0).applyQuaternion(cam.quaternion);
+  sc3.traverse(function(o){
+    var a=o.userData && o.userData.setbackDimAnchor;
+    if(!a) return;
+    var lead=o.userData.setbackDimLead;
+    if(!inFront(a[0],a[1],a[2])){ o.position.set(a[0],a[1],a[2]); if(lead) lead.visible=false; return; }
+    var here=ndcX(a[0],a[1],a[2]);
+    var target=null;
+    if(here>x0-SETBACK_DIM_LABEL_GAP_NDC && here<x1+SETBACK_DIM_LABEL_GAP_NDC){
+      target=((here-x0)<(x1-here))?(x0-SETBACK_DIM_LABEL_GAP_NDC):(x1+SETBACK_DIM_LABEL_GAP_NDC);
+    }
+    if(target===null){ o.position.set(a[0],a[1],a[2]); if(lead) lead.visible=false; return; }
+    // 1m 動かすと画面の x がどれだけ動くかを測り、必要な距離を1回で解く。
+    var d=ndcX(a[0]+right.x,a[1]+right.y,a[2]+right.z)-here;
+    if(!(Math.abs(d)>1e-6)){ o.position.set(a[0],a[1],a[2]); if(lead) lead.visible=false; return; }
+    var m=(target-here)/d;
+    if(m>SETBACK_DIM_LABEL_MAX_M) m=SETBACK_DIM_LABEL_MAX_M;
+    if(m<-SETBACK_DIM_LABEL_MAX_M) m=-SETBACK_DIM_LABEL_MAX_M;
+    o.position.set(a[0]+right.x*m,a[1]+right.y*m,a[2]+right.z*m);
+    if(lead){
+      var pa=lead.geometry.attributes.position;
+      pa.array[0]=a[0]; pa.array[1]=a[1]; pa.array[2]=a[2];
+      pa.array[3]=o.position.x; pa.array[4]=o.position.y; pa.array[5]=o.position.z;
+      pa.needsUpdate=true;
+      lead.visible=true;
+    }
+  });
 }
 // 斜線制限の対象メッシュ。はみ出しの計測も、実際の削りも、同じ集合を見る。
 function setbackSubjectMeshes(){
@@ -10646,8 +10741,10 @@ function applySetbackCut(){
 }
 function build3DSetback(){
   if(!sc3 || isInt) return;
+  _setbackBuildingBox=null;
   var planes=setbackPlanes();
   if(!planes.length) return;
+  measureSetbackBuildingBox();
   var grp=new THREE.Group();
   grp.userData={b:true,setbackHelper:true};
   planes.forEach(function(pl){
@@ -17801,6 +17898,8 @@ function anyWasdActive(){
 }
 function render3DNow(){
   if(!ren||!sc3||!camExt) return;
+  // 斜線の寸法の文字を、この視点で建物に被らない位置へ逃がしてから描く。
+  if(typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(camExt);
   if(composer){
     composer.passes[0].camera=camExt;
     for(var i=1;i<composer.passes.length;i++){
@@ -19181,6 +19280,23 @@ function isFiniteCanvasText(text){
   return text !== '' && !/NaN|Infinity|-Infinity/.test(String(text));
 }
 
+// 下敷きの無い寸法値（定規ツール・Task 21-5）。角丸四角で囲む代わりに、
+// 白い縁取りだけで図面の線から浮かせる。JIS の寸法表記も囲みは持たない。
+function drawPlainDimLabel(cx, cy, text, color){
+  text = String(text == null ? '' : text);
+  if(!isFiniteCanvasValue(cx) || !isFiniteCanvasValue(cy) || !isFiniteCanvasText(text)) return;
+  var fsz = Math.max(9, Math.min(13, ST.zoom*5));
+  ctx.save();
+  ctx.font = 'bold '+fsz+'px "Noto Sans JP",sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.strokeText(text, cx, cy+1);
+  ctx.fillStyle = color || '#2f80ed';
+  ctx.fillText(text, cx, cy+1);
+  ctx.restore();
+}
 function drawDimLabel(cx, cy, text, bgColor, textColor){
   text = String(text == null ? '' : text);
   if(!isFiniteCanvasValue(cx) || !isFiniteCanvasValue(cy) || !isFiniteCanvasText(text)) return;
@@ -24158,6 +24274,7 @@ updateMobileShiftButton();
       renderNow:function(){
         if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
         var cam=getActive3DCamera();
+        if(typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(cam);
         if(typeof composer!=='undefined' && composer) composer.render();
         else ren.render(sc3,cam);
       },

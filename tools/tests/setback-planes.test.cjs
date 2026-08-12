@@ -118,16 +118,26 @@ const THREE = {
   DoubleSide: 2, SRGBColorSpace: 'srgb'
 };
 
+// 何が描かれたかを記録する canvas。角丸四角の下敷きが付いていないことを
+// 「呼ばれた操作」で確かめるために使う(Task 21-5)。
+let LAST_LABEL_OPS = null;
 function fakeCanvas() {
+  const ops = [];
+  const rec = (name) => function () { ops.push(name); };
   const ctx = {
     fillStyle: '', strokeStyle: '', lineWidth: 0, font: '', textAlign: '', textBaseline: '',
-    fillRect: function () {}, strokeRect: function () {}, fillText: function () {},
-    beginPath: function () {}, fill: function () {}, stroke: function () {}
+    lineJoin: '', miterLimit: 0,
+    fillRect: rec('fillRect'), strokeRect: rec('strokeRect'), rect: rec('rect'),
+    roundRect: rec('roundRect'),
+    fillText: rec('fillText'), strokeText: rec('strokeText'),
+    beginPath: rec('beginPath'), fill: rec('fill'), stroke: rec('stroke')
   };
+  LAST_LABEL_OPS = ops;
   return { width: 0, height: 0, getContext: function () { return ctx; } };
 }
 
-const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
+const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_DIM_CLEAR_MM',
+  '_setbackBuildingBox', 'SETBACK_DIM_LABEL_GAP_NDC', 'SETBACK_DIM_LABEL_MAX_M', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'SETBACK_NORTH_COLOR',
   'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR', 'CONTEXT_EXTERIOR_TYPES'];
 const SETBACK_FNS = [
@@ -144,6 +154,8 @@ const SETBACK_FNS = [
   'setbackTriF', 'setbackLerpVert', 'clipTriangleAboveSetbackPlane',
   'isSetbackSubjectMesh', 'setbackSubjectMeshes', 'setbackLiveCoefsForMesh',
   'collectSetbackOverhangTris',
+  'setbackBuildingPlanBoundsMm', 'setbackDimSMm',
+  'measureSetbackBuildingBox', 'layoutSetbackDimLabels',
   'addSetbackLine', 'makeSetbackLabelSprite', 'addSetbackPlaneMesh',
   'addSetbackDims', 'addSetbackOverhang', 'build3DSetback', 'applySetbackDimVisibility',
   'setbackCutGeometry', 'applySetbackCut',
@@ -542,6 +554,46 @@ test('21-3: パネルは「手入力か既定か」をその場で言う', () =>
   const hB = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctxB);
   assert.ok(hB.indexOf('（手入力）') >= 0, hB.slice(0, 400));
   assert.ok(/value="6200"/.test(hB), '欄に手入力の値が出ていない');
+});
+
+// ── 6c. 寸法の表記と置き場所（Task 21-5）────────────────────────────
+test('21-5(最重要): 3Dの寸法に角丸四角の下敷きを付けない', () => {
+  const it = siteWith({ zone: 'low1', road: false, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  vm.runInContext('makeSetbackLabelSprite("制限高さ 8000mm",0x3f7fd0,2.0)', ctx);
+  const ops = LAST_LABEL_OPS;
+  assert.ok(ops && ops.length, '何も描いていない');
+  ['roundRect', 'fillRect', 'strokeRect', 'rect'].forEach((bad) => {
+    assert.equal(ops.indexOf(bad), -1, bad + ' で下敷きを描いている: ' + ops.join(','));
+  });
+  assert.ok(ops.indexOf('fillText') >= 0, '文字を描いていない');
+  assert.ok(ops.indexOf('strokeText') >= 0, '縁取りが無いと地の上で読めない');
+});
+
+test('21-5(最重要): 3Dの寸法は建物の平面の外形より外へ出る', () => {
+  // 敷地いっぱいではない建物を置き、寸法の s 座標が建物の外形の外にあることを見る。
+  const it = siteWith({ zone: 'low1', road: false, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  vm.runInContext('DATA.rooms=[{id:"a",floor:1,x:0,y:0,w:4000,d:3000}];', ctx);
+  const b = vm.runInContext('JSON.stringify(setbackBuildingPlanBoundsMm())', ctx);
+  assert.ok(b, '建物の平面範囲が読める');
+  const bb = JSON.parse(b);
+  const s = vm.runInContext('setbackDimSMm(setbackPlanes()[0])', ctx);
+  // 北側斜線では s = -x（makeSetbackPlane の px,py）。建物は x 0..4000 なので
+  // s は -4000..0 の帯に入る。寸法はその外側でなければならない。
+  const lo = Math.min(-bb.maxX, -bb.minX), hi = Math.max(-bb.maxX, -bb.minX);
+  assert.ok(s > hi || s < lo, '寸法の位置 ' + s + ' が建物の外形 ' + lo + '..' + hi + ' に被っている');
+  assert.ok(Math.min(Math.abs(s - hi), Math.abs(s - lo)) >= 900,
+    '外形から離れていない: ' + s);
+});
+
+test('21-5: 建物が無ければ寸法は敷地の中ほどへ落ちる（出さないのではなく置き場所だけの話）', () => {
+  const it = siteWith({ zone: 'low1', road: false, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  vm.runInContext('DATA.rooms=[]; DATA.items=DATA.items.filter(function(o){return o.type!=="roof";});', ctx);
+  const pl = vm.runInContext('setbackPlanes()[0]', ctx);
+  const s = vm.runInContext('setbackDimSMm(setbackPlanes()[0])', ctx);
+  assert.ok(Math.abs(s - (pl.siteSMin + pl.siteSMax) / 2) < 1e-6, s);
 });
 
 // ── 7. 三角形の切断（はみ出しの土台）────────────────────────────────────
