@@ -5570,7 +5570,8 @@ function updateProps(){
   }
   if(it.type==='ruler'){
     html += '<div class="ph">定規</div>';
-    html += '<div class="pr"><div class="pl">測定長さ</div><input class="pi" type="text" value="'+Math.round(rulerLengthMm(it))+'mm" readonly></div>';
+    html += '<div class="pr"><div class="pl">測定長さ (mm)</div><input class="pi" type="number" min="'+RULER_MIN_LEN_MM+'" max="'+RULER_MAX_LEN_MM+'" step="10" value="'+Math.round(rulerLengthMm(it))+'" onchange="updateSelectedRulerLength(this.value)"></div>';
+    html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">置いたあとでも数値で入れ直せます。1点目は動かず、2点目だけが同じ向きに伸び縮みします</div>';
     html += '<div class="pr"><div class="pl">補助線の長さ(mm)</div><input class="pi" type="number" step="100" value="'+Math.round(Number(it.extLen)||0)+'" onchange="updateSelectedProp(\'extLen\',+this.value)"></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">両端から測定対象へ垂直に伸びる補助線。負の値で反対側に伸びます</div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
@@ -7712,6 +7713,34 @@ function makeRulerItemFromPoints(x1,y1,x2,y2){
   var midX=(x1+x2)/2, midY=(y1+y2)/2;
   var rot=Math.atan2(dy,dx)*180/Math.PI;
   return mkItem('ruler',midX-len/2,midY-RULER_THICKNESS_MM/2,rot,ST.floor,len,RULER_THICKNESS_MM);
+}
+// 定規の両端(平面 mm)。置くときの1点目が a、2点目が b。
+// makeRulerItemFromPoints の逆で、中心 ± 向き×長さ/2 である。
+function rulerEndPointsMm(it){
+  var len=rulerLengthMm(it);
+  var a=(it.rot||0)*Math.PI/180;
+  var ux=Math.cos(a), uy=Math.sin(a);
+  var cx=it.x+len/2, cy=it.y+(Number(it.d)||RULER_THICKNESS_MM)/2;
+  return {a:{x:cx-ux*len/2,y:cy-uy*len/2}, b:{x:cx+ux*len/2,y:cy+uy*len/2}, ux:ux, uy:uy};
+}
+var RULER_MIN_LEN_MM=1;
+var RULER_MAX_LEN_MM=200000;
+// 置いたあとで測定長さを入れ直す (Task 21-4)。**1点目を動かさず**、2点目だけを
+// 同じ向きに伸び縮みさせる(定規は「ここから何mm」を測る道具なので、掴んだ端は動かない)。
+function updateSelectedRulerLength(v){
+  var it=ST.selected;
+  if(!it || it.type!=='ruler') return;
+  if(isObjectLocked(it)){ updateProps(); return; }
+  var len=Number(v);
+  if(!isFinite(len)){ updateProps(); return; }
+  len=Math.max(RULER_MIN_LEN_MM,Math.min(RULER_MAX_LEN_MM,Math.round(len)));
+  var ends=rulerEndPointsMm(it);
+  saveState();
+  it.w=len;
+  it.x=ends.a.x+ends.ux*len/2-len/2;
+  it.y=ends.a.y+ends.uy*len/2-(Number(it.d)||RULER_THICKNESS_MM)/2;
+  draw2d();
+  updateProps();
 }
 function makeWalkRouteItemFromPathPoints(points){
   var shape=makeWalkRouteShapeFromWorldPoints(points,ST.floor,'#10b981',WALK_DEFAULT_SPEED_MPS);
