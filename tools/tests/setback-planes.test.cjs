@@ -127,13 +127,13 @@ function fakeCanvas() {
   return { width: 0, height: 0, getContext: function () { return ctx; } };
 }
 
-const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
+const SETBACK_VARS = ['U', 'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'SETBACK_NORTH_COLOR',
   'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR', 'CONTEXT_EXTERIOR_TYPES'];
 const SETBACK_FNS = [
   'escHtml', 'isFiniteCanvasValue', 'getObjBounds',
   'isContextExteriorItemType', 'isGroundLevelItemType',
-  'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
+  'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
@@ -147,7 +147,8 @@ const SETBACK_FNS = [
   'addSetbackLine', 'makeSetbackLabelSprite', 'addSetbackPlaneMesh',
   'addSetbackDims', 'addSetbackOverhang', 'build3DSetback', 'applySetbackDimVisibility',
   'setbackCutGeometry', 'applySetbackCut',
-  'setbackZoneOptionsHtml', 'siteSetbackRaw', 'siteSetbackPanelHtml', 'updateSelectedSetback'
+  'setbackZoneOptionsHtml', 'siteSetbackRaw', 'siteSetbackEffective', 'setbackCustomMark',
+  'siteSetbackPanelHtml', 'updateSelectedSetback'
 ];
 
 function makeCtx(items, opts) {
@@ -442,6 +443,107 @@ test('16: 寸法トグルが切れた状態で作り直しても、寸法は消�
   assert.ok(dims.every((d) => d.visible === false));
 });
 
+// ── 6b. 数値の手入力（Task 21-3）─────────────────────────────────────
+// 用途地域から既定が入るのは良いが、**基準高さも勾配も自治体によって違う**。
+// 手で入れた数がそのまま制限面に効くこと、壊れた数は効かないこと、
+// 用途地域を選び直したら既定へ戻ること、を実行して確かめる。
+test('21-3(最重要): 北側斜線の基準高さを手で入れると、制限面がその高さから立ち上がる', () => {
+  const it = siteWith({ zone: 'low1', road: false, north: true, northBaseMm: 7500 });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const pl = vm.runInContext('setbackPlanes()[0]', ctx);
+  assert.equal(pl.kind, 'north');
+  assert.equal(pl.baseMm, 7500, '手入力の基準高さが効いていない');
+  // 条文から独立に: 境界から 4000mm の位置の制限 = 7500 + 1.25*4000
+  const h = vm.runInContext('setbackLimitHeightMmAt(setbackPlanes()[0],0,' + (SITE_MIN_Y + 4000) + ')', ctx);
+  assert.ok(Math.abs(h - (7500 + 1.25 * 4000)) < 1e-6, '制限高さ ' + h);
+});
+
+test('21-3(最重要): 勾配を手で入れると、制限面の傾きがその勾配になる', () => {
+  const it = siteWith({ zone: 'low1', road: false, north: true, northSlope: 0.6 });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const pl = vm.runInContext('setbackPlanes()[0]', ctx);
+  assert.equal(pl.slope, 0.6);
+  const a = vm.runInContext('setbackLimitHeightMmAt(setbackPlanes()[0],0,' + (SITE_MIN_Y + 1000) + ')', ctx);
+  const b = vm.runInContext('setbackLimitHeightMmAt(setbackPlanes()[0],0,' + (SITE_MIN_Y + 3000) + ')', ctx);
+  assert.ok(Math.abs((b - a) / 2000 - 0.6) < 1e-9, '傾き ' + ((b - a) / 2000));
+});
+
+test('21-3: 道路斜線の勾配も手で入れられる', () => {
+  const it = siteWith({ zone: 'low1', road: true, north: false, roadSlope: 1.5 });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const pls = vm.runInContext('setbackPlanes()', ctx);
+  assert.ok(pls.length > 0);
+  pls.forEach((p) => { assert.equal(p.slope, 1.5); });
+});
+
+test('21-3(最重要): 手入力が無ければ、面は条文どおりの既定のまま（保存済みプランが動かない）', () => {
+  const it = siteWith({ zone: 'low1', road: true, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const pls = vm.runInContext('setbackPlanes()', ctx);
+  const north = pls.filter((p) => p.kind === 'north')[0];
+  const rd = pls.filter((p) => p.kind === 'road')[0];
+  assert.equal(north.baseMm, 5000);
+  assert.equal(north.slope, 1.25);
+  assert.equal(rd.slope, 1.25);
+});
+
+test('21-3(最重要): 範囲の外・数でない手入力は効かず、既定へ落ちる', () => {
+  [{ northBaseMm: -1 }, { northBaseMm: 999999 }, { northBaseMm: 'abc' }, { northBaseMm: NaN }]
+    .forEach((extra) => {
+      const it = siteWith(Object.assign({ zone: 'low1', road: false, north: true }, extra));
+      const ctx = makeCtx([it, road()], { selected: it });
+      assert.equal(vm.runInContext('setbackPlanes()[0].baseMm', ctx), 5000,
+        JSON.stringify(extra) + ' が効いてしまった');
+    });
+  [{ northSlope: 0 }, { northSlope: 99 }, { northSlope: null }].forEach((extra) => {
+    const it = siteWith(Object.assign({ zone: 'low1', road: false, north: true }, extra));
+    const ctx = makeCtx([it, road()], { selected: it });
+    assert.equal(vm.runInContext('setbackPlanes()[0].slope', ctx), 1.25,
+      JSON.stringify(extra) + ' が効いてしまった');
+  });
+});
+
+test('21-3(最重要): 用途地域を選び直すと手入力は消え、その地域の既定へ戻る', () => {
+  const it = siteWith({ zone: 'low1', road: true, north: true,
+    northBaseMm: 7500, northSlope: 0.6, roadSlope: 0.8 });
+  const ctx = makeCtx([it, road()], { selected: it });
+  assert.equal(vm.runInContext('setbackPlanes().filter(function(p){return p.kind==="north";})[0].baseMm', ctx), 7500);
+  vm.runInContext('updateSelectedSetback("zone","mid1")', ctx);
+  const s = vm.runInContext('JSON.stringify(DATA.items[0].setback)', ctx);
+  const o = JSON.parse(s);
+  assert.equal(o.zone, 'mid1');
+  assert.equal(o.northBaseMm, undefined, '手入力が残っている: ' + s);
+  assert.equal(o.northSlope, undefined, '手入力が残っている: ' + s);
+  assert.equal(o.roadSlope, undefined, '手入力が残っている: ' + s);
+  const north = vm.runInContext('setbackPlanes().filter(function(p){return p.kind==="north";})[0]', ctx);
+  assert.equal(north.baseMm, 10000, '中高層住専の既定 10000mm へ戻っていない');
+  assert.equal(north.slope, 1.25);
+});
+
+test('21-3: 手入力しない限り setback に余計な鍵を書かない（保存内容を増やさない）', () => {
+  const it = siteWith({ zone: 'low1', road: false, north: false });
+  const ctx = makeCtx([it, road()], { selected: it });
+  vm.runInContext('updateSelectedSetback("north",true)', ctx);
+  const o = JSON.parse(vm.runInContext('JSON.stringify(DATA.items[0].setback)', ctx));
+  assert.deepEqual(Object.keys(o).sort(), ['north', 'road', 'zone']);
+  vm.runInContext('updateSelectedSetback("northBaseMm","6200")', ctx);
+  const o2 = JSON.parse(vm.runInContext('JSON.stringify(DATA.items[0].setback)', ctx));
+  assert.deepEqual(Object.keys(o2).sort(), ['north', 'northBaseMm', 'road', 'zone']);
+  assert.equal(o2.northBaseMm, 6200);
+});
+
+test('21-3: パネルは「手入力か既定か」をその場で言う', () => {
+  const a = siteWith({ zone: 'low1', road: false, north: true });
+  const ctxA = makeCtx([a, road()], { selected: a });
+  const hA = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctxA);
+  assert.ok(hA.indexOf('（用途地域の既定）') >= 0, hA.slice(0, 400));
+  const b = siteWith({ zone: 'low1', road: false, north: true, northBaseMm: 6200 });
+  const ctxB = makeCtx([b, road()], { selected: b });
+  const hB = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctxB);
+  assert.ok(hB.indexOf('（手入力）') >= 0, hB.slice(0, 400));
+  assert.ok(/value="6200"/.test(hB), '欄に手入力の値が出ていない');
+});
+
 // ── 7. 三角形の切断（はみ出しの土台）────────────────────────────────────
 function triArea(t) {
   const ax = t[3] - t[0], ay = t[4] - t[1], az = t[5] - t[2];
@@ -588,11 +690,13 @@ test('16(最重要): 北側斜線の無い用途地域では、北側斜線の�
     assert.ok(h.indexOf('道路斜線を表示') >= 0, z + ' でも道路斜線は出る');
   });
 });
-test('16: 中高層住専では基準高さ 10000mm が欄に出る', () => {
+test('16: 中高層住専では基準高さ 10000mm が欄に入る', () => {
   const it = siteWith({ zone: 'mid2', road: false, north: false });
   const ctx = makeCtx([it, road()], { selected: it });
   const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
-  assert.ok(h.indexOf('基準高さ 10000mm') >= 0, h);
+  assert.ok(h.indexOf('北側斜線の基準高さ') >= 0, h);
+  assert.ok(/value="10000"/.test(h), '欄に 10000 が入っていない: ' + h);
+  assert.ok(h.indexOf('中高層住専 10000mm') >= 0, '条文の既定が書かれていない');
 });
 test('16: 道路が無ければ道路斜線のスイッチも出さない', () => {
   const it = siteWith({ zone: 'low1', road: false, north: false });

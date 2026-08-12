@@ -200,9 +200,10 @@ test('19-1: 角度は 0〜360 に畳まれる（負・360超・小数）', () =>
 
 // ══ 19-2 斜線制限はプランの方位を読む ═════════════════════════════════
 
-const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM'];
+const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM',
+  'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX'];
 const SETBACK_FNS = [
-  'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
+  'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
   'setbackPlanesForSite', 'makeSetbackPlane', 'setbackDistanceMm', 'setbackLimitHeightMmAt',

@@ -110,7 +110,7 @@ const THREE = {
 };
 
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H',
-  'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
+  'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'SETBACK_SECTION_CELL_MM', 'SETBACK_SECTION_MAX_CELLS', 'SETBACK_VALLEY_LAP_MM',
   'CONTEXT_EXTERIOR_TYPES', '_setbackRoofCache', '_setbackRoofCacheKey'];
 
@@ -120,7 +120,7 @@ const FNS = [
   'wallFullHeightM', 'isPositiveNumber',
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',
-  'setbackLawApi', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
+  'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',

@@ -5192,8 +5192,26 @@ function siteSetbackRaw(it){
   var s=(it && it.setback && typeof it.setback==='object')?it.setback:null;
   var law=setbackLawApi();
   var zone=(s && law && law.zone(s.zone))?s.zone:'';
-  return {zone:zone, road:!!(s&&s.road), north:!!(s&&s.north)};
+  return {zone:zone, road:!!(s&&s.road), north:!!(s&&s.north),
+    northBaseMm:(s&&s.northBaseMm!==undefined)?s.northBaseMm:null,
+    northSlope:(s&&s.northSlope!==undefined)?s.northSlope:null,
+    roadSlope:(s&&s.roadSlope!==undefined)?s.roadSlope:null};
 }
+// 用途地域の既定値と、手入力があればその値。パネルの入力欄に出す「今効いている数」。
+function siteSetbackEffective(it){
+  var law=setbackLawApi();
+  var cur=siteSetbackRaw(it);
+  var z=law?law.zone(cur.zone):null;
+  var nb=setbackOverrideNum(cur.northBaseMm,SETBACK_BASE_MIN_MM,SETBACK_BASE_MAX_MM);
+  var ns=setbackOverrideNum(cur.northSlope,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
+  var rs=setbackOverrideNum(cur.roadSlope,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
+  return {
+    northBaseMm:(nb===null)?((z&&law.northBaseMm(z.id))||0):nb, northBaseCustom:nb!==null,
+    northSlope:(ns===null)?(law?law.NORTH_SLOPE:1.25):ns, northSlopeCustom:ns!==null,
+    roadSlope:(rs===null)?((z&&law.roadSlope(z.id))||1.25):rs, roadSlopeCustom:rs!==null
+  };
+}
+function setbackCustomMark(on){ return on?'<b>（手入力）</b>':'（用途地域の既定）'; }
 function siteSetbackPanelHtml(it){
   var law=setbackLawApi();
   if(!law) return '';
@@ -5209,8 +5227,11 @@ function siteSetbackPanelHtml(it){
   // 出ていない道路の斜線が効いていないように読める）。
   var roads=setbackRoadItems(it).filter(function(r){ return setbackRoadWidthMm(r)>0; });
   var road=roads.length?roads[0]:null, width=setbackRoadWidthMm(road);
+  var eff=siteSetbackEffective(it);
   if(road && width>0){
-    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線を表示（勾配 '+law.roadSlope(cur.zone)+'）</label></div>';
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線を表示</label></div>';
+    h+='<div class="pr"><div class="pl">道路斜線の勾配 1:</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.roadSlope+'" onchange="updateSelectedSetback(\'roadSlope\',this.value)"></div>';
+    h+='<div class="lock-status-note">'+setbackCustomMark(eff.roadSlopeCustom)+'　条文の既定は住居系 '+law.ROAD_SLOPE_RESIDENTIAL+'・それ以外 '+law.ROAD_SLOPE_OTHER+'。</div>';
     h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" value="'+
       roads.map(function(r){ return Math.round(setbackRoadWidthMm(r))+'mm'; }).join(' / ')+
       '（道路アイテムの奥行 D'+(roads.length>1?'・前面道路 '+roads.length+'本':'')+'）" readonly></div>';
@@ -5223,8 +5244,16 @@ function siteSetbackPanelHtml(it){
   }
   // 北側斜線は低層住専・中高層住専にしか無い。無い用途地域では欄ごと出さない。
   if(law.hasNorthLimit(cur.zone)){
-    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示（基準高さ '+law.northBaseMm(cur.zone)+'mm ＋ 勾配 '+law.NORTH_SLOPE+'）</label></div>';
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示</label></div>';
+    h+='<div class="pr"><div class="pl">北側斜線の基準高さ (mm)</div><input class="pi" type="number" min="'+SETBACK_BASE_MIN_MM+'" max="'+SETBACK_BASE_MAX_MM+'" step="100" value="'+eff.northBaseMm+'" onchange="updateSelectedSetback(\'northBaseMm\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">北側斜線の勾配 1:</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.northSlope+'" onchange="updateSelectedSetback(\'northSlope\',this.value)"></div>';
+    h+='<div class="lock-status-note">基準高さ '+setbackCustomMark(eff.northBaseCustom)+'／勾配 '+setbackCustomMark(eff.northSlopeCustom)+
+      '　条文の既定は低層住専 '+law.NORTH_BASE_LOW_MM+'mm・中高層住専 '+law.NORTH_BASE_MID_MM+'mm、勾配 '+law.NORTH_SLOPE+'。</div>';
   }
+  h+='<div class="lock-status-note">基準高さと勾配は<b>自治体によって違う</b>ので手で入れ直せます。'+
+    '<b>用途地域を選び直すと、手で入れた数は消えてその地域の既定へ戻ります</b>'+
+    '（用途地域が既定の出どころなので、選び直したあとも前の数が残っていると、'+
+    '画面に出ている地域と効いている数が食い違うため）。</div>';
   h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ていた部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。壁の上端も同じ屋根で切られます。家具は削りません（制限面から飛び出した家具は置き方の問題として見えます）。<b>制限面と寸法の表示</b>は「寸法」ボタンで出し入れします（消しても削りは効いたままです）。</div>';
   // 誤解されると危険なので、何を見ていないのかまで書く。「参考です」だけでは
   // 「だいたい合っている」と読まれる。実際には **緩和を1つも見ていないので実際より
@@ -5243,13 +5272,28 @@ function updateSelectedSetback(key,val){
   if(!it || it.type!=='site-rect') return;
   var law=setbackLawApi();
   var cur=siteSetbackRaw(it);
-  if(key==='zone') cur.zone=(law && law.zone(val))?val:'';
+  if(key==='zone'){
+    cur.zone=(law && law.zone(val))?val:'';
+    // Task 21-3: 用途地域は既定値の出どころである。選び直したら手入力は消し、
+    // その地域の既定へ戻す。残すと「画面に出ている地域」と「効いている数」が
+    // 食い違ったまま気付けない。パネルにもそう書いてある。
+    cur.northBaseMm=null; cur.northSlope=null; cur.roadSlope=null;
+  }
   else if(key==='road') cur.road=!!val;
   else if(key==='north') cur.north=!!val;
+  else if(key==='northBaseMm') cur.northBaseMm=setbackOverrideNum(val,SETBACK_BASE_MIN_MM,SETBACK_BASE_MAX_MM);
+  else if(key==='northSlope') cur.northSlope=setbackOverrideNum(val,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
+  else if(key==='roadSlope') cur.roadSlope=setbackOverrideNum(val,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
   // 効かない用途地域の北側斜線は書き残さない。使われない値が後で効きはじめるのが最悪。
   if(!cur.zone || !law || !law.hasNorthLimit(cur.zone)) cur.north=false;
   if(!cur.zone){ updateSelectedProp('setback',null); return; }
-  updateSelectedProp('setback',{zone:cur.zone, road:cur.road, north:cur.north});
+  var next={zone:cur.zone, road:cur.road, north:cur.north};
+  // 上書きが無いときは鍵そのものを書かない。**斜線を触っていないプランの保存内容を
+  // 1バイトも増やさない**ためで、既定値を書き込むと条文が変わったとき追随できなくなる。
+  if(cur.northBaseMm!==null && cur.northBaseMm!==undefined) next.northBaseMm=cur.northBaseMm;
+  if(cur.northSlope!==null && cur.northSlope!==undefined) next.northSlope=cur.northSlope;
+  if(cur.roadSlope!==null && cur.roadSlope!==undefined) next.roadSlope=cur.roadSlope;
+  updateSelectedProp('setback',next);
 }
 function updateSelectedCeilingType(v){
   var room=ST.selected;
@@ -9295,6 +9339,19 @@ function setbackLawApi(){
 // 保存済みプランは setback を持たない。持たなければ null を返し、以降は何も起きない。
 // 「効かない用途地域の北側斜線」はここで黙って落とす（UI にも出さないが、
 //  古い保存データが持っていた場合の受け口としても効かせない）。
+// 手入力の上書き値。範囲の外・数でないものは **無かったことにして既定へ戻す**
+// (壊れた値を黙って効かせない)。Task 21-3。
+function setbackOverrideNum(v,lo,hi){
+  if(v===undefined || v===null || v==='') return null;
+  var n=Number(v);
+  if(typeof n!=='number' || !isFinite(n)) return null;
+  if(n<lo || n>hi) return null;
+  return n;
+}
+var SETBACK_BASE_MIN_MM=0;
+var SETBACK_BASE_MAX_MM=50000;
+var SETBACK_SLOPE_MIN=0.1;
+var SETBACK_SLOPE_MAX=10;
 function siteSetbackConfig(it){
   var law=setbackLawApi();
   if(!law || !it || it.type!=='site-rect') return null;
@@ -9305,7 +9362,16 @@ function siteSetbackConfig(it){
   var road=!!s.road;
   var north=!!s.north && law.hasNorthLimit(z.id);
   if(!road && !north) return null;
-  return {zone:z.id, road:road, north:north};
+  // 用途地域から入る既定値。**地域によって数値が違う**ので手で上書きできる。
+  // 上書きが無ければ条文どおりの値がそのまま出る(保存済みのプランは1つも動かない)。
+  var nb=setbackOverrideNum(s.northBaseMm,SETBACK_BASE_MIN_MM,SETBACK_BASE_MAX_MM);
+  var ns=setbackOverrideNum(s.northSlope,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
+  var rs=setbackOverrideNum(s.roadSlope,SETBACK_SLOPE_MIN,SETBACK_SLOPE_MAX);
+  return {zone:z.id, road:road, north:north,
+    northBaseMm:(nb===null)?law.northBaseMm(z.id):nb,
+    northSlope:(ns===null)?law.NORTH_SLOPE:ns,
+    roadSlope:(rs===null)?law.roadSlope(z.id):rs,
+    northBaseCustom:nb!==null, northSlopeCustom:ns!==null, roadSlopeCustom:rs!==null};
 }
 // 斜線制限を設定してある敷地。**複数あれば全部**。
 //
@@ -9447,7 +9513,7 @@ function setbackPlanesForSite(site){
     var nnx=-nv.x+0, nny=-nv.y+0;   // +0 は -0 を残さないため（保存値・比較で嘘をつく）
     var d0=Infinity;
     cs.forEach(function(p){ d0=Math.min(d0,nnx*p.x+nny*p.y); });
-    out.push(makeSetbackPlane('north',cfg.zone,law.northBaseMm(cfg.zone),law.NORTH_SLOPE,
+    out.push(makeSetbackPlane('north',cfg.zone,cfg.northBaseMm,cfg.northSlope,
       nnx,nny,d0,sb));
   }
   if(cfg.road){
@@ -9483,7 +9549,7 @@ function setbackPlanesForSite(site){
       kept.push(m);
     });
     kept.forEach(function(m){
-      out.push(makeSetbackPlane('road',cfg.zone,0,law.roadSlope(cfg.zone),
+      out.push(makeSetbackPlane('road',cfg.zone,0,cfg.roadSlope,
         m.nx,m.ny,m.d0,sb));
     });
   }
