@@ -23881,6 +23881,194 @@ var JISDRAW=(function(){
     return bottomDimSvg(xs,wallMaxY,LW)+leftDimSvg(ys,wallMinX,LW);
   }
 
+  // ─── 斜線制限を平面図に出す (Task 23) ─────────────────────────────────
+  // 平面図に出すものは **2つあり、別物である**。
+  //   (1) 制限そのもの … 斜線が立ち上がる**線**。北側境界線、道路の反対側の境界線。
+  //       これは面ではない。平面図では敷地・道路の境界線の慣習どおり
+  //       **細い一点鎖線**で引き、「この線から斜線がかかる」ことを注記で言う。
+  //   (2) 制限で削られた結果 … 切り口に架かった屋根の**伏せ(輪郭)と勾配の向き**。
+  //       切断面より上にある物なので**破線**。勾配は寸(10に対する立ち上がり)で書く。
+  // 判定も形も **既にある関数から取る**。setbackPlanes(制限面)・setbackCutSpanMm
+  // (削られた範囲)・setbackPointAt((t,s)→平面座標)。法の算術をここに書き写さない。
+  //
+  // **斜線制限を設定していないプランでは setbackPlanes() が空配列を返し、
+  //   この節の関数はすべて空文字列を返す = 平面図の SVG は1バイトも変わらない。**
+  // 図面だけを切り出して動かす場面(テスト・部分読み込み)では斜線制限の関数が
+  // 存在しないこともあるので、その場合も「何も出さない」に倒す。
+  function setbackPlanesForDrawing(){
+    if(typeof setbackPlanes!=='function') return [];
+    var pls=setbackPlanes();
+    return (pls&&pls.length)?pls:[];
+  }
+  // 境界線の線種: 一点鎖線(長線・点・長線…)。JIS の敷地/道路境界線の線種であり、
+  // 屋根伏せの破線とも、寸法線の実線とも見分けが付く。
+  function setbackChainDash(LW){
+    return (LW.text*2.2)+' '+(LW.text*0.55)+' '+(LW.text*0.28)+' '+(LW.text*0.55);
+  }
+  // 切断面より上にある物(屋根)は破線。既存の建具なし開口の破線と同じ考え方。
+  function setbackRoofDash(LW){ return (LW.text*0.9)+' '+(LW.text*0.5); }
+  // 勾配の表記。日本の屋根伏図は「10 に対する立ち上がり」を寸で書く(4寸勾配 = 0.4)。
+  // 斜線の勾配 1.25 は 12.5寸、1.5 は 15寸。分数(N分の1)ではなく寸を採るのは、
+  // 屋根の勾配として読む欄だからである(制限そのものの勾配は境界線の注記側に出す)。
+  function setbackSunText(slope){
+    return String(Math.round(slope*10*100)/100)+'寸';
+  }
+  function setbackSlopeText(slope){
+    return String(Math.round(slope*1000)/1000);
+  }
+  function setbackKindLabel(pl){ return pl.kind==='north' ? '北側斜線' : '道路斜線'; }
+  // 境界線の注記。「どの境界線か」と「そこから何がかかるか」を1行で言う。
+  function setbackLineLabelText(pl){
+    if(pl.kind==='north'){
+      return '北側境界線（北側斜線 基準'+Math.round(pl.baseMm)+' 勾配'+setbackSlopeText(pl.slope)+'）';
+    }
+    return '道路反対側境界線（道路斜線 勾配'+setbackSlopeText(pl.slope)+'）';
+  }
+  // 直線 p+d*u を用紙(view)の矩形で切る(Liang-Barsky)。返すのは媒介変数の範囲。
+  // **用紙に1点もかからない線は null** を返し、呼び出し側は何も描かない
+  // (図面の外へ伸びる線や、枠の外へ出る注記を作らないため)。
+  function clipLineToRect(px,py,dx,dy,rect){
+    var u0=-Infinity, u1=Infinity, i, r;
+    var ps=[-dx,dx,-dy,dy];
+    var qs=[px-rect.minX, rect.maxX-px, py-rect.minY, rect.maxY-py];
+    for(i=0;i<4;i++){
+      if(Math.abs(ps[i])<1e-12){ if(qs[i]<0) return null; continue; }
+      r=qs[i]/ps[i];
+      if(ps[i]<0){ if(r>u1) return null; if(r>u0) u0=r; }
+      else { if(r<u0) return null; if(r<u1) u1=r; }
+    }
+    if(!(u1>u0)) return null;
+    return {u0:u0,u1:u1};
+  }
+  function rectContains(rect,x,y,pad){
+    return x>=rect.minX+pad && x<=rect.maxX-pad && y>=rect.minY+pad && y<=rect.maxY-pad;
+  }
+  // 図面の文字は上下が裏返らない向きで読ませる(JIS の文字方向)。
+  // 線に沿わせる角度を [-90,90) へ畳むと、どちらの向きの線でも正立したまま読める。
+  // **90 ではなく -90 に倒す**のは、縦書きになる文字を「下から上へ読む」向きに
+  // 揃えるため。既存の左側寸法(dimValueText の rotate(-90))と同じ向きである。
+  // 方位を回すと三角関数の誤差で「ちょうど90度」が 89.999…度 として出てくる。
+  // 素直に 90 で切ると、その一本だけ向きが裏返る。1e-9 の隙間を見て同じ側へ倒す。
+  function uprightDeg(deg){
+    var a=deg%180;                 // (-180,180)
+    if(a<-90) a+=180;              // [-90,90]
+    if(a>=90-1e-9) a-=180;         // 90(と誤差の 89.999…)は -90 側へ
+    if(a<-90) a=-90;
+    return a;
+  }
+  function svgLine(a,b,LW,dash){
+    return '<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y
+      +'" stroke="#000" stroke-width="'+LW.thin+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  }
+  // (1) 制限そのもの。t=0 の直線 = 斜線が立ち上がる境界線をそのまま引く。
+  function setbackLimitLinesToSvg(view,LW){
+    var pls=setbackPlanesForDrawing();
+    if(!pls.length) return '';
+    var out='';
+    pls.forEach(function(pl){
+      var p0=setbackPointAt(pl,0,0);            // t=0 の線上の1点(法線に沿って d0 の位置)
+      var seg=clipLineToRect(p0.x,p0.y,pl.px,pl.py,view);
+      if(!seg) return;                          // 用紙に乗らない境界線は描かない
+      var a={x:p0.x+pl.px*seg.u0, y:p0.y+pl.py*seg.u0};
+      var b={x:p0.x+pl.px*seg.u1, y:p0.y+pl.py*seg.u1};
+      out+=svgLine(a,b,LW,setbackChainDash(LW));
+      var text=setbackLineLabelText(pl);
+      var fs=LW.text*0.8;
+      // 用紙に見えている長さより注記が長ければ、注記だけ落とす(はみ出させない)。
+      if(estRoomLabelWidth(text,fs)>(seg.u1-seg.u0)) return;
+      var mx=(a.x+b.x)/2, my=(a.y+b.y)/2, off=fs*0.9;
+      // 既定は敷地の外側(法線の逆向き)。そこが枠の外なら敷地の側へ寄せる。
+      var tx=mx-pl.nx*off, ty=my-pl.ny*off;
+      if(!rectContains(view,tx,ty,fs)){ tx=mx+pl.nx*off; ty=my+pl.ny*off; }
+      var ang=uprightDeg(Math.atan2(pl.py,pl.px)*180/Math.PI);
+      out+='<text x="'+tx+'" y="'+ty+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif"'
+        +' font-size="'+fs+'" fill="#000"'+(ang?' transform="rotate('+ang+' '+tx+' '+ty+')"':'')
+        +'>'+escSvgText(text)+'</text>';
+    });
+    return out;
+  }
+  // (2) 削られた結果に架かった屋根の伏せ。輪郭は setbackCutSpanMm が返す
+  // 「削る範囲」そのもの(= setbackRoofItemForPlane が屋根を作るのに使っている範囲)を
+  // (t,s) から平面座標へ戻して引く。屋根の形をここで作り直さない。
+  function setbackRoofOutlineSvg(pl,span,LW){
+    var dash=setbackRoofDash(LW), out='';
+    if(span.edges && span.edges.length){
+      // edges は輪郭(片側だけが覆われているセル境界)。凹んだ間取りでも外形だけが出る。
+      span.edges.forEach(function(e){
+        out+=svgLine(setbackPointAt(pl,e.tLo,e.sLo),setbackPointAt(pl,e.tHi,e.sHi),LW,dash);
+      });
+    } else {
+      // 輪郭が細切れになりすぎて外接矩形へ落ちた場合(SETBACK_ROOF_MAX_RECTS)。
+      var cs=[[span.tLo,span.sLo],[span.tHi,span.sLo],[span.tHi,span.sHi],[span.tLo,span.sHi]];
+      out+='<polygon points="'+cs.map(function(c){
+        var p=setbackPointAt(pl,c[0],c[1]); return p.x+','+p.y;
+      }).join(' ')+'" fill="none" stroke="#000" stroke-width="'+LW.thin
+        +'" stroke-dasharray="'+dash+'"/>';
+    }
+    return out;
+  }
+  // 勾配の向き。屋根面の高さは 基準高さ+勾配*t (t=境界からの水平距離) なので、
+  // **t が減る向き = 境界へ向かう向き**が下り勾配である。矢印はその向きへ向ける。
+  // (北側斜線なら真北へ、道路斜線なら道路へ下る。3D で見えている片流れと同じ向き。)
+  function setbackRoofSlopeArrowSvg(pl,span,view,LW){
+    var sMid=(span.sLo+span.sHi)/2, tMid=(span.tLo+span.tHi)/2;
+    var len=Math.min((span.tHi-span.tLo)*0.7, LW.text*9);
+    if(!(len>0)) return '';
+    var tail=setbackPointAt(pl,tMid+len/2,sMid);   // 高い側(水上)
+    var tip=setbackPointAt(pl,tMid-len/2,sMid);    // 低い側(水下) = 境界の側
+    var dx=(tip.x-tail.x)/len, dy=(tip.y-tail.y)/len;
+    var ah=Math.min(len*0.3,LW.text*1.3), aw=ah*0.42;
+    var bx=tip.x-dx*ah, by=tip.y-dy*ah;            // 矢じりの根元
+    var out='<line x1="'+tail.x+'" y1="'+tail.y+'" x2="'+bx+'" y2="'+by
+      +'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+    out+='<polygon points="'+tip.x+','+tip.y+' '+(bx-dy*aw)+','+(by+dx*aw)+' '
+      +(bx+dy*aw)+','+(by-dx*aw)+'" fill="#000"/>';
+    var text=setbackSunText(pl.slope)+'勾配（'+setbackKindLabel(pl)+'）';
+    // 勾配の注記は **屋根の低い縁と境界線のあいだの空き** に、境界線と平行に置く。
+    // そこは建物の外であり、部屋名にも寸法にも当たらない唯一の帯である。しかも
+    // 「この屋根はこの境界へ下る」ことが図の上でつながって読める。
+    // 建物の上へ重ねないのは、この図面がもともと採っている流儀である
+    // (寸法も注記も建物の外の余白に出す)。
+    var fs=LW.text*0.8, minFs=LW.text*0.35;   // 下限は部屋名と同じ「判読できる最小」
+    var band=span.tLo;                        // 境界線から屋根の低い縁までの空き
+    if(band<fs*1.6) fs=band/1.6;              // 帯に収まるまで字を小さくする
+    // 1:200 のような粗い縮尺では、帯が数mmしか無く読める字が入らないことがある。
+    // そのときは **注記を出さない**(矢印だけを残す)。勾配の数値そのものは境界線の
+    // 注記(勾配1.25)にも書いてあるので、図面から数字が消えることはない。
+    if(fs<minFs) return out;
+    var p=setbackPointAt(pl,band/2,sMid);
+    var cx0=p.x, cy0=p.y;
+    var ang=uprightDeg(Math.atan2(pl.py,pl.px)*180/Math.PI);   // 境界線に沿う向き
+    // 枠に入らない注記は出さない。中心だけでなく **文字の両端** で見る。
+    var halfW=estRoomLabelWidth(text,fs)/2;
+    if(!rectContains(view,cx0+pl.px*halfW,cy0+pl.py*halfW,fs)) return out;
+    if(!rectContains(view,cx0-pl.px*halfW,cy0-pl.py*halfW,fs)) return out;
+    // <text> の y は**ベースライン**。字の中心を狙った位置へ置くため、回した字の
+    // 上向き(rotate(ang) が (0,-1) を写した向き)ぶんだけベースラインを下げる。
+    var ar=ang*Math.PI/180;
+    var tx=cx0-Math.sin(ar)*fs*0.35, ty=cy0+Math.cos(ar)*fs*0.35;
+    out+='<text x="'+tx+'" y="'+ty+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif"'
+      +' font-size="'+fs+'" fill="#000"'+(ang?' transform="rotate('+ang+' '+tx+' '+ty+')"':'')
+      +'>'+escSvgText(text)+'</text>';
+    return out;
+  }
+  // 屋根伏せは **最上階の平面図にだけ** 出す(その階の頭を斜線が削っている。
+  // 下の階の平面図に屋根の輪郭を重ねると、その階の切断面に無い物が混ざる)。
+  function setbackRoofPlanToSvg(floor,view,LW){
+    var pls=setbackPlanesForDrawing();
+    if(!pls.length) return '';
+    if(floorHasUpper(floor)) return '';
+    if(typeof setbackCutSpanMm!=='function') return '';
+    var out='';
+    pls.forEach(function(pl){
+      var span=setbackCutSpanMm(pl);
+      if(!span) return;                 // その面では1mmも削られていない = 屋根は架からない
+      out+=setbackRoofOutlineSvg(pl,span,LW);
+      out+=setbackRoofSlopeArrowSvg(pl,span,view,LW);
+    });
+    return out;
+  }
+
   // 方位記号: 右上に円+矢印+「N」。矢印は **プランに保存されている方位ぶん回す**。
   // 立面図の軸も平面図の向きも建物に正対したままなので、回さないと
   // 「上が真北」と読める図面になり、振れた敷地でそのまま嘘になる。
@@ -23935,8 +24123,12 @@ var JISDRAW=(function(){
     var label=floor+'F 平面図';
     // 部屋ラベル・設備・階段は壁の黒塗りより後(手前)に描画し、壁と重なっても隠れないようにする。
     // 寸法線は建物外側の余白部分のみに描くため、壁や開口と重なる心配はない。
+    // 斜線制限の境界線と屋根伏せは、切断面より上/敷地側の情報なので壁より手前に置く
+    // (黒塗りの壁に隠されない)。**斜線制限が無いプランでは両方とも空文字列**なので、
+    // ここに足しても出力は1バイトも変わらない。
     return svgOpen(view,opts)+dimensionsToSvg(floor,LW)+wallsToSvg(floor,LW)+openingsToSvg(floor,LW)
       +roomLabelsToSvg(floor,LW)+fixturesToSvg(floor,LW)+stairsToSvg(floor,LW)
+      +setbackLimitLinesToSvg(view,LW)+setbackRoofPlanToSvg(floor,view,LW)
       +northMarkSvg(view,LW)+titleBlockSvg(label,scaleNum,view,LW)+svgClose();
   }
 
