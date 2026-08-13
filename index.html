@@ -4205,6 +4205,63 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs){
   if(lim!==null&&best>lim-fy) best=lim-fy;
   return best;
 }
+// ── 壁の上端の折れ線を1か所で決める (Task 24-1) ────────────────────────
+// 壁の頭を削る条件は「勾配天井に接しているか」「外皮に面しているか(下限)」
+// 「頭を押さえる屋根はどれか」の3つである。**3D と図面はこの1つを通す。**
+// 判定を2か所に置くと、どちらかを直した日に立面図と3Dが黙って食い違う。
+// 削りの対象でない壁では null を返し、呼び出し側は従来の「まっすぐな上辺」の
+// 枝をそのまま通る(= 勾配も斜線も使っていないプランは1頂点も動かない)。
+// isOuter は既に求めてあれば渡す(buildWall3D は extSpans から持っている)。
+function wallTopCutEnv(w,isOuter){
+  if(!wallTouchesSlopedCeiling(w)) return null;
+  if(isOuter===undefined)
+    isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
+  return {
+    minH:isOuter?wallFullHeightM(w&&w.floor):undefined,
+    roofs:wallLimitingRoofs(w)
+  };
+}
+// 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
+// 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
+// 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
+var WALL_TOP_SAMPLE_STEP_M=0.06;
+// 同じ直線に乗っている点を落とす(高さの差が 0.5mm 未満)。図面の点列を短くする
+// ためだけのもので、0.5mm は立面図が既に採っている段差の判定と同じ値である。
+function wallTopProfileSimplify(pts){
+  var out=[pts[0]], i, a, b, c, span, mid;
+  for(i=1;i<pts.length-1;i++){
+    a=out[out.length-1]; b=pts[i]; c=pts[i+1];
+    span=c[0]-a[0];
+    mid=span>1e-9 ? a[1]+(c[1]-a[1])*((b[0]-a[0])/span) : b[1];
+    if(Math.abs(b[1]-mid)>=0.0005) out.push(b);
+  }
+  out.push(pts[pts.length-1]);
+  return out;
+}
+// 壁の上端の折れ線。[[t(0..1), 高さm], ...] を t 昇順で返す。高さはその階の
+// floorBaseY 基準で、壁自身の高さ(wallDisplayHeightM)は超えない -- 3D の
+// slopedTopAt と同じ頭打ちである。
+// **実際には削られていない壁では null**。立面図はこれを受け取って上端を引く。
+function wallTopProfileM(w){
+  var env=wallTopCutEnv(w);
+  if(!env) return null;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var lenMm=Math.sqrt(dx*dx+dy*dy);
+  if(lenMm<1) return null;
+  var fullH=wallDisplayHeightM(w);
+  var n=Math.max(2,Math.min(400,Math.ceil((lenMm*U)/WALL_TOP_SAMPLE_STEP_M)));
+  var pts=[], flat=true, i, t, h;
+  for(i=0;i<=n;i++){
+    t=i/n;
+    h=wallTopHeightAtM(w,t,fullH,env.minH,env.roofs);
+    if(h>fullH) h=fullH;
+    if(h<0.001) h=0.001;
+    pts.push([t,h]);
+    if(Math.abs(h-fullH)>=0.0005) flat=false;
+  }
+  if(flat) return null;   // 頭を押さえる物が無かった = 従来のまっすぐな上辺
+  return wallTopProfileSimplify(pts);
+}
 // 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
 // 最大値を採る。低い方に合わせて切ると高い側の部屋に穴が開くので、最大値以外は
 // 選べない。ただし片側でも部屋に面していない壁(=外皮に面する壁)は階高まで伸ばす:
@@ -13412,19 +13469,14 @@ function buildWall3D(w){
   var wallH=wallDisplayHeightM(w);
   var baseNormalX=-dirZ, baseNormalZ=dirX;
   // 上辺を勾配に沿わせるのは、勾配天井を宣言した部屋に接している壁だけ。
-  // 宣言していないプランでは slopedTop が false のまま = ジオメトリは1頂点も動かない。
-  var slopedTop=wallTouchesSlopedCeiling(w);
-  // 外壁は**屋根が無いところでは**下げない。外皮の高さ(階高)を下限にして、
-  // 上へ(切妻の妻壁のように)しか動かさない。過去の実測で、下げた部屋の上で
-  // ファサードに水平のスリットが貫通した(Task 2b)。
-  var slopedTopMinH=isOuter?wallFullHeightM(fl):undefined;
-  // 屋根がある位置では、内外の区別なく屋根の下面が上端になる(Task 15)。
-  // 壁1本につき一度だけ集める。
-  var slopedTopRoofs=slopedTop?wallLimitingRoofs(w):null;
-  // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
-  // 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
-  // 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
-  var WALL_TOP_SAMPLE_STEP_M=0.06;
+  // 宣言していないプランでは topEnv が null のまま = ジオメトリは1頂点も動かない。
+  // 判定・下限・押さえる屋根は wallTopCutEnv が持つ(立面図も同じそれを通る)。
+  // 外壁は**屋根が無いところでは**下げない(外皮の高さが下限。Task 2b)、
+  // 屋根がある位置では屋根の下面が上端になる(Task 15) -- どちらもそこにある。
+  var topEnv=wallTopCutEnv(w,isOuter);
+  var slopedTop=!!topEnv;
+  var slopedTopMinH=topEnv?topEnv.minH:undefined;
+  var slopedTopRoofs=topEnv?topEnv.roofs:null;
   // さらに上へ少しだけ伸ばして、刻みの食い違いで壁と天井のあいだにスリットが
   // 開く可能性を消す。上へ出た分は天井面に隠れる(下から見えるのは天井の側)。
   var WALL_TOP_OVERSHOOT_M=0.015;
@@ -23000,6 +23052,19 @@ var JISDRAW=(function(){
   // base/top = 世界高さ(mm、floorBaseYを基準に上向き正)。floorBaseY/wallDisplayHeightMはm返しなので
   //   ÷U(=×1000)でmmに変換する点に注意。
   // depth = dp軸(視点に近いほど大)への両端点射影の最大値。その壁が「どれだけ手前にあるか」を表す代表値。
+  // 壁の上端の折れ線を、この方位の u 軸へ載せ替える(mm)。高さは **3D の壁と同じ**
+  // wallTopProfileM から取る。図面側で高さを数え直すと、どちらかを直した日に
+  // 立面図と3Dが食い違う。削られていない壁では null = 従来のまっすぐな上端。
+  // 図面だけを切り出して動かす場面(テスト・部分読み込み)では関数が無いこともある
+  // ので、その場合も従来の枝へ倒す。
+  function elevWallTopPoints(w,u1,u2,base){
+    if(typeof wallTopProfileM!=='function') return null;
+    var prof=wallTopProfileM(w);
+    if(!prof||prof.length<2) return null;
+    var pts=prof.map(function(p){ return [u1+(u2-u1)*p[0], base+p[1]/U]; });
+    if(pts[pts.length-1][0]<pts[0][0]) pts.reverse();   // u 昇順にそろえる
+    return pts;
+  }
   function elevWallRects(dir){
     var ax=ELEV_AXES[dir];
     var rects=[];
@@ -23009,22 +23074,53 @@ var JISDRAW=(function(){
       var f=w.floor||1;
       var base=floorBaseY(f)/U;
       var top=base+wallDisplayHeightM(w)/U;
-      rects.push({uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,depth:Math.max(d1,d2),floor:f,wall:w});
+      var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,
+        depth:Math.max(d1,d2),depthMin:Math.min(d1,d2),floor:f,wall:w};
+      var pts=elevWallTopPoints(w,u1,u2,base);
+      if(pts){
+        r.topPts=pts;
+        // top は「その壁のいちばん高い所」。高さ寸法(軒高)と図の高さ範囲がここを見る。
+        r.top=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
+      }
+      rects.push(r);
     });
     return rects;
   }
-
-  // 区間(uA→uB)の値(top/base)を隣接区間と結合しながらステップ状の点列にする。
-  // 直前区間と同値(0.5mm未満の差)なら右端だけ延長し、異なる値なら縦の段差点を追加する。
-  function elevStepPoints(segs,field){
-    var out=[];
-    segs.forEach(function(s){
-      var y=s[field];
-      if(out.length && Math.abs(out[out.length-1][1]-y)<0.5){
-        out[out.length-1]=[s.uB,y];
-      } else {
-        out.push([s.uA,y]); out.push([s.uB,y]);
+  // 折れ線を持つ壁の、u 位置における上端。持たない壁(削られていない壁)は
+  // これまでどおり一定値を返す。
+  function elevTopAtU(r,u){
+    var pts=r.topPts, i, a, b;
+    if(!pts) return r.top;
+    if(u<=pts[0][0]) return pts[0][1];
+    for(i=1;i<pts.length;i++){
+      a=pts[i-1]; b=pts[i];
+      if(u<=b[0]){
+        if(b[0]-a[0]<1e-9) return Math.max(a[1],b[1]);
+        return a[1]+(b[1]-a[1])*((u-a[0])/(b[0]-a[0]));
       }
+    }
+    return pts[pts.length-1][1];
+  }
+
+  // 区間(uA→uB)の値を隣接区間と結合しながら点列にする。値は区間の左端(fieldA)と
+  // 右端(fieldB)の2つを持つ: 削られた壁の上端は区間の中で傾くからである。
+  // 平らな区間が続くあいだは右端だけを延長する(段差の無い所に点を置かない)。
+  // 上端が水平な壁だけのプランでは fieldA===fieldB===従来の値なので、
+  // 出来る点列は変更前と1バイトも変わらない。
+  function elevStepPoints(segs,fieldA,fieldB){
+    var out=[], prevFlat=false;
+    segs.forEach(function(s){
+      var yA=s[fieldA], yB=s[fieldB];
+      var flat=Math.abs(yB-yA)<0.5;
+      var joins=out.length && Math.abs(out[out.length-1][1]-yA)<0.5;
+      if(joins && prevFlat && flat){
+        out[out.length-1]=[s.uB,yB];
+      } else if(joins){
+        out.push([s.uB,yB]);
+      } else {
+        out.push([s.uA,yA]); out.push([s.uB,yB]);
+      }
+      prevFlat=flat;
     });
     return out;
   }
@@ -23035,18 +23131,26 @@ var JISDRAW=(function(){
     var wide=rects.filter(function(r){return r.uMax-r.uMin>0.5;});
     if(!wide.length) return [];
     var xs=[];
-    wide.forEach(function(r){ xs.push(r.uMin,r.uMax); });
+    wide.forEach(function(r){
+      xs.push(r.uMin,r.uMax);
+      // 上端の折れ位置も区間の境目にする。そうしないと折れが区間の中に隠れる。
+      if(r.topPts) r.topPts.forEach(function(p){ xs.push(p[0]); });
+    });
     xs.sort(function(a,b){return a-b;});
     var uniq=[];
     xs.forEach(function(v){ if(!uniq.length||v-uniq[uniq.length-1]>0.5) uniq.push(v); });
     var segs=[];
     for(var i=0;i<uniq.length-1;i++){
       var uA=uniq[i], uB=uniq[i+1], mid=(uA+uB)/2;
-      var top=-Infinity, base=Infinity, cover=false;
+      var topA=-Infinity, topB=-Infinity, base=Infinity, cover=false;
       wide.forEach(function(r){
-        if(r.uMin<=mid+0.5 && r.uMax>=mid-0.5){ cover=true; top=Math.max(top,r.top); base=Math.min(base,r.base); }
+        if(r.uMin<=mid+0.5 && r.uMax>=mid-0.5){
+          cover=true;
+          topA=Math.max(topA,elevTopAtU(r,uA)); topB=Math.max(topB,elevTopAtU(r,uB));
+          base=Math.min(base,r.base);
+        }
       });
-      if(cover) segs.push({uA:uA,uB:uB,top:top,base:base});
+      if(cover) segs.push({uA:uA,uB:uB,topA:topA,topB:topB,base:base});
     }
     return segs;
   }
@@ -23074,8 +23178,8 @@ var JISDRAW=(function(){
     var segs=elevSegments(rects);
     if(!segs.length) return [];
     return elevSegmentGroups(segs).map(function(group){
-      var topPts=elevStepPoints(group,'top');
-      var basePts=elevStepPoints(group,'base').slice().reverse();
+      var topPts=elevStepPoints(group,'topA','topB');
+      var basePts=elevStepPoints(group,'base','base').slice().reverse();
       return topPts.concat(basePts);
     });
   }
@@ -23181,7 +23285,7 @@ var JISDRAW=(function(){
     if(!isFinite(uMin)){ uMin=0; uMax=1000; hMax=1000; hMinBase=0; }
     var hMin=Math.min(0,hMinBase); // 基礎分の余白でGLより壁基準が高い場合もGL(0)は常に含める
     hMin=Math.min(hMin,-foundationHeightMm()); // 基礎帯(GLより下)がviewBoxからはみ出さないよう下方に拡張
-    var apexH=roofMaxApexHeightMm();
+    var apexH=roofMaxApexHeightMm(dir);
     if(apexH!=null) hMax=Math.max(hMax,apexH); // 屋根の最高高さが壁上端より高い分を反映
     return {uMin:uMin-ELEV_MARGIN_MM, uMax:uMax+ELEV_MARGIN_MM+ELEV_HEIGHT_DIM_EXTRA_MM, hMin:hMin-ELEV_MARGIN_MM, hMax:hMax+ELEV_MARGIN_MM};
   }
@@ -23298,20 +23402,125 @@ var JISDRAW=(function(){
     var closed=hull.concat([[uLast,baseHeightMm],[uFirst,baseHeightMm]]);
     return {points:closed, apex:apex};
   }
-  function roofProfileToSvg(dir,LW){
-    var out='';
-    DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+  // ─── 斜線の下の「実際の屋根」(Task 24-1) ───────────────────────────────
+  // 3D では屋根メッシュそのものが制限面で切られ(applySetbackCut)、切り口には
+  // 片流れ屋根が架かる(setbackRoofItems)。切っていない輪郭を描けば、その屋根は
+  // 現物と違う形になる。だから図面でも **同じ面で切り、同じ屋根を足す**。
+  //
+  // 制限面をこの立面の (u,高さ) へ落とす。制限高さは平面上の位置の一次式
+  // (setbackLimitHeightMmAt)で、û と d̂(ELEV_AXES)は正規直交なので
+  //   limit = baseMm + slope*((n·û)u + (n·d̂)d - d0)
+  // という座標の取り替えになる(法の算術を書き写してはいない)。立面は奥行き d が
+  // 潰れるので、その物のいちばん高くなる奥行きを採る。面が立面と正対している
+  // (n·d̂=0)ときは奥行きに依らず、これは厳密である。
+  function elevLimitLine(pl,ax,dLo,dHi){
+    var cu=pl.nx*ax.u[0]+pl.ny*ax.u[1];
+    var cd=pl.nx*ax.dp[0]+pl.ny*ax.dp[1];
+    var d=(cd>=0)?dHi:dLo;
+    return {a:pl.baseMm+pl.slope*(cd*d-pl.d0), b:pl.slope*cu, cu:cu, cd:cd};
+  }
+  function elevLimitHAt(ln,u){ return ln.a+ln.b*u; }
+  // アイテムの平面範囲を、この方位の奥行き軸へ射影した範囲。
+  function elevItemDepthRange(it,ax){
+    var lo=Infinity, hi=-Infinity;
+    (getObjBounds(it)||[]).forEach(function(p){
+      var d=p.x*ax.dp[0]+p.y*ax.dp[1];
+      if(d<lo) lo=d;
+      if(d>hi) hi=d;
+    });
+    if(!isFinite(lo)) return {lo:0,hi:0};
+    return {lo:lo,hi:hi};
+  }
+  // 多角形を「制限高さ以下」の側で切る(Sutherland-Hodgman)。全点が制限の下に
+  // あれば点列はそのまま返るので、切られない屋根の輪郭は1点も動かない。
+  function clipProfileByLimitLine(points,ln){
+    var out=[], n=points.length, i, cur, prev, fc, fp, t;
+    for(i=0;i<n;i++){
+      cur=points[i]; prev=points[(i+n-1)%n];
+      fc=elevLimitHAt(ln,cur[0])-cur[1];
+      fp=elevLimitHAt(ln,prev[0])-prev[1];
+      if((fp<0)!==(fc<0)){
+        t=fp/(fp-fc);
+        out.push([prev[0]+(cur[0]-prev[0])*t, prev[1]+(cur[1]-prev[1])*t]);
+      }
+      if(fc>=0) out.push(cur);
+    }
+    return out;
+  }
+  // 立面図に出る屋根アイテム。斜線の切り口に架かる片流れ屋根は 3D に建っている
+  // 屋根そのもの(setbackRoofItems)なので、同じ列に並べる。
+  // **斜線制限を設定していないプランでは1枚も増えない。**
+  function elevRoofItems(){
+    var items=DATA.items.filter(function(it){return it.type==='roof';});
+    if(setbackPlanesForDrawing().length && typeof setbackRoofItems==='function')
+      items=items.concat(setbackRoofItems());
+    return items;
+  }
+  // 屋根1枚ぶんの、制限面で切ったあとの輪郭。{points,apex} か null。
+  function elevRoofProfiles(dir){
+    var ax=ELEV_AXES[dir], pls=setbackPlanesForDrawing(), out=[];
+    elevRoofItems().forEach(function(it){
       var prof=roofItemProfile(it,dir);
       if(!prof || prof.points.length<3) return;
+      var pts=prof.points, apex=prof.apex;
+      // 斜線由来の屋根は制限面の上に載っている物なので、自分の面では切らない。
+      if(pls.length && !it.setbackRoof){
+        var dr=elevItemDepthRange(it,ax);
+        pls.forEach(function(pl){
+          if(pts.length>=3) pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dr.lo,dr.hi));
+        });
+        if(pts.length<3) return;
+        apex=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
+      }
+      out.push({points:pts,apex:apex});
+    });
+    return out;
+  }
+  // 壁のシルエット。母屋+離れのように壁群がu方向に分離している場合、elevSkylineは
+  // グループごとに独立した点列を返すので、棟ごとに別の<polygon>として描く
+  // (離れた棟の間を直線で橋渡ししないため)。
+  // 制限面があるときは、そこで切る -- 3D は壁のメッシュそのものを面で切っている
+  // (applySetbackCut)。壁の頭は既に wallTopProfileM で下がっているが、床より下へは
+  // 下がれないので、面より上に薄い切り残りが出る。3D ではそれも面で消えている。
+  function elevSkylineToSvg(dir,rects,LW){
+    var pls=setbackPlanesForDrawing(), ax=ELEV_AXES[dir], out='';
+    var dLo=Infinity, dHi=-Infinity;
+    rects.forEach(function(r){
+      if(r.depthMin<dLo) dLo=r.depthMin;
+      if(r.depth>dHi) dHi=r.depth;
+    });
+    elevSkyline(rects).forEach(function(pts){
+      if(pls.length){
+        pls.forEach(function(pl){
+          if(pts.length>=3) pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dLo,dHi));
+        });
+        if(pts.length<3) return;
+      }
+      var s=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
+      if(s) out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+    });
+    return out;
+  }
+  function roofProfileToSvg(dir,LW){
+    var out='';
+    elevRoofProfiles(dir).forEach(function(prof){
       var s=prof.points.map(function(p){return p[0]+','+p[1];}).join(' ');
       out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
     });
     return out;
   }
   // 全roofアイテムの頂点のうち最高高さ(mm、絶対値)。屋根が無ければnull。
-  // 頂点の実高さはどの方位から見ても同じ(uへの投影だけがdirで変わる)ので方位引数は不要。
-  function roofMaxApexHeightMm(){
+  // 斜線制限が無いプランでは頂点の実高さはどの方位から見ても同じなので、
+  // 従来どおり頂点をそのまま数える(方位で1バイトも変わらない)。制限があるときは
+  // 切ったあとの輪郭 = 実際に建っている高さを見る。
+  function roofMaxApexHeightMm(dir){
     var max=-Infinity;
+    if(setbackPlanesForDrawing().length){
+      elevRoofProfiles(dir).forEach(function(prof){
+        if(prof.apex>max) max=prof.apex;
+      });
+      return isFinite(max)?max:null;
+    }
     DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
       var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
       roofLocalVertices(it).forEach(function(v){
@@ -23355,7 +23564,7 @@ var JISDRAW=(function(){
     var eaveH=-Infinity;
     rects.forEach(function(r){ eaveH=Math.max(eaveH,r.top); });
     if(!isFinite(eaveH)) return '';
-    var apexH=roofMaxApexHeightMm();
+    var apexH=roofMaxApexHeightMm(dir);
     var levels=[0,eaveH];
     if(apexH!=null && apexH>eaveH+0.5) levels.push(apexH); // 屋根がある(壁上端より高い)場合のみ3段目
     var xBuild=ext.uMax, xIn=xBuild+700, xLead=xIn+LW.text*0.3;
@@ -23389,12 +23598,7 @@ var JISDRAW=(function(){
     // <g transform="scale(1,-1)">で一括反転することで各座標計算での符号ミスを避ける。
     var view={minX:cx-vw/2, minY:-(ch+vh/2), maxX:cx+vw/2, maxY:-(ch-vh/2)};
     var body='';
-    // 母屋+離れのように壁群がu方向に分離している場合、elevSkylineはグループごとに独立した点列を返すので、
-    // 棟ごとに別の<polygon>として描く(離れた棟の間を直線で橋渡ししないため)。
-    elevSkyline(rects).forEach(function(pts){
-      var skylinePts=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
-      if(skylinePts) body+='<polygon points="'+skylinePts+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
-    });
+    body+=elevSkylineToSvg(dir,rects,LW);
     body+=roofProfileToSvg(dir,LW); // 屋根が無いプランでは中身が空文字列になり壁上端までの立面のまま
     body+=foundationToSvg(dir,LW);
     body+=elevGlSvg(bounds,LW);

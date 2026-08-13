@@ -100,7 +100,7 @@ const THREE = {
 
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
-  'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M'];
+  'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M', 'WALL_TOP_SAMPLE_STEP_M'];
 const FNS = [
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
@@ -112,7 +112,7 @@ const FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'wallRoofTopLimitWorldY',
-  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
   'wallHeightMm', 'wallDisplayHeightM',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',

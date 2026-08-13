@@ -105,7 +105,7 @@ function ctxFor(walls) {
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('_roofCeilingExtentCache'),
-    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'),
+    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'),
     topLevelVar('WALL_FACE_JITTER_M')
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
@@ -116,7 +116,7 @@ function ctxFor(walls) {
     'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
-    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
+    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallHeightMm', 'wallDisplayHeightM',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
     'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'
