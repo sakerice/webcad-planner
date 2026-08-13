@@ -24284,7 +24284,7 @@ var JISDRAW=(function(){
   function titleBlockSvg(label,scale,bounds,LW){
     var boxW=140*scale, boxH=20*scale, margin=LW.text*1.2;
     var x=bounds.maxX-margin-boxW, y=bounds.maxY-margin-boxH;
-    var text=escSvgText(label)+'  |  縮尺 1:'+scale+'  |  '+isoDateStr(new Date())+'  |  WebCAD Planner';
+    var text=escSvgText(label)+'  |  縮尺 1:'+scale+'  |  '+isoDateStr(new Date())+'  |  house-planner mobile';
     var fs=LW.text*0.9;
     var out='<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="'+boxH+'" fill="#fff" stroke="#000" stroke-width="'+LW.mid+'"/>';
     out+='<text x="'+(x+boxW/2)+'" y="'+(y+boxH/2+fs*0.32)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000">'+text+'</text>';
