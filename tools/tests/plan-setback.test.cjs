@@ -1,4 +1,4 @@
-// Task 23: 斜線制限とその結果を JIS 平面図に出す。
+// Task 23 / Task 25-1: 斜線制限を JIS 平面図に出す。**出すのは境界線だけ**。
 //
 // grep ではない。index.html から関数と JISDRAW の即時実行関数を波括弧の対応で
 // 切り出し、node:vm で **走らせて** 出来た SVG の座標・線種・文字を読む。
@@ -6,9 +6,10 @@
 // 確かめること:
 //   23-1 斜線制限を設定していないプランでは、平面図の SVG が1バイトも変わらない。
 //   23-2 制限そのもの = 斜線が立ち上がる境界線が、正しい位置に一点鎖線で出る。
-//   23-3 削られた結果 = 屋根の伏せ(輪郭)と勾配の向きが出る。輪郭は 3D に架かる
-//        屋根アイテムと同じ範囲、矢印は境界へ向かって下る向き。
-//   23-4 2方向(道路＋北側)にかかる場合は両方出る。
+//   25-1 削られた結果(屋根伏せの階段状の破線・勾配の矢印・勾配の注記)は
+//        **平面図には出さない**。斜線制限そのものは立面図が示す(Task 24)ので、
+//        平面図の役目は「どこから斜線が立ち上がるか」だけである。
+//   23-4 2方向(道路＋北側)にかかる場合は境界線が両方出る。
 //   23-5 読める図面であること: 用紙に乗らない境界線は引かない、注記は枠内。
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -187,7 +188,8 @@ function chainLines(svg) {
   }
   return out;
 }
-// 破線(屋根伏せ)の <line>。dasharray が2値のものだけを拾う。
+// 破線の <line>。dasharray が2値のものだけを拾う。Task 25-1 より後は
+// **1本も出てはいけない**(屋根伏せの階段状の破線を平面図から外したため)。
 function roofDashLines(svg) {
   const out = [];
   const re = /<line x1="([-\d.]+)" y1="([-\d.]+)" x2="([-\d.]+)" y2="([-\d.]+)" stroke="#000" stroke-width="([-\d.]+)" stroke-dasharray="([^"]+)"\/>/g;
@@ -221,17 +223,6 @@ function texts(svg) {
   while ((m = re.exec(svg))) out.push({ x: +m[1], y: +m[2], s: m[3] });
   return out;
 }
-function bboxOf(lines) {
-  const b = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-  lines.forEach((l) => {
-    [[l.x1, l.y1], [l.x2, l.y2]].forEach((p) => {
-      b.minX = Math.min(b.minX, p[0]); b.maxX = Math.max(b.maxX, p[0]);
-      b.minY = Math.min(b.minY, p[1]); b.maxY = Math.max(b.maxY, p[1]);
-    });
-  });
-  return b;
-}
-
 // ══ 23-1 既定は「何も出ない」 ═════════════════════════════════════════
 
 test('23-1(最重要): 斜線制限を設定していないプランの平面図は1バイトも変わらない', () => {
@@ -294,144 +285,84 @@ test('23-2(最重要): 境界線は面が動けば一緒に動く(方位を回�
   assert.equal(chainLines(planSvg(ctx, 3))[0].y1, 0, '0度へ戻すと元へ戻る');
 });
 
-test('23-2: 境界線と屋根伏せは線種で見分けが付く(一点鎖線と破線)', () => {
+test('23-2: 境界線は敷地境界の線種(一点鎖線)で引かれる', () => {
   const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
   const svg = planSvg(ctx, 3);
   const chain = chainLines(svg)[0].dash.split(' ').map(Number);
-  const dash = svg.match(/stroke-dasharray="([\d.]+ [\d.]+)"/);
-  assert.ok(dash, '屋根の破線が無い');
   assert.equal(chain.length, 4, '境界線は長線・間・点・間の4値 = 一点鎖線');
   assert.ok(chain[0] > chain[2], '長線のほうが点より長い: ' + chain.join(' '));
-  assert.notEqual(chain.join(' '), dash[1], '境界線と屋根が同じ線種になっている');
 });
 
-// ══ 23-3 削られた結果 = 屋根の伏せと勾配 ══════════════════════════════
+// ══ 25-1 削られた結果は平面図に描かない ══════════════════════════════
+// Task 23 では、切り口に架かる屋根の伏せ(階段状の破線)・勾配の矢印・勾配の注記も
+// 平面図に出していた。Task 25-1 でそれをやめた。**消えたことを実行して確かめる**。
+// 「そもそも削られていないから出ない」で受かってしまわないよう、どの試験でも
+// 先に setbackRoofItems() で「3D には屋根が架かっている」ことを確かめてから見る。
 
-test('23-3(最重要): 削られた範囲の屋根が、平面図に輪郭として出る(3Dの屋根と同じ範囲)', () => {
+// 平面図から、境界線(一点鎖線)とその注記だけを取り除いた文字列。
+// これが「斜線を設定していない平面図」と一致すれば、平面図に足されたのは
+// 境界線とその注記**だけ**である。
+function withoutLimitLines(svg) {
+  return svg
+    .replace(/<line [^>]*stroke-dasharray="[\d.]+ [\d.]+ [\d.]+ [\d.]+"\/>/g, '')
+    .replace(/<text [^>]*>[^<]*境界線[^<]*<\/text>/g, '');
+}
+
+test('25-1(最重要): 削られているプランでも、屋根の輪郭・勾配の矢印・勾配の注記が1つも出ない', () => {
   const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
+  // 空振りしていないことの確認: 3D には切り口の屋根が1枚架かっている。
+  assert.equal(plain(run(ctx, 'setbackRoofItems()')).length, 1,
+    '削られていないプランで試している(試験が空振りする)');
   const svg = planSvg(ctx, 3);
-  const dl = roofDashLines(svg);
-  assert.ok(dl.length >= 4, '屋根の輪郭が出ている: ' + dl.length);
-  const b = bboxOf(dl);
-  // (a) 図面の輪郭は、3D に架かる屋根アイテムそのものの範囲と一致する。
-  const it = plain(run(ctx, 'setbackRoofItems()'))[0];
-  assert.ok(it, '屋根アイテムが作られている');
-  ['x', 'y'].forEach((k) => {
-    const lo = it[k], hi = it[k] + it[k === 'x' ? 'w' : 'd'];
-    assert.ok(Math.abs(b[k === 'x' ? 'minX' : 'minY'] - lo) < 1e-6,
-      k + ' の下端が屋根アイテムと違う: ' + b[k === 'x' ? 'minX' : 'minY'] + ' vs ' + lo);
-    assert.ok(Math.abs(b[k === 'x' ? 'maxX' : 'maxY'] - hi) < 1e-6,
-      k + ' の上端が屋根アイテムと違う: ' + b[k === 'x' ? 'maxX' : 'maxY'] + ' vs ' + hi);
+  assert.equal(roofDashLines(svg).length, 0,
+    '屋根伏せの破線が出ている: ' + JSON.stringify(roofDashLines(svg)));
+  assert.equal(arrowHeads(svg).length, 0,
+    '勾配の矢印が出ている: ' + JSON.stringify(arrowHeads(svg)));
+  const sun = texts(svg).filter((t) => /寸|勾配/.test(t.s) && !/境界線/.test(t.s));
+  assert.deepEqual(sun, [], '勾配の注記が出ている: ' + JSON.stringify(sun));
+  // 残すものは残っている。
+  assert.equal(chainLines(svg).length, 1, '境界線が消えている');
+  const label = texts(svg).filter((t) => /北側境界線/.test(t.s));
+  assert.equal(label.length, 1, '境界線の注記が消えている: ' + JSON.stringify(texts(svg).map((t) => t.s)));
+  assert.ok(/5000/.test(label[0].s) && /1\.25/.test(label[0].s),
+    '基準高さと勾配が注記から消えている: ' + label[0].s);
+});
+
+test('25-1(最重要): 平面図に足されるのは境界線とその注記だけ(他の要素は1つも増えない)', () => {
+  const off = withDrawing(withSetback(makeCtx(basePlan(null))));
+  const on = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
+  assert.equal(plain(run(on, 'setbackRoofItems()')).length, 1, '削られているプランで比べている');
+  [1, 2, 3].forEach((f) => {
+    assert.equal(withoutLimitLines(planSvg(on, f)), planSvg(off, f),
+      f + 'F: 境界線と注記のほかにも何かが足されている');
   });
-  // (b) 条文から独立に解いた切れ目(y=2840)の近くで終わっており、南の壁までは届かない。
-  const cut = (8550 - 5000) / 1.25;
-  assert.ok(Math.abs(cut - 2840) < 1e-9, '手計算の確認: ' + cut);
-  assert.ok(northLimitMm(cut) > 8500, '切れ目の南側では制限が建物より高い');
-  assert.ok(b.maxY > cut - 400 && b.maxY < cut + 400, '屋根の南端が切れ目付近にない: ' + b.maxY);
-  assert.ok(b.maxY < 5000, '屋根が建物全体を覆ってしまっている: ' + b.maxY);
 });
 
-test('23-3(最重要): 屋根の輪郭は閉じた輪になっている(長さ0の線・開いた端が無い)', () => {
-  const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
-  const dl = roofDashLines(planSvg(ctx, 3));
-  assert.ok(dl.length >= 4, '輪郭が出ていない');
-  const ends = {};
-  dl.forEach((l) => {
-    assert.ok(Math.hypot(l.x2 - l.x1, l.y2 - l.y1) > 1e-6, '長さ0の線がある: ' + JSON.stringify(l));
-    [[l.x1, l.y1], [l.x2, l.y2]].forEach((p) => {
-      const k = p[0].toFixed(3) + ',' + p[1].toFixed(3);
-      ends[k] = (ends[k] || 0) + 1;
-    });
-  });
-  // 閉じた輪郭では、どの端点も必ず偶数本の線が集まる(開いた端が1つも無い)。
-  const odd = Object.keys(ends).filter((k) => ends[k] % 2 === 1);
-  assert.deepEqual(odd, [], '輪郭が閉じていない(開いた端): ' + odd.join(' / '));
-});
-
-test('23-3(最重要): 勾配の矢印は境界へ向かって下る向きに出る', () => {
-  const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
+test('25-1(最重要): 2方向にかかる場合も、屋根の輪郭も矢印も出ない(境界線は2本出る)', () => {
+  const ctx = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
+  assert.equal(plain(run(ctx, 'setbackRoofItems()')).length, 2, '3D には屋根が2枚架かっている');
   const svg = planSvg(ctx, 3);
-  const heads = arrowHeads(svg);
-  assert.equal(heads.length, 1, '矢じりが1つ: ' + JSON.stringify(heads));
-  const h = heads[0];
-  // 屋根面の高さは 5000+1.25y なので、下るのは y が減る向き = 北側境界(y=0)の側。
-  assert.ok(h.tip.y < h.base.y, '矢印が北を向いていない(勾配の向きが逆): ' + JSON.stringify(h));
-  assert.ok(Math.abs(h.tip.x - h.base.x) < 1e-6, '矢印は境界に直交する向き: ' + JSON.stringify(h));
-  // 矢印は屋根の輪郭の中にある。
-  const b = bboxOf(roofDashLines(svg));
-  assert.ok(h.tip.y >= b.minY && h.base.y <= b.maxY, '矢印が屋根の外にある');
+  assert.equal(roofDashLines(svg).length, 0, '屋根伏せの破線が出ている');
+  assert.equal(arrowHeads(svg).length, 0, '勾配の矢印が出ている');
+  assert.equal(chainLines(svg).length, 2, '境界線が2本出ていない');
+  const labels = texts(svg).map((t) => t.s);
+  assert.ok(labels.some((s) => /北側境界線/.test(s)), '北側の注記が無い: ' + labels.join(' / '));
+  assert.ok(labels.some((s) => /道路反対側境界線/.test(s)), '道路の注記が無い: ' + labels.join(' / '));
 });
 
-test('23-3(最重要): 勾配は寸で書かれる(勾配1.25 = 12.5寸)', () => {
+test('25-1: 境界線はどの階の平面図にも出る。屋根の輪郭はどの階にも出ない', () => {
   const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
-  const t = texts(planSvg(ctx, 3)).filter((x) => /勾配/.test(x.s) && !/境界線/.test(x.s));
-  assert.equal(t.length, 1, '勾配の注記が1つ: ' + JSON.stringify(t));
-  assert.ok(/12\.5寸/.test(t[0].s), '12.5寸(=1.25)と書かれていない: ' + t[0].s);
-  assert.ok(/北側斜線/.test(t[0].s), 'どの斜線の屋根か書かれていない: ' + t[0].s);
-  // 勾配を変えれば表記も動く(定数を焼き付けていない)。1.5 → 15寸。
-  run(ctx, 'DATA.items[0].setback.northSlope=1.5;');
-  const t2 = texts(planSvg(ctx, 3)).filter((x) => /勾配/.test(x.s) && !/境界線/.test(x.s));
-  assert.ok(/15寸/.test(t2[0].s), '勾配1.5 が 15寸にならない: ' + t2[0].s);
-});
-
-test('23-3(最重要): 勾配の注記は建物の上に重ならない(境界線と屋根の低い縁のあいだに置く)', () => {
-  const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
-  const svg = planSvg(ctx, 3);
-  const note = texts(svg).filter((t) => /勾配/.test(t.s) && !/境界線/.test(t.s))[0];
-  assert.ok(note, '勾配の注記が無い');
-  const roof = bboxOf(roofDashLines(svg));
-  // 北側境界線は y=0、屋根の低い縁は roof.minY。注記はその **あいだ** にある。
-  assert.ok(note.y > 0 && note.y < roof.minY,
-    '注記が境界線と屋根のあいだに無い: ' + note.y + ' (屋根の北端 ' + roof.minY + ')');
-  // 建物(壁 y=1000〜5000)の上には乗っていない。
-  assert.ok(note.y < 1000, '注記が建物の上に乗っている: ' + note.y);
-});
-
-test('23-3(最重要): 空きに読める字が入らない縮尺では、注記を落として矢印だけ残す', () => {
-  // 敷地の北側境界を建物のすぐ手前(y=950、建物は y=1000〜)に置くと、
-  // 境界線と屋根のあいだに文字を置く場所が無い。
-  const p = basePlan(NORTH_ONLY);
-  p.items[0].y = 950;
-  const ctx = withDrawing(withSetback(makeCtx(p)));
-  const svg = planSvg(ctx, 3);
-  assert.equal(chainLines(svg).length, 1, '境界線は出る');
-  assert.ok(roofDashLines(svg).length >= 4, '屋根の輪郭は出る');
-  assert.equal(arrowHeads(svg).length, 1, '勾配の向き(矢印)は残る');
-  const note = texts(svg).filter((t) => /勾配/.test(t.s) && !/境界線/.test(t.s));
-  assert.equal(note.length, 0, '置き場所が無いのに注記を出している: ' + JSON.stringify(note));
-  // 勾配の数値そのものは境界線の注記に残るので、図面から数字は消えない。
-  assert.ok(texts(svg).some((t) => /北側境界線/.test(t.s) && /1\.25/.test(t.s)),
-    '境界線の注記から勾配が消えている: ' + JSON.stringify(texts(svg).map((t) => t.s)));
-});
-
-test('23-3(最重要): 屋根伏せは最上階の平面図にだけ出る。境界線はどの階にも出る', () => {
-  const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
-  [1, 2].forEach((f) => {
+  [1, 2, 3].forEach((f) => {
     const svg = planSvg(ctx, f);
+    assert.equal(chainLines(svg).length, 1, f + 'F に境界線が無い');
     assert.equal(roofDashLines(svg).length, 0, f + 'F に屋根の輪郭が出ている');
     assert.equal(arrowHeads(svg).length, 0, f + 'F に勾配の矢印が出ている');
-    assert.equal(chainLines(svg).length, 1, f + 'F に境界線が無い');
   });
-  assert.ok(roofDashLines(planSvg(ctx, 3)).length >= 4, '3F(最上階)には屋根が出る');
-});
-
-test('23-3: 制限に1mmも当たらないプランでは、境界線は出るが屋根は出ない', () => {
-  // 平屋(1階だけ)にすると天端 3150mm。北側斜線は境界でも 5000mm なので当たらない。
-  const p = basePlan(NORTH_ONLY);
-  p.rooms = p.rooms.filter((r) => r.floor === 1);
-  p.walls = p.walls.filter((w) => w.floor === 1);
-  p.items = p.items.filter((i) => i.type !== 'roof');
-  const ctx = withDrawing(withSetback(makeCtx(p)));
-  assert.deepEqual(plain(run(ctx, 'setbackRoofItems()')), [], '屋根アイテムも作られない');
-  const svg = planSvg(ctx, 1);
-  assert.equal(chainLines(svg).length, 1, '制限そのものは出る');
-  assert.equal(roofDashLines(svg).length, 0, '架かる屋根が無いのに輪郭が出ている');
-  assert.equal(arrowHeads(svg).length, 0);
 });
 
 // ══ 23-4 2方向にかかる場合 ════════════════════════════════════════════
 
-test('23-4(最重要): 道路＋北側の2方向にかかる場合、境界線も屋根も両方出る', () => {
+test('23-4(最重要): 道路＋北側の2方向にかかる場合、境界線が両方出る', () => {
   const ctx = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
   const planes = plain(run(ctx, 'setbackPlanes()'));
   assert.equal(planes.length, 2, '面が2枚: ' + JSON.stringify(planes.map((p) => p.kind)));
@@ -445,13 +376,8 @@ test('23-4(最重要): 道路＋北側の2方向にかかる場合、境界線�
   const labels = texts(svg).map((t) => t.s);
   assert.ok(labels.some((s) => /北側境界線/.test(s)), '北側の注記が無い: ' + labels.join(' / '));
   assert.ok(labels.some((s) => /道路反対側境界線/.test(s)), '道路の注記が無い: ' + labels.join(' / '));
-  // 屋根も2枚。矢印は互いに逆向き(北の屋根は北へ、道路の屋根は道路へ下る)。
-  const heads = arrowHeads(svg);
-  assert.equal(heads.length, 2, '勾配の矢印が2つ出ていない: ' + JSON.stringify(heads));
-  const north = heads.filter((h) => h.tip.y < h.base.y);
-  const road = heads.filter((h) => h.tip.y > h.base.y);
-  assert.equal(north.length, 1, '北へ下る矢印が1つ');
-  assert.equal(road.length, 1, '道路(南)へ下る矢印が1つ');
+  // それぞれの注記に、その制限の勾配が入っている(どちらの斜線かが読める)。
+  assert.ok(labels.some((s) => /北側斜線/.test(s)), '北側斜線の勾配注記が無い: ' + labels.join(' / '));
   assert.ok(labels.some((s) => /道路斜線/.test(s)), '道路斜線の勾配注記が無い: ' + labels.join(' / '));
 });
 
@@ -470,8 +396,7 @@ test('23-5(最重要): 用紙に乗らない境界線は引かない(枠外へ�
 
 test('23-5(最重要): 境界線が用紙の外にあるときは、その脇に置く注記も出さない', () => {
   // 手入力の勾配(0.1)を使うと、制限面は遠くまで低いままなので、境界線から
-  // ずっと離れた3階建てだけが制限を超える。屋根は建物の上にできるが、
-  // 境界線と屋根のあいだの空き(=注記を置く帯)は用紙の外まで伸びる。
+  // ずっと離れた3階建てだけが制限を超える。境界線 y=0 は用紙の外に出る。
   //   平屋 y=1000..20000 … 天端3150 < 5000+0.1d  → 超えない
   //   3階建て y=25000..29000 … 天端8550 > 5000+0.1d(=7500〜7900) → 超える
   const site = { id: 'site', type: 'site-rect', x: -1000, y: 0, w: 8000, d: 40000, rot: 0,
@@ -488,10 +413,9 @@ test('23-5(最重要): 境界線が用紙の外にあるときは、その脇に
   const svg = run(ctx, 'JISDRAW.buildFloorPlanSvg(3,{scale:"100",paper:"a4"})');
   const v = viewBox(svg);
   assert.ok(v.minY > 0, '用紙は塔のまわりだけを写している(境界線 y=0 は枠の外): ' + v.minY);
+  assert.ok(plain(run(ctx, 'setbackRoofItems()')).length >= 1, '3D には屋根が架かっている');
   assert.equal(chainLines(svg).length, 0, '枠の外の境界線を引いている');
-  assert.ok(roofDashLines(svg).length >= 4, '屋根の輪郭は出る');
-  assert.equal(arrowHeads(svg).length, 1, '勾配の矢印は出る');
-  const note = texts(svg).filter((t) => /勾配/.test(t.s));
+  const note = texts(svg).filter((t) => /境界線|勾配/.test(t.s));
   assert.equal(note.length, 0, '枠の外に注記を置いている: ' + JSON.stringify(note));
 });
 
@@ -501,7 +425,7 @@ test('23-5(最重要): 線も注記も用紙の枠の中に収まる(はみ出�
     const svg = run(ctx, 'JISDRAW.buildFloorPlanSvg(3,' + opts + ')');
     const v = viewBox(svg);
     const fs = run(ctx, 'JISDRAW.lineWidths(' + scale + ').text') * 0.8;
-    chainLines(svg).concat(roofDashLines(svg)).forEach((l) => {
+    chainLines(svg).forEach((l) => {
       [[l.x1, l.y1], [l.x2, l.y2]].forEach((p) => {
         assert.ok(p[0] >= v.minX - 1e-6 && p[0] <= v.maxX + 1e-6, '線が枠の外: ' + JSON.stringify(l));
         assert.ok(p[1] >= v.minY - 1e-6 && p[1] <= v.maxY + 1e-6, '線が枠の外: ' + JSON.stringify(l));
@@ -534,5 +458,5 @@ test('23-5: 斜線の注記は上下が裏返らない向きで書かれる(回�
       if (Math.abs(Math.abs(a) - 90) < 1e-9) assert.equal(a, -90, '縦書きの向きが逆: ' + m[2]);
     }
   });
-  assert.ok(seen >= 6, '注記そのものが読めていない: ' + seen);
+  assert.equal(seen, 3, '境界線の注記が方位ごとに1つずつ読めていない: ' + seen);
 });
