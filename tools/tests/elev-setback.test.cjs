@@ -7,6 +7,9 @@
 //   24-0 斜線も勾配天井も無いプランの立面図 SVG は1バイトも変わらない。
 //   24-1 壁の上端は 3D と同じ折れ線(wallTopProfileM)で描かれる。屋根も、
 //        斜線で削られた形＋斜線由来の片流れ屋根が出る。
+//   24-2 斜線制限が、距離が横軸に出ている立面図に「基準高さ＋斜線＋注記」で出る。
+//        正対する立面図(距離が奥行きへ潰れる向き)には引かない。
+//        建物は斜線の下に収まっている。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
@@ -367,4 +370,134 @@ test('24-1(最重要): 既存の屋根は、制限面より上には描かれな
         '制限 ' + Math.round(limitAt(p[0])) + ' に対し ' + p[1] + ' が出ている');
     });
   });
+});
+
+// ══ 24-2 斜線そのものを引く ═══════════════════════════════════════════
+
+test('24-2(最重要): 北側斜線は、距離が横軸に出る立面図(東・西)に出る', () => {
+  const ctx = full(setbackHouse(NORTH_ONLY, false));
+  ['e', 'w'].forEach((d) => {
+    const svg = elev(ctx, d);
+    const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+    const diag = chainLines(svg).filter((l) => l.w === mid);
+    assert.equal(diag.length, 1, d + ' 立面図に斜線が1本: ' + JSON.stringify(chainLines(svg)));
+    assert.notEqual(diag[0].h1, diag[0].h2, d + ' の斜線が水平になっている');
+  });
+  // 北側斜線に正対する立面図では、距離は奥行きへ潰れる。そこに斜めの線は引かない。
+  ['n', 's'].forEach((d) => {
+    assert.equal(chainLines(elev(ctx, d)).length, 0, d + ' 立面図に斜線が出ている');
+    assert.equal(/斜線/.test(elev(ctx, d)), false, d + ' 立面図に注記が出ている');
+  });
+});
+
+test('24-2(最重要): 方位が振れて距離がどの立面図の横軸にも出ない向きなら、斜線は引かない', () => {
+  const ctx = full(setbackHouse(NORTH_ONLY, false));
+  run(ctx, 'setPlanNorthDeg(45)');
+  const pl = plain(run(ctx, 'setbackPlanes()'))[0];
+  assert.ok(Math.abs(pl.nx) > 0.5 && Math.abs(pl.ny) > 0.5, '面は45度を向いている: ' + JSON.stringify(pl));
+  DIRS.forEach((d) => {
+    // 45度では、どの立面図でも「境界からの距離」は横軸と奥行きへ半分ずつ分かれる。
+    // 斜めの線を1本引いても、それはどの位置の制限高さでもない。
+    assert.equal(chainLines(elev(ctx, d)).length, 0, d + ' 立面図に斜線が出ている');
+  });
+  run(ctx, 'setPlanNorthDeg(0)');
+  assert.equal(chainLines(elev(ctx, 'e')).length, 3, '0度へ戻すと東立面図に戻ってくる');
+});
+
+test('24-2(最重要): 斜線の起点は境界の位置と基準高さ、勾配は制限の勾配', () => {
+  const ctx = full(setbackHouse(NORTH_ONLY, false));
+  const pl = plain(run(ctx, 'setbackPlanes()'))[0];
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  const l = chainLines(elev(ctx, 'e')).filter((x) => x.w === mid)[0];
+  // 東立面図の u = -y。境界(y=0=d0)は u=0 にある。
+  const slope = (l.h2 - l.h1) / (l.u2 - l.u1);
+  assert.ok(Math.abs(Math.abs(slope) - pl.slope) < 1e-9, '勾配が 1.25: ' + slope);
+  // 線を u=0(境界)まで延ばすと基準高さ 5000 になる。
+  const hAt0 = l.h1 + slope * (0 - l.u1);
+  assert.ok(Math.abs(hAt0 - pl.baseMm) < 1e-6, '境界での高さが基準高さ: ' + hAt0);
+  assert.ok(Math.max(l.u1, l.u2) <= 1e-6, '境界より外(t<0)へは伸びていない');
+  // 起点が読めるように、基準高さの水平線と境界の縦線も出ている。
+  const thin = run(ctx, 'JISDRAW.lineWidths(100).thin');
+  const marks = chainLines(elev(ctx, 'e')).filter((x) => x.w === thin);
+  assert.equal(marks.length, 2, '基準高さの水平線と境界の縦線: ' + JSON.stringify(marks));
+  const horiz = marks.filter((x) => Math.abs(x.h1 - x.h2) < 1e-9)[0];
+  const vert = marks.filter((x) => Math.abs(x.u1 - x.u2) < 1e-9)[0];
+  assert.ok(horiz && Math.abs(horiz.h1 - pl.baseMm) < 1e-6, '水平線は基準高さ: ' + JSON.stringify(horiz));
+  assert.ok(vert && Math.abs(vert.u1) < 1e-6, '縦線は境界の位置: ' + JSON.stringify(vert));
+  assert.ok(vert && Math.min(vert.h1, vert.h2) === 0 && Math.abs(Math.max(vert.h1, vert.h2) - pl.baseMm) < 1e-6,
+    '縦線は GL から基準高さまで');
+});
+
+test('24-2(最重要): 注記に基準高さと勾配が入る', () => {
+  const ctx = full(setbackHouse(NORTH_ONLY, false));
+  const note = texts(elev(ctx, 'e')).filter((t) => /斜線/.test(t));
+  assert.equal(note.length, 1, '注記が1つ: ' + JSON.stringify(texts(elev(ctx, 'e'))));
+  assert.ok(/北側斜線/.test(note[0]), '何の制限か: ' + note[0]);
+  assert.ok(/5000/.test(note[0]), '基準高さ: ' + note[0]);
+  assert.ok(/1\.25/.test(note[0]), '勾配: ' + note[0]);
+});
+
+test('24-2(最重要): 建物が斜線の下に収まっている(壁も屋根も)', () => {
+  const ctx = full(setbackHouse(NORTH_ONLY, false));
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  const svg = elev(ctx, 'e');
+  const l = chainLines(svg).filter((x) => x.w === mid)[0];
+  const slope = (l.h2 - l.h1) / (l.u2 - l.u1);
+  const limitAt = (u) => l.h1 + slope * (u - l.u1);   // 図面に引かれた斜線そのもの
+  const polys = thickPolys(svg, lw);
+  assert.ok(polys.length >= 2, '壁と屋根が描かれている');
+  polys.forEach((poly) => poly.forEach((p) => {
+    assert.ok(p[1] <= limitAt(p[0]) + 1,
+      '斜線 ' + Math.round(limitAt(p[0])) + ' を ' + p[1] + ' が超えている (u=' + p[0] + ')');
+  }));
+});
+
+test('24-2(最重要): 2方向にかかる場合、それぞれの制限がそれぞれの立面図に出る', () => {
+  const ctx = full(setbackHouse(BOTH, true));
+  const kinds = plain(run(ctx, 'setbackPlanes()')).map((p) => p.kind).sort();
+  assert.deepEqual(kinds, ['north', 'road'], '面が2枚できている');
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  // 北側斜線(境界線は東西)は東・西立面図に、東の道路斜線(境界線は南北)は南・北立面図に。
+  ['e', 'w'].forEach((d) => {
+    const svg = elev(ctx, d);
+    assert.equal(chainLines(svg).filter((x) => x.w === mid).length, 1, d + ' の斜線は1本');
+    assert.ok(texts(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線の注記');
+    assert.ok(!texts(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線が混ざっている');
+  });
+  ['n', 's'].forEach((d) => {
+    const svg = elev(ctx, d);
+    assert.equal(chainLines(svg).filter((x) => x.w === mid).length, 1, d + ' の斜線は1本');
+    assert.ok(texts(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線の注記');
+    assert.ok(!texts(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線が混ざっている');
+  });
+});
+
+test('24-2: 道路斜線の基準高さは 0 なので、起点は GL の上にある', () => {
+  const ctx = full(setbackHouse(BOTH, true));
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  const thin = run(ctx, 'JISDRAW.lineWidths(100).thin');
+  const svg = elev(ctx, 's');
+  const l = chainLines(svg).filter((x) => x.w === mid)[0];
+  assert.ok(Math.min(l.h1, l.h2) < 1, '低い側の端は GL: ' + JSON.stringify(l));
+  // 基準高さ 0 の水平線は GL 線と重なるので引かない。
+  assert.equal(chainLines(svg).filter((x) => x.w === thin).length, 0,
+    '基準高さ 0 で余分な線を引いている');
+});
+
+// 2方向がかち合う隅では、いっぽうの斜線の切り口に架かる板が、もういっぽうの
+// 制限を超えたまま建っている(build3DSetbackRoofs は板を削り直さない)。
+// 立面図はそれをそのまま描く -- 図面を合わせて隠さない。直すのは 3D の側である。
+test('24-2: 隅で、片方の斜線の板がもう片方の制限を超えていない', { todo: '3D 側の未修正: 斜線の板が他方の面で削られない' }, () => {
+  const ctx = full(setbackHouse(BOTH, true));
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  const svg = elev(ctx, 's');
+  const l = chainLines(svg).filter((x) => x.w === mid)[0];
+  const slope = (l.h2 - l.h1) / (l.u2 - l.u1);
+  const limitAt = (u) => l.h1 + slope * (u - l.u1);
+  thickPolys(svg, lw).forEach((poly) => poly.forEach((p) => {
+    assert.ok(p[1] <= limitAt(p[0]) + 1,
+      '道路斜線 ' + Math.round(limitAt(p[0])) + ' を ' + p[1] + ' が超えている (u=' + p[0] + ')');
+  }));
 });

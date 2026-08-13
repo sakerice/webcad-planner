@@ -23580,6 +23580,70 @@ var JISDRAW=(function(){
     return out;
   }
 
+  // ─── 斜線制限を立面図に引く (Task 24-2) ───────────────────────────────
+  // 斜線制限は「境界からの水平距離 × 勾配」で決まる高さの限度である。だから
+  // **その距離が図面の横軸に出ている立面図でだけ、斜めの線になる。**
+  // 北側斜線(境界線は東西に走る)なら距離の向きは南北 = 東立面図・西立面図の横軸。
+  // 正対する立面図(北立面図)では距離が奥行きへ潰れ、斜線は1本の水平線にしか
+  // ならない -- そこへ斜めの線を引くと、図面が読み手に嘘をつく。だから引かない。
+  // (elevLimitLine の n·d̂ が 0 = 距離が横軸に出ている、という判定そのもの。)
+  //
+  // 引くのは3本と注記1つ:
+  //   ・境界(t=0)の位置を示す縦線(GL〜基準高さ)
+  //   ・基準高さの水平線(境界の外側へ少し出す)
+  //   ・そこから立ち上がる斜線
+  // **斜線制限を設定していないプランでは setbackPlanes() が空 = 1バイトも増えない。**
+  function elevSetbackLimitToSvg(dir,view,LW){
+    var pls=setbackPlanesForDrawing();
+    if(!pls.length) return '';
+    var ax=ELEV_AXES[dir];
+    // view は反転後(y=-高さ)の紙の枠。(u,高さ)の枠へ戻して、紙からはみ出す線を切る。
+    var rect={minX:view.minX, maxX:view.maxX, minY:-view.maxY, maxY:-view.minY};
+    var dash=setbackChainDash(LW), out='';
+    pls.forEach(function(pl){
+      var ln=elevLimitLine(pl,ax,0,0);
+      if(Math.abs(ln.cd)>1e-6) return;    // 距離が奥行きへ潰れる立面 = この向きには効いて見えない
+      if(Math.abs(ln.cu)<1e-6) return;
+      var u0=pl.d0/ln.cu, h0=pl.baseMm;   // 斜線の起点 = 境界の位置と基準高さ
+      var du=ln.cu, dh=pl.slope;          // 距離が1増えるごとの (u,高さ)
+      var seg=clipLineToRect(u0,h0,du,dh,rect);
+      if(!seg) return;
+      var t0=Math.max(0,seg.u0), t1=seg.u1;   // 境界より外(t<0)へは伸ばさない
+      // 制限が効くのは敷地の上である。面が持っている敷地の範囲(siteTMax)で止める
+      // -- 紙いっぱいまで引くと、建物より敷地より遥かに長い線が図面を支配する。
+      var tSite=Math.max(pl.siteTMax,0);
+      if(tSite>0 && t1>tSite) t1=tSite;
+      if(!(t1>t0)) return;
+      var ax0=u0+du*t0, ay0=h0+dh*t0, ax1=u0+du*t1, ay1=h0+dh*t1;
+      out+='<line x1="'+ax0+'" y1="'+ay0+'" x2="'+ax1+'" y2="'+ay1
+        +'" stroke="#000" stroke-width="'+LW.mid+'" stroke-dasharray="'+dash+'"/>';
+      // 起点。基準高さの水平線は境界の外側(t<0 の側)へ出し、そこから立ち上がる
+      // ことが読めるようにする。基準高さが 0(道路斜線)なら GL 線と重なるので出さない。
+      if(h0>0.5){
+        var back=Math.max(600,ELEV_MARGIN_MM*0.5);
+        var bx=u0-du*back;
+        if(bx<rect.minX) bx=rect.minX;
+        if(bx>rect.maxX) bx=rect.maxX;
+        out+='<line x1="'+bx+'" y1="'+h0+'" x2="'+u0+'" y2="'+h0
+          +'" stroke="#000" stroke-width="'+LW.thin+'" stroke-dasharray="'+dash+'"/>';
+        out+='<line x1="'+u0+'" y1="0" x2="'+u0+'" y2="'+h0
+          +'" stroke="#000" stroke-width="'+LW.thin+'" stroke-dasharray="'+dash+'"/>';
+      }
+      // 注記。基準高さと勾配を書く(平面図の境界線の注記と同じ数値の出どころ)。
+      var text=setbackKindLabel(pl)+' 基準'+Math.round(pl.baseMm)+' 勾配'+setbackSlopeText(pl.slope);
+      var fs=LW.text*0.8, half=estRoomLabelWidth(text,fs)/2;
+      // 斜線の上端側へ、線から少し離して置く。枠に収まる位置まで内側へ寄せる。
+      var tx=ax1-du*half*1.1, ty=ay1+fs*0.6;
+      if(tx-half<rect.minX+fs) tx=rect.minX+fs+half;
+      if(tx+half>rect.maxX-fs) tx=rect.maxX-fs-half;
+      if(ty+fs>rect.maxY) ty=rect.maxY-fs;
+      out+='<g transform="translate('+tx+','+ty+') scale(1,-1)">'
+        +'<text x="0" y="0" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif"'
+        +' font-size="'+fs+'" fill="#000">'+escSvgText(text)+'</text></g>';
+    });
+    return out;
+  }
+
   function buildElevationSvg(dir,opts){
     opts=opts||{};
     var ax=ELEV_AXES[dir];
@@ -23605,6 +23669,8 @@ var JISDRAW=(function(){
     body+=elevBalconyFenceToSvg(dir,LW);
     body+=elevOpenings(dir,LW);
     body+=heightDimsToSvg(dir,LW);
+    // 斜線制限。設定が無ければ空文字列なので、ここに足しても出力は1バイトも変わらない。
+    body+=elevSetbackLimitToSvg(dir,view,LW);
     // 方位記号は反転グループの **外** に置く（中に入れると記号ごと上下が裏返る）。
     // これは立面図にとって新しい出力である: 方位0度でも記号は出るので、
     // 立面図の SVG はこの1つぶんだけ、これまでと違うバイト列になる。
