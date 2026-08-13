@@ -86,11 +86,11 @@ const BASE_FNS = [
 // 斜線制限まわり(plan-setback.test.cjs と同じ顔ぶれ)。
 const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
   'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
-  'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
+  'SETBACK_VALLEY_LAP_MM', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey'];
 const SETBACK_FNS = [
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
-  'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
@@ -98,7 +98,7 @@ const SETBACK_FNS = [
   'setbackPlanesForSite', 'makeSetbackPlane', 'setbackDistanceMm', 'setbackLimitHeightMmAt',
   'setbackPointAt', 'setbackPlanes',
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
-  'setbackRoofTemplateItem', 'setbackRoofItemForPlane', 'setbackRoofItems',
+  'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackRoofItemForPlane', 'setbackRoofItems',
   'setbackRoofsOverRoom', 'setbackRoofsForRoom'
 ];
 // 壁の上端の折れ線(3D と共通の経路)。
@@ -485,19 +485,49 @@ test('24-2: 道路斜線の基準高さは 0 なので、起点は GL の上に�
     '基準高さ 0 で余分な線を引いている');
 });
 
-// 2方向がかち合う隅では、いっぽうの斜線の切り口に架かる板が、もういっぽうの
-// 制限を超えたまま建っている(build3DSetbackRoofs は板を削り直さない)。
-// 立面図はそれをそのまま描く -- 図面を合わせて隠さない。直すのは 3D の側である。
-test('24-2: 隅で、片方の斜線の板がもう片方の制限を超えていない', { todo: '3D 側の未修正: 斜線の板が他方の面で削られない' }, () => {
+// 隅で2つの制限がかち合うところ。いっぽうの切り口に架かる屋根が、もういっぽうの
+// 制限を超えたまま描かれていた(Task 24 が todo として残した不具合)。3D の板は谷で
+// 切られているので、図面もそこで切る。Task 25-3 で直した。
+test('25-3(最重要): 隅で、片方の斜線の屋根がもう片方の制限を超えていない', () => {
+  const ctx = full(setbackHouse(BOTH, true));
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  let checked = 0;
+  DIRS.forEach((d) => {
+    const svg = elev(ctx, d);
+    const l = chainLines(svg).filter((x) => x.w === mid)[0];
+    if (!l) return;                       // その方位には斜線が出ない
+    const slope = (l.h2 - l.h1) / (l.u2 - l.u1);
+    const limitAt = (u) => l.h1 + slope * (u - l.u1);
+    thickPolys(svg, lw).forEach((poly) => poly.forEach((p) => {
+      checked++;
+      assert.ok(p[1] <= limitAt(p[0]) + 1,
+        d + ': 斜線 ' + Math.round(limitAt(p[0])) + ' を ' + p[1] + ' が超えている (u=' + p[0] + ')');
+    }));
+  });
+  assert.ok(checked > 20, '見た点が少なすぎる: ' + checked);
+});
+
+// 直す前は、南立面図で道路斜線を 3.3m ほど超えた輪郭が描かれていた。
+// 「超えていない」が空振りでないこと -- 谷で実際に切った跡が図面に出ていること --
+// を、切った断面が制限の線の上に乗っていることで確かめる。
+test('25-3(最重要): 谷で切った跡が図面に出ている(そもそも切っていない、ではない)', () => {
   const ctx = full(setbackHouse(BOTH, true));
   const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
   const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
   const svg = elev(ctx, 's');
   const l = chainLines(svg).filter((x) => x.w === mid)[0];
+  assert.ok(l, '南立面図に道路斜線が引かれている');
   const slope = (l.h2 - l.h1) / (l.u2 - l.u1);
   const limitAt = (u) => l.h1 + slope * (u - l.u1);
+  // 制限の線の上にちょうど乗っている点 = そこで切られた断面である。
+  let onLimit = 0;
   thickPolys(svg, lw).forEach((poly) => poly.forEach((p) => {
-    assert.ok(p[1] <= limitAt(p[0]) + 1,
-      '道路斜線 ' + Math.round(limitAt(p[0])) + ' を ' + p[1] + ' が超えている (u=' + p[0] + ')');
+    if (p[1] > 100 && Math.abs(p[1] - limitAt(p[0])) < 1) onLimit++;
   }));
+  assert.ok(onLimit >= 2, '道路斜線で切った跡が図面に無い: ' + onLimit);
+  // 北側斜線の屋根そのものが、道路斜線の下に収まる高さまで下がっている。
+  const north = plain(run(ctx, 'setbackRoofItems()')).filter((i) => i.setbackKind === 'north')[0];
+  assert.ok(north && north.setbackClips && north.setbackClips.length === 1,
+    '北の屋根が谷を1つ持っている: ' + JSON.stringify(north && north.setbackClips));
 });

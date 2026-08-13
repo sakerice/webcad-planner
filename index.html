@@ -3759,8 +3759,25 @@ function roomHasRoomAbove(room){
 // 屋根アイテムの footprint が平面上のこの点を覆っているか。回転・フリップは
 // roofLocalPoint が既に持っているので、ローカル座標で矩形に入るかだけを見る
 // (isInsideItem は建具の当たり判定の余白を持っており、屋根の輪郭とは別物)。
+// 谷(2つの制限が交わる線)の向こう側か。setbackClips は「この面のほうが低い
+// (＝この面が効く)側」を表す平面座標の一次式で、値が0以上の側だけがこの屋根の
+// 領分である。制限が1枚だけのプランでは setbackClips が付かないので、
+// 既存の屋根も1枚制限の斜線屋根も、ここは1回も通らない。
+function setbackClipsCoverPlan(cls,xMm,yMm){
+  var i, c;
+  for(i=0;i<cls.length;i++){
+    c=cls[i];
+    if(c.c+c.cx*xMm+c.cy*yMm<0) return false;
+  }
+  return true;
+}
 function roofCoversPlanPoint(it,xMm,yMm){
   var lp=roofLocalPoint(it,xMm,yMm);
+  // 斜線由来の屋根は、**自分の面がいちばん低い範囲にしか架からない**(Task 25-3)。
+  // 角で2つの制限が交わるところでは、谷の向こうはもう一方の面の屋根の領分である。
+  // 3D に建つ板もそこで切られている(build3DSetbackRoofSlab の setbackOtherPlaneClips)
+  // ので、同じ谷をここでも使う -- 谷の定義は setbackBindingClipPlan 1本しかない。
+  if(it.setbackClips && !setbackClipsCoverPlan(it.setbackClips,xMm,yMm)) return false;
   // 斜線由来の屋根が凹みのある輪郭を持つとき(Task 18-3)は、その輪郭で見る。
   // setbackOutline を持たない屋根 -- つまり既存の屋根すべて -- は従来の矩形のまま。
   if(it.setbackOutline) return setbackOutlineCoversLocal(it.setbackOutline,lp.x,lp.z);
@@ -9621,6 +9638,12 @@ function makeSetbackPlane(kind,zone,baseMm,slope,nx,ny,d0,sb){
     nx:nx, ny:ny, d0:d0, px:px, py:py,
     siteTMin:tMin, siteTMax:tMax, siteSMin:sMin, siteSMax:sMax};
 }
+// 制限面をそれと分かる文字列に。**面のオブジェクトは呼ぶたびに作り直される**ので、
+// 「この屋根はどの面の切り口に架かっているか」を同一性で持つことができない。
+// 面を決めている数値そのもので照合する。
+function setbackPlaneKeyOf(pl){
+  return pl.kind+':'+pl.baseMm+':'+pl.slope+':'+pl.nx+':'+pl.ny+':'+pl.d0;
+}
 function setbackDistanceMm(pl,xMm,yMm){ return pl.nx*xMm+pl.ny*yMm-pl.d0; }
 function setbackLimitHeightMmAt(pl,xMm,yMm){ return pl.baseMm+pl.slope*setbackDistanceMm(pl,xMm,yMm); }
 // (t,s) から平面座標へ戻す。nx,ny と px,py は正規直交なのでこれで一意に決まる。
@@ -10273,7 +10296,7 @@ function setbackRoofTemplateItem(){
 // どちらも距離の一次式である。だから pitch=atan(slope) とし、屋根ローカルの +z を
 // 「境界からの距離が増える向き」へ合わせ、elev を低い側の軒の高さに置けば、屋根面は
 // 制限面に **厳密に一致** する。屋根の描き方も高さの計算も新しくは書いていない。
-function setbackRoofItemForPlane(pl,span,key){
+function setbackRoofItemForPlane(pl,span,key,planes){
   if(!span) return null;
   var tpl=setbackRoofTemplateItem();
   var floor=tpl?(tpl.floor||1):1;
@@ -10298,6 +10321,16 @@ function setbackRoofItemForPlane(pl,span,key){
     color:tpl?tpl.color:undefined, texture:tpl?tpl.texture:undefined,
     gutterMode:'off'   // 制限面に沿った切り口。樋を自動生成する対象ではない。
   };
+  // 角で2つの制限が交わるとき、この屋根の領分は **自分の面がいちばん低い側だけ**
+  // である(Task 25-3)。谷の向こうはもう一方の面の屋根が架かる所で、そこまで
+  // この面の勾配で伸ばすと、もう一方の制限を超えたまま立つ(道路斜線で実測 3.3m)。
+  // 谷の線は 3D の板を切っているのと同じ式(setbackBindingClipsPlan)から取る。
+  // **制限面が1枚だけのプランでは空配列なので、この行は1プロパティも足さない。**
+  var clips=setbackBindingClipsPlan(pl,planes);
+  if(clips.length){
+    it.setbackClips=clips;
+    it.setbackPlaneKey=setbackPlaneKeyOf(pl);
+  }
   // Task 18-3: 削った範囲が矩形1枚に収まらない（L字などで凹んでいる）ときだけ、
   // 屋根ローカルの輪郭を持たせる。**矩形1枚のときは付けない**ので、凹みの無い
   // 間取りの屋根アイテムは 1 プロパティも増えず、今までと同じ物のままである。
@@ -10335,7 +10368,7 @@ function setbackRoofItems(){
   if(_setbackRoofCacheKey===key&&_setbackRoofCache) return _setbackRoofCache;
   var out=[];
   planes.forEach(function(pl){
-    var it=setbackRoofItemForPlane(pl,setbackCutSpanMm(pl),key+'#'+pl.kind);
+    var it=setbackRoofItemForPlane(pl,setbackCutSpanMm(pl),key+'#'+pl.kind,planes);
     if(it) out.push(it);
   });
   _setbackRoofCacheKey=key; _setbackRoofCache=out;
@@ -10486,22 +10519,42 @@ function setbackSectionFootprint(pl,planes){
   for(i=0;i<nt*ns;i++) if(cov[i]) return fp;
   return null;
 }
-// 他の制限面ごとに「この面のほうが低い(＝この面が効く)側」を表す (t,s) の一次式。
-// 制限高さは平面座標の一次式で、(t,s)→平面座標も一次なので、差もまた一次式になる。
-// 値が正の側だけを残せば、谷の線で過不足なく切れる。
+// 谷 = 2つの制限面が交わる線。**その定義はここ1本しかない。**
+// 「面 pl のほうが面 b より低い(＝ pl が効く)側」を表す平面座標 (x,y) の一次式で、
+// 制限高さがどちらも座標の一次式だから、その差もまた一次式になる。
+// 値が0以上の側だけを残せば、谷の線で過不足なく切れる。
+//
+// 3D の板(build3DSetbackRoofSlab)も、平面の屋根アイテム(setbackRoofItemForPlane)も、
+// 立面図(elevRoofProfiles)も、全部この式から出る。別々に書くと、板が切れている所と
+// 図面が切れている所と天井が下りている所が食い違いはじめる。
 var SETBACK_VALLEY_LAP_MM=1;   // 谷で1mmだけ重ねる(継ぎ目に髪の毛ほどの隙間も出さない)
-function setbackOtherPlaneClips(pl,planes){
+function setbackBindingClipPlan(pl,b){
+  var f=function(x,y){
+    return setbackLimitHeightMmAt(b,x,y)-setbackLimitHeightMmAt(pl,x,y);
+  };
+  var f0=f(0,0);
+  return {c:f0+SETBACK_VALLEY_LAP_MM,cx:(f(1000,0)-f0)/1000,cy:(f(0,1000)-f0)/1000};
+}
+// 面が1枚だけなら **空配列**。制限が1つのプランは今までと1つも変わらない。
+function setbackBindingClipsPlan(pl,planes){
   var out=[];
   (planes||[]).forEach(function(b){
     if(b===pl) return;
-    var g=function(t,s){
-      var p=setbackPointAt(pl,t,s);
-      return setbackLimitHeightMmAt(b,p.x,p.y)-setbackLimitHeightMmAt(pl,p.x,p.y);
-    };
-    var g0=g(0,0);
-    out.push({c:g0+SETBACK_VALLEY_LAP_MM,ct:(g(1000,0)-g0)/1000,cs:(g(0,1000)-g0)/1000});
+    out.push(setbackBindingClipPlan(pl,b));
   });
   return out;
+}
+// 同じ谷を、面 pl の (t,s) 座標へ移したもの。(t,s)→平面座標が一次変換なので、
+// 3点で測れば厳密に決まる(近似ではない)。
+function setbackOtherPlaneClips(pl,planes){
+  return setbackBindingClipsPlan(pl,planes).map(function(cl){
+    var g=function(t,s){
+      var p=setbackPointAt(pl,t,s);
+      return cl.c+cl.cx*p.x+cl.cy*p.y;
+    };
+    var g0=g(0,0);
+    return {c:g0,ct:(g(1000,0)-g0)/1000,cs:(g(0,1000)-g0)/1000};
+  });
 }
 function setbackClipValue(cl,t,s){ return cl.c+cl.ct*t+cl.cs*s; }
 // 線分が矩形そのものの辺の上に乗っているか。乗っていないなら谷で切った断口である。
@@ -23463,15 +23516,24 @@ var JISDRAW=(function(){
       var prof=roofItemProfile(it,dir);
       if(!prof || prof.points.length<3) return;
       var pts=prof.points, apex=prof.apex;
-      // 斜線由来の屋根は制限面の上に載っている物なので、自分の面では切らない。
-      if(pls.length && !it.setbackRoof){
+      // 斜線由来の屋根は **自分の面の上にぴったり載っている** ので、自分の面では
+      // 切らない(切ると丸め誤差ぶんだけ輪郭が削れて潰れる)。だが **他の面では
+      // 切る**: 角で2つの制限が交わるところで、片方の面に架かった屋根が
+      // もう片方の制限を超えたまま描かれていた(道路斜線で 3.3m)。3D の板は谷で
+      // 切られているので、切らずに描くと図面のほうが現物と違う形になる。Task 25-3。
+      var own=it.setbackRoof?(it.setbackPlaneKey||''):null;
+      var cut=false;
+      if(pls.length){
         var dr=elevItemDepthRange(it,ax);
         pls.forEach(function(pl){
-          if(pts.length>=3) pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dr.lo,dr.hi));
+          if(own!==null && (own==='' || setbackPlaneKeyOf(pl)===own)) return;
+          if(pts.length<3) return;
+          pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dr.lo,dr.hi));
+          cut=true;
         });
         if(pts.length<3) return;
-        apex=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
       }
+      if(cut) apex=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
       out.push({points:pts,apex:apex});
     });
     return out;

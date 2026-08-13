@@ -104,7 +104,7 @@ const HEIGHT_FNS = [
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
   // Task 12-1: 屋根から天井を導く経路。宣言していない部屋はここを通らない。
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
-    'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
+    'roomDeclaresSlopedCeiling', 'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',

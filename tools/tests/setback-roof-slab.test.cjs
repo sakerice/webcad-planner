@@ -132,7 +132,7 @@ const FNS = [
   'setbackRoofTemplateItem',
   // Task 21-1 の本体
   'setbackWorldToTS', 'setbackSectionTris', 'setbackTriSRangeInBand', 'setbackSectionFootprint',
-  'setbackOtherPlaneClips', 'setbackClipValue', 'setbackRectHasEdge',
+  'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackOtherPlaneClips', 'setbackClipValue', 'setbackRectHasEdge',
   'setbackClipPolygon', 'setbackClipSegment',
   'setbackFootprintRects', 'setbackFootprintEdges',
   'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',

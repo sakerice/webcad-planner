@@ -82,11 +82,11 @@ const DRAW_OBJ_VARS = ['LEGACY_FMP_TYPE_MAP'];
 // 斜線制限まわり(setback-cut.test.cjs と同じ顔ぶれのうち、平面図が触るぶん)。
 const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
   'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
-  'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
+  'SETBACK_VALLEY_LAP_MM', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey'];
 const SETBACK_FNS = [
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
-  'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
@@ -94,7 +94,7 @@ const SETBACK_FNS = [
   'setbackPlanesForSite', 'makeSetbackPlane', 'setbackDistanceMm', 'setbackLimitHeightMmAt',
   'setbackPointAt', 'setbackPlanes',
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
-  'setbackRoofTemplateItem', 'setbackRoofItemForPlane', 'setbackRoofItems'
+  'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackRoofItemForPlane', 'setbackRoofItems'
 ];
 
 function makeCtx(data) {
