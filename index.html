@@ -5160,6 +5160,39 @@ function selectedRoomCeilingHtml(it){
   html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
 }
+// 天井の仕上げ（色・テクスチャ）の欄 (Task 22)。
+// 床テクスチャの欄と同じ書き方・同じ入れ物で、置き場所だけ天井の欄の下。
+// 天井の高さの欄(selectedRoomCeilingHtml)と分けてあるのは、あちらが type==='flat'
+// の途中で return する形をしているためで、仕上げは平らでも勾配でも同じように要る。
+//
+// **描いただけでは部屋に何も書かない。** 書き込みは onchange から
+// updateSelectedProp を通る経路だけ(=ロック判定・undo・再描画を既存と共有する)。
+function selectedRoomCeilingFinishHtml(it){
+  if(!it||it.type!=='room') return '';
+  var hasColor=!!it.ceilingColor;
+  var hasTex=!!it.ceilingTexture;
+  var html='<div class="ph" style="margin-top:12px">天井の仕上げ</div>';
+  html+='<div class="pr"><div class="pl">天井カラー</div><input class="pi" type="color" value="'+(it.ceilingColor||CEILING_DEFAULT_COLOR)+'" onchange="updateSelectedProp(\'ceilingColor\',this.value)"></div>';
+  if(hasColor) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'ceilingColor\',null)">天井カラー解除</button>';
+  html+='<div class="pr"><div class="pl">天井テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadRoomCeilingTex(this)"></div>';
+  if(hasTex) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'ceilingTexture\',null)">天井テクスチャ解除</button>';
+  html+=textureFlipControlsHtml(
+    'updateSelectedProp(\'ceilingTextureFlipX\','+(!it.ceilingTextureFlipX)+')',
+    'updateSelectedProp(\'ceilingTextureFlipY\','+(!it.ceilingTextureFlipY)+')',
+    {texture:it.ceilingTexture,textureFlipX:it.ceilingTextureFlipX,textureFlipY:it.ceilingTextureFlipY},
+    false);
+  if(!hasColor&&!hasTex){
+    html+='<div class="lock-status-note">未設定です。この部屋の天井は今までどおり既定の色（'+CEILING_DEFAULT_COLOR+'）で描かれます。</div>';
+  } else if(hasTex&&hasColor){
+    html+='<div class="lock-status-note">テクスチャを設定しているあいだ、天井カラーは効きません（画像が優先されます）。</div>';
+  }
+  // 「設定したのに何も起きない」に見える2つの場合を、その場で言う。
+  html+='<div class="lock-status-note">天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。平らな天井にも勾配天井にも同じ仕上げが乗ります。</div>';
+  if(typeof roomHasCoverAbove==='function'&&!roomHasCoverAbove(it)){
+    html+='<div class="lock-status-note">この部屋の上には部屋も屋根もありません。天井面そのものが作られないので、仕上げを設定しても外観3Dには出ません（上に屋根を載せると出ます）。</div>';
+  }
+  return html;
+}
 // 「宣言が効いたのか、斜線が効いたのか」を画面で言い分ける。斜線由来の勾配天井は
 // 部屋の ceiling 宣言を必要としないので、宣言欄だけを見ていると理由が読めなくなる。
 function roomSetbackCeilingNoteHtml(room){
@@ -5926,6 +5959,7 @@ function updateProps(){
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
     html += selectedRoomCeilingHtml(it);
+    html += selectedRoomCeilingFinishHtml(it);
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
@@ -5983,6 +6017,14 @@ function updateSelectedProp(p,v,noSave){
   // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
   // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
   if(p==='setback' && !v) delete ST.selected.setback;
+  // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
+  // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
+  if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
+  if(p==='ceilingTexture' && !v){
+    delete ST.selected.ceilingTexture;
+    delete ST.selected.ceilingTextureFlipX;
+    delete ST.selected.ceilingTextureFlipY;
+  }
   if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
   if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
     var ws=getExteriorWallSetting(ST.selected);
@@ -6100,6 +6142,19 @@ function uploadTex(inp){
   r.onload=function(e){
     prepareUploadedTexture(e.target.result,function(dataUrl){
       updateSelectedProp('texture', dataUrl);
+    });
+  };
+  r.readAsDataURL(file);
+}
+// 天井テクスチャの読み込み (Task 22)。床の uploadTex と同じ道を通り、
+// 書き込み先のフィールド名だけが違う。
+function uploadRoomCeilingTex(inp){
+  if(ST.selected && isObjectLocked(ST.selected)){ updateProps(); return; }
+  var file=inp.files[0]; if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    prepareUploadedTexture(e.target.result,function(dataUrl){
+      updateSelectedProp('ceilingTexture', dataUrl);
     });
   };
   r.readAsDataURL(file);
@@ -17543,6 +17598,57 @@ function makeCeilingMaterial(){
   }
   return new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide});
 }
+// ── 部屋ごとの天井の仕上げ (Task 22) ────────────────────────────────────────
+// 床の仕上げ(makeRoomFloorMaterial が読む r.texture / r.textureFlipX /
+// r.textureFlipY)を、そのまま天井へ広げたもの。入れ物は部屋そのもので、
+// 壁の内観面が interiorColor / interiorTexture / interiorTextureFlipX を持つのと
+// 同じ形に、部屋は ceilingColor / ceilingTexture / ceilingTextureFlipX を持つ。
+// 天井のために別の入れ物(DATA.ceilingSettings のようなもの)は作らない。
+//
+// **指定が無い部屋では null を返す。** 呼び出し側は従来の makeCeilingMaterial() が
+// 作った材質をそのまま使い回すので、保存済みプラン(全部これに当たる)の天井は
+// 1ビットも動かない。
+function resolveRoomCeilingAppearance(r){
+  var texture=(r&&r.ceilingTexture)||null;
+  var color=(r&&r.ceilingColor)||null;
+  if(!texture&&!color) return null;
+  return appearanceWithTextureOrientation(color,texture,'room',r,'ceilingTexture');
+}
+// 天井テクスチャ1枚あたりの高さ(m)。床(makeRoomFloorMaterial の 0.9)と同じにする。
+// 天井材も床材と同じ寸法で売られているので、床と別の数を持ち込む理由が無い。
+var CEILING_TEXTURE_TILE_M=0.9;
+// 既定の天井色。makeCeilingMaterial の 0xf4f1ea と同じ色を、UIが「未設定のとき
+// 何色で描かれるか」を言うために持つ。makeCeilingMaterial の側は数値リテラルの
+// ままにしてある(PV採光のテストがあの関数だけを切り出して評価するため、外の
+// 変数を参照させない)。ズレは ceiling-finish のテストが見張る。
+var CEILING_DEFAULT_COLOR='#f4f1ea';
+// 天井面の材質。仕上げを指定していない部屋では baseMat(= makeCeilingMaterial() が
+// 作った従来の材質)を**そのまま**返す。同じインスタンスを共有するので、指定の
+// 無いプランでは今日と同じ材質が今日と同じ枚数だけ作られる。
+//
+// PV採光の「描かないが影は落とす」オクルーダーは仕上げより優先する。内観採光は
+// 天井が描かれないことに依存しているので、色を塗ってそれを壊してはいけない。
+function makeRoomCeilingMaterial(r,baseMat){
+  if(PV_INTERIOR_DAYLIGHT && isInt) return baseMat;
+  var ap=resolveRoomCeilingAppearance(r);
+  if(!ap) return baseMat;
+  var rw=(r&&r.w||0)*U, rd=(r&&r.d||0)*U;
+  if(ap.texture){
+    var tex=cloneRepeatReadyTexture(getTexture3D(ap.texture));
+    if(tex){
+      tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+      setTextureRepeatNoDistort(tex,rw,rd,CEILING_TEXTURE_TILE_M);
+      applyTextureFlip(tex,ap);
+      // 既定の天井材と違うのは map だけにする。粗さ・金属度・両面描画を揃えて
+      // おかないと、仕上げを1つ設定した部屋だけ質感が飛ぶ。
+      return new THREE.MeshStandardMaterial({map:tex,color:0xffffff,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+    }
+  }
+  if(ap.color){
+    return new THREE.MeshStandardMaterial({color:ap.color,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+  }
+  return baseMat;
+}
 // 部屋に照明が1つも置かれていないときにレンダが自動で足す天井器具。
 // ユーザーが設計として置いたものではないので、部材ガイドの legend でもそう名乗る
 // （名乗らないと 'render-object' = 未分類のまま LOCKED に落ち、生成AIは
@@ -17713,7 +17819,9 @@ function buildRooms3D(flFilt){
       }
       var ceilingHoles=stairwellHolesForRoom(r,ceilingStairQuadsByFloor);
       // 勾配を宣言していない部屋では null。従来の平らな枝をそのまま通る。
-      sc3.add(buildRoomCeilingMesh(r,ceilY,matCeiling,ceilingHoles,roomCeilingProfile(r)));
+      // 材質は部屋ごと。仕上げを持たない部屋では matCeiling がそのまま返る
+      // (=平らな天井も勾配天井も、同じ1つの仕上げが乗る)。
+      sc3.add(buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
     }
 
 	    // Ceiling downlights

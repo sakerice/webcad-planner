@@ -301,13 +301,19 @@ function ceilingYsFor(data, floor) {
     LIGHT_SETTINGS: { room: 1, env: 0 },
     isWalkView: function () { return false; },
     isLightItemType: function () { return false; },
-    makeCeilingMaterial: function () { return {}; },
+    makeCeilingMaterial: function () { return { base: true }; },
     makeRoomFloorMaterial: function () { return {}; },
     buildRoomFloorMeshes: function () { return { slab: {}, slabBody: null }; },
     buildRoomCeilingMesh: function (r, ceilY, mat, holes, slope) {
-      got.push({ id: r.id, floor: r.floor, ceilY: ceilY, slope: slope === undefined ? null : slope });
+      got.push({ id: r.id, floor: r.floor, ceilY: ceilY, mat: mat, slope: slope === undefined ? null : slope });
       return {};
     },
+    // Task 22: 天井の仕上げ。本物の makeRoomCeilingMaterial を通し、
+    // テクスチャまわりだけ最小のスタブで支える。
+    getTexture3D: function (k) { return k ? { key: k } : null; },
+    cloneRepeatReadyTexture: function (t) { return t ? { key: t.key } : null; },
+    setTextureRepeatNoDistort: function () {},
+    applyTextureFlip: function () {},
     roomHasCoverAbove: function () { return true; },
     stairwellQuadsForFloor: function () { return []; },
     stairwellHolesForRoom: function () { return []; },
@@ -323,9 +329,11 @@ function ceilingYsFor(data, floor) {
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('U'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM')
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
+    topLevelVar('CEILING_TEXTURE_TILE_M')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
-   .concat([topLevelFunction('buildRooms3D')]).join('\n'), ctx);
+   .concat(['appearanceWithTextureOrientation', 'resolveRoomCeilingAppearance',
+            'makeRoomCeilingMaterial', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
   ctx.buildRooms3D(floor);
   return { got: got, U: ctx.U, floorBaseY: ctx.floorBaseY };
 }
