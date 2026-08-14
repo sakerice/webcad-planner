@@ -124,6 +124,7 @@ const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', 'ROOM_OVERLAP_EPS_MM',
   'SETBACK_SECTION_CELL_MM', 'SETBACK_SECTION_MAX_CELLS', 'SETBACK_VALLEY_LAP_MM',
   'SETBACK_NORTH_COLOR', 'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR',
   'CONTEXT_EXTERIOR_TYPES', '_setbackRoofCache', '_setbackRoofCacheKey',
+  '_setbackRoomRoofsCache', '_setbackRoomRoofsCacheKey',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M', 'WALL_TOP_SAMPLE_STEP_M'];
 
 const FNS = [
@@ -156,7 +157,7 @@ const FNS = [
   'collectSetbackOverhangTris', 'setbackOverhangAudit',
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
   'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackRoofItemForPlane', 'setbackRoofItems',
-  'setbackRoofsOverRoom',
+  'clipPlanPolyByRoofLocal', 'roofRoomOverlapPointsMm', 'setbackRoofsOverRoom',
   'setbackWorldToTS', 'setbackSectionTris', 'setbackTriSRangeInBand', 'setbackSectionFootprint',
   'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackOtherPlaneClips', 'setbackClipValue', 'setbackRectHasEdge',
   'setbackClipPolygon', 'setbackClipSegment',
@@ -456,4 +457,220 @@ test('25-3(最重要): 谷の外では、板が二重に張られていない(�
   assert.ok(n > 100, '見た点が少なすぎる: ' + n);
   assert.ok(covered / n > 0.9, '削られた所が板で覆われていない: ' + covered + '/' + n);
   assert.equal(doubled, 0, '谷から離れた所で板が二重: ' + JSON.stringify(worstAt));
+});
+
+// ══ 28 板の「外接矩形」と「輪郭」を取り違えない ═══════════════════════════
+//
+// 背景(Task 27): 斜線の切り口に架かる板(setbackRoofItems)のアイテムは、
+// **切り口の外接矩形を制限面の座標系で採ったもの** である。方位が振れると切り口は
+// (t,s) 平面で斜めの帯になるので、その外接矩形は建物の外まで張り出す。立面図は
+// その矩形をそのまま立体として描いていて、建物のどこにも対応しない長方形を出して
+// いた(Task 27 で取りやめ)。
+//
+// 天井の側は同じ板を読んでいる。読んでいる場所は2つある:
+//   ・setbackRoofsOverRoom … その部屋に架かる板を選ぶ
+//   ・roofTopLimitAtPlanPoint … 点ごとに、覆っている板の下面で頭を押さえる
+// どちらも覆いの判定を roofCoversPlanPoint に任せていて、その中では
+// **凹みのある切り口は setbackOutline(重ならない矩形の集まり)で見る**。
+// だから天井には外接矩形の張り出しが届かない。ここでそれを実測で押さえる。
+
+// 方位 θ を振ったときの北側斜線。条文と幾何から独立に解く:
+//   真北 = (sin θ, −cos θ)。北側境界線は敷地を北から支える辺で、面はそこから
+//   真南 s = (−sin θ, cos θ) の向きへ 1.25 の勾配で立ち上がる(基準 5000mm)。
+function northLimitAtDegMm(deg, xMm, yMm) {
+  const a = deg * Math.PI / 180;
+  const sx = -Math.sin(a), sy = Math.cos(a);
+  let d0 = Infinity;
+  [[-1000, 0], [7000, 0], [7000, 7000], [-1000, 7000]].forEach((c) => {
+    d0 = Math.min(d0, sx * c[0] + sy * c[1]);
+  });
+  return 5000 + 1.25 * (sx * xMm + sy * yMm - d0);
+}
+function lowerLimitAtDegMm(deg, xMm, yMm) {
+  return Math.min(northLimitAtDegMm(deg, xMm, yMm), roadLimitMm(xMm));
+}
+// 凸多角形を半平面 f(p) <= 0 で切る(サザーランド・ホジマン)。
+function clipConvex(poly, f) {
+  const out = [];
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const fa = f(a), fb = f(b);
+    if (fa <= 0) out.push(a);
+    if ((fa <= 0) !== (fb <= 0)) {
+      const t = fa / (fa - fb);
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+  }
+  return out;
+}
+// 点から凸多角形までの距離(中は 0)。
+function distToConvex(poly, p) {
+  if (poly.length < 3) return Infinity;
+  let neg = false, pos = false;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const c = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    if (c < -1e-9) neg = true;
+    if (c > 1e-9) pos = true;
+  }
+  if (!(neg && pos)) return 0;
+  let best = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const L2 = dx * dx + dy * dy;
+    let t = L2 > 0 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    const qx = a[0] + dx * t, qy = a[1] + dy * t;
+    best = Math.min(best, Math.hypot(p[0] - qx, p[1] - qy));
+  }
+  return best;
+}
+// 実際に削られる平面領域 = 建物の footprint のうち、低いほうの制限が天端より
+// 低い所。min(北,道路) < 8550 は2つの半平面の **和** なので、凸な2枚に分けて持つ。
+//   北側: 5000 + 1.25(s·p − d0) < 8550  ⇔  s·p < d0 + 2840
+//   道路: 1.25(10000 − x) < 8550        ⇔  x > 3160
+function cutPiecesAtDeg(deg) {
+  const box = [[0, 1000], [6000, 1000], [6000, 5000], [0, 5000]];
+  return [
+    clipConvex(box, (p) => northLimitAtDegMm(deg, p[0], p[1]) - TOP_M * 1000),
+    clipConvex(box, (p) => roadLimitMm(p[0]) - TOP_M * 1000)
+  ];
+}
+function distToCut(deg, p) {
+  const ps = cutPiecesAtDeg(deg);
+  return Math.min(distToConvex(ps[0], p), distToConvex(ps[1], p));
+}
+// その方位で、板が「覆っている」と答えた点(平面 mm)を格子で集める。
+//   kind='outline' … 製品どおり roofCoversPlanPoint(輪郭で見る)
+//   kind='bbox'    … 板のアイテムの外接矩形だけで見る(立面図が見ていた形)
+function coveredPointsMm(ctx, kind) {
+  return plain(run(ctx, '(function(){var items=setbackRoofItems(), out=[];'
+    + 'function bbox(it,x,y){var lp=roofLocalPoint(it,x,y);'
+    + ' return Math.abs(lp.x)<=it.w*U/2+1e-6 && Math.abs(lp.z)<=it.d*U/2+1e-6;}'
+    + 'for(var x=-2000;x<=9000;x+=100) for(var y=-2000;y<=8000;y+=100){'
+    + ' for(var i=0;i<items.length;i++){'
+    + '  if(' + (kind === 'bbox' ? 'bbox(items[i],x,y)' : 'roofCoversPlanPoint(items[i],x,y)') + '){'
+    + '   out.push([x,y]); break; } } }'
+    + 'return out;})()'));
+}
+
+test('28(最重要): 天井が見る板の覆いは、実際の切り口から1目ぶんしか外へ出ない', () => {
+  // 「1目」= 切り取り範囲を測る格子の目(建物の平面範囲 ÷ 64 ≒ 100mm)。板の輪郭は
+  // 縁が切り口から食み出さないよう、当たった格子点を1目ぶん膨らませた和で作られる。
+  // その膨らみは残る。**メートル単位で張り出さない** ことがここの主張である。
+  let worstOutline = 0, worstBbox = 0, at = null;
+  [0, 15, 30, 45, 60, 75, 90].forEach((deg) => {
+    const ctx = makeCtx(cornerPlan(BOTH, true), { northDeg: deg });
+    assert.equal(run(ctx, 'setbackRoofItems().length'), 2, deg + '度: 板が2枚できていない');
+    coveredPointsMm(ctx, 'outline').forEach((p) => {
+      const d = distToCut(deg, p);
+      if (d > worstOutline) { worstOutline = d; at = [deg, p[0], p[1]]; }
+    });
+    coveredPointsMm(ctx, 'bbox').forEach((p) => {
+      const d = distToCut(deg, p);
+      if (d > worstBbox) worstBbox = d;
+    });
+  });
+  // 空振り防止: 外接矩形で見ればメートル単位で張り出している。つまりこの試験は
+  // 「そもそも張り出しが起きない形の建物」を見ているのではない。
+  assert.ok(worstBbox > 500,
+    '外接矩形でも張り出していない = この試験が何も突いていない: ' + Math.round(worstBbox) + 'mm');
+  assert.ok(worstOutline <= 300,
+    '板の覆いが切り口から ' + Math.round(worstOutline) + 'mm 外へ出ている(1目ぶんを超える) @'
+    + JSON.stringify(at));
+});
+
+test('28(最重要): 部屋の真ん中を横切る斜線の帯でも、天井がその切り口についてくる', () => {
+  // 方位15度・北側＋道路。北側の板は谷(道路側の領分)で削られて帯になり、
+  // **部屋の中心にも四隅にも掛からない**。中心と四隅の5点だけで「この部屋に
+  // 架かっているか」を決めていた頃は、この板が丸ごと落ちて、帯の下の天井が
+  // 切り口より 1.1m 高いまま残っていた。
+  const DEG = 15;
+  const ctx = makeCtx(cornerPlan(BOTH, true), { northDeg: DEG });
+  const room = 'DATA.rooms.filter(function(r){return r.floor===3;})[0]';
+  const north = 'setbackRoofItems().filter(function(it){return it.setbackKind==="north";})[0]';
+  assert.ok(run(ctx, north + '?1:0'), '北側の板ができている');
+  // 空振り防止: この試験が突いている条件そのもの(5点のどれにも掛からない)。
+  assert.deepEqual(
+    plain(run(ctx, '(function(){var r=' + room + ';return [[r.x+r.w/2,r.y+r.d/2],[r.x,r.y],'
+      + '[r.x+r.w,r.y],[r.x,r.y+r.d],[r.x+r.w,r.y+r.d]].map(function(p){'
+      + 'return roofCoversPlanPoint(' + north + ',p[0],p[1])?1:0;});})()')),
+    [0, 0, 0, 0, 0], '中心か四隅に掛かってしまっている(この試験が効かない)');
+  assert.ok(run(ctx, '(function(){var r=' + room + ', n=0;'
+    + 'for(var x=100;x<=5900;x+=100) for(var y=1050;y<=4950;y+=100)'
+    + ' if(roofCoversPlanPoint(' + north + ',x,y)) n++; return n;})()') > 20,
+    '北側の板が部屋の中を横切っていない(この試験が効かない)');
+
+  assert.equal(run(ctx, 'setbackRoofsOverRoom(' + room + ').filter(function(it){'
+    + 'return it.setbackKind==="north";}).length'), 1,
+    '部屋の中を横切っている北側の板が、その部屋に架かる屋根として選ばれていない');
+
+  const flat = run(ctx, '(floorBaseY(3)+roomCeilingHeightM(' + room + '))/U');
+  const floorTop = run(ctx, 'floorTopY(3)/U');
+  const got = plain(run(ctx, '(function(){var r=' + room + ', p=roomCeilingProfile(r), out=[];'
+    + 'for(var x=100;x<=5900;x+=100) for(var y=1050;y<=4950;y+=100)'
+    + ' out.push([x,y,roomCeilingWorldYAtMm(r,p,x,y)/U]);'
+    + 'return out;})()'));
+  let n = 0, nNorth = 0, worst = 0, worstAt = null, deepest = 0;
+  got.forEach((g) => {
+    const lower = lowerLimitAtDegMm(DEG, g[0], g[1]);
+    // 縁の1目ぶんを避けて、**確実に削られている所**だけを見る。
+    if (lower - 250 > flat - 300) return;
+    // 制限面が床より下へ来る所は、部屋そのものが削り取られている。天井の値に
+    // 意味が無いので数えない。
+    if (lower - 250 <= floorTop) return;
+    n++;
+    if (northLimitAtDegMm(DEG, g[0], g[1]) < roadLimitMm(g[0])) nNorth++;
+    const want = Math.min(flat, lower - 250);
+    if (flat - want > deepest) deepest = flat - want;
+    const e = Math.abs(g[2] - want);
+    if (e > worst) { worst = e; worstAt = [g[0], g[1], Math.round(g[2]), Math.round(want)]; }
+  });
+  assert.ok(n > 50, '見た点が少なすぎる: ' + n);
+  assert.ok(nNorth > 10, '北側斜線が効いている点が少なすぎる: ' + nNorth);
+  assert.ok(deepest > 800,
+    '天井が下がるはずの量が小さすぎて、落ちても気づけない: ' + Math.round(deepest) + 'mm');
+  assert.ok(worst < 2,
+    '天井が切り口についてきていない: ' + Math.round(worst) + 'mm ずれ @' + JSON.stringify(worstAt));
+});
+
+test('28(最重要): 板が外接矩形へ落ちても、天井は元の平天井より下がらない', () => {
+  // 輪郭が細切れになりすぎたときの保険(SETBACK_ROOF_MAX_RECTS)は、輪郭を捨てて
+  // **外接矩形1枚**へ落とす。そのときだけ、天井も立面図と同じ張り出した形を見る。
+  // それでも天井が狂わないのは、板の下面が制限面そのもので、天井が
+  //   min(その点の制限 − 250mm, 元の平天井)
+  // に抑えられているからである。張り出した先は「制限が建物より高い」所なので、
+  // 元の平天井のほうが低く、そちらが勝つ。**この頭打ちが無くなると張り出しが
+  // そのまま天井に出る。**
+  const DEG = 15;
+  const ctx = makeCtx(cornerPlan(BOTH, true), { northDeg: DEG });
+  run(ctx, 'SETBACK_ROOF_MAX_RECTS=1; _setbackRoofCacheKey=null; _setbackRoomRoofsCacheKey=null;');
+  assert.equal(run(ctx, 'setbackRoofItems().filter(function(it){return !!it.setbackOutline;}).length'), 0,
+    '保険が発動していない(輪郭が残っている) = この試験が何も突いていない');
+  // 空振り防止: 外接矩形なので、板は実際の切り口からメートル単位で張り出している。
+  let far = 0;
+  coveredPointsMm(ctx, 'outline').forEach((p) => {
+    const d = distToCut(DEG, p);
+    if (d > far) far = d;
+  });
+  assert.ok(far > 500, '張り出しが再現できていない: ' + Math.round(far) + 'mm');
+
+  const room = 'DATA.rooms.filter(function(r){return r.floor===3;})[0]';
+  const flat = run(ctx, '(floorBaseY(3)+roomCeilingHeightM(' + room + '))/U');
+  const floorTop = run(ctx, 'floorTopY(3)/U');
+  const got = plain(run(ctx, '(function(){var r=' + room + ', p=roomCeilingProfile(r), out=[];'
+    + 'for(var x=100;x<=5900;x+=100) for(var y=1050;y<=4950;y+=100)'
+    + ' out.push([x,y,roomCeilingWorldYAtMm(r,p,x,y)/U]);'
+    + 'return out;})()'));
+  let worst = 0, worstAt = null;
+  got.forEach((g) => {
+    const lower = lowerLimitAtDegMm(DEG, g[0], g[1]);
+    if (lower - 250 <= floorTop) return;          // そこは部屋ごと削り取られている
+    const want = Math.min(flat, lower - 250);
+    const off = Math.abs(g[2] - want);            // 切り口が示す高さからのずれ(上下とも)
+    if (off > worst) { worst = off; worstAt = [g[0], g[1], Math.round(g[2]), Math.round(want)]; }
+  });
+  assert.ok(worst <= 300,
+    '張り出した所で天井が ' + Math.round(worst) + 'mm ずれている @' + JSON.stringify(worstAt));
 });

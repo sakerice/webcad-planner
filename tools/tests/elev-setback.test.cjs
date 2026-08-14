@@ -90,7 +90,8 @@ const BASE_FNS = [
 const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
   'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX',
   'SETBACK_VALLEY_LAP_MM', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
-  'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey'];
+  'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey',
+  '_setbackRoomRoofsCache', '_setbackRoomRoofsCacheKey'];
 const SETBACK_FNS = [
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
@@ -102,7 +103,7 @@ const SETBACK_FNS = [
   'setbackPointAt', 'setbackPlanes',
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
   'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackRoofItemForPlane', 'setbackRoofItems',
-  'setbackRoofsOverRoom', 'setbackRoofsForRoom'
+  'clipPlanPolyByRoofLocal', 'roofRoomOverlapPointsMm', 'setbackRoofsOverRoom', 'setbackRoofsForRoom'
 ];
 // 壁の上端の折れ線(3D と共通の経路)。
 const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',

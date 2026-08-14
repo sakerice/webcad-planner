@@ -10381,25 +10381,98 @@ function setbackRoofItems(){
   _setbackRoofCacheKey=key; _setbackRoofCache=out;
   return out;
 }
+// 平面の凸多角形を「屋根ローカル座標が [lo,hi] の帯」で切る(サザーランド・ホジマン)。
+// 屋根ローカルの x も z も平面座標 (x,y) の一次式なので、境界との交点は線形補間で
+// 厳密に出る。返り値は平面座標(mm)の凸多角形。重なりが無ければ空配列。
+function clipPlanPolyByRoofLocal(it,poly,useZ,lo,hi){
+  function val(p){ var lp=roofLocalPoint(it,p[0],p[1]); return useZ?lp.z:lp.x; }
+  function half(pts,sign,bound){
+    var out=[], i, a, b, va, vb, t;
+    for(i=0;i<pts.length;i++){
+      a=pts[i]; b=pts[(i+1)%pts.length];
+      va=(val(a)-bound)*sign; vb=(val(b)-bound)*sign;
+      if(va>=0) out.push(a);
+      if((va>=0)!==(vb>=0)){
+        t=va/(va-vb);
+        out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]);
+      }
+    }
+    return out;
+  }
+  var p=half(poly,1,lo);
+  if(p.length<3) return [];
+  p=half(p,-1,hi);
+  return p.length<3?[]:p;
+}
+// 部屋の矩形と屋根の輪郭が **平面で重なっている所** の代表点(平面座標 mm)。
+//
+// これが要る理由: 部屋を中心と四隅の5点でしか見ないと、部屋の**真ん中を横切る**
+// 帯を丸ごと落とす。斜線由来の板の輪郭は、方位が振れれば階段状になり、制限が2枚
+// あれば谷(setbackClips)で削られるので、四隅にも中心にも掛からない帯が普通に出る。
+// 実測: 北側+道路の2枚・方位15度で、板は部屋の中央を横切っているのに5点のどれにも
+// 掛からず、その部屋の天井が **切り口より 1117mm 高いまま** 残っていた。
+//
+// 輪郭を持たない屋根(=既存の屋根すべてと、凹みの無い斜線の板)は矩形1枚として
+// 同じ道を通る。判定そのものは roofCoversPlanPoint に任せる -- ここが返すのは
+// 「どこを見ればよいか」だけで、覆いの定義を2か所に書かない。
+function roofRoomOverlapPointsMm(it,room){
+  var quad=[[room.x,room.y],[room.x+room.w,room.y],
+    [room.x+room.w,room.y+room.d],[room.x,room.y+room.d]];
+  var rs=(it.setbackOutline&&it.setbackOutline.rects)||
+    [{x0:-it.w*U/2,x1:it.w*U/2,z0:-it.d*U/2,z1:it.d*U/2}];
+  var out=[], k, i, p, cx, cy;
+  for(k=0;k<rs.length;k++){
+    p=clipPlanPolyByRoofLocal(it,quad,false,rs[k].x0,rs[k].x1);
+    if(!p.length) continue;
+    p=clipPlanPolyByRoofLocal(it,p,true,rs[k].z0,rs[k].z1);
+    if(!p.length) continue;
+    cx=0; cy=0;
+    for(i=0;i<p.length;i++){ cx+=p[i][0]; cy+=p[i][1]; }
+    cx/=p.length; cy/=p.length;
+    out.push([cx,cy]);
+    // 谷(setbackClips)は重なりを斜めに横切るので、重心が谷の向こうへ落ちることが
+    // ある。縁のすぐ内側も見て、片側でも残っていれば拾う。
+    for(i=0;i<p.length;i++)
+      out.push([p[i][0]+(cx-p[i][0])*0.01, p[i][1]+(cy-p[i][1])*0.01]);
+  }
+  return out;
+}
 // この部屋に架かる斜線由来の屋根。上に部屋がある階には架からない(あいだに床がある)。
 // 部屋の一部でも覆っていれば返す -- そこだけ天井が下がるのが斜線の効き方である。
+var _setbackRoomRoofsCache={};
+var _setbackRoomRoofsCacheKey=null;
 function setbackRoofsOverRoom(room){
   var out=[];
   if(!room||room.hidden3D) return out;
   if(roomHasRoomAbove(room)) return out;
-  var pts=[[room.x+room.w/2,room.y+room.d/2],
-    [room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]];
+  var items=setbackRoofItems();
+  if(!items.length) return out;
   var floorY=floorTopY(room.floor);
-  setbackRoofItems().forEach(function(it){
+  // 覆いの判定は壁1本ぶんの上端を引くだけで何百回も呼ばれる。板の形が変わらない
+  // あいだは答えも変わらないので、板のキャッシュキーごと覚えておく。
+  // (キーは制限面・部屋・屋根アイテムの寸法を全部含む: setbackRoofItems 参照。
+  //  階高だけはキーに入っていないので、この部屋の床の高さも鍵に足す。)
+  if(_setbackRoomRoofsCacheKey!==_setbackRoofCacheKey){
+    _setbackRoomRoofsCache={}; _setbackRoomRoofsCacheKey=_setbackRoofCacheKey;
+  }
+  var ck=[room.id||'?',room.floor,room.x,room.y,room.w,room.d,floorY].join(':');
+  if(_setbackRoomRoofsCache[ck]) return _setbackRoomRoofsCache[ck];
+  var corners=[[room.x+room.w/2,room.y+room.d/2],
+    [room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]];
+  items.forEach(function(it){
+    // 中心と四隅に加えて、輪郭と部屋が重なっている所そのものを見る。
+    var pts=corners.concat(roofRoomOverlapPointsMm(it,room));
     var covers=false, i;
     for(i=0;i<pts.length;i++) if(roofCoversPlanPoint(it,pts[i][0],pts[i][1])){ covers=true; break; }
     if(!covers) return;
     // 下の階の頭の上を通り過ぎるだけの面には天井を引き下げさせない。
+    // 板の下面は平面なので、部屋の矩形の中での最高点は必ず四隅のどれかに出る。
     var apex=-Infinity;
     for(i=0;i<pts.length;i++) apex=Math.max(apex,roofCeilingWorldYAt(it,pts[i][0],pts[i][1]));
     if(apex<=floorY) return;
     out.push(it);
   });
+  _setbackRoomRoofsCache[ck]=out;
   return out;
 }
 // ══ 斜線の切り口そのものを屋根にする (Task 21-1) ═══════════════════════════

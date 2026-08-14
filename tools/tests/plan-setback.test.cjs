@@ -540,3 +540,32 @@ test('26-5: 斜線を設定していないプランは、どの方位でも1バ�
     });
   });
 });
+
+// ══ 28 平面図は「斜線由来の板」を1本も引かない ═══════════════════════════
+//
+// 背景(Task 27): 斜線の切り口に架かる板(setbackRoofItems)は **切り口の外接矩形を
+// 制限面の座標系で採ったもの** なので、方位が振れると建物の外まで張り出す。
+// 立面図はその板を立体として描いていて、建物のどこにも対応しない長方形を出して
+// いた(Task 27 で取りやめ)。同じ板を平面図も読んでいれば、同じ嘘が平面図にも出る。
+//
+// 平面図は板を読んでいない。Task 25-1 で「削られた結果」を平面図から外し、
+// 残したのは **斜線が立ち上がる境界線** だけ = setbackPlanes と setbackPointAt から
+// 引く一点鎖線である。だから板がどれだけ張り出していようと平面図には出ない。
+//
+// それを **実行して** 確かめる: 板を作る関数そのものを「呼ばれたら落ちる」物に
+// すり替えても、平面図の SVG は1バイトも変わらない。
+// 誰かが平面図に板の伏図を戻したら、この試験がその場で落ちる。
+test('28(最重要): 平面図は setbackRoofItems を1度も呼ばない(板の張り出しが図面に出ない)', () => {
+  const good = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
+  const trap = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
+  // 空振り防止: すり替える前は、この関数はちゃんと板を作っている。
+  assert.ok(run(trap, 'setbackRoofItems().length') > 0, '前提: 板が作られるプランである');
+  run(trap, 'setbackRoofItems=function(){ throw new Error("平面図が斜線の板を読んでいる"); };');
+  [0, 15, 45, 90, 200].forEach((deg) => {
+    run(good, 'setPlanNorthDeg(' + deg + ')');
+    run(trap, 'setPlanNorthDeg(' + deg + ')');
+    [1, 2, 3].forEach((f) => {
+      assert.equal(planSvg(trap, f), planSvg(good, f), deg + '度 ' + f + 'F が変わった');
+    });
+  });
+});

@@ -122,6 +122,7 @@ const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', 'ROOM_OVERLAP_EPS_MM',
   'SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M', 'SETBACK_BASE_MIN_MM', 'SETBACK_BASE_MAX_MM', 'SETBACK_SLOPE_MIN', 'SETBACK_SLOPE_MAX', 'SETBACK_VALLEY_LAP_MM', 'SETBACK_CUT_SAMPLES', 'SETBACK_ROOF_MAX_RECTS',
   'SETBACK_NORTH_COLOR', 'SETBACK_ROAD_COLOR', 'SETBACK_OVER_COLOR',
   'CONTEXT_EXTERIOR_TYPES', '_setbackRoofCache', '_setbackRoofCacheKey',
+  '_setbackRoomRoofsCache', '_setbackRoomRoofsCacheKey',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M', 'WALL_TOP_SAMPLE_STEP_M'];
 
 const FNS = [
@@ -155,7 +156,7 @@ const FNS = [
   // 斜線で削る（Task 17）
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
   'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackRoofItemForPlane', 'setbackRoofItems',
-  'setbackRoofsOverRoom', 'build3DSetbackRoofs',
+  'clipPlanPolyByRoofLocal', 'roofRoomOverlapPointsMm', 'setbackRoofsOverRoom', 'build3DSetbackRoofs',
   'setbackCutGeometry', 'applySetbackCut'
 ];
 
