@@ -2530,6 +2530,17 @@ body{
 #bottom-nav .bnav-btn.active:active{
   box-shadow:none!important;
 }
+/* フッターは操作を9つ並べる。狭い画面ではアイコンの器と余白を詰めて、
+   9つとも同じ幅で1画面に収める(横スクロールはさせない)。 */
+@media (max-width:430px){
+  #bottom-nav{padding:0 4px}
+  #bottom-nav .bnav-btn{padding:4px 0;margin:5px 0}
+  #bottom-nav .bnav-icon{width:26px;height:26px}
+}
+@media (max-width:360px){
+  #bottom-nav .bnav-icon{width:22px;height:22px;font-size:15px}
+  #bottom-nav .bnav-btn{font-size:7.5px}
+}
 #sidebar .common-tools{
   margin:0 0 12px!important;
   padding:12px!important;
@@ -3087,8 +3098,8 @@ input[type="reset"]:focus-visible{
     <img class="brand-logo" src="assets/brand/house-planner-mobile-icon.png?v=3" alt="" aria-hidden="true">
     <span class="brand-word">house-planner mobile</span>
   </b>
-  <!-- Mobile: hamburger for sidebar -->
-  <button class="tbtn" id="mob-menu-btn" onclick="toggleMobileSidebar()" style="display:none">☰ ツール</button>
+  <!-- ヘッダーは「いま何を見ているか」を切り替える場所。ツールメニューの開き口は
+       スマホではフッターの「ツール」が持つので、ここには置かない。 -->
   <div class="tsep"></div>
   <select id="floor-sel" onchange="onFloorChange(this.value)">
     <option value="1">1F</option><option value="2">2F</option><option value="3">3F</option><option value="4">4F</option>
@@ -3104,8 +3115,8 @@ input[type="reset"]:focus-visible{
   <button class="tbtn mob-hide" onclick="toggleDim()">↔ 寸法</button>
   <button class="tbtn mob-hide" onclick="resetView()">⊙ 全体表示</button>
   <div class="tsep mob-hide"></div>
-  <button class="tbtn mob-hide" onclick="undoAction()">↩ Undo</button>
-  <button class="tbtn mob-hide" onclick="redoAction()">↪ Redo</button>
+  <!-- Undo / Redo はヘッダーから外した。操作はフッター(スマホ)とツールメニューの
+       共通操作(全幅)が持つ。 -->
   <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
@@ -3124,19 +3135,16 @@ input[type="reset"]:focus-visible{
       <div class="common-tools-title">共通操作</div>
       <div class="common-tools-grid">
         <div class="stool active" data-tool="select" onclick="setTool('select')" title="選択・変形"><span class="sicon">↖</span>選択</div>
-        <div class="stool" data-tool="erase" onclick="setTool('erase')" title="削除"><span class="sicon">✕</span>削除</div>
         <div class="stool" onclick="undoAction()" title="Undo"><span class="sicon">↩</span>Undo</div>
         <div class="stool" onclick="redoAction()" title="Redo"><span class="sicon">↪</span>Redo</div>
         <div class="stool" onclick="copySelectedFromButton()" title="コピー"><span class="sicon">⧉</span>コピー</div>
         <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
-        <!-- 「↔ 寸法」はツールバーにしか無く、ツールバーは mob-hide でスマホでは
-             丸ごと消える。スマホ前提のアプリでデスクトップにしか無い操作は操作では
-             ないので、共通操作(スマホでもハンバーガーから開く)にも同じ toggleDim を
-             置く。新しい状態は作らない -- 押すのは既存の ST.showDim そのものである。 -->
-        <div class="stool active" id="stool-dim" onclick="toggleDim()" title="寸法の表示切替"><span class="sicon">⇥</span>寸法</div>
-        <!-- 「⊞ グリッド」「⊙ 全体表示」「🗑 階クリア」も 寸法 と同じで、ツールバー
+        <!-- 「削除」と「寸法」はこのグリッドから外し、すぐ下の「編集・表示」へ
+             移した。どちらもツールメニューの中に残しているので、スマホでも
+             フッターの「ツール」から到達できる。 -->
+        <!-- 「⊞ グリッド」「⊙ 全体表示」「🗑 階クリア」は、ツールバー
              (mob-hide)にしか無かった。768px以下では入口が1つも無くなり、機能が
              消えたのと同じになる。押すのは既存の toggleGrid / resetView / clearFloor
              そのもので、新しい状態も新しい確認ダイアログも作らない。 -->
@@ -3176,6 +3184,16 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" id="jis-drawing-mobile-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
         </div>
       </div>
+    </div>
+    <!-- 共通操作から外した「削除」「寸法」の置き場。ツールメニューの中なので、
+         スマホではフッターの「ツール」から、デスクトップでは常設のサイドバーから
+         到達できる。既定で開いた状態(cat-body open)にしてあるのは、畳んだままだと
+         「スマホから押せない」と実質同じになるためである。押すのは既存の
+         setTool('erase') / toggleDim そのもので、新しい状態は作らない。 -->
+    <div class="cat-hdr" onclick="toggleCat(this)">📝 編集・表示 <span>-</span></div>
+    <div class="cat-body open">
+      <div class="stool" data-tool="erase" onclick="setTool('erase')" title="削除"><span class="sicon">✕</span>削除</div>
+      <div class="stool active" id="stool-dim" onclick="toggleDim()" title="寸法の表示切替"><span class="sicon">⇥</span>寸法</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>+</span></div>
     <div class="cat-body">
@@ -3527,30 +3545,40 @@ input[type="reset"]:focus-visible{
   <span id="app-version">house-planner mobile v3.0.6</span>
 </div>
 
-<!-- Bottom navigation (mobile only) -->
+<!-- Bottom navigation (mobile only)
+     フッター = 図面に対する「操作」。表示の切り替え(平面図/外観3D/内観3D/
+     ウォークスルー/3D更新)はヘッダーが持つので、ここには置かない。
+     ここはツールメニューへのショートカットなので、同じ項目がツールメニューの
+     中にもあってよい(重複は意図であって、片方を消すものではない)。 -->
 <div id="bottom-nav">
   <button class="bnav-btn" id="bnav-tools" onclick="toggleMobileSidebar()">
     <span class="bnav-icon">🛠</span>ツール
   </button>
-  <button class="bnav-btn active" id="bnav-2d" onclick="setView('2d');closeMobilePanels()">
-    <span class="bnav-icon">📐</span>平面図
-  </button>
-  <button class="bnav-btn" id="bnav-3de" onclick="setViewWithLoading('3d-ext');closeMobilePanels()">
-    <span class="bnav-icon">🏗</span>外観3D
-  </button>
-  <button class="bnav-btn" id="bnav-3di" onclick="setViewWithLoading('3d-int');closeMobilePanels()">
-    <span class="bnav-icon">🚶</span>内観3D
-  </button>
-  <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
-    <span class="bnav-icon">📷</span>画像
-  </button>
-  <!-- 平面図を参照にする経路はスマホの2D表示から入る。ツールバーは mob-hide で、
-       FAB は3Dの中にしか無いので、ここが無いと携帯では平面図から動画を作れない。 -->
-  <button class="bnav-btn" id="bnav-video" onclick="openVideoRenderDialog();closeMobilePanels()">
-    <span class="bnav-icon">🎬</span>動画
+  <button class="bnav-btn active" id="bnav-select" data-tool="select" onclick="setTool('select')">
+    <span class="bnav-icon">↖</span>選択
   </button>
   <button class="bnav-btn" id="bnav-undo" onclick="undoAction()">
     <span class="bnav-icon">↩</span>Undo
+  </button>
+  <button class="bnav-btn" id="bnav-redo" onclick="redoAction()">
+    <span class="bnav-icon">↪</span>Redo
+  </button>
+  <button class="bnav-btn" id="bnav-copy" onclick="copySelectedFromButton()">
+    <span class="bnav-icon">⧉</span>コピー
+  </button>
+  <button class="bnav-btn" id="bnav-paste" onclick="pasteCopiedFromButton()">
+    <span class="bnav-icon">▣</span>貼付
+  </button>
+  <button class="bnav-btn" id="bnav-save" onclick="savePlanToStorage()">
+    <span class="bnav-icon">💾</span>保存
+  </button>
+  <!-- 画像AI/動画AIも「操作」である。ツールバーは mob-hide、画像側のFABは3Dの
+       中にしか無いので、この2つを外すと 768px 以下で入口がゼロになる。 -->
+  <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
+    <span class="bnav-icon">📷</span>画像
+  </button>
+  <button class="bnav-btn" id="bnav-video" onclick="openVideoRenderDialog();closeMobilePanels()">
+    <span class="bnav-icon">🎬</span>動画
   </button>
 </div>
 
@@ -18998,6 +19026,13 @@ function syncToolUi(){
     if(tools[i].getAttribute('data-tool')===ST.tool) tools[i].classList.add('active');
     else tools[i].classList.remove('active');
   }
+  // フッターの「選択」はツールメニューの同じ項目のショートカットなので、
+  // 選択中かどうかの表示もサイドバー側と揃える。
+  var navTools=document.querySelectorAll('.bnav-btn[data-tool]');
+  for(var k=0;k<navTools.length;k++){
+    if(navTools[k].getAttribute('data-tool')===ST.tool) navTools[k].classList.add('active');
+    else navTools[k].classList.remove('active');
+  }
   var assets=document.querySelectorAll('.asset-tile[data-tool]');
   for(var j=0;j<assets.length;j++){
     if(assets[j].getAttribute('data-tool')===ST.tool) assets[j].classList.add('active');
@@ -19069,7 +19104,7 @@ function chooseOpeningDoorModelTool(t){
 }
 
 function toggleGrid(){ST.showGrid=!ST.showGrid;draw2d();}
-// 共通操作の「寸法」ボタン(スマホから押せる唯一の入口)の on/off 表示を合わせる。
+// ツールメニュー「編集・表示」の寸法ボタン(スマホから押せる入口)の on/off 表示を合わせる。
 function syncDimToolButton(){
   var b=(typeof document!=='undefined')?document.getElementById('stool-dim'):null;
   if(b) b.className='stool'+(ST.showDim?' active':'');
@@ -22899,8 +22934,7 @@ function isMobileLayout(){return window.innerWidth<=768;}
 // Show mobile UI elements
 function applyMobileUI(){
   if(!isMobileLayout()) return;
-  var mobBtn=document.getElementById('mob-menu-btn');
-  if(mobBtn) mobBtn.style.display='';
+  // ツールメニューの開き口はフッターの「ツール」(#bnav-tools)が持つ。
   updateMobileShiftButton();
   // Hide .mob-hide items handled by CSS
 }
@@ -22964,14 +22998,7 @@ setView = function(v){
   });
   var topTarget=document.getElementById(topIds[v]);
   if(topTarget) topTarget.classList.add('active');
-  // Sync bottom nav
-  ['2d','3d-ext','3d-int'].forEach(function(id){
-    var b=document.getElementById('bnav-'+id.replace('-ext','-3de').replace('3d-ext','3de').replace('3d-int','3di').replace('2d','2d'));
-    if(b) b.classList.remove('active');
-  });
-  var ids={'2d':'bnav-2d','3d-ext':'bnav-3de','3d-int':'bnav-3di'};
-  var tgt=document.getElementById(ids[v]);
-  if(tgt) tgt.classList.add('active');
+  // ボトムナビは表示の切り替えを持たなくなった(ヘッダーの担当)。同期する対象は無い。
   // Show joy hint on interior mobile
   var jh=document.getElementById('joy-hint');
   if(jh) jh.style.display=(v==='3d-int'&&isMobileLayout()?'block':'none');
