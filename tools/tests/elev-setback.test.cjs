@@ -413,7 +413,8 @@ test('24-2(最重要): 方位が振れて距離がどの立面図の横軸にも
     assert.equal(chainLines(elev(ctx, d)).length, 0, d + ' 立面図に斜線が出ている');
   });
   run(ctx, 'setPlanNorthDeg(0)');
-  assert.equal(chainLines(elev(ctx, 'e')).length, 3, '0度へ戻すと東立面図に戻ってくる');
+  // 斜線本体 + 基準高さの水平線。境界の縦線は引かない(下のテスト参照)。
+  assert.equal(chainLines(elev(ctx, 'e')).length, 2, '0度へ戻すと東立面図に戻ってくる');
 });
 
 test('24-2(最重要): 斜線の起点は境界の位置と基準高さ、勾配は制限の勾配', () => {
@@ -431,13 +432,14 @@ test('24-2(最重要): 斜線の起点は境界の位置と基準高さ、勾配
   // 起点が読めるように、基準高さの水平線と境界の縦線も出ている。
   const thin = run(ctx, 'JISDRAW.lineWidths(100).thin');
   const marks = chainLines(elev(ctx, 'e')).filter((x) => x.w === thin);
-  assert.equal(marks.length, 2, '基準高さの水平線と境界の縦線: ' + JSON.stringify(marks));
+  assert.equal(marks.length, 1, '補助線は基準高さの水平線だけ: ' + JSON.stringify(marks));
   const horiz = marks.filter((x) => Math.abs(x.h1 - x.h2) < 1e-9)[0];
-  const vert = marks.filter((x) => Math.abs(x.u1 - x.u2) < 1e-9)[0];
   assert.ok(horiz && Math.abs(horiz.h1 - pl.baseMm) < 1e-6, '水平線は基準高さ: ' + JSON.stringify(horiz));
-  assert.ok(vert && Math.abs(vert.u1) < 1e-6, '縦線は境界の位置: ' + JSON.stringify(vert));
-  assert.ok(vert && Math.min(vert.h1, vert.h2) === 0 && Math.abs(Math.max(vert.h1, vert.h2) - pl.baseMm) < 1e-6,
-    '縦線は GL から基準高さまで');
+  // 境界位置から立ち上がる縦線は引かない。水平線・縦線・図面の枠が揃うと
+  // 閉じた長方形に読め、そこに何か立っているように見える(実際に図面を見て
+  // そう報告された)。境界の平面上の位置は平面図の点線が示す。
+  const vert = marks.filter((x) => Math.abs(x.u1 - x.u2) < 1e-9)[0];
+  assert.ok(!vert, '境界の縦線が復活している: ' + JSON.stringify(vert));
 });
 
 test('24-2(最重要): 注記に基準高さと勾配が入る', () => {

@@ -23818,16 +23818,19 @@ var JISDRAW=(function(){
       var ax0=u0+du*t0, ay0=h0+dh*t0, ax1=u0+du*t1, ay1=h0+dh*t1;
       out+='<line x1="'+ax0+'" y1="'+ay0+'" x2="'+ax1+'" y2="'+ay1
         +'" stroke="#000" stroke-width="'+LW.mid+'" stroke-dasharray="'+dash+'"/>';
-      // 起点。基準高さの水平線は境界の外側(t<0 の側)へ出し、そこから立ち上がる
-      // ことが読めるようにする。基準高さが 0(道路斜線)なら GL 線と重なるので出さない。
+      // 起点。基準高さの水平線だけを、境界の外側(t<0 の側)へ短く出す。
+      // 基準高さが 0(道路斜線)なら GL 線と重なるので出さない。
+      //
+      // 境界位置から立ち上がる**垂直線は引かない**。水平線・垂直線・図面の枠が
+      // 揃うと閉じた長方形に読め、そこに何か立っているように見える(実際に
+      // 図面を見てそう報告された)。境界の平面上の位置は平面図の点線が示すので、
+      // 立面図の役目は「基準高さ」と「そこからの斜線」を示すことに絞る。
       if(h0>0.5){
         var back=Math.max(600,ELEV_MARGIN_MM*0.5);
         var bx=u0-du*back;
         if(bx<rect.minX) bx=rect.minX;
         if(bx>rect.maxX) bx=rect.maxX;
         out+='<line x1="'+bx+'" y1="'+h0+'" x2="'+u0+'" y2="'+h0
-          +'" stroke="#000" stroke-width="'+LW.thin+'" stroke-dasharray="'+dash+'"/>';
-        out+='<line x1="'+u0+'" y1="0" x2="'+u0+'" y2="'+h0
           +'" stroke="#000" stroke-width="'+LW.thin+'" stroke-dasharray="'+dash+'"/>';
       }
       // 注記。基準高さと勾配を書く(平面図の境界線の注記と同じ数値の出どころ)。
