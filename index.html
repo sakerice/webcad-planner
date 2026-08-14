@@ -3375,7 +3375,7 @@ input[type="reset"]:focus-visible{
          この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
          中身も既存の unity-render-* クラスをそのまま使う。 -->
     <div class="ph">この機能について</div>
-    <div id="unity-render-status" class="unity-render-status">現在見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するための一式を作成します。基準・エッジ・深度・法線・カテゴリ・インスタンス画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
+    <div class="unity-render-status">現在見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するための一式を作成します。基準・エッジ・深度・法線・カテゴリ・インスタンス画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
@@ -3406,6 +3406,8 @@ input[type="reset"]:focus-visible{
       </div>
     </div>
     <div class="ph">データ作成</div>
+    <!-- 進捗と結果はここへ。「この機能について」は書き換えない -->
+    <div id="unity-render-status" class="unity-render-status"></div>
     <div class="unity-render-actions">
       <button id="ai-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="generateAiRenderPackage()">画像AI用データを作る</button>
     </div>
@@ -3476,7 +3478,7 @@ input[type="reset"]:focus-visible{
     </div>
     <!-- 見出しの並びは画像AI用データのダイアログと同じ順序に揃えてある(Task 29-3)。 -->
     <div class="ph">この機能について</div>
-    <div id="video-render-status" class="unity-render-status">いま見ている画面を参照にして、動画生成AIへ渡す一式（参照画像・指示文・設計情報）を作ります。</div>
+    <div class="unity-render-status">いま見ている画面を参照にして、動画生成AIへ渡す一式（参照画像・指示文・設計情報）を作ります。</div>
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
@@ -3502,6 +3504,8 @@ input[type="reset"]:focus-visible{
       </div>
     </div>
     <div class="ph">データ作成</div>
+    <!-- 進捗と結果はここへ。「この機能について」は書き換えない -->
+    <div id="video-render-status" class="unity-render-status"></div>
     <div class="unity-render-actions">
       <button id="video-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runVideoRenderPackage()">動画AI用データを作る</button>
     </div>

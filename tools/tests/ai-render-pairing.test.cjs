@@ -211,3 +211,30 @@ test('旧称「AI高品質化用データ」は画面のどこにも残ってい
 test('入口の抽出が壊れていない（3つ拾えている）', () => {
   assert.ok(STILL_ENTRIES.length >= 3);
 });
+
+// 「この機能について」は、その機能が何をするものかを、使う前に読む欄である。
+// 以前はここが進捗・結果の表示欄を兼ねており、生成すると
+// 「画像AI用データを生成しました。推奨手順: ...」で説明が上書きされ、
+// 見出しと中身が食い違っていた（オーナー報告）。説明と結果は別の要素にする。
+test('「この機能について」は進捗や結果で上書きされない', () => {
+  for (const id of ['unity-render-status', 'video-render-status']) {
+    const at = html.indexOf('id="' + id + '"');
+    assert.notEqual(at, -1, id + ' が無い');
+    const before = html.slice(0, at);
+    const lastHeading = before.lastIndexOf('<div class="ph">');
+    const heading = html.slice(lastHeading, before.indexOf('</div>', lastHeading));
+    assert.ok(!heading.includes('この機能について'),
+      id + ' が「この機能について」の中にある: ' + heading);
+    assert.ok(heading.includes('データ作成'),
+      id + ' は「データ作成」の下に置く: ' + heading);
+  }
+});
+
+test('「この機能について」には、書き換えられない説明文が入っている', () => {
+  const heads = [...html.matchAll(/<div class="ph">この機能について<\/div>\s*<div([^>]*)>([^<]{20,})</g)];
+  assert.equal(heads.length, 2, '2つのダイアログ両方に説明文が要る');
+  heads.forEach((m) => {
+    assert.ok(!/\bid=/.test(m[1]),
+      '説明文に id があると、また上書きされる: ' + m[1]);
+  });
+});
