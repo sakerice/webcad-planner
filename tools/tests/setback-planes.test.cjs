@@ -799,3 +799,35 @@ test('16: チェックを入れると設定が書かれ、面が出るように�
   assert.deepEqual(plain(it.setback), { zone: 'low1', road: false, north: true });
   assert.deepEqual(plain(vm.runInContext('setbackPlanes()', ctx)).map((p) => p.kind), ['north']);
 });
+
+// ══ 26-3 但し書きが約束できないことを約束しない ═════════════════════════
+//
+// 「実際の審査より厳しい側に出ます」と書いてあった。見ていないのが緩和だけなら
+// 本当だが、**絶対高さ制限（法55条）と日影規制はそもそも実装していない**。
+// 第一種低層住専で 10.5m に設計しても何も言わない = 緩い側へ振れる道が1本ある。
+// (直すのは文言だけである。絶対高さ制限は実装しない。)
+test('26-3(最重要): 「必ず厳しい側」という保証を書かない', () => {
+  const it = siteWith({ zone: 'low1', road: true, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
+  assert.equal(/実際の審査より<b>厳しい側<\/b>に出ます/.test(h), false,
+    '外したはずの保証がまだ書いてある');
+  assert.ok(/「必ず厳しい側」ではありません/.test(h), '保証を外したことが書かれていない: ' + h);
+});
+test('26-3(最重要): 未実装の制限を名指しする（絶対高さ制限と日影規制）', () => {
+  const it = siteWith({ zone: 'low1', road: true, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
+  assert.ok(h.indexOf('絶対高さ制限') >= 0, '絶対高さ制限を名指ししていない');
+  assert.ok(h.indexOf('法55条') >= 0, '条番号が無い');
+  assert.ok(h.indexOf('日影規制') >= 0, '日影規制を名指ししていない');
+  assert.ok(/絶対高さ制限[^<]*日影規制[^<]*未実装/.test(h.replace(/<\/?b>/g, '')),
+    '未実装だと書いていない: ' + h);
+});
+test('26-3: 名指しするだけで、絶対高さ制限は実装しない（面は増えない）', () => {
+  // 低層住専で 10m を超えても、面の枚数も種類も変わらない。
+  const it = siteWith({ zone: 'low1', road: false, north: true });
+  const ctx = makeCtx([it, road()], { selected: it });
+  const kinds = plain(vm.runInContext('setbackPlanes()', ctx)).map((p) => p.kind);
+  assert.deepEqual(kinds, ['north'], '北側斜線の面が1枚だけ（絶対高さの面は増えていない）');
+});
