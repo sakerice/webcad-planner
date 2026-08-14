@@ -1,0 +1,66 @@
+{
+  "id": "T94-exterior",
+  "mode": "sequence",
+  "plan": "assets/default_plan.json",
+  "view": "3d-ext",
+  "floor": 1,
+  "fps": 24,
+  "duration": 4,
+  "resolution": {
+    "width": 1280,
+    "height": 720
+  },
+  "camera": {
+    "keys": [
+      {
+        "t": 0,
+        "pos": [
+          21.0,
+          3.2,
+          -3.6
+        ],
+        "target": [
+          5.5,
+          2.8,
+          1.4
+        ],
+        "fov": 50
+      },
+      {
+        "t": 2,
+        "pos": [
+          17.0,
+          2.7,
+          -3.1
+        ],
+        "target": [
+          5.5,
+          2.7,
+          1.4
+        ],
+        "fov": 50
+      },
+      {
+        "t": 4,
+        "pos": [
+          13.0,
+          2.2,
+          -2.6
+        ],
+        "target": [
+          5.5,
+          2.6,
+          1.4
+        ],
+        "fov": 50
+      }
+    ]
+  },
+  "guides": [
+    "base",
+    "edge",
+    "instance",
+    "segmentation"
+  ],
+  "guideStride": 24
+}

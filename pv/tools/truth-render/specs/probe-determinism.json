@@ -1,0 +1,19 @@
+{
+  "id": "probe-determinism",
+  "mode": "determinism-probe",
+  "plan": "assets/default_plan.json",
+  "view": "3d-int",
+  "floor": 2,
+  "fps": 1,
+  "duration": 2,
+  "resolution": { "width": 1280, "height": 720 },
+  "camera": {
+    "keys": [
+      { "t": 0, "pos": [0.0, 1.4, 0.0], "target": [0.0, 1.4, -1.0], "fov": 75 },
+      { "t": 1, "pos": [1.2, 1.4, -0.8], "target": [0.4, 1.4, -1.8], "fov": 75 },
+      { "t": 2, "pos": [0.0, 1.4, 0.0], "target": [0.0, 1.4, -1.0], "fov": 75 }
+    ]
+  },
+  "guides": ["base"],
+  "guideStride": 1
+}

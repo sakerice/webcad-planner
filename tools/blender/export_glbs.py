@@ -1,9 +1,13 @@
-"""Export car / neighbor-house / neighbor-building GLBs for webcad-planner.
+"""Export car / neighbor-building / bike / pole GLBs for webcad-planner.
 
 Run inside Blender after building the models with car_build.py /
-house_build.py / bldg_build.py. Modules are grouped under named empties
-(nh_base/nh_mid/nh_roof, bd_base/bd_mid/bd_top) which the app stacks
-per-floor at runtime; keep those names stable.
+bldg_build.py / bike_build.py / pole_build.py. Modules are grouped under
+named empties (bd_base/bd_mid/bd_top) which the app stacks per-floor at
+runtime; keep those names stable.
+
+隣家(neighbor_house_kit.glb)は本スクリプトの対象外。
+`house_kit_build.py` が単体で組み立てからGLB書き出しまで行う
+(`python3 tools/blender/house_kit_build.py`)。
 """
 import bpy, os
 OUT = '/Users/nariiwa/Projects/webcad-planner/assets/models/context'
@@ -24,11 +28,6 @@ def ensure_group(prefix, keys):
                 ob.parent = e
     return empties
 
-house_empties = ensure_group('nh_', ['base', 'mid', 'roof'])
-be = bpy.data.objects.get('nh_balc')
-if be:
-    be.location = (be.location.x, be.location.y, 0)
-    house_empties.append('nh_balc')
 bldg_empties = ensure_group('bd_', ['base', 'mid', 'top'])
 fbike_root = bpy.data.objects.get('bk2_root')
 if not fbike_root:
@@ -74,7 +73,6 @@ def export_sel(prefixes, empties, path):
     return os.path.getsize(path)
 
 print('car', export_sel(['car_'], ['car_root'], OUT + '/car_sedan.glb'))
-print('house', export_sel(['nh_'], house_empties, OUT + '/neighbor_house.glb'))
 print('bldg', export_sel(['bd_'], bldg_empties, OUT + '/neighbor_building.glb'))
 print('pole', export_sel(['up_'], ['up_root'], OUT + '/utility_pole.glb'))
 print('bike', export_sel(['bk_'], ['bk_root'], OUT + '/bicycle.glb'))

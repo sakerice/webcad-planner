@@ -1,0 +1,19 @@
+{
+  "id": "T93-ldk-eye",
+  "mode": "sequence",
+  "plan": "assets/default_plan.json",
+  "view": "3d-ext",
+  "floor": 2,
+  "fps": 24,
+  "duration": 4,
+  "resolution": { "width": 1280, "height": 720 },
+  "camera": {
+    "keys": [
+      { "t": 0, "pos": [6.30, 4.20, 1.15], "target": [3.00, 4.05, 1.15], "fov": 60 },
+      { "t": 2, "pos": [5.20, 4.20, 1.15], "target": [2.40, 4.05, 1.15], "fov": 60 },
+      { "t": 4, "pos": [4.10, 4.20, 1.15], "target": [1.80, 4.05, 1.15], "fov": 60 }
+    ]
+  },
+  "guides": ["base", "edge", "instance", "segmentation"],
+  "guideStride": 24
+}

@@ -8,7 +8,7 @@ Blenderで生成・更新するためのスクリプト一式。
 | ファイル | 役割 |
 |---|---|
 | `context_models.blend` | 全モデルを含む作業用シーン(プレビュー用ライト/カメラ入り) |
-| `house_build.py` | 隣家(nh_*: base/mid/roof + 独立ノードnh_balc) |
+| `house_kit_build.py` | **隣家パーツキット**(nh_seg_*/nh_corner/nh_balcony ほか)。単体で実行するとGLB書き出しまで行う |
 | `bldg_build.py` | 周辺ビル(bd_*: base/mid/top) |
 | `car_build.py` | 白セダン(car_*)。カローラE210実寸(4495×1745×1435/WB2640)参照 |
 | `bike_build.py` / `fbike_build.py` | ママチャリ / 折りたたみ自転車 |
@@ -21,16 +21,37 @@ Blenderで生成・更新するためのスクリプト一式。
 
 ## ワークフロー
 
+### 隣家(neighbor_house_kit.glb)
+
+隣家だけは一体モデルではなく**実寸パーツキット**として書き出す。
+アプリ側(`index.html` の NEIGHBOR HOUSE KIT セクション)が 910mm(1P)
+グリッドにパーツを並べて組み立てるため、隣家のサイズを変えても
+サッシ・玄関ドア・シャッター・バルコニー・軒の出は実寸のまま保たれる。
+
+GUIもMCPも不要で、`bpy` モジュール(PyPI)さえあれば単体で走る。
+
+```bash
+pip install bpy                                  # Blender 4.2 / Python 3.11
+python3 tools/blender/house_kit_build.py         # 組み立て → GLB書き出し
+python3 tools/blender/house_kit_build.py --no-export   # 寸法確認のみ
+```
+
+パーツ名(`nh_seg_win_l` など)と原点の約束は `index.html` の
+`NH_SEG_PART` / `nhAttach()` と一対一で対応している。**名前と原点を
+変えるときは必ず両方を直すこと。**
+
+### その他のモデル(車・周辺ビル・自転車・電柱)
+
 ```bash
 # 1. Blender(GUI)をアドオン付きで起動しておく
 /Applications/Blender.app/Contents/MacOS/Blender tools/blender/context_models.blend \
   --python tools/blender/blender_startup.py &
 
 # 2. ビルドスクリプトを流す(モデルを作り直す)
-python3 tools/blender/bmcp.py code tools/blender/house_build.py
+python3 tools/blender/bmcp.py code tools/blender/car_build.py
 
 # 3. プレビューレンダーで確認
-python3 tools/blender/bmcp.py code tools/blender/render/house_render.py
+python3 tools/blender/bmcp.py code tools/blender/render/car_render.py
 
 # 4. GLBへエクスポート
 python3 tools/blender/bmcp.py code tools/blender/export_glbs.py
@@ -47,8 +68,15 @@ echo "import bpy; bpy.ops.wm.save_as_mainfile(filepath='$(pwd)/tools/blender/con
 - **glTFエクスポーターは `matrix_parent_inverse` を無視する。**
   エンプティへ親子付けするメッシュは、頂点データを `data.transform()` で
   アンカー基準ローカルへベイクし、子のローカル変換はゼロにすること
-  (`house_build.py` の nh_balc 処理が実装例)。
+  (`house_kit_build.py` の `anchor_parts()` は全パーツの変換を適用して
+  この問題自体を避けている)。
 - **`matp()` はマテリアルを名前で再利用するため、過去に設定した
   Emission等の入力が残存する。** 再定義時は Emission Strength=0 を明示する。
-- 家・ビルはアプリ側でフロア数に応じて base/mid/roof(top) を積み上げるため、
-  ノード名は変更しないこと。バルコニー(nh_balc)は伸縮に追従させない独立ノード。
+- 周辺ビルはアプリ側でフロア数に応じて bd_base/bd_mid/bd_top を積み上げるため、
+  ノード名は変更しないこと。
+- **隣家パーツは絶対にスケールされない前提で作る。** 幅が910の倍数でない
+  パーツを足すとベイ割りに載らない。無地パネルだけは端数吸収のため
+  横方向にスケールされる。
+- **外壁テクスチャに方向性のある模様(横目地・縦目地・うねり)を入れないこと。**
+  端数吸収でスケールした端部ベイだけ模様のピッチが変わり、縞がずれて見える。
+  外壁は等方な微粒子ノイズのみ(`make_wall_image`)。
