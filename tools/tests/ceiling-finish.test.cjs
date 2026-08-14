@@ -225,15 +225,30 @@ test('左右・上下の反転が repeat と offset に効く（床と同じ扱�
   assert.equal(plain.map.offset.x, 0);
   assert.equal(plain.map.offset.y, 0);
 
+  // 反転後の位置 u は、素の状態の 1-u と同じテクスチャ座標を指す（=鏡像）。
+  // この部屋は横2枚・縦3枚のタイリングなので offset は 2 と 3 になる。
+  // 以前ここは 1 を直に書いていたが、それは repeat が1枚のときにだけ成り立つ値だった
+  // （繰り返しは整数枚なので、この部屋での見え方は以前と同じ）。
+  const mirrors = (m, axis) => {
+    const r = m.map.repeat[axis], o = m.map.offset[axis];
+    const pr = plain.map.repeat[axis], po = plain.map.offset[axis];
+    [0, 0.5, 1].forEach((u) => {
+      assert.ok(Math.abs((o + r * u) - (po + pr * (1 - u))) < 1e-9,
+        axis + ' の反転が鏡像になっていない: u=' + u);
+    });
+  };
+
   const flipX = ctx.makeRoomCeilingMaterial(room({ ceilingTexture: 'tex', ceilingTextureFlipX: true }), base);
   assert.ok(flipX.map.repeat.x < 0, '左右反転が repeat.x に効いていない');
-  assert.equal(flipX.map.offset.x, 1);
+  mirrors(flipX, 'x');
   assert.ok(flipX.map.repeat.y > 0, '左右反転で上下まで反転している');
+  assert.equal(flipX.map.offset.y, 0, '左右反転で上下の位置がずれている');
 
   const flipY = ctx.makeRoomCeilingMaterial(room({ ceilingTexture: 'tex', ceilingTextureFlipY: true }), base);
   assert.ok(flipY.map.repeat.y < 0, '上下反転が repeat.y に効いていない');
-  assert.equal(flipY.map.offset.y, 1);
+  mirrors(flipY, 'y');
   assert.ok(flipY.map.repeat.x > 0);
+  assert.equal(flipY.map.offset.x, 0);
 });
 
 test('反転のフィールド名は天井のもの（床の textureFlipX を巻き込まない）', () => {

@@ -11641,15 +11641,26 @@ function setTextureRepeatNoDistort(tex,surfaceW,surfaceH,tileH){
   var repY=Math.max(surfaceH/th,0.1);
   var repX=Math.max(surfaceW/(th*aspect),0.1);
   tex.repeat.set(repX,repY);
+  // 密度の指定は「反転前の素の状態」を作ること。バルコニーフェンスは壁用に作った
+  // (=反転済みの)マテリアルへ実寸で密度を掛け直すので、反転の分の offset を
+  // 残すと掛け直すたびに柄の位相がずれていく
+  tex.offset.set(0,0);
 }
+// 左右/上下反転。反転とは面の左右(上下)を入れ替えて読むこと、つまり反転後の u は
+// 素の状態の 1-u と同じ位置を指す。素の状態が offset=o / repeat=r なら
+//   o + r*(1-u) = (o+r) + (-r)*u
+// なので offset には o+r を入れる。1-o は o=(1-r)/2 のとき、つまり全面表示や中央の
+// 切り出しでしか一致せず、中央から寄せた切り出し(sX)やタイリングでは使う範囲ごとずれる。
 function applyTextureFlip(tex, source){
   if(!tex) return tex;
-  var rx=Math.abs((tex.repeat&&tex.repeat.x)||1);
-  var ry=Math.abs((tex.repeat&&tex.repeat.y)||1);
-  var ox=(tex.offset&&tex.offset.x)||0;
-  var oy=(tex.offset&&tex.offset.y)||0;
+  var rx=(tex.repeat&&tex.repeat.x)||1, ry=(tex.repeat&&tex.repeat.y)||1;
+  var ox=(tex.offset&&tex.offset.x)||0, oy=(tex.offset&&tex.offset.y)||0;
+  // すでに反転済みなら素の状態へ戻してから掛け直す(何度呼んでも結果が変わらない)。
+  // repeat が負のとき offset は使う範囲の終端なので、始端に直す
+  if(rx<0){ ox+=rx; rx=-rx; }
+  if(ry<0){ oy+=ry; ry=-ry; }
   tex.repeat.set(source&&source.textureFlipX?-rx:rx, source&&source.textureFlipY?-ry:ry);
-  tex.offset.set(source&&source.textureFlipX?1-ox:ox, source&&source.textureFlipY?1-oy:oy);
+  tex.offset.set(source&&source.textureFlipX?ox+rx:ox, source&&source.textureFlipY?oy+ry:oy);
   tex.needsUpdate=true;
   return tex;
 }
