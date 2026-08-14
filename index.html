@@ -3111,7 +3111,10 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
-  <button class="tbtn" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
+  <!-- 入口はダイアログを開くだけ。撮影も生成もしない(動画AIと同じ)。生成は
+       ダイアログの「データ作成」にある #ai-render-run を押してから走る。
+       設定(仕上げメモ・生活感・平面図同梱)を変えてから生成できるのが要点。 -->
+  <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()">📷 画像AIレンダー</button>
   <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()">🎬 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
@@ -3277,7 +3280,8 @@ input[type="reset"]:focus-visible{
           <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
         </div>
       </div>
-      <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
+      <!-- 浮きボタンもダイアログを開くだけ(上のヘッダーの入口と同じ)。 -->
+      <button id="unity-render-fab" type="button" onclick="openUnityRenderModal()">📷 画像AIレンダー</button>
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
         <button type="button" class="elev-snap-btn" data-elev-dir="n" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
         <button type="button" class="elev-snap-btn" data-elev-dir="e" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>

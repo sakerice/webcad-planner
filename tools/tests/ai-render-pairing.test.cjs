@@ -164,12 +164,14 @@ function buttonsCalling(fn) {
   return out;
 }
 const VIDEO_ICONS = ['🎥', '🎬', '📹', '📽', '🎞'];
-const STILL_ENTRIES = buttonsCalling('generateAiRenderPackage')
+// Task 32: 画像AIの入口も動画AIと同じく「ダイアログを開くだけ」になった。
+// 生成を呼ぶのはダイアログの中の実行ボタンだけである。
+const STILL_ENTRIES = buttonsCalling('openUnityRenderModal')
   .filter((b) => (b.attrs.id || '') !== '' || true);
 
 test('画像AI側のアイコンは、動画のアイコンではない', () => {
   const iconOf = (label) => Array.from(label)[0];
-  const still = buttonsCalling('generateAiRenderPackage')
+  const still = buttonsCalling('openUnityRenderModal')
     .filter((b) => ['unity-render-toolbar-btn', 'unity-render-fab'].indexOf(b.attrs.id) >= 0);
   assert.equal(still.length, 2, '画像AIの入口が2つ揃っていない: ' + still.map((s) => s.attrs.id));
   const icons = still.map((b) => iconOf(b.label));
@@ -188,13 +190,13 @@ test('動画AI側のアイコンは動画のまま、画像側と別のもので
   const vIcons = video.map((b) => iconOf(b.label));
   assert.equal(new Set(vIcons).size, 1, '動画AIの入口でアイコンが揃っていない: ' + vIcons.join(' '));
   assert.ok(VIDEO_ICONS.indexOf(vIcons[0]) >= 0, '動画側が動画のアイコンでない: ' + vIcons[0]);
-  const stillIcon = iconOf(buttonsCalling('generateAiRenderPackage')
+  const stillIcon = iconOf(buttonsCalling('openUnityRenderModal')
     .find((b) => b.attrs.id === 'unity-render-toolbar-btn').label);
   assert.notEqual(stillIcon, vIcons[0], '2つの機能が同じアイコンを使っている');
 });
 
 test('ツールバーの呼称が「画像AIレンダー」「動画AIレンダー」で対になっている', () => {
-  const byId = (id) => [].concat(buttonsCalling('generateAiRenderPackage'),
+  const byId = (id) => [].concat(buttonsCalling('openUnityRenderModal'),
     buttonsCalling('openVideoRenderDialog')).find((b) => b.attrs.id === id);
   const still = byId('unity-render-toolbar-btn').label;
   const video = byId('video-render-toolbar-btn').label;
@@ -208,8 +210,10 @@ test('旧称「AI高品質化用データ」は画面のどこにも残ってい
   assert.equal(html.indexOf('AI高品質化用データ'), -1);
 });
 
-test('入口の抽出が壊れていない（3つ拾えている）', () => {
-  assert.ok(STILL_ENTRIES.length >= 3);
+test('入口の抽出が壊れていない（入口2つ＋ダイアログの実行ボタン1つ）', () => {
+  assert.ok(STILL_ENTRIES.length >= 2, '画像AIの入口が2つ拾えていない');
+  assert.equal(buttonsCalling('generateAiRenderPackage').length, 1,
+    '生成を呼ぶボタンはダイアログの実行ボタンだけであるべき');
 });
 
 // 「この機能について」は、その機能が何をするものかを、使う前に読む欄である。

@@ -291,7 +291,8 @@ const FEATURES = {
   savePlanToStorage: '保存',
   exportPlan: 'JSON書き出し',
   'import-file': 'JSON読込',
-  generateAiRenderPackage: '画像AIレンダー',
+  // Task 32: 画像AIの入口はダイアログを開くだけ（生成はダイアログの中のボタン）
+  openUnityRenderModal: '画像AIレンダー',
   openVideoRenderDialog: '動画AIレンダー',
   openJisDrawingDialog: 'JIS図面'
 };
@@ -314,7 +315,7 @@ test('入口の抽出そのものが機能している（12機能すべてにボ
   });
   // 画像AIレンダーはヘッダーと3D画面の浮きボタンの2つ。どちらも取りこぼして
   // いないことを、id で固定する（ボトムナビからは外れた）。
-  const stillIds = ENTRIES.generateAiRenderPackage.map((n) => n.id).filter(Boolean);
+  const stillIds = ENTRIES.openUnityRenderModal.map((n) => n.id).filter(Boolean);
   ['unity-render-toolbar-btn', 'unity-render-fab'].forEach((id) => {
     assert.ok(stillIds.indexOf(id) >= 0, '画像AIレンダーの入口 ' + id + ' が見えていない');
   });
@@ -363,7 +364,7 @@ test('320〜1400px のどの幅でも、どの機能も入口がゼロになら�
 test('768px の境目の両側で、画像AIと動画AIの入口がヘッダーに残っている', () => {
   [768, 772].forEach((w) => {
     const env = { width: w, coarse: false };
-    ['generateAiRenderPackage', 'openVideoRenderDialog'].forEach((fn) => {
+    ['openUnityRenderModal', 'openVideoRenderDialog'].forEach((fn) => {
       const live = ENTRIES[fn].filter((n) => isRendered(n, env));
       assert.ok(live.length > 0, FEATURES[fn] + ' が ' + w + 'px で消えている');
       const ids = live.map((n) => ancestorIds(n).join('/'));
