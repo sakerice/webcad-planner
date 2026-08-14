@@ -10,6 +10,9 @@
 //   24-2 斜線制限が、距離が横軸に出ている立面図に「基準高さ＋斜線＋注記」で出る。
 //        正対する立面図(距離が奥行きへ潰れる向き)には引かない。
 //        建物は斜線の下に収まっている。
+//   26-1 **方位を振った状態で**、図面の輪郭が 3D の実際の形を上回らない。
+//        3D 側の形は図面のコードを1行も通さずに作る: 屋根面を細かく標本化し、
+//        各点で min(高さ, いちばん低い制限) を採って、その上側凸包を真の輪郭とする。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
@@ -530,4 +533,191 @@ test('25-3(最重要): 谷で切った跡が図面に出ている(そもそも�
   const north = plain(run(ctx, 'setbackRoofItems()')).filter((i) => i.setbackKind === 'north')[0];
   assert.ok(north && north.setbackClips && north.setbackClips.length === 1,
     '北の屋根が谷を1つ持っている: ' + JSON.stringify(north && north.setbackClips));
+});
+
+// ══ 26-1 方位を振っても、図面が実際より緩く出ない ═══════════════════════
+//
+// 立面図は奥行きを潰す。制限高さは平面上の位置で決まるので、潰した先で1本の
+// 直線として切ると「どの奥行きの制限を採るか」を選ぶことになる。以前は
+// **制限がいちばん高くなる奥行き**を採っていた = 3D が既に削った屋根が図面に
+// 残る = 実際より緩い図面。奥行き方向に高さが一定の箱では緩い縮約が厳密に
+// 正しいので、平屋根の検証では 0mm になり、方位0/90/180/270 でも 0mm になる。
+// だからここは **振れた方位で、奥行きへ高さが変わる屋根** を測る。
+
+// 3階建て 8×12m、切妻30度(勾配は y 方向 = 奥行きへ高さが変わる)、第一種低層住専。
+function gableIntoDepthHouse() {
+  const walls = [], rooms = [];
+  const x0 = 0, y0 = 0, x1 = 8000, y1 = 12000;
+  [1, 2, 3].forEach((f) => {
+    box(f, x0, y0, x1, y1).forEach((w) => walls.push(w));
+    rooms.push({ id: 'r' + f, n: f + '階', floor: f, x: x0, y: y0, w: x1 - x0, d: y1 - y0 });
+  });
+  return {
+    walls, rooms, floors: {},
+    items: [
+      { id: 'site', type: 'site-rect', x: -2000, y: -2000, w: 12000, d: 16000, rot: 0,
+        setback: { zone: 'low1', road: false, north: true } },
+      { id: 'roof1', type: 'roof', roofType: 'gable', x: 0, y: 0, w: 8000, d: 12000,
+        rot: 0, floor: 4, elev: 0, pitch: 30, roofThickness: 180 }
+    ]
+  };
+}
+
+// 図面のコードを1行も使わずに作る「3D の実際の形」。屋根面と壁の頭を細かく
+// 標本化し、各点で min(高さ, いちばん低い制限)。立体ごとに上側凸包を取る
+// (屋根面は凹、制限面は一次式なので min も凹 = 凸包が真の輪郭に一致する)。
+const TRUTH_SRC = `
+var TRUTH_AX={s:{u:[1,0],dp:[0,1]},n:{u:[-1,0],dp:[0,-1]},e:{u:[0,-1],dp:[1,0]},w:{u:[0,1],dp:[-1,0]}};
+function truthLowestLimit(pls,x,y){
+  var h=Infinity,k;
+  for(k=0;k<pls.length;k++) h=Math.min(h,setbackLimitHeightMmAt(pls[k],x,y));
+  return h;
+}
+function truthUpperHull(pts){
+  var s=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];}),hull=[],i,p,o,a,cr;
+  for(i=0;i<s.length;i++){
+    p=s[i];
+    while(hull.length>=2){
+      o=hull[hull.length-2];a=hull[hull.length-1];
+      cr=(a[0]-o[0])*(p[1]-o[1])-(a[1]-o[1])*(p[0]-o[0]);
+      if(cr>=0) hull.pop(); else break;
+    }
+    hull.push(p);
+  }
+  return hull;
+}
+function truthBodies(dir,N){
+  var ax=TRUTH_AX[dir], pls=setbackPlanes(), bodies=[];
+  var roofs=DATA.items.filter(function(it){return it.type==='roof';});
+  if(pls.length) roofs=roofs.concat(setbackRoofItems());
+  roofs.forEach(function(it){
+    var base=floorBaseY(it.floor||1)/U+(it.elev||0);
+    var W=it.w*U, D=it.d*U, i, j, lx, lz, w, h, pts=[];
+    for(i=0;i<=N;i++){
+      lx=-W/2+W*i/N;
+      for(j=0;j<=N;j++){
+        lz=-D/2+D*j/N;
+        w=roofLocalToWorldMm(it,lx,lz);
+        h=base+roofSurfaceHeightAt(it,lx,lz)/U;
+        if(pls.length) h=Math.min(h,truthLowestLimit(pls,w.x,w.y));
+        pts.push([w.x*ax.u[0]+w.y*ax.u[1],h]);
+      }
+    }
+    bodies.push(truthUpperHull(pts));
+  });
+  DATA.walls.forEach(function(wl){
+    var u1=wl.x1*ax.u[0]+wl.y1*ax.u[1], u2=wl.x2*ax.u[0]+wl.y2*ax.u[1];
+    if(Math.abs(u2-u1)<0.5) return;
+    var fullH=wallDisplayHeightM(wl), base=floorBaseY(wl.floor||1)/U;
+    var env=(typeof wallTopCutEnv==='function')?wallTopCutEnv(wl):null;
+    var i,t,h,x,y,pts=[];
+    for(i=0;i<=200;i++){
+      t=i/200;
+      x=wl.x1+(wl.x2-wl.x1)*t; y=wl.y1+(wl.y2-wl.y1)*t;
+      h=env?Math.min(fullH,wallTopHeightAtM(wl,t,fullH,env.minH,env.roofs)):fullH;
+      h=base+h/U;
+      if(pls.length) h=Math.min(h,truthLowestLimit(pls,x,y));
+      pts.push([x*ax.u[0]+y*ax.u[1],h]);
+    }
+    if(pts[pts.length-1][0]<pts[0][0]) pts.reverse();
+    bodies.push(pts);
+  });
+  return bodies;
+}
+`;
+
+// 屋根面の標本の細かさ。真の輪郭は「標本を弦で結んだ上側凸包」なので、折れの
+// 近くだけ真の面より少し **低く** 出る(=図面が少し高く見える)。この残差は
+// 実測で N=120 のとき 16.4mm、N=240 で 4.1mm、N=480 で 1.2mm と 1/N^2 で消える。
+// 防いでいる不具合の大きさ(最大 1144.6mm)とは3桁違う。
+const TRUTH_N = 240;
+const TRUTH_TOL_MM = 6;
+
+// 折れ線(u昇順)の u における値。範囲外は null。
+function polyValueAt(pts, u) {
+  if (!pts.length) return null;
+  if (u < pts[0][0] - 1e-9 || u > pts[pts.length - 1][0] + 1e-9) return null;
+  for (let i = 1; i < pts.length; i++) {
+    if (u <= pts[i][0] + 1e-9) {
+      const a = pts[i - 1], b = pts[i];
+      if (b[0] - a[0] < 1e-9) return Math.max(a[1], b[1]);
+      return a[1] + (b[1] - a[1]) * ((u - a[0]) / (b[0] - a[0]));
+    }
+  }
+  return pts[pts.length - 1][1];
+}
+function truthTopAt(bodies, u) {
+  let best = null;
+  bodies.forEach((b) => { const v = polyValueAt(b, u); if (v !== null && (best === null || v > best)) best = v; });
+  return best;
+}
+// 図面の輪郭(太線ポリゴン)の、u における上端。
+function drawnTopAt(polys, u) {
+  let best = null;
+  polys.forEach((poly) => {
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      if (Math.abs(b[0] - a[0]) < 1e-9) continue;
+      if (u < Math.min(a[0], b[0]) || u > Math.max(a[0], b[0])) continue;
+      const h = a[1] + (b[1] - a[1]) * ((u - a[0]) / (b[0] - a[0]));
+      if (best === null || h > best) best = h;
+    }
+  });
+  return best;
+}
+// その方位・その立面での「図面 − 3D」の最大(正 = 緩い側)。
+function loosenessMm(ctx, dir) {
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  const polys = thickPolys(elev(ctx, dir), lw);
+  const bodies = plain(run(ctx, 'truthBodies("' + dir + '",' + TRUTH_N + ')'));
+  let lo = Infinity, hi = -Infinity;
+  bodies.forEach((b) => { if (b.length) { lo = Math.min(lo, b[0][0]); hi = Math.max(hi, b[b.length - 1][0]); } });
+  let worst = -Infinity, at = null;
+  for (let u = lo; u <= hi; u += 20) {
+    const t = truthTopAt(bodies, u);
+    const d = drawnTopAt(polys, u);
+    if (t === null || d === null) continue;
+    if (d - t > worst) { worst = d - t; at = u; }
+  }
+  return { worst: worst === -Infinity ? 0 : worst, u: at };
+}
+
+test('26-1(最重要): 振れた方位でも、図面の輪郭が 3D の実際の形より上に出ない', () => {
+  const ctx = full(gableIntoDepthHouse());
+  run(ctx, TRUTH_SRC);
+  // 直す前に緩みが出ていた方位を含める。76/284 度が最悪(約1.14m)、
+  // 65〜88 度と 272〜295 度が緩んでいた。0/90/180/270 度では原理的に出ない。
+  [0, 45, 76, 88, 90, 105, 256, 284].forEach((deg) => {
+    run(ctx, 'setPlanNorthDeg(' + deg + ');');
+    DIRS.forEach((d) => {
+      const m = loosenessMm(ctx, d);
+      assert.ok(m.worst <= TRUTH_TOL_MM,
+        deg + '度 ' + d + '立面 u=' + Math.round(m.u) + ' で図面が 3D より '
+        + m.worst.toFixed(1) + 'mm 高い(緩い側)');
+    });
+  });
+});
+
+test('26-1(最重要): この家と方位では、切らなければ実際に1m以上はみ出す(空振りでない)', () => {
+  // 上の試験が「そもそも屋根が制限に当たっていない」ために通っているのでは
+  // ないことを、切る前の輪郭が 3D の実際より 1m 以上高いことで示す。
+  const ctx = full(gableIntoDepthHouse());
+  run(ctx, TRUTH_SRC);
+  run(ctx, 'setPlanNorthDeg(76);');
+  const bodies = plain(run(ctx, 'truthBodies("s",' + TRUTH_N + ')'));
+  // 切っていない輪郭 = 同じ家から斜線の設定だけ外したもの(形は1mmも変えていない)。
+  const plain0 = gableIntoDepthHouse();
+  delete plain0.items[0].setback;
+  const bare = full(plain0);
+  const lw = run(bare, 'JISDRAW.lineWidths(100).thick');
+  const raw = thickPolys(elev(bare, 's'), lw);
+  let worst = -Infinity, at = null;
+  for (let u = 0; u <= 8000; u += 20) {
+    const t = truthTopAt(bodies, u);
+    const d = drawnTopAt(raw, u);
+    if (t === null || d === null) continue;
+    if (d - t > worst) { worst = d - t; at = u; }
+  }
+  assert.ok(worst > 1000,
+    '切らない輪郭は 3D より 1m 以上高いはず: ' + worst.toFixed(1) + 'mm (u=' + at + ')');
 });

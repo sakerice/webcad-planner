@@ -23118,8 +23118,41 @@ var JISDRAW=(function(){
     if(pts[pts.length-1][0]<pts[0][0]) pts.reverse();   // u 昇順にそろえる
     return pts;
   }
+  // 壁1本の上での斜線制限を、u の一次式として厳密に書く (Task 26-1)。
+  // 壁は直線なので、この方位の奥行き d は u の一次式 d(u) である。制限高さは
+  //   limit = baseMm + slope*((n·û)u + (n·d̂)d - d0)
+  // なので、d を u で置き換えれば **奥行きを潰さずに** 位置ごとの制限が出る。
+  // (以前は立面全体で1つの d -- しかも制限がいちばん高くなる端 -- を採っていた。
+  //  それは常に「実際より緩い」側の近似である。)
+  // 視線に平行な壁(u が動かない)は外形に出ない(elevSegments が幅で落とす)ので、
+  // その場合だけ従来どおり奥行きの代表値で書く。
+  function elevWallLimitLines(w,ax,pls){
+    var out=[];
+    if(!pls || !pls.length) return out;
+    var u1=w.x1*ax.u[0]+w.y1*ax.u[1], u2=w.x2*ax.u[0]+w.y2*ax.u[1];
+    var d1=w.x1*ax.dp[0]+w.y1*ax.dp[1], d2=w.x2*ax.dp[0]+w.y2*ax.dp[1];
+    var du=u2-u1, dd=d2-d1;
+    pls.forEach(function(pl){
+      var cu=pl.nx*ax.u[0]+pl.ny*ax.u[1];
+      var cd=pl.nx*ax.dp[0]+pl.ny*ax.dp[1];
+      if(Math.abs(du)<1e-6){
+        out.push({a:pl.baseMm+pl.slope*(cd*Math.max(d1,d2)-pl.d0), b:pl.slope*cu});
+        return;
+      }
+      out.push({a:pl.baseMm+pl.slope*(cd*(d1-dd*u1/du)-pl.d0), b:pl.slope*(cu+cd*dd/du)});
+    });
+    return out;
+  }
+  // その壁に効いている、いちばん低い制限(mm)。制限が無ければ Infinity。
+  function elevWallLimitAtU(r,u){
+    var lims=r.lims, i, v, m=Infinity;
+    if(!lims) return m;
+    for(i=0;i<lims.length;i++){ v=lims[i].a+lims[i].b*u; if(v<m) m=v; }
+    return m;
+  }
   function elevWallRects(dir){
     var ax=ELEV_AXES[dir];
+    var pls=setbackPlanesForDrawing();
     var rects=[];
     DATA.walls.forEach(function(w){
       var u1=w.x1*ax.u[0]+w.y1*ax.u[1], u2=w.x2*ax.u[0]+w.y2*ax.u[1];
@@ -23127,23 +23160,71 @@ var JISDRAW=(function(){
       var f=w.floor||1;
       var base=floorBaseY(f)/U;
       var top=base+wallDisplayHeightM(w)/U;
-      var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,
+      var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,rawTop:top,
         depth:Math.max(d1,d2),depthMin:Math.min(d1,d2),floor:f,wall:w};
       var pts=elevWallTopPoints(w,u1,u2,base);
       if(pts){
         r.topPts=pts;
         // top は「その壁のいちばん高い所」。高さ寸法(軒高)と図の高さ範囲がここを見る。
         r.top=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
+        r.rawTop=r.top;
+      }
+      if(pls.length){
+        r.lims=elevWallLimitLines(w,ax,pls);
+        // 軒高もこの壁の **実際に残っている** いちばん高い所を採る。
+        // 制限は u の一次式、上端は折れ線なので、両者の折れ点だけ見れば最大が出る。
+        var us=[r.uMin,r.uMax].concat(elevWallCapCrossUs(r));
+        var hi=-Infinity;
+        us.forEach(function(u){
+          if(u<r.uMin-0.5 || u>r.uMax+0.5) return;
+          var h=elevTopAtU(r,u);
+          if(h>hi) hi=h;
+        });
+        r.top=isFinite(hi)?Math.max(hi,r.base):r.base;
       }
       rects.push(r);
     });
     return rects;
   }
+  // 上端の折れ線と制限の直線が交わる u。ここを区間の境目にしないと、切れ目が
+  // 区間の中に隠れて直線で結ばれてしまう。
+  function elevWallCapCrossUs(r){
+    var out=[], lims=r.lims;
+    if(!lims || !lims.length) return out;
+    var segs=[], i, k;
+    if(r.topPts){
+      for(i=1;i<r.topPts.length;i++) segs.push([r.topPts[i-1],r.topPts[i]]);
+    } else {
+      segs.push([[r.uMin,r.rawTop],[r.uMax,r.rawTop]]);
+    }
+    for(k=0;k<lims.length;k++){
+      for(i=0;i<segs.length;i++){
+        var a=segs[i][0], b=segs[i][1];
+        if(b[0]-a[0]<1e-9) continue;
+        var slope=(b[1]-a[1])/(b[0]-a[0]);
+        // 上端(a[1]+slope*(u-a[0])) と 制限(lims[k].a+lims[k].b*u) が等しくなる u
+        var den=slope-lims[k].b;
+        if(Math.abs(den)<1e-12) continue;
+        var u=(lims[k].a-a[1]+slope*a[0])/den;
+        if(u>=a[0]-1e-9 && u<=b[0]+1e-9) out.push(u);
+      }
+      // 制限が床まで落ちる位置(そこから先はその壁が1枚も残らない)
+      if(Math.abs(lims[k].b)>1e-12){
+        var ub=(r.base-lims[k].a)/lims[k].b;
+        if(ub>=r.uMin-1e-9 && ub<=r.uMax+1e-9) out.push(ub);
+      }
+    }
+    return out;
+  }
   // 折れ線を持つ壁の、u 位置における上端。持たない壁(削られていない壁)は
-  // これまでどおり一定値を返す。
+  // これまでどおり一定値を返す。斜線制限があるときは、**その壁の上のその位置での**
+  // 制限で頭を押さえる(elevWallLimitAtU)。
   function elevTopAtU(r,u){
+    return Math.min(elevWallRawTopAtU(r,u), elevWallLimitAtU(r,u));
+  }
+  function elevWallRawTopAtU(r,u){
     var pts=r.topPts, i, a, b;
-    if(!pts) return r.top;
+    if(!pts) return r.rawTop;
     if(u<=pts[0][0]) return pts[0][1];
     for(i=1;i<pts.length;i++){
       a=pts[i-1]; b=pts[i];
@@ -23188,6 +23269,8 @@ var JISDRAW=(function(){
       xs.push(r.uMin,r.uMax);
       // 上端の折れ位置も区間の境目にする。そうしないと折れが区間の中に隠れる。
       if(r.topPts) r.topPts.forEach(function(p){ xs.push(p[0]); });
+      // 斜線で切れる位置も同じ理由で境目にする(Task 26-1)。
+      elevWallCapCrossUs(r).forEach(function(u){ if(u>r.uMin&&u<r.uMax) xs.push(u); });
     });
     xs.sort(function(a,b){return a-b;});
     var uniq=[];
@@ -23198,8 +23281,11 @@ var JISDRAW=(function(){
       var topA=-Infinity, topB=-Infinity, base=Infinity, cover=false;
       wide.forEach(function(r){
         if(r.uMin<=mid+0.5 && r.uMax>=mid-0.5){
+          // 斜線で床まで削り取られた区間には、その壁はもう建っていない。
+          if(elevTopAtU(r,mid)<=r.base+0.5) return;
           cover=true;
-          topA=Math.max(topA,elevTopAtU(r,uA)); topB=Math.max(topB,elevTopAtU(r,uB));
+          topA=Math.max(topA,Math.max(elevTopAtU(r,uA),r.base));
+          topB=Math.max(topB,Math.max(elevTopAtU(r,uB),r.base));
           base=Math.min(base,r.base);
         }
       });
@@ -23455,50 +23541,112 @@ var JISDRAW=(function(){
     var closed=hull.concat([[uLast,baseHeightMm],[uFirst,baseHeightMm]]);
     return {points:closed, apex:apex};
   }
-  // ─── 斜線の下の「実際の屋根」(Task 24-1) ───────────────────────────────
+  // ─── 斜線の下の「実際の屋根」(Task 24-1 / 26-1) ─────────────────────────
   // 3D では屋根メッシュそのものが制限面で切られ(applySetbackCut)、切り口には
   // 片流れ屋根が架かる(setbackRoofItems)。切っていない輪郭を描けば、その屋根は
   // 現物と違う形になる。だから図面でも **同じ面で切り、同じ屋根を足す**。
   //
-  // 制限面をこの立面の (u,高さ) へ落とす。制限高さは平面上の位置の一次式
-  // (setbackLimitHeightMmAt)で、û と d̂(ELEV_AXES)は正規直交なので
-  //   limit = baseMm + slope*((n·û)u + (n·d̂)d - d0)
-  // という座標の取り替えになる(法の算術を書き写してはいない)。立面は奥行き d が
-  // 潰れるので、その物のいちばん高くなる奥行きを採る。面が立面と正対している
-  // (n·d̂=0)ときは奥行きに依らず、これは厳密である。
-  function elevLimitLine(pl,ax,dLo,dHi){
+  // **切るのは (u,高さ) の平面ではなく、平面座標のままの上面である。**
+  // 制限高さは平面上の位置 (x,y) の一次式(setbackLimitHeightMmAt)であって、
+  // 立面は奥行き d を潰す。潰したあとで1本の直線として切ると、その立面の
+  // 奥行き範囲のどこか1つの d を選ぶことになる。以前はそこで **制限がいちばん
+  // 高くなる d** を採っていた(Task 26-1 で直す前)。奥行き方向に高さが変わる形
+  // (奥へ流れる切妻・段状のボリューム・張り出し)では、3D が既に削った屋根が
+  // 図面には残る = **実際より緩い図面**になる。斜線制限で最悪なのはそれである。
+  //
+  // だから (x,y,高さ) のまま切る:
+  //   1. 屋根の上面を三角形に分ける(roofUpperFacets)
+  //   2. 各面を制限面で伏せる(capPolygonByPlane) -- 制限より上は制限の高さになる
+  //   3. 出来た点を u 軸へ落として上側凸包を取る
+  // 上面は凹(gable/hip/mono/flat はどれも凹)、制限面は一次式なので min も凹。
+  // 凹な面の標本を弦で結ぶ上側凸包は真の面を **超えない** = 緩い側へは出ない。
+  function elevLimitLine(pl,ax){
     var cu=pl.nx*ax.u[0]+pl.ny*ax.u[1];
     var cd=pl.nx*ax.dp[0]+pl.ny*ax.dp[1];
-    var d=(cd>=0)?dHi:dLo;
-    return {a:pl.baseMm+pl.slope*(cd*d-pl.d0), b:pl.slope*cu, cu:cu, cd:cd};
+    return {a:pl.baseMm-pl.slope*pl.d0, b:pl.slope*cu, cu:cu, cd:cd};
   }
-  function elevLimitHAt(ln,u){ return ln.a+ln.b*u; }
-  // アイテムの平面範囲を、この方位の奥行き軸へ射影した範囲。
-  function elevItemDepthRange(it,ax){
-    var lo=Infinity, hi=-Infinity;
-    (getObjBounds(it)||[]).forEach(function(p){
-      var d=p.x*ax.dp[0]+p.y*ax.dp[1];
-      if(d<lo) lo=d;
-      if(d>hi) hi=d;
-    });
-    if(!isFinite(lo)) return {lo:0,hi:0};
-    return {lo:lo,hi:hi};
-  }
-  // 多角形を「制限高さ以下」の側で切る(Sutherland-Hodgman)。全点が制限の下に
-  // あれば点列はそのまま返るので、切られない屋根の輪郭は1点も動かない。
-  function clipProfileByLimitLine(points,ln){
-    var out=[], n=points.length, i, cur, prev, fc, fp, t;
-    for(i=0;i<n;i++){
-      cur=points[i]; prev=points[(i+n-1)%n];
-      fc=elevLimitHAt(ln,cur[0])-cur[1];
-      fp=elevLimitHAt(ln,prev[0])-prev[1];
-      if((fp<0)!==(fc<0)){
-        t=fp/(fp-fc);
-        out.push([prev[0]+(cur[0]-prev[0])*t, prev[1]+(cur[1]-prev[1])*t]);
+  // 屋根の上面を作る三角形。3頂点の通る平面より上に他の頂点が1つも無い組み合わせ
+  // = 上側凸包の面である。頂点は6つ以下(roofLocalVertices)なので総当たりで足りる。
+  // 平面に落として潰れる(3点が一直線)組み合わせは高さの式にならないので飛ばす。
+  function roofUpperFacets(verts){
+    var n=verts.length, out=[], i, j, k, m;
+    for(i=0;i<n;i++) for(j=i+1;j<n;j++) for(k=j+1;k<n;k++){
+      var A=verts[i], B=verts[j], C=verts[k];
+      var ux=B.x-A.x, uy=B.y-A.y, uh=B.h-A.h;
+      var vx=C.x-A.x, vy=C.y-A.y, vh=C.h-A.h;
+      var det=ux*vy-uy*vx;
+      if(Math.abs(det)<1) continue;              // 平面で潰れている(面積1mm²未満)
+      var a=(uh*vy-vh*uy)/det, b=(ux*vh-vx*uh)/det;
+      var ok=true;
+      for(m=0;m<n;m++){
+        var P=verts[m];
+        if(P.h>A.h+a*(P.x-A.x)+b*(P.y-A.y)+1e-3){ ok=false; break; }
       }
-      if(fc>=0) out.push(cur);
+      if(ok) out.push([A,B,C]);
     }
     return out;
+  }
+  // 上面の一片を制限面で伏せる。制限より下の点はそのまま、上の点は制限の高さへ
+  // 落とし、辺が制限をまたぐ所に折れの点を足す。返る点はすべて「切ったあとの
+  // 上面」の上に載っている(3D が残す形そのもの)。
+  function capPolygonByPlane(poly,pl){
+    var out=[], n=poly.length, i, cur, prev, lc, lp, t;
+    for(i=0;i<n;i++){
+      cur=poly[i]; prev=poly[(i+n-1)%n];
+      lc=setbackLimitHeightMmAt(pl,cur.x,cur.y)-cur.h;
+      lp=setbackLimitHeightMmAt(pl,prev.x,prev.y)-prev.h;
+      if((lp<0)!==(lc<0)){
+        t=lp/(lp-lc);
+        out.push({x:prev.x+(cur.x-prev.x)*t, y:prev.y+(cur.y-prev.y)*t, h:prev.h+(cur.h-prev.h)*t});
+      }
+      out.push({x:cur.x, y:cur.y, h:(lc<0)?(cur.h+lc):cur.h});
+    }
+    return out;
+  }
+  // 上側凸包のうち、基準面より上に残っている所だけを閉多角形にする。凹なので
+  // 「基準より上」は必ず1区間になり、途切れた輪郭を1本で橋渡しすることはない。
+  function closeProfileAboveBase(hull,baseMm){
+    var out=[], i, a, b, t;
+    for(i=0;i<hull.length;i++){
+      b=hull[i];
+      if(i>0){
+        a=hull[i-1];
+        if((a[1]>baseMm)!==(b[1]>baseMm) && Math.abs(b[1]-a[1])>1e-9){
+          t=(baseMm-a[1])/(b[1]-a[1]);
+          out.push([a[0]+(b[0]-a[0])*t, baseMm]);
+        }
+      }
+      if(b[1]>=baseMm) out.push(b);
+    }
+    if(out.length<2) return null;
+    return out.concat([[out[out.length-1][0],baseMm],[out[0][0],baseMm]]);
+  }
+  // 屋根1枚ぶんの、制限面で **位置ごとに** 切ったあとの輪郭。{points,apex} か null。
+  function roofItemProfileCut(it,dir,pls,skipKey){
+    var ax=ELEV_AXES[dir];
+    var verts=roofLocalVertices(it);
+    if(!verts.length) return null;
+    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var world=verts.map(function(v){
+      var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})
+      return {x:w.x, y:w.y, h:baseHeightMm+v.h/U};
+    });
+    var polys=roofUpperFacets(world);
+    if(!polys.length) return null;
+    pls.forEach(function(pl){
+      if(skipKey!==null && (skipKey==='' || setbackPlaneKeyOf(pl)===skipKey)) return;
+      polys=polys.map(function(p){ return capPolygonByPlane(p,pl); });
+    });
+    var pts=[], apex=-Infinity;
+    polys.forEach(function(p){ p.forEach(function(q){
+      pts.push([q.x*ax.u[0]+q.y*ax.u[1], q.h]);
+      if(q.h>apex) apex=q.h;
+    }); });
+    var hull=upperHull(pts);
+    if(hull.length<2) return null;
+    var closed=closeProfileAboveBase(hull,baseHeightMm);
+    if(!closed) return null;
+    return {points:closed, apex:apex};
   }
   // 立面図に出る屋根アイテム。斜線の切り口に架かる片流れ屋根は 3D に建っている
   // 屋根そのもの(setbackRoofItems)なので、同じ列に並べる。
@@ -23510,54 +23658,35 @@ var JISDRAW=(function(){
     return items;
   }
   // 屋根1枚ぶんの、制限面で切ったあとの輪郭。{points,apex} か null。
+  // **斜線制限を設定していないプランでは roofItemProfile をそのまま通る。**
   function elevRoofProfiles(dir){
-    var ax=ELEV_AXES[dir], pls=setbackPlanesForDrawing(), out=[];
+    var pls=setbackPlanesForDrawing(), out=[];
     elevRoofItems().forEach(function(it){
-      var prof=roofItemProfile(it,dir);
-      if(!prof || prof.points.length<3) return;
-      var pts=prof.points, apex=prof.apex;
-      // 斜線由来の屋根は **自分の面の上にぴったり載っている** ので、自分の面では
-      // 切らない(切ると丸め誤差ぶんだけ輪郭が削れて潰れる)。だが **他の面では
-      // 切る**: 角で2つの制限が交わるところで、片方の面に架かった屋根が
-      // もう片方の制限を超えたまま描かれていた(道路斜線で 3.3m)。3D の板は谷で
-      // 切られているので、切らずに描くと図面のほうが現物と違う形になる。Task 25-3。
-      var own=it.setbackRoof?(it.setbackPlaneKey||''):null;
-      var cut=false;
+      var prof;
       if(pls.length){
-        var dr=elevItemDepthRange(it,ax);
-        pls.forEach(function(pl){
-          if(own!==null && (own==='' || setbackPlaneKeyOf(pl)===own)) return;
-          if(pts.length<3) return;
-          pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dr.lo,dr.hi));
-          cut=true;
-        });
-        if(pts.length<3) return;
+        // 斜線由来の屋根は **自分の面の上にぴったり載っている** ので、自分の面では
+        // 切らない(切ると丸め誤差ぶんだけ輪郭が削れて潰れる)。だが **他の面では
+        // 切る**: 角で2つの制限が交わるところで、片方の面に架かった屋根が
+        // もう片方の制限を超えたまま描かれていた(道路斜線で 3.3m)。3D の板は谷で
+        // 切られているので、切らずに描くと図面のほうが現物と違う形になる。Task 25-3。
+        prof=roofItemProfileCut(it,dir,pls,it.setbackRoof?(it.setbackPlaneKey||''):null);
+      } else {
+        prof=roofItemProfile(it,dir);
       }
-      if(cut) apex=pts.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity);
-      out.push({points:pts,apex:apex});
+      if(!prof || prof.points.length<3) return;
+      out.push(prof);
     });
     return out;
   }
   // 壁のシルエット。母屋+離れのように壁群がu方向に分離している場合、elevSkylineは
   // グループごとに独立した点列を返すので、棟ごとに別の<polygon>として描く
   // (離れた棟の間を直線で橋渡ししないため)。
-  // 制限面があるときは、そこで切る -- 3D は壁のメッシュそのものを面で切っている
-  // (applySetbackCut)。壁の頭は既に wallTopProfileM で下がっているが、床より下へは
-  // 下がれないので、面より上に薄い切り残りが出る。3D ではそれも面で消えている。
+  // 制限面があるときの切り取りは **壁1本ごと**(elevWallLimitLines)で、ここには
+  // 出てこない -- 壁は直線なので、その壁の上での制限高さは u の一次式に書ける。
   function elevSkylineToSvg(dir,rects,LW){
-    var pls=setbackPlanesForDrawing(), ax=ELEV_AXES[dir], out='';
-    var dLo=Infinity, dHi=-Infinity;
-    rects.forEach(function(r){
-      if(r.depthMin<dLo) dLo=r.depthMin;
-      if(r.depth>dHi) dHi=r.depth;
-    });
+    var out='';
     elevSkyline(rects).forEach(function(pts){
-      if(pls.length){
-        pls.forEach(function(pl){
-          if(pts.length>=3) pts=clipProfileByLimitLine(pts,elevLimitLine(pl,ax,dLo,dHi));
-        });
-        if(pts.length<3) return;
-      }
+      if(pts.length<3) return;
       var s=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
       if(s) out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
     });
@@ -23663,7 +23792,7 @@ var JISDRAW=(function(){
     var rect={minX:view.minX, maxX:view.maxX, minY:-view.maxY, maxY:-view.minY};
     var dash=setbackChainDash(LW), out='';
     pls.forEach(function(pl){
-      var ln=elevLimitLine(pl,ax,0,0);
+      var ln=elevLimitLine(pl,ax);
       if(Math.abs(ln.cd)>1e-6) return;    // 距離が奥行きへ潰れる立面 = この向きには効いて見えない
       if(Math.abs(ln.cu)<1e-6) return;
       var u0=pl.d0/ln.cu, h0=pl.baseMm;   // 斜線の起点 = 境界の位置と基準高さ
