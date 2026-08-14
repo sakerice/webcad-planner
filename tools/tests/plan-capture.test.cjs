@@ -444,3 +444,175 @@ test('通常の2D表示ではラベルを描かない（キャプチャ中だけ
   c.PLAN_CAPTURE = { ceilingLabels: true };
   assert.equal(c.planCaptureCeilingLabels(), true);
 });
+
+// ══ Task 26-4: planCaptureShows を `return true` にしても緑だった ══════════
+//
+// Task 3 の注記除去は、上の grep 群でしか守られていなかった。関数が常に true を
+// 返すようになっても全テストが緑のまま = **グリッド・下階ゴースト・選択ハンドル・
+// メモ・定規・寸法線が焼き込まれた参照画像が出荷されうる。**
+// ここは draw2d と個々の描画関数を node:vm で **実際に走らせ**、キャプチャ中に
+// 何が描かれたかを数える。
+
+// 呼ばれた関数名と、canvas に入った命令を記録する実行環境。
+// draw2d が呼ぶ描画関数のうち、切り出していないものは自動で「記録するだけの
+// 空関数」になる(未定義参照で落とさない)。判定はすべて呼ばれたかどうかで行う。
+function drawSandbox(parts, extra) {
+  const calls = [];
+  const ops = [];
+  const recordingCtx = new Proxy({}, {
+    has() { return true; },
+    get(t, k) {
+      if (typeof k === 'symbol') return undefined;
+      return function () { ops.push(String(k) + '(' + Array.prototype.slice.call(arguments, 0, 2).join(',') + ')'); };
+    },
+    set(t, k, v) { ops.push(String(k) + '=' + v); return true; }
+  });
+  const base = Object.assign({
+    console: console,
+    ctx: recordingCtx,
+    canvas: { width: 800, height: 600 },
+    document: { getElementById() { return { textContent: '', style: {}, classList: { add() {}, remove() {} } }; } },
+    Math: Math, Number: Number, String: String, Boolean: Boolean, Array: Array,
+    Object: Object, JSON: JSON, isFinite: isFinite, isNaN: isNaN,
+    parseInt: parseInt, parseFloat: parseFloat,
+    DRAG: { active: false }
+  }, extra || {});
+  const sb = new Proxy(base, {
+    has() { return true; },
+    get(t, k) {
+      if (k in t) return t[k];
+      if (typeof k === 'symbol') return undefined;
+      const spy = function () { calls.push(String(k)); return undefined; };
+      t[k] = spy;
+      return spy;
+    },
+    set(t, k, v) { t[k] = v; return true; }
+  });
+  const c = vm.createContext(sb);
+  vm.runInContext(parts.join('\n'), c);
+  return { ctx: c, calls: calls, ops: ops };
+}
+
+// 編集中(キャプチャではない)の draw2d と、キャプチャ中の draw2d を1回ずつ走らせる。
+function runDraw2d(capture) {
+  const data = {
+    walls: [
+      { id: 'w1', floor: 1, x1: 0, y1: 0, x2: 4000, y2: 0, thick: 120 },
+      { id: 'w2', floor: 2, x1: 0, y1: 0, x2: 4000, y2: 0, thick: 120 }
+    ],
+    rooms: [
+      { id: 'r1', type: 'room', floor: 1, x: 0, y: 0, w: 4000, d: 3000 },
+      { id: 'r2', type: 'room', floor: 2, x: 0, y: 0, w: 4000, d: 3000 }
+    ],
+    items: [{ id: 'm1', type: 'memo', floor: 2, x: 100, y: 100, w: 300, d: 300 }]
+  };
+  const room2 = data.rooms[1];
+  const s = drawSandbox([
+    topLevelVar('PLAN_CAPTURE'),
+    topLevelFunction('planCaptureShows'),
+    topLevelFunction('planCaptureDefaults'),
+    topLevelFunction('draw2d')
+  ], {
+    DATA: data,
+    ST: { floor: 2, zoom: 20, panX: 0, panY: 0, showGrid: true, showDim: true,
+          selected: room2, selectAll: false, tool: 'select', view: '2d',
+          drawing: false, drawPts: [], mouseW: { x: 0, y: 0 }, multiSelected: [] }
+  });
+  s.ctx.PLAN_CAPTURE = capture ? s.ctx.planCaptureDefaults() : null;
+  s.ctx.draw2d();
+  return s;
+}
+
+test('26-4(最重要): キャプチャ中の draw2d は、グリッド・下階ゴースト・寸法線を描かない', () => {
+  const editing = runDraw2d(false);
+  // 前提: 編集中はどれも描かれている(空振りの試験にしない)。
+  assert.ok(editing.calls.indexOf('drawGrid') >= 0, '編集中にグリッドが描かれていない');
+  assert.ok(editing.calls.indexOf('drawDim') >= 0, '編集中に寸法線が描かれていない');
+  assert.ok(editing.ops.indexOf('globalAlpha=0.22') >= 0, '編集中に下階ゴーストが描かれていない');
+
+  const capturing = runDraw2d(true);
+  assert.equal(capturing.calls.indexOf('drawGrid'), -1, 'キャプチャにグリッドが焼き込まれる');
+  assert.equal(capturing.calls.indexOf('drawDim'), -1, 'キャプチャに寸法線が焼き込まれる');
+  assert.equal(capturing.ops.indexOf('globalAlpha=0.22'), -1,
+    'キャプチャに下階ゴーストが焼き込まれる');
+});
+
+test('26-4(最重要): キャプチャ中は、選択された部屋が赤いハイライトにならない', () => {
+  const editing = runDraw2d(false);
+  const capturing = runDraw2d(true);
+  assert.ok(editing.ops.indexOf('strokeStyle=#e94560') >= 0,
+    '編集中に選択ハイライトが出ていない(前提が壊れている)');
+  assert.equal(capturing.ops.indexOf('strokeStyle=#e94560'), -1,
+    'キャプチャに選択ハイライトが焼き込まれる');
+});
+
+// 選択ハンドル・ロックバッジは呼び出し側が多数あるので、抑止は描画関数の中に
+// 1か所だけ置いてある。draw2d 越しでは「呼ばれたか」しか見えないので、
+// ここは関数そのものを走らせて、canvas に1命令も入らないことを見る。
+function runGated(fnName, args, capture, extra) {
+  const s = drawSandbox([
+    topLevelVar('PLAN_CAPTURE'),
+    topLevelFunction('planCaptureShows'),
+    topLevelFunction('planCaptureDefaults'),
+    topLevelFunction('w2c'),
+    topLevelFunction('isObjectLocked'),
+    topLevelFunction('drawLockBadgePx'),
+    topLevelFunction(fnName)
+  ], Object.assign({
+    ST: { floor: 1, zoom: 20, panX: 0, panY: 0, tool: 'select', multiSelected: [] },
+    DATA: { walls: [], rooms: [], items: [] }
+  }, extra || {}));
+  s.ctx.PLAN_CAPTURE = capture ? s.ctx.planCaptureDefaults() : null;
+  s.ctx[fnName].apply(null, args);
+  return s;
+}
+
+test('26-4(最重要): キャプチャ中は、選択ハンドルが1命令も canvas に入らない', () => {
+  const obj = { id: 1, type: 'sofa', floor: 1, x: 0, y: 0, w: 1000, d: 1000, rot: 0 };
+  assert.ok(runGated('drawHandles', [obj, 100, 100, 50, 50, 1], false).ops.length > 0,
+    '編集中にハンドルが描かれていない(前提が壊れている)');
+  assert.deepEqual(runGated('drawHandles', [obj, 100, 100, 50, 50, 1], true).ops, [],
+    'キャプチャに選択ハンドルが焼き込まれる');
+
+  const wall = { id: 'w1', floor: 1, x1: 0, y1: 0, x2: 4000, y2: 0 };
+  assert.ok(runGated('drawWallHandles', [wall], false).ops.length > 0,
+    '編集中に壁のハンドルが描かれていない(前提が壊れている)');
+  assert.deepEqual(runGated('drawWallHandles', [wall], true).ops, [],
+    'キャプチャに壁のハンドルが焼き込まれる');
+});
+
+test('26-4(最重要): キャプチャ中は、施錠バッジが1命令も canvas に入らない', () => {
+  const wall = { id: 'w1', floor: 1, x1: 0, y1: 0, x2: 4000, y2: 0, locked: true };
+  const args = [[wall], []];
+  const st = { floor: 1, zoom: 20, panX: 0, panY: 0, tool: 'select', multiSelected: [] };
+  const data = { walls: [wall], rooms: [], items: [] };
+  assert.ok(runGated('drawLockOverlays', args, false, { ST: st, DATA: data }).ops.length > 0,
+    '編集中に施錠バッジが描かれていない(前提が壊れている)');
+  assert.deepEqual(runGated('drawLockOverlays', args, true, { ST: st, DATA: data }).ops, [],
+    'キャプチャに施錠バッジが焼き込まれる');
+});
+
+test('26-4(最重要): キャプチャ中は、メモ・定規・ウォークルートが描画対象から外れる', () => {
+  // drawItem2d の入口で落ちること。落ちなければ canvas に命令が入る。
+  const memo = { id: 'm1', type: 'memo', floor: 1, x: 0, y: 0, w: 300, d: 300, n: 'メモ' };
+  const s = drawSandbox([
+    topLevelVar('PLAN_CAPTURE'),
+    topLevelFunction('planCaptureShows'),
+    topLevelFunction('planCaptureDefaults'),
+    topLevelFunction('isPlanAnnotationType'),
+    topLevelFunction('w2c'),
+    topLevelFunction('drawItem2d')
+  ], {
+    ST: { floor: 1, zoom: 20, panX: 0, panY: 0, tool: 'select', selected: null, view: '2d' },
+    DATA: { walls: [], rooms: [], items: [memo] },
+    // 姿勢の解決そのものはこの試験の対象ではない(注記が描かれるかどうかだけを見る)。
+    getItemDisplayPose: (o) => ({ x: o.x + o.w / 2, y: o.y + o.d / 2, rot: 0 })
+  });
+  s.ctx.PLAN_CAPTURE = null;
+  s.ctx.drawItem2d(memo);
+  assert.ok(s.ops.length > 0, '編集中にメモが描かれていない(前提が壊れている)');
+  const n = s.ops.length;
+  s.ctx.PLAN_CAPTURE = s.ctx.planCaptureDefaults();
+  s.ctx.drawItem2d(memo);
+  assert.equal(s.ops.length, n, 'キャプチャにメモが焼き込まれる');
+});

@@ -949,3 +949,57 @@ test('方位の既定はキャンバスの上が北', () => {
   assert.match(slider, /value="0"/, 'the default bearing is north-up, like a map');
   assert.match(slider, /北の方角/, 'the label states what the value means');
 });
+
+// ── 4. Task 26-4: 3D経路の階層が、消しても緑のまま出荷されないように ──────
+// 生き残った変異: 3D経路が package.json に書く部材の階層をすべて FREE にする。
+// 判定器は FREE を「生成AIの領分」として測らないので、**何も測らなくなる**。
+// 併せて、色→階層の表そのものが空になる変異も塞ぐ（同じ結果になる）。
+test('26-4(最重要): 3D経路の色→階層の表は空にならず、LockTiers の分類そのものになる', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  const table = pkg.packageJson.lockTiers;
+  assert.ok(table && typeof table === 'object', 'lockTiers が無い');
+  const colors = Object.keys(table);
+  assert.equal(colors.length, LIT.legend.length,
+    'ガイドに写った部材の数だけ色がある: ' + JSON.stringify(table));
+  // 期待値はテスト側で独立に引く（実装の分類規則を書き写さない）。
+  LIT.legend.forEach((e) => {
+    assert.equal(table[e.color.toLowerCase()], LockTiers.tierOf(e.type),
+      e.type + ' (' + e.color + ') の階層が違う: ' + JSON.stringify(table));
+  });
+  assert.ok(colors.some((k) => table[k] !== 'FREE'),
+    'すべて FREE になっている＝判定器が1つも測らない');
+});
+
+test('26-4(最重要): 3D経路の instances の階層も LockTiers の分類そのもの', async () => {
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  const list = pkg.packageJson.instances;
+  assert.ok(Array.isArray(list) && list.length === LIT.legend.length,
+    'instances が無い/数が合わない: ' + JSON.stringify(list));
+  list.forEach((e) => {
+    const src = LIT.legend.filter((x) => x.id === e.id)[0];
+    assert.ok(src, '知らない部材が混ざっている: ' + JSON.stringify(e));
+    assert.equal(e.tier, LockTiers.tierOf(src.type), src.type + ' の階層が違う');
+  });
+  // 建具・躯体は必ず LOCKED 側に残る（すべて FREE にする変異はここで赤くなる）。
+  const locked = list.filter((e) => e.tier === 'LOCKED');
+  assert.ok(locked.length >= 1,
+    'LOCKED の部材が1つも無い＝判定器が何も測らない: ' + JSON.stringify(list));
+  assert.equal(locked[0].type, 'wall');
+});
+
+test('26-4(最重要): 階層が全部 FREE になると、暗部の持ち上げも起きない', async () => {
+  // 「FREE の部材は持ち上げの理由にならない」(shadow-lift.js) ので、階層が
+  // 死ぬと reference.png も持ち上がらない。ここは同じ入力を2通りの表で通し、
+  // その因果を実際に測る（変異が何を壊すのかを、テスト自身が示す）。
+  const c = harness({ view: '3d-ext', floor: 2 });
+  const pkg = await build(c);
+  assert.equal(pkg.packageJson.shadowLift.applied, true, '本物の表では持ち上がる');
+  const allFree = {};
+  Object.keys(pkg.packageJson.lockTiers).forEach((k) => { allFree[k] = 'FREE'; });
+  const dead = ShadowLift.curveFor(ShadowLift.measure(c.$baseIm,
+    c.$registry.get('url:instance'), allFree));
+  assert.equal(dead.applied, false,
+    'すべて FREE でも持ち上がってしまう＝この試験は階層の生死を見ていない');
+});
