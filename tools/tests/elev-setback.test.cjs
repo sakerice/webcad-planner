@@ -235,6 +235,9 @@ function chainLines(svg) {
   }
   return out;
 }
+// 「引けた」注記(基準高さと勾配の数値が入る)と、「引けなかった」注記(※ で始まる)。
+function drawnNotes(svg) { return texts(svg).filter((t) => /勾配/.test(t)); }
+function undrawnNotes(svg) { return texts(svg).filter((t) => t.indexOf('※') === 0); }
 function texts(svg) {
   const out = [];
   const re = /<text[^>]*>([^<]*)<\/text>/g;
@@ -388,8 +391,14 @@ test('24-2(最重要): 北側斜線は、距離が横軸に出る立面図(東�
   });
   // 北側斜線に正対する立面図では、距離は奥行きへ潰れる。そこに斜めの線は引かない。
   ['n', 's'].forEach((d) => {
-    assert.equal(chainLines(elev(ctx, d)).length, 0, d + ' 立面図に斜線が出ている');
-    assert.equal(/斜線/.test(elev(ctx, d)), false, d + ' 立面図に注記が出ている');
+    const svg = elev(ctx, d);
+    assert.equal(chainLines(svg).length, 0, d + ' 立面図に斜線が出ている');
+    assert.deepEqual(drawnNotes(svg), [], d + ' 立面図に「引けた」注記が出ている');
+    // Task 26-2: 引けないことは **黙って落とさず**、紙の上に書く。
+    assert.ok(undrawnNotes(svg).some((t) => /北側斜線.*引けない/.test(t)),
+      d + ' 立面図に「北側斜線が引けない」注記が無い: ' + JSON.stringify(texts(svg)));
+    assert.ok(undrawnNotes(svg).some((t) => /適合を示していない/.test(t)),
+      d + ' 立面図に「適合を示していない」注記が無い');
   });
 });
 
@@ -465,14 +474,18 @@ test('24-2(最重要): 2方向にかかる場合、それぞれの制限がそ�
   ['e', 'w'].forEach((d) => {
     const svg = elev(ctx, d);
     assert.equal(chainLines(svg).filter((x) => x.w === mid).length, 1, d + ' の斜線は1本');
-    assert.ok(texts(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線の注記');
-    assert.ok(!texts(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線が混ざっている');
+    assert.ok(drawnNotes(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線の注記');
+    assert.ok(!drawnNotes(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線が引かれている');
+    assert.ok(undrawnNotes(svg).some((t) => /道路斜線.*引けない/.test(t)),
+      d + ' に「道路斜線が引けない」注記が無い: ' + JSON.stringify(texts(svg)));
   });
   ['n', 's'].forEach((d) => {
     const svg = elev(ctx, d);
     assert.equal(chainLines(svg).filter((x) => x.w === mid).length, 1, d + ' の斜線は1本');
-    assert.ok(texts(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線の注記');
-    assert.ok(!texts(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線が混ざっている');
+    assert.ok(drawnNotes(svg).some((t) => /道路斜線/.test(t)), d + ' に道路斜線の注記');
+    assert.ok(!drawnNotes(svg).some((t) => /北側斜線/.test(t)), d + ' に北側斜線が引かれている');
+    assert.ok(undrawnNotes(svg).some((t) => /北側斜線.*引けない/.test(t)),
+      d + ' に「北側斜線が引けない」注記が無い: ' + JSON.stringify(texts(svg)));
   });
 });
 
@@ -721,3 +734,98 @@ test('26-1(最重要): この家と方位では、切らなければ実際に1m�
   assert.ok(worst > 1000,
     '切らない輪郭は 3D より 1m 以上高いはず: ' + worst.toFixed(1) + 'mm (u=' + at + ')');
 });
+
+// ══ 26-2 引けない制限は、黙って消さずに紙へ書く ═════════════════════════
+//
+// 北側斜線だけを設定した家では、斜めの線が出るのは 0/90/180/270 度だけである
+// (それ以外では境界からの距離が奥行きへ潰れる)。道路斜線の法線は道路アイテムから
+// 来るので方位に依らず出る。**北＋道路のとき、道路の線は出るのに北の線は出ない。**
+// 図面が「制限はここです」と言いながら、もう一方を黙って落としていた。
+
+function planeKindsOnSheet(svg) {
+  const drawn = {}, noted = {};
+  drawnNotes(svg).forEach((t) => { if (/北側斜線/.test(t)) drawn.north = 1; if (/道路斜線/.test(t)) drawn.road = 1; });
+  undrawnNotes(svg).forEach((t) => {
+    if (!/引けない/.test(t)) return;
+    if (/北側斜線/.test(t)) noted.north = 1;
+    if (/道路斜線/.test(t)) noted.road = 1;
+  });
+  return { drawn: Object.keys(drawn).sort(), noted: Object.keys(noted).sort() };
+}
+
+// 注記が出るかどうかは制限面の向きだけで決まり、家の形には依らない。方位を1周
+// なめる試験は平屋の箱で回す(3階建てだと壁の上端の折れ線を毎回引き直すので遅い)。
+function tinySetbackHouse(cfg, road) {
+  const walls = box(1, 0, 1000, 4000, 4000);
+  const rooms = [{ id: 'r1', n: '1階', floor: 1, x: 0, y: 1000, w: 4000, d: 3000 }];
+  const site = { id: 'site', type: 'site-rect', x: -1000, y: 0, w: 8000, d: 7000, rot: 0 };
+  if (cfg) site.setback = JSON.parse(JSON.stringify(cfg));
+  const items = [site,
+    { id: 'roof1', type: 'roof', roofType: 'flat', x: 0, y: 1000, w: 4000, d: 3000,
+      rot: 0, floor: 2, elev: 0, pitch: 30, roofThickness: 180 }];
+  if (road) items.push({ id: 'road1', type: 'road', x: 4500, y: 2000, w: 8000, d: 3000, rot: 90 });
+  return { walls, rooms, floors: {}, items };
+}
+
+// 方位を1周なめて、立面図ごとに「引いた制限」「引けないと書いた制限」「斜めの線の
+// 本数」を集める。SVG は (方位, 立面) につき1回だけ組む。
+function sweepSheets(ctx, stepDeg) {
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  const rows = [];
+  for (let deg = 0; deg < 360; deg += stepDeg) {
+    run(ctx, 'setPlanNorthDeg(' + deg + ');');
+    DIRS.forEach((d) => {
+      const svg = elev(ctx, d);
+      const k = planeKindsOnSheet(svg);
+      k.deg = deg; k.dir = d;
+      k.diagonals = chainLines(svg).filter((x) => x.w === mid).length;
+      rows.push(k);
+    });
+  }
+  return rows;
+}
+
+test('26-2(最重要): どの方位のどの立面でも、制限は「引かれる」か「引けないと書かれる」', () => {
+  [[NORTH_ONLY, false, 5], [BOTH, true, 5]].forEach((cfg) => {
+    const ctx = full(tinySetbackHouse(cfg[0], cfg[1]));
+    const kinds = plain(run(ctx, 'setbackPlanes()')).map((p) => p.kind).sort();
+    assert.ok(kinds.length >= 1, '面ができている');
+    const rows = sweepSheets(ctx, cfg[2]);
+    rows.forEach((k) => {
+      assert.deepEqual(k.drawn.concat(k.noted).sort(), kinds,
+        k.deg + '度 ' + k.dir + '立面: 黙って落ちた制限がある (引いた=' + JSON.stringify(k.drawn)
+        + ' 引けないと書いた=' + JSON.stringify(k.noted) + ')');
+      assert.equal(k.drawn.filter((x) => k.noted.indexOf(x) >= 0).length, 0,
+        k.deg + '度 ' + k.dir + '立面: 同じ制限を二重に書いている');
+    });
+    // 北側斜線だけの家では、斜めの線が出るのは 72 方位のうち 4 つ(0/90/180/270)
+    // だけである。**残り 68 方位で黙って消えていた**のが Task 26-2 の不具合。
+    if (cfg[0] === NORTH_ONLY) {
+      const degs = {};
+      rows.forEach((k) => { if (k.diagonals) degs[k.deg] = 1; });
+      assert.deepEqual(Object.keys(degs).map(Number).sort((x, y) => x - y), [0, 90, 180, 270],
+        '斜めの線が出る方位');
+      const silent = rows.filter((k) => !k.diagonals && !k.noted.length);
+      assert.deepEqual(silent, [], '線も注記も無い立面が残っている');
+    }
+  });
+});
+
+test('26-2(最重要): 北＋道路で、道路の線が出る立面には北が引けないと書いてある', () => {
+  const ctx = full(setbackHouse(BOTH, true));
+  const mid = run(ctx, 'JISDRAW.lineWidths(100).mid');
+  // 東立面図: 北側斜線が引ける向き。道路斜線は奥行きへ潰れる。
+  const east = elev(ctx, 'e');
+  assert.equal(chainLines(east).filter((x) => x.w === mid).length, 1, '東立面の斜線は1本');
+  assert.deepEqual(planeKindsOnSheet(east), { drawn: ['north'], noted: ['road'] });
+  // 南立面図: その逆。
+  const south = elev(ctx, 's');
+  assert.deepEqual(planeKindsOnSheet(south), { drawn: ['road'], noted: ['north'] });
+  // 注記は「何が引けないか」と「この図が何を示していないか」の両方を言う。
+  const note = undrawnNotes(south);
+  assert.ok(note.some((t) => /北側斜線は、境界からの距離がこの立面の奥行き方向に潰れるため引けない/.test(t)),
+    '引けない理由が書いてある: ' + JSON.stringify(note));
+  assert.ok(note.some((t) => /^※ この立面図は、上に挙げた制限への適合を示していない$/.test(t)),
+    '適合を示していないと書いてある: ' + JSON.stringify(note));
+});
+

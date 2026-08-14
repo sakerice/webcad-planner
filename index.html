@@ -23790,21 +23790,24 @@ var JISDRAW=(function(){
     var ax=ELEV_AXES[dir];
     // view は反転後(y=-高さ)の紙の枠。(u,高さ)の枠へ戻して、紙からはみ出す線を切る。
     var rect={minX:view.minX, maxX:view.maxX, minY:-view.maxY, maxY:-view.minY};
-    var dash=setbackChainDash(LW), out='';
+    var dash=setbackChainDash(LW), out='', undrawn=[];
     pls.forEach(function(pl){
       var ln=elevLimitLine(pl,ax);
-      if(Math.abs(ln.cd)>1e-6) return;    // 距離が奥行きへ潰れる立面 = この向きには効いて見えない
-      if(Math.abs(ln.cu)<1e-6) return;
+      // 距離が奥行きへ潰れる立面 = この向きには斜めの線にならない。
+      if(Math.abs(ln.cd)>1e-6 || Math.abs(ln.cu)<1e-6){
+        undrawn.push(setbackKindLabel(pl)+'は、境界からの距離がこの立面の奥行き方向に潰れるため引けない');
+        return;
+      }
       var u0=pl.d0/ln.cu, h0=pl.baseMm;   // 斜線の起点 = 境界の位置と基準高さ
       var du=ln.cu, dh=pl.slope;          // 距離が1増えるごとの (u,高さ)
       var seg=clipLineToRect(u0,h0,du,dh,rect);
-      if(!seg) return;
+      if(!seg){ undrawn.push(setbackKindLabel(pl)+'は、この用紙の範囲に入らないため引けない'); return; }
       var t0=Math.max(0,seg.u0), t1=seg.u1;   // 境界より外(t<0)へは伸ばさない
       // 制限が効くのは敷地の上である。面が持っている敷地の範囲(siteTMax)で止める
       // -- 紙いっぱいまで引くと、建物より敷地より遥かに長い線が図面を支配する。
       var tSite=Math.max(pl.siteTMax,0);
       if(tSite>0 && t1>tSite) t1=tSite;
-      if(!(t1>t0)) return;
+      if(!(t1>t0)){ undrawn.push(setbackKindLabel(pl)+'は、この用紙の範囲に入らないため引けない'); return; }
       var ax0=u0+du*t0, ay0=h0+dh*t0, ax1=u0+du*t1, ay1=h0+dh*t1;
       out+='<line x1="'+ax0+'" y1="'+ay0+'" x2="'+ax1+'" y2="'+ay1
         +'" stroke="#000" stroke-width="'+LW.mid+'" stroke-dasharray="'+dash+'"/>';
@@ -23831,6 +23834,27 @@ var JISDRAW=(function(){
       out+='<g transform="translate('+tx+','+ty+') scale(1,-1)">'
         +'<text x="0" y="0" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif"'
         +' font-size="'+fs+'" fill="#000">'+escSvgText(text)+'</text></g>';
+    });
+    // 引けなかった制限は **黙って落とさない** (Task 26-2)。
+    // 北側斜線だけを設定した家では、斜線が出るのは 0/90/180/270 度だけである。
+    // 道路斜線の法線は道路アイテムから来るので方位に依らず出る。北＋道路のとき、
+    // 道路の線は全方位で出るのに北の線は出ない -- 図面が「制限はここです」と
+    // 言いながら、もう一方を黙って落としていた。
+    // **その立面が何への適合を示していないのか**を紙の上に書く。
+    out+=elevSetbackUndrawnNoteSvg(undrawn,rect,LW);
+    return out;
+  }
+  // 引けなかった制限の注記。用紙の左下に、下から順に積む。
+  function elevSetbackUndrawnNoteSvg(undrawn,rect,LW){
+    if(!undrawn.length) return '';
+    var fs=LW.text*0.75, out='';
+    var x=rect.minX+fs*0.8, y=rect.minY+fs*1.0;
+    var lines=undrawn.slice();
+    lines.push('この立面図は、上に挙げた制限への適合を示していない');
+    lines.forEach(function(txt,i){
+      out+='<g transform="translate('+x+','+(y+(lines.length-1-i)*fs*1.5)+') scale(1,-1)">'
+        +'<text x="0" y="0" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fs+'" fill="#000">'
+        +escSvgText('※ '+txt)+'</text></g>';
     });
     return out;
   }
