@@ -3111,7 +3111,7 @@ input[type="reset"]:focus-visible{
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
-  <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+  <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
   <button class="tbtn mob-hide" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()">🎬 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
@@ -3136,6 +3136,13 @@ input[type="reset"]:focus-visible{
              ないので、共通操作(スマホでもハンバーガーから開く)にも同じ toggleDim を
              置く。新しい状態は作らない -- 押すのは既存の ST.showDim そのものである。 -->
         <div class="stool active" id="stool-dim" onclick="toggleDim()" title="寸法の表示切替"><span class="sicon">⇥</span>寸法</div>
+        <!-- 「⊞ グリッド」「⊙ 全体表示」「🗑 階クリア」も 寸法 と同じで、ツールバー
+             (mob-hide)にしか無かった。768px以下では入口が1つも無くなり、機能が
+             消えたのと同じになる。押すのは既存の toggleGrid / resetView / clearFloor
+             そのもので、新しい状態も新しい確認ダイアログも作らない。 -->
+        <div class="stool" id="stool-grid" onclick="toggleGrid()" title="グリッドの表示切替"><span class="sicon">⊞</span>グリッド</div>
+        <div class="stool" id="stool-fit" onclick="resetView()" title="全体表示"><span class="sicon">⊙</span>全体表示</div>
+        <div class="stool" id="stool-clear" onclick="clearFloor()" title="現在階の未ロック要素を削除"><span class="sicon">🗑</span>階クリア</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -3164,6 +3171,9 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" onclick="exportPlan()">↓ JSON保存</button>
           <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()">📂 JSON読込</button>
           <button class="pbtn sec" type="button" onclick="openShareDialog()">🔗 共同編集</button>
+          <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が
+               1つも無かった。書き出し系はここに集めるのが既存の並びである。 -->
+          <button class="pbtn sec" type="button" id="jis-drawing-mobile-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
         </div>
       </div>
     </div>
@@ -3275,7 +3285,7 @@ input[type="reset"]:focus-visible{
           <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
         </div>
       </div>
-      <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">🎥 AIレンダー</button>
+      <button id="unity-render-fab" type="button" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
         <button type="button" class="elev-snap-btn" data-elev-dir="n" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
         <button type="button" class="elev-snap-btn" data-elev-dir="e" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
@@ -3366,10 +3376,15 @@ input[type="reset"]:focus-visible{
 <div id="unity-render-modal" onclick="if(event.target===this)closeUnityRenderModal()">
   <div class="unity-render-card">
     <div class="unity-render-head">
-      <div class="unity-render-title">AI高品質化用データ</div>
+      <div class="unity-render-title">画像AI用データ</div>
       <button class="unity-render-close" onclick="closeUnityRenderModal()">×</button>
     </div>
+    <!-- 見出しの並びは動画AI用データのダイアログと同じ順序に揃えてある(Task 29-3):
+         この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
+         中身も既存の unity-render-* クラスをそのまま使う。 -->
+    <div class="ph">この機能について</div>
     <div id="unity-render-status" class="unity-render-status">現在見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するための一式を作成します。基準・エッジ・深度・法線・カテゴリ・インスタンス画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
+    <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
         <label for="ai-render-style-input">任意の仕上げメモ</label>
@@ -3397,12 +3412,17 @@ input[type="reset"]:focus-visible{
         </select>
         <small id="ai-floor-use-help">未指定時のみ、壁・部屋の有無から居住階かどうかを推論します。</small>
       </div>
-      <div class="ai-instruction-actions">
-        <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
-      </div>
     </div>
+    <div class="ph">データ作成</div>
+    <div class="unity-render-actions">
+      <button id="ai-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="generateAiRenderPackage()">画像AI用データを作る</button>
+    </div>
+    <div class="ph">データ出力</div>
     <textarea id="ai-instructions-preview" class="ai-instructions-preview" readonly placeholder="AIへの指示文は、データ生成後にここへ表示されます。"></textarea>
-    <img id="unity-render-img" class="unity-render-img" alt="AIレンダー用の基準画像プレビュー">
+    <div class="ai-instruction-actions">
+      <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
+    </div>
+    <img id="unity-render-img" class="unity-render-img" alt="画像AI用の基準画像プレビュー">
     <div id="ai-package-preview" class="ai-package-preview">
       <div class="ai-package-shot"><img id="ai-base-img" alt="base render"><span>基準画像</span></div>
       <div class="ai-package-shot"><img id="ai-edge-img" alt="edge guide"><span>エッジ画像</span></div>
@@ -3412,7 +3432,6 @@ input[type="reset"]:focus-visible{
       <div class="ai-package-shot"><img id="ai-instance-img" alt="instance guide"><span>部材ID画像</span></div>
     </div>
     <div class="unity-render-actions">
-      <button class="pbtn sec" style="width:auto;padding:7px 12px" onclick="generateAiRenderPackage()">再生成</button>
       <a id="ai-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">一括DL</a>
       <a id="ai-dl-json" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">パッケージJSON保存</a>
       <a id="ai-dl-prompt" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">AIへの指示文を保存</a>
@@ -3463,7 +3482,10 @@ input[type="reset"]:focus-visible{
       <div class="unity-render-title">動画AI用データ</div>
       <button class="unity-render-close" onclick="closeVideoRenderModal()">×</button>
     </div>
+    <!-- 見出しの並びは画像AI用データのダイアログと同じ順序に揃えてある(Task 29-3)。 -->
+    <div class="ph">この機能について</div>
     <div id="video-render-status" class="unity-render-status">いま見ている画面を参照にして、動画生成AIへ渡す一式（参照画像・指示文・設計情報）を作ります。</div>
+    <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
         <div id="video-render-source" class="video-source-note"></div>
@@ -3487,9 +3509,11 @@ input[type="reset"]:focus-visible{
         </div>
       </div>
     </div>
+    <div class="ph">データ作成</div>
     <div class="unity-render-actions">
       <button id="video-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runVideoRenderPackage()">動画AI用データを作る</button>
     </div>
+    <div class="ph">データ出力</div>
     <img id="video-render-img" class="unity-render-img" alt="動画AI用の参照画像プレビュー">
     <div id="video-render-files" class="unity-render-cmd video-render-files">作成すると、ZIPの中身がここに出ます。</div>
   </div>
@@ -3518,7 +3542,7 @@ input[type="reset"]:focus-visible{
     <span class="bnav-icon">🚶</span>内観3D
   </button>
   <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
-    <span class="bnav-icon">🎥</span>AI
+    <span class="bnav-icon">📷</span>画像
   </button>
   <!-- 平面図を参照にする経路はスマホの2D表示から入る。ツールバーは mob-hide で、
        FAB は3Dの中にしか無いので、ここが無いと携帯では平面図から動画を作れない。 -->
@@ -21315,7 +21339,7 @@ function buildAiRenderPrompt(metadata,includePlan){
 }
 async function ensureAiRenderableView(){
   if(isUnityRenderableView()) return true;
-  setUnityRenderStatus('AI高品質化用データを作るため、外観3D表示へ切り替えています...');
+  setUnityRenderStatus('画像AI用データを作るため、外観3D表示へ切り替えています...');
   setView('3d-ext');
   await waitFrame(260);
   return isUnityRenderableView();
@@ -21512,7 +21536,7 @@ function handleAiDownloadLinkClick(e){
   var a=e&&e.currentTarget;
   if(a && !a.classList.contains('disabled')) return true;
   if(e) e.preventDefault();
-  setUnityRenderStatus('ダウンロード用データが未生成です。「再生成」を押してから、保存ボタンをクリックしてください。');
+  setUnityRenderStatus('ダウンロード用データが未生成です。「画像AI用データを作る」を押してから、保存ボタンをクリックしてください。');
   return false;
 }
 async function generateAiRenderPackage(){
@@ -21523,7 +21547,7 @@ async function generateAiRenderPackage(){
   setUnityRenderImage('');
   await ensureAiRenderableView();
   if(!isUnityRenderableView()){
-    setUnityRenderStatus('外観3Dまたは内観3Dを表示してからAIレンダー用パッケージを生成してください。');
+    setUnityRenderStatus('外観3Dまたは内観3Dを表示してから画像AI用データを作ってください。');
     return null;
   }
   setUnityRenderBusy(true);
@@ -21592,7 +21616,7 @@ async function generateAiRenderPackage(){
     syncAiRenderDownloadLinks();
     setUnityRenderImage(base);
     setUnityRenderStatus(
-      'AI高品質化用データを生成しました。\n\n'+
+      '画像AI用データを生成しました。\n\n'+
       '推奨手順:\n'+
       '1. 一括DLで制御パッケージを保存\n'+
       '2. 基準・エッジ・深度・法線・カテゴリ・部材IDの6画像をAIへ添付\n'+
@@ -21601,7 +21625,7 @@ async function generateAiRenderPackage(){
     );
     return AI_RENDER_PACKAGE;
   }catch(err){
-    setUnityRenderStatus('AI高品質化用データの生成に失敗しました。\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
+    setUnityRenderStatus('画像AI用データの生成に失敗しました。\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
     return null;
   }finally{
     setUnityRenderBusy(false);
@@ -21639,7 +21663,7 @@ async function copyAiRenderPrompt(){
 }
 async function downloadAiRenderPrompt(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('AIへの指示文を保存するため、先にAI高品質化用データを生成しています...');
+    setUnityRenderStatus('AIへの指示文を保存するため、先に画像AI用データを生成しています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21648,7 +21672,7 @@ async function downloadAiRenderPrompt(){
 }
 async function downloadAiRenderPackageJson(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('パッケージJSONを保存するため、先にAI高品質化用データを生成しています...');
+    setUnityRenderStatus('パッケージJSONを保存するため、先に画像AI用データを生成しています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21657,7 +21681,7 @@ async function downloadAiRenderPackageJson(){
 }
 async function downloadAiRenderImage(kind, quiet){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('画像を保存するため、先にAI高品質化用データを生成しています...');
+    setUnityRenderStatus('画像を保存するため、先に画像AI用データを生成しています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21671,14 +21695,14 @@ async function downloadAiRenderImage(kind, quiet){
 }
 async function downloadAiRenderBundle(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('一括DLのため、先にAI高品質化用データを生成しています...');
+    setUnityRenderStatus('一括DLのため、先に画像AI用データを生成しています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
   if(AI_RENDER_PACKAGE.zipBlob){
     downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob);
     setUnityRenderStatus(
-      'AI高品質化用データを一括DLしました。\n\n'+
+      '画像AI用データを一括DLしました。\n\n'+
       '保存される内容:\n'+
       '- ai-instructions.md（AIへの指示文）\n'+
       '- ai-render-package.json\n'+
@@ -21711,7 +21735,7 @@ async function downloadAiRenderBundle(){
   ];
   downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob||makeZipBlob(files));
   setUnityRenderStatus(
-    'AI高品質化用データを一括DLしました。\n\n'+
+    '画像AI用データを一括DLしました。\n\n'+
     '保存される内容:\n'+
     '- ai-instructions.md（AIへの指示文）\n'+
     '- ai-render-package.json\n'+
@@ -22953,6 +22977,12 @@ setView = function(v){
   if(jh) jh.style.display=(v==='3d-int'&&isMobileLayout()?'block':'none');
   updateUnityRenderControls();
 };
+// #unity-render-toolbar-btn は CSS で display:none、.show が付いて初めて出る。
+// その .show を付けるのは updateUnityRenderControls() だけで、呼ぶのは上の
+// setView ラッパーだけだった。つまり読み込み直後(既定の平面図)では、画像AI
+// レンダーの入口がツールバーに1つも無い — 一度ビューを切り替えるまで、機能が
+// 消えているのと同じに見える。初期化時に一度呼んで、その帯を塞ぐ。
+updateUnityRenderControls();
 
 // ─── 2D Canvas Touch Events ──────────────────────
 var _pinch={active:false,startDist:0,startZoom:1,midX:0,midY:0};
