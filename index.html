@@ -11748,6 +11748,34 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
   }
   return makeColorAccurateMaterial({map:tc,color:fallbackColor||0xffffff});
 }
+// BoxGeometry の既定UVは6面それぞれを「その面の正面から見て正立」させる。1枚のマテリアルで
+// 扉に画像を貼ると表も裏も同じ向きに読めてしまい、世界座標では左右が入れ替わる。実物の扉は
+// 1枚の板なので、表で戸先(ノブ側)に描かれた取手は裏から見ても同じ辺になければならない。
+// これを U 方向だけ反転した複製で作る。
+function mirrorMaterialTextureX(mat){
+  if(!mat||!mat.map) return mat;
+  var src=mat.map;
+  var tex=src.clone();
+  tex.image=src.image;
+  var rx=(src.repeat&&src.repeat.x)||1;
+  var ox=(src.offset&&src.offset.x)||0;
+  // u を 1-u に読み替える: ox+rx*(1-u) = (ox+rx) + (-rx)*u。
+  // 1-ox とせず ox+rx を使うのは、中心から寄せたトリミング(sX)でも同じ範囲を保つため
+  tex.repeat.set(-rx,(src.repeat&&src.repeat.y)||1);
+  tex.offset.set(ox+rx,(src.offset&&src.offset.y)||0);
+  tex.needsUpdate=true;
+  var out=mat.clone();
+  out.map=tex;
+  return out;
+}
+// 扉の面材用。frontSign(室外側のローカルz方向)の面はテクスチャどおり、その裏だけ反転させる。
+// BoxGeometry のマテリアル順は [+X,-X,+Y,-Y,+Z,-Z]。
+function doorLeafFaceMaterials(mat,frontSign){
+  if(!mat||!mat.map) return mat;
+  var mats=[mat,mat,mat,mat,mat,mat];
+  mats[frontSign<0?4:5]=mirrorMaterialTextureX(mat);
+  return mats;
+}
 function roofTypeOptions(){
   return [
     ['gable','切妻屋根'],
@@ -14171,6 +14199,9 @@ function buildWinFrames(flFilt){
       }
     })();
     var exS=exSign||-1;              // 室外方向(不明時は-z)
+    // 扉の面材。テクスチャは室外側の面をそのまま見せ、裏面だけ左右反転させる。
+    // 反転しないと、玄関のテクスチャで表は戸先にあるノブが裏では吊元側に現れる
+    var doorLeafMat=doorLeafFaceMaterials(doorMat,exS);
     // 半外付けオフセット: 外側が確定した窓のみ。内部間仕切りの窓は中央納まり
     var zBase=(isWindowLikeType(it.type)&&exSign)?exSign*0.050:0;
     var crescentMat=new THREE.MeshStandardMaterial({color:0x3f4347,roughness:0.4,metalness:0.5});
@@ -14330,7 +14361,7 @@ function buildWinFrames(flFilt){
         // 引込み戸: 戸は壁厚センターにあり、開けると隣接壁の中(戸袋)へ消える
         var isPocket=(it.type==='door-pocket');
         addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,isPocket?frameDepth:0.06);
-        var ssWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):(doorOpenState(it)!=='closed'?1:0);
+        var ssWant=doorOpenWant(it);
         var ssDir=it.flipX?-1:1;
         var leafW=ww+0.06;
         var zOffS=isPocket?0:(it.flipY?1:-1)*(((best.thick||120)/2)*U+0.036/2+0.008);
@@ -14339,7 +14370,7 @@ function buildWinFrames(flFilt){
         leafG.position.set(ssWant?openXS:closedXS,0,0);
         leafG.userData.noMerge=true;
         grp.add(leafG);
-        var lm=new THREE.Mesh(new THREE.BoxGeometry(leafW,panelH,0.036),doorMat);
+        var lm=new THREE.Mesh(new THREE.BoxGeometry(leafW,panelH,0.036),doorLeafMat);
         lm.position.set(0,panelY,zOffS);
         lm.castShadow=true; lm.receiveShadow=true;
         leafG.add(lm);
@@ -14375,7 +14406,7 @@ function buildWinFrames(flFilt){
         // 折れ戸(クローゼット用・上吊り): 片開き=2枚1組 / 両開き=2枚組×2。
         // 親ピボット(吊元)+子ピボット(中折れ)を逆回転させて実物の折り畳み軌跡を再現
         addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,0.09);
-        var foldWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):(doorOpenState(it)!=='closed'?1:0);
+        var foldWant=doorOpenWant(it);
         var knobMat=new THREE.MeshStandardMaterial({color:0x9fa4a9,roughness:0.4,metalness:0.6});
         var foldHingeMat=new THREE.MeshStandardMaterial({color:0x8a8073,roughness:0.6,metalness:0.3});
         var zProt=(it.flipY?1:-1);        // 折り畳み時の突出方向
@@ -14385,7 +14416,7 @@ function buildWinFrames(flFilt){
           var pivotA=new THREE.Group(); pivotA.position.set(hingeX,0,0); pivotA.userData.noMerge=true; grp.add(pivotA);
           var pivotB=new THREE.Group(); pivotB.position.set(dirX*pw,0,0); pivotB.userData.noMerge=true; pivotA.add(pivotB);
           [pivotA,pivotB].forEach(function(pv){
-            var m=new THREE.Mesh(new THREE.BoxGeometry(pw-0.004,panelH,0.032),doorMat);
+            var m=new THREE.Mesh(new THREE.BoxGeometry(pw-0.004,panelH,0.032),doorLeafMat);
             m.position.set(dirX*pw/2,panelY,0);
             m.castShadow=true; m.receiveShadow=true; pv.add(m);
           });
@@ -14417,17 +14448,15 @@ function buildWinFrames(flFilt){
         // 鴨居(上枠)にレールを隠す納まり。露出したダブルバーは使わない
         addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,0.11);
         var slideOpen=doorOpenState(it)!=='closed';
-        // ウォークスルー中に近接判定で開閉させた状態は、家具の非同期ロード完了ごとに
-        // 起きる rebuild3D() で消えないよう、アイテムをキーに前回値を引き継ぐ
-        var slideWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):(slideOpen?1:0);
+        var slideWant=doorOpenWant(it);
         var leftOpen=!!it.flipX;
         var panelW=ww*0.54;
         var leftPos=-ww*0.23, rightPos=ww*0.23;
         var fixedX=leftOpen?rightPos:leftPos;
         var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
         // 引き違い2枚のレールピッチは34mm(戸厚36mmでほぼ密着する実際の納まり)
-        addBox(doorMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
-        var slideLeaf=addBox(doorMat,movingX,panelY, 0.019,panelW,panelH,leafT);
+        addBox(doorLeafMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
+        var slideLeaf=addBox(doorLeafMat,movingX,panelY, 0.019,panelW,panelH,leafT);
         // 掘り込み引手: 各戸の召し合わせ側端部から25mm内側、縦長30x100(中心H950)・両面。
         // パネル面より一段暗いグレーで2mm沈んで見える表現
         var pullMat=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
@@ -14453,8 +14482,7 @@ function buildWinFrames(flFilt){
         pivot.position.set(hingeX,0,0);
         // 開き戸は90度まで開く(ウォークスルーの通行と実際の使い方に合わせる)
         var doorOpenY=openSide*Math.PI/2;
-        var pivotDefaultWant=doorOpenState(it)==='closed'?0:1;
-        var pivotWant=_doorWantByItem.has(it)?_doorWantByItem.get(it):pivotDefaultWant;
+        var pivotWant=doorOpenWant(it);
         pivot.rotation.y=pivotWant?doorOpenY:0;
         if(openingModelReady){
           // モデル建具は縦に伸ばしすぎるとGLB内蔵の取手・ノブまで比例して
@@ -14466,14 +14494,14 @@ function buildWinFrames(flFilt){
           modelLeafWrap.position.set(leafX,panelBottomGap,0);
           modelLeafWrap.add(modelLeaf);
           if(panelH>slabH+0.01){
-            var transom=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH-slabH,leafT),doorMat);
+            var transom=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH-slabH,leafT),doorLeafMat);
             transom.position.set(0,slabH+(panelH-slabH)/2,0);
             transom.castShadow=true; transom.receiveShadow=true;
             modelLeafWrap.add(transom);
           }
           pivot.add(modelLeafWrap);
         } else {
-          var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorMat);
+          var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorLeafMat);
           leaf.position.set(leafX,panelY,0);
           leaf.castShadow=true; leaf.receiveShadow=true;
           pivot.add(leaf);
@@ -18249,6 +18277,15 @@ var _doorAnims=[];
 // 近くのドアが連続的にパタパタしてしまう
 var _doorWantByItem=new WeakMap();
 function isWalkView(){ return ST.view==='3d-walk'; }
+// 扉を建てるときの開閉希望。近接開閉の記録を読んでいいのはウォークスルー中だけ。
+// ビューを抜けたあとも読むと、扉から離れて終了したときの「閉」が残りつづけ、
+// 開閉状態を「開く」にしても外観3D/内観3Dで開かなくなる
+function doorOpenWant(it){
+  if(isWalkView() && _doorWantByItem.has(it)) return _doorWantByItem.get(it);
+  return doorOpenState(it)==='closed'?0:1;
+}
+// ウォークスルーを離れるときに呼ぶ。以降はプランの開閉状態が効く
+function resetWalkDoorWants(){ _doorWantByItem=new WeakMap(); }
 function walkEyeHeightMm(){ return WALK_EYE_PRESETS_MM[WALK.eyePreset]||WALK_EYE_PRESETS_MM.stand; }
 function walkEyeY(){ return floorTopY(WALK.floor)+(WALK.groundOff||0)+walkEyeHeightMm()*U; }
 function updateWalkEyePresetButton(){
@@ -18899,6 +18936,9 @@ function setView(v){
   if(v!=='3d-ext' && WALKTHROUGH) stopWalkthrough();
   if(v!=='3d-walk' && WALK.active){
     WALK.active=false; WALK.keys={}; WALK.moving=false;
+    // 近接開閉の記録を捨てる。残すと、扉から離れて抜けたときの「閉」が
+    // 外観3D/内観3Dまで居座り、開閉状態を「開く」にしても開かなくなる
+    resetWalkDoorWants();
     var _wh=document.getElementById('walk-hud');
     if(_wh) _wh.style.display='none';
     if(camExt && WALK.prevFov!==null){ camExt.fov=WALK.prevFov; WALK.prevFov=null; camExt.updateProjectionMatrix(); }
