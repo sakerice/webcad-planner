@@ -397,3 +397,33 @@ test('ウォークスルーでは画像AIも「撮れない」と押す前に書
   assert.match(note, /ウォークスルー/, note);
   assert.match(note, /外観3D/, note);
 });
+
+// ── 表現プリセット ────────────────────────────────────────────────────────
+// 生活感の有無はプリセットが決める。以前はチェックボックスだったが、
+// プリセット名が「生活画像」である以上、同じ設定が2か所にあることになる。
+test('プリセットは3つで、既定は生活画像（従来の既定と同じ）', () => {
+  const h = harness({ view: '3d-ext' });
+  // vm の外へ出た配列は realm が違うので deepStrictEqual が通らない。文字列で比べる。
+  const ids = h.ctx.AI_IMAGE_PRESETS.map((p) => p.id).join(',');
+  assert.equal(ids, 'life,life-watercolor,architectural');
+  // 既定は先頭。ここが入れ替わると、既存ユーザーの出力が黙って変わる。
+  assert.equal(h.ctx.AI_IMAGE_PRESETS[0].life, true, '既定のプリセットで生活感が消えている');
+});
+
+test('建築写真プリセットは人を入れない（外観でも）', async () => {
+  const h = harness({ view: '3d-ext' });
+  await h.press(ENTRY_IDS[0]);
+  h.dom.byId['ai-render-preset'].value = 'architectural';
+  await h.press(RUN_ID);
+  const prompt = h.pkg().prompt;
+  assert.match(prompt, /- Do not add people or vehicles\./,
+    '建築写真なのに通行人を足してよいと書いている');
+  assert.match(prompt, /Preferred style: photorealistic architectural photography/);
+});
+
+test('生活画像プリセットは外観で人を足してよいと書く（従来どおり）', async () => {
+  const h = harness({ view: '3d-ext' });
+  await h.press(ENTRY_IDS[0]);
+  await h.press(RUN_ID);
+  assert.match(h.pkg().prompt, /You MAY add believable street life/);
+});

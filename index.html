@@ -462,7 +462,11 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
   /* Coords in top-left on mobile */
   #coords{bottom:auto;top:48px;right:6px;background:rgba(22,33,62,0.7);padding:2px 6px;border-radius:4px}
-  #unity-render-fab{right:10px;top:10px;padding:9px 11px;font-size:11px}
+  /* top/right はここでは決めない。下の #unity-render-fab{top:70px} が、
+     スマホの固定ツールバー(上端8〜60px)を避けるために位置を持っている。
+     ここで小さい top を書くと、後ろの規則に負けたまま残り、
+     次に読む人には「10px が効いている」と読めてしまう。 */
+  #unity-render-fab{padding:9px 11px;font-size:11px}
   .unity-render-config{grid-template-columns:1fr}
 }
 
@@ -21336,13 +21340,23 @@ var AI_IMAGE_PRESETS=[
     id:'life',
     label:'生活画像',
     painterly:false,
+    life:true,
     style:'photorealistic architectural photography of a home that is lived in, natural daylight pouring through the openings and filling the space with soft indirect light, every surface reading as real material with age and use in it (grain in the timber, weave in the fabric, a sheen on the stone), the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, clean modern Japanese residential presentation'
   },
   {
     id:'life-watercolor',
     label:'生活画像（水彩風）',
     painterly:true,
+    life:true,
     style:'watercolour architectural illustration of a home that is lived in, soft washes carrying the colour with pigment edges, paper grain and gentle colour bleeding past the boundaries, warm daylight blooming through the openings and pooling on the floor, the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, painterly throughout while the room still reads as a real Japanese home'
+  }
+,
+  {
+    id:'architectural',
+    label:'建築写真',
+    painterly:false,
+    life:false,
+    style:'photorealistic architectural photography, natural daylight, clean modern Japanese residential presentation, every surface reading as real material with grain in the timber, weave in the fabric and a sheen on the stone, the room presented empty and unoccupied as in a completion photograph'
   }
 ];
 function aiRenderPresetById(id){
@@ -21388,9 +21402,10 @@ function buildAiRenderPrompt(metadata){
   var note=aiRenderNote();
   var style=preset.style+(note?'. '+note:'');
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
-  // 通行人・自転車は外観のときだけ。内観に「歩行者を足してよい」と書くと、
-  // 部屋の中を人が横切る絵になる。生活感そのものはプリセット本文が担う。
-  var allowLife=metadata.view!=='interior';
+  // 通行人・自転車を足してよいのは、生活感を出すプリセットを選んでいて、かつ外観の
+  // ときだけ。内観に「歩行者を足してよい」と書くと部屋の中を人が横切る絵になる。
+  // 建築写真プリセットは人を入れない（完成写真としての引き渡し用）。
+  var allowLife=!!preset.life&&metadata.view!=='interior';
   var painterly=!!preset.painterly;
   // カメラ・照明の実測値を渡すと、生成側の視点・光の再現性が上がる
   var camInfo='';
