@@ -93,12 +93,18 @@ function makeDom() {
   add('video-render-status');
   add('video-render-source');
   add('video-render-preset', 'select');
-  add('video-render-text', 'textarea');
+  add('video-render-note', 'input');
   add('video-render-duration', 'input').value = '8';
   add('video-render-duration-val');
   add('video-render-guides-check', 'input');
   add('video-render-img', 'img');
   add('video-render-files');
+  add('video-instructions-preview', 'textarea');
+  add('video-package-preview');
+  add('video-shot-plan-context');
+  add('video-plan-context-img', 'img');
+  ['video-dl-bundle', 'video-dl-json', 'video-dl-prompt', 'video-dl-reference', 'video-dl-plan']
+    .forEach((id) => add(id, 'a').classList.add('disabled'));
   const run = add('video-render-run', 'button');
   const close = add('video-render-close', 'button');
   close.classList.add('unity-render-close');
@@ -119,11 +125,18 @@ function ui(opts) {
   const o = opts || {};
   const dom = makeDom();
   const calls = [];
+  const revoked = [];
+  let urlSeq = 0;
   const generate = o.generate || function () { return Promise.resolve(null); };
   const ctx = vm.createContext({
     console: console,
     document: dom.doc,
     VideoPrompt: VideoPrompt,
+    Blob: function (parts, o) { this.parts = parts; this.type = (o || {}).type || ''; },
+    URL: { createObjectURL: function () { return 'blob:test/' + (urlSeq++); },
+           revokeObjectURL: function (u) { revoked.push(u); } },
+    atob: function (b) { return Buffer.from(b, 'base64').toString('binary'); },
+    Uint8Array: Uint8Array,
     ST: { view: o.view || '3d-int', floor: 2 },
     generateVideoRenderPackage: function (options) {
       calls.push(options);
@@ -139,17 +152,23 @@ function ui(opts) {
     topLevelFunction('videoRenderSelectedPresetId'),
     topLevelFunction('videoRenderSelectedPreset'),
     topLevelFunction('videoRenderFillPresetOptions'),
-    topLevelFunction('videoRenderSetPromptFromPreset'),
     topLevelFunction('onVideoRenderPresetChange'),
     topLevelFunction('videoRenderSourceNoteText'),
     topLevelFunction('syncVideoRenderSource'),
     topLevelFunction('videoRenderDurationSec'),
     topLevelFunction('onVideoRenderDurationInput'),
     topLevelFunction('videoRenderIncludesGuides'),
-    topLevelFunction('videoRenderUserText'),
+    topLevelFunction('videoRenderNote'),
     topLevelFunction('setVideoRenderStatus'),
     topLevelFunction('setVideoRenderImage'),
-    topLevelFunction('setVideoRenderFileList'),
+    topLevelFunction('setVideoInstructionsPreview'),
+    topLevelVar('VIDEO_RENDER_DOWNLOAD_URLS'),
+    topLevelVar('VIDEO_RENDER_DL_IDS'),
+    topLevelFunction('setAiDownloadLink'),
+    topLevelFunction('makeVideoDownloadObjectUrl'),
+    topLevelFunction('dataUrlToBlobSync'),
+    topLevelFunction('clearVideoRenderDownloadLinks'),
+    topLevelFunction('syncVideoRenderDownloadLinks'),
     topLevelFunction('setVideoRenderBusy'),
     topLevelFunction('openVideoRenderDialog'),
     topLevelFunction('closeVideoRenderModal'),
@@ -157,6 +176,7 @@ function ui(opts) {
   ].join('\n'), ctx);
   ctx.$dom = dom;
   ctx.$calls = calls;
+  ctx.$revoked = revoked;
   return ctx;
 }
 
@@ -180,75 +200,67 @@ test('平面図を見ているとき、選べるのは図面系プリセット�
   PLAN_IDS.forEach((id) => assert.ok(D3_IDS.indexOf(id) === -1, id + ' が3D側にも居る'));
 });
 
-test('ダイアログを開いたままビューを切り替えると、一覧も本文も入れ替わる', () => {
+test('ダイアログを開いたままビューを切り替えると、一覧が入れ替わる', () => {
   const c = ui({ view: '3d-int' });
   c.openVideoRenderDialog();
   const sel = c.$dom.byId['video-render-preset'];
-  const ta = c.$dom.byId['video-render-text'];
   assert.deepEqual(idsOf(sel), D3_IDS);
-  const before = ta.value;
 
   c.ST.view = '2d';
   c.syncVideoRenderSource();          // setView の末尾から呼ばれるもの
 
   assert.deepEqual(idsOf(sel), PLAN_IDS);
   assert.equal(sel.value, PLAN_IDS[0]);
-  assert.notEqual(ta.value, before);
-  assert.equal(ta.value, VideoPrompt.presetsFor('plan')[0].body);
   assert.equal(c.$dom.byId['video-render-modal'].classList.contains('show'), true);
 });
 
-test('同じビューのまま呼ばれても、書きかけの本文を消さない', () => {
-  const c = ui({ view: '3d-int' });
-  c.openVideoRenderDialog();
-  const ta = c.$dom.byId['video-render-text'];
-  ta.value = '手で書いた本文';
-  c.syncVideoRenderSource();
-  c.syncVideoRenderSource();
-  assert.equal(ta.value, '手で書いた本文');
-});
-
-// ── 2. プリセットを選ぶと入力欄に入る ────────────────────────────────────
-test('プリセットを選ぶと、その本文が入力欄に入る', () => {
+// ── 2. 仕上げメモはプリセットに従属しない ────────────────────────────────
+// メモはプリセット本文の**後ろに足される**もので、置き換えない。だからプリセットを
+// 選び直してもメモは消えないし、ビューを跨いでも残ってよい。
+test('プリセットを選び直しても仕上げメモは消えない', () => {
   const c = ui({ view: '3d-int' });
   c.openVideoRenderDialog();
   const sel = c.$dom.byId['video-render-preset'];
-  const ta = c.$dom.byId['video-render-text'];
-  const second = VideoPrompt.presetsFor('3d')[1];
-  sel.value = second.id;
+  c.$dom.byId['video-render-note'].value = '静かな冬の朝';
+  sel.value = VideoPrompt.presetsFor('3d')[2].id;
   c.onVideoRenderPresetChange();
-  assert.equal(ta.value, second.body);
+  assert.equal(c.$dom.byId['video-render-note'].value, '静かな冬の朝');
 });
 
-test('手で書き換えた後にプリセットを選び直すと上書きされる', () => {
+test('ビューを切り替えても仕上げメモは残る', () => {
   const c = ui({ view: '3d-int' });
   c.openVideoRenderDialog();
-  const sel = c.$dom.byId['video-render-preset'];
-  const ta = c.$dom.byId['video-render-text'];
-  ta.value = 'わたしが書いた文';
-  const third = VideoPrompt.presetsFor('3d')[2];
-  sel.value = third.id;
-  c.onVideoRenderPresetChange();
-  assert.equal(ta.value, third.body);
+  c.$dom.byId['video-render-note'].value = '手で書いたメモ';
+  c.ST.view = '2d';
+  c.syncVideoRenderSource();
+  assert.equal(c.$dom.byId['video-render-note'].value, '手で書いたメモ');
 });
 
 // ── 3. 入力欄の値が generateVideoRenderPackage へどう渡るか ────────────────
-test('触っていない本文は userText として渡さない（渡すと光の文が落ちる）', async () => {
+test('メモが空なら note は空文字で渡る（プリセットだけが表現を決める）', async () => {
   const c = ui({ view: '3d-int', generate: () => ({ files: [], images: {} }) });
   c.openVideoRenderDialog();
   await c.runVideoRenderPackage();
   assert.equal(c.$calls.length, 1);
-  assert.equal(c.$calls[0].userText, '');
+  assert.equal(c.$calls[0].note, '');
   assert.equal(c.$calls[0].presetId, D3_IDS[0]);
   assert.equal(c.$calls[0].source, '3d');
 });
 
-test('書き換えた本文は userText として渡る', async () => {
+test('書いたメモは note として渡る', async () => {
   const c = ui({ view: '3d-int', generate: () => ({ files: [], images: {} }) });
   c.openVideoRenderDialog();
-  c.$dom.byId['video-render-text'].value = 'A slow dolly through a snowy room.';
+  c.$dom.byId['video-render-note'].value = 'A slow dolly through a snowy room.';
   await c.runVideoRenderPackage();
-  assert.equal(c.$calls[0].userText, 'A slow dolly through a snowy room.');
+  assert.equal(c.$calls[0].note, 'A slow dolly through a snowy room.');
+});
+
+// 押した瞬間にZIPが降ってくるのはやめた。画像AI側と同じく、出力欄で選んで保存する。
+test('作るボタンは勝手にダウンロードを始めない（download:false で呼ぶ）', async () => {
+  const c = ui({ view: '3d-int', generate: () => ({ files: [], images: {} }) });
+  c.openVideoRenderDialog();
+  await c.runVideoRenderPackage();
+  assert.equal(c.$calls[0].download, false);
 });
 
 test('平面図を見ているときは source:"plan" と図面系プリセットが渡る', async () => {
@@ -308,13 +320,13 @@ test('拒否の後もダイアログは操作できる（設定が残り、ボ�
   });
   c.openVideoRenderDialog();
   c.$dom.byId['video-render-duration'].value = '11';
-  c.$dom.byId['video-render-text'].value = '書きかけの本文';
+  c.$dom.byId['video-render-note'].value = '書きかけのメモ';
   await c.runVideoRenderPackage();
 
   assert.equal(c.$dom.byId['video-render-modal'].classList.contains('show'), true, 'ダイアログが閉じている');
   assert.deepEqual(idsOf(c.$dom.byId['video-render-preset']), PLAN_IDS, 'プリセットの一覧が消えた');
   assert.equal(c.$dom.byId['video-render-duration'].value, '11', '尺が巻き戻った');
-  assert.equal(c.$dom.byId['video-render-text'].value, '書きかけの本文', '本文が消えた');
+  assert.equal(c.$dom.byId['video-render-note'].value, '書きかけのメモ', 'メモが消えた');
   c.$dom.buttons.forEach((b) => assert.equal(b.disabled, false, 'ボタンが無効のまま残っている'));
 
   // 直してもう一度押せる
@@ -338,23 +350,100 @@ test('拒否は毎回ちがう文面をそのまま出す（定型文へ潰さ�
 });
 
 // ── 5. 成功したとき ──────────────────────────────────────────────────────
-test('成功すると、出来たファイルの一覧が表示される', async () => {
-  const files = [
-    { name: 'reference.png', size: 1915673 },
-    { name: 'prompt.txt', size: 1229 },
-    { name: 'package.json', size: 10806 }
-  ];
-  const c = ui({
-    view: '2d',
-    generate: () => ({ files: files, images: { reference: 'data:image/png;base64,AAAA' } })
-  });
+const PNG_1PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+function okPackage(extra) {
+  return Object.assign({
+    files: [{ name: 'reference.png', size: 1915673 }, { name: 'prompt.txt', size: 1229 },
+      { name: 'package.json', size: 10806 }],
+    prompt: 'A warm, photoreal architectural film.',
+    packageJsonText: '{"version":1}',
+    zipBlob: { fake: 'zip' },
+    images: { reference: PNG_1PX }
+  }, extra || {});
+}
+
+test('成功すると、指示文と参照画像が出力欄に出る', async () => {
+  const c = ui({ view: '2d', generate: () => okPackage() });
   c.openVideoRenderDialog();
   const pkg = await c.runVideoRenderPackage();
   assert.ok(pkg, 'パッケージが返っていない');
-  const shown = c.$dom.byId['video-render-files'].textContent + '\n' + c.$dom.byId['video-render-status'].textContent;
-  files.forEach((f) => assert.ok(shown.indexOf(f.name) >= 0, f.name + ' が出ていない'));
-  assert.equal(c.$dom.byId['video-render-img'].getAttribute('src'), 'data:image/png;base64,AAAA');
+  assert.equal(c.$dom.byId['video-instructions-preview'].value, pkg.prompt);
+  assert.equal(c.$dom.byId['video-render-img'].getAttribute('src'), PNG_1PX);
   assert.equal(c.$dom.byId['video-render-modal'].classList.contains('show'), true);
+});
+
+test('成功すると、保存ボタンが押せるようになる', async () => {
+  const c = ui({ view: '2d', generate: () => okPackage() });
+  c.openVideoRenderDialog();
+  ['video-dl-bundle', 'video-dl-json', 'video-dl-prompt', 'video-dl-reference']
+    .forEach((id) => assert.equal(c.$dom.byId[id].classList.contains('disabled'), true,
+      id + ' が作る前から押せる'));
+  await c.runVideoRenderPackage();
+  ['video-dl-bundle', 'video-dl-json', 'video-dl-prompt', 'video-dl-reference'].forEach((id) => {
+    const a = c.$dom.byId[id];
+    assert.equal(a.classList.contains('disabled'), false, id + ' が押せないまま');
+    assert.ok(a.download, id + ' にファイル名が無い');
+    assert.match(a.href, /^blob:/, id + ' が blob: URL でない');
+  });
+  // 平面図が無いパッケージでは平面図の保存ボタンは出さない
+  assert.equal(c.$dom.byId['video-dl-plan'].classList.contains('disabled'), true);
+  assert.equal(c.$dom.byId['video-dl-plan'].style.display, 'none');
+});
+
+// iOS Safari は data: URL に付いた download 属性を無視してその場で開く。
+// 参照画像は data: のまま張らず、同一オリジンの blob: に変えてから張る。
+test('参照画像の保存リンクは data: ではなく blob:', async () => {
+  const c = ui({ view: '2d', generate: () => okPackage() });
+  c.openVideoRenderDialog();
+  await c.runVideoRenderPackage();
+  const a = c.$dom.byId['video-dl-reference'];
+  assert.doesNotMatch(a.href, /^data:/, 'data: URL のままでは iOS Safari で保存されない');
+  assert.match(a.href, /^blob:/);
+});
+
+test('平面図つきのパッケージでは平面図の保存ボタンとプレビューが出る', async () => {
+  const c = ui({ view: '2d', generate: () => okPackage({ images: { reference: PNG_1PX, planContext: PNG_1PX } }) });
+  c.openVideoRenderDialog();
+  await c.runVideoRenderPackage();
+  assert.equal(c.$dom.byId['video-dl-plan'].classList.contains('disabled'), false);
+  assert.equal(c.$dom.byId['video-dl-plan'].style.display, '');
+  assert.equal(c.$dom.byId['video-shot-plan-context'].style.display, '');
+  assert.equal(c.$dom.byId['video-plan-context-img'].getAttribute('src'), PNG_1PX);
+});
+
+// 作り直したとき、前回の blob URL を解放する。解放を忘れると、
+// 大きな参照画像がタブを閉じるまでメモリに残り続ける。
+test('作り直すと前回の blob URL が解放される', async () => {
+  const c = ui({ view: '2d', generate: () => okPackage() });
+  c.openVideoRenderDialog();
+  await c.runVideoRenderPackage();
+  const first = c.$dom.byId['video-dl-bundle'].href;
+  await c.runVideoRenderPackage();
+  assert.ok(c.$revoked.indexOf(first) >= 0, '前回の URL が解放されていない');
+  assert.notEqual(c.$dom.byId['video-dl-bundle'].href, first);
+});
+
+// 画像AI用データを作り直しても、動画側の保存リンクは生きていなければならない。
+// URL の袋を共有すると、画像側の revoke が動画側のリンクまで無効にする。
+test('動画側の blob URL は画像AI側の袋に入れない', () => {
+  assert.match(html, /var VIDEO_RENDER_DOWNLOAD_URLS=\[\];/);
+  const fn = topLevelFunction('syncVideoRenderDownloadLinks');
+  assert.doesNotMatch(fn, /makeAiDownloadObjectUrl/,
+    '画像AI側の袋へ入れると、画像を作り直した瞬間に動画の保存ボタンが死ぬ');
+});
+
+test('拒否されると保存ボタンは押せない状態に戻る', async () => {
+  let ok = true;
+  const c = ui({ view: '2d', generate: () => { if (ok) return okPackage(); throw new Error(REFUSAL); } });
+  c.openVideoRenderDialog();
+  await c.runVideoRenderPackage();
+  assert.equal(c.$dom.byId['video-dl-bundle'].classList.contains('disabled'), false);
+  ok = false;
+  await c.runVideoRenderPackage();
+  ['video-dl-bundle', 'video-dl-json', 'video-dl-prompt', 'video-dl-reference'].forEach((id) =>
+    assert.equal(c.$dom.byId[id].classList.contains('disabled'), true,
+      id + ' が古いデータのまま押せる'));
+  assert.equal(c.$dom.byId['video-instructions-preview'].value, '');
 });
 
 // ── 6. 配線の確認（上の実行検査の補足）──────────────────────────────────

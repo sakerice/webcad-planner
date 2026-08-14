@@ -275,7 +275,7 @@ function roleOf(e) {
   if (has('ph')) return '節の見出し';
   if (has('unity-render-close')) return '閉じるボタン';
   if (has('unity-render-status')) return '説明・状態表示';
-  if (has('video-source-note')) return '説明・状態表示';
+  if (has('airx-source-note')) return '説明・状態表示';
   if (has('unity-render-cmd')) return '使い方・ファイル一覧';
   if (has('airx-check')) return 'チェックの行';
   if (has('pbtn')) return 'ボタン';
@@ -333,9 +333,9 @@ test('ダイアログ向けの CSS が font-size を直書きしていない（�
   const DIALOG_CLASSES = [
     'airx-dialog', 'airx-check', 'unity-render-card', 'unity-render-head', 'unity-render-title',
     'unity-render-close', 'unity-render-status', 'unity-render-cmd', 'unity-render-config',
-    'unity-render-actions', 'unity-render-img', 'ai-style-field', 'ai-floor-use-field',
+    'unity-render-actions', 'unity-render-img', 'ai-style-field',
     'ai-instructions-preview', 'ai-instruction-actions', 'ai-package-preview', 'ai-package-shot',
-    'video-field', 'video-prompt-input', 'video-source-note', 'video-render-files'
+    'airx-field', 'airx-source-note', 'video-render-files'
   ];
   const bad = [];
   RULES.forEach((r) => {
@@ -456,11 +456,11 @@ test('決めた語のほうは、ちゃんと画面に出ている', () => {
 });
 
 test('出力欄の言い出しが2つのダイアログで揃っている', () => {
-  // 画像は「作ると、AIへの指示文がここに出ます。」動画は「作ると、ZIPの中身がここに出ます。」
+  // どちらも先頭は「AIへの指示文」の欄で、同じ文言で待っている。
   const still = (STILL.inner.match(/id="ai-instructions-preview"[^>]*placeholder="([^"]*)"/) || [])[1] || '';
-  const video = text((VIDEO.inner.match(/id="video-render-files"[^>]*>([^<]*)</) || [])[1] || '');
+  const video = (VIDEO.inner.match(/id="video-instructions-preview"[^>]*placeholder="([^"]*)"/) || [])[1] || '';
   assert.match(still, /^作ると、.*がここに出ます。$/, '画像AI の出力欄: ' + still);
-  assert.match(video, /^作ると、.*がここに出ます。$/, '動画AI の出力欄: ' + video);
+  assert.equal(video, still, '2つのダイアログで待ち受けの文が違う');
 });
 
 test('画面に出る言葉から、旧称・略語が消えている（index.html 全体）', () => {
@@ -497,4 +497,83 @@ test('作る／作成する／生成する が混ざっていない（2つのダ
         '状態表示に「' + w + '」が残っている（動詞は「作る」に決めた）');
     });
   assert.ok(bodies.indexOf('作っています') >= 0, '「作っています」が使われていない');
+});
+
+// ══ 7. 並び順 ═════════════════════════════════════════════════════════════
+// 「レイアウト順が違う」というオーナーの指摘に対する固定。文字サイズを揃えても
+// 並びが違えば同じ画面には見えない。ここでは2つのダイアログを同じ言葉に
+// 潰してから、順序そのものを比べる。
+//
+// 動画にしか無いもの（尺・ガイド画像の同梱）は片側に足されるが、それ以外は
+// 1つも増えず、順序も入れ替わらないこと。
+function shapeOf(card) {
+  const out = [];
+  const re = /<(div|label|select|input|textarea|button|a|img)\b([^>]*)>/g;
+  let m;
+  while ((m = re.exec(card.inner))) {
+    const tag = m[1], attrs = m[2];
+    const id = (attrs.match(/id="([^"]*)"/) || [])[1] || '';
+    const cls = (attrs.match(/class="([^"]*)"/) || [])[1] || '';
+    if (/\bph\b/.test(cls)) {
+      const at = card.inner.indexOf('>', m.index) + 1;
+      out.push('見出し:' + card.inner.slice(at, card.inner.indexOf('<', at)).trim());
+    } else if (/airx-source-note/.test(cls)) out.push('参照の説明');
+    else if (/unity-render-status/.test(cls)) out.push('説明・状態');
+    else if (/unity-render-title/.test(cls)) out.push('題');
+    else if (/unity-render-close/.test(cls)) out.push('閉じる');
+    else if (/ai-instructions-preview/.test(cls)) out.push('指示文の欄');
+    else if (/unity-render-img/.test(cls)) out.push('参照画像');
+    else if (/ai-package-preview/.test(cls)) out.push('プレビュー一覧');
+    else if (/unity-render-cmd/.test(cls)) out.push('使い方');
+    else if (/airx-check/.test(cls)) out.push('チェックの行');
+    else if (tag === 'label') out.push('設定の名前');
+    else if (tag === 'select') out.push('選択');
+    else if (tag === 'input' && /type="text"/.test(attrs)) out.push('入力');
+    else if (tag === 'input' && /type="range"/.test(attrs)) out.push('スライダ');
+    else if (tag === 'button' && /pbtn/.test(cls)) out.push('ボタン:' + (/copy|Copy/.test(attrs) ? 'コピー' : '作る'));
+    else if (tag === 'a' && /pbtn/.test(cls)) out.push('保存:' + id.replace(/^(ai|video)-dl-/, ''));
+  }
+  return out;
+}
+
+test('2つのダイアログの並びが同じ（動画だけの設定を除いて）', () => {
+  const still = shapeOf(STILL);
+  // 動画にしか無いのは「尺」と「ガイド画像を含める」の2項目。ここだけ取り除く。
+  const video = shapeOf(VIDEO);
+  const durAt = video.indexOf('スライダ');
+  assert.notEqual(durAt, -1, '尺のスライダが動画側に無い');
+  video.splice(durAt - 1, 2);                       // 設定の名前 + スライダ
+  const checkAt = video.indexOf('チェックの行');
+  assert.notEqual(checkAt, -1, 'ガイド画像のチェックが動画側に無い');
+  video.splice(checkAt, 1);
+
+  // 保存ボタンの顔ぶれは生成物の都合で違う（画像はガイド6枚、動画は参照1枚）。
+  // ここで比べるのは「どの位置に保存ボタンの塊が来るか」なので、塊に潰す。
+  const fold = (a) => a.reduce((acc, v) => {
+    if (v.indexOf('保存:') === 0) { if (acc[acc.length - 1] !== '保存ボタン群') acc.push('保存ボタン群'); }
+    else acc.push(v);
+    return acc;
+  }, []);
+
+  assert.deepEqual(fold(video), fold(still));
+});
+
+test('どちらのダイアログも 設定 → データ作成 → データ出力 の順に見出しが並ぶ', () => {
+  [['画像AI', STILL], ['動画AI', VIDEO]].forEach(([name, card]) => {
+    const heads = shapeOf(card).filter((s) => s.indexOf('見出し:') === 0);
+    assert.deepEqual(heads,
+      ['見出し:この機能について', '見出し:設定', '見出し:データ作成', '見出し:データ出力'], name);
+  });
+});
+
+// データ作成のボタンより後ろにしか、保存ボタンと指示文の欄は出てこないこと。
+// 「押す前に出力欄が埋まっている」形に戻ると、押す意味が読めなくなる。
+test('指示文の欄と保存ボタンは、作るボタンより後ろにある', () => {
+  [['画像AI', STILL], ['動画AI', VIDEO]].forEach(([name, card]) => {
+    const shape = shapeOf(card);
+    const run = shape.indexOf('ボタン:作る');
+    assert.notEqual(run, -1, name + ': 作るボタンが無い');
+    assert.ok(shape.indexOf('指示文の欄') > run, name + ': 指示文の欄が作るボタンより前にある');
+    assert.ok(shape.findIndex((s) => s.indexOf('保存:') === 0) > run, name + ': 保存ボタンが作るボタンより前にある');
+  });
 });

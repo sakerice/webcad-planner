@@ -64,12 +64,13 @@ test('天井高ラベルは通常の 2D 表示には出ない（キャプチャ�
   assert.match(body, /return\s+!!\(/);
 });
 
-test('既存の静止画AIレンダーは既定では平面図を含めない', () => {
-  assert.match(html, /id="ai-render-plan-check"/);
-  const checkbox = html.slice(html.indexOf('id="ai-render-plan-check"'), html.indexOf('id="ai-render-plan-check"') + 200);
-  assert.doesNotMatch(checkbox.split('>')[0], /\schecked/);
+// 画像AIレンダーの平面図同梱（既定オフのチェックボックス）は廃止した。
+// 注記を外した平面図キャプチャそのものは動画AI側で使い続けている。
+test('画像AIレンダーは平面図を同梱しない', () => {
+  assert.equal(html.indexOf('id="ai-render-plan-check"'), -1);
+  assert.equal(html.indexOf('aiRenderIncludesPlan'), -1);
   const gen = html.slice(html.indexOf('async function generateAiRenderPackage'), html.indexOf('async function copyAiRenderPrompt'));
-  assert.match(gen, /aiRenderIncludesPlan\(\)/);
+  assert.doesNotMatch(gen, /plan_guide\.png/);
 });
 
 // ── Task 7c-1 / 7c-3: 構図と解像度 ───────────────────────────────────────

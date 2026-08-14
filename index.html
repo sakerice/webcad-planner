@@ -220,9 +220,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .ai-style-field{display:grid;gap:4px;min-width:0}
 .ai-style-field label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
 .ai-style-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
-.ai-floor-use-field{display:grid;gap:4px;min-width:0;padding:10px 12px;border:1px solid var(--hp-border,#24385f);border-radius:12px;background:rgba(255,255,255,.04)}
-.ai-floor-use-field label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
-.ai-floor-use-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 .ai-instruction-actions{display:flex;justify-content:flex-end;gap:8px}
 .ai-instruction-actions .pbtn{min-height:36px}
 .ai-instructions-preview{display:none;width:100%;min-height:132px;resize:vertical;box-sizing:border-box;background:#fff;border:1px solid var(--hp-border,#24385f);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55;color:var(--hp-text,#2d2a27);white-space:pre-wrap}
@@ -3040,21 +3037,16 @@ input[type="reset"]:focus-visible{
   background:rgba(45,39,33,0.38);backdrop-filter:blur(3px);
 }
 #video-render-modal.show{display:flex}
-.video-field{display:grid;gap:4px;min-width:0;margin-top:10px}
-.video-field > label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
-.video-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
-.video-prompt-input{
-  width:100%;box-sizing:border-box;min-height:104px;resize:vertical;
-  background:#fff;border:1px solid var(--hp-border,#24385f);border-radius:9px;
-  color:var(--hp-text,#2d2a27);padding:8px;font-family:inherit;line-height:1.55;
-}
+.airx-field{display:grid;gap:4px;min-width:0;margin-top:10px}
+.airx-field > label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
+.airx-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 #video-render-duration{width:100%}
 .video-render-files{white-space:pre-wrap;min-height:0}
 @media (max-width:768px){
   /* スマホ: 縦持ちでも中身が全部見えること。カードは端まで使い、
      入力欄のタップ標的は 44px を割らない。 */
-  #video-render-modal{padding:8px}  .video-prompt-input{min-height:92px}
-  #video-render-preset{min-height:44px}
+  #video-render-modal{padding:8px}
+  #video-render-preset,#ai-render-preset{min-height:44px}
   #video-render-duration{height:34px}
 }
 
@@ -3074,7 +3066,7 @@ input[type="reset"]:focus-visible{
    丸めた元の値(Task 33 以前):
      節の見出し .ph 13px → 14px / 閉じる× 16px → 14px
      指示文プレビュー 11px → 12px / 使い方・ファイル一覧 11px → 12px
-     参照の説明 .video-source-note 指定なし(16px) → 12px
+     参照の説明 .airx-source-note 指定なし(16px) → 12px
      スマホだけ本文欄 13px → 12px(スマホ専用の上書きをやめた)
    これ以外(14/12/11/10)は元から4段階のどれかに乗っていた。 */
 .airx-dialog{
@@ -3090,9 +3082,8 @@ input[type="reset"]:focus-visible{
 /* 本文 */
 .airx-dialog .unity-render-status,
 .airx-dialog .unity-render-cmd,
-.airx-dialog .video-source-note,
+.airx-dialog .airx-source-note,
 .airx-dialog .ai-instructions-preview,
-.airx-dialog .video-prompt-input,
 .airx-dialog .airx-check,
 .airx-dialog input,
 .airx-dialog select,
@@ -3440,30 +3431,17 @@ input[type="reset"]:focus-visible{
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
-        <label for="ai-render-style-input">任意の仕上げメモ</label>
-        <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
-        <small>空欄でもOKです。形を変えず、雰囲気だけ足したいときに使います。</small>
-        <label class="airx-check">
-          <input id="ai-render-life-check" type="checkbox" checked>
-          生活感を加える（通行人・自転車・植栽など。形は変えない）
-        </label>
-        <label class="airx-check">
-          <input id="ai-render-plan-check" type="checkbox">
-          現在階の平面図（注記なし・天井高つき）も含める
-        </label>
-      </div>
-      <div class="ai-floor-use-field">
-        <label id="ai-floor-use-label" for="ai-floor-use-select">現在階の用途</label>
-        <select id="ai-floor-use-select" onchange="setCurrentFloorUse(this.value)">
-          <option value="auto">自動判定（旧データ互換）</option>
-          <option value="residential">居住階</option>
-          <option value="loft">ロフト・中間階</option>
-          <option value="roof">屋根階</option>
-          <option value="mechanical">設備階</option>
-          <option value="outdoor">屋上・外部床</option>
-          <option value="custom" disabled>カスタム設定（JSON）</option>
-        </select>
-        <small id="ai-floor-use-help">未指定時のみ、壁・部屋の有無から居住階かどうかを推論します。</small>
+        <div id="ai-render-source" class="airx-source-note"></div>
+        <div class="airx-field">
+          <label for="ai-render-preset">表現プリセット</label>
+          <select id="ai-render-preset" onchange="onAiRenderPresetChange()"></select>
+          <small>いま見ている画面に合うものだけが並びます。</small>
+        </div>
+        <div class="airx-field">
+          <label for="ai-render-style-input">任意の仕上げメモ</label>
+          <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
+          <small>空欄でもOKです。プリセットの後ろに足されます（プリセットを置き換えません）。</small>
+        </div>
       </div>
     </div>
     <div class="ph">データ作成</div>
@@ -3496,7 +3474,6 @@ input[type="reset"]:focus-visible{
       <a id="ai-dl-depth" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">深度画像保存</a>
       <a id="ai-dl-normal" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">法線画像保存</a>
       <a id="ai-dl-instance" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">部材ID画像保存</a>
-      <a id="ai-dl-plan" class="pbtn sec disabled" style="width:auto;padding:7px 12px;display:none" href="#" onclick="return handleAiDownloadLinkClick(event)">平面図保存</a>
     </div>
     <div class="unity-render-cmd">使い方: ZIPに入ったガイド画像6枚と「AIへの指示文」を、使いたい画像生成AIにまとめて渡してください。凡例JSONはセグメントと部材IDの対応を確かめるのに使います。</div>
   </div>
@@ -3545,24 +3522,24 @@ input[type="reset"]:focus-visible{
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
-        <div id="video-render-source" class="video-source-note"></div>
-        <div class="video-field">
+        <div id="video-render-source" class="airx-source-note"></div>
+        <div class="airx-field">
           <label for="video-render-preset">表現プリセット</label>
           <select id="video-render-preset" onchange="onVideoRenderPresetChange()"></select>
-          <small>選ぶと下の本文に入ります。参照にする画面に合うものだけが並びます。</small>
+          <small>参照にする画面に合うものだけが並びます。</small>
         </div>
-        <div class="video-field">
-          <label for="video-render-text">AIへの本文（自由に書き換えられます）</label>
-          <textarea id="video-render-text" class="video-prompt-input" spellcheck="false"></textarea>
-          <small>書き換えた本文はそのまま使われます。プリセットを選び直すと上書きされます。形を変えない指示と部材の名指しは、本文とは別に必ず付きます。</small>
+        <div class="airx-field">
+          <label for="video-render-note">任意の仕上げメモ</label>
+          <input id="video-render-note" type="text" placeholder="例: 明るい昼、静かな冬の朝、木の質感を強めに">
+          <small>空欄でもOKです。プリセットの後ろに足されます（プリセットを置き換えません）。</small>
         </div>
-        <div class="video-field">
+        <div class="airx-field">
           <label for="video-render-duration">尺 <span id="video-render-duration-val">8秒</span></label>
           <input id="video-render-duration" type="range" min="4" max="15" step="1" value="8" oninput="onVideoRenderDurationInput()">
         </div>
         <!-- ガイド画像は尺とは無関係の設定。尺の枠に入れていたため、
              尺の一部に読めていた（オーナー報告）。自分の枠に出す。 -->
-        <div class="video-field">
+        <div class="airx-field">
           <label class="airx-check" for="video-render-guides-check">
             <input id="video-render-guides-check" type="checkbox">
             ガイド画像を含める（エッジ・深度・法線・部材ID。3D参照のときだけ）
@@ -3577,8 +3554,24 @@ input[type="reset"]:focus-visible{
       <button id="video-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runVideoRenderPackage()">動画AI用データを作る</button>
     </div>
     <div class="ph">データ出力</div>
+    <!-- 並びは画像AI側と同じ: プロンプト → コピー → プレビュー → 保存ボタン → 使い方。
+         押した瞬間にZIPが降ってくるのをやめ、ここで中身を見てから選んで保存する。 -->
+    <textarea id="video-instructions-preview" class="ai-instructions-preview" readonly placeholder="作ると、AIへの指示文がここに出ます。"></textarea>
+    <div class="ai-instruction-actions">
+      <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyVideoRenderPrompt()">AIへの指示文をコピー</button>
+    </div>
     <img id="video-render-img" class="unity-render-img" alt="動画AI用の参照画像プレビュー">
-    <div id="video-render-files" class="unity-render-cmd video-render-files">作ると、ZIPの中身がここに出ます。</div>
+    <div id="video-package-preview" class="ai-package-preview">
+      <div class="ai-package-shot" id="video-shot-plan-context" style="display:none"><img id="video-plan-context-img" alt="plan context"><span>平面図（撮影位置つき）</span></div>
+    </div>
+    <div class="unity-render-actions">
+      <a id="video-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleVideoDownloadLinkClick(event)">ZIPを保存</a>
+      <a id="video-dl-json" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleVideoDownloadLinkClick(event)">パッケージJSON保存</a>
+      <a id="video-dl-prompt" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleVideoDownloadLinkClick(event)">AIへの指示文を保存</a>
+      <a id="video-dl-reference" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleVideoDownloadLinkClick(event)">参照画像保存</a>
+      <a id="video-dl-plan" class="pbtn sec disabled" style="width:auto;padding:7px 12px;display:none" href="#" onclick="return handleVideoDownloadLinkClick(event)">平面図保存</a>
+    </div>
+    <div id="video-render-files" class="unity-render-cmd video-render-files">使い方: ZIPに入った reference.png と prompt.txt を、使いたい動画生成AIへまとめて渡してください。</div>
   </div>
 </div>
 
@@ -6630,42 +6623,11 @@ function explicitFloorMetadata(plan,floor){
   var value=metadata[String(floor)];
   return value&&typeof value==='object'&&!Array.isArray(value)?value:null;
 }
-function syncFloorUseControl(){
-  var select=document.getElementById('ai-floor-use-select');
-  var label=document.getElementById('ai-floor-use-label');
-  var help=document.getElementById('ai-floor-use-help');
-  if(label) label.textContent=ST.floor+'Fの用途';
-  if(!select) return;
-  var metadata=explicitFloorMetadata(DATA,ST.floor);
-  var role=metadata?(FLOOR_USE_DEFINITIONS[metadata.role]?metadata.role:'custom'):'auto';
-  select.value=role;
-  if(help){
-    if(role==='auto') help.textContent='未指定です。壁・部屋の有無から居住階かどうかを推論します。';
-    else if(role==='custom') help.textContent=typeof metadata.occupiable==='boolean'?(metadata.occupiable?'JSONの明示設定により、この階を利用階数に含めます。':'JSONの明示設定により、この階を利用階数に含めません。'):'JSONのカスタム用途です。occupiable未指定のため壁・部屋から推論します。';
-    else help.textContent=FLOOR_USE_DEFINITIONS[role].occupiable?'この階は建物の利用階数に含めます。':'この階は建物の利用階数に含めません。';
-  }
-}
-function setCurrentFloorUse(role){
-  var metadata=ensureFloorMetadata(DATA);
-  var key=String(ST.floor);
-  if(role==='auto'){
-    if(!Object.prototype.hasOwnProperty.call(metadata,key)){syncFloorUseControl();return;}
-    saveState();
-    delete metadata[key];
-  }else{
-    var def=FLOOR_USE_DEFINITIONS[role];
-    if(!def){syncFloorUseControl();return;}
-    var current=metadata[key];
-    if(current&&current.role===role&&current.occupiable===def.occupiable){syncFloorUseControl();return;}
-    saveState();
-    metadata[key]={role:role,occupiable:def.occupiable};
-  }
-  AI_RENDER_PACKAGE=null;
-  clearAiRenderDownloadLinks();
-  setAiPackagePreview(null);
-  setAiInstructionsPreview('');
-  syncFloorUseControl();
-}
+// 階の用途 (floorMetadata) は保存された JSON が持つ設定として読むだけにした。
+// 以前は画像AIレンダーのダイアログに選択欄を出していたが、この設定が効くのは
+// AIへ渡す説明文の "Building occupiable floors" の1行だけで、建物にも図面にも
+// 斜線制限にも影響しない。レンダー設定に混ざっていると、間取りの設定を
+// そこで変えているように読めてしまう。
 // wallHeight:WALL_H は新規の壁に入れる既定値。部屋の天井高ではないので置き換えない。
 function mkWall(x1,y1,x2,y2,floor,thick,color){
   return {id:nextId++,x1:x1,y1:y1,x2:x2,y2:y2,floor:floor||1,
@@ -6781,7 +6743,6 @@ function loadPreset(attempt){
     nextId=Math.max(nextId||1,Math.floor(maxId)+1);
     clearEditHistory();
     normalizeLegacyFurnitureItems();
-    syncFloorUseControl();
     draw2d();
     if(ren) rebuild3D();
   }).catch(function(e){
@@ -19095,6 +19056,9 @@ function setView(v){
   // 動画AIレンダーの参照は「いま画面に出ているもの」。ビューが変われば選べる
   // 表現プリセットも変わる（3D用の文を平面図に当てると参照そのものが壊れる）。
   if(typeof syncVideoRenderSource==='function') syncVideoRenderSource();
+  // 画像AI側の「参照にする画面」も同じ理由で追随させる。ダイアログを開いたまま
+  // ビューを切り替えると、説明文が前のビューのまま残ってしまう。
+  if(typeof syncAiRenderSource==='function') syncAiRenderSource();
 }
 
 function refresh3DPreview(){
@@ -19236,7 +19200,6 @@ function onFloorChange(v){
   ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false;
   document.getElementById('props').classList.remove('show');
   document.getElementById('st-floor').textContent='フロア:'+v+'F';
-  syncFloorUseControl();
   draw2d();
 }
 
@@ -20145,7 +20108,6 @@ function restoreHistorySnapshot(snapshot){
   ST.selected=null;clearMultiSelection();ST.selectAll=false;DRAG.active=false;
   var props=document.getElementById('props');
   if(props) props.classList.remove('show');
-  syncFloorUseControl();
   sharedForceFullSync();markDirty();
   draw2d();if(ren)rebuild3D();
 }
@@ -20341,7 +20303,6 @@ async function loadPlanFromStorage(){
     syncExteriorWallSettings();
     normalizeLegacyFurnitureItems();
     restoreViewState();
-    syncFloorUseControl();
   }catch(e){
     // 復元途中で失敗したら空画面のまま止めず、デフォルトプランに復帰する
     console.error('[WebCAD] saved plan restore failed:', e);
@@ -20525,7 +20486,7 @@ function applySharedPatch(patch,isOwn){
     });
     if(patch.fields)Object.keys(patch.fields).forEach(function(key){if(key!=='viewState')DATA[key]=sharedClone(patch.fields[key]);});
     syncNorthFromPlan();
-    ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();ensureFloorMetadata();syncExteriorWallSettings();normalizeLegacyFurnitureItems();syncFloorUseControl();
+    ensureObjectIds();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();ensureFloorMetadata();syncExteriorWallSettings();normalizeLegacyFurnitureItems();
     if(selectedName&&selectedId!==null)ST.selected=(DATA[selectedName]||[]).find(function(item){return String(item&&item.id)===selectedId;})||null;
     clearMultiSelection();clearEditHistory();draw2d();if(ST.selected)updateProps();else document.getElementById('props').classList.remove('show');
     if(!isOwn)sharedSchedule3DRefresh();
@@ -20818,17 +20779,9 @@ function setAiDownloadLink(id,href,filename){
 }
 function clearAiRenderDownloadLinks(){
   revokeAiRenderDownloadUrls();
-  ['ai-dl-bundle','ai-dl-json','ai-dl-prompt','ai-dl-base','ai-dl-edge','ai-dl-segmentation','ai-dl-depth','ai-dl-normal','ai-dl-instance','ai-dl-plan'].forEach(function(id){
+  ['ai-dl-bundle','ai-dl-json','ai-dl-prompt','ai-dl-base','ai-dl-edge','ai-dl-segmentation','ai-dl-depth','ai-dl-normal','ai-dl-instance'].forEach(function(id){
     setAiDownloadLink(id,null,'');
   });
-  var planLink=document.getElementById('ai-dl-plan');
-  if(planLink) planLink.style.display='none';
-}
-// 平面図の同梱は明示的に選んだときだけ。既定オフなので、
-// 既存ユーザーの出力(指示文・ファイル一覧)はこれまでと1バイトも変わらない。
-function aiRenderIncludesPlan(){
-  var c=document.getElementById('ai-render-plan-check');
-  return !!(c&&c.checked);
 }
 function getActive3DCamera(){
   // AI package captures must match the currently visible 3D canvas.
@@ -21372,12 +21325,73 @@ function buildAiRenderMetadata(instanceLegend){
     ]
   };
 }
-function buildAiRenderPrompt(metadata,includePlan){
-  var styleInput=document.getElementById('ai-render-style-input');
-  var style=(styleInput&&styleInput.value.trim())||'photorealistic architectural visualization, natural daylight, clean modern Japanese residential presentation';
+// ── 表現プリセット（画像AI）─────────────────────────────────────────────
+// 動画AI側 (VideoPrompt.PRESETS) と同じ役目。違いは渡す先が1枚の画像だという
+// ことだけなので、「filmed」「handheld」のような映像の言葉は使わない。
+// style は指示文の "Preferred style:" の行になり、仕上げメモはその後ろに足される。
+// painterly は「絵画的な見た目を避けろ」という既定の指示とネガティブプロンプトの
+// "illustration" を外す鍵でもある。水彩を頼みながら同時に禁じるのを防ぐ。
+var AI_IMAGE_PRESETS=[
+  {
+    id:'life',
+    label:'生活画像',
+    painterly:false,
+    style:'photorealistic architectural photography of a home that is lived in, natural daylight pouring through the openings and filling the space with soft indirect light, every surface reading as real material with age and use in it (grain in the timber, weave in the fabric, a sheen on the stone), the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, clean modern Japanese residential presentation'
+  },
+  {
+    id:'life-watercolor',
+    label:'生活画像（水彩風）',
+    painterly:true,
+    style:'watercolour architectural illustration of a home that is lived in, soft washes carrying the colour with pigment edges, paper grain and gentle colour bleeding past the boundaries, warm daylight blooming through the openings and pooling on the floor, the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, painterly throughout while the room still reads as a real Japanese home'
+  }
+];
+function aiRenderPresetById(id){
+  for(var i=0;i<AI_IMAGE_PRESETS.length;i++) if(AI_IMAGE_PRESETS[i].id===id) return AI_IMAGE_PRESETS[i];
+  return null;
+}
+function aiRenderSelectedPreset(){
+  var sel=document.getElementById('ai-render-preset');
+  return sel?aiRenderPresetById(sel.value):null;
+}
+function aiRenderFillPresetOptions(){
+  var sel=document.getElementById('ai-render-preset');
+  if(!sel||sel.options.length===AI_IMAGE_PRESETS.length) return;
+  sel.innerHTML='';
+  for(var i=0;i<AI_IMAGE_PRESETS.length;i++){
+    var o=document.createElement('option');
+    o.value=AI_IMAGE_PRESETS[i].id;
+    o.textContent=AI_IMAGE_PRESETS[i].label;
+    sel.appendChild(o);
+  }
+  sel.value=AI_IMAGE_PRESETS[0].id;
+}
+// 仕上げメモ。プリセットの style の後ろに足される（置き換えない）。
+function aiRenderNote(){
+  var inp=document.getElementById('ai-render-style-input');
+  return inp?String(inp.value||'').replace(/^\s+|\s+$/g,''):'';
+}
+function onAiRenderPresetChange(){}
+// 動画AI側の「参照にする画面」と同じ一文。押す前に、何が撮られるのか分かるように。
+function aiRenderSourceNoteText(){
+  if(ST.view==='3d-int') return '参照にする画面: 内観3D（いま見ている画角をそのまま撮ります）';
+  if(ST.view==='3d-ext') return '参照にする画面: 外観3D（いま見ている画角をそのまま撮ります）';
+  if(ST.view==='3d-walk') return '参照にする画面: なし（ウォークスルーの目線からは撮れません。外観3D か 内観3D へ切り替えてください）';
+  return '参照にする画面: なし（外観3D か 内観3D を表示してください。押すと外観3Dへ切り替えます）';
+}
+function syncAiRenderSource(){
+  aiRenderFillPresetOptions();
+  var note=document.getElementById('ai-render-source');
+  if(note) note.textContent=aiRenderSourceNoteText();
+}
+function buildAiRenderPrompt(metadata){
+  var preset=aiRenderSelectedPreset()||AI_IMAGE_PRESETS[0];
+  var note=aiRenderNote();
+  var style=preset.style+(note?'. '+note:'');
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
-  var lifeCheck=document.getElementById('ai-render-life-check');
-  var allowLife=!!(lifeCheck&&lifeCheck.checked)&&metadata.view!=='interior';
+  // 通行人・自転車は外観のときだけ。内観に「歩行者を足してよい」と書くと、
+  // 部屋の中を人が横切る絵になる。生活感そのものはプリセット本文が担う。
+  var allowLife=metadata.view!=='interior';
+  var painterly=!!preset.painterly;
   // カメラ・照明の実測値を渡すと、生成側の視点・光の再現性が上がる
   var camInfo='';
   try{
@@ -21419,8 +21433,6 @@ function buildAiRenderPrompt(metadata,includePlan){
     '- segmentation-legend.json: machine-readable map of every segment color to its object/category meaning.',
     '- instance_guide.png: unique-color map for individual designed elements. Translucent neighboring-building context is intentionally omitted and remains identified only in segmentation_guide.png. Do not merge, split, add, remove, or move colored instances.',
     '- instance-legend.json: machine-readable ID, source collection, type, floor, position, and dimensions for each instance color.',
-    // 平面図は既定では同梱しない。false のときこの行は null になり、既存の指示文と完全に一致する。
-    includePlan ? '- plan_guide.png: top-down 2D floor plan of floor '+metadata.floor+'F with editing annotations removed. Room names and "CH <millimetres>" ceiling heights are design data. Use it only to keep room layout, openings, and ceiling heights consistent. It is a drawing, not a camera view: never render it, and never change the camera to match it.' : null,
     '',
     'Strict requirements:',
     '- Do not add, remove, or move walls, windows, doors, roof parts, stairs, rooms, furniture, fixtures, fences, balconies, or cars.',
@@ -21429,7 +21441,9 @@ function buildAiRenderPrompt(metadata,includePlan){
     '- Preserve assigned colors and textures as much as possible.',
     '- Improve only lighting, shadow softness, ambient occlusion, glass transparency, material realism, texture clarity, and overall rendering quality.',
     '- If uncertain, prefer the base_render.png over aesthetic interpretation.',
-    '- Render at high resolution with crisp architectural detail; avoid painterly or illustration looks.',
+    painterly
+      ? '- Render at high resolution with crisp architectural detail. A watercolour treatment is intended: soft pigment edges, paper grain and colour bleeding are welcome, but they must not move, blur away or invent any edge that the guides fix.'
+      : '- Render at high resolution with crisp architectural detail; avoid painterly or illustration looks.',
     allowLife ? '- You MAY add believable street life for realism: one or two pedestrians walking on the road/sidewalk, a bicycle, subtle planting, utility wires. People must not occlude the main facade, must be at correct human scale (about 1.6-1.75 m), and must not alter any architecture.' : '- Do not add people or vehicles.',
     siteLines.length ? '' : null,
     siteLines.length ? 'Site boundary context:' : null,
@@ -21461,7 +21475,12 @@ function buildAiRenderPrompt(metadata,includePlan){
     }, null, 2),
     '',
     'Negative prompt:',
-    'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed, underspecified materials, wide empty land outside the site, large vacant setback, isolated house in an empty field, grass covering the entire scene, lawn outside the site boundary, changing gravel to grass, changing concrete to grass'
+    // "illustration" は水彩プリセットのときだけ外す。付けたまま水彩を頼むと、
+    // 表現の指定と否定が正面から衝突する。
+    (painterly
+      ? 'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, blurry, overexposed,'
+      : 'changed layout, extra windows, missing walls, added furniture, removed furniture, changed roof, warped geometry, wrong perspective, fantasy style, illustration, blurry, overexposed,')+
+      ' underspecified materials, wide empty land outside the site, large vacant setback, isolated house in an empty field, grass covering the entire scene, lawn outside the site boundary, changing gravel to grass, changing concrete to grass'
   ].filter(function(line){return line!==null;}).join('\n');
 }
 async function ensureAiRenderableView(){
@@ -21512,6 +21531,20 @@ function downloadBlobFile(filename,blob){
 }
 function downloadTextFile(filename,text,mime){
   downloadBlobFile(filename,new Blob([text],{type:mime||'text/plain;charset=utf-8'}));
+}
+// data: URL を Blob にする同期版。保存リンクを張る場面では await できない
+// （リンクを張る間にユーザーがタップすると、href が '#' のままで空振りする）。
+// base64 でない data: URL は扱わないので、その場合は null を返して呼び側に任せる。
+function dataUrlToBlobSync(dataUrl){
+  if(typeof dataUrl!=='string') return null;
+  var m=/^data:([^;,]*);base64,/.exec(dataUrl);
+  if(!m) return null;
+  try{
+    var bin=atob(dataUrl.slice(m[0].length));
+    var bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    return new Blob([bytes],{type:m[1]||'application/octet-stream'});
+  }catch(e){ return null; }
 }
 async function dataUrlToBlob(dataUrl){
   var res=await fetch(dataUrl);
@@ -21626,6 +21659,15 @@ function aiRenderPackageJsonText(){
     imageFiles:imageFiles
   },null,2);
 }
+// 画像の保存リンクは data: URL ではなく blob: URL を張る。
+// iOS Safari は data: URL に付いた download 属性を無視して**その場で開いてしまう**
+// ので、保存ボタンを押しても保存されない。ここは主にスマホから使う機能なので、
+// 同一オリジンの blob: にしておく（download 属性が効く）。
+function setAiImageDownloadLink(id,img){
+  if(!img||!img.dataUrl) return;
+  var blob=dataUrlToBlobSync(img.dataUrl);
+  setAiDownloadLink(id,blob?makeAiDownloadObjectUrl(blob):img.dataUrl,img.filename);
+}
 function syncAiRenderDownloadLinks(){
   clearAiRenderDownloadLinks();
   if(!AI_RENDER_PACKAGE) return;
@@ -21647,17 +21689,12 @@ function syncAiRenderDownloadLinks(){
     );
   }
   var imgs=AI_RENDER_PACKAGE.images||{};
-  if(imgs.base) setAiDownloadLink('ai-dl-base',imgs.base.dataUrl,imgs.base.filename);
-  if(imgs.edge) setAiDownloadLink('ai-dl-edge',imgs.edge.dataUrl,imgs.edge.filename);
-  if(imgs.segmentation) setAiDownloadLink('ai-dl-segmentation',imgs.segmentation.dataUrl,imgs.segmentation.filename);
-  if(imgs.depth) setAiDownloadLink('ai-dl-depth',imgs.depth.dataUrl,imgs.depth.filename);
-  if(imgs.normal) setAiDownloadLink('ai-dl-normal',imgs.normal.dataUrl,imgs.normal.filename);
-  if(imgs.instance) setAiDownloadLink('ai-dl-instance',imgs.instance.dataUrl,imgs.instance.filename);
-  if(imgs.plan){
-    setAiDownloadLink('ai-dl-plan',imgs.plan.dataUrl,imgs.plan.filename);
-    var planLink=document.getElementById('ai-dl-plan');
-    if(planLink) planLink.style.display='';
-  }
+  setAiImageDownloadLink('ai-dl-base',imgs.base);
+  setAiImageDownloadLink('ai-dl-edge',imgs.edge);
+  setAiImageDownloadLink('ai-dl-segmentation',imgs.segmentation);
+  setAiImageDownloadLink('ai-dl-depth',imgs.depth);
+  setAiImageDownloadLink('ai-dl-normal',imgs.normal);
+  setAiImageDownloadLink('ai-dl-instance',imgs.instance);
 }
 function handleAiDownloadLinkClick(e){
   var a=e&&e.currentTarget;
@@ -21697,14 +21734,8 @@ async function generateAiRenderPackage(){
     setUnityRenderStatus('面方向を固定する法線画像を作っています...');
     await waitFrame(30);
     var normal=captureAiOverrideGuideDataUrl('normal');
-    var plan='';
-    if(aiRenderIncludesPlan()){
-      setUnityRenderStatus('注記を外した平面図を撮影しています...');
-      await waitFrame(30);
-      plan=capturePlan2dDataUrl({annotations:false});
-    }
     var metadata=buildAiRenderMetadata(instanceData.legend);
-    var prompt=buildAiRenderPrompt(metadata,!!plan);
+    var prompt=buildAiRenderPrompt(metadata);
     setUnityRenderStatus('保存するZIPを準備しています...');
     var enc=new TextEncoder();
     var legendText=JSON.stringify({version:2,legend:metadata.segmentationLegend,siteContext:metadata.siteContext},null,2);
@@ -21721,7 +21752,6 @@ async function generateAiRenderPackage(){
       {name:'normal_guide.png',bytes:await dataUrlToBytes(normal)},
       {name:'instance_guide.png',bytes:await dataUrlToBytes(instance)}
     ];
-    if(plan) zipFiles.push({name:'plan_guide.png',bytes:await dataUrlToBytes(plan)});
     AI_RENDER_PACKAGE={
       version:2,
       createdAt:metadata.createdAt,
@@ -21737,7 +21767,6 @@ async function generateAiRenderPackage(){
       },
       zipBlob:makeZipBlob(zipFiles)
     };
-    if(plan) AI_RENDER_PACKAGE.images.plan={filename:'plan_guide.png',dataUrl:plan};
     setAiPackagePreview(AI_RENDER_PACKAGE);
     setAiInstructionsPreview(AI_RENDER_PACKAGE.prompt);
     syncAiRenderDownloadLinks();
@@ -22037,12 +22066,13 @@ function videoDaylightDescriptor(){
 // こちら側へ写し取ると表が2つに増え、必ず片方が腐る。
 function composeVideoPromptOrThrow(opts){
   var text=VideoPrompt.compose(opts);
-  if(!text) throw new Error('プロンプトを組み立てられませんでした（表現プリセットも入力文もありません）。');
-  var user=(typeof opts.userText==='string')?opts.userText.replace(/^\s+|\s+$/g,''):'';
-  // ユーザーが本文を書いたときは光の描写もユーザーのもの。compose は意図的に
-  // 光の文を足さない（Task 5 の決定）ので、ここでも要求しない。
-  if(user!=='') return text;
-  var withoutLight=VideoPrompt.compose({preset:opts.preset,legend:opts.legend,camera:opts.camera});
+  if(!text) throw new Error('プロンプトを組み立てられませんでした（表現プリセットがありません）。');
+  // 仕上げメモはプリセット本文の後ろに足されるだけなので、光の文の有無は
+  // メモの有無に関わらず判定できる。比較する側にも同じメモを渡し、
+  // 差が「光の文だけ」になるようにする。
+  var withoutLight=VideoPrompt.compose({
+    preset:opts.preset,legend:opts.legend,camera:opts.camera,note:opts.note
+  });
   if(text===withoutLight){
     throw new Error('光の状態をプロンプトに書けませんでした（時刻プリセット "'+
       (opts.daylight&&opts.daylight.timeOfDay)+'"）。このまま渡すと生成AIが'+
@@ -22057,7 +22087,7 @@ function composeVideoPromptOrThrow(opts){
 // 取り違えを黙って別のプリセットへ差し替えるのは、壊れたことにユーザーが
 // 気づけないまま渡すことなので、ここでは必ず投げる。
 function videoSourceLabel(source){ return source==='plan'?'平面図':'3Dレンダ'; }
-function resolveVideoPreset(source,presetId,userText){
+function resolveVideoPreset(source,presetId){
   var presets=VideoPrompt.presetsFor(source), i;
   if(!presets.length){
     throw new Error('素材の種類 "'+source+'" には表現プリセットがありません（"plan" か "3d"）。');
@@ -22076,7 +22106,7 @@ function resolveVideoPreset(source,presetId,userText){
   }
   // 既定へ倒すのは presetId を指定されなかったときだけ。指定されたidが見つからない
   // まま既定へ落ちる経路は、上で全部投げ切ってある。
-  return userText?null:presets[0];
+  return presets[0];
 }
 // 同梱しなかったものは、理由ごと書き残す。黙って欠けたパッケージは、開いた人には
 // バグに見える。「入れなかった」と「入れ忘れた」を読む側が区別できるようにする。
@@ -22298,7 +22328,7 @@ async function generateVideoRenderPackage(options){
   var duration=Math.max(4,Math.min(VideoPrompt.MAX_DURATION_SEC,
     Number(opt.durationSec)||VideoPrompt.DEFAULT_DURATION_SEC));
   // プリセットの候補は素材の種類だけが決める。噛み合わない組み合わせはここで死ぬ。
-  var preset=resolveVideoPreset(source,opt.presetId,opt.userText);
+  var preset=resolveVideoPreset(source,opt.presetId);
   var enc=new TextEncoder();
   var daylight=videoDaylightDescriptor();
 
@@ -22331,7 +22361,7 @@ async function generateVideoRenderPackage(options){
     // 「床から1.5m」と書けば真上からの参照と矛盾する。
     var planInstances=planInstanceList(planFloor);
     var planPrompt=composeVideoPromptOrThrow({
-      preset:preset,legend:planInstances,camera:null,daylight:daylight,userText:opt.userText
+      preset:preset,legend:planInstances,camera:null,daylight:daylight,note:opt.note
     });
     var planNames=['reference.png','prompt.txt','package.json'];
     var planJson=videoPackageJson({
@@ -22436,7 +22466,7 @@ async function generateVideoRenderPackage(options){
   // 4) プロンプト。光を書けなかったら黙って続けない。
   var prompt=composeVideoPromptOrThrow({
     preset:preset,legend:instanceData.legend,camera:camera,
-    daylight:daylight,userText:opt.userText
+    daylight:daylight,note:opt.note
   });
 
   // 5) ガイド画像。既定では撮らない（撮らないものはZIPにも入らない）。
@@ -22547,14 +22577,9 @@ function videoRenderFillPresetOptions(source){
   sel.value=presets.length?presets[0].id:'';
   return presets.length?presets[0]:null;
 }
-function videoRenderSetPromptFromPreset(preset){
-  var ta=document.getElementById('video-render-text');
-  if(ta) ta.value=preset?preset.body:'';
-}
-// 選び直した以上、それがユーザーの意図。書きかけでも上書きする。
-function onVideoRenderPresetChange(){
-  videoRenderSetPromptFromPreset(videoRenderSelectedPreset());
-}
+// プリセットを選び直しても仕上げメモは消さない。メモはプリセットを置き換えず
+// 後ろに足すものなので、どのプリセットとも共存できる。
+function onVideoRenderPresetChange(){}
 // setView の末尾から呼ばれる。画面が変われば選べるものも変わる。
 // 参照が変わったのに本文が前のままだと、3D用の文で平面図を撮ることになるので
 // 本文も入れ替える（画面を切り替えたのはユーザーの操作である）。
@@ -22574,9 +22599,8 @@ function syncVideoRenderSource(){
   var source=videoRenderSourceFromView();
   var changed=(VIDEO_RENDER_UI.source!==source);
   if(changed){
-    var first=videoRenderFillPresetOptions(source);
+    videoRenderFillPresetOptions(source);
     VIDEO_RENDER_UI.source=source;
-    videoRenderSetPromptFromPreset(first);
   }
   // 説明文はビューが変わるたびに書き直す。ウォークスルーは source では 3D と
   // 同じなので、source の変化だけを見ていると「いま見ている3Dの画角をそのまま
@@ -22603,16 +22627,10 @@ function videoRenderIncludesGuides(){
   var el=document.getElementById('video-render-guides-check');
   return !!(el&&el.checked);
 }
-// 本文がプリセットのままなら、それは「ユーザーが書いた文」ではない。
-// userText を渡すと VideoPrompt は光の文を足さなくなる（Task 5 の決定）ので、
-// 触っていない本文はプリセット経路のまま通す。触っていれば渡す。
-function videoRenderUserText(){
-  var ta=document.getElementById('video-render-text');
-  var text=ta?String(ta.value||''):'';
-  var preset=videoRenderSelectedPreset();
-  var trim=text.replace(/^\s+|\s+$/g,'');
-  if(preset&&trim===String(preset.body).replace(/^\s+|\s+$/g,'')) return '';
-  return text;
+// 仕上げメモ。プリセット本文の後ろに足される（置き換えない）。
+function videoRenderNote(){
+  var inp=document.getElementById('video-render-note');
+  return inp?String(inp.value||'').replace(/^\s+|\s+$/g,''):'';
 }
 function setVideoRenderStatus(text){
   var el=document.getElementById('video-render-status');
@@ -22624,15 +22642,100 @@ function setVideoRenderImage(url){
   if(url){ img.setAttribute('src',url); img.classList.add('show'); }
   else { img.removeAttribute('src'); img.classList.remove('show'); }
 }
-function setVideoRenderFileList(files){
-  var el=document.getElementById('video-render-files');
-  if(!el) return;
-  if(!files||!files.length){ el.textContent='作成すると、ZIPの中身がここに出ます。'; return; }
-  var lines=['house-planner-video-package.zip の中身 ('+files.length+'件)'],i;
-  for(i=0;i<files.length;i++){
-    lines.push('  '+files[i].name+'  '+(files[i].size||0).toLocaleString()+' bytes');
+function setVideoInstructionsPreview(text){
+  var ta=document.getElementById('video-instructions-preview');
+  if(!ta) return;
+  ta.value=text||'';
+  ta.classList.toggle('show',!!text);
+}
+// 保存リンクの見た目と挙動は画像AI側と同じ作り (setAiDownloadLink を共用)。
+// ただし blob の URL は別の袋で持つ。画像AI側の袋へ入れると、画像AI用データを
+// 作り直した瞬間にそちらの revoke が動画側のURLまで無効化し、動画の保存ボタンが
+// 押しても何も落ちてこないリンクになる。
+var VIDEO_RENDER_DOWNLOAD_URLS=[];
+var VIDEO_RENDER_DL_IDS=['video-dl-bundle','video-dl-json','video-dl-prompt','video-dl-reference','video-dl-plan'];
+function makeVideoDownloadObjectUrl(blob){
+  var url=URL.createObjectURL(blob);
+  VIDEO_RENDER_DOWNLOAD_URLS.push(url);
+  return url;
+}
+function clearVideoRenderDownloadLinks(){
+  VIDEO_RENDER_DOWNLOAD_URLS.forEach(function(url){
+    try{ URL.revokeObjectURL(url); }catch(e){}
+  });
+  VIDEO_RENDER_DOWNLOAD_URLS=[];
+  VIDEO_RENDER_DL_IDS.forEach(function(id){ setAiDownloadLink(id,null,''); });
+  var planLink=document.getElementById('video-dl-plan');
+  if(planLink) planLink.style.display='none';
+  var planShot=document.getElementById('video-shot-plan-context');
+  if(planShot) planShot.style.display='none';
+  var planImg=document.getElementById('video-plan-context-img');
+  if(planImg) planImg.removeAttribute('src');
+}
+function syncVideoRenderDownloadLinks(pkg){
+  clearVideoRenderDownloadLinks();
+  if(!pkg) return;
+  if(pkg.zipBlob){
+    setAiDownloadLink('video-dl-bundle',makeVideoDownloadObjectUrl(pkg.zipBlob),
+      'house-planner-video-package.zip');
   }
-  el.textContent=lines.join('\n');
+  if(pkg.packageJsonText){
+    setAiDownloadLink('video-dl-json',
+      makeVideoDownloadObjectUrl(new Blob([pkg.packageJsonText],{type:'application/json;charset=utf-8'})),
+      'package.json');
+  }
+  if(pkg.prompt){
+    setAiDownloadLink('video-dl-prompt',
+      makeVideoDownloadObjectUrl(new Blob([pkg.prompt],{type:'text/plain;charset=utf-8'})),
+      'prompt.txt');
+  }
+  var imgs=pkg.images||{};
+  if(imgs.reference){
+    var refBlob=dataUrlToBlobSync(imgs.reference);
+    setAiDownloadLink('video-dl-reference',
+      refBlob?makeVideoDownloadObjectUrl(refBlob):imgs.reference,'reference.png');
+  }
+  if(imgs.planContext){
+    var planBlob=dataUrlToBlobSync(imgs.planContext);
+    setAiDownloadLink('video-dl-plan',
+      planBlob?makeVideoDownloadObjectUrl(planBlob):imgs.planContext,'plan_context.png');
+    var planLink=document.getElementById('video-dl-plan');
+    if(planLink) planLink.style.display='';
+    var planImg=document.getElementById('video-plan-context-img');
+    if(planImg) planImg.setAttribute('src',imgs.planContext);
+    var planShot=document.getElementById('video-shot-plan-context');
+    if(planShot) planShot.style.display='';
+  }
+}
+function handleVideoDownloadLinkClick(e){
+  var a=e&&e.currentTarget;
+  if(a && !a.classList.contains('disabled')) return true;
+  if(e) e.preventDefault();
+  setVideoRenderStatus('まだ動画AI用データがありません。「動画AI用データを作る」を押してから、保存ボタンを押してください。');
+  return false;
+}
+async function copyVideoRenderPrompt(){
+  var ta=document.getElementById('video-instructions-preview');
+  var text=ta?String(ta.value||''):'';
+  if(!text){
+    setVideoRenderStatus('まだAIへの指示文がありません。「動画AI用データを作る」を押してください。');
+    return;
+  }
+  var copied=false;
+  if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
+    try{ await navigator.clipboard.writeText(text); copied=true; }catch(err){}
+  }
+  if(!copied&&ta){
+    ta.classList.add('show');
+    ta.focus();
+    ta.select();
+    try{ copied=document.execCommand('copy'); }catch(err2){ copied=false; }
+  }
+  setVideoRenderStatus(
+    copied
+      ? 'AIへの指示文をクリップボードにコピーしました。\n参照画像も一緒に動画生成AIへ渡してください。'
+      : 'ブラウザにより自動コピーが拒否されました。\n「AIへの指示文」を選択済みにしたので、手動でコピーしてください。'
+  );
 }
 function setVideoRenderBusy(busy){
   VIDEO_RENDER_UI.busy=!!busy;
@@ -22668,25 +22771,29 @@ async function runVideoRenderPackage(){
   setVideoRenderStatus(videoRenderSourceLabel(source)+'から動画AI用データを作っています...\n'+
     '参照画像の撮影と検査に十数秒かかることがあります。');
   try{
+    // download:false — 押した瞬間にZIPが降ってくるのはやめ、下の「データ出力」で
+    // 中身を見てから選んで保存する（画像AI側と同じ流れ）。
     var pkg=await generateVideoRenderPackage({
       source:source,
       presetId:presetId,
-      userText:videoRenderUserText(),
+      note:videoRenderNote(),
       durationSec:durationSec,
-      includeGuides:includeGuides
+      includeGuides:includeGuides,
+      download:false
     });
     if(!pkg) throw new Error('パッケージが作られませんでした。');
-    setVideoRenderFileList(pkg.files);
+    setVideoInstructionsPreview(pkg.prompt);
     setVideoRenderImage(pkg.images&&pkg.images.reference);
-    setVideoRenderStatus('動画AI用データを作り、ZIPを保存しました。\n'+
-      'ファイル名: house-planner-video-package.zip\n'+
+    syncVideoRenderDownloadLinks(pkg);
+    setVideoRenderStatus('動画AI用データを作りました（'+pkg.files.length+'件）。\n'+
       '参照: '+videoRenderSourceLabel(source)+' / 尺: '+durationSec+'秒'+
       (includeGuides?' / ガイド画像あり':'')+'\n\n'+
-      'ZIPを解凍し、reference.png と prompt.txt を動画生成AIへ渡してください。');
+      '下の「データ出力」から、必要なものを保存してください。');
     return pkg;
   }catch(err){
     // 生成側の拒否は「直せる指示」である。要約も置き換えもせず、そのまま出す。
-    setVideoRenderFileList(null);
+    setVideoInstructionsPreview('');
+    clearVideoRenderDownloadLinks();
     setVideoRenderImage('');
     setVideoRenderStatus('動画AI用データを作れませんでした。\n\n'+
       (err&&err.message?err.message:String(err))+'\n\n'+
@@ -22744,7 +22851,7 @@ function openUnityRenderModal(){
   }
   var m=document.getElementById('unity-render-modal');
   syncUnityRenderServerInput();
-  syncFloorUseControl();
+  syncAiRenderSource();
   if(m) m.classList.add('show');
 }
 function closeUnityRenderModal(){
@@ -22877,7 +22984,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); syncFloorUseControl(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -25125,7 +25232,7 @@ updateMobileShiftButton();
       },
       // フロア切替はアプリ自身の既存経路(#floor-sel の onchange と同じ onFloorChange)
       // に委譲する。ST.floor を直接書き換えると、選択解除・#st-floor 表示更新・
-      // 用途セレクタ同期(syncFloorUseControl)・draw2d 再描画が一切走らず、
+      // draw2d 再描画が一切走らず、
       // アプリの他部分が古いフロアの状態を参照し続ける恐れがあるため。
       // getFloor は ST.floor をそのまま読み返す — setFloor の戻り値を信用せず、
       // 呼び出し元(capture-runner.mjs)が実際に反映されたかを別途確認できるようにする。

@@ -51,6 +51,17 @@ function topLevelVar(name) {
   assert.notEqual(m, null, 'var ' + name + ' が index.html に無い');
   return m[0];
 }
+// 複数行の配列リテラル（表）を取り出す。topLevelVar の正規表現は1行しか掴めない。
+function topLevelArrayVar(name) {
+  const at = html.indexOf('\nvar ' + name + '=[');
+  assert.notEqual(at, -1, 'var ' + name + ' の配列が index.html に無い');
+  let i = html.indexOf('[', at), depth = 0;
+  for (; i < html.length; i++) {
+    if (html[i] === '[') depth++;
+    else if (html[i] === ']') { depth--; if (depth === 0) break; }
+  }
+  return html.slice(at + 1, i + 2);
+}
 
 // ボタンの onclick を、書かれているとおりに取り出す（押したのと同じものを走らせる）
 function onclickOf(id) {
@@ -91,7 +102,7 @@ function El(tag) {
 }
 
 const DL_IDS = ['ai-dl-bundle', 'ai-dl-json', 'ai-dl-prompt', 'ai-dl-base', 'ai-dl-edge',
-  'ai-dl-segmentation', 'ai-dl-depth', 'ai-dl-normal', 'ai-dl-instance', 'ai-dl-plan'];
+  'ai-dl-segmentation', 'ai-dl-depth', 'ai-dl-normal', 'ai-dl-instance'];
 
 function makeDom() {
   const byId = {};
@@ -106,8 +117,8 @@ function makeDom() {
     .forEach(function (id) { add(id, 'img'); });
   DL_IDS.forEach(function (id) { const a = add(id, 'a'); a.classList.add('disabled'); });
   add('ai-render-style-input', 'input');
-  add('ai-render-life-check', 'input').checked = true;   // 既定はオン（画面と同じ）
-  add('ai-render-plan-check', 'input').checked = false;  // 既定はオフ（画面と同じ）
+  add('ai-render-source');
+  add('ai-render-preset', 'select');
   ENTRY_IDS.concat([RUN_ID]).forEach(function (id) { buttons.push(add(id, 'button')); });
   return {
     byId: byId,
@@ -141,11 +152,13 @@ function harness(opts) {
     orbit: { target: { x: 0, y: 0, z: 0 } },
     URL: { createObjectURL: function () { return 'blob:test'; }, revokeObjectURL: function () {} },
     Blob: function (parts) { this.size = (parts && parts.length) || 0; },
+    atob: function (b) { return Buffer.from(b, 'base64').toString('binary'); },
+    Uint8Array: Uint8Array,
     alert: function (msg) { calls.push('alert:' + msg); },
     // 入口が触るもの（開くときの同期）
     isUnityRenderFeatureEnabled: function () { return true; },
     syncUnityRenderServerInput: function () { calls.push('syncUnityRenderServerInput'); },
-    syncFloorUseControl: function () { calls.push('syncFloorUseControl'); },
+    syncAiRenderSource: function () { calls.push('syncAiRenderSource'); },
     // 撮影まわり（ここが走ったかどうかが本題）
     setView: function (v) { calls.push('setView:' + v); ctxRef.ST.view = v; },
     captureCurrent3DDataUrl: function () { calls.push('captureCurrent3DDataUrl'); return 'data:image/png;base64,base'; },
@@ -200,7 +213,13 @@ function harness(opts) {
     topLevelFunction('makeAiDownloadObjectUrl'),
     topLevelFunction('setAiDownloadLink'),
     topLevelFunction('clearAiRenderDownloadLinks'),
-    topLevelFunction('aiRenderIncludesPlan'),
+    topLevelArrayVar('AI_IMAGE_PRESETS'),
+    topLevelFunction('aiRenderPresetById'),
+    topLevelFunction('aiRenderSelectedPreset'),
+    topLevelFunction('aiRenderFillPresetOptions'),
+    topLevelFunction('aiRenderNote'),
+    topLevelFunction('dataUrlToBlobSync'),
+    topLevelFunction('setAiImageDownloadLink'),
     topLevelFunction('aiRenderPackageJsonText'),
     topLevelFunction('syncAiRenderDownloadLinks'),
     topLevelFunction('buildAiRenderPrompt'),
@@ -278,7 +297,7 @@ test('「データ作成」のボタンを押すと、そこで撮影と生成�
   });
 });
 
-test('設定を触らずに押したときのZIPの中身は、これまでと同じ10件・同じ並び', async () => {
+test('設定を触らずに押したときのZIPの中身は10件・同じ並び', async () => {
   const h = harness({ view: '3d-ext' });
   await h.press(ENTRY_IDS[0]);
   await h.press(RUN_ID);
@@ -294,9 +313,10 @@ test('設定を触らずに押したときのZIPの中身は、これまでと�
     'normal_guide.png',
     'instance_guide.png'
   ]);
+  // 既定は先頭のプリセット。仕上げメモが空なら style はプリセットそのもの。
   assert.match(h.pkg().prompt,
-    /Preferred style: photorealistic architectural visualization, natural daylight, clean modern Japanese residential presentation/,
-    '既定の仕上げ指定が変わっている');
+    new RegExp('Preferred style: ' + h.ctx.AI_IMAGE_PRESETS[0].style.slice(0, 60).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    '既定の表現プリセットが指示文に入っていない');
 });
 
 // ── 利点: 開いてから設定を変えても、その回に効く ───────────────────────────
@@ -305,17 +325,49 @@ test('ダイアログを開いた後に変えた設定が、その1回目の生�
   await h.press(ENTRY_IDS[0]);           // 開くだけ
   // 開いてから設定を変える（開いた瞬間に撮っていた頃は、ここが効かなかった）
   h.dom.byId['ai-render-style-input'].value = '夕暮れ、暖色の照明';
-  h.dom.byId['ai-render-plan-check'].checked = true;
-  h.dom.byId['ai-render-life-check'].checked = false;
+  h.dom.byId['ai-render-preset'].value = 'life-watercolor';
   await h.press(RUN_ID);
 
   const prompt = h.pkg().prompt;
-  assert.match(prompt, /Preferred style: 夕暮れ、暖色の照明/, '仕上げメモが指示文に入っていない');
-  assert.match(prompt, /- plan_guide\.png:/, '平面図の同梱が指示文に入っていない');
-  assert.match(prompt, /- Do not add people or vehicles\./, '生活感オフが指示文に入っていない');
-  assert.ok(h.calls.indexOf('capturePlan2dDataUrl') >= 0, '平面図を撮っていない');
-  assert.ok(h.zips[0].indexOf('plan_guide.png') >= 0, 'ZIPに平面図が入っていない');
-  assert.equal(h.dom.byId['ai-dl-plan'].classList.contains('disabled'), false, '平面図の保存リンクが押せない');
+  // 仕上げメモはプリセットを置き換えず、後ろに足される。
+  assert.match(prompt, /Preferred style: watercolour/, '選んだプリセットが指示文に入っていない');
+  assert.match(prompt, /夕暮れ、暖色の照明/, '仕上げメモが指示文に入っていない');
+  // 水彩を頼みながら「絵画的な見た目を避けろ」と言わないこと。
+  assert.doesNotMatch(prompt, /avoid painterly or illustration looks/,
+    '水彩プリセットなのに絵画的な見た目を禁じている');
+  assert.doesNotMatch(prompt.slice(prompt.indexOf('Negative prompt:')), /illustration/,
+    '水彩プリセットなのにネガティブプロンプトが illustration を禁じている');
+});
+
+// 既定（写実）のときは、絵画的な見た目を避ける指示とネガティブプロンプトが残る。
+// 上のテストだけだと、両方を無条件に消しても緑のままになる。
+test('写実プリセットでは、絵画的な見た目を避ける指示が残る', async () => {
+  const h = harness({ view: '3d-ext' });
+  await h.press(ENTRY_IDS[0]);
+  await h.press(RUN_ID);
+  const prompt = h.pkg().prompt;
+  assert.match(prompt, /avoid painterly or illustration looks/);
+  assert.match(prompt.slice(prompt.indexOf('Negative prompt:')), /illustration/);
+});
+
+// 通行人・自転車を足してよいのは外観だけ。内観に書くと部屋の中を人が横切る。
+test('内観では通行人を足してよいと書かない', async () => {
+  const h = harness({ view: '3d-int', metaView: 'interior' });
+  await h.press(ENTRY_IDS[0]);
+  await h.press(RUN_ID);
+  assert.match(h.pkg().prompt, /- Do not add people or vehicles\./);
+});
+
+// iOS Safari は data: URL の download 属性を無視して開いてしまう。
+test('画像の保存リンクは data: ではなく blob:', async () => {
+  const h = harness({ view: '3d-ext' });
+  await h.press(ENTRY_IDS[0]);
+  await h.press(RUN_ID);
+  ['ai-dl-base', 'ai-dl-edge', 'ai-dl-instance'].forEach(function (id) {
+    const a = h.dom.byId[id];
+    assert.doesNotMatch(a.href, /^data:/, id + ' が data: URL のまま（iOS Safari で保存されない）');
+    assert.match(a.href, /^blob:/, id);
+  });
 });
 
 test('設定を変えて押し直すと、2回目の内容がその設定に入れ替わる', async () => {
@@ -327,6 +379,21 @@ test('設定を変えて押し直すと、2回目の内容がその設定に入�
   await h.press(RUN_ID);
   const second = h.pkg().prompt;
   assert.notEqual(first, second, '押し直しても指示文が変わっていない');
-  assert.match(second, /Preferred style: 朝の光、白い壁/);
+  assert.match(second, /朝の光、白い壁/);
+  assert.doesNotMatch(first, /朝の光、白い壁/);
   assert.equal(h.genCalls(), 2);
+});
+
+// 「参照にする画面」の一文は、ダイアログを開いたままビューを切り替えても追随する。
+// 動画AI側と同じ扱い（setView の末尾から両方が呼ばれる）。
+test('ビュー切替から画像AI側の説明文の更新が呼ばれている', () => {
+  const setView = topLevelFunction('setView');
+  assert.match(setView, /syncAiRenderSource\(\)/);
+});
+
+test('ウォークスルーでは画像AIも「撮れない」と押す前に書く', () => {
+  const ctx = vm.createContext({ ST: { view: '3d-walk' } });
+  const note = vm.runInContext('(' + topLevelFunction('aiRenderSourceNoteText') + ')', ctx)();
+  assert.match(note, /ウォークスルー/, note);
+  assert.match(note, /外観3D/, note);
 });

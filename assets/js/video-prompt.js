@@ -1,7 +1,7 @@
 // 撮ったレンダと instance-legend から、生成AIに渡す1本のプロンプト文を組み立てる。
 //
 // 構成比が仕様である。実測で得た事実だけを実装しているので、好みで並べ替えないこと。
-//   1. 表現の指定（プリセット本文、またはユーザーが書いた文）  60〜70%
+//   1. 表現の指定（プリセット本文＋任意の仕上げメモ）          60〜70%
 //   2. この家に何があるか（LOCKED の名指し）                  20〜30%
 //   3. してはならないこと（2〜3文）                           末尾のみ
 //
@@ -250,14 +250,16 @@
     return out;
   }
 
-  // userText はプリセット本文を「置き換える」。LOCKED の名指しと末尾の制約は
-  // それでも付く。ユーザーが何を書いても家が保たれるのはこの2つのおかげである。
+  // note は「仕上げメモ」。プリセット本文の**後ろに足す**のであって、置き換えない。
+  //
+  // 以前は userText がプリセット本文をまるごと置き換えていた。短い一言
+  // （「明るい昼」など）を書いた瞬間、表現の指定がその一言だけになり、残りは
+  // 末尾の禁止文だけのプロンプトになる。それは実測で素通し（渡した映像のほぼ
+  // コピー）を生んだ形そのものなので、置き換えは許さない。
   function compose(opts) {
     var o = opts || {};
     var appearance = '';
-    if (typeof o.userText === 'string' && o.userText.replace(/^\s+|\s+$/g, '') !== '') {
-      appearance = o.userText.replace(/^\s+|\s+$/g, '');
-    } else if (o.preset && typeof o.preset.body === 'string') {
+    if (o.preset && typeof o.preset.body === 'string') {
       appearance = o.preset.body;
       var light = lightSentence(o.daylight);
       if (light) appearance += ' ' + light;
@@ -265,6 +267,9 @@
     // 表現の指定が無いまま組み立てると、禁止だけのプロンプトになる。
     // それは実測で素通しを生んだ形そのものなので、何も返さない。
     if (appearance === '') return '';
+    if (typeof o.note === 'string' && o.note.replace(/^\s+|\s+$/g, '') !== '') {
+      appearance += ' ' + o.note.replace(/^\s+|\s+$/g, '');
+    }
 
     return [appearance, houseSentence(o.legend), shotSentence(o.camera), CLOSING].join(' ');
   }
