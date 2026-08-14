@@ -272,7 +272,7 @@ test('「データ作成」のボタンを押すと、そこで撮影と生成�
   assert.equal(h.dom.byId['ai-instructions-preview'].value, pkg.prompt, '指示文が出力欄に出ていない');
   assert.equal(h.dom.byId['ai-package-preview'].classList.contains('show'), true, '画像プレビューが出ていない');
   assert.equal(h.dom.byId['unity-render-img'].classList.contains('show'), true, '基準画像が出ていない');
-  assert.match(h.dom.byId['unity-render-status'].textContent, /画像AI用データを生成しました/, '完了の知らせが出ていない');
+  assert.match(h.dom.byId['unity-render-status'].textContent, /画像AI用データを作りました/, '完了の知らせが出ていない');
   ['ai-dl-bundle', 'ai-dl-prompt', 'ai-dl-base'].forEach(function (id) {
     assert.equal(h.dom.byId[id].classList.contains('disabled'), false, id + ' が押せないまま');
   });

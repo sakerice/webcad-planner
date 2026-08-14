@@ -209,23 +209,23 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #unity-render-modal.show{display:flex}
 .unity-render-card{width:min(780px,96vw);max-height:92dvh;overflow:auto;background:#16213e;border:1px solid #2a4080;border-radius:8px;box-shadow:0 22px 60px rgba(0,0,0,0.45);padding:14px;color:#eef}
 .unity-render-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.unity-render-title{font-size:14px;font-weight:700;color:#fff}
-.unity-render-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer;font-size:16px}
-.unity-render-status{font-size:12px;line-height:1.6;color:#cce;background:#101a33;border:1px solid #24385f;border-radius:6px;padding:10px;margin-bottom:10px;white-space:pre-wrap}
+.unity-render-title{font-weight:700;color:#fff}
+.unity-render-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer}
+.unity-render-status{line-height:1.6;color:#cce;background:#101a33;border:1px solid #24385f;border-radius:6px;padding:10px;margin-bottom:10px;white-space:pre-wrap}
 .unity-render-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .unity-render-actions a{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .unity-render-actions a.disabled{opacity:0.55;cursor:not-allowed}
 .unity-render-config{display:grid;grid-template-columns:1fr;gap:10px;align-items:stretch;margin:10px 0 12px}
-.unity-render-config input,.unity-render-config select{min-width:0;background:#0f172a;border:1px solid #2a4080;color:#eef;border-radius:6px;padding:8px;font-size:12px}
+.unity-render-config input,.unity-render-config select{min-width:0;background:#0f172a;border:1px solid #2a4080;color:#eef;border-radius:6px;padding:8px}
 .ai-style-field{display:grid;gap:4px;min-width:0}
-.ai-style-field label{font-size:11px;font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
-.ai-style-field small{font-size:10px;color:var(--hp-muted,#7a8fb0);line-height:1.45}
+.ai-style-field label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
+.ai-style-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 .ai-floor-use-field{display:grid;gap:4px;min-width:0;padding:10px 12px;border:1px solid var(--hp-border,#24385f);border-radius:12px;background:rgba(255,255,255,.04)}
-.ai-floor-use-field label{font-size:11px;font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
-.ai-floor-use-field small{font-size:10px;color:var(--hp-muted,#7a8fb0);line-height:1.45}
+.ai-floor-use-field label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
+.ai-floor-use-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 .ai-instruction-actions{display:flex;justify-content:flex-end;gap:8px}
 .ai-instruction-actions .pbtn{min-height:36px}
-.ai-instructions-preview{display:none;width:100%;min-height:132px;resize:vertical;box-sizing:border-box;background:#fff;border:1px solid var(--hp-border,#24385f);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.55;color:var(--hp-text,#2d2a27);white-space:pre-wrap}
+.ai-instructions-preview{display:none;width:100%;min-height:132px;resize:vertical;box-sizing:border-box;background:#fff;border:1px solid var(--hp-border,#24385f);border-radius:12px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55;color:var(--hp-text,#2d2a27);white-space:pre-wrap}
 .ai-instructions-preview.show{display:block}
 .unity-render-img{display:none;width:100%;max-height:62dvh;object-fit:contain;background:#0f172a;border:1px solid #24385f;border-radius:6px}
 .unity-render-img.show{display:block}
@@ -233,8 +233,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .ai-package-preview.show{display:grid}
 .ai-package-shot{background:#f7f8fa;border-radius:14px;padding:8px}
 .ai-package-shot img{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#fff;border-radius:10px}
-.ai-package-shot span{display:block;margin-top:6px;font-size:10px;font-weight:800;color:#5f5650;text-align:center}
-.unity-render-cmd{font-size:11px;color:#aac;background:#0b1226;border:1px solid #24385f;border-radius:6px;padding:8px;overflow:auto;white-space:nowrap}
+.ai-package-shot span{display:block;margin-top:6px;font-weight:800;color:#5f5650;text-align:center}
+/* 同じクラスなのに、画像側は nowrap で使い方の1行が画面外へ切れ、動画側は
+   .video-render-files で pre-wrap に上書きされていた。折り返しは共通にする。 */
+.unity-render-cmd{color:#aac;background:#0b1226;border:1px solid #24385f;border-radius:6px;padding:8px;overflow:auto;white-space:pre-wrap}
 #unity-render-fab{display:none;position:absolute;right:14px;top:14px;z-index:260;border:1px solid #e94560;background:#e94560;color:#fff;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.28);cursor:pointer;touch-action:manipulation}
 #unity-render-fab.show{display:block}
 #unity-render-toolbar-btn{display:none}
@@ -3034,23 +3036,71 @@ input[type="reset"]:focus-visible{
 }
 #video-render-modal.show{display:flex}
 .video-field{display:grid;gap:4px;min-width:0;margin-top:10px}
-.video-field > label{font-size:11px;font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
-.video-field small{font-size:10px;color:var(--hp-muted,#7a8fb0);line-height:1.45}
+.video-field > label{font-weight:800;color:var(--hp-text-soft,#8a9ab0)}
+.video-field small{color:var(--hp-muted,#7a8fb0);line-height:1.45}
 .video-prompt-input{
   width:100%;box-sizing:border-box;min-height:104px;resize:vertical;
   background:#fff;border:1px solid var(--hp-border,#24385f);border-radius:9px;
-  color:var(--hp-text,#2d2a27);padding:8px;font-family:inherit;font-size:12px;line-height:1.55;
+  color:var(--hp-text,#2d2a27);padding:8px;font-family:inherit;line-height:1.55;
 }
 #video-render-duration{width:100%}
-.video-check{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px}
 .video-render-files{white-space:pre-wrap;min-height:0}
 @media (max-width:768px){
   /* スマホ: 縦持ちでも中身が全部見えること。カードは端まで使い、
      入力欄のタップ標的は 44px を割らない。 */
-  #video-render-modal{padding:8px}  .video-prompt-input{min-height:92px;font-size:13px}
+  #video-render-modal{padding:8px}  .video-prompt-input{min-height:92px}
   #video-render-preset{min-height:44px}
   #video-render-duration{height:34px}
 }
+
+/* ══ 画像AI/動画AIダイアログの共通の型 (Task 33) ═══════════════════════
+   「近しい機能なのに UI のルールが違いすぎる」というオーナーの指摘に対する
+   1か所。2つのダイアログ(#unity-render-modal / #video-render-modal)の
+   カードはどちらも .airx-dialog を付けており、**文字の大きさはここでしか
+   決めない**。片方のダイアログにだけ font-size を足すと
+   tools/tests/ai-render-typography.test.cjs が赤くなる。
+
+   段階は4つだけ:
+     見出し --airx-fs-heading … ダイアログの題・節の見出し・閉じるボタン
+     本文   --airx-fs-body    … 説明文・状態表示・入力欄・出力欄
+     ラベル --airx-fs-label   … 設定項目の名前・ボタン
+     補助文 --airx-fs-help    … ラベルの下の1行説明・プレビューの見出し
+
+   丸めた元の値(Task 33 以前):
+     節の見出し .ph 13px → 14px / 閉じる× 16px → 14px
+     指示文プレビュー 11px → 12px / 使い方・ファイル一覧 11px → 12px
+     参照の説明 .video-source-note 指定なし(16px) → 12px
+     スマホだけ本文欄 13px → 12px(スマホ専用の上書きをやめた)
+   これ以外(14/12/11/10)は元から4段階のどれかに乗っていた。 */
+.airx-dialog{
+  --airx-fs-heading:14px;
+  --airx-fs-body:12px;
+  --airx-fs-label:11px;
+  --airx-fs-help:10px;
+}
+/* 見出し */
+.airx-dialog .unity-render-title,
+.airx-dialog .ph,
+.airx-dialog .unity-render-close{font-size:var(--airx-fs-heading)}
+/* 本文 */
+.airx-dialog .unity-render-status,
+.airx-dialog .unity-render-cmd,
+.airx-dialog .video-source-note,
+.airx-dialog .ai-instructions-preview,
+.airx-dialog .video-prompt-input,
+.airx-dialog .airx-check,
+.airx-dialog input,
+.airx-dialog select,
+.airx-dialog textarea{font-size:var(--airx-fs-body)}
+/* ラベル */
+.airx-dialog label,
+.airx-dialog .pbtn{font-size:var(--airx-fs-label)}
+/* 補助文 */
+.airx-dialog small,
+.airx-dialog .ai-package-shot span{font-size:var(--airx-fs-help)}
+/* チェックボックスの行は2つのダイアログで同じ形にする(以前は画像側だけ
+   インラインの style= で書かれており、余白も 6px/8px と食い違っていた)。 */
+.airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -3370,7 +3420,9 @@ input[type="reset"]:focus-visible{
 <!-- Sidebar overlay (mobile) -->
 <div id="sb-overlay" onclick="toggleMobileSidebar()"></div>
 <div id="unity-render-modal" onclick="if(event.target===this)closeUnityRenderModal()">
-  <div class="unity-render-card">
+  <!-- airx-dialog: 動画AI側と共通の型(文字サイズ4段階・チェック行の形)。
+       スタイルシート末尾の「共通の型 (Task 33)」だけが文字サイズを決める。 -->
+  <div class="unity-render-card airx-dialog">
     <div class="unity-render-head">
       <div class="unity-render-title">画像AI用データ</div>
       <button class="unity-render-close" onclick="closeUnityRenderModal()">×</button>
@@ -3379,20 +3431,20 @@ input[type="reset"]:focus-visible{
          この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
          中身も既存の unity-render-* クラスをそのまま使う。 -->
     <div class="ph">この機能について</div>
-    <div class="unity-render-status">現在見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するための一式を作成します。基準・エッジ・深度・法線・カテゴリ・インスタンス画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
+    <div class="unity-render-status">いま見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するためのデータを作ります。基準・エッジ・深度・法線・セグメント・部材IDのガイド画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
         <label for="ai-render-style-input">任意の仕上げメモ</label>
         <input id="ai-render-style-input" type="text" placeholder="例: 明るい昼、モデルハウス風、白い壁紙を自然に">
-        <small>空欄でもOKです。間取りを変えず、雰囲気だけ追加したい時に使います。</small>
-        <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px">
+        <small>空欄でもOKです。形を変えず、雰囲気だけ足したいときに使います。</small>
+        <label class="airx-check">
           <input id="ai-render-life-check" type="checkbox" checked>
-          生活感を加える(通行人・自転車・植栽など。建物の形は変えない)
+          生活感を加える（通行人・自転車・植栽など。形は変えない）
         </label>
-        <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px">
+        <label class="airx-check">
           <input id="ai-render-plan-check" type="checkbox">
-          現在階の平面図(注記なし・天井高つき)も同梱する
+          現在階の平面図（注記なし・天井高つき）も含める
         </label>
       </div>
       <div class="ai-floor-use-field">
@@ -3416,7 +3468,7 @@ input[type="reset"]:focus-visible{
       <button id="ai-render-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="generateAiRenderPackage()">画像AI用データを作る</button>
     </div>
     <div class="ph">データ出力</div>
-    <textarea id="ai-instructions-preview" class="ai-instructions-preview" readonly placeholder="AIへの指示文は、データ生成後にここへ表示されます。"></textarea>
+    <textarea id="ai-instructions-preview" class="ai-instructions-preview" readonly placeholder="作ると、AIへの指示文がここに出ます。"></textarea>
     <div class="ai-instruction-actions">
       <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="copyAiRenderPrompt()">AIへの指示文をコピー</button>
     </div>
@@ -3430,7 +3482,7 @@ input[type="reset"]:focus-visible{
       <div class="ai-package-shot"><img id="ai-instance-img" alt="instance guide"><span>部材ID画像</span></div>
     </div>
     <div class="unity-render-actions">
-      <a id="ai-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">一括DL</a>
+      <a id="ai-dl-bundle" class="pbtn disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">ZIPを保存</a>
       <a id="ai-dl-json" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">パッケージJSON保存</a>
       <a id="ai-dl-prompt" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">AIへの指示文を保存</a>
       <a id="ai-dl-base" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">基準画像保存</a>
@@ -3441,7 +3493,7 @@ input[type="reset"]:focus-visible{
       <a id="ai-dl-instance" class="pbtn sec disabled" style="width:auto;padding:7px 12px" href="#" onclick="return handleAiDownloadLinkClick(event)">部材ID画像保存</a>
       <a id="ai-dl-plan" class="pbtn sec disabled" style="width:auto;padding:7px 12px;display:none" href="#" onclick="return handleAiDownloadLinkClick(event)">平面図保存</a>
     </div>
-    <div class="unity-render-cmd">使い方: 一括DLした制御画像6枚と「AIへの指示文」を、利用したい画像生成AIにまとめて渡してください。凡例JSONはカテゴリと部材IDの対応確認に使います。</div>
+    <div class="unity-render-cmd">使い方: ZIPに入ったガイド画像6枚と「AIへの指示文」を、使いたい画像生成AIにまとめて渡してください。凡例JSONはセグメントと部材IDの対応を確かめるのに使います。</div>
   </div>
 </div>
 
@@ -3475,14 +3527,16 @@ input[type="reset"]:focus-visible{
 <!-- 動画AIレンダー (Task 8)。導線も構成も静止画AIレンダーに寄せてある。
      ユーザーから見た違いは「静止画か動画か」だけにする。 -->
 <div id="video-render-modal" onclick="if(event.target===this)closeVideoRenderModal()">
-  <div class="unity-render-card">
+  <!-- airx-dialog: 画像AI側と共通の型(文字サイズ4段階・チェック行の形)。
+       スタイルシート末尾の「共通の型 (Task 33)」だけが文字サイズを決める。 -->
+  <div class="unity-render-card airx-dialog">
     <div class="unity-render-head">
       <div class="unity-render-title">動画AI用データ</div>
       <button class="unity-render-close" onclick="closeVideoRenderModal()">×</button>
     </div>
     <!-- 見出しの並びは画像AI用データのダイアログと同じ順序に揃えてある(Task 29-3)。 -->
     <div class="ph">この機能について</div>
-    <div class="unity-render-status">いま見ている画面を参照にして、動画生成AIへ渡す一式（参照画像・指示文・設計情報）を作ります。</div>
+    <div class="unity-render-status">いま見ている画面を参照にして、動画生成AIへ渡すデータ（参照画像・AIへの指示文・設計情報）を作ります。</div>
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
@@ -3495,14 +3549,14 @@ input[type="reset"]:focus-visible{
         <div class="video-field">
           <label for="video-render-text">AIへの本文（自由に書き換えられます）</label>
           <textarea id="video-render-text" class="video-prompt-input" spellcheck="false"></textarea>
-          <small>書き換えた本文はそのまま使われます。プリセットを選び直すと上書きされます。間取りを保つ指示と部材の名指しは、本文とは別に必ず付きます。</small>
+          <small>書き換えた本文はそのまま使われます。プリセットを選び直すと上書きされます。形を変えない指示と部材の名指しは、本文とは別に必ず付きます。</small>
         </div>
         <div class="video-field">
           <label for="video-render-duration">尺 <span id="video-render-duration-val">8秒</span></label>
           <input id="video-render-duration" type="range" min="4" max="15" step="1" value="8" oninput="onVideoRenderDurationInput()">
-          <label class="video-check" for="video-render-guides-check">
+          <label class="airx-check" for="video-render-guides-check">
             <input id="video-render-guides-check" type="checkbox">
-            詳細ガイドを含める（エッジ・深度・法線・部材ID。3D参照のときだけ）
+            ガイド画像を含める（エッジ・深度・法線・部材ID。3D参照のときだけ）
           </label>
         </div>
       </div>
@@ -3515,7 +3569,7 @@ input[type="reset"]:focus-visible{
     </div>
     <div class="ph">データ出力</div>
     <img id="video-render-img" class="unity-render-img" alt="動画AI用の参照画像プレビュー">
-    <div id="video-render-files" class="unity-render-cmd video-render-files">作成すると、ZIPの中身がここに出ます。</div>
+    <div id="video-render-files" class="unity-render-cmd video-render-files">作ると、ZIPの中身がここに出ます。</div>
   </div>
 </div>
 
@@ -21549,7 +21603,7 @@ function handleAiDownloadLinkClick(e){
   var a=e&&e.currentTarget;
   if(a && !a.classList.contains('disabled')) return true;
   if(e) e.preventDefault();
-  setUnityRenderStatus('ダウンロード用データが未生成です。「画像AI用データを作る」を押してから、保存ボタンをクリックしてください。');
+  setUnityRenderStatus('まだ画像AI用データがありません。「画像AI用データを作る」を押してから、保存ボタンを押してください。');
   return false;
 }
 async function generateAiRenderPackage(){
@@ -21568,19 +21622,19 @@ async function generateAiRenderPackage(){
     setUnityRenderStatus('現在の3Dビューから基準画像を撮影しています...');
     await waitFrame(50);
     var base=captureCurrent3DDataUrl();
-    setUnityRenderStatus('構造保持用のセグメント画像を生成しています...');
+    setUnityRenderStatus('構造保持用のセグメント画像を作っています...');
     await waitFrame(30);
     var seg=captureSegmentation3DDataUrl();
-    setUnityRenderStatus('設計部材ごとのインスタンスID画像を生成しています...');
+    setUnityRenderStatus('設計部材ごとの部材ID画像を作っています...');
     await waitFrame(30);
     var instanceData=captureInstance3DData();
     var instance=instanceData.dataUrl;
-    setUnityRenderStatus('部材ID画像から構造エッジ画像を生成しています...');
+    setUnityRenderStatus('部材ID画像から構造エッジ画像を作っています...');
     var edge=await makeEdgeDataUrlFromSegmentation(instance);
-    setUnityRenderStatus('カメラ空間の深度画像を生成しています...');
+    setUnityRenderStatus('カメラ空間の深度画像を作っています...');
     await waitFrame(30);
     var depth=captureAiOverrideGuideDataUrl('depth');
-    setUnityRenderStatus('面方向を固定する法線画像を生成しています...');
+    setUnityRenderStatus('面方向を固定する法線画像を作っています...');
     await waitFrame(30);
     var normal=captureAiOverrideGuideDataUrl('normal');
     var plan='';
@@ -21591,7 +21645,7 @@ async function generateAiRenderPackage(){
     }
     var metadata=buildAiRenderMetadata(instanceData.legend);
     var prompt=buildAiRenderPrompt(metadata,!!plan);
-    setUnityRenderStatus('一括DL用ZIPを準備しています...');
+    setUnityRenderStatus('保存するZIPを準備しています...');
     var enc=new TextEncoder();
     var legendText=JSON.stringify({version:2,legend:metadata.segmentationLegend,siteContext:metadata.siteContext},null,2);
     var instanceLegendText=JSON.stringify({version:2,instances:metadata.instanceLegend},null,2);
@@ -21629,16 +21683,16 @@ async function generateAiRenderPackage(){
     syncAiRenderDownloadLinks();
     setUnityRenderImage(base);
     setUnityRenderStatus(
-      '画像AI用データを生成しました。\n\n'+
+      '画像AI用データを作りました。\n\n'+
       '推奨手順:\n'+
-      '1. 一括DLで制御パッケージを保存\n'+
-      '2. 基準・エッジ・深度・法線・カテゴリ・部材IDの6画像をAIへ添付\n'+
+      '1. 「ZIPを保存」で画像AI用データを保存\n'+
+      '2. 基準・エッジ・深度・法線・セグメント・部材IDのガイド画像6枚をAIへ添付\n'+
       '3. 2つの凡例JSONとAIへの指示文を一緒に渡す\n\n'+
       '基準画像と部材ID画像を最重要参照に指定し、カメラ変更や部材の追加削除を許可しないでください。'
     );
     return AI_RENDER_PACKAGE;
   }catch(err){
-    setUnityRenderStatus('画像AI用データの生成に失敗しました。\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
+    setUnityRenderStatus('画像AI用データを作れませんでした。\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
     return null;
   }finally{
     setUnityRenderBusy(false);
@@ -21646,7 +21700,7 @@ async function generateAiRenderPackage(){
 }
 async function copyAiRenderPrompt(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('AIへの指示文を作成しています。生成後にコピーを試します...');
+    setUnityRenderStatus('AIへの指示文を作っています。作ったあとコピーを試します...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21670,13 +21724,13 @@ async function copyAiRenderPrompt(){
   }
   setUnityRenderStatus(
     copied
-      ? 'AIへの指示文をクリップボードにコピーしました。\n基準・エッジ・深度・法線・カテゴリ・部材IDの6画像と、2つの凡例JSONも一緒にAIへ添付してください。'
+      ? 'AIへの指示文をクリップボードにコピーしました。\n基準・エッジ・深度・法線・セグメント・部材IDのガイド画像6枚と、2つの凡例JSONも一緒にAIへ添付してください。'
       : 'ブラウザにより自動コピーが拒否されました。\n下に表示された「AIへの指示文」を選択済みにしたので、手動でコピーしてください。'
   );
 }
 async function downloadAiRenderPrompt(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('AIへの指示文を保存するため、先に画像AI用データを生成しています...');
+    setUnityRenderStatus('AIへの指示文を保存するため、先に画像AI用データを作っています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21685,7 +21739,7 @@ async function downloadAiRenderPrompt(){
 }
 async function downloadAiRenderPackageJson(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('パッケージJSONを保存するため、先に画像AI用データを生成しています...');
+    setUnityRenderStatus('パッケージJSONを保存するため、先に画像AI用データを作っています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21694,7 +21748,7 @@ async function downloadAiRenderPackageJson(){
 }
 async function downloadAiRenderImage(kind, quiet){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('画像を保存するため、先に画像AI用データを生成しています...');
+    setUnityRenderStatus('画像を保存するため、先に画像AI用データを作っています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
@@ -21708,14 +21762,14 @@ async function downloadAiRenderImage(kind, quiet){
 }
 async function downloadAiRenderBundle(){
   if(!AI_RENDER_PACKAGE){
-    setUnityRenderStatus('一括DLのため、先に画像AI用データを生成しています...');
+    setUnityRenderStatus('ZIPを保存するため、先に画像AI用データを作っています...');
     await generateAiRenderPackage();
     if(!AI_RENDER_PACKAGE) return;
   }
   if(AI_RENDER_PACKAGE.zipBlob){
     downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob);
     setUnityRenderStatus(
-      '画像AI用データを一括DLしました。\n\n'+
+      '画像AI用データを作り、ZIPを保存しました。\n\n'+
       '保存される内容:\n'+
       '- ai-instructions.md（AIへの指示文）\n'+
       '- ai-render-package.json\n'+
@@ -21730,7 +21784,7 @@ async function downloadAiRenderBundle(){
     );
     return;
   }
-  setUnityRenderStatus('ZIPを作成しています...');
+  setUnityRenderStatus('ZIPを作っています...');
   var enc=new TextEncoder();
   var legendText=JSON.stringify({version:2,legend:AI_RENDER_PACKAGE.metadata.segmentationLegend,siteContext:AI_RENDER_PACKAGE.metadata.siteContext},null,2);
   var instanceLegendText=JSON.stringify({version:2,instances:AI_RENDER_PACKAGE.metadata.instanceLegend||[]},null,2);
@@ -21748,7 +21802,7 @@ async function downloadAiRenderBundle(){
   ];
   downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob||makeZipBlob(files));
   setUnityRenderStatus(
-    '画像AI用データを一括DLしました。\n\n'+
+    '画像AI用データを作り、ZIPを保存しました。\n\n'+
     '保存される内容:\n'+
     '- ai-instructions.md（AIへの指示文）\n'+
     '- ai-render-package.json\n'+
@@ -22180,7 +22234,7 @@ async function generateVideoRenderPackage(options){
   var opt=options||{};
   // 素材の種類は呼び出し側が宣言する。既定は Task 7 のまま 3D。
   var source=opt.source||'3d';
-  var includeGuides=!!opt.includeGuides;   // 設計 §12.3: 詳細ガイドは既定オフ
+  var includeGuides=!!opt.includeGuides;   // 設計 §12.3: ガイド画像は既定オフ
   var duration=Math.max(4,Math.min(VideoPrompt.MAX_DURATION_SEC,
     Number(opt.durationSec)||VideoPrompt.DEFAULT_DURATION_SEC));
   // プリセットの候補は素材の種類だけが決める。噛み合わない組み合わせはここで死ぬ。
@@ -22325,7 +22379,7 @@ async function generateVideoRenderPackage(options){
     daylight:daylight,userText:opt.userText
   });
 
-  // 5) 詳細ガイド。既定では撮らない（撮らないものは同梱もされない）。
+  // 5) ガイド画像。既定では撮らない（撮らないものはZIPにも入らない）。
   var guides=null;
   if(includeGuides){
     await waitFrame(30);
@@ -22551,7 +22605,7 @@ async function runVideoRenderPackage(){
   var durationSec=videoRenderDurationSec();
   var includeGuides=videoRenderIncludesGuides();
   setVideoRenderBusy(true);
-  setVideoRenderStatus(videoRenderSourceLabel(source)+'から動画AI用データを作成しています...\n'+
+  setVideoRenderStatus(videoRenderSourceLabel(source)+'から動画AI用データを作っています...\n'+
     '参照画像の撮影と検査に十数秒かかることがあります。');
   try{
     var pkg=await generateVideoRenderPackage({
@@ -22564,10 +22618,10 @@ async function runVideoRenderPackage(){
     if(!pkg) throw new Error('パッケージが作られませんでした。');
     setVideoRenderFileList(pkg.files);
     setVideoRenderImage(pkg.images&&pkg.images.reference);
-    setVideoRenderStatus('動画AI用データを作成し、ZIPを保存しました。\n'+
+    setVideoRenderStatus('動画AI用データを作り、ZIPを保存しました。\n'+
       'ファイル名: house-planner-video-package.zip\n'+
       '参照: '+videoRenderSourceLabel(source)+' / 尺: '+durationSec+'秒'+
-      (includeGuides?' / 詳細ガイドあり':'')+'\n\n'+
+      (includeGuides?' / ガイド画像あり':'')+'\n\n'+
       'ZIPを解凍し、reference.png と prompt.txt を動画生成AIへ渡してください。');
     return pkg;
   }catch(err){
@@ -24746,7 +24800,7 @@ function jisFileBaseName(){
 function jisDownloadSvg(){
   if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
   // downloadTextFile(:16841)→downloadBlobFile(:16829)は<a download>+objectURL方式で、
-  // 既存のAI一括DL等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
+  // 既存の画像AI用データのZIP保存等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
   downloadTextFile(jisFileBaseName()+'.svg', jisCurrentSvg(), 'image/svg+xml;charset=utf-8');
 }
 function jisDownloadPng(){
