@@ -3554,6 +3554,10 @@ input[type="reset"]:focus-visible{
         <div class="video-field">
           <label for="video-render-duration">尺 <span id="video-render-duration-val">8秒</span></label>
           <input id="video-render-duration" type="range" min="4" max="15" step="1" value="8" oninput="onVideoRenderDurationInput()">
+        </div>
+        <!-- ガイド画像は尺とは無関係の設定。尺の枠に入れていたため、
+             尺の一部に読めていた（オーナー報告）。自分の枠に出す。 -->
+        <div class="video-field">
           <label class="airx-check" for="video-render-guides-check">
             <input id="video-render-guides-check" type="checkbox">
             ガイド画像を含める（エッジ・深度・法線・部材ID。3D参照のときだけ）

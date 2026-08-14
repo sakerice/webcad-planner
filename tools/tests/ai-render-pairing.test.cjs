@@ -242,3 +242,14 @@ test('「この機能について」には、書き換えられない説明文�
       '説明文に id があると、また上書きされる: ' + m[1]);
   });
 });
+
+// ガイド画像を含めるかどうかは、尺とは無関係の設定。同じ枠に入れていたため
+// 尺の一部に読めていた（オーナー報告）。設定は1枠に1つ。
+test('ガイド画像のチェックは、尺とは別の枠にある', () => {
+  const dur = html.indexOf('id="video-render-duration"');
+  const chk = html.indexOf('id="video-render-guides-check"');
+  assert.ok(dur > 0 && chk > dur, '順序が想定と違う');
+  const between = html.slice(dur, chk);
+  assert.ok(between.includes('</div>'),
+    '尺の枠が閉じないままチェックが続いている＝尺の一部に読める');
+});
