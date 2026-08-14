@@ -349,15 +349,30 @@ test('24-1(最重要): 斜線で削られた階の壁が、立面図で斜めに
   assert.ok(Math.abs(found - 1.25) < 0.02, '勾配が北側斜線の 1.25 と一致する: ' + found);
 });
 
-test('24-1: 斜線由来の片流れ屋根が、立面図にも出る(3D に建っている屋根と同じ)', () => {
+// Task 27: 斜線由来の板(setbackRoofItems)は、立面図に **輪郭を1枚も足さない**。
+// Task 24 は「3D に建っている物は図面にも出す」として板を屋根の列に並べていたが、
+// 板の輪郭は closeProfileAboveBase で低いほうの軒まで閉じられる = 制限が削り取った
+// 空の上に立体を描く。そのうえ板のアイテムは切り口の外接矩形なので、建物の外まで
+// 張り出す。切り口の形は壁(elevWallLimitLines)と屋根(capPolygonByPlane)が既に
+// 描いているので、板が足せる物は無い。
+test('27-1(最重要): 斜線由来の板は立面図に輪郭を足さない(切り口は壁と屋根が描く)', () => {
   const off = full(setbackHouse(null, false));
   const on = full(setbackHouse(NORTH_ONLY, false));
   const lw = run(on, 'JISDRAW.lineWidths(100).thick');
-  const nRoof = plain(run(on, 'setbackRoofItems()')).length;
-  assert.equal(nRoof, 1, '3D に斜線由来の屋根が1枚建っている');
-  assert.equal(thickPolys(elev(on, 'e'), lw).length,
-    thickPolys(elev(off, 'e'), lw).length + nRoof,
-    '立面図の輪郭がその枚数ぶん増えている');
+  // 空振り防止: 3D には板が建っている(消したのは図面だけ)。
+  assert.equal(plain(run(on, 'setbackRoofItems()')).length, 1, '3D に斜線由来の屋根が1枚建っている');
+  DIRS.forEach((d) => {
+    assert.equal(thickPolys(elev(on, d), lw).length, thickPolys(elev(off, d), lw).length,
+      d + '立面図の輪郭の枚数が、斜線の有無で変わっている');
+  });
+  // それでも切り口は図面に出ている(輪郭が減っただけ、ではない)。
+  const wall = thickPolys(elev(on, 'e'), lw)[0];
+  let sloped = 0;
+  for (let i = 1; i < wall.length; i++) {
+    const a = wall[i - 1], b = wall[i];
+    if (Math.abs(b[1] - a[1]) > 100 && Math.abs(b[0] - a[0]) > 100) sloped++;
+  }
+  assert.ok(sloped >= 1, '斜めに切れた上端が図面から消えている: ' + JSON.stringify(wall));
 });
 
 test('24-1(最重要): 既存の屋根は、制限面より上には描かれない(3D は切っている)', () => {
@@ -925,4 +940,142 @@ test('26-5(最重要): 斜線を設定していないプランの立面図は、
       });
     });
   });
+});
+
+// ══ 27 図面に、建物のどこにも無い線を描かない ═══════════════════════════
+//
+// 出荷後の報告: 斜線を設定したプランの立面図の上のほうに、建物のどこにも
+// 対応しない長方形が出る(「変な水平線と垂直線」)。正体は斜線由来の板
+// (setbackRoofItems)の輪郭で、
+//   ・下辺 = closeProfileAboveBase が低いほうの軒の高さまで閉じた水平線。
+//     その下は制限が削り取った空である。
+//   ・縦辺 = 板のアイテムが切り口の (t,s) 外接矩形なので、建物の外まで伸びる。
+// どちらも 3D のどの辺でもない。
+//
+// ここで見るのは図面の作り方ではなく **描かれた線そのもの** である。図面のコードを
+// 1行も通さずに、置かれた屋根と壁から「あり得る水平線の高さ」と「建物の広がり」を
+// 作り、輪郭の全部の辺を突き合わせる。
+
+// 立体ごとのシルエット(上端の折れ線と、底の高さ)。TRUTH_SRC と同じ道具立てで、
+// **斜線由来の板は入れない**(板が図面に出ないことを確かめる側なので)。
+const BODY_SRC = `
+function bodySilhouettes(dir,N){
+  var ax=TRUTH_AX[dir], pls=setbackPlanes(), out=[];
+  DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
+    var base=floorBaseY(it.floor||1)/U+(it.elev||0);
+    // 陸屋根の立体は板厚のぶんだけ上に立つ(roofLocalVertices の 'flat' と同じ)。
+    var rise=(it.roofType==='flat')?Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U))/U:0;
+    var W=it.w*U, D=it.d*U, i, j, lx, lz, w, h, pts=[];
+    for(i=0;i<=N;i++){
+      lx=-W/2+W*i/N;
+      for(j=0;j<=N;j++){
+        lz=-D/2+D*j/N;
+        w=roofLocalToWorldMm(it,lx,lz);
+        h=base+roofSurfaceHeightAt(it,lx,lz)/U+rise;
+        if(pls.length) h=Math.min(h,truthLowestLimit(pls,w.x,w.y));
+        pts.push([w.x*ax.u[0]+w.y*ax.u[1],h]);
+      }
+    }
+    out.push({base:base,top:truthUpperHull(pts)});
+  });
+  DATA.walls.forEach(function(wl){
+    var u1=wl.x1*ax.u[0]+wl.y1*ax.u[1], u2=wl.x2*ax.u[0]+wl.y2*ax.u[1];
+    if(Math.abs(u2-u1)<0.5) return;
+    var fullH=wallDisplayHeightM(wl), base=floorBaseY(wl.floor||1)/U;
+    var env=(typeof wallTopCutEnv==='function')?wallTopCutEnv(wl):null;
+    var i, t, h, x, y, pts=[];
+    for(i=0;i<=200;i++){
+      t=i/200;
+      x=wl.x1+(wl.x2-wl.x1)*t; y=wl.y1+(wl.y2-wl.y1)*t;
+      h=env?Math.min(fullH,wallTopHeightAtM(wl,t,fullH,env.minH,env.roofs)):fullH;
+      h=base+h/U;
+      if(pls.length) h=Math.min(h,truthLowestLimit(pls,x,y));
+      pts.push([x*ax.u[0]+y*ax.u[1],h]);
+    }
+    if(pts[pts.length-1][0]<pts[0][0]) pts.reverse();
+    out.push({base:base,top:pts});
+  });
+  return out;
+}
+`;
+
+// 高さ h の水平線が、区間 [uA,uB] でその立体の **上端そのもの** か。
+// (上端が h に届き、かつ h を超えない。標本の粗さぶんだけ届かない点は許す。)
+function bodyTopIsAt(body, h, uA, uB, tol) {
+  let hi = -Infinity;
+  for (let k = 0; k <= 40; k++) {
+    const v = polyValueAt(body.top, uA + (uB - uA) * (k / 40));
+    if (v === null) return false;
+    if (v > h + tol) return false;
+    if (v > hi) hi = v;
+  }
+  return hi >= h - tol;
+}
+// その水平線を、どれかの立体が持っているか。持ち主は「底の高さ」か「上端」。
+function horizontalHasBody(bodies, h, uA, uB, tol) {
+  return bodies.some((b) => {
+    if (!b.top.length) return false;
+    const lo = b.top[0][0], hi = b.top[b.top.length - 1][0];
+    if (uA < lo - tol || uB > hi + tol) return false;
+    if (Math.abs(b.base - h) < 1) return true;
+    return bodyTopIsAt(b, h, uA, uB, tol);
+  });
+}
+
+test('27-2(最重要): 立面図の輪郭の水平線は、どれも建物のどれかの水平な辺である', () => {
+  const TOL = 12;   // mm(3D 側の標本の粗さ。防いでいる不具合は 1200mm 級である)
+  [['北のみ', setbackHouse(NORTH_ONLY, false)], ['北＋道路', setbackHouse(BOTH, true)]].forEach(([name, data]) => {
+    const ctx = full(data);
+    run(ctx, TRUTH_SRC);
+    run(ctx, BODY_SRC);
+    const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+    assert.ok(plain(run(ctx, 'setbackRoofItems()')).length >= 1, name + ': 3D で削られているプランで見ている');
+    let checked = 0;
+    [0, 90, 180, 270].forEach((deg) => {
+      run(ctx, 'setPlanNorthDeg(' + deg + ');');
+      DIRS.forEach((d) => {
+        const bodies = plain(run(ctx, 'bodySilhouettes("' + d + '",120)'));
+        thickPolys(elev(ctx, d), lw).forEach((poly) => {
+          for (let i = 0; i < poly.length; i++) {
+            const a = poly[i], b = poly[(i + 1) % poly.length];
+            if (Math.abs(b[1] - a[1]) > 0.5) continue;          // 水平ではない
+            const uA = Math.min(a[0], b[0]), uB = Math.max(a[0], b[0]);
+            if (uB - uA < 1) continue;                          // 点に潰れた辺
+            checked++;
+            assert.ok(horizontalHasBody(bodies, a[1], uA, uB, TOL),
+              name + ' ' + deg + '度 ' + d + '立面: 高さ ' + a[1].toFixed(1)
+              + ' の水平線(u=' + uA.toFixed(0) + '..' + uB.toFixed(0)
+              + ')が、建物のどの辺でもない');
+          }
+        });
+      });
+    });
+    assert.ok(checked > 20, name + ': 見た水平線が少なすぎる: ' + checked);
+  });
+});
+
+test('27-2(最重要): 立面図の輪郭は、建物の平面の広がりの外へ出ない', () => {
+  // 斜線由来の板は切り口の (t,s) 外接矩形なので、方位が振れると建物の外へ
+  // 数メートル張り出す(実測 3.7m)。輪郭は建物の上にしか立たない。
+  const ctx = full(setbackHouse(BOTH, true));
+  run(ctx, TRUTH_SRC);
+  run(ctx, BODY_SRC);
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  let checked = 0;
+  [0, 45, 90, 137, 180, 256, 300].forEach((deg) => {
+    run(ctx, 'setPlanNorthDeg(' + deg + ');');
+    DIRS.forEach((d) => {
+      const bodies = plain(run(ctx, 'bodySilhouettes("' + d + '",60)'));
+      let lo = Infinity, hi = -Infinity;
+      bodies.forEach((b) => b.top.forEach((p) => { lo = Math.min(lo, p[0]); hi = Math.max(hi, p[0]); }));
+      assert.ok(isFinite(lo), '立体がある');
+      thickPolys(elev(ctx, d), lw).forEach((poly) => poly.forEach((p) => {
+        checked++;
+        assert.ok(p[0] >= lo - 2 && p[0] <= hi + 2,
+          deg + '度 ' + d + '立面: 輪郭の点 u=' + p[0].toFixed(0)
+          + ' が建物の広がり(' + lo.toFixed(0) + '..' + hi.toFixed(0) + ')の外にある');
+      }));
+    });
+  });
+  assert.ok(checked > 100, '見た点が少なすぎる: ' + checked);
 });

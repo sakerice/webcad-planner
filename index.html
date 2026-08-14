@@ -23629,7 +23629,7 @@ var JISDRAW=(function(){
     return out.concat([[out[out.length-1][0],baseMm],[out[0][0],baseMm]]);
   }
   // 屋根1枚ぶんの、制限面で **位置ごとに** 切ったあとの輪郭。{points,apex} か null。
-  function roofItemProfileCut(it,dir,pls,skipKey){
+  function roofItemProfileCut(it,dir,pls){
     var ax=ELEV_AXES[dir];
     var verts=roofLocalVertices(it);
     if(!verts.length) return null;
@@ -23641,7 +23641,6 @@ var JISDRAW=(function(){
     var polys=roofUpperFacets(world);
     if(!polys.length) return null;
     pls.forEach(function(pl){
-      if(skipKey!==null && (skipKey==='' || setbackPlaneKeyOf(pl)===skipKey)) return;
       polys=polys.map(function(p){ return capPolygonByPlane(p,pl); });
     });
     var pts=[], apex=-Infinity;
@@ -23655,31 +23654,36 @@ var JISDRAW=(function(){
     if(!closed) return null;
     return {points:closed, apex:apex};
   }
-  // 立面図に出る屋根アイテム。斜線の切り口に架かる片流れ屋根は 3D に建っている
-  // 屋根そのもの(setbackRoofItems)なので、同じ列に並べる。
-  // **斜線制限を設定していないプランでは1枚も増えない。**
+  // 立面図に出る屋根アイテム = **プランに置かれている屋根だけ**。
+  //
+  // 斜線の切り口に架かる片流れ屋根(setbackRoofItems)はここに並べない。Task 24 は
+  // 「3D に建っている物は図面にも出す」として並べていたが、それは図面に嘘を描いた
+  // (Task 27 の不具合報告: 立面図の上のほうに、建物のどこにも対応しない長方形)。
+  //
+  // 理由は2つある。
+  //
+  //  1. **あの板は、制限面の上にぴったり載っている。** 壁も屋根も同じ制限面で
+  //     切ってあるので(elevWallLimitLines / capPolygonByPlane)、板の輪郭は
+  //     既に描かれている切り口と重なる。板が外形へ足せる物は何も無い。
+  //  2. **板の下は、制限が削り取った空である。** それなのに輪郭は
+  //     closeProfileAboveBase で低いほうの軒の高さまで閉じられていた。閉じるための
+  //     水平線(軒の高さ)と垂直線(板の端)が、何も建っていない所に長方形を描く。
+  //     しかも板のアイテムは切り口の (t,s) 外接矩形なので、方位が振れると建物の
+  //     外まで数メートル張り出す。実測で外形が最大 3.7m 高く出ていた。
+  //
+  // 板そのものは 3D に建ったままである(build3DSetbackRoofSlab)。ここで変わるのは
+  // 「立面図が板を独立した立体として描くのをやめる」ことだけで、切り口の形は
+  // 壁と屋根が制限面で切られた輪郭として今までどおり出る。
+  // **斜線制限を設定していないプランでは、この関数は従来と同じ列を返す。**
   function elevRoofItems(){
-    var items=DATA.items.filter(function(it){return it.type==='roof';});
-    if(setbackPlanesForDrawing().length && typeof setbackRoofItems==='function')
-      items=items.concat(setbackRoofItems());
-    return items;
+    return DATA.items.filter(function(it){return it.type==='roof';});
   }
   // 屋根1枚ぶんの、制限面で切ったあとの輪郭。{points,apex} か null。
   // **斜線制限を設定していないプランでは roofItemProfile をそのまま通る。**
   function elevRoofProfiles(dir){
     var pls=setbackPlanesForDrawing(), out=[];
     elevRoofItems().forEach(function(it){
-      var prof;
-      if(pls.length){
-        // 斜線由来の屋根は **自分の面の上にぴったり載っている** ので、自分の面では
-        // 切らない(切ると丸め誤差ぶんだけ輪郭が削れて潰れる)。だが **他の面では
-        // 切る**: 角で2つの制限が交わるところで、片方の面に架かった屋根が
-        // もう片方の制限を超えたまま描かれていた(道路斜線で 3.3m)。3D の板は谷で
-        // 切られているので、切らずに描くと図面のほうが現物と違う形になる。Task 25-3。
-        prof=roofItemProfileCut(it,dir,pls,it.setbackRoof?(it.setbackPlaneKey||''):null);
-      } else {
-        prof=roofItemProfile(it,dir);
-      }
+      var prof=pls.length ? roofItemProfileCut(it,dir,pls) : roofItemProfile(it,dir);
       if(!prof || prof.points.length<3) return;
       out.push(prof);
     });
