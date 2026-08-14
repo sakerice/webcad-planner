@@ -1042,7 +1042,12 @@ body{
   border-radius:999px;
 }
 #unity-render-fab{
-  top:18px;
+  /* スマホではツールバーが position:fixed で画面上部 8〜60px を覆う。
+     3Dビュー内のこのボタンは absolute なので、以前の値では完全に下敷きになり、
+     その点をタップしてもツールバーが拾ってボタンには届かなかった（375px で実測）。
+     ツールバーの下端より下から始める。デスクトップではツールバーが
+     fixed でないので、この値でも見た目は変わらない。 */
+  top:70px;
   right:18px;
   padding:10px 14px;
 }

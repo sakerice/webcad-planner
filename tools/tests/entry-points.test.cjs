@@ -384,3 +384,21 @@ test('評価器が知らないメディア特性の上に display を載せて�
   assert.deepEqual(names.filter((n) => /mob-hide|bottom-nav|mobile-only|mobile-data|unity-render|video-render|bnav|toolbar|sidebar/.test(n)), [],
     '入口に効く display が、評価器の知らないメディアクエリの下にある');
 });
+
+// 3Dビュー内の浮きボタンは position:absolute、スマホのツールバーは position:fixed で
+// 画面上部 8〜60px を覆う。top を 18px にしていたため完全に下敷きになり、
+// その点をタップしてもツールバーが拾ってボタンには届かなかった（375px で実測）。
+// z-index では解決しない（ツールバーは不透明で上に乗る）ので、位置で避ける。
+test('3Dの浮きボタンは、固定ツールバーの下端より下から始まる', () => {
+  const css = html.slice(html.indexOf('<style'), html.indexOf('</style>', html.lastIndexOf('<style')));
+  // ツールバーの高さ（スマホ）
+  const tb = /#toolbar\{[^}]*min-height:(\d+)px/.exec(css);
+  assert.ok(tb, '#toolbar の min-height が読めない');
+  const toolbarBottom = Number(tb[1]) + 16; // 上下の余白ぶんを見込む
+  // 浮きボタンの top のうち、最後に効くもの
+  const tops = [...css.matchAll(/#unity-render-fab\{[^}]*?top:(\d+)px/g)].map((m) => Number(m[1]));
+  assert.ok(tops.length, '#unity-render-fab の top が読めない');
+  const effective = tops[tops.length - 1];
+  assert.ok(effective >= toolbarBottom,
+    'top:' + effective + 'px はツールバー(下端およそ' + toolbarBottom + 'px)に潜る');
+});
