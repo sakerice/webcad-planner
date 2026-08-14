@@ -23168,7 +23168,7 @@ var JISDRAW=(function(){
       var base=floorBaseY(f)/U;
       var top=base+wallDisplayHeightM(w)/U;
       var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,rawTop:top,
-        depth:Math.max(d1,d2),depthMin:Math.min(d1,d2),floor:f,wall:w};
+        depth:Math.max(d1,d2),floor:f,wall:w};
       var pts=elevWallTopPoints(w,u1,u2,base);
       if(pts){
         r.topPts=pts;
