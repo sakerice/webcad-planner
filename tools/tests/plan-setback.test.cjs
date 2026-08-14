@@ -460,3 +460,83 @@ test('23-5: 斜線の注記は上下が裏返らない向きで書かれる(回�
   });
   assert.equal(seen, 3, '境界線の注記が方位ごとに1つずつ読めていない: ' + seen);
 });
+
+// ══ 26-5 方位0だけで確かめない ═════════════════════════════════════════
+//
+// 上の試験のほとんどは方位0で走っていた。方位0は北側境界線が敷地の辺と平行に
+// なる、いちばん都合の良い1点である。Task 26-1 の不具合(立面図の切り取りが実際
+// より緩く出る)は、まさに方位0では原理的に出なかった。**平面図側でも、振れた
+// 方位を通す。**
+
+test('26-5(最重要): 方位を振っても、平面図に足されるのは境界線とその注記だけ', () => {
+  const off = withDrawing(withSetback(makeCtx(basePlan(null))));
+  const on = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
+  assert.equal(plain(run(on, 'setbackRoofItems()')).length, 2, '削られているプランで比べている');
+  [17, 45, 90, 133, 200, 271, 318].forEach((deg) => {
+    run(on, 'setPlanNorthDeg(' + deg + ')');
+    run(off, 'setPlanNorthDeg(' + deg + ')');
+    [1, 2, 3].forEach((f) => {
+      assert.equal(withoutLimitLines(planSvg(on, f)), planSvg(off, f),
+        deg + '度 ' + f + 'F: 境界線と注記のほかにも何かが足されている');
+      const svg = planSvg(on, f);
+      assert.equal(roofDashLines(svg).length, 0, deg + '度 ' + f + 'F: 屋根伏せの破線が出ている');
+      assert.equal(arrowHeads(svg).length, 0, deg + '度 ' + f + 'F: 勾配の矢印が出ている');
+    });
+  });
+});
+
+test('26-5(最重要): 方位を振っても、北側境界線は敷地の北端を通り、面の法線に直交する', () => {
+  const ctx = withDrawing(withSetback(makeCtx(basePlan(NORTH_ONLY))));
+  [0, 17, 45, 90, 133, 200, 271, 318].forEach((deg) => {
+    run(ctx, 'setPlanNorthDeg(' + deg + ')');
+    const pl = plain(run(ctx, 'setbackPlanes()'))[0];
+    const cl = chainLines(planSvg(ctx, 3));
+    assert.equal(cl.length, 1, deg + '度: 境界線が1本出ていない: ' + JSON.stringify(cl));
+    // 線の向きは面の法線に直交する。
+    const dx = cl[0].x2 - cl[0].x1, dy = cl[0].y2 - cl[0].y1;
+    const len = Math.hypot(dx, dy);
+    assert.ok(len > 1, deg + '度: 線に長さが無い');
+    assert.ok(Math.abs((dx * pl.nx + dy * pl.ny) / len) < 1e-6,
+      deg + '度: 境界線が法線に直交していない');
+    // 線上の点は、法線方向の距離が d0 ちょうど(=制限が立ち上がる位置)。
+    [[cl[0].x1, cl[0].y1], [cl[0].x2, cl[0].y2]].forEach((p) => {
+      assert.ok(Math.abs(p[0] * pl.nx + p[1] * pl.ny - pl.d0) < 1e-6,
+        deg + '度: 境界線が制限の起点を通っていない');
+    });
+  });
+});
+
+test('26-5(最重要): 方位を振っても、線も注記も用紙の枠に収まる', () => {
+  const ctx = withDrawing(withSetback(makeCtx(basePlan(BOTH, { road: true, roadY: 5500 }))));
+  const fs = run(ctx, 'JISDRAW.lineWidths(100).text') * 0.8;
+  for (let deg = 0; deg < 360; deg += 15) {
+    run(ctx, 'setPlanNorthDeg(' + deg + ')');
+    const svg = planSvg(ctx, 3);
+    const v = viewBox(svg);
+    chainLines(svg).forEach((l) => {
+      [[l.x1, l.y1], [l.x2, l.y2]].forEach((p) => {
+        assert.ok(p[0] >= v.minX - 1e-6 && p[0] <= v.maxX + 1e-6, deg + '度: 線が枠の外');
+        assert.ok(p[1] >= v.minY - 1e-6 && p[1] <= v.maxY + 1e-6, deg + '度: 線が枠の外');
+      });
+    });
+    texts(svg).filter((t) => /境界線/.test(t.s)).forEach((t) => {
+      const half = t.s.length * fs * 0.95 / 2;
+      assert.ok(t.x - half >= v.minX && t.x + half <= v.maxX,
+        deg + '度: 注記が横にはみ出す: ' + t.s);
+      assert.ok(t.y >= v.minY + fs && t.y <= v.maxY - fs,
+        deg + '度: 注記が縦にはみ出す: ' + t.s);
+    });
+  }
+});
+
+test('26-5: 斜線を設定していないプランは、どの方位でも1バイトも変わらない', () => {
+  const before = withDrawing(makeCtx(basePlan(null)));
+  const after = withDrawing(withSetback(makeCtx(basePlan(null))));
+  [0, 17, 90, 200, 318].forEach((deg) => {
+    run(before, 'setPlanNorthDeg(' + deg + ')');
+    run(after, 'setPlanNorthDeg(' + deg + ')');
+    [1, 2, 3].forEach((f) => {
+      assert.equal(planSvg(after, f), planSvg(before, f), deg + '度 ' + f + 'F が変わった');
+    });
+  });
+});

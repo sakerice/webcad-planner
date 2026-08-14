@@ -829,3 +829,98 @@ test('26-2(最重要): 北＋道路で、道路の線が出る立面には北が
     '適合を示していないと書いてある: ' + JSON.stringify(note));
 });
 
+
+// ══ 26-5 方位0だけで確かめない ═════════════════════════════════════════
+
+// 斜めに走る壁を1枚離して建てた家。**この壁の上では、奥行きが横位置と一緒に
+// 変わる。** 立面で奥行きを潰してから1本の直線で切ると、この壁の切り口は
+// 必ず間違う(方位0でも間違う)。壁は直線なので、正しい切り口は u の一次式で
+// 厳密に書ける -- それが出ているかを勾配で測る。
+function obliqueWingHouse() {
+  const walls = [], rooms = [];
+  [1, 2, 3].forEach((f) => {
+    box(f, 0, 1000, 6000, 5000).forEach((w) => walls.push(w));
+    rooms.push({ id: 'r' + f, n: f + '階', floor: f, x: 0, y: 1000, w: 6000, d: 4000 });
+  });
+  // 母屋から離れた、平面で斜めに走る壁(x:7000→13000 のあいだに y:1000→7000)。
+  walls.push({ id: 'wing', floor: 3, x1: 7000, y1: 1000, x2: 13000, y2: 7000, thick: 120 });
+  return {
+    walls, rooms, floors: {},
+    items: [
+      { id: 'site', type: 'site-rect', x: -1000, y: 0, w: 16000, d: 9000, rot: 0,
+        setback: { zone: 'low1', road: false, north: true } },
+      { id: 'roof1', type: 'roof', roofType: 'flat', x: 0, y: 1000, w: 6000, d: 4000,
+        rot: 0, floor: 4, elev: 0, pitch: 30, roofThickness: 180 }
+    ]
+  };
+}
+// 図面の輪郭の、u における上端。
+function skylineTopAt(polys, u) {
+  let best = null;
+  polys.forEach((poly) => {
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      if (Math.abs(b[0] - a[0]) < 1e-9) continue;
+      if (u < Math.min(a[0], b[0]) || u > Math.max(a[0], b[0])) continue;
+      const h = a[1] + (b[1] - a[1]) * ((u - a[0]) / (b[0] - a[0]));
+      if (best === null || h > best) best = h;
+    }
+  });
+  return best;
+}
+
+test('26-5(最重要): 斜めに走る壁の上端が、その壁の上での制限そのものになる', () => {
+  const ctx = full(obliqueWingHouse());
+  const lw = run(ctx, 'JISDRAW.lineWidths(100).thick');
+  const U = run(ctx, 'U');
+  const base = run(ctx, 'floorBaseY(3)') / U;
+  const fullTop = base + run(ctx, 'wallFullHeightM(3)') / U;
+  let sloped = 0, checked = 0;
+  // 方位0を含めて1周する。**方位0でもこの壁では間違いが出る**(奥行きが横位置と
+  // 一緒に動くのは、壁が斜めだからであって、方位が振れているからではない)。
+  for (let deg = 0; deg < 360; deg += 10) {
+    run(ctx, 'setPlanNorthDeg(' + deg + ');');
+    const pl = plain(run(ctx, 'setbackPlanes()'))[0];
+    // 南立面: u = x。壁の上では y = u - 6000 なので、制限はそのまま u の一次式。
+    const limitAt = (u) => pl.baseMm + pl.slope * (pl.nx * u + pl.ny * (u - 6000) - pl.d0);
+    const polys = thickPolys(elev(ctx, 's'), lw);
+    let partial = 0;
+    for (let u = 7100; u <= 12900; u += 100) {
+      const lim = limitAt(u);
+      const got = skylineTopAt(polys, u);
+      if (lim <= base + 1) {                       // 床まで削られた = 壁は建っていない
+        assert.ok(got === null || got <= base + 1,
+          deg + '度 u=' + u + ': 削り取られた所に壁が描かれている (' + got + ')');
+        checked++;
+      } else if (lim >= fullTop - 1) {             // 制限より低い = そのままの高さ
+        assert.ok(got !== null && Math.abs(got - fullTop) < 1,
+          deg + '度 u=' + u + ': 当たっていない壁が ' + got + ' に描かれている');
+        checked++;
+      } else {                                     // 途中で切れる = 制限そのものが上端
+        assert.ok(got !== null && Math.abs(got - lim) < 1,
+          deg + '度 u=' + u + ': 図面 ' + (got === null ? 'なし' : got.toFixed(1))
+            + ' / その位置の制限 ' + lim.toFixed(1));
+        partial++; checked++;
+      }
+    }
+    if (partial >= 3) sloped++;
+  }
+  assert.ok(checked > 1000, '見た点が少なすぎる: ' + checked);
+  assert.ok(sloped >= 3,
+    '斜めに切れた方位が足りない(切っていない = 実際より緩い図面): ' + sloped);
+});
+
+test('26-5(最重要): 斜線を設定していないプランの立面図は、どの方位でも1バイトも変わらない', () => {
+  const old = before(gableHouse(null));
+  const now = full(gableHouse(null));
+  [0, 17, 90, 200, 318].forEach((deg) => {
+    run(old, 'setPlanNorthDeg(' + deg + ');');
+    run(now, 'setPlanNorthDeg(' + deg + ');');
+    DIRS.forEach((d) => {
+      ['"100"', '"auto"'].forEach((s) => {
+        const o = '{scale:' + s + ',paper:"a3"}';
+        assert.equal(elev(now, d, o), elev(old, d, o), deg + '度 ' + d + ' ' + s + ' が変わった');
+      });
+    });
+  });
+});
