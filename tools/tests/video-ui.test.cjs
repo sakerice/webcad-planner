@@ -358,20 +358,21 @@ test('成功すると、出来たファイルの一覧が表示される', async
 });
 
 // ── 6. 配線の確認（上の実行検査の補足）──────────────────────────────────
-// 入口はデスクトップのツールバーとスマホのボトムナビの2つ。3D画面右上の浮きボタンは
-// 置かない — どちらの環境でも既に入口があり、静止画AIレンダーの浮きボタンの真下に
+// 入口はヘッダーのツールバーボタン1つ。狭い幅でも消えないよう mob-hide を持たない。
+// 3D画面右上の浮きボタンは置かない — 静止画AIレンダーの浮きボタンの真下に
 // 重なって並ぶだけだった。静止画側の浮きボタンは既存の挙動なので残っている。
-test('ツールバーとボトムナビからダイアログを開ける', () => {
+test('ツールバーからダイアログを開ける', () => {
   assert.match(html, /id="video-render-toolbar-btn"[^>]*onclick="openVideoRenderDialog\(\)"/);
-  assert.match(html, /id="bnav-video"[^>]*onclick="openVideoRenderDialog\(\)/);
 });
 
 test('3D画面右上に動画AIの浮きボタンを置かない', () => {
   assert.doesNotMatch(html, /id="video-render-fab"/,
     'the third entry point was removed as redundant; do not reintroduce it');
-  // デスクトップとスマホの両方に入口が残っていることを、消した側とセットで固定する。
-  assert.match(html, /id="video-render-toolbar-btn"/);
-  assert.match(html, /id="bnav-video"/);
+  // 唯一の入口であるヘッダーのボタンが、狭い幅で消える指定を持たないこと。
+  const at = html.indexOf('id="video-render-toolbar-btn"');
+  assert.notEqual(at, -1);
+  const tag = html.slice(html.lastIndexOf('<', at), html.indexOf('>', at) + 1);
+  assert.doesNotMatch(tag, /mob-hide/, '動画AIレンダーがスマホ幅で消える');
 });
 
 test('尺のスライダは 4〜15 の範囲を持ち、既定 8 で置かれている', () => {

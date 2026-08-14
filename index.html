@@ -2530,17 +2530,6 @@ body{
 #bottom-nav .bnav-btn.active:active{
   box-shadow:none!important;
 }
-/* フッターは操作を9つ並べる。狭い画面ではアイコンの器と余白を詰めて、
-   9つとも同じ幅で1画面に収める(横スクロールはさせない)。 */
-@media (max-width:430px){
-  #bottom-nav{padding:0 4px}
-  #bottom-nav .bnav-btn{padding:4px 0;margin:5px 0}
-  #bottom-nav .bnav-icon{width:26px;height:26px}
-}
-@media (max-width:360px){
-  #bottom-nav .bnav-icon{width:22px;height:22px;font-size:15px}
-  #bottom-nav .bnav-btn{font-size:7.5px}
-}
 #sidebar .common-tools{
   margin:0 0 12px!important;
   padding:12px!important;
@@ -3098,8 +3087,7 @@ input[type="reset"]:focus-visible{
     <img class="brand-logo" src="assets/brand/house-planner-mobile-icon.png?v=3" alt="" aria-hidden="true">
     <span class="brand-word">house-planner mobile</span>
   </b>
-  <!-- ヘッダーは「いま何を見ているか」を切り替える場所。ツールメニューの開き口は
-       スマホではフッターの「ツール」が持つので、ここには置かない。 -->
+  <!-- ツールメニューの開き口はフッターの「ツール」(#bnav-tools)が持つ。 -->
   <div class="tsep"></div>
   <select id="floor-sel" onchange="onFloorChange(this.value)">
     <option value="1">1F</option><option value="2">2F</option><option value="3">3F</option><option value="4">4F</option>
@@ -3115,15 +3103,16 @@ input[type="reset"]:focus-visible{
   <button class="tbtn mob-hide" onclick="toggleDim()">↔ 寸法</button>
   <button class="tbtn mob-hide" onclick="resetView()">⊙ 全体表示</button>
   <div class="tsep mob-hide"></div>
-  <!-- Undo / Redo はヘッダーから外した。操作はフッター(スマホ)とツールメニューの
-       共通操作(全幅)が持つ。 -->
-  <button class="tbtn mob-hide" onclick="clearFloor()">🗑 階クリア</button>
+  <!-- Undo / Redo はヘッダーから外した。 -->
+  <!-- 階クリアは狭い幅でも消さない(ヘッダーは横スクロールする)。 -->
+  <button class="tbtn" onclick="clearFloor()">🗑 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
-  <button class="tbtn mob-hide" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
-  <button class="tbtn mob-hide" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()">🎬 動画AIレンダー</button>
+  <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
+  <button class="tbtn" id="unity-render-toolbar-btn" onclick="generateAiRenderPackage()">📷 画像AIレンダー</button>
+  <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()">🎬 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
   <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
   <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
@@ -3141,16 +3130,11 @@ input[type="reset"]:focus-visible{
         <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
         <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
         <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
-        <!-- 「削除」と「寸法」はこのグリッドから外し、すぐ下の「編集・表示」へ
-             移した。どちらもツールメニューの中に残しているので、スマホでも
-             フッターの「ツール」から到達できる。 -->
-        <!-- 「⊞ グリッド」「⊙ 全体表示」「🗑 階クリア」は、ツールバー
-             (mob-hide)にしか無かった。768px以下では入口が1つも無くなり、機能が
-             消えたのと同じになる。押すのは既存の toggleGrid / resetView / clearFloor
-             そのもので、新しい状態も新しい確認ダイアログも作らない。 -->
+        <!-- 「⊞ グリッド」「⊙ 全体表示」は、ツールバー(mob-hide)にしか無かった。
+             768px以下では入口が1つも無くなり、機能が消えたのと同じになる。押すのは
+             既存の toggleGrid / resetView そのもので、新しい状態は作らない。 -->
         <div class="stool" id="stool-grid" onclick="toggleGrid()" title="グリッドの表示切替"><span class="sicon">⊞</span>グリッド</div>
         <div class="stool" id="stool-fit" onclick="resetView()" title="全体表示"><span class="sicon">⊙</span>全体表示</div>
-        <div class="stool" id="stool-clear" onclick="clearFloor()" title="現在階の未ロック要素を削除"><span class="sicon">🗑</span>階クリア</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -3184,16 +3168,6 @@ input[type="reset"]:focus-visible{
           <button class="pbtn sec" type="button" id="jis-drawing-mobile-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
         </div>
       </div>
-    </div>
-    <!-- 共通操作から外した「削除」「寸法」の置き場。ツールメニューの中なので、
-         スマホではフッターの「ツール」から、デスクトップでは常設のサイドバーから
-         到達できる。既定で開いた状態(cat-body open)にしてあるのは、畳んだままだと
-         「スマホから押せない」と実質同じになるためである。押すのは既存の
-         setTool('erase') / toggleDim そのもので、新しい状態は作らない。 -->
-    <div class="cat-hdr" onclick="toggleCat(this)">📝 編集・表示 <span>-</span></div>
-    <div class="cat-body open">
-      <div class="stool" data-tool="erase" onclick="setTool('erase')" title="削除"><span class="sicon">✕</span>削除</div>
-      <div class="stool active" id="stool-dim" onclick="toggleDim()" title="寸法の表示切替"><span class="sicon">⇥</span>寸法</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>+</span></div>
     <div class="cat-body">
@@ -3546,8 +3520,6 @@ input[type="reset"]:focus-visible{
 </div>
 
 <!-- Bottom navigation (mobile only)
-     フッター = 図面に対する「操作」。表示の切り替え(平面図/外観3D/内観3D/
-     ウォークスルー/3D更新)はヘッダーが持つので、ここには置かない。
      ここはツールメニューへのショートカットなので、同じ項目がツールメニューの
      中にもあってよい(重複は意図であって、片方を消すものではない)。 -->
 <div id="bottom-nav">
@@ -3571,14 +3543,6 @@ input[type="reset"]:focus-visible{
   </button>
   <button class="bnav-btn" id="bnav-save" onclick="savePlanToStorage()">
     <span class="bnav-icon">💾</span>保存
-  </button>
-  <!-- 画像AI/動画AIも「操作」である。ツールバーは mob-hide、画像側のFABは3Dの
-       中にしか無いので、この2つを外すと 768px 以下で入口がゼロになる。 -->
-  <button class="bnav-btn" id="bnav-ai" onclick="generateAiRenderPackage();closeMobilePanels()">
-    <span class="bnav-icon">📷</span>画像
-  </button>
-  <button class="bnav-btn" id="bnav-video" onclick="openVideoRenderDialog();closeMobilePanels()">
-    <span class="bnav-icon">🎬</span>動画
   </button>
 </div>
 
@@ -19104,7 +19068,7 @@ function chooseOpeningDoorModelTool(t){
 }
 
 function toggleGrid(){ST.showGrid=!ST.showGrid;draw2d();}
-// ツールメニュー「編集・表示」の寸法ボタン(スマホから押せる入口)の on/off 表示を合わせる。
+// 「寸法」ボタンの on/off 表示を合わせる。ボタンが無い幅では何もしない。
 function syncDimToolButton(){
   var b=(typeof document!=='undefined')?document.getElementById('stool-dim'):null;
   if(b) b.className='stool'+(ST.showDim?' active':'');
@@ -22998,7 +22962,7 @@ setView = function(v){
   });
   var topTarget=document.getElementById(topIds[v]);
   if(topTarget) topTarget.classList.add('active');
-  // ボトムナビは表示の切り替えを持たなくなった(ヘッダーの担当)。同期する対象は無い。
+  // ボトムナビは表示の切り替えを持たない。同期する対象は無い。
   // Show joy hint on interior mobile
   var jh=document.getElementById('joy-hint');
   if(jh) jh.style.display=(v==='3d-int'&&isMobileLayout()?'block':'none');

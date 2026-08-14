@@ -170,21 +170,21 @@ const STILL_ENTRIES = buttonsCalling('generateAiRenderPackage')
 test('画像AI側のアイコンは、動画のアイコンではない', () => {
   const iconOf = (label) => Array.from(label)[0];
   const still = buttonsCalling('generateAiRenderPackage')
-    .filter((b) => ['unity-render-toolbar-btn', 'unity-render-fab', 'bnav-ai'].indexOf(b.attrs.id) >= 0);
-  assert.equal(still.length, 3, '画像AIの入口が3つ揃っていない: ' + still.map((s) => s.attrs.id));
+    .filter((b) => ['unity-render-toolbar-btn', 'unity-render-fab'].indexOf(b.attrs.id) >= 0);
+  assert.equal(still.length, 2, '画像AIの入口が2つ揃っていない: ' + still.map((s) => s.attrs.id));
   const icons = still.map((b) => iconOf(b.label));
   icons.forEach((ic, i) => {
     assert.ok(VIDEO_ICONS.indexOf(ic) < 0,
       still[i].attrs.id + ' のアイコン ' + ic + ' は動画のアイコンである');
   });
-  assert.equal(new Set(icons).size, 1, '画像AIの3つの入口でアイコンが揃っていない: ' + icons.join(' '));
+  assert.equal(new Set(icons).size, 1, '画像AIの2つの入口でアイコンが揃っていない: ' + icons.join(' '));
 });
 
 test('動画AI側のアイコンは動画のまま、画像側と別のものである', () => {
   const iconOf = (label) => Array.from(label)[0];
   const video = buttonsCalling('openVideoRenderDialog')
-    .filter((b) => ['video-render-toolbar-btn', 'bnav-video'].indexOf(b.attrs.id) >= 0);
-  assert.equal(video.length, 2, '動画AIの入口が2つ揃っていない');
+    .filter((b) => ['video-render-toolbar-btn'].indexOf(b.attrs.id) >= 0);
+  assert.equal(video.length, 1, '動画AIの入口(ヘッダー)が見つからない');
   const vIcons = video.map((b) => iconOf(b.label));
   assert.equal(new Set(vIcons).size, 1, '動画AIの入口でアイコンが揃っていない: ' + vIcons.join(' '));
   assert.ok(VIDEO_ICONS.indexOf(vIcons[0]) >= 0, '動画側が動画のアイコンでない: ' + vIcons[0]);
