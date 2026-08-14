@@ -1161,9 +1161,13 @@ git commit -m "Let the package's tier table drive the fidelity thresholds"
 
 ## 完了時の確認
 
-- [ ] `node --test "tools/tests/*.test.cjs"` が全通過
+- [ ] `node --test "tools/tests/*.test.cjs"` が全通過（521件）
 - [ ] `node --test "pv/tools/truth-render/tests/*.test.mjs"` が全通過（115件）
-- [ ] `python3 -m unittest` で fidelity-qa と truth-render の Python テストが全通過
+- [ ] Python は **discovery 形式で、件数まで見る**（Task 26-6）。
+      素の `python3 -m unittest` はリポジトリ直下では0件実行して成功を返すので、
+      それを完了確認に使わない。件数を書くのは「0件でも OK が出る」を防ぐため。
+  - [ ] `cd pv/tools/fidelity-qa && python3 -m unittest discover -s tests` が **205件** 全通過
+  - [ ] `cd pv/tools/truth-render && python3 -m unittest discover -s tests` が **35件** 全通過
 - [ ] `node tools/check-html-js.cjs` が通る
 - [ ] **既存プランの3Dバウンディングボックスとメッシュ数が、この計画の実施前と一致する**
 - [ ] **既存の静止画AIレンダーの出力が、この計画の実施前と diff ゼロ**

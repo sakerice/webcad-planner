@@ -230,3 +230,8 @@ class CliPlacementTest(unittest.TestCase):
         proc, result = self._run(["--summary"])
         self.assertIn("要約", proc.stdout)
         self.assertIn("summary_ja", result)
+
+
+# 直接走らせても走るように。無いとこのファイルだけ「静かに0件」になる(Task 26-6)。
+if __name__ == "__main__":
+    unittest.main()

@@ -661,10 +661,6 @@ class InstanceBoxesResizeTest(unittest.TestCase):
             self.assertEqual(exact.sum(), 0, resample)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 # ---------------------------------------------------------------------------
 # 仕上げ(色味)ドリフト
 # ---------------------------------------------------------------------------
@@ -820,3 +816,9 @@ class FinishDriftTest(unittest.TestCase):
         generated = finish_render({"stair#1": (0, 0, 255)})
         # 純赤 -> 純青 は色味 L1 で 2.0、×100 で 200。周囲の階調ぶん少し下がる。
         self.assertGreater(instance_finish_drift(truth, generated, regions)["stair#1"], 150.0)
+
+
+# `unittest.main()` は **必ずファイルの末尾** に置く(Task 26-6)。途中に置くと、
+# そこから下のクラスは登録されず、直接走らせたときだけ静かに件数が減る。
+if __name__ == "__main__":
+    unittest.main()

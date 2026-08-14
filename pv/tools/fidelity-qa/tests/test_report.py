@@ -986,10 +986,6 @@ class SameToneInstanceIsUnverifiableEndToEndTest(unittest.TestCase):
                       result["unverifiable"]["frames"][0]["checks"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 # ---------------------------------------------------------------------------
 # 仕上げ(色味)ドリフト
 # ---------------------------------------------------------------------------
@@ -1656,3 +1652,10 @@ class PackageNamesThePartsTest(unittest.TestCase):
         tiering = PackageTiering(plan, None)
         self.assertEqual(tiering.describe()["named_instances"], 0)
         self.assertIsNone(tiering.tier_of("sofa#I97", "furniture"))
+
+
+# `unittest.main()` は **必ずファイルの末尾** に置く。途中に置くと、そこから下の
+# クラスは import されただけで登録されず、`python3 tests/test_report.py` は
+# 101件のうち51件しか走らないまま OK を返す(Task 26-6 で直した)。
+if __name__ == "__main__":
+    unittest.main()

@@ -326,10 +326,6 @@ class CheckSceneReadinessTest(unittest.TestCase):
         self.assertIn('had not finished loading', msg)
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
 class ExteriorShotTest(unittest.TestCase):
     """外観ショットでは家具は外皮の内側にあり、ガラス越しにしか写らない。
 
@@ -397,3 +393,9 @@ class ExteriorShotTest(unittest.TestCase):
         ok, msg = check_scene_readiness(self.root)
         self.assertTrue(ok, msg)
         self.assertNotIn('exterior shot', msg)
+
+
+# `unittest.main()` は **必ずファイルの末尾** に置く(Task 26-6)。途中に置くと、
+# そこから下のクラスは登録されず、直接走らせたときだけ静かに件数が減る。
+if __name__ == '__main__':
+    unittest.main()
