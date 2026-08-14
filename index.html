@@ -11813,6 +11813,12 @@ function selectionNeedsFull3DRebuild(previous,next){
 }
 
 function handle3DPointerPick(e){
+  // 'erase' (タップで消す削除ツール) は、UI のどこからも選べない状態にしてある。
+  // 意図的に外したものであり、到達できないのは不具合ではない。
+  // 理由: タップ1回で配置物が消えるため、軽く触れただけで気づかないうちに
+  // オブジェクトを消してしまう事故が多かった。消す操作は「選択 -> 設定パネルから削除」
+  // または Del キーに一本化し、必ず一度選択を挟ませる。
+  // 実装そのものは残してあるので、方針が変われば入口を戻すだけで復活する。
   if(ST.tool!=='select' && ST.tool!=='erase') return;
   var ref=pickSelectable3D(e);
   if(ST.tool==='erase'){
