@@ -396,7 +396,7 @@ test('1F でも建具を数えて名指しする（階ごとに中身が変わ�
     camera: null, daylight: { timeOfDay: 'day' }
   });
   assert.match(text, /nine windows/, text);
-  assert.match(text, /three sliding doors/);
+  assert.match(text, /four sliding doors/);
   assert.match(text, /a front door/);
   assert.match(text, /a staircase/, '階段を名指ししていない');
 });

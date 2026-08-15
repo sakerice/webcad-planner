@@ -1093,15 +1093,15 @@
   },
   {
    "id": 1038,
-   "type": "door-swing-s",
+   "type": "door-slide-s",
    "x": 6500.0,
-   "y": 3315.0,
+   "y": 3565.0,
    "w": 650,
-   "d": 650,
+   "d": 150,
    "rot": 0,
    "floor": 1,
    "flipX": false,
-   "flipY": true,
+   "flipY": false,
    "sScale": 1,
    "sX": 0,
    "sY": 0,
@@ -1264,7 +1264,7 @@
   {
    "id": 1046,
    "type": "window",
-   "x": 2755.0,
+   "x": 1855.0,
    "y": -75.0,
    "w": 690,
    "d": 150,
@@ -1620,7 +1620,7 @@
   {
    "id": 1099,
    "type": "door-swing",
-   "x": 6510.0,
+   "x": 6410.0,
    "y": 4160.0,
    "w": 780,
    "d": 780,
@@ -2067,7 +2067,7 @@
   {
    "id": 1123,
    "type": "lattice-screen",
-   "x": 5620.0,
+   "x": 5430.0,
    "y": 7970.0,
    "w": 1500,
    "d": 60,
@@ -2308,8 +2308,8 @@
   {
    "id": 1135,
    "type": "tree",
-   "x": 8450.0,
-   "y": 350.0,
+   "x": 8750.0,
+   "y": 550.0,
    "w": 1500,
    "d": 1500,
    "rot": 0,
@@ -2362,26 +2362,8 @@
   {
    "id": 1138,
    "type": "tree",
-   "x": 8700.0,
-   "y": 6250.0,
-   "w": 900,
-   "d": 900,
-   "rot": 0,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": "#86996f",
-   "colorCustom": true,
-   "locked": true
-  },
-  {
-   "id": 1139,
-   "type": "tree",
-   "x": 4450.0,
-   "y": 7850.0,
+   "x": 4250.0,
+   "y": 7550.0,
    "w": 1500,
    "d": 1500,
    "rot": 0,
@@ -2396,9 +2378,9 @@
    "locked": true
   },
   {
-   "id": 1140,
+   "id": 1139,
    "type": "gas-heater",
-   "x": 65.0,
+   "x": -35.0,
    "y": -370.0,
    "w": 470,
    "d": 240,
@@ -2414,7 +2396,7 @@
    "locked": true
   },
   {
-   "id": 1141,
+   "id": 1140,
    "type": "meter-box",
    "x": -160.0,
    "y": 1140.0,
@@ -2433,9 +2415,9 @@
    "elev": 1600
   },
   {
-   "id": 1142,
+   "id": 1141,
    "type": "sewer-pit",
-   "x": 2050.0,
+   "x": 5150.0,
    "y": -650.0,
    "w": 300,
    "d": 300,
@@ -2451,7 +2433,7 @@
    "locked": true
   },
   {
-   "id": 1143,
+   "id": 1142,
    "type": "sewer-pit",
    "x": 5450.0,
    "y": -650.0,
@@ -2469,9 +2451,9 @@
    "locked": true
   },
   {
-   "id": 1144,
+   "id": 1143,
    "type": "sewer-pit",
-   "x": 8450.0,
+   "x": 7750.0,
    "y": -650.0,
    "w": 300,
    "d": 300,
@@ -2487,10 +2469,10 @@
    "locked": true
   },
   {
-   "id": 1145,
+   "id": 1144,
    "type": "sewer-pit",
-   "x": 8450.0,
-   "y": 3450.0,
+   "x": 8250.0,
+   "y": 3950.0,
    "w": 300,
    "d": 300,
    "rot": 0,
@@ -2505,7 +2487,7 @@
    "locked": true
   },
   {
-   "id": 1146,
+   "id": 1145,
    "type": "sewer-pit",
    "x": 6850.0,
    "y": 9450.0,
@@ -2523,7 +2505,43 @@
    "locked": true
   },
   {
+   "id": 1146,
+   "type": "sewer-pit",
+   "x": 350.0,
+   "y": 9450.0,
+   "w": 300,
+   "d": 300,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#6f7275",
+   "colorCustom": true,
+   "locked": true
+  },
+  {
    "id": 1147,
+   "type": "sewer-pit",
+   "x": 9450.0,
+   "y": 7450.0,
+   "w": 300,
+   "d": 300,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#6f7275",
+   "colorCustom": true,
+   "locked": true
+  },
+  {
+   "id": 1148,
    "type": "fmp-AirConditionerWall01",
    "x": -210.0,
    "y": 2870.0,
@@ -2542,7 +2560,7 @@
    "elev": 2050
   },
   {
-   "id": 1148,
+   "id": 1149,
    "type": "ac-outdoor",
    "x": -730.0,
    "y": 2850.0,
@@ -2560,9 +2578,9 @@
    "locked": true
   },
   {
-   "id": 1149,
+   "id": 1150,
    "type": "fmp-AirConditionerWall01",
-   "x": 400.0,
+   "x": 2800.0,
    "y": 60.0,
    "w": 800,
    "d": 260,
@@ -2579,9 +2597,9 @@
    "elev": 2050
   },
   {
-   "id": 1150,
+   "id": 1151,
    "type": "ac-outdoor",
-   "x": 1000.0,
+   "x": 2800.0,
    "y": -450.0,
    "w": 800,
    "d": 300,
@@ -2597,7 +2615,7 @@
    "locked": true
   },
   {
-   "id": 1151,
+   "id": 1152,
    "type": "fmp-AirConditionerWall01",
    "x": 3800.0,
    "y": 60.0,
@@ -2616,7 +2634,7 @@
    "elev": 2050
   },
   {
-   "id": 1152,
+   "id": 1153,
    "type": "ac-outdoor",
    "x": 4100.0,
    "y": -450.0,
@@ -2634,7 +2652,7 @@
    "locked": true
   },
   {
-   "id": 1153,
+   "id": 1154,
    "type": "fmp-AirConditionerWall01",
    "x": -210.0,
    "y": 4870.0,
@@ -2653,7 +2671,7 @@
    "elev": 2050
   },
   {
-   "id": 1154,
+   "id": 1155,
    "type": "ac-outdoor",
    "x": -730.0,
    "y": 4850.0,
@@ -2671,7 +2689,7 @@
    "locked": true
   },
   {
-   "id": 1155,
+   "id": 1156,
    "type": "fmp-AirConditionerWall01",
    "x": 7600.0,
    "y": 4870.0,
@@ -2690,7 +2708,7 @@
    "elev": 2050
   },
   {
-   "id": 1156,
+   "id": 1157,
    "type": "ac-outdoor",
    "x": 8100.0,
    "y": 4850.0,
@@ -2708,7 +2726,7 @@
    "locked": true
   },
   {
-   "id": 1157,
+   "id": 1158,
    "type": "road",
    "x": -9720.0,
    "y": 12285.0,
@@ -2727,7 +2745,7 @@
    "contextHeight": 70
   },
   {
-   "id": 1158,
+   "id": 1159,
    "type": "utility-pole",
    "x": 10425.0,
    "y": 16410.0,
@@ -2746,7 +2764,7 @@
    "contextHeight": 6500
   },
   {
-   "id": 1159,
+   "id": 1160,
    "type": "neighbor-house",
    "x": 10920.0,
    "y": 300.0,
@@ -2767,7 +2785,7 @@
    "contextGhost": true
   },
   {
-   "id": 1160,
+   "id": 1161,
    "type": "neighbor-house",
    "x": -8600.0,
    "y": 800.0,
@@ -2788,7 +2806,7 @@
    "contextGhost": true
   },
   {
-   "id": 1161,
+   "id": 1162,
    "type": "neighbor-house",
    "x": 700.0,
    "y": -7800.0,
@@ -2809,7 +2827,7 @@
    "contextGhost": true
   },
   {
-   "id": 1162,
+   "id": 1163,
    "type": "neighbor-building",
    "x": -5800.0,
    "y": 17335.0,
@@ -2830,7 +2848,7 @@
    "contextGhost": true
   },
   {
-   "id": 1163,
+   "id": 1164,
    "type": "fmp-CabinetD01",
    "x": 3702.0,
    "y": 1660.5,
@@ -2848,7 +2866,7 @@
    "locked": true
   },
   {
-   "id": 1164,
+   "id": 1165,
    "type": "fmp-CabinetD_Sink",
    "x": 4068.0,
    "y": 1660.5,
@@ -2866,7 +2884,7 @@
    "locked": true
   },
   {
-   "id": 1165,
+   "id": 1166,
    "type": "fmp-CabinetD03",
    "x": 4800.0,
    "y": 1660.5,
@@ -2884,9 +2902,9 @@
    "locked": true
   },
   {
-   "id": 1166,
+   "id": 1167,
    "type": "fmp-GasStove07",
-   "x": 4696.0,
+   "x": 4604.0,
    "y": 1646.5,
    "w": 572,
    "d": 507,
@@ -2903,9 +2921,9 @@
    "elev": 797
   },
   {
-   "id": 1167,
+   "id": 1168,
    "type": "fmp-KitchenExhaust07",
-   "x": 4749.0,
+   "x": 4657.0,
    "y": 1677.0,
    "w": 466,
    "d": 466,
@@ -2922,7 +2940,7 @@
    "elev": 1900
   },
   {
-   "id": 1168,
+   "id": 1169,
    "type": "fmp-Refrigerator02",
    "x": 3720.0,
    "y": 122.5,
@@ -2940,7 +2958,7 @@
    "locked": true
   },
   {
-   "id": 1169,
+   "id": 1170,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
    "x": 4420.0,
    "y": 75.0,
@@ -2958,7 +2976,7 @@
    "locked": true
   },
   {
-   "id": 1170,
+   "id": 1171,
    "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
    "x": 4530.0,
    "y": 124.5,
@@ -2977,7 +2995,7 @@
    "elev": 710
   },
   {
-   "id": 1171,
+   "id": 1172,
    "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
    "x": 5272.5,
    "y": 165.0,
@@ -2996,9 +3014,9 @@
    "elev": 710
   },
   {
-   "id": 1172,
+   "id": 1173,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant-317746",
-   "x": 5498.5,
+   "x": 5648.5,
    "y": 198.0,
    "w": 403,
    "d": 84,
@@ -3015,7 +3033,7 @@
    "elev": 710
   },
   {
-   "id": 1173,
+   "id": 1174,
    "type": "im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut",
    "x": 3921.0,
    "y": 2935.5,
@@ -3033,7 +3051,7 @@
    "locked": true
   },
   {
-   "id": 1174,
+   "id": 1175,
    "type": "im0261-Kid-MEGA_PACK_kid-kid-677431_Brown",
    "x": 4640.0,
    "y": 2294.5,
@@ -3051,7 +3069,7 @@
    "locked": true
   },
   {
-   "id": 1175,
+   "id": 1176,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
    "x": 550.0,
    "y": 3900.0,
@@ -3069,7 +3087,7 @@
    "locked": true
   },
   {
-   "id": 1176,
+   "id": 1177,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-354290_frame_walnut_brown",
    "x": -720.0,
    "y": 4693.0,
@@ -3087,7 +3105,7 @@
    "locked": true
   },
   {
-   "id": 1177,
+   "id": 1178,
    "type": "im0261-Tv-MEGA_PACK_tv-electronic-280915",
    "x": -315.0,
    "y": 4794.5,
@@ -3106,10 +3124,10 @@
    "elev": 610
   },
   {
-   "id": 1178,
+   "id": 1179,
    "type": "im0261-Decor-MEGA_PACK_decor-decor-71718_Frame_NaturalWood",
    "x": 251.5,
-   "y": 4352.0,
+   "y": 3952.0,
    "w": 97,
    "d": 96,
    "rot": 90,
@@ -3125,7 +3143,7 @@
    "elev": 610
   },
   {
-   "id": 1179,
+   "id": 1180,
    "type": "im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa",
    "x": 1699.0,
    "y": 4400.5,
@@ -3143,7 +3161,7 @@
    "locked": true
   },
   {
-   "id": 1180,
+   "id": 1181,
    "type": "im0261-Table-MEGA_PACK_Table-table-167288_frame_1190b_urbanacacia",
    "x": 1166.5,
    "y": 4510.5,
@@ -3161,7 +3179,7 @@
    "locked": true
   },
   {
-   "id": 1181,
+   "id": 1182,
    "type": "im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
    "x": 1615.0,
    "y": 4795.5,
@@ -3180,7 +3198,7 @@
    "elev": 359
   },
   {
-   "id": 1182,
+   "id": 1183,
    "type": "im0261-Table-MEGA_PACK_Table-table-157282",
    "x": 3000.0,
    "y": 3125.0,
@@ -3198,7 +3216,7 @@
    "locked": true
   },
   {
-   "id": 1183,
+   "id": 1184,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-31085_2",
    "x": 3237.0,
    "y": 3187.0,
@@ -3217,7 +3235,7 @@
    "elev": 501
   },
   {
-   "id": 1184,
+   "id": 1185,
    "type": "im0261-Decor-MEGA_PACK_decor-clock-116007_Frame_RoseGoldBlack",
    "x": 1748.5,
    "y": 1894.0,
@@ -3236,7 +3254,7 @@
    "elev": 1500
   },
   {
-   "id": 1185,
+   "id": 1186,
    "type": "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White",
    "x": 6040.5,
    "y": 6595.0,
@@ -3255,7 +3273,7 @@
    "elev": 1350
   },
   {
-   "id": 1186,
+   "id": 1187,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 598.0,
    "y": 7098.5,
@@ -3273,7 +3291,7 @@
    "locked": true
   },
   {
-   "id": 1187,
+   "id": 1188,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 1998.0,
    "y": 7098.5,
@@ -3291,7 +3309,7 @@
    "locked": true
   },
   {
-   "id": 1188,
+   "id": 1189,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
    "x": -1011.0,
    "y": 3282.5,
@@ -3310,7 +3328,7 @@
    "elev": 660
   },
   {
-   "id": 1189,
+   "id": 1190,
    "type": "im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1",
    "x": 231.0,
    "y": 3019.0,
@@ -3328,7 +3346,7 @@
    "locked": true
   },
   {
-   "id": 1190,
+   "id": 1191,
    "type": "im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood",
    "x": 307.0,
    "y": 2160.0,
@@ -3346,7 +3364,7 @@
    "locked": true
   },
   {
-   "id": 1191,
+   "id": 1192,
    "type": "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
    "x": 637.5,
    "y": 3285.0,
@@ -3364,7 +3382,7 @@
    "locked": true
   },
   {
-   "id": 1192,
+   "id": 1193,
    "type": "im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown",
    "x": 4459.0,
    "y": 6382.5,
@@ -3382,7 +3400,7 @@
    "locked": true
   },
   {
-   "id": 1193,
+   "id": 1194,
    "type": "im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame",
    "x": 5875.0,
    "y": 6675.0,
@@ -3400,7 +3418,7 @@
    "locked": true
   },
   {
-   "id": 1194,
+   "id": 1195,
    "type": "im0261-Pet-MEGA_PACK_Pet-pet-43005_Frame_Green",
    "x": 5240.0,
    "y": 6640.0,
@@ -3418,7 +3436,7 @@
    "locked": true
   },
   {
-   "id": 1195,
+   "id": 1196,
    "type": "fmp-BathTub03",
    "x": -89.5,
    "y": 642.5,
@@ -3436,7 +3454,7 @@
    "locked": true
   },
   {
-   "id": 1196,
+   "id": 1197,
    "type": "fmp-ShowerSystem03",
    "x": 1159.5,
    "y": 74.5,
@@ -3454,7 +3472,7 @@
    "locked": true
   },
   {
-   "id": 1197,
+   "id": 1198,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
    "x": 745.5,
    "y": 64.0,
@@ -3473,7 +3491,7 @@
    "elev": 1000
   },
   {
-   "id": 1198,
+   "id": 1199,
    "type": "washer",
    "x": 2630.0,
    "y": 60.0,
@@ -3491,7 +3509,7 @@
    "locked": true
   },
   {
-   "id": 1199,
+   "id": 1200,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
    "x": 2542.0,
    "y": 57.0,
@@ -3510,7 +3528,7 @@
    "elev": 1500
   },
   {
-   "id": 1200,
+   "id": 1201,
    "type": "fmp-BathroomVanity07",
    "x": 3019.0,
    "y": 887.0,
@@ -3528,7 +3546,7 @@
    "locked": true
   },
   {
-   "id": 1201,
+   "id": 1202,
    "type": "fmp-WashBasin01",
    "x": 3038.0,
    "y": 882.5,
@@ -3547,7 +3565,7 @@
    "elev": 695
   },
   {
-   "id": 1202,
+   "id": 1203,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
    "x": 3355.5,
    "y": 1079.0,
@@ -3566,7 +3584,7 @@
    "elev": 1000
   },
   {
-   "id": 1203,
+   "id": 1204,
    "type": "im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray",
    "x": 1939.0,
    "y": 1279.0,
@@ -3584,7 +3602,7 @@
    "locked": true
   },
   {
-   "id": 1204,
+   "id": 1205,
    "type": "fmp-Toilet01",
    "x": 6655.5,
    "y": 1882.0,
@@ -3602,7 +3620,25 @@
    "locked": true
   },
   {
-   "id": 1205,
+   "id": 1206,
+   "type": "im0261-Bath-MEGA_PACK_BATH-bath-l933_all_in_one_washbasin_frame",
+   "x": 6547.5,
+   "y": 2915.0,
+   "w": 555,
+   "d": 470,
+   "rot": 180,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1207,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
    "x": 6425.0,
    "y": 1440.0,
@@ -3620,13 +3656,13 @@
    "locked": true
   },
   {
-   "id": 1206,
+   "id": 1208,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-154332_frame",
-   "x": 7345.0,
-   "y": 5530.0,
+   "x": 7520.0,
+   "y": 5685.0,
    "w": 780,
    "d": 430,
-   "rot": 180,
+   "rot": -90,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -3638,25 +3674,7 @@
    "locked": true
   },
   {
-   "id": 1207,
-   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
-   "x": 7436.5,
-   "y": 5987.5,
-   "w": 597,
-   "d": 305,
-   "rot": 0,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
-   "id": 1208,
+   "id": 1209,
    "type": "im0261-Decor-MEGA_PACK_decor-decor_698778_frame",
    "x": 7821.5,
    "y": 6905.5,
@@ -3674,7 +3692,7 @@
    "locked": true
   },
   {
-   "id": 1209,
+   "id": 1210,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant-144523_frame",
    "x": 7919.0,
    "y": 6461.0,
@@ -3692,7 +3710,7 @@
    "locked": true
   },
   {
-   "id": 1210,
+   "id": 1211,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold",
    "x": 6130.0,
    "y": 5782.5,
@@ -3710,7 +3728,7 @@
    "locked": true
   },
   {
-   "id": 1211,
+   "id": 1212,
    "type": "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
    "x": 6951.0,
    "y": 4085.5,
@@ -3729,7 +3747,7 @@
    "elev": 1350
   },
   {
-   "id": 1212,
+   "id": 1213,
    "type": "fmp-Bed12",
    "x": 120.0,
    "y": 4615.0,
@@ -3747,7 +3765,7 @@
    "locked": true
   },
   {
-   "id": 1213,
+   "id": 1214,
    "type": "im0261-Table-MEGA_PACK_Table-table-309959",
    "x": 1870.0,
    "y": 4670.0,
@@ -3765,7 +3783,7 @@
    "locked": true
   },
   {
-   "id": 1214,
+   "id": 1215,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame",
    "x": 2000.0,
    "y": 4800.0,
@@ -3784,10 +3802,10 @@
    "elev": 513
   },
   {
-   "id": 1215,
+   "id": 1216,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-65549",
    "x": 3640.0,
-   "y": 6381.5,
+   "y": 6181.5,
    "w": 1120,
    "d": 437,
    "rot": -90,
@@ -3802,7 +3820,7 @@
    "locked": true
   },
   {
-   "id": 1216,
+   "id": 1217,
    "type": "fmp-Chair29",
    "x": 3485.0,
    "y": 5379.0,
@@ -3820,7 +3838,7 @@
    "locked": true
   },
   {
-   "id": 1217,
+   "id": 1218,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
    "x": 402.5,
    "y": 6807.0,
@@ -3838,7 +3856,7 @@
    "locked": true
   },
   {
-   "id": 1218,
+   "id": 1219,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 1398.0,
    "y": 7118.5,
@@ -3856,7 +3874,7 @@
    "locked": true
   },
   {
-   "id": 1219,
+   "id": 1220,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 2818.0,
    "y": 7118.5,
@@ -3874,7 +3892,7 @@
    "locked": true
   },
   {
-   "id": 1220,
+   "id": 1221,
    "type": "fmp-Closet24",
    "x": 4711.0,
    "y": 6362.0,
@@ -3892,7 +3910,7 @@
    "locked": true
   },
   {
-   "id": 1221,
+   "id": 1222,
    "type": "fmp-Closet14",
    "x": 4514.0,
    "y": 5413.5,
@@ -3910,9 +3928,9 @@
    "locked": true
   },
   {
-   "id": 1222,
+   "id": 1223,
    "type": "fmp-Table44",
-   "x": -194.5,
+   "x": -104.5,
    "y": 938.0,
    "w": 1049,
    "d": 524,
@@ -3928,9 +3946,9 @@
    "locked": true
   },
   {
-   "id": 1223,
+   "id": 1224,
    "type": "fmp-Chair29",
-   "x": 615.0,
+   "x": 705.0,
    "y": 979.0,
    "w": 430,
    "d": 442,
@@ -3946,9 +3964,9 @@
    "locked": true
   },
   {
-   "id": 1224,
+   "id": 1225,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame",
-   "x": 277.5,
+   "x": 357.5,
    "y": 780.5,
    "w": 245,
    "d": 239,
@@ -3965,7 +3983,7 @@
    "elev": 626
   },
   {
-   "id": 1225,
+   "id": 1226,
    "type": "fmp-Bed05",
    "x": 2044.0,
    "y": -275.0,
@@ -3983,7 +4001,7 @@
    "locked": true
   },
   {
-   "id": 1226,
+   "id": 1227,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
    "x": 800.0,
    "y": 1250.0,
@@ -4001,7 +4019,7 @@
    "locked": true
   },
   {
-   "id": 1227,
+   "id": 1228,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 798.0,
    "y": 53.5,
@@ -4019,7 +4037,7 @@
    "locked": true
   },
   {
-   "id": 1228,
+   "id": 1229,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-179264",
    "x": -595.0,
    "y": 1468.5,
@@ -4037,7 +4055,7 @@
    "locked": true
   },
   {
-   "id": 1229,
+   "id": 1230,
    "type": "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
    "x": 3311.0,
    "y": 2385.5,
@@ -4056,7 +4074,7 @@
    "elev": 1400
   },
   {
-   "id": 1230,
+   "id": 1231,
    "type": "im0261-Mattress-MEGA_PACK_Mattress-mattress-40418_SS",
    "x": 3852.5,
    "y": 182.0,
@@ -4074,7 +4092,7 @@
    "locked": true
   },
   {
-   "id": 1231,
+   "id": 1232,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
    "x": 4160.0,
    "y": 2305.5,
@@ -4092,7 +4110,7 @@
    "locked": true
   },
   {
-   "id": 1232,
+   "id": 1233,
    "type": "im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood",
    "x": 3707.0,
    "y": 2260.0,
@@ -4110,7 +4128,7 @@
    "locked": true
   },
   {
-   "id": 1233,
+   "id": 1234,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585",
    "x": 3667.0,
    "y": 2995.0,
@@ -4128,7 +4146,7 @@
    "locked": true
   },
   {
-   "id": 1234,
+   "id": 1235,
    "type": "fmp-Drawer25",
    "x": 4854.0,
    "y": 3117.0,
@@ -4146,7 +4164,7 @@
    "locked": true
   },
   {
-   "id": 1235,
+   "id": 1236,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-203701_yellow",
    "x": 3850.0,
    "y": 34.0,
@@ -4162,10 +4180,10 @@
    "color": null,
    "colorCustom": false,
    "locked": true,
-   "elev": 880
+   "elev": 530
   },
   {
-   "id": 1236,
+   "id": 1237,
    "type": "fmp-Toilet01",
    "x": 5745.5,
    "y": 62.0,
@@ -4183,7 +4201,7 @@
    "locked": true
   },
   {
-   "id": 1237,
+   "id": 1238,
    "type": "im0261-Table-MEGA_PACK_Table-table-175980_frame_brown",
    "x": 6951.0,
    "y": 5900.0,
@@ -4201,7 +4219,7 @@
    "locked": true
   },
   {
-   "id": 1238,
+   "id": 1239,
    "type": "fmp-Chair31",
    "x": 6892.0,
    "y": 5907.0,
@@ -4219,7 +4237,7 @@
    "locked": true
   },
   {
-   "id": 1239,
+   "id": 1240,
    "type": "im0261-Electronic-MEGA_PACK_Electronic-electronic-566595",
    "x": 7620.0,
    "y": 5999.0,
@@ -4238,7 +4256,7 @@
    "elev": 739
   },
   {
-   "id": 1240,
+   "id": 1241,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-25416",
    "x": 7749.5,
    "y": 5463.5,
@@ -4257,7 +4275,7 @@
    "elev": 739
   },
   {
-   "id": 1241,
+   "id": 1242,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown",
    "x": 6497.0,
    "y": 6791.0,
@@ -4275,7 +4293,7 @@
    "locked": true
   },
   {
-   "id": 1242,
+   "id": 1243,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant_133259",
    "x": 6434.5,
    "y": 5471.0,
@@ -4293,7 +4311,7 @@
    "locked": true
   },
   {
-   "id": 1243,
+   "id": 1244,
    "type": "light-ceiling",
    "x": 1575.0,
    "y": 4675.0,
@@ -4319,7 +4337,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1244,
+   "id": 1245,
    "type": "light-ceiling",
    "x": 4575.0,
    "y": 3375.0,
@@ -4345,7 +4363,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1245,
+   "id": 1246,
    "type": "light-down",
    "x": 4210.0,
    "y": 810.0,
@@ -4371,7 +4389,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1246,
+   "id": 1247,
    "type": "light-down",
    "x": 5310.0,
    "y": 810.0,
@@ -4397,7 +4415,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1247,
+   "id": 1248,
    "type": "light-down",
    "x": 4610.0,
    "y": 1810.0,
@@ -4423,7 +4441,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1248,
+   "id": 1249,
    "type": "light-down",
    "x": 2610.0,
    "y": 860.0,
@@ -4449,7 +4467,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1249,
+   "id": 1250,
    "type": "light-down",
    "x": 810.0,
    "y": 860.0,
@@ -4475,7 +4493,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1250,
+   "id": 1251,
    "type": "light-down",
    "x": 6735.0,
    "y": 2610.0,
@@ -4501,7 +4519,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1251,
+   "id": 1252,
    "type": "light-down",
    "x": 6810.0,
    "y": 4510.0,
@@ -4527,7 +4545,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1252,
+   "id": 1253,
    "type": "light-down",
    "x": 7210.0,
    "y": 6210.0,
@@ -4553,7 +4571,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1253,
+   "id": 1254,
    "type": "light-down",
    "x": 7230.0,
    "y": 7810.0,
@@ -4579,7 +4597,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1254,
+   "id": 1255,
    "type": "light-ceiling",
    "x": 1575.0,
    "y": 1175.0,
@@ -4605,7 +4623,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1255,
+   "id": 1256,
    "type": "light-down",
    "x": 820.0,
    "y": 3090.0,
@@ -4631,7 +4649,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1256,
+   "id": 1257,
    "type": "light-ceiling",
    "x": 4275.0,
    "y": 1575.0,
@@ -4657,7 +4675,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1257,
+   "id": 1258,
    "type": "light-down",
    "x": 5825.0,
    "y": 610.0,
@@ -4683,7 +4701,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1258,
+   "id": 1259,
    "type": "light-down",
    "x": 6735.0,
    "y": 1410.0,
@@ -4709,7 +4727,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1259,
+   "id": 1260,
    "type": "light-down",
    "x": 6735.0,
    "y": 2910.0,
@@ -4735,7 +4753,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1260,
+   "id": 1261,
    "type": "light-down",
    "x": 7645.0,
    "y": 1310.0,
@@ -4761,7 +4779,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1261,
+   "id": 1262,
    "type": "light-down",
    "x": 1910.0,
    "y": 4010.0,
@@ -4787,7 +4805,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1262,
+   "id": 1263,
    "type": "light-down",
    "x": 4910.0,
    "y": 4010.0,
@@ -4813,7 +4831,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1263,
+   "id": 1264,
    "type": "light-ceiling",
    "x": 1575.0,
    "y": 5675.0,
@@ -4839,7 +4857,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1264,
+   "id": 1265,
    "type": "light-down",
    "x": 5310.0,
    "y": 5710.0,
@@ -4865,7 +4883,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1265,
+   "id": 1266,
    "type": "light-down",
    "x": 7310.0,
    "y": 5710.0,
@@ -4891,7 +4909,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1266,
+   "id": 1267,
    "type": "memo",
    "x": 100.0,
    "y": -1850.0,
@@ -4910,7 +4928,7 @@
    "noteText": "モダン2階建てモデルプラン 3LDK+書斎\n敷地約150㎡ / 延床約116㎡(35坪)"
   },
   {
-   "id": 1267,
+   "id": 1268,
    "type": "ruler",
    "x": -910.0,
    "y": 12825.0,

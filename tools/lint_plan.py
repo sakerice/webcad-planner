@@ -825,9 +825,13 @@ def check19_reachability(data):
     「家具が並んで実質通れない」タイプの分断は、個々の寸法チェックでは
     絶対に出てこない(1F東西の分断がこれで丸ごと見逃されていた)。
     """
+    return _reach(data, 600.0)
+
+
+def _reach(data, clear, only_names=None):
     out = []
     CELL = 100.0        # グリッド解像度
-    CLEAR = 600.0       # 必要な有効幅
+    CLEAR = clear       # 必要な有効幅
     pad = CLEAR / 2.0
     for floor in sorted({r.get('floor', 1) for r in data.get('rooms', [])}):
         rms = [r for r in data['rooms'] if r.get('floor', 1) == floor]
@@ -918,6 +922,8 @@ def check19_reachability(data):
             name = (r.get('n') or '').strip()
             if not name or name in ('PS', '階段', 'バルコニー'):
                 continue
+            if only_names and name not in only_names:
+                continue
             ok = False
             ci0 = max(0, int((r['x'] - x0) / CELL)); ci1 = min(nx - 1, int((r['x'] + r['w'] - x0) / CELL))
             cj0 = max(0, int((r['y'] - y0) / CELL)); cj1 = min(ny - 1, int((r['y'] + r['d'] - y0) / CELL))
@@ -929,6 +935,153 @@ def check19_reachability(data):
             if not ok:
                 out.append('[%dF] 部屋「%s」へ有効幅%.0fmmの経路で到達できない'
                            % (floor, name, CLEAR))
+    return out
+
+
+def check20_opening_span_clear(data):
+    """建具の開口スパンの中に、直交する壁の端部が突き出していないか。
+
+    開口の真ん中に壁が立つと、扉が壁に当たる/開口が2つに割れる。
+    平面図では線が重なって見えないので気づきにくい。
+    """
+    out = []
+    for it in data['items']:
+        if it['type'] not in DOOR_TYPES or it['type'] == 'window':
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), _ = axes(it)
+        half = it['w'] / 2.0
+        ax, ay = cx - ux * half, cy - uy * half
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            for ex, ey in ((w['x1'], w['y1']), (w['x2'], w['y2'])):
+                # 端点が開口線分の内側(端から5mm以上)かつ線分から壁厚以内にあるか
+                t = (ex - ax) * ux + (ey - ay) * uy
+                if not (5.0 < t < it['w'] - 5.0):
+                    continue
+                perp = abs(-(ex - ax) * uy + (ey - ay) * ux)
+                if perp <= (w.get('thick', 120) or 120) / 2.0 + 30.0:
+                    vio(out, it, '開口(幅%.0fmm)の中に壁 id=%s の端部が突き出している'
+                        '(開口の端から%.0fmm)' % (it['w'], w.get('id', '?'), t))
+                    break
+            else:
+                continue
+            break
+    return out
+
+
+def check21_outdoor_overlap(data):
+    """屋外アイテム同士の重なり。check3 は外構系を丸ごと除外しているため素通りする。"""
+    out = []
+    TARGET = {'ac-outdoor', 'water-heater', 'gas-heater', 'meter-box',
+              'sewer-pit', 'exterior-stair', 'ramp', 'tree', 'car',
+              'bicycle', 'bicycle-fold', 'fence', 'wood-fence',
+              'lattice-screen', 'downspout'}
+    objs = [o for o in data['items'] if o.get('type') in TARGET]
+    for i in range(len(objs)):
+        for j in range(i + 1, len(objs)):
+            a, b = objs[i], objs[j]
+            if a.get('floor', 1) != b.get('floor', 1):
+                continue
+            # 塀・フェンスは連続配置するので端部の接触は許す
+            if a['type'] in ('fence', 'wood-fence', 'lattice-screen') and \
+               b['type'] in ('fence', 'wood-fence', 'lattice-screen'):
+                continue
+            ea, eb = a.get('elev', 0) or 0, b.get('elev', 0) or 0
+            if abs(ea - eb) >= 500 or max(ea, eb) >= 500:
+                continue
+            ox, oy = rect_overlap(aabb(a), aabb(b))
+            if ox > 20.0 and oy > 20.0:
+                out.append('[%s] %s と %s: 屋外で重なっている（約 %.0f×%.0fmm）'
+                           % (fl(a), label(a), label(b), ox, oy))
+    return out
+
+
+def check22_high_object_clash(data, root=None):
+    """高所設置物(壁掛けエアコン・カーテン・吊り棚)同士の3次元干渉。
+
+    check3 は elev>=500 を「意図的な組合せ」として丸ごと除外するので、
+    エアコンがカーテンから生えているような不良を検出できない。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+
+    def band(o):
+        t = o.get('type', '')
+        h = cat[t][2] if t in cat else (o.get('customHeight') if t == 'custom-block' else None)
+        if not h:
+            return None
+        e = o.get('elev', 0) or 0
+        return (e, e + h)
+
+    objs = []
+    for o in data['items']:
+        t = o.get('type', '')
+        if t in DOOR_TYPES or t in ANNOTATION_TYPES or is_light(t) or is_neighbor(t):
+            continue
+        if t in STRUCT_SITE_TYPES:
+            continue
+        b = band(o)
+        if b and b[1] > 500:
+            objs.append((o, b))
+    for i in range(len(objs)):
+        for j in range(i + 1, len(objs)):
+            (a, ba), (b, bb) = objs[i], objs[j]
+            if a.get('floor', 1) != b.get('floor', 1):
+                continue
+            vo = min(ba[1], bb[1]) - max(ba[0], bb[0])
+            if vo <= 20:
+                continue
+            # 一方が他方の上に載っている(=天板)組合せは除外
+            if abs(ba[0] - bb[1]) < 60 or abs(bb[0] - ba[1]) < 60:
+                continue
+            ox, oy = rect_overlap(aabb(a), aabb(b))
+            if ox > 20.0 and oy > 20.0:
+                out.append('[%s] %s と %s: 高さ%.0fmm分が3次元で干渉'
+                           '（平面 %.0f×%.0fmm）'
+                           % (fl(a), label(a), label(b), vo, ox, oy))
+    return out
+
+
+def check23_kitchen_aisle(data):
+    """キッチンの中に有効1000mmの立ち位置帯があるか(品質基準の通路幅)。
+
+    出入口の開口(910モジュール)は日本の住宅では標準なので、到達性ではなく
+    「調理側に1000mm立てるか」を見る。
+    """
+    out = []
+    CELL, CLEAR = 100.0, 1000.0
+    pad = CLEAR / 2.0
+    for r in data.get('rooms', []):
+        if 'キッチン' not in (r.get('n') or ''):
+            continue
+        floor = r.get('floor', 1)
+        boxes = []
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            ht = (w.get('thick', 120) or 120) / 2.0
+            boxes.append((min(w['x1'], w['x2']) - ht, min(w['y1'], w['y2']) - ht,
+                          max(w['x1'], w['x2']) + ht, max(w['y1'], w['y2']) + ht))
+        for f in data['items']:
+            if f.get('floor', 1) == floor and is_furniture(f) and (f.get('elev') or 0) < 500:
+                boxes.append(aabb(f))
+        free = 0
+        px = r['x']
+        while px <= r['x'] + r['w']:
+            py = r['y']
+            while py <= r['y'] + r['d']:
+                if not any(b[0] - pad <= px <= b[2] + pad and b[1] - pad <= py <= b[3] + pad
+                           for b in boxes):
+                    free += 1
+                py += CELL
+            px += CELL
+        if free < 3:
+            out.append('[%dF] 部屋「%s」に有効幅%.0fmmの立ち位置が取れていない'
+                       % (floor, (r.get('n') or '').strip(), CLEAR))
     return out
 
 
@@ -954,6 +1107,10 @@ CHECKS = [
     ('17. 窓上端の通り', check17_window_head_alignment),
     ('18. 収納率', check18_storage_ratio),
     ('19. 全室への通行連続性', check19_reachability),
+    ('20. 開口内への壁端部の突き出し', check20_opening_span_clear),
+    ('21. 屋外アイテム同士の重なり', check21_outdoor_overlap),
+    ('22. 高所設置物の3次元干渉', check22_high_object_clash),
+    ('23. キッチン通路の有効1000mm', check23_kitchen_aisle),
 ]
 
 
