@@ -14123,8 +14123,10 @@ function buildWall3D(w){
   merged.forEach(function(o){
     addBandPiece(cursor,o.a);
     if(o.kind==='window'){
-      var sill=o.sill||1.0;
-      var wh=o.h||1.2;
+      // 掃き出し窓は sill=0。|| で既定値に落とすと 0 が falsy で 1.0m に化け、
+      // 窓の下に1mの壁が立ち、ガラスが壁天端を突き抜け、窓の上の壁が消える。
+      var sill=isFinite(Number(o.sill))?Number(o.sill):1.0;
+      var wh=isFinite(Number(o.h))&&Number(o.h)>0?Number(o.h):1.2;
       addWallPiece(o.a,o.b,0,sill);
       addWindowGlassPiece(o.a,o.b,sill,wh);
       addWallPiece(o.a,o.b,sill+wh,Math.max(0,wallH-(sill+wh)));
@@ -15505,7 +15507,11 @@ function buildItem3D(it){
   else if(it.type==='bath'){build3DBath(grp,w3,d3);}
   else if(it.type==='toilet'){build3DToilet(grp);}
   else if(it.type==='sink'){build3DSink(grp);}
-  else if(it.type==='tree'){build3DTree(grp,2.8+Math.random()*0.8);}
+  else if(it.type==='tree'){
+    // 樹高はアイテムの平面寸法から決める。Math.random() を使うと rebuild3D の
+    // たびに寸法が変わり、平面図で確保した離隔も守れず外壁を突き抜ける。
+    build3DTree(grp,Math.max(1.6,Math.min(6.5,Math.max(w3,d3)*2.1)),Math.max(w3,d3));
+  }
   else if(it.type==='car'){
     if(ensureGltfModel(CONTEXT_CAR_GLB)){
       configureCarGlbMaterials();
@@ -17707,8 +17713,14 @@ function build3DSink(grp){
   _B(grp,ch,0,1.0,0,0.05,0.1,0.05);_B(grp,ch,0,1.04,0.12,0.04,0.04,0.26);
   _B(grp,new THREE.MeshStandardMaterial({color:0x90b0c8,roughness:0.0,metalness:0.9,transparent:true,opacity:0.65}),0,1.5,-0.14,0.5,0.6,0.02);
 }
-function build3DTree(grp,h){
+function build3DTree(grp,h,spread){
   h=h||3.0;
+  // 樹冠の広がりは水平±0.44h。spread(=アイテムの平面寸法)が与えられたら
+  // 樹冠がその直径に収まるようグループごと縮める(離隔を守るため)
+  if(spread>0){
+    var s=Math.min(1,spread/Math.max(0.001,h*0.88));
+    if(s<1){ grp.scale.x*=s; grp.scale.z*=s; }   // flipX/flipY の符号を壊さない
+  }
   var barkMat=new THREE.MeshStandardMaterial({color:0x5a3518,roughness:0.96,metalness:0.0,flatShading:true});
   var leafDark=new THREE.MeshStandardMaterial({color:0x285f2c,roughness:0.94,metalness:0.0,flatShading:true});
   var leafMid=new THREE.MeshStandardMaterial({color:0x397b38,roughness:0.92,metalness:0.0,flatShading:true});

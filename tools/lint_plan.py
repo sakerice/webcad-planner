@@ -818,6 +818,120 @@ def check18_storage_ratio(data):
     return out
 
 
+def check19_reachability(data):
+    """各階の全室に、有効幅600mmの経路で到達できるか。
+
+    壁と家具を障害物にしたグリッドで塗りつぶす。建具の位置は通れるものとする。
+    「家具が並んで実質通れない」タイプの分断は、個々の寸法チェックでは
+    絶対に出てこない(1F東西の分断がこれで丸ごと見逃されていた)。
+    """
+    out = []
+    CELL = 100.0        # グリッド解像度
+    CLEAR = 600.0       # 必要な有効幅
+    pad = CLEAR / 2.0
+    for floor in sorted({r.get('floor', 1) for r in data.get('rooms', [])}):
+        rms = [r for r in data['rooms'] if r.get('floor', 1) == floor]
+        if not rms:
+            continue
+        x0 = min(r['x'] for r in rms); x1 = max(r['x'] + r['w'] for r in rms)
+        y0 = min(r['y'] for r in rms); y1 = max(r['y'] + r['d'] for r in rms)
+        nx = int((x1 - x0) / CELL) + 2; ny = int((y1 - y0) / CELL) + 2
+        if nx * ny > 400000:
+            continue
+        # 室内セル
+        inside = [[False] * ny for _ in range(nx)]
+        for i in range(nx):
+            for j in range(ny):
+                px, py = x0 + i * CELL, y0 + j * CELL
+                for r in rms:
+                    if r['x'] <= px <= r['x'] + r['w'] and r['y'] <= py <= r['y'] + r['d']:
+                        inside[i][j] = True
+                        break
+        # 障害物(壁・家具)。建具のある区間は通す
+        doors = [d for d in data['items']
+                 if d.get('floor', 1) == floor and d.get('type') in DOOR_TYPES
+                 and d.get('type') != 'window']
+        blocked = [[False] * ny for _ in range(nx)]
+
+        def mark(box, extra):
+            # 格子点が膨張した箱の中に入るセルだけを塞ぐ。切り上げで1セル余分に
+            # 塞ぐと、790mm幅の廊下のように余裕の少ない通路が誤って不通になる
+            bi0 = max(0, int(math.ceil((box[0] - extra - x0) / CELL)))
+            bi1 = min(nx - 1, int(math.floor((box[2] + extra - x0) / CELL)))
+            bj0 = max(0, int(math.ceil((box[1] - extra - y0) / CELL)))
+            bj1 = min(ny - 1, int(math.floor((box[3] + extra - y0) / CELL)))
+            for i in range(bi0, bi1 + 1):
+                for j in range(bj0, bj1 + 1):
+                    blocked[i][j] = True
+
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            ht = (w.get('thick', 120) or 120) / 2.0
+            mark((min(w['x1'], w['x2']) - ht, min(w['y1'], w['y2']) - ht,
+                  max(w['x1'], w['x2']) + ht, max(w['y1'], w['y2']) + ht), pad)
+        for f in data['items']:
+            if f.get('floor', 1) == floor and is_furniture(f) \
+                    and (f.get('elev') or 0) < 500:
+                mark(aabb(f), pad)
+        for d in doors:
+            # 開口は「幅=建具幅 / 奥行=壁厚+前後CLEAR」の通路として開ける。
+            # 建具のAABBだけを開けると、壁を膨らませた分が残って通り抜けられない
+            b = aabb(d)
+            (_ux, _uy), (vx, vy) = axes(d)
+            ex = CLEAR if abs(vx) > abs(vy) else 0.0
+            ey = CLEAR if abs(vy) >= abs(vx) else 0.0
+            bi0 = max(0, int((b[0] - ex - x0) / CELL))
+            bi1 = min(nx - 1, int((b[2] + ex - x0) / CELL))
+            bj0 = max(0, int((b[1] - ey - y0) / CELL))
+            bj1 = min(ny - 1, int((b[3] + ey - y0) / CELL))
+            for i in range(bi0, bi1 + 1):
+                for j in range(bj0, bj1 + 1):
+                    blocked[i][j] = False
+
+        free = [[inside[i][j] and not blocked[i][j] for j in range(ny)] for i in range(nx)]
+        start = None
+        entry = [r for r in rms if '玄関' in (r.get('n') or '')] or \
+                [r for r in rms if 'ホール' in (r.get('n') or '')] or rms
+        for r in entry:
+            ci = int((r['x'] + r['w'] / 2 - x0) / CELL)
+            cj = int((r['y'] + r['d'] / 2 - y0) / CELL)
+            for di in range(-4, 5):
+                for dj in range(-4, 5):
+                    i, j = ci + di, cj + dj
+                    if 0 <= i < nx and 0 <= j < ny and free[i][j]:
+                        start = (i, j); break
+                if start: break
+            if start: break
+        if not start:
+            continue
+        seen = [[False] * ny for _ in range(nx)]
+        stack = [start]; seen[start[0]][start[1]] = True
+        while stack:
+            i, j = stack.pop()
+            for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                a, b = i + di, j + dj
+                if 0 <= a < nx and 0 <= b < ny and free[a][b] and not seen[a][b]:
+                    seen[a][b] = True
+                    stack.append((a, b))
+        for r in rms:
+            name = (r.get('n') or '').strip()
+            if not name or name in ('PS', '階段', 'バルコニー'):
+                continue
+            ok = False
+            ci0 = max(0, int((r['x'] - x0) / CELL)); ci1 = min(nx - 1, int((r['x'] + r['w'] - x0) / CELL))
+            cj0 = max(0, int((r['y'] - y0) / CELL)); cj1 = min(ny - 1, int((r['y'] + r['d'] - y0) / CELL))
+            for i in range(ci0, ci1 + 1):
+                for j in range(cj0, cj1 + 1):
+                    if seen[i][j]:
+                        ok = True; break
+                if ok: break
+            if not ok:
+                out.append('[%dF] 部屋「%s」へ有効幅%.0fmmの経路で到達できない'
+                           % (floor, name, CLEAR))
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -839,6 +953,7 @@ CHECKS = [
     ('16. エアコン室内機と室外機の対応', check16_ac_pairing),
     ('17. 窓上端の通り', check17_window_head_alignment),
     ('18. 収納率', check18_storage_ratio),
+    ('19. 全室への通行連続性', check19_reachability),
 ]
 
 
