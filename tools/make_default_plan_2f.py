@@ -299,9 +299,9 @@ w_b2 = wall(910, 7280, 910, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
 w_b3 = wall(4550, 7280, 4550, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
 
 # ── 屋根 (フラットルーフのキューブ型)
-item("roof", BW / 2, BD / 2, BW + 300, BD + 300, 3, rot=0,
+item("roof", BW / 2, BD / 2, BW + 900, BD + 900, 3, rot=0,
      color=COL_ROOF, roofType="flat", pitch=5, elev=0,
-     roofThickness=300, roofSkirt=0, roofEdgeColor=COL_ROOF)
+     roofThickness=260, roofSkirt=0, roofEdgeColor=COL_ROOF)
 item("roof", 7320, 7660, 1900, 1000, 2, rot=180,
      color=COL_ROOF, roofType="mono", pitch=3, elev=0,
      roofThickness=80, roofSkirt=0, roofEdgeColor=COL_ROOF)
@@ -328,34 +328,32 @@ item("lattice-screen", 250, SY1 - 90, 2000, 60, 1, color=COL_FENCE,
      latticeHeight=1100, fencePattern="vertical", fenceTopStyle="even")
 item("lattice-screen", 9550, SY1 - 90, 1600, 60, 1, color=COL_FENCE,
      latticeHeight=1100, fencePattern="vertical", fenceTopStyle="even")
-item("lattice-screen", 6000, 8300, 2100, 60, 1, rot=90, color=COL_WOOD,
-     latticeHeight=2000, fencePattern="vertical", fenceTopStyle="even")
+item("lattice-screen", 6370, 8000, 1500, 60, 1, rot=90, color=COL_WOOD,
+     latticeHeight=2400, fencePattern="vertical", fenceTopStyle="even")
 item("custom-block", 6350, 11750, 400, 150, 1, color=COL_CHARCOAL,
      customHeight=1500, name="門柱", texture="galvalume_dark")
 
 # 玄関ポーチ(平坦な踏込み)+階段。ドアが階段の上に直接開かないようにする
-item("custom-block", 7320, 7880, 1600, 1200, 1, color="#b9b8b4",
+item("custom-block", 7280, 7880, 1820, 1200, 1, color="#b9b8b4",
      customHeight=450, name="玄関ポーチ", texture="porch_tile")
-item("exterior-stair", 7320, 8930, 1600, 900, 1, rot=180,
+item("exterior-stair", 7280, 8930, 1820, 900, 1, rot=180,
      color="#b8b2a8", targetHeight=450, accessSteps=3, texture="porch_tile")
 item("custom-block", 7320, 10830, 1100, 2900, 1, color="#b9b8b4",
      customHeight=20, name="アプローチ", texture="porch_tile")
 # LDK大開口の外のウッドデッキ(FL450の段差解消)
 item("custom-block", 1900, 7800, 2600, 900, 1, color=COL_WOOD,
      customHeight=450, name="ウッドデッキ", texture="wood_cedar")
-item("exterior-stair", 1900, 8480, 1800, 450, 1, rot=180,
-     color="#b8b2a8", targetHeight=450, accessSteps=2)
-# 勝手口の外階段
-item("exterior-stair", 2200, -360, 900, 700, 1, rot=0,
+item("exterior-stair", 1900, 8475, 1800, 450, 1, rot=180,
      color="#b8b2a8", targetHeight=450, accessSteps=3)
+# 勝手口の外階段
+item("custom-block", 2200, -235, 1200, 350, 1, color="#b9b8b4",
+     customHeight=450, name="勝手口ポーチ", texture="porch_tile")
+item("exterior-stair", 2200, -590, 900, 360, 1, rot=0,
+     color="#b8b2a8", targetHeight=450, accessSteps=2)
 # 土間コンのスリット目地
-item("custom-block", 2500, 10100, 5000, 100, 1, color="#3f8f4a",
-     customHeight=15, name="スリット目地")
-item("custom-block", 2500, 11400, 5000, 100, 1, color="#3f8f4a",
-     customHeight=15, name="スリット目地")
 
 # 駐車(道路並列)・自転車
-item("car", 3450, 10700, 1850, 4500, 1, rot=90, color="#ced1d5")
+item("car", 3450, 10250, 1850, 4500, 1, rot=90, color="#ced1d5")
 item("bicycle", 8800, 10200, 580, 1850, 1, rot=0, color="#a8b4c4")
 item("bicycle-fold", 9400, 10200, 550, 1450, 1, rot=0, color="#d8a878")
 
@@ -374,8 +372,6 @@ item("sewer-pit", 5600, -500, 300, 300, 1, color="#6f7275")
 item("sewer-pit", 8600, -500, 300, 300, 1, color="#6f7275")
 item("sewer-pit", 8600, 3600, 300, 300, 1, color="#6f7275")
 item("sewer-pit", 7000, 9600, 300, 300, 1, color="#6f7275")
-for cx, cy in ((-160, -160), (BW + 160, -160), (-160, BD + 160), (BW + 160, BD + 160)):
-    item("downspout", cx, cy, 150, 150, 1, color=COL_ROOF, downspoutTop=5850)
 
 # エアコン: 室内機は必ず外壁面。室外機は配管長3m以内に対で置く
 AC_PAIRS = [
@@ -591,7 +587,7 @@ light("down", 7400, 5800, 2, 2380)                   # 書斎
 
 # ══════════ 注記 ══════════
 item("memo", 1200, -1600, 2200, 500, 1, color="#fff3a6",
-     noteText="モダン2階建てモデルプラン 4LDK+書斎\n敷地約150㎡ / 延床約117㎡(35坪)")
+     noteText="モダン2階建てモデルプラン 3LDK+書斎\n敷地約150㎡ / 延床約116㎡(35坪)")
 item("ruler", SX0 + SW / 2, SY1 + 600, SW, 120, 1, color="#2f80ed")
 
 # ══════════ 外装カスケード ══════════

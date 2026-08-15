@@ -3761,7 +3761,9 @@ function isFloorAwareGroundItemType(t){
 // 敷地サーフェス(site-rect)の描画面は GL より 35mm 下(build3DSiteRect)。
 // その上に立つ接地アイテムを GL=0 に置くと 35mm 浮いて見えるので、
 // 中心が敷地サーフェス上にあるものは面の高さへ接地させる。
-var SITE_SURFACE_Y = -0.035;
+// 敷地サーフェスの描画面。素地グラウンド(-0.06)とZファイティングしない範囲で
+// GL に寄せる。ここを下げすぎると基礎やポーチの脚元に隙間が見える
+var SITE_SURFACE_Y = -0.012;
 function groundYForItem(it){
   if(it.type==='site-rect' || it.type==='foundation') return 0;
   var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
@@ -13819,14 +13821,17 @@ function buildWall3D(w){
       applyTextureFlip(fenceMat.map,resolveExteriorWallAppearance(w));
       fenceMat.map.needsUpdate=true;
     }
+    // 手すりはバルコニーのスラブ天端から立てる。壁の基準(fy=floorBaseY)から
+    // 立てると床スラブ厚(180mm)ぶん低くなり、実効高が1100mmを割ってしまう
+    var slabTop=floorTopY(fl)+0.006-fy;
     var panel=new THREE.Mesh(new THREE.BoxGeometry(segLen,FENCE_H,w.thick*U),fenceMat);
-    panel.position.set(x1+dirX*mid,fy+FENCE_H/2,z1+dirZ*mid);
+    panel.position.set(x1+dirX*mid,fy+slabTop+FENCE_H/2,z1+dirZ*mid);
     panel.rotation.y=rotY;
     panel.castShadow=true; panel.receiveShadow=true;
     wallGroup.add(panel);
     var kasaMat=new THREE.MeshStandardMaterial({color:0x83888e,roughness:0.4,metalness:0.55});
     var kasa=new THREE.Mesh(new THREE.BoxGeometry(segLen+0.02,KASA_H,w.thick*U+0.05),kasaMat);
-    kasa.position.set(x1+dirX*mid,fy+FENCE_H+KASA_H/2,z1+dirZ*mid);
+    kasa.position.set(x1+dirX*mid,fy+slabTop+FENCE_H+KASA_H/2,z1+dirZ*mid);
     kasa.rotation.y=rotY;
     kasa.castShadow=true; kasa.receiveShadow=true;
     wallGroup.add(kasa);
@@ -14267,10 +14272,15 @@ function buildWinFrames(flFilt){
       var SD=0.07, frW=0.035, fbW=0.045;
       var innerW=Math.max(ww-frW*2,0.06);
       var innerH=Math.max(totalH-frW-fbW,0.06);
-      addBox(frameMat,0,y0+totalH-frW/2,zBase,ww,frW,SD);
-      addBox(frameMat,0,y0+fbW/2,zBase,ww,fbW,SD);
-      addBox(frameMat,-ww/2+frW/2,y0+totalH/2,zBase,frW,totalH,SD);
-      addBox(frameMat, ww/2-frW/2,y0+totalH/2,zBase,frW,totalH,SD);
+      // 枠は壁厚いっぱいまで伸ばした額縁納まりにする。見込み70mmだけだと
+      // 室内側の掘り込み小口が露出し、開口の左右に外壁の柄が回り込んで見える
+      var slWallHalf=((best&&best.thick?best.thick:120)*U)/2;
+      var SDF=exSign?(0.085+slWallHalf+0.005):(slWallHalf*2+0.01);
+      var zF=exSign?exS*((0.085-(slWallHalf+0.005))/2):0;
+      addBox(frameMat,0,y0+totalH-frW/2,zF,ww,frW,SDF);
+      addBox(frameMat,0,y0+fbW/2,zF,ww,fbW,SDF);
+      addBox(frameMat,-ww/2+frW/2,y0+totalH/2,zF,frW,totalH,SDF);
+      addBox(frameMat, ww/2-frW/2,y0+totalH/2,zF,frW,totalH,SDF);
       // 下枠水切り(室外側へ突き出し・水勾配イメージの薄板)
       addBox(frameMat,0,y0+0.008,zBase+exS*(SD/2+0.014),ww,0.016,0.028);
       // 下枠上面のレール2本
@@ -14853,6 +14863,9 @@ function build3DRoofItem(grp,it,w3,d3){
     var f=[[-W/2,baseY,-D/2],[W/2,baseY,-D/2],[W/2,baseY,D/2],[-W/2,baseY,D/2]];
     quad(f[0],f[1],f[2],f[3],mat);
     edgeLoop(f);
+    // 軒天(下面)。これが無いと、壁面と鼻隠しの間に屋根厚ぶんの溝が周回する
+    var fb=[[-W/2,bottomY,-D/2],[-W/2,bottomY,D/2],[W/2,bottomY,D/2],[W/2,bottomY,-D/2]];
+    quad(fb[0],fb[1],fb[2],fb[3],edgeMat);
     return;
   }
   if(type==='mono'){
@@ -14863,6 +14876,9 @@ function build3DRoofItem(grp,it,w3,d3){
     var m1=[-W/2,baseY,-D/2], m2=[W/2,baseY,-D/2], m3=[W/2,baseY+rise,D/2], m4=[-W/2,baseY+rise,D/2];
     quad(m1,m2,m3,m4,mat);
     edgeLoop([m1,m2,m3,m4]);
+    // 軒天(下面)。庇では見上げ面になるので必ず要る
+    quad([m1[0],m1[1]-thick,m1[2]],[m4[0],m4[1]-thick,m4[2]],
+         [m3[0],m3[1]-thick,m3[2]],[m2[0],m2[1]-thick,m2[2]],edgeMat);
     return;
   }
   if(type==='hip'){
@@ -15574,8 +15590,13 @@ function buildItem3D(it){
   else if(isCustomBlockType(it.type)){
     var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff) ||
       new THREE.MeshStandardMaterial({color:it.color||ICOLORS[it.type]||0xc9d7ee,roughness:0.78,metalness:0.02});
+    // 上下面は側面用の1マテリアルを使い回すと、高さでUVを決めている都合で
+    // 平たいブロック(デッキ・ポーチ・土間)の天端だけ柄が極端に伸びる。
+    // 天端は w×d でUVを取り直した専用マテリアルにする
+    var blockTopMat=makeItemTextureMaterial(it,w3,d3,'repeat',0xffffff)||blockMat;
     var blockGeo=new THREE.BoxGeometry(w3,h,d3);
-    var block=new THREE.Mesh(blockGeo,blockMat);
+    var blockMats=[blockMat,blockMat,blockTopMat,blockTopMat,blockMat,blockMat];
+    var block=new THREE.Mesh(blockGeo,blockMats);
     block.position.y=h/2;
     block.castShadow=true; block.receiveShadow=true;
     grp.add(block);
@@ -15594,6 +15615,7 @@ function buildItem3D(it){
       build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
     } else {
       build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps);
+      build3DStairHandrail(grp,w3,d3,baseRise,partRise);
     }
   }
   else{
@@ -16845,6 +16867,30 @@ function addStairRiserPanel(grp,mat,a,b,y,h,thickness){
   panel.rotation.y=-Math.atan2(b[1]-a[1],b[0]-a[0]);
   panel.castShadow=true; panel.receiveShadow=true; grp.add(panel);
 }
+// 直進階段の手すり(片側)。壁側でない方の端に、段鼻を結ぶ勾配で笠木と支柱を立てる。
+// 手すりが無いと階段が「板の連なり」に見え、法規上も成立しない。
+function build3DStairHandrail(grp,w,d,baseRise,partRise){
+  if(d<0.3||partRise<0.1) return;
+  var H=0.85;                       // 段鼻からの手すり高さ
+  var x=w/2-0.055;                  // 側桁の内側
+  var mat=new THREE.MeshStandardMaterial({color:0x4a3b2c,roughness:0.55,metalness:0.05});
+  var postMat=new THREE.MeshStandardMaterial({color:0x2f3336,roughness:0.5,metalness:0.5});
+  var z0=-d/2, z1=d/2;
+  var y0=baseRise+H, y1=baseRise+partRise+H;
+  var len=Math.hypot(d,partRise);
+  var rail=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,len),mat);
+  rail.position.set(x,(y0+y1)/2,(z0+z1)/2);
+  rail.rotation.x=-Math.atan2(partRise,d);
+  rail.castShadow=true; rail.receiveShadow=true; grp.add(rail);
+  var n=Math.max(2,Math.round(d/0.42));
+  for(var i=0;i<=n;i++){
+    var t=i/n, pz=z0+d*t, top=baseRise+partRise*t+H;
+    var bot=baseRise+partRise*t;
+    var post=new THREE.Mesh(new THREE.BoxGeometry(0.022,Math.max(0.05,top-bot),0.022),postMat);
+    post.position.set(x,(top+bot)/2,pz);
+    post.castShadow=true; grp.add(post);
+  }
+}
 function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
   steps=Math.max(1,steps||6);
   var treadD=d/steps;
@@ -17392,7 +17438,10 @@ function buildUnityKitchen3D(grp,w,d,color){
 function applyItemColorToGroup(grp,color){
   if(!color) return;
   grp.traverse(function(o){
-    if(o.isMesh && o.material) o.material=applySelectableColor(o.material,color);
+    if(!o.isMesh || !o.material) return;
+    // 面ごとに別マテリアルを持つメッシュ(custom-blockの天端など)にも効かせる
+    if(Array.isArray(o.material)) o.material=o.material.map(function(m){return applySelectableColor(m,color);});
+    else o.material=applySelectableColor(o.material,color);
   });
 }
 function _B(g,mat,x,y,z,w,h,d){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);}
@@ -17583,7 +17632,7 @@ function build3DSiteRect(grp,it,w,d){
   var mat=makeSiteSurfaceMaterial(it,w,d);
   var plane=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat);
   plane.rotation.x=-Math.PI/2;
-  plane.position.y=-0.035;
+  plane.position.y=SITE_SURFACE_Y;
   plane.receiveShadow=true;
   plane.userData.siteRect=true;
   plane.userData.siteRectRef=it;
@@ -17593,7 +17642,7 @@ function build3DSiteRect(grp,it,w,d){
   var edgeMat=new THREE.LineBasicMaterial({color:cfg.edge,transparent:true,opacity:0.85});
   var edge=new THREE.LineSegments(edgeGeo,edgeMat);
   edge.rotation.x=-Math.PI/2;
-  edge.position.y=-0.034;
+  edge.position.y=SITE_SURFACE_Y+0.001;
   edge.userData.siteRect=true;
   grp.add(edge);
 }
