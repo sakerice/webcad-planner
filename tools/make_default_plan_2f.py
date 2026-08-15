@@ -419,6 +419,10 @@ item("im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame", 6120, 3050, 450, 450, 1,
 
 # ── 水まわり (1F)
 item("fmp-BathTub03", 500, 910, 1680, 762, 1, rot=90)
+# 洗い場: シャワー水栓(北壁)と鏡(東壁)。浴槽だけでは浴室として成立しない
+item("fmp-ShowerSystem03", 1300, 300, 281, 451, 1, rot=180)
+item("im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
+     950, 290, 409, 42, 1, rot=0, elev=1000)   # 洗い場の鏡(北壁・折戸の動線外)
 item("washer", 2950, 380, 640, 640, 1, color="#dddddd")
 item("fmp-BathroomVanity07", 3400, 1100, 700, 460, 1, rot=-90)
 item("fmp-WashBasin01", 3400, 1100, 700, 460, 1, rot=-90, elev=700)
