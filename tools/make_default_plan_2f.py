@@ -169,7 +169,7 @@ win(2000, BD, 1, "25620", 0, 2030)                    # LDK南 大開口掃き�
 win(5460, BD, 1, "F03613", 660, 1370, kind="fix")     # ダイニング南スリット
 win(5000, 0, 1, "11909", 900, 970)                    # キッチン北
 win(3100, 0, 1, "06905", 900, 570)                    # 洗面北
-win(900, 0, 1, "06905", 1030, 570)                    # 浴室北
+win(900, 0, 1, "06905", 900, 570)                     # 浴室北(洗面と高さを揃える)
 win(0, 3300, 1, "16513", 660, 1370, vertical=True)    # LDK西
 win(0, 5800, 1, "03613", 660, 1370, vertical=True, kind="casement")  # LD西スリット
 win(BW, 6100, 1, "F03613", 660, 1370, vertical=True, kind="fix")     # 玄関東スリット
@@ -204,7 +204,7 @@ room("洋室A", 0, 0, 3640, 3640, 2, texture="wood_floor")
 room("洋室B", 3640, 0, 2730, 3640, 2, texture="wood_floor")
 room("トイレ", 6370, 0, 910, 1365, 2, texture="tile_floor")
 room("ホール", 6370, 1365, 910, 2275, 2, texture="wood_floor")
-room("物入", 7280, 0, 910, 910, 2, texture="wood_floor")
+room("PS", 7280, 0, 910, 910, 2, texture="wood_floor")
 room("廊下", 0, 3640, 7280, 910, 2, texture="wood_floor")
 room("主寝室", 0, 4550, 4550, 2730, 2, texture="wood_floor")
 room("WIC", 4550, 4550, 1820, 2730, 2, texture="wood_floor")
@@ -275,8 +275,6 @@ item("custom-block", 2500, SY1 - 500, 400, 150, 1, color=COL_CHARCOAL,
 # 玄関ポーチ・スロープ・勝手口 (外階段/スロープは rot=0 で南が高い)
 item("exterior-stair", 7320, BD + 460, 1600, 900, 1, rot=180,
      color="#b8b2a8", targetHeight=450, accessSteps=3, texture="porch_tile")
-item("ramp", 5150, BD + 910, 900, 1820, 1, rot=180,
-     color="#b8b2a8", targetHeight=450)
 item("exterior-stair", 2200, -360, 900, 700, 1, rot=0,
      color="#b8b2a8", targetHeight=450, accessSteps=3)
 # ポーチ脇の木調縦格子(目隠し)
@@ -297,10 +295,10 @@ item("bicycle", 9140, 8400, 580, 1850, 1, rot=0, color="#a8b4c4")
 item("bicycle-fold", 9800, 8350, 550, 1450, 1, rot=0, color="#d8a878")
 
 # 植栽 (東側の庭 + 玄関脇のシンボルツリー株立ち)
-item("tree", 9200, 1100, 1500, 1500, 1, color="#5d8f52")
-item("tree", 9300, 3600, 1300, 1300, 1, color="#5d8f52")
-item("tree", 8800, 6300, 1500, 1500, 1, color="#6a9a58")   # シンボルツリー
-item("tree", 9150, 6700, 900, 900, 1, color="#7aa862")     # 株立ちの添え
+item("tree", 9200, 1100, 1500, 1500, 1, color="#6f855f")
+item("tree", 9300, 3600, 1300, 1300, 1, color="#74895f")
+item("tree", 8800, 6300, 1500, 1500, 1, color="#7d9268")   # シンボルツリー
+item("tree", 9150, 6700, 900, 900, 1, color="#86996f")     # 株立ちの添え
 
 # 住宅設備 (外部)。雨樋・竪樋の金物は黒で統一
 item("ac-outdoor", 4300, -300, 800, 300, 1, color="#d8dadc")
@@ -316,9 +314,9 @@ for cx, cy in ((-160, -160), (BW + 160, -160), (-160, BD + 160), (BW + 160, BD +
     item("downspout", cx, cy, 150, 150, 1, color=COL_ROOF, downspoutTop=5850)
 
 # 道路・電柱・隣家 (電線はrot=0でX方向=道路と平行に張られる)
-item("road", 5280, SY1 + 2275, 16380, 4550, 1, color="#55585c", contextHeight=70)
-item("utility-pole", 10600, SY1 + 250, 350, 350, 1, rot=0, color="#8c9297",
-     contextHeight=6500)
+item("road", 5280, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70)
+item("utility-pole", 10600, SY1 + 4300, 350, 350, 1, rot=0, color="#8c9297",
+     contextHeight=6500)   # 道路の反対側(電線が敷地上空に掛からない位置)
 item("neighbor-house", 10920 + 3640, 300 + 3185, 7280, 6370, 1,
      color="#d7c1a3", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-house", -8600 + 3640, 800 + 3185, 7280, 6370, 1,
@@ -343,12 +341,14 @@ for t, w in (("fmp-CabinetD01", 410), ("fmp-CabinetD02", 410),
 item("fmp-GasStove07", 5465, 1900, 530, 470, 1, rot=0, elev=797)
 item("fmp-KitchenExhaust02", 5465, 1910, 750, 575, 1, rot=0, elev=2086)
 item("fmp-Refrigerator03", 5970, 440, 700, 700, 1, rot=180)
-item("custom-block", 4450, 305, 1500, 450, 1, color="#d9d4c9",
-     customHeight=900, name="カップボード")
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
+     4450, 300, 1600, 450, 1, rot=0)    # カップボード(サイドボード)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 3960, 180, 816, 266, 1,
+     rot=0, elev=1500)                  # 壁付け飾り棚
 item("im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
-     4000, 300, 340, 351, 1, rot=180, elev=910)   # カップボード上の炊飯器
+     4100, 300, 340, 351, 1, rot=180, elev=720)   # カップボード上の炊飯器
 item("im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
-     4800, 290, 255, 270, 1, rot=180, elev=910)   # コーヒーメーカー
+     4800, 290, 255, 270, 1, rot=180, elev=720)   # コーヒーメーカー
 
 # ── ダイニング (1F): カウンター横並び配膳のテーブルセット
 item("im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut",
@@ -359,10 +359,10 @@ item("im0261-Decor-MEGA_PACK_decor-clock-131686", 1900, 1915, 547, 67, 1,
 # ── リビング (1F): TVを西壁、ソファは東からTV向き、ラグの上にローテーブル
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-122712_Dark_Navy",
      2450, 5100, 2700, 2000, 1, rot=0)
-item("custom-block", 350, 5100, 450, 1800, 1, color="#4a4038",
-     customHeight=500, name="TVボード")
-item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 330, 5100, 1230, 211, 1,
-     rot=90, elev=500)
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-354290_frame_walnut_brown",
+     280, 5100, 2000, 414, 1, rot=90)   # TVローボード
+item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 300, 5100, 1230, 211, 1,
+     rot=90, elev=610)
 item("im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa", 3900, 5100, 2402, 999, 1,
      rot=90)
 item("fmp-Table27", 2450, 5100, 897, 860, 1, rot=0)
@@ -391,23 +391,23 @@ item("fmp-BathTub03", 500, 910, 1680, 762, 1, rot=90)
 item("washer", 2950, 380, 640, 640, 1, color="#dddddd")
 item("fmp-BathroomVanity07", 3400, 1100, 700, 460, 1, rot=-90)
 item("fmp-WashBasin01", 3400, 1100, 700, 460, 1, rot=-90, elev=700)
-item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-336846_frame",
-     2040, 1200, 900, 400, 1, rot=90)   # リネン棚
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 2950, 190, 816, 266, 1,
+     rot=0, elev=1500)                  # 洗濯機上のランドリーシェルフ
 item("fmp-Toilet01", 6825, 2350, 460, 700, 1, rot=180)
 
 # ── 玄関・ホール (1F)
-item("custom-block", 7985, 6100, 380, 1000, 1, color="#8a7a63",
-     customHeight=1000, name="下駄箱")   # 玄関ドアの開閉域(x<=7790)の外
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-143628_frame_1_naturalwood",
+     6580, 6100, 830, 400, 1, rot=90)   # 下駄箱(西壁沿い・ドア開閉域の外)
 item("im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold",
      8160, 6950, 600, 35, 1, rot=90, elev=0)      # 姿見
 item("im0261-Plant-MEGA_PACK_Plant-plant-144523_frame",
-     7985, 5900, 202, 198, 1, rot=0, elev=1010)   # 下駄箱上のグリーン
+     6580, 5800, 202, 198, 1, rot=0, elev=1150)   # 下駄箱上のグリーン
 item("im0261-Decor-MEGA_PACK_decor-decor_698778_frame",
      7900, 7130, 357, 289, 1, rot=0)              # 傘立て
 item("im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
      7212, 4100, 498, 29, 1, rot=90, elev=1350)   # 階段室壁の絵
-item("custom-block", 6820, 350, 780, 350, 1, color="#cfc8ba",
-     customHeight=1800, name="棚")
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-157369", 7060, 900, 1100, 420, 1,
+     rot=-90)                            # パントリー棚(東壁沿い)
 item("fmp-AirConditionerWall01", 1000, 1960, 800, 260, 1, rot=180, elev=2200)
 
 # ── 主寝室 (2F): 夫婦のダブルベッドを西壁沿い横置き
@@ -461,10 +461,10 @@ item("im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown",
 item("im0261-Plant-MEGA_PACK_Plant-plant_133259", 6550, 7050, 291, 258, 2, rot=0)
 
 # ── WIC・2Fトイレ
-item("custom-block", 5450, 6900, 1600, 550, 2, color="#cfc8ba",
-     customHeight=1700, name="収納")
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown",
+     5450, 6900, 1003, 591, 2, rot=0)   # ワードローブ
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
-     5460, 5300, 1600, 450, 2, rot=0)                      # 引き出しチェスト
+     5460, 5700, 1600, 450, 2, rot=0)                      # 引き出しチェスト(折戸動線の外)
 item("fmp-Toilet01", 6825, 500, 460, 700, 2, rot=0)
 
 # ───────── 照明 ─────────

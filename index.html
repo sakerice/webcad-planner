@@ -3750,19 +3750,32 @@ function isGroundLevelItemType(t){
     t==='ac-outdoor' || t==='water-heater' || t==='meter-box' || t==='sewer-pit' ||
     t==='downspout' || t==='gas-heater' ||
     t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
-    t==='fence' || t==='wood-fence';
+    t==='fence' || t==='wood-fence' || t==='lattice-screen';
 }
 // 塀・フェンス・車などはバルコニーの手すり代わり等で2階以上にも置かれるため、
 // 接地(GL=0)は1階配置のときだけ。上階ではその階の床天端に置く
 function isFloorAwareGroundItemType(t){
   return t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
-    t==='fence' || t==='wood-fence';
+    t==='fence' || t==='wood-fence' || t==='lattice-screen';
+}
+// 敷地サーフェス(site-rect)の描画面は GL より 35mm 下(build3DSiteRect)。
+// その上に立つ接地アイテムを GL=0 に置くと 35mm 浮いて見えるので、
+// 中心が敷地サーフェス上にあるものは面の高さへ接地させる。
+var SITE_SURFACE_Y = -0.035;
+function groundYForItem(it){
+  if(it.type==='site-rect' || it.type==='foundation') return 0;
+  var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+  var on=DATA.items.some(function(s){
+    return s.type==='site-rect' && (s.floor||1)===1 &&
+      cx>=s.x && cx<=s.x+s.w && cy>=s.y && cy<=s.y+s.d;
+  });
+  return on?SITE_SURFACE_Y:0;
 }
 function item3DBaseY(it){
   if(!it) return 0;
   if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
     if(isFloorAwareGroundItemType(it.type) && (it.floor||1)>1) return floorTopY(it.floor);
-    return 0;
+    return groundYForItem(it);
   }
   if(it.type==='roof') return floorBaseY(it.floor);
   return floorTopY(it.floor);
@@ -14326,13 +14339,18 @@ function buildWinFrames(flFilt){
         // FIX・縦すべり出し: 枠見込み70mm(半外付け)+障子は5mm手前に段差を付けて分離
         var windowKind=effectiveWindowKind(it);
         var SD2=0.07;
+        // 枠は壁厚いっぱいまで伸ばした額縁納まりにする。枠が薄いと掘り込みの
+        // 白い小口が外から見え、特にダーク外壁のスリット窓でズレのように目立つ
+        var wallHalf=((best&&best.thick?best.thick:120)*U)/2;
+        var SDF=exSign?(0.085+wallHalf+0.005):(wallHalf*2+0.01);
+        var zF=exSign?exS*((0.085-(wallHalf+0.005))/2):0;
         var outerBar=0.035;
         var innerW=Math.max(ww-outerBar*2,0.02);
         var innerH=Math.max(wh-outerBar*2,0.02);
-        addBox(frameMat,0,outerBar/2,zBase,ww,outerBar,SD2);
-        addBox(frameMat,0,wh-outerBar/2,zBase,ww,outerBar,SD2);
-        addBox(frameMat,-ww/2+outerBar/2,wh/2,zBase,outerBar,wh,SD2);
-        addBox(frameMat, ww/2-outerBar/2,wh/2,zBase,outerBar,wh,SD2);
+        addBox(frameMat,0,outerBar/2,zF,ww,outerBar,SDF);
+        addBox(frameMat,0,wh-outerBar/2,zF,ww,outerBar,SDF);
+        addBox(frameMat,-ww/2+outerBar/2,wh/2,zF,outerBar,wh,SDF);
+        addBox(frameMat, ww/2-outerBar/2,wh/2,zF,outerBar,wh,SDF);
         addBox(frameMat,0,0.006,zBase+exS*(SD2/2+0.012),ww,0.012,0.024);
         if(windowKind==='casement'){
           // 縦すべり出し: 枠から3mm目地を開けた一枚障子(框30mm・見込み30mm)を室内寄りに

@@ -35,7 +35,8 @@ DOOR_TYPES = {
     'door-fold', 'door-fold-w', 'door-front', 'door-opening',
     'door-opening-arch', 'window', 'window-door',
 }
-SWING_DOOR_TYPES = {'door-swing', 'door-swing-s', 'door-front'}
+SWING_DOOR_TYPES = {'door-swing', 'door-swing-s', 'door-front',
+                    'door-fold', 'door-fold-w'}
 ANNOTATION_TYPES = {'memo', 'ruler', 'walk-route'}
 
 # 敷地・構造・外構系（「家具」から除外する型）
@@ -266,7 +267,8 @@ def check2_swing_clearance(data):
             continue
         cx, cy = center(it)
         (ux, uy), (vx, vy) = axes(it)
-        w = it['w']
+        # 開き戸は開口幅の正方形、折戸は畳み代+通行幅900で見る
+        w = 900.0 if it['type'] in ('door-fold', 'door-fold-w') else it['w']
         floor = it.get('floor', 1)
         blockers = []  # 各側のブロッカー一覧
         for sign in (1, -1):
@@ -478,6 +480,32 @@ def check9_light_elev(data):
     return out
 
 
+def check10_room_access(data):
+    """名前を持つ部屋は、境界に建具(ドア/開口/掃き出し窓)が1つ以上あること。
+    PS(配管区画)・階段・バルコニー・吹き抜け・無名室は対象外。"""
+    out = []
+    skip_names = {'PS', '階段', 'バルコニー', '吹き抜け', ''}
+    entry_types = set(DOOR_TYPES) - {'window'}
+    for r in data.get('rooms', []):
+        name = (r.get('n') or '').strip()
+        if name in skip_names:
+            continue
+        floor = r.get('floor', 1)
+        rx0, ry0 = r['x'] - 200, r['y'] - 200
+        rx1, ry1 = r['x'] + r['w'] + 200, r['y'] + r['d'] + 200
+        found = False
+        for it in data.get('items', []):
+            if it.get('floor', 1) != floor or it.get('type') not in entry_types:
+                continue
+            b = aabb(it)
+            if b[0] < rx1 and b[2] > rx0 and b[1] < ry1 and b[3] > ry0:
+                found = True
+                break
+        if not found:
+            vio(out, r, '部屋「%s」にどこからも入れない(境界に建具が無い)' % name)
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -490,6 +518,7 @@ CHECKS = [
     ('7. 敷地外へのはみ出し', check7_inside_site),
     ('8. 階段の連続性', check8_stairs),
     ('9. 照明の天井高超過', check9_light_elev),
+    ('10. 部屋への到達性', check10_room_access),
 ]
 
 
