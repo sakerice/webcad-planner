@@ -1085,6 +1085,243 @@ def check23_kitchen_aisle(data):
     return out
 
 
+SLIDE_POCKET_TYPES = {'door-slide', 'door-slide-s', 'door-pocket'}
+
+
+def check24_slide_pocket(data):
+    """片引戸の引き代(戸袋)が戸幅ぶん壁に残っているか、その壁面が空いているか。
+
+    引戸は開口と同じだけ壁が要る。壁が足りないと全開できないし、
+    戸が滑る面に家具が立っていても同じこと。どちらも平面図では気づけない。
+    """
+    out = []
+    furn = [f for f in data['items'] if is_furniture(f)]
+    for it in data['items']:
+        if it['type'] not in SLIDE_POCKET_TYPES:
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), (vx, vy) = axes(it)
+        half = it['w'] / 2.0
+        host, best = None, 1e9
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            d = seg_point_dist(cx, cy, w['x1'], w['y1'], w['x2'], w['y2'])
+            if d < best:
+                best, host = d, w
+        if host is None or best > (host.get('thick', 120) or 120) / 2.0 + 40.0:
+            continue
+        wl = math.hypot(host['x2'] - host['x1'], host['y2'] - host['y1'])
+        wux, wuy = (host['x2'] - host['x1']) / wl, (host['y2'] - host['y1']) / wl
+        t = (cx - host['x1']) * wux + (cy - host['y1']) * wuy
+        left = t - half            # 開口の西/北側に残る壁
+        right = wl - (t + half)    # 開口の東/南側に残る壁
+        pocket = max(left, right)
+        if pocket < it['w'] - 10:
+            vio(out, it, '引き代が%.0fmmしかない(戸幅%.0fmm・壁 id=%s 長さ%.0fmm)。'
+                '全開できない' % (pocket, it['w'], host.get('id', '?'), wl))
+            continue
+        # 戸が滑る側の壁面600mm帯に家具が立っていないか
+        sign = 1.0 if right >= left else -1.0
+        sx = cx + ux * sign * it['w']
+        sy = cy + uy * sign * it['w']
+        rect = {'x': sx - it['w'] / 2.0, 'y': sy - 300.0, 'w': it['w'], 'd': 600.0,
+                'rot': it.get('rot', 0)}
+        box = aabb(rect)
+        hits = [f for f in furn if f.get('floor', 1) == floor
+                and (f.get('elev') or 0) < 500
+                and rects_intersect(aabb(f), box, 20.0)]
+        if hits:
+            vio(out, it, '戸が滑る壁面に %s がある(全開できない)'
+                % ', '.join(sorted({label(f) for f in hits})))
+    return out
+
+
+def check25_swing_arc(data):
+    """開き戸が実際に何度まで開くか。90度開けないものを違反にする。"""
+    out = []
+    furn = [f for f in data['items'] if is_furniture(f)]
+    for it in data['items']:
+        if it['type'] not in ('door-swing', 'door-swing-s', 'door-front'):
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), (vx, vy) = axes(it)
+        half = it['w'] / 2.0
+        # 吊元は flipX 側の端、開く向きは flipY
+        hs = -1.0 if not it.get('flipX') else 1.0
+        hx, hy = cx + ux * half * hs, cy + uy * half * hs
+        ss = 1.0 if not it.get('flipY') else -1.0
+        others = [f for f in furn if f.get('floor', 1) == floor
+                  and (f.get('elev') or 0) < 500]
+        worst = 90.0
+        blocker = None
+        for deg in range(10, 95, 5):
+            a = math.radians(deg)
+            # 戸先の位置(吊元まわりに回す)
+            dx = -ux * hs * math.cos(a) + vx * ss * math.sin(a)
+            dy = -uy * hs * math.cos(a) + vy * ss * math.sin(a)
+            # 戸板を薄い矩形として当たり判定
+            mx, my = hx + dx * it['w'] / 2.0, hy + dy * it['w'] / 2.0
+            leaf = {'x': mx - it['w'] / 2.0, 'y': my - 20.0, 'w': it['w'], 'd': 40.0,
+                    'rot': math.degrees(math.atan2(dy, dx))}
+            lb = aabb(leaf)
+            hit = [f for f in others if rects_intersect(aabb(f), lb, 20.0)]
+            if hit:
+                worst = deg - 5
+                blocker = hit[0]
+                break
+        if worst < 80:
+            vio(out, it, '%d度までしか開かない(%s が当たる)'
+                % (worst, label(blocker) if blocker else '?'))
+    return out
+
+
+def check26_storage_facing(data, root=None):
+    """収納家具の正面(rotの向き)が壁や物で塞がれていないか。
+
+    扉・引き出しは正面へ開く。背面を室内に向けていると使えないし見た目も悪い。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+    KEYS = ('Cabinet', 'CABINET', 'Shelf', 'Closet', 'Drawer', 'shelf', 'cabinet')
+    for it in data['items']:
+        t = it.get('type', '')
+        if not any(k in t for k in KEYS):
+            continue
+        if (it.get('elev') or 0) >= 500:
+            continue          # 吊り棚は対象外
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), (vx, vy) = axes(it)
+        # rot=0 は正面が北(-y)。ローカル -v 方向が正面
+        need = 600.0
+        fx, fy = cx - vx * (it['d'] / 2.0 + need / 2.0), cy - vy * (it['d'] / 2.0 + need / 2.0)
+        rect = {'x': fx - it['w'] / 2.0, 'y': fy - need / 2.0, 'w': it['w'], 'd': need,
+                'rot': it.get('rot', 0)}
+        box = aabb(rect)
+        hits = []
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            ht = (w.get('thick', 120) or 120) / 2.0
+            wb = (min(w['x1'], w['x2']) - ht, min(w['y1'], w['y2']) - ht,
+                  max(w['x1'], w['x2']) + ht, max(w['y1'], w['y2']) + ht)
+            ox, oy = rect_overlap(wb, box)
+            if ox > 30 and oy > 30:
+                hits.append('壁 id=%s' % w.get('id', '?'))
+        for f in data['items']:
+            if f is it or f.get('floor', 1) != floor or not is_furniture(f):
+                continue
+            if (f.get('elev') or 0) >= 500:
+                continue
+            if rects_intersect(aabb(f), box, 30.0):
+                hits.append(label(f))
+        if hits:
+            vio(out, it, '正面600mmが塞がれている(扉・引き出しが使えない): %s'
+                % ', '.join(sorted(set(hits))[:4]))
+    return out
+
+
+def check27_operable_window(data):
+    """開閉できる窓(sliding/casement)の室内側600mmに家具が立っていないか。"""
+    out = []
+    furn = [f for f in data['items'] if is_furniture(f)]
+    rooms_by_floor = {}
+    for r in data.get('rooms', []):
+        rooms_by_floor.setdefault(r.get('floor', 1), []).append(r)
+    for it in data['items']:
+        if it['type'] != 'window':
+            continue
+        if (it.get('windowKind') or 'sliding') == 'fix':
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (_u), (vx, vy) = axes(it)[0], axes(it)[1]
+        sill = it.get('windowSill') or 0
+        for sign in (1, -1):
+            px, py = cx + sign * vx * 300, cy + sign * vy * 300
+            inside = any(px >= r['x'] and px <= r['x'] + r['w'] and
+                         py >= r['y'] and py <= r['y'] + r['d']
+                         for r in rooms_by_floor.get(floor, []))
+            if not inside:
+                continue
+            bx = cx + sign * vx * 300
+            by = cy + sign * vy * 300
+            rect = {'x': bx - it['w'] / 2.0, 'y': by - 300.0, 'w': it['w'], 'd': 600.0,
+                    'rot': it.get('rot', 0)}
+            box = aabb(rect)
+            hits = [f for f in furn if f.get('floor', 1) == floor
+                    and rects_intersect(aabb(f), box, 20.0)
+                    and (f.get('elev') or 0) + _model_h(f) > sill + 100]
+            if hits:
+                vio(out, it, '室内側600mmに %s があり開閉できない'
+                    % ', '.join(sorted({label(f) for f in hits})))
+    return out
+
+
+_H_CACHE = {}
+
+
+def _model_h(o):
+    t = o.get('type', '')
+    if t == 'custom-block':
+        return o.get('customHeight') or 900
+    if not _H_CACHE:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+        _H_CACHE.update(_load_catalog(root) or {'': (0, 0, 0)})
+    v = _H_CACHE.get(t)
+    return (v[2] or 0) if v else 700
+
+
+def check28_curtain_fit(data, root=None):
+    """カーテンが対応する窓と幅・高さで整合しているか。"""
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+    wins = [w for w in data['items'] if w['type'] in ('window', 'window-door')]
+    curtains = [c for c in data['items'] if '-Curtain-' in c.get('type', '')]
+    # 窓ごとにカーテンをまとめる(掃き出し窓は2枚吊ることがある)
+    by_win = {}
+    for c in curtains:
+        cx, cy = center(c)
+        best, bd = None, 1e9
+        for w in wins:
+            if w.get('floor', 1) != c.get('floor', 1):
+                continue
+            wx, wy = center(w)
+            d = math.hypot(wx - cx, wy - cy)
+            if d < bd:
+                best, bd = w, d
+        if best is None or bd > 1500:
+            vio(out, c, '対応する窓が見つからない(最寄り %.0fmm)' % bd)
+            continue
+        by_win.setdefault(id(best), (best, []))[1].append(c)
+    for _k, (w, cs) in by_win.items():
+        total = sum(c['w'] for c in cs)
+        if total < w['w'] - 20:
+            vio(out, cs[0], '窓(幅%.0fmm)に対しカーテン合計%.0fmmで足りない'
+                '(左右%.0fmmずつガラスが出る)'
+                % (w['w'], total, (w['w'] - total) / 2.0))
+        elif total > w['w'] * 1.45:
+            vio(out, cs[0], '窓(幅%.0fmm)に対しカーテン合計%.0fmmで過大'
+                % (w['w'], total))
+        sill = w.get('windowSill') or 0
+        top = sill + (w.get('windowHeight') or 0)
+        for c in cs:
+            h = (cat.get(c['type']) or (0, 0, 0))[2] or 0
+            e = c.get('elev') or 0
+            if e + h < top - 20:
+                vio(out, c, 'カーテン上端%.0fmmが窓上端%.0fmmに届いていない'
+                    % (e + h, top))
+            if sill > 300 and e < sill - 400:
+                vio(out, c, '腰窓(窓台%.0fmm)に床丈のカーテンが掛かっている'
+                    '(下端%.0fmm)' % (sill, e))
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -1111,6 +1348,11 @@ CHECKS = [
     ('21. 屋外アイテム同士の重なり', check21_outdoor_overlap),
     ('22. 高所設置物の3次元干渉', check22_high_object_clash),
     ('23. キッチン通路の有効1000mm', check23_kitchen_aisle),
+    ('24. 引戸の引き代と戸袋面', check24_slide_pocket),
+    ('25. 開き戸の開き角度', check25_swing_arc),
+    ('26. 収納家具の正面クリアランス', check26_storage_facing),
+    ('27. 開閉窓の室内側クリアランス', check27_operable_window),
+    ('28. カーテンと窓の整合', check28_curtain_fit),
 ]
 
 

@@ -341,8 +341,7 @@ item("exterior-stair", 7280, 8930, 1820, 900, 1, rot=180,
 item("custom-block", 7320, 10830, 1100, 2900, 1, color="#b9b8b4",
      customHeight=20, name="アプローチ", texture="porch_tile")
 # LDK大開口の外のウッドデッキ(FL450の段差解消)
-item("custom-block", 1900, 7800, 2600, 900, 1, color=COL_WOOD,
-     customHeight=450, name="ウッドデッキ", texture="wood_cedar")
+item("fmp-WoodDeck01", 1900, 7800, 2600, 900, 1, rot=0)   # ウッドデッキ(実物モデル)
 item("exterior-stair", 1900, 8475, 1800, 450, 1, rot=180,
      color="#b8b2a8", targetHeight=450, accessSteps=3)
 # 勝手口の外階段

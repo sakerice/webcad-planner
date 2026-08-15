@@ -15540,9 +15540,16 @@ function buildItem3D(it){
   else if(it.type==='toilet'){build3DToilet(grp);}
   else if(it.type==='sink'){build3DSink(grp);}
   else if(it.type==='tree'){
-    // 樹高はアイテムの平面寸法から決める。Math.random() を使うと rebuild3D の
-    // たびに寸法が変わり、平面図で確保した離隔も守れず外壁を突き抜ける。
-    build3DTree(grp,Math.max(1.6,Math.min(6.5,Math.max(w3,d3)*2.1)),Math.max(w3,d3));
+    // 株立ちの庭木モデルがあればそれを使う。無い場合だけ簡易ジオメトリで代替。
+    var treeFmp=getFmpItem(TREE_MODEL_ID);
+    if(treeFmp && ensureGltfModel(treeFmp.model)){
+      var th=Math.max(1.6,Math.min(6.5,Math.max(w3,d3)*2.0));
+      grp.add(makeGltfBoxFitClone(treeFmp.model,w3,th,d3,null));
+    } else {
+      // 樹高はアイテムの平面寸法から決める。Math.random() を使うと rebuild3D の
+      // たびに寸法が変わり、平面図で確保した離隔も守れず外壁を突き抜ける。
+      build3DTree(grp,Math.max(1.6,Math.min(6.5,Math.max(w3,d3)*2.1)),Math.max(w3,d3));
+    }
   }
   else if(it.type==='car'){
     if(ensureGltfModel(CONTEXT_CAR_GLB)){
@@ -15924,6 +15931,8 @@ function addHouseSidingLines(grp,mat,w3,d3,bodyH){
 var CONTEXT_GLB_SPECS={
   'neighbor-building':{url:'assets/models/context/neighbor_building.glb',base:'bd_base',mid:'bd_mid',roof:'bd_top',fw:5.2,fd:3.6,sh:2.7,roofH:0.45,wallMats:{BdPanel:1,BdPanelDark:1}}
 };
+// 庭木は株立ちのGLBを使う。カタログ(custom/manifest.json)に無い場合だけ簡易ジオメトリ
+var TREE_MODEL_ID='fmp-GardenTree01';
 var CONTEXT_CAR_GLB='assets/models/context/car_sedan.glb';
 var _carGlbConfigured=false;
 function configureCarGlbMaterials(){
