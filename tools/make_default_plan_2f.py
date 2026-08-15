@@ -161,144 +161,135 @@ item("foundation", BW / 2, BD / 2, BW, BD, 1, color="#474747",
      foundationHeight=450)
 
 # ══════════ 1F ══════════
+# 設計方針: 2階の壁は全て1階の壁の上に載せるか、直交壁で分割して最大スパンを
+# 4550mm以下に収める。「リントを通すためだけの袖壁」は置かない。
+# 部屋は全て矩形で、無名の余り矩形を作らない(1階は建物面積 59.62㎡ ちょうど)。
 w_n1 = wall(0, 0, BW, 0, 1)
 w_e1 = wall(BW, 0, BW, BD, 1)                 # アクセント(チャコール)
 w_s1m = wall(0, BD, 6370, BD, 1)              # 白
 w_s1e = wall(6370, BD, BW, BD, 1)             # アクセント(玄関ボリューム)
 w_w1 = wall(0, BD, 0, 0, 1)
 
-wall(0, 1820, 3640, 1820, 1)          # 浴室・洗面の南壁
 wall(1820, 0, 1820, 1820, 1)          # 浴室|洗面
-wall(3640, 0, 3640, 1820, 1)          # 洗面|キッチン
+wall(0, 1820, 3640, 1820, 1)          # 浴室+洗面|ランドリー
+wall(3640, 0, 3640, 2730, 1)          # 水まわり|キッチン
+wall(0, 2730, 6370, 2730, 1)          # 北ゾーン|洋室+LDK
+wall(2730, 2730, 2730, BD, 1)         # 洋室(1F)|LDK
 wall(6370, 0, 6370, BD, 1)            # 東ゾーン背骨
 wall(7280, 0, 7280, 4550, 1)          # 階段室西壁
 wall(6370, 1820, 7280, 1820, 1)       # パントリー南
 wall(6370, 3640, 7280, 3640, 1)       # トイレ南
-wall(7280, 910, 8190, 910, 1)         # 物入南
-wall(7280, 6370, 8190, 6370, 1)       # SIC南
-wall(7280, 5460, 7280, 6370, 1)       # SIC西
-wall(3640, 2275, 5460, 2275, 1, wallHeight=1100)   # 対面キッチン腰壁
-# 直下率確保の袖壁。2Fの y3640 / y4550 の壁を6370mmのクリアスパンで受けるのは
-# 在来木造では成立しないため、1Fに受けを立ててスパンを4550以下に割る
-wall(1820, 3640, 2730, 3640, 1)
-wall(4550, 4550, 5460, 4550, 1)
+wall(7280, 910, 8190, 910, 1)         # 納戸南
+wall(6370, 4550, 8190, 4550, 1)       # 廊下+階段|ホール
+wall(6370, 5460, 8190, 5460, 1)       # ホール|玄関
 
 room("浴室", 0, 0, 1820, 1820, 1, texture="tile_floor")
 room("洗面脱衣室", 1820, 0, 1820, 1820, 1, texture="tile_floor")
-room("キッチン", 3640, 0, 2730, 2275, 1, texture="wood_floor")
+room("ランドリー", 0, 1820, 3640, 910, 1, texture="tile_floor")
+room("キッチン", 3640, 0, 2730, 2730, 1, texture="wood_floor")
+room("洋室", 0, 2730, 2730, 4550, 1, texture="wood_floor")
+room("LDK", 2730, 2730, 3640, 4550, 1, texture="wood_floor")
 room("パントリー", 6370, 0, 910, 1820, 1, texture="wood_floor")
-room("物入", 7280, 0, 910, 910, 1, texture="wood_floor")
-room("トイレ", 6370, 1820, 910, 1820, 1, texture="tile_floor")
+room("納戸", 7280, 0, 910, 910, 1, texture="wood_floor")
 room("階段", 7280, 910, 910, 3640, 1, texture="wood_floor")
-room("LDK", 0, 1820, 3640, 5460, 1, texture="wood_floor")
-room("", 3640, 2275, 2730, 5005, 1, texture="wood_floor")   # LDK東(ラベルは西に集約)
-room("ホール", 6370, 3640, 910, 1820, 1, texture="wood_floor")
-room("", 7280, 4550, 910, 910, 1, texture="wood_floor")     # ホール東(階段下)
-room("玄関", 6370, 5460, 910, 1820, 1, texture="porch_tile")
-room("", 7280, 6370, 910, 910, 1, texture="porch_tile")      # 玄関東(土間)
-room("SIC", 7280, 5460, 910, 910, 1, texture="wood_floor")   # シューズクローク
+room("トイレ", 6370, 1820, 910, 1820, 1, texture="tile_floor")
+room("廊下", 6370, 3640, 910, 910, 1, texture="wood_floor")
+room("ホール", 6370, 4550, 1820, 910, 1, texture="wood_floor")
+room("玄関", 6370, 5460, 1820, 1820, 1, texture="porch_tile")
 
-# ── 1F 建具 (flipY=True は -y=北側へ開く)
-door("door-fold", 1820, 1000, 780, 1, vertical=True)
-door("door-slide-s", 2600, 1820, 780, 1)
-door("door-opening", 6370, 900, 780, 1, vertical=True)
-door("door-slide-s", 7280, 455, 650, 1, vertical=True)          # 物入(引戸)
-door("door-slide-s", 6825, 3640, 650, 1)                        # トイレ(引戸)
-door("door-slide", 6370, 4550, 1650, 1, vertical=True)          # LDK↔ホール
-door("door-front", 7320, BD, 940, 1, color=COL_DOOR)            # 玄関ドア(外開き)
-door("door-swing-s", 2200, 0, 650, 1, flipY=True)               # 勝手口(外開き)
-door("door-opening", 7280, 5915, 780, 1, vertical=True)         # SIC
+# ── 1F 建具 (引戸は引き代を戸幅ぶん確保できる位置にだけ置く)
+door("door-fold", 910, 1820, 780, 1)                            # 浴室(折戸)
+door("door-slide-s", 2730, 1820, 780, 1)                        # 洗面→ランドリー
+door("door-slide", 1400, 2730, 1650, 1)                         # ランドリー↔洋室
+door("door-opening", 5915, 2730, 780, 1)                        # キッチン出入口
+door("door-opening", 6370, 900, 780, 1, vertical=True)          # パントリー
+door("door-swing-s", 7735, 910, 650, 1, flipY=True)             # 納戸
+door("door-swing-s", 6825, 3640, 650, 1, flipY=True)            # トイレ(室内開き)
+door("door-slide", 2730, 4550, 1650, 1, vertical=True)          # 洋室↔LDK
+door("door-slide", 6370, 4900, 1650, 1, vertical=True)          # LDK↔ホール
+door("door-opening", 7280, 5460, 1650, 1)                       # 玄関→ホール(上り框)
+door("door-front", 7320, BD, 940, 1, color=COL_DOOR)            # 玄関ドア
+door("door-swing-s", 5000, 0, 650, 1, flipY=True)               # 勝手口(外開き)
 
 # ── 1F 窓 (上端2030の通りで揃える)
-win(2000, BD, 1, "25620", 0, 2030)                    # LDK南 大開口
-win(5000, BD, 1, "F11913", 660, 1370, kind="fix")     # ダイニング南FIX
-win(5000, 0, 1, "11909", 1060, 970)                   # キッチン北
-win(2200, 0, 1, "06905", 1460, 570)                   # 洗面北
+win(4000, BD, 1, "25620", 0, 2030)                    # LDK南 大開口
+win(1400, BD, 1, "16520", 0, 2030)                    # 洋室南 掃き出し
+win(5000, 0, 1, "16513", 660, 1370)                   # キッチン北
+win(2600, 0, 1, "06905", 1460, 570)                   # 洗面北
 win(900, 0, 1, "06905", 1460, 570)                    # 浴室北
-win(0, 3300, 1, "16513", 660, 1370, vertical=True)    # LDK西
-win(0, 5800, 1, "03613", 660, 1370, vertical=True, kind="casement")
+win(0, 4200, 1, "16513", 660, 1370, vertical=True)    # 洋室西
+win(0, 6400, 1, "03613", 660, 1370, vertical=True, kind="casement")   # 洋室西スリット
+win(0, 2275, 1, "07409", 1260, 770, vertical=True)    # ランドリー西
 win(BW, 6800, 1, "F03613", 660, 1370, vertical=True, kind="fix")      # 玄関東
 win(BW, 2400, 1, "03613", 660, 1370, vertical=True, kind="casement")  # 階段東
 
-# ── 階段 (ホール(南)から北へ上り、頂部コーナーで西へ抜ける)
+# ── 階段 (ホールから北へ上り、頂部コーナーで西へ抜ける)
 item("stair", 7735, 3185, 910, 2730, 1, rot=180, color="#e8e0c8", stairOrder=1)
 _c = item("stair-corner", 7735, 1365, 910, 910, 1, rot=0,
           color="#e8e0c8", stairOrder=2)
 _c["flipX"] = True
 
 # ══════════ 2F ══════════
-# 東ゾーンは階段着地から廊下まで一直線の縦動線にし、トイレは北外壁側へ。
-# (旧案は上り口の壁が455mm欠落し、トイレが階段室に開放されていた)
 w_n2 = wall(0, 0, BW, 0, 2)
 w_e2 = wall(BW, 0, BW, BD, 2)
 w_s2m = wall(0, BD, 6370, BD, 2)
 w_s2e = wall(6370, BD, BW, BD, 2)
 w_w2 = wall(0, BD, 0, 0, 2)
 
-wall(3640, 0, 3640, 3640, 2)          # 洋室A|洋室B
-wall(5460, 0, 5460, 1365, 2)          # 洋室B|2Fトイレ
-wall(5460, 1365, 6370, 1365, 2)       # 2Fトイレ南
-wall(5460, 1365, 5460, 2275, 2)       # 洋室B|CL
-wall(5460, 2275, 6370, 2275, 2)       # 洋室BのCL南
-wall(6370, 0, 6370, 3640, 2)          # 北ゾーン|2Fホール
-wall(0, 2730, 1820, 2730, 2)          # 洋室A|CL
-wall(1820, 2730, 1820, 3640, 2)       # CL|洋室A(南の張り出し)
-wall(0, 3640, 6370, 3640, 2)          # 北ゾーン南壁
-wall(7280, 0, 7280, 910, 2)           # 2Fホール|PS
-wall(7280, 910, 8190, 910, 2)         # PS南(階段着地の北)
-wall(7280, 1820, 7280, 4550, 2)       # 2Fホール|吹き抜け
-wall(0, 4550, 8190, 4550, 2)          # 南ゾーン北壁
-wall(910, 3640, 910, 4550, 2)         # リネン庫東
-wall(4550, 4550, 4550, BD, 2)         # 主寝室|WIC
-wall(6370, 4550, 6370, BD, 2)         # WIC|書斎
+wall(0, 2730, 6370, 2730, 2)          # 北ゾーン|廊下   (直下: 1F y2730)
+# x6370-7280 は2Fホールから廊下への通り抜け(壁を置かない)
+wall(0, 3640, 7280, 3640, 2)          # 廊下|南ゾーン   (直下: 1F x2730/x6370で分割)
+wall(3640, 0, 3640, 2730, 2)          # 洋室A|洋室B     (直下: 1F x3640)
+wall(6370, 0, 6370, BD, 2)            # 東ゾーン背骨    (直下: 1F x6370)
+wall(7280, 0, 7280, 4550, 2)          # 階段室西壁      (直下: 1F x7280)
+wall(6370, 1820, 7280, 1820, 2)       # 2Fトイレ南      (直下: 1F y1820)
+wall(7280, 910, 8190, 910, 2)         # 2F収納南        (直下: 1F y910)
+wall(3640, 3640, 3640, BD, 2)         # 主寝室|WIC/書斎
+wall(3640, 5460, 6370, 5460, 2)       # WIC|書斎
+wall(6370, 4550, 8190, 4550, 2)       # 廊下|納戸
 
 room("洋室A", 0, 0, 3640, 2730, 2, texture="wood_floor")
-room("", 1820, 2730, 1820, 910, 2, texture="wood_floor")     # 洋室A南の張り出し
-room("CL", 0, 2730, 1820, 910, 2, texture="wood_floor")
-room("洋室B", 3640, 0, 1820, 3640, 2, texture="wood_floor")
-room("CL", 5460, 1365, 910, 910, 2, texture="wood_floor")    # 洋室BのCL
-room("", 5460, 2275, 910, 1365, 2, texture="wood_floor")     # 洋室B東の張り出し
-room("トイレ", 5460, 0, 910, 1365, 2, texture="tile_floor")
-room("ホール", 6370, 0, 910, 3640, 2, texture="wood_floor")
-room("", 7280, 910, 910, 910, 2, texture="wood_floor")       # 階段着地
-room("PS", 7280, 0, 910, 910, 2, texture="wood_floor")
-room("リネン庫", 0, 3640, 910, 910, 2, texture="wood_floor")
-room("廊下", 910, 3640, 6370, 910, 2, texture="wood_floor")
-room("主寝室", 0, 4550, 4550, 2730, 2, texture="wood_floor")
-room("WIC", 4550, 4550, 1820, 2730, 2, texture="wood_floor")
-room("書斎", 6370, 4550, 1820, 2730, 2, texture="wood_floor")
+room("洋室B", 3640, 0, 2730, 2730, 2, texture="wood_floor")
+room("トイレ", 6370, 0, 910, 1820, 2, texture="tile_floor")
+room("収納", 7280, 0, 910, 910, 2, texture="wood_floor")
+room("ホール", 6370, 1820, 910, 910, 2, texture="wood_floor")
+room("階段ホール", 7280, 910, 910, 910, 2, texture="wood_floor")
+room("廊下", 0, 2730, 7280, 910, 2, texture="wood_floor")
+room("廊下", 6370, 3640, 910, 910, 2, texture="wood_floor")
+room("主寝室", 0, 3640, 3640, 3640, 2, texture="wood_floor")
+room("WIC", 3640, 3640, 2730, 1820, 2, texture="wood_floor")
+room("書斎", 3640, 5460, 2730, 1820, 2, texture="wood_floor")
+room("納戸", 6370, 4550, 1820, 2730, 2, texture="wood_floor")
 # x7280-8190 / y1820-4550 は階段吹き抜け(床なし)
 
 # ── 2F 建具
-door("door-swing", 2600, 3640, 780, 2, flipY=True)      # 洋室A(室内開き)
-door("door-fold-w", 910, 2730, 1650, 2, flipY=True)     # CL
-door("door-swing", 5000, 3640, 780, 2, flipY=True)      # 洋室B(室内開き)
-door("door-slide-s", 6370, 680, 650, 2, vertical=True)  # 2Fトイレ(引戸)
-door("door-slide-s", 5915, 2275, 650, 2)               # 洋室BのCL(引戸・張り出しから)
-door("door-slide-s", 910, 4095, 650, 2, vertical=True)  # リネン庫(引戸)
-door("door-swing", 3000, 4550, 780, 2)                  # 主寝室(室内開き=南)
-door("door-fold", 5950, 4550, 780, 2)                   # WIC
-door("door-slide-s", 4550, 4900, 650, 2, vertical=True) # 主寝室↔WIC
-door("door-swing", 6800, 4550, 780, 2)                  # 書斎
+door("door-swing", 1400, 2730, 780, 2, flipY=True)      # 洋室A(室内開き)
+door("door-swing", 5000, 2730, 780, 2, flipY=True)      # 洋室B(室内開き)
+door("door-slide-s", 6825, 1820, 650, 2)                # 2Fトイレ(引戸)
+door("door-swing-s", 7735, 910, 650, 2, flipY=True)     # 2F収納
+door("door-swing", 1400, 3640, 780, 2)                  # 主寝室(室内開き=南)
+door("door-fold-w", 4700, 3640, 1650, 2)                # WIC
+door("door-swing", 5800, 5460, 780, 2)                  # 書斎(WICから)
+door("door-slide", 6825, 4550, 1650, 2)                 # 納戸(引戸)
 
 # ── 2F 窓 (上端2030で1Fと通りを揃える)
-win(1500, 0, 2, "16513", 660, 1370)                   # 洋室A北
-win(0, 1500, 2, "11909", 1060, 970, vertical=True)    # 洋室A西
-win(4500, 0, 2, "16513", 660, 1370)                   # 洋室B北
-win(5915, 0, 2, "06905", 1460, 570)                   # 2Fトイレ北
-win(0, 5900, 2, "16513", 660, 1370, vertical=True)    # 主寝室西
-win(2900, BD, 2, "16520", 0, 2030)                    # 主寝室南 掃き出し
-win(7300, BD, 2, "F06013", 660, 1370, kind="fix")     # 書斎南FIX
-win(BW, 5900, 2, "03613", 660, 1370, vertical=True, kind="casement")  # 書斎東(開閉可)
+win(1400, 0, 2, "16513", 660, 1370)                   # 洋室A北
+win(0, 1400, 2, "16513", 660, 1370, vertical=True)    # 洋室A西
+win(4800, 0, 2, "16513", 660, 1370)                   # 洋室B北
+win(6825, 0, 2, "06905", 1460, 570)                   # 2Fトイレ北
+win(0, 5000, 2, "16513", 660, 1370, vertical=True)    # 主寝室西
+win(1800, BD, 2, "16520", 0, 2030)                    # 主寝室南 掃き出し
+win(4800, BD, 2, "16513", 660, 1370)                  # 書斎南
+win(BW, 5900, 2, "03613", 660, 1370, vertical=True, kind="casement")  # 納戸東
 win(BW, 2400, 2, "F03613", 660, 1370, vertical=True, kind="fix")      # 吹き抜け東
 
-# ── バルコニー (主寝室南・木調腰壁・出910に収める)
-item("balcony", 2730, 7735, 3640, 910, 2, color="#c8e8c8")
-w_b1 = wall(910, 8190, 4550, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
-w_b2 = wall(910, 7280, 910, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
-w_b3 = wall(4550, 7280, 4550, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
+# ── バルコニー (主寝室南・木調腰壁・出910)
+item("balcony", 1820, 7735, 3640, 910, 2, color="#c8e8c8")
+w_b1 = wall(0, 8190, 3640, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
+w_b2 = wall(0, BD, 0, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
+w_b3 = wall(3640, BD, 3640, 8190, 2, wallStyle="balcony-fence", wallHeight=1100)
 
-# ── 屋根 (フラットルーフのキューブ型)
+# ── 屋根 (フラットルーフのキューブ型・軒の出450)
 item("roof", BW / 2, BD / 2, BW + 900, BD + 900, 3, rot=0,
      color=COL_ROOF, roofType="flat", pitch=5, elev=0,
      roofThickness=260, roofSkirt=0, roofEdgeColor=COL_ROOF)
@@ -376,11 +367,11 @@ item("sewer-pit", 9600, 7600, 300, 300, 1, color="#6f7275")
 # エアコン: 室内機は必ず外壁面。室外機は配管長3m以内に対で置く
 AC_PAIRS = [
     # (室内機 cx, cy, rot, floor, 室外機 cx, cy, rot)
-    (190, 3000, 90, 1, -330, 3000, 90),        # LDK(西壁)
-    (3200, 190, 180, 2, 3200, -300, 0),        # 洋室A(北壁・カーテンの外)
-    (4200, 190, 180, 2, 4500, -300, 0),        # 洋室B(北壁)
-    (190, 5000, 90, 2, -330, 5000, 90),        # 主寝室(西壁)
-    (8000, 5000, -90, 2, 8500, 5000, -90),     # 書斎(東壁)
+    (6180, 3000, -90, 1, 8500, 3000, -90),     # LDK(東壁)
+    (2900, 130, 180, 2, 2900, -300, 0),        # 洋室A(北壁)
+    (5500, 130, 180, 2, 5500, -300, 0),        # 洋室B(北壁)
+    (190, 4200, 90, 2, -330, 4200, 90),        # 主寝室(西壁)
+    (6180, 6300, -90, 2, 8500, 6300, -90),     # 書斎(東壁)
 ]
 for ix, iy, irot, fl, ox, oy, orot in AC_PAIRS:
     item("fmp-AirConditionerWall01", ix, iy, 800, 260, fl, rot=irot, elev=2050)
@@ -400,195 +391,190 @@ item("neighbor-building", -3200, SY1 + 6850, 5200, 3600, 1,
      color="#8f98a3", contextFloors=3, contextHeight=9150, contextGhost=True)
 
 # ══════════ 1F 家具 ══════════
-# ── キッチン: 対面ペニンシュラ。東側に910の出入口を残す
-item("fmp-CabinetD01", 3885, 1920, 366, 519, 1, rot=0)
-item("fmp-CabinetD_Sink", 4434, 1920, 732, 519, 1, rot=0)
-item("fmp-CabinetD03", 4982, 1920, 364, 519, 1, rot=0)
-item("fmp-GasStove07", 4890, 1900, 530, 470, 1, rot=0, elev=797)
-item("fmp-KitchenExhaust07", 4890, 1910, 466, 466, 1, rot=0, elev=1900)  # 島型
-item("fmp-Refrigerator02", 4040, 470, 640, 695, 1, rot=180)
+# ── キッチン (背面カウンター450 / 通路1680 / 対面カウンター600)
+kx = 3760
+for t, w in (("fmp-CabinetD01", 366), ("fmp-CabinetD_Sink", 732),
+             ("fmp-CabinetD03", 364)):
+    item(t, kx + w / 2, 2380, w, 519, 1, rot=0)
+    kx += w
+item("fmp-GasStove07", 5000, 2360, 530, 470, 1, rot=0, elev=797)
+item("fmp-KitchenExhaust07", 5000, 2370, 466, 466, 1, rot=0, elev=1900)
+item("fmp-Refrigerator02", 4060, 420, 640, 695, 1, rot=180)
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
-     5220, 300, 1600, 450, 1, rot=180)                      # 背面カウンター
+     5320, 300, 1600, 450, 1, rot=180)                      # 背面カウンター
 item("im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
-     4700, 300, 340, 351, 1, rot=180, elev=710)
+     4800, 300, 340, 351, 1, rot=180, elev=710)
 item("im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
-     5400, 300, 255, 270, 1, rot=180, elev=710)
-item("im0261-Plant-MEGA_PACK_Plant-plant-317746", 5850, 240, 403, 84, 1,
-     rot=180, elev=710)
+     5500, 300, 255, 270, 1, rot=180, elev=710)
 
-# ── ダイニング(カウンター南・横並び配膳)
+# ── ダイニング(キッチンカウンターの南) / リビング(南の庭側)
 item("im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut",
-     4800, 3600, 1758, 1329, 1, rot=0)
-item("im0261-Kid-MEGA_PACK_kid-kid-677431_Brown", 4900, 2600, 520, 611, 1, rot=180)
-
-# ── リビング(TVは西壁、ソファは東から西を向く)
+     4400, 3700, 1758, 1329, 1, rot=0)
+item("im0261-Kid-MEGA_PACK_kid-kid-677431_Brown", 3400, 3700, 520, 611, 1, rot=90)
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
-     1800, 4900, 2500, 2000, 1, rot=0)
+     4400, 5800, 2500, 2000, 1, rot=0)
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-354290_frame_walnut_brown",
-     280, 4900, 2000, 414, 1, rot=90)                       # TVローボード
-item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 300, 4900, 1230, 211, 1,
-     rot=90, elev=610)
-item("im0261-Decor-MEGA_PACK_decor-decor-71718_Frame_NaturalWood",
-     300, 4000, 97, 96, 1, rot=90, elev=610)
-item("im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa", 2900, 4900, 2402, 999, 1,
-     rot=-90)
+     6100, 5800, 2000, 414, 1, rot=-90)                     # TVローボード(東壁)
+item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 6080, 5800, 1230, 211, 1,
+     rot=-90, elev=610)
+item("im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa", 3900, 5800, 2402, 999, 1,
+     rot=90)
 item("im0261-Table-MEGA_PACK_Table-table-167288_frame_1190b_urbanacacia",
-     1750, 4900, 1167, 779, 1, rot=0)
+     4900, 5800, 1167, 779, 1, rot=0)
 item("im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
-     1750, 4900, 270, 209, 1, rot=0, elev=359)
-item("im0261-Table-MEGA_PACK_Table-table-157282", 3350, 3300, 700, 350, 1, rot=-90)
-item("im0261-Lamp-MEGA_PACK_lamp-lamp-31085_2", 3350, 3300, 226, 226, 1,
-     rot=0, elev=501)
-item("im0261-Decor-MEGA_PACK_decor-clock-116007_Frame_RoseGoldBlack",
-     1900, 1915, 303, 42, 1, rot=180, elev=1500)
+     4900, 5800, 270, 209, 1, rot=0, elev=359)
+item("im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown",
+     3300, 6900, 682, 835, 1, rot=0)
+item("im0261-Pet-MEGA_PACK_Pet-pet-43005_Frame_Green", 5900, 6950, 520, 520, 1,
+     rot=15)
 item("im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White",
-     6290, 6600, 499, 29, 1, rot=-90, elev=1350)
-# カーテン(天井2400を貫通しない丈)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1300, 7150, 1404, 103, 1,
+     2800, 4000, 499, 29, 1, rot=90, elev=1350)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 3600, 7150, 1404, 103, 1,
      rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 2700, 7150, 1404, 103, 1,
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 4900, 7150, 1404, 103, 1,
      rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 90, 3300, 2202, 35, 1,
-     rot=90, elev=660)
-# 子どもの遊びコーナー
-item("im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1", 400, 3400, 338, 762, 1,
+
+# ── 洋室(1F・和洋室/客間)
+item("im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame", 1400, 4600, 2000, 1500, 1,
      rot=0)
-item("im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood", 900, 2400, 1186, 480, 1,
+item("im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1", 500, 3200, 338, 762, 1,
+     rot=0)
+item("im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood", 1500, 3150, 1186, 480, 1,
      rot=0)
 item("im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
-     900, 3400, 525, 230, 1, rot=70)
-# 猫・グリーン・読書椅子
-item("im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown",
-     4800, 6800, 682, 835, 1, rot=0)
-item("im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame", 6100, 6900, 450, 450, 1, rot=0)
-item("im0261-Pet-MEGA_PACK_Pet-pet-43005_Frame_Green", 5500, 6900, 520, 520, 1,
-     rot=15)
+     2300, 3300, 525, 230, 1, rot=70)
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     420, 6300, 750, 300, 1, rot=90)                        # 西壁の飾り棚
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1400, 7150, 1404, 103, 1,
+     rot=180)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 4200, 2202, 35, 1,
+     rot=90, elev=660)
 
 # ── 水まわり
-item("fmp-BathTub03", 500, 910, 1179, 535, 1, rot=90)
-item("fmp-ShowerSystem03", 1300, 300, 281, 451, 1, rot=180)
+item("fmp-BathTub03", 500, 900, 1179, 535, 1, rot=90)
+item("fmp-ShowerSystem03", 1300, 290, 281, 451, 1, rot=180)
 item("im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
-     950, 85, 409, 42, 1, rot=180, elev=1000)
-item("washer", 2950, 380, 640, 640, 1, rot=180, color="#dddddd")
-item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 2950, 190, 816, 266, 1,
-     rot=180, elev=1500)
-item("fmp-BathroomVanity07", 3360, 1100, 682, 426, 1, rot=-90)
-item("fmp-WashBasin01", 3360, 1100, 644, 435, 1, rot=-90, elev=695)
+     900, 85, 409, 42, 1, rot=180, elev=1000)
+item("washer", 3260, 380, 640, 640, 1, rot=180, color="#dddddd")
+item("fmp-BathroomVanity07", 2200, 300, 682, 426, 1, rot=180)
+item("fmp-WashBasin01", 2200, 300, 644, 435, 1, rot=180, elev=695)
 item("im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
-     3560, 1100, 409, 42, 1, rot=-90, elev=1000)
-item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 2160, 1450, 442, 342, 1,
-     rot=0)
+     2200, 85, 409, 42, 1, rot=180, elev=1000)
+item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 3300, 2280, 442, 342, 1,
+     rot=0)                                                 # ランドリー
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 700, 2280, 816, 266, 1,
+     rot=0, elev=1500)                                      # ランドリー吊り棚
 item("fmp-Toilet01", 6825, 2140, 339, 516, 1, rot=180)
 item("im0261-Bath-MEGA_PACK_BATH-bath-l933_all_in_one_washbasin_frame",
-     6825, 3150, 555, 470, 1, rot=180)   # 手洗い
+     6825, 3280, 555, 470, 1, rot=180)                      # 手洗い
 
-# ── パントリー・玄関
+# ── パントリー・納戸・玄関
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
-     6825, 1600, 800, 320, 1, rot=180)
-item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-154332_frame", 7910, 5900,
-     780, 430, 1, rot=-90)                                  # SIC トール収納(東壁)
-item("im0261-Decor-MEGA_PACK_decor-decor_698778_frame", 8000, 7050, 357, 289, 1,
-     rot=0)                                                 # 傘立て(土間東の隅)
-item("im0261-Plant-MEGA_PACK_Plant-plant-144523_frame", 8020, 6560, 202, 198, 1,
-     rot=0)   # 土間東の隅(910幅の土間は通路として空ける)
+     6825, 300, 800, 320, 1, rot=180)                       # パントリー棚(北壁)
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-143628_frame_1_naturalwood",
+     6620, 6300, 830, 400, 1, rot=90)                       # 下駄箱
 item("im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold",
-     6430, 5800, 600, 35, 1, rot=90)
+     8110, 6300, 600, 35, 1, rot=-90)                       # 姿見
+item("im0261-Plant-MEGA_PACK_Plant-plant-143525_frame", 7900, 7000, 451, 458, 1,
+     rot=0)
 item("im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
-     7200, 4100, 498, 29, 1, rot=90, elev=1350)
+     7200, 4200, 498, 29, 1, rot=90, elev=1350)
 
 # ══════════ 2F 家具 ══════════
 # ── 主寝室
-item("fmp-Bed12", 950, 5600, 1660, 1970, 2, rot=180)
-item("im0261-Table-MEGA_PACK_Table-table-309959", 2100, 4900, 460, 460, 2, rot=0)
-item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2100, 4900, 200, 200, 2,
+item("fmp-Bed12", 1400, 4700, 1660, 1970, 2, rot=180)
+item("im0261-Table-MEGA_PACK_Table-table-309959", 2600, 3980, 460, 460, 2, rot=0)
+item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2600, 3980, 200, 200, 2,
      rot=0, elev=513)
-item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-65549", 4200, 6400, 1120, 437, 2,
-     rot=-90)                                               # ドレッサー
-item("fmp-Chair29", 3700, 5600, 430, 442, 2, rot=90)
+item("fmp-Drawer35", 2600, 6900, 1811, 496, 2, rot=0)
 item("im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
-     600, 7000, 395, 386, 2, rot=0)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 2100, 7170, 1404, 103, 2,
+     400, 6900, 395, 386, 2, rot=0)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1200, 7150, 1404, 103, 2,
      rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 3520, 7170, 1404, 103, 2,
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 2400, 7150, 1404, 103, 2,
      rot=180)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 5000, 2202, 35, 2,
+     rot=90, elev=660)
 
-# ── WIC (壁付けクローゼットで歩ける幅を残す)
-item("fmp-Closet24", 5300, 6790, 1178, 856, 2, rot=0)
-item("fmp-Closet14", 4990, 5800, 952, 773, 2, rot=90)
-
-# ── 洋室A (小2の娘)
-item("fmp-Table44", 420, 1200, 1049, 524, 2, rot=90)        # 白デスク
-item("fmp-Chair29", 920, 1200, 430, 442, 2, rot=-90)
-item("im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame", 480, 900, 245, 239, 2,
-     rot=0, elev=626)
-item("fmp-Bed05", 2600, 700, 1112, 1950, 2, rot=90)
-item("im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
-     1800, 2000, 2000, 1500, 2, rot=0)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1500, 105, 1404, 103, 2,
-     rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-179264", 105, 1500, 1400, 63, 2,
-     rot=90)
-item("im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
-     3560, 2400, 498, 29, 2, rot=-90, elev=1400)
-
-# ── 洋室B (2歳の息子)
-item("im0261-Mattress-MEGA_PACK_Mattress-mattress-40418_SS",
-     4400, 1200, 1095, 2036, 2, rot=180)
-item("im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
-     4600, 2900, 880, 1189, 2, rot=0)
-item("im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood", 4300, 2500, 1186, 480, 2,
-     rot=0)
-item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585", 4150, 3200, 966, 410, 2,
-     rot=180)
-item("fmp-Drawer25", 5000, 3300, 292, 366, 2, rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-203701_yellow",
-     4500, 110, 1300, 152, 2, rot=180, elev=530)
-
-# ── 2Fトイレ
-item("fmp-Toilet01", 5915, 320, 339, 516, 2, rot=180)
+# ── WIC
+item("fmp-Closet24", 4300, 5150, 1178, 856, 2, rot=180)
+item("fmp-Closet14", 5800, 5150, 952, 773, 2, rot=180)
 
 # ── 書斎
 item("im0261-Table-MEGA_PACK_Table-table-175980_frame_brown",
-     7830, 6200, 1758, 600, 2, rot=-90)
-item("fmp-Chair31", 7200, 6200, 616, 586, 2, rot=90)
+     4700, 7000, 1758, 600, 2, rot=180)
+item("fmp-Chair31", 4700, 6400, 616, 586, 2, rot=180)
 item("im0261-Electronic-MEGA_PACK_Electronic-electronic-566595",
-     7830, 6200, 420, 402, 2, rot=-90, elev=739)
-item("im0261-Lamp-MEGA_PACK_lamp-lamp-25416", 7830, 5600, 161, 273, 2,
-     rot=-90, elev=739)
+     4700, 7000, 420, 402, 2, rot=180, elev=739)
+item("im0261-Lamp-MEGA_PACK_lamp-lamp-25416", 5500, 7000, 161, 273, 2,
+     rot=180, elev=739)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown",
-     6900, 7000, 806, 418, 2, rot=0)
-item("im0261-Plant-MEGA_PACK_Plant-plant_133259", 6580, 5600, 291, 258, 2, rot=0)
+     3900, 5750, 806, 418, 2, rot=90)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 4800, 7150, 2202, 35, 2,
+     rot=180, elev=660)
+
+# ── 洋室A (小2の娘)
+item("fmp-Table44", 2900, 400, 1049, 524, 2, rot=180)       # 白デスク(北窓下)
+item("fmp-Chair29", 2900, 1000, 430, 442, 2, rot=0)
+item("im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame", 3400, 380, 245, 239, 2,
+     rot=180, elev=626)
+item("fmp-Bed05", 600, 1500, 1112, 1950, 2, rot=90)
+item("fmp-Closet14", 2900, 2230, 952, 773, 2, rot=180)
+item("im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
+     1800, 1900, 2000, 1500, 2, rot=0)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 1400, 100, 2202, 35, 2,
+     rot=180, elev=660)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 1400, 2202, 35, 2,
+     rot=90, elev=660)
+
+# ── 洋室B (2歳の息子)
+item("im0261-Mattress-MEGA_PACK_Mattress-mattress-40418_SS",
+     4400, 1500, 1095, 2036, 2, rot=180)
+item("im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
+     5700, 1600, 880, 1189, 2, rot=0)
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585", 5800, 350, 966, 410, 2,
+     rot=180)
+item("fmp-Drawer25", 6100, 2400, 292, 366, 2, rot=-90)
+item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 4800, 100, 2202, 35, 2,
+     rot=180, elev=660)
+
+# ── 2Fトイレ・納戸
+item("fmp-Toilet01", 6825, 400, 339, 516, 2, rot=180)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-157369", 6700, 4900, 1100, 420, 2, rot=180)
 
 # ══════════ 照明 ══════════
-light("ceiling", 1800, 4900, 1, 2380, shadow=True)   # リビング
-light("ceiling", 4800, 3600, 1, 2380, shadow=True)   # ダイニング
-light("down", 4300, 900, 1, 2380)
-light("down", 5400, 900, 1, 2380)
-light("down", 4700, 1900, 1, 2380)                   # キッチン手元
-light("down", 2700, 950, 1, 2380)
-light("down", 900, 950, 1, 2380)
+light("ceiling", 4400, 5800, 1, 2380, shadow=True)   # リビング
+light("ceiling", 4400, 3700, 1, 2380, shadow=True)   # ダイニング
+light("ceiling", 1400, 5000, 1, 2380)                # 洋室(1F)
+light("down", 4300, 700, 1, 2380)
+light("down", 5500, 700, 1, 2380)
+light("down", 4700, 2400, 1, 2380)                   # キッチン手元
+light("down", 2700, 900, 1, 2380)
+light("down", 900, 900, 1, 2380)
+light("down", 1800, 2280, 1, 2380)                   # ランドリー
 light("down", 6825, 2700, 1, 2380)
-light("down", 6900, 4600, 1, 2380)
+light("down", 6825, 4100, 1, 2380)
+light("down", 7300, 5000, 1, 2380)
 light("down", 7300, 6300, 1, 2380)
 light("down", 7320, 7900, 1, 2600)                   # 玄関ポーチ
 
 light("ceiling", 1800, 1400, 2, 2380)                # 洋室A
-light("down", 910, 3180, 2, 2380)                    # CL
-light("ceiling", 4500, 1800, 2, 2380)                # 洋室B
-light("down", 5915, 700, 2, 2380)                    # 2Fトイレ
-light("down", 6825, 1500, 2, 2380)                   # 2Fホール
-light("down", 6825, 3000, 2, 2380)
+light("ceiling", 5000, 1400, 2, 2380)                # 洋室B
+light("down", 6825, 900, 2, 2380)                    # 2Fトイレ
+light("down", 6825, 2280, 2, 2380)                   # 2Fホール
 light("down", 7735, 1400, 2, 2380)                   # 階段着地
-light("down", 2000, 4100, 2, 2380)                   # 廊下
-light("down", 5000, 4100, 2, 2380)
-light("ceiling", 1800, 5900, 2, 2380, shadow=True)   # 主寝室
-light("down", 5400, 5800, 2, 2380)                   # WIC
-light("down", 7400, 5800, 2, 2380)                   # 書斎
+light("down", 1500, 3180, 2, 2380)                   # 廊下
+light("down", 4500, 3180, 2, 2380)
+light("ceiling", 1800, 5400, 2, 2380, shadow=True)   # 主寝室
+light("down", 5000, 4400, 2, 2380)                   # WIC
+light("down", 4800, 6300, 2, 2380)                   # 書斎
+light("down", 7280, 5900, 2, 2380)                   # 納戸
 
 # ══════════ 注記 ══════════
 item("memo", 1200, -1600, 2200, 500, 1, color="#fff3a6",
-     noteText="モダン2階建てモデルプラン 3LDK+書斎\n敷地約150㎡ / 延床約116㎡(35坪)")
+     noteText="モダン2階建てモデルプラン 4LDK+書斎\n敷地約150㎡ / 延床約117㎡(35坪)")
 item("ruler", SX0 + SW / 2, SY1 + 600, SW, 120, 1, color="#2f80ed")
+
 
 # ══════════ 外装カスケード ══════════
 def wall_setting(color, texture):

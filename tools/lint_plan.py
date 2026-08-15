@@ -1032,6 +1032,9 @@ def check22_high_object_clash(data, root=None):
             (a, ba), (b, bb) = objs[i], objs[j]
             if a.get('floor', 1) != b.get('floor', 1):
                 continue
+            # カーテン同士は隣り合って掛かるので対象外
+            if '-Curtain-' in a.get('type', '') and '-Curtain-' in b.get('type', ''):
+                continue
             vo = min(ba[1], bb[1]) - max(ba[0], bb[0])
             if vo <= 20:
                 continue
