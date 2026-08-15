@@ -618,6 +618,206 @@ def check12_ceiling_clash(data, root=None):
     return out
 
 
+SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
+                    'door-opening', 'door-opening-arch'}
+
+
+def check13_slide_clearance(data):
+    """引戸・開口の前面600mmに家具が入り込んでいないか。
+
+    check2 は開き戸しか見ないので、引戸の正面に物を置いても素通りしていた。
+    通れれば良いので、両側とも塞がれている場合だけを違反とする。
+    """
+    out = []
+    furn = [f for f in data['items'] if is_furniture(f)]
+    for it in data['items']:
+        if it['type'] not in SLIDE_DOOR_TYPES:
+            continue
+        cx, cy = center(it)
+        (_ux, _uy), (vx, vy) = axes(it)
+        w, band = it['w'], 600.0
+        floor = it.get('floor', 1)
+        blocked = []
+        for sign in (1, -1):
+            bx = cx + sign * vx * band / 2.0
+            by = cy + sign * vy * band / 2.0
+            rect = {'x': bx - w / 2.0, 'y': by - band / 2.0,
+                    'w': w, 'd': band, 'rot': it.get('rot', 0)}
+            box = aabb(rect)
+            blocked.append([f for f in furn
+                            if f.get('floor', 1) == floor
+                            and rects_intersect(aabb(f), box, 20.0)])
+        if blocked[0] and blocked[1]:
+            names = sorted({label(f) for f in blocked[0] + blocked[1]})
+            vio(out, it, '前面の通行帯(600mm)が両側とも家具で塞がれている: %s'
+                % ', '.join(names))
+    return out
+
+
+def check14_wall_support(data):
+    """2階以上の壁が1階(直下)の壁に支持されているか。
+
+    支持率0%で長さ2730mm超の壁は、その下が丸ごとクリアスパンになる。
+    在来木造で成立しない構成をここで止める。
+    """
+    out = []
+    TOL = 200.0     # 直下判定の許容ずれ
+    for w in data.get('walls', []):
+        fl_ = w.get('floor', 1)
+        if fl_ <= 1 or w.get('wallStyle') == 'balcony-fence':
+            continue
+        length = math.hypot(w['x2'] - w['x1'], w['y2'] - w['y1'])
+        if length <= 2730:
+            continue
+        horiz = abs(w['y2'] - w['y1']) < 1.0
+        below = [b for b in data.get('walls', []) if b.get('floor', 1) == fl_ - 1]
+        covered = 0.0
+        for b in below:
+            b_horiz = abs(b['y2'] - b['y1']) < 1.0
+            if b_horiz != horiz:
+                continue
+            if horiz and abs(b['y1'] - w['y1']) > TOL:
+                continue
+            if not horiz and abs(b['x1'] - w['x1']) > TOL:
+                continue
+            if horiz:
+                lo = max(min(w['x1'], w['x2']), min(b['x1'], b['x2']))
+                hi = min(max(w['x1'], w['x2']), max(b['x1'], b['x2']))
+            else:
+                lo = max(min(w['y1'], w['y2']), min(b['y1'], b['y2']))
+                hi = min(max(w['y1'], w['y2']), max(b['y1'], b['y2']))
+            covered += max(0.0, hi - lo)
+        # 直交する下階の壁は「点で受ける柱」として、その位置でスパンを割る
+        cuts = []
+        for b in below:
+            b_horiz = abs(b['y2'] - b['y1']) < 1.0
+            if b_horiz == horiz:
+                continue
+            if horiz:
+                bx = b['x1']
+                lo, hi = min(w['x1'], w['x2']), max(w['x1'], w['x2'])
+                if lo - TOL <= bx <= hi + TOL and \
+                   min(b['y1'], b['y2']) - TOL <= w['y1'] <= max(b['y1'], b['y2']) + TOL:
+                    cuts.append(bx)
+            else:
+                by = b['y1']
+                lo, hi = min(w['y1'], w['y2']), max(w['y1'], w['y2'])
+                if lo - TOL <= by <= hi + TOL and \
+                   min(b['x1'], b['x2']) - TOL <= w['x1'] <= max(b['x1'], b['x2']) + TOL:
+                    cuts.append(by)
+        lo = min(w['x1'], w['x2']) if horiz else min(w['y1'], w['y2'])
+        hi = max(w['x1'], w['x2']) if horiz else max(w['y1'], w['y2'])
+        pts = sorted(set([lo, hi] + [c for c in cuts if lo < c < hi]))
+        span = max((pts[i + 1] - pts[i] for i in range(len(pts) - 1)), default=hi - lo)
+        if covered < 1.0 and span > 4550:
+            vio(out, w, '長さ%.0fmmの壁が直下で支持されておらず、'
+                '最大スパン%.0fmm(実用上限4550)を受ける梁が必要'
+                % (length, span))
+    return out
+
+
+def check15_window_outside_clearance(data):
+    """掃き出し窓の屋外側1500mmに車・自転車・設備・塀が無いか。"""
+    out = []
+    BLOCK = {'car', 'bicycle', 'bicycle-fold', 'ac-outdoor', 'water-heater',
+             'gas-heater', 'fence', 'wood-fence'}
+    blockers = [b for b in data['items'] if b['type'] in BLOCK]
+    rooms_by_floor = {}
+    for r in data.get('rooms', []):
+        rooms_by_floor.setdefault(r.get('floor', 1), []).append(r)
+    for it in data['items']:
+        if it['type'] != 'window-door' and not (
+                it['type'] == 'window' and (it.get('windowSill') or 0) == 0):
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (_u), (vx, vy) = axes(it)[0], axes(it)[1]
+        for sign in (1, -1):
+            px, py = cx + sign * vx * 300, cy + sign * vy * 300
+            inside = any(px >= r['x'] and px <= r['x'] + r['w'] and
+                         py >= r['y'] and py <= r['y'] + r['d']
+                         for r in rooms_by_floor.get(floor, []))
+            if inside:
+                continue    # 室内側は check5 が見る
+            bx = cx + sign * vx * 750
+            by = cy + sign * vy * 750
+            rect = {'x': bx - it['w'] / 2.0, 'y': by - 750, 'w': it['w'],
+                    'd': 1500, 'rot': it.get('rot', 0)}
+            box = aabb(rect)
+            hits = [b for b in blockers if rects_intersect(aabb(b), box, 20.0)]
+            if hits:
+                vio(out, it, '屋外側1500mm以内に %s がある'
+                    % ', '.join(sorted({label(b) for b in hits})))
+    return out
+
+
+def check16_ac_pairing(data):
+    """エアコン室内機と室外機が1対1で、配管長3m以内に対応しているか。"""
+    out = []
+    ins = [i for i in data['items'] if 'AirConditioner' in i.get('type', '')]
+    outs = [o for o in data['items'] if o.get('type') == 'ac-outdoor']
+    used = set()
+    for i in ins:
+        ix, iy = center(i)
+        best, bd = None, 1e9
+        for o in outs:
+            if id(o) in used:
+                continue
+            ox, oy = center(o)
+            dist = math.hypot(ox - ix, oy - iy)
+            if dist < bd:
+                best, bd = o, dist
+        if best is None or bd > 3000:
+            vio(out, i, '配管長3m以内に対応する室外機が無い(最寄り %.0fmm)' % bd)
+        else:
+            used.add(id(best))
+    for o in outs:
+        if id(o) not in used:
+            vio(out, o, '対応する室内機が無い室外機')
+    return out
+
+
+def check17_window_head_alignment(data):
+    """同一階・同一外壁面で窓の上端(sill+height)の種類が2を超えていないか。"""
+    out = []
+    groups = {}
+    for it in data['items']:
+        if it['type'] not in ('window', 'window-door'):
+            continue
+        top = (it.get('windowSill') or 0) + (it.get('windowHeight') or 0)
+        rot = int(round((it.get('rot', 0) or 0))) % 180
+        key = (it.get('floor', 1), 'NS' if rot == 0 else 'EW')
+        groups.setdefault(key, {}).setdefault(top, []).append(it)
+    for (floor, face), tops in sorted(groups.items()):
+        if len(tops) > 2:
+            desc = ', '.join('%dmm×%d枚' % (t, len(v)) for t, v in sorted(tops.items()))
+            out.append('[%dF] %s面: 窓上端が%d種類ある(%s)'
+                       % (floor, face, len(tops), desc))
+    return out
+
+
+def check18_storage_ratio(data):
+    """収納率が10%以上あるか。"""
+    out = []
+    NAMES = ('収納', 'WIC', 'CL', 'SIC', '納戸', 'パントリー', '物入',
+             'クローゼット', 'リネン', 'シューズ')
+    total = 0.0
+    store = 0.0
+    for r in data.get('rooms', []):
+        a = (r['w'] * r['d']) / 1e6
+        if (r.get('n') or '').strip() in ('PS',):
+            continue
+        total += a
+        if any(n in (r.get('n') or '') for n in NAMES):
+            store += a
+    if total > 0:
+        ratio = store / total * 100.0
+        if ratio < 10.0:
+            out.append('収納率 %.1f%% (収納 %.1f㎡ / 延床 %.1f㎡)。'
+                       '目安10〜13%%に届いていない' % (ratio, store, total))
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -633,6 +833,12 @@ CHECKS = [
     ('10. 部屋への到達性', check10_room_access),
     ('11. モデルIDと寸法の実在性', check11_model_ids),
     ('12. 天井高の貫通', check12_ceiling_clash),
+    ('13. 引戸・開口の前面通行帯', check13_slide_clearance),
+    ('14. 上階の壁の直下支持', check14_wall_support),
+    ('15. 掃き出し窓の屋外側クリアランス', check15_window_outside_clearance),
+    ('16. エアコン室内機と室外機の対応', check16_ac_pairing),
+    ('17. 窓上端の通り', check17_window_head_alignment),
+    ('18. 収納率', check18_storage_ratio),
 ]
 
 
