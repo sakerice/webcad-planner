@@ -18,6 +18,8 @@ rot は中心まわり時計回り度。
   7. アイテムの敷地（site-rect群）外へのはみ出し
   8. 階段（stair/stair-corner）の隣接連続性と stairOrder の連番
   9. 照明の elev が天井高（既定 1F:2700 / 2F以上:2520）を超えていないか
+ 10. 部屋への到達性（PS等を除き、境界に建具があるか）
+ 11. 家具モデルIDがカタログ(manifest)に実在するか、寸法が一致するか
 
 出力: 「[階] 種別 id: 説明」形式の違反リストと件数サマリ。違反0なら "OK"。
 終了コードは常に0。標準ライブラリのみ使用。
@@ -506,6 +508,60 @@ def check10_room_access(data):
     return out
 
 
+MANIFESTS = [
+    'assets/models/furniture_mega/manifest.json',
+    'assets/models/interior_model_0_26_1/manifest.json',
+    'assets/models/custom/manifest.json',
+]
+
+
+def _load_catalog(root):
+    """{id: (w,d,h)} を返す。manifestが無い場合は None(=チェック不能)。"""
+    cat = {}
+    found = False
+    for rel in MANIFESTS:
+        path = os.path.join(root, rel)
+        if not os.path.exists(path):
+            continue
+        found = True
+        with open(path, encoding='utf-8') as f:
+            m = json.load(f)
+        for i in (m.get('items') or m):
+            cat[i['id']] = (i.get('w'), i.get('d'), i.get('h'))
+    return cat if found else None
+
+
+def check11_model_ids(data, root=None):
+    """fmp-/im0261- のtypeがカタログに実在し、w/dが概ね一致するか。
+
+    存在しないIDは3Dで無言のまま代替表示になり、目視でも気づきにくい。
+    寸法は回転(rot 90度単位)でw/dが入れ替わるため、両順で照合する。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root)
+    if cat is None:
+        return out
+    for it in data.get('items', []):
+        t = it.get('type', '')
+        if not (t.startswith('fmp-') or t.startswith('im0261-')):
+            continue
+        if t not in cat:
+            vio(out, it, 'モデルID「%s」がカタログに存在しない'
+                '(3Dで別物・代替形状になる)' % t)
+            continue
+        cw, cd, _ = cat[t]
+        if not cw or not cd:
+            continue
+        w, d = it.get('w', 0), it.get('d', 0)
+        ok = (abs(w - cw) <= 3 and abs(d - cd) <= 3) or \
+             (abs(w - cd) <= 3 and abs(d - cw) <= 3)
+        if not ok:
+            vio(out, it, '寸法がカタログと違う: プラン %.0fx%.0f / カタログ %.0fx%.0f'
+                % (w, d, cw, cd))
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -519,6 +575,7 @@ CHECKS = [
     ('8. 階段の連続性', check8_stairs),
     ('9. 照明の天井高超過', check9_light_elev),
     ('10. 部屋への到達性', check10_room_access),
+    ('11. モデルIDと寸法の実在性', check11_model_ids),
 ]
 
 

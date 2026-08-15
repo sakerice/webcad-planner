@@ -23,6 +23,7 @@
 usage: python3 tools/make_default_plan_2f.py [出力パス]
 """
 import json
+import os
 import sys
 
 M = 910          # 1モジュール
@@ -62,8 +63,38 @@ def room(n, x, y, w, d, floor, texture=None, **kw):
     rooms.append(r)
     return r
 
+def _load_catalog():
+    """家具カタログ {id: (w,d,h)}。manifestが無ければ空。"""
+    cat = {}
+    for rel in ("assets/models/furniture_mega/manifest.json",
+                "assets/models/interior_model_0_26_1/manifest.json",
+                "assets/models/custom/manifest.json"):
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            m = json.load(f)
+        for i in (m.get("items") or m):
+            cat[i["id"]] = (i.get("w"), i.get("d"), i.get("h"))
+    return cat
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+CATALOG = _load_catalog()
+
 def item(t, cx, cy, w, d, floor, rot=0, color=None, locked=True, **kw):
-    """中心座標で配置する。x,y,w,d は回転前の矩形、rot は中心まわりの回転。"""
+    """中心座標で配置する。x,y,w,d は回転前の矩形、rot は中心まわりの回転。
+
+    家具モデル(fmp-/im0261-)の w,d はカタログ値で上書きする。3D側は高さを
+    カタログ固定のまま w,d だけを引き伸ばすので、カタログと違う寸法を書くと
+    「背は同じで横に太った家具」になるため。引数の w,d は配置意図の記録用。
+    """
+    if t in CATALOG and (t.startswith("fmp-") or t.startswith("im0261-")):
+        cw, cd, _ = CATALOG[t]
+        if cw and cd:
+            # rot 90/270 で置いた想定の指定は、そのまま長辺の向きを保つ
+            if abs(w - cd) + abs(d - cw) < abs(w - cw) + abs(d - cd):
+                cw, cd = cd, cw
+            w, d = cw, cd
     it = {"id": nid(), "type": t, "x": round(cx - w / 2, 2), "y": round(cy - d / 2, 2),
           "w": w, "d": d, "rot": rot, "floor": floor,
           "flipX": False, "flipY": False, "sScale": 1, "sX": 0, "sY": 0}
@@ -416,7 +447,7 @@ item("im0261-Table-MEGA_PACK_Table-table-309959", 2350, 4850, 460, 460, 2,
      rot=0)                                        # ナイトテーブル
 item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2350, 4850, 200, 200, 2,
      rot=0, elev=515)                              # 読書灯
-item("fmp-Drawer40", 750, 7050, 1200, 452, 2, rot=180)
+item("fmp-Drawer40", 800, 6900, 1366, 515, 2, rot=180)
 item("im0261-Mirror-MEGA_PACK_Mirror-J-38-Dressing-Mirror",
      4220, 7050, 643, 453, 2, rot=0)               # ドレッサーミラー(南壁沿い)
 item("fmp-Sofa39", 4230, 6300, 566, 712, 2, rot=180)   # 読書チェア
@@ -445,7 +476,7 @@ item("im0261-Kid-MEGA_PACK_kid-picnic_childrens_hut_aubergine",
      5780, 2900, 1105, 1010, 2, rot=0)
 item("im0261-Kid-MEGA_PACK_kid-kid-klappa_frame", 5420, 1650, 882, 869, 2,
      rot=20)
-item("im0261-Kid-MEGA_PACK_kid-kid-MULA", 4800, 2750, 363, 127, 2, rot=30)
+item("im0261-Kid-MEGA_PACK_kid-MULA", 4800, 2750, 363, 127, 2, rot=30)
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585",
      6140, 600, 966, 410, 2, rot=90)                       # おもちゃ収納
 
