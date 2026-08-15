@@ -119,11 +119,12 @@ test('14-1: 既定プラン1階の部屋は、2階分上の屋根から天井を
     '天井が屋根の高さ(3階相当)まで持ち上がっている: ' + m.highMm + 'mm');
 });
 
-test('14-1: 既定プラン最上階(3階)の部屋は、いまも屋根から天井をもらい、実際に傾く', () => {
+test('14-1: 既定プラン最上階の部屋は、いまも屋根から天井をもらい、実際に傾く', () => {
   const data = clone(PLAN);
   const ctx = makeCtx(data);
-  const room = data.rooms.filter((r) => r.floor === 3)[0];
-  assert.equal(ctx.roomAboveRoom(room), null, '3階の部屋の上に部屋がある(前提が崩れている)');
+  const topFloor = Math.max.apply(null, data.rooms.map((r) => r.floor || 1));
+  const room = data.rooms.filter((r) => r.floor === topFloor)[0];
+  assert.equal(ctx.roomAboveRoom(room), null, '最上階の部屋の上に部屋がある(前提が崩れている)');
   room.ceiling = { type: 'sloped', lowMm: 2200 };
   const roof = ctx.roofItemOverRoom(room);
   assert.notEqual(roof, null, '最上階の部屋が屋根を失った');
@@ -252,8 +253,11 @@ test('14(最重要): 既定プランの全部屋は、天井の高さも出ど�
     (byFloor[r.floor] = byFloor[r.floor] || new Set()).add(ctx.roomRenderedCeilingMm(r));
   });
   // Task 2 以来の既知の実測値。ここが動けば保存済みの家が動いている。
+  // (1階は階高そのまま 2700、2階以上は床スラブ 180 を引いた 2520)
   assert.deepEqual(byFloor[1], new Set([2700]));
-  assert.deepEqual(byFloor[2], new Set([2520]));
-  assert.deepEqual(byFloor[3], new Set([2520]));
+  Object.keys(byFloor).map(Number).filter((f) => f > 1).forEach((f) => {
+    assert.deepEqual(byFloor[f], new Set([2520]), f + '階の実寸が 2520 でない');
+  });
+  assert.ok(Object.keys(byFloor).length >= 2, '既定プランに2階以上の部屋が無い(前提が崩れている)');
   assert.deepEqual(ctx.__warns, [], '既定プランで丸めの警告が出た');
 });

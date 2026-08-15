@@ -216,9 +216,12 @@ test('天井高ラベルの数値は、レンダが置いた天井の実寸と�
     seen[r.floor] = rendered;
   });
   // 実測値そのもの。ここが 2400 に戻ったら、それが直した不良である。
+  // (1階は階高そのまま 2700、2階以上は床スラブ 180 を引いた 2520)
   assert.equal(seen[1], 2700, '1階の実寸が 2700 でない');
-  assert.equal(seen[2], 2520, '2階の実寸が 2520 でない（階高 2700 - 床スラブ 180）');
-  assert.equal(seen[3], 2520);
+  Object.keys(seen).map(Number).filter((f) => f > 1).forEach((f) => {
+    assert.equal(seen[f], 2520, f + '階の実寸が 2520 でない（階高 2700 - 床スラブ 180）');
+  });
+  assert.ok(seen[2] !== undefined, '既定プランに2階の部屋が無い(前提が崩れている)');
 });
 
 test('HeightModel の既定をそのまま出すと実寸と食い違う（＝これが直した不良）', () => {

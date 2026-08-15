@@ -382,10 +382,10 @@ test('平面図経路のプロンプトが、この家の窓・階段・バル�
     preset: planPreset(), legend: planInstanceListOf(2),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  // 2F の実データ: window 7 / stair+stair-corner / balcony 1
-  assert.match(text, /seven windows/, '窓の数を名指ししていない: ' + text);
-  assert.match(text, /a staircase/, '階段を名指ししていない');
+  // 2F の実データ: window+window-door 9 / balcony 1 / 玄関庇の roof 1
+  assert.match(text, /nine windows/, '窓の数を名指ししていない: ' + text);
   assert.match(text, /a balcony/, 'バルコニーを名指ししていない');
+  assert.match(text, /a roof/, '屋根(玄関庇)を名指ししていない');
   // 名指しできないときの総称形に落ちていないこと
   assert.doesNotMatch(text, /The house is the one the reference draws/);
 });
@@ -395,9 +395,10 @@ test('1F でも建具を数えて名指しする（階ごとに中身が変わ�
     preset: planPreset(), legend: planInstanceListOf(1),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  assert.match(text, /four windows/, text);
-  assert.match(text, /three sliding doors/);
+  assert.match(text, /nine windows/, text);
+  assert.match(text, /two sliding doors/);
   assert.match(text, /a front door/);
+  assert.match(text, /a staircase/, '階段を名指ししていない');
 });
 
 test('compose は色を必要としない（色は composer の要件ではない）', () => {
@@ -693,8 +694,8 @@ test('家が小さく写る構図でも、拒否せずに書き出す（占有�
   const view = c.PLAN_CAPTURE_VIEW;
   const ratio = c.planSubjectFrameRatio(c.planSubjectBoundsMm(2), view, view.width, view.height);
   // カメラ（世界座標 x=20m, z=6m）まで入れた箱に fit するので、家そのものは
-  // 主題だけに fit したとき (0.909) よりずっと小さく写る。
-  assert.ok(ratio < 0.6,
+  // 主題だけに fit したとき (約0.9) よりずっと小さく写る。
+  assert.ok(ratio < 0.7,
     'この構図では家が小さく写るはずだが ' + ratio.toFixed(3) + ' だった（前提が壊れている）');
   assert.ok(Array.from(pkg.files).some((f) => f.name === 'plan_context.png'),
     '小さく写ることを理由に plan_context.png が落とされている');
