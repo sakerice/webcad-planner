@@ -382,10 +382,10 @@ test('平面図経路のプロンプトが、この家の窓・階段・バル�
     preset: planPreset(), legend: planInstanceListOf(2),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  // 2F の実データ: window+window-door 9 / balcony 1 / 2Fトイレの引戸 1
+  // 2F の実データ: window+window-door 9 / balcony 1 / 引戸2(2Fトイレ・WIC連絡)
   assert.match(text, /nine windows/, '窓の数を名指ししていない: ' + text);
   assert.match(text, /a balcony/, 'バルコニーを名指ししていない');
-  assert.match(text, /a sliding door/, '引戸を名指ししていない');
+  assert.match(text, /two sliding doors/, '引戸を名指ししていない');
   // 名指しできないときの総称形に落ちていないこと
   assert.doesNotMatch(text, /The house is the one the reference draws/);
 });
@@ -396,7 +396,7 @@ test('1F でも建具を数えて名指しする（階ごとに中身が変わ�
     camera: null, daylight: { timeOfDay: 'day' }
   });
   assert.match(text, /nine windows/, text);
-  assert.match(text, /two sliding doors/);
+  assert.match(text, /three sliding doors/);
   assert.match(text, /a front door/);
   assert.match(text, /a staircase/, '階段を名指ししていない');
 });

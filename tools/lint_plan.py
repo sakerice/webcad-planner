@@ -70,8 +70,9 @@ def is_furniture(it):
         return False
     if is_light(t) or is_neighbor(t):
         return False
-    # 高さ100mm以下の custom-block は床仕上げ(アプローチ・目地ライン等)扱い
-    if t == 'custom-block' and (it.get('customHeight') or 900) <= 100:
+    # 高さ500mm以下の custom-block は床仕上げ・段(デッキ/ポーチ/目地)扱い。
+    # 家具ではないので、ドアの開閉域や家具重なりの対象から外す
+    if t == 'custom-block' and (it.get('customHeight') or 900) <= 500:
         return False
     # カーテンは窓に付く物、カーペットは床仕上げ。重なり・窓前チェックの対象外
     if '-Curtain-' in t or '-Carpet-' in t:
@@ -291,9 +292,25 @@ def check2_swing_clearance(data):
     return out
 
 
-def check3_furniture_overlap(data):
-    """家具同士のAABB重なり。elev差500mm以上・高所設置(elev500mm以上)は除外。"""
+def check3_furniture_overlap(data, root=None):
+    """家具同士のAABB重なり。
+
+    除外するのは「意図的に重なる組合せ」だけ:
+      - elev差500mm以上 / 高所設置(elev500mm以上)の壁掛け・吊り物
+      - 一方が他方の天板に載っている(elev >= 相手の高さ-50)
+    """
     out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+
+    def height_of(o):
+        t = o.get('type', '')
+        if t in cat:
+            return cat[t][2] or 0
+        if t == 'custom-block':
+            return o.get('customHeight') or 900
+        return 0
+
     furn = [f for f in data['items'] if is_furniture(f)]
     for i in range(len(furn)):
         for j in range(i + 1, len(furn)):
@@ -303,6 +320,10 @@ def check3_furniture_overlap(data):
             ea, eb = a.get('elev', 0) or 0, b.get('elev', 0) or 0
             if abs(ea - eb) >= 500 or max(ea, eb) >= 500:
                 continue  # 高さ違い・壁掛け等の意図的な組合せ
+            if ea >= height_of(b) - 50 and ea > 0:
+                continue  # a が b の上に載っている
+            if eb >= height_of(a) - 50 and eb > 0:
+                continue  # b が a の上に載っている
             ox, oy = rect_overlap(aabb(a), aabb(b))
             if ox > 10.0 and oy > 10.0:
                 out.append('[%s] %s と %s: AABBが重なっている'
@@ -562,6 +583,41 @@ def check11_model_ids(data, root=None):
     return out
 
 
+CEILING_MM = 2400   # index.html の WALL_H
+
+
+def check12_ceiling_clash(data, root=None):
+    """屋内アイテムの elev + モデル高が天井高を超えていないか。
+
+    カーテン(h2500超)やレンジフードは elev を足すと簡単に天井を抜ける。
+    3Dでは天井面より上が壁の外へ突き出して見える。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root)
+    if cat is None:
+        return out
+    # 屋外に立つものは対象外
+    outdoor = set(STRUCT_SITE_TYPES) | {'ac-outdoor', 'gas-heater', 'water-heater',
+                                        'meter-box', 'sewer-pit', 'downspout'}
+    for it in data.get('items', []):
+        t = it.get('type', '')
+        if t in outdoor or is_light(t) or is_neighbor(t):
+            continue
+        h = None
+        if t in cat:
+            h = cat[t][2]
+        elif t == 'custom-block':
+            h = it.get('customHeight') or 900
+        if not h:
+            continue
+        top = (it.get('elev') or 0) + h
+        if top > CEILING_MM + 1:
+            vio(out, it, '天井(%dmm)を %.0fmm 貫通している(elev %.0f + 高さ %.0f)'
+                % (CEILING_MM, top - CEILING_MM, it.get('elev') or 0, h))
+    return out
+
+
 # ---------------------------------------------------------------- メイン
 
 CHECKS = [
@@ -576,6 +632,7 @@ CHECKS = [
     ('9. 照明の天井高超過', check9_light_elev),
     ('10. 部屋への到達性', check10_room_access),
     ('11. モデルIDと寸法の実在性', check11_model_ids),
+    ('12. 天井高の貫通', check12_ceiling_clash),
 ]
 
 
