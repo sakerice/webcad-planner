@@ -120,6 +120,8 @@ test('14-1: 既定プラン1階の部屋は、2階分上の屋根から天井を
 });
 
 test('14-1: 既定プラン最上階の部屋は、いまも屋根から天井をもらい、実際に傾く', () => {
+  // 現行の既定プランはフラットルーフなので、勾配の検証は同じ屋根アイテムを
+  // 切妻に差し替えたクローンで行う（「最上階の部屋が屋根を見つける」経路は実データのまま）。
   const data = clone(PLAN);
   const ctx = makeCtx(data);
   const topFloor = Math.max.apply(null, data.rooms.map((r) => r.floor || 1));
@@ -128,7 +130,17 @@ test('14-1: 既定プラン最上階の部屋は、いまも屋根から天井�
   room.ceiling = { type: 'sloped', lowMm: 2200 };
   const roof = ctx.roofItemOverRoom(room);
   assert.notEqual(roof, null, '最上階の部屋が屋根を失った');
-  const m = measureCeilingMm(ctx, room);
+
+  const sloped = clone(PLAN);
+  sloped.items.forEach((it) => {
+    if (it.type === 'roof' && it.floor === topFloor + 1) {
+      it.roofType = 'gable'; it.pitch = 30;
+    }
+  });
+  const ctx2 = makeCtx(sloped);
+  const room2 = sloped.rooms.filter((r) => r.floor === topFloor)[0];
+  room2.ceiling = { type: 'sloped', lowMm: 2200 };
+  const m = measureCeilingMm(ctx2, room2);
   assert.equal(m.source, 'roof');
   assert.ok(m.highMm - m.lowMm > 300,
     '屋根から導いた天井が傾いていない（高低差 ' + (m.highMm - m.lowMm) + 'mm）');
