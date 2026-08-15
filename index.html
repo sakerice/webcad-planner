@@ -3764,6 +3764,18 @@ function isFloorAwareGroundItemType(t){
 // 敷地サーフェスの描画面。素地グラウンド(-0.06)とZファイティングしない範囲で
 // GL に寄せる。ここを下げすぎると基礎やポーチの脚元に隙間が見える
 var SITE_SURFACE_Y = -0.012;
+// アイテムの中心が基礎(=建物が載る土台)の上にあるか。屋内/屋外の判定に使う
+function itemOnFoundation(it){
+  if(!it || !DATA || !DATA.items) return false;
+  var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+  var any=false, on=false;
+  DATA.items.forEach(function(f){
+    if(f.type!=='foundation' || (f.floor||1)!==1) return;
+    any=true;
+    if(cx>=f.x && cx<=f.x+f.w && cy>=f.y && cy<=f.y+f.d) on=true;
+  });
+  return any ? on : true;   // 基礎を置いていないプランは従来どおり床レベル
+}
 function groundYForItem(it){
   if(it.type==='site-rect' || it.type==='foundation') return 0;
   var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
@@ -3780,6 +3792,10 @@ function item3DBaseY(it){
     return groundYForItem(it);
   }
   if(it.type==='roof') return floorBaseY(it.floor);
+  // 1階に置いた一般アイテムでも、基礎の外(=屋外)にあるものは地面に置く。
+  // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
+  // 「地面から浮いた謎の矩形」になる
+  if((it.floor||1)===1 && !itemOnFoundation(it)) return groundYForItem(it);
   return floorTopY(it.floor);
 }
 // 外皮としての壁の高さ(m)。部屋ではなく「その階の壁」の高さ = 階高まで。
