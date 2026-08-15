@@ -172,9 +172,9 @@
   {
    "id": 1015,
    "x1": 3640,
-   "y1": 1820,
+   "y1": 2275,
    "x2": 5460,
-   "y2": 1820,
+   "y2": 2275,
    "floor": 1,
    "thick": 120,
    "color": "#888888",
@@ -184,7 +184,7 @@
    "wallHeight": 1100
   },
   {
-   "id": 1045,
+   "id": 1046,
    "x1": 0,
    "y1": 0,
    "x2": 8190,
@@ -197,7 +197,7 @@
    "locked": true
   },
   {
-   "id": 1046,
+   "id": 1047,
    "x1": 8190,
    "y1": 0,
    "x2": 8190,
@@ -210,7 +210,7 @@
    "locked": true
   },
   {
-   "id": 1047,
+   "id": 1048,
    "x1": 0,
    "y1": 7280,
    "x2": 6370,
@@ -223,7 +223,7 @@
    "locked": true
   },
   {
-   "id": 1048,
+   "id": 1049,
    "x1": 6370,
    "y1": 7280,
    "x2": 8190,
@@ -236,7 +236,7 @@
    "locked": true
   },
   {
-   "id": 1049,
+   "id": 1050,
    "x1": 0,
    "y1": 7280,
    "x2": 0,
@@ -249,7 +249,7 @@
    "locked": true
   },
   {
-   "id": 1050,
+   "id": 1051,
    "x1": 3640,
    "y1": 0,
    "x2": 3640,
@@ -262,7 +262,7 @@
    "locked": true
   },
   {
-   "id": 1051,
+   "id": 1052,
    "x1": 6370,
    "y1": 0,
    "x2": 6370,
@@ -275,7 +275,7 @@
    "locked": true
   },
   {
-   "id": 1052,
+   "id": 1053,
    "x1": 0,
    "y1": 3640,
    "x2": 6370,
@@ -288,7 +288,7 @@
    "locked": true
   },
   {
-   "id": 1053,
+   "id": 1054,
    "x1": 6370,
    "y1": 1365,
    "x2": 7280,
@@ -301,7 +301,7 @@
    "locked": true
   },
   {
-   "id": 1054,
+   "id": 1055,
    "x1": 7280,
    "y1": 0,
    "x2": 7280,
@@ -314,7 +314,7 @@
    "locked": true
   },
   {
-   "id": 1055,
+   "id": 1056,
    "x1": 7280,
    "y1": 910,
    "x2": 8190,
@@ -327,7 +327,7 @@
    "locked": true
   },
   {
-   "id": 1056,
+   "id": 1057,
    "x1": 7280,
    "y1": 1820,
    "x2": 7280,
@@ -340,7 +340,7 @@
    "locked": true
   },
   {
-   "id": 1057,
+   "id": 1058,
    "x1": 0,
    "y1": 4550,
    "x2": 8190,
@@ -353,7 +353,7 @@
    "locked": true
   },
   {
-   "id": 1058,
+   "id": 1059,
    "x1": 4550,
    "y1": 4550,
    "x2": 4550,
@@ -366,7 +366,7 @@
    "locked": true
   },
   {
-   "id": 1059,
+   "id": 1060,
    "x1": 6370,
    "y1": 4550,
    "x2": 6370,
@@ -379,7 +379,7 @@
    "locked": true
   },
   {
-   "id": 1085,
+   "id": 1086,
    "x1": 910,
    "y1": 8480,
    "x2": 4550,
@@ -394,7 +394,7 @@
    "wallHeight": 1100
   },
   {
-   "id": 1086,
+   "id": 1087,
    "x1": 910,
    "y1": 7280,
    "x2": 910,
@@ -409,7 +409,7 @@
    "wallHeight": 1100
   },
   {
-   "id": 1087,
+   "id": 1088,
    "x1": 4550,
    "y1": 7280,
    "x2": 4550,
@@ -461,7 +461,7 @@
    "x": 3640,
    "y": 0,
    "w": 2730,
-   "d": 1820,
+   "d": 2275,
    "floor": 1,
    "n": "キッチン",
    "sScale": 1,
@@ -535,7 +535,7 @@
    "type": "room",
    "x": 0,
    "y": 1820,
-   "w": 6370,
+   "w": 3640,
    "d": 5460,
    "floor": 1,
    "n": "LDK",
@@ -547,6 +547,21 @@
   },
   {
    "id": "r1024",
+   "type": "room",
+   "x": 3640,
+   "y": 2275,
+   "w": 2730,
+   "d": 5005,
+   "floor": 1,
+   "n": "",
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "locked": true,
+   "texture": "wood_floor"
+  },
+  {
+   "id": "r1025",
    "type": "room",
    "x": 6370,
    "y": 3640,
@@ -561,7 +576,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1025",
+   "id": "r1026",
    "type": "room",
    "x": 6370,
    "y": 5460,
@@ -576,7 +591,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": "r1060",
+   "id": "r1061",
    "type": "room",
    "x": 0,
    "y": 0,
@@ -591,7 +606,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1061",
+   "id": "r1062",
    "type": "room",
    "x": 3640,
    "y": 0,
@@ -606,7 +621,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1062",
+   "id": "r1063",
    "type": "room",
    "x": 6370,
    "y": 0,
@@ -621,7 +636,7 @@
    "texture": "tile_floor"
   },
   {
-   "id": "r1063",
+   "id": "r1064",
    "type": "room",
    "x": 6370,
    "y": 1365,
@@ -636,7 +651,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1064",
+   "id": "r1065",
    "type": "room",
    "x": 7280,
    "y": 0,
@@ -651,7 +666,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1065",
+   "id": "r1066",
    "type": "room",
    "x": 0,
    "y": 3640,
@@ -666,7 +681,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1066",
+   "id": "r1067",
    "type": "room",
    "x": 0,
    "y": 4550,
@@ -681,7 +696,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1067",
+   "id": "r1068",
    "type": "room",
    "x": 4550,
    "y": 4550,
@@ -696,7 +711,7 @@
    "texture": "wood_floor"
   },
   {
-   "id": "r1068",
+   "id": "r1069",
    "type": "room",
    "x": 6370,
    "y": 4550,
@@ -732,7 +747,7 @@
    "foundationHeight": 450
   },
   {
-   "id": 1026,
+   "id": 1027,
    "type": "door-fold",
    "x": 1430.0,
    "y": 790.0,
@@ -752,7 +767,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1027,
+   "id": 1028,
    "type": "door-slide-s",
    "x": 2210.0,
    "y": 1745.0,
@@ -772,7 +787,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1028,
+   "id": 1029,
    "type": "door-opening",
    "x": 5980.0,
    "y": 820.0,
@@ -792,7 +807,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1029,
+   "id": 1030,
    "type": "door-swing-s",
    "x": 6955.0,
    "y": 130.0,
@@ -812,7 +827,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1030,
+   "id": 1031,
    "type": "door-swing-s",
    "x": 6500.0,
    "y": 3315.0,
@@ -832,7 +847,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1031,
+   "id": 1032,
    "type": "door-slide",
    "x": 5545.0,
    "y": 4475.0,
@@ -852,7 +867,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1032,
+   "id": 1033,
    "type": "door-front",
    "x": 6850.0,
    "y": 7180.0,
@@ -872,7 +887,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1033,
+   "id": 1034,
    "type": "door-swing-s",
    "x": 1875.0,
    "y": -325.0,
@@ -892,7 +907,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1034,
+   "id": 1035,
    "type": "window-door",
    "x": 700.0,
    "y": 7190.0,
@@ -916,7 +931,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1035,
+   "id": 1036,
    "type": "window",
    "x": 5257.5,
    "y": 7205.0,
@@ -939,7 +954,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1036,
+   "id": 1037,
    "type": "window",
    "x": 4382.5,
    "y": -75.0,
@@ -962,7 +977,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1037,
+   "id": 1038,
    "type": "window",
    "x": 2755.0,
    "y": -75.0,
@@ -985,7 +1000,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1038,
+   "id": 1039,
    "type": "window",
    "x": 555.0,
    "y": -75.0,
@@ -1008,7 +1023,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1039,
+   "id": 1040,
    "type": "window",
    "x": -845.0,
    "y": 3225.0,
@@ -1031,7 +1046,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1040,
+   "id": 1041,
    "type": "window",
    "x": -202.5,
    "y": 5725.0,
@@ -1054,7 +1069,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1041,
+   "id": 1042,
    "type": "window",
    "x": 7987.5,
    "y": 6025.0,
@@ -1077,7 +1092,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1042,
+   "id": 1043,
    "type": "window",
    "x": 7987.5,
    "y": 2325.0,
@@ -1100,7 +1115,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1043,
+   "id": 1044,
    "type": "stair",
    "x": 7280.0,
    "y": 1820.0,
@@ -1119,7 +1134,7 @@
    "stairOrder": 1
   },
   {
-   "id": 1044,
+   "id": 1045,
    "type": "stair-corner",
    "x": 7280.0,
    "y": 910.0,
@@ -1138,7 +1153,7 @@
    "stairOrder": 2
   },
   {
-   "id": 1069,
+   "id": 1070,
    "type": "door-swing",
    "x": 2510.0,
    "y": 3250.0,
@@ -1158,7 +1173,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1070,
+   "id": 1071,
    "type": "door-swing",
    "x": 3910.0,
    "y": 3250.0,
@@ -1178,7 +1193,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1071,
+   "id": 1072,
    "type": "door-slide-s",
    "x": 6500.0,
    "y": 1290.0,
@@ -1198,7 +1213,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1072,
+   "id": 1073,
    "type": "door-swing",
    "x": 3510.0,
    "y": 4160.0,
@@ -1218,7 +1233,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1073,
+   "id": 1074,
    "type": "door-fold-w",
    "x": 4635.0,
    "y": 4340.0,
@@ -1238,7 +1253,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1074,
+   "id": 1075,
    "type": "door-swing",
    "x": 6410.0,
    "y": 4160.0,
@@ -1258,7 +1273,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1075,
+   "id": 1076,
    "type": "window",
    "x": 655.0,
    "y": -75.0,
@@ -1281,7 +1296,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1076,
+   "id": 1077,
    "type": "window",
    "x": 4182.5,
    "y": -75.0,
@@ -1304,7 +1319,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1077,
+   "id": 1078,
    "type": "window",
    "x": 6480.0,
    "y": -75.0,
@@ -1327,7 +1342,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1078,
+   "id": 1079,
    "type": "window",
    "x": -617.5,
    "y": 1425.0,
@@ -1350,7 +1365,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1079,
+   "id": 1080,
    "type": "window",
    "x": -845.0,
    "y": 5825.0,
@@ -1373,7 +1388,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1080,
+   "id": 1081,
    "type": "window-door",
    "x": 2155.0,
    "y": 7190.0,
@@ -1397,7 +1412,7 @@
    "doorOpenState": "closed"
   },
   {
-   "id": 1081,
+   "id": 1082,
    "type": "window",
    "x": 7000.0,
    "y": 7205.0,
@@ -1420,7 +1435,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1082,
+   "id": 1083,
    "type": "window",
    "x": 7890.0,
    "y": 5825.0,
@@ -1443,7 +1458,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1083,
+   "id": 1084,
    "type": "window",
    "x": 7987.5,
    "y": 2325.0,
@@ -1466,7 +1481,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1084,
+   "id": 1085,
    "type": "balcony",
    "x": 910.0,
    "y": 7280.0,
@@ -1484,7 +1499,7 @@
    "locked": true
   },
   {
-   "id": 1088,
+   "id": 1089,
    "type": "roof",
    "x": -150.0,
    "y": -150.0,
@@ -1508,7 +1523,7 @@
    "roofEdgeColor": "#2B2B2B"
   },
   {
-   "id": 1089,
+   "id": 1090,
    "type": "roof",
    "x": 6370.0,
    "y": 7160.0,
@@ -1532,7 +1547,7 @@
    "roofEdgeColor": "#2B2B2B"
   },
   {
-   "id": 1090,
+   "id": 1091,
    "type": "site-rect",
    "x": -910.0,
    "y": -910.0,
@@ -1551,7 +1566,7 @@
    "siteSurface": "gravel"
   },
   {
-   "id": 1091,
+   "id": 1092,
    "type": "site-rect",
    "x": -910.0,
    "y": 0.0,
@@ -1570,7 +1585,7 @@
    "siteSurface": "grass"
   },
   {
-   "id": 1092,
+   "id": 1093,
    "type": "site-rect",
    "x": -910.0,
    "y": 7280.0,
@@ -1589,7 +1604,7 @@
    "siteSurface": "concrete"
   },
   {
-   "id": 1093,
+   "id": 1094,
    "type": "fence",
    "x": -910.0,
    "y": -910.0,
@@ -1607,7 +1622,7 @@
    "locked": true
   },
   {
-   "id": 1094,
+   "id": 1095,
    "type": "fence",
    "x": -910.0,
    "y": -790.0,
@@ -1625,7 +1640,7 @@
    "locked": true
   },
   {
-   "id": 1095,
+   "id": 1096,
    "type": "fence",
    "x": 10345.0,
    "y": -790.0,
@@ -1643,7 +1658,7 @@
    "locked": true
   },
   {
-   "id": 1096,
+   "id": 1097,
    "type": "lattice-screen",
    "x": -750.0,
    "y": 12165.0,
@@ -1664,7 +1679,7 @@
    "fenceTopStyle": "even"
   },
   {
-   "id": 1097,
+   "id": 1098,
    "type": "lattice-screen",
    "x": 8750.0,
    "y": 12165.0,
@@ -1685,7 +1700,7 @@
    "fenceTopStyle": "even"
   },
   {
-   "id": 1098,
+   "id": 1099,
    "type": "custom-block",
    "x": 2300.0,
    "y": 11710.0,
@@ -1706,7 +1721,7 @@
    "texture": "galvalume_dark"
   },
   {
-   "id": 1099,
+   "id": 1100,
    "type": "exterior-stair",
    "x": 6520.0,
    "y": 7290.0,
@@ -1727,7 +1742,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": 1100,
+   "id": 1101,
    "type": "ramp",
    "x": 4700.0,
    "y": 7280.0,
@@ -1746,7 +1761,7 @@
    "targetHeight": 450
   },
   {
-   "id": 1101,
+   "id": 1102,
    "type": "exterior-stair",
    "x": 1750.0,
    "y": -710.0,
@@ -1766,7 +1781,7 @@
    "accessSteps": 3
   },
   {
-   "id": 1102,
+   "id": 1103,
    "type": "lattice-screen",
    "x": 5050.0,
    "y": 8270.0,
@@ -1787,7 +1802,7 @@
    "fenceTopStyle": "even"
   },
   {
-   "id": 1103,
+   "id": 1104,
    "type": "custom-block",
    "x": 6770.0,
    "y": 8185.0,
@@ -1808,7 +1823,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": 1104,
+   "id": 1105,
    "type": "custom-block",
    "x": -800.0,
    "y": 9150.0,
@@ -1828,7 +1843,7 @@
    "name": "スリット目地"
   },
   {
-   "id": 1105,
+   "id": 1106,
    "type": "custom-block",
    "x": -800.0,
    "y": 10550.0,
@@ -1848,7 +1863,7 @@
    "name": "スリット目地"
   },
   {
-   "id": 1106,
+   "id": 1107,
    "type": "car",
    "x": 2675.0,
    "y": 7500.0,
@@ -1866,7 +1881,7 @@
    "locked": true
   },
   {
-   "id": 1107,
+   "id": 1108,
    "type": "bicycle",
    "x": 8850.0,
    "y": 7475.0,
@@ -1884,7 +1899,7 @@
    "locked": true
   },
   {
-   "id": 1108,
+   "id": 1109,
    "type": "bicycle-fold",
    "x": 9525.0,
    "y": 7625.0,
@@ -1902,7 +1917,7 @@
    "locked": true
   },
   {
-   "id": 1109,
+   "id": 1110,
    "type": "tree",
    "x": 8450.0,
    "y": 350.0,
@@ -1920,7 +1935,7 @@
    "locked": true
   },
   {
-   "id": 1110,
+   "id": 1111,
    "type": "tree",
    "x": 8650.0,
    "y": 2950.0,
@@ -1938,7 +1953,7 @@
    "locked": true
   },
   {
-   "id": 1111,
+   "id": 1112,
    "type": "tree",
    "x": 8050.0,
    "y": 5550.0,
@@ -1956,7 +1971,7 @@
    "locked": true
   },
   {
-   "id": 1112,
+   "id": 1113,
    "type": "tree",
    "x": 8700.0,
    "y": 6250.0,
@@ -1974,7 +1989,7 @@
    "locked": true
   },
   {
-   "id": 1113,
+   "id": 1114,
    "type": "ac-outdoor",
    "x": 3900.0,
    "y": -450.0,
@@ -1992,7 +2007,7 @@
    "locked": true
   },
   {
-   "id": 1114,
+   "id": 1115,
    "type": "ac-outdoor",
    "x": 5000.0,
    "y": -450.0,
@@ -2010,7 +2025,7 @@
    "locked": true
   },
   {
-   "id": 1115,
+   "id": 1116,
    "type": "ac-outdoor",
    "x": 8100.0,
    "y": 2250.0,
@@ -2028,7 +2043,7 @@
    "locked": true
   },
   {
-   "id": 1116,
+   "id": 1117,
    "type": "water-heater",
    "x": 6185.0,
    "y": -850.0,
@@ -2046,7 +2061,7 @@
    "locked": true
   },
   {
-   "id": 1117,
+   "id": 1118,
    "type": "gas-heater",
    "x": -415.0,
    "y": 4980.0,
@@ -2064,7 +2079,7 @@
    "locked": true
   },
   {
-   "id": 1118,
+   "id": 1119,
    "type": "meter-box",
    "x": -160.0,
    "y": 2930.0,
@@ -2083,7 +2098,7 @@
    "elev": 1600
   },
   {
-   "id": 1119,
+   "id": 1120,
    "type": "sewer-pit",
    "x": 1350.0,
    "y": -605.0,
@@ -2101,7 +2116,7 @@
    "locked": true
   },
   {
-   "id": 1120,
+   "id": 1121,
    "type": "sewer-pit",
    "x": 4850.0,
    "y": -605.0,
@@ -2119,7 +2134,7 @@
    "locked": true
   },
   {
-   "id": 1121,
+   "id": 1122,
    "type": "sewer-pit",
    "x": 6850.0,
    "y": 7450.0,
@@ -2137,28 +2152,9 @@
    "locked": true
   },
   {
-   "id": 1122,
-   "type": "downspout",
-   "x": -235.0,
-   "y": -235.0,
-   "w": 150,
-   "d": 150,
-   "rot": 0,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": "#2B2B2B",
-   "colorCustom": true,
-   "locked": true,
-   "downspoutTop": 5850
-  },
-  {
    "id": 1123,
    "type": "downspout",
-   "x": 8275.0,
+   "x": -235.0,
    "y": -235.0,
    "w": 150,
    "d": 150,
@@ -2177,6 +2173,25 @@
   {
    "id": 1124,
    "type": "downspout",
+   "x": 8275.0,
+   "y": -235.0,
+   "w": 150,
+   "d": 150,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#2B2B2B",
+   "colorCustom": true,
+   "locked": true,
+   "downspoutTop": 5850
+  },
+  {
+   "id": 1125,
+   "type": "downspout",
    "x": -235.0,
    "y": 7365.0,
    "w": 150,
@@ -2194,7 +2209,7 @@
    "downspoutTop": 5850
   },
   {
-   "id": 1125,
+   "id": 1126,
    "type": "downspout",
    "x": 8275.0,
    "y": 7365.0,
@@ -2213,7 +2228,7 @@
    "downspoutTop": 5850
   },
   {
-   "id": 1126,
+   "id": 1127,
    "type": "road",
    "x": -2910.0,
    "y": 12285.0,
@@ -2232,7 +2247,7 @@
    "contextHeight": 70
   },
   {
-   "id": 1127,
+   "id": 1128,
    "type": "utility-pole",
    "x": 10425.0,
    "y": 12360.0,
@@ -2251,7 +2266,7 @@
    "contextHeight": 6500
   },
   {
-   "id": 1128,
+   "id": 1129,
    "type": "neighbor-house",
    "x": 10920.0,
    "y": 300.0,
@@ -2272,7 +2287,7 @@
    "contextGhost": true
   },
   {
-   "id": 1129,
+   "id": 1130,
    "type": "neighbor-house",
    "x": -8600.0,
    "y": 800.0,
@@ -2293,7 +2308,7 @@
    "contextGhost": true
   },
   {
-   "id": 1130,
+   "id": 1131,
    "type": "neighbor-house",
    "x": 700.0,
    "y": -7800.0,
@@ -2314,7 +2329,7 @@
    "contextGhost": true
   },
   {
-   "id": 1131,
+   "id": 1132,
    "type": "neighbor-building",
    "x": -5800.0,
    "y": 17335.0,
@@ -2335,31 +2350,13 @@
    "contextGhost": true
   },
   {
-   "id": 1132,
+   "id": 1133,
    "type": "fmp-CabinetD01",
    "x": 3700.0,
-   "y": 1160.0,
+   "y": 1620.0,
    "w": 410,
    "d": 600,
-   "rot": 180,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
-   "id": 1133,
-   "type": "fmp-CabinetD02",
-   "x": 4110.0,
-   "y": 1160.0,
-   "w": 410,
-   "d": 600,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2372,12 +2369,12 @@
   },
   {
    "id": 1134,
-   "type": "fmp-CabinetD_Sink",
-   "x": 4520.0,
-   "y": 1160.0,
-   "w": 760,
+   "type": "fmp-CabinetD02",
+   "x": 4110.0,
+   "y": 1620.0,
+   "w": 410,
    "d": 600,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2390,12 +2387,12 @@
   },
   {
    "id": 1135,
-   "type": "fmp-CabinetD03",
-   "x": 5280.0,
-   "y": 1160.0,
-   "w": 370,
+   "type": "fmp-CabinetD_Sink",
+   "x": 4520.0,
+   "y": 1620.0,
+   "w": 760,
    "d": 600,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2408,12 +2405,12 @@
   },
   {
    "id": 1136,
-   "type": "fmp-CabinetD04",
-   "x": 5650.0,
-   "y": 1160.0,
+   "type": "fmp-CabinetD03",
+   "x": 5280.0,
+   "y": 1620.0,
    "w": 370,
    "d": 600,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2426,12 +2423,30 @@
   },
   {
    "id": 1137,
+   "type": "fmp-CabinetD04",
+   "x": 5650.0,
+   "y": 1620.0,
+   "w": 370,
+   "d": 600,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1138,
    "type": "fmp-GasStove07",
    "x": 5200.0,
-   "y": 1205.0,
+   "y": 1665.0,
    "w": 530,
    "d": 470,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2444,13 +2459,13 @@
    "elev": 797
   },
   {
-   "id": 1138,
+   "id": 1139,
    "type": "fmp-KitchenExhaust02",
    "x": 5090.0,
-   "y": 1162.5,
+   "y": 1622.5,
    "w": 750,
    "d": 575,
-   "rot": 180,
+   "rot": 0,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2463,7 +2478,7 @@
    "elev": 2086
   },
   {
-   "id": 1139,
+   "id": 1140,
    "type": "fmp-Refrigerator03",
    "x": 5620.0,
    "y": 90.0,
@@ -2481,7 +2496,7 @@
    "locked": true
   },
   {
-   "id": 1140,
+   "id": 1141,
    "type": "custom-block",
    "x": 3700.0,
    "y": 80.0,
@@ -2501,30 +2516,12 @@
    "name": "カップボード"
   },
   {
-   "id": 1141,
-   "type": "fmp-Table35",
-   "x": 3965.5,
-   "y": 2390.5,
-   "w": 1269,
-   "d": 619,
-   "rot": 0,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
    "id": 1142,
-   "type": "fmp-Chair37",
-   "x": 4108.0,
-   "y": 1980.0,
-   "w": 384,
-   "d": 440,
+   "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
+   "x": 3830.0,
+   "y": 124.5,
+   "w": 340,
+   "d": 351,
    "rot": 180,
    "floor": 1,
    "flipX": false,
@@ -2534,15 +2531,16 @@
    "sY": 0,
    "color": null,
    "colorCustom": false,
-   "locked": true
+   "locked": true,
+   "elev": 910
   },
   {
    "id": 1143,
-   "type": "fmp-Chair37",
-   "x": 4758.0,
-   "y": 1980.0,
-   "w": 384,
-   "d": 440,
+   "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
+   "x": 4672.5,
+   "y": 155.0,
+   "w": 255,
+   "d": 270,
    "rot": 180,
    "floor": 1,
    "flipX": false,
@@ -2552,15 +2550,16 @@
    "sY": 0,
    "color": null,
    "colorCustom": false,
-   "locked": true
+   "locked": true,
+   "elev": 910
   },
   {
    "id": 1144,
-   "type": "fmp-Chair37",
-   "x": 4108.0,
-   "y": 2980.0,
-   "w": 384,
-   "d": 440,
+   "type": "im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut",
+   "x": 1571.0,
+   "y": 1935.5,
+   "w": 1758,
+   "d": 1329,
    "rot": 0,
    "floor": 1,
    "flipX": false,
@@ -2574,11 +2573,30 @@
   },
   {
    "id": 1145,
-   "type": "fmp-Chair37",
-   "x": 4758.0,
-   "y": 2980.0,
-   "w": 384,
-   "d": 440,
+   "type": "im0261-Decor-MEGA_PACK_decor-clock-131686",
+   "x": 1626.5,
+   "y": 1881.5,
+   "w": 547,
+   "d": 67,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 1500
+  },
+  {
+   "id": 1146,
+   "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-122712_Dark_Navy",
+   "x": 1100.0,
+   "y": 4100.0,
+   "w": 2700,
+   "d": 2000,
    "rot": 0,
    "floor": 1,
    "flipX": false,
@@ -2591,12 +2609,12 @@
    "locked": true
   },
   {
-   "id": 1146,
+   "id": 1147,
    "type": "custom-block",
    "x": 125.0,
-   "y": 4250.0,
+   "y": 4200.0,
    "w": 450,
-   "d": 1500,
+   "d": 1800,
    "rot": 0,
    "floor": 1,
    "flipX": false,
@@ -2611,12 +2629,12 @@
    "name": "TVボード"
   },
   {
-   "id": 1147,
-   "type": "im0261-Tv-MEGA_PACK_tv-electronic-126724_frame",
-   "x": -33.0,
-   "y": 4887.5,
-   "w": 726,
-   "d": 225,
+   "id": 1148,
+   "type": "im0261-Tv-MEGA_PACK_tv-electronic-280915",
+   "x": -285.0,
+   "y": 4994.5,
+   "w": 1230,
+   "d": 211,
    "rot": 90,
    "floor": 1,
    "flipX": false,
@@ -2630,31 +2648,13 @@
    "elev": 500
   },
   {
-   "id": 1148,
-   "type": "im0261-Sofa-MEGA_PACK_Sofa-2-seater_modular_sofa",
-   "x": 1850.0,
-   "y": 4508.5,
-   "w": 1200,
-   "d": 983,
-   "rot": 270,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
    "id": 1149,
-   "type": "fmp-Sofa39",
-   "x": 3067.0,
-   "y": 4644.0,
-   "w": 566,
-   "d": 712,
-   "rot": -90,
+   "type": "im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa",
+   "x": 2699.0,
+   "y": 4600.5,
+   "w": 2402,
+   "d": 999,
+   "rot": 90,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2668,8 +2668,8 @@
   {
    "id": 1150,
    "type": "fmp-Table27",
-   "x": 1051.5,
-   "y": 4620.0,
+   "x": 2001.5,
+   "y": 4670.0,
    "w": 897,
    "d": 860,
    "rot": 0,
@@ -2685,6 +2685,169 @@
   },
   {
    "id": 1151,
+   "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-31085_2",
+   "x": 3787.0,
+   "y": 3537.0,
+   "w": 226,
+   "d": 226,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1152,
+   "type": "im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown",
+   "x": 5659.0,
+   "y": 3882.5,
+   "w": 682,
+   "d": 835,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1153,
+   "type": "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White",
+   "x": 6090.5,
+   "y": 6295.0,
+   "w": 499,
+   "d": 10,
+   "rot": 90,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 1350
+  },
+  {
+   "id": 1154,
+   "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-154085_Frame_Gray",
+   "x": 538.5,
+   "y": 6983.0,
+   "w": 2923,
+   "d": 294,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1155,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1",
+   "x": 631.0,
+   "y": 2969.0,
+   "w": 338,
+   "d": 762,
+   "rot": 30,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1156,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood",
+   "x": 1257.0,
+   "y": 3410.0,
+   "w": 1186,
+   "d": 480,
+   "rot": -15,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1157,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
+   "x": 1187.5,
+   "y": 4235.0,
+   "w": 525,
+   "d": 230,
+   "rot": 70,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1158,
+   "type": "im0261-Pet-MEGA_PACK_Pet-pet-43005_Frame_Green",
+   "x": 5340.0,
+   "y": 6440.0,
+   "w": 520,
+   "d": 520,
+   "rot": 15,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1159,
+   "type": "im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame",
+   "x": 5895.0,
+   "y": 2825.0,
+   "w": 450,
+   "d": 450,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1160,
    "type": "fmp-BathTub03",
    "x": -340.0,
    "y": 529.0,
@@ -2702,7 +2865,7 @@
    "locked": true
   },
   {
-   "id": 1152,
+   "id": 1161,
    "type": "washer",
    "x": 2630.0,
    "y": 60.0,
@@ -2720,7 +2883,7 @@
    "locked": true
   },
   {
-   "id": 1153,
+   "id": 1162,
    "type": "fmp-BathroomVanity07",
    "x": 3050.0,
    "y": 870.0,
@@ -2738,7 +2901,7 @@
    "locked": true
   },
   {
-   "id": 1154,
+   "id": 1163,
    "type": "fmp-WashBasin01",
    "x": 3050.0,
    "y": 870.0,
@@ -2757,7 +2920,25 @@
    "elev": 700
   },
   {
-   "id": 1155,
+   "id": 1164,
+   "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-336846_frame",
+   "x": 1590.0,
+   "y": 1000.0,
+   "w": 900,
+   "d": 400,
+   "rot": 90,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1165,
    "type": "fmp-Toilet01",
    "x": 6595.0,
    "y": 2000.0,
@@ -2775,12 +2956,12 @@
    "locked": true
   },
   {
-   "id": 1156,
+   "id": 1166,
    "type": "custom-block",
    "x": 7795.0,
    "y": 5600.0,
    "w": 380,
-   "d": 1200,
+   "d": 1000,
    "rot": 0,
    "floor": 1,
    "flipX": false,
@@ -2795,7 +2976,82 @@
    "name": "下駄箱"
   },
   {
-   "id": 1157,
+   "id": 1167,
+   "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold",
+   "x": 7860.0,
+   "y": 6932.5,
+   "w": 600,
+   "d": 35,
+   "rot": 90,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 0
+  },
+  {
+   "id": 1168,
+   "type": "im0261-Plant-MEGA_PACK_Plant-plant-144523_frame",
+   "x": 7884.0,
+   "y": 5801.0,
+   "w": 202,
+   "d": 198,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 1010
+  },
+  {
+   "id": 1169,
+   "type": "im0261-Decor-MEGA_PACK_decor-decor_698778_frame",
+   "x": 7721.5,
+   "y": 6985.5,
+   "w": 357,
+   "d": 289,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1170,
+   "type": "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
+   "x": 6963.0,
+   "y": 4085.5,
+   "w": 498,
+   "d": 29,
+   "rot": 90,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 1350
+  },
+  {
+   "id": 1171,
    "type": "custom-block",
    "x": 6430.0,
    "y": 175.0,
@@ -2815,7 +3071,7 @@
    "name": "棚"
   },
   {
-   "id": 1158,
+   "id": 1172,
    "type": "fmp-AirConditionerWall01",
    "x": 600.0,
    "y": 1830.0,
@@ -2834,12 +3090,12 @@
    "elev": 2200
   },
   {
-   "id": 1159,
+   "id": 1173,
    "type": "fmp-Bed11",
-   "x": 264.0,
-   "y": 4416.5,
-   "w": 1680,
-   "d": 2087,
+   "x": 290.0,
+   "y": 4500.0,
+   "w": 1600,
+   "d": 2000,
    "rot": 90,
    "floor": 2,
    "flipX": false,
@@ -2852,7 +3108,44 @@
    "locked": true
   },
   {
-   "id": 1160,
+   "id": 1174,
+   "type": "im0261-Table-MEGA_PACK_Table-table-309959",
+   "x": 2120.0,
+   "y": 4620.0,
+   "w": 460,
+   "d": 460,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1175,
+   "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame",
+   "x": 2250.0,
+   "y": 4750.0,
+   "w": 200,
+   "d": 200,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 515
+  },
+  {
+   "id": 1176,
    "type": "fmp-Drawer40",
    "x": 150.0,
    "y": 6824.0,
@@ -2870,7 +3163,79 @@
    "locked": true
   },
   {
-   "id": 1161,
+   "id": 1177,
+   "type": "im0261-Mirror-MEGA_PACK_Mirror-J-38-Dressing-Mirror",
+   "x": 3898.5,
+   "y": 6823.5,
+   "w": 643,
+   "d": 453,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1178,
+   "type": "fmp-Sofa39",
+   "x": 3947.0,
+   "y": 5944.0,
+   "w": 566,
+   "d": 712,
+   "rot": 180,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1179,
+   "type": "im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
+   "x": 2202.5,
+   "y": 5207.0,
+   "w": 395,
+   "d": 386,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1180,
+   "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-45658",
+   "x": 2056.5,
+   "y": 7070.5,
+   "w": 1887,
+   "d": 199,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1181,
    "type": "fmp-AirConditionerWall01",
    "x": 500.0,
    "y": 4630.0,
@@ -2889,7 +3254,296 @@
    "elev": 2200
   },
   {
-   "id": 1162,
+   "id": 1182,
+   "type": "im0261-Table-MEGA_PACK_Table-table-78393_frame_natural",
+   "x": -245.0,
+   "y": 1290.0,
+   "w": 1050,
+   "d": 420,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1183,
+   "type": "im0261-Chair-MEGA_PACK_Chair-chair-230409_frame_walnut",
+   "x": 500.0,
+   "y": 1285.0,
+   "w": 520,
+   "d": 430,
+   "rot": -90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1184,
+   "type": "fmp-Bed05",
+   "x": 2494.0,
+   "y": 75.0,
+   "w": 1112,
+   "d": 1950,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1185,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black",
+   "x": -400.0,
+   "y": 2760.0,
+   "w": 1200,
+   "d": 280,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1186,
+   "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
+   "x": 1360.0,
+   "y": 1905.5,
+   "w": 880,
+   "d": 1189,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1187,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
+   "x": 1937.5,
+   "y": 2635.0,
+   "w": 525,
+   "d": 230,
+   "rot": -40,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1188,
+   "type": "futon_set",
+   "x": 3800.0,
+   "y": 350.0,
+   "w": 1000,
+   "d": 2100,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#d8d0e8",
+   "colorCustom": true,
+   "locked": true
+  },
+  {
+   "id": 1189,
+   "type": "im0261-Kid-MEGA_PACK_kid-picnic_childrens_hut_aubergine",
+   "x": 5227.5,
+   "y": 2395.0,
+   "w": 1105,
+   "d": 1010,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1190,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid-klappa_frame",
+   "x": 4979.0,
+   "y": 1215.5,
+   "w": 882,
+   "d": 869,
+   "rot": 20,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1191,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid-MULA",
+   "x": 4618.5,
+   "y": 2686.5,
+   "w": 363,
+   "d": 127,
+   "rot": 30,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1192,
+   "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585",
+   "x": 5657.0,
+   "y": 395.0,
+   "w": 966,
+   "d": 410,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1193,
+   "type": "im0261-Table-MEGA_PACK_Table-table-175980_frame_brown",
+   "x": 6981.0,
+   "y": 5950.0,
+   "w": 1758,
+   "d": 600,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1194,
+   "type": "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut",
+   "x": 6910.5,
+   "y": 5949.5,
+   "w": 579,
+   "d": 601,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1195,
+   "type": "im0261-Electronic-MEGA_PACK_Electronic-electronic-566595",
+   "x": 7690.0,
+   "y": 6049.0,
+   "w": 420,
+   "d": 402,
+   "rot": 90,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true,
+   "elev": 745
+  },
+  {
+   "id": 1196,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown",
+   "x": 7347.0,
+   "y": 4571.0,
+   "w": 806,
+   "d": 418,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1197,
+   "type": "im0261-Plant-MEGA_PACK_Plant-plant_133259",
+   "x": 6404.5,
+   "y": 6921.0,
+   "w": 291,
+   "d": 258,
+   "rot": 0,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "locked": true
+  },
+  {
+   "id": 1198,
    "type": "custom-block",
    "x": 4650.0,
    "y": 6625.0,
@@ -2909,30 +3563,12 @@
    "name": "収納"
   },
   {
-   "id": 1163,
-   "type": "fmp-Table34",
-   "x": 400.0,
-   "y": 100.0,
-   "w": 1200,
-   "d": 600,
-   "rot": 180,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
-   "id": 1164,
-   "type": "futon_set",
-   "x": 2100.0,
-   "y": 750.0,
-   "w": 1000,
-   "d": 2100,
+   "id": 1199,
+   "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
+   "x": 4660.0,
+   "y": 5075.0,
+   "w": 1600,
+   "d": 450,
    "rot": 0,
    "floor": 2,
    "flipX": false,
@@ -2940,84 +3576,12 @@
    "sScale": 1,
    "sX": 0,
    "sY": 0,
-   "color": "#d8d0e8",
-   "colorCustom": true,
-   "locked": true
-  },
-  {
-   "id": 1165,
-   "type": "fmp-Table43",
-   "x": 3800.0,
-   "y": 59.0,
-   "w": 1200,
-   "d": 522,
-   "rot": 180,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
    "color": null,
    "colorCustom": false,
    "locked": true
   },
   {
-   "id": 1166,
-   "type": "futon_set",
-   "x": 5100.0,
-   "y": 950.0,
-   "w": 1000,
-   "d": 2100,
-   "rot": 0,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": "#d8d0e8",
-   "colorCustom": true,
-   "locked": true
-  },
-  {
-   "id": 1167,
-   "type": "fmp-Table34",
-   "x": 6800.0,
-   "y": 6000.0,
-   "w": 1200,
-   "d": 600,
-   "rot": 90,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
-   "id": 1168,
-   "type": "fmp-Chair14",
-   "x": 6560.0,
-   "y": 6047.5,
-   "w": 520,
-   "d": 505,
-   "rot": 90,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "locked": true
-  },
-  {
-   "id": 1169,
+   "id": 1200,
    "type": "fmp-Toilet01",
    "x": 6595.0,
    "y": 150.0,
@@ -3035,10 +3599,10 @@
    "locked": true
   },
   {
-   "id": 1170,
+   "id": 1201,
    "type": "light-ceiling",
-   "x": 1975.0,
-   "y": 4275.0,
+   "x": 2225.0,
+   "y": 4875.0,
    "w": 450,
    "d": 450,
    "rot": 0,
@@ -3061,10 +3625,10 @@
    "lightCastShadow": true
   },
   {
-   "id": 1171,
+   "id": 1202,
    "type": "light-ceiling",
-   "x": 4275.0,
-   "y": 3075.0,
+   "x": 2225.0,
+   "y": 2375.0,
    "w": 450,
    "d": 450,
    "rot": 0,
@@ -3087,7 +3651,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1172,
+   "id": 1203,
    "type": "light-down",
    "x": 4110.0,
    "y": 810.0,
@@ -3113,7 +3677,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1173,
+   "id": 1204,
    "type": "light-down",
    "x": 5310.0,
    "y": 810.0,
@@ -3139,7 +3703,33 @@
    "lightCastShadow": false
   },
   {
-   "id": 1174,
+   "id": 1205,
+   "type": "light-down",
+   "x": 4510.0,
+   "y": 1810.0,
+   "w": 180,
+   "d": 180,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#fff6dd",
+   "colorCustom": true,
+   "locked": true,
+   "elev": 2380,
+   "lightKind": "down",
+   "lightShape": "point",
+   "lightColor": "#fff6dd",
+   "lightIntensity": 0.72,
+   "lightRange": 4400,
+   "lightAngle": 64,
+   "lightCastShadow": false
+  },
+  {
+   "id": 1206,
    "type": "light-down",
    "x": 2610.0,
    "y": 860.0,
@@ -3165,7 +3755,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1175,
+   "id": 1207,
    "type": "light-down",
    "x": 810.0,
    "y": 860.0,
@@ -3191,7 +3781,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1176,
+   "id": 1208,
    "type": "light-down",
    "x": 6735.0,
    "y": 2710.0,
@@ -3217,7 +3807,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1177,
+   "id": 1209,
    "type": "light-down",
    "x": 6810.0,
    "y": 4460.0,
@@ -3243,7 +3833,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1178,
+   "id": 1210,
    "type": "light-down",
    "x": 7210.0,
    "y": 6210.0,
@@ -3269,7 +3859,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1179,
+   "id": 1211,
    "type": "light-down",
    "x": 7230.0,
    "y": 7510.0,
@@ -3295,7 +3885,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1180,
+   "id": 1212,
    "type": "light-ceiling",
    "x": 1575.0,
    "y": 1575.0,
@@ -3321,7 +3911,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1181,
+   "id": 1213,
    "type": "light-ceiling",
    "x": 4775.0,
    "y": 1575.0,
@@ -3347,7 +3937,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1182,
+   "id": 1214,
    "type": "light-ceiling",
    "x": 1975.0,
    "y": 5675.0,
@@ -3373,7 +3963,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1183,
+   "id": 1215,
    "type": "light-down",
    "x": 2410.0,
    "y": 4010.0,
@@ -3399,7 +3989,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1184,
+   "id": 1216,
    "type": "light-down",
    "x": 5410.0,
    "y": 4010.0,
@@ -3425,7 +4015,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1185,
+   "id": 1217,
    "type": "light-down",
    "x": 6735.0,
    "y": 2410.0,
@@ -3451,7 +4041,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1186,
+   "id": 1218,
    "type": "light-down",
    "x": 5370.0,
    "y": 5810.0,
@@ -3477,7 +4067,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1187,
+   "id": 1219,
    "type": "light-down",
    "x": 7190.0,
    "y": 5810.0,
@@ -3503,7 +4093,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1188,
+   "id": 1220,
    "type": "light-down",
    "x": 6735.0,
    "y": 610.0,
@@ -3529,7 +4119,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1189,
+   "id": 1221,
    "type": "light-down",
    "x": 7645.0,
    "y": 2610.0,
@@ -3555,7 +4145,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1190,
+   "id": 1222,
    "type": "memo",
    "x": 100.0,
    "y": -1850.0,
@@ -3574,7 +4164,7 @@
    "noteText": "モダン2階建てモデルプラン 4LDK+書斎\n敷地約150㎡ / 延床約109㎡"
   },
   {
-   "id": 1191,
+   "id": 1223,
    "type": "ruler",
    "x": -910.0,
    "y": 12825.0,
@@ -3657,21 +4247,15 @@
     "textureFlipX": false,
     "textureFlipY": false
    },
-   "1046": {
+   "1047": {
     "color": "#3A3D40",
     "texture": "galvalume_dark",
     "textureFlipX": false,
     "textureFlipY": false
    },
-   "1048": {
+   "1049": {
     "color": "#3A3D40",
     "texture": "galvalume_dark",
-    "textureFlipX": false,
-    "textureFlipY": false
-   },
-   "1085": {
-    "color": "#8B5E3C",
-    "texture": "wood_cedar",
     "textureFlipX": false,
     "textureFlipY": false
    },
@@ -3682,6 +4266,12 @@
     "textureFlipY": false
    },
    "1087": {
+    "color": "#8B5E3C",
+    "texture": "wood_cedar",
+    "textureFlipX": false,
+    "textureFlipY": false
+   },
+   "1088": {
     "color": "#8B5E3C",
     "texture": "wood_cedar",
     "textureFlipX": false,

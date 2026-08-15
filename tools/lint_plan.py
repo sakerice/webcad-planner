@@ -70,6 +70,9 @@ def is_furniture(it):
     # 高さ100mm以下の custom-block は床仕上げ(アプローチ・目地ライン等)扱い
     if t == 'custom-block' and (it.get('customHeight') or 900) <= 100:
         return False
+    # カーテンは窓に付く物、カーペットは床仕上げ。重なり・窓前チェックの対象外
+    if '-Curtain-' in t or '-Carpet-' in t:
+        return False
     return True
 
 
