@@ -245,6 +245,94 @@ def make_plaster(name, base_hex, out_diffuse, out_normal, seed_suffix=''):
     return {out_diffuse: to_image(arr), out_normal: to_image(normal)}
 
 
+# ─────────────────────────────────────────────────────────────
+# 外壁: 立平葺き(たてひらぶき) 働き幅300mm
+#   セキノ興産 タテヒラウォール300 の実寸。働き幅300 / ハゼ高さ27.3 /
+#   ハゼ見付15 / 傾斜部25mm。900mm 角にちょうど3枚(n3)入る唯一の立平。
+#   既存のテクスチャは山ピッチ37.5mmで、これに対応する製品は実在しない。
+# ─────────────────────────────────────────────────────────────
+def make_standing_seam():
+    name = 'galvalume_seam'
+    rng = rng_for(name)
+    px_mm = 900.0 / SIZE
+    pitch_px = SIZE / 3.0          # 働き幅 300mm
+    seam_px = 15.0 / px_mm         # ハゼの見付 15mm
+    slope_px = 25.0 / px_mm        # ハゼ根元の傾斜 25mm
+
+    base = hex_rgb('#3A3D40')
+    arr = np.repeat(np.repeat(base[None, None, :], SIZE, axis=0), SIZE, axis=1).astype(np.float64)
+    height = np.zeros((SIZE, SIZE))
+
+    x = np.arange(SIZE)
+    for k in range(3):
+        s0 = k * pitch_px
+        # ハゼ(立ち上がり)。実寸27.3mmだが、板の面から見た「立ち上がりの帯」
+        # として扱う。法線側で稜線が出れば金属の折り目に見える
+        for i in range(int(seam_px) + 1):
+            c = int(round(s0 + i)) % SIZE
+            height[:, c] += 27.3
+        for i in range(int(slope_px) + 1):
+            c = int(round(s0 + seam_px + i)) % SIZE
+            height[:, c] += 27.3 * (1.0 - i / slope_px)
+
+    # 面のわずかなうねり(長尺鋼板は必ず起きる)。縦方向に長く、横に細かい
+    swell = smooth_noise(rng, SIZE, 5, 0.9) + smooth_noise(rng, SIZE, 23, 0.25)
+    height += swell
+    arr += (height * 0.30)[..., None]
+    arr += rng.normal(0.0, 1.1, (SIZE, SIZE, 1))
+    normal = normal_from_height(height, px_mm, strength=0.35)
+    return {'wall_galvalume_dark': to_image(arr),
+            'wall_galvalume_dark_normal': to_image(normal)}
+
+
+# ─────────────────────────────────────────────────────────────
+# 外壁: 杉本実(ほんざね)羽目板 働き幅105mm・目透かし3mm
+#   吉野中央木材/天然木材.com の標準寸法(厚12 × 働き幅105)。
+#   105mm は 900mm を割り切らないので、フットプリントを 945mm(9枚)にする。
+# ─────────────────────────────────────────────────────────────
+def make_cedar_boards():
+    name = 'cedar_board'
+    rng = rng_for(name)
+    px_mm = 945.0 / SIZE
+    rows = 9                        # 945 / 105 = 9枚
+    row_px = SIZE / rows
+    gap_px = max(1, int(round(3.0 / px_mm)))   # 目透かし 3mm
+
+    light = hex_rgb('#9A7A5A')
+    dark = hex_rgb('#7E6146')
+    y = np.arange(SIZE)
+    row_idx = (y / row_px).astype(int) % rows
+    row_f = rng.uniform(0.0, 1.0, rows)
+    row_gain = rng.uniform(0.97, 1.03, rows)
+
+    arr = np.zeros((SIZE, SIZE, 3))
+    for c in range(3):
+        arr[..., c] = (light[c] + (dark[c] - light[c]) * row_f[row_idx])[:, None]
+    arr *= row_gain[row_idx][:, None, None]
+
+    # 木目。板の長手(x)方向へ流す
+    grain = rng.uniform(-1.0, 1.0, (rows, int(row_px) + 2))
+    height = np.zeros((SIZE, SIZE))
+    for r in range(rows):
+        prof = wrap_blur_1d(grain[r][None, :], 2, axis=1)[0]
+        k1 = rng.integers(2, 6)
+        mean = 2.4 * np.sin(2 * np.pi * k1 * np.arange(SIZE) / SIZE)
+        y0, y1 = int(r * row_px), min(int((r + 1) * row_px), SIZE)
+        for yy in range(y0, y1):
+            idx = ((yy - y0) + mean).astype(int) % len(prof)
+            arr[yy] += (prof[idx] * 5.0)[..., None]
+        # 目透かしの影
+        for g in range(gap_px):
+            c = (y0 + g) % SIZE
+            arr[c] *= 0.72
+            height[c] -= 3.0
+
+    arr += rng.normal(0.0, 1.4, (SIZE, SIZE, 1))
+    normal = normal_from_height(height, px_mm, strength=0.8)
+    return {'wood_cedar_warm': to_image(arr),
+            'wood_cedar_warm_normal': to_image(normal)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='assets/textures')
@@ -259,6 +347,8 @@ def main():
                                'wall_plaster_white', 'wall_plaster_white_normal'))
     images.update(make_plaster('plaster_int', '#EFEDE7',
                                'wall_plaster_diffuse', 'wall_plaster_normal', '_int'))
+    images.update(make_standing_seam())
+    images.update(make_cedar_boards())
 
     for key, img in images.items():
         path = os.path.join(args.out, key + '.jpg')

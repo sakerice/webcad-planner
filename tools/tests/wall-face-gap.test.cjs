@@ -138,6 +138,8 @@ function gapsOf(ctx, wall) {
   function walk(o) {
     if (o.children) { o.children.forEach(walk); return; }
     if (!o.isMesh) return;
+    // 幅木も箱だが壁のコアではない。厚み12mmの板を壁厚と取り違えない
+    if (o.userData && o.userData.skirting) return;
     if (o.geometry.kind === 'box') { out.coreDepth = o.geometry.depth; return; }
     const d = Math.abs(o.position.x) - core;
     if (o.userData.exteriorFace) out.ext = d;

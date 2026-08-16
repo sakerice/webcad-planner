@@ -480,8 +480,10 @@ item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
      3015, 5150, 1600, 450, 1, rot=90)                      # TVボード(西壁)
 item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 2900, 5150, 1230, 211, 1,
      rot=90, elev=900)                                      # 壁掛けTV
-item("im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
-     4400, 5150, 2500, 2000, 1, rot=0)
+# パッチワークのラグは橙×黒×白が強く、グリーンのソファと木床に喧嘩する。
+# アクセントは壁1面に集約し、床のファブリックは彩度を落とす
+item("im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
+     4400, 5150, 2000, 1500, 1, rot=0)
 item("fmp-Sofa16", 5200, 5150, 1939, 774, 1, rot=-90)         # 3人掛け・TVと正対
 item("im0261-Table-MEGA_PACK_Table-table-309959", 4100, 5150, 460, 460, 1, rot=0)
 item("im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",

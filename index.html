@@ -9121,9 +9121,9 @@ var TEX_TILE_M = {
   plaster:       0.9,
   plaster_white: 0.9,
   wall_int:      0.9,
-  siding:        0.45,
-  galvalume_dark:0.45,
-  wood_cedar:    0.45,
+  siding:        0.455,   // 窯業系サイディングの働き幅455mm
+  galvalume_dark:0.9,     // 立平葺き 働き幅300mm × 3
+  wood_cedar:    0.945,   // 杉本実羽目板 働き幅105mm × 9
   roof_tile:     0.8
 };
 function texTileM(key, fallback){
@@ -9133,10 +9133,12 @@ function texTileM(key, fallback){
 // 法線マップを持つテクスチャ。塗り壁・板張りは凹凸(=傾き)で見えるので、
 // diffuse だけではどう塗ってもベタ塗りにしかならない。
 var ASSET_TEX_NORMAL = {
-  plaster_white: 'assets/textures/wall_plaster_white_normal.jpg',
-  plaster:       'assets/textures/wall_plaster_normal.jpg',
-  wall_int:      'assets/textures/wall_plaster_normal.jpg',
-  siding:        'assets/textures/wall_siding_normal.jpg'
+  plaster_white:  'assets/textures/wall_plaster_white_normal.jpg',
+  plaster:        'assets/textures/wall_plaster_normal.jpg',
+  wall_int:       'assets/textures/wall_plaster_normal.jpg',
+  siding:         'assets/textures/wall_siding_normal.jpg',
+  galvalume_dark: 'assets/textures/wall_galvalume_dark_normal.jpg',
+  wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg'
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
@@ -13554,9 +13556,20 @@ function makeExteriorWallMaterial(w,fl,len,face){
       var utc=cloneRepeatReadyTexture(userTex);
       if(!utc) return finish(makeExteriorLightingMaterial({color:ap.color||'#e8e0cc',roughness:0.9,envMapIntensity:0.14}));
       utc.wrapS = utc.wrapT = THREE.RepeatWrapping;
-      setTextureRepeatNoDistort(utc,len,wallFullHeightM(fl),wallTextureTileHeight());
+      setTextureRepeatNoDistort(utc,len,wallFullHeightM(fl),texTileM(ap.texture,wallTextureTileHeight()));
       applyTextureFlip(utc,ap);
-      return finish(makeExteriorLightingMaterial({map:utc,color:0xffffff,roughness:0.92,envMapIntensity:0.18}));
+      // 金属系の外装(ガルバリウム鋼板)は、空のグラデーションが縦に映り込むのが
+      // 見どころ。roughness 0.92 / metalness 0 では映り込みが完全に潰れ、
+      // 濃い灰色の紙にしか見えない。塗装鋼板の実際は半艶で roughness 0.35〜0.50。
+      var metallic=/galvalume|metal|steel|alumi/i.test(ap.texture||'');
+      var en=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+      if(en) setTextureRepeatNoDistort(en,len,wallFullHeightM(fl),texTileM(ap.texture,wallTextureTileHeight()));
+      var em=makeExteriorLightingMaterial({map:utc,color:0xffffff,
+        roughness:metallic?0.42:0.92,
+        metalness:metallic?0.55:0.0,
+        envMapIntensity:metallic?0.42:0.18});
+      if(en){ em.normalMap=en; em.normalScale=new THREE.Vector2(0.9,0.9); }
+      return finish(em);
     }
   }
   if(ap.color){
@@ -13598,9 +13611,17 @@ function makeInteriorWallMaterial(w,len,face){
     var tc=cloneRepeatReadyTexture(tex);
     if(!tc) return finish(makeInteriorLightingMaterial({color:ap.color||INTERIOR_WALL_DEFAULT,roughness:0.94,envMapIntensity:0.06,side:THREE.DoubleSide}));
     tc.wrapS = tc.wrapT = THREE.RepeatWrapping;
-    setTextureRepeatNoDistort(tc,len,wallFullHeightM(w&&w.floor),wallTextureTileHeight());
+    var wTile=texTileM(ap.texture,wallTextureTileHeight());
+    setTextureRepeatNoDistort(tc,len,wallFullHeightM(w&&w.floor),wTile);
     applyTextureFlip(tc,ap);
-    return finish(makeInteriorLightingMaterial({map:tc,color:0xffffff,roughness:0.94,envMapIntensity:0.07,side:THREE.DoubleSide}));
+    // 塗り壁は凹凸(=面の傾き)で見える。diffuseだけでは何を塗ってもベタ塗りになる
+    var wn=cloneRepeatReadyTexture(getTextureNormal3D(ap.texture));
+    if(wn) setTextureRepeatNoDistort(wn,len,wallFullHeightM(w&&w.floor),wTile);
+    return finish(makeInteriorLightingMaterial({map:tc,
+      normalMap:wn||undefined,
+      normalScale:wn?new THREE.Vector2(0.7,0.7):undefined,
+      color:ap.color||0xffffff,
+      roughness:0.94,envMapIntensity:0.10,side:THREE.DoubleSide}));
   }
   if(ap.source==='default'){
     var it2=getTexture3D('wall_int');
@@ -13873,7 +13894,36 @@ function buildWall3D(w){
       face.userData.interiorFace=true;
       if(isOuter){ markInteriorCutawayCandidate(face,w,0,0); face.userData.noMerge=true; }
       wallGroup.add(face);
+      addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat);
     });
+  }
+  // 幅木。壁と床が幅ゼロの硬いエッジで突き合わさるのは現実には起きず、
+  // 見た目の安っぽさへの寄与が大きいわりに、足すのは板1枚で済む。
+  // 高さ60mm(ソフト巾木でメーカーが「最も一般的」と書く寸法)、見付12mm。
+  // 色は壁合わせ。床合わせは床が広く見える代わりに天井が低く見えるので、
+  // 天井高を稼ぎたいモダン住宅では壁合わせが定石。
+  function addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat){
+    if(yBase>0.005) return;              // 開口の上に載る帯には付かない
+    if(segLen<0.05) return;
+    if(w.wallStyle) return;              // バルコニー手すり等には付けない
+    var SK_H=0.06, SK_T=0.012;
+    // 色はその面に実際に貼られた仕上げから取る(アクセント壁では幅木も濃色になる)
+    var skColor=(faceMat&&faceMat.color&&faceMat.color.getHex)
+      ? faceMat.color.getHex() : (w.interiorColor||'#EFEDE7');
+    var mat=new THREE.MeshStandardMaterial({
+      color:skColor, roughness:0.62, metalness:0.0
+    });
+    var mesh=new THREE.Mesh(new THREE.BoxGeometry(segLen,SK_H,SK_T),mat);
+    mesh.castShadow=false; mesh.receiveShadow=true;
+    mesh.position.set(
+      x1+dirX*mid+normalX*(intOff+SK_T/2),
+      fy+SK_H/2,
+      z1+dirZ*mid+normalZ*(intOff+SK_T/2)
+    );
+    mesh.rotation.y=rotY;
+    mesh.userData.noMerge=true;
+    mesh.userData.skirting=true;
+    wallGroup.add(mesh);
   }
   // バルコニーフェンス: 建築基準法(2階以上の手すり1100mm以上)の手すり壁+アルミ笠木。
   // 外壁設定(色・テクスチャ)に追従するので、外観アクセントとして自由に仕上げられる
