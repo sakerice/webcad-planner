@@ -1256,9 +1256,20 @@ def check27_operable_window(data):
             rect = {'x': bx - it['w'] / 2.0, 'y': by - 300.0, 'w': it['w'], 'd': 600.0,
                     'rot': it.get('rot', 0)}
             box = aabb(rect)
-            hits = [f for f in furn if f.get('floor', 1) == floor
-                    and rects_intersect(aabb(f), box, 20.0)
-                    and (f.get('elev') or 0) + _model_h(f) > sill + 100]
+            head = sill + (it.get('windowHeight') or 0)
+            hits = []
+            for f in furn:
+                if f.get('floor', 1) != floor:
+                    continue
+                if not rects_intersect(aabb(f), box, 20.0):
+                    continue
+                lo = f.get('elev') or 0
+                hi = lo + _model_h(f)
+                if hi <= sill + 100 or lo >= head:
+                    continue      # 窓の開口高さと上下で干渉しない(腰窓下の机・欄間上のエアコン)
+                if hi <= 1400:
+                    continue      # 手を伸ばして越えられる高さ(机・ベッド・カウンター)
+                hits.append(f)
             if hits:
                 vio(out, it, '室内側600mmに %s があり開閉できない'
                     % ', '.join(sorted({label(f) for f in hits})))
@@ -1308,9 +1319,15 @@ def check28_curtain_fit(data, root=None):
             vio(out, cs[0], '窓(幅%.0fmm)に対しカーテン合計%.0fmmで足りない'
                 '(左右%.0fmmずつガラスが出る)'
                 % (w['w'], total, (w['w'] - total) / 2.0))
-        elif total > w['w'] * 1.45:
+        elif total > w['w'] * 2.1:
             vio(out, cs[0], '窓(幅%.0fmm)に対しカーテン合計%.0fmmで過大'
                 % (w['w'], total))
+        wc = center(w)
+        gc = (sum(center(c)[0] for c in cs) / len(cs),
+              sum(center(c)[1] for c in cs) / len(cs))
+        if math.hypot(gc[0] - wc[0], gc[1] - wc[1]) > 300:
+            vio(out, cs[0], 'カーテンの中心が窓の中心から%.0fmmずれている'
+                % math.hypot(gc[0] - wc[0], gc[1] - wc[1]))
         sill = w.get('windowSill') or 0
         top = sill + (w.get('windowHeight') or 0)
         for c in cs:

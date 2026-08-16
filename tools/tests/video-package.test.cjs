@@ -377,15 +377,32 @@ test('階層は LockTiers.tierOf の戻り値そのもの（分類規則を書�
     '階層の文字列を書き写している（分類が2か所になる）');
 });
 
+// 既定プランは作り直されるので、期待値は「その階に実際に何個あるか」から作る。
+// 数字を書き写すと、間取りを直すたびにテストが嘘になる。
+const NUM_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
+  'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+  'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+
+function countByPrefix(floor, prefix) {
+  return planInstanceListOf(floor).filter(function (e) {
+    return String(e.type).indexOf(prefix) === 0;
+  }).length;
+}
+
+function phrase(n, singular, plural) {
+  return n === 1 ? ('a ' + singular) : (NUM_WORDS[n] + ' ' + plural);
+}
+
 test('平面図経路のプロンプトが、この家の窓・階段・バルコニーを数えて名指しする', () => {
   const text = VideoPrompt.compose({
     preset: planPreset(), legend: planInstanceListOf(2),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  // 2F の実データ: window+window-door 9 / balcony 1 / 引戸4(2Fトイレ・WIC連絡・CL・リネン庫)
-  assert.match(text, /nine windows/, '窓の数を名指ししていない: ' + text);
+  assert.ok(text.includes(phrase(countByPrefix(2, 'window'), 'window', 'windows')),
+    '窓の数を名指ししていない: ' + text);
   assert.match(text, /a balcony/, 'バルコニーを名指ししていない');
-  assert.match(text, /four sliding doors/, '引戸を名指ししていない');
+  assert.ok(text.includes(phrase(countByPrefix(2, 'door-slide'), 'sliding door', 'sliding doors')),
+    '引戸を名指ししていない: ' + text);
   // 名指しできないときの総称形に落ちていないこと
   assert.doesNotMatch(text, /The house is the one the reference draws/);
 });
@@ -395,8 +412,8 @@ test('1F でも建具を数えて名指しする（階ごとに中身が変わ�
     preset: planPreset(), legend: planInstanceListOf(1),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  assert.match(text, /nine windows/, text);
-  assert.match(text, /four sliding doors/);
+  assert.ok(text.includes(phrase(countByPrefix(1, 'window'), 'window', 'windows')), text);
+  assert.ok(text.includes(phrase(countByPrefix(1, 'door-slide'), 'sliding door', 'sliding doors')), text);
   assert.match(text, /a front door/);
   assert.match(text, /a staircase/, '階段を名指ししていない');
 });
