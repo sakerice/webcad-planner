@@ -623,33 +623,47 @@ SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
 
 
 def check13_slide_clearance(data):
-    """引戸・開口の前面600mmに家具が入り込んでいないか。
+    """引戸・開口の前面に、幅600mm以上の通り抜けが連続して残っているか。
 
     check2 は開き戸しか見ないので、引戸の正面に物を置いても素通りしていた。
-    通れれば良いので、両側とも塞がれている場合だけを違反とする。
+    開口いっぱいが空いている必要はない。全面開口のキッチンのように
+    ペニンシュラが一部を塞いでいても、端に600mmの通り道が続いていれば通れる。
+    両側ともその600mmが取れない場合だけを違反とする。
     """
     out = []
+    NEED = 600.0
     furn = [f for f in data['items'] if is_furniture(f)]
     for it in data['items']:
         if it['type'] not in SLIDE_DOOR_TYPES:
             continue
         cx, cy = center(it)
-        (_ux, _uy), (vx, vy) = axes(it)
+        (ux, uy), (vx, vy) = axes(it)
         w, band = it['w'], 600.0
         floor = it.get('floor', 1)
+        here = [f for f in furn if f.get('floor', 1) == floor]
         blocked = []
         for sign in (1, -1):
             bx = cx + sign * vx * band / 2.0
             by = cy + sign * vy * band / 2.0
-            rect = {'x': bx - w / 2.0, 'y': by - band / 2.0,
-                    'w': w, 'd': band, 'rot': it.get('rot', 0)}
-            box = aabb(rect)
-            blocked.append([f for f in furn
-                            if f.get('floor', 1) == floor
-                            and rects_intersect(aabb(f), box, 20.0)])
+            n = max(1, int(w / 50.0))
+            step = w / n
+            hit, run, best = [], 0.0, 0.0
+            for i in range(n):
+                off = (i + 0.5) * step - w / 2.0
+                sx, sy = bx + ux * off, by + uy * off
+                cell = aabb({'x': sx - step / 2.0, 'y': sy - band / 2.0,
+                             'w': step, 'd': band, 'rot': it.get('rot', 0)})
+                on = [f for f in here if rects_intersect(aabb(f), cell, 20.0)]
+                if on:
+                    hit.extend(on)
+                    run = 0.0
+                else:
+                    run += step
+                    best = max(best, run)
+            blocked.append(hit if best < NEED else [])
         if blocked[0] and blocked[1]:
             names = sorted({label(f) for f in blocked[0] + blocked[1]})
-            vio(out, it, '前面の通行帯(600mm)が両側とも家具で塞がれている: %s'
+            vio(out, it, '前面に幅600mmの通り道が両側とも残っていない: %s'
                 % ', '.join(names))
     return out
 
@@ -800,7 +814,7 @@ def check18_storage_ratio(data):
     """収納率が10%以上あるか。"""
     out = []
     NAMES = ('収納', 'WIC', 'CL', 'SIC', '納戸', 'パントリー', '物入',
-             'クローゼット', 'リネン', 'シューズ')
+             'クローゼット', 'リネン', 'シューズ', '押入')
     total = 0.0
     store = 0.0
     for r in data.get('rooms', []):
