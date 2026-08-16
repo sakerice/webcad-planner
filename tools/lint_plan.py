@@ -525,8 +525,52 @@ def check10_room_access(data):
                 found = True
                 break
         if not found:
-            vio(out, r, '部屋「%s」にどこからも入れない(境界に建具が無い)' % name)
+            found = _room_has_open_edge(data, r, floor)
+        if not found:
+            vio(out, r, '部屋「%s」にどこからも入れない(建具も壁の切れ目も無い)' % name)
     return out
+
+
+def _room_has_open_edge(data, r, floor):
+    """部屋の境界に、壁が無く隣室に face している幅600mm以上の区間があるか。
+
+    建具を置かずに壁を切って通す(ホールと廊下のような)つなぎ方があるので、
+    建具の有無だけで「入れない」と断じない。実際に通れるかは check19 が見る。
+    """
+    STEP, NEED = 50.0, 600.0
+    walls = [w for w in data.get('walls', []) if w.get('floor', 1) == floor]
+    rooms = [o for o in data.get('rooms', []) if o.get('floor', 1) == floor and o is not r]
+    x0, y0 = r['x'], r['y']
+    x1, y1 = x0 + r['w'], y0 + r['d']
+    edges = [((x0, y0), (x1, y0), (0.0, -1.0)), ((x0, y1), (x1, y1), (0.0, 1.0)),
+             ((x0, y0), (x0, y1), (-1.0, 0.0)), ((x1, y0), (x1, y1), (1.0, 0.0))]
+    for (ax, ay), (bx, by), (nx, ny) in edges:
+        length = math.hypot(bx - ax, by - ay)
+        if length < NEED:
+            continue
+        ux, uy = (bx - ax) / length, (by - ay) / length
+        run = 0.0
+        n = int(length / STEP)
+        for i in range(n + 1):
+            px, py = ax + ux * i * STEP, ay + uy * i * STEP
+            blocked = False
+            for w in walls:
+                ht = (w.get('thick', 120) or 120) / 2.0
+                if (min(w['x1'], w['x2']) - ht <= px <= max(w['x1'], w['x2']) + ht and
+                        min(w['y1'], w['y2']) - ht <= py <= max(w['y1'], w['y2']) + ht):
+                    blocked = True
+                    break
+            if not blocked:
+                qx, qy = px + nx * 150.0, py + ny * 150.0
+                blocked = not any(o['x'] <= qx <= o['x'] + o['w'] and
+                                  o['y'] <= qy <= o['y'] + o['d'] for o in rooms)
+            if blocked:
+                run = 0.0
+            else:
+                run += STEP
+                if run >= NEED:
+                    return True
+    return False
 
 
 MANIFESTS = [
