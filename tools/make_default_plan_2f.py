@@ -362,8 +362,9 @@ item("lattice-screen", 1000, 9130, 1600, 60, 1, color=COL_WOOD,
      latticeHeight=1100, fencePattern="vertical", fenceTopStyle="even")
 item("lattice-screen", 4800, 9130, 1800, 60, 1, color=COL_WOOD,
      latticeHeight=1100, fencePattern="vertical", fenceTopStyle="even")
-item("custom-block", 6130, 11250, 400, 150, 1, color=COL_CHARCOAL,
-     customHeight=1500, name="門柱", texture="galvalume_dark")
+# 機能門柱。表札・インターホン・ポスト・照明が付いた実物のモデル。
+# custom-block の板1枚では「未完成のフィン」にしか見えなかった
+item("fmp-GatePost01", 6130, 11250, 400, 200, 1, rot=180)
 
 # 玄関ポーチ(平坦な踏込み)+階段。ドアが階段の上に直接開かないようにする
 item("custom-block", 7100, 7880, 1820, 1200, 1, color="#b9b8b4",
@@ -379,7 +380,7 @@ item("exterior-stair", 2900, 8630, 1800, 900, 1, rot=180,
      color="#8a7256", targetHeight=450, accessSteps=3, texture="wood_cedar")
 
 # 駐車(道路並列)・自転車
-item("car", 3450, 10100, 1850, 4500, 1, rot=90, color="#ced1d5")
+item("car", 3450, 10100, 1800, 4400, 1, rot=90, color="#ced1d5")
 item("bicycle", 8800, 10200, 580, 1850, 1, rot=0, color="#a8b4c4")
 item("bicycle-fold", 9400, 10200, 550, 1450, 1, rot=0, color="#d8a878")
 
