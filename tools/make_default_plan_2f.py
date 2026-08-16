@@ -424,10 +424,12 @@ item("im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black",
 # ── ランドリー (室内干し。洗う→干す→しまうが1階で完結する)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 1400, 2280, 816, 266, 1,
      rot=0, elev=1500)
-item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 2350, 2280, 816, 266, 1,
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 2500, 2450, 816, 266, 1,
      rot=0, elev=1500)
 item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 1400, 2280, 442, 342, 1,
      rot=0)
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     2400, 2050, 750, 300, 1, rot=180, elev=900)          # リネンの吊戸棚
 item("im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame", 500, 2280, 450, 450, 1,
      rot=0)                                                 # 猫トイレ
 item("im0261-Pet-MEGA_PACK_Pet-pet-46694_frame", 1000, 2280, 360, 167, 1, rot=0)  # 猫の食器
@@ -531,6 +533,8 @@ item("im0261-Lamp-MEGA_PACK_lamp-lamp-25416", 5750, 6800, 161, 273, 2,
      rot=180, elev=739)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
      6150, 6300, 597, 305, 2, rot=-90, elev=1100)          # 壁付けの飾り棚
+item("im0261-Decor-MEGA_PACK_decor-decor-shop_the_look", 6150, 6300, 246, 106, 2,
+     rot=-90, elev=1750)
 item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 4800, 7150, 2202, 35, 2,
      rot=180, elev=660)
 
