@@ -14876,11 +14876,24 @@ function build3DRoofItem(grp,it,w3,d3){
     return {axis:'z',rise:rise,r1:[0,baseY+rise,-lenZ/2],r2:[0,baseY+rise,lenZ/2]};
   }
   if(type==='flat'){
-    var f=[[-W/2,baseY,-D/2],[W/2,baseY,-D/2],[W/2,baseY,D/2],[-W/2,baseY,D/2]];
+    // 陸屋根の板は基準面(=壁の天端)の「上」に載せる。下にぶら下げると
+    // 壁の天面と屋根の天面が同じ高さで重なり、真上から見たときに
+    // 壁の割付がちらついて見える。高さモデル(roofLocalVertices)も
+    // 0〜+thick で持っており、そちらが正しい
+    var fTop=baseY+thick;
+    var fBot=baseY-Math.max(0,skirt-thick);
+    var f=[[-W/2,fTop,-D/2],[W/2,fTop,-D/2],[W/2,fTop,D/2],[-W/2,fTop,D/2]];
     quad(f[0],f[1],f[2],f[3],mat);
-    edgeLoop(f);
+    for(var fi=0;fi<4;fi++){
+      var fa=f[fi], fbb=f[(fi+1)%4];
+      quad(fa,fbb,[fbb[0],baseY,fbb[2]],[fa[0],baseY,fa[2]],edgeMat);
+      if(fBot<baseY-0.001){
+        quad([fa[0],baseY,fa[2]],[fbb[0],baseY,fbb[2]],
+             [fbb[0],fBot,fbb[2]],[fa[0],fBot,fa[2]],skirtMat);
+      }
+    }
     // 軒天(下面)。これが無いと、壁面と鼻隠しの間に屋根厚ぶんの溝が周回する
-    var fb=[[-W/2,bottomY,-D/2],[-W/2,bottomY,D/2],[W/2,bottomY,D/2],[W/2,bottomY,-D/2]];
+    var fb=[[-W/2,fBot,-D/2],[-W/2,fBot,D/2],[W/2,fBot,D/2],[W/2,fBot,-D/2]];
     quad(fb[0],fb[1],fb[2],fb[3],edgeMat);
     return;
   }
@@ -14947,6 +14960,8 @@ function roofEaveEdges(it,W,D){
   var type=it.roofType||'gable';
   var edges=[];
   var y=0; // 軒先は屋根アイテムのローカル基準面(baseY)
+  // 陸屋根の板だけは基準面の上に載るので、鼻隠しの天端もそのぶん上げる
+  if(type==='flat') y=Math.max(0.03,Math.min(0.6,(it.roofThickness||180)*U));
   if(type==='flat'||type==='hip'||type==='hip-ridge'||type==='hip-ridge-long'){
     edges.push({x1:-W/2,z1:-D/2,x2:W/2,z2:-D/2,y:y});
     edges.push({x1:W/2,z1:D/2,x2:-W/2,z2:D/2,y:y});
