@@ -452,19 +452,21 @@ item("im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
      5600, 300, 255, 270, 1, rot=180, elev=710)
 
 # ── LDK: 北がダイニング、南がリビング(TVは西壁・ソファは東から西を向く)
-item("im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut",
-     4700, 3900, 1758, 1329, 1, rot=0)
+# 4人用のコンパクトなセット。6人用ではリビングの奥行が取れない
+item("im0261-Tableset-MEGA_PACK_Tableset-tableset_456939_Frame_Walnutbrown",
+     4700, 3550, 1189, 1109, 1, rot=0)
 item("im0261-Plant-MEGA_PACK_Plant-plant-230510", 3100, 3800, 618, 719, 1, rot=0)
-item("im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
-     4600, 5200, 2500, 2000, 1, rot=0)
-item("fmp-Sofa16", 3177, 5200, 1939, 774, 1, rot=90)          # 3人掛け・西壁づけ
-item("im0261-Table-MEGA_PACK_Table-table-309959", 4700, 5200, 460, 460, 1, rot=0)
-item("im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
-     4700, 5200, 270, 209, 1, rot=0, elev=513)
+# TVは西壁、ソファはその正面。東側 x5900-6300 を南北の通り道に残す
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
-     6085, 6050, 1600, 450, 1, rot=-90)                     # TVボード(東壁)
-item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 6200, 6050, 1230, 211, 1,
-     rot=-90, elev=900)                                     # 壁掛けTV
+     3015, 5150, 1600, 450, 1, rot=90)                      # TVボード(西壁)
+item("im0261-Tv-MEGA_PACK_tv-electronic-280915", 2900, 5150, 1230, 211, 1,
+     rot=90, elev=900)                                      # 壁掛けTV
+item("im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
+     4400, 5150, 2500, 2000, 1, rot=0)
+item("fmp-Sofa16", 5200, 5150, 1939, 774, 1, rot=-90)         # 3人掛け・TVと正対
+item("im0261-Table-MEGA_PACK_Table-table-309959", 4100, 5150, 460, 460, 1, rot=0)
+item("im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
+     4100, 5150, 270, 209, 1, rot=0, elev=513)
 item("im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White",
      6290, 3400, 499, 29, 1, rot=-90, elev=1350)
 item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 3700, 7150, 1404, 103, 1,
@@ -572,8 +574,8 @@ item("fmp-Toilet01", 7735, 6000, 339, 516, 2, rot=0)
 item("fmp-WashBasin04", 7560, 5450, 496, 423, 2, rot=90, elev=750)
 
 # ══════════ 照明 ══════════
-light("ceiling", 4600, 5200, 1, 2380, shadow=True)   # リビング
-light("ceiling", 4700, 3900, 1, 2380, shadow=True)   # ダイニング
+light("ceiling", 4400, 5150, 1, 2380, shadow=True)   # リビング
+light("ceiling", 4700, 3550, 1, 2380, shadow=True)   # ダイニング
 light("ceiling", 1400, 5000, 1, 2380)                # 洋室(1F)
 light("down", 4300, 700, 1, 2380)
 light("down", 5500, 700, 1, 2380)
