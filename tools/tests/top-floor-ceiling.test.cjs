@@ -258,7 +258,13 @@ test('14(最重要): 既定プランの全部屋は、天井の高さも出ど�
   const data = clone(PLAN);
   const ctx = makeCtx(data);
   const byFloor = {};
-  data.rooms.forEach((r) => {
+  // 既定プランは吹き抜けを1室持つ。そこだけ天井高を明示しているので外す。
+  const declares = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+  const voids = data.rooms.filter(declares);
+  assert.ok(voids.length > 0, '既定プランに吹き抜けが無い(前提が崩れている)');
+  voids.forEach((r) => assert.ok(ctx.roomCeilingHeightM(r) > ctx.storyHeightM(r.floor),
+    r.id + ' の吹き抜けが階高で丸められた'));
+  data.rooms.filter((r) => !declares(r)).forEach((r) => {
     assert.equal(ctx.roomCeilingProfile(r), null, r.id + ' が勾配の枝に入った');
     assert.equal(ctx.roomRoofCeilingExtent(r), null, r.id + ' が屋根由来の天井を持った');
     assert.equal(ctx.roomCeilingHeightM(r), ctx.storyHeightM(r.floor), r.id + ' の天井高が動いた');

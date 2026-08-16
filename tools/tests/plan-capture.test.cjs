@@ -418,8 +418,9 @@ function drawLabelsOn(data, floor) {
 }
 
 test('図面に描かれる天井高ラベルは、レンダが置いた天井の実寸を言う', () => {
-  // 既定プランの部屋はどれも天井高を明示していない。実測: 1F 2700 / 2F 2520。
-  assert.deepEqual(new Set(drawLabelsOn(PLAN, 1)), new Set(['CH 2700']));
+  // 既定プランは吹き抜け(CH 5280)を1室持ち、それ以外は明示していない。
+  // 実測: 1F 2700 / 2F 2520。
+  assert.deepEqual(new Set(drawLabelsOn(PLAN, 1)), new Set(['CH 2700', 'CH 5280']));
   assert.deepEqual(new Set(drawLabelsOn(PLAN, 2)), new Set(['CH 2520']));
   // HeightModel の既定をそのまま描くと 2400 になる（＝これが直した不良）。
   assert.equal(HeightModel.ceilingLabel(PLAN, PLAN.rooms.filter((r) => r.floor === 1)[0]),

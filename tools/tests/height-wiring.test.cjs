@@ -167,13 +167,21 @@ test('階高を超える天井高だけは階高へ丸める（上階の床を�
 
 test('天井高を明示しない部屋は階高をそのまま受け取る（保存済みの家が下がらない）', () => {
   const g = heights(PLAN);
-  const f1 = PLAN.rooms.filter((r) => r.floor === 1);
-  const f2 = PLAN.rooms.filter((r) => r.floor === 2);
+// 既定プランは吹き抜け(リビングの上に2階の床を張らない部屋)を持つ。
+// そこだけは天井高を明示しているので、この検査からは外す。
+const declaresCeiling = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+  const f1 = PLAN.rooms.filter((r) => r.floor === 1 && !declaresCeiling(r));
+  const f2 = PLAN.rooms.filter((r) => r.floor === 2 && !declaresCeiling(r));
   assert.ok(f1.length > 0 && f2.length > 0);
   f1.forEach((r) => assert.equal(Math.round(g.roomCeilingHeightM(r) / g.U), 2700, r.id));
   f2.forEach((r) => assert.equal(Math.round(g.roomCeilingHeightM(r) / g.U), 2700, r.id));
   // HeightModel の既定 (2400) へ落としていないこと。落とすと家が 300mm 下がる。
   assert.notEqual(HeightModel.ceilingHeightMm(PLAN, f1[0]), 2700);
+  // 明示した部屋(吹き抜け)は階高を超えて置かれる。丸められていないこと。
+  const voids = PLAN.rooms.filter(declaresCeiling);
+  assert.ok(voids.length > 0, '既定プランに吹き抜けが無い');
+  voids.forEach((r) => assert.ok(g.roomCeilingHeightM(r) / g.U > 2700,
+    r.id + ' の吹き抜けが階高で丸められた'));
 });
 
 // ── Task 2b: 壁1枚の高さ（wallDisplayHeightM）────────────────────────────
@@ -349,10 +357,15 @@ test('天井メッシュは roomCeilingHeightM の高さに置かれる（階高
 });
 
 test('既定プランでは天井は階高の位置に置かれる（既存の家が動かない）', () => {
+  // 吹き抜け(天井高を明示した部屋)だけは例外。そこは2階の天井まで抜ける。
+  const declared = {};
+  PLAN.rooms.forEach(function (r) {
+    if ((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight) declared[r.id] = true;
+  });
   [1, 2].forEach(function (f) {
     const r = ceilingYsFor(PLAN, f);
     assert.ok(r.got.length > 0, 'floor ' + f + ' の天井が作られていない');
-    r.got.forEach(function (e) {
+    r.got.filter(function (e) { return !declared[e.id]; }).forEach(function (e) {
       assert.equal(Math.round((e.ceilY - r.floorBaseY(f)) / r.U), 2700, e.id);
     });
   });

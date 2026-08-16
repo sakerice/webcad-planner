@@ -4094,7 +4094,20 @@ function roomCeilingHeightM(room){
     // 緩めるのは **勾配を宣言した部屋だけ**。平天井を階高より上へ置くと、壁は階高
     // までしか建たないので天井が宙に浮く。上に部屋がある階では従来どおり丸める
     // (階高の側を上げると上階の床ごと家全体が動くので、丸めるのは天井の側)。
+    // 吹き抜けは「上階の床を張らず、天井を上階の天井まで上げる」ことである。
+    // 上に階そのものはあるのに、その位置だけ部屋が無い場合に限り、平天井でも
+    // 階高を超えてよい。壁は wallCeilingHeightM が隣室の天井高まで建てるので
+    // 天井は宙に浮かない。最上階の平天井を階高で丸めるのは従来どおり
+    // (そこにあるのは吹き抜けではなく小屋裏で、勾配天井の領分である)。
     if(roomDeclaresSlopedCeiling(room)&&!roomHasRoomAbove(room)) return h;
+    var upperExists=false;
+    if(typeof DATA!=='undefined'&&DATA&&DATA.rooms){
+      for(var ri=0;ri<DATA.rooms.length;ri++){
+        var rr=DATA.rooms[ri];
+        if(rr&&!rr.hidden3D&&(rr.floor||1)===(floor||1)+1){ upperExists=true; break; }
+      }
+    }
+    if(!roomHasRoomAbove(room)&&upperExists) return h;
     var key=((room&&room.id)||'?')+'@'+mm;
     if(!_ceilingClampWarned[key]){
       _ceilingClampWarned[key]=1;
@@ -9097,6 +9110,49 @@ var ASSET_TEX_MAP = {
   'wood_cedar':     'assets/textures/wood_cedar_warm.jpg',
   'porch_tile':     'assets/textures/porch_tile_gray.jpg'
 };
+// テクスチャ1枚が実世界の何メートルに貼られるか。画像はこの寸法ちょうどの
+// 1タイルとして作ってある(tools/make_interior_textures.py)。ここを間違えると
+// 板幅も目地も実寸からずれる。表に無いキーは呼び出し側の既定値を使う。
+var TEX_TILE_M = {
+  wood_floor: 1.818,      // 複合フローリングの定尺1818mm。2P(151.5mm)が12枚
+  tile_floor: 1.8,        // 600角タイル3×3
+  concrete:   1.8,
+  porch_tile: 1.8,
+  plaster:       0.9,
+  plaster_white: 0.9,
+  wall_int:      0.9,
+  siding:        0.45,
+  galvalume_dark:0.45,
+  wood_cedar:    0.45,
+  roof_tile:     0.8
+};
+function texTileM(key, fallback){
+  var v = key && TEX_TILE_M[key];
+  return (typeof v === 'number' && v > 0) ? v : fallback;
+}
+// 法線マップを持つテクスチャ。塗り壁・板張りは凹凸(=傾き)で見えるので、
+// diffuse だけではどう塗ってもベタ塗りにしかならない。
+var ASSET_TEX_NORMAL = {
+  plaster_white: 'assets/textures/wall_plaster_white_normal.jpg',
+  plaster:       'assets/textures/wall_plaster_normal.jpg',
+  wall_int:      'assets/textures/wall_plaster_normal.jpg',
+  siding:        'assets/textures/wall_siding_normal.jpg'
+};
+var _texNormalCache = {};
+function getTextureNormal3D(key){
+  var src = key && ASSET_TEX_NORMAL[key];
+  if(!src) return null;
+  if(_texNormalCache[key]) return _texNormalCache[key];
+  var tex = new THREE.TextureLoader().load(src, function(){
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    if(ren) tex.anisotropy = ren.capabilities.getMaxAnisotropy();
+    scheduleTextureSceneRefresh();
+  });
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.NoColorSpace;
+  _texNormalCache[key] = tex;
+  return tex;
+}
 function normalizeDataImageMime(src){
   if(typeof src!=='string' || src.indexOf('data:image/')!==0) return src;
   var comma=src.indexOf(',');
@@ -17889,16 +17945,22 @@ function makeRoomFloorMaterial(r){
   var diffName=isWet?'floor_tile_diffuse.jpg':'floor_wood_diffuse.jpg';
   var normName=isWet?'floor_tile_normal.jpg':'floor_wood_normal.jpg';
   var roughName=isWet?'floor_tile_roughness.jpg':'floor_wood_roughness.jpg';
-  var repU=Math.max(0.5,rw/0.9), repV=Math.max(0.5,rd/0.9);
+  var tileM=texTileM(isWet?'tile_floor':'wood_floor',0.9);
+  var repU=Math.max(0.5,rw/tileM), repV=Math.max(0.5,rd/tileM);
   var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
   var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
   var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
-  var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.6,0.6),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.06};
+  // マット塗装でも空は映る。0.06 では床が紙に見える
+  var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.85,0.85),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.20};
   if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
     var tex=cloneRepeatReadyTexture(getTexture3D(r.texture));
     if(tex){
-      setTextureRepeatNoDistort(tex,rw,rd,0.9); applyTextureFlip(tex,r);
-      return makeInteriorLightingMaterial({map:tex,color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.06});
+      setTextureRepeatNoDistort(tex,rw,rd,texTileM(r.texture,0.9)); applyTextureFlip(tex,r);
+      var rn=cloneRepeatReadyTexture(getTextureNormal3D(r.texture));
+      if(rn) setTextureRepeatNoDistort(rn,rw,rd,texTileM(r.texture,0.9));
+      return makeInteriorLightingMaterial({map:tex,normalMap:rn||undefined,
+        normalScale:rn?new THREE.Vector2(0.85,0.85):undefined,
+        color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.20});
     }
   }
   return new THREE.MeshStandardMaterial(matParams);
@@ -17968,7 +18030,9 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
 function roomHasCoverAbove(r){
   var upperFloor=r.floor+1;
   var upperRooms=DATA.rooms.filter(function(u){return !u.hidden3D&&u.floor===upperFloor;});
-  var upperRoofs=DATA.items.filter(function(it){return !it.hidden3D&&it.floor===upperFloor&&it.type==='roof';});
+  // 屋根は直上階とは限らない。吹き抜け(上階に床を張らない部屋)の上を覆うのは
+  // その上の屋根なので、直上階だけを見ると天井が張られず空が抜けて見える。
+  var upperRoofs=DATA.items.filter(function(it){return !it.hidden3D&&it.floor>r.floor&&it.type==='roof';});
   if(!upperRooms.length&&!upperRoofs.length) return false;
   var fractions=[0.18,0.5,0.82];
   for(var ix=0;ix<fractions.length;ix++) for(var iz=0;iz<fractions.length;iz++){

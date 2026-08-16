@@ -287,13 +287,16 @@ test('12-1(最重要): 勾配を宣言していない部屋は、屋根の下で
 
 test('12-1(最重要): 既定プランの全部屋は宣言していないので、天井の出どころが変わらない', () => {
   const ctx = makeCtx(PLAN);
-  PLAN.rooms.forEach((r) => {
+// 既定プランは吹き抜け(リビングの上に2階の床を張らない部屋)を持つ。
+// そこだけは天井高を明示しているので、この検査からは外す。
+const declaresCeiling = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+  PLAN.rooms.filter((r) => !declaresCeiling(r)).forEach((r) => {
     assert.equal(ctx.roomCeilingProfile(r), null, r.id + ' が勾配の枝に入った');
     assert.equal(ctx.roomCeilingHeightM(r), ctx.storyHeightM(r.floor), r.id + ' の天井高が動いた');
   });
   // 実測値(Task 2 以来の既知の数字)がそのまま出ること
-  const f1 = PLAN.rooms.filter((r) => r.floor === 1);
-  const f2 = PLAN.rooms.filter((r) => r.floor === 2);
+  const f1 = PLAN.rooms.filter((r) => r.floor === 1 && !declaresCeiling(r));
+  const f2 = PLAN.rooms.filter((r) => r.floor === 2 && !declaresCeiling(r));
   assert.deepEqual(new Set(f1.map((r) => ctx.roomRenderedCeilingMm(r))), new Set([2700]));
   assert.deepEqual(new Set(f2.map((r) => ctx.roomRenderedCeilingMm(r))), new Set([2520]));
 });

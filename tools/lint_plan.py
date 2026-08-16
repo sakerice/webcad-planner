@@ -656,10 +656,32 @@ def check12_ceiling_clash(data, root=None):
         if not h:
             continue
         top = (it.get('elev') or 0) + h
-        if top > CEILING_MM + 1:
+        ceil = _ceiling_for_item(data, it)
+        if top > ceil + 1:
             vio(out, it, '天井(%dmm)を %.0fmm 貫通している(elev %.0f + 高さ %.0f)'
-                % (CEILING_MM, top - CEILING_MM, it.get('elev') or 0, h))
+                % (ceil, top - ceil, it.get('elev') or 0, h))
     return out
+
+
+def _ceiling_for_item(data, it):
+    """そのアイテムが立っている部屋の天井高(mm)。
+
+    吹き抜けの部屋は天井高を明示しており、階高より高い。一律 CEILING_MM で
+    見ると、吹き抜けに吊ったシーリングファンが「天井を貫通」と誤検出される。
+    """
+    cx, cy = center(it)
+    floor = it.get('floor', 1)
+    for r in data.get('rooms', []):
+        if r.get('floor', 1) != floor:
+            continue
+        if r['x'] <= cx <= r['x'] + r['w'] and r['y'] <= cy <= r['y'] + r['d']:
+            c = r.get('ceiling') or {}
+            mm = c.get('heightMm') or r.get('ceilingHeight')
+            if mm:
+                # 部屋の天井高は床スラブ下端からの寸法。仕上げ面はスラブぶん低い
+                return float(mm) - 180.0
+            return CEILING_MM
+    return CEILING_MM
 
 
 SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
