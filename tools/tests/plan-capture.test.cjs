@@ -394,6 +394,8 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('floorSlabHeightM'), topLevelFunction('floorSlabHeightMForFloor'),
     topLevelFunction('floorBaseY'), topLevelFunction('floorTopY'),
     topLevelFunction('isPositiveNumber'),
+    topLevelFunction('roomVoidTargetFloor'), topLevelFunction('roomIsVoidCeiling'),
+    topLevelFunction('roomVoidCeilingMm'), topLevelFunction('roomVoidFloorsAreOpen'),
     topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
     topLevelFunction('roomsOverlapInPlan'), topLevelFunction('roomAboveRoom'),
     topLevelFunction('roomHasRoomAbove'),
@@ -418,9 +420,10 @@ function drawLabelsOn(data, floor) {
 }
 
 test('図面に描かれる天井高ラベルは、レンダが置いた天井の実寸を言う', () => {
-  // 既定プランは吹き抜け(CH 5280)を1室持ち、それ以外は明示していない。
+  // 既定プランは吹き抜けを1室持ち、それ以外は明示していない。天井高は
+  // 階高から計算されるので、階高を変えればこの数字も変わる。
   // 実測: 1F 2700 / 2F 2520。
-  assert.deepEqual(new Set(drawLabelsOn(PLAN, 1)), new Set(['CH 2700', 'CH 5280']));
+  assert.deepEqual(new Set(drawLabelsOn(PLAN, 1)), new Set(['CH 2700', 'CH 5400']));
   assert.deepEqual(new Set(drawLabelsOn(PLAN, 2)), new Set(['CH 2520']));
   // HeightModel の既定をそのまま描くと 2400 になる（＝これが直した不良）。
   assert.equal(HeightModel.ceilingLabel(PLAN, PLAN.rooms.filter((r) => r.floor === 1)[0]),

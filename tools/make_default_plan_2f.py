@@ -204,10 +204,11 @@ room("押入", 0, 2730, 2730, 910, 1, texture="wood_floor")
 room("洋室", 0, 3640, 2730, 3640, 1, texture="wood_floor")
 room("LDK", 2730, 2730, 3640, 2730, 1, texture="wood_floor")
 room("LDK", 2730, 5460, 910, 1820, 1, texture="wood_floor")
-# リビングの上は2階の床を張らない。天井は2階の天井まで上げる
-# (1階床基準5280 = 階高2700 + 2階の天井2400 + スラブ180)
+# リビングの上は2階の床を張らない。天井高は書かない -- toFloor だけ宣言すれば
+# アプリが階高から計算する。手で数字を書くと階高を変えた瞬間に上階の天井と
+# 食い違い、スラブの小口が室内に見える
 room("リビング", 3640, 5460, 2730, 1820, 1, texture="wood_floor",
-     ceiling={"type": "flat", "heightMm": 5280}, ceilingHeight=5280)
+     ceiling={"type": "void", "toFloor": 2})
 room("パントリー", 6370, 0, 910, 1820, 1, texture="wood_floor")
 room("階段", 7280, 0, 910, 4550, 1, texture="wood_floor")
 room("トイレ", 6370, 1820, 910, 1820, 1, texture="tile_floor")

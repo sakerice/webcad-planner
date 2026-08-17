@@ -478,6 +478,37 @@ def check8_stairs(data):
     return out
 
 
+# ── 天井高 ────────────────────────────────────────────────────────────
+# index.html の roomVoidCeilingMm と同じ式。手で数字を書かせないための唯一の
+# 決まりごとなので、片方だけ直すと必ず食い違う。
+FLOOR_H_MM = 2700       # 階高 (index.html の FLOOR_H)
+FLOOR_SLAB_MM = 180     # 床スラブ (index.html の FLOOR_SLAB_H)
+
+
+def room_ceiling_mm(room):
+    """その部屋の天井高(床天端から測ったmm)。吹き抜けは階高から計算する。"""
+    floor = room.get('floor', 1)
+    slab = 0 if floor <= 1 else FLOOR_SLAB_MM
+    c = room.get('ceiling') or {}
+    if c.get('type') == 'void':
+        to = c.get('toFloor')
+        to = int(to) if isinstance(to, (int, float)) else floor + 1
+        to = max(floor + 1, to)
+        return (to - floor + 1) * FLOOR_H_MM - slab
+    mm = c.get('heightMm') or room.get('ceilingHeight')
+    if isinstance(mm, (int, float)) and mm > 0:
+        return float(mm) - slab
+    return None
+
+
+def room_at(data, floor, cx, cy):
+    for r in data.get('rooms', []):
+        if (r.get('floor', 1) == floor
+                and r['x'] <= cx <= r['x'] + r['w']
+                and r['y'] <= cy <= r['y'] + r['d']):
+            return r
+    return None
+
 def check9_light_elev(data):
     """照明の elev が天井高（部屋指定 > 既定 1F:2700 / 2F以上:2520）以内か。"""
     out = []
@@ -488,14 +519,11 @@ def check9_light_elev(data):
         floor = it.get('floor', 1)
         ceiling = 2700 if floor <= 1 else 2520
         cx, cy = center(it)
-        for r in rooms:
-            if (r.get('floor', 1) == floor
-                    and r['x'] <= cx <= r['x'] + r['w']
-                    and r['y'] <= cy <= r['y'] + r['d']):
-                ch = r.get('ceilingHeight')
-                if isinstance(ch, (int, float)) and ch > 0:
-                    ceiling = ch
-                break
+        r = room_at(data, floor, cx, cy)
+        if r is not None:
+            mm = room_ceiling_mm(r)
+            if mm:
+                ceiling = mm
         elev = it.get('elev', 0) or 0
         if elev > ceiling:
             vio(out, it, '照明の elev %.0fmm が天井高 %.0fmm を超えている'
@@ -664,24 +692,16 @@ def check12_ceiling_clash(data, root=None):
 
 
 def _ceiling_for_item(data, it):
-    """そのアイテムが立っている部屋の天井高(mm)。
+    """そのアイテムが立っている部屋の天井高(床天端からのmm)。
 
-    吹き抜けの部屋は天井高を明示しており、階高より高い。一律 CEILING_MM で
-    見ると、吹き抜けに吊ったシーリングファンが「天井を貫通」と誤検出される。
+    吹き抜けの部屋は階高より高い。一律 CEILING_MM で見ると、吹き抜けに吊った
+    シーリングファンが「天井を貫通」と誤検出される。
     """
     cx, cy = center(it)
-    floor = it.get('floor', 1)
-    for r in data.get('rooms', []):
-        if r.get('floor', 1) != floor:
-            continue
-        if r['x'] <= cx <= r['x'] + r['w'] and r['y'] <= cy <= r['y'] + r['d']:
-            c = r.get('ceiling') or {}
-            mm = c.get('heightMm') or r.get('ceilingHeight')
-            if mm:
-                # 部屋の天井高は床スラブ下端からの寸法。仕上げ面はスラブぶん低い
-                return float(mm) - 180.0
-            return CEILING_MM
-    return CEILING_MM
+    r = room_at(data, it.get('floor', 1), cx, cy)
+    if r is None:
+        return CEILING_MM
+    return room_ceiling_mm(r) or CEILING_MM
 
 
 SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
@@ -1424,6 +1444,73 @@ def check28_curtain_fit(data, root=None):
 
 # ---------------------------------------------------------------- メイン
 
+def check29_void_guard(data):
+    """吹き抜けの縁に、落下を止める壁か手すりがあるか。
+
+    上階の床が切れる縁は、そのままだと人が落ちる。壁で塞ぐと2層の抜けが
+    死ぬので balcony-fence(手すり壁)でよいが、何も無いのは駄目。
+    宣言した吹き抜けと、階段の直上(アプリが自動で床を抜く)の両方を見る。
+    """
+    out = []
+    STEP, REACH, TOL = 100.0, 200.0, 90.0
+    holes = []          # (rect, floor, ラベル)
+    for r in data.get('rooms', []):
+        c = r.get('ceiling') or {}
+        if c.get('type') != 'void':
+            continue
+        frm = r.get('floor', 1)
+        to = c.get('toFloor')
+        to = int(to) if isinstance(to, (int, float)) else frm + 1
+        for f in range(frm + 1, max(frm + 1, to) + 1):
+            holes.append(((r['x'], r['y'], r['x'] + r['w'], r['y'] + r['d']),
+                          f, '%d階の吹き抜け' % frm, r))
+    for it in data.get('items', []):
+        if it.get('type') not in ('stair', 'stair-corner'):
+            continue
+        b = aabb(it)
+        holes.append((b, it.get('floor', 1) + 1, '階段の吹き抜け', it))
+    # 階段は上りきった側が必ず開いていないと降り口にならない。その1辺ぶんは
+    # 手すりが無くて当然なので、階段の有効幅までは許す。
+    allow = {}
+    for it in data.get('items', []):
+        if it.get('type') in ('stair', 'stair-corner'):
+            allow[id(it)] = min(it['w'], it['d']) + 120.0
+
+    for (box, floor, label, ref) in holes:
+        x0, y0, x1, y1 = box
+        walls = [w for w in data.get('walls', []) if w.get('floor', 1) == floor]
+        rooms = [r for r in data.get('rooms', []) if r.get('floor', 1) == floor]
+        edges = [((x0, y0), (x1, y0), (0.0, -1.0)), ((x0, y1), (x1, y1), (0.0, 1.0)),
+                 ((x0, y0), (x0, y1), (-1.0, 0.0)), ((x1, y0), (x1, y1), (1.0, 0.0))]
+        open_len = 0.0
+        for (ax, ay), (bx, by), (nx, ny) in edges:
+            length = math.hypot(bx - ax, by - ay)
+            if length < 1.0:
+                continue
+            ux, uy = (bx - ax) / length, (by - ay) / length
+            n = max(1, int(length / STEP))
+            for i in range(n + 1):
+                px, py = ax + ux * i * STEP, ay + uy * i * STEP
+                qx, qy = px + nx * REACH, py + ny * REACH
+                # 外側に床が無ければ落ちようがない(吹き抜けが続いている)
+                if not any(r['x'] <= qx <= r['x'] + r['w'] and
+                           r['y'] <= qy <= r['y'] + r['d'] for r in rooms):
+                    continue
+                guarded = False
+                for w in walls:
+                    ht = (w.get('thick', 120) or 120) / 2.0 + TOL
+                    if (min(w['x1'], w['x2']) - ht <= px <= max(w['x1'], w['x2']) + ht and
+                            min(w['y1'], w['y2']) - ht <= py <= max(w['y1'], w['y2']) + ht):
+                        guarded = True
+                        break
+                if not guarded:
+                    open_len += STEP
+        if open_len >= max(300.0, allow.get(id(ref), 0.0)):
+            vio(out, ref, '%s の縁 %.0fmm に手すりも壁も無い(%d階の床がその外にある)'
+                % (label, open_len, floor))
+    return out
+
+
 CHECKS = [
     ('1. 建具が壁線上に乗っているか', check1_doors_on_walls),
     ('2. 開き戸の開閉スペース', check2_swing_clearance),
@@ -1453,6 +1540,7 @@ CHECKS = [
     ('26. 収納家具の正面クリアランス', check26_storage_facing),
     ('27. 開閉窓の室内側クリアランス', check27_operable_window),
     ('28. カーテンと窓の整合', check28_curtain_fit),
+    ('29. 吹き抜けの縁の手すり', check29_void_guard),
 ]
 
 

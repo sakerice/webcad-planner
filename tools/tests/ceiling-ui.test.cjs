@@ -83,7 +83,8 @@ const FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint', 'roomSetbackCeilingNoteHtml',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
-  'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
+  'roomVoidBlockReason', 'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
   'roofTypeOptions', 'objectIdLabel',
   // Task 13 で足したもの

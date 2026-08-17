@@ -315,6 +315,7 @@ const WIRE_FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'textureImageAspect', 'setTextureRepeatNoDistort', 'applyTextureFlip',
   'appearanceWithTextureOrientation', 'makeCeilingMaterial',

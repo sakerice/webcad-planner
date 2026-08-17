@@ -58,6 +58,7 @@ const FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel'
 ];
@@ -259,7 +260,8 @@ test('14(最重要): 既定プランの全部屋は、天井の高さも出ど�
   const ctx = makeCtx(data);
   const byFloor = {};
   // 既定プランは吹き抜けを1室持つ。そこだけ天井高を明示しているので外す。
-  const declares = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+  const declares = (r) => !!((r.ceiling &&
+    (r.ceiling.heightMm || r.ceiling.type === 'void')) || r.ceilingHeight);
   const voids = data.rooms.filter(declares);
   assert.ok(voids.length > 0, '既定プランに吹き抜けが無い(前提が崩れている)');
   voids.forEach((r) => assert.ok(ctx.roomCeilingHeightM(r) > ctx.storyHeightM(r.floor),

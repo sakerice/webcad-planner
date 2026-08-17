@@ -511,7 +511,8 @@ const VIDEO_FNS = [
   // 高さ（package.json の heightModel はレンダと同じ経路で解く）
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-  'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'wallFullHeightM', 'isPositiveNumber', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',

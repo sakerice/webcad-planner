@@ -101,6 +101,7 @@ const HEIGHT_FNS = [
   'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM',
   // Task 12-1: 屋根から天井を導く経路。宣言していない部屋はここを通らない。
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
@@ -169,7 +170,8 @@ test('天井高を明示しない部屋は階高をそのまま受け取る（�
   const g = heights(PLAN);
 // 既定プランは吹き抜け(リビングの上に2階の床を張らない部屋)を持つ。
 // そこだけは天井高を明示しているので、この検査からは外す。
-const declaresCeiling = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+const declaresCeiling = (r) => !!((r.ceiling &&
+  (r.ceiling.heightMm || r.ceiling.type === 'void')) || r.ceilingHeight);
   const f1 = PLAN.rooms.filter((r) => r.floor === 1 && !declaresCeiling(r));
   const f2 = PLAN.rooms.filter((r) => r.floor === 2 && !declaresCeiling(r));
   assert.ok(f1.length > 0 && f2.length > 0);
@@ -360,7 +362,8 @@ test('既定プランでは天井は階高の位置に置かれる（既存の�
   // 吹き抜け(天井高を明示した部屋)だけは例外。そこは2階の天井まで抜ける。
   const declared = {};
   PLAN.rooms.forEach(function (r) {
-    if ((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight) declared[r.id] = true;
+    if ((r.ceiling && (r.ceiling.heightMm || r.ceiling.type === 'void'))
+        || r.ceilingHeight) declared[r.id] = true;
   });
   [1, 2].forEach(function (f) {
     const r = ceilingYsFor(PLAN, f);

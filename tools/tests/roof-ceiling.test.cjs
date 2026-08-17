@@ -141,6 +141,7 @@ const HEIGHT_FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
   'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
@@ -289,7 +290,8 @@ test('12-1(最重要): 既定プランの全部屋は宣言していないので
   const ctx = makeCtx(PLAN);
 // 既定プランは吹き抜け(リビングの上に2階の床を張らない部屋)を持つ。
 // そこだけは天井高を明示しているので、この検査からは外す。
-const declaresCeiling = (r) => !!((r.ceiling && r.ceiling.heightMm) || r.ceilingHeight);
+const declaresCeiling = (r) => !!((r.ceiling &&
+  (r.ceiling.heightMm || r.ceiling.type === 'void')) || r.ceilingHeight);
   PLAN.rooms.filter((r) => !declaresCeiling(r)).forEach((r) => {
     assert.equal(ctx.roomCeilingProfile(r), null, r.id + ' が勾配の枝に入った');
     assert.equal(ctx.roomCeilingHeightM(r), ctx.storyHeightM(r.floor), r.id + ' の天井高が動いた');
