@@ -102,7 +102,7 @@ function ctxFor(walls) {
     buildWinFrames: function () {}
   });
   vm.runInContext([
-    topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
+    topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('WALL_CORE_END_PAD_MM'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('_roofCeilingExtentCache'),
     topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'),
@@ -120,7 +120,7 @@ function ctxFor(walls) {
     'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallHeightMm', 'wallDisplayHeightM',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
-    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'
+    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'buildWall3D'
   ].map(topLevelFunction)).join('\n'), ctx);
   return ctx;
 }

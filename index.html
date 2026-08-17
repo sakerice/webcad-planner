@@ -7452,6 +7452,12 @@ function drawWall2d(w){
   var dx=b.cx-a.cx,dy=b.cy-a.cy,len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return;
   var nx=-dy/len,ny=dx/len,t=w.thick*ST.zoom*0.05/2;
+  // 出隅では相手の厚みの半分ぶん端を伸ばす。芯線の端を同じ点に置いただけだと
+  // 「厚/2 × 厚/2」の四角が両方の矩形から外れ、角が階段状に欠ける(3Dと同じ理由)
+  var px=ST.zoom*0.05, ux=dx/len, uy=dy/len;
+  var e1=wallEndCornerExtensionMm(w,false)*px, e2=wallEndCornerExtensionMm(w,true)*px;
+  a={cx:a.cx-ux*e1, cy:a.cy-uy*e1};
+  b={cx:b.cx+ux*e2, cy:b.cy+uy*e2};
   var sel=ST.selected===w;
   ctx.save();
   // JIS A0150(建築製図通則)/公共建築工事標準仕様書に準拠した壁の断面表現:
@@ -13555,6 +13561,74 @@ function addWallIntersectionBreakpointsBySide(w,sideBreaks){
 // 必要な延長量が大きく異なり(例: 72mmと12mm)、一律の値では片方が塞ぎきれず
 // もう片方は逆に大きくはみ出して室内に薄い板が浮いて見える不具合になっていた
 var INTERIOR_FINISH_MM=12;
+// 壁のコア(芯線から thick/2 の箱)は、芯線の端どうしを同じ点に置いただけでは
+// 出隅を閉じられない。横壁の箱は x0..len / y-60..+60、縦壁の箱は x-60..+60 /
+// y0..len なので、x-60..0 かつ y-60..0 の「厚/2 × 厚/2」の四角が
+// どちらにも入らず、角が欠けて階段状に見える。
+// 欠けている分だけ自分の軸方向へ伸ばして閉じる。
+//
+// ただし T字や、直交する壁が通り抜けている交点で伸ばしてはいけない。
+// そこは既に相手の箱で埋まっており、伸ばすと相手の反対側の面から自分の断面が
+// 顔を出す(外壁のファサードに内壁の色の帯が出る)。
+// 「相手も端で出会っているか」だけでは足りない — 例えば南外壁が x6370 で
+// 2枚に分かれている所へ背骨の壁が突き当たると、相手の1枚は端だが実際には
+// もう1枚が続いているので埋まっている。そこで、伸ばそうとしている領域を
+// 実際にサンプリングして、他の壁に覆われていないときだけ伸ばす。
+var WALL_CORE_END_PAD_MM=6;   // 突き付け接合の浮動小数点誤差を埋める既存の延長
+// 角を塞いでいると見なせるのは、素通しでない(solid)かつ相手と同じ高さまで
+// 立っている壁だけ。腰高の手すり壁や格子壁は、その上端から先が開いたままなので
+// 「埋まっている」と数えてはいけない
+function wallSolidCoverHeightMm(o){
+  var st=o.wallStyle||'solid';
+  if(st!=='solid') return isPositiveNumber(o.wallHeight)?Number(o.wallHeight):0;
+  return isPositiveNumber(o.wallHeight)?Number(o.wallHeight):WALL_H;
+}
+function wallCoreBoxHitMm(o,px,py){
+  var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
+  if(olen<1) return false;
+  var ux=odx/olen, uy=ody/olen;
+  var t=(px-o.x1)*ux+(py-o.y1)*uy;
+  var sdist=Math.abs(-(px-o.x1)*uy+(py-o.y1)*ux);
+  return t>=-WALL_CORE_END_PAD_MM && t<=olen+WALL_CORE_END_PAD_MM
+      && sdist<=(o.thick||120)/2;
+}
+function wallEndCornerExtensionMm(w,atEnd){
+  if((w.thick||0)<120) return 0;
+  var px=atEnd?w.x2:w.x1, py=atEnd?w.y2:w.y1;
+  var wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
+  if(wlen<1) return 0;
+  var ux=(wdx/wlen)*(atEnd?1:-1), uy=(wdy/wlen)*(atEnd?1:-1); // 端から外向き
+  var nx=-uy, ny=ux;
+  var need=0;
+  DATA.walls.forEach(function(o){
+    if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
+    var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
+    if(olen<1) return;
+    var sinA=Math.abs(wdx*ody-wdy*odx)/(wlen*olen);
+    if(sinA<0.12) return;             // 平行な継ぎ足しは角を作らない
+    var t=((px-o.x1)*odx+(py-o.y1)*ody)/(olen*olen);
+    if(t<-0.02||t>1.02) return;       // 相手の芯線の範囲外
+    var qx=o.x1+odx*t, qy=o.y1+ody*t;
+    if(Math.hypot(px-qx,py-qy)>(o.thick||120)/2+40) return;
+    var v=((o.thick||120)/2)/sinA;   // 相手の外側の面まで届く距離(直交なら厚/2)
+    if(v>need) need=v;
+  });
+  if(need<=0) return 0;
+  need=Math.min(need,220);
+  var half=(w.thick||120)/2-1, reach=need*0.9, open=false;
+  var myH=wallSolidCoverHeightMm(w);
+  [1,-1].forEach(function(sg){
+    var sx=px+ux*reach+nx*half*sg, sy=py+uy*reach+ny*half*sg;
+    var covered=false;
+    DATA.walls.forEach(function(o){
+      if(covered||o===w||o.floor!==w.floor||(o.thick||0)<120) return;
+      if(wallSolidCoverHeightMm(o)<myH-50) return;  // 腰高の手すり壁では塞げない
+      if(wallCoreBoxHitMm(o,sx,sy)) covered=true;
+    });
+    if(!covered) open=true;
+  });
+  return open?need:0;
+}
 function wallCornerExtensionMm(w,atEnd){
   var px=atEnd?w.x2:w.x1, py=atEnd?w.y2:w.y1;
   var wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
@@ -13889,6 +13963,20 @@ function buildWall3D(w){
     mark3DSelectable(wallGroup,w,'wall');
   }
   var extSpans=getWallExteriorSpans(w);
+  // 出隅の欠けを埋める延長(mm→m)。従来は一律6mmで、直交する2枚の芯線の端が
+  // 同じ点に来る出隅に「厚/2 × 厚/2」の四角い欠けが残っていた
+  var endExtA=Math.max(0.006,wallEndCornerExtensionMm(w,false)*U);
+  var endExtB=Math.max(0.006,wallEndCornerExtensionMm(w,true)*U);
+  // 外装面も同じだけ伸ばさないと、伸ばしたコアの断面が角に帯として露出する
+  if(extSpans.length){
+    var spanFirst=extSpans[0], spanLast=extSpans[0];
+    extSpans.forEach(function(sp){
+      if(sp.a<spanFirst.a) spanFirst=sp;
+      if(sp.b>spanLast.b) spanLast=sp;
+    });
+    if(spanFirst.a<=0.002) spanFirst.a-=endExtA;
+    if(spanLast.b>=len-0.002) spanLast.b+=endExtB;
+  }
   var isOuter=extSpans.length>0;
   var mat=isOuter?makeExteriorWallMaterial(w,fl,len):makeWallCoreMaterial();
   // 壁コア(Box)の上下面(天井側の断面)は、内観3Dの俯瞰(ドールハウス)カメラで
@@ -14084,10 +14172,10 @@ function buildWall3D(w){
   }
   function addSlopedTopWallPiece(a,b,yBase,h){
     var thick=w.thick*U;
-    // 端の6mm延長は箱の枝と同じ理由(突き付け接合の浮動小数点誤差でスリットが透ける)
+    // 端の延長は箱の枝と同じ(突き付けのスリット塞ぎ + 出隅の欠け埋め)
     var coreA=a, coreB=b;
-    if(a<=0.002) coreA-=0.006;
-    if(b>=len-0.002) coreB+=0.006;
+    if(a<=0.002) coreA-=endExtA;
+    if(b>=len-0.002) coreB+=endExtB;
     var segs=Math.max(2,Math.min(160,Math.ceil((coreB-coreA)/WALL_TOP_SAMPLE_STEP_M)));
     var verts=[], idxBody=[], idxTop=[], si, lx, top, p, n;
     for(si=0;si<=segs;si++){
@@ -14119,7 +14207,8 @@ function buildWall3D(w){
     wallGroup.add(mesh);
     if(extMat&&extSpans.length){
       extSpans.forEach(function(sp){
-        var aa=Math.max(a,sp.a), bb=Math.min(b,sp.b);
+        // コアと同じ範囲(coreA..coreB)で切る。a,b で切ると角で外装が足りない
+        var aa=Math.max(coreA,sp.a), bb=Math.min(coreB,sp.b);
         if(bb-aa<0.004) return;
         var face=slopedFaceMesh(aa,bb,yBase,h,wallExteriorFaceOffsetM(w),sp.sign,
           makeExteriorWallMaterial(w,fl,len,sp));
@@ -14165,11 +14254,12 @@ function buildWall3D(w){
     }
     // BoxGeometry の材質配列は [+x,-x,+y(上面),-y(底面),+z,-z] の順。上下面だけ capMat にする
     var boxMat=isOuter?[mat,mat,capMat,capMat,mat,mat]:mat;
-    // 壁の真端に接するピースは6mmだけ延長し、突き付け接合部の浮動小数点誤差による
-    // スリット(向こう側が点線状に透ける)を物理的に塞ぐ
+    // 壁の真端に接するピースは延長する。突き付け接合部の浮動小数点誤差による
+    // スリット(向こう側が点線状に透ける)を塞ぎ、出隅では相手の厚みの半分ぶん
+    // 伸ばして角の欠けを埋める(endExtA/endExtB)
     var coreA=a, coreB=b;
-    if(a<=0.002) coreA-=0.006;
-    if(b>=len-0.002) coreB+=0.006;
+    if(a<=0.002) coreA-=endExtA;
+    if(b>=len-0.002) coreB+=endExtB;
     var coreLen=coreB-coreA, coreMid=(coreA+coreB)/2;
     var mesh=new THREE.Mesh(new THREE.BoxGeometry(coreLen,h,w.thick*U),boxMat);
     mesh.castShadow=true; mesh.receiveShadow=true;
@@ -14177,7 +14267,7 @@ function buildWall3D(w){
     mesh.rotation.y=rotY;
     if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); mesh.userData.noMerge=true; }
     wallGroup.add(mesh);
-    addExteriorFace(a,b,yBase,h);
+    addExteriorFace(coreA,coreB,yBase,h);
     addInteriorFaces(a,b,yBase,h);
   }
   function wallTopCutAt(t,h){
@@ -24626,18 +24716,22 @@ var JISDRAW=(function(){
     return '</svg>';
   }
 
-  // 壁: drawWall2d(:5715)と同じ4点ポリゴン(壁芯±thick/2)を黒塗り断面(JIS)で描く。
+  // 壁: drawWall2d と同じ4点ポリゴン(壁芯±thick/2)を黒塗り断面(JIS)で描く。
+  // 出隅の端の延長も drawWall2d と揃える(揃えないと図面だけ角が欠ける)。
   function wallsToSvg(floor,LW){
     var out='';
     DATA.walls.filter(function(w){return (w.floor||1)===floor;}).forEach(function(w){
       var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
       if(len<1) return;
       var nx=-dy/len, ny=dx/len, t=(w.thick||120)/2;
+      var ux=dx/len, uy=dy/len;
+      var e1=wallEndCornerExtensionMm(w,false), e2=wallEndCornerExtensionMm(w,true);
+      var ax=w.x1-ux*e1, ay=w.y1-uy*e1, bx=w.x2+ux*e2, by=w.y2+uy*e2;
       var pts=[
-        (w.x1+nx*t)+','+(w.y1+ny*t),
-        (w.x2+nx*t)+','+(w.y2+ny*t),
-        (w.x2-nx*t)+','+(w.y2-ny*t),
-        (w.x1-nx*t)+','+(w.y1-ny*t)
+        (ax+nx*t)+','+(ay+ny*t),
+        (bx+nx*t)+','+(by+ny*t),
+        (bx-nx*t)+','+(by-ny*t),
+        (ax-nx*t)+','+(ay-ny*t)
       ].join(' ');
       out+='<polygon points="'+pts+'" fill="#000" stroke="#000" stroke-width="'+LW.thin+'"/>';
     });
