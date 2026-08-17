@@ -1611,6 +1611,65 @@ def check32_wall_joint(data):
     return out
 
 
+CEILING_FINISH_MM = 12.0    # index.html の CEILING_FINISH_M と同じ
+
+
+def ceiling_finish_mm(data, floor, cx, cy):
+    """天井仕上げ面の高さ(mm)。**その階の床仕上げ面から測る** = elev と同じ基準。
+
+    アプリ(ceilingFinishElevationMm)・生成器(ceiling_elev)と同じ式。
+    3つの基準が食い違っていたのが「照明が天井から浮く / 天井裏に埋まる」原因
+    だったので、式は3か所に同じものを置き、この検査で結果を突き合わせる。
+    """
+    slab = 0.0 if floor <= 1 else float(FLOOR_SLAB_MM)
+    r = room_at(data, floor, cx, cy)
+    h = float(FLOOR_H_MM)
+    if r is not None:
+        c = r.get('ceiling') or {}
+        if c.get('type') == 'void':
+            to = c.get('toFloor')
+            to = int(to) if isinstance(to, (int, float)) else floor + 1
+            h = (max(floor + 1, to) - floor + 1) * float(FLOOR_H_MM)
+    return h - slab - CEILING_FINISH_MM
+
+
+# 天井に固定する器具。値は「取付面(elev)からモデル上端までの高さ(mm)」。
+# 照明は elev が取付面そのものなので0。モデルは底面が elev なのでモデル高。
+CEILING_FIXTURES = {
+    'light-ceiling': 0.0,
+    'light-down': 0.0,
+    'light-spot': 0.0,
+    'fmp-CeilingFan01': 350.0,
+}
+
+
+def check33_light_mount(data):
+    """天井付けの器具が、実際に天井仕上げ面に付いているか。
+
+    既定プランは全灯 elev=2380 の一律で、1階は308mm浮き、2階は124mm浮いていた。
+    アプリの既定値(wallFullHeightM-160)も1階148mm低く2階32mm高かった。
+    どちらも「どの高さを基準に測るか」の取り違えで、目で見て気付くのは難しい。
+    屋外(部屋の外)の器具は軒下などに付くので対象外。
+    """
+    out = []
+    TOL = 3.0
+    for it in data['items']:
+        top_off = CEILING_FIXTURES.get(it.get('type'))
+        if top_off is None:
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        if room_at(data, floor, cx, cy) is None:
+            continue                      # 屋外(ポーチ等)は天井が無い
+        want = ceiling_finish_mm(data, floor, cx, cy)
+        top = float(it.get('elev') or 0) + top_off
+        if abs(top - want) > TOL:
+            vio(out, it, '天井仕上げ面 %.0fmm に対し器具の上端が %.0fmm '
+                         '(%+.0fmm ずれて%s)'
+                % (want, top, top - want, '浮いている' if top < want else '埋まっている'))
+    return out
+
+
 def check30_facing_wall(data):
     """家具の正面が、すぐ目の前の壁にぶつかっていないか。
 
@@ -1795,6 +1854,7 @@ CHECKS = [
     ('30. 家具の裏表(正面が壁を向いていないか)', check30_facing_wall),
     ('31. 壁付け家具が壁から離れていないか', check31_wall_mounted_gap),
     ('32. 壁の継ぎ目のずれ', check32_wall_joint),
+    ('33. 照明器具が天井に付いているか', check33_light_mount),
 ]
 
 

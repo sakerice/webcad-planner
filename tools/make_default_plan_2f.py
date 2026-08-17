@@ -157,7 +157,49 @@ def door(t, cx, cy, w, floor, vertical=False, color=None, flipY=False, **kw):
     it["flipY"] = flipY
     return it
 
-def light(kind, cx, cy, floor, elev, shadow=False):
+FLOOR_H_MM = 2700       # 階高
+SLAB_MM = 180           # 2階以上の床スラブ
+CEILING_FINISH_MM = 12  # 天井仕上げ面の厚み(index.html の CEILING_FINISH_M)
+
+def ceiling_elev(floor, cx, cy):
+    """天井仕上げ面の高さ(mm)。**その階の床仕上げ面から測る** = elev と同じ基準。
+
+    照明の取付高さはここに合わせる。基準がずれていたのが「天井から浮く/
+    天井裏に埋まる」原因だった:
+      部屋の天井高は床スラブ下端から / elev は床仕上げ面から /
+      天井面のメッシュはさらに仕上げ厚ぶん下
+    index.html の ceilingFinishElevationMm と同じ値になること。
+    食い違いは lint の check33 が止める。
+    """
+    slab = 0 if floor <= 1 else SLAB_MM
+    h = FLOOR_H_MM
+    for r in rooms:
+        if r["floor"] != floor:
+            continue
+        if not (r["x"] <= cx <= r["x"] + r["w"] and r["y"] <= cy <= r["y"] + r["d"]):
+            continue
+        c = r.get("ceiling") or {}
+        if c.get("type") == "void":
+            to = max(floor + 1, int(c.get("toFloor") or floor + 1))
+            h = (to - floor + 1) * FLOOR_H_MM
+        break
+    return h - slab - CEILING_FINISH_MM
+
+
+def ceiling_mounted(t, cx, cy, floor, **kw):
+    """天井に付ける器具(モデル)を、キャノピー上端が天井面に来る高さで置く。
+
+    モデルは「原点から上へ h」で作ってあるので、アプリはその **底面** を
+    floorTopY+elev に置く。よって elev は 天井面 - モデル高。
+    """
+    h = (CATALOG.get(t) or (None, None, None))[2] or 0
+    return item(t, cx, cy, kw.pop("w", 0), kw.pop("d", 0), floor,
+                elev=ceiling_elev(floor, cx, cy) - h, **kw)
+
+
+def light(kind, cx, cy, floor, elev=None, shadow=False):
+    if elev is None:
+        elev = ceiling_elev(floor, cx, cy)   # 既定は天井仕上げ面(=直付け/埋込)
     size = {"ceiling": 450, "down": 180}[kind]
     inten = {"ceiling": 0.56, "down": 0.72}[kind]
     rng = {"ceiling": 5600, "down": 4400}[kind]
@@ -628,35 +670,40 @@ item("custom-block", 7918, 5450, 496, 423, 2, rot=-90, color="#e6e3de",
 item("fmp-WashBasin04", 7918, 5450, 496, 423, 2, rot=-90, elev=750)
 
 # ══════════ 照明 ══════════
-light("ceiling", 4400, 5150, 1, 2380, shadow=True)   # リビング
+light("ceiling", 4400, 5150, 1, shadow=True)   # リビング
 # 吹き抜けのシーリングファン。天井5280の直下に吊る(器具高さ350)
-item("fmp-CeilingFan01", 5005, 6370, 1200, 1200, 1, rot=0, elev=4750)
-light("ceiling", 5005, 6370, 1, 4700)                # 吹き抜けの高所照明
-light("ceiling", 4700, 3550, 1, 2380, shadow=True)   # ダイニング
-light("ceiling", 1400, 5000, 1, 2380)                # 洋室(1F)
-light("down", 4300, 700, 1, 2380)
-light("down", 5500, 700, 1, 2380)
-light("down", 4700, 2400, 1, 2380)                   # キッチン手元
-light("down", 2700, 900, 1, 2380)
-light("down", 900, 900, 1, 2380)
-light("down", 1800, 2280, 1, 2380)                   # ランドリー
-light("down", 6825, 2700, 1, 2380)
-light("down", 6825, 4100, 1, 2380)
-light("down", 7300, 5000, 1, 2380)
-light("down", 7300, 6300, 1, 2380)
-light("down", 7750, 6950, 1, 2380)                   # 玄関土間
-light("down", 6825, 900, 1, 2380)                    # パントリー
-light("down", 7735, 400, 1, 2380)                    # 階段の上り切り
-light("down", 7735, 2300, 1, 2380)                   # 階段直進部
+# ファンはキャノピー上端が天井面に来る高さで吊る(elev = 天井 - モデル高)
+ceiling_mounted("fmp-CeilingFan01", 5005, 6370, 1, w=1200, d=1200, rot=0)
+# 吹き抜けの照明は天井(FL+5388)の埋込。以前はファンの下に直付け器具を
+# 宙吊りにしていて、何にも留まっていない円盤が浮いていた。
+# ファンの回転域(φ1200)を避けて2灯に振り分ける
+light("down", 4180, 6060, 1)
+light("down", 5830, 6680, 1)
+light("ceiling", 4700, 3550, 1, shadow=True)   # ダイニング
+light("ceiling", 1400, 5000, 1)                # 洋室(1F)
+light("down", 4300, 700, 1)
+light("down", 5500, 700, 1)
+light("down", 4700, 2400, 1)                   # キッチン手元
+light("down", 2700, 900, 1)
+light("down", 900, 900, 1)
+light("down", 1800, 2280, 1)                   # ランドリー
+light("down", 6825, 2700, 1)
+light("down", 6825, 4100, 1)
+light("down", 7300, 5000, 1)
+light("down", 7300, 6300, 1)
+light("down", 7750, 6950, 1)                   # 玄関土間
+light("down", 6825, 900, 1)                    # パントリー
+light("down", 7735, 400, 1)                    # 階段の上り切り
+light("down", 7735, 2300, 1)                   # 階段直進部
 light("down", 7100, 7900, 1, 2600)                   # 玄関ポーチ
 
-light("ceiling", 1800, 1400, 2, 2380)                # 洋室A
-light("ceiling", 5000, 1400, 2, 2380)                # 洋室B
-light("down", 7735, 5200, 2, 2380)                   # 2Fトイレ
-light("down", 6825, 800, 2, 2380)                    # 2Fホール北
-light("down", 6825, 2100, 2, 2380)                   # 2Fホール南
-light("down", 7100, 4100, 2, 2380)                   # 2F廊下(東)
-light("down", 6825, 5900, 2, 2380)                   # 2F納戸
+light("ceiling", 1800, 1400, 2)                # 洋室A
+light("ceiling", 5000, 1400, 2)                # 洋室B
+light("down", 7735, 5200, 2)                   # 2Fトイレ
+light("down", 6825, 800, 2)                    # 2Fホール北
+light("down", 6825, 2100, 2)                   # 2Fホール南
+light("down", 7100, 4100, 2)                   # 2F廊下(東)
+light("down", 6825, 5900, 2)                   # 2F納戸
 # 有効幅790mmの廊下で至近から見上げるので、中心が1.4m前後になる高さにする
 item("im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
      1500, 2800, 500, 10, 2, rot=180, elev=1050)
@@ -664,13 +711,13 @@ item("im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
      3400, 2800, 500, 10, 2, rot=180, elev=1050)
 item("im0261-Painting-MEGA_PACK_Painting-decor-476641_frame",
      5900, 2800, 600, 31, 2, rot=180, elev=1050)
-light("down", 1500, 3180, 2, 2380)                   # 廊下
-light("down", 4500, 3180, 2, 2380)
-light("ceiling", 1200, 5200, 2, 2380, shadow=True)   # 主寝室
-light("down", 3185, 4400, 2, 2380)                   # WIC北
-light("down", 3185, 6300, 2, 2380)                   # WIC南
-light("down", 5100, 4300, 2, 2380)                   # 書斎
-light("down", 455, 3185, 2, 2380)                    # リネン庫
+light("down", 1500, 3180, 2)                   # 廊下
+light("down", 4500, 3180, 2)
+light("ceiling", 1200, 5200, 2, shadow=True)   # 主寝室
+light("down", 3185, 4400, 2)                   # WIC北
+light("down", 3185, 6300, 2)                   # WIC南
+light("down", 5100, 4300, 2)                   # 書斎
+light("down", 455, 3185, 2)                    # リネン庫
 
 # ══════════ 注記 ══════════
 item("memo", 1200, -1600, 2200, 500, 1, color="#fff3a6",

@@ -4340,7 +4340,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4365,15 +4365,15 @@
    "sY": 0,
    "color": null,
    "colorCustom": false,
-   "elev": 4750
+   "elev": 5038
   },
   {
    "id": 1250,
-   "type": "light-ceiling",
-   "x": 4780.0,
-   "y": 6145.0,
-   "w": 450,
-   "d": 450,
+   "type": "light-down",
+   "x": 4090.0,
+   "y": 5970.0,
+   "w": 180,
+   "d": 180,
    "rot": 0,
    "floor": 1,
    "flipX": false,
@@ -4383,17 +4383,42 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 4700,
-   "lightKind": "ceiling",
+   "elev": 5388,
+   "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
-   "lightIntensity": 0.56,
-   "lightRange": 5600,
+   "lightIntensity": 0.72,
+   "lightRange": 4400,
    "lightAngle": 64,
    "lightCastShadow": false
   },
   {
    "id": 1251,
+   "type": "light-down",
+   "x": 5740.0,
+   "y": 6590.0,
+   "w": 180,
+   "d": 180,
+   "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": "#fff6dd",
+   "colorCustom": true,
+   "elev": 5388,
+   "lightKind": "down",
+   "lightShape": "point",
+   "lightColor": "#fff6dd",
+   "lightIntensity": 0.72,
+   "lightRange": 4400,
+   "lightAngle": 64,
+   "lightCastShadow": false
+  },
+  {
+   "id": 1252,
    "type": "light-ceiling",
    "x": 4475.0,
    "y": 3325.0,
@@ -4408,7 +4433,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4418,7 +4443,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1252,
+   "id": 1253,
    "type": "light-ceiling",
    "x": 1175.0,
    "y": 4775.0,
@@ -4433,7 +4458,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4443,7 +4468,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1253,
+   "id": 1254,
    "type": "light-down",
    "x": 4210.0,
    "y": 610.0,
@@ -4458,7 +4483,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4468,7 +4493,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1254,
+   "id": 1255,
    "type": "light-down",
    "x": 5410.0,
    "y": 610.0,
@@ -4483,7 +4508,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4493,7 +4518,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1255,
+   "id": 1256,
    "type": "light-down",
    "x": 4610.0,
    "y": 2310.0,
@@ -4508,7 +4533,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4518,7 +4543,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1256,
+   "id": 1257,
    "type": "light-down",
    "x": 2610.0,
    "y": 810.0,
@@ -4533,7 +4558,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4543,7 +4568,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1257,
+   "id": 1258,
    "type": "light-down",
    "x": 810.0,
    "y": 810.0,
@@ -4558,7 +4583,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4568,7 +4593,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1258,
+   "id": 1259,
    "type": "light-down",
    "x": 1710.0,
    "y": 2190.0,
@@ -4583,7 +4608,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4593,7 +4618,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1259,
+   "id": 1260,
    "type": "light-down",
    "x": 6735.0,
    "y": 2610.0,
@@ -4608,7 +4633,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4618,7 +4643,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1260,
+   "id": 1261,
    "type": "light-down",
    "x": 6735.0,
    "y": 4010.0,
@@ -4633,7 +4658,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4643,7 +4668,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1261,
+   "id": 1262,
    "type": "light-down",
    "x": 7210.0,
    "y": 4910.0,
@@ -4658,7 +4683,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4668,7 +4693,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1262,
+   "id": 1263,
    "type": "light-down",
    "x": 7210.0,
    "y": 6210.0,
@@ -4683,7 +4708,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4693,7 +4718,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1263,
+   "id": 1264,
    "type": "light-down",
    "x": 7660.0,
    "y": 6860.0,
@@ -4708,7 +4733,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4718,7 +4743,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1264,
+   "id": 1265,
    "type": "light-down",
    "x": 6735.0,
    "y": 810.0,
@@ -4733,7 +4758,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4743,7 +4768,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1265,
+   "id": 1266,
    "type": "light-down",
    "x": 7645.0,
    "y": 310.0,
@@ -4758,7 +4783,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4768,7 +4793,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1266,
+   "id": 1267,
    "type": "light-down",
    "x": 7645.0,
    "y": 2210.0,
@@ -4783,7 +4808,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2688,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4793,7 +4818,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1267,
+   "id": 1268,
    "type": "light-down",
    "x": 7010.0,
    "y": 7810.0,
@@ -4818,7 +4843,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1268,
+   "id": 1269,
    "type": "light-ceiling",
    "x": 1575.0,
    "y": 1175.0,
@@ -4833,7 +4858,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4843,7 +4868,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1269,
+   "id": 1270,
    "type": "light-ceiling",
    "x": 4775.0,
    "y": 1175.0,
@@ -4858,7 +4883,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4868,7 +4893,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1270,
+   "id": 1271,
    "type": "light-down",
    "x": 7645.0,
    "y": 5110.0,
@@ -4883,7 +4908,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4893,7 +4918,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1271,
+   "id": 1272,
    "type": "light-down",
    "x": 6735.0,
    "y": 710.0,
@@ -4908,7 +4933,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4918,7 +4943,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1272,
+   "id": 1273,
    "type": "light-down",
    "x": 6735.0,
    "y": 2010.0,
@@ -4933,7 +4958,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4943,7 +4968,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1273,
+   "id": 1274,
    "type": "light-down",
    "x": 7010.0,
    "y": 4010.0,
@@ -4958,7 +4983,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4968,7 +4993,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1274,
+   "id": 1275,
    "type": "light-down",
    "x": 6735.0,
    "y": 5810.0,
@@ -4983,7 +5008,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -4993,7 +5018,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1275,
+   "id": 1276,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
    "x": 1250.0,
    "y": 2795.0,
@@ -5011,7 +5036,7 @@
    "elev": 1050
   },
   {
-   "id": 1276,
+   "id": 1277,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
    "x": 3150.0,
    "y": 2795.0,
@@ -5029,7 +5054,7 @@
    "elev": 1050
   },
   {
-   "id": 1277,
+   "id": 1278,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-476641_frame",
    "x": 5600.0,
    "y": 2784.5,
@@ -5047,7 +5072,7 @@
    "elev": 1050
   },
   {
-   "id": 1278,
+   "id": 1279,
    "type": "light-down",
    "x": 1410.0,
    "y": 3090.0,
@@ -5062,7 +5087,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5072,7 +5097,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1279,
+   "id": 1280,
    "type": "light-down",
    "x": 4410.0,
    "y": 3090.0,
@@ -5087,7 +5112,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5097,7 +5122,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1280,
+   "id": 1281,
    "type": "light-ceiling",
    "x": 975.0,
    "y": 4975.0,
@@ -5112,7 +5137,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "ceiling",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5122,7 +5147,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1281,
+   "id": 1282,
    "type": "light-down",
    "x": 3095.0,
    "y": 4310.0,
@@ -5137,7 +5162,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5147,7 +5172,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1282,
+   "id": 1283,
    "type": "light-down",
    "x": 3095.0,
    "y": 6210.0,
@@ -5162,7 +5187,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5172,7 +5197,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1283,
+   "id": 1284,
    "type": "light-down",
    "x": 5010.0,
    "y": 4210.0,
@@ -5187,7 +5212,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5197,7 +5222,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1284,
+   "id": 1285,
    "type": "light-down",
    "x": 365.0,
    "y": 3095.0,
@@ -5212,7 +5237,7 @@
    "sY": 0,
    "color": "#fff6dd",
    "colorCustom": true,
-   "elev": 2380,
+   "elev": 2508,
    "lightKind": "down",
    "lightShape": "point",
    "lightColor": "#fff6dd",
@@ -5222,7 +5247,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1285,
+   "id": 1286,
    "type": "memo",
    "x": 100.0,
    "y": -1850.0,
@@ -5240,7 +5265,7 @@
    "noteText": "モダン2階建てモデルプラン 4LDK+書斎\n敷地約150㎡ / 延床約117㎡(35坪)"
   },
   {
-   "id": 1286,
+   "id": 1287,
    "type": "ruler",
    "x": -910.0,
    "y": 11915.0,

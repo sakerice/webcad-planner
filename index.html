@@ -234,8 +234,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 /* 同じクラスなのに、画像側は nowrap で使い方の1行が画面外へ切れ、動画側は
    .video-render-files で pre-wrap に上書きされていた。折り返しは共通にする。 */
 .unity-render-cmd{color:#aac;background:#0b1226;border:1px solid #24385f;border-radius:6px;padding:8px;overflow:auto;white-space:pre-wrap}
-#unity-render-fab{display:none;position:absolute;right:14px;top:14px;z-index:260;border:1px solid #e94560;background:#e94560;color:#fff;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.28);cursor:pointer;touch-action:manipulation}
-#unity-render-fab.show{display:block}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
 /* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
@@ -462,11 +460,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
   /* Coords in top-left on mobile */
   #coords{bottom:auto;top:48px;right:6px;background:rgba(22,33,62,0.7);padding:2px 6px;border-radius:4px}
-  /* top/right はここでは決めない。下の #unity-render-fab{top:70px} が、
-     スマホの固定ツールバー(上端8〜60px)を避けるために位置を持っている。
-     ここで小さい top を書くと、後ろの規則に負けたまま残り、
-     次に読む人には「10px が効いている」と読めてしまう。 */
-  #unity-render-fab{padding:9px 11px;font-size:11px}
   .unity-render-config{grid-template-columns:1fr}
 }
 
@@ -849,12 +842,6 @@ body{
   color:var(--hp-text);
   border-radius:9px;
 }
-#unity-render-fab{
-  border:1px solid var(--hp-primary);
-  background:var(--hp-primary);
-  border-radius:999px;
-  box-shadow:0 12px 28px rgba(242,74,46,0.28);
-}
 #bottom-nav{
   background:rgba(255,255,255,0.98);
   border-top:1px solid var(--hp-border);
@@ -1041,16 +1028,6 @@ body{
   bottom:14px;
   padding:4px 9px;
   border-radius:999px;
-}
-#unity-render-fab{
-  /* スマホではツールバーが position:fixed で画面上部 8〜60px を覆う。
-     3Dビュー内のこのボタンは absolute なので、以前の値では完全に下敷きになり、
-     その点をタップしてもツールバーが拾ってボタンには届かなかった（375px で実測）。
-     ツールバーの下端より下から始める。デスクトップではツールバーが
-     fixed でないので、この値でも見た目は変わらない。 */
-  top:70px;
-  right:18px;
-  padding:10px 14px;
 }
 #statusbar{
   margin:0 10px 8px;
@@ -2120,8 +2097,7 @@ body{
 .unity-render-card,
 #bottom-nav,
 #statusbar,
-#asset-preview,
-#unity-render-fab{
+#asset-preview{
   box-shadow:0 4px 12px rgba(24,20,18,0.13)!important;
 }
 #statusbar{
@@ -2994,8 +2970,8 @@ input[type="reset"]:focus-visible{
 }
 
 /* ── 外観3D: 立面方向カメラスナップ(東西南北) ─────────
-   外観3D(ST.view==='3d-ext')表示中のみ表示。右上の#unity-render-fabとは
-   反対の右下に置き、右下常設の#app-version(bottom:10px,高さ30px)の
+   外観3D(ST.view==='3d-ext')表示中のみ表示。右下に置き、
+   右下常設の#app-version(bottom:10px,高さ30px)の
    上に十分な間隔(bottom:54px)を空けて重ならないようにする。 */
 #elev-snap-fab{
   position:absolute;
@@ -3330,8 +3306,9 @@ input[type="reset"]:focus-visible{
           <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
         </div>
       </div>
-      <!-- 浮きボタンもダイアログを開くだけ(上のヘッダーの入口と同じ)。 -->
-      <button id="unity-render-fab" type="button" onclick="openUnityRenderModal()">📷 画像AIレンダー</button>
+      <!-- 右上の浮き「画像AIレンダー」は削除した。ヘッダーの
+           #unity-render-toolbar-btn が同じダイアログを開くので入口は足りており、
+           3Dの画角を確認したい所に常時かぶるだけだった。 -->
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
         <button type="button" class="elev-snap-btn" data-elev-dir="n" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
         <button type="button" class="elev-snap-btn" data-elev-dir="e" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
@@ -5102,8 +5079,25 @@ function lightKindLabel(kind){
 function lightShapeLabel(shape){
   return shape==='line'?'線ライト':'点ライト';
 }
-function defaultLightElevationMm(floor){
-  return Math.max(1800,Math.round(wallFullHeightM(floor||ST.floor||1)*1000-160));
+// 天井仕上げ面の厚み。buildRoomCeilingMesh が天井面をここだけ下げて置く。
+var CEILING_FINISH_M=0.012;
+// 天井仕上げ面の高さ(mm)。**その階の床仕上げ面から測る**(=アイテムの elev と
+// 同じ基準)。基準の取り違えが照明の浮き/埋まりの原因だったので、変換はここへ
+// 集約する:
+//   roomCeilingHeightM ... 床スラブ下端(floorBaseY)から
+//   item の elev       ... 床仕上げ面(floorTopY)から
+//   天井面のメッシュ    ... ceilY - CEILING_FINISH_M
+function ceilingFinishElevationMm(floor,cx,cy){
+  var fl=floor||1;
+  var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
+  var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
+  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U);
+}
+// 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
+// 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
+// 部屋が分かるなら、その部屋の天井(吹き抜けを含む)に合わせる。
+function defaultLightElevationMm(floor,cx,cy){
+  return Math.max(1800,ceilingFinishElevationMm(floor||ST.floor||1,cx,cy));
 }
 function ensureLightDefaults(it){
   if(!it || !isLightItemType(it.type)) return it;
@@ -5115,7 +5109,8 @@ function ensureLightDefaults(it){
   if(!isFinite(Number(it.lightRange))) it.lightRange=it.lightKind==='spot'?5200:(it.lightKind==='down'?4400:5600);
   if(!isFinite(Number(it.lightAngle))) it.lightAngle=it.lightKind==='spot'?32:64;
   if(it.lightCastShadow===undefined) it.lightCastShadow=true;
-  if(!isFinite(Number(it.elev))) it.elev=defaultLightElevationMm(it.floor);
+  if(!isFinite(Number(it.elev)))
+    it.elev=defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2);
   it.color=it.lightColor;
   return it;
 }
@@ -13072,7 +13067,7 @@ function findDefaultPlacementSurface(item){
 }
 function applyDefaultPlacementElevation(item){
   if(item && isLightItemType(item.type)){
-    item.elev=defaultLightElevationMm(item.floor);
+    item.elev=defaultLightElevationMm(item.floor,item.x+item.w/2,item.y+item.d/2);
     return null;
   }
   var surface=findDefaultPlacementSurface(item);
@@ -15644,18 +15639,24 @@ function build3DLightItem(grp,it,w3,d3){
   var mat=makeLightFixtureMaterial(color);
   var trimMat=new THREE.MeshStandardMaterial({color:0x4b4b4b,roughness:0.38,metalness:0.35});
   var lineMode=shape==='line';
+  // 器具の形は種類ごとに違うので、elev を「器具の中心」として扱うと必ず
+  // 天井から半分めり込むか半分浮く。elev は **取付面(天井仕上げ面)** とし、
+  // 器具の側をここでぶら下げる。光源(PointLight/SpotLight)は grp のままにして
+  // 照らし方を変えない。
+  var fix=new THREE.Group();
+  grp.add(fix);
   if(lineMode){
     var body=new THREE.Mesh(new THREE.BoxGeometry(Math.max(w3,0.28),0.035,Math.max(d3,0.045)),mat);
-    body.castShadow=true; body.receiveShadow=true; grp.add(body);
+    body.castShadow=true; body.receiveShadow=true; fix.add(body);
     var endW=Math.min(0.035,Math.max(w3*0.12,0.025));
     [-1,1].forEach(function(side){
       var cap=new THREE.Mesh(new THREE.BoxGeometry(endW,0.04,Math.max(d3,0.055)),trimMat);
       cap.position.x=side*Math.max(w3/2-endW/2,0);
-      cap.castShadow=true; cap.receiveShadow=true; grp.add(cap);
+      cap.castShadow=true; cap.receiveShadow=true; fix.add(cap);
     });
   } else if(kind==='ceiling'){
     var disk=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.42,0.08),Math.max(Math.min(w3,d3)*0.42,0.08),0.045,32),mat);
-    disk.castShadow=true; disk.receiveShadow=true; grp.add(disk);
+    disk.castShadow=true; disk.receiveShadow=true; fix.add(disk);
   } else if(kind==='down'){
     // 天井埋め込み型ダウンライト: 天井面とほぼツライチの穴あきトリムリング(中央に
     // 開口があり奥のレンズが見える)+ その奥(天井内)へわずかに引っ込めた発光レンズ。
@@ -15666,18 +15667,26 @@ function build3DLightItem(grp,it,w3,d3){
     var ring=new THREE.Mesh(new THREE.RingGeometry(dr*0.66,dr,28),ringMat);
     ring.rotation.x=Math.PI/2; // 天井面(下向き)を向くように
     ring.position.y=-0.002;
-    ring.castShadow=false; ring.receiveShadow=true; grp.add(ring);
+    ring.castShadow=false; ring.receiveShadow=true; fix.add(ring);
     var lensR=dr*0.6;
     var lens=new THREE.Mesh(new THREE.CylinderGeometry(lensR,lensR,0.008,20),mat);
     lens.position.y=0.006; // リングより天井側へわずかに引っ込め、埋め込み感を出す
-    lens.castShadow=false; lens.receiveShadow=false; grp.add(lens);
+    lens.castShadow=false; lens.receiveShadow=false; fix.add(lens);
   } else {
     var cyl=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(Math.min(w3,d3)*0.28,0.055),Math.max(Math.min(w3,d3)*0.22,0.045),0.12,20),mat);
-    cyl.castShadow=true; cyl.receiveShadow=true; grp.add(cyl);
+    cyl.castShadow=true; cyl.receiveShadow=true; fix.add(cyl);
     var yoke=new THREE.Mesh(new THREE.BoxGeometry(Math.max(w3*0.72,0.12),0.025,0.035),trimMat);
     yoke.position.y=0.045;
-    yoke.castShadow=true; yoke.receiveShadow=true; grp.add(yoke);
+    yoke.castShadow=true; yoke.receiveShadow=true; fix.add(yoke);
   }
+  // 取付面(y=0=elev)に対する器具のぶら下げ量。
+  //   直付け(シーリング/ライン/スポット) … 器具の上面を天井面へ
+  //   埋込(ダウンライト)                 … トリムリングを天井面へ。レンズは
+  //                                        その上(天井裏)に残して埋込に見せる
+  fix.position.y = lineMode ? -0.0175
+                 : (kind==='ceiling') ? -0.0225
+                 : (kind==='down') ? 0.002
+                 : -0.0575;
   var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
   var angleRad=THREE.MathUtils.degToRad(Math.max(10,Math.min(110,Number(it.lightAngle)||45))/2);
   addLightBeamHint(grp,kind,color,rangeM,angleRad);
@@ -21064,7 +21073,7 @@ function updateUnityRenderControls(){
   // 動画AIには右上の浮きボタンを置かない。入口はヘッダーのツールバー(デスクトップ)と
   // ボトムナビ(スマホ)の2つで足りており、3つ目は静止画AIレンダーの浮きボタンの
   // 真下に重なって並ぶだけだった。静止画側の浮きボタンは既存の挙動なので残す。
-  ['unity-render-toolbar-btn','unity-render-fab','video-render-toolbar-btn'].forEach(function(id){
+  ['unity-render-toolbar-btn','video-render-toolbar-btn'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.classList.toggle('show',show);
   });
@@ -23313,7 +23322,7 @@ function setUnityRenderImage(url){
 }
 function setUnityRenderBusy(busy){
   unityRenderBusy=busy;
-  document.querySelectorAll('#unity-render-modal button,#unity-render-fab,#unity-render-toolbar-btn,#unity-render-modal a.pbtn').forEach(function(btn){
+  document.querySelectorAll('#unity-render-modal button,#unity-render-toolbar-btn,#unity-render-modal a.pbtn').forEach(function(btn){
     if(!btn) return;
     if(btn.classList.contains('unity-render-close')) return;
     if(btn.tagName==='A'){

@@ -172,8 +172,8 @@ const STILL_ENTRIES = buttonsCalling('openUnityRenderModal')
 test('画像AI側のアイコンは、動画のアイコンではない', () => {
   const iconOf = (label) => Array.from(label)[0];
   const still = buttonsCalling('openUnityRenderModal')
-    .filter((b) => ['unity-render-toolbar-btn', 'unity-render-fab'].indexOf(b.attrs.id) >= 0);
-  assert.equal(still.length, 2, '画像AIの入口が2つ揃っていない: ' + still.map((s) => s.attrs.id));
+    .filter((b) => ['unity-render-toolbar-btn'].indexOf(b.attrs.id) >= 0);
+  assert.equal(still.length, 1, '画像AIの入口(ヘッダー)が見つからない: ' + still.map((s) => s.attrs.id));
   const icons = still.map((b) => iconOf(b.label));
   icons.forEach((ic, i) => {
     assert.ok(VIDEO_ICONS.indexOf(ic) < 0,
@@ -202,16 +202,16 @@ test('ツールバーの呼称が「画像AIレンダー」「動画AIレンダ�
   const video = byId('video-render-toolbar-btn').label;
   assert.match(still, /画像AIレンダー$/, 'ツールバー(画像): ' + still);
   assert.match(video, /動画AIレンダー$/, 'ツールバー(動画): ' + video);
-  // 3D画面の浮きボタンも同じ呼称にする（片方だけ古い名前を残さない）。
-  assert.match(byId('unity-render-fab').label, /画像AIレンダー$/);
+  // 3D画面の浮きボタンは削除済み。入口はこのヘッダーの1つだけ。
 });
 
 test('旧称「AI高品質化用データ」は画面のどこにも残っていない', () => {
   assert.equal(html.indexOf('AI高品質化用データ'), -1);
 });
 
-test('入口の抽出が壊れていない（入口2つ＋ダイアログの実行ボタン1つ）', () => {
-  assert.ok(STILL_ENTRIES.length >= 2, '画像AIの入口が2つ拾えていない');
+// 浮きボタン(#unity-render-fab)を消したので、画像AIの入口はヘッダーの1つ。
+test('入口の抽出が壊れていない（入口1つ＋ダイアログの実行ボタン1つ）', () => {
+  assert.ok(STILL_ENTRIES.length >= 1, '画像AIの入口が拾えていない');
   assert.equal(buttonsCalling('generateAiRenderPackage').length, 1,
     '生成を呼ぶボタンはダイアログの実行ボタンだけであるべき');
 });
