@@ -1444,6 +1444,257 @@ def check28_curtain_fit(data, root=None):
 
 # ---------------------------------------------------------------- メイン
 
+# rot は「正面が向く方角」。向きの付け間違いは3Dを回して眺めるまで気付けず、
+# 目視レビューでは必ず取りこぼす(実際、壁を向いたデスクとモニタ、道路に背を
+# 向けた隣家、家の壁へ吹き付ける室外機を同時に見落とした)。機械で見る。
+FRONTED_TYPES = (
+    'washer', 'fmp-Refrigerator', 'fmp-Toilet', 'fmp-WashBasin',
+    'fmp-BathroomVanity', 'fmp-GasStove', 'fmp-Bed', 'fmp-Sofa', 'fmp-Chair',
+    'fmp-Table', 'fmp-AirConditionerWall', 'ac-outdoor', 'neighbor-house',
+    'Tv-MEGA', 'Sofa', 'Chair', 'Table-MEGA', 'Tableset', 'Shelf-MEGA',
+    'Cabinet-MEGA', 'CABINET', 'Closet', 'Mirror-MEGA', 'Painting-MEGA',
+    'Desk', 'Kitchen-MEGA',
+)
+# 背面を必ず壁(または屋外なら建物)に付ける物。付いていないと宙に浮く
+WALL_BACKED_TYPES = (
+    'fmp-AirConditionerWall', 'Mirror-MEGA', 'Painting-MEGA', 'Shelf-MEGA',
+    'Cabinet-MEGA', 'CABINET', 'Closet', 'fmp-Toilet', 'washer',
+    'fmp-Refrigerator',
+)
+
+
+def _front_dir(it):
+    """正面の向き(単位ベクトル)。rot=0 は北(-y)。"""
+    th = math.radians(it.get('rot', 0) or 0)
+    return (math.sin(th), -math.cos(th))
+
+
+def _wall_boxes(data, floor):
+    out = []
+    for w in data.get('walls', []):
+        if w.get('floor', 1) != floor:
+            continue
+        t = (w.get('thick', 120) or 120) / 2.0
+        out.append((min(w['x1'], w['x2']) - t, min(w['y1'], w['y2']) - t,
+                    max(w['x1'], w['x2']) + t, max(w['y1'], w['y2']) + t,
+                    w.get('id', '?')))
+    return out
+
+
+def _opening_boxes(data, floor, z0, z1):
+    """建具の外接矩形のうち、高さ z0..z1 と重なるものだけ。
+
+    高さを見ないと、窓と同じ平面位置にある壁掛けエアコン(FL+2050)まで
+    「壁が無い」と判定してしまう。窓は 1200-2030 にしか開いていない。
+    """
+    out = []
+    for it in data['items']:
+        t = it.get('type', '')
+        if it.get('floor', 1) != floor:
+            continue
+        if t.startswith('door-'):
+            a, b = 0.0, float(it.get('doorHeight') or 2000)
+        elif t.startswith('window'):
+            a = float(it.get('windowSill') or 0)
+            b = a + float(it.get('windowHeight') or 1300)
+        else:
+            continue
+        if b <= z0 or a >= z1:
+            continue
+        out.append(aabb(it))
+    return out
+
+
+def _wall_at(boxes, px, py, openings=None):
+    for x0, y0, x1, y1, wid in boxes:
+        if x0 <= px <= x1 and y0 <= py <= y1:
+            if openings and any(a[0] <= px <= a[2] and a[1] <= py <= a[3]
+                                for a in openings):
+                return None      # 建具の位置は壁が抜けている
+            return wid
+    return None
+
+
+def _is_on_furniture(it, data):
+    """他の家具の天板に載っているか。載っている物に壁付けを求めても意味が無い。
+
+    洗面台の上の洗面ボウル、デスクの上のモニタが該当する。elev がその家具の
+    高さとほぼ一致し、平面でほぼ収まっていれば「載っている」と見なす。
+    """
+    elev = it.get('elev') or 0
+    if elev <= 0:
+        return False
+    box = aabb(it)
+    area = max(1.0, (box[2] - box[0]) * (box[3] - box[1]))
+    for f in data['items']:
+        if f is it or f.get('floor', 1) != it.get('floor', 1):
+            continue
+        top = (f.get('elev') or 0) + _catalog_height(f)
+        if abs(top - elev) > 90:
+            continue
+        ox, oy = rect_overlap(aabb(f), box)
+        if ox > 0 and oy > 0 and ox * oy > area * 0.5:
+            return True
+    return False
+
+
+_HEIGHT_CACHE = {}
+
+
+def _catalog_height(it):
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    if 'cat' not in _HEIGHT_CACHE:
+        _HEIGHT_CACHE['cat'] = _load_catalog(root) or {}
+    h = it.get('customHeight')
+    if isinstance(h, (int, float)) and h > 0:
+        return float(h)
+    got = _HEIGHT_CACHE['cat'].get(it.get('type'))
+    return float(got[2]) if got and got[2] else 0.0
+
+
+def _wall_dist(boxes, cx, cy, dx, dy, start, limit=4000.0, step=40.0,
+               openings=None):
+    """(cx,cy) から (dx,dy) 方向へ、家具の縁(start)より先で最初に当たる壁までの距離。"""
+    d = start
+    while d <= start + limit:
+        if _wall_at(boxes, cx + dx * d, cy + dy * d, openings) is not None:
+            return d - start
+        d += step
+    return None
+
+
+def _proj_t(w, px, py):
+    """点を壁のセンターラインへ射影したときの媒介変数 t と距離。"""
+    dx, dy = w['x2'] - w['x1'], w['y2'] - w['y1']
+    l2 = dx * dx + dy * dy
+    if l2 < 1:
+        return None, None
+    t = ((px - w['x1']) * dx + (py - w['y1']) * dy) / l2
+    tc = max(0.0, min(1.0, t))
+    qx, qy = w['x1'] + dx * tc, w['y1'] + dy * tc
+    return t, math.hypot(px - qx, py - qy)
+
+
+def check32_wall_joint(data):
+    """壁の継ぎ目が、相手のセンターラインにきちんと乗っているか。
+
+    3Dの壁は芯から厚みの半分ずつ振り分けた箱として立つ。端点が相手の芯から
+    数十mmずれていると、その分だけ箱が食い違い、交差部に段差やスリットが
+    出る(いわゆる「ガタガタ」)。芯に乗っていれば必ず箱同士が重なるので、
+    重なり量を目で確かめる必要が無くなる。
+
+    どの壁にも接していない自由端は、L字の出隅など正しい場合があるので
+    違反にしない。ここで見るのは「接しようとして外している」端点だけ。
+    """
+    out = []
+    NEAR = 260.0        # これ以上離れていれば「接する気が無い端点」とみなす
+    ON = 1.0            # 芯に乗っているとみなす許容
+    for w in data.get('walls', []):
+        for lbl, (px, py) in (('始端', (w['x1'], w['y1'])),
+                              ('終端', (w['x2'], w['y2']))):
+            best = None
+            for o in data['walls']:
+                if o is w or o.get('floor', 1) != w.get('floor', 1):
+                    continue
+                t, dist = _proj_t(o, px, py)
+                if dist is None or dist > NEAR:
+                    continue
+                if t < -0.05 or t > 1.05:
+                    continue
+                if best is None or dist < best[0]:
+                    best = (dist, o.get('id', '?'))
+            if best and best[0] > ON:
+                out.append('[%dF] 壁 %s の%s (%.0f,%.0f) が壁 %s の芯から '
+                           '%.0fmm ずれている(交差部に段差が出る)'
+                           % (w.get('floor', 1), w.get('id', '?'), lbl,
+                              px, py, best[1], best[0]))
+    return out
+
+
+def check30_facing_wall(data):
+    """家具の正面が、すぐ目の前の壁にぶつかっていないか。
+
+    「正面が壁から400mm以内」だけで判定すると、910モジュールのトイレに置いた
+    手洗いのように**部屋が狭いだけ**の物まで挙がる。向きの付け間違いは
+    「背中を向けるべき壁に顔を向けている」状態なので、
+      正面までの距離 < 背面までの距離
+    を条件に加える。これで、狭い部屋の正しい配置は通り、裏返しだけが残る。
+    """
+    out = []
+    NEED = 400.0
+    for it in data['items']:
+        t = it.get('type', '')
+        if not any(k in t for k in FRONTED_TYPES):
+            continue
+        boxes = _wall_boxes(data, it.get('floor', 1))
+        z0 = float(it.get('elev') or 0)
+        holes = _opening_boxes(data, it.get('floor', 1), z0,
+                               z0 + max(200.0, _catalog_height(it)))
+        cx, cy = center(it)
+        fx, fy = _front_dir(it)
+        half = it['d'] / 2.0
+        front = _wall_dist(boxes, cx, cy, fx, fy, half, NEED, openings=holes)
+        if front is None:
+            continue
+        back = _wall_dist(boxes, cx, cy, -fx, -fy, half, openings=holes)
+        if back is not None and back <= front:
+            continue                     # 背中側の方が壁に近い = 向きは正しい
+        vio(out, it, '正面が %.0fmm先の壁にぶつかっている(背面側は%s)。'
+                     'rot=%s の付け間違いを疑う'
+            % (front, ('%.0fmm' % back) if back is not None else '壁なし',
+               it.get('rot', 0)))
+    # 屋外機は建物(=基礎の外形)へ吹き付けていないか
+    found = [i for i in data['items'] if i.get('type') == 'foundation']
+    for it in data['items']:
+        if it.get('type') != 'ac-outdoor':
+            continue
+        cx, cy = center(it)
+        fx, fy = _front_dir(it)
+        for f in found:
+            b = aabb(f)
+            for dist in (it['d'] / 2.0 + 60, it['d'] / 2.0 + 400):
+                px, py = cx + fx * dist, cy + fy * dist
+                if b[0] <= px <= b[2] and b[1] <= py <= b[3]:
+                    vio(out, it, '吹き出しが建物側を向いている(rot=%s)'
+                        % it.get('rot', 0))
+                    break
+            else:
+                continue
+            break
+    return out
+
+
+def check31_wall_mounted_gap(data):
+    """壁付けの家具が、背面を壁に付けているか。
+
+    棚やキャビネットが部屋の真ん中に浮いていると、間取りとして意味を成さない。
+    壁の欠落を見つける手段でもある(実際、書斎の東側に壁が1枚抜けていて、
+    そこに置いた飾り棚が開口の中に立っているのをこれで見つけた)。
+    """
+    out = []
+    GAP = 120.0
+    for it in data['items']:
+        t = it.get('type', '')
+        if not any(k in t for k in WALL_BACKED_TYPES):
+            continue
+        if _is_on_furniture(it, data):
+            continue                       # 天板の上の物は壁に付かない
+        floor = it.get('floor', 1)
+        boxes = _wall_boxes(data, floor)
+        cx, cy = center(it)
+        fx, fy = _front_dir(it)
+        back = it['d'] / 2.0
+        hit = None
+        for dist in (back + 10, back + GAP / 2, back + GAP):
+            hit = _wall_at(boxes, cx - fx * dist, cy - fy * dist)
+            if hit is not None:
+                break
+        if hit is None:
+            vio(out, it, '背面が壁から %.0fmm 以上離れている'
+                         '(壁の抜けか、置き場所の間違い)' % GAP)
+    return out
+
+
 def check29_void_guard(data):
     """吹き抜けの縁に、落下を止める壁か手すりがあるか。
 
@@ -1541,6 +1792,9 @@ CHECKS = [
     ('27. 開閉窓の室内側クリアランス', check27_operable_window),
     ('28. カーテンと窓の整合', check28_curtain_fit),
     ('29. 吹き抜けの縁の手すり', check29_void_guard),
+    ('30. 家具の裏表(正面が壁を向いていないか)', check30_facing_wall),
+    ('31. 壁付け家具が壁から離れていないか', check31_wall_mounted_gap),
+    ('32. 壁の継ぎ目のずれ', check32_wall_joint),
 ]
 
 

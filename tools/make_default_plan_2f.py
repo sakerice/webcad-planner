@@ -266,6 +266,7 @@ wall(0, 3640, 6370, 3640, 2)          # 廊下|南ゾーン   (直下: 1F x2730/
 # x6370-7280 の y3640 は廊下から東の廊下への通り抜け
 wall(3640, 0, 3640, 2730, 2)          # 洋室A|洋室B     (直下: 1F x3640)
 wall(6370, 0, 6370, 2730, 2)          # 洋室B|2Fホール  (直下: 1F x6370)
+wall(6370, 3640, 6370, 4550, 2)       # 書斎|廊下       (直下: 1F x6370)
 wall(6370, 4550, 6370, BD, 2)         # WIC/書斎|納戸    (直下: 1F x6370)
 wall(7280, 910, 7280, 3640, 2)        # 2Fホール|吹抜   (直下: 1F x7280)
 # x7280 の y0-910 は廻り段を上がって西へ抜ける口
@@ -375,8 +376,9 @@ item("exterior-stair", 7100, 8930, 1820, 900, 1, rot=180,
 item("custom-block", 7100, 9930, 1100, 2880, 1, color="#b9b8b4",
      customHeight=20, name="アプローチ", texture="porch_tile")
 # 掃き出し窓の外のウッドデッキ(FL450の段差解消)。壁面に付けて2台連続させる
-item("fmp-WoodDeck01", 1750, 7730, 2600, 900, 1, rot=0)   # 洋室の前
-item("fmp-WoodDeck01", 4354, 7730, 2600, 900, 1, rot=0)   # LDK大開口の前
+# デッキの正面(幕板側)は南=庭に向く。モデルの正面は +Y なので rot=180
+item("fmp-WoodDeck01", 1750, 7730, 2600, 900, 1, rot=180)   # 洋室の前
+item("fmp-WoodDeck01", 4354, 7730, 2600, 900, 1, rot=180)   # LDK大開口の前
 item("exterior-stair", 2900, 8630, 1800, 900, 1, rot=180,
      color="#8a7256", targetHeight=450, accessSteps=3, texture="wood_cedar")
 
@@ -403,27 +405,42 @@ item("sewer-pit", 8400, 3200, 300, 300, 1, color="#6f7275")
 item("sewer-pit", 5900, 9300, 300, 300, 1, color="#6f7275")
 item("sewer-pit", 500, 9600, 300, 300, 1, color="#6f7275")
 
-# エアコン: 室内機は必ず外壁面。室外機は配管長3m以内に対で置く
+# エアコン。守る決まりは3つ。
+#   1. 居室には必ず室内機を置く。室外機だけが外に並ぶと、屋外から見たときに
+#      「中にエアコンが無い部屋の室外機」に見える
+#   2. 室内機は必ず外壁面。冷媒管は外壁を貫通するので内壁には付かない
+#   3. 室外機の**正面(吹き出し)を建物の外へ向ける**。壁を向けると風が戻る
+#      (rot は正面が向く方角。西の壁際なら -90 = 西向き)
 AC_PAIRS = [
-    # (室内機 cx, cy, rot, floor, 室外機 cx, cy, rot)
-    (5300, 130, 180, 1, 5300, -700, 0),        # LDK+キッチン(北外壁)
-    (2900, 130, 180, 2, 3300, -300, 0),        # 洋室A(北壁)
-    (5500, 130, 180, 2, 4400, -300, 0),        # 洋室B(北壁)
-    (190, 6700, 90, 2, -330, 4200, 90),        # 主寝室(西壁・カーテンレールを外す)
+    # (室内機 cx, cy, rot, floor, elev, 室外機 cx, cy, rot)
+    (5300, 130, 180, 1, 2050, 5300, -210, 0),    # キッチン+ダイニング(北外壁)
+    # 南の外壁は大開口とデッキで埋まっているので、室外機はデッキ東端の
+    # 脇(デッキとポーチ格子の間)に縦置きし、吹き出しは西の芝生側へ逃がす
+    (4350, 7150, 0, 1, 2400, 5900, 8600, -90),   # リビング(吹抜の南壁・高所)
+    # 西面は2台並ぶ。**それぞれ自分の部屋の真下に置く**こと。近い方から
+    # 総当りで対にするので、位置を入れ替えると2階の室内機が1階の室外機に
+    # 取られ、「室内機の無い室外機」と「室外機の無い室内機」が同時に出る
+    (190, 4100, 90, 1, 2050, -210, 3400, -90),   # 洋室(西外壁)
+    (2900, 130, 180, 2, 2050, 3300, -210, 0),    # 洋室A(北壁)
+    (5500, 130, 180, 2, 2050, 4400, -210, 0),    # 洋室B(北壁)
+    (190, 6700, 90, 2, 2050, -210, 7010, -90),   # 主寝室(西壁)
 ]
-for ix, iy, irot, fl, ox, oy, orot in AC_PAIRS:
-    item("fmp-AirConditionerWall01", ix, iy, 800, 260, fl, rot=irot, elev=2050)
+for ix, iy, irot, fl, iel, ox, oy, orot in AC_PAIRS:
+    item("fmp-AirConditionerWall01", ix, iy, 800, 260, fl, rot=irot, elev=iel)
     item("ac-outdoor", ox, oy, 800, 300, 1, rot=orot, color="#d8dadc")
 
 # 道路・電柱・隣家
 item("road", 5280, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70)
 item("utility-pole", 10600, SY1 + 4300, 350, 350, 1, rot=0, color="#8c9297",
      contextHeight=6500)
-item("neighbor-house", 14560, 3485, 7280, 6370, 1,
+# 東西の隣家はこの家と同じ道路(南)に面するので、玄関側=南を向く(rot=180)。
+# 既定の rot=0 のままだと3軒とも道路に背を向けて建つ
+item("neighbor-house", 14560, 3485, 7280, 6370, 1, rot=180,
      color="#d7c1a3", contextFloors=2, contextHeight=6300, contextGhost=True)
-item("neighbor-house", -4960, 3985, 7280, 6370, 1,
+item("neighbor-house", -4960, 3985, 7280, 6370, 1, rot=180,
      color="#c9c2b4", contextFloors=2, contextHeight=6300, contextGhost=True)
-item("neighbor-house", 4340, -4615, 7280, 6370, 1,
+# 北の家は反対側(北)の道路に面するので、こちらへは背面(北向き=rot 0)を見せる
+item("neighbor-house", 4340, -4615, 7280, 6370, 1, rot=0,
      color="#b9bcc2", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-building", -3200, SY1 + 6850, 5200, 3600, 1,
      color="#8f98a3", contextFloors=3, contextHeight=9150, contextGhost=True)
@@ -442,18 +459,28 @@ item("fmp-WashBasin01", 2250, 300, 644, 435, 1, rot=180, elev=695)
 item("im0261-Mirror-MEGA_PACK_Mirror-mirror-70923_frame",
      2250, 90, 796, 35, 1, rot=180, elev=1000)
 
-# ── ランドリー (室内干し。洗う→干す→しまうが1階で完結する)
-item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 1400, 2280, 816, 266, 1,
-     rot=0, elev=1500)
-item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 2500, 2450, 816, 266, 1,
-     rot=0, elev=1500)
-item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 1400, 2280, 442, 342, 1,
-     rot=0)
+# ── ランドリー (洗う→干す→たたむ→しまう が1階で完結する)
+#
+# 内法は 3520 × 790 しかない。この寸法では守るべき制約が3つある。
+#   1. 奥行300の収納を床置きすると正面に490mmしか残らず、扉が使えない
+#      → 収納は必ず**吊る**(FL+900以上)。足元を空ければ通路として使える
+#   2. 東半分(x1560-3510)は「洗面→LDK」の通り道。しかも洗面側の引戸は
+#      x1560-2340 の壁面へ滑るので、その面に物を付けると戸が全開できない
+#      → 収納は x60-1560 の西側だけに寄せる
+#   3. 床に置くのは動かす物(ランドリーバスケット)だけ
+#   4. 西壁の窓は引違い。開け閉めに室内側600mmが要るので x60-600 は空ける
+# 結果、収納を置けるのは x600-1560 の 960mm だけ。ここに吊り戸棚1台と
+# その上の棚1枚を重ねる。無理に2台並べると必ず上の4つのどれかを壊す
+LDY_N = 1880                                   # 北壁の内法面
+LDY_S = 2670                                   # 南壁の内法面
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
-     2400, 2050, 750, 300, 1, rot=180, elev=900)          # リネンの吊戸棚
-item("im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame", 500, 2280, 450, 450, 1,
-     rot=0)                                                 # 猫トイレ
-item("im0261-Pet-MEGA_PACK_Pet-pet-46694_frame", 1000, 2280, 360, 167, 1, rot=0)  # 猫の食器
+     1080, LDY_N + 150, 750, 300, 1, rot=180, elev=900)    # 吊り戸棚(900-1700)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 1080, LDY_N + 133, 816, 266, 1,
+     rot=180, elev=1720)                                   # その上の棚(-2370)
+item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 281, LDY_S - 171, 442, 342, 1,
+     rot=0)                                                # ランドリーバスケット
+item("im0261-Pet-MEGA_PACK_Pet-pet-46694_frame", 900, LDY_S - 84, 360, 167, 1,
+     rot=0)                                                # 猫の食器(南壁際)
 
 # ── キッチン (背面450 / 通路1595 / 対面600)
 kx = 3680
@@ -548,13 +575,16 @@ item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 5000, 2202, 35, 2,
 # ── WIC (壁付けクローゼットで通路を残す)
 
 # ── 書斎
+# デスクは南壁に背を付け、正面(引き出し側)を北=室内へ向ける。rot は
+# 「正面が向く方角」なので、南壁に付けて rot=180 にすると壁と向かい合って
+# 座る場所が無くなる。モニタも同じ向きに揃えないと椅子から背面を見ることになる
 item("im0261-Table-MEGA_PACK_Table-table-175980_frame_brown",
-     5100, 5090, 1758, 600, 2, rot=180)
-item("fmp-Chair31", 5100, 4450, 616, 586, 2, rot=180)
+     5100, 5090, 1758, 600, 2, rot=0)
+item("fmp-Chair31", 5100, 4450, 616, 586, 2, rot=180)     # デスクと正対
 item("im0261-Tv-MEGA_PACK_tv-electronic-126724_frame",
-     5100, 5090, 726, 225, 2, rot=180, elev=739)          # モニタ
+     5100, 5090, 726, 225, 2, rot=0, elev=739)            # モニタ
 item("im0261-Lamp-MEGA_PACK_lamp-lamp-25416", 5800, 5090, 161, 273, 2,
-     rot=180, elev=739)
+     rot=0, elev=739)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
      6150, 4300, 597, 305, 2, rot=-90, elev=1100)          # 壁付けの飾り棚
 item("im0261-Decor-MEGA_PACK_decor-decor-shop_the_look", 6150, 4300, 246, 106, 2,
@@ -583,8 +613,9 @@ item("fmp-Bed03", 4250, 1100, 1050, 1932, 2, rot=180)
 item("fmp-Closet14", 5923, 1900, 952, 773, 2, rot=-90)
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
      5000, 2200, 880, 1189, 2, rot=0)
-item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585", 5800, 400, 966, 410, 2,
-     rot=180)
+# 北壁に付けると窓のカーテン(FL+660から下がる)へ天板が食い込むので東壁に回す
+item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585", 6105, 700, 966, 410, 2,
+     rot=-90)
 item("im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1", 4100, 2300, 338, 762, 2,
      rot=90)
 item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 4800, 100, 2202, 35, 2,

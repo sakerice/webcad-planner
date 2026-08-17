@@ -161,6 +161,13 @@ def build_deck():
 
     ob = finish_object('WoodDeck', bm, [WOOD, WOOD_D, STONE], which)
     normalize_to(ob, W, D, H)
+    # 幕板は3面(手前と左右)にしか無く、残る1面は家の外壁に突き付ける側。
+    # モデルの正面は +Y と決めているので、幕板の付いた面を +Y にしておかないと
+    # ライブラリのサムネイルが「根太が丸見えの裏面」になる。
+    # 配置側は rot=180 で家に向ける(=見た目は変わらない)
+    for v in ob.data.vertices:
+        v.co.y = -v.co.y
+    ob.data.flip_normals()
     return ob
 
 
