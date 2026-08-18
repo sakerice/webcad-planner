@@ -1,8 +1,9 @@
 import importlib.util, json, math, sys
 spec = importlib.util.spec_from_file_location('lp', 'tools/lint_plan.py')
 lp = importlib.util.module_from_spec(spec); spec.loader.exec_module(lp)
-data = json.load(open('assets/default_plan.json'))
+# 引数2つ目でプランのパスを差し替えられる(3階建てプランなどの調査用)
 floor = int(sys.argv[1])
+data = json.load(open(sys.argv[2] if len(sys.argv) > 2 else 'assets/default_plan.json'))
 CELL = 100.0; CLEAR = 600.0; pad = CLEAR / 2.0
 rms = [r for r in data['rooms'] if r.get('floor', 1) == floor]
 x0 = min(r['x'] for r in rms); x1 = max(r['x'] + r['w'] for r in rms)

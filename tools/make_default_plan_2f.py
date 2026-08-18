@@ -33,7 +33,6 @@ import os
 import sys
 
 M = 910          # 1モジュール
-WALL_T = 120
 CEIL = 2400      # WALL_H。elev+モデル高がこれを超えないこと
 
 # 色パレット
@@ -54,159 +53,17 @@ COL_DOOR = "#5C4230"       # 玄関ドア(ダークウォールナット)
 COL_FENCE = "#222222"      # 黒格子フェンス
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from plan_kit import Plan, load_catalog, wall_setting, finish_cascade  # noqa: E402
 
-_id = [1000]
-def nid():
-    _id[0] += 1
-    return _id[0]
-
-walls, rooms, items = [], [], []
-
-def _load_catalog():
-    cat = {}
-    for rel in ("assets/models/furniture_mega/manifest.json",
-                "assets/models/interior_model_0_26_1/manifest.json",
-                "assets/models/custom/manifest.json"):
-        path = os.path.join(ROOT, rel)
-        if not os.path.exists(path):
-            continue
-        with open(path, encoding="utf-8") as f:
-            m = json.load(f)
-        for i in (m.get("items") or m):
-            cat[i["id"]] = (i.get("w"), i.get("d"), i.get("h"))
-    return cat
-
-CATALOG = _load_catalog()
-
-# ───────── helpers ─────────
-def wall(x1, y1, x2, y2, floor, **kw):
-    # 内装は壁1枚ごとに持たせる。interiorWallSettings の whole/floor を linked に
-    # すると全部の壁が同じ仕上げに固定され、アクセント壁を1枚も作れなくなる
-    # (解決順が linked → wall.interiorColor だから)。
-    w = {"id": nid(), "x1": x1, "y1": y1, "x2": x2, "y2": y2, "floor": floor,
-         "thick": WALL_T, "color": "#888888", "texture": None, "texScale": 1,
-         "interiorColor": COL_WALL_INT, "interiorTexture": "wall_int",
-         "locked": False}
-    w.update(kw)
-    walls.append(w)
-    return w
-
-def room(n, x, y, w, d, floor, texture=None, **kw):
-    r = {"id": "r%d" % nid(), "type": "room", "x": x, "y": y, "w": w, "d": d,
-         "floor": floor, "n": n, "sScale": 1, "sX": 0, "sY": 0, "locked": False}
-    if texture:
-        r["texture"] = texture
-    r.update(kw)
-    rooms.append(r)
-    return r
-
-def item(t, cx, cy, w, d, floor, rot=0, color=None, locked=False, **kw):
-    """中心座標で配置する。家具モデルの w,d はカタログ値で上書きする。
-
-    3D側は高さをカタログ固定のまま w,d だけ引き伸ばすので、カタログと違う
-    寸法を書くと「背は同じで横に太った家具」になる。引数は配置意図の記録用。
-    """
-    if t in CATALOG and (t.startswith("fmp-") or t.startswith("im0261-")):
-        cw, cd, _h = CATALOG[t]
-        if cw and cd:
-            if abs(w - cd) + abs(d - cw) < abs(w - cw) + abs(d - cd):
-                cw, cd = cd, cw
-            w, d = cw, cd
-    it = {"id": nid(), "type": t, "x": round(cx - w / 2, 2), "y": round(cy - d / 2, 2),
-          "w": w, "d": d, "rot": rot, "floor": floor,
-          "flipX": False, "flipY": False, "sScale": 1, "sX": 0, "sY": 0}
-    if color is not None:
-        it["color"] = color
-        it["colorCustom"] = True
-    else:
-        it["color"] = None
-        it["colorCustom"] = False
-    if locked:
-        it["locked"] = True
-    it.update(kw)
-    items.append(it)
-    return it
-
-WIN_W = {"02607": 260, "03613": 405, "06905": 690, "07409": 780,
-         "11909": 1235, "16509": 1690, "16511": 1690, "16513": 1690,
-         "16520": 1690, "25620": 2600,
-         "F03613": 405, "F06013": 600, "F11913": 1235, "F16503": 1690}
-
-def win(cx, cy, floor, std, sill, height, vertical=False, kind="sliding"):
-    ww = WIN_W[std]
-    t = "window-door" if std in ("16520", "25620") else "window"
-    dd = 180 if t == "window-door" else 150
-    kw = {}
-    if t == "window-door":
-        kw["doorOpenState"] = "closed"   # 未指定だと開いた状態で描画される
-    return item(t, cx, cy, ww, dd, floor, rot=90 if vertical else 0,
-                color="#000000", windowStd=std, windowKind=kind,
-                windowSill=sill, windowHeight=height, sashColor=COL_SASH, **kw)
-
-def door(t, cx, cy, w, floor, vertical=False, color=None, flipY=False, **kw):
-    depth = {"door-swing": w, "door-swing-s": w, "door-fold": 420,
-             "door-fold-w": 420, "door-slide": 150, "door-slide-s": 150,
-             "door-pocket": 150, "door-front": 200, "door-opening": 160,
-             "door-opening-arch": 160}[t]
-    base = {"doorHeight": 2330 if t == "door-front" else 2000,
-            "doorOpenState": "closed"}
-    base.update(kw)
-    it = item(t, cx, cy, w, depth, floor, rot=90 if vertical else 0,
-              color=color or ("#f8d0a0" if t == "door-front" else "#f8e8c0"),
-              **base)
-    it["flipY"] = flipY
-    return it
-
-FLOOR_H_MM = 2700       # 階高
-SLAB_MM = 180           # 2階以上の床スラブ
-CEILING_FINISH_MM = 12  # 天井仕上げ面の厚み(index.html の CEILING_FINISH_M)
-
-def ceiling_elev(floor, cx, cy):
-    """天井仕上げ面の高さ(mm)。**その階の床仕上げ面から測る** = elev と同じ基準。
-
-    照明の取付高さはここに合わせる。基準がずれていたのが「天井から浮く/
-    天井裏に埋まる」原因だった:
-      部屋の天井高は床スラブ下端から / elev は床仕上げ面から /
-      天井面のメッシュはさらに仕上げ厚ぶん下
-    index.html の ceilingFinishElevationMm と同じ値になること。
-    食い違いは lint の check33 が止める。
-    """
-    slab = 0 if floor <= 1 else SLAB_MM
-    h = FLOOR_H_MM
-    for r in rooms:
-        if r["floor"] != floor:
-            continue
-        if not (r["x"] <= cx <= r["x"] + r["w"] and r["y"] <= cy <= r["y"] + r["d"]):
-            continue
-        c = r.get("ceiling") or {}
-        if c.get("type") == "void":
-            to = max(floor + 1, int(c.get("toFloor") or floor + 1))
-            h = (to - floor + 1) * FLOOR_H_MM
-        break
-    return h - slab - CEILING_FINISH_MM
-
-
-def ceiling_mounted(t, cx, cy, floor, **kw):
-    """天井に付ける器具(モデル)を、キャノピー上端が天井面に来る高さで置く。
-
-    モデルは「原点から上へ h」で作ってあるので、アプリはその **底面** を
-    floorTopY+elev に置く。よって elev は 天井面 - モデル高。
-    """
-    h = (CATALOG.get(t) or (None, None, None))[2] or 0
-    return item(t, cx, cy, kw.pop("w", 0), kw.pop("d", 0), floor,
-                elev=ceiling_elev(floor, cx, cy) - h, **kw)
-
-
-def light(kind, cx, cy, floor, elev=None, shadow=False):
-    if elev is None:
-        elev = ceiling_elev(floor, cx, cy)   # 既定は天井仕上げ面(=直付け/埋込)
-    size = {"ceiling": 450, "down": 180}[kind]
-    inten = {"ceiling": 0.56, "down": 0.72}[kind]
-    rng = {"ceiling": 5600, "down": 4400}[kind]
-    return item("light-%s" % kind, cx, cy, size, size, floor, elev=elev,
-                color="#fff6dd", lightKind=kind, lightShape="point",
-                lightColor="#fff6dd", lightIntensity=inten, lightRange=rng,
-                lightAngle=64, lightCastShadow=shadow)
+# 組み立ての決まりごと(座標・高さの基準・カタログ寸法の扱い)は plan_kit が持つ。
+# ここが持つのは「この家をどう設計したか」だけにする。
+CATALOG = load_catalog(ROOT)
+P = Plan(catalog=CATALOG, interior_color=COL_WALL_INT)
+wall, room, item = P.wall, P.room, P.item
+win, door, light = P.win, P.door, P.light
+ceiling_elev, ceiling_mounted = P.ceiling_elev, P.ceiling_mounted
+walls, rooms, items = P.walls, P.rooms, P.items
 
 # ───────── 建物躯体 (footprint 8190×7280 = 9P×8P) ─────────
 BW, BD = 9 * M, 8 * M      # 8190 × 7280
@@ -777,6 +634,5 @@ plan = {
 }
 
 out = sys.argv[1] if len(sys.argv) > 1 else "assets/default_plan.json"
-with open(out, "w", encoding="utf-8") as f:
-    json.dump(plan, f, ensure_ascii=False, indent=1)
-print("wrote %s  walls=%d rooms=%d items=%d" % (out, len(walls), len(rooms), len(items)))
+P.dump(out, **{k: v for k, v in plan.items()
+               if k not in ("walls", "rooms", "items")})

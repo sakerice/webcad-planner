@@ -1778,7 +1778,18 @@ def check29_void_guard(data):
         if it.get('type') not in ('stair', 'stair-corner'):
             continue
         b = aabb(it)
-        holes.append((b, it.get('floor', 1) + 1, '階段の吹き抜け', it))
+        up = it.get('floor', 1) + 1
+        # 3階建て以上では階段を同じ位置に積む。続きの階段が井戸を占めている
+        # 階では、床の代わりにその階段自体が立っており、落下する縁は無い
+        # (縁が生まれるのは一番上の階だけで、それは次の周回で見る)。
+        covered = any(
+            o.get('type') in ('stair', 'stair-corner')
+            and o.get('floor', 1) == up
+            and rect_overlap(aabb(o), b)[0] > it['w'] * 0.8
+            and rect_overlap(aabb(o), b)[1] > it['d'] * 0.8
+            for o in data.get('items', []))
+        if not covered:
+            holes.append((b, up, '階段の吹き抜け', it))
     # 階段は上りきった側が必ず開いていないと降り口にならない。その1辺ぶんは
     # 手すりが無くて当然なので、階段の有効幅までは許す。
     allow = {}
