@@ -5961,6 +5961,17 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.wallStyle||'solid')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
+    // 巾木は無い家もある(巾木レス納まり)。壁ごとに切れるようにする。
+    html += '<div class="pr"><div class="pl">巾木</div><select class="pi" onchange="updateSelectedProp(\'skirting\',this.value!==\'off\')">';
+    [['on','あり (60mm)'],['off','なし']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.skirting===false?'off':'on')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    if(it.skirting!==false){
+      // 色は既定で壁合わせ(その面の仕上げ色)。指定したら壁ごとに固定
+      html += '<div class="pr"><div class="pl">巾木カラー</div><input class="pi" type="color" value="'+(it.skirtingColor||it.interiorColor||'#EFEDE7')+'" onchange="updateSelectedProp(\'skirtingColor\',this.value)"></div>';
+      if(it.skirtingColor) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'skirtingColor\',null)">巾木を壁の色に戻す</button>';
+    }
     if((it.thick||0)<120){
       html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
       html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
@@ -6322,6 +6333,9 @@ function updateSelectedProp(p,v,noSave){
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
+  // 巾木も同じ扱い。「あり(既定)」「壁の色(既定)」へ戻したら受け口ごと消す。
+  if(p==='skirting' && v!==false) delete ST.selected.skirting;
+  if(p==='skirtingColor' && !v) delete ST.selected.skirtingColor;
   if(p==='ceilingTexture' && !v){
     delete ST.selected.ceilingTexture;
     delete ST.selected.ceilingTextureFlipX;
@@ -14102,13 +14116,17 @@ function buildWall3D(w){
   // 色は壁合わせ。床合わせは床が広く見える代わりに天井が低く見えるので、
   // 天井高を稼ぎたいモダン住宅では壁合わせが定石。
   function addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat){
+    if(w.skirting===false) return;       // 巾木レスの納まり(壁ごとに選べる)
     if(yBase>0.005) return;              // 開口の上に載る帯には付かない
     if(segLen<0.05) return;
     if(w.wallStyle) return;              // バルコニー手すり等には付けない
     var SK_H=0.06, SK_T=0.012;
-    // 色はその面に実際に貼られた仕上げから取る(アクセント壁では幅木も濃色になる)
-    var skColor=(faceMat&&faceMat.color&&faceMat.color.getHex)
-      ? faceMat.color.getHex() : (w.interiorColor||'#EFEDE7');
+    // 色は既定で「その面に実際に貼られた仕上げ」(アクセント壁では巾木も濃色)。
+    // 壁に skirtingColor が指定されていればそちらを使う(木目調の巾木など)
+    var skColor=w.skirtingColor
+      ? w.skirtingColor
+      : ((faceMat&&faceMat.color&&faceMat.color.getHex)
+         ? faceMat.color.getHex() : (w.interiorColor||'#EFEDE7'));
     var mat=new THREE.MeshStandardMaterial({
       color:skColor, roughness:0.62, metalness:0.0
     });
@@ -14122,6 +14140,9 @@ function buildWall3D(w){
     mesh.rotation.y=rotY;
     mesh.userData.noMerge=true;
     mesh.userData.skirting=true;
+    // 巾木は壁の一部。内観3Dのカットアウェイで壁面が透明になるときは
+    // 一緒に消えること。登録を忘れると、壁が消えた縁に板だけが浮いて残る
+    if(isOuter){ markInteriorCutawayCandidate(mesh,w,0,0); }
     wallGroup.add(mesh);
   }
   // バルコニーフェンス: 建築基準法(2階以上の手すり1100mm以上)の手すり壁+アルミ笠木。
