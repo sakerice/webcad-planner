@@ -6008,11 +6008,16 @@ function updateProps(){
   html += '<div class="pr"><div class="pl">位置 X (mm)</div><input class="pi" type="number" value="'+Math.round(it.x)+'" onchange="updateSelectedProp(\'x\',+this.value)"></div>';
   html += '<div class="pr"><div class="pl">位置 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y)+'" onchange="updateSelectedProp(\'y\',+this.value)"></div>';
   
+  // 道路は w が道路に沿った長さ、d が幅員。「幅 W / 奥行 D」のままだと
+  // 幅を変えたいのに長さの欄を触ることになる(既定プランは w=30000/d=4550)。
+  // 値の持ち方は変えず、呼び名だけその物に合わせる。
+  var wLabel=(it.type==='road')?'道路長 (mm)':'幅 W (mm)';
+  var dLabel=(it.type==='road')?'幅員 (mm)':'奥行 D (mm)';
   if(it.w !== undefined && !isWindowLikeType(it.type)) {
-    html += '<div class="pr"><div class="pl">幅 W (mm)</div><input class="pi" type="number" value="'+Math.round(it.w)+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">'+wLabel+'</div><input class="pi" type="number" value="'+Math.round(it.w)+'" onchange="updateSelectedProp(\'w\',+this.value)"></div>';
   }
   if(it.d !== undefined && !isWindowLikeType(it.type)) {
-    html += '<div class="pr"><div class="pl">奥行 D (mm)</div><input class="pi" type="number" value="'+Math.round(it.d)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">'+dLabel+'</div><input class="pi" type="number" value="'+Math.round(it.d)+'" onchange="updateSelectedProp(\'d\',+this.value)"></div>';
   }
   if(it.rot !== undefined) {
     html += '<div class="pr"><div class="pl">回転 (°)</div><input class="pi" type="number" value="'+Math.round(it.rot)+'" onchange="updateSelectedProp(\'rot\',+this.value)"></div>';
@@ -18561,6 +18566,15 @@ function buildRooms3D(flFilt){
   });
 }
 
+// アイテムの回転を考慮した平面のAABB(mm)。90度単位は厳密。
+function aabbOfPlanItem(o){
+  var w=Number(o.w)||0, d=Number(o.d)||0;
+  var cx=(Number(o.x)||0)+w/2, cy=(Number(o.y)||0)+d/2;
+  var th=(Number(o.rot)||0)*Math.PI/180;
+  var hw=(Math.abs(w*Math.cos(th))+Math.abs(d*Math.sin(th)))/2;
+  var hd=(Math.abs(w*Math.sin(th))+Math.abs(d*Math.cos(th)))/2;
+  return [cx-hw, cy-hd, cx+hw, cy+hd];
+}
 function buildLandscape(){
   if(DATA.walls.length===0) return;
   // Compute building bounding box from walls
@@ -18572,8 +18586,23 @@ function buildLandscape(){
   var bx=(minX+maxX)/2*U, bz=(minZ+maxZ)/2*U;
   var bw=(maxX-minX)*U, bd=(maxZ-minZ)*U;
 
-  // Neutral context ground. Actual grass/gravel/concrete is drawn only by site rectangles.
-  var gndSize = Math.max(bw, bd) + 12;
+  // 地面。芝・砂利・土間は敷地(site-rect)が描くので、ここは素地の下地。
+  //
+  // 以前は「建物のバウンディングボックス+12m」だけだった。既定プランでは
+  // 建物が 8.2x7.3m なので 20m 角にしかならず、敷地(11.4x13.2m)や
+  // 道路(x -9.7..20.3m)の外側で地面が途切れて、家が島に建って見えていた。
+  // 敷地・道路・隣家まで含めた範囲を測り、その3倍まで広げる。
+  var gx0=minX, gx1=maxX, gz0=minZ, gz1=maxZ;
+  (DATA.items||[]).forEach(function(o){
+    if(!o) return;
+    if(o.type!=='site-rect' && !isContextExteriorItemType(o.type)) return;
+    var b=aabbOfPlanItem(o);
+    gx0=Math.min(gx0,b[0]); gz0=Math.min(gz0,b[1]);
+    gx1=Math.max(gx1,b[2]); gz1=Math.max(gz1,b[3]);
+  });
+  bx=(gx0+gx1)/2*U; bz=(gz0+gz1)/2*U;
+  var gndSize = Math.max(Math.max(bw, bd) + 12,
+                         Math.max((gx1-gx0)*U, (gz1-gz0)*U) * 3);
   var gndMat = new THREE.MeshStandardMaterial({
     color: 0xd7d5ce,
     roughness: 1.0,
@@ -23437,8 +23466,48 @@ function doImport(inp){
   r.readAsText(file);
 }
 
+// 天井に固定する器具。値は「取付面(elev)から器具の上端までの高さ(mm)」。
+// 照明は elev が取付面そのものなので0。GLBのモデルは底面が elev なのでモデル高。
+var CEILING_FIXTURE_TOP_MM={'light-ceiling':0,'light-down':0,'light-spot':0,'fmp-CeilingFan01':350};
+// 保存済みプランの天井付け器具を、天井仕上げ面へ寄せ直す。
+//
+// 取付高さの既定値が長らく当て推量(wallFullHeightM-160)で、1階は天井から
+// 148mm下に浮き、2階は32mm上=天井裏に埋まっていた。既定プランに至っては
+// 全灯 elev=2380 の一律で1階が308mm浮いていた。式を直しても、既に保存された
+// プランは古い値を持ったままなので、読み込み時に1度だけ寄せ直す。
+//
+// 部屋の外(玄関ポーチの軒下など)にある器具は天井が無いので触らない。
+// 動かすのは「実際にずれているもの」だけにして、無用な差分を作らない。
+//
+// **1度だけ**走らせること。毎回の読み込みで寄せ直すと、利用者が意図して
+// 下げたペンダントまで天井へ戻してしまう。済んだ印をプランに書き、
+// 以降は触らない(印は JSON にもブラウザ保存にも一緒に残る)。
+var PLAN_FIX_CEILING_FIXTURES='ceilingFixtureElev';
+function snapCeilingFixturesToCeiling(){
+  if(!DATA||!DATA.items) return 0;
+  if(!DATA.planFixes||typeof DATA.planFixes!=='object') DATA.planFixes={};
+  if(DATA.planFixes[PLAN_FIX_CEILING_FIXTURES]) return 0;
+  if(!DATA.rooms||!DATA.rooms.length) return 0;   // 部屋が読めていないうちは判定しない
+  DATA.planFixes[PLAN_FIX_CEILING_FIXTURES]=1;
+  var moved=0;
+  DATA.items.forEach(function(it){
+    if(!it) return;
+    var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+    if(topOff===undefined) return;
+    var fl=it.floor||1;
+    var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+    if(!roomAtPointOnFloor(fl,cx,cy)) return;      // 屋外は天井が無い
+    var want=ceilingFinishElevationMm(fl,cx,cy)-topOff;
+    if(Math.abs((Number(it.elev)||0)-want)<=1) return;
+    it.elev=want;
+    moved++;
+  });
+  if(moved) console.info('[WebCAD] 天井付けの器具 '+moved+'個を天井面へ寄せ直しました');
+  return moved;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
+  snapCeilingFixturesToCeiling();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){
