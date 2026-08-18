@@ -112,9 +112,11 @@ test('どの壁とも出会わない自由端は伸ばさない', () => {
   assert.equal(ext(ctx, a, true), 0);
 });
 
-test('既定プランの外周4隅がすべて閉じている', () => {
+test('現実的な間取り(フィクスチャ)の外周4隅がすべて閉じている', () => {
   const plan = JSON.parse(
-    readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+    readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
   const ctx = ctxWith(plan.walls);
   const BW = 8190, BD = 7280;
   const corners = [[0, 0], [BW, 0], [BW, BD], [0, BD]];

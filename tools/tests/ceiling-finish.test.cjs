@@ -23,7 +23,9 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
-const PLAN = JSON.parse(readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 // ── index.html からの切り出し（ceiling-ui.test.cjs と同じやり方）──────────
 function scanBalanced(from) {

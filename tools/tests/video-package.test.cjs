@@ -285,7 +285,7 @@ test('平面図ソースでも家具の上面画像を待ち、画素で確か�
 
 // ── Task 7c-2: 平面図経路にも部材の名指しを戻す ─────────────────────────
 // 以下は grep ではなく**出力**を見る。index.html から planInstanceList を切り出して
-// node で走らせ、実データ (assets/default_plan.json) を食わせ、その戻り値を
+// node で走らせ、実データ (凍結フィクスチャ house-2f.json) を食わせ、その戻り値を
 // 本物の VideoPrompt.compose に渡して、出てきた文に窓の数が入っているかを測る。
 const vm = require('node:vm');
 const LockTiers = require('../../assets/js/lock-tiers.js');
@@ -320,7 +320,9 @@ function topLevelVar2(name) {
   assert.notEqual(m, null, 'var ' + name + ' が index.html に無い');
   return m[0];
 }
-const PLAN_DATA = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN_DATA = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 function planListFor(data) {
   const src = [
     topLevelVar2('CONTEXT_EXTERIOR_TYPES'),

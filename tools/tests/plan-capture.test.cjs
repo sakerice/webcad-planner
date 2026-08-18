@@ -75,7 +75,7 @@ test('画像AIレンダーは平面図を同梱しない', () => {
 
 // ── Task 7c-1 / 7c-3: 構図と解像度 ───────────────────────────────────────
 // ここから下の検査は grep ではなく**数値**を見る。index.html から関数を切り出して
-// node の vm で実際に走らせ、実データ (assets/default_plan.json) を食わせて、
+// node の vm で実際に走らせ、実データ (凍結フィクスチャ house-2f.json) を食わせて、
 // 主題がフレームの何割を占めるかを測る。ソースに文字列が在るかどうかは、
 // この計画で既に4回、未修正のコードに対して通っている。
 const vm = require('node:vm');
@@ -133,7 +133,9 @@ function geometryWith(data) {
     topLevelFunction('planSubjectFrameRatio')
   ], { DATA: data, U: 0.001 });
 }
-const PLAN = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 const FRAME = { w: 1400, h: 900 };   // Task 7b が実測に使ったビューポート
 
 test('主題の箱に敷地・道路・隣家・電柱は入らない（入れると家は必ず小さく写る）', () => {

@@ -19,7 +19,9 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
-const PLAN = JSON.parse(readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 function topLevelFunction(name) {
   const at = html.indexOf('\nfunction ' + name + '(');
@@ -106,7 +108,7 @@ test('新しく置く照明の既定値は、その部屋の天井仕上げ面�
   assert.equal(def(1, 5005, 6370), 5388, '吹き抜けでは高所に付く');
 });
 
-test('既定プランの室内の天井付け器具は、すべて天井仕上げ面に一致する', () => {
+test('室内の天井付け器具は、すべて天井仕上げ面に一致する', () => {
   const ctx = makeCtx(clone(PLAN));
   let checked = 0;
   for (const it of PLAN.items) {
