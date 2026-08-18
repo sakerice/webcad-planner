@@ -313,12 +313,14 @@ test('入口の抽出そのものが機能している（12機能すべてにボ
   Object.keys(FEATURES).forEach((fn) => {
     assert.ok(ENTRIES[fn].length > 0, FEATURES[fn] + ' のボタンが1つも見つからない');
   });
-  // 画像AIレンダーはヘッダーと3D画面の浮きボタンの2つ。どちらも取りこぼして
-  // いないことを、id で固定する（ボトムナビからは外れた）。
+  // 画像AIレンダーの入口はヘッダーの1つだけ。3D画面の右上に出ていた浮きボタン
+  // (#unity-render-fab)は、同じダイアログを開くだけで画角を確認したい所に
+  // 常時かぶるので削除した。復活させないよう、id を固定して数も見る。
   const stillIds = ENTRIES.openUnityRenderModal.map((n) => n.id).filter(Boolean);
-  ['unity-render-toolbar-btn', 'unity-render-fab'].forEach((id) => {
-    assert.ok(stillIds.indexOf(id) >= 0, '画像AIレンダーの入口 ' + id + ' が見えていない');
-  });
+  assert.ok(stillIds.indexOf('unity-render-toolbar-btn') >= 0,
+    '画像AIレンダーの入口 unity-render-toolbar-btn が見えていない');
+  assert.equal(html.indexOf('unity-render-fab'), -1,
+    '削除した浮きボタン #unity-render-fab が復活している');
 });
 
 // ── 7. 本題: どの幅でも、どの機能も、入口が1つ以上ある ────────────────────
@@ -385,20 +387,7 @@ test('評価器が知らないメディア特性の上に display を載せて�
     '入口に効く display が、評価器の知らないメディアクエリの下にある');
 });
 
-// 3Dビュー内の浮きボタンは position:absolute、スマホのツールバーは position:fixed で
-// 画面上部 8〜60px を覆う。top を 18px にしていたため完全に下敷きになり、
-// その点をタップしてもツールバーが拾ってボタンには届かなかった（375px で実測）。
-// z-index では解決しない（ツールバーは不透明で上に乗る）ので、位置で避ける。
-test('3Dの浮きボタンは、固定ツールバーの下端より下から始まる', () => {
-  const css = html.slice(html.indexOf('<style'), html.indexOf('</style>', html.lastIndexOf('<style')));
-  // ツールバーの高さ（スマホ）
-  const tb = /#toolbar\{[^}]*min-height:(\d+)px/.exec(css);
-  assert.ok(tb, '#toolbar の min-height が読めない');
-  const toolbarBottom = Number(tb[1]) + 16; // 上下の余白ぶんを見込む
-  // 浮きボタンの top のうち、最後に効くもの
-  const tops = [...css.matchAll(/#unity-render-fab\{[^}]*?top:(\d+)px/g)].map((m) => Number(m[1]));
-  assert.ok(tops.length, '#unity-render-fab の top が読めない');
-  const effective = tops[tops.length - 1];
-  assert.ok(effective >= toolbarBottom,
-    'top:' + effective + 'px はツールバー(下端およそ' + toolbarBottom + 'px)に潜る');
-});
+// 3D画面の右上に出ていた浮きボタン(#unity-render-fab)は削除した。
+// 「スマホの固定ツールバーに潜らない top を持つこと」を見ていた検査は、
+// ボタンごと無くなったので役目を終えている。復活の検知は上の
+// 「入口の抽出そのものが機能している」に置いた。

@@ -15,7 +15,9 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
-const PLAN = JSON.parse(readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 // ── index.html からの切り出し（roof-ceiling.test.cjs と同じやり方）───────────
 function topLevelFunction(name) {
@@ -58,6 +60,7 @@ const FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel'
 ];
@@ -119,15 +122,28 @@ test('14-1: 既定プラン1階の部屋は、2階分上の屋根から天井を
     '天井が屋根の高さ(3階相当)まで持ち上がっている: ' + m.highMm + 'mm');
 });
 
-test('14-1: 既定プラン最上階(3階)の部屋は、いまも屋根から天井をもらい、実際に傾く', () => {
+test('14-1: 既定プラン最上階の部屋は、いまも屋根から天井をもらい、実際に傾く', () => {
+  // 現行の既定プランはフラットルーフなので、勾配の検証は同じ屋根アイテムを
+  // 切妻に差し替えたクローンで行う（「最上階の部屋が屋根を見つける」経路は実データのまま）。
   const data = clone(PLAN);
   const ctx = makeCtx(data);
-  const room = data.rooms.filter((r) => r.floor === 3)[0];
-  assert.equal(ctx.roomAboveRoom(room), null, '3階の部屋の上に部屋がある(前提が崩れている)');
+  const topFloor = Math.max.apply(null, data.rooms.map((r) => r.floor || 1));
+  const room = data.rooms.filter((r) => r.floor === topFloor)[0];
+  assert.equal(ctx.roomAboveRoom(room), null, '最上階の部屋の上に部屋がある(前提が崩れている)');
   room.ceiling = { type: 'sloped', lowMm: 2200 };
   const roof = ctx.roofItemOverRoom(room);
   assert.notEqual(roof, null, '最上階の部屋が屋根を失った');
-  const m = measureCeilingMm(ctx, room);
+
+  const sloped = clone(PLAN);
+  sloped.items.forEach((it) => {
+    if (it.type === 'roof' && it.floor === topFloor + 1) {
+      it.roofType = 'gable'; it.pitch = 30;
+    }
+  });
+  const ctx2 = makeCtx(sloped);
+  const room2 = sloped.rooms.filter((r) => r.floor === topFloor)[0];
+  room2.ceiling = { type: 'sloped', lowMm: 2200 };
+  const m = measureCeilingMm(ctx2, room2);
   assert.equal(m.source, 'roof');
   assert.ok(m.highMm - m.lowMm > 300,
     '屋根から導いた天井が傾いていない（高低差 ' + (m.highMm - m.lowMm) + 'mm）');
@@ -245,15 +261,25 @@ test('14(最重要): 既定プランの全部屋は、天井の高さも出ど�
   const data = clone(PLAN);
   const ctx = makeCtx(data);
   const byFloor = {};
-  data.rooms.forEach((r) => {
+  // 既定プランは吹き抜けを1室持つ。そこだけ天井高を明示しているので外す。
+  const declares = (r) => !!((r.ceiling &&
+    (r.ceiling.heightMm || r.ceiling.type === 'void')) || r.ceilingHeight);
+  const voids = data.rooms.filter(declares);
+  assert.ok(voids.length > 0, '既定プランに吹き抜けが無い(前提が崩れている)');
+  voids.forEach((r) => assert.ok(ctx.roomCeilingHeightM(r) > ctx.storyHeightM(r.floor),
+    r.id + ' の吹き抜けが階高で丸められた'));
+  data.rooms.filter((r) => !declares(r)).forEach((r) => {
     assert.equal(ctx.roomCeilingProfile(r), null, r.id + ' が勾配の枝に入った');
     assert.equal(ctx.roomRoofCeilingExtent(r), null, r.id + ' が屋根由来の天井を持った');
     assert.equal(ctx.roomCeilingHeightM(r), ctx.storyHeightM(r.floor), r.id + ' の天井高が動いた');
     (byFloor[r.floor] = byFloor[r.floor] || new Set()).add(ctx.roomRenderedCeilingMm(r));
   });
   // Task 2 以来の既知の実測値。ここが動けば保存済みの家が動いている。
+  // (1階は階高そのまま 2700、2階以上は床スラブ 180 を引いた 2520)
   assert.deepEqual(byFloor[1], new Set([2700]));
-  assert.deepEqual(byFloor[2], new Set([2520]));
-  assert.deepEqual(byFloor[3], new Set([2520]));
+  Object.keys(byFloor).map(Number).filter((f) => f > 1).forEach((f) => {
+    assert.deepEqual(byFloor[f], new Set([2520]), f + '階の実寸が 2520 でない');
+  });
+  assert.ok(Object.keys(byFloor).length >= 2, '既定プランに2階以上の部屋が無い(前提が崩れている)');
   assert.deepEqual(ctx.__warns, [], '既定プランで丸めの警告が出た');
 });

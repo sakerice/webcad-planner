@@ -14,7 +14,9 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
-const PLAN = JSON.parse(readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 // ── index.html からの切り出し（video-ui.test.cjs と同じやり方）───────────
 function topLevelFunction(name) {
@@ -141,6 +143,7 @@ const HEIGHT_FNS = [
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
   'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
@@ -149,9 +152,9 @@ const HEIGHT_FNS = [
   'buildRoomCeilingShapeGeometry', 'buildSlopedCeilingGeometry', 'buildRoomCeilingMesh',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'buildWall3D'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'buildWall3D'
 ];
-const HEIGHT_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
+const HEIGHT_VARS = ['U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'INTERIOR_WALL_DEFAULT', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache',
   'ROOM_OVERLAP_EPS_MM',
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M', 'WALL_TOP_SAMPLE_STEP_M'];
@@ -287,13 +290,17 @@ test('12-1(最重要): 勾配を宣言していない部屋は、屋根の下で
 
 test('12-1(最重要): 既定プランの全部屋は宣言していないので、天井の出どころが変わらない', () => {
   const ctx = makeCtx(PLAN);
-  PLAN.rooms.forEach((r) => {
+// 既定プランは吹き抜け(リビングの上に2階の床を張らない部屋)を持つ。
+// そこだけは天井高を明示しているので、この検査からは外す。
+const declaresCeiling = (r) => !!((r.ceiling &&
+  (r.ceiling.heightMm || r.ceiling.type === 'void')) || r.ceilingHeight);
+  PLAN.rooms.filter((r) => !declaresCeiling(r)).forEach((r) => {
     assert.equal(ctx.roomCeilingProfile(r), null, r.id + ' が勾配の枝に入った');
     assert.equal(ctx.roomCeilingHeightM(r), ctx.storyHeightM(r.floor), r.id + ' の天井高が動いた');
   });
   // 実測値(Task 2 以来の既知の数字)がそのまま出ること
-  const f1 = PLAN.rooms.filter((r) => r.floor === 1);
-  const f2 = PLAN.rooms.filter((r) => r.floor === 2);
+  const f1 = PLAN.rooms.filter((r) => r.floor === 1 && !declaresCeiling(r));
+  const f2 = PLAN.rooms.filter((r) => r.floor === 2 && !declaresCeiling(r));
   assert.deepEqual(new Set(f1.map((r) => ctx.roomRenderedCeilingMm(r))), new Set([2700]));
   assert.deepEqual(new Set(f2.map((r) => ctx.roomRenderedCeilingMm(r))), new Set([2520]));
 });

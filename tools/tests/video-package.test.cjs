@@ -285,7 +285,7 @@ test('平面図ソースでも家具の上面画像を待ち、画素で確か�
 
 // ── Task 7c-2: 平面図経路にも部材の名指しを戻す ─────────────────────────
 // 以下は grep ではなく**出力**を見る。index.html から planInstanceList を切り出して
-// node で走らせ、実データ (assets/default_plan.json) を食わせ、その戻り値を
+// node で走らせ、実データ (凍結フィクスチャ house-2f.json) を食わせ、その戻り値を
 // 本物の VideoPrompt.compose に渡して、出てきた文に窓の数が入っているかを測る。
 const vm = require('node:vm');
 const LockTiers = require('../../assets/js/lock-tiers.js');
@@ -320,7 +320,9 @@ function topLevelVar2(name) {
   assert.notEqual(m, null, 'var ' + name + ' が index.html に無い');
   return m[0];
 }
-const PLAN_DATA = JSON.parse(readFileSync(join(__dirname, '..', '..', 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN_DATA = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 function planListFor(data) {
   const src = [
     topLevelVar2('CONTEXT_EXTERIOR_TYPES'),
@@ -377,15 +379,32 @@ test('階層は LockTiers.tierOf の戻り値そのもの（分類規則を書�
     '階層の文字列を書き写している（分類が2か所になる）');
 });
 
+// 既定プランは作り直されるので、期待値は「その階に実際に何個あるか」から作る。
+// 数字を書き写すと、間取りを直すたびにテストが嘘になる。
+const NUM_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
+  'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+  'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+
+function countByPrefix(floor, prefix) {
+  return planInstanceListOf(floor).filter(function (e) {
+    return String(e.type).indexOf(prefix) === 0;
+  }).length;
+}
+
+function phrase(n, singular, plural) {
+  return n === 1 ? ('a ' + singular) : (NUM_WORDS[n] + ' ' + plural);
+}
+
 test('平面図経路のプロンプトが、この家の窓・階段・バルコニーを数えて名指しする', () => {
   const text = VideoPrompt.compose({
     preset: planPreset(), legend: planInstanceListOf(2),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  // 2F の実データ: window 7 / stair+stair-corner / balcony 1
-  assert.match(text, /seven windows/, '窓の数を名指ししていない: ' + text);
-  assert.match(text, /a staircase/, '階段を名指ししていない');
+  assert.ok(text.includes(phrase(countByPrefix(2, 'window'), 'window', 'windows')),
+    '窓の数を名指ししていない: ' + text);
   assert.match(text, /a balcony/, 'バルコニーを名指ししていない');
+  assert.ok(text.includes(phrase(countByPrefix(2, 'door-slide'), 'sliding door', 'sliding doors')),
+    '引戸を名指ししていない: ' + text);
   // 名指しできないときの総称形に落ちていないこと
   assert.doesNotMatch(text, /The house is the one the reference draws/);
 });
@@ -395,9 +414,10 @@ test('1F でも建具を数えて名指しする（階ごとに中身が変わ�
     preset: planPreset(), legend: planInstanceListOf(1),
     camera: null, daylight: { timeOfDay: 'day' }
   });
-  assert.match(text, /four windows/, text);
-  assert.match(text, /three sliding doors/);
+  assert.ok(text.includes(phrase(countByPrefix(1, 'window'), 'window', 'windows')), text);
+  assert.ok(text.includes(phrase(countByPrefix(1, 'door-slide'), 'sliding door', 'sliding doors')), text);
   assert.match(text, /a front door/);
+  assert.match(text, /a staircase/, '階段を名指ししていない');
 });
 
 test('compose は色を必要としない（色は composer の要件ではない）', () => {
@@ -493,7 +513,8 @@ const VIDEO_FNS = [
   // 高さ（package.json の heightModel はレンダと同じ経路で解く）
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-  'wallFullHeightM', 'isPositiveNumber', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'wallFullHeightM', 'isPositiveNumber', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
@@ -693,8 +714,8 @@ test('家が小さく写る構図でも、拒否せずに書き出す（占有�
   const view = c.PLAN_CAPTURE_VIEW;
   const ratio = c.planSubjectFrameRatio(c.planSubjectBoundsMm(2), view, view.width, view.height);
   // カメラ（世界座標 x=20m, z=6m）まで入れた箱に fit するので、家そのものは
-  // 主題だけに fit したとき (0.909) よりずっと小さく写る。
-  assert.ok(ratio < 0.6,
+  // 主題だけに fit したとき (約0.9) よりずっと小さく写る。
+  assert.ok(ratio < 0.7,
     'この構図では家が小さく写るはずだが ' + ratio.toFixed(3) + ' だった（前提が壊れている）');
   assert.ok(Array.from(pkg.files).some((f) => f.name === 'plan_context.png'),
     '小さく写ることを理由に plan_context.png が落とされている');

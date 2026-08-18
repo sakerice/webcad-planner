@@ -17,7 +17,9 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const Law = require(join(ROOT, 'assets', 'js', 'setback-law.js'));
-const PLAN = JSON.parse(readFileSync(join(ROOT, 'assets', 'default_plan.json'), 'utf8'));
+// 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
+// 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 // ── index.html からの切り出し（roof-ceiling.test.cjs と同じやり方）──────────
 function topLevelFunction(name) {
@@ -190,9 +192,14 @@ function clone(o) { return JSON.parse(JSON.stringify(o)); }
 // vm の中で作られた配列・オブジェクトは別realm なので deepStrictEqual が通らない。
 // 値だけを見たいので、比較の前にこちら側の素の値へ写す。
 function plain(v) { return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
-const DEFAULT_SITE = PLAN.items.filter((i) => i.type === 'site-rect')[0];
-const DEFAULT_ROAD = PLAN.items.filter((i) => i.type === 'road')[0];
-assert.ok(DEFAULT_SITE && DEFAULT_ROAD, '既定プランに敷地と道路がある前提');
+// 幾何フィクスチャ。かつては既定プランの敷地・道路をそのまま借りていたが、
+// このテストの主張は斜線計算の数式であってプランの中身ではないので、
+// 当時の値をここに固定して既定プランの入れ替えから切り離した。
+// (前提: 道路は rot=90 の南北向きで、敷地の東側にある)
+const DEFAULT_SITE = { id: 901, type: 'site-rect', x: -590, y: -570, rot: 0,
+  floor: 1, w: 8970, d: 5340, color: 'rgba(100,160,100,0.1)', siteSurface: 'gravel' };
+const DEFAULT_ROAD = { id: 902, type: 'road', x: 0, y: 266.25, rot: 90,
+  floor: 1, w: 20000, d: 3277.5, color: '#55585c', contextHeight: 70 };
 
 // 既定プランの数値（テスト側で独立に持つ）
 const SITE_MIN_Y = DEFAULT_SITE.y;                       // -570  北側境界

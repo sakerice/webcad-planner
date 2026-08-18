@@ -14,6 +14,7 @@ Blenderで生成・更新するためのスクリプト一式。
 | `bike_build.py` / `fbike_build.py` | ママチャリ / 折りたたみ自転車 |
 | `pole_build.py` | 電柱 |
 | `export_glbs.py` | 全モデルをGLBへエクスポート(モジュール用エンプティへ自動親子付け) |
+| `exterior_build.py` | **外構モデル**(庭木・ウッドデッキ)。出力先は `assets/models/custom/`。単体で実行するとGLB＋top/thumbのPNGまで書き出す |
 | `blender_mcp_addon.py` | Blenderに入れるソケットアドオン(port 9876, blenderMCP互換) |
 | `blender_startup.py` | GUI起動時にアドオンを読み込むスタートアップ |
 | `bmcp.py` | アドオンへコードを送るCLIクライアント |
@@ -39,6 +40,23 @@ python3 tools/blender/house_kit_build.py --no-export   # 寸法確認のみ
 パーツ名(`nh_seg_win_l` など)と原点の約束は `index.html` の
 `NH_SEG_PART` / `nhAttach()` と一対一で対応している。**名前と原点を
 変えるときは必ず両方を直すこと。**
+
+### 外構(庭木・ウッドデッキ)
+
+`assets/models/context/` ではなく `assets/models/custom/` へ出す。
+GUIもMCPも不要。bpy が無い場合は Blender の CLI から流す。
+
+```bash
+python3 tools/blender/exterior_build.py                # GLB + top/thumb PNG
+python3 tools/blender/exterior_build.py --no-icons     # GLBだけ(Cyclesを回さない)
+python3 tools/blender/exterior_build.py --no-export    # 三角形数と寸法の確認のみ
+
+/Applications/Blender.app/Contents/MacOS/Blender --background \
+  --factory-startup --python tools/blender/exterior_build.py
+```
+
+メッシュのバウンディングボックスは `assets/models/custom/manifest.json` の
+w/d/h と一致させてある(`normalize_to()`)。**片方だけ変えないこと。**
 
 ### その他のモデル(車・周辺ビル・自転車・電柱)
 

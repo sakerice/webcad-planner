@@ -102,7 +102,7 @@ function ctxFor(walls) {
     buildWinFrames: function () {}
   });
   vm.runInContext([
-    topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
+    topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('WALL_CORE_END_PAD_MM'), topLevelVar('INTERIOR_WALL_DEFAULT'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('_roofCeilingExtentCache'),
     topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'),
@@ -115,11 +115,12 @@ function ctxFor(walls) {
     'roofItemOverRoom', 'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
     'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
-    'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomExplicitCeilingMm', 'roomCeilingHeightM',
+    'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM',
     'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallHeightMm', 'wallDisplayHeightM',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
-    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'buildWall3D'
+    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'buildWall3D'
   ].map(topLevelFunction)).join('\n'), ctx);
   return ctx;
 }
@@ -138,6 +139,8 @@ function gapsOf(ctx, wall) {
   function walk(o) {
     if (o.children) { o.children.forEach(walk); return; }
     if (!o.isMesh) return;
+    // 幅木も箱だが壁のコアではない。厚み12mmの板を壁厚と取り違えない
+    if (o.userData && o.userData.skirting) return;
     if (o.geometry.kind === 'box') { out.coreDepth = o.geometry.depth; return; }
     const d = Math.abs(o.position.x) - core;
     if (o.userData.exteriorFace) out.ext = d;
