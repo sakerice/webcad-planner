@@ -5782,9 +5782,9 @@ function setTextureSettingValue(obj,key,value){
     obj.textureFlipX=false;
     obj.textureFlipY=false;
   }
-  // 巾木は既定(あり/壁紙合わせ)ならフィールドを持たない。true や null を
-  // 残すと保存 JSON が「一度も触っていない面」と別物になる
-  if(key==='skirting' && value!==false) delete obj.skirting;
+  // 巾木は「未指定(=上位の設定に任せる)」ならフィールドを持たない。
+  // null を残すと保存 JSON が「一度も触っていない設定」と別物になる
+  if(key==='skirting' && (value===null||value===undefined)) delete obj.skirting;
   if(key==='skirtingColor' && !value) delete obj.skirtingColor;
 }
 function appearanceWithTextureOrientation(color, texture, source, owner, prefix){
@@ -5861,17 +5861,21 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
     mode!=='custom'
   );
   if(kind==='interior'){
-    // 巾木は面ごと。壁は両面が別の部屋に面するので、部屋ごとの統一
-    // (この部屋だけ巾木レス・この部屋だけ濃色)は面単位でしか作れない
-    var skOn=setting.skirting!==false;
+    // 巾木は壁紙カラーと同じカスケード。既定は「内観カラー設定に任せる」で、
+    // この面だけ変えたいときに あり/なし を明示する
+    var faceObj=getWallInteriorFaces(wall).find(function(f){return interiorFaceKey(wall,f)===faceKey;});
+    var skResolved=resolveSkirtingForFace(wall,faceObj);
+    var skOwn=setting.skirting;   // undefined=任せる / true / false
+    var skSel=(skOwn===undefined)?'inherit':(skOwn===false?'off':'on');
     html += '<div class="face-custom-row" style="margin-top:7px"><span class="face-muted">巾木</span>';
-    html += '<select onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirting\',this.value!==\'off\')">';
-    html += '<option value="on" '+(skOn?'selected':'')+'>あり (60mm)</option>';
-    html += '<option value="off" '+(skOn?'':'selected')+'>なし</option>';
+    html += '<select onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirting\',this.value===\'inherit\'?null:this.value===\'on\')">';
+    html += '<option value="inherit" '+(skSel==='inherit'?'selected':'')+'>内観カラー設定に任せる（現在: '+(skResolved.on?'あり':'なし')+'）</option>';
+    html += '<option value="on" '+(skSel==='on'?'selected':'')+'>あり (60mm)</option>';
+    html += '<option value="off" '+(skSel==='off'?'selected':'')+'>なし</option>';
     html += '</select></div>';
-    if(skOn){
+    if(skResolved.on){
       html += '<div class="face-custom-row"><span class="face-muted">巾木カラー</span>';
-      html += '<input type="color" value="'+(setting.skirtingColor||colorValue)+'" onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirtingColor\',this.value)"></div>';
+      html += '<input type="color" value="'+(setting.skirtingColor||skResolved.color||colorValue)+'" onchange="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirtingColor\',this.value)"></div>';
       if(setting.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 8px;margin-top:4px" onclick="'+updateFn+'('+wall.id+',\''+faceKey+'\',\'skirtingColor\',null)">壁紙の色に戻す</button>';
     }
   }
@@ -12577,6 +12581,22 @@ function resolveInteriorFaceAppearance(w,face){
   return appearanceWithTextureOrientation(INTERIOR_WALL_DEFAULT,null,'default',null);
 }
 
+// 巾木の有無と色。壁紙カラーと同じく 面 → 階 → 家全体 → 既定 の順で決める。
+// 有無と色は独立に解決する(全体で「なし」でも、この面だけ「あり」にできる)。
+// 色の null は「壁紙のその面の色に合わせる」(描画側 addSkirting が面材から取る)。
+function resolveSkirtingForFace(w,face){
+  var s=ensureInteriorWallSettings();
+  var fs=face?getInteriorFaceSetting(w,face):null;
+  var fl=s.floors[w.floor||1]||null;
+  var on=(fs&&fs.skirting!==undefined)?fs.skirting!==false
+       :(fl&&fl.skirting!==undefined)?fl.skirting!==false
+       :(s.whole&&s.whole.skirting!==undefined)?s.whole.skirting!==false
+       :true;
+  var color=(fs&&fs.skirtingColor)||(fl&&fl.skirtingColor)
+          ||(s.whole&&s.whole.skirtingColor)||null;
+  return {on:on,color:color};
+}
+
 function resolveInteriorWallAppearance(w){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
@@ -12863,6 +12883,16 @@ function renderExteriorWallPanel(mode){
     ins.whole,
     false
   );
+  html += '<div style="display:flex;gap:6px;align-items:center;margin-top:8px;border-top:1px dashed #24406f;padding-top:8px">';
+  html += '<span style="font-size:10px;color:#cce;font-weight:bold">巾木</span>';
+  html += '<select style="font-size:10px" onchange="updateInteriorSetting(\'whole\',\'skirting\',this.value===\'off\'?false:null)">';
+  html += '<option value="on" '+(ins.whole.skirting===false?'':'selected')+'>あり (既定)</option>';
+  html += '<option value="off" '+(ins.whole.skirting===false?'selected':'')+'>なし</option>';
+  html += '</select>';
+  html += '<input type="color" value="'+(ins.whole.skirtingColor||ins.whole.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'whole\',\'skirtingColor\',this.value)">';
+  if(ins.whole.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 6px" onclick="updateInteriorSetting(\'whole\',\'skirtingColor\',null)">壁紙合わせ</button>';
+  html += '</div>';
+  html += '<div style="font-size:9px;color:#7a8fb0;margin-top:3px">色を指定しなければ壁紙の色に合わせます。階・面の個別指定が優先されます。</div>';
   html += '</div>';
   for(var ifl=1; ifl<=4; ifl++){
     var ifs=ins.floors[ifl]||defaultInteriorFloorSetting();
@@ -12879,6 +12909,17 @@ function renderExteriorWallPanel(mode){
       ifs,
       false
     );
+    var iflSkSel=(ifs.skirting===undefined)?'inherit':(ifs.skirting===false?'off':'on');
+    html += '<div style="display:flex;gap:6px;align-items:center;margin-top:6px">';
+    html += '<span style="font-size:10px;color:#cce">巾木</span>';
+    html += '<select style="font-size:10px" onchange="updateInteriorSetting(\'floor\',\'skirting\',this.value===\'inherit\'?null:this.value===\'on\','+ifl+')">';
+    html += '<option value="inherit" '+(iflSkSel==='inherit'?'selected':'')+'>家全体に合わせる</option>';
+    html += '<option value="on" '+(iflSkSel==='on'?'selected':'')+'>あり</option>';
+    html += '<option value="off" '+(iflSkSel==='off'?'selected':'')+'>なし</option>';
+    html += '</select>';
+    html += '<input type="color" value="'+(ifs.skirtingColor||ins.whole.skirtingColor||ifs.color||INTERIOR_WALL_DEFAULT)+'" style="width:42px;height:24px;border:none" onchange="updateInteriorSetting(\'floor\',\'skirtingColor\',this.value,'+ifl+')">';
+    if(ifs.skirtingColor) html += '<button class="pbtn sec" style="padding:3px 6px" onclick="updateInteriorSetting(\'floor\',\'skirtingColor\',null,'+ifl+')">戻す</button>';
+    html += '</div>';
     html += '</div>';
   }
   html += '<button class="pbtn" onclick="hideWallPanel()" style="margin-top:10px">閉じる</button>';
@@ -14123,18 +14164,18 @@ function buildWall3D(w){
   // 色は壁合わせ。床合わせは床が広く見える代わりに天井が低く見えるので、
   // 天井高を稼ぎたいモダン住宅では壁合わせが定石。
   function addSkirting(yBase,mid,segLen,normalX,normalZ,intOff,faceMat,faceInfo){
-    // 有無と色は**内観面ごと**の設定(壁紙カラーと同じ受け口)。壁は両面が
-    // 別の部屋に面するので、面単位でないと部屋ごとの統一が取れない
-    var fs=faceInfo?getInteriorFaceSetting(w,faceInfo):null;
-    if(fs&&fs.skirting===false) return;  // この面は巾木レスの納まり
+    // 有無と色は壁紙カラーと同じカスケード(面 → 階 → 家全体 → 既定)。
+    // 壁は両面が別の部屋に面するので、個別は面単位で持つ
+    var sk=resolveSkirtingForFace(w,faceInfo);
+    if(!sk.on) return;                   // この面は巾木レスの納まり
     if(yBase>0.005) return;              // 開口の上に載る帯には付かない
     if(segLen<0.05) return;
     if(w.wallStyle) return;              // バルコニー手すり等には付けない
     var SK_H=0.06, SK_T=0.012;
     // 色は既定で「その面に実際に貼られた仕上げ」(アクセント壁では巾木も濃色)。
-    // 面の設定に skirtingColor があればそちら(木目調の巾木など)
-    var skColor=(fs&&fs.skirtingColor)
-      ? fs.skirtingColor
+    // カスケードに指定があればそちら(木目調の巾木など)
+    var skColor=sk.color
+      ? sk.color
       : ((faceMat&&faceMat.color&&faceMat.color.getHex)
          ? faceMat.color.getHex() : (w.interiorColor||'#EFEDE7'));
     var mat=new THREE.MeshStandardMaterial({
