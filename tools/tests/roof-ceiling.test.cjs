@@ -152,7 +152,7 @@ const HEIGHT_FNS = [
   'buildRoomCeilingShapeGeometry', 'buildSlopedCeilingGeometry', 'buildRoomCeilingMesh',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'buildWall3D'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'buildWall3D'
 ];
 const HEIGHT_VARS = ['U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'INTERIOR_WALL_DEFAULT', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache',
