@@ -13662,21 +13662,37 @@ function wallEndCornerExtensionMm(w,atEnd){
   if(wlen<1) return 0;
   var ux=(wdx/wlen)*(atEnd?1:-1), uy=(wdy/wlen)*(atEnd?1:-1); // 端から外向き
   var nx=-uy, ny=ux;
-  var need=0;
+  // 延長量は「この端から相手の**外面**までの実距離」。一律 厚/2 にすると、
+  // 端点を相手の外面まで描いてあるプラン(面合わせ)で二重に伸びて、外装面
+  // から突き出す。端点が芯線上(芯合わせ)なら s=0 で従来どおり厚/2 になる。
+  // 係合する相手が複数ある接合(斜め壁の突き当たりなど)では、最も遠い面まで
+  // 伸ばすと最も近い相手の面から突き出す。延長は**最も近い係合面まで**とする。
+  // 通常の出隅は相手が1枚なので min でも max でも同じ値になる。
+  var need=Infinity;
   DATA.walls.forEach(function(o){
     if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
     if(olen<1) return;
     var sinA=Math.abs(wdx*ody-wdy*odx)/(wlen*olen);
-    if(sinA<0.12) return;             // 平行な継ぎ足しは角を作らない
-    var t=((px-o.x1)*odx+(py-o.y1)*ody)/(olen*olen);
-    if(t<-0.02||t>1.02) return;       // 相手の芯線の範囲外
-    var qx=o.x1+odx*t, qy=o.y1+ody*t;
-    if(Math.hypot(px-qx,py-qy)>(o.thick||120)/2+40) return;
-    var v=((o.thick||120)/2)/sinA;   // 相手の外側の面まで届く距離(直交なら厚/2)
-    if(v>need) need=v;
+    // 箱の延長で隙間なく閉じられるのは**ほぼ直角**の取り合いだけ(±10度)。
+    // 斜め壁の突き当たりに箱を伸ばすと、先端の角が相手の面から三角に
+    // はみ出す。斜めの接合を綺麗に納めるには留め(斜め断面)の形状が要る。
+    // それはここでは作らないので、斜めは伸ばさない(従来の見た目のまま)。
+    if(sinA<0.985) return;
+    // 端から外向き(u)に進んで相手の芯線と交わるまでの距離 s。
+    // 負なら既に行き過ぎている(面合わせで描かれた端点)。
+    var denom=ux*ody-uy*odx;
+    if(Math.abs(denom)<1e-9) return;
+    var sAlong=((o.x1-px)*ody-(o.y1-py)*odx)/denom;
+    var toFace=((o.thick||120)/2)/sinA;   // 芯線から相手の外面までの距離
+    if(sAlong>toFace+40 || sAlong<-(toFace+40)) return; // 角を成す距離ではない
+    var qx=px+ux*sAlong, qy=py+uy*sAlong;
+    var tt=((qx-o.x1)*odx+(qy-o.y1)*ody)/(olen*olen);
+    if(tt<-0.02||tt>1.02) return;     // 交点が相手の線分の範囲外
+    var v=sAlong+toFace;              // 端から相手の外面まで。負や0なら既に閉じている
+    if(v<need) need=v;
   });
-  if(need<=0) return 0;
+  if(!isFinite(need)||need<=0) return 0;
   need=Math.min(need,220);
   var half=(w.thick||120)/2-1, reach=need*0.9, open=false;
   var myH=wallSolidCoverHeightMm(w);
@@ -16019,7 +16035,6 @@ function buildItem3D(it){
       build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
     } else {
       build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps);
-      build3DStairHandrail(grp,w3,d3,baseRise,partRise);
     }
   }
   else{
@@ -17276,30 +17291,10 @@ function addStairRiserPanel(grp,mat,a,b,y,h,thickness){
   panel.rotation.y=-Math.atan2(b[1]-a[1],b[0]-a[0]);
   panel.castShadow=true; panel.receiveShadow=true; grp.add(panel);
 }
-// 直進階段の手すり(片側)。壁側でない方の端に、段鼻を結ぶ勾配で笠木と支柱を立てる。
-// 手すりが無いと階段が「板の連なり」に見え、法規上も成立しない。
-function build3DStairHandrail(grp,w,d,baseRise,partRise){
-  if(d<0.3||partRise<0.1) return;
-  var H=0.85;                       // 段鼻からの手すり高さ
-  var x=w/2-0.055;                  // 側桁の内側
-  var mat=new THREE.MeshStandardMaterial({color:0x4a3b2c,roughness:0.55,metalness:0.05});
-  var postMat=new THREE.MeshStandardMaterial({color:0x2f3336,roughness:0.5,metalness:0.5});
-  var z0=-d/2, z1=d/2;
-  var y0=baseRise+H, y1=baseRise+partRise+H;
-  var len=Math.hypot(d,partRise);
-  var rail=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,len),mat);
-  rail.position.set(x,(y0+y1)/2,(z0+z1)/2);
-  rail.rotation.x=-Math.atan2(partRise,d);
-  rail.castShadow=true; rail.receiveShadow=true; grp.add(rail);
-  var n=Math.max(2,Math.round(d/0.42));
-  for(var i=0;i<=n;i++){
-    var t=i/n, pz=z0+d*t, top=baseRise+partRise*t+H;
-    var bot=baseRise+partRise*t;
-    var post=new THREE.Mesh(new THREE.BoxGeometry(0.022,Math.max(0.05,top-bot),0.022),postMat);
-    post.position.set(x,(top+bot)/2,pz);
-    post.castShadow=true; grp.add(post);
-  }
-}
+// 階段の自動手すりは取り下げた。実物の手すりは壁沿い区間では**壁付け**で、
+// 側桁から柱を立てるのは吹き抜け側だけ。その取り合い(どの区間が壁沿いかの
+// 判定と壁付け金物)を実装せずに一律で板から生やすのは近似であり、品質未達。
+// 法の要求(手すり義務)はその納まりごと作れるようになってから入れる。
 function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
   steps=Math.max(1,steps||6);
   var treadD=d/steps;
