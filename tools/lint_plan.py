@@ -1670,6 +1670,275 @@ def check33_light_mount(data):
     return out
 
 
+# ────────────────────────────────────────────────────────────────
+# 住まい方の検査 (34〜38)
+#
+# 33項目までは「幾何が壊れていないか」しか見ていなかった。壊れていなくても
+# 住みにくい間取りは通ってしまう。実際の後悔事例(出典は docs/quality-team.md
+# 「住まい方の設計規則」)のうち、機械で判定できるものを規則にする。
+# ────────────────────────────────────────────────────────────────
+
+PUBLIC_ROOMS = ('玄関', 'ホール', 'LDK', 'リビング', 'ダイニング', '客間')
+PRIVATE_ROOMS = ('主寝室', '寝室', '洋室', '子供部屋', '子ども部屋', '書斎')
+WET_ROOMS = ('トイレ', '浴室', '洗面脱衣室', 'ランドリー', '洗面所')
+LIVING_ROOMS = ('LDK', 'リビング', 'ダイニング', '主寝室', '寝室', '洋室',
+                '子供部屋', '子ども部屋', '書斎', 'キッチン')
+
+
+def _fwd(it):
+    """正面の向き(単位ベクトル)。rot=0 は北(-y)。"""
+    r = math.radians(it.get('rot', 0) or 0)
+    return (math.sin(r), -math.cos(r))
+
+
+def check34_entry_sightline(data):
+    """玄関を開けたとき、居室や水まわりまで一直線に見通せてしまわないか。
+
+    「リビングや洗面室のドアを玄関と一直線に配置すると、閉め忘れた時に
+    玄関から中が丸見え」という後悔事例。玄関からホールが見えるのは
+    上り框の開口そのものなので当たり前 -- **見通した先の部屋の役割**で判る。
+    """
+    out = []
+    STEP, REACH = 80.0, 12000.0
+    EXPOSED = ('LDK', 'リビング', 'ダイニング', '洗面', '浴室', 'トイレ',
+               'ランドリー', '寝室', '洋室', '書斎', 'キッチン')
+    for door in data['items']:
+        if door.get('type') != 'door-front':
+            continue
+        floor = door.get('floor', 1)
+        cx, cy = center(door)
+        # 室内の向きは rot から決めつけない。玄関ドアの rot=0 は正面が
+        # **室内**を向く(実測)ので、-fwd を室内とした最初の実装は常に屋外へ
+        # 光線を飛ばし、何があっても0件を返す死んだ検査だった。
+        # 部屋が在る側を室内とする。
+        fx, fy = _fwd(door)
+        ix, iy = fx, fy
+        if room_at(data, floor, cx + fx * 800, cy + fy * 800) is None:
+            ix, iy = -fx, -fy
+        if room_at(data, floor, cx + ix * 800, cy + iy * 800) is None:
+            continue                 # どちら側にも部屋が無い(判定不能)
+        walls = [w for w in data.get('walls', []) if w.get('floor', 1) == floor
+                 and (w.get('thick', 120) or 120) >= 120]
+        holes = [aabb(o) for o in data['items']
+                 if o.get('floor', 1) == floor
+                 and o.get('type') in DOOR_TYPES and o.get('type') != 'window']
+        d, seen = 200.0, []
+        while d <= REACH:
+            px, py = cx + ix * d, cy + iy * d
+            blocked = False
+            for w in walls:
+                ht = (w.get('thick', 120) or 120) / 2.0
+                if (min(w['x1'], w['x2']) - ht <= px <= max(w['x1'], w['x2']) + ht
+                        and min(w['y1'], w['y2']) - ht <= py <= max(w['y1'], w['y2']) + ht):
+                    # 建具の位置なら壁は抜けている(開けっ放しなら見通せる)
+                    if not any(b[0] <= px <= b[2] and b[1] <= py <= b[3] for b in holes):
+                        blocked = True
+                    break
+            if blocked:
+                break
+            r = room_at(data, floor, px, py)
+            if r is not None:
+                nm = (r.get('n') or '').strip()
+                if nm and nm not in seen:
+                    seen.append(nm)
+            d += STEP
+        hit = [n for n in seen if any(k in n for k in EXPOSED)]
+        if hit:
+            vio(out, door, '開けると %s まで一直線に見通せる(経路: %s)。'
+                           '建具を閉め忘れると中が丸見えになる'
+                % ('・'.join(hit), ' → '.join(seen)))
+    return out
+
+
+def check35_wet_room_over_bedroom(data):
+    """トイレ・浴室の直下が寝室やリビングになっていないか(排水音)。
+
+    「トイレをリビングや寝室の上に設置すると、下階に音が響いて眠りを妨げる」。
+    平面が重なっているかどうかだけで判定できる。
+    """
+    out = []
+    for r in data.get('rooms', []):
+        name = (r.get('n') or '').strip()
+        if not any(k in name for k in ('トイレ', '浴室')):
+            continue
+        fl = r.get('floor', 1)
+        if fl <= 1:
+            continue
+        for o in data.get('rooms', []):
+            if o.get('floor', 1) != fl - 1:
+                continue
+            oname = (o.get('n') or '').strip()
+            if not any(k in oname for k in ('寝室', 'リビング', 'LDK', '洋室')):
+                continue
+            ox = min(r['x'] + r['w'], o['x'] + o['w']) - max(r['x'], o['x'])
+            oy = min(r['y'] + r['d'], o['y'] + o['d']) - max(r['y'], o['y'])
+            if ox > 300 and oy > 300:
+                out.append('[%dF] %s の直下が %dF %s (%.0f×%.0fmm 重なり)。'
+                           '排水音が寝室・居室へ落ちる'
+                           % (fl, name, fl - 1, oname, ox, oy))
+    return out
+
+
+def check36_work_triangle(data):
+    """キッチンのシンク・コンロ・冷蔵庫を結ぶ三角形の三辺合計。
+
+    3600〜6000mm が使いやすいとされる目安。短すぎると2人で立てず、
+    長すぎると調理のたびに歩かされる。
+    """
+    out = []
+    KEYS = {'sink': 'CabinetD_Sink', 'stove': 'GasStove', 'fridge': 'Refrigerator'}
+    by_floor = {}
+    for it in data['items']:
+        for role, frag in KEYS.items():
+            if frag in it.get('type', ''):
+                by_floor.setdefault(it.get('floor', 1), {}).setdefault(role, []).append(it)
+    for floor, roles in sorted(by_floor.items()):
+        if len(roles) < 3:
+            continue
+        pts = {k: center(v[0]) for k, v in roles.items()}
+        per = 0.0
+        legs = []
+        keys = list(pts)
+        for i in range(len(keys)):
+            a, b = pts[keys[i]], pts[keys[(i + 1) % len(keys)]]
+            dist = math.hypot(a[0] - b[0], a[1] - b[1])
+            legs.append('%s-%s %.0f' % (keys[i], keys[(i + 1) % len(keys)], dist))
+            per += dist
+        if per < 3600 or per > 6000:
+            out.append('[%dF] ワークトライアングルの三辺合計 %.0fmm '
+                       '(目安 3600〜6000)。%s'
+                       % (floor, per, ' / '.join(legs)))
+    return out
+
+
+def check37_room_windows(data):
+    """居室に窓が足りているか。
+
+    「窓が少ないと室内が暗く風通しが悪い。理想は1部屋に2カ所」。
+    8㎡(約5帖)以上の居室は2カ所以上、それ未満は1カ所以上を要求する。
+    """
+    out = []
+    seen = set()
+    for r in data.get('rooms', []):
+        name = (r.get('n') or '').strip()
+        if not any(name == k or name.startswith(k) for k in LIVING_ROOMS):
+            continue
+        fl = r.get('floor', 1)
+        if (fl, name) in seen:
+            continue
+        seen.add((fl, name))
+        rects = [o for o in data['rooms']
+                 if o.get('floor', 1) == fl and (o.get('n') or '').strip() == name]
+        area = sum(o['w'] * o['d'] for o in rects) / 1e6
+        n = 0
+        for it in data['items']:
+            if it.get('floor', 1) != fl:
+                continue
+            if it.get('type') not in ('window', 'window-door'):
+                continue
+            cx, cy = center(it)
+            # 窓は壁の中に居るので、部屋の縁から少し内側/外側の余裕を見る
+            if any(o['x'] - 150 <= cx <= o['x'] + o['w'] + 150
+                   and o['y'] - 150 <= cy <= o['y'] + o['d'] + 150 for o in rects):
+                n += 1
+        need = 2 if area >= 8.0 else 1
+        if n < need:
+            out.append('[%dF] %s (%.1f㎡) の窓が %d カ所。%d カ所以上ほしい'
+                       '(採光と通風は対角に2カ所が目安)' % (fl, name, area, n, need))
+    return out
+
+
+def check38_laundry_to_drying(data):
+    """洗濯機から干す場所までが遠すぎないか。
+
+    「洗濯機とベランダが遠い」は家事動線の代表的な後悔。
+    干す場所はバルコニーか、室内干しの部屋(ランドリー等)とみなす。
+    階をまたぐ場合は濡れた洗濯物を持って階段を上ることになる。
+    """
+    out = []
+    washers = [i for i in data['items'] if i.get('type') == 'washer']
+    if not washers:
+        return out
+    spots = []
+    for i in data['items']:
+        if i.get('type') == 'balcony':
+            spots.append((i.get('floor', 1), center(i), 'バルコニー'))
+    for r in data.get('rooms', []):
+        nm = (r.get('n') or '').strip()
+        if any(k in nm for k in ('ランドリー', '物干', 'サンルーム')):
+            spots.append((r.get('floor', 1), (r['x'] + r['w'] / 2, r['y'] + r['d'] / 2), nm))
+    if not spots:
+        out.append('干す場所(バルコニー・ランドリー)がプランに無い')
+        return out
+    for wsh in washers:
+        wf = wsh.get('floor', 1)
+        wc = center(wsh)
+        same = [(math.hypot(wc[0] - c[0], wc[1] - c[1]), nm)
+                for (f, c, nm) in spots if f == wf]
+        if same:
+            dist, nm = min(same)
+            if dist > 8000:
+                vio(out, wsh, '同じ階の干し場(%s)まで %.0fmm。遠すぎる' % (nm, dist))
+        else:
+            near = min((abs(f - wf), nm) for (f, c, nm) in spots)
+            vio(out, wsh, '同じ階に干す場所が無い(最寄りは %d階違いの %s)。'
+                          '濡れた洗濯物を持って階段を上ることになる' % (near[0], near[1]))
+    return out
+
+
+# 対で使う家具。(自分の断片, 相手の断片, 届く距離mm, 説明)
+# 「ソファはテレビを向く」のような **関係** は、壁との距離では表せない。
+# check30 はソファを180度回しても壁から離れていれば通してしまう。
+PAIRED_FACING = [
+    ('Sofa', 'Tv-MEGA', 8000, 'ソファはテレビを向く'),
+    ('Tv-MEGA', 'Sofa', 8000, 'テレビはソファを向く'),
+    ('Chair', 'Table', 2500, '椅子は机・食卓を向く'),
+]
+
+
+def check39_paired_facing(data):
+    """対で使う家具が互いを向いているか。
+
+    ソファがテレビに背を向けている、椅子が机に背を向けている、という
+    「180度逆」は、壁から離れていれば check30 を素通りする。
+    相手との位置関係で見る。
+    """
+    out = []
+    COS = 0.35          # 正面から約70度以内なら「向いている」とみなす
+    for it in data['items']:
+        t = it.get('type', '')
+        for mine, theirs, reach, why in PAIRED_FACING:
+            if mine not in t:
+                continue
+            cx, cy = center(it)
+            best = None
+            for o in data['items']:
+                if o is it or o.get('floor', 1) != it.get('floor', 1):
+                    continue
+                if theirs not in o.get('type', ''):
+                    continue
+                ox, oy = center(o)
+                dist = math.hypot(ox - cx, oy - cy)
+                if dist > reach:
+                    continue
+                if best is None or dist < best[0]:
+                    best = (dist, o, ox, oy)
+            if best is None:
+                continue
+            dist, o, ox, oy = best
+            if dist < 1.0:
+                continue
+            fx, fy = _fwd(it)
+            ux, uy = (ox - cx) / dist, (oy - cy) / dist
+            dot = fx * ux + fy * uy
+            if dot < COS:
+                deg = math.degrees(math.acos(max(-1.0, min(1.0, dot))))
+                vio(out, it, '%s: %s は %.0fmm 先だが、正面は %.0f度ずれている'
+                             '(rot=%s)。180度逆に置いていないか'
+                    % (why, label(o), dist, deg, it.get('rot', 0)))
+    return out
+
+
 def check30_facing_wall(data):
     """家具の正面が、すぐ目の前の壁にぶつかっていないか。
 
@@ -1866,6 +2135,12 @@ CHECKS = [
     ('31. 壁付け家具が壁から離れていないか', check31_wall_mounted_gap),
     ('32. 壁の継ぎ目のずれ', check32_wall_joint),
     ('33. 照明器具が天井に付いているか', check33_light_mount),
+    ('34. 玄関からの見通し(開けたら中が丸見え)', check34_entry_sightline),
+    ('35. 水まわりの直下に居室(音)', check35_wet_room_over_bedroom),
+    ('36. キッチンのワークトライアングル', check36_work_triangle),
+    ('37. 居室の窓の数(採光と通風)', check37_room_windows),
+    ('38. 洗う→干すの距離', check38_laundry_to_drying),
+    ('39. 対で使う家具が互いを向いているか', check39_paired_facing),
 ]
 
 
