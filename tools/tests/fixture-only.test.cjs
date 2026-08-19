@@ -18,8 +18,12 @@ const FILES = readdirSync(HERE).filter((f) => f.endsWith('.test.cjs'));
 
 test('どのテストも assets/default_plan.json を読み込んでいない', () => {
   const offenders = [];
+  // preset-choice は「起動時の台帳が実在する正しいファイルを指しているか」という
+  // **出荷配線の検査**なので、台帳のファイル(=既定間取り)を読むのが仕事。
+  // 間取りの中身(部屋割りや寸法)には触れない範囲でだけ許す。
+  const EXEMPT = ['fixture-only.test.cjs', 'preset-choice.test.cjs'];
   for (const f of FILES) {
-    if (f === 'fixture-only.test.cjs') continue;
+    if (EXEMPT.includes(f)) continue;
     const src = readFileSync(join(HERE, f), 'utf8');
     // コメントで言及するのは構わない。readFileSync に渡していたら駄目。
     const lines = src.split('\n');
