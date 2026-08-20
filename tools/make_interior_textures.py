@@ -97,52 +97,103 @@ def normal_from_height(height_mm, texel_mm, strength=1.0):
 # 床: オーク 2P(151.5mm) 定尺りゃんこ張り
 # ─────────────────────────────────────────────────────────────
 def make_wood_floor():
+    """オーク 2P(151.5mm)・定尺りゃんこ張り。板目と柾目を混ぜる。"""
     name = 'floor_wood'
     rng = rng_for(name)
     px_mm = 1818.0 / SIZE
     rows = 12                      # 1818 / 151.5 = 12枚
     row_px = SIZE / rows
 
-    light = hex_rgb('#CBBAA5')
-    dark = hex_rgb('#BCA994')
+    # 板ごとの色は L*66〜76 / C*16〜20 のオーク。ΔL*10前後は実物の振れ幅
+    light = hex_rgb('#C3AE8E')
+    dark = hex_rgb('#A2895F')
 
     y = np.arange(SIZE)
     x = np.arange(SIZE)
     row_idx = (y / row_px).astype(int) % rows
     row_f = rng.uniform(0.0, 1.0, rows)             # 板ごとの色の振り分け
-    row_gain = rng.uniform(0.985, 1.015, rows)      # 板ごとの明るさのばらつき
+    row_gain = rng.uniform(0.96, 1.04, rows)        # 板ごとの明るさのばらつき
 
     base = np.zeros((SIZE, SIZE, 3))
     for c in range(3):
         base[..., c] = (light[c] + (dark[c] - light[c]) * row_f[row_idx])[:, None]
     base *= row_gain[row_idx][:, None, None]
 
-    # 木目: 幅方向のプロファイルを作り、長手方向へ蛇行させて読む。
-    # プロファイルを長手方向に作ると、木目が板を横切ってしまう。
-    grain_profile = rng.uniform(-1.0, 1.0, (rows, int(row_px) + 2))
+    # ── 年輪の場から木目を作る ──────────────────────────────
     tone = np.zeros((SIZE, SIZE))
     pore = np.zeros((SIZE, SIZE))
+    xn = x / SIZE
     for r in range(rows):
-        prof = wrap_blur_1d(grain_profile[r][None, :], 2, axis=1)[0]
-        k1 = rng.integers(2, 5)
-        k2 = rng.integers(5, 10)
-        mean = 2.2 * np.sin(2 * np.pi * k1 * x / SIZE) + 1.0 * np.sin(2 * np.pi * k2 * x / SIZE)
         y0 = int(r * row_px)
-        y1 = int((r + 1) * row_px)
-        for yy in range(y0, min(y1, SIZE)):
-            idx = ((yy - y0) + mean).astype(int) % len(prof)
-            g = prof[idx]
-            tone[yy] = g * 4.5
-            pore[yy] = np.where(g < -0.55, (g + 0.55) * 20.0, 0.0)
-    arr = base + (tone + pore)[..., None]
+        y1 = min(int((r + 1) * row_px), SIZE)
+        h = max(y1 - y0, 1)
+        # 年輪は「髄(pith)からの距離」の等高線。板は丸太の接線方向の薄切り
+        # なので、板の上の点(u,v)から髄までの距離は
+        #     r = sqrt(d(u)^2 + (v - vc)^2)
+        # になる。d が小さい(髄に近い挽き板=板目)ほど等高線が放物線に反って
+        # **山形の杢**が出て、d が大きい(柾目)ほど長手方向のまっすぐな縞になる。
+        # ここを ring = A·v² + B·u と書くと、柾目の縞が板を横切ってしまう。
+        vv_mm = (np.arange(y0, y1) - y0) * px_mm          # 板幅方向(mm)
+        quarter = rng.random() < 0.30                     # 柾目の板を混ぜる
+        wmm = h * px_mm
+        # 年輪の中心(髄の真上)は**板の外**に置く。中に入れると等高線が閉じて
+        # 同心円(節のような玉杢)になり、床一面がそれだと不自然になる。
+        # 複合フローリングは大径木からスライスした突板なので、実物も
+        # 中心を外した長い流れの木目になる
+        if quarter:
+            vc = rng.uniform(-1.5, 2.5) * wmm
+            d0 = rng.uniform(260.0, 700.0)
+        else:
+            vc = rng.choice([rng.uniform(-1.3, -0.2), rng.uniform(1.2, 2.3)]) * wmm
+            d0 = rng.uniform(40.0, 90.0)
+        dwob = (0.30 * np.sin(2 * np.pi * rng.integers(1, 3) * xn + rng.uniform(0, 6.3))
+                + 0.16 * np.sin(2 * np.pi * rng.integers(3, 6) * xn + rng.uniform(0, 6.3)))
+        d_u = d0 * (1.0 + 0.14 * dwob)                     # (SIZE,)
+        vn = (vv_mm - vc)[:, None]                         # (h,1) mm
+        r = np.sqrt(d_u[None, :] ** 2 + vn ** 2)           # (h,SIZE) mm
+        spacing = rng.uniform(5.0, 9.0)                    # 年輪間隔(mm)
+        # 長手方向の位相のずれ。丸太は先細りなので、板の上を進むにつれて
+        # 年輪の番号がずれていき、等高線が**開いた山形**になって流れる。
+        # これが無いと等高線が閉じて「同心の楕円(бullseye)」になる。
+        # 位相は整数本ぶんずらす -- そうしないとタイルの継ぎ目で木目が切れる
+        k = int(rng.integers(3, 9)) * int(rng.choice([-1, 1]))
+        ring = r / spacing + k * xn[None, :]
+        ring += smooth_noise(rng, SIZE, 48, 0.12)[y0:y1]
 
-    # 木口(板の短辺の継ぎ目)。1行1本、隣の行とは300mm以上ずらす
+        t = ring - np.floor(ring)                          # 0..1
+        # 晩材(濃い細い帯)+ 早材(明るい幅広) の非対称なプロファイル
+        late = np.exp(-((t - 0.08) / 0.055) ** 2)
+        mid = np.exp(-((t - 0.34) / 0.22) ** 2) * 0.30
+        g = -(late * 1.0 + mid)
+        tone[y0:y1] = g * 15.0
+        # 導管(オークの粗い管孔)。晩材の縁に細く走る
+        pore[y0:y1] = np.where(late > 0.55, -(late - 0.55) * 26.0, 0.0)
+
+        # 板ごとの縦じま(髄線・ミネラルストリーク)を数本
+        for _ in range(rng.integers(0, 3)):
+            xs0 = int(rng.integers(0, SIZE))
+            ln = int(rng.integers(SIZE // 6, SIZE // 2))
+            vy = int(rng.integers(0, h))
+            amp = rng.uniform(2.0, 4.5)
+            idx = (np.arange(xs0, xs0 + ln)) % SIZE
+            fall = np.sin(np.linspace(0, np.pi, ln)) * amp
+            for dy in (-1, 0, 1):
+                yy = y0 + (vy + dy) % h
+                tone[yy, idx] -= fall * (1.0 if dy == 0 else 0.45)
+
+    arr = base + (tone + pore)[..., None]
+    # 木は青が落ちる。濃くなるほど黄赤へ寄せると「木の色」になる
+    arr[..., 2] += (tone + pore) * 0.22
+    arr[..., 0] -= (tone + pore) * 0.06
+
+    # ── 木口(板の短辺の継ぎ目)。1行1本、隣の行とは300mm以上ずらす ──
     butt_px = np.zeros(rows, dtype=int)
     prev = -10 ** 6
     for r in range(rows):
+        cand = int(rng.integers(0, SIZE))
         for _ in range(64):
             cand = int(rng.integers(0, SIZE))
-            if abs(cand - prev) * px_mm > 300 and abs(cand - prev) * px_mm < 1518:
+            if 300 < abs(cand - prev) * px_mm < 1518:
                 break
         butt_px[r] = cand
         prev = cand
@@ -150,25 +201,27 @@ def make_wood_floor():
     for r in range(rows):
         y0, y1 = int(r * row_px), min(int((r + 1) * row_px), SIZE)
         bx = butt_px[r]
-        arr[y0:y1, bx] *= 0.91
-        arr[y0:y1, (bx + 1) % SIZE] *= 0.99
-        height[y0:y1, bx] -= 0.25
+        arr[y0:y1, bx] *= 0.80
+        arr[y0:y1, (bx - 1) % SIZE] *= 0.93
+        arr[y0:y1, (bx + 1) % SIZE] *= 1.02
+        height[y0:y1, bx] -= 0.30
 
-    # 実(さね)の目地。板の境目を1px落とす → ΔL* 6前後
+    # ── 実(さね)の目地。1px落として、隣に細い返しの光を置く ──
     for r in range(rows):
         y0 = int(r * row_px)
-        arr[y0] *= 0.90
-        arr[(y0 + 1) % SIZE] *= 1.015
-        height[y0] -= 0.35
+        arr[y0] *= 0.72
+        arr[(y0 - 1) % SIZE] *= 0.93
+        arr[(y0 + 1) % SIZE] *= 1.035
+        height[y0] -= 0.40
 
-    arr += rng.normal(0.0, 1.6, (SIZE, SIZE, 1))
+    arr += rng.normal(0.0, 1.9, (SIZE, SIZE, 1))
 
     # 法線: 目地と木口の溝 + 導管のわずかな凹み
-    height += pore * 0.02
+    height += pore * 0.03
     normal = normal_from_height(height, px_mm, strength=1.0)
 
-    # 粗さ: 導管は光を散らすので粗く、板の面はマット塗装(0.48〜0.62)
-    rough = 0.55 + (-pore) * 0.004 + smooth_noise(rng, SIZE, 16, 0.03)
+    # 粗さ: 導管は光を散らすので粗く、板の面はマット塗装(0.45〜0.68)
+    rough = 0.54 + (-pore) * 0.005 + smooth_noise(rng, SIZE, 16, 0.035)
     rough = np.clip(rough, 0.42, 0.72) * 255
     return {
         'floor_wood_diffuse': to_image(arr),
