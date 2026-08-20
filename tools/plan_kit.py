@@ -22,6 +22,7 @@
   → 天井付けの器具は ceiling_elev() を通すこと
 """
 import json
+import math
 
 
 M = 910             # 1モジュール(半間=455 / 1間=910)
@@ -128,6 +129,91 @@ class Plan(object):
         it.update(kw)
         self.items.append(it)
         return it
+
+
+    # ── 窓装飾(カーテン・ロールスクリーン) ──────────────────
+    #   位置・向き・高さ・枚数は**窓から決める**。手で書くと必ずずれる。
+    #   実際、窓を1つ動かすたびにカーテンだけ取り残されて、壁を突き抜けたり
+    #   窓から外れたりしていた。
+    CURTAIN_SHORT = "fmp-Curtain01"      # 900 x 150 x 1350
+    CURTAIN_LONG = "fmp-Curtain02"       # 900 x 150 x 2150
+    # 幅 → (標準丈1500, 短丈1100)。窓台の高い窓に1500を吊ると裾が
+    # 窓台より400mm以上下がり、「腰窓に床丈を吊った」形になる
+    ROLLER = [(780, "fmp-RollerScreen01", "fmp-RollerScreen04"),
+              (1235, "fmp-RollerScreen02", "fmp-RollerScreen05"),
+              (1690, "fmp-RollerScreen03", "fmp-RollerScreen06")]
+    # 窓の上端からレール上端までの立ち上がり。天井2400・窓上端2030の家では
+    # 上に壁掛けエアコン(下端FL+2050)が来るので、10mmしか取れない
+    DRESS_HEAD = 10
+
+    def _room_at(self, floor, x, y):
+        for r in self.rooms:
+            if r.get("floor", 1) != floor:
+                continue
+            if r["x"] <= x <= r["x"] + r["w"] and r["y"] <= y <= r["y"] + r["d"]:
+                return r
+        return None
+
+    def _inward(self, w):
+        """窓の室内側の単位ベクトル。部屋が在る側を室内とする。"""
+        cx, cy = w["x"] + w["w"] / 2.0, w["y"] + w["d"] / 2.0
+        rot = w.get("rot", 0) % 360
+        n = (0.0, 1.0) if rot in (0, 180) else (1.0, 0.0)
+        for sign in (1, -1):
+            px, py = cx + n[0] * sign * 500, cy + n[1] * sign * 500
+            if self._room_at(w.get("floor", 1), px, py) is not None:
+                return (n[0] * sign, n[1] * sign)
+        return (n[0], n[1])
+
+    @staticmethod
+    def _rot_for_front(ix, iy):
+        """正面が (ix,iy) を向く rot。rot=0 の正面は北(-y)。"""
+        if abs(ix) > abs(iy):
+            return 90 if ix > 0 else -90
+        return 180 if iy > 0 else 0
+
+    def dress(self, w, kind="curtain", color=None):
+        """窓 w にカーテン(またはロールスクリーン)を吊る。
+
+        kind="curtain" は900mm幅の片開きを、窓幅を覆う枚数だけ並べる。
+        kind="roller" は窓幅にいちばん近い幅のロールスクリーンを1枚。
+        戻り値は置いたアイテムのリスト。
+        """
+        cx, cy = w["x"] + w["w"] / 2.0, w["y"] + w["d"] / 2.0
+        sill = w.get("windowSill") or 0
+        top = sill + (w.get("windowHeight") or 0)
+        ix, iy = self._inward(w)
+        rot = self._rot_for_front(ix, iy)
+        floor = w.get("floor", 1)
+        out = []
+        if kind == "roller":
+            row = min(self.ROLLER, key=lambda t: abs(t[0] - w["w"]))
+            # 裾は窓台の300mm下まで。それ以上下げるとカウンター(天板850)や
+            # 洗面台に刺さる
+            mid = row[1] if self.catalog[row[1]][2] <= top + 400 - sill else row[2]
+            dw, dd, dh = self.catalog[mid]
+            off = w["d"] / 2.0 + dd / 2.0 + 5
+            # 裾は窓台の20mm下まで。それ以上下げるとカウンター(天板850)や
+            # 洗面台に刺さる
+            self.item(mid, cx + ix * off, cy + iy * off, dw, dd, floor,
+                      rot=rot, color=color,
+                      elev=round(max(top + self.DRESS_HEAD - dh, sill - 20)))
+            out.append(self.items[-1])
+            return out
+        mid = self.CURTAIN_SHORT if sill > 0 else self.CURTAIN_LONG
+        dw, dd, dh = self.catalog[mid]
+        # 窓幅を覆う最小の枚数。lint は「合計幅 >= 窓幅」を要求する
+        n = max(1, int(math.ceil((w["w"] - 20) / float(dw))))
+        off = w["d"] / 2.0 + dd / 2.0 + 5
+        # 掃き出し窓は床まで届かせる。腰窓は窓台の少し下まで
+        elev = max(0, round(top + self.DRESS_HEAD - dh))
+        ux, uy = (1.0, 0.0) if rot in (0, 180) else (0.0, 1.0)
+        for i in range(n):
+            t = (i - (n - 1) / 2.0) * dw
+            self.item(mid, cx + ux * t + ix * off, cy + uy * t + iy * off,
+                      dw, dd, floor, rot=rot, color=color, elev=elev)
+            out.append(self.items[-1])
+        return out
 
     # ── 建具 ────────────────────────────────────────────────
     def win(self, cx, cy, floor, std, sill, height, vertical=False,

@@ -67,6 +67,7 @@ CATALOG = load_catalog(ROOT)
 P = Plan(catalog=CATALOG, interior_color=COL_WALL_INT)
 wall, room, item = P.wall, P.room, P.item
 win, door, light = P.win, P.door, P.light
+dress = P.dress
 ceiling_mounted = P.ceiling_mounted
 
 # ───────── 躯体 (footprint 5460×8190 = 6P×9P, 各階44.7㎡) ─────────
@@ -124,9 +125,9 @@ win(910, 0, 1, "06905", 1460, 570, kind="fix")        # 浴室北(採光FIX)
 win(2730, 0, 1, "06905", 1460, 570, kind="fix")       # 洗面北(採光FIX)
 win(4095, 0, 1, "03613", 1460, 570, kind="fix")       # トイレ北
 win(BW, 2275, 1, "F03613", 660, 1370, vertical=True, kind="fix")   # 階段東
-win(0, 2730, 1, "07409", 1260, 770, vertical=True)    # ランドリー西(換気)
-win(0, 4600, 1, "16513", 660, 1370, vertical=True)    # 洋室 西
-win(1400, BD, 1, "16520", 0, 2030)                    # 洋室 南 掃き出し(対角)
+dress(win(0, 2730, 1, "07409", 1260, 770, vertical=True), "roller")    # ランドリー西(換気)
+dress(win(0, 4600, 1, "16513", 660, 1370, vertical=True))    # 洋室 西
+dress(win(1400, BD, 1, "16520", 0, 2030))                    # 洋室 南 掃き出し(対角)
 win(BW, 7000, 1, "F03613", 660, 1370, vertical=True, kind="fix")   # 玄関東(採光)
 
 item("stair", 5005, 2275, 910, 2730, 1, rot=180, color="#e8e0c8", stairOrder=1)
@@ -171,11 +172,11 @@ door("door-opening", 3640, 5005, 2730, 2, vertical=True)      # LDK↔LDK東 大
 door("door-fold-w", 4550, 7280, 1650, 2)                      # 収納(LDK東から)
 
 # 窓はシンクの真上だけ。天板(850)より上に立ち上げ、東のレンジフードと離す
-win(932, 0, 2, "07409", 900, 1000)                    # キッチン北(シンク上)
+dress(win(932, 0, 2, "07409", 900, 1000), "roller")                    # キッチン北(シンク上)
 win(3185, 0, 2, "03613", 1460, 570, kind="fix")       # トイレ北
 win(BW, 2275, 2, "F03613", 660, 1370, vertical=True, kind="fix")   # 階段東
-win(0, 3900, 2, "16513", 660, 1370, vertical=True)    # LDK西
-win(1820, BD, 2, "25620", 0, 2030)                    # リビング南 大開口→バルコニー
+dress(win(0, 3900, 2, "16513", 660, 1370, vertical=True))    # LDK西
+dress(win(1820, BD, 2, "25620", 0, 2030))                    # リビング南 大開口→バルコニー
 win(BW, 5460, 2, "F03613", 660, 1370, vertical=True, kind="fix")   # LDK東
 
 item("stair", 5005, 2275, 910, 2730, 2, rot=180, color="#e8e0c8", stairOrder=3)
@@ -229,11 +230,13 @@ door("door-swing-s", 4095, 3640, 650, 3)                      # 洋室B(ホー�
 door("door-fold-w", 4100, 7280, 900, 3)                       # クローゼット(洋室Bから)
 door("door-opening", 3640, 3185, 910, 3, vertical=True)       # ホール↔廊下
 
-win(2040, 0, 3, "11909", 660, 1370)                   # 洋室A 北(机の上)
-win(0, 1365, 3, "07409", 1200, 830, vertical=True)    # 洋室A 西(高窓・ベッドの上)
+dress(win(2040, 0, 3, "11909", 660, 1370), "roller")                   # 洋室A 北(机の上)
+dress(win(0, 1365, 3, "07409", 1200, 830, vertical=True), "roller")    # 洋室A 西(高窓・ベッドの上)
 win(BW, 2275, 3, "F03613", 660, 1370, vertical=True, kind="fix")   # 階段東
-win(0, 4700, 3, "16513", 660, 1370, vertical=True)    # 主寝室 西
-win(BW, 4900, 3, "16513", 1000, 1030, vertical=True)  # 洋室B 東(腰高1000)
+dress(win(0, 4700, 3, "16513", 660, 1370, vertical=True))    # 主寝室 西
+# 1820幅の部屋にベッド(1050)を置くと、カーテン(奥行150)を吊る余地が無い。
+# 奥行50のロールスクリーンにして、ベッドの脇に通り道を残す [check19/22]
+dress(win(BW, 4900, 3, "16513", 1000, 1030, vertical=True), "roller")  # 洋室B 東
 # ★この家の要。吹き抜けの上に開けた高窓から、2階リビングへ光を落とす
 win(1820, BD, 3, "16513", 1400, 900, kind="fix")      # 吹き抜け 南の高窓
 
@@ -284,11 +287,13 @@ for sy in (-500, 1500, 4000):
     item("sewer-pit", 5900, sy, 300, 300, 1, color="#6f7275")
 
 # エアコン。室内機は必ず外壁面、室外機は吹き出しを建物の外へ向ける [check30]
+# 室内機は窓の真上に置かない。カーテンレールの上端(窓上端+100)と
+# 室内機の下端(FL+2050)がぶつかる [check22]
 AC_PAIRS = [
     # (室内機 cx, cy, rot, floor, elev, 室外機 cx, cy, rot)
-    (190, 3400, 90, 2, 2050, -330, 3400, -90),   # LDK(西外壁)
-    (190, 4200, 90, 3, 2050, -330, 5000, -90),   # 主寝室(西外壁)
-    (1365, 190, 180, 3, 2050, 1365, -310, 0),    # 洋室A(北外壁)
+    (190, 5500, 90, 2, 2050, -330, 5600, -90),   # LDK(西外壁・窓より南)
+    (800, 3835, 180, 3, 2050, -330, 4400, -90),  # 主寝室(廊下側の壁)
+    (600, 190, 180, 3, 2050, 600, -310, 0),      # 洋室A(北外壁・窓より西)
 ]
 for ix, iy, irot, fl, iel, ox, oy, orot in AC_PAIRS:
     item("fmp-AirConditionerWall01", ix, iy, 800, 260, fl, rot=irot, elev=iel)
@@ -355,12 +360,6 @@ item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
 item("im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
      300, 7800, 395, 386, 1, rot=0)
 # 掃き出し窓(1690)は左右2枚。1枚だと両端143mmずつガラスが出る [check28]
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1050, 8060, 1404, 103, 1,
-     rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1750, 8060, 1404, 103, 1,
-     rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 4600, 2202, 35, 1,
-     rot=90, elev=660)
 
 # ── 玄関・ホール・クローゼット(SIC)
 item("im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown",
@@ -431,12 +430,6 @@ item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
      4150, 7960, 800, 320, 2, rot=0)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
      5000, 7960, 800, 320, 2, rot=0)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 1300, 8060, 1404, 103, 2,
-     rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-177647", 2400, 8060, 1404, 103, 2,
-     rot=180)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 3900, 2202, 35, 2,
-     rot=90, elev=660)
 item("im0261-Painting-MEGA_PACK_Painting-decor-476641_frame",
      3520, 4300, 600, 31, 2, rot=-90, elev=1100)
 # 吹き抜けのシーリングファン。天井5.2mの空気を回す
@@ -446,7 +439,7 @@ ceiling_mounted("fmp-CeilingFan01", 1820, 7280, 2, w=1200, d=1200, rot=0)
 # ── 洋室A(小1の息子)。北窓と西窓で対角採光
 # 壁際はカーテンが下りている。西壁から344mm、北窓のカーテン下端(y117)から
 # 8mm離して置く。ベッドは高さ882mmでカーテンの下端660mmより高い [check22]
-item("fmp-Bed05", 900, 1100, 1112, 1950, 3, rot=180)
+item("fmp-Bed05", 850, 1100, 1112, 1950, 3, rot=180)
 item("fmp-Table44", 2100, 340, 1049, 524, 3, rot=180)
 item("fmp-Chair29", 1950, 900, 430, 442, 3, rot=0)
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
@@ -475,8 +468,6 @@ item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2350, 5900, 200, 200, 3,
      rot=0, elev=513)
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame", 1400, 4600, 2000, 1500, 3,
      rot=0)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 4800, 2202, 35, 3,
-     rot=90, elev=660)
 item("im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
      1300, 6304, 500, 10, 3, rot=0, elev=1500)
 
@@ -488,13 +479,11 @@ item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
      3185, 6100, 597, 305, 3, rot=0)
 
 # ── 洋室B(保育園の娘)。東窓と南窓で対角採光
-item("fmp-Bed03", 4860, 5400, 1050, 1932, 3, rot=180)
+item("fmp-Bed03", 4825, 5400, 1050, 1932, 3, rot=180)
 item("im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
      4300, 6600, 880, 1189, 3, rot=0)
 item("im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1", 4700, 6800, 338, 762, 3,
      rot=0)
-item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 5382, 4900, 2202, 35, 3,
-     rot=90, elev=950)
 # 洋室Bのクローゼット(奥行910)。中身は浅い棚2つ
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
      4100, 7900, 597, 305, 3, rot=0)

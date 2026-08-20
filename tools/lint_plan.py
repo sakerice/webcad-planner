@@ -74,10 +74,22 @@ def is_furniture(it):
     # 家具ではないので、ドアの開閉域や家具重なりの対象から外す
     if t == 'custom-block' and (it.get('customHeight') or 900) <= 500:
         return False
-    # カーテンは窓に付く物、カーペットは床仕上げ。重なり・窓前チェックの対象外
-    if '-Curtain-' in t or '-Carpet-' in t:
+    # カーテン・ロールスクリーンは窓に付く物、カーペットは床仕上げ。
+    # 重なり・窓前チェックの対象外
+    if is_window_dressing(t) or '-Carpet-' in t:
         return False
     return True
+
+
+def is_window_dressing(t):
+    """窓装飾(カーテン・ロールスクリーン)か。
+
+    自作モデル(fmp-Curtain01 等)はカタログ品の '-Curtain-' に当たらないので、
+    ここで両方をまとめて見る。片方だけ書くと、自作へ差し替えた瞬間に
+    「カーテンが1枚も無い」判定になって静かに素通りする。
+    """
+    return ('-Curtain-' in t or t.startswith('fmp-Curtain')
+            or t.startswith('fmp-RollerScreen'))
 
 
 # ---------------------------------------------------------------- 幾何ヘルパ
@@ -1420,7 +1432,7 @@ def check28_curtain_fit(data, root=None):
     root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
     cat = _load_catalog(root) or {}
     wins = [w for w in data['items'] if w['type'] in ('window', 'window-door')]
-    curtains = [c for c in data['items'] if '-Curtain-' in c.get('type', '')]
+    curtains = [c for c in data['items'] if is_window_dressing(c.get('type', ''))]
     # 窓ごとにカーテンをまとめる(掃き出し窓は2枚吊ることがある)
     by_win = {}
     for c in curtains:
