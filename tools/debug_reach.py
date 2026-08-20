@@ -20,8 +20,8 @@ blocked = [[False] * ny for _ in range(nx)]
 WHO = {}
 cur = ['?']
 def mark(box, extra):
-    for i in range(max(0, int(math.ceil((box[0]-extra-x0)/CELL))), min(nx-1, int(math.floor((box[2]+extra-x0)/CELL)))+1):
-        for j in range(max(0, int(math.ceil((box[1]-extra-y0)/CELL))), min(ny-1, int(math.floor((box[3]+extra-y0)/CELL)))+1):
+    for i in range(max(0, int(math.floor((box[0]-extra-x0)/CELL))+1), min(nx-1, int(math.ceil((box[2]+extra-x0)/CELL))-1)+1):
+        for j in range(max(0, int(math.floor((box[1]-extra-y0)/CELL))+1), min(ny-1, int(math.ceil((box[3]+extra-y0)/CELL))-1)+1):
             blocked[i][j] = True
             WHO.setdefault((i, j), []).append(cur[0])
 for w in data['walls']:

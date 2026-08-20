@@ -958,12 +958,14 @@ def _reach(data, clear, only_names=None):
         blocked = [[False] * ny for _ in range(nx)]
 
         def mark(box, extra):
-            # 格子点が膨張した箱の中に入るセルだけを塞ぐ。切り上げで1セル余分に
-            # 塞ぐと、790mm幅の廊下のように余裕の少ない通路が誤って不通になる
-            bi0 = max(0, int(math.ceil((box[0] - extra - x0) / CELL)))
-            bi1 = min(nx - 1, int(math.floor((box[2] + extra - x0) / CELL)))
-            bj0 = max(0, int(math.ceil((box[1] - extra - y0) / CELL)))
-            bj1 = min(ny - 1, int(math.floor((box[3] + extra - y0) / CELL)))
+            # 格子点が膨張した箱の**内側**に入るセルだけを塞ぐ。
+            # 障害物からちょうど extra(=有効幅の半分)離れた格子点は、そこを
+            # 中心に有効幅ちょうどの通路が取れるので通れる。境界を塞ぐと
+            # 「実寸645mmの脇道」が不通と判定されてしまう
+            bi0 = max(0, int(math.floor((box[0] - extra - x0) / CELL)) + 1)
+            bi1 = min(nx - 1, int(math.ceil((box[2] + extra - x0) / CELL)) - 1)
+            bj0 = max(0, int(math.floor((box[1] - extra - y0) / CELL)) + 1)
+            bj1 = min(ny - 1, int(math.ceil((box[3] + extra - y0) / CELL)) - 1)
             for i in range(bi0, bi1 + 1):
                 for j in range(bj0, bj1 + 1):
                     blocked[i][j] = True
@@ -1281,6 +1283,24 @@ def check25_swing_arc(data):
     return out
 
 
+_STORAGE_ROOM_WORDS = ('クローゼット', 'WIC', 'ウォークイン', '納戸', 'パントリー',
+                       'シューズ', 'SIC', '収納', '押入', 'リネン', '物入')
+
+
+def _in_shallow_storage(data, it):
+    """短辺1200mm以下の収納室の中にあるか。"""
+    cx, cy = center(it)
+    for r in data.get('rooms', []):
+        if r.get('floor', 1) != it.get('floor', 1):
+            continue
+        if not (r['x'] <= cx <= r['x'] + r['w'] and r['y'] <= cy <= r['y'] + r['d']):
+            continue
+        n = (r.get('n') or '')
+        if any(k in n for k in _STORAGE_ROOM_WORDS) and min(r['w'], r['d']) <= 1200:
+            return True
+    return False
+
+
 def check26_storage_facing(data, root=None):
     """収納家具の正面(rotの向き)が壁や物で塞がれていないか。
 
@@ -1297,6 +1317,10 @@ def check26_storage_facing(data, root=None):
         if (it.get('elev') or 0) >= 500:
             continue          # 吊り棚は対象外
         floor = it.get('floor', 1)
+        # 短辺1200mm以下の収納室(押入れ・壁面クローゼット)の中身は対象外。
+        # 中に立ち入らず、戸口の前に立って使う造りなので、棚の正面600mmは要らない
+        if _in_shallow_storage(data, it):
+            continue
         cx, cy = center(it)
         (ux, uy), (vx, vy) = axes(it)
         # rot=0 は正面が北(-y)。ローカル -v 方向が正面
@@ -1811,6 +1835,74 @@ def check36_work_triangle(data):
     return out
 
 
+def _walls_cover_edge(data, floor, ax, ay, bx, by, frac=0.6):
+    """線分 (ax,ay)-(bx,by) の上に、長さの frac 以上を覆う壁があるか。"""
+    total = math.hypot(bx - ax, by - ay)
+    if total <= 1:
+        return True
+    horiz = abs(by - ay) < 1
+    lo, hi = (min(ax, bx), max(ax, bx)) if horiz else (min(ay, by), max(ay, by))
+    spans = []
+    for w in data.get('walls', []):
+        if w.get('floor', 1) != floor:
+            continue
+        ht = (w.get('thick', 120) or 120) / 2.0
+        if horiz:
+            if abs(w['y1'] - w['y2']) > 1 or abs((w['y1'] + w['y2']) / 2.0 - ay) > ht:
+                continue
+            a, b = min(w['x1'], w['x2']), max(w['x1'], w['x2'])
+        else:
+            if abs(w['x1'] - w['x2']) > 1 or abs((w['x1'] + w['x2']) / 2.0 - ax) > ht:
+                continue
+            a, b = min(w['y1'], w['y2']), max(w['y1'], w['y2'])
+        a, b = max(a, lo), min(b, hi)
+        if b > a:
+            spans.append((a, b))
+    spans.sort()
+    covered, cur = 0.0, None
+    for a, b in spans:
+        if cur is None or a > cur[1]:
+            if cur:
+                covered += cur[1] - cur[0]
+            cur = [a, b]
+        else:
+            cur[1] = max(cur[1], b)
+    if cur:
+        covered += cur[1] - cur[0]
+    return covered >= total * frac
+
+
+def _open_space(data, floor, seed_rects, min_open=900.0):
+    """壁で仕切られていない隣室をたどって、ひと続きの空間の矩形を集める。"""
+    rooms = [r for r in data.get('rooms', []) if r.get('floor', 1) == floor]
+    group = list(seed_rects)
+    changed = True
+    while changed:
+        changed = False
+        for o in rooms:
+            if any(o is g for g in group):
+                continue
+            for g in group:
+                # 縦の共有辺
+                for a, b in ((g, o), (o, g)):
+                    if abs(a['x'] + a['w'] - b['x']) < 1:
+                        lo = max(a['y'], b['y']); hi = min(a['y'] + a['d'], b['y'] + b['d'])
+                        if hi - lo >= min_open and not _walls_cover_edge(
+                                data, floor, b['x'], lo, b['x'], hi):
+                            group.append(o); changed = True; break
+                    if abs(a['y'] + a['d'] - b['y']) < 1:
+                        lo = max(a['x'], b['x']); hi = min(a['x'] + a['w'], b['x'] + b['w'])
+                        if hi - lo >= min_open and not _walls_cover_edge(
+                                data, floor, lo, b['y'], hi, b['y']):
+                            group.append(o); changed = True; break
+                else:
+                    continue
+                break
+            if changed:
+                break
+    return group
+
+
 def check37_room_windows(data):
     """居室に窓が足りているか。
 
@@ -1827,19 +1919,33 @@ def check37_room_windows(data):
         if (fl, name) in seen:
             continue
         seen.add((fl, name))
-        rects = [o for o in data['rooms']
+        named = [o for o in data['rooms']
                  if o.get('floor', 1) == fl and (o.get('n') or '').strip() == name]
-        area = sum(o['w'] * o['d'] for o in rects) / 1e6
+        area = sum(o['w'] * o['d'] for o in named) / 1e6
+        # 壁で仕切られていない隣室は同じ空間。そこに射す光はこの部屋にも届く
+        rects = _open_space(data, fl, named)
+        # 吹き抜けの部屋は、その吹き抜けの真上に開いた高窓も自分の窓
+        voids = []
+        for o in rects:
+            c = o.get('ceiling') or {}
+            if c.get('type') == 'void':
+                voids.append((o, set(range(fl + 1, int(c.get('toFloor') or fl) + 1))))
+
+        def _in(o, cx, cy):
+            # 窓は壁の中に居るので、部屋の縁から少し内側/外側の余裕を見る
+            return (o['x'] - 150 <= cx <= o['x'] + o['w'] + 150
+                    and o['y'] - 150 <= cy <= o['y'] + o['d'] + 150)
+
         n = 0
         for it in data['items']:
-            if it.get('floor', 1) != fl:
-                continue
             if it.get('type') not in ('window', 'window-door'):
                 continue
+            wf = it.get('floor', 1)
             cx, cy = center(it)
-            # 窓は壁の中に居るので、部屋の縁から少し内側/外側の余裕を見る
-            if any(o['x'] - 150 <= cx <= o['x'] + o['w'] + 150
-                   and o['y'] - 150 <= cy <= o['y'] + o['d'] + 150 for o in rects):
+            if wf == fl:
+                if any(_in(o, cx, cy) for o in rects):
+                    n += 1
+            elif any(wf in fs and _in(o, cx, cy) for o, fs in voids):
                 n += 1
         need = 2 if area >= 8.0 else 1
         if n < need:

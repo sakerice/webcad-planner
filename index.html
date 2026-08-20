@@ -3826,8 +3826,12 @@ function roomIsVoidCeiling(room){
 // 測った値から、後で床スラブぶんを足し戻す)で返す。
 function roomVoidCeilingMm(room){
   var from=(room&&room.floor)||1, to=roomVoidTargetFloor(room);
-  var m=floorBaseY(to)+storyHeightM(to)-floorBaseY(from);
-  return Math.round((m-floorSlabHeightMForFloor(from))/U);
+  // **床スラブ下端(floorBaseY)からの高さ**を返す。roomCeilingHeightM の
+  // 他の枝(平天井・勾配)と基準を揃えるため。ここで床スラブを引いてしまうと
+  // 「床仕上げ面からの高さ」になり、呼び出し側 ceilingFinishElevationMm が
+  // もう一度スラブを引くので二重に引かれる。1階の吹き抜けはスラブ0mmなので
+  // 症状が出ず、2階以上に吹き抜けを作った瞬間に天井が180mm下がる。
+  return Math.round((floorBaseY(to)+storyHeightM(to)-floorBaseY(from))/U);
 }
 // 吹き抜けが成立するか。自分と目標階の間の **全ての階** で、この部屋の足元の
 // 上に部屋が無いこと。直上階だけを見ると2層以上の吹き抜けが作れない。
@@ -6913,7 +6917,7 @@ var PRESET_PLANS={
          desc:'郊外の敷地45坪。吹き抜けリビング・ウッドデッキ・車庫つき'},
   '3f': {file:'assets/default_plan_3f.json',
          name:'3階建て 3LDK+WIC',
-         desc:'都市の間口3間・敷地25坪。2階LDKのリビング階段・バルコニー'}
+         desc:'都市の間口3間・敷地25坪。3階の高窓から吹き抜けで2階リビングへ光を落とす'}
 };
 var PRESET_CURRENT='2f';
 // 起動時の間取り選択。既定間取りが使われる起動(=保存の復元も共同編集も

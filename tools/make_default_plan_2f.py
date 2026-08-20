@@ -123,11 +123,11 @@ door("door-fold-w", 1400, 3640, 1650, 1)                        # 押入(折戸)
 door("door-opening", 5005, 2730, 2730, 1)                       # キッチン↔LDK 全面開口
 door("door-opening", 6370, 900, 780, 1, vertical=True)          # パントリー
 door("door-swing-s", 6825, 3640, 650, 1)                        # トイレ(外開き)
-door("door-opening", 6825, 4550, 780, 1)                        # ホール↔廊下
+door("door-opening", 6760, 4550, 780, 1)                        # ホール↔廊下
 door("door-swing", 2730, 6700, 780, 1, vertical=True, flipX=True)  # 洋室↔LDK
 door("door-swing-s", 6370, 4100, 650, 1, vertical=True)         # LDK↔廊下
 door("door-opening", 7280, 5460, 1650, 1)                       # 玄関→ホール(上り框)
-door("door-front", 7100, BD, 940, 1, color=COL_DOOR)            # 玄関ドア
+door("door-front", 7280, BD, 940, 1, color=COL_DOOR)            # 玄関ドア
 
 # ── 1F 窓 (上端2030の通りで揃える)
 win(4350, BD, 1, "25620", 0, 2030)                    # LDK南 大開口
@@ -216,6 +216,7 @@ win(1370, BD, 2, "16520", 0, 2030)                    # 主寝室南 掃き出�
 win(4800, BD, 2, "16513", 660, 1370)                  # 吹抜の高窓(南)
 win(BW, 5460, 2, "06905", 1460, 570, vertical=True)   # 2Fトイレ東
 win(BW, 2400, 2, "F03613", 660, 1370, vertical=True, kind="fix")      # 吹き抜け東
+win(5100, 5460, 2, "16513", 900, 1130, kind="fix")    # 書斎→吹き抜けの室内窓
 
 # ── バルコニー (主寝室南・木調腰壁・出910)
 item("balcony", 1365, 7962.5, 2730, 1365, 2, color="#8d867c")
@@ -268,9 +269,9 @@ item("lattice-screen", 4800, 9130, 1800, 60, 1, color=COL_WOOD,
 item("fmp-GatePost01", 6130, 11250, 400, 200, 1, rot=180)
 
 # 玄関ポーチ(平坦な踏込み)+階段。ドアが階段の上に直接開かないようにする
-item("custom-block", 7100, 7880, 1820, 1200, 1, color="#b9b8b4",
+item("custom-block", 7280, 7880, 1820, 1200, 1, color="#b9b8b4",
      customHeight=450, name="玄関ポーチ", texture="porch_tile")
-item("exterior-stair", 7100, 8930, 1820, 900, 1, rot=180,
+item("exterior-stair", 7280, 8930, 1820, 900, 1, rot=180,
      color="#b8b2a8", targetHeight=450, accessSteps=3, texture="porch_tile")
 item("custom-block", 7100, 9930, 1100, 2880, 1, color="#b9b8b4",
      customHeight=20, name="アプローチ", texture="porch_tile")
@@ -442,8 +443,10 @@ item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 4600, 2202, 35, 1,
 
 # ── トイレ・パントリー・玄関
 item("fmp-Toilet01", 6600, 2140, 339, 516, 1, rot=180)
-item("custom-block", 7008, 2150, 496, 423, 1, rot=-90, color="#e6e3de",
-     customHeight=750, name="手洗いカウンター")
+# 造作の手洗いカウンター。単色の箱のままだと「置き忘れたブロック」に見える。
+# 木の天板として仕上げる
+item("custom-block", 7008, 2150, 496, 423, 1, rot=-90, color="#a9866a",
+     customHeight=750, name="手洗いカウンター", texture="wood_cedar")
 item("fmp-WashBasin04", 7008, 2150, 496, 423, 1, rot=-90, elev=750)
 item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
      6825, 1550, 800, 320, 1, rot=0)
@@ -472,6 +475,52 @@ item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 100, 5000, 2202, 35, 2,
      rot=90, elev=940)
 
 # ── WIC (壁付けクローゼットで通路を残す)
+
+# ── 収納の中身。扉を開けて床しか無い部屋を無くす
+# 押入(奥行910・中段付き)。下段に布団用の枕棚、上段に季節物
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black",
+     700, 2950, 1200, 280, 1, rot=180)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black",
+     2000, 2950, 1200, 280, 1, rot=180)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 700, 2930, 816, 266, 1,
+     rot=180, elev=1500)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 1900, 2930, 816, 266, 1,
+     rot=180, elev=1500)
+item("im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray", 700, 3400, 442, 342, 1,
+     rot=180)
+
+# リネン庫(910角)。タオル・シーツを3段で
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     215, 3185, 597, 305, 2, rot=90)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     215, 3185, 597, 305, 2, rot=90, elev=700)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     215, 3185, 597, 305, 2, rot=90, elev=1400)
+
+# WIC。引戸の引き代(x2430-3030 / y4940-5720)と前面通行帯を外して東壁へ寄せる
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
+     3420, 5400, 800, 320, 2, rot=-90)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
+     3420, 6400, 800, 320, 2, rot=-90)
+
+# 納戸。910幅の細長い部屋で、突き当たりにもう1つ収納がある。床に棚を置くと
+# 奥へ通れなくなるので、床は空けて壁に吊り棚を並べる [check19]
+# 北は引戸の前面通行帯(y4610-5210)、南は収納の開き戸の開閉スペース
+# (y6500-7150)。棚を置けるのは間の1290mmだけなので、そこに3段重ねる
+# 棚の高さは650。段の間隔はそれ以上あけないと棚同士がめり込む [check22]
+for _ey in (600, 1300):
+    item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 6563, 5855, 816, 266, 2,
+         rot=90, elev=_ey)
+    item("im0261-Shelf-MEGA_PACK_Shelf-shelf-161715", 7087, 5855, 816, 266, 2,
+         rot=-90, elev=_ey)
+
+# 収納(910角・納戸から)。開き戸の開き代(x6955-7605)を外して東壁へ
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     7970, 6825, 597, 305, 2, rot=-90)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     7970, 6825, 597, 305, 2, rot=-90, elev=700)
+item("im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+     7970, 6825, 597, 305, 2, rot=-90, elev=1400)
 
 # ── 書斎
 # デスクは南壁に背を付け、正面(引き出し側)を北=室内へ向ける。rot は
@@ -522,8 +571,8 @@ item("im0261-Curtain-MEGA_PACK_Curtain-curtain-230615", 4800, 100, 2202, 35, 2,
 
 # ── 2Fトイレ・納戸
 item("fmp-Toilet01", 7735, 6050, 339, 516, 2, rot=0)
-item("custom-block", 7918, 5450, 496, 423, 2, rot=-90, color="#e6e3de",
-     customHeight=750, name="手洗いカウンター")
+item("custom-block", 7918, 5450, 496, 423, 2, rot=-90, color="#a9866a",
+     customHeight=750, name="手洗いカウンター", texture="wood_cedar")
 item("fmp-WashBasin04", 7918, 5450, 496, 423, 2, rot=-90, elev=750)
 
 # ══════════ 照明 ══════════
@@ -552,7 +601,7 @@ light("down", 7750, 6950, 1)                   # 玄関土間
 light("down", 6825, 900, 1)                    # パントリー
 light("down", 7735, 400, 1)                    # 階段の上り切り
 light("down", 7735, 2300, 1)                   # 階段直進部
-light("down", 7100, 7900, 1, 2600)                   # 玄関ポーチ
+light("down", 7280, 7900, 1, 2600)                   # 玄関ポーチ
 
 light("ceiling", 1800, 1400, 2)                # 洋室A
 light("ceiling", 5000, 1400, 2)                # 洋室B
