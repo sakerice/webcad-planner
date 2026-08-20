@@ -463,10 +463,11 @@ item("im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
 
 # ══════════ 2F 家具 ══════════
 # ── 主寝室
-# 引戸の正面(x1830-2610)とWICの戸袋面(x2430-3030)を両方外す [check42/24]
-item("fmp-Bed14", 1200, 5200, 1546, 1899, 2, rot=0)
-item("im0261-Table-MEGA_PACK_Table-table-309959", 2250, 5900, 460, 460, 2, rot=180)
-item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2250, 5900, 200, 200, 2,
+# 枕元は北壁につける。南は掃き出し窓の室内側1000mmが要るので、
+# 頭を南に振ると壁から1m浮いた「置いただけ」の据わりになる [check5/30]
+item("fmp-Bed14", 1200, 4650, 1546, 1899, 2, rot=180)
+item("im0261-Table-MEGA_PACK_Table-table-309959", 2350, 5400, 460, 460, 2, rot=180)
+item("im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame", 2350, 5400, 200, 200, 2,
      rot=180, elev=513)
 item("im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
      2470, 6900, 395, 386, 2, rot=0)
