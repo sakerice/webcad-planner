@@ -205,17 +205,6 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #sb-overlay.show{display:block}
 
 /* ── UNITY RENDER DIALOG ───────────────── */
-#preset-choice-modal{display:none;position:fixed;inset:0;z-index:340;background:rgba(10,16,30,0.55);align-items:center;justify-content:center;padding:18px}
-#preset-choice-modal.show{display:flex}
-.preset-choice-card{background:#fff;color:#223;border-radius:14px;max-width:640px;width:100%;padding:22px 22px 18px;box-shadow:0 18px 48px rgba(0,0,0,0.35)}
-.preset-choice-title{font-size:16px;font-weight:700}
-.preset-choice-sub{font-size:11px;color:#68758a;margin:6px 0 14px;line-height:1.6}
-.preset-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:560px){.preset-choice-grid{grid-template-columns:1fr}}
-.preset-choice-btn{border:1.5px solid #d5dbe6;border-radius:10px;background:#f8fafc;padding:14px;text-align:left;cursor:pointer;font-family:inherit;touch-action:manipulation}
-.preset-choice-btn:hover{border-color:#e94560;background:#fff}
-.preset-choice-name{font-size:13px;font-weight:700;color:#1c2740}
-.preset-choice-desc{font-size:11px;color:#68758a;margin-top:5px;line-height:1.55}
 #unity-render-modal{display:none;position:fixed;inset:0;background:rgba(5,9,18,0.64);z-index:900;align-items:center;justify-content:center;padding:18px}
 #unity-render-modal.show{display:flex}
 .unity-render-card{width:min(780px,96vw);max-height:92dvh;overflow:auto;background:#16213e;border:1px solid #2a4080;border-radius:8px;box-shadow:0 22px 60px rgba(0,0,0,0.45);padding:14px;color:#eef}
@@ -3407,15 +3396,6 @@ input[type="reset"]:focus-visible{
 </div>
 <!-- Sidebar overlay (mobile) -->
 <div id="sb-overlay" onclick="toggleMobileSidebar()"></div>
-<!-- 起動時の既定間取り選択。保存プランの復元も共同編集も無い起動にだけ出す。
-     背後には既に2階建てが読み込まれているので、閉じても空画面にならない。 -->
-<div id="preset-choice-modal" onclick="if(event.target===this)closePresetChoice()">
-  <div class="preset-choice-card">
-    <div class="preset-choice-title">はじめる間取りを選んでください</div>
-    <div class="preset-choice-sub">あとから自由に作り替えられます。保存済みのプランはツールバーの「読込」から開けます。</div>
-    <div class="preset-choice-grid" id="preset-choice-grid"></div>
-  </div>
-</div>
 <div id="unity-render-modal" onclick="if(event.target===this)closeUnityRenderModal()">
   <!-- airx-dialog: 動画AI側と共通の型(文字サイズ4段階・チェック行の形)。
        スタイルシート末尾の「共通の型 (Task 33)」だけが文字サイズを決める。 -->
@@ -6953,48 +6933,9 @@ function mkItem(type,x,y,rot,floor,w,d){
 var _defaultPlanPending=true; // 保存プラン復元やインポートが先に走ったらデフォルト適用を中止
 // 既定間取りの台帳。既定間取りは商品なので今後も増える。
 // テストはここを読まない(tools/tests/fixtures/ の凍結間取りを読む)。
-var PRESET_PLANS={
-  '2f': {file:'assets/default_plan.json',
-         name:'2階建て 4LDK+書斎',
-         desc:'郊外の敷地45坪。吹き抜けリビング・ウッドデッキ・車庫つき'},
-  '3f': {file:'assets/default_plan_3f.json',
-         name:'3階建て 3LDK+WIC',
-         desc:'都市の間口3間・敷地25坪。3階の高窓から吹き抜けで2階リビングへ光を落とす'}
-};
-var PRESET_CURRENT='2f';
-// 起動時の間取り選択。既定間取りが使われる起動(=保存の復元も共同編集も
-// 無かった)にだけ出す。編集が始まったあとに読み替えると作業を消すので、
-// _defaultPlanPending が立っている間しか出さない。
-function maybeOfferPresetChoice(){
-  if(!_defaultPlanPending) return;
-  var grid=document.getElementById('preset-choice-grid');
-  var modal=document.getElementById('preset-choice-modal');
-  if(!grid||!modal) return;
-  var html='';
-  Object.keys(PRESET_PLANS).forEach(function(key){
-    var p=PRESET_PLANS[key];
-    html+='<button type="button" class="preset-choice-btn" onclick="choosePresetPlan(\''+key+'\')">'
-        +'<div class="preset-choice-name">'+p.name+'</div>'
-        +'<div class="preset-choice-desc">'+p.desc+'</div></button>';
-  });
-  grid.innerHTML=html;
-  modal.classList.add('show');
-}
-function closePresetChoice(){
-  var modal=document.getElementById('preset-choice-modal');
-  if(modal) modal.classList.remove('show');
-}
-function choosePresetPlan(key){
-  closePresetChoice();
-  if(!_defaultPlanPending) return;          // 選択待ちの間に別のプランが開かれた
-  if(key===PRESET_CURRENT) return;          // 既に読み込まれている(既定は2階建て)
-  loadPreset(0,key);
-}
-function loadPreset(attempt,variant){
+function loadPreset(attempt){
   attempt=attempt||0;
-  variant=variant||'2f';
-  var preset=PRESET_PLANS[variant]||PRESET_PLANS['2f'];
-  fetch(preset.file).then(function(r){
+  fetch('assets/default_plan.json').then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }).then(function(plan){
@@ -7014,17 +6955,15 @@ function loadPreset(attempt,variant){
     var maxId=0;
     DATA.items.concat(DATA.walls).forEach(function(o){var n=Number(o.id);if(isFinite(n)&&n>maxId)maxId=n;});
     nextId=Math.max(nextId||1,Math.floor(maxId)+1);
-    PRESET_CURRENT=variant;
     clearEditHistory();
     normalizeLegacyFurnitureItems();
-    if(typeof restoreViewState==='function'&&DATA.viewState) restoreViewState();
     draw2d();
     if(ren) rebuild3D();
   }).catch(function(e){
     console.warn('[WebCAD] default plan load failed:', e);
     if(!_defaultPlanPending) return;
     // 低速回線等での取得失敗時は数回リトライし、それでも空なら画面に通知する
-    if(attempt<3){ setTimeout(function(){ if(_defaultPlanPending) loadPreset(attempt+1,variant); }, 2000*(attempt+1)); return; }
+    if(attempt<3){ setTimeout(function(){ if(_defaultPlanPending) loadPreset(attempt+1); }, 2000*(attempt+1)); return; }
     if(!DATA.walls.length && !DATA.items.length){
       alert('デフォルトプランの読み込みに失敗しました。\n通信環境を確認してページを再読み込みしてください。');
     }
@@ -25820,11 +25759,7 @@ function jisPrint(){
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
-initSharedRoomFromUrl().then(async function(joined){
-  if(!joined) await checkStorageOnInit();
-  // 既定間取りで始まる起動なら、どの間取りで始めるかを選んでもらう
-  maybeOfferPresetChoice();
-});
+initSharedRoomFromUrl().then(function(joined){if(!joined)checkStorageOnInit();});
 initNativeColorInputs();
 // ─── Init mobile ─────────────────────────────────
 initTouchPressFeedback();
