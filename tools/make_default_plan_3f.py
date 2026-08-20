@@ -16,6 +16,21 @@
                  │  吹き抜け(2F天井高 5.2m)
     2F リビング ─┘  ＋ 掃き出し窓 → バルコニー
 
+■ 外観 —「木の帯を1本通した白い箱、足元はチャコール」
+  素材は3つまで。それぞれに役割を1つだけ持たせる。
+
+    白(塗り壁)        本体(2〜3階)。上を軽くして、隣家が910mmに迫る通りでの
+                      圧迫感を減らす
+    チャコール(ガルバ) 足元(1階)・東面(階段室)・屋根の見付け。縦長ボリューム
+                      の重心を下げ、道路際の汚れやすい足元を締める
+    杉(縦張り)        玄関からバルコニーまでを1〜3階通しで覆う縦の帯
+
+  南面(道路側=顔)の開口は**中心を1本の軸(x=1820)に通す**。
+  1階の掃き出し窓・2階の大開口・3階の高窓を揃えるだけで立面が静かになる。
+  バラバラの位置に開けた窓は、素材を何色に変えても整わない。
+  バルコニーの手すり壁は本体と同じ白。ここを木にすると玄関の帯と木が
+  2本になり、どちらが主役か消える。
+
 ■ 階の役割
   1F 迎える階  玄関・納戸・洋室(客間/親世帯)・浴室・洗面・ランドリー・トイレ
   2F 暮らす階  LDK・キッチン・パントリー・トイレ・吹き抜け・バルコニー
@@ -55,7 +70,7 @@ COL_CHARCOAL = "#3A3D40"      # 外壁アクセント(ガルバ)
 COL_WOOD = "#8B5E3C"          # 木調アクセント
 COL_ROOF = "#2B2B2B"
 COL_SASH = "#1c1c1c"
-COL_DOOR = "#5C4230"
+COL_DOOR = "#33363A"          # 玄関ドア(杉の帯に落とす黒い矩形)
 COL_FENCE = "#222222"
 COL_SKIRT = "#6B5A48"         # 巾木(木調) — 壁より濃く、床とつなぐ
 
@@ -79,7 +94,8 @@ item("foundation", BW / 2, BD / 2, BW, BD, 1, color="#474747",
 # ══════════════════════════ 1F ══════════════════════════
 w_n1 = wall(0, 0, BW, 0, 1)
 w_e1 = wall(BW, 0, BW, BD, 1)                 # 東面(階段室・チャコールガルバ)
-w_s1 = wall(0, BD, BW, BD, 1)
+w_s1 = wall(0, BD, 3640, BD, 1)
+w_s1e = wall(3640, BD, BW, BD, 1)   # 玄関の帯(杉)
 w_w1 = wall(0, BD, 0, 0, 1)
 
 wall(1820, 0, 1820, 1820, 1)          # 浴室|洗面
@@ -127,7 +143,7 @@ win(4095, 0, 1, "03613", 1460, 570, kind="fix")       # トイレ北
 win(BW, 2275, 1, "F03613", 660, 1370, vertical=True, kind="fix")   # 階段東
 dress(win(0, 2730, 1, "07409", 1260, 770, vertical=True), "roller")    # ランドリー西(換気)
 dress(win(0, 4600, 1, "16513", 660, 1370, vertical=True))    # 洋室 西
-dress(win(1400, BD, 1, "16520", 0, 2030))                    # 洋室 南 掃き出し(対角)
+dress(win(1820, BD, 1, "16520", 0, 2030))                    # 洋室 南 掃き出し(2F・3Fと同軸)
 win(BW, 7000, 1, "F03613", 660, 1370, vertical=True, kind="fix")   # 玄関東(採光)
 
 item("stair", 5005, 2275, 910, 2730, 1, rot=180, color="#e8e0c8", stairOrder=1)
@@ -138,7 +154,8 @@ _c1["flipX"] = True
 # ══════════════════════════ 2F ══════════════════════════
 w_n2 = wall(0, 0, BW, 0, 2)
 w_e2 = wall(BW, 0, BW, BD, 2)
-w_s2 = wall(0, BD, BW, BD, 2)
+w_s2 = wall(0, BD, 3640, BD, 2)
+w_s2e = wall(3640, BD, BW, BD, 2)   # 玄関の帯(杉)
 w_w2 = wall(0, BD, 0, 0, 2)
 
 wall(2730, 0, 2730, 2730, 2)          # キッチン|トイレ・パントリー (直下 1F x2730)
@@ -193,7 +210,8 @@ w_b3 = wall(3640, BD, 3640, 9100, 2, wallStyle="balcony-fence", wallHeight=1100)
 # ══════════════════════════ 3F ══════════════════════════
 w_n3 = wall(0, 0, BW, 0, 3)
 w_e3 = wall(BW, 0, BW, BD, 3)
-w_s3 = wall(0, BD, BW, BD, 3)
+w_s3 = wall(0, BD, 3640, BD, 3)
+w_s3e = wall(3640, BD, BW, BD, 3)   # 玄関の帯(杉)
 w_w3 = wall(0, BD, 0, 0, 3)
 
 wall(2730, 0, 2730, 2730, 3)          # 洋室A|クローゼット (直下 2F x2730)
@@ -280,7 +298,7 @@ item("fmp-GatePost01", 5000, 10350, 400, 200, 1, rot=180)
 
 item("bicycle", 700, 10150, 580, 1850, 1, rot=90, color="#a8b4c4")
 item("bicycle-fold", 2600, 10150, 550, 1450, 1, rot=90, color="#d8a878")
-item("tree", 3050, 8650, 1000, 1000, 1, color="#6f855f")
+item("tree", -150, 9000, 1000, 1000, 1, color="#6f855f")
 item("gas-heater", 5200, -350, 470, 240, 1, rot=0)
 item("meter-box", -160, 700, 180, 120, 1, rot=90, elev=1600)
 for sy in (-500, 1500, 4000):
@@ -545,15 +563,27 @@ light("down", 4550, 7500, 3)
 item("memo", 1200, -1600, 2200, 500, 1, color="#fff3a6",
      noteText="都市型3階建てモデルプラン 3LDK+WIC\n"
               "敷地約76㎡(23坪) / 延床約134㎡(40坪)\n"
-              "3階の高窓→吹き抜け→2階リビングへ光を落とす")
+              "3階の高窓→吹き抜け→2階リビングへ光を落とす\n"
+              "外観: 白い箱 / 足元と東面はチャコール / 玄関の帯は杉")
 item("ruler", SX0 + SW / 2, SY1 + 600, SW, 120, 1, color="#2f80ed")
 
 # ══════════════════════════ 仕上げのカスケード ══════════════════════════
+# 外装は「階のカスケード」で1階だけチャコールにし、そこへ壁単位で
+# 東面(階段室)と玄関の帯を上書きする。解決順は whole → floors → walls。
 ext_walls_map = {}
 for w in (w_e1, w_e2, w_e3):
     ext_walls_map[str(w["id"])] = wall_setting(COL_CHARCOAL, "galvalume_dark")
-for w in (w_b1, w_b2, w_b3):
+for w in (w_s1e, w_s2e, w_s3e):
     ext_walls_map[str(w["id"])] = wall_setting(COL_WOOD, "wood_cedar")
+# バルコニーの手すり壁は本体と同じ白。ここを木にすると、玄関の帯と
+# 木が2本になって「どちらが主役か」が消える
+for w in (w_b1, w_b2, w_b3):
+    ext_walls_map[str(w["id"])] = wall_setting(COL_WHITE, "plaster_white")
+
+_ext = finish_cascade(COL_WHITE, "plaster_white")
+_ext["floors"]["1"] = dict(wall_setting(COL_CHARCOAL, "galvalume_dark"),
+                           linked=False)
+_ext["walls"] = ext_walls_map
 
 out = sys.argv[1] if len(sys.argv) > 1 else "assets/default_plan_3f.json"
 P.dump(
@@ -564,8 +594,7 @@ P.dump(
         "3": {"role": "residential", "occupiable": True},
         "4": {"role": "roof", "occupiable": False},
     },
-    exteriorWallSettings=dict(
-        finish_cascade(COL_WHITE, "plaster_white"), walls=ext_walls_map),
+    exteriorWallSettings=_ext,
     interiorWallSettings={k: v for k, v in
                           finish_cascade(COL_WALL_INT, "wall_int").items()
                           if k != "walls"},

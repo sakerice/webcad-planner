@@ -79,9 +79,11 @@ scene.camera = cam
 # モデルの正面は +Y。カメラは -Z を向くので、+Y 側から見るには rot_z=180 が要る。
 # ここを間違えると、ずっと背面だけを見て「正面が作れていない」と誤診する。
 VIEWS = {
-    'q': (math.radians(62), 0, math.radians(215)),   # 前方 3/4
+    'q': (math.radians(62), 0, math.radians(215)),    # 前方 3/4
     'side': (math.radians(80), 0, math.radians(270)),
     'front': (math.radians(80), 0, math.radians(180)),
+    'rear': (math.radians(80), 0, math.radians(0)),   # 真後ろ
+    'rq': (math.radians(62), 0, math.radians(35)),    # 後方 3/4
 }
 dist = max((mx - mn).length, size) * 2.35
 os.makedirs(OUT, exist_ok=True)

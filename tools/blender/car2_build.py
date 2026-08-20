@@ -122,10 +122,9 @@ TOP_LINE = [
 TOP_LINE = [tuple(v) for v in _TABLES['TOP_LINE']] if 'TOP_LINE' in _TABLES else TOP_LINE
 # 側面図: ベルトライン(ショルダー)。y → z
 BELT_LINE = [
-    (-2.200, 0.965), (-2.080, 1.010), (-1.900, 1.045), (-1.680, 1.005),
-    (-1.360, 1.010), (-1.080, 0.995), (-0.650, 0.975), (0.000, 0.955),
+    (-2.200, 0.965), (-2.080, 1.010), (-1.900, 1.115), (-1.680, 1.075),
+    (-1.360, 1.026), (-1.080, 0.995), (-0.650, 0.975), (0.000, 0.955),
     (0.550, 0.935), (1.050, 0.905), (1.500, 0.925), (1.820, 0.890),
-    # 鼻先はベルトを天端より下げておくこと。上回ると断面が自己交差する
     (2.080, 0.740), (2.160, 0.690), (2.200, 0.650),
 ]
 BELT_LINE = [tuple(v) for v in _TABLES['BELT_LINE']] if 'BELT_LINE' in _TABLES else BELT_LINE
@@ -135,8 +134,8 @@ PLAN_HW = [
     (-2.200, 0.585), (-2.180, 0.660), (-2.140, 0.735), (-2.090, 0.795),
     (-1.980, 0.835), (-1.720, 0.872), (-1.360, 0.893), (-0.750, 0.900),
     (0.000, 0.898), (0.720, 0.892), (1.300, 0.879), (1.720, 0.855),
-    (1.980, 0.825), (2.090, 0.785), (2.140, 0.725), (2.180, 0.650),
-    (2.200, 0.585),
+    (1.980, 0.838), (2.090, 0.812), (2.140, 0.778), (2.180, 0.722),
+    (2.200, 0.658),
 ]
 PLAN_HW = [tuple(v) for v in _TABLES['PLAN_HW']] if 'PLAN_HW' in _TABLES else PLAN_HW
 # 平面図: ルーフ(前ではボンネット、後ろではデッキ)での半幅。y → x
@@ -145,7 +144,7 @@ PLAN_HW_ROOF = [
     (-1.940, 0.685), (-1.680, 0.705), (-1.420, 0.760), (-1.180, 0.782),
     (-0.750, 0.796), (-0.200, 0.802), (0.350, 0.807), (0.820, 0.827),
     (1.050, 0.852), (1.300, 0.860), (1.720, 0.770), (1.980, 0.720),
-    (2.090, 0.660), (2.140, 0.590), (2.180, 0.515), (2.200, 0.445),
+    (2.090, 0.700), (2.140, 0.648), (2.180, 0.582), (2.200, 0.520),
 ]
 PLAN_HW_ROOF = [tuple(v) for v in _TABLES['PLAN_HW_ROOF']] if 'PLAN_HW_ROOF' in _TABLES else PLAN_HW_ROOF
 # 側面図: ロッカー(サイドシル)下端。前後で持ち上げて進入角/離脱角を作る
@@ -171,8 +170,22 @@ STATION_Y = [float(v) for v in _TABLES['STATION_Y']] if 'STATION_Y' in _TABLES e
 #   0..3   床下〜ロッカー外面      4..5  下部ボディ側面
 #   6..8   ショルダー(支持ループ)  9..11 DLO(ガラスが張れる帯)
 #   12..14 ルーフ                  15    ルーフ中心
-RING_N = 16
-FULL_N = RING_N * 2 - 2                     # 左右合わせた1リングの点数 = 30
+# 断面の点は **名前** で呼ぶ。番号を直に書くと、点を1つ足すたびに FEATURES の
+# リング番号を全部ずらす羽目になり、意匠が静かにずれる。名前にしておけば
+# 「キャラクターラインを1本足す」が点の追加だけで済む。
+(R_FLOOR_C, R_FLOOR_M, R_FLOOR_O, R_ROCKER, R_SILL,
+ R_LCRS_A, R_LCRS, R_LCRS_B,
+ R_SHLD_A, R_SHLD, R_SHLD_B,
+ R_DLO_LO, R_DLO_M, R_DLO_HI,
+ R_ROOF_SH, R_ROOF_A, R_ROOF_B, R_ROOF_C) = range(18)
+RING_N = 18
+FULL_N = RING_N * 2 - 2                     # 左右合わせた1リングの点数 = 34
+
+# 帯として使うまとまり
+CLAD_RINGS = (R_FLOOR_C, R_FLOOR_M, R_FLOOR_O, R_ROCKER)
+DLO_RINGS = (R_DLO_LO, R_DLO_M, R_DLO_HI)
+ROOF_RINGS = (R_ROOF_SH, R_ROOF_A, R_ROOF_B, R_ROOF_C)
+FASCIA_RINGS = (R_FLOOR_C, R_FLOOR_M, R_FLOOR_O, R_ROCKER, R_SILL)
 
 
 def mirror_ring(j):
@@ -205,20 +218,37 @@ GH = _TABLES.get('GREENHOUSE', {
     'backlight': [-1.900, -1.500],
 })
 FEATURES = [
-    ('clad',        MAT_CLAD,   (-9.0, 9.0),        rings(0, 1, 2, 3)),
+    ('clad',        MAT_CLAD,   (-9.0, 9.0),        rings(*CLAD_RINGS)),
     # キャビン全長の DLO 帯を先に黒(ピラー)で塗り、あとからガラスを重ねる。
     # A/B/C ピラーが自動的に黒く残り、窓まわりが1本の帯になる
     ('dlo_surround', MAT_PILLAR, (GH['glass_side_r'][0], GH['glass_side_f'][1]),
-     rings(9, 10, 11)),
+     rings(*DLO_RINGS)),
     ('front_lower', MAT_GRILLE, (GH['front_lower'], 2.210),
-     rings(0, 1, 2, 3, 4)),
+     rings(*FASCIA_RINGS)),
     ('rear_lower',  MAT_CLAD,   (-2.210, GH['rear_lower']),
-     rings(0, 1, 2, 3, 4, 5)),
-    ('glass_side_f', MAT_GLASS, tuple(GH['glass_side_f']), rings(9, 10, 11)),
-    ('glass_side_r', MAT_GLASS, tuple(GH['glass_side_r']), rings(9, 10, 11)),
-    ('windscreen',  MAT_GLASS,  tuple(GH['windscreen']), rings(12, 13, 14, 15)),
-    ('backlight',   MAT_GLASS,  tuple(GH['backlight']), rings(12, 13, 14, 15)),
+     rings(*FASCIA_RINGS)),
+    ('glass_side_f', MAT_GLASS, tuple(GH['glass_side_f']), rings(*DLO_RINGS)),
+    ('glass_side_r', MAT_GLASS, tuple(GH['glass_side_r']), rings(*DLO_RINGS)),
+    ('ws_frit',     MAT_PILLAR, (GH['windscreen'][0] - 0.090,
+                                 GH['windscreen'][1] + 0.090), rings(*ROOF_RINGS)),
+    # リヤガラスは **DLO の帯にも** 載せること。テールは面が寝ているので、
+    # ルーフの帯はそこでは天端の数十mmしか無く、テールゲートの大半は
+    # DLO の帯が受け持つ。ルーフの帯だけに割り当てると、リヤガラスが
+    # 描かれずテールゲートが白い板のまま残る(実際そうなった)
+    ('bl_frit',     MAT_PILLAR, (GH['backlight'][0] - 0.090,
+                                 GH['backlight'][1] + 0.090),
+     rings(*ROOF_RINGS) | rings(*DLO_RINGS)),
+    ('windscreen',  MAT_GLASS,  tuple(GH['windscreen']), rings(*ROOF_RINGS)),
+    ('backlight',   MAT_GLASS,  tuple(GH['backlight']),
+     rings(*ROOF_RINGS) | rings(*DLO_RINGS)),
 ]
+# フリットの境目もステーション線に乗せないと、意匠が一番近い断面に丸められる
+for _v in (GH['windscreen'][0] - 0.090, GH['windscreen'][1] + 0.090,
+           GH['backlight'][0] - 0.090, GH['backlight'][1] + 0.090):
+    _v = round(_v, 3)
+    if -2.200 < _v < 2.200 and _v not in STATION_Y:
+        STATION_Y.append(_v)
+STATION_Y = sorted(set(round(v, 4) for v in STATION_Y), reverse=True)
 CAP_Y = {1: 2.205, -1: -2.205}      # 前後の蓋(ファン)を判定に載せるための代表 y
 
 
@@ -326,28 +356,49 @@ def ring_points(y):
         zsh = zt - 0.05
     g = zt - zsh                        # 肩から天端まで
     b = zsh - z0                        # ロッカーから肩まで
+    # 下部キャラクターライン。参考図はドア下半分に1本、明確な稜線が走る。
+    # 稜線は「支持点を稜線のすぐ上下に寄せる」ことで初めて立つ。点を1つ
+    # 置くだけだとサブディビジョンで丸められて消える
+    zc = z0 + b * 0.52                  # 稜線の高さ(ロッカーと肩の間)
+
+    # ルーフ/ボンネット/デッキの **横方向の膨らみ(クラウン)**。
+    # 旧実装はこれを g(肩から天端までの差)の比で置いていた。キャビンでは
+    # g が 660mm あるので膨らんだが、ボンネットとデッキでは g が 50mm まで
+    # 縮むため膨らみが 3mm しか出ず、**上面が真っ平らな板**になっていた。
+    # クラウンは幅で決まるものなので、半幅から出す。
+    crown = min(0.050, hwr * 0.062)
+    z_shld_b = zsh + min(0.024, g * 0.042)
+    z_roof_sh = max(zt - crown * 0.97, z_shld_b + 0.020)
+    # DLO の3点は肩とルーフ肩の間を按分する。こうすると上下の順序が
+    # 崩れようがない(固定の比で置くと、g が縮む鼻先で必ず逆転する)
+    z_dlo_lo = _mix(z_shld_b, z_roof_sh, 0.11)
+    z_dlo_m = _mix(z_shld_b, z_roof_sh, 0.45)
+    z_dlo_hi = _mix(z_shld_b, z_roof_sh, 0.80)
     return [
-        (0.0,          z0 - 0.015),
-        (hw * 0.52,    z0 - 0.010),
-        (hw * 0.86,    z0 + 0.008),
-        (hw * 0.965,   z0 + 0.075),                   # ロッカー外面
-        # 0.42 だと黒い帯が全高の1/3(z≒0.53m)まで上がり、ジャッキアップ
-        # した SUV に見える。実車の樹脂はサイドシル際の細い帯だけ
-        (hw * 0.995,   z0 + b * 0.22),
-        (hw * 1.000,   zsh - min(0.090, b * 0.16)),
-        (hw * 0.999,   zsh - min(0.030, b * 0.055)),  # 支持ループ(下)
-        (hw * 0.988,   zsh - min(0.004, b * 0.008)),  # ショルダー(稜線)
-        (hw * 0.955,   zsh + g * 0.035),              # 支持ループ(上)
-        # ショルダーからルーフ幅へは **3段かけて** 絞る。1段で詰めると
-        # 肩の上に幅100mmの棚ができ、ルーフが別の箱として載って見える
-        # (三面図をどう引いても直らない。断面の側の問題)
-        (_mix(hw * 0.955, hwr * 1.045, 0.45), zsh + g * 0.130),   # DLO下端
-        (_mix(hw * 0.955, hwr * 1.020, 0.80), zsh + g * 0.450),
-        (hwr * 1.000,  zsh + g * 0.760),
-        (hwr * 0.985,  zsh + g * 0.930),              # ルーフ肩
-        (hwr * 0.930,  zsh + g * 0.982),
-        (hwr * 0.640,  zsh + g * 0.997),
-        (0.0,          zt),
+        (0.0,          z0 - 0.015),                   # R_FLOOR_C
+        (hw * 0.52,    z0 - 0.010),                   # R_FLOOR_M
+        (hw * 0.86,    z0 + 0.008),                   # R_FLOOR_O
+        (hw * 0.965,   z0 + 0.075),                   # R_ROCKER 外面
+        # 樹脂はサイドシル際の細い帯だけ。全高の1/3まで黒くすると
+        # ジャッキアップした SUV に見える
+        (hw * 0.992,   z0 + b * 0.22),                # R_SILL
+        (hw * 0.997,   zc - 0.030),                   # R_LCRS_A 支持(下)
+        (hw * 0.998,   zc),                           # R_LCRS   稜線
+        (hw * 0.994,   zc + 0.030),                   # R_LCRS_B 支持(上)
+        # 支持点は稜線の 20〜30mm 以内に寄せること。旧値は 46〜49mm 離れて
+        # おり、サブディビジョンで丸められてキャラクターラインが消えていた
+        (hw * 0.993,   zsh - min(0.030, b * 0.055)),  # R_SHLD_A 支持(下)
+        (hw * 1.000,   zsh - min(0.006, b * 0.012)),  # R_SHLD   ショルダー稜線
+        (hw * 0.990,   zsh + min(0.024, g * 0.042)),  # R_SHLD_B 支持(上)
+        # ショルダーからルーフ幅へは3段かけて絞る。1段で詰めると肩の上に
+        # 棚ができ、ルーフが別の箱として載って見える
+        (_mix(hw * 0.982, hwr * 1.045, 0.45), z_dlo_lo),   # R_DLO_LO
+        (_mix(hw * 0.982, hwr * 1.020, 0.80), z_dlo_m),    # R_DLO_M
+        (hwr * 1.000,  z_dlo_hi),                     # R_DLO_HI
+        (hwr * 0.985,  z_roof_sh),                    # R_ROOF_SH ルーフ肩
+        (hwr * 0.930,  zt - crown * 0.84),            # R_ROOF_A
+        (hwr * 0.640,  zt - crown * 0.38),            # R_ROOF_B
+        (0.0,          zt),                           # R_ROOF_C
     ]
 
 
@@ -489,24 +540,28 @@ def build_wheel(y, sign, tire_m, rim_m, dark_m):
     objs.append(revolve([(rim_r - 0.012, outer - w * 0.30),
                          (rim_r * 0.26, outer - w * 0.38), (0.001, outer - w * 0.40)],
                         30, y, sign, 'rimdisc_' + tag, dark_m))
-    # スポーク5本。皿より外側(車体外側)に置いて必ず見えるようにする
+    # 5本ツインスポーク。1本ずつの単純な5本だと「板を貼った皿」に見える。
+    # 2本を狭い角度で対にすると、少ないポリゴンでもアルミホイールに見える
     for k in range(5):
-        a = 2 * math.pi * k / 5 + math.radians(18)
-        me = bpy.data.meshes.new('spoke')
-        bm = bmesh.new()
-        bmesh.ops.create_cube(bm, size=1.0)
-        bmesh.ops.scale(bm, vec=Vector((0.026, rim_r * 0.80, 0.052)), verts=bm.verts)
-        bmesh.ops.translate(bm, verts=bm.verts, vec=Vector((0, rim_r * 0.42, 0)))
-        bmesh.ops.rotate(bm, verts=bm.verts, cent=Vector((0, 0, 0)),
-                         matrix=Matrix.Rotation(a, 3, 'X'))
-        bmesh.ops.translate(bm, verts=bm.verts,
-                            vec=Vector((sign * (outer - w * 0.20), y, TIRE_R)))
-        bm.to_mesh(me)
-        bm.free()
-        sp = bpy.data.objects.new('spoke', me)
-        bpy.context.collection.objects.link(sp)
-        sp.data.materials.append(rim_m)
-        objs.append(sp)
+        base = 2 * math.pi * k / 5 + math.radians(18)
+        for da in (math.radians(-7.5), math.radians(7.5)):
+            me = bpy.data.meshes.new('spoke')
+            bm = bmesh.new()
+            bmesh.ops.create_cube(bm, size=1.0)
+            bmesh.ops.scale(bm, vec=Vector((0.024, rim_r * 0.74, 0.030)),
+                            verts=bm.verts)
+            bmesh.ops.translate(bm, verts=bm.verts,
+                                vec=Vector((0, rim_r * 0.46, 0)))
+            bmesh.ops.rotate(bm, verts=bm.verts, cent=Vector((0, 0, 0)),
+                             matrix=Matrix.Rotation(base + da, 3, 'X'))
+            bmesh.ops.translate(bm, verts=bm.verts,
+                                vec=Vector((sign * (outer - w * 0.20), y, TIRE_R)))
+            bm.to_mesh(me)
+            bm.free()
+            sp = bpy.data.objects.new('spoke', me)
+            bpy.context.collection.objects.link(sp)
+            sp.data.materials.append(rim_m)
+            objs.append(sp)
     # ハブキャップ
     objs.append(revolve([(0.001, outer - w * 0.16), (0.052, outer - w * 0.17),
                          (0.052, outer - w * 0.24)],
@@ -515,11 +570,14 @@ def build_wheel(y, sign, tire_m, rim_m, dark_m):
 
 
 # ── 箱もの ────────────────────────────────────────────────────
-def box(name, center, size, material, bevel=0.0, segments=1):
+def box(name, center, size, material, bevel=0.0, segments=1, rot_z=0.0):
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
     bmesh.ops.create_cube(bm, size=1.0)
     bmesh.ops.scale(bm, vec=Vector(size), verts=bm.verts)
+    if rot_z:
+        bmesh.ops.rotate(bm, verts=bm.verts, cent=Vector((0, 0, 0)),
+                         matrix=Matrix.Rotation(rot_z, 3, 'Z'))
     if bevel > 0:
         bmesh.ops.bevel(bm, geom=bm.verts[:] + bm.edges[:], offset=bevel,
                         segments=segments, affect='EDGES', profile=0.5,
@@ -537,41 +595,54 @@ def hw_at(y):
     return lerp_table(PLAN_HW, y) * HWS
 
 
-def build_lamp(sign, path, z_lo, z_hi, material, name, out=0.006, bulge=0.012):
-    """車体の平面輪郭をなぞってレンズ面を張る。
+def build_lamp(sign, ys, z_lo, z_hi, material, name, out=0.008, bulge=0.012,
+               x_inner=None):
+    """車体の面に沿わせてレンズを張る。
 
-    ランプを直方体で貼ると、丸いノーズには必ず角が刺さるか浮くかする。
-    輪郭 (x, y) の折れ線に沿わせて3列(下・中・上)で張り、中央列だけ外へ
-    膨らませると、面から浮かずにレンズらしい張りが出る。
+    輪郭は **その高さでの実際の面** を surface_x(y, z) で拾う。ショルダーの
+    半幅だけで決めると、肩より上/下にあるランプが車体に埋もれ、細い筋にしか
+    見えなくなる(テールランプで実際にそうなった)。
+
+    ys は後→前(またはその逆)に並んだ y のリスト。x_inner を与えると、
+    最初の点だけ中心寄りの位置に置いて正面/背面へ回り込ませる。
     """
     zs = (z_lo, (z_lo + z_hi) / 2.0, z_hi)
     outs = (out, out + bulge, out)
-    n = len(path)
-    # 各点の外向き法線(平面内)。輪郭は「正面の内側 → 外へ → 後方へ回り込む」
-    # 順に並ぶので、進行方向を左90度に回したものが外向きになる。符号を逆に
-    # すると全部ボディの内側へ潜り、レンダリングしても何も見えない
+    pts = [(ys[0], x_inner)] + [(y, None) for y in ys] if x_inner else \
+        [(y, None) for y in ys]
+    n = len(pts)
+
+    def xz(i, k):
+        y, forced = pts[i]
+        x = forced if forced is not None else surface_x(y, zs[k])
+        return x, y
+
+    # 平面内の外向き法線(進行方向を左90度)
     norms = []
     for i in range(n):
-        ax, ay = path[max(0, i - 1)]
-        bx, by = path[min(n - 1, i + 1)]
-        dx, dy = bx - ax, by - ay
+        ya = pts[max(0, i - 1)][0]
+        yb = pts[min(n - 1, i + 1)][0]
+        xa = xz(max(0, i - 1), 1)[0]
+        xb = xz(min(n - 1, i + 1), 1)[0]
+        dx, dy = xb - xa, yb - ya
         ln = math.hypot(dx, dy) or 1.0
         norms.append((-dy / ln, dx / ln))
 
     bm = bmesh.new()
     grid = []
-    for i, (px, py) in enumerate(path):
+    for i in range(n):
         nx, ny = norms[i]
         col = []
         for k in range(3):
-            col.append(bm.verts.new((sign * (px + nx * outs[k]),
-                                     py + ny * outs[k], zs[k])))
+            x, y = xz(i, k)
+            col.append(bm.verts.new((sign * (x + nx * outs[k]),
+                                     y + ny * outs[k], zs[k])))
         grid.append(col)
     for i in range(n - 1):
         for k in range(2):
             quad = (grid[i][k], grid[i][k + 1], grid[i + 1][k + 1], grid[i + 1][k])
             bm.faces.new(quad if sign > 0 else tuple(reversed(quad)))
-    for i in (0, n - 1):                       # 端の小口を塞ぐ
+    for i in (0, n - 1):
         bm.faces.new((grid[i][0], grid[i][1], grid[i][2]))
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     me = bpy.data.meshes.new(name)
@@ -597,24 +668,136 @@ def lamp_path(x_inner, ys):
 def build_lamps(head_m, drl_m, tail_m):
     """ランプの z は必ず、その y での車体の天端(TOP_LINE)より下に収めること。
     はみ出すと車体から赤い旗が立つ。"""
-    fy = (2.200, 2.196, 2.180, 2.140, 2.090, 2.030)
-    ry = (-2.200, -2.196, -2.180, -2.140, -2.080, -1.960)
+    fy = (2.200, 2.180, 2.140, 2.090, 2.030)
+    ry = (-2.200, -2.180, -2.140, -2.080, -1.960)
     objs = []
     for sign in (1, -1):
         # ヘッドランプ。ノーズの天端は y=2.200 で 0.725 なので、その下に
         # 収める。かつバンパーの暗い部分(z<0.44)より上に置き、ボディ色の
         # 面を背にしないと、暗いレンズが暗いバンパーに埋もれて見えなくなる
-        objs.append(build_lamp(sign, lamp_path(0.300, fy), 0.548, 0.652,
-                               head_m, 'headlamp_%d' % sign, out=0.008))
+        objs.append(build_lamp(sign, fy, 0.548, 0.652, head_m, 'headlamp_%d' % sign,
+                               out=0.008, x_inner=0.395))
         # レンズの中で光る部分。暗いレンズに明るい線が入って初めてランプに見える
-        objs.append(build_lamp(sign, lamp_path(0.318, fy), 0.578, 0.606,
-                               drl_m, 'proj_%d' % sign, out=0.012, bulge=0.002))
+        objs.append(build_lamp(sign, fy, 0.578, 0.606, drl_m, 'proj_%d' % sign,
+                               out=0.012, bulge=0.002, x_inner=0.410))
         # デイライト: ランプ上端の細い光の線。これの有無で顔付きが決まる
-        objs.append(build_lamp(sign, lamp_path(0.288, fy), 0.656, 0.676,
-                               drl_m, 'drl_%d' % sign, out=0.012, bulge=0.003))
+        objs.append(build_lamp(sign, fy, 0.656, 0.676, drl_m, 'drl_%d' % sign,
+                               out=0.012, bulge=0.003, x_inner=0.385))
         # テールランプ: テールゲート脇。天端は y=-2.200 で 1.010
-        objs.append(build_lamp(sign, lamp_path(0.290, ry), 0.830, 0.985,
-                               tail_m, 'taillamp_%d' % sign, out=0.008))
+        objs.append(build_lamp(sign, ry, 0.760, 0.960, tail_m, 'taillamp_%d' % sign,
+                               out=0.008, x_inner=0.240))
+        # 四半部へ回り込む細い赤帯。真後ろだけだと 3/4 から見て消える
+        objs.append(build_lamp(sign, (-2.200, -2.140, -2.080, -1.980, -1.870),
+                               0.880, 0.945, tail_m,
+                               'taillamp_wrap_%d' % sign, out=0.010,
+                               bulge=0.004))
+    return objs
+
+
+def surface_x(y, z):
+    """その (y, z) での車体側面の半幅。断面を引いて z で内挿する。
+
+    ドアの見切り線・ハンドル・給油口のように「面に貼り付ける」物は、これで
+    面の位置を拾ってから置く。決め打ちの座標で置くと、必ず浮くか刺さる。
+    """
+    pts = ring_points(y)
+    best = None
+    for i in range(len(pts) - 1):
+        (x0, z0), (x1, z1) = pts[i], pts[i + 1]
+        lo, hi = (z0, z1) if z0 <= z1 else (z1, z0)
+        if lo - 1e-6 <= z <= hi + 1e-6:
+            t = 0.0 if abs(z1 - z0) < 1e-9 else (z - z0) / (z1 - z0)
+            cand = x0 + (x1 - x0) * t
+            if best is None or cand > best:
+                best = cand
+    return best if best is not None else 0.0
+
+
+def build_cut_line(sign, y, z_lo, z_hi, material, name, width=0.011,
+                   out=0.0035, steps=9):
+    """ドアの見切り線(パネルの隙間)。車体面に沿った細い溝。
+
+    低ポリゴンの車が車に見えるかどうかは、ここで決まる。分割線が1本も無い
+    のっぺりした側面は、どれだけ形が良くても「塊」にしか見えない。
+    """
+    bm = bmesh.new()
+    cols = []
+    for k in range(steps + 1):
+        z = z_lo + (z_hi - z_lo) * k / steps
+        x = surface_x(y, z)
+        col = [bm.verts.new((sign * (x + out), y - width / 2, z)),
+               bm.verts.new((sign * (x - 0.006), y, z)),
+               bm.verts.new((sign * (x + out), y + width / 2, z))]
+        cols.append(col)
+    for k in range(steps):
+        c0, c1 = cols[k], cols[k + 1]
+        for j in (0, 1):
+            q = (c0[j], c0[j + 1], c1[j + 1], c1[j])
+            bm.faces.new(q if sign > 0 else tuple(reversed(q)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    ob.data.materials.append(material)
+    return ob
+
+
+def build_body_details(dark_m, trim_m, chrome_m):
+    """ドアの見切り・ハンドル・給油口。面の位置を拾ってから貼る。"""
+    objs = []
+    gl_f, gl_r = GH['glass_side_f'], GH['glass_side_r']
+    # 見切りは 前ドア前端 / B ピラー / 後ドア後端 の3本(左右で6本)
+    cuts = (gl_f[1] + 0.030, (gl_f[0] + gl_r[1]) / 2.0, gl_r[0] - 0.030)
+    for sign in (1, -1):
+        for i, y in enumerate(cuts):
+            z0 = lerp_table(ROCKER_Z, y) + 0.090
+            z1 = lerp_table(BELT_LINE, y) - 0.010
+            objs.append(build_cut_line(sign, y, z0, z1, dark_m,
+                                       'cut_%d_%d' % (sign, i)))
+        # ドアハンドル。ベルトラインのすぐ下、前後ドアに1つずつ
+        for y in ((gl_f[0] + gl_f[1]) / 2.0 - 0.060,
+                  (gl_r[0] + gl_r[1]) / 2.0 - 0.060):
+            zh = lerp_table(BELT_LINE, y) - 0.085
+            x = surface_x(y, zh)
+            objs.append(box('handle_%d_%.0f' % (sign, y * 100),
+                            (sign * (x + 0.014), y, zh),
+                            (0.026, 0.135, 0.034), chrome_m,
+                            bevel=0.008, segments=2))
+    # リヤの分割線と造形。テールゲートの見切りが無いと、後ろが「切り落とした
+    # 箱」に見える。バンパーの見切り・ナンバー・リフレクタまで入れる
+    yb = GH['rear_lower']
+    zr_lo = lerp_table(ROCKER_Z, yb) + 0.110
+    zr_hi = lerp_table(BELT_LINE, yb) + 0.030
+    for sign in (1, -1):
+        objs.append(build_cut_line(sign, yb + 0.010, zr_lo, zr_hi, dark_m,
+                                   'cut_tg_%d' % sign, width=0.010))
+    y_tail = STATION_Y[-1]                    # -2.200
+    objs.append(box('plate_r', (0.0, y_tail + 0.012, 0.560),
+                    (0.330, 0.016, 0.078), chrome_m, bevel=0.004))
+    objs.append(box('rear_skid', (0.0, y_tail + 0.016, 0.432),
+                    (0.900, 0.026, 0.090), dark_m, bevel=0.014, segments=2))
+    for sx in (1, -1):                        # リヤリフレクタ
+        objs.append(box('reflector_%d' % sx, (sx * 0.400, y_tail + 0.010, 0.470),
+                        (0.110, 0.014, 0.036), trim_m, bevel=0.006))
+    # ワイパー2本。カウル(フロントガラス下端)に寝かせて置く
+    ywc = GH['windscreen'][1]
+    zwc = lerp_table(TOP_LINE, ywc) - 0.012
+    for sx, ang in ((1, 0.30), (-1, 0.30)):
+        objs.append(box('wiper_%d' % sx, (sx * 0.230, ywc - 0.030, zwc),
+                        (0.500, 0.024, 0.014), dark_m, bevel=0.005,
+                        segments=1, rot_z=sx * ang))
+    # リヤワイパー(テールゲート)
+    ybw = (GH['backlight'][0] + GH['backlight'][1]) / 2.0
+    objs.append(box('wiper_r', (0.060, ybw - 0.010,
+                                lerp_table(TOP_LINE, ybw) - 0.030),
+                    (0.360, 0.022, 0.013), dark_m, bevel=0.005, rot_z=0.22))
+    # 給油口(右後ろのフェンダー)
+    y = gl_r[0] - 0.190
+    zf = lerp_table(BELT_LINE, y) - 0.190
+    objs.append(box('fuel_cap', (surface_x(y, zf) + 0.006, y, zf),
+                    (0.012, 0.150, 0.150), trim_m, bevel=0.030, segments=3))
     return objs
 
 
@@ -658,12 +841,12 @@ def build_spoiler(body_m, dark_m):
     落ちて「切り落とした箱」に見える。
     """
     objs = []
-    y0 = GH['backlight'][0]
+    y0 = GH['backlight'][1]          # ガラスの上端(=前寄り)
     zt = lerp_table(TOP_LINE, y0)
     hwr = lerp_table(PLAN_HW_ROOF, y0) * HWS
-    objs.append(box('spoiler', (0.0, y0 - 0.070, zt + 0.024),
+    objs.append(box('spoiler', (0.0, y0 - 0.080, zt + 0.020),
                     (hwr * 1.72, 0.160, 0.048), body_m, bevel=0.014, segments=2))
-    objs.append(box('spoiler_lip', (0.0, y0 - 0.140, zt + 0.012),
+    objs.append(box('spoiler_lip', (0.0, y0 - 0.150, zt + 0.004),
                     (hwr * 1.40, 0.040, 0.022), dark_m, bevel=0.008))
     return objs
 
@@ -793,6 +976,7 @@ def main():
     # ルーフレールは付けない。参考図のハッチバックには無く、
     # 水平に通すとルーフが後ろ下がりのぶんだけ浮いて見える
     parts += build_spoiler(mats[MAT_BODY], mats[MAT_CLAD])
+    parts += build_body_details(mats[MAT_PILLAR], TRIM, CHROME)
     for ay in (AXLE_F, AXLE_R):
         for sign in (1, -1):
             parts.append(build_arch_trim(ay, sign, mats[MAT_CLAD]))
