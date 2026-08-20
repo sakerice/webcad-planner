@@ -4474,7 +4474,49 @@ function wallCeilingHeightM(w){
   if(!w) return envelopeM;
   var adj=wallAdjacentRoomsCeiling(w);
   if(!adj.found) return envelopeM;
-  return adj.enclosed ? adj.maxM : Math.max(adj.maxM,envelopeM);
+  var h=adj.enclosed ? adj.maxM : Math.max(adj.maxM,envelopeM);
+  var cap=wallStackedAboveCapM(w);
+  return (cap!==null && cap<h) ? cap : h;
+}
+// この壁とほぼ同じ線・同じ区間に **上階の壁** が在るか。在るなら、そこから
+// 上は上階の壁が受け持つので、吹き抜けの天井まで伸ばしてはいけない。
+// 伸ばすと同じ場所に壁が2枚立ち、
+//   - 外から見て重なった面がちらつく
+//   - 上階の壁に開けた窓の背後が下階の壁で塞がれる
+// という2つが同時に起きる(3階の吹き抜けの高窓がこれで見えなくなっていた)。
+// 一部しか覆われていない場合は切らない。切ると覆われていない側に穴が開く。
+function wallStackedAboveCapM(w){
+  if(!w || !DATA || !DATA.walls) return null;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return null;
+  var ux=dx/len, uy=dy/len;
+  var half=((w.thick||120)/2)+40;
+  var up=(w.floor|0)+1, spans=[], i, o, odx, ody, olen, p1, p2, t1, t2;
+  for(i=0;i<DATA.walls.length;i++){
+    o=DATA.walls[i];
+    if(o===w || (o.floor|0)!==up) continue;
+    odx=o.x2-o.x1; ody=o.y2-o.y1;
+    olen=Math.sqrt(odx*odx+ody*ody);
+    if(olen<1) continue;
+    if(Math.abs((odx/olen)*ux+(ody/olen)*uy)<0.999) continue;   // 平行でない
+    p1=-(o.x1-w.x1)*uy+(o.y1-w.y1)*ux;
+    p2=-(o.x2-w.x1)*uy+(o.y2-w.y1)*ux;
+    if(Math.abs(p1)>half || Math.abs(p2)>half) continue;        // 同じ線に乗っていない
+    t1=(o.x1-w.x1)*ux+(o.y1-w.y1)*uy;
+    t2=(o.x2-w.x1)*ux+(o.y2-w.y1)*uy;
+    spans.push([Math.max(0,Math.min(t1,t2)),Math.min(len,Math.max(t1,t2))]);
+  }
+  if(!spans.length) return null;
+  spans.sort(function(a,b){return a[0]-b[0];});
+  var covered=0, curA=spans[0][0], curB=spans[0][1];
+  for(i=1;i<spans.length;i++){
+    if(spans[i][0]>curB){ covered+=Math.max(0,curB-curA); curA=spans[i][0]; curB=spans[i][1]; }
+    else if(spans[i][1]>curB) curB=spans[i][1];
+  }
+  covered+=Math.max(0,curB-curA);
+  if(covered<len*0.95) return null;
+  return Math.max(0.3,floorBaseY(up)-floorBaseY(w.floor|0));
 }
 
 var ISIZES = {
@@ -12012,11 +12054,6 @@ function applyWallFaceUv(geo,a,b,yBase,h,totalLen,totalH){
   uv.needsUpdate=true;
 }
 
-function makeColorAccurateMaterial(params){
-  var mat=new THREE.MeshBasicMaterial(params);
-  mat.toneMapped=false;
-  return mat;
-}
 function makeExteriorLightingMaterial(params){
   params=params||{};
   var matParams={
@@ -12069,7 +12106,17 @@ function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
       side:opts.side
     });
   }
-  return makeColorAccurateMaterial({map:tc,color:fallbackColor||0xffffff});
+  // 無照明(MeshBasicMaterial)の枝は置かない。1か所でも残すと、そこだけ
+  // 夜に白く光ったまま残り、影も落ちない。opts を渡し忘れた呼び出しが
+  // 静かに無照明になるのを防ぐため、既定でも光を受けるマテリアルを返す
+  return makeExteriorLightingMaterial({
+    map:tc,
+    color:fallbackColor||0xffffff,
+    roughness:opts.roughness==null?0.88:opts.roughness,
+    metalness:opts.metalness==null?0.02:opts.metalness,
+    envMapIntensity:opts.envMapIntensity==null?0.16:opts.envMapIntensity,
+    side:opts.side
+  });
 }
 // BoxGeometry の既定UVは6面それぞれを「その面の正面から見て正立」させる。1枚のマテリアルで
 // 扉に画像を貼ると表も裏も同じ向きに読めてしまい、世界座標では左右が入れ替わる。実物の扉は
@@ -16087,12 +16134,13 @@ function buildItem3D(it){
     finalizeContextGroup(grp,it);
   }
   else if(isCustomBlockType(it.type)){
-    var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff) ||
+    var blockOpts={lighting:true,roughness:0.88,metalness:0.02,envMapIntensity:0.16};
+    var blockMat=makeItemTextureMaterial(it,Math.max(w3,d3),h,'repeat',0xffffff,blockOpts) ||
       new THREE.MeshStandardMaterial({color:it.color||ICOLORS[it.type]||0xc9d7ee,roughness:0.78,metalness:0.02});
     // 上下面は側面用の1マテリアルを使い回すと、高さでUVを決めている都合で
     // 平たいブロック(デッキ・ポーチ・土間)の天端だけ柄が極端に伸びる。
     // 天端は w×d でUVを取り直した専用マテリアルにする
-    var blockTopMat=makeItemTextureMaterial(it,w3,d3,'repeat',0xffffff)||blockMat;
+    var blockTopMat=makeItemTextureMaterial(it,w3,d3,'repeat',0xffffff,blockOpts)||blockMat;
     var blockGeo=new THREE.BoxGeometry(w3,h,d3);
     var blockMats=[blockMat,blockMat,blockTopMat,blockTopMat,blockMat,blockMat];
     var block=new THREE.Mesh(blockGeo,blockMats);

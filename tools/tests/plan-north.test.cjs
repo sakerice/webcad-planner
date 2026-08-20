@@ -83,7 +83,7 @@ const DRAW_FNS = [
   'isWindowLikeType',
   'isOpeningItemType',
   'wallAdjacentRoomsCeiling',
-  'wallCeilingHeightM',
+  'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',

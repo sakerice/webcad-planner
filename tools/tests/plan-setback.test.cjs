@@ -69,7 +69,7 @@ function jisdrawIife() {
 const DRAW_FNS = [
   'bestFmpType', 'getFmpItem',
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
-  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',
