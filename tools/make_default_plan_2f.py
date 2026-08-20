@@ -99,21 +99,21 @@ wall(6370, 5460, 8190, 5460, 1)       # ホール|玄関
 room("浴室", 0, 0, 1820, 1820, 1, texture="tile_floor")
 room("洗面脱衣室", 1820, 0, 1820, 1820, 1, texture="tile_floor")
 room("ランドリー", 0, 1820, 3640, 910, 1, texture="tile_floor")
-room("キッチン", 3640, 0, 2730, 2730, 1, texture="wood_floor")
-room("押入", 0, 2730, 2730, 910, 1, texture="wood_floor")
-room("洋室", 0, 3640, 2730, 3640, 1, texture="wood_floor")
-room("LDK", 2730, 2730, 3640, 2730, 1, texture="wood_floor")
-room("LDK", 2730, 5460, 910, 1820, 1, texture="wood_floor")
+room("キッチン", 3640, 0, 2730, 2730, 1, texture="wood_oak")
+room("押入", 0, 2730, 2730, 910, 1, texture="wood_oak")
+room("洋室", 0, 3640, 2730, 3640, 1, texture="wood_oak")
+room("LDK", 2730, 2730, 3640, 2730, 1, texture="wood_oak")
+room("LDK", 2730, 5460, 910, 1820, 1, texture="wood_oak")
 # リビングの上は2階の床を張らない。天井高は書かない -- toFloor だけ宣言すれば
 # アプリが階高から計算する。手で数字を書くと階高を変えた瞬間に上階の天井と
 # 食い違い、スラブの小口が室内に見える
-room("リビング", 3640, 5460, 2730, 1820, 1, texture="wood_floor",
+room("リビング", 3640, 5460, 2730, 1820, 1, texture="wood_oak",
      ceiling={"type": "void", "toFloor": 2})
-room("パントリー", 6370, 0, 910, 1820, 1, texture="wood_floor")
-room("階段", 7280, 0, 910, 4550, 1, texture="wood_floor")
+room("パントリー", 6370, 0, 910, 1820, 1, texture="wood_oak")
+room("階段", 7280, 0, 910, 4550, 1, texture="wood_oak")
 room("トイレ", 6370, 1820, 910, 1820, 1, texture="tile_floor")
-room("廊下", 6370, 3640, 910, 910, 1, texture="wood_floor")
-room("ホール", 6370, 4550, 1820, 910, 1, texture="wood_floor")
+room("廊下", 6370, 3640, 910, 910, 1, texture="wood_oak")
+room("ホール", 6370, 4550, 1820, 910, 1, texture="wood_oak")
 room("玄関", 6370, 5460, 1820, 1820, 1, texture="porch_tile")
 
 # ── 1F 建具 (引戸は引き代を戸幅ぶん確保できる位置にだけ置く)
@@ -181,19 +181,19 @@ wall(6370, 4550, 8190, 4550, 2)       # 廊下|納戸・トイレ
 wall(7280, 4550, 7280, BD, 2)         # 納戸|トイレ・収納
 wall(7280, 6370, 8190, 6370, 2)       # トイレ|収納
 
-room("洋室A", 0, 0, 3640, 2730, 2, texture="wood_floor")
-room("洋室B", 3640, 0, 2730, 2730, 2, texture="wood_floor")
-room("ホール", 6370, 0, 910, 2730, 2, texture="wood_floor")
-room("リネン庫", 0, 2730, 910, 910, 2, texture="wood_floor")
-room("廊下", 910, 2730, 6370, 910, 2, texture="wood_floor")
-room("廊下", 6370, 3640, 1820, 910, 2, texture="wood_floor")
-room("主寝室", 0, 3640, 2730, 3640, 2, texture="wood_floor")
-room("WIC", 2730, 3640, 910, 3640, 2, texture="wood_floor")
-room("書斎", 3640, 3640, 2730, 1820, 2, texture="wood_floor")
+room("洋室A", 0, 0, 3640, 2730, 2, texture="wood_oak")
+room("洋室B", 3640, 0, 2730, 2730, 2, texture="wood_oak")
+room("ホール", 6370, 0, 910, 2730, 2, texture="wood_oak")
+room("リネン庫", 0, 2730, 910, 910, 2, texture="wood_oak")
+room("廊下", 910, 2730, 6370, 910, 2, texture="wood_oak")
+room("廊下", 6370, 3640, 1820, 910, 2, texture="wood_oak")
+room("主寝室", 0, 3640, 2730, 3640, 2, texture="wood_oak")
+room("WIC", 2730, 3640, 910, 3640, 2, texture="wood_oak")
+room("書斎", 3640, 3640, 2730, 1820, 2, texture="wood_oak")
 # x3640-6370 / y5460-7280 はリビングの吹き抜け(床なし)
-room("納戸", 6370, 4550, 910, 2730, 2, texture="wood_floor")
+room("納戸", 6370, 4550, 910, 2730, 2, texture="wood_oak")
 room("トイレ", 7280, 4550, 910, 1820, 2, texture="tile_floor")
-room("収納", 7280, 6370, 910, 910, 2, texture="wood_floor")
+room("収納", 7280, 6370, 910, 910, 2, texture="wood_oak")
 # x7280-8190 / y0-3640 は階段吹き抜け(床なし)
 
 # ── 2F 建具

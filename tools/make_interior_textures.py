@@ -20,7 +20,9 @@
 
 ■ 出力
   assets/textures/
-    floor_wood_diffuse.jpg / _normal.jpg / _roughness.jpg   オーク 2P(151.5mm)
+    floor_oak_diffuse.jpg / _normal.jpg / _roughness.jpg    オーク 2P(151.5mm)
+    ※ floor_wood_*.jpg は**出荷済みの凍結素材**。保存プランが参照している
+      ので、ここでは作り直さない。差し替えると既存ユーザーの床が変わる
     floor_tile_diffuse.jpg / _normal.jpg / _roughness.jpg   600角 磁器質
     wall_plaster_white.jpg / wall_plaster_white_normal.jpg  外壁 塗り壁(白)
     wall_plaster_diffuse.jpg / wall_plaster_normal.jpg      内壁 塗り壁(グレージュ)
@@ -224,9 +226,9 @@ def make_wood_floor():
     rough = 0.54 + (-pore) * 0.005 + smooth_noise(rng, SIZE, 16, 0.035)
     rough = np.clip(rough, 0.42, 0.72) * 255
     return {
-        'floor_wood_diffuse': to_image(arr),
-        'floor_wood_normal': to_image(normal),
-        'floor_wood_roughness': to_image(np.repeat(rough[..., None], 3, axis=2)),
+        'floor_oak_diffuse': to_image(arr),
+        'floor_oak_normal': to_image(normal),
+        'floor_oak_roughness': to_image(np.repeat(rough[..., None], 3, axis=2)),
     }
 
 

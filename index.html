@@ -7089,6 +7089,7 @@ function onSheetLoad() {
     PATTERNS[key] = c;
   }
   extPat('wood_floor'); extPat('grass'); extPat('stone'); extPat('tile_floor');
+  PATTERNS['wood_oak']=PATTERNS['wood_floor'];   // 2Dのハッチは木目の総称
   draw2d();
 }
 if(window.location.protocol!=='file:'){
@@ -9328,7 +9329,10 @@ var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 var _texCache = {};
 // PBR texture map — high-quality generated textures in assets/textures/
 var ASSET_TEX_MAP = {
+  // wood_floor は出荷済みの素材。保存プランが参照しているので**凍結**する。
+  // 描き直したオークは別キー(wood_oak)として足す
   'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
+  'wood_oak':    'assets/textures/floor_oak_diffuse.jpg',
   'grass':       'assets/grass.png',
   'stone':       'assets/stone.png',
   'gravel':      'assets/stone.png',
@@ -9348,6 +9352,7 @@ var ASSET_TEX_MAP = {
 // 板幅も目地も実寸からずれる。表に無いキーは呼び出し側の既定値を使う。
 var TEX_TILE_M = {
   wood_floor: 1.818,      // 複合フローリングの定尺1818mm。2P(151.5mm)が12枚
+  wood_oak:   1.818,
   tile_floor: 1.8,        // 600角タイル3×3
   concrete:   1.8,
   porch_tile: 1.8,
@@ -9371,7 +9376,8 @@ var ASSET_TEX_NORMAL = {
   wall_int:       'assets/textures/wall_plaster_normal.jpg',
   siding:         'assets/textures/wall_siding_normal.jpg',
   galvalume_dark: 'assets/textures/wall_galvalume_dark_normal.jpg',
-  wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg'
+  wood_cedar:     'assets/textures/wood_cedar_warm_normal.jpg',
+  wood_oak:       'assets/textures/floor_oak_normal.jpg'
 };
 var _texNormalCache = {};
 function getTextureNormal3D(key){
@@ -18374,20 +18380,32 @@ function polyAreaAbs(poly){
   }
   return Math.abs(a)/2;
 }
+// 床材のキー → PBR3枚組(diffuse/normal/roughness)のファイル名の頭。
+// ここに載っているキーは「アプリが持っている床材」で、載っていないキーは
+// ユーザーがアップロードした画像として扱う
+var FLOOR_PBR_STEM = {
+  wood_floor: 'floor_wood',
+  wood_oak:   'floor_oak',
+  tile_floor: 'floor_tile'
+};
 function makeRoomFloorMaterial(r){
   var rw=r.w*U, rd=r.d*U;
   var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
-  var diffName=isWet?'floor_tile_diffuse.jpg':'floor_wood_diffuse.jpg';
-  var normName=isWet?'floor_tile_normal.jpg':'floor_wood_normal.jpg';
-  var roughName=isWet?'floor_tile_roughness.jpg':'floor_wood_roughness.jpg';
-  var tileM=texTileM(isWet?'tile_floor':'wood_floor',0.9);
+  // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
+  // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
+  var floorKey=FLOOR_PBR_STEM[r.texture]?r.texture:(isWet?'tile_floor':'wood_floor');
+  var stem=FLOOR_PBR_STEM[floorKey];
+  var diffName=stem+'_diffuse.jpg';
+  var normName=stem+'_normal.jpg';
+  var roughName=stem+'_roughness.jpg';
+  var tileM=texTileM(floorKey,0.9);
   var repU=Math.max(0.5,rw/tileM), repV=Math.max(0.5,rd/tileM);
   var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
   var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
   var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
   // マット塗装でも空は映る。0.06 では床が紙に見える
   var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.85,0.85),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.20};
-  if(r.texture&&r.texture!=='wood_floor'&&r.texture!=='tile_floor'){
+  if(r.texture&&!FLOOR_PBR_STEM[r.texture]){
     var tex=cloneRepeatReadyTexture(getTexture3D(r.texture));
     if(tex){
       setTextureRepeatNoDistort(tex,rw,rd,texTileM(r.texture,0.9)); applyTextureFlip(tex,r);

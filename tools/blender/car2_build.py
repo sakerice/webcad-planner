@@ -92,8 +92,10 @@ HW = W / 2
 #   **一致していなければならない**。アプリの makeGltfBoxFitClone は3軸を
 #   独立に伸縮するため、比が違うとその軸だけ潰れる(幅だけ8%細い車になる)。
 #   ドアミラーは全幅に含まれないが、bbox には含まれてしまう。そこで
-#   ボディを 1690 に絞り、ミラー先端でちょうど 1800 に届くよう設計する。
-BODY_W = 1.690
+#   ボディを 1655 に絞り、ミラー先端でちょうど 1800 に届くよう設計する。
+#   (1690 だとミラーの張り出しが 62mm しか取れず、ドアから生えた
+#    小さな突起にしか見えなかった)
+BODY_W = 1.655
 HWS = BODY_W / W                 # 平面図の半幅表(1800基準)に掛ける係数
 MIRROR_X = HW                    # ミラー最外(=全幅)
 ROOF_TOP = H                     # ルーフレール上端(=全高)
@@ -489,7 +491,7 @@ def body_materials():
         # ランプが付いていないように見える。実車もレンズの中は暗く、光るのは
         # 中のリフレクタとデイライトの線だけ。この明暗差が顔付きを作る
         mat('CarHeadlight', hex_lin('#2E3641'), rough=0.08, metal=0.25),
-        mat('CarTaillight', hex_lin('#C4141F'), rough=0.16, emit=1.1),
+        mat('CarTaillight', hex_lin('#A81620'), rough=0.16, emit=0.28),
         mat('CarGrille', hex_lin('#26292E'), rough=0.42),
         mat('CarDrl', hex_lin('#EFF4FF'), rough=0.08, emit=1.6),
         # ピラーとサッシ。参考図でも実車でも窓まわりは黒く塗られていて、
@@ -551,7 +553,7 @@ def build_wheel(y, sign, tire_m, rim_m, dark_m):
             me = bpy.data.meshes.new('spoke')
             bm = bmesh.new()
             bmesh.ops.create_cube(bm, size=1.0)
-            bmesh.ops.scale(bm, vec=Vector((0.024, rim_r * 0.74, 0.030)),
+            bmesh.ops.scale(bm, vec=Vector((0.026, rim_r * 0.76, 0.040)),
                             verts=bm.verts)
             bmesh.ops.translate(bm, verts=bm.verts,
                                 vec=Vector((0, rim_r * 0.46, 0)))
@@ -609,16 +611,29 @@ def build_lamp(sign, ys, z_lo, z_hi, material, name, out=0.008, bulge=0.012,
     ys は後→前(またはその逆)に並んだ y のリスト。x_inner を与えると、
     最初の点だけ中心寄りの位置に置いて正面/背面へ回り込ませる。
     """
-    zs = (z_lo, (z_lo + z_hi) / 2.0, z_hi)
     outs = (out, out + bulge, out)
+
+    def zs_at(y):
+        """その y で車体に収まる高さ3点。
+
+        全長にわたって同じ z で通すと、車体が上下に逃げる所でレンズが面から
+        飛び出し、3/4 から見て「赤い旗」が立つ。ここで station ごとに天端と
+        ロッカーで挟んでおけば、置き場所を微調整しなくても外へ出ない。
+        """
+        hi = min(z_hi, lerp_table(TOP_LINE, y) - 0.032)
+        lo = max(z_lo, lerp_table(ROCKER_Z, y) + 0.060)
+        if hi - lo < 0.020:
+            hi = lo + 0.020
+        return (lo, (lo + hi) / 2.0, hi)
     pts = [(ys[0], x_inner)] + [(y, None) for y in ys] if x_inner else \
         [(y, None) for y in ys]
     n = len(pts)
 
     def xz(i, k):
         y, forced = pts[i]
-        x = forced if forced is not None else surface_x(y, zs[k])
-        return x, y
+        z = zs_at(y)[k]
+        x = forced if forced is not None else surface_x(y, z)
+        return x, y, z
 
     # 平面内の外向き法線(進行方向を左90度)
     norms = []
@@ -630,6 +645,13 @@ def build_lamp(sign, ys, z_lo, z_hi, material, name, out=0.008, bulge=0.012,
         dx, dy = xb - xa, yb - ya
         ln = math.hypot(dx, dy) or 1.0
         norms.append((-dy / ln, dx / ln))
+    # 外向きかどうかを確かめる。輪郭を「中心寄り → 外 → 後方へ回り込む」の
+    # 順で並べると、前端(+y)では法線が +y(外)になるが、後端(-y)でも +y、
+    # つまり **車体の内側** を向く。テールランプだけレンズが8mm潜って
+    # 見えなくなるのはこれが原因(前で直したときに後ろを見落とした)。
+    # 先頭の点の y と法線の y の符号が合わなければ、全部反転する
+    if norms and norms[0][1] * pts[0][0] < 0:
+        norms = [(-nx, -ny) for nx, ny in norms]
 
     bm = bmesh.new()
     grid = []
@@ -637,9 +659,9 @@ def build_lamp(sign, ys, z_lo, z_hi, material, name, out=0.008, bulge=0.012,
         nx, ny = norms[i]
         col = []
         for k in range(3):
-            x, y = xz(i, k)
+            x, y, z = xz(i, k)
             col.append(bm.verts.new((sign * (x + nx * outs[k]),
-                                     y + ny * outs[k], zs[k])))
+                                     y + ny * outs[k], z)))
         grid.append(col)
     for i in range(n - 1):
         for k in range(2):
@@ -676,28 +698,33 @@ def build_lamps(head_m, drl_m, tail_m):
     # メッキモールを貼ったように見える
     fy = (2.200, 2.180, 2.140, 2.090, 2.020, 1.940)
     fy_drl = (2.200, 2.180, 2.140, 2.090, 2.030)
-    ry = (-2.200, -2.180, -2.140, -2.080, -1.960)
+    ry = (-2.200, -2.180, -2.140, -2.080, -2.010)
     objs = []
     for sign in (1, -1):
         # ヘッドランプ。ノーズの天端は y=2.200 で 0.725 なので、その下に
         # 収める。かつバンパーの暗い部分(z<0.44)より上に置き、ボディ色の
         # 面を背にしないと、暗いレンズが暗いバンパーに埋もれて見えなくなる
-        objs.append(build_lamp(sign, fy, 0.548, 0.652, head_m, 'headlamp_%d' % sign,
+        objs.append(build_lamp(sign, fy, 0.585, 0.689, head_m, 'headlamp_%d' % sign,
                                out=0.008, x_inner=0.395))
         # レンズの中で光る部分。暗いレンズに明るい線が入って初めてランプに見える
-        objs.append(build_lamp(sign, fy_drl, 0.578, 0.606, drl_m, 'proj_%d' % sign,
+        objs.append(build_lamp(sign, fy_drl, 0.612, 0.640, drl_m, 'proj_%d' % sign,
                                out=0.012, bulge=0.002, x_inner=0.410))
         # デイライト: ランプ上端の細い光の線。これの有無で顔付きが決まる
-        objs.append(build_lamp(sign, fy_drl, 0.656, 0.676, drl_m, 'drl_%d' % sign,
+        objs.append(build_lamp(sign, fy_drl, 0.693, 0.711, drl_m, 'drl_%d' % sign,
                                out=0.012, bulge=0.003, x_inner=0.385))
         # テールランプ: テールゲート脇。天端は y=-2.200 で 1.010
-        objs.append(build_lamp(sign, ry, 0.760, 0.960, tail_m, 'taillamp_%d' % sign,
+        objs.append(build_lamp(sign, ry, 0.800, 0.935, tail_m, 'taillamp_%d' % sign,
                                out=0.008, x_inner=0.240))
         # 四半部へ回り込む細い赤帯。真後ろだけだと 3/4 から見て消える
-        objs.append(build_lamp(sign, (-2.200, -2.140, -2.080, -1.980, -1.870),
-                               0.880, 0.945, tail_m,
-                               'taillamp_wrap_%d' % sign, out=0.010,
-                               bulge=0.004))
+        # 回り込みは四半部の途中で止める。ベルトラインの跳ね上げで
+        # 車体が上へ逃げる領域まで引くと、レンズが面から飛び出して
+        # 「赤い旗」が立つ
+        objs.append(build_lamp(sign,
+                               (-2.200, -2.170, -2.140, -2.105, -2.070,
+                                -2.040, -2.010),
+                               0.850, 0.918, tail_m,
+                               'taillamp_wrap_%d' % sign, out=0.007,
+                               bulge=0.003))
     return objs
 
 
@@ -751,6 +778,37 @@ def build_cut_line(sign, y, z_lo, z_hi, material, name, width=0.017,
     return ob
 
 
+def build_belt_strip(sign, ys, off_lo, off_hi, material, name, out=0.006):
+    """ベルトライン(その y のショルダー高さ)に沿った細い帯を張る。
+
+    高さが y ごとに変わる線に部材を通したいときは、必ずこれを使う。箱を
+    並べると各箱が別の高さの直方体になり、段々のかけらにしか見えない。
+    """
+    bm = bmesh.new()
+    cols = []
+    for y in ys:
+        zb = lerp_table(BELT_LINE, y)
+        col = []
+        for dz, o in ((off_lo, 0.0), ((off_lo + off_hi) / 2.0, out),
+                      (off_hi, 0.0)):
+            z = zb + dz
+            col.append(bm.verts.new((sign * (surface_x(y, z) + o + 0.002), y, z)))
+        cols.append(col)
+    for i in range(len(cols) - 1):
+        c0, c1 = cols[i], cols[i + 1]
+        for j in (0, 1):
+            q = (c0[j], c0[j + 1], c1[j + 1], c1[j])
+            bm.faces.new(q if sign > 0 else tuple(reversed(q)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    ob.data.materials.append(material)
+    return ob
+
+
 def build_body_details(dark_m, trim_m, chrome_m):
     """ドアの見切り・ハンドル・給油口。面の位置を拾ってから貼る。"""
     objs = []
@@ -772,6 +830,15 @@ def build_body_details(dark_m, trim_m, chrome_m):
                             (sign * (x + 0.014), y, zh),
                             (0.026, 0.135, 0.034), chrome_m,
                             bevel=0.008, segments=2))
+    # ベルトモール。黒いグリーンハウスとボディ色の境目に部材を1本通す。
+    # 実車は必ずここに窓枠のモールがあり、無いと黒帯が「塗り分け」に見える。
+    # **箱を並べてはいけない**。各箱が別の高さの直方体になるので、
+    # 段々のかけら(破線)にしか見えない。面に沿った連続した帯として張る
+    ys_belt = [v for v in STATION_Y
+               if GH['glass_side_r'][0] - 0.02 <= v <= GH['glass_side_f'][1] + 0.02]
+    for sign in (1, -1):
+        objs.append(build_belt_strip(sign, ys_belt, 0.016, 0.040, trim_m,
+                                     'beltmould_%d' % sign))
     # シャークフィンアンテナ。ルーフ後端の中央。無いと屋根が寂しい
     ya = GH['backlight'][1] - 0.060
     objs.append(box('antenna', (0.0, ya, lerp_table(TOP_LINE, ya) + 0.028),
@@ -789,13 +856,16 @@ def build_body_details(dark_m, trim_m, chrome_m):
         objs.append(build_cut_line(sign, yb + 0.010, zr_lo, zr_hi, dark_m,
                                    'cut_tg_%d' % sign, width=0.010))
     y_tail = STATION_Y[-1]                    # -2.200
-    objs.append(box('plate_r', (0.0, y_tail + 0.012, 0.560),
+    objs.append(box('plate_r', (0.0, y_tail + 0.012, 0.640),
                     (0.330, 0.016, 0.078), chrome_m, bevel=0.004))
     objs.append(box('rear_skid', (0.0, y_tail + 0.016, 0.432),
                     (0.900, 0.026, 0.090), dark_m, bevel=0.014, segments=2))
     for sx in (1, -1):                        # リヤリフレクタ
         objs.append(box('reflector_%d' % sx, (sx * 0.400, y_tail + 0.010, 0.470),
                         (0.110, 0.014, 0.036), trim_m, bevel=0.006))
+    for k in range(-2, 3):                    # ディフューザーの縦フィン
+        objs.append(box('diffuser_%d' % k, (k * 0.115, y_tail + 0.022, 0.372),
+                        (0.024, 0.040, 0.070), trim_m, bevel=0.006))
     # ワイパー2本。カウル(フロントガラス下端)に寝かせて置く
     ywc = GH['windscreen'][1]
     zwc = lerp_table(TOP_LINE, ywc) - 0.012
@@ -902,20 +972,25 @@ def build_grille(dark_m, chrome_m):
     objs = []
     y0 = STATION_Y[0]                       # 2.200
     # 中央の細いグリル。左右のヘッドランプ(内端 x=0.300)に掛からない幅にする
-    objs.append(box('grille_frame', (0.0, y0 - 0.014, 0.596),
-                    (0.520, 0.026, 0.092), dark_m, bevel=0.010, segments=2))
-    for k, z in enumerate((0.568, 0.596, 0.624)):
+    objs.append(box('grille_frame', (0.0, y0 - 0.014, 0.516),
+                    (0.560, 0.026, 0.086), dark_m, bevel=0.010, segments=2))
+    for k, z in enumerate((0.490, 0.516, 0.542)):
         objs.append(box('grille_bar_%d' % k, (0.0, y0 - 0.006, z),
-                        (0.480 - abs(k - 1) * 0.02, 0.012, 0.014), chrome_m,
+                        (0.516 - abs(k - 1) * 0.02, 0.012, 0.013), chrome_m,
                         bevel=0.004, segments=2))
     # 下部インテーク(バンパー開口)。参考図のこの車は下が大きく開いている
-    objs.append(box('intake', (0.0, y0 - 0.016, 0.428),
-                    (1.060, 0.026, 0.142), dark_m, bevel=0.014, segments=2))
+    objs.append(box('intake', (0.0, y0 - 0.016, 0.398),
+                    (1.100, 0.026, 0.116), dark_m, bevel=0.014, segments=2))
     for k in range(3):
-        objs.append(box('intake_bar_%d' % k, (0.0, y0 - 0.008, 0.386 + k * 0.042),
+        objs.append(box('intake_bar_%d' % k, (0.0, y0 - 0.008, 0.364 + k * 0.034),
                         (1.020 - k * 0.02, 0.010, 0.013), dark_m, bevel=0.003))
-    objs.append(box('plate_f', (0.0, y0 - 0.010, 0.500),
+    objs.append(box('plate_f', (0.0, y0 - 0.010, 0.516),
                     (0.330, 0.014, 0.078), chrome_m, bevel=0.004))
+    # バンパー隅の縦スリット(エアカーテン)。参考図にもあり、
+    # のっぺりした前隅に縦の区切りが入って締まる
+    for sx in (1, -1):
+        objs.append(box('air_curtain_%d' % sx, (sx * 0.545, y0 - 0.020, 0.430),
+                        (0.070, 0.030, 0.190), dark_m, bevel=0.014, segments=2))
     return objs
 
 
