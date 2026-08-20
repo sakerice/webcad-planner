@@ -125,6 +125,90 @@ def break_33(d):
     return d
 
 
+def _clone_furniture(d):
+    """フィクスチャの中から、大きめの家具を1つ複製して返す(位置は呼び側で決める)。"""
+    best = None
+    for i in d['items']:
+        if not lp.is_furniture(i):
+            continue
+        if (i.get('elev') or 0) >= 500:
+            continue
+        if best is None or i['w'] * i['d'] > best['w'] * best['d']:
+            best = i
+    c = copy.deepcopy(best)
+    c['id'] = max((x.get('id') or 0) for x in d['items']) + 1
+    d['items'].append(c)
+    return c
+
+
+def break_40(d):
+    """窓の見付けの真ん中に、腰高から立ち上がる大きな家具を置く。"""
+    wn = next(w for w in d['items']
+              if w['type'] == 'window' and (w.get('windowSill') or 0) > 300)
+    cx, cy = lp.center(wn)
+    (ux, uy), (vx, vy) = lp.axes(wn)
+    floor = wn.get('floor', 1)
+    # 部屋がある側へ200mmずらして置く
+    sign = 1 if lp.room_at(d, floor, cx + vx * 500, cy + vy * 500) else -1
+    c = _clone_furniture(d)
+    c['floor'] = floor
+    c['rot'] = wn.get('rot', 0)
+    c['elev'] = wn.get('windowSill') or 0
+    c['w'], c['d'] = wn['w'], 300
+    c['x'] = cx + vx * sign * 200 - c['w'] / 2.0
+    c['y'] = cy + vy * sign * 200 - c['d'] / 2.0
+    return d
+
+
+def break_41(d):
+    """窓のスパンの真ん中に、直交する壁を突き刺す。"""
+    wn = next(w for w in d['items'] if w['type'] == 'window')
+    cx, cy = lp.center(wn)
+    (ux, uy), (vx, vy) = lp.axes(wn)
+    d['walls'].append({
+        'id': max(w.get('id', 0) for w in d['walls']) + 1,
+        'x1': cx, 'y1': cy, 'x2': cx + vx * 2000, 'y2': cy + vy * 2000,
+        'thick': 120, 'floor': wn.get('floor', 1), 'color': '#888888'})
+    return d
+
+
+def break_42(d):
+    """玄関ドアの正面に、幅いっぱいの家具を立てる。"""
+    door = next(i for i in d['items'] if i['type'] == 'door-front')
+    cx, cy = lp.center(door)
+    (ux, uy), (vx, vy) = lp.axes(door)
+    floor = door.get('floor', 1)
+    sign = 1 if lp.room_at(d, floor, cx + vx * 500, cy + vy * 500) else -1
+    c = _clone_furniture(d)
+    c['floor'] = floor
+    c['rot'] = door.get('rot', 0)
+    c['elev'] = 0
+    c['w'], c['d'] = door['w'] + 200, 400
+    c['x'] = cx + vx * sign * 400 - c['w'] / 2.0
+    c['y'] = cy + vy * sign * 400 - c['d'] / 2.0
+    return d
+
+
+def break_43(d):
+    """いちばん広い開口の正面を、幅いっぱいの家具で塞ぐ。"""
+    op = max((i for i in d['items'] if i['type'] == 'door-opening'),
+             key=lambda i: i['w'])
+    cx, cy = lp.center(op)
+    (ux, uy), (vx, vy) = lp.axes(op)
+    floor = op.get('floor', 1)
+    sign = 1 if lp.room_at(d, floor, cx + vx * 700, cy + vy * 700) else -1
+    c = _clone_furniture(d)
+    c['floor'] = floor
+    c['rot'] = op.get('rot', 0)
+    c['elev'] = 0
+    # 開口の面に接した物は「開口の一部(対面カウンター)」として除外されるので、
+    # 少し離して置く
+    c['w'], c['d'] = op['w'], 500
+    c['x'] = cx + vx * sign * 600 - c['w'] / 2.0
+    c['y'] = cy + vy * sign * 600 - c['d'] / 2.0
+    return d
+
+
 CASES = [
     ('34', break_34, '玄関から居室が見通せる'),
     ('35', break_35, 'トイレの直下が居室'),
@@ -134,6 +218,10 @@ CASES = [
     ('30', break_30_wall, '家具の正面が壁'),
     ('39', break_30, '家具が相手に背を向けている'),
     ('33', break_33, '照明が天井から浮いている'),
+    ('40', break_40, '窓の見付けを家具が塞ぐ'),
+    ('41', break_41, '窓を壁が横切る'),
+    ('42', break_42, '玄関ドアの正面が塞がれる'),
+    ('43', break_43, '広い開口の正面が塞がれる'),
 ]
 
 fail = 0

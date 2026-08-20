@@ -2207,6 +2207,259 @@ def check29_void_guard(data):
     return out
 
 
+# ── 40〜43: 「lintが0件でも実物に残っていた粗」を拾う ───────────────
+def _item_height(it, cat):
+    h = (cat.get(it.get('type')) or (0, 0, 0))[2]
+    if h:
+        return h
+    return it.get('customHeight') or ITEM_FALLBACK_H.get(it.get('type'), 900)
+
+
+ITEM_FALLBACK_H = {'washer': 900, 'custom-block': 900, 'tree': 1500}
+
+
+def check40_window_face_blocked(data, root=None):
+    """窓の見付け(ガラス面の矩形)に、物が掛かっていないか。
+
+    27は「窓を開けるために手が届くか」を見る検査で、**窓と同じ壁面に物を
+    掛けてしまう**事故は素通りする。洗面の鏡を窓の上に重ねる、トイレの棚を
+    窓の前に吊る、玄関の下駄箱で採光窓を塞ぐ -- どれも実際にやった。
+    窓の内側400mm以内にあって、高さが窓の開口と重なる物を違反にする。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+    for wn in data['items']:
+        if wn.get('type') not in ('window', 'window-door'):
+            continue
+        floor = wn.get('floor', 1)
+        sill = wn.get('windowSill') or 0
+        top = sill + (wn.get('windowHeight') or 0)
+        if top <= sill:
+            continue
+        cx, cy = center(wn)
+        (ux, uy), (vx, vy) = axes(wn)
+        for sign in (1, -1):
+            # 部屋がある側だけを見る(屋外側はデッキ・室外機の定位置)
+            if room_at(data, floor, cx + vx * sign * 500, cy + vy * sign * 500) is None:
+                continue
+            zx, zy = cx + vx * sign * 200, cy + vy * sign * 200
+            zone = {'x': zx - wn['w'] / 2.0, 'y': zy - 200.0,
+                    'w': wn['w'], 'd': 400.0, 'rot': wn.get('rot', 0)}
+            zb = aabb(zone)
+            hits = []
+            for f in data['items']:
+                if f is wn or f.get('floor', 1) != floor or not is_furniture(f):
+                    continue
+                e = f.get('elev') or 0
+                h = _item_height(f, cat)
+                if e + h <= sill + 50 or e >= top - 50:
+                    continue          # 窓台より下 / 窓の上 = 見付けに掛からない
+                if min(e + h, top) - max(e, sill) < 150:
+                    continue          # 高さ方向の掛かりが浅い
+                ox, oy = rect_overlap(aabb(f), zb)
+                span = max(ox, oy) if wn['w'] > wn['d'] else min(ox, oy)
+                # 幅方向の掛かり。机上のランプのような小物までは咎めない
+                if ox <= 60 or oy <= 60:
+                    continue
+                span = ox if abs(ux) > abs(uy) else oy
+                if span < min(400.0, wn['w'] * 0.25):
+                    continue
+                hits.append('%s(高さ%.0f-%.0f・幅%.0fmm)'
+                            % (label(f), e, e + h, span))
+            if hits:
+                vio(out, wn, '窓の見付け(台%.0f-%.0fmm)を塞いでいる: %s'
+                    % (sill, top, ', '.join(sorted(hits))))
+    return out
+
+
+def check41_wall_across_opening(data):
+    """開口(窓を含む)を、直交する壁が横切っていないか。
+
+    20は建具だけを見て窓を外し、しかも壁の**端点**しか見ていなかった。
+    そのため「間仕切り壁が窓の真ん中に取り付く」形を素通りした。
+    開口の端で突き合う壁(=開口の見込みを作る壁)は正しいので、
+    **芯線が開口スパンの内側に入っているもの**だけを違反にする。
+    """
+    out = []
+    for it in data['items']:
+        if it.get('type') not in DOOR_TYPES:
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), _ = axes(it)
+        half = it['w'] / 2.0
+        ax, ay = cx - ux * half, cy - uy * half
+        for w in data.get('walls', []):
+            if w.get('floor', 1) != floor:
+                continue
+            ht = (w.get('thick', 120) or 120) / 2.0
+            ts, ps = [], []
+            for ex, ey in ((w['x1'], w['y1']), (w['x2'], w['y2'])):
+                ts.append((ex - ax) * ux + (ey - ay) * uy)
+                ps.append(-(ex - ax) * uy + (ey - ay) * ux)
+            # 開口と同じ線に乗っている壁(=開口を持つ親壁)は対象外
+            if abs(ps[0]) <= ht + 30 and abs(ps[1]) <= ht + 30:
+                continue
+            # 開口の線に届いていない壁は対象外
+            if min(abs(ps[0]), abs(ps[1])) > ht + 30 and ps[0] * ps[1] > 0:
+                continue
+            # **芯線**が開口スパンの内側にどれだけ入っているか。
+            # 直交する壁は開口の線に「点」で投影されるので、区間長ではなく
+            # 開口の端からの距離で見る(区間長で見ると常に0になり素通りする)
+            lo, hi = min(ts), max(ts)
+            if hi - lo < 30.0:
+                t = (lo + hi) / 2.0
+                inside = min(t, it['w'] - t)
+                if t <= 30.0 or t >= it['w'] - 30.0:
+                    inside = 0.0
+            else:
+                inside = min(hi, it['w'] - 30.0) - max(lo, 30.0)
+            if inside > 30.0:
+                vio(out, it, '開口(幅%.0fmm)を壁 id=%s が横切っている'
+                    '(開口の中に芯線が%.0fmm)' % (it['w'], w.get('id', '?'), inside))
+                break
+    return out
+
+
+def check42_door_side_blocked(data, root=None):
+    """建具の**片側**の前面が、背の高い物で塞がれていないか。
+
+    2は「両側とも塞がれている」ときしか出さない。押入れの中に棚があるのは
+    正しいので両側判定にしたのだが、そのせいで「玄関ドアの正面に鉢」
+    「寝室の引戸の前にベッド」が素通りした。塞がれている側が
+    **収納室でない** ときは、片側でも違反にする。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+    for it in data['items']:
+        if it.get('type') not in DOOR_TYPES or it.get('type') == 'window':
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), (vx, vy) = axes(it)
+        need = 600.0
+        for sign in (1, -1):
+            px, py = cx + vx * sign * (need / 2.0 + 120), cy + vy * sign * (need / 2.0 + 120)
+            r = room_at(data, floor, px, py)
+            if r is None:
+                continue                      # 屋外側は対象外
+            n = (r.get('n') or '')
+            if any(k in n for k in _STORAGE_ROOM_WORDS):
+                continue                      # 収納室の中は手を伸ばして使う
+            # 前面600mmの帯を開口に沿って刻み、連続して空いている幅を測る
+            zcx = cx + vx * sign * (need / 2.0 + 60)
+            zcy = cy + vy * sign * (need / 2.0 + 60)
+            zone_box = aabb({'x': zcx - it['w'] / 2.0, 'y': zcy - need / 2.0,
+                             'w': it['w'], 'd': need, 'rot': it.get('rot', 0)})
+            half = it['w'] / 2.0
+            STEP = 40.0
+            spans, cur, blockers = [], 0.0, set()
+            t = -half + 20
+            while t <= half - 20:
+                mx = cx + ux * t + vx * sign * (need / 2.0 + 60)
+                my = cy + uy * t + vy * sign * (need / 2.0 + 60)
+                cell = aabb({'x': mx - 20, 'y': my - need / 2.0,
+                             'w': 40, 'd': need, 'rot': it.get('rot', 0)})
+                hit = None
+                for f in data['items']:
+                    if f.get('floor', 1) != floor or not is_furniture(f):
+                        continue
+                    e = f.get('elev') or 0
+                    if e + _item_height(f, cat) <= 400:
+                        continue              # 踏み越えられる低い物
+                    if e >= 2000:
+                        continue              # 建具の高さより上(天井付けの器具)
+                    fb = aabb(f)
+                    # 帯へのめり込みが数mmしかない物は通路を塞いだ扱いにしない。
+                    # 刻みは40mmなので、判定の余裕はセルではなく**帯の奥行**で見る
+                    zox, zoy = rect_overlap(fb, zone_box)
+                    if min(zox, zoy) < 60.0:
+                        continue
+                    if rects_intersect(fb, cell, 0.0):
+                        hit = label(f)
+                        break
+                if hit:
+                    blockers.add(hit)
+                    spans.append(cur)
+                    cur = 0.0
+                else:
+                    cur += STEP
+                t += STEP
+            spans.append(cur)
+            if blockers and max(spans) < 600.0:
+                vio(out, it, '%s側の有効幅が%.0fmmしか残っていない'
+                    '(開口%.0fmm・%s)'
+                    % (n or '室', max(spans), it['w'], ', '.join(sorted(blockers))))
+    return out
+
+
+def check43_wide_opening_frontage(data, root=None):
+    """広い開口(1650mm以上)の前が、幅の半分以上にわたって空いているか。
+
+    13は「幅600mmの通り道が1本残っていれば通す」。全面開口のキッチンで
+    ペニンシュラが一部を塞ぐ形を許すためだが、そのせいで**2730mmの開口の
+    真正面に食卓が205mmで迫っている**形まで通していた。
+    開口が広いほど、そこは「通る場所」ではなく「つながっている場所」なので、
+    前面の空きは幅に比例して要る。
+    """
+    out = []
+    root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+    cat = _load_catalog(root) or {}
+    STEP = 60.0
+    for it in data['items']:
+        if it.get('type') not in ('door-opening', 'door-opening-arch'):
+            continue
+        if it['w'] < 1650:
+            continue
+        floor = it.get('floor', 1)
+        cx, cy = center(it)
+        (ux, uy), (vx, vy) = axes(it)
+        half = it['w'] / 2.0
+        for sign in (1, -1):
+            if room_at(data, floor, cx + vx * sign * 700, cy + vy * sign * 700) is None:
+                continue
+            free = 0
+            total = 0
+            t = -half + 30
+            while t <= half - 30:
+                total += 1
+                mx = cx + ux * t + vx * sign * 400
+                my = cy + uy * t + vy * sign * 400
+                cell = {'x': mx - 30, 'y': my - 30, 'w': 60, 'd': 60, 'rot': 0}
+                cb = aabb(cell)
+                blocked = False
+                for f in data['items']:
+                    if f.get('floor', 1) != floor or not is_furniture(f):
+                        continue
+                    if (f.get('elev') or 0) + _item_height(f, cat) <= 400:
+                        continue
+                    # 開口の面に接して立つ物(対面キッチンのカウンターなど)は
+                    # 障害物ではなく開口の一部。200mm以内に寄っていたら数えない
+                    fb = aabb(f)
+                    near = 1e9
+                    for ex, ey in ((fb[0], fb[1]), (fb[2], fb[1]),
+                                   (fb[0], fb[3]), (fb[2], fb[3])):
+                        near = min(near, abs((ex - cx) * vx + (ey - cy) * vy))
+                    if near < 200.0:
+                        continue
+                    if rects_intersect(aabb(f), cb, 0.0):
+                        blocked = True
+                        break
+                if not blocked:
+                    free += 1
+                t += STEP
+            if total and free < total * 0.5:
+                vio(out, it, '幅%.0fmmの開口の前面800mmが%d%%しか空いていない'
+                    '(%s側)。広い開口の正面に物を置かない'
+                    % (it['w'], round(100.0 * free / total),
+                       (room_at(data, floor, cx + vx * sign * 700,
+                                cy + vy * sign * 700) or {}).get('n', '')))
+    return out
+
+
+
 CHECKS = [
     ('1. 建具が壁線上に乗っているか', check1_doors_on_walls),
     ('2. 開き戸の開閉スペース', check2_swing_clearance),
@@ -2247,6 +2500,10 @@ CHECKS = [
     ('37. 居室の窓の数(採光と通風)', check37_room_windows),
     ('38. 洗う→干すの距離', check38_laundry_to_drying),
     ('39. 対で使う家具が互いを向いているか', check39_paired_facing),
+    ('40. 窓の見付けを塞ぐ物', check40_window_face_blocked),
+    ('41. 開口を横切る壁', check41_wall_across_opening),
+    ('42. 建具の片側の前面', check42_door_side_blocked),
+    ('43. 広い開口の前面通行帯', check43_wide_opening_frontage),
 ]
 
 

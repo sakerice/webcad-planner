@@ -1566,11 +1566,11 @@
   },
   {
    "id": 1069,
-   "type": "door-swing-s",
+   "type": "door-fold",
    "x": 3315.0,
-   "y": 1950.0,
+   "y": 2065.0,
    "w": 650,
-   "d": 650,
+   "d": 420,
    "rot": 90,
    "floor": 2,
    "flipX": false,
@@ -1729,7 +1729,7 @@
    "id": 1077,
    "type": "window",
    "x": -845.0,
-   "y": 3325.0,
+   "y": 3825.0,
    "w": 1690,
    "d": 150,
    "rot": 90,
@@ -1848,7 +1848,7 @@
   {
    "id": 1111,
    "type": "door-slide-s",
-   "x": 975.0,
+   "x": 1885.0,
    "y": 2655.0,
    "w": 780,
    "d": 150,
@@ -1905,9 +1905,9 @@
   {
    "id": 1114,
    "type": "door-fold-w",
-   "x": 1905.0,
-   "y": 4795.0,
-   "w": 1650,
+   "x": 2130.0,
+   "y": 4190.0,
+   "w": 1200,
    "d": 420,
    "rot": 90,
    "floor": 3,
@@ -1981,9 +1981,9 @@
   {
    "id": 1118,
    "type": "window",
-   "x": 520.0,
+   "x": 1422.5,
    "y": -75.0,
-   "w": 1690,
+   "w": 1235,
    "d": 150,
    "rot": 0,
    "floor": 3,
@@ -1994,7 +1994,7 @@
    "sY": 0,
    "color": "#000000",
    "colorCustom": true,
-   "windowStd": "16513",
+   "windowStd": "11909",
    "windowKind": "sliding",
    "windowSill": 660,
    "windowHeight": 1370,
@@ -2018,8 +2018,8 @@
    "colorCustom": true,
    "windowStd": "07409",
    "windowKind": "sliding",
-   "windowSill": 660,
-   "windowHeight": 1370,
+   "windowSill": 1200,
+   "windowHeight": 830,
    "sashColor": "#1c1c1c"
   },
   {
@@ -2048,7 +2048,7 @@
    "id": 1121,
    "type": "window",
    "x": -845.0,
-   "y": 4125.0,
+   "y": 4625.0,
    "w": 1690,
    "d": 150,
    "rot": 90,
@@ -2068,28 +2068,6 @@
   },
   {
    "id": 1122,
-   "type": "window",
-   "x": -202.5,
-   "y": 5525.0,
-   "w": 405,
-   "d": 150,
-   "rot": 90,
-   "floor": 3,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": "#000000",
-   "colorCustom": true,
-   "windowStd": "03613",
-   "windowKind": "casement",
-   "windowSill": 660,
-   "windowHeight": 1370,
-   "sashColor": "#1c1c1c"
-  },
-  {
-   "id": 1123,
    "type": "window",
    "x": 4615.0,
    "y": 4825.0,
@@ -2111,7 +2089,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1124,
+   "id": 1123,
    "type": "window",
    "x": 975.0,
    "y": 8115.0,
@@ -2133,7 +2111,7 @@
    "sashColor": "#1c1c1c"
   },
   {
-   "id": 1125,
+   "id": 1124,
    "type": "roof",
    "x": -450.0,
    "y": -450.0,
@@ -2156,7 +2134,7 @@
    "roofEdgeColor": "#2B2B2B"
   },
   {
-   "id": 1126,
+   "id": 1125,
    "type": "roof",
    "x": 3640.0,
    "y": 8070.0,
@@ -2179,7 +2157,7 @@
    "roofEdgeColor": "#2B2B2B"
   },
   {
-   "id": 1127,
+   "id": 1126,
    "type": "site-rect",
    "x": -910.0,
    "y": -910.0,
@@ -2197,7 +2175,7 @@
    "siteSurface": "grass"
   },
   {
-   "id": 1128,
+   "id": 1127,
    "type": "site-rect",
    "x": -910.0,
    "y": 8190.0,
@@ -2215,7 +2193,7 @@
    "siteSurface": "concrete"
   },
   {
-   "id": 1129,
+   "id": 1128,
    "type": "fence",
    "x": -910.0,
    "y": -910.0,
@@ -2232,7 +2210,7 @@
    "colorCustom": true
   },
   {
-   "id": 1130,
+   "id": 1129,
    "type": "fence",
    "x": -910.0,
    "y": -790.0,
@@ -2249,7 +2227,7 @@
    "colorCustom": true
   },
   {
-   "id": 1131,
+   "id": 1130,
    "type": "fence",
    "x": 6250.0,
    "y": -790.0,
@@ -2266,7 +2244,7 @@
    "colorCustom": true
   },
   {
-   "id": 1132,
+   "id": 1131,
    "type": "lattice-screen",
    "x": 200.0,
    "y": 9770.0,
@@ -2286,7 +2264,7 @@
    "fenceTopStyle": "even"
   },
   {
-   "id": 1133,
+   "id": 1132,
    "type": "custom-block",
    "x": 3640.0,
    "y": 8190.0,
@@ -2306,7 +2284,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": 1134,
+   "id": 1133,
    "type": "exterior-stair",
    "x": 3640.0,
    "y": 9100.0,
@@ -2326,7 +2304,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": 1135,
+   "id": 1134,
    "type": "custom-block",
    "x": 2400.0,
    "y": 9100.0,
@@ -2346,7 +2324,7 @@
    "texture": "porch_tile"
   },
   {
-   "id": 1136,
+   "id": 1135,
    "type": "fmp-GatePost01",
    "x": 4800.0,
    "y": 10250.0,
@@ -2363,7 +2341,7 @@
    "colorCustom": false
   },
   {
-   "id": 1137,
+   "id": 1136,
    "type": "bicycle",
    "x": 410.0,
    "y": 9225.0,
@@ -2380,7 +2358,7 @@
    "colorCustom": true
   },
   {
-   "id": 1138,
+   "id": 1137,
    "type": "bicycle-fold",
    "x": 2325.0,
    "y": 9425.0,
@@ -2397,7 +2375,7 @@
    "colorCustom": true
   },
   {
-   "id": 1139,
+   "id": 1138,
    "type": "tree",
    "x": 2550.0,
    "y": 8150.0,
@@ -2414,7 +2392,7 @@
    "colorCustom": true
   },
   {
-   "id": 1140,
+   "id": 1139,
    "type": "gas-heater",
    "x": 4965.0,
    "y": -470.0,
@@ -2431,7 +2409,7 @@
    "colorCustom": false
   },
   {
-   "id": 1141,
+   "id": 1140,
    "type": "meter-box",
    "x": -250.0,
    "y": 640.0,
@@ -2449,7 +2427,7 @@
    "elev": 1600
   },
   {
-   "id": 1142,
+   "id": 1141,
    "type": "sewer-pit",
    "x": 5750.0,
    "y": -650.0,
@@ -2466,7 +2444,7 @@
    "colorCustom": true
   },
   {
-   "id": 1143,
+   "id": 1142,
    "type": "sewer-pit",
    "x": 5750.0,
    "y": 1350.0,
@@ -2483,7 +2461,7 @@
    "colorCustom": true
   },
   {
-   "id": 1144,
+   "id": 1143,
    "type": "sewer-pit",
    "x": 5750.0,
    "y": 3850.0,
@@ -2500,7 +2478,7 @@
    "colorCustom": true
   },
   {
-   "id": 1145,
+   "id": 1144,
    "type": "fmp-AirConditionerWall01",
    "x": -210.0,
    "y": 3270.0,
@@ -2518,7 +2496,7 @@
    "elev": 2050
   },
   {
-   "id": 1146,
+   "id": 1145,
    "type": "ac-outdoor",
    "x": -730.0,
    "y": 3250.0,
@@ -2535,7 +2513,7 @@
    "colorCustom": true
   },
   {
-   "id": 1147,
+   "id": 1146,
    "type": "fmp-AirConditionerWall01",
    "x": -210.0,
    "y": 4070.0,
@@ -2553,7 +2531,7 @@
    "elev": 2050
   },
   {
-   "id": 1148,
+   "id": 1147,
    "type": "ac-outdoor",
    "x": -730.0,
    "y": 4850.0,
@@ -2570,7 +2548,7 @@
    "colorCustom": true
   },
   {
-   "id": 1149,
+   "id": 1148,
    "type": "fmp-AirConditionerWall01",
    "x": 965.0,
    "y": 60.0,
@@ -2588,7 +2566,7 @@
    "elev": 2050
   },
   {
-   "id": 1150,
+   "id": 1149,
    "type": "ac-outdoor",
    "x": 965.0,
    "y": -460.0,
@@ -2605,7 +2583,7 @@
    "colorCustom": true
   },
   {
-   "id": 1151,
+   "id": 1150,
    "type": "road",
    "x": -12270.0,
    "y": 10465.0,
@@ -2623,7 +2601,7 @@
    "contextHeight": 70
   },
   {
-   "id": 1152,
+   "id": 1151,
    "type": "utility-pole",
    "x": 6525.0,
    "y": 10725.0,
@@ -2641,7 +2619,7 @@
    "contextHeight": 6500
   },
   {
-   "id": 1153,
+   "id": 1152,
    "type": "neighbor-house",
    "x": 7280.0,
    "y": 815.0,
@@ -2661,7 +2639,7 @@
    "contextGhost": true
   },
   {
-   "id": 1154,
+   "id": 1153,
    "type": "neighbor-house",
    "x": -9100.0,
    "y": 815.0,
@@ -2681,7 +2659,7 @@
    "contextGhost": true
   },
   {
-   "id": 1155,
+   "id": 1154,
    "type": "neighbor-house",
    "x": -910.0,
    "y": -7280.0,
@@ -2701,7 +2679,7 @@
    "contextGhost": true
   },
   {
-   "id": 1156,
+   "id": 1155,
    "type": "fmp-BathTub03",
    "x": -189.5,
    "y": 532.5,
@@ -2718,7 +2696,7 @@
    "colorCustom": false
   },
   {
-   "id": 1157,
+   "id": 1156,
    "type": "fmp-ShowerSystem03",
    "x": 1109.5,
    "y": 34.5,
@@ -2735,7 +2713,7 @@
    "colorCustom": false
   },
   {
-   "id": 1158,
+   "id": 1157,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-70923_frame",
    "x": 302.0,
    "y": 72.5,
@@ -2753,7 +2731,7 @@
    "elev": 1000
   },
   {
-   "id": 1159,
+   "id": 1158,
    "type": "fmp-BathroomVanity07",
    "x": 2259.0,
    "y": 87.0,
@@ -2770,7 +2748,7 @@
    "colorCustom": false
   },
   {
-   "id": 1160,
+   "id": 1159,
    "type": "fmp-WashBasin01",
    "x": 2278.0,
    "y": 82.5,
@@ -2788,7 +2766,7 @@
    "elev": 695
   },
   {
-   "id": 1161,
+   "id": 1160,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-70923_frame",
    "x": 2202.0,
    "y": 72.5,
@@ -2806,7 +2784,7 @@
    "elev": 1000
   },
   {
-   "id": 1162,
+   "id": 1161,
    "type": "washer",
    "x": 2980.0,
    "y": 70.0,
@@ -2823,7 +2801,7 @@
    "colorCustom": false
   },
   {
-   "id": 1163,
+   "id": 1162,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
    "x": 125.0,
    "y": 1880.0,
@@ -2841,7 +2819,7 @@
    "elev": 900
   },
   {
-   "id": 1164,
+   "id": 1163,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
    "x": 915.0,
    "y": 1880.0,
@@ -2859,7 +2837,7 @@
    "elev": 900
   },
   {
-   "id": 1165,
+   "id": 1164,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
    "x": 492.0,
    "y": 1880.0,
@@ -2877,13 +2855,30 @@
    "elev": 1720
   },
   {
-   "id": 1166,
+   "id": 1165,
    "type": "im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray",
    "x": 479.0,
    "y": 3229.0,
    "w": 442,
    "d": 342,
    "rot": 0,
+   "floor": 1,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false
+  },
+  {
+   "id": 1166,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
+   "x": 1867.0,
+   "y": 1917.0,
+   "w": 816,
+   "d": 266,
+   "rot": 180,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2908,28 +2903,11 @@
    "sX": 0,
    "sY": 0,
    "color": null,
-   "colorCustom": false
-  },
-  {
-   "id": 1168,
-   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
-   "x": 1867.0,
-   "y": 1917.0,
-   "w": 816,
-   "d": 266,
-   "rot": 180,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
    "colorCustom": false,
    "elev": 1200
   },
   {
-   "id": 1169,
+   "id": 1168,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
    "x": 1867.0,
    "y": 3267.0,
@@ -2946,7 +2924,7 @@
    "colorCustom": false
   },
   {
-   "id": 1170,
+   "id": 1169,
    "type": "fmp-Toilet01",
    "x": 3925.5,
    "y": 60.0,
@@ -2963,13 +2941,13 @@
    "colorCustom": false
   },
   {
-   "id": 1171,
+   "id": 1170,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
-   "x": 3687.0,
-   "y": 80.0,
+   "x": 3427.0,
+   "y": 567.0,
    "w": 816,
    "d": 266,
-   "rot": 180,
+   "rot": 90,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -2981,9 +2959,9 @@
    "elev": 1500
   },
   {
-   "id": 1172,
+   "id": 1171,
    "type": "fmp-Bed14",
-   "x": 127.0,
+   "x": 377.0,
    "y": 3750.5,
    "w": 1546,
    "d": 1899,
@@ -2998,9 +2976,9 @@
    "colorCustom": false
   },
   {
-   "id": 1173,
+   "id": 1172,
    "type": "im0261-Table-MEGA_PACK_Table-table-309959",
-   "x": 1870.0,
+   "x": 2170.0,
    "y": 3770.0,
    "w": 460,
    "d": 460,
@@ -3015,9 +2993,9 @@
    "colorCustom": false
   },
   {
-   "id": 1174,
+   "id": 1173,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame",
-   "x": 2000.0,
+   "x": 2300.0,
    "y": 3900.0,
    "w": 200,
    "d": 200,
@@ -3033,7 +3011,7 @@
    "elev": 513
   },
   {
-   "id": 1175,
+   "id": 1174,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame",
    "x": 300.0,
    "y": 5550.0,
@@ -3050,7 +3028,7 @@
    "colorCustom": false
   },
   {
-   "id": 1176,
+   "id": 1175,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
    "x": -515.0,
    "y": 6475.0,
@@ -3067,7 +3045,7 @@
    "colorCustom": false
   },
   {
-   "id": 1177,
+   "id": 1176,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
    "x": 102.5,
    "y": 7607.0,
@@ -3084,7 +3062,7 @@
    "colorCustom": false
   },
   {
-   "id": 1178,
+   "id": 1177,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 348.0,
    "y": 8008.5,
@@ -3101,7 +3079,7 @@
    "colorCustom": false
   },
   {
-   "id": 1179,
+   "id": 1178,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 1048.0,
    "y": 8008.5,
@@ -3118,7 +3096,7 @@
    "colorCustom": false
   },
   {
-   "id": 1180,
+   "id": 1179,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
    "x": -1001.0,
    "y": 4582.5,
@@ -3136,13 +3114,13 @@
    "elev": 660
   },
   {
-   "id": 1181,
+   "id": 1180,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown",
-   "x": 4598.5,
+   "x": 3493.5,
    "y": 6504.5,
    "w": 1003,
    "d": 591,
-   "rot": -90,
+   "rot": 90,
    "floor": 1,
    "flipX": false,
    "flipY": false,
@@ -3153,7 +3131,7 @@
    "colorCustom": false
   },
   {
-   "id": 1182,
+   "id": 1181,
    "type": "im0261-Mirror-MEGA_PACK_Mirror-mirror-498995_frame_light_brown",
    "x": 5006.0,
    "y": 5733.5,
@@ -3170,24 +3148,7 @@
    "colorCustom": false
   },
   {
-   "id": 1183,
-   "type": "im0261-Plant-MEGA_PACK_Plant-plant-143525_frame",
-   "x": 4924.5,
-   "y": 7571.0,
-   "w": 451,
-   "d": 458,
-   "rot": 0,
-   "floor": 1,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false
-  },
-  {
-   "id": 1184,
+   "id": 1182,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
    "x": 3020.0,
    "y": 5940.0,
@@ -3204,7 +3165,7 @@
    "colorCustom": false
   },
   {
-   "id": 1185,
+   "id": 1183,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
    "x": 3020.0,
    "y": 7540.0,
@@ -3221,7 +3182,7 @@
    "colorCustom": false
   },
   {
-   "id": 1186,
+   "id": 1184,
    "type": "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
    "x": 2951.0,
    "y": 5399.5,
@@ -3239,7 +3200,7 @@
    "elev": 1100
   },
   {
-   "id": 1187,
+   "id": 1185,
    "type": "fmp-CabinetD01",
    "x": 200.0,
    "y": 60.5,
@@ -3256,7 +3217,7 @@
    "colorCustom": false
   },
   {
-   "id": 1188,
+   "id": 1186,
    "type": "fmp-CabinetD_Sink",
    "x": 566.0,
    "y": 60.5,
@@ -3273,7 +3234,7 @@
    "colorCustom": false
   },
   {
-   "id": 1189,
+   "id": 1187,
    "type": "fmp-CabinetD02",
    "x": 1298.0,
    "y": 60.5,
@@ -3290,7 +3251,7 @@
    "colorCustom": false
   },
   {
-   "id": 1190,
+   "id": 1188,
    "type": "fmp-CabinetD03",
    "x": 1664.0,
    "y": 60.5,
@@ -3307,7 +3268,7 @@
    "colorCustom": false
   },
   {
-   "id": 1191,
+   "id": 1189,
    "type": "fmp-GasStove07",
    "x": 1456.0,
    "y": 66.5,
@@ -3325,7 +3286,7 @@
    "elev": 797
   },
   {
-   "id": 1192,
+   "id": 1190,
    "type": "fmp-KitchenExhaust07",
    "x": 1509.0,
    "y": 87.0,
@@ -3343,9 +3304,9 @@
    "elev": 1970
   },
   {
-   "id": 1193,
+   "id": 1191,
    "type": "fmp-Refrigerator02",
-   "x": 2060.0,
+   "x": 2000.0,
    "y": 1552.5,
    "w": 640,
    "d": 695,
@@ -3360,9 +3321,9 @@
    "colorCustom": false
   },
   {
-   "id": 1194,
+   "id": 1192,
    "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
-   "x": 330.0,
+   "x": 210.0,
    "y": 144.5,
    "w": 340,
    "d": 351,
@@ -3378,25 +3339,7 @@
    "elev": 900
   },
   {
-   "id": 1195,
-   "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
-   "x": 772.5,
-   "y": 185.0,
-   "w": 255,
-   "d": 270,
-   "rot": 180,
-   "floor": 2,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "elev": 900
-  },
-  {
-   "id": 1196,
+   "id": 1193,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
    "x": 2777.0,
    "y": 1880.0,
@@ -3414,7 +3357,42 @@
    "elev": 1500
   },
   {
-   "id": 1197,
+   "id": 1194,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+   "x": 2886.5,
+   "y": 1887.5,
+   "w": 597,
+   "d": 305,
+   "rot": 180,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false
+  },
+  {
+   "id": 1195,
+   "type": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
+   "x": 3057.5,
+   "y": 1905.0,
+   "w": 255,
+   "d": 270,
+   "rot": 180,
+   "floor": 2,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false,
+   "elev": 650
+  },
+  {
+   "id": 1196,
    "type": "fmp-Toilet01",
    "x": 3015.5,
    "y": 60.0,
@@ -3431,13 +3409,13 @@
    "colorCustom": false
   },
   {
-   "id": 1198,
+   "id": 1197,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715",
    "x": 2777.0,
-   "y": 80.0,
+   "y": 1474.0,
    "w": 816,
    "d": 266,
-   "rot": 180,
+   "rot": 0,
    "floor": 2,
    "flipX": false,
    "flipY": false,
@@ -3449,7 +3427,7 @@
    "elev": 1600
   },
   {
-   "id": 1199,
+   "id": 1198,
    "type": "im0261-Tableset-MEGA_PACK_Tableset-tableset_456939_Frame_Walnutbrown",
    "x": 1225.5,
    "y": 3445.5,
@@ -3466,7 +3444,7 @@
    "colorCustom": false
   },
   {
-   "id": 1200,
+   "id": 1199,
    "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
    "x": -500.0,
    "y": 5775.0,
@@ -3483,7 +3461,7 @@
    "colorCustom": false
   },
   {
-   "id": 1201,
+   "id": 1200,
    "type": "im0261-Tv-MEGA_PACK_tv-electronic-280915",
    "x": -355.0,
    "y": 5894.5,
@@ -3501,7 +3479,7 @@
    "elev": 900
   },
   {
-   "id": 1202,
+   "id": 1201,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
    "x": 400.0,
    "y": 5250.0,
@@ -3518,7 +3496,7 @@
    "colorCustom": false
   },
   {
-   "id": 1203,
+   "id": 1202,
    "type": "fmp-Sofa16",
    "x": 1430.5,
    "y": 5613.0,
@@ -3535,7 +3513,7 @@
    "colorCustom": false
   },
   {
-   "id": 1204,
+   "id": 1203,
    "type": "im0261-Table-MEGA_PACK_Table-table-309959",
    "x": 1240.0,
    "y": 5770.0,
@@ -3552,7 +3530,7 @@
    "colorCustom": false
   },
   {
-   "id": 1205,
+   "id": 1204,
    "type": "im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
    "x": 1335.0,
    "y": 5895.5,
@@ -3570,7 +3548,7 @@
    "elev": 513
   },
   {
-   "id": 1206,
+   "id": 1205,
    "type": "im0261-Plant-MEGA_PACK_Plant-plant-230510",
    "x": 4741.0,
    "y": 3940.5,
@@ -3587,7 +3565,7 @@
    "colorCustom": false
   },
   {
-   "id": 1207,
+   "id": 1206,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
    "x": 3750.0,
    "y": 7800.0,
@@ -3604,7 +3582,7 @@
    "colorCustom": false
   },
   {
-   "id": 1208,
+   "id": 1207,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
    "x": 4600.0,
    "y": 7800.0,
@@ -3621,7 +3599,7 @@
    "colorCustom": false
   },
   {
-   "id": 1209,
+   "id": 1208,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 598.0,
    "y": 8008.5,
@@ -3638,7 +3616,7 @@
    "colorCustom": false
   },
   {
-   "id": 1210,
+   "id": 1209,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
    "x": 1698.0,
    "y": 8008.5,
@@ -3655,10 +3633,10 @@
    "colorCustom": false
   },
   {
-   "id": 1211,
+   "id": 1210,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
    "x": -1001.0,
-   "y": 3382.5,
+   "y": 3882.5,
    "w": 2202,
    "d": 35,
    "rot": 90,
@@ -3673,7 +3651,7 @@
    "elev": 660
   },
   {
-   "id": 1212,
+   "id": 1211,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-476641_frame",
    "x": 3220.0,
    "y": 4284.5,
@@ -3691,7 +3669,7 @@
    "elev": 1100
   },
   {
-   "id": 1213,
+   "id": 1212,
    "type": "fmp-CeilingFan01",
    "x": 1220.0,
    "y": 6680.0,
@@ -3709,7 +3687,7 @@
    "elev": 4858
   },
   {
-   "id": 1214,
+   "id": 1213,
    "type": "fmp-Bed05",
    "x": 344.0,
    "y": 125.0,
@@ -3726,7 +3704,7 @@
    "colorCustom": false
   },
   {
-   "id": 1215,
+   "id": 1214,
    "type": "fmp-Table44",
    "x": 1575.5,
    "y": 78.0,
@@ -3743,10 +3721,10 @@
    "colorCustom": false
   },
   {
-   "id": 1216,
+   "id": 1215,
    "type": "fmp-Chair29",
    "x": 1735.0,
-   "y": 779.0,
+   "y": 679.0,
    "w": 430,
    "d": 442,
    "rot": 0,
@@ -3760,7 +3738,7 @@
    "colorCustom": false
   },
   {
-   "id": 1217,
+   "id": 1216,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
    "x": 500.0,
    "y": 1350.0,
@@ -3777,12 +3755,12 @@
    "colorCustom": false
   },
   {
-   "id": 1218,
-   "type": "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
-   "x": 1837.5,
-   "y": 225.0,
-   "w": 525,
-   "d": 230,
+   "id": 1217,
+   "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame",
+   "x": 2227.5,
+   "y": 220.5,
+   "w": 245,
+   "d": 239,
    "rot": 180,
    "floor": 3,
    "flipX": false,
@@ -3795,12 +3773,29 @@
    "elev": 626
   },
   {
+   "id": 1218,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+   "x": 2886.5,
+   "y": 62.5,
+   "w": 597,
+   "d": 305,
+   "rot": 180,
+   "floor": 3,
+   "flipX": false,
+   "flipY": false,
+   "sScale": 1,
+   "sX": 0,
+   "sY": 0,
+   "color": null,
+   "colorCustom": false
+  },
+  {
    "id": 1219,
-   "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
-   "x": 264.0,
-   "y": 82.5,
-   "w": 2202,
-   "d": 35,
+   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
+   "x": 2886.5,
+   "y": 62.5,
+   "w": 597,
+   "d": 305,
    "rot": 180,
    "floor": 3,
    "flipX": false,
@@ -3810,33 +3805,15 @@
    "sY": 0,
    "color": null,
    "colorCustom": false,
-   "elev": 660
+   "elev": 700
   },
   {
    "id": 1220,
-   "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-203701_yellow",
-   "x": -474.0,
-   "y": 1289.0,
-   "w": 1300,
-   "d": 152,
-   "rot": 90,
-   "floor": 3,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false,
-   "elev": 530
-  },
-  {
-   "id": 1221,
-   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
-   "x": 2886.5,
-   "y": 97.5,
-   "w": 597,
-   "d": 305,
+   "type": "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger",
+   "x": 2922.5,
+   "y": 100.0,
+   "w": 525,
+   "d": 230,
    "rot": 180,
    "floor": 3,
    "flipX": false,
@@ -3845,29 +3822,13 @@
    "sX": 0,
    "sY": 0,
    "color": null,
-   "colorCustom": false
+   "colorCustom": false,
+   "elev": 1350
   },
   {
-   "id": 1222,
-   "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
-   "x": 2886.5,
-   "y": 2327.5,
-   "w": 597,
-   "d": 305,
-   "rot": 0,
-   "floor": 3,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false
-  },
-  {
-   "id": 1223,
+   "id": 1221,
    "type": "fmp-Bed14",
-   "x": 127.0,
+   "x": 527.0,
    "y": 4405.5,
    "w": 1546,
    "d": 1899,
@@ -3882,9 +3843,9 @@
    "colorCustom": false
   },
   {
-   "id": 1224,
+   "id": 1222,
    "type": "im0261-Table-MEGA_PACK_Table-table-309959",
-   "x": 1770.0,
+   "x": 2120.0,
    "y": 5670.0,
    "w": 460,
    "d": 460,
@@ -3899,9 +3860,9 @@
    "colorCustom": false
   },
   {
-   "id": 1225,
+   "id": 1223,
    "type": "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame",
-   "x": 1900.0,
+   "x": 2250.0,
    "y": 5800.0,
    "w": 200,
    "d": 200,
@@ -3917,7 +3878,7 @@
    "elev": 513
   },
   {
-   "id": 1226,
+   "id": 1224,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame",
    "x": 400.0,
    "y": 3850.0,
@@ -3934,27 +3895,10 @@
    "colorCustom": false
   },
   {
-   "id": 1227,
-   "type": "im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame",
-   "x": 2102.5,
-   "y": 4507.0,
-   "w": 395,
-   "d": 386,
-   "rot": 0,
-   "floor": 3,
-   "flipX": false,
-   "flipY": false,
-   "sScale": 1,
-   "sX": 0,
-   "sY": 0,
-   "color": null,
-   "colorCustom": false
-  },
-  {
-   "id": 1228,
+   "id": 1225,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
    "x": -1001.0,
-   "y": 4182.5,
+   "y": 4782.5,
    "w": 2202,
    "d": 35,
    "rot": 90,
@@ -3969,9 +3913,9 @@
    "elev": 660
   },
   {
-   "id": 1229,
+   "id": 1226,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
-   "x": 650.0,
+   "x": 1050.0,
    "y": 6299.0,
    "w": 500,
    "d": 10,
@@ -3987,13 +3931,13 @@
    "elev": 1500
   },
   {
-   "id": 1230,
+   "id": 1227,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
-   "x": 2886.5,
-   "y": 3747.5,
+   "x": 3129.5,
+   "y": 5347.5,
    "w": 597,
    "d": 305,
-   "rot": 180,
+   "rot": -90,
    "floor": 3,
    "flipX": false,
    "flipY": false,
@@ -4004,7 +3948,7 @@
    "colorCustom": false
   },
   {
-   "id": 1231,
+   "id": 1228,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
    "x": 2886.5,
    "y": 5947.5,
@@ -4021,7 +3965,7 @@
    "colorCustom": false
   },
   {
-   "id": 1232,
+   "id": 1229,
    "type": "fmp-Bed03",
    "x": 4335.0,
    "y": 4434.0,
@@ -4038,7 +3982,7 @@
    "colorCustom": false
   },
   {
-   "id": 1233,
+   "id": 1230,
    "type": "im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
    "x": 3860.0,
    "y": 6005.5,
@@ -4055,7 +3999,7 @@
    "colorCustom": false
   },
   {
-   "id": 1234,
+   "id": 1231,
    "type": "im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1",
    "x": 4531.0,
    "y": 6419.0,
@@ -4072,7 +4016,7 @@
    "colorCustom": false
   },
   {
-   "id": 1235,
+   "id": 1232,
    "type": "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615",
    "x": 4281.0,
    "y": 4882.5,
@@ -4090,7 +4034,7 @@
    "elev": 950
   },
   {
-   "id": 1236,
+   "id": 1233,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
    "x": 3801.5,
    "y": 7747.5,
@@ -4107,7 +4051,7 @@
    "colorCustom": false
   },
   {
-   "id": 1237,
+   "id": 1234,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
    "x": 4701.5,
    "y": 7747.5,
@@ -4124,7 +4068,7 @@
    "colorCustom": false
   },
   {
-   "id": 1238,
+   "id": 1235,
    "type": "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural",
    "x": 3796.5,
    "y": 59.5,
@@ -4142,7 +4086,7 @@
    "elev": 1100
   },
   {
-   "id": 1239,
+   "id": 1236,
    "type": "im0261-Decor-MEGA_PACK_decor-decor-shop_the_look",
    "x": 3972.0,
    "y": 159.0,
@@ -4160,7 +4104,7 @@
    "elev": 1750
   },
   {
-   "id": 1240,
+   "id": 1237,
    "type": "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
    "x": 450.0,
    "y": 2785.0,
@@ -4178,7 +4122,7 @@
    "elev": 1450
   },
   {
-   "id": 1241,
+   "id": 1238,
    "type": "light-down",
    "x": 820.0,
    "y": 820.0,
@@ -4203,7 +4147,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1242,
+   "id": 1239,
    "type": "light-down",
    "x": 2640.0,
    "y": 810.0,
@@ -4228,7 +4172,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1243,
+   "id": 1240,
    "type": "light-down",
    "x": 810.0,
    "y": 2410.0,
@@ -4253,7 +4197,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1244,
+   "id": 1241,
    "type": "light-down",
    "x": 2185.0,
    "y": 2410.0,
@@ -4278,7 +4222,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1245,
+   "id": 1242,
    "type": "light-down",
    "x": 4005.0,
    "y": 810.0,
@@ -4303,7 +4247,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1246,
+   "id": 1243,
    "type": "light-down",
    "x": 3550.0,
    "y": 2610.0,
@@ -4328,7 +4272,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1247,
+   "id": 1244,
    "type": "light-ceiling",
    "x": 1140.0,
    "y": 5675.0,
@@ -4353,7 +4297,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1248,
+   "id": 1245,
    "type": "light-down",
    "x": 3095.0,
    "y": 4310.0,
@@ -4378,7 +4322,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1249,
+   "id": 1246,
    "type": "light-down",
    "x": 3095.0,
    "y": 6510.0,
@@ -4403,7 +4347,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1250,
+   "id": 1247,
    "type": "light-down",
    "x": 4005.0,
    "y": 4910.0,
@@ -4428,7 +4372,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1251,
+   "id": 1248,
    "type": "light-down",
    "x": 4460.0,
    "y": 6910.0,
@@ -4453,7 +4397,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1252,
+   "id": 1249,
    "type": "light-down",
    "x": 4915.0,
    "y": 410.0,
@@ -4478,7 +4422,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1253,
+   "id": 1250,
    "type": "light-down",
    "x": 4460.0,
    "y": 8510.0,
@@ -4503,7 +4447,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1254,
+   "id": 1251,
    "type": "light-down",
    "x": 610.0,
    "y": 610.0,
@@ -4528,7 +4472,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1255,
+   "id": 1252,
    "type": "light-down",
    "x": 1810.0,
    "y": 610.0,
@@ -4553,7 +4497,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1256,
+   "id": 1253,
    "type": "light-down",
    "x": 1310.0,
    "y": 2010.0,
@@ -4578,7 +4522,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1257,
+   "id": 1254,
    "type": "light-down",
    "x": 3095.0,
    "y": 810.0,
@@ -4603,7 +4547,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1258,
+   "id": 1255,
    "type": "light-down",
    "x": 3095.0,
    "y": 2185.0,
@@ -4628,7 +4572,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1259,
+   "id": 1256,
    "type": "light-down",
    "x": 4005.0,
    "y": 810.0,
@@ -4653,7 +4597,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1260,
+   "id": 1257,
    "type": "light-down",
    "x": 4005.0,
    "y": 2610.0,
@@ -4678,7 +4622,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1261,
+   "id": 1258,
    "type": "light-ceiling",
    "x": 1595.0,
    "y": 3775.0,
@@ -4703,7 +4647,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1262,
+   "id": 1259,
    "type": "light-down",
    "x": 4460.0,
    "y": 4210.0,
@@ -4728,7 +4672,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1263,
+   "id": 1260,
    "type": "light-down",
    "x": 4460.0,
    "y": 6210.0,
@@ -4753,7 +4697,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1264,
+   "id": 1261,
    "type": "light-down",
    "x": 4460.0,
    "y": 7610.0,
@@ -4778,7 +4722,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1265,
+   "id": 1262,
    "type": "light-down",
    "x": 4915.0,
    "y": 410.0,
@@ -4803,7 +4747,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1266,
+   "id": 1263,
    "type": "light-down",
    "x": 610.0,
    "y": 6810.0,
@@ -4828,7 +4772,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1267,
+   "id": 1264,
    "type": "light-down",
    "x": 2810.0,
    "y": 7610.0,
@@ -4853,7 +4797,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1268,
+   "id": 1265,
    "type": "light-ceiling",
    "x": 1140.0,
    "y": 1140.0,
@@ -4878,7 +4822,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1269,
+   "id": 1266,
    "type": "light-down",
    "x": 3095.0,
    "y": 1275.0,
@@ -4903,7 +4847,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1270,
+   "id": 1267,
    "type": "light-down",
    "x": 4005.0,
    "y": 810.0,
@@ -4928,7 +4872,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1271,
+   "id": 1268,
    "type": "light-down",
    "x": 4005.0,
    "y": 2610.0,
@@ -4953,7 +4897,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1272,
+   "id": 1269,
    "type": "light-down",
    "x": 810.0,
    "y": 3095.0,
@@ -4978,7 +4922,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1273,
+   "id": 1270,
    "type": "light-down",
    "x": 2610.0,
    "y": 3095.0,
@@ -5003,7 +4947,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1274,
+   "id": 1271,
    "type": "light-ceiling",
    "x": 1140.0,
    "y": 4775.0,
@@ -5028,7 +4972,7 @@
    "lightCastShadow": true
   },
   {
-   "id": 1275,
+   "id": 1272,
    "type": "light-down",
    "x": 3095.0,
    "y": 4910.0,
@@ -5053,7 +4997,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1276,
+   "id": 1273,
    "type": "light-ceiling",
    "x": 4325.0,
    "y": 5275.0,
@@ -5078,7 +5022,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1277,
+   "id": 1274,
    "type": "light-down",
    "x": 4460.0,
    "y": 7410.0,
@@ -5103,7 +5047,7 @@
    "lightCastShadow": false
   },
   {
-   "id": 1278,
+   "id": 1275,
    "type": "memo",
    "x": 100.0,
    "y": -1850.0,
@@ -5121,7 +5065,7 @@
    "noteText": "都市型3階建てモデルプラン 3LDK+WIC\n敷地約76㎡(23坪) / 延床約134㎡(40坪)\n3階の高窓→吹き抜け→2階リビングへ光を落とす"
   },
   {
-   "id": 1279,
+   "id": 1276,
    "type": "ruler",
    "x": -910.0,
    "y": 11005.0,
