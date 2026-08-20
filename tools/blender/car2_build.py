@@ -118,14 +118,14 @@ TOP_LINE = [
     (-1.840, 1.180), (-1.680, 1.250), (-1.500, 1.370), (-1.300, 1.500),
     (-1.080, 1.575), (-0.750, 1.601), (-0.350, 1.616), (0.150, 1.620),
     (0.350, 1.575), (0.550, 1.490), (0.820, 1.320), (1.050, 1.160),
-    (1.300, 1.035), (1.500, 0.995), (1.820, 0.950), (2.020, 0.915),
+    (1.300, 1.044), (1.500, 1.010), (1.820, 0.962), (2.020, 0.917),
     (2.100, 0.815), (2.160, 0.765), (2.200, 0.725),
 ]
 TOP_LINE = [tuple(v) for v in _TABLES['TOP_LINE']] if 'TOP_LINE' in _TABLES else TOP_LINE
 # 側面図: ベルトライン(ショルダー)。y → z
 BELT_LINE = [
-    (-2.200, 0.965), (-2.080, 1.010), (-1.900, 1.115), (-1.680, 1.075),
-    (-1.360, 1.026), (-1.080, 0.995), (-0.650, 0.975), (0.000, 0.955),
+    (-2.200, 0.965), (-2.080, 1.010), (-1.900, 1.079), (-1.680, 1.073),
+    (-1.360, 1.030), (-1.080, 0.998), (-0.650, 0.975), (0.000, 0.955),
     (0.550, 0.935), (1.050, 0.905), (1.500, 0.955), (1.820, 0.935),
     (2.080, 0.740), (2.160, 0.690), (2.200, 0.650),
 ]
@@ -353,6 +353,9 @@ def ring_points(y):
     """
     hw = lerp_table(PLAN_HW, y) * HWS
     hwr = lerp_table(PLAN_HW_ROOF, y) * HWS
+    # 前後端の下まわり(バンパーの下半分)を絞る。ショルダーと同じ半幅のまま
+    # だと、バンパーの下端が箱のまま角張って見える
+    low = hw * (1.0 - 0.13 * max(0.0, (abs(y) - 1.86) / 0.34) ** 1.4)
     z0 = lerp_table(ROCKER_Z, y)
     zsh = lerp_table(BELT_LINE, y)
     zt = lerp_table(TOP_LINE, y)
@@ -380,18 +383,23 @@ def ring_points(y):
     z_dlo_hi = _mix(z_shld_b, z_roof_sh, 0.80)
     return [
         (0.0,          z0 - 0.015),                   # R_FLOOR_C
-        (hw * 0.52,    z0 - 0.010),                   # R_FLOOR_M
-        (hw * 0.86,    z0 + 0.008),                   # R_FLOOR_O
-        (hw * 0.965,   z0 + 0.075),                   # R_ROCKER 外面
+        (low * 0.52,   z0 - 0.010),                   # R_FLOOR_M
+        (low * 0.86,   z0 + 0.008),                   # R_FLOOR_O
+        # サイドシルは一段外へ張り出させる。ここが車体側面と同一面だと
+        # 黒い帯が「塗っただけ」に見え、断面の下半分がのっぺりする
+        (low * 0.975,  z0 + 0.070),                   # R_ROCKER 外面
         # 樹脂はサイドシル際の細い帯だけ。全高の1/3まで黒くすると
         # ジャッキアップした SUV に見える
-        (hw * 0.992,   z0 + b * 0.22),                # R_SILL
+        (low * 0.992,  z0 + b * 0.22),                # R_SILL
         (hw * 0.984,   zc - 0.028),                   # R_LCRS_A 支持(下)
         (hw * 0.997,   zc),                           # R_LCRS   稜線
         (hw * 0.986,   zc + 0.028),                   # R_LCRS_B 支持(上)
         # 支持点は稜線の 20〜30mm 以内に寄せること。旧値は 46〜49mm 離れて
         # おり、サブディビジョンで丸められてキャラクターラインが消えていた
-        (hw * 0.986,   zsh - min(0.032, b * 0.058)),  # R_SHLD_A 支持(下)
+        # 前方ほど稜線を鋭くする。フェンダーの峰はベルトを持ち上げて
+        # 作るものではない(ボンネットより高くすると断面が反転する)
+        (hw * (0.986 - 0.010 * max(0.0, min(1.0, (y - 0.90) / 1.10))),
+         zsh - min(0.032, b * 0.058)),                # R_SHLD_A 支持(下)
         (hw * 1.000,   zsh - min(0.006, b * 0.012)),  # R_SHLD   ショルダー稜線
         (hw * 0.981,   zsh + min(0.026, g * 0.045)),  # R_SHLD_B 支持(上)
         # ショルダーからルーフ幅へは3段かけて絞る。1段で詰めると肩の上に
@@ -529,15 +537,15 @@ def build_wheel(y, sign, tire_m, rim_m, dark_m):
     outer = HW - 0.075
     w, R = TIRE_W, TIRE_R
     prof = [
-        (R - 0.105, outer - w * 0.02), (R - 0.020, outer - w * 0.02),
+        (R - 0.068, outer - w * 0.02), (R - 0.018, outer - w * 0.02),
         (R - 0.004, outer - w * 0.10), (R, outer - w * 0.30),
         (R, outer - w * 0.70), (R - 0.004, outer - w * 0.90),
-        (R - 0.020, outer - w * 0.98), (R - 0.105, outer - w * 0.98),
+        (R - 0.018, outer - w * 0.98), (R - 0.068, outer - w * 0.98),
     ]
     tag = '%d_%d' % (int(y * 100), sign)
     objs = [revolve(prof, 30, y, sign, 'tire_' + tag, tire_m)]
 
-    rim_r = R - 0.100
+    rim_r = R - 0.062
     objs.append(revolve([(rim_r, outer - w * 0.03), (rim_r - 0.014, outer - w * 0.03),
                          (rim_r - 0.014, outer - w * 0.55), (rim_r, outer - w * 0.55)],
                         30, y, sign, 'rimlip_' + tag, rim_m))
@@ -827,25 +835,19 @@ def build_body_details(dark_m, trim_m, chrome_m):
             zh = lerp_table(BELT_LINE, y) - 0.085
             x = surface_x(y, zh)
             objs.append(box('handle_%d_%.0f' % (sign, y * 100),
-                            (sign * (x + 0.014), y, zh),
-                            (0.026, 0.135, 0.034), chrome_m,
+                            (sign * (x + 0.017), y, zh),
+                            (0.032, 0.152, 0.044), chrome_m,
                             bevel=0.008, segments=2))
-    # ベルトモール。黒いグリーンハウスとボディ色の境目に部材を1本通す。
-    # 実車は必ずここに窓枠のモールがあり、無いと黒帯が「塗り分け」に見える。
-    # **箱を並べてはいけない**。各箱が別の高さの直方体になるので、
-    # 段々のかけら(破線)にしか見えない。面に沿った連続した帯として張る
-    ys_belt = [v for v in STATION_Y
-               if GH['glass_side_r'][0] - 0.02 <= v <= GH['glass_side_f'][1] + 0.02]
-    for sign in (1, -1):
-        objs.append(build_belt_strip(sign, ys_belt, 0.016, 0.040, trim_m,
-                                     'beltmould_%d' % sign))
+    # ベルトモールは付けない。実車では黒く目立たない部材だが、低ポリゴンで
+    # 帯として張り出させるとハイライトを拾い、ミラーからリヤへ向かう
+    # 明るい筋になって「車体に貼り付いた棒」に見える。無い方がよい
     # シャークフィンアンテナ。ルーフ後端の中央。無いと屋根が寂しい
     ya = GH['backlight'][1] - 0.060
     objs.append(box('antenna', (0.0, ya, lerp_table(TOP_LINE, ya) + 0.028),
                     (0.038, 0.135, 0.056), dark_m, bevel=0.014, segments=2))
     # マフラーカッター(左後ろ)
     yex = STATION_Y[-1] + 0.060
-    objs.append(box('exhaust', (-0.330, yex, 0.300),
+    objs.append(box('exhaust', (-0.268, yex, 0.318),
                     (0.075, 0.120, 0.055), chrome_m, bevel=0.020, segments=2))
     # リヤの分割線と造形。テールゲートの見切りが無いと、後ろが「切り落とした
     # 箱」に見える。バンパーの見切り・ナンバー・リフレクタまで入れる
@@ -858,13 +860,13 @@ def build_body_details(dark_m, trim_m, chrome_m):
     y_tail = STATION_Y[-1]                    # -2.200
     objs.append(box('plate_r', (0.0, y_tail + 0.012, 0.640),
                     (0.330, 0.016, 0.078), chrome_m, bevel=0.004))
-    objs.append(box('rear_skid', (0.0, y_tail + 0.016, 0.432),
-                    (0.900, 0.026, 0.090), dark_m, bevel=0.014, segments=2))
+    objs.append(box('rear_skid', (0.0, y_tail + 0.018, 0.446),
+                    (0.820, 0.026, 0.084), dark_m, bevel=0.014, segments=2))
     for sx in (1, -1):                        # リヤリフレクタ
         objs.append(box('reflector_%d' % sx, (sx * 0.400, y_tail + 0.010, 0.470),
                         (0.110, 0.014, 0.036), trim_m, bevel=0.006))
     for k in range(-2, 3):                    # ディフューザーの縦フィン
-        objs.append(box('diffuser_%d' % k, (k * 0.115, y_tail + 0.022, 0.372),
+        objs.append(box('diffuser_%d' % k, (k * 0.088, y_tail + 0.026, 0.392),
                         (0.024, 0.040, 0.070), trim_m, bevel=0.006))
     # ワイパー2本。カウル(フロントガラス下端)に寝かせて置く
     ywc = GH['windscreen'][1]
@@ -878,11 +880,20 @@ def build_body_details(dark_m, trim_m, chrome_m):
     objs.append(box('wiper_r', (0.060, ybw - 0.010,
                                 lerp_table(TOP_LINE, ybw) - 0.030),
                     (0.360, 0.022, 0.013), dark_m, bevel=0.005, rot_z=0.22))
-    # 給油口(右後ろのフェンダー)
+    # 給油口(右後ろのフェンダー)。黒い四角にしてはいけない -- そんな車は
+    # ほとんど無い。実車はボディ色のフラップで、見えるのは縁の細い切れ目だけ。
+    # ここでは切れ目だけを薄い溝として入れる
     y = gl_r[0] - 0.190
-    zf = lerp_table(BELT_LINE, y) - 0.190
-    objs.append(box('fuel_cap', (surface_x(y, zf) + 0.006, y, zf),
-                    (0.012, 0.150, 0.150), trim_m, bevel=0.030, segments=3))
+    zf = lerp_table(BELT_LINE, y) - 0.185
+    xf = surface_x(y, zf)
+    for dz in (-0.072, 0.072):
+        objs.append(box('fuel_edge_h_%.0f' % (dz * 1000),
+                        (xf + 0.003, y, zf + dz),
+                        (0.008, 0.150, 0.008), dark_m, bevel=0.002))
+    for dy in (-0.075, 0.075):
+        objs.append(box('fuel_edge_v_%.0f' % (dy * 1000),
+                        (xf + 0.003, y + dy, zf),
+                        (0.008, 0.008, 0.150), dark_m, bevel=0.002))
     return objs
 
 
@@ -947,7 +958,7 @@ def build_mirror(sign, shell_m, glass_m):
     zb = lerp_table(BELT_LINE, y)
     xw = hw_at(y)
     # ハウジング外端は必ず全幅(MIRROR_X)にちょうど届かせる。ここが全幅を決める
-    shell_hw = (MIRROR_X - xw) * 0.62
+    shell_hw = (MIRROR_X - xw) * 0.78
     shell_cx = MIRROR_X - shell_hw
     objs = []
     # 台座(セイル): ドア面に食い込ませて隙間を作らない
@@ -961,6 +972,11 @@ def build_mirror(sign, shell_m, glass_m):
     # ハウジング: 卵形。前が高く後ろへ絞る
     objs.append(box('mir_shell_%d' % sign, (sign * shell_cx, y - 0.014, zb + 0.086),
                     (shell_hw * 2, 0.210, 0.108), shell_m, bevel=0.030, segments=3))
+    # ハウジング前面のウインカー。小さいが、これがあると「板」に見えない
+    objs.append(box('mir_turn_%d' % sign,
+                    (sign * (shell_cx + shell_hw * 0.30), y + 0.086, zb + 0.092),
+                    (shell_hw * 1.10, 0.016, 0.020),
+                    bpy.data.materials['CarDrl'], bevel=0.004))
     # 鏡面: 後ろ向きに露出させる
     objs.append(box('mir_glass_%d' % sign, (sign * shell_cx, y - 0.106, zb + 0.086),
                     (shell_hw * 1.60, 0.010, 0.084), glass_m, bevel=0.006, segments=2))
@@ -1041,6 +1057,9 @@ def main():
         bpy.data.objects.remove(cutter, do_unlink=True)
 
     sub = body.modifiers.new('Sub', 'SUBSURF')
+    # 2段にすると 22,000 → 61,500 三角形になるのに、見た目はほぼ
+    # 変わらなかった(スムーズシェーディングで既に足りている)。
+    # 面の細かさはボトルネックではない
     sub.levels = sub.render_levels = 1
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.modifier_apply(modifier=sub.name)
