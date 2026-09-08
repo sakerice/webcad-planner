@@ -3,7 +3,7 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({args:['--use-angle=metal']});
 try {
  const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://localhost:8932/');await page.waitForSelector('#fmp-exterior-search',{state:'attached'});await page.locator('#bnav-tools').click();await page.evaluate(()=>document.getElementById('fmp-exterior').closest('.cat-body').classList.add('open'));
+ await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('#fmp-exterior-search',{state:'attached'});await page.locator('#bnav-tools').click();await page.evaluate(()=>document.getElementById('fmp-exterior').closest('.cat-body').classList.add('open'));
  for(const name of ['薄型機能門柱','一体型機能門柱','二本脚型']) {
   await page.locator('#fmp-exterior-search').fill(name);const tile=page.locator('#fmp-exterior .asset-tile:not([hidden])');assert.equal(await tile.count(),1);await tile.click();
   await page.evaluate(()=>{ST.floor=1;placeItem(ST.tool,2000,2000);document.getElementById('props').classList.add('show','prop-expanded');});

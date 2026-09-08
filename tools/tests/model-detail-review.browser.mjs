@@ -3,7 +3,7 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const stage=process.env.REVIEW_STAGE||'after',dir=`docs/quality-review/detail-loop/${stage}`;fs.mkdirSync(dir,{recursive:true});
 const browser=await chromium.launch({args:['--use-angle=metal']});
 try{
- const page=await browser.newPage();await page.goto('http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>init3D());
+ const page=await browser.newPage();await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>init3D());
  const ids=await page.evaluate(()=>Object.values(FMP_ITEMS).filter(i=>i.provenance==='original').map(i=>i.id).concat(['im0261-Sofa-MEGA_PACK_Sofa-BOLIA_sofa_Ivory','im0261-Bed-MEGA_PACK_BED-bed-43693','ac-outdoor','water-heater','meter-box','sewer-pit','neighbor-house','neighbor-building','utility-pole','wood-fence','car','bicycle','bicycle-fold','candidate-car']));const stats=[];
  for(const id of ids.filter(id=>!process.env.MODEL_FILTER||process.env.MODEL_FILTER.split(',').includes(id))){const result=await page.evaluate(async({id,stage})=>{
   async function cached(url){if(_modelCache[url])return;const g=await new Promise((resolve,reject)=>getGltfLoader().load(url,resolve,undefined,reject));ModelQuality.prepare(g.scene,url);_modelCache[url]=g.scene;}

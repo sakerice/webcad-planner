@@ -69,14 +69,14 @@ function jisdrawIife() {
 const DRAW_FNS = [
   'bestFmpType', 'getFmpItem',
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
-  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',
-  'getObjBounds', 'isFiniteCanvasValue',
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue',
   'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg'
 ];
-const DRAW_VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H'];
+const DRAW_VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'FLOOR_H', 'FLOOR_SLAB_H'];
 const DRAW_OBJ_VARS = ['LEGACY_FMP_TYPE_MAP'];
 
 // 斜線制限まわり(setback-cut.test.cjs と同じ顔ぶれのうち、平面図が触るぶん)。

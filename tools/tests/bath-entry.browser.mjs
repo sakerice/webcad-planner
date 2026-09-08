@@ -4,7 +4,7 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({args:['--use-angle=metal']});
 try{
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-shoe-tall'));await page.evaluate(()=>init3D());
+ await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-shoe-tall'));await page.evaluate(()=>init3D());
  const result=await page.evaluate(async()=>{
   const out=[];
   for(const kind of ['tall','counter','bridge']){

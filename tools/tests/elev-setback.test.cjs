@@ -74,7 +74,7 @@ const BASE_OBJ_VARS = ['LEGACY_FMP_TYPE_MAP'];
 const BASE_FNS = [
   'bestFmpType', 'getFmpItem',
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
-  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallHeightMm', 'wallDisplayHeightM',
@@ -112,6 +112,7 @@ const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVER
 const TOP_FNS = [
   'roomDeclaresSlopedCeiling', 'roofItemOverRoom', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm',
   'wallTouchesSlopedCeiling',

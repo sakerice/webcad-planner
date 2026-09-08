@@ -73,6 +73,8 @@ function onclickOf(id) {
   return oc[1];
 }
 
+// 浮きボタン(#unity-render-fab)は削除したので、入口はヘッダーの1つ。
+
 const ENTRY_IDS = ['unity-render-toolbar-btn'];
 const RUN_ID = 'ai-render-run';
 

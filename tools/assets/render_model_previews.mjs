@@ -8,7 +8,7 @@ const contextTypes=['washer','futon_set','lattice-screen','tree','bicycle','bicy
 const items=manifests.flatMap(p=>JSON.parse(fs.readFileSync(p)).items).concat([{id:'context-car',model:'assets/models/refined/precision_car_v1.glb'},...contextTypes.map(type=>({id:'context-'+type,type}))]).filter(i=>!process.env.MODEL_FILTER||process.env.MODEL_FILTER.split(',').includes(i.id));
 const browser=await chromium.launch({args:['--use-angle=metal']});
 try{
- const page=await browser.newPage();await page.goto('http://localhost:8932/');await page.waitForFunction(()=>window.THREE);await page.evaluate(()=>init3D());
+ const page=await browser.newPage();await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE);await page.evaluate(()=>init3D());
  await page.evaluate(()=>{
   window.previewRenderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});
   previewRenderer.setSize(512,512);previewRenderer.outputColorSpace=THREE.SRGBColorSpace;previewRenderer.toneMapping=THREE.ACESFilmicToneMapping;previewRenderer.toneMappingExposure=1;

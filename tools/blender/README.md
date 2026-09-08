@@ -15,6 +15,10 @@ Blenderで生成・更新するためのスクリプト一式。
 | `pole_build.py` | 電柱 |
 | `export_glbs.py` | 全モデルをGLBへエクスポート(モジュール用エンプティへ自動親子付け) |
 | `car_meshy_reduce.py` | **Meshy製ハッチバック**(高密度メッシュ)をリダクションして `car_hatchback.glb` を書き出す |
+| `exterior_build.py` | **外構モデル**(庭木・ウッドデッキ)。出力先は `assets/models/custom/`。単体で実行するとGLB＋top/thumbのPNGまで書き出す |
+| `interior_build.py` | 内装モデル(シーリングファン) |
+| `window_treatment_build.py` | **窓まわり**(カーテン2種・ロールスクリーン6種)。出力先は `assets/models/custom/` |
+
 | `blender_mcp_addon.py` | Blenderに入れるソケットアドオン(port 9876, blenderMCP互換) |
 | `blender_startup.py` | GUI起動時にアドオンを読み込むスタートアップ |
 | `bmcp.py` | アドオンへコードを送るCLIクライアント |
@@ -40,6 +44,36 @@ python3 tools/blender/house_kit_build.py --no-export   # 寸法確認のみ
 パーツ名(`nh_seg_win_l` など)と原点の約束は `index.html` の
 `NH_SEG_PART` / `nhAttach()` と一対一で対応している。**名前と原点を
 変えるときは必ず両方を直すこと。**
+
+### 外構(庭木・ウッドデッキ)
+
+`assets/models/context/` ではなく `assets/models/custom/` へ出す。
+GUIもMCPも不要。bpy が無い場合は Blender の CLI から流す。
+
+```bash
+python3 tools/blender/exterior_build.py                # GLB + top/thumb PNG
+python3 tools/blender/exterior_build.py --no-icons     # GLBだけ(Cyclesを回さない)
+python3 tools/blender/exterior_build.py --no-export    # 三角形数と寸法の確認のみ
+
+/Applications/Blender.app/Contents/MacOS/Blender --background \
+  --factory-startup --python tools/blender/exterior_build.py
+```
+
+メッシュのバウンディングボックスは `assets/models/custom/manifest.json` の
+w/d/h と一致させてある(`normalize_to()`)。**片方だけ変えないこと。**
+
+### 窓まわり(カーテン・ロールスクリーン)
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender --background \
+  --factory-startup --python tools/blender/window_treatment_build.py
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup \
+  --python tools/blender/make_icons.py -- assets/models/custom/curtain_short.glb ...
+```
+
+間取りへは `plan_kit` の `dress(win(...), "curtain"|"roller")` で置く。
+**位置・向き・丈・枚数は窓から決まる**ので、座標を手で書かないこと。
+窓を動かすたびにカーテンだけ取り残されて壁を突き抜ける、を何度もやった。
 
 ### その他のモデル(車・周辺ビル・自転車・電柱)
 

@@ -313,12 +313,15 @@ test('入口の抽出そのものが機能している（12機能すべてにボ
   Object.keys(FEATURES).forEach((fn) => {
     assert.ok(ENTRIES[fn].length > 0, FEATURES[fn] + ' のボタンが1つも見つからない');
   });
-  // 画像AIレンダーはヘッダーと3D画面の浮きボタンの2つ。どちらも取りこぼして
-  // いないことを、id で固定する（ボトムナビからは外れた）。
+  // 画像AIレンダーの入口はヘッダーの1つだけ。3D画面の右上に出ていた浮きボタン
+  // (#unity-render-fab)は、同じダイアログを開くだけで画角を確認したい所に
+  // 常時かぶるので削除した。復活させないよう、id を固定して数も見る。
   const stillIds = ENTRIES.openUnityRenderModal.map((n) => n.id).filter(Boolean);
-  ['unity-render-toolbar-btn'].forEach((id) => {
-    assert.ok(stillIds.indexOf(id) >= 0, '画像AIレンダーの入口 ' + id + ' が見えていない');
-  });
+  assert.ok(stillIds.indexOf('unity-render-toolbar-btn') >= 0,
+    '画像AIレンダーの入口 unity-render-toolbar-btn が見えていない');
+  assert.equal(html.indexOf('unity-render-fab'), -1,
+    '削除した浮きボタン #unity-render-fab が復活している');
+
 });
 
 // ── 7. 本題: どの幅でも、どの機能も、入口が1つ以上ある ────────────────────
@@ -399,3 +402,4 @@ test('パネル共通の影にステータスバーの固定寸法が混入し�
   assert.equal(shared.some((r) => r.decls.height && r.decls.height.value === '30px' &&
     r.decls.bottom && r.decls.bottom.value === '10px'), false);
 });
+

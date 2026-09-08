@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch();try{
-const p=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto('http://localhost:8932/');await p.waitForFunction(()=>window.ST&&window.DATA);await p.waitForSelector('#app-loading',{state:'hidden'});
+const p=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(process.env.APP_URL||'http://localhost:8932/');await p.waitForFunction(()=>window.ST&&window.DATA);await p.waitForSelector('#app-loading',{state:'hidden'});
 await p.evaluate(()=>{DATA.items=[mkItem('table',1000,1000,0,1,800,800),mkItem('table',2600,1000,30,1,800,800),mkItem('table',1000,1000,0,2,800,800)];DATA.walls=[mkWall(1000,2800,3400,2800,1,120)];DATA.rooms=[];ST.floor=1;ST.tool='select';ST.selected=null;clearMultiSelection();ST.zoom=2;ST.panX=400;ST.panY=100;ST.snap=10;clearEditHistory();draw2d();});
 async function pos(x,y){return await p.evaluate(({x,y})=>{const pt=w2c(x,y),r=canvas.getBoundingClientRect();return{x:pt.cx+r.left,y:pt.cy+r.top};},{x,y});}
 async function drag(a,b){const start=await pos(...a),end=await pos(...b);await p.mouse.move(start.x,start.y);await p.mouse.down();await p.mouse.move(end.x,end.y,{steps:8});await p.mouse.up();}

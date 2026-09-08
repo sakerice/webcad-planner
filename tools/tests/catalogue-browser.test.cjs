@@ -20,15 +20,15 @@ test('catalogue search stays visible and selects the correct tool on mobile and 
    await page.waitForSelector('#fmp-furniture-search',{state:'attached'});
    if(width<500)await page.locator('#bnav-tools').click();
    await page.evaluate(()=>document.getElementById('fmp-furniture').closest('.cat-body').classList.add('open'));
-   for(const mount of ['fmp-furniture','fmp-fixtures','fmp-exterior']){assert.ok(await page.locator('#'+mount+' .asset-tile').count()>0);assert.equal(await page.locator('#'+mount+' .asset-subcat.open').count(),await page.locator('#'+mount+' .asset-subcat').count());}
-   assert.ok(await page.locator('#fmp-furniture .asset-tile').first().isVisible());
+   for(const mount of ['fmp-furniture','fmp-fixtures','fmp-exterior']){assert.ok(await page.locator('#'+mount+' .asset-tile').count()>0);assert.equal(await page.locator('#'+mount+' .asset-subcat.open').count(),0);}
+   assert.equal(await page.locator('#fmp-furniture .asset-tile').first().isVisible(),false);
    const input=page.locator('#fmp-furniture-search');
    await input.fill('ベッド');assert.ok(await page.locator('#fmp-furniture .asset-tile:not([hidden])').count()>1);
    await input.fill('ｂｅｄ０１');
    await page.waitForFunction(()=>document.querySelector('#fmp-furniture-search').getBoundingClientRect().top>=document.querySelector('.common-tools').getBoundingClientRect().bottom);
    assert.equal(await page.locator('#fmp-furniture .asset-tile:not([hidden])').count(),1);
    await input.fill('該当しない検索');assert.equal(await page.locator('#fmp-furniture .asset-tile:not([hidden])').count(),0);
-   await input.fill('');assert.equal(await page.locator('#fmp-furniture .asset-subcat.open').count(),await page.locator('#fmp-furniture .asset-subcat').count());
+   await input.fill('');assert.equal(await page.locator('#fmp-furniture .asset-subcat.open').count(),0);
    await input.fill('Bed01');await page.locator('#fmp-furniture .asset-tile:not([hidden])').click();
    assert.equal(await page.evaluate(()=>ST.tool),'fmp-Bed01');assert.deepEqual(errors,[]);await page.close();
   }

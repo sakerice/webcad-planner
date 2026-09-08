@@ -66,14 +66,14 @@ function jisdrawIife() {
 const FNS = [
   'bestFmpType', 'getFmpItem',
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
-  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',
-  'getObjBounds', 'isFiniteCanvasValue',
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue',
   'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg'
 ];
-const VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H'];
+const VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'FLOOR_H', 'FLOOR_SLAB_H'];
 const OBJ_VARS = ['LEGACY_FMP_TYPE_MAP'];
 
 function house() {
