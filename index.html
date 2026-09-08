@@ -13521,6 +13521,17 @@ function wallDisplayHeightM(w){
   if(!w || w.wallHeight===undefined || isNaN(Number(w.wallHeight)) || Number(w.wallHeight)===WALL_H) return wallCeilingHeightM(w);
   return Math.max(0.3,wallHeightMm(w)*U+floorSlabHeightMForFloor(w.floor));
 }
+// バルコニーフェンス(手すり壁)の手すり高さ(m)。**バルコニーの床天端から**
+// 測る。建築基準法の2階以上の手すり1100mm以上がここの起点なので、階の床基準
+// (floorBaseY)ではなく床天端から測らないと、スラブ厚ぶん実効高が足りなくなる。
+// 「壁高さ」に個別指定があればそれに従う(立面図が使う wallDisplayHeightM と
+// 同じ値になり、3Dと図面が食い違わない)。WALL_H と等しい値は
+// wallDisplayHeightM と同じ「未指定」の番兵なので既定の1100へ落とす。
+function balconyFenceRailHeightM(w){
+  var v=Number(w&&w.wallHeight);
+  if(!w || w.wallHeight===undefined || !isFinite(v) || v===WALL_H) return 1.10;
+  return Math.max(300,Math.min(6000,v))*U;
+}
 function hasWallTopShape(w){
   return !!(w && w.wallTopShape && w.wallTopShape!=='flat');
 }
@@ -14575,29 +14586,35 @@ function buildWall3D(w){
     var segLen=b-a;
     if(segLen<0.03) return;
     var mid=(a+b)/2;
-    var FENCE_H=1.10, KASA_H=0.045;
+    var KASA_H=0.045;
+    // 手すりの高さ(バルコニー床天端から笠木下まで)。既定は建築基準法の下限1100mm
+    var railH=balconyFenceRailHeightM(w);
+    // 手すり壁は外壁の一部なので、**床スラブの小口まで下ろして覆う**。
+    // スラブ天端から立てると、外から見て床材が階の床スラブ厚(180mm)ぶん
+    // 帯になって露出する(バルコニーの床の色が外観に出る)。壁の基準
+    // fy=floorBaseY はスラブの下端なので、そこまで下ろせば下階の外壁と
+    // continuous につながり、他の壁種と同じ足元の納まりになる
+    var slabTop=floorTopY(fl)+0.006-fy;
+    var panelH=slabTop+railH;
     var fenceMat;
     try{ fenceMat=makeExteriorWallMaterial(w,fl,len); }
     catch(e){ fenceMat=new THREE.MeshStandardMaterial({color:w.color||0xdadfdc,roughness:0.85}); }
     // 通常壁用マテリアルは階高を基準にテクスチャの縦リピート数を決める。
-    // 高さ1.1mのバルコニーフェンスへそのまま貼ると縦方向だけ圧縮されるため、
+    // 1m強のバルコニーフェンスへそのまま貼ると縦方向だけ圧縮されるため、
     // フェンス片の実寸でUV密度を再計算し、長さ・高さ変更後も柄の比率を保つ。
     if(fenceMat.map){
-      setTextureRepeatNoDistort(fenceMat.map,segLen,FENCE_H,wallTextureTileHeight());
+      setTextureRepeatNoDistort(fenceMat.map,segLen,panelH,wallTextureTileHeight());
       applyTextureFlip(fenceMat.map,resolveExteriorWallAppearance(w));
       fenceMat.map.needsUpdate=true;
     }
-    // 手すりはバルコニーのスラブ天端から立てる。壁の基準(fy=floorBaseY)から
-    // 立てると床スラブ厚(180mm)ぶん低くなり、実効高が1100mmを割ってしまう
-    var slabTop=floorTopY(fl)+0.006-fy;
-    var panel=new THREE.Mesh(new THREE.BoxGeometry(segLen,FENCE_H,w.thick*U),fenceMat);
-    panel.position.set(x1+dirX*mid,fy+slabTop+FENCE_H/2,z1+dirZ*mid);
+    var panel=new THREE.Mesh(new THREE.BoxGeometry(segLen,panelH,w.thick*U),fenceMat);
+    panel.position.set(x1+dirX*mid,fy+panelH/2,z1+dirZ*mid);
     panel.rotation.y=rotY;
     panel.castShadow=true; panel.receiveShadow=true;
     wallGroup.add(panel);
     var kasaMat=new THREE.MeshStandardMaterial({color:0x83888e,roughness:0.4,metalness:0.55});
     var kasa=new THREE.Mesh(new THREE.BoxGeometry(segLen+0.02,KASA_H,w.thick*U+0.05),kasaMat);
-    kasa.position.set(x1+dirX*mid,fy+slabTop+FENCE_H+KASA_H/2,z1+dirZ*mid);
+    kasa.position.set(x1+dirX*mid,fy+panelH+KASA_H/2,z1+dirZ*mid);
     kasa.rotation.y=rotY;
     kasa.castShadow=true; kasa.receiveShadow=true;
     wallGroup.add(kasa);
