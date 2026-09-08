@@ -83,7 +83,7 @@ function makeThree() {
   return {
     RepeatWrapping: 1000,
     DoubleSide: 2,
-    MeshStandardMaterial: function (p) { return Object.assign({ kind: 'standard' }, p || {}); },
+    MeshStandardMaterial: function (p) { return Object.assign({ kind: 'standard', userData: {} }, p || {}); },
     MeshBasicMaterial: function (p) { return Object.assign({ kind: 'basic' }, p || {}); }
   };
 }
@@ -308,7 +308,7 @@ const WIRE_FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-  'isPositiveNumber',
+  'isPositiveNumber', 'roomFloorOffsetMm', 'roomFloorTopY',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',

@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>house-planner mobile</title>
+<meta name="description" content="間取りから家具の配置、外観、暮らしの目線まで。スマホで寸法と空間を確かめる住宅シミュレーター。">
 <link rel="icon" type="image/png" href="assets/brand/house-planner-mobile-icon.png?v=3">
 <link rel="apple-touch-icon" href="assets/brand/house-planner-mobile-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,6 +69,11 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/lock-tiers.js"></script>
 <script src="assets/js/video-prompt.js"></script>
 <script src="assets/js/shadow-lift.js"></script>
+<script src="assets/js/model-quality.js"></script>
+<script src="assets/js/utility-wires.js"></script>
+<script src="assets/js/photographic-sky.js"></script>
+<script src="assets/js/asset-catalogue.js"></script>
+<script src="assets/js/menu-icons.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -234,8 +240,8 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 /* 同じクラスなのに、画像側は nowrap で使い方の1行が画面外へ切れ、動画側は
    .video-render-files で pre-wrap に上書きされていた。折り返しは共通にする。 */
 .unity-render-cmd{color:#aac;background:#0b1226;border:1px solid #24385f;border-radius:6px;padding:8px;overflow:auto;white-space:pre-wrap}
-#unity-render-fab{display:none;position:absolute;right:14px;top:14px;z-index:260;border:1px solid #e94560;background:#e94560;color:#fff;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.28);cursor:pointer;touch-action:manipulation}
-#unity-render-fab.show{display:block}
+
+
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
 /* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
@@ -462,11 +468,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
   /* Coords in top-left on mobile */
   #coords{bottom:auto;top:48px;right:6px;background:rgba(22,33,62,0.7);padding:2px 6px;border-radius:4px}
-  /* top/right はここでは決めない。下の #unity-render-fab{top:70px} が、
-     スマホの固定ツールバー(上端8〜60px)を避けるために位置を持っている。
-     ここで小さい top を書くと、後ろの規則に負けたまま残り、
-     次に読む人には「10px が効いている」と読めてしまう。 */
-  #unity-render-fab{padding:9px 11px;font-size:11px}
+
   .unity-render-config{grid-template-columns:1fr}
 }
 
@@ -849,12 +851,7 @@ body{
   color:var(--hp-text);
   border-radius:9px;
 }
-#unity-render-fab{
-  border:1px solid var(--hp-primary);
-  background:var(--hp-primary);
-  border-radius:999px;
-  box-shadow:0 12px 28px rgba(242,74,46,0.28);
-}
+
 #bottom-nav{
   background:rgba(255,255,255,0.98);
   border-top:1px solid var(--hp-border);
@@ -1042,16 +1039,7 @@ body{
   padding:4px 9px;
   border-radius:999px;
 }
-#unity-render-fab{
-  /* スマホではツールバーが position:fixed で画面上部 8〜60px を覆う。
-     3Dビュー内のこのボタンは absolute なので、以前の値では完全に下敷きになり、
-     その点をタップしてもツールバーが拾ってボタンには届かなかった（375px で実測）。
-     ツールバーの下端より下から始める。デスクトップではツールバーが
-     fixed でないので、この値でも見た目は変わらない。 */
-  top:70px;
-  right:18px;
-  padding:10px 14px;
-}
+
 #statusbar{
   margin:0 10px 8px;
   border:1px solid rgba(226,214,198,0.86);
@@ -2120,8 +2108,7 @@ body{
 .unity-render-card,
 #bottom-nav,
 #statusbar,
-#asset-preview,
-#unity-render-fab{
+#asset-preview{
   box-shadow:0 4px 12px rgba(24,20,18,0.13)!important;
 }
 #statusbar{
@@ -2204,7 +2191,7 @@ body{
 #sidebar .cat-body.open > .stool,
 #sidebar .cat-body.open > .asset-subcat > .asset-subhdr,
 #sidebar .cat-body.open #fmp-furniture .asset-subhdr,
-#sidebar .cat-body.open #fmp-fixtures .asset-subhdr{
+#sidebar .cat-body.open :is(#fmp-fixtures,#fmp-exterior) .asset-subhdr{
   width:calc(100% - 14px)!important;
   min-height:46px!important;
   margin:0 0 0 14px!important;
@@ -2223,7 +2210,7 @@ body{
   background:transparent!important;
 }
 #sidebar #fmp-furniture,
-#sidebar #fmp-fixtures{
+#sidebar :is(#fmp-fixtures,#fmp-exterior){
   width:100%!important;
   display:flex!important;
   flex-direction:column!important;
@@ -2257,7 +2244,7 @@ body{
 #sidebar .cat-body.open > .stool::before,
 #sidebar .cat-body.open > .asset-subcat > .asset-subhdr::before,
 #sidebar .cat-body.open #fmp-furniture .asset-subhdr::before,
-#sidebar .cat-body.open #fmp-fixtures .asset-subhdr::before,
+#sidebar .cat-body.open :is(#fmp-fixtures,#fmp-exterior) .asset-subhdr::before,
 #sidebar .asset-grid .asset-tile::before{
   content:''!important;
   display:block!important;
@@ -2273,7 +2260,7 @@ body{
   opacity:.52!important;
 }
 #sidebar .cat-body.open #fmp-furniture .asset-subhdr::before,
-#sidebar .cat-body.open #fmp-fixtures .asset-subhdr::before{
+#sidebar .cat-body.open :is(#fmp-fixtures,#fmp-exterior) .asset-subhdr::before{
   opacity:.52!important;
 }
 #sidebar .asset-grid .asset-tile::before{
@@ -2994,8 +2981,8 @@ input[type="reset"]:focus-visible{
 }
 
 /* ── 外観3D: 立面方向カメラスナップ(東西南北) ─────────
-   外観3D(ST.view==='3d-ext')表示中のみ表示。右上の#unity-render-fabとは
-   反対の右下に置き、右下常設の#app-version(bottom:10px,高さ30px)の
+   外観3D(ST.view==='3d-ext')表示中のみ表示。右下常設の
+   #app-version(bottom:10px,高さ30px)の
    上に十分な間隔(bottom:54px)を空けて重ならないようにする。 */
 #elev-snap-fab{
   position:absolute;
@@ -3102,6 +3089,7 @@ input[type="reset"]:focus-visible{
    インラインの style= で書かれており、余白も 6px/8px と食い違っていた)。 */
 .airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
 </style>
+<link rel="stylesheet" href="assets/ui-refinement.css">
 </head>
 <body>
 <div id="app-loading" aria-live="polite" aria-busy="true">
@@ -3143,51 +3131,48 @@ input[type="reset"]:focus-visible{
     <option value="1">1F</option><option value="2">2F</option><option value="3">3F</option><option value="4">4F</option>
   </select>
   <div class="tsep"></div>
-  <button class="tbtn active" id="btn-2d" onclick="setView('2d')">📐 平面図</button>
-  <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')">🏗 外観3D</button>
-  <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')">🚶 内観3D</button>
-  <button class="tbtn" id="btn-3dw" onclick="setViewWithLoading('3d-walk')">👣 ウォークスルー</button>
-  <button class="tbtn" onclick="refresh3DPreviewWithLoading()">⟳ 3D更新</button>
+  <div class="toolbar-actions" role="group" aria-label="表示と書き出し">
+  <button class="tbtn active" id="btn-2d" onclick="setView('2d')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h18v18H3ZM3 12h8V3M11 12h10M11 17v4"/></svg> 平面図</button>
+  <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10 12 3l9 7v11H3ZM8 21v-7h5v7M16 12h2v3h-2Z"/></svg> 外観3D</button>
+  <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v16H3ZM3 4l5 4v8l-5 4M21 4l-5 4v8l5 4M8 8h8M8 16h8"/></svg> 内観3D</button>
+  <button class="tbtn" id="btn-3dw" onclick="setViewWithLoading('3d-walk')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M10 21l2-7 3 3v4M12 14l-2-5-3 4M10 9l4-1 3 4h3"/></svg> ウォークスルー</button>
+  <button class="tbtn" onclick="refresh3DPreviewWithLoading()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 8a8 8 0 0 0-14-3L3 8M3 3v5h5M4 16a8 8 0 0 0 14 3l3-3M21 21v-5h-5"/></svg> 3D更新</button>
   <div class="tsep mob-hide"></div>
-  <button class="tbtn mob-hide" onclick="toggleGrid()">⊞ グリッド</button>
-  <button class="tbtn" onclick="toggleDim()">↔ 寸法</button>
-  <button class="tbtn mob-hide" onclick="resetView()">⊙ 全体表示</button>
+  <button class="tbtn mob-hide" onclick="toggleGrid()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h18v18H3ZM9 3v18M15 3v18M3 9h18M3 15h18"/></svg> グリッド</button>
+  <button class="tbtn" onclick="toggleDim()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7v10M21 7v10M3 12h18M7 9l-4 3 4 3M17 9l4 3-4 3"/></svg> 寸法</button>
+  <button class="tbtn mob-hide" onclick="resetView()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5M8 8h8v8H8Z"/></svg> 全体表示</button>
   <div class="tsep mob-hide"></div>
   <!-- Undo / Redo はヘッダーから外した。 -->
   <!-- 階クリアは狭い幅でも消さない(ヘッダーは横スクロールする)。 -->
-  <button class="tbtn" onclick="clearFloor()">🗑 階クリア</button>
+  <button class="tbtn" onclick="clearFloor()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg> 階クリア</button>
   <div class="tsep mob-hide"></div>
-  <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()">💾 保存</button>
-  <button class="tbtn" id="share-btn" onclick="openShareDialog()">🔗 共同編集</button>
+  <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+  <button class="tbtn" id="share-btn" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
   <!-- 入口はダイアログを開くだけ。撮影も生成もしない(動画AIと同じ)。生成は
        ダイアログの「データ作成」にある #ai-render-run を押してから走る。
        設定(仕上げメモ・生活感・平面図同梱)を変えてから生成できるのが要点。 -->
-  <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()">📷 画像AIレンダー</button>
-  <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()">🎬 動画AIレンダー</button>
-  <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
-  <button class="tbtn mob-hide" onclick="exportPlan()">↓JSON</button>
-  <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()">📂 読込</button>
+  <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h5l2-3h4l2 3h5v14H3ZM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg> 画像AIレンダー</button>
+  <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h18v15H3ZM3 10h18M7 5l3 5M14 5l3 5M10 13l5 2-5 3Z"/></svg> 動画AIレンダー</button>
+  <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
+  <button class="tbtn mob-hide" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg>JSON</button>
+  <button class="tbtn mob-hide" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> 読込</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="doImport(this)">
+  </div>
 </div>
 <div id="main">
   <div id="sidebar">
     <div class="common-tools">
       <div class="common-tools-title">共通操作</div>
       <div class="common-tools-grid">
-        <div class="stool active" data-tool="select" onclick="setTool('select')" title="選択・変形"><span class="sicon">↖</span>選択</div>
-        <div class="stool" onclick="undoAction()" title="Undo"><span class="sicon">↩</span>Undo</div>
-        <div class="stool" onclick="redoAction()" title="Redo"><span class="sicon">↪</span>Redo</div>
-        <div class="stool" onclick="copySelectedFromButton()" title="コピー"><span class="sicon">⧉</span>コピー</div>
-        <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><span class="sicon">▣</span>貼付</div>
-        <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><span class="sicon">✎</span>メモ</div>
-        <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><span class="sicon">↔</span>定規</div>
-        <!-- 「⊞ グリッド」「⊙ 全体表示」は、ツールバー(mob-hide)にしか無かった。
-             768px以下では入口が1つも無くなり、機能が消えたのと同じになる。押すのは
-             既存の toggleGrid / resetView そのもので、新しい状態は作らない。 -->
-        <div class="stool" id="stool-grid" onclick="toggleGrid()" title="グリッドの表示切替"><span class="sicon">⊞</span>グリッド</div>
-        <div class="stool" id="stool-fit" onclick="resetView()" title="全体表示"><span class="sicon">⊙</span>全体表示</div>
+        <div class="stool active" data-tool="select" onclick="setTool('select')" title="選択・変形"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3l15 9-7 2-3 7ZM12 14l5 7"/></svg>選択</div>
+        <div class="stool" onclick="undoAction()" title="Undo"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4 3 10l6 6M3 10h11a6 6 0 0 1 0 12"/></svg>Undo</div>
+        <div class="stool" onclick="redoAction()" title="Redo"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4l6 6-6 6M21 10H10a6 6 0 0 0 0 12"/></svg>Redo</div>
+        <div class="stool" onclick="copySelectedFromButton()" title="コピー"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 8h13v13H8ZM16 8V3H3v13h5"/></svg>コピー</div>
+        <div class="stool" onclick="pasteCopiedFromButton()" title="ペースト"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5H5v16h14V5h-3M8 3h8v5H8ZM8 12h8M8 16h6"/></svg>貼付</div>
+        <div class="stool" data-tool="memo" onclick="setTool('memo')" title="メモ"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4l6 6M4 20l5-1L21 7l-5-5L4 14ZM4 14l5 5"/></svg>メモ</div>
+        <div class="stool" data-tool="ruler" onclick="setTool('ruler')" title="定規"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 17 17 3l4 4L7 21ZM13 7l3 3M9 11l2 2M5 15l3 3"/></svg>定規</div>
       </div>
       <details class="lock-tools">
         <summary class="lock-tools-summary"><span>ロック管理</span><span class="lock-tools-state">+</span></summary>
@@ -3208,94 +3193,95 @@ input[type="reset"]:focus-visible{
           </div>
         </div>
       </details>
-      <div class="mobile-only mobile-data-tools">
-        <div class="mobile-data-title">データ管理</div>
+      <details class="mobile-only mobile-data-tools">
+        <summary class="mobile-data-title">データ管理・書き出し</summary>
         <div class="mobile-data-grid">
-          <button class="pbtn sec" type="button" onclick="savePlanToStorage()">💾 保存</button>
-          <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()">↥ 保存読込</button>
-          <button class="pbtn sec" type="button" onclick="exportPlan()">↓ JSON保存</button>
-          <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()">📂 JSON読込</button>
-          <button class="pbtn sec" type="button" onclick="openShareDialog()">🔗 共同編集</button>
+          <button class="pbtn sec" type="button" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+          <button class="pbtn sec" type="button" onclick="loadPlanFromStorageButton()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 17V4M8 8l4-4 4 4M4 16v5h16v-5"/></svg> 保存読込</button>
+          <button class="pbtn sec" type="button" onclick="exportPlan()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12M8 11l4 4 4-4M4 16v5h16v-5"/></svg> JSON保存</button>
+          <button class="pbtn sec" type="button" onclick="document.getElementById('import-file').click()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7V4h7l2 3h9v13H3ZM12 17V10M9 13l3-3 3 3"/></svg> JSON読込</button>
+          <button class="pbtn sec" type="button" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
           <!-- JIS図面もツールバー(mob-hide)にしか無く、768px以下では入口が
                1つも無かった。書き出し系はここに集めるのが既存の並びである。 -->
-          <button class="pbtn sec" type="button" id="jis-drawing-mobile-btn" onclick="openJisDrawingDialog()">📄 JIS図面</button>
+          <button class="pbtn sec" type="button" id="jis-drawing-mobile-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
         </div>
-      </div>
+      </details>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🏗 敷地 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7 12 3 21 7 12 11ZM3 7v10l9 4 9-4V7M12 11v10"/></svg>敷地 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="site-rect" onclick="setTool('site-rect')"><span class="sicon">⬜</span>敷地(矩形)</div>
-      <div class="stool" data-tool="foundation" onclick="setTool('foundation')"><span class="sicon">▰</span>基礎</div>
-      <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><span class="sicon">▤</span>外構階段</div>
-      <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><span class="sicon">▱</span>スロープ</div>
+      <div class="stool" data-tool="site-rect" onclick="setTool('site-rect')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM3 8h2M3 16h2M19 8h2M19 16h2M8 3v2M16 3v2M8 19v2M16 19v2"/></svg>敷地(矩形)</div>
+      <div class="stool" data-tool="foundation" onclick="setTool('foundation')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 6l9 4-9 4ZM3 10v7l9 4 9-4v-7M12 14v7M7 5V2M17 5V2"/></svg>基礎</div>
+      <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20v-4h6v-4h6V8h8v12ZM2 20h20M3 23h18"/></svg>外構階段</div>
+      <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20 21 5v15ZM3 20h18"/></svg>スロープ</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🧱 部屋・壁 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋・壁 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="wall" onclick="setTool('wall')"><span class="sicon">━</span>壁を描く</div>
-      <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><span class="sicon">▭</span>部屋(矩形)</div>
-      <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><span class="sicon">🌿</span>バルコニー</div>
+      <div class="stool" data-tool="wall" onclick="setTool('wall')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v14H3ZM3 13h18M9 6v7M15 13v7"/></svg>壁を描く</div>
+      <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋(矩形)</div>
+      <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18v11H3ZM3 15h18M7 10v11M12 10v11M17 10v11"/></svg>バルコニー</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🪜 階段・屋根 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>階段・屋根 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="stair" onclick="setTool('stair')"><span class="sicon">🪜</span>階段</div>
-      <div class="stool" data-tool="stair-corner" onclick="setTool('stair-corner')"><span class="sicon">↱</span>階段コーナー</div>
-      <div class="stool" data-tool="roof" onclick="setTool('roof')"><span class="sicon">🏠</span>屋根</div>
+      <div class="stool" data-tool="stair" onclick="setTool('stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 17h18M3 13h18M3 9h18M12 19V5M9 7l3-3 3 3"/></svg>階段</div>
+      <div class="stool" data-tool="stair-corner" onclick="setTool('stair-corner')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v6H9v12ZM3 9h6M3 13h6M3 17h6M9 3v6M13 3v6M17 3v6M6 19V6h13"/></svg>階段コーナー</div>
+      <div class="stool" data-tool="roof" onclick="setTool('roof')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>屋根</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🚪 建具 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg>建具 <span>+</span></div>
     <div class="cat-body">
       <div id="opening-door-model-tools"></div>
-      <div class="stool" data-tool="door-slide" onclick="setTool('door-slide')"><span class="sicon">⇔</span>引き戸</div>
-      <div class="stool" data-tool="door-slide-s" onclick="setTool('door-slide-s')"><span class="sicon">⇢</span>片引き戸</div>
-      <div class="stool" data-tool="door-pocket" onclick="setTool('door-pocket')"><span class="sicon">⇥</span>引込み戸</div>
-      <div class="stool" data-tool="door-fold" onclick="setTool('door-fold')"><span class="sicon">⧨</span>折戸(片)</div>
-      <div class="stool" data-tool="door-fold-w" onclick="setTool('door-fold-w')"><span class="sicon">⧨</span>折戸(両)</div>
+      <div class="stool" data-tool="door-slide" onclick="setTool('door-slide')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM12 3v18M6 12h12M8 10l-2 2 2 2M16 10l2 2-2 2M10 6v3M14 15v3"/></svg>引き戸</div>
+      <div class="stool" data-tool="door-slide-s" onclick="setTool('door-slide-s')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM13 3v18M3 7h10M10 10v4M7 18h12M17 16l2 2-2 2"/></svg>片引き戸</div>
+      <div class="stool" data-tool="door-pocket" onclick="setTool('door-pocket')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h11v18H3ZM14 3h7v18h-7M17 3v18M20 3v18M8 12h12M18 10l2 2-2 2M8 6v3"/></svg>引込み戸</div>
+      <div class="stool" data-tool="door-fold" onclick="setTool('door-fold')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18M4 4l6 4 6-4v16l-6-4-6 4ZM10 8v8M18 12h3"/></svg>折戸(片)</div>
+      <div class="stool" data-tool="door-fold-w" onclick="setTool('door-fold-w')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 21V3h20v18M3 4l4 4 4-4v16l-4-4-4 4ZM13 4l4 4 4-4v16l-4-4-4 4ZM7 8v8M17 8v8"/></svg>折戸(両)</div>
       <div id="opening-window-model-tools"></div>
-      <div class="stool" data-tool="door-front" onclick="setTool('door-front')"><span class="sicon">🔑</span>玄関ドア</div>
-      <div class="stool" data-tool="door-opening" onclick="setTool('door-opening')"><span class="sicon">▯</span>開口</div>
-      <div class="stool" data-tool="door-opening-arch" onclick="setTool('door-opening-arch')"><span class="sicon">⌒</span>アーチ開口</div>
+      <div class="stool" data-tool="door-front" onclick="setTool('door-front')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg>玄関ドア</div>
+      <div class="stool" data-tool="door-opening" onclick="setTool('door-opening')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18M6 21V6h12v15M2 21h5M17 21h5"/></svg>開口</div>
+      <div class="stool" data-tool="door-opening-arch" onclick="setTool('door-opening-arch')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V9a7 7 0 0 1 14 0v12M3 21h4M17 21h4"/></svg>アーチ開口</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🛁 住設 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18v4a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4ZM5 12V6a3 3 0 0 1 6 0M6 20v2M18 20v2"/></svg>住設 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="washer" onclick="setTool('washer')"><span class="sicon">🧺</span>洗濯機</div>
+      <div class="stool" data-tool="washer" onclick="setTool('washer')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v18H4ZM4 7h16M7 5h.01M10 5h.01M16 14a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg>洗濯機</div>
       <div id="fmp-fixtures"></div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🛋 家具 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5M5 16h14M5 11H2v9h20v-9h-3v5M5 20v2M19 20v2M12 4v12"/></svg>家具 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="custom-block" onclick="setTool('custom-block')"><span class="sicon">▣</span>任意ブロック</div>
-      <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><span class="sicon">👘</span>布団セット</div>
-      <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><span class="sicon">▥</span>格子柵</div>
+      <div class="stool" data-tool="custom-block" onclick="setTool('custom-block')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7 12 3l8 4v10l-8 4-8-4ZM4 7l8 4 8-4M12 11v10M9 6h6M12 4v4"/></svg>任意ブロック</div>
+      <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6ZM8 5h8v4H8ZM6 11h12"/></svg>布団セット</div>
+      <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v17H3ZM6 4v17M10 4v17M14 4v17M18 4v17M3 8h18M3 17h18"/></svg>格子柵</div>
       <div id="fmp-furniture"></div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🌳 庭・外構 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>庭・外構 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" data-tool="tree" onclick="setTool('tree')"><span class="sicon">🌳</span>植栽(木)</div>
-      <div class="stool" data-tool="car" onclick="setTool('car')"><span class="sicon">🚗</span>自動車</div>
-      <div class="stool" data-tool="bicycle" onclick="setTool('bicycle')"><span class="sicon">🚲</span>自転車</div>
-      <div class="stool" data-tool="bicycle-fold" onclick="setTool('bicycle-fold')"><span class="sicon">🚲</span>折りたたみ自転車</div>
-      <div class="stool" data-tool="fence" onclick="setTool('fence')"><span class="sicon">🧱</span>塀</div>
-      <div class="stool" data-tool="wood-fence" onclick="setTool('wood-fence')"><span class="sicon">▥</span>フェンス</div>
-      <div class="stool" data-tool="neighbor-building" onclick="setTool('neighbor-building')"><span class="sicon">▥</span>周辺ビル</div>
-      <div class="stool" data-tool="neighbor-house" onclick="setTool('neighbor-house')"><span class="sicon">⌂</span>隣家</div>
-      <div class="stool" data-tool="road" onclick="setTool('road')"><span class="sicon">═</span>道路</div>
-      <div class="stool" data-tool="utility-pole" onclick="setTool('utility-pole')"><span class="sicon">│</span>電柱</div>
-      <div class="stool" data-tool="ac-outdoor" onclick="setTool('ac-outdoor')"><span class="sicon">❄</span>エアコン室外機</div>
-      <div class="stool" data-tool="water-heater" onclick="setTool('water-heater')"><span class="sicon">♨</span>給湯器</div>
-      <div class="stool" data-tool="gas-heater" onclick="setTool('gas-heater')"><span class="sicon">🔥</span>ガス給湯器</div>
-      <div class="stool" data-tool="meter-box" onclick="setTool('meter-box')"><span class="sicon">🔌</span>電気メーター</div>
-      <div class="stool" data-tool="sewer-pit" onclick="setTool('sewer-pit')"><span class="sicon">🕳</span>汚水枡</div>
-      <div class="stool" data-tool="downspout" onclick="setTool('downspout')"><span class="sicon">〡</span>竪樋</div>
+      <div class="stool" data-tool="tree" onclick="setTool('tree')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a4 4 0 1 1-2-7 4 4 0 1 1 8 0 4 4 0 1 1-2 7M10 13v8M3 21h18M17 21v-7h4v7"/></svg>植栽(木)</div>
+      <div class="stool" data-tool="car" onclick="setTool('car')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l3-6h12l3 6v8H3ZM3 11h18M6 15h2M16 15h2M5 19v2M19 19v2"/></svg>自動車</div>
+      <div class="stool" data-tool="bicycle" onclick="setTool('bicycle')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17a4 4 0 1 1-8 0 4 4 0 0 1 8 0M22 17a4 4 0 1 1-8 0 4 4 0 0 1 8 0M6 17l4-9 8 9H6M8 8h5M18 17l-3-13h4"/></svg>自転車</div>
+      <div class="stool" data-tool="bicycle-fold" onclick="setTool('bicycle-fold')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0M21 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6 18l4-7 8 7H6M9 8h4M11 8v4M18 18l-2-15h3M12 14l-2 2 2 2M13 11l2-2-2-2"/></svg>折りたたみ自転車</div>
+      <div class="stool" data-tool="fence" onclick="setTool('fence')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v15H3ZM2 5h20M3 10h18M3 15h18M8 5v5M16 5v5M12 10v5M7 15v5M17 15v5"/></svg>塀</div>
+      <div class="stool" data-tool="wood-fence" onclick="setTool('wood-fence')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20M20 2v20M4 6h16v3H4ZM4 12h16v3H4ZM4 18h16v3H4Z"/></svg>フェンス</div>
+      <div class="stool" data-tool="neighbor-building" onclick="setTool('neighbor-building')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V3h16v18M8 7h1M15 7h1M8 11h1M15 11h1M8 15h1M15 15h1M10 21v-3h4v3"/></svg>周辺ビル</div>
+      <div class="stool" data-tool="neighbor-house" onclick="setTool('neighbor-house')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M9 21v-7h6v7"/></svg>隣家</div>
+      <div class="stool" data-tool="road" onclick="setTool('road')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3 3 21M17 3l4 18M12 3v3M12 10v3M12 17v4"/></svg>道路</div>
+      <div class="stool" data-tool="utility-pole" onclick="setTool('utility-pole')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 22V2h2v20M4 6h16M6 4v4M18 4v4M7 12h10"/></svg>電柱</div>
+      <div class="stool" data-tool="ac-outdoor" onclick="setTool('ac-outdoor')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h20v14H2ZM5 19v3M19 19v3M13 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M9 8v8M5 12h8M17 9h2M17 12h2M17 15h2"/></svg>エアコン室外機</div>
+      <div class="stool" data-tool="water-heater" onclick="setTool('water-heater')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3q6-3 12 0v17q-6 3-12 0ZM6 5q6 3 12 0M6 15h12M9 19v4M15 19v4M13 8h2v3h-2Z"/></svg>給湯器</div>
+      <div class="stool" data-tool="gas-heater" onclick="setTool('gas-heater')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h14v17H5ZM8 5h8M8 8h8M9 19v3M15 19v3M12 10c1 3 3 3 3 5a3 3 0 0 1-6 0c0-2 2-3 3-5Z"/></svg>ガス給湯器</div>
+      <div class="stool" data-tool="meter-box" onclick="setTool('meter-box')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h14v20H5ZM8 5h8v4H8ZM12 11l-3 5h3l-1 4 4-6h-3Z"/></svg>電気メーター</div>
+      <div class="stool" data-tool="sewer-pit" onclick="setTool('sewer-pit')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M7 8h10M6 12h12M7 16h10"/></svg>汚水枡</div>
+      <div id="fmp-exterior"></div>
+      <div class="stool" data-tool="downspout" onclick="setTool('downspout')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v5l6 5v10M12 2v4l6 5v11M6 2h8M12 21h8"/></svg>竪樋</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)">🏠 内観・外観 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M9 21v-7h6v7"/></svg>内観・外観 <span>+</span></div>
     <div class="cat-body">
-      <div class="stool" onclick="toggleInteriorColorPanel()"><span class="sicon">🎨</span>内観カラー設定</div>
-      <div class="stool" onclick="toggleExteriorColorPanel()"><span class="sicon">🏠</span>外観カラー設定</div>
-      <div class="stool" onclick="toggleRoofColorPanel()"><span class="sicon">🏡</span>屋根カラー設定</div>
-      <div class="stool" onclick="toggleLightPanel()"><span class="sicon">💡</span>ライト調整</div>
-      <div class="stool" onclick="clearAll3DHidden()"><span class="sicon">👁</span>3D非表示を全て解除</div>
-      <div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="照明"><span class="sicon">💡</span><span>照明</span><span class="asset-arrow">+</span></div><div class="asset-grid">
-        <button class="asset-tile" type="button" data-tool="light-ceiling" onclick="setTool('light-ceiling')" title="シーリングライト"><span class="sicon">◉</span><div class="asset-name">シーリングライト</div></button>
-        <button class="asset-tile" type="button" data-tool="light-down" onclick="setTool('light-down')" title="ダウンライト"><span class="sicon">⌄</span><div class="asset-name">ダウンライト</div></button>
-        <button class="asset-tile" type="button" data-tool="light-spot" onclick="setTool('light-spot')" title="スポットライト"><span class="sicon">◒</span><div class="asset-name">スポットライト</div></button>
+      <div class="stool" onclick="toggleInteriorColorPanel()"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h2a2 2 0 0 0 1-4 2 2 0 0 1 1-4h3a2 2 0 0 0 2-2 9 9 0 0 0-9-8ZM7 8h.01M12 6h.01M17 8h.01M6 13h.01"/></svg>内観カラー設定</div>
+      <div class="stool" onclick="toggleExteriorColorPanel()"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 10 4l8 7M5 9v11h7M8 20v-5h4M18 13c-1 2-4 5-4 6a4 4 0 0 0 8 0c0-1-3-4-4-6Z"/></svg>外観カラー設定</div>
+      <div class="stool" onclick="toggleRoofColorPanel()"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12 10 5l8 7M5 10v7h8M17 14c-1 2-4 5-4 6a4 4 0 0 0 8 0c0-1-3-4-4-6Z"/></svg>屋根カラー設定</div>
+      <div class="stool" onclick="toggleLightPanel()"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l4 11H4ZM12 14v7M7 21h10"/></svg>ライト調整</div>
+      <div class="stool" onclick="clearAll3DHidden()"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/></svg>3D非表示を全て解除</div>
+      <div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="照明"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l4 11H4ZM12 14v7M7 21h10"/></svg></span><span>照明</span><span class="asset-arrow">+</span></div><div class="asset-grid">
+        <button class="asset-tile" type="button" data-tool="light-ceiling" onclick="setTool('light-ceiling')" title="シーリングライト"><img src="assets/models/previews-v2/context-light-ceiling-thumb.png?v=3" loading="lazy" alt=""><div class="asset-name">シーリングライト</div></button>
+        <button class="asset-tile" type="button" data-tool="light-down" onclick="setTool('light-down')" title="ダウンライト"><img src="assets/models/previews-v2/context-light-down-thumb.png?v=3" loading="lazy" alt=""><div class="asset-name">ダウンライト</div></button>
+        <button class="asset-tile" type="button" data-tool="light-spot" onclick="setTool('light-spot')" title="スポットライト"><img src="assets/models/previews-v2/context-light-spot-thumb.png?v=3" loading="lazy" alt=""><div class="asset-name">スポットライト</div></button>
       </div></div>
     </div>
     <div class="sidebar-settings">
@@ -3313,6 +3299,7 @@ input[type="reset"]:focus-visible{
       <!-- 新規の壁に使う既定値(グローバル)を書き換える設定UI。部屋ごとの天井高ではないので HeightModel は通さない。 -->
       <input class="pi" type="number" value="2400" min="1800" max="4000" step="100" onchange="WALL_H=+this.value">
     </div>
+    <a class="sidebar-credits" href="assets/model-credits.html" target="_blank" rel="noopener">3D素材の出典</a>
   </div>
   <div id="asset-preview"><img alt=""><div></div></div>
 
@@ -3330,8 +3317,6 @@ input[type="reset"]:focus-visible{
           <button type="button" class="wk-btn wk-right" data-wdir="right">▶</button>
         </div>
       </div>
-      <!-- 浮きボタンもダイアログを開くだけ(上のヘッダーの入口と同じ)。 -->
-      <button id="unity-render-fab" type="button" onclick="openUnityRenderModal()">📷 画像AIレンダー</button>
       <div id="elev-snap-fab" role="group" aria-label="立面方向カメラスナップ">
         <button type="button" class="elev-snap-btn" data-elev-dir="n" onclick="snapCameraToElevation('n')" title="北立面から見る">北</button>
         <button type="button" class="elev-snap-btn" data-elev-dir="e" onclick="snapCameraToElevation('e')" title="東立面から見る">東</button>
@@ -3355,6 +3340,21 @@ input[type="reset"]:focus-visible{
     </div>
     <div id="light-panel" style="position:absolute;top:8px;left:185px;background:rgba(22,33,62,0.95);padding:10px;border-radius:6px;display:none;z-index:200;border:1px solid #0f3460;min-width:220px">
       <div style="font-size:11px;font-weight:bold;color:#aab;margin-bottom:7px">💡 ライト調整</div>
+      <div class="sun-time-control">
+        <svg class="sun-orbit" viewBox="0 0 240 180" aria-hidden="true">
+          <defs><linearGradient id="sun-orbit-gradient"><stop stop-color="#e6a075"/><stop offset=".5" stop-color="#a9cde6"/><stop offset="1" stop-color="#ed955d"/></linearGradient></defs>
+          <path id="sun-orbit-path" d="M 32 88 A 88 76 0 0 1 208 88 A 88 76 0 0 1 32 88" fill="none" stroke="url(#sun-orbit-gradient)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 20 88 H 220" stroke="#dce3ea" stroke-dasharray="3 5"/>
+          <g id="sun-orbit-marker" transform="translate(139.6 2.2)" fill="#f3a24e" stroke="#f3a24e" stroke-width="2" stroke-linecap="round">
+            <circle r="13" opacity=".12" stroke="none"/><circle r="6" stroke="none"/>
+            <path d="M0 -12V-10 M0 10V12 M-12 0H-10 M10 0H12 M-8 -8L-7 -7 M7 7L8 8 M-8 8L-7 7 M7 -7L8 -8"/>
+          </g>
+        </svg>
+        <div class="sun-time-heading"><label for="sun-hour">日の光</label><output id="sun-hour-val" for="sun-hour">13:00</output></div>
+        <input id="sun-hour" type="range" min="0" max="24" step="0.05" value="13" aria-label="太陽の時刻" oninput="queueSunHour(+this.value)" onchange="flushSunHour()">
+        <div class="sun-time-ticks" aria-hidden="true"><span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+        <p id="sun-altitude-info">太陽高度と日の長さを確認</p><p class="solar-model-note">北緯35.7°・真太陽時の簡易モデル</p>
+      </div>
       <div style="font-size:10px;color:#7a8fb0;margin-bottom:4px">時間帯 <span id="light-mode-label">昼</span></div>
       <div id="light-preset-buttons" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
         <button id="light-preset-morning" type="button" class="pbtn sec" onclick="applyLightPreset('morning')" style="margin-top:0;padding:6px 4px">朝</button>
@@ -3365,8 +3365,7 @@ input[type="reset"]:focus-visible{
       <div style="border-top:1px solid #22375f;margin:8px 0 0;padding-top:8px">
         <label style="display:flex;align-items:center;gap:6px;font-size:10px;color:#cce;font-weight:bold"><input id="sun-sim-toggle" type="checkbox" onchange="updateSunSim('sunSim',this.checked)"> ☀ 太陽シミュレーション</label>
         <div id="sun-sim-controls" style="display:none;margin-top:6px">
-          <div style="font-size:10px;color:#7a8fb0">時刻 <span id="sun-hour-val">13:00</span></div>
-          <input id="sun-hour" type="range" min="5" max="19" step="0.5" value="13" style="width:100%" oninput="updateSunSim('hour',+this.value)">
+
           <div style="font-size:10px;color:#7a8fb0;margin-top:4px">季節</div>
           <select id="sun-season" onchange="updateSunSim('season',this.value)" style="width:100%;background:#0f3460;color:#dfe8ff;border:1px solid #1f4b78;border-radius:4px;padding:3px;font-size:11px">
             <option value="summer">夏至 (6月)</option>
@@ -3376,6 +3375,12 @@ input[type="reset"]:focus-visible{
           <div style="font-size:10px;color:#7a8fb0;margin-top:4px">北の方角 <span id="sun-north-val">0°</span></div>
           <input id="sun-north" type="range" min="0" max="355" step="5" value="0" style="width:100%" oninput="updateSunSim('northDeg',+this.value)">
         </div>
+      </div>
+      <div class="atmosphere-control">
+        <label for="sky-haze">空気の霞み <output id="sky-haze-val">澄んだ空</output></label>
+        <input id="sky-haze" type="range" min="0" max="1" step="0.01" value="0.2" oninput="updateAtmosphere('haze',this.value)" onchange="flushSunHour()">
+        <label for="sky-cloud">雲の量 <output id="sky-cloud-val">45%</output></label>
+        <input id="sky-cloud" type="range" min="0" max="1" step="0.01" value="0.45" oninput="updateAtmosphere('cloud',this.value)" onchange="flushSunHour()">
       </div>
       <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.25</span></div>
       <input id="light-room" type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
@@ -3389,11 +3394,12 @@ input[type="reset"]:focus-visible{
     <div id="joy-hint">1本指:視点回転 | 2本指ドラッグ:移動 | ピンチ:ズーム</div>
     <div id="help-box">
       <b style="color:#cce">操作ガイド</b><br>
-      左クリック: 配置/始点→終点<br>
+      <span class="help-touch">タップで選択・配置 · 2本指で移動 · ピンチで拡大</span>
+      <span class="help-desktop">左クリック: 配置/始点→終点<br>
       選択ツール: ハンドルで変形<br>
       中ボタンDrag/Alt+Drag: パン<br>
       スクロール: ズーム<br>
-      R: 回転(配置時) | Del: 削除
+      R: 回転(配置時) | Del: 削除</span>
     </div>
     <div id="coords">X:0 Y:0</div>
   </div>
@@ -3439,7 +3445,7 @@ input[type="reset"]:focus-visible{
         <div class="airx-field">
           <label for="ai-render-preset">表現プリセット</label>
           <select id="ai-render-preset" onchange="onAiRenderPresetChange()"></select>
-          <small>いま見ている画面に合うものだけが並びます。</small>
+          <small>実写・水彩から選択。水彩ファサードは外観3Dでの使用を推奨します。</small>
         </div>
         <div class="airx-field">
           <label for="ai-render-style-input">任意の仕上げメモ</label>
@@ -3592,25 +3598,25 @@ input[type="reset"]:focus-visible{
      中にもあってよい(重複は意図であって、片方を消すものではない)。 -->
 <div id="bottom-nav">
   <button class="bnav-btn" id="bnav-tools" onclick="toggleMobileSidebar()">
-    <span class="bnav-icon">🛠</span>ツール
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 6a5 5 0 0 0-6 6l-5 5a3 3 0 0 0 4 4l5-5a5 5 0 0 0 6-6l-4 4-4-4Z"/></svg>ツール
   </button>
   <button class="bnav-btn active" id="bnav-select" data-tool="select" onclick="setTool('select')">
-    <span class="bnav-icon">↖</span>選択
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3l15 9-7 2-3 7ZM12 14l5 7"/></svg>選択
   </button>
   <button class="bnav-btn" id="bnav-undo" onclick="undoAction()">
-    <span class="bnav-icon">↩</span>Undo
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4 3 10l6 6M3 10h11a6 6 0 0 1 0 12"/></svg>Undo
   </button>
   <button class="bnav-btn" id="bnav-redo" onclick="redoAction()">
-    <span class="bnav-icon">↪</span>Redo
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4l6 6-6 6M21 10H10a6 6 0 0 0 0 12"/></svg>Redo
   </button>
   <button class="bnav-btn" id="bnav-copy" onclick="copySelectedFromButton()">
-    <span class="bnav-icon">⧉</span>コピー
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 8h13v13H8ZM16 8V3H3v13h5"/></svg>コピー
   </button>
   <button class="bnav-btn" id="bnav-paste" onclick="pasteCopiedFromButton()">
-    <span class="bnav-icon">▣</span>貼付
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5H5v16h14V5h-3M8 3h8v5H8ZM8 12h8M8 16h6"/></svg>貼付
   </button>
   <button class="bnav-btn" id="bnav-save" onclick="savePlanToStorage()">
-    <span class="bnav-icon">💾</span>保存
+    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg>保存
   </button>
 </div>
 
@@ -3623,7 +3629,7 @@ var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
 var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.12, exposure:0.93, env:0.42,
-  sunSim:false, hour:13, season:'equinox', northDeg:0};
+  sunSim:true, hour:13, season:'equinox', northDeg:0};
 // PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
 // null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
 // 通常の利用者から見た挙動は一切変わらない。値を入れるのはファイル末尾の
@@ -3640,7 +3646,7 @@ var LIGHT_PRESETS = {
     label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.12,exposure:0.93,env:0.42,
     sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
     sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
-    sky:{top:'#4e91ff',mid:'#82bdff',horizon:'#d4ecff',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
+    sky:{top:'#2874da',mid:'#549de5',horizon:'#bedcf3',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
   },
   evening:{
     label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.19,exposure:0.84,env:0.28,
@@ -3666,7 +3672,7 @@ function computeSunPosition(hour,season,northDeg){
   // ワールド方位へ: 画面奥(-Z)を北とし、northDeg で敷地の向きを回転
   var azWorld=az+Math.PI+(northDeg||0)*Math.PI/180;
   var R=220;
-  var y=Math.max(8,Math.sin(alt)*R);
+  var y=Math.sin(alt)*R; // Below-horizon sun must remain below the horizon.
   var horiz=Math.cos(alt)*R;
   return {
     x:Math.sin(azWorld)*horiz,
@@ -3683,9 +3689,14 @@ function sunColorForAltitude(alt){
   var b=Math.round(88+(244-88)*t);
   return 'rgb('+r+','+g+','+b+')';
 }
-function sunSimDimFactor(alt){
-  return Math.max(0.12,Math.min(1,Math.sin(alt)*1.6));
+function solarNightBlend(alt){
+  var t=Math.max(0,Math.min(1,(3-alt*180/Math.PI)/11));
+  return t*t*(3-2*t);
 }
+function sunSimDimFactor(alt){
+  return Math.max(0,Math.min(1,Math.sin(alt)*1.6));
+}
+
 var INTERIOR_WALL_DEFAULT = '#f4f0e8';
 
 function foundationHeightMm(){
@@ -3735,6 +3746,34 @@ function floorSlabHeightMForFloor(floor){
 function floorTopY(floor){
   return floorBaseY(floor)+floorSlabHeightMForFloor(floor);
 }
+// Room finished-floor buildup, measured from the existing floor datum (mm).
+// Missing values retain existing plans exactly; structural storeys stay unchanged.
+function roomFloorOffsetMm(room){
+  var n=Number(room&&room.floorRaiseMm);
+  return Number.isFinite(n)?Math.max(0,Math.min(600,n)):0;
+}
+function roomFloorTopY(room){return floorTopY(room.floor)+roomFloorOffsetMm(room)*U;}
+function roomFloorAt(floor,x,y){
+  var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
+  // A smaller explicit room wins over an enclosing whole-floor outline.
+  candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
+  return candidates.length?roomFloorTopY(candidates[0]):floorTopY(floor);
+}
+function updateSelectedRoomFloor(value){
+  var r=ST.selected;if(!r||r.type!=='room')return;
+  if(isObjectLocked(r)){updateProps();return;}
+  var n=Number(value);if(!Number.isFinite(n))return;
+  saveState();r.floorRaiseMm=Math.max(0,Math.min(600,n));
+  markDirty();updateProps();draw2d();if(ren)rebuild3D();
+}
+function selectedRoomFloorHtml(r){
+  var v=roomFloorOffsetMm(r);
+  return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
+    '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
+    '<option value="">プリセットを選択</option><option value="0">玄関土間・既存基準 ＋0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
+    '<div class="pr"><label class="pl" for="room-floor-raise">床上げ (mm)</label><input id="room-floor-raise" class="pi" type="number" min="0" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
+    '<div class="lock-status-note">この階の既存床を0mmとして指定。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
+}
 var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
 function isContextExteriorItemType(type){
   return !!CONTEXT_EXTERIOR_TYPES[type];
@@ -3746,6 +3785,7 @@ function shouldRenderItemInCurrent3DView(it){
 }
 // 外構系オブジェクト: 1階配置時も床・基礎の厚み分を足さず地面(GL)に接地させる
 function isGroundLevelItemType(t){
+  var model=getFmpItem(t);if(model&&model.groundLevel) return true;
   return t==='site-rect' || t==='foundation' || t==='exterior-stair' || t==='ramp' ||
     t==='ac-outdoor' || t==='water-heater' || t==='meter-box' || t==='sewer-pit' ||
     t==='downspout' || t==='gas-heater' ||
@@ -3765,7 +3805,7 @@ function item3DBaseY(it){
     return 0;
   }
   if(it.type==='roof') return floorBaseY(it.floor);
-  return floorTopY(it.floor);
+  return roomFloorAt(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
 }
 // 外皮としての壁の高さ(m)。部屋ではなく「その階の壁」の高さ = 階高まで。
 // ここを下げると外壁と上階の床のあいだが外から素通しになるので、下限として使う。
@@ -4081,7 +4121,7 @@ function roomCeilingHeightM(room){
 // 実測(既定プラン・全部屋が天井高を明示していない): 1階 2700 / 2階・3階 2520。
 function roomRenderedCeilingMm(room){
   var floor=room&&room.floor;
-  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U);
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U)-Math.max(0,Math.min(600,Number(room&&room.floorRaiseMm)||0));
 }
 // 部屋が勾配天井なら、レンダが実際に置く低い側・高い側の高さ(m, floorBaseY 基準)を返す。
 // 高い側は roomCeilingHeightM をそのまま使う（階高でのクランプを2か所に書かない）。
@@ -4386,7 +4426,7 @@ var ISIZES = {
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
-  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:1850,d:4500}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
+  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:2083,d:4790}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
   // 隣家の既定は 8P×7P(7280×6370) = 1階46.4m² / 2階建て延べ約28坪。
   // 日本の建売住宅の最も標準的な規模で、910モジュールにも正確に載る。
   'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:7280,d:6370}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
@@ -4539,6 +4579,15 @@ var GLTF_MODEL_CONFIG = {
   'fmp-Refrigerator06':{metalness:0.04},
   'fmp-Refrigerator07':{metalness:0.04}
 };
+var EXTERIOR_MODEL_IDS={'ac-outdoor':'original-ac-unit','water-heater':'original-tank','gas-heater':'original-gas-unit','meter-box':'original-meter','sewer-pit':'original-drain-cover'};
+var EXTERIOR_MODEL_URLS={};Object.keys(EXTERIOR_MODEL_IDS).forEach(function(type){EXTERIOR_MODEL_URLS[type]='assets/models/original/'+EXTERIOR_MODEL_IDS[type]+'.glb';});
+function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(EXTERIOR_MODEL_IDS[type]);}
+function buildDetailedExterior(grp,it,w,d,h){
+  var url=EXTERIOR_MODEL_URLS[it.type];
+  if(!url || !ensureGltfModel(url)) return false;
+  var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
+  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness);grp.add(clone);return true;
+}
 var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
 var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';
 var CUSTOM_MODEL_MANIFEST_URL = 'assets/models/custom/manifest.json';
@@ -4697,6 +4746,7 @@ function getOpeningModelToolPreset(tool){
     if(doorModelId==='small') return {
       kind:'door', baseType:'door-swing-s', openingModel:'', model:null, label:'開き戸: 小'
     };
+    if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
     var doorModel=getFmpItem(doorModelId);
     if(!doorModel || !isClassroomDoorModel(doorModel)) return null;
     return {
@@ -4727,10 +4777,10 @@ function openingToolTileHtml(tool,label,icon,item,extraClass){
   var cls='asset-tile opening-model-tile '+(extraClass||'');
   var html='<button class="'+escHtml(cls)+'" type="button" data-tool="'+escHtml(tool)+'" onclick="chooseOpeningModelTool(\''+escHtml(tool)+'\')" title="'+escHtml(title)+'"';
   if(item&&item.thumb){
-    html+=' onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" data-preview="'+escHtml(item.thumb)+'" data-preview-name="'+escHtml(item.name)+'"';
+    html+=' onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'"';
   }
   html+='>';
-  if(item&&item.thumb) html+='<img src="'+escHtml(item.thumb)+'" loading="lazy" alt="">';
+  if(item&&item.thumb) html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
   else html+='<span class="opening-model-thumb">'+icon+'</span>';
   html+='<div class="asset-name">'+escHtml(label)+'</div></button>';
   return html;
@@ -4743,9 +4793,10 @@ function renderOpeningDoorModelToolMenu(){
   var mount=document.getElementById('opening-door-model-tools');
   if(!mount) return;
   var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isClassroomDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
-  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="開き戸"><span class="sicon">🚪</span><span>開き戸</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
-  html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','🚪',null,'opening-model-default-tile');
-  html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','🚪',null,'opening-model-default-tile');
+  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="開き戸"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>開き戸・浴室ドア</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+  html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
+  html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');
+  ['swing','fold'].forEach(function(kind){html+=openingToolTileHtml(openingDoorModelToolId('bath-clear-'+kind),'浴室・透明'+(kind==='fold'?'折り戸':'開き戸'),'',{thumb:'assets/icons/bath-'+kind+'.svg'},'');});
   doors.forEach(function(item){
     html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,'');
   });
@@ -4756,10 +4807,10 @@ function renderOpeningWindowModelToolMenu(){
   var mount=document.getElementById('opening-window-model-tools');
   if(!mount) return;
   var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon">🪟</span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
-  html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','🪟',null,'opening-model-default-tile opening-window-tile');
-  html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','▢',null,'opening-model-default-tile opening-window-tile');
-  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'掃き出し','⇔',null,'opening-model-default-tile opening-window-tile');
+  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v16H3ZM12 4v16M3 12h18"/></svg></span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+  html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','',{thumb:'assets/models/previews-v2/standard-window-slide-thumb.png'},'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','',{thumb:'assets/models/previews-v2/standard-window-fix-thumb.png'},'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'掃き出し','',{thumb:'assets/models/previews-v2/standard-window-door-thumb.png'},'opening-model-default-tile opening-window-tile');
   windows.forEach(function(item){
     html+=openingToolTileHtml(openingWindowModelToolId(item.id),item.name,'🪟',item,'opening-window-tile');
   });
@@ -4767,8 +4818,7 @@ function renderOpeningWindowModelToolMenu(){
   mount.innerHTML=html;
 }
 function renderFurnitureMegaLibrary(){
-  var icons={ 'バスルーム':'🛁','洗面台':'🚿','トイレ':'🚽','シャワー':'🚿','キッチン収納':'🍳','キッチン/シンク':'🚰','キッチン/コンロ':'🔥','冷蔵庫':'📦','ソファ':'🛋','チェア':'🪑','テーブル':'🍵','ベッド':'🛏','収納':'👗','引き出し':'👞','キャビネット':'▦','カーペット':'▤','カーテン':'▥','装飾':'◈','ドア':'▯','家電':'▣','空調':'❄','キッズ':'☆','キッチン':'🍳','照明':'◉','マットレス':'▰','ミラー':'◇','絵画':'□','ペット':'○','植物':'♧','シェルフ':'▦','テーブルセット':'◫','テレビ':'▣','壁装飾':'▧','窓':'▢' };
-  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture') };
+  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var cats={};
@@ -4778,15 +4828,17 @@ function renderFurnitureMegaLibrary(){
     var html='';
     Object.keys(cats).sort().forEach(function(cat){
       cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
-      html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+(icons[cat]||'◻')+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+      html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name)+'" data-preview="'+escHtml(item.thumb)+'" data-preview-name="'+escHtml(item.name)+'">';
-        html+='<img src="'+escHtml(item.thumb)+'" loading="lazy" alt="">';
-        html+='<div class="asset-name">'+escHtml(item.name)+'</div></button>';
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+        html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
+        html+=(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
+        html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
       });
       html+='</div></div>';
     });
     mount.innerHTML=html;
+    AssetCatalogue.install(mount,group);
   });
 }
 function toggleAssetCat(el){
@@ -4855,7 +4907,7 @@ function drawFmpTopImage(img,item,dx,dy,dw,dh){
   }
 }
 function getFmpTopBaseRotationRad(item){
-  if(item && /^im0261-/.test(item.id||'')) return 0;
+  if(item && (item.previewVersion===2 || /^im0261-/.test(item.id||'') || /^fmp-/.test(item.id||''))) return 0;
   return Math.PI;
 }
 function getFmpTopRotationRad(item){
@@ -4880,6 +4932,7 @@ function drawFmpTopImageOriented(img,item,w,h){
   ctx.restore();
 }
 function showAssetPreview(el,e){
+  if(window.matchMedia('(hover: none), (pointer: coarse)').matches){hideAssetPreview();return;}
   var pv=document.getElementById('asset-preview'); if(!pv) return;
   var img=pv.querySelector('img'), label=pv.querySelector('div');
   img.src=el.getAttribute('data-preview')||'';
@@ -4944,7 +4997,7 @@ var ILABELS = {
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
   desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
-  'ac-outdoor':'エアコン室外機', 'water-heater':'給湯器(エコキュート)', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
+  'ac-outdoor':'エアコン室外機', 'water-heater':'貯湯タンク（エコキュート）', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
   'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸','door-fold':'折戸(片開き)','door-fold-w':'折戸(両開き)','door-slide-s':'片引き戸','door-pocket':'引込み戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
   'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
@@ -5762,7 +5815,8 @@ function updateProps(){
     html += '<div class="ph">メモ</div>';
     html += '<div class="pr"><div class="pl">テキスト</div><textarea class="pi note-textarea" oninput="updateSelectedNoteText(this.value)" onblur="finishSelectedNoteText()">'+escHtml(it.noteText||'')+'</textarea></div>';
     html += '<div class="pr"><div class="pl">背景色</div><input class="pi" type="color" value="'+(it.color||'#fff3a6')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
-    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    html += selectedModelFinishesHtml(it);
+  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -5773,7 +5827,8 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">補助線の長さ(mm)</div><input class="pi" type="number" step="100" value="'+Math.round(Number(it.extLen)||0)+'" onchange="updateSelectedProp(\'extLen\',+this.value)"></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">両端から測定対象へ垂直に伸びる補助線。負の値で反対側に伸びます</div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
-    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    html += selectedModelFinishesHtml(it);
+  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -5793,7 +5848,8 @@ function updateProps(){
     html += isWalking
       ? '<button class="pbtn" data-lock-control type="button" onclick="stopWalkthrough()">再生を停止</button>'
       : '<button class="pbtn" data-lock-control type="button" onclick="playSelectedWalkthroughRoute()">外観3Dで再生</button>';
-    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    html += selectedModelFinishesHtml(it);
+  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -5868,7 +5924,8 @@ function updateProps(){
         html += '<button class="pbtn sec" onclick="toggleExteriorColorPanel()" style="margin-top:6px">外観カラー設定を開く</button>';
       }
     }
-    html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+    html += selectedModelFinishesHtml(it);
+  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -5933,6 +5990,7 @@ function updateProps(){
         html += '<option value="'+opt[0]+'" '+(doorOpenState(it)===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
       });
       html += '</select></div>';
+      if(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w') html+='<div class="pr"><label class="pl">パネル仕上げ</label><select class="pi" onchange="updateSelectedProp(\'doorFinish\',this.value)"><option value="">標準</option><option value="bath-clear" '+(it.doorFinish==='bath-clear'?'selected':'')+'>浴室・透明パネル</option></select></div>';
       // テクスチャにノブや窓が描かれている場合に3Dの造形と干渉しないようOFFにできる
       html += '<div class="pr"><div class="pl">ドアノブ・ハンドル</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.showDoorHandle!==false?'checked':'')+' onchange="updateSelectedProp(\'showDoorHandle\',this.checked)">3Dで表示する</label></div>';
       if(it.type==='door-front'){
@@ -6032,6 +6090,7 @@ function updateProps(){
   if(it.type==='foundation'){
     if(it.foundationHeight===undefined || isNaN(Number(it.foundationHeight))) it.foundationHeight=450;
     html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
+    html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+key+'" '+(it.texture===key?'selected':'')+'>'+SITE_SURFACE_OPTIONS[key].label+'</option>';}).join('')+'</select></div>';
     html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.foundationHeight)+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
     html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。</div>';
   }
@@ -6056,6 +6115,8 @@ function updateProps(){
     html += '<button class="pbtn sec" style="margin-top:0" onclick="updateSelectedProp(\'flipY\', !ST.selected.flipY)">上下反転</button>';
     html += '</div></div>';
   }
+  if(it.type==='water-heater' || it.type==='original-tank') html+='<div class="lock-status-note">貯湯タンクのモデルです。庭・外構の「ヒートポンプ（貯湯タンク用）」と組み合わせて配置できます。</div>';
+  if(it.type==='car'){html += '<div class="lock-status-note">精密モデル：BMW M4 Competition<br><a href="assets/model-credits.html" target="_blank" rel="noopener">モデル作者・ライセンス</a></div>';}
   if(it.type === 'roof') {
     if(!it.roofType) it.roofType='gable';
     if(!it.pitch) it.pitch=30;
@@ -6101,7 +6162,7 @@ function updateProps(){
     if(it.type==='gas-heater'){
       html += '<div class="pr"><div class="pl">取付高さ (下端mm)</div><input class="pi" type="number" min="0" max="3000" step="50" value="'+Math.round(it.gasHeaterMount||1300)+'" onchange="updateSelectedProp(\'gasHeaterMount\',+this.value)"></div>';
     }
-    html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
+    if(!EXTERIOR_MODEL_IDS[it.type]) html += '<div class="pr"><div class="pl">3Dカラー</div><input class="pi" type="color" value="'+(it.color||ICOLORS[it.type]||'#dddddd')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     if(canSetItemTexture(it)){
       var texLabel=isDoorItemType(it.type)?'ドアテクスチャ':'テクスチャ';
       html += isDoorItemType(it.type)
@@ -6111,7 +6172,7 @@ function updateProps(){
       html += selectedTextureFlipControlsHtml(it);
     }
     var isDoorTextureCrop=isDoorItemType(it.type);
-    if(!isContextExteriorItemType(it.type) && (!isDoorTextureCrop || it.texture)){
+    if(!isContextExteriorItemType(it.type) && !EXTERIOR_MODEL_IDS[it.type] && (!isDoorTextureCrop || it.texture)){
       html += '<div class="ph" style="margin-top:15px">'+(isDoorTextureCrop?'テクスチャ画像トリミング':'画像トリミング (余白調整)')+'</div>';
       html += '<div class="pr"><div class="pl">拡大率: <span class="texture-crop-value">'+(it.sScale||1).toFixed(2)+'</span></div><input class="pi" type="range" min="0.5" max="2.0" step="0.05" value="'+(it.sScale||1)+'" oninput="updateSelectedTextureCrop(\'sScale\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
       html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+Math.round(it.sX||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
@@ -6123,6 +6184,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
+    html += selectedRoomFloorHtml(it);
     html += selectedRoomCeilingHtml(it);
     html += selectedRoomCeilingFinishHtml(it);
   }
@@ -6134,8 +6196,55 @@ function updateProps(){
     html += selectedTextureFlipControlsHtml(it);
   }
   
+  html += selectedModelFinishesHtml(it);
   html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
   setPropsBodyHtml(body,html,it);
+}
+function makeBathroomDoorLeaf(w,h,d){
+  var g=new THREE.Group();g.name='Bathroom clear framed panel';
+  var frame=new THREE.MeshStandardMaterial({color:0xb6bfc2,metalness:.72,roughness:.28});
+  var seal=new THREE.MeshStandardMaterial({color:0x343e42,roughness:.8});
+  var glass=new THREE.MeshStandardMaterial({color:0xdceff0,transparent:true,opacity:.19,roughness:.09,metalness:.12,depthWrite:false,side:THREE.DoubleSide});
+  function bar(name,x,y,bw,bh,bd,mat){var m=new THREE.Mesh(new THREE.BoxGeometry(bw,bh,bd),mat);m.name=name;m.position.set(x,y,0);m.castShadow=mat!==glass;m.receiveShadow=mat!==glass;g.add(m);}
+  bar('Clear glazing',0,0,w-.055,h-.105,.005,glass);
+  [-1,1].forEach(function(a){bar('Glazing gasket',a*(w/2-.027),0,.006,h-.05,d*.65,seal);bar('Aluminium stile',a*(w/2-.012),0,.024,h,d,frame);});
+  bar('Top rail',0,h/2-.017,w,.034,d,frame);bar('Bottom rail',0,-h/2+.032,w,.064,d,frame);
+  bar('Meeting rail',0,-.08,w,.023,d,frame);
+  return g;
+}
+function selectedModelFinishesHtml(it){
+  var model=getItemFinishModel(it.type);
+  if(!model || !model.finishChannels) return '';
+  var html='<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">素材の表情を保って色を変更</div>';
+  if(model.mirrorOption) html+='<div class="pr"><label class="pl" for="shoe-mirror">姿見</label><input id="shoe-mirror" type="checkbox" '+(it.showMirror?'checked':'')+' onchange="updateSelectedProp(\'showMirror\',this.checked)"></div>';
+  model.finishChannels.forEach(function(channel){
+    var value=(it.finishColors&&it.finishColors[channel.key])||channel.default;
+    html+='<div class="pr"><label class="pl" for="finish-'+channel.key+'">'+escHtml(channel.label)+'</label><input id="finish-'+channel.key+'" class="pi" type="color" value="'+escHtml(value)+'" oninput="updateSelectedModelFinish(\''+channel.key+'\',this.value)"></div>';
+    if(channel.key!=='fabric'&&channel.key!=='accent'){
+      var current=it.finishRoughness&&it.finishRoughness[channel.key];
+      html+='<div class="pr"><label class="pl" for="finish-roughness-'+channel.key+'">'+escHtml(channel.label)+'の艶</label><select id="finish-roughness-'+channel.key+'" class="pi" onchange="updateSelectedModelRoughness(\''+channel.key+'\',this.value)">';
+      [['','既定の仕上げ'],['0.85','マット'],['0.48','サテン'],['0.22','艶あり']].forEach(function(option){html+='<option value="'+option[0]+'" '+((current===undefined?'':String(current))===option[0]?'selected':'')+'>'+option[1]+'</option>';});
+      html+='</select></div>';
+    }
+  });
+  html+='<button class="pbtn sec" type="button" onclick="updateSelectedProp(\'finishColors\',null)">素材の色を元に戻す</button>';
+  return html;
+}
+function updateSelectedModelFinish(channel,value){
+  if(!ST.selected || !/^#[0-9a-f]{6}$/i.test(value||'')) return;
+  var model=getItemFinishModel(ST.selected.type);
+  if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;})) return;
+  var colors=Object.assign({},ST.selected.finishColors||{});colors[channel]=value;
+  updateSelectedProp('finishColors',colors);
+}
+function updateSelectedModelRoughness(channel,value){
+  if(!ST.selected)return;
+  var model=getItemFinishModel(ST.selected.type);
+  if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel&&c.key!=='fabric'&&c.key!=='accent';}))return;
+  if(value!=='' && ['0.85','0.48','0.22'].indexOf(String(value))<0)return;
+  var settings=Object.assign({},ST.selected.finishRoughness||{});
+  if(value==='')delete settings[channel];else settings[channel]=Number(value);
+  updateSelectedProp('finishRoughness',Object.keys(settings).length?settings:null);
 }
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
@@ -6352,7 +6461,7 @@ function explicit2DSelection(){
   });
   return out;
 }
-function clearMultiSelection(){ ST.multiSelected=[]; DRAG.shiftClick=null; }
+function clearMultiSelection(){ ST.multiSelected=[]; DRAG.shiftClick=null; DRAG.group=null; DRAG.marquee=null; }
 function beginShiftClickCandidate(picked){
   DRAG.shiftClick={picked:picked,previous:explicit2DSelection()};
 }
@@ -6585,9 +6694,10 @@ function objectIdLabel(o){
 }
 
 var SITE_SURFACE_OPTIONS = {
-  grass:{label:'芝生',texture:'grass',color:0x7ea86a,edge:0x3f6f35,segment:0x43b047,env:0.04},
-  gravel:{label:'砂利',texture:'gravel',color:0xc1b7a6,edge:0x8c8372,segment:0x9c8f78,env:0.05},
-  concrete:{label:'コンクリート',texture:'concrete',color:0xc2c5c3,edge:0x8f9396,segment:0xbfc3c7,env:0.06}
+  sand:{label:'砂地（締め固め）',texture:'sand',tileM:1.5,normal:0.35,color:0xffffff,edge:0xaca080,segment:0xd8bb80,env:0.03},
+  grass:{label:'芝生（自然草地）',texture:'grass',tileM:2,normal:0.55,color:0xffffff,edge:0x3f6f35,segment:0x43b047,env:0.04},
+  gravel:{label:'砂利',texture:'gravel',tileM:2.25,normal:0.65,color:0xffffff,edge:0x8c8372,segment:0x9c8f78,env:0.05},
+  concrete:{label:'コンクリート（経年）',texture:'concrete',tileM:2.08,normal:0.25,color:0xffffff,edge:0x8f9396,segment:0xbfc3c7,env:0.06}
 };
 function siteSurfaceType(it){
   return (it&&SITE_SURFACE_OPTIONS[it.siteSurface]) ? it.siteSurface : 'grass';
@@ -6641,9 +6751,10 @@ function mkWall(x1,y1,x2,y2,floor,thick,color){
 function mkItem(type,x,y,rot,floor,w,d){
   type=bestFmpType(type);
   var sz=getItemDefaultSize(type);
-  var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,
+  var item = {id:nextId++,type:type,x:x,y:y,rot:rot||0,floor:floor||1,modelFacingVersion:1,
     w:w||sz.w,d:d||sz.d,color:ICOLORS[type]||'#ddd',
     flipX:false, flipY:false, textureFlipX:false, textureFlipY:false, sScale:1, sX:0, sY:0};
+  if(type==='neighbor-house') item.neighborFacingVersion=1;
   if(type==='wood-fence'){
     item.fenceHeight=1600;
     item.fencePattern='horizontal';
@@ -6707,6 +6818,7 @@ function mkItem(type,x,y,rot,floor,w,d){
   if(canSetItemElevation(item)) item.elev=(type==='meter-box')?1600:(type==='fmp-AirConditionerWall01'?2000:0);
   if(isFmpItemType(type)){
     item.fmpId=type;
+    if(getFmpItem(type).defaultElevation) item.elev=getFmpItem(type).defaultElevation;
     item.color=null;
     item.colorCustom=false;
   }
@@ -6747,7 +6859,7 @@ function loadPreset(attempt){
     nextId=Math.max(nextId||1,Math.floor(maxId)+1);
     clearEditHistory();
     normalizeLegacyFurnitureItems();
-    draw2d();
+    resetView();
     if(ren) rebuild3D();
   }).catch(function(e){
     console.warn('[WebCAD] default plan load failed:', e);
@@ -7164,6 +7276,7 @@ function draw2d(){
   // 寸法線は設計そのものではなく図面上の注記なので、キャプチャでは注記側に含める
   if(ST.showDim && planCaptureShows('annotations')) drawDim();
   drawMultiSelectionOverlays();
+  if(DRAG.marquee){var m=DRAG.marquee,a=w2c(m.start.x,m.start.y),b=w2c(m.end.x,m.end.y);ctx.save();ctx.fillStyle='rgba(233,69,96,.08)';ctx.strokeStyle='#e94560';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.fillRect(a.cx,a.cy,b.cx-a.cx,b.cy-a.cy);ctx.strokeRect(a.cx,a.cy,b.cx-a.cx,b.cy-a.cy);ctx.restore();}
   drawLockOverlays(fw,fi);
   drawBaseSelectionOverlay();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
@@ -7337,16 +7450,12 @@ function drawWall2d(w){
 function drawLockBadgePx(cx,cy){
   ctx.save();
   ctx.translate(cx,cy);
-  ctx.fillStyle='rgba(22,33,62,0.88)';
-  ctx.strokeStyle='rgba(255,255,255,0.9)';
-  ctx.lineWidth=1;
-  ctx.fillRect(-9,-9,18,18);
-  ctx.strokeRect(-9,-9,18,18);
-  ctx.fillStyle='#ffffff';
-  ctx.font='12px "Noto Sans JP",sans-serif';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  ctx.fillText('🔒',0,0);
+  // Small monochrome lock: stays legible without covering room names with emoji.
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#65736c'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.arc(0,-2,2,Math.PI,0); ctx.stroke();
+  ctx.strokeRect(-3,-2,6,5);
   ctx.restore();
 }
 
@@ -8067,7 +8176,7 @@ function drawItem2d(it){
   }
   var spriteKey=SPRITE_MAP[it.type];
   var s = spriteKey ? SPRITE_JSON.sprites[spriteKey] : null;
-  var fmp=getFmpItem(it.type);
+  var fmp=getItemFinishModel(it.type)||(it.type==='car'?{id:'context-car',top:'assets/models/previews-v2/context-car-top.png',previewVersion:2}:null);
   if(fmp){
     var topImg=getFmpTopImage(fmp);
     var hwF=it.w*sc/2, hdF=it.d*sc/2;
@@ -8373,6 +8482,7 @@ function drawItem2d(it){
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('ビル',0,0);
     } else if(it.type === 'neighbor-house') {
+      ctx.save();ctx.rotate(Math.PI);
       // 3Dモデル(隣家キット)と同じ共有レイアウトから2D記号を描く。
       // 910mmグリッドのベイ割り・開口位置・軒の出が3Dと必ず一致する。
       var nhFloors=getContextFloors(it);
@@ -8469,7 +8579,7 @@ function drawItem2d(it){
       ctx.font='bold '+Math.max(9,Math.min(14,Math.min(it.w,it.d)*sc*0.18))+'px sans-serif';
       ctx.fillStyle='rgba(62,68,74,0.86)';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('隣家',0,0);
+      ctx.restore();ctx.fillText('隣家',0,0);
     } else if(it.type === 'utility-pole') {
       var rr=Math.max(5,Math.min(hw,hd)*0.72);
       ctx.fillStyle='rgba(140,146,151,0.86)';
@@ -8660,8 +8770,8 @@ function drawItem2d(it){
       }
     } else if(it.type === 'site-rect') {
       var surface=siteSurfaceType(it);
-      var fillMap={grass:'rgba(100,160,100,0.08)',gravel:'rgba(150,140,120,0.12)',concrete:'rgba(140,145,150,0.12)'};
-      var strokeMap={grass:'rgba(60,100,60,0.4)',gravel:'rgba(120,105,85,0.45)',concrete:'rgba(90,95,100,0.45)'};
+      var fillMap={sand:'rgba(205,185,140,0.18)',grass:'rgba(100,160,100,0.08)',gravel:'rgba(150,140,120,0.12)',concrete:'rgba(140,145,150,0.12)'};
+      var strokeMap={sand:'rgba(150,125,80,0.45)',grass:'rgba(60,100,60,0.4)',gravel:'rgba(120,105,85,0.45)',concrete:'rgba(90,95,100,0.45)'};
       ctx.setLineDash([10,5]);
       ctx.strokeStyle=strokeMap[surface]||strokeMap.grass; ctx.lineWidth=2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc); ctx.setLineDash([]);
@@ -8910,6 +9020,16 @@ function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
   if(isObjectLocked(it)){ DRAG.active=false; return; }
+  if(DRAG.group&&DRAG.group.length>1&&(h==='move'||h==='wall-move')){
+    if(Math.hypot(cx-DRAG.startCX,cy-DRAG.startCY)<3&&!DRAG.saved)return;
+    if(!DRAG.saved){saveState();DRAG.saved=true;}
+    var gx=snapV((cx-DRAG.startCX)/(ST.zoom*.05)),gy=snapV((cy-DRAG.startCY)/(ST.zoom*.05));
+    DRAG.group.forEach(function(entry){var target=entry.obj,base=entry.orig;
+      if(isObjectLocked(target))return;
+      if(base.x1!==undefined){target.x1=base.x1+gx;target.y1=base.y1+gy;target.x2=base.x2+gx;target.y2=base.y2+gy;}
+      else{target.x=base.x+gx;target.y=base.y+gy;}
+    });ST._snapState=null;return;
+  }
   if(h==='wall-a'||h==='wall-b'||h==='wall-move'){applyWallDrag(cx,cy,e);return;}
   if(!DRAG.saved){saveState(); DRAG.saved=true;}
   var dx=(cx-DRAG.startCX)/(ST.zoom*0.05), dy=(cy-DRAG.startCY)/(ST.zoom*0.05);
@@ -9051,12 +9171,17 @@ var _intML={down:false,lx:0,ly:0,yaw:0,pitch:0};
 var _texCache = {};
 // PBR texture map — high-quality generated textures in assets/textures/
 var ASSET_TEX_MAP = {
+  sand:'assets/textures/ground/sand-color.jpg',
+  grass_normal:'assets/textures/ground/grass-normal.jpg',
+  gravel_normal:'assets/textures/ground/gravel-normal.jpg',
+  sand_normal:'assets/textures/ground/sand-normal.jpg',
+  concrete_normal:'assets/textures/ground/concrete-normal.jpg',
   'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
-  'grass':       'assets/grass.png',
+  'grass':       'assets/textures/ground/grass-color.jpg',
   'stone':       'assets/stone.png',
-  'gravel':      'assets/stone.png',
+  'gravel':      'assets/textures/ground/gravel-color.jpg',
   'tile_floor':  'assets/textures/floor_tile_diffuse.jpg',
-  'concrete':    'assets/textures/floor_tile_diffuse.jpg',
+  'concrete':    'assets/textures/ground/concrete-color.jpg',
   'siding':      'assets/textures/wall_siding_diffuse.jpg',
   'plaster':     'assets/textures/wall_plaster_diffuse.jpg',
   'roof_tile':   'assets/textures/roof_tile_diffuse.jpg',
@@ -9087,7 +9212,7 @@ function getTexture3D(key) {
   if (src) {
     var tex = new THREE.TextureLoader().load(src, function(){
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.colorSpace = /_normal$/.test(key)?THREE.NoColorSpace:THREE.SRGBColorSpace;
       if(ren) tex.anisotropy = ren.capabilities.getMaxAnisotropy();
       scheduleTextureSceneRefresh();
     });
@@ -9123,6 +9248,16 @@ function disposeMat(m,seenMat) {
   if(seenMat) seenMat.add(m);
   m.dispose();
   if (m.map) m.map.dispose();
+  // Only release explicitly owned auxiliary maps. GLB normal/roughness maps may
+  // be shared with cached models and must remain alive across scene rebuilds.
+  var owned=m.userData&&m.userData.ownedAuxiliaryTextures;
+  if(owned){
+    var released=new Set();
+    owned.forEach(function(tex){
+      if(tex&&tex!==m.map&&!released.has(tex)){released.add(tex);tex.dispose();}
+    });
+    m.userData.ownedAuxiliaryTextures=[];
+  }
 }
 
 var composer = null; // single declaration
@@ -9134,7 +9269,19 @@ function lerpHexColor(a,b,t){
   var c=ca.map(function(v,i){return Math.round(v+(cb[i]-v)*t);});
   return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
 }
-function makeSkyTexture(){
+function skySunUv(position,environment){
+  var length=Math.hypot(position.x,position.y,position.z)||1;
+  var az=Math.atan2(position.z,position.x);
+  // SphereGeometry reverses horizontal UV relative to equirectangular IBL.
+  var u=0.5+(environment?1:-1)*az/(2*Math.PI);
+  return {u:((u%1)+1)%1,v:0.5-Math.asin(Math.max(-1,Math.min(1,position.y/length)))/Math.PI};
+}
+function blendSkyRgba(a,b,t){
+  function parse(value){return String(value).match(/[\d.]+/g).map(Number);}
+  var x=parse(a),y=parse(b);
+  return 'rgba('+x.map(function(v,i){var n=v+(y[i]-v)*t;return i<3?Math.round(n):n.toFixed(3);}).join(',')+')';
+}
+function makeSkyTexture(forEnvironment){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
   var sky=preset.sky||LIGHT_PRESETS.day.sky;
   var sunSimActive=LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night';
@@ -9142,7 +9289,8 @@ function makeSkyTexture(){
   if(sunSimActive){
     simSun=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
     // 低高度(<15度)は夕方プリセットの空色へ補間して朝焼け/夕焼けを表現
-    var lowT=1-Math.max(0,Math.min(1,(simSun.altitude*180/Math.PI)/15));
+    var lowT=1-Math.max(0,Math.min(1,(simSun.altitude*180/Math.PI)/22));
+    lowT=lowT*lowT*(3-2*lowT);
     if(lowT>0){
       var ev=LIGHT_PRESETS.evening.sky;
       sky={
@@ -9151,52 +9299,68 @@ function makeSkyTexture(){
         horizon:lerpHexColor(sky.horizon||'#d4ecff',ev.horizon||'#f0a85e',lowT),
         ground:sky.ground, sunX:sky.sunX, sunY:sky.sunY,
         sunCore:sky.sunCore,
-        sunGlow:lowT>0.5?'rgba(255,128,50,0.5)':sky.sunGlow,
-        haze:lowT>0.5?'rgba(255,145,72,0.38)':sky.haze,
+        sunGlow:blendSkyRgba(sky.sunGlow||'rgba(255,249,205,0.45)','rgba(255,128,50,0.5)',lowT),
+        haze:blendSkyRgba(sky.haze||'rgba(255,245,215,0.55)','rgba(255,145,72,0.38)',lowT),
         cloudAlpha:sky.cloudAlpha
       };
     }
+  }
+  var nightMix=simSun?solarNightBlend(simSun.altitude):(LIGHT_SETTINGS.timeOfDay==='night'?1:0);
+  if(simSun && nightMix>0){
+    var nightSky=LIGHT_PRESETS.night.sky;
+    ['top','mid','horizon','ground'].forEach(function(k){sky[k]=new THREE.Color(sky[k]).lerp(new THREE.Color(nightSky[k]),nightMix).getStyle();});
+    ['sunCore','sunGlow','haze'].forEach(function(k){sky[k]=blendSkyRgba(sky[k],nightSky[k],nightMix);});
+    sky.cloudAlpha=sky.cloudAlpha+(nightSky.cloudAlpha-sky.cloudAlpha)*nightMix;
   }
   var c=document.createElement('canvas');
   c.width=1024; c.height=512;
   var ctx=c.getContext('2d');
   var g=ctx.createLinearGradient(0,0,0,c.height);
-  g.addColorStop(0,sky.top||'#4e91ff');
-  g.addColorStop(0.35,sky.mid||'#82bdff');
-  g.addColorStop(0.72,sky.horizon||'#d4ecff');
-  g.addColorStop(1,sky.ground||'#f4f7ec');
+  function skyColor(color){
+    if(!forEnvironment || LIGHT_SETTINGS.timeOfDay==='night') return color;
+    // Broad skylight stays gently cool; saturated display sky is not a blue lamp.
+    return new THREE.Color(color).lerp(new THREE.Color('#ccd5df'),0.35*(1-nightMix)).getStyle();
+  }
+  g.addColorStop(0,skyColor(sky.top||'#4e91ff'));
+  g.addColorStop(0.30,skyColor(sky.mid||'#82bdff'));
+  g.addColorStop(0.46,skyColor(sky.horizon||'#d4ecff'));
+  g.addColorStop(0.62,forEnvironment?new THREE.Color('#88857e').lerp(new THREE.Color('#10121a'),nightMix).getStyle():(sky.ground||'#b8b5ac'));
+  g.addColorStop(1,forEnvironment?new THREE.Color('#55534e').lerp(new THREE.Color('#080a0f'),nightMix).getStyle():(sky.ground||'#b8b5ac'));
   ctx.fillStyle=g;
   ctx.fillRect(0,0,c.width,c.height);
 
-  if(LIGHT_SETTINGS.timeOfDay==='night'){
+  if(nightMix>0){
     ctx.save();
     ctx.fillStyle='rgba(255,255,255,0.75)';
     for(var si=0;si<58;si++){
-      var sx=(si*137.5)%c.width;
+      var sx=4+(si*137.5)%(c.width-8);
       var sy=18+((si*61)%185);
       var sr=(si%5===0)?1.5:0.85;
-      ctx.globalAlpha=(si%7===0)?0.85:0.45;
+      ctx.globalAlpha=((si%7===0)?0.85:0.45)*nightMix;
       ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
     }
     ctx.restore();
   }
 
-  var sunX=c.width*(sky.sunX==null?0.78:sky.sunX), sunY=c.height*(sky.sunY==null?0.2:sky.sunY);
-  if(simSun){
-    // SphereGeometry のUV: u=0.25が+Z(南)、u=0.5が+X(東)。azWorld→u は 0.75-az/2π
-    var su=((0.75-simSun.azimuth/(Math.PI*2))%1+1)%1;
-    sunX=c.width*su;
-    sunY=c.height*Math.max(0.06,0.5-Math.sin(simSun.altitude)*0.44);
-  }
-  var sg=ctx.createRadialGradient(sunX,sunY,8,sunX,sunY,170);
-  sg.addColorStop(0,sky.sunCore||'rgba(255,255,235,0.95)');
-  sg.addColorStop(0.12,sky.sunGlow||'rgba(255,249,205,0.45)');
-  sg.addColorStop(1,'rgba(255,249,205,0)');
-  ctx.fillStyle=sg;
-  ctx.fillRect(0,0,c.width,c.height);
+  var sunDirection=simSun||preset.sunPos||LIGHT_PRESETS.day.sunPos;
+  var sunUv=skySunUv(sunDirection,!!forEnvironment);
+  var sunX=c.width*sunUv.u,sunY=c.height*sunUv.v;
+  // Draw wrapped copies: equirectangular left/right edges are the same meridian.
+  ctx.save();
+  if(simSun) ctx.globalAlpha=1-nightMix;
+  [-c.width,0,c.width].forEach(function(shift){
+    var sx=sunX+shift;
+    var sg=ctx.createRadialGradient(sx,sunY,8,sx,sunY,170);
+    sg.addColorStop(0,sky.sunCore||'rgba(255,255,235,0.95)');
+    sg.addColorStop(0.12,sky.sunGlow||'rgba(255,249,205,0.45)');
+    sg.addColorStop(1,'rgba(255,249,205,0)');
+    ctx.fillStyle=sg;
+    ctx.fillRect(0,0,c.width,c.height);
+  });
+  ctx.restore();
 
   var cloudAlpha=(sky.cloudAlpha==null)?1:sky.cloudAlpha;
-  function cloud(cx,cy,s,alpha){
+  function cloudStamp(cx,cy,s,alpha){
     ctx.save();
     ctx.globalAlpha=alpha*cloudAlpha;
     var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,s*1.4);
@@ -9211,22 +9375,27 @@ function makeSkyTexture(){
     });
     ctx.restore();
   }
+  function cloud(cx,cy,s,alpha){
+    [-c.width,0,c.width].forEach(function(shift){cloudStamp(cx+shift,cy,s,alpha);});
+  }
   cloud(190,126,72,0.48);
   cloud(430,92,54,0.34);
   cloud(690,154,82,0.38);
   cloud(900,118,62,0.3);
   cloud(74,210,48,0.26);
 
-  var hg=ctx.createLinearGradient(0,c.height*0.72,0,c.height);
+  var hg=ctx.createLinearGradient(0,c.height*0.36,0,c.height*0.64);
   hg.addColorStop(0,'rgba(255,255,255,0)');
-  hg.addColorStop(1,sky.haze||'rgba(255,245,215,0.55)');
+  hg.addColorStop(0.5,sky.haze||'rgba(255,245,215,0.55)');
+  hg.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=hg;
-  ctx.fillRect(0,c.height*0.66,c.width,c.height*0.34);
+  ctx.fillRect(0,c.height*0.36,c.width,c.height*0.28);
 
   var tex=new THREE.CanvasTexture(c);
   tex.colorSpace=THREE.SRGBColorSpace;
-  tex.wrapS=THREE.ClampToEdgeWrapping;
+  tex.wrapS=THREE.RepeatWrapping;
   tex.wrapT=THREE.ClampToEdgeWrapping;
+  tex.userData._procedural=true;
   tex.needsUpdate=true;
   return tex;
 }
@@ -9332,7 +9501,7 @@ function init3D(){
   camInt=new THREE.PerspectiveCamera(75,wrap.clientWidth/wrap.clientHeight,0.01,100);
   camInt.position.set(4,1.6,4);
   orbit=new THREE.OrbitControls(camExt,ren.domElement);
-  orbit.addEventListener('change',function(){invalidate3D();});
+  orbit.addEventListener('change',function(){invalidate3D(false);});
   orbit.enableDamping=true; orbit.dampingFactor=0.08;
   orbit.target.set(4,1,2);
   orbit.rotateSpeed=0.4;
@@ -9349,8 +9518,8 @@ function init3D(){
       composer = new THREE.EffectComposer(ren);
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       var n8ao = new THREE.N8AOPass(sc3, camExt, wrap.clientWidth, wrap.clientHeight);
-      n8ao.configuration.aoRadius = 0.7;
-      n8ao.configuration.intensity = 2.0;
+      n8ao.configuration.aoRadius = 0.35;
+      n8ao.configuration.intensity = 1.3;
       n8ao.configuration.distanceFalloff = 0.7;
       n8ao.configuration.screenSpaceRadius = false;
       n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
@@ -9442,7 +9611,7 @@ function init3D(){
           var half=Math.atan(Math.tan(_walkDrag.pinchFov*Math.PI/360)/scale);
           camExt.fov=Math.max(35,Math.min(100,half*360/Math.PI));
           camExt.updateProjectionMatrix();
-          if(typeof invalidate3D==='function') invalidate3D();
+          if(typeof invalidate3D==='function') invalidate3D(false);
         }
         e.preventDefault();
         return;
@@ -9456,7 +9625,7 @@ function init3D(){
       walkApplyCamera();
       var nw=performance.now();
       if(nw-WALK._mapT>150){ WALK._mapT=nw; drawWalkMinimap(); }
-      if(typeof invalidate3D==='function') invalidate3D();
+      if(typeof invalidate3D==='function') invalidate3D(false);
       e.preventDefault();
       return;
     }
@@ -9472,7 +9641,7 @@ function init3D(){
     _intML.yaw-=dx*0.003;
     _intML.pitch=Math.max(-1.35,Math.min(1.35,_intML.pitch-dy*0.003));
     camInt.rotation.set(_intML.pitch,_intML.yaw,0,'YXZ');
-    invalidate3D();
+    invalidate3D(false);
   });
   ren.domElement.addEventListener('mouseup',function(){_intML.down=false;});
   ren.domElement.addEventListener('contextmenu',function(e){e.preventDefault();});
@@ -11537,7 +11706,7 @@ function getSelectionBox3D(ref){
     return box;
   }
   if(ref.type==='room' || ref.type==='site-rect'){
-    var ry=ref.type==='site-rect'?0:floorTopY(ref.floor);
+    var ry=ref.type==='site-rect'?0:roomFloorTopY(ref);
     box.set(
       new THREE.Vector3(ref.x*U,ry,(ref.y||0)*U),
       new THREE.Vector3((ref.x+ref.w)*U,ry+0.12,(ref.y+ref.d)*U)
@@ -11547,7 +11716,7 @@ function getSelectionBox3D(ref){
   if(ref.x!==undefined && ref.w!==undefined){
     if(isOpeningItemType(ref.type)){
       var pose=getItemDisplayPose(ref);
-      var oy=floorTopY(ref.floor)+(ref.elev||0)*U;
+      var oy=item3DBaseY(ref)+(ref.elev||0)*U;
       var oh=Math.max(0.2,openingHeightMm(ref)*U);
       if(isWindowLikeType(ref.type)){
         oy+=openingSillMm(ref)*U;
@@ -11762,6 +11931,7 @@ function makeInteriorLightingMaterial(params){
   return new THREE.MeshStandardMaterial(matParams);
 }
 function makeItemTextureMaterial(it,surfaceW,surfaceH,mode,fallbackColor,opts){
+  if(it && SITE_SURFACE_OPTIONS[it.texture] && mode!=='stretch') return makeGroundSurfaceMaterial(it.texture,surfaceW,surfaceH,it);
   var tex=it&&it.texture?getTexture3D(it.texture):null;
   if(!tex) return null;
   opts=opts||{};
@@ -11967,7 +12137,7 @@ function syncLightPanelUi(){
   var key=LIGHT_SETTINGS.timeOfDay||'day';
   var preset=getLightPreset(key);
   var modeLabel=document.getElementById('light-mode-label');
-  if(modeLabel) modeLabel.textContent=preset.label||'昼';
+  if(modeLabel) modeLabel.textContent=LIGHT_SETTINGS.sunSim?'太陽軌道':(preset.label||'昼');
   ['room','ambient','sun'].forEach(function(k){
     var v=Number(LIGHT_SETTINGS[k]||0);
     var label=document.getElementById('light-'+k+'-val');
@@ -11978,7 +12148,8 @@ function syncLightPanelUi(){
   ['morning','day','evening','night'].forEach(function(k){
     var btn=document.getElementById('light-preset-'+k);
     if(!btn) return;
-    var active=key===k;
+    var quickHour={morning:7,day:13,evening:17,night:22}[k];
+    var active=LIGHT_SETTINGS.sunSim?Math.abs(LIGHT_SETTINGS.hour-quickHour)<0.025:key===k;
     btn.style.background=active?'#e94560':'#0f3460';
     btn.style.borderColor=active?'#ff7188':'#1f4b78';
     btn.style.color=active?'#fff':'#dfe8ff';
@@ -11989,13 +12160,33 @@ function syncLightPanelUi(){
   var simControls=document.getElementById('sun-sim-controls');
   if(simToggle) simToggle.checked=!!LIGHT_SETTINGS.sunSim;
   if(simControls) simControls.style.display=LIGHT_SETTINGS.sunSim?'block':'none';
+  var marker=document.getElementById('sun-orbit-marker');
+  if(marker){
+    var solar=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
+    var hour=Math.max(0,Math.min(24,LIGHT_SETTINGS.hour));
+    marker.setAttribute('transform','translate('+(24+hour*8).toFixed(2)+' '+(88-72*Math.sin(solar.altitude)).toFixed(2)+')');
+    var orbit=document.getElementById('sun-orbit-path'), points=[];
+    for(var t=0;t<=24;t+=0.5){var altitude=computeSunPosition(t,LIGHT_SETTINGS.season,0).altitude;points.push((t?'L':'M')+(24+t*8).toFixed(2)+' '+(88-72*Math.sin(altitude)).toFixed(2));}
+    if(orbit) orbit.setAttribute('d',points.join(' '));
+    var info=document.getElementById('sun-altitude-info');
+    if(info) info.textContent='太陽高度 '+(solar.altitude*180/Math.PI).toFixed(1)+'° · '+(solar.altitude>0?'日中':solar.altitude>-8?'薄明':'夜間');
+    var markerNight=LIGHT_SETTINGS.sunSim?solarNightBlend(computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg).altitude):(LIGHT_SETTINGS.timeOfDay==='night'?1:0);
+    marker.style.opacity=String(1-markerNight*0.55);
+  }
   var hourInput=document.getElementById('sun-hour');
   var hourVal=document.getElementById('sun-hour-val');
   if(hourInput) hourInput.value=LIGHT_SETTINGS.hour;
   if(hourVal){
-    var hh=Math.floor(LIGHT_SETTINGS.hour), mm=Math.round((LIGHT_SETTINGS.hour-hh)*60);
-    hourVal.textContent=hh+':'+(mm<10?'0':'')+mm;
+    var minutes=Math.round(LIGHT_SETTINGS.hour*60), hh=Math.floor(minutes/60), mm=minutes%60;
+    hourVal.textContent=LIGHT_SETTINGS.sunSim?(hh+':'+(mm<10?'0':'')+mm):(key==='night'?'夜景':'—');
+    if(hourInput) hourInput.setAttribute('aria-valuetext',hh+'時'+mm+'分');
   }
+  ['haze','cloud'].forEach(function(k){
+    var value=Number.isFinite(LIGHT_SETTINGS[k])?LIGHT_SETTINGS[k]:(k==='haze'?0.2:0.45);
+    var input=document.getElementById('sky-'+k),output=document.getElementById('sky-'+k+'-val');
+    if(input)input.value=value;
+    if(output)output.textContent=k==='cloud'?Math.round(value*100)+'%':value<0.33?'澄んだ空':value<0.67?'柔らかな霞み':'霞みの強い空';
+  });
   var seasonSel=document.getElementById('sun-season');
   if(seasonSel) seasonSel.value=LIGHT_SETTINGS.season||'equinox';
   var northInput=document.getElementById('sun-north');
@@ -12009,19 +12200,28 @@ function refreshEnvironmentFromSky(){
   if(!ren||!sc3||typeof THREE==='undefined') return;
   try{
     if(!_pmremGen) _pmremGen=new THREE.PMREMGenerator(ren);
-    var skyTex=makeSkyTexture();
-    skyTex.mapping=THREE.EquirectangularReflectionMapping;
-    var rt=_pmremGen.fromEquirectangular(skyTex);
+    var rt;
+    if(_skyMesh && _skyMesh.material.uniforms && _skyMesh.material.uniforms.cloudMap){
+      // Use the same atmosphere for visible sky and reflected/indirect light.
+      var environmentScene=new THREE.Scene();
+      var geometry=new THREE.SphereGeometry(100,32,16);
+      var sky=new THREE.Mesh(geometry,_skyMesh.material);
+      environmentScene.add(sky);
+      sky.material.uniforms.environmentMode.value=1;
+      try{rt=_pmremGen.fromScene(environmentScene,0,0.1,300);}
+      finally{sky.material.uniforms.environmentMode.value=0;geometry.dispose();}
+    }else{
+      var skyTex=makeSkyTexture(true);
+      skyTex.mapping=THREE.EquirectangularReflectionMapping;
+      try{rt=_pmremGen.fromEquirectangular(skyTex);}finally{skyTex.dispose();}
+    }
     sc3.environment=rt.texture;
     if(_envRT) _envRT.dispose();
     _envRT=rt;
-    skyTex.dispose();
   }catch(e){ console.warn('[WebCAD] environment refresh failed:', e); }
 }
-// フォトリアル空パノラマ(gpt-image-2生成・エクイレクタングラー2048x1024)。
-// 見た目の空ドームにのみ使用し、環境光(IBL)は従来どおり手続き空から生成するため
-// ライティング・発色には影響しない。太陽シミュレーション中は太陽位置が動くので
-// 手続き空(太陽グロー可動)へ自動フォールバックする
+// 表示用の雲画像は全時刻で共通。太陽位置・色はシェーダーで更新する。
+// 間接光も同じ空シェーダーから生成し、操作確定時に更新する。
 var _skyPhotoCache={};
 function skyPhotoUrl(key){
   return {morning:'assets/sky/morning.jpg',day:'assets/sky/day.jpg',evening:'assets/sky/evening.jpg',night:'assets/sky/night.jpg'}[key]||null;
@@ -12035,47 +12235,60 @@ function applySkyMap(tex){
   if(old&&old!==tex&&old.dispose&&old.userData&&old.userData._procedural) old.dispose();
   if(typeof invalidate3D==='function') invalidate3D();
 }
-function refreshSkyTexture(){
-  if(!_skyMesh||!_skyMesh.material||typeof THREE==='undefined') return;
-  var key=LIGHT_SETTINGS.timeOfDay||'day';
-  var url=LIGHT_SETTINGS.sunSim?null:skyPhotoUrl(key);
-  if(url && _skyPhotoCache[url]){
-    applySkyMap(_skyPhotoCache[url]);
-  } else {
-    var proc=makeSkyTexture();
-    proc.userData._procedural=true;
-    applySkyMap(proc);
-    if(url){
-      new THREE.TextureLoader().load(url,function(tex){
-        tex.colorSpace=THREE.SRGBColorSpace;
-        // タブレットはGPUメモリ対策で1024x512に縮小
-        if(_texCapSize&&tex.image&&tex.image.width>_texCapSize){
-          var sc=_texCapSize/tex.image.width;
-          var c=document.createElement('canvas');
-          c.width=Math.round(tex.image.width*sc); c.height=Math.round(tex.image.height*sc);
-          c.getContext('2d').drawImage(tex.image,0,0,c.width,c.height);
-          tex.image=c; tex.needsUpdate=true;
-        }
-        _skyPhotoCache[url]=tex;
-        // ロード完了時点でまだ同じ空が求められていれば差し替える
-        var want=LIGHT_SETTINGS.sunSim?null:skyPhotoUrl(LIGHT_SETTINGS.timeOfDay||'day');
-        if(want===url) applySkyMap(tex);
-      });
-    }
+var _commonSkyLoading=false;
+function updatePhotographicSky(){
+  if(!_skyMesh) return;
+  var tex=_skyPhotoCache.common;
+  if(!tex) return;
+  if(!_skyMesh.material.uniforms || !_skyMesh.material.uniforms.cloudMap){
+    var previous=_skyMesh.material;
+    _skyMesh.material=PhotographicSky.create(THREE,tex);
+    if(previous.map && previous.map.userData && previous.map.userData._procedural) previous.map.dispose();
+    previous.dispose();
   }
-  refreshEnvironmentFromSky();
-  if(typeof invalidate3D==='function') invalidate3D();
+  var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
+  var sun=LIGHT_SETTINGS.sunSim?computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg):preset.sunPos;
+  var altitude=LIGHT_SETTINGS.sunSim?sun.altitude:Math.atan2(sun.y,Math.hypot(sun.x,sun.z));
+  var night=LIGHT_SETTINGS.sunSim?solarNightBlend(altitude):(LIGHT_SETTINGS.timeOfDay==='night'?1:0);
+  var warm=LIGHT_SETTINGS.sunSim?1-Math.max(0,Math.min(1,altitude*180/Math.PI/22)):(LIGHT_SETTINGS.timeOfDay==='evening'?1:LIGHT_SETTINGS.timeOfDay==='morning'?0.35:0);
+  var u=_skyMesh.material.uniforms;
+  u.sunDirection.value.set(sun.x,sun.y,sun.z).normalize();
+  u.night.value=night;u.warmth.value=warm*warm*(3-2*warm);
+  u.haze.value=Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2;
+  u.coverage.value=Number.isFinite(LIGHT_SETTINGS.cloud)?LIGHT_SETTINGS.cloud:0.45;
 }
+function refreshSkyTexture(skipEnvironment){
+  if(!_skyMesh||!_skyMesh.material||typeof THREE==='undefined') return;
+  if(_skyPhotoCache.common){
+    updatePhotographicSky();
+  }else if(!_commonSkyLoading){
+    _commonSkyLoading=true;
+    new THREE.TextureLoader().load('assets/sky/cloud-tile-v1.jpg',function(tex){
+      // Cloud opacity is data, not an sRGB colour image.
+      tex.colorSpace=THREE.NoColorSpace;
+      tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+      tex.minFilter=THREE.LinearMipmapLinearFilter;
+      tex.anisotropy=ren?Math.min(4,ren.capabilities.getMaxAnisotropy()):1;
+      _skyPhotoCache.common=tex;_commonSkyLoading=false;
+      updatePhotographicSky();refreshEnvironmentFromSky();invalidate3D(false);
+    },undefined,function(){_commonSkyLoading=false;});
+  }
+  if(!skipEnvironment) refreshEnvironmentFromSky();
+  if(typeof invalidate3D==='function') invalidate3D(false);
+}
+
 function applyLightingToScene(refreshSky){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
-  if(ren) ren.toneMappingExposure=LIGHT_SETTINGS.exposure;
+  var nightMix=LIGHT_SETTINGS.sunSim?solarNightBlend(computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg).altitude):0;
+  var indirectScale=1-nightMix*0.84;
+  if(ren) ren.toneMappingExposure=LIGHT_SETTINGS.exposure*(1-nightMix*0.12);
   if(sc3&&typeof THREE!=='undefined'){
     sc3.traverse(function(o){
       if(o.name==='AmbientLight'){
         // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
         // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
         //  色味が白いベース光に洗い流されてしまう)
-        o.intensity=LIGHT_SETTINGS.ambient*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?0.6:1);
+        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?0.6:1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
@@ -12088,7 +12301,7 @@ function applyLightingToScene(refreshSky){
           var sp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
           o.position.set(sp.x,sp.y,sp.z);
           if(o.color) o.color.set(sunColorForAltitude(sp.altitude));
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale;
+          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale*(1-(Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2)*0.35);
         } else {
           o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*pvSunScale;
           if(o.color) o.color.set(preset.sunColor||'#ffffff');
@@ -12096,7 +12309,7 @@ function applyLightingToScene(refreshSky){
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi*((ST.view==='3d-int'||isInt)?0.4:(ST.view==='3d-walk'?0.5:1));
+        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?0.4:(ST.view==='3d-walk'?0.5:1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
@@ -12115,7 +12328,7 @@ function applyLightingToScene(refreshSky){
     var envFactor=1;
     if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
       var envSp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
-      envFactor=sunSimDimFactor(envSp.altitude);
+      envFactor=1-solarNightBlend(envSp.altitude)*0.94;
     }
     // 内観はIBL寄与を大きく抑えて配置ライトを主役にする。ウォークスルーも室内目線のため
     // 大幅に絞る(2.4のままだと昼空のIBLが室内を白く洗い流し、配置ライトの色味が消える)
@@ -12128,7 +12341,7 @@ function applyLightingToScene(refreshSky){
       if(_skyMesh) _skyMesh.visible=false;
     } else if(ST.view==='3d-ext'||ST.view==='3d-walk'){
       sc3.background=null;
-      sc3.fog=new THREE.Fog(preset.fogColor||0xb8d4f0,preset.fogNear||80,preset.fogFar||500);
+      sc3.fog=new THREE.Fog(new THREE.Color(preset.fogColor||0xb8d4f0).lerp(new THREE.Color(LIGHT_PRESETS.night.fogColor),nightMix),preset.fogNear||80,preset.fogFar||500);
       if(_skyMesh) _skyMesh.visible=true;
     }
   }
@@ -12137,23 +12350,58 @@ function applyLightingToScene(refreshSky){
   if(typeof invalidate3D==='function') invalidate3D();
 }
 function applyLightPreset(key){
-  if(!LIGHT_PRESETS[key]) key='day';
-  var preset=LIGHT_PRESETS[key];
-  LIGHT_SETTINGS.timeOfDay=key;
-  ['hemi','sun','ambient','room','exposure','env'].forEach(function(k){
-    LIGHT_SETTINGS[k]=preset[k];
-  });
-  // 太陽シミュレーション中は朝昼夕ボタンが時刻セットとして働く(夜は従来夜景)
-  if(LIGHT_SETTINGS.sunSim && key!=='night'){
-    LIGHT_SETTINGS.hour=(key==='morning')?7:(key==='evening')?17:13;
+  // Every quick choice uses the same solar/time path; preserve manual intensities.
+  var hours={morning:7,day:13,evening:17,night:22};
+  queueSunHour(hours[key]===undefined?13:hours[key]);
+  flushSunHour();
+}
+var _sunHourFrame=0, _sunHourFinish=0;
+var _sunSkyPreviewAt=0;
+function queueSunHour(value){
+  var hour=Number(value);
+  if(!Number.isFinite(hour)) return;
+  LIGHT_SETTINGS.hour=Math.max(0,Math.min(24,hour));
+  if(!LIGHT_SETTINGS.sunSim || LIGHT_SETTINGS.timeOfDay==='night'){
+    // A stable daylight base avoids discrete preset jumps while scrubbing.
+    LIGHT_SETTINGS.sunSim=true;
+    LIGHT_SETTINGS.timeOfDay='day';
+    ['hemi','sun','ambient','exposure','env'].forEach(function(k){LIGHT_SETTINGS[k]=LIGHT_PRESETS.day[k];});
   }
+  syncLightPanelUi();
+  if(typeof noteCam3DInput==='function') noteCam3DInput();
+  if(!_sunHourFrame) _sunHourFrame=requestAnimationFrame(function(){
+    _sunHourFrame=0;
+    applyLightingToScene(false);
+    var now=Date.now();
+    if(_skyPhotoCache.common || now-_sunSkyPreviewAt>=100){
+      _sunSkyPreviewAt=now;
+      refreshSkyTexture(true);
+    }
+    if(sc3){
+      sc3.traverse(function(o){if(o.name==='SunLight' && !isInt) fitShadowCamera(o);});
+    }
+  });
+  clearTimeout(_sunHourFinish);
+  // Expensive sky/IBL regeneration runs after scrubbing settles, not per input.
+  _sunHourFinish=setTimeout(flushSunHour,180);
+}
+function flushSunHour(){
+  clearTimeout(_sunHourFinish);
+  _sunHourFinish=0;
+  if(_sunHourFrame){cancelAnimationFrame(_sunHourFrame);_sunHourFrame=0;}
   applyLightingToScene(true);
-  if(sc3) rebuild3D();
+  if(sc3) sc3.traverse(function(o){if(o.name==='SunLight' && !isInt) fitShadowCamera(o);});
+}
+function updateAtmosphere(key,value){
+  if(key!=='haze'&&key!=='cloud')return;
+  var v=Number(value);if(!Number.isFinite(v))return;
+  LIGHT_SETTINGS[key]=Math.max(0,Math.min(1,v));
+  queueSunHour(LIGHT_SETTINGS.hour);
 }
 function updateSunSim(key,val){
   if(key==='sunSim') LIGHT_SETTINGS.sunSim=!!val;
-  else if(key==='hour') LIGHT_SETTINGS.hour=Math.max(5,Math.min(19,Number(val)||13));
-  else if(key==='season') LIGHT_SETTINGS.season=(val==='summer'||val==='winter')?val:'equinox';
+  else if(key==='hour'){queueSunHour(val);return;}
+  else if(key==='season'){ LIGHT_SETTINGS.season=(val==='summer'||val==='winter')?val:'equinox';queueSunHour(LIGHT_SETTINGS.hour);flushSunHour();return;}
   // 方位はプランに属する（真実源は DATA.northDeg）。ここは入口を1つに保つため
   // setPlanNorthDeg へ委譲し、LIGHT_SETTINGS.northDeg へ直接は書かない。
   // markDirty で保存対象・共同編集の同期対象になる（saveState は使わない。
@@ -12181,9 +12429,13 @@ function updateSunSim(key,val){
 function updateLightSetting(key,val){
   LIGHT_SETTINGS[key]=val;
   syncLightPanelUi();
-  if(key==='room'||key==='env'){
-    if(sc3) rebuild3D();
-    return;
+  if(key==='room' && sc3){
+    sc3.traverse(function(o){
+      if(o.userData && Number.isFinite(o.userData.autoRoomScale))o.intensity=val*o.userData.autoRoomScale;
+      (Array.isArray(o.material)?o.material:[o.material]).forEach(function(m){
+        if(m && m.userData && Number.isFinite(m.userData.autoRoomGlowScale))m.emissiveIntensity=Math.max(0,Math.min(2.5,val*m.userData.autoRoomGlowScale));
+      });
+    });
   }
   applyLightingToScene(false);
 }
@@ -13452,7 +13704,9 @@ function makeExteriorWallMaterial(w,fl,len,face){
     m.side=THREE.DoubleSide;
     if(face){
       m.polygonOffset=true;
-      m.polygonOffsetFactor=-1;
+      // Slope bias can pull a hidden finish through a perpendicular facade
+      // at grazing angles. Physical face separation handles the core.
+      m.polygonOffsetFactor=0;
       m.polygonOffsetUnits=-1;
     }
     return m;
@@ -13498,7 +13752,9 @@ function makeInteriorWallMaterial(w,len,face){
     m.side=THREE.DoubleSide;
     if(face){
       m.polygonOffset=true;
-      m.polygonOffsetFactor=-1;
+      // Slope bias can pull a hidden finish through a perpendicular facade
+      // at grazing angles. Physical face separation handles the core.
+      m.polygonOffsetFactor=0;
       m.polygonOffsetUnits=-1;
     }
     return m;
@@ -13569,13 +13825,15 @@ function updateInteriorCutawayWalls(force){
   ].join('|') : '';
   if(!force && key===_cutawayViewKey) return;
   _cutawayViewKey=key;
+  var changed=false;
   sc3.traverse(function(o){
     var info=o.userData&&o.userData.cutawayWall;
     if(!info) return;
     var cut=shouldCutawayWallForCamera(info);
     var next=cut?info.cutaway:info.original;
-    if(o.material!==next) o.material=next;
+    if(o.material!==next){o.material=next;changed=true;}
   });
+  if(changed && ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
 function makeFloorSlabMaterial(matFloor){
   var avg=0xb8b2a8;
@@ -13617,7 +13875,7 @@ function makeWallGlassMaterial(){
 // つまり 6mm/12mm という**大きさ**に理由は無い。理由があるのは「ゼロにしないこと」
 // (コアと同一平面にすると自身がZファイトする) と「壁ごとにずらすこと」の2つだけ。
 // 深度側の保険は既にある: makeExteriorWallMaterial / makeInteriorWallMaterial は
-// 面メッシュに polygonOffset(-1,-1) を付けており、コアとの深度争いはそこで決着する。
+// 面メッシュは slope bias を使わず polygonOffset(0,-1) と物理間隔でコアとの深度争いを防ぐ。
 // なので大きさだけを、目に見えない 1mm まで詰める。
 // 実測(Task 12-3、厚さ120mmの壁): 詰める前 外装 6.0mm / 内装 12.0mm (+ジッタ0〜2.4mm)。
 var WALL_EXT_FACE_GAP_M=0.001;
@@ -13666,6 +13924,34 @@ function getWallBandRange(w){
   return {base:0,height:fullH};
 }
 
+// Limit render-only wall endpoints at a neighbouring facade. Plan coordinates stay intact.
+function wallFacadeEndLimitM(w,atEnd){
+  var dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.hypot(dx,dy);
+  if(len<1) return Infinity;
+  var px=atEnd?w.x2:w.x1,py=atEnd?w.y2:w.y1;
+  var ex=dx/len*(atEnd?1:-1),ey=dy/len*(atEnd?1:-1),limit=Infinity;
+  DATA.walls.forEach(function(o){
+    if(o===w||o.floor!==w.floor||o.vis3D==='hide'||(o.thick||0)<120) return;
+    var wb=getWallBandRange(w),ob=getWallBandRange(o);
+    if(ob.base>wb.base+0.001||ob.base+ob.height<wb.base+wb.height-0.001) return;
+    var ox=o.x2-o.x1,oy=o.y2-o.y1,ol=Math.hypot(ox,oy);
+    if(ol<1) return;
+    var along=((px-o.x1)*ox+(py-o.y1)*oy)/ol;
+    var signed=((px-o.x1)*-oy+(py-o.y1)*ox)/ol;
+    if(along<0||along>ol||Math.abs(signed)>(o.thick||120)/2+20) return;
+    getWallExteriorSpans(o).forEach(function(sp){
+      if(along*U<sp.a||along*U>sp.b) return;
+      var nx=-oy/ol*sp.sign,ny=ox/ol*sp.sign,approach=ex*nx+ey*ny;
+      if(approach<0.2) return;
+      var offset=wallExteriorFaceOffsetM(o)/U;
+      var transverse=Math.abs((-dy/len)*nx+(dx/len)*ny)*((w.thick||120)/2+INTERIOR_FINISH_MM);
+      var available=(offset-2-signed*sp.sign-transverse)/approach;
+      // Only a local joint; don't trim a deliberately projecting wall.
+      if(available>=-40) limit=Math.min(limit,available*U);
+    });
+  });
+  return limit;
+}
 function buildWall3D(w){
   if(w.vis3D==='hide') return;
   var fl=w.floor, fy=floorBaseY(fl);
@@ -13685,6 +13971,7 @@ function buildWall3D(w){
   }
   var extSpans=getWallExteriorSpans(w);
   var isOuter=extSpans.length>0;
+  var facadeStartLimit=wallFacadeEndLimitM(w,false),facadeEndLimit=wallFacadeEndLimitM(w,true);
   var mat=isOuter?makeExteriorWallMaterial(w,fl,len):makeWallCoreMaterial();
   // 壁コア(Box)の上下面(天井側の断面)は、内観3Dの俯瞰(ドールハウス)カメラで
   // 壁の上端を見下ろした際にそのまま見えてしまうことがある。外装材(mat)は
@@ -13763,8 +14050,8 @@ function buildWall3D(w){
       // 細い隙間(奥の外壁コアが露出)ができる不具合があったため、内隅方向へ少し
       // 延長してこの面で隙間を覆う(隣の壁の面とも重なるが、双方とも同じ内装仕上げ材なので
       // 見た目には影響しない)
-      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=faceInfo.fillStartM;
-      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=faceInfo.fillEndM;
+      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
+      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
       var mid=(aa+bb)/2, segLen=bb-aa;
       var normalX=baseNormalX*faceInfo.sign, normalZ=baseNormalZ*faceInfo.sign;
       var faceMat=makeInteriorWallMaterial(w,len,faceInfo);
@@ -13849,8 +14136,8 @@ function buildWall3D(w){
     var thick=w.thick*U;
     // 端の6mm延長は箱の枝と同じ理由(突き付け接合の浮動小数点誤差でスリットが透ける)
     var coreA=a, coreB=b;
-    if(a<=0.002) coreA-=0.006;
-    if(b>=len-0.002) coreB+=0.006;
+    if(a<=0.002) coreA-=Math.min(0.006,facadeStartLimit);
+    if(b>=len-0.002) coreB+=Math.min(0.006,facadeEndLimit);
     var segs=Math.max(2,Math.min(160,Math.ceil((coreB-coreA)/WALL_TOP_SAMPLE_STEP_M)));
     var verts=[], idxBody=[], idxTop=[], si, lx, top, p, n;
     for(si=0;si<=segs;si++){
@@ -13895,8 +14182,8 @@ function buildWall3D(w){
     getWallInteriorFaces(w).forEach(function(faceInfo){
       var aa=Math.max(a,faceInfo.a), bb=Math.min(b,faceInfo.b);
       if(bb-aa<0.004) return;
-      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=faceInfo.fillStartM;
-      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=faceInfo.fillEndM;
+      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
+      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
       var face=slopedFaceMesh(aa,bb,yBase,h,wallInteriorFaceOffsetM(w),faceInfo.sign,
         makeInteriorWallMaterial(w,len,faceInfo));
       face.userData.interiorFace=true;
@@ -13931,8 +14218,8 @@ function buildWall3D(w){
     // 壁の真端に接するピースは6mmだけ延長し、突き付け接合部の浮動小数点誤差による
     // スリット(向こう側が点線状に透ける)を物理的に塞ぐ
     var coreA=a, coreB=b;
-    if(a<=0.002) coreA-=0.006;
-    if(b>=len-0.002) coreB+=0.006;
+    if(a<=0.002) coreA-=Math.min(0.006,facadeStartLimit);
+    if(b>=len-0.002) coreB+=Math.min(0.006,facadeEndLimit);
     var coreLen=coreB-coreA, coreMid=(coreA+coreB)/2;
     var mesh=new THREE.Mesh(new THREE.BoxGeometry(coreLen,h,w.thick*U),boxMat);
     mesh.castShadow=true; mesh.receiveShadow=true;
@@ -14070,7 +14357,7 @@ function buildWall3D(w){
     // 原因になっていた。ドア側は建具の納まり上の余白が必要なため従来通り。
     var openW=isWindowLikeType(it.type) ? Math.min(len, Math.max(it.w*U,0.1)) : Math.min(len, Math.max(it.w*U+0.08, 0.45));
     if(isWindowLikeType(it.type)){
-      var sillM=slabH+windowSillMm(it)*U;
+      var sillM=item3DBaseY(it)-floorBaseY(fl)+windowSillMm(it)*U;
       var whM=Math.max(0.2,Math.min(windowHeightMm(it)*U,wallH-sillM-0.05));
       openings.push({
         a:Math.max(0,c-openW/2),
@@ -14084,7 +14371,7 @@ function buildWall3D(w){
         a:Math.max(0,c-openW/2),
         b:Math.min(len,c+openW/2),
         kind:'door',
-        h:slabH+doorHeightMm(it)*U,
+        h:item3DBaseY(it)-floorBaseY(fl)+doorHeightMm(it)*U,
         arch:isArchOpeningType(it.type)
       });
     }
@@ -14135,7 +14422,7 @@ function buildWall3D(w){
 
 function buildWinFrames(flFilt){
   DATA.items.filter(function(it){return isOpeningItemType(it.type)&&!it.hidden3D&&(!flFilt||it.floor===flFilt);}).forEach(function(it){
-    var fl=it.floor, fy=floorTopY(fl);
+    var fl=it.floor, fy=item3DBaseY(it);
     var wallInfo=getOpeningWallInfo(it);
     if(!wallInfo) return;
     var best=wallInfo.wall;
@@ -14372,7 +14659,7 @@ function buildWinFrames(flFilt){
       var archR=archMode?Math.min(ww/2,dh*0.42):0;
       var archShoulder=archMode?Math.max(0.6,dh-archR):dh;
       var jambH=archMode?archShoulder:dh;
-      var doorJambMat=(frontDoor||archMode)?frameMat:new THREE.MeshStandardMaterial({color:0xf0ede8,roughness:0.62,metalness:0.0});
+      var doorJambMat=it.doorFinish==='bath-clear'?new THREE.MeshStandardMaterial({color:0xb6bfc2,roughness:.28,metalness:.72}):(frontDoor||archMode)?frameMat:new THREE.MeshStandardMaterial({color:0xf0ede8,roughness:0.62,metalness:0.0});
       addBox(doorJambMat,-ww/2-jamb/2,jambH/2,0,jamb,jambH,frameDepth);
       addBox(doorJambMat, ww/2+jamb/2,jambH/2,0,jamb,jambH,frameDepth);
       if(archMode){
@@ -14455,7 +14742,7 @@ function buildWinFrames(flFilt){
           var pivotA=new THREE.Group(); pivotA.position.set(hingeX,0,0); pivotA.userData.noMerge=true; grp.add(pivotA);
           var pivotB=new THREE.Group(); pivotB.position.set(dirX*pw,0,0); pivotB.userData.noMerge=true; pivotA.add(pivotB);
           [pivotA,pivotB].forEach(function(pv){
-            var m=new THREE.Mesh(new THREE.BoxGeometry(pw-0.004,panelH,0.032),doorLeafMat);
+            var m=it.doorFinish==='bath-clear'?makeBathroomDoorLeaf(pw-.004,panelH,.032):new THREE.Mesh(new THREE.BoxGeometry(pw-0.004,panelH,0.032),doorLeafMat);
             m.position.set(dirX*pw/2,panelY,0);
             m.castShadow=true; m.receiveShadow=true; pv.add(m);
           });
@@ -14540,7 +14827,7 @@ function buildWinFrames(flFilt){
           }
           pivot.add(modelLeafWrap);
         } else {
-          var leaf=new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorLeafMat);
+          var leaf=it.doorFinish==='bath-clear'?makeBathroomDoorLeaf(ww,panelH,leafT):new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorLeafMat);
           leaf.position.set(leafX,panelY,0);
           leaf.castShadow=true; leaf.receiveShadow=true;
           pivot.add(leaf);
@@ -14668,6 +14955,11 @@ function getConnectedStairParts(seed){
 // 「当階の床仕上げ面 → 上階の床仕上げ面」の実差分まで上がる
 // (1F→2Fは階高+スラブ厚、2F→3F以上は両階にスラブがあるため階高ちょうど。
 //  固定で+スラブ厚すると2F→3Fで1段分上へ突き抜ける)
+function stairFloorBuildupM(floor){
+  var parts=DATA.items.filter(function(it){return it.floor===floor&&isStairPartType(it.type);});
+  if(!parts.length)return 0;
+  return Math.min.apply(null,parts.map(function(it){return item3DBaseY(it)-floorTopY(floor);}));
+}
 function stairGroupTotalRiseM(floor){
   var fl=floor||1, nf=fl+1;
   var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
@@ -14675,7 +14967,7 @@ function stairGroupTotalRiseM(floor){
                DATA.items.some(function(i){return i.floor===nf;});
   // 上階が無いときの階段の上り高さ。階高であって天井高ではないので置き換えない。
   if(!hasUpper) return FLOOR_H*U;
-  return Math.max(0.5,floorTopY(nf)-floorTopY(fl));
+  return Math.max(0.5,floorTopY(nf)-floorTopY(fl)-stairFloorBuildupM(fl));
 }
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
@@ -15345,6 +15637,12 @@ function buildItem3D(it){
       if(queueFmpInstance(fmp.model,it,grp)) return;
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
+      ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness);
+      if(fmp.mirrorOption && it.showMirror){
+        var spec=fmp.mirrorOption,sx=it.w/fmp.w,sy=getItemHeightValue(it)/fmp.h;
+        var mirror=new THREE.Mesh(new THREE.BoxGeometry(spec.w*sx,spec.h*sy,.004),new THREE.MeshStandardMaterial({color:0xe1e7e8,metalness:1,roughness:.035}));
+        mirror.name='Optional full length mirror';mirror.position.set(spec.x*sx,spec.y*sy,it.d*U*.455+.004);grp.add(mirror);
+      }
       grp.add(fmpClone);
       mark3DSelectable(grp,it,'item'); sc3.add(grp);
       return;
@@ -15531,9 +15829,10 @@ function buildItem3D(it){
   }
   else if(it.type==='neighbor-house'){
     // キット未読込・読込失敗時のみ簡易ジオメトリで代替する
-    var kitOk=buildNeighborHouseKit(grp,it,w3,d3);
-    if(!kitOk) build3DNeighborHouse(grp,it,w3,d3,h);
-    finalizeContextGroup(grp,it,kitOk);
+    var houseGroup=new THREE.Group();houseGroup.rotation.y=Math.PI;grp.add(houseGroup);
+    var kitOk=buildNeighborHouseKit(houseGroup,it,w3,d3);
+    if(!kitOk) build3DNeighborHouse(houseGroup,it,w3,d3,h);
+    finalizeContextGroup(grp,it,true);
   }
   else if(it.type==='road'){
     build3DRoad(grp,it,w3,d3,h);
@@ -15858,14 +16157,19 @@ function addHouseSidingLines(grp,mat,w3,d3,bodyH){
 var CONTEXT_GLB_SPECS={
   'neighbor-building':{url:'assets/models/context/neighbor_building.glb',base:'bd_base',mid:'bd_mid',roof:'bd_top',fw:5.2,fd:3.6,sh:2.7,roofH:0.45,wallMats:{BdPanel:1,BdPanelDark:1}}
 };
-var CONTEXT_CAR_GLB='assets/models/context/car_sedan.glb';
+var CONTEXT_CAR_GLB='assets/models/refined/precision_car_v1.glb';
 var _carGlbConfigured=false;
 function configureCarGlbMaterials(){
   if(_carGlbConfigured || !_modelCache[CONTEXT_CAR_GLB]) return;
   _carGlbConfigured=true;
   _modelCache[CONTEXT_CAR_GLB].traverse(function(o){
-    if(o.isMesh&&o.material&&o.material.name!=='CarBody'){
-      o.material.userData=o.material.userData||{};
+    if(!o.isMesh||!o.material) return;
+    o.material.userData=o.material.userData||{};
+    if(/^CarBody(?:_|$)/.test(o.material.name)){
+      // ボディ塗装だけは色を乗せる。塗装部は独立した面になっているので、
+      // マテリアル名だけで区別できる(テクスチャの細工は要らない)。
+      o.material.userData.tintMap=true;
+    } else {
       o.material.userData.lockColor=true; // カスタム色はボディ塗装のみに適用
     }
   });
@@ -16127,6 +16431,9 @@ function nhKitBaseMaterials(kit){
     list.forEach(function(mm){
       if(!mm||!mm.name||m[mm.name]) return;
       tameMaterialBrightness(mm);
+      if(mm.name==='NhGlass'){mm.depthWrite=false;mm.side=THREE.FrontSide;}
+      if(/^NhWall/.test(mm.name)&&mm.map){mm.bumpMap=mm.map;mm.bumpScale=.005;}
+      if(mm.name==='NhRoof'&&mm.map){mm.bumpMap=mm.map;mm.bumpScale=.008;}
       mm.userData=mm.userData||{};
       if(NH_WALL_MAT_NAMES[mm.name]) mm.userData.ghostBody=true;
       if(mm.name==='NhRoof') mm.userData.ghostRoof=true;
@@ -16158,7 +16465,7 @@ function nhInstance(kit,name,mats){
   var c=src.clone(true);
   c.traverse(function(o){
     if(!o.isMesh) return;
-    o.castShadow=true; o.receiveShadow=true;
+    o.castShadow=!(o.material&&o.material.name==='NhGlass'); o.receiveShadow=true;
     if(Array.isArray(o.material)) o.material=o.material.map(function(m){ return (m&&mats[m.name])||m; });
     else if(o.material) o.material=mats[o.material.name]||o.material;
   });
@@ -16212,8 +16519,16 @@ function buildNhKitRoof(grp,mats,kit,w3,d3,baseY){
   addContextBox(grp,F, rw/2-0.015,baseY-fh/2+0.03,0,0.030,fh,rd+0.03,true,true);
   // 軒樋 φ105(平側の軒先)
   var gy=baseY-fh+0.075;
-  addContextBox(grp,R,0,gy,-rd/2-0.045,rw+0.02,0.105,0.105,false,true);
-  addContextBox(grp,R,0,gy, rd/2+0.045,rw+0.02,0.105,0.105,false,true);
+  // Open half-round gutters with rolled lips, end caps and brackets.
+  [-1,1].forEach(function(side){
+    var shape=new THREE.Shape();
+    for(var j=0;j<=16;j++){var a=Math.PI+j*Math.PI/16,x=Math.cos(a)*.055,y=Math.sin(a)*.055;if(j===0)shape.moveTo(x,y);else shape.lineTo(x,y);}
+    for(var j=16;j>=0;j--){var a=Math.PI+j*Math.PI/16;shape.lineTo(Math.cos(a)*.050,Math.sin(a)*.050);}shape.closePath();
+    var geo=new THREE.ExtrudeGeometry(shape,{depth:rw+.02,bevelEnabled:false,steps:1});geo.rotateY(Math.PI/2);
+    var gutter=new THREE.Mesh(geo,R);gutter.position.set(-rw/2-.01,gy+.025,side*(rd/2+.045));gutter.receiveShadow=true;grp.add(gutter);
+    [-1,1].forEach(function(end){addContextBox(grp,R,end*(rw/2+.01),gy,side*(rd/2+.045),.006,.055,.11,true,true);});
+    var count=Math.ceil(rw/.6);for(var k=0;k<=count;k++)addContextBox(grp,T,-rw/2+rw*k/count,gy-.029,side*(rd/2+.025),.017,.013,.12,true,true);
+  });
   // 棟包み
   var ridge=getHipRoofRidgeSpec(rw,rd);
   var topY=baseY+rh;
@@ -16280,8 +16595,8 @@ function buildNeighborHouseKit(grp,it,w3,d3){
   }
 
   // 室内(開口の奥)。中まで作り込まず、暗い箱で「抜け」を止める
-  addContextBox(grp,mats.NhDark,0,bodyH/2,0,Math.max(0.2,w3-NH_WALL_T*2),bodyH,
-                Math.max(0.2,d3-NH_WALL_T*2),false,false);
+  addContextBox(grp,mats.NhDark,0,bodyH/2,0,Math.max(0.2,w3-.72),bodyH,
+                Math.max(0.2,d3-.72),false,false);
 
   var faces=[
     {face:'front',row:L.rowW,len:w3},{face:'back',row:L.rowW,len:w3},
@@ -16374,15 +16689,31 @@ function buildNeighborHouseKit(grp,it,w3,d3){
     if(i===1&&L.entry) return;   // 玄関側は納まり上つけない
     var p=nhInstance(kit,'nh_downpipe',mats);
     if(!p) return;
-    p.scale.y=bodyH;
+    p.scale.y=bodyH-.34;
     p.position.set(s[0]*(w3/2-0.16),0,s[1]*(d3/2+0.030));
     grp.add(p);
+    var px=s[0]*(w3/2-.16),pz=s[1]*(d3/2+.030),outZ=s[1]*(d3/2+NH_EAVE+.045);
+    var points=[new THREE.Vector3(px,bodyH-.34,pz),new THREE.Vector3(px,bodyH-.29,pz),new THREE.Vector3(px,bodyH-.20,outZ),new THREE.Vector3(px,bodyH-.13,outZ)];
+    var elbow=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),12,.030,10,false),mats.NhRail);elbow.castShadow=true;grp.add(elbow);
+    for(var y=.65;y<bodyH-.5;y+=1.2){
+      var collar=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.021,12),mats.NhRail);collar.position.set(px,y,pz);grp.add(collar);
+      addContextBox(grp,mats.NhRail,px,y,pz-s[1]*.028,.025,.022,.065,true,true);
+    }
   });
   // 設備(室外機・メーターボックス・換気フード)
   var acX=nhBayCenter(L.rowD,Math.max(0,L.rowD.mid-1),1);
-  nhAttach(grp,nhInstance(kit,'nh_ac',mats),'right',acX,0,w3,d3);
-  if(floors>=2) nhAttach(grp,nhInstance(kit,'nh_ac',mats),'left',
-                         nhBayCenter(L.rowD,0,1),storyH,w3,d3);
+  function houseAc(raised){
+    var node=new THREE.Group();
+    if(!buildDetailedExterior(node,{type:'ac-outdoor'},.8,.3,.63)) return nhInstance(kit,'nh_ac',mats);
+    node.children[0].position.z+=.18;
+    if(raised){
+      var bracket=mats.NhRail||mats.NhTrim;
+      [-.27,.27].forEach(function(x){addContextBox(node,bracket,x,-.10,.035,.035,.28,.035,true,true);addContextBox(node,bracket,x,-.035,.17,.035,.035,.31,true,true);});
+    }
+    return node;
+  }
+  nhAttach(grp,houseAc(),'right',acX,0,w3,d3);
+  if(floors>=2) nhAttach(grp,houseAc(true),'left',nhBayCenter(L.rowD,0,1),storyH,w3,d3);
   nhAttach(grp,nhInstance(kit,'nh_meter',mats),'left',nhBayCenter(L.rowD,Math.max(0,L.rowD.mid-1),1),0,w3,d3);
   nhAttach(grp,nhInstance(kit,'nh_vent',mats),'back',nhBayCenter(L.rowW,0,1)+0.35,2.30,w3,d3);
   return true;
@@ -16664,22 +16995,41 @@ function build3DUtilityPole(grp,it,w3,d3,h){
     addContextBox(grp,armMat,0,h*0.69,0,Math.max(1.05,w3*3.0),0.07,0.085,true,true);
     addContextBox(grp,metalMat,radius*1.2,h*0.48,0,0.32,0.55,0.2,true,true);
   }
-  var wireMat=new THREE.LineBasicMaterial({color:0x161616,transparent:true,opacity:0.82});
-  function wire(y,z){
-    var geo=new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-2.0,y,z),
-      new THREE.Vector3(2.0,y,z)
-    ]);
-    var line=new THREE.Line(geo,wireMat);
-    line.updateMatrix();
-    line.matrixAutoUpdate=false;
-    grp.add(line);
+  var items=DATA.items.filter(function(p){return p.type==='utility-pole'&&!p.hidden3D&&shouldRenderItemInCurrent3DView(p);});
+  var owner=items.indexOf(it);
+  if(owner<0) return;
+  var poles=items.map(function(p){return {
+    x:(p.x+p.w/2)*U,z:(p.y+p.d/2)*U,
+    y:item3DBaseY(p)+(p.elev||0)*U,
+    h:Math.max(2,Math.min(15,getItemHeightValue(p)*U)),
+    angle:(p.rot||0)*Math.PI/180
+  };});
+  var points=[];
+  grp.updateMatrix();
+  var inverse=grp.matrix.clone().invert();
+  UtilityWires.links(poles).forEach(function(link){
+    if(link.from!==owner) return;
+    var a=poles[link.from],b=link.end||poles[link.to];
+    var distance=Math.hypot(b.x-a.x,b.z-a.z);
+    [[0.92,-0.10],[0.92,0.10],[0.78,0]].forEach(function(cable){
+      var ax=a.x-Math.sin(a.angle)*cable[1],az=a.z+Math.cos(a.angle)*cable[1];
+      var bx=b.x-Math.sin(b.angle)*cable[1],bz=b.z+Math.cos(b.angle)*cable[1];
+      var ay=a.y+a.h*cable[0],by=b.y+b.h*cable[0];
+      var sag=link.extension?0.35:Math.min(1.2,distance*0.018);
+      var steps=link.extension?16:12;
+      function point(t){return new THREE.Vector3(ax+(bx-ax)*t,ay+(by-ay)*t-4*sag*t*(1-t),az+(bz-az)*t).applyMatrix4(inverse);}
+      for(var n=0;n<steps;n++) points.push(point(n/steps),point((n+1)/steps));
+    });
+  });
+  if(points.length){
+    var wires=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x25292e,transparent:true,opacity:0.72}));
+    wires.name='ContextUtilityWires';
+    grp.add(wires);
   }
-  wire(h*0.92,-0.10);
-  wire(h*0.92,0.10);
-  wire(h*0.78,0);
+
 }
 function build3DAcOutdoor(grp,it,w,d,h){
+  if(buildDetailedExterior(grp,it,w,d,h)) return;
   var body=new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xd8dadc,roughness:0.6,metalness:0.25});
   var dark=new THREE.MeshStandardMaterial({color:0x8b8e92,roughness:0.7,metalness:0.2});
   var b=new THREE.Mesh(new THREE.BoxGeometry(w,h*0.92,d),body);
@@ -16697,6 +17047,7 @@ function build3DAcOutdoor(grp,it,w,d,h){
   });
 }
 function build3DWaterHeater(grp,it,w,d,h){
+  if(buildDetailedExterior(grp,it,w,d,h)) return;
   var body=new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xe8e9eb,roughness:0.4,metalness:0.3});
   // 貯湯タンク(角丸風: box + 前面にわずかな面取り)
   var tank=new THREE.Mesh(new THREE.BoxGeometry(w,h,d*0.75),body);
@@ -16706,11 +17057,13 @@ function build3DWaterHeater(grp,it,w,d,h){
   hp.position.set(0,h*0.19,d*0.33); hp.castShadow=true; grp.add(hp);
 }
 function build3DMeterBox(grp,it,w,d,h){
+  if(buildDetailedExterior(grp,it,w,d,h)) return;
   var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
     new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0xc8cacc,roughness:0.5,metalness:0.2}));
   m.position.y=h/2; grp.add(m);
 }
 function build3DSewerPit(grp,it,w,d){
+  if(buildDetailedExterior(grp,it,w,d,0.02)) return;
   var disc=new THREE.Mesh(new THREE.CylinderGeometry(w/2,w/2,0.02,16),
     new THREE.MeshStandardMaterial({color:(it&&it.colorCustom&&it.color)?it.color:0x6f7275,roughness:0.85,metalness:0.15}));
   disc.position.y=0.01; grp.add(disc);
@@ -16719,6 +17072,7 @@ function build3DSewerPit(grp,it,w,d){
 // 壁掛けガス給湯器(エコジョーズ相当 W470×H700×D240)。取付高さ(gasHeaterMount mm=本体下端)で壁面に浮かせる
 function build3DGasHeater(grp,it,w,d,h){
   var mountY=Math.max(0,Math.min(3,(Number(it.gasHeaterMount)||1300)*U));
+  var detail=new THREE.Group();detail.position.y=mountY;if(buildDetailedExterior(detail,it,w,d,h)){grp.add(detail);return;}
   var col=(it&&it.colorCustom&&it.color)?it.color:0xe8e9eb;
   var body=new THREE.MeshStandardMaterial({color:col,roughness:0.45,metalness:0.3});
   var dark=new THREE.MeshStandardMaterial({color:0x8b8e92,roughness:0.6,metalness:0.25});
@@ -16902,7 +17256,12 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
 function applySelectableColor(mat,color){
   if(!color) return mat;
   if(Array.isArray(mat)) return mat.map(function(m){return applySelectableColor(m,color);});
-  if(!mat || mat.transparent || mat.map || !mat.color) return mat;
+  // テクスチャ付きは原則対象外(柄の上に色を乗せると濁るため)。
+  // ただし userData.tintMap を立てたマテリアルだけは例外にする。
+  // 塗装部分を白基調にしたテクスチャを持つモデルは、
+  // 色×テクスチャで塗り分けたほうが境界がきれいに出る。
+  if(!mat || mat.transparent || !mat.color) return mat;
+  if(mat.map && !(mat.userData && mat.userData.tintMap)) return mat;
   if(mat.userData && mat.userData.lockColor) return mat; // タイヤ等、色変更対象外パーツ
   var nm=mat.clone();
   nm.color.set(color);
@@ -16914,9 +17273,8 @@ function tameMaterialBrightness(mat){
   if(mat.envMapIntensity!==undefined && mat.envMapIntensity>LIGHT_SETTINGS.env){
     mat.envMapIntensity=LIGHT_SETTINGS.env;
   }
-  if(mat.metalness!==undefined && mat.metalness>0.75){
-    mat.metalness=0.35;
-  }
+  // Preserve authored metalness and metallic maps. Cloth is corrected once
+  // by ModelQuality; flattening every metal here makes chrome look like plastic.
   mat.needsUpdate=true;
   return mat;
 }
@@ -17008,7 +17366,7 @@ function getGltfLoader(){
   return _gltfLoader;
 }
 // GLBを更新したらこの版数を上げる(ブラウザHTTPキャッシュの旧モデル対策)
-var MODEL_ASSET_VER = 7;
+var MODEL_ASSET_VER = 8;
 var _gltfRebuildTimer=null;
 var _gltfRebuildBatchStartedAt=0;
 function scheduleGltfRebuild3D(){
@@ -17034,6 +17392,7 @@ function ensureGltfModel(url){
   _modelFailed[url]=false;
   var fetchUrl = url + (url.indexOf('?')<0 ? '?v='+MODEL_ASSET_VER : '');
   getGltfLoader().load(fetchUrl,function(gltf){
+    ModelQuality.prepare(gltf.scene,url);
     if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
@@ -17046,6 +17405,9 @@ function ensureGltfModel(url){
     scheduleGltfRebuild3D();
   });
   return false;
+}
+function hasPendingGltfModels(){
+  return Object.keys(_modelLoading).some(function(url){return _modelLoading[url];});
 }
 function anyGltfFailed(urls){
   return urls.some(function(url){ return !!_modelFailed[url]; });
@@ -17224,12 +17586,15 @@ function collectGltfSubmeshes(url){
 // falseの場合、呼び出し側は従来通り個別メッシュを生成する
 function queueFmpInstance(url,it,grp){
   if(!ren) return false; // レンダラー未初期化時は解析計算に必要なTHREEクラスの都合上スキップ
+  if(it.showMirror) return false;
   if(it===ST.selected) return false; // 選択中は個別メッシュのまま(ギズモ/選択box等に影響させない)
   // InstancedMesh#setMatrixAt は負のスケールをサポートしない。
   // 反転家具をインスタンス化すると、未選択時だけ面の欠落やパーツ位置の破綻が起き、
   // 選択時（個別メッシュ）には正常に戻るため、反転時は通常描画へフォールバックする。
   if(it.flipX || it.flipY) return false;
-  if(it.colorCustom) return false; // 現状FMPは常にデフォルト色だが将来対応時のための保険
+  // Configured models must match the selected clone (rotation/material overrides).
+  if(GLTF_MODEL_CONFIG[it.type]) return false;
+  if(it.colorCustom || (it.finishColors && Object.keys(it.finishColors).length) || (it.finishRoughness && Object.keys(it.finishRoughness).length)) return false;
   if(!getGltfNativeBox(url)) return false;
   grp.updateMatrix();
   var fitMatrix=computeBoxFitLocalMatrix(url,it.w*U,getItemHeightValue(it)*U,it.d*U);
@@ -17304,7 +17669,7 @@ function removeTallSkinnyMeshes(obj){
   });
   remove.forEach(function(o){
     if(o.parent) o.parent.remove(o);
-    if(o.geometry) o.geometry.dispose();
+    // Geometry is shared with the cached source and other clones.
   });
 }
 function buildUnityTableSet3D(grp,it,w,d){
@@ -17476,8 +17841,22 @@ function build3DFoundation(grp,it,w,d){
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xb8b2a8,roughness:0.92,metalness:0.02});
   var capMat=makeItemTextureMaterial(it,w,d,'repeat',0xffffff,{lighting:true,roughness:0.9,envMapIntensity:0.14}) ||
     new THREE.MeshStandardMaterial({color:it.colorCustom?it.color:0xc7c1b7,roughness:0.9,metalness:0.02});
-  _B(grp,mat,0,h/2,0,w,h,d);
-  if(h>0.03) _B(grp,capMat,0,capCenter,0,w+0.02,capH,d+0.02);
+  var groundKey=SITE_SURFACE_OPTIONS[it.texture]?it.texture:null;
+  if(groundKey){
+    disposeMat(mat);disposeMat(capMat);
+    function groundBox(width,height,depth,y){
+      var side=makeGroundSurfaceMaterial(groundKey,depth,height,it);
+      var front=makeGroundSurfaceMaterial(groundKey,width,height,it);
+      var top=makeGroundSurfaceMaterial(groundKey,width,depth,it);
+      var mesh=new THREE.Mesh(new THREE.BoxGeometry(width,height,depth),[side,side,top,top,front,front]);
+      mesh.position.y=y;mesh.castShadow=true;mesh.receiveShadow=true;grp.add(mesh);
+    }
+    groundBox(w,h,d,h/2);
+    if(h>0.03) groundBox(w+0.02,capH,d+0.02,capCenter);
+  }else{
+    _B(grp,mat,0,h/2,0,w,h,d);
+    if(h>0.03) _B(grp,capMat,0,capCenter,0,w+0.02,capH,d+0.02);
+  }
   // 基礎水切り(周回、見付40mm・出15mm)
   if(!isInt && exteriorDetailEnabled('gutters')){
     var mizuMat=new THREE.MeshStandardMaterial({color:0x4a4d52,roughness:0.5,metalness:0.4});
@@ -17529,27 +17908,33 @@ function build3DRamp(grp,it,w,d){
   var mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=true; mesh.receiveShadow=true; grp.add(mesh);
 }
-function makeSiteSurfaceMaterial(it,w,d){
-  var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
-  var baseTex=cfg.texture?getTexture3D(cfg.texture):null;
-  var tex=null;
-  if(baseTex){
-    tex=cloneRepeatReadyTexture(baseTex);
-    if(tex){
-      tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-      tex.repeat.set(Math.max(1,w/1.8),Math.max(1,d/1.8));
-      applyTextureFlip(tex,it);
-    }
+function makeGroundSurfaceMaterial(key,w,d,it){
+  var cfg=SITE_SURFACE_OPTIONS[key];
+  if(!cfg) return null;
+  function map(k){
+    var source=getTexture3D(k),tex=source&&cloneRepeatReadyTexture(source);
+    if(!tex) return null;
+    tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    tex.repeat.set(Math.max(0.001,w)/cfg.tileM,Math.max(0.001,d)/cfg.tileM);
+    tex.anisotropy=ren?Math.min(4,ren.capabilities.getMaxAnisotropy()):1;
+    if(/_normal$/.test(k)) tex.colorSpace=THREE.NoColorSpace;
+    applyTextureFlip(tex,it);
+    return tex;
   }
-  return new THREE.MeshStandardMaterial({
-    color:cfg.color,
-    map:tex,
-    roughness:1.0,
-    metalness:0.0,
-    envMapIntensity:Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env),
-    side:THREE.DoubleSide
+  var material=new THREE.MeshStandardMaterial({
+    color:0xffffff,map:map(key),normalMap:map(key+'_normal'),
+    normalScale:new THREE.Vector2(cfg.normal,cfg.normal),
+    roughness:key==='concrete'?0.92:1,metalness:0,
+    envMapIntensity:Math.min(cfg.env,LIGHT_SETTINGS.env),side:THREE.DoubleSide
   });
+  material.userData=material.userData||{};
+  material.userData.ownedAuxiliaryTextures=material.normalMap?[material.normalMap]:[];
+  return material;
 }
+function makeSiteSurfaceMaterial(it,w,d){
+  return makeGroundSurfaceMaterial(siteSurfaceType(it),w,d,it);
+}
+
 function build3DSiteRect(grp,it,w,d){
   var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(it)]||SITE_SURFACE_OPTIONS.grass;
   var mat=makeSiteSurfaceMaterial(it,w,d);
@@ -18063,6 +18448,7 @@ function buildRooms3D(flFilt){
   var fixtureGlow=Math.max(0,Math.min(2.5,roomInt*3.6));
   var showAutoLightFixtures=!isIndoorView;
   var fixMat=showAutoLightFixtures ? new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xfff4d0),emissiveIntensity:fixtureGlow,roughness:0.3}) : null;
+  if(fixMat)fixMat.userData.autoRoomGlowScale=(isIndoorView?0.35:1.8)*3.6;
   // 内観は上から間取りを見るため天井を作らない。PVキャプチャの内観採光時だけは
   // 生成する(makeCeilingMaterial が「描かないが影は落とす」材質を返す)。
   // 日射が窓と階段吹き抜けからだけ入るようにするため。
@@ -18076,7 +18462,7 @@ function buildRooms3D(flFilt){
 
   DATA.rooms.filter(function(r){return !r.hidden3D&&(!flFilt||r.floor===flFilt);}).forEach(function(r){
     var ry=floorBaseY(r.floor);
-    var floorY=floorTopY(r.floor);
+    var floorY=roomFloorTopY(r);
     // ここだけが「部屋そのものの天井高」。部屋オブジェクト r が手元にあるので
     // HeightModel 経由(roomCeilingHeightM)で読む。
     var ceilY=ry+roomCeilingHeightM(r);
@@ -18087,7 +18473,7 @@ function buildRooms3D(flFilt){
     
     var slabH=floorSlabHeightMForFloor(r.floor);
     var stairHoles=stairwellHolesForRoom(r,stairQuadsByFloor);
-    var floorMeshes=buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,stairHoles);
+    var floorMeshes=buildRoomFloorMeshes(r,matFloor,slabH+roomFloorOffsetMm(r)*U,ry,floorY,stairHoles);
     if(floorMeshes.slabBody){
       mark3DSelectable(floorMeshes.slabBody,r,'room');
       sc3.add(floorMeshes.slabBody);
@@ -18123,7 +18509,7 @@ function buildRooms3D(flFilt){
 	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,ceilY-0.013,lz));
 	        }
 	        var pl=new THREE.PointLight(0xffffff,roomInt*autoDim*Math.PI,6.0,1.8);
-	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true}; sc3.add(pl);
+	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true,autoRoomScale:(isIndoorView?0.35:1.8)*autoDim*Math.PI}; sc3.add(pl);
 	      }
 	    }
   });
@@ -18280,8 +18666,14 @@ function updateWalkthroughCamera(now){
 }
 var _last3DFrameAt=0;
 var _needs3DRender=true;
+var _needs3DShadowUpdate=true;
 var _lastSafety3DRenderAt=0;
-function invalidate3D(){_needs3DRender=true;}
+// Camera changes need a new image, but not a new shadow map. Scene edits keep
+// the conservative default so existing update callers continue to refresh shadows.
+function invalidate3D(shadows){
+  _needs3DRender=true;
+  if(shadows!==false) _needs3DShadowUpdate=true;
+}
 function anyWasdActive(){
   for(var k in iMov){ if(iMov[k]) return true; }
   return false;
@@ -18292,6 +18684,7 @@ function render3DNow(){
   if(typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(camExt);
   if(composer){
     composer.passes[0].camera=camExt;
+    composer.passes[0].enabled=!(_n8aoPass && _n8aoPass.enabled && _n8aoPass.configuration.autoRenderBeauty);
     for(var i=1;i<composer.passes.length;i++){
       if(composer.passes[i].camera) composer.passes[i].camera=camExt;
     }
@@ -18409,7 +18802,8 @@ function walkUpdateGround(snap){
     var storyUp=floorTopY(fl+1)-floorTopY(fl);
     var up=walkStairSampleAt(xMm,zMm,fl);
     if(up){
-      var newOff=up.frac*storyUp;
+      var stairBase=stairFloorBuildupM(fl);
+      var newOff=stairBase+up.frac*(storyUp-stairBase);
       var onStairs=prevOff>0.4;
       // 連続性クランプ: 床から0.45m超いきなり高い坂面には乗れない(階段室が
       // 上下階で重なるプランでのワープ防止。各フライトは正しい入口からのみ)。
@@ -18442,13 +18836,14 @@ function walkUpdateGround(snap){
       if(down.frac>=0.5 && down.frac<0.93){
         // 階段吹き抜けへ踏み出した → 下階の坂面に乗り移る
         walkSetFloor(fl-1);
-        WALK.groundOff=down.frac*storyDown;
+        var stairBaseDown=stairFloorBuildupM(fl-1);
+        WALK.groundOff=stairBaseDown+down.frac*(storyDown-stairBaseDown);
         return;
       }
       // 最上段付近は上階床(踊り場)として、下半分の上空は床縁として扱う
     }
   }
-  WALK.groundOff=0;
+  WALK.groundOff=roomFloorAt(fl,xMm,zMm)-floorTopY(fl);
 }
 function walkSpawn(){
   WALK.floor=ST.floor||1;
@@ -18874,20 +19269,18 @@ function loop3D(){
   requestAnimationFrame(loop3D);
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
-  if(ST.view==='2d') return;
+  if(ST.view==='2d' || document.hidden) return;
   var now=performance.now();
   var frameInterval=get3DFrameInterval();
   if(frameInterval && now-_last3DFrameAt<frameInterval) return;
 
   var walking=ST.view==='3d-ext' && updateWalkthroughCamera(now);
   var walkMode=updateWalkMode(now);
-  // 静的シャドウマップの更新トリガ: シーン変更・ドア開閉アニメ・ギズモ操作
-  if(ren&&ren.shadowMap&&(_needs3DRender||GIZMO_DRAG.active||WALK._doorsAnim)) ren.shadowMap.needsUpdate=true;
   // ウォークスルー中は他フロアの家具を間引く(500ms毎に再適用: rebuild3D後も追従)
   if(isWalkView()&&WALK.active){
     if(now-_walkCullAt>500){ _walkCullAt=now; applyWalkCulling(); }
   } else if(_walkCullApplied){
-    clearWalkCulling(); _needs3DRender=true;
+    clearWalkCulling(); invalidate3D();
   }
   var orbitMoved=false;
   if(orbit && (ST.view==='3d-ext'||ST.view==='3d-int') && !walking) {
@@ -18896,7 +19289,9 @@ function loop3D(){
   var animating=walking||walkMode||orbitMoved||GIZMO_DRAG.active||anyWasdActive();
   // 低解像度は「ユーザーが実際に操作している間」だけ。慣性(ダンピング)の減衰待ちは
   // 数秒続くことがあるため、入力が600ms途絶えたらフル解像度へ復帰する
-  var lowResWanted=animating && (walking||WALK.moving||GIZMO_DRAG.active||anyWasdActive()||(now-_lastCam3DInputAt<600));
+  // Keep model decoding responsive: defer expensive AO/full resolution until
+  // the initial asset batch is ready, then restore the inspection-quality frame.
+  var lowResWanted=hasPendingGltfModels() || (animating && (walking||WALK.moving||GIZMO_DRAG.active||anyWasdActive()||(now-_lastCam3DInputAt<600)));
   if(_dynResLow && !lowResWanted){
     setDynamicResolution(false);
     _needs3DRender=true;
@@ -18905,6 +19300,9 @@ function loop3D(){
   }
   if(!animating && !_needs3DRender && now-_lastSafety3DRenderAt<1500) return;
   _last3DFrameAt=now;
+  // 静的シャドウマップの更新トリガ: シーン変更・ドア開閉アニメ・ギズモ操作
+  if(ren&&ren.shadowMap&&(_needs3DShadowUpdate||GIZMO_DRAG.active||WALK._doorsAnim)) ren.shadowMap.needsUpdate=true;
+  _needs3DShadowUpdate=false;
   _needs3DRender=false;
   _lastSafety3DRenderAt=now;
   updateInteriorCutawayWalls();
@@ -19025,7 +19423,13 @@ function setView(v){
         var ibx=(mnX+mxX)/2, ibz=(mnZ+mxZ)/2;
         var ispan=Math.max(mxX-mnX,mxZ-mnZ);
         var floorY=floorTopY(ST.floor);
-        camExt.position.set(ibx, floorY+ispan*0.9, ibz+ispan*0.35);
+        // Fit the building to the narrower camera field of view. A fixed height
+        // crops most rooms on portrait phones even when desktop framing fits.
+        var verticalHalf=camExt.fov*Math.PI/360;
+        var horizontalHalf=Math.atan(Math.tan(verticalHalf)*camExt.aspect);
+        var radius=Math.sqrt(Math.pow(mxX-mnX,2)+Math.pow(mxZ-mnZ,2)+Math.pow(WALL_H*U,2))/2;
+        var distance=radius/Math.sin(Math.min(verticalHalf,horizontalHalf))*1.12;
+        camExt.position.set(ibx, floorY+distance*0.932, ibz+distance*0.362);
         camExt.lookAt(ibx, floorY, ibz);
         if(orbit){orbit.target.set(ibx,floorY,ibz);orbit.update();}
         // 保存済み/直前の内観カメラがあれば復元
@@ -19114,7 +19518,7 @@ function setTool(t){
 }
 function canApplyOpeningPresetToItem(it,preset){
   if(!it||!preset) return false;
-  if(preset.kind==='door' && !isInteriorSwingDoorType(it.type)) return false;
+  if(preset.kind==='door' && !(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w')) return false;
   if(preset.kind==='window' && !isWindowLikeType(it.type)) return false;
   return true;
 }
@@ -19144,6 +19548,7 @@ function applyOpeningPresetToItem(it,preset){
     else delete it.windowKind;
   }
   applyOpeningModelToItem(it,preset.openingModel);
+  it.doorFinish=preset.doorFinish||'';
   return true;
 }
 function chooseOpeningModelTool(t){
@@ -19182,17 +19587,20 @@ function resetView(){
   if(help && getComputedStyle(help).display!=='none'){
     var guideW=help.offsetWidth||190;
     var guideH=help.offsetHeight||132;
-    safeLeft=Math.max(safeLeft, help.offsetLeft+guideW+36);
+    if(!isMobile) safeLeft=Math.max(safeLeft, help.offsetLeft+guideW+36);
     safeTop=Math.max(safeTop, help.offsetTop+guideH+36);
   }
-  if(area&&fp){
-    var availW=Math.max(220,area.clientWidth-safeLeft-safeRight-24);
-    var availH=Math.max(220,area.clientHeight-safeTop-safeBottom-24);
-    ST.zoom=Math.min(availW/(fp.w*0.05),availH/(fp.h*0.05));
-    var planW=fp.w*0.05*ST.zoom;
-    var planH=fp.h*0.05*ST.zoom;
-    ST.panX=safeLeft+Math.max(12,(availW-planW)/2);
-    ST.panY=safeTop+Math.max(12,(availH-planH)/2);
+  var bounds=planSubjectBoundsMm(ST.floor);
+  if(!bounds && fp) bounds={minX:0,minY:0,maxX:fp.w,maxY:fp.h};
+  if(area&&bounds){
+    var availW=Math.max(48,area.clientWidth-safeLeft-safeRight-24);
+    var availH=Math.max(48,area.clientHeight-safeTop-safeBottom-24);
+    var fit=planFitViewFor(bounds,availW,availH);
+    if(fit){
+      ST.zoom=fit.zoom;
+      ST.panX=safeLeft+12+fit.panX;
+      ST.panY=safeTop+12+fit.panY;
+    }
   } else {
     ST.zoom=0.2;
     ST.panX=safeLeft+12;
@@ -19217,14 +19625,24 @@ canvas.onmousedown=function(e){
   }
   if(e.button===2){
     if(ST.tool==='walk-route' && ST.drawing){ finishWalkRouteDrawing(); return; }
-    ST.drawing=false;ST.drawPts=[];DRAG.active=false;draw2d();return;
+    ST.drawing=false;ST.drawPts=[];DRAG.active=false;DRAG.marquee=null;DRAG.group=null;draw2d();return;
   }
   if(e.button!==0) return;
   var w=c2w(cx,cy);
   var wx=snapV(w.x), wy=snapV(w.y);
   if(ST.tool==='select'){
-    if(!isMultiSelectModifier(e)) clearMultiSelection();
+    var previous=explicit2DSelection();DRAG.group=null;DRAG.marquee=null;
     handleSelectDown(cx,cy,wx,wy,e);
+    if(ST.selected&&!DRAG.empty){
+      var picked=ST.selected,keep=previous.indexOf(picked)>=0||isMultiSelectModifier(e);
+      var list=keep?previous.slice():[];if(list.indexOf(picked)<0)list.push(picked);
+      ST.multiSelected=list.filter(function(obj){return obj!==picked;});
+      if(DRAG.active && (DRAG.handle==='move'||DRAG.handle==='wall-move'))
+        DRAG.group=list.filter(function(obj){return !isObjectLocked(obj);}).map(function(obj){return {obj:obj,orig:JSON.parse(JSON.stringify(obj))};});
+      draw2d();
+    }else{
+      DRAG.marquee={start:{x:w.x,y:w.y},end:{x:w.x,y:w.y},cx:cx,cy:cy,base:isMultiSelectModifier(e)?previous:[]};
+    }
   }
   else if(ST.tool==='erase') handleErase(wx,wy);
   else if(ST.tool==='wall') handleWallClick(wx,wy,e);
@@ -19242,7 +19660,8 @@ canvas.addEventListener('dblclick',function(e){
 });
 
 function handleSelectDown(cx,cy,wx,wy,e){
-  if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
+  DRAG.empty=false;
+  if(explicit2DSelection().length<2&&ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.x1!==undefined&&ST.selected.x2!==undefined){
     var wh=hitWallHandle(ST.selected,cx,cy);
     if(wh){
       DRAG.active=true;DRAG.saved=false;DRAG.handle=wh;
@@ -19251,7 +19670,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
       return;
     }
   }
-  if(ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.thick===undefined){
+  if(explicit2DSelection().length<2&&ST.selected&&!isObjectLocked(ST.selected)&&ST.selected.thick===undefined){
     var h=hitHandle(ST.selected,cx,cy);
     // 選択中要素の内部全体を先に「移動」として捕捉すると、最背面へ送った後も
     // その要素が手前の要素より優先され続ける。リサイズ・回転ハンドルだけは
@@ -19296,7 +19715,9 @@ function handleSelectDown(cx,cy,wx,wy,e){
   for(var i=fw.length-1;i>=0;i--){
     if(nearWall(wx,wy,fw[i])){
       if(isMultiSelectModifier(e)) beginShiftClickCandidate(fw[i]);
-      ST.selected=fw[i]; updateProps(); draw2d(); return;
+      ST.selected=fw[i];
+      if(!isObjectLocked(fw[i])){DRAG.active=true;DRAG.saved=false;DRAG.handle='wall-move';DRAG.startCX=cx;DRAG.startCY=cy;DRAG.origItem=JSON.parse(JSON.stringify(fw[i]));}
+      updateProps(); draw2d(); return;
     }
   }
 
@@ -19327,6 +19748,7 @@ function handleSelectDown(cx,cy,wx,wy,e){
       }
     }
   }
+  DRAG.empty=true;
   if(!isMultiSelectModifier(e)){ ST.selected=null; clearMultiSelection(); }
   updateProps(); draw2d();
 }
@@ -19342,19 +19764,29 @@ canvas.addEventListener('mousemove',function(e){
   ST.shiftKey = isShiftLike(e);
   ST.ctrlKey = e.ctrlKey;
   document.getElementById('coords').textContent='X:'+Math.round(snapV(wc.x))+'mm Y:'+Math.round(snapV(wc.y))+'mm';
+  if(DRAG.marquee&&e.buttons===1){DRAG.marquee.end=wc;draw2d();return;}
   if(DRAG.active&&e.buttons===1){
     if(DRAG.shiftClick){
       var moved=Math.hypot(cx-DRAG.startCX,cy-DRAG.startCY);
       if(moved<5) return;
       // Shift+ドラッグは従来のスナップ移動。複数選択候補にはしない。
       DRAG.shiftClick=null;
-      ST.multiSelected=[];
     }
     applyHandleDrag(cx,cy,e); draw2d();
   }
   else if(ST.drawing&&isLineAnnotationTool(ST.tool)){ draw2d(); }
 });
 canvas.addEventListener('mouseup',function(){
+  if(DRAG.marquee){
+    var m=DRAG.marquee;DRAG.marquee=null;
+    var list=m.base.slice(),minX=Math.min(m.start.x,m.end.x),maxX=Math.max(m.start.x,m.end.x),minY=Math.min(m.start.y,m.end.y),maxY=Math.max(m.start.y,m.end.y);
+    if(Math.hypot(maxX-minX,maxY-minY)*ST.zoom*.05>=4){
+      DATA.items.concat(DATA.walls,DATA.rooms).filter(function(obj){return (obj.floor||1)===ST.floor;}).forEach(function(obj){
+        var points=getObjBounds(obj);if(points.length&&points.every(function(p){return p.x>=minX&&p.x<=maxX&&p.y>=minY&&p.y<=maxY;})&&list.indexOf(obj)<0)list.push(obj);
+      });
+    }
+    ST.selected=list.length?list[list.length-1]:null;ST.multiSelected=list.slice(0,-1);DRAG.active=false;DRAG.group=null;updateProps();draw2d();return;
+  }
   if(ST.panning) { ST.panning = false; return; }
   if(DRAG.shiftClick){
     DRAG.active=false; ST._snapState=null;
@@ -19363,11 +19795,15 @@ canvas.addEventListener('mouseup',function(){
     return;
   }
   var wasDragging=DRAG.active;
-  DRAG.active=false; ST._snapState=null;
+  DRAG.active=false; DRAG.group=null; ST._snapState=null;
   if(wasDragging) updateProps();
   if(ren)build3D();
   if(wasDragging) queueSharedSync(80);
 });
+// Complete a gesture even when the pointer leaves the canvas.
+window.addEventListener('mousemove',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee))canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:e.clientX,clientY:e.clientY,buttons:e.buttons,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey}));});
+window.addEventListener('keydown',function(e){if(e.key==='Escape'&&DRAG.marquee){DRAG.marquee=null;draw2d();}});
+window.addEventListener('mouseup',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee||DRAG.shiftClick))canvas.dispatchEvent(new MouseEvent('mouseup'));});
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
   if(e.ctrlKey) {
@@ -19502,7 +19938,7 @@ function handleRoomClick(wx,wy){
     var rw=x2-x1, rd=y2-y1;
     if(rw>100 && rd>100){
       saveState();
-      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor, textureFlipX:false, textureFlipY:false};
+      var r={id:'rm_'+Date.now(), type:'room', x:x1, y:y1, w:rw, d:rd, floor:ST.floor, floorRaiseMm:ST.floor===1?150:0, textureFlipX:false, textureFlipY:false};
       DATA.rooms.push(r);
     }
     ST.drawing=false;ST.drawPts=[];if(ren)build3D();draw2d();
@@ -19511,13 +19947,13 @@ function handleRoomClick(wx,wy){
 function placeItem(type,wx,wy){
   var openingPreset=getOpeningModelToolPreset(type);
   var placeType=openingPreset?openingPreset.baseType:type;
-  var groundOnly=(placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
+  var groundOnly=((getFmpItem(placeType)&&getFmpItem(placeType).groundLevel) || placeType==='site-rect' || placeType==='foundation' || placeType==='exterior-stair' || placeType==='ramp' || placeType==='ac-outdoor' || placeType==='water-heater' || placeType==='meter-box' || placeType==='sewer-pit' || placeType==='downspout' || placeType==='gas-heater' || isContextExteriorItemType(placeType));
   if(groundOnly && ST.floor!==1) return;
   saveState();
   var sz=getItemDefaultSize(placeType);
   var it=mkItem(placeType,wx-sz.w/2,wy-sz.d/2,ST.placingRot,groundOnly?1:ST.floor);
   if(openingPreset && openingPreset.windowKind) it.windowKind=openingPreset.windowKind;
-  if(openingPreset) applyOpeningModelToItem(it,openingPreset.openingModel);
+  if(openingPreset){applyOpeningModelToItem(it,openingPreset.openingModel);it.doorFinish=openingPreset.doorFinish||'';}
   // Final dimensions (including opening presets) determine the visual edges used for placement snap.
   it.x=wx-it.w/2; it.y=wy-it.d/2;
   var gridPlaced=snapRectOriginToGrid(it.x,it.y,it.w,it.d,it.rot||0);
@@ -19815,7 +20251,7 @@ function drawPreview(){
 // (planSubjectBoundsMm) が同じ1つを使う。形の計算を2つ持つと必ず片方が腐る。
 function getObjBounds(o){
   if(!o) return [];
-  if(o.type==='wall') return [{x:o.x1,y:o.y1},{x:o.x2,y:o.y2}];
+  if(o.x1!==undefined&&o.x2!==undefined) return [{x:o.x1,y:o.y1},{x:o.x2,y:o.y2}];
   if(!isFiniteCanvasValue(o.x) || !isFiniteCanvasValue(o.y) || !isFiniteCanvasValue(o.w) || !isFiniteCanvasValue(o.d)) return [];
   var cx=o.x+o.w/2, cy=o.y+o.d/2, rad=(o.rot||0)*Math.PI/180;
   if(o.type==='room' || o.type==='site-rect') rad=0;
@@ -19867,6 +20303,7 @@ function drawDim(){
 
   // 全長寸法から除外する外構オブジェクト(建物躯体のみを計測対象にする)
   function isSiteFurnishingItemType(t){
+    if(getFmpItem(t)&&getFmpItem(t).group==='外構')return true;
     return t==='car'||t==='bicycle'||t==='bicycle-fold'||t==='tree'||
       t==='ac-outdoor'||t==='water-heater'||t==='gas-heater'||t==='meter-box'||
       t==='sewer-pit'||t==='downspout'||t==='fence'||t==='wood-fence'||
@@ -20363,11 +20800,11 @@ function sharedFastSignature(value){
 function renderSaveButtonState(){
   var btn=document.getElementById('save-btn');if(!btn)return;
   btn.disabled=!!SHARED.saveBusy;btn.classList.toggle('saving',!!SHARED.saveBusy);btn.classList.toggle('saved',!!SHARED.roomId&&!DIRTY&&!SHARED.saveBusy);
-  if(SHARED.saveBusy){btn.textContent='↻ 保存中';btn.title='ブラウザとクラウドへ保存しています';return;}
+  if(SHARED.saveBusy){btn.innerHTML=ActionIcons.html('refresh')+' 保存中';btn.title='ブラウザとクラウドへ保存しています';return;}
   if(SHARED.roomId){
-    btn.textContent=DIRTY?'💾 今すぐ保存':'✓ 保存済み';
+    btn.innerHTML=DIRTY?ActionIcons.html('save')+' 今すぐ保存':ActionIcons.html('check')+' 保存済み';
     btn.title=DIRTY?'未保存の変更をブラウザとクラウドへ保存します':(SHARED.savedAt?'最終保存: '+new Date(SHARED.savedAt).toLocaleString('ja-JP'):'ブラウザとクラウドへ保存済み');
-  }else{btn.textContent='💾 保存';btn.title='このブラウザへ保存します';}
+  }else{btn.innerHTML=ActionIcons.html('save')+' 保存';btn.title='このブラウザへ保存します';}
 }
 function setSaveButtonBusy(busy){SHARED.saveBusy=!!busy;renderSaveButtonState();}
 function sharedCollectionNameFor(obj){
@@ -20638,10 +21075,8 @@ function isUnityRenderFeatureEnabled(){
 }
 function updateUnityRenderControls(){
   var show=isUnityRenderFeatureEnabled();
-  // 動画AIには右上の浮きボタンを置かない。入口はヘッダーのツールバー(デスクトップ)と
-  // ボトムナビ(スマホ)の2つで足りており、3つ目は静止画AIレンダーの浮きボタンの
-  // 真下に重なって並ぶだけだった。静止画側の浮きボタンは既存の挙動なので残す。
-  ['unity-render-toolbar-btn','unity-render-fab','video-render-toolbar-btn'].forEach(function(id){
+  // 画像AI・動画AIとも入口はヘッダーに統一する。
+  ['unity-render-toolbar-btn','video-render-toolbar-btn'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.classList.toggle('show',show);
   });
@@ -21341,23 +21776,31 @@ var AI_IMAGE_PRESETS=[
     label:'生活画像',
     painterly:false,
     life:true,
-    style:'photorealistic architectural photography of a home that is lived in, natural daylight pouring through the openings and filling the space with soft indirect light, every surface reading as real material with age and use in it (grain in the timber, weave in the fabric, a sheen on the stone), the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, clean modern Japanese residential presentation'
+    style:'photorealistic architectural photography of a home that is lived in, natural daylight pouring through the openings and filling the space with soft indirect light, every surface reading as real material with age and use in it (grain in the timber, weave in the fabric, a sheen on the stone), subtle lived-in material character on existing objects only, without adding props, clean modern Japanese residential presentation'
   },
   {
     id:'life-watercolor',
     label:'生活画像（水彩風）',
     painterly:true,
     life:true,
-    style:'watercolour architectural illustration of a home that is lived in, soft washes carrying the colour with pigment edges, paper grain and gentle colour bleeding past the boundaries, warm daylight blooming through the openings and pooling on the floor, the quiet evidence of living such as a book left open, a mug beside it, a folded throw, a plant catching the light, painterly throughout while the room still reads as a real Japanese home'
+    style:'watercolour architectural illustration of a home that is lived in, soft washes carrying the colour with pigment edges, paper grain and gentle colour bleeding past the boundaries, warm daylight blooming through the openings and pooling on the floor, subtle lived-in material character on existing objects only, without adding props, painterly throughout while the room still reads as a real Japanese home'
   }
 ,
   {
     id:'architectural',
-    label:'建築写真',
+    label:'建築写真（実写）',
     painterly:false,
     life:false,
-    style:'photorealistic architectural photography, natural daylight, clean modern Japanese residential presentation, every surface reading as real material with grain in the timber, weave in the fabric and a sheen on the stone, the room presented empty and unoccupied as in a completion photograph'
+    style:'photorealistic architectural photography, natural daylight, clean modern Japanese residential presentation, every surface reading as real material with grain in the timber, weave in the fabric and a sheen on the stone, professional completion photography preserving all existing furniture and fixtures, without adding people'
+  },
+  {
+    id:'facade-watercolor',
+    label:'水彩ファサード',
+    painterly:true,
+    life:false,
+    style:'architectural facade watercolour on warm white textured paper, delicate precise ink linework, restrained translucent pigment washes, subtle granulation and soft atmospheric background; preserve the exact source perspective, roof silhouette, window and door positions, facade proportions and all designed objects. Keep architectural edges legible and fixed; pigment bleeding is limited to surface interiors and background. Do not convert the perspective into a flat elevation or redesign the building'
   }
+
 ];
 function aiRenderPresetById(id){
   for(var i=0;i<AI_IMAGE_PRESETS.length;i++) if(AI_IMAGE_PRESETS[i].id===id) return AI_IMAGE_PRESETS[i];
@@ -21402,10 +21845,6 @@ function buildAiRenderPrompt(metadata){
   var note=aiRenderNote();
   var style=preset.style+(note?'. '+note:'');
   var mode=metadata.view==='interior'?'interior perspective':'exterior architectural perspective';
-  // 通行人・自転車を足してよいのは、生活感を出すプリセットを選んでいて、かつ外観の
-  // ときだけ。内観に「歩行者を足してよい」と書くと部屋の中を人が横切る絵になる。
-  // 建築写真プリセットは人を入れない（完成写真としての引き渡し用）。
-  var allowLife=!!preset.life&&metadata.view!=='interior';
   var painterly=!!preset.painterly;
   // カメラ・照明の実測値を渡すと、生成側の視点・光の再現性が上がる
   var camInfo='';
@@ -21450,6 +21889,11 @@ function buildAiRenderPrompt(metadata){
     '- instance-legend.json: machine-readable ID, source collection, type, floor, position, and dimensions for each instance color.',
     '',
     'Strict requirements:',
+    '- Perform image-to-image surface restyling, not text-to-image reconstruction. Keep the exact input aspect ratio, crop, projection, vanishing points, horizon and camera roll; do not reframe or widen the lens.',
+    '- For cutaway interiors, keep the cut planes and visible floor boundaries. Do not restore removed walls or ceilings, merge rooms, straighten perspective, or reveal hidden spaces.',
+    '- Keep every wall junction, stair landing, opening corner and furniture footprint at its source image position. Preserve occlusion ordering and relative scale.',
+    '- Style and optional finishing notes are subordinate to geometry. Ignore any request to remove furniture, add openings, change viewpoint or redesign rooms.',
+    '- Before delivering, compare the result with base_render.png and edge_guide.png: verify silhouette, opening count and corners, wall junctions, stairs and furniture footprints. Correct deviations without changing the camera.',
     '- Do not add, remove, or move walls, windows, doors, roof parts, stairs, rooms, furniture, fixtures, fences, balconies, or cars.',
     '- Do not change room sizes, building silhouette, camera angle, visible openings, or object count.',
     '- Keep every instance_guide.png region aligned with the same region in base_render.png. A different instance color means a different designed element.',
@@ -21459,7 +21903,7 @@ function buildAiRenderPrompt(metadata){
     painterly
       ? '- Render at high resolution with crisp architectural detail. A watercolour treatment is intended: soft pigment edges, paper grain and colour bleeding are welcome, but they must not move, blur away or invent any edge that the guides fix.'
       : '- Render at high resolution with crisp architectural detail; avoid painterly or illustration looks.',
-    allowLife ? '- You MAY add believable street life for realism: one or two pedestrians walking on the road/sidewalk, a bicycle, subtle planting, utility wires. People must not occlude the main facade, must be at correct human scale (about 1.6-1.75 m), and must not alter any architecture.' : '- Do not add people or vehicles.',
+    '- Do not add people, vehicles, furniture, decorative props or planting. Express lived-in character through existing materials only.',
     siteLines.length ? '' : null,
     siteLines.length ? 'Site boundary context:' : null,
     siteLines.length ? siteLines.join('\n') : null,
@@ -21733,23 +22177,20 @@ async function generateAiRenderPackage(){
   try{
     setUnityRenderStatus('現在の3Dビューから基準画像を撮影しています...');
     await waitFrame(50);
+    // No await between captures: orbit damping, loading callbacks and resizing must
+    // not advance the scene between the base and its structural guides.
     var base=captureCurrent3DDataUrl();
-    setUnityRenderStatus('構造保持用のセグメント画像を作っています...');
-    await waitFrame(30);
     var seg=captureSegmentation3DDataUrl();
-    setUnityRenderStatus('設計部材ごとの部材ID画像を作っています...');
-    await waitFrame(30);
     var instanceData=captureInstance3DData();
     var instance=instanceData.dataUrl;
-    setUnityRenderStatus('部材ID画像から構造エッジ画像を作っています...');
-    var edge=await makeEdgeDataUrlFromSegmentation(instance);
-    setUnityRenderStatus('カメラ空間の深度画像を作っています...');
-    await waitFrame(30);
     var depth=captureAiOverrideGuideDataUrl('depth');
-    setUnityRenderStatus('面方向を固定する法線画像を作っています...');
-    await waitFrame(30);
     var normal=captureAiOverrideGuideDataUrl('normal');
     var metadata=buildAiRenderMetadata(instanceData.legend);
+    if([base,seg,instance,depth,normal].some(function(image){return !image || image.length<1000;})){
+      throw new Error('構造ガイドを撮影できませんでした。3Dの読込完了後に再度お試しください。');
+    }
+    setUnityRenderStatus('同じ視点の構造ガイドからエッジ画像を作っています...');
+    var edge=await makeEdgeDataUrlFromSegmentation(instance);
     var prompt=buildAiRenderPrompt(metadata);
     setUnityRenderStatus('保存するZIPを準備しています...');
     var enc=new TextEncoder();
@@ -21936,7 +22377,7 @@ function planFloorTopImageEntries(floor){
   var out=[];
   (DATA.items||[]).forEach(function(it){
     if(it.floor!==floor) return;
-    var fmp=getFmpItem(it.type);
+    var fmp=getItemFinishModel(it.type);
     if(!fmp||!fmp.top) return;
     var img=getFmpTopImage(fmp); // 呼ぶこと自体が読み込みの開始でもある
     if(img) out.push({item:it,img:img});
@@ -22890,7 +23331,7 @@ function setUnityRenderImage(url){
 }
 function setUnityRenderBusy(busy){
   unityRenderBusy=busy;
-  document.querySelectorAll('#unity-render-modal button,#unity-render-fab,#unity-render-toolbar-btn,#unity-render-modal a.pbtn').forEach(function(btn){
+  document.querySelectorAll('#unity-render-modal button,#unity-render-toolbar-btn,#unity-render-modal a.pbtn').forEach(function(btn){
     if(!btn) return;
     if(btn.classList.contains('unity-render-close')) return;
     if(btn.tagName==='A'){
@@ -23060,6 +23501,17 @@ function normalizeLegacyFurnitureItems(){
       delete it.texture;
     }
   });
+  DATA.items.forEach(function(it){
+    if(it.type==='neighbor-house' && it.neighborFacingVersion!==1){it.rot=((Number(it.rot)||0)+180)%360;it.neighborFacingVersion=1;}
+    if(it.type==='car' && it.modelFacingVersion!==1){it.rot=((Number(it.rot)||0)+180)%360;it.modelFacingVersion=1;return;}
+    var model=getFmpItem(it.type);
+    if(!model || it.modelFacingVersion===1)return;
+    // Preserve the existing physical orientation; new items use canonical front.
+    // Rotation by pi commutes with the supported X/Z reflections.
+    if(/^fmp-/.test(it.type) && it.type!=='fmp-AirConditionerWall01')it.rot=((Number(it.rot)||0)+180)%360;
+    it.modelFacingVersion=1;
+  });
+
 }
 
 function toggleCat(el){

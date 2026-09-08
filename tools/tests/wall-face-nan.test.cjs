@@ -116,7 +116,7 @@ const FNS = [
   'wallHeightMm', 'wallDisplayHeightM',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'buildWall3D'
+  'wallFacadeEndLimitM', 'buildWall3D'
 ];
 
 function makeCtx(data) {

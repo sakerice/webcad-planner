@@ -73,7 +73,7 @@ function onclickOf(id) {
   return oc[1];
 }
 
-const ENTRY_IDS = ['unity-render-toolbar-btn', 'unity-render-fab'];
+const ENTRY_IDS = ['unity-render-toolbar-btn'];
 const RUN_ID = 'ai-render-run';
 
 // ── 最小の DOM ────────────────────────────────────────────────────────────
@@ -161,13 +161,13 @@ function harness(opts) {
     syncAiRenderSource: function () { calls.push('syncAiRenderSource'); },
     // 撮影まわり（ここが走ったかどうかが本題）
     setView: function (v) { calls.push('setView:' + v); ctxRef.ST.view = v; },
-    captureCurrent3DDataUrl: function () { calls.push('captureCurrent3DDataUrl'); return 'data:image/png;base64,base'; },
-    captureSegmentation3DDataUrl: function () { calls.push('captureSegmentation3DDataUrl'); return 'data:image/png;base64,seg'; },
+    captureCurrent3DDataUrl: function () { calls.push('captureCurrent3DDataUrl'); return ('data:image/png;base64,base'+'A'.repeat(1200)); },
+    captureSegmentation3DDataUrl: function () { calls.push('captureSegmentation3DDataUrl'); return ('data:image/png;base64,seg'+'A'.repeat(1200)); },
     captureInstance3DData: function () {
       calls.push('captureInstance3DData');
-      return { dataUrl: 'data:image/png;base64,inst', legend: [{ id: 'wall-1' }] };
+      return { dataUrl: ('data:image/png;base64,inst'+'A'.repeat(1200)), legend: [{ id: 'wall-1' }] };
     },
-    captureAiOverrideGuideDataUrl: function (kind) { calls.push('captureAiOverrideGuideDataUrl:' + kind); return 'data:image/png;base64,' + kind; },
+    captureAiOverrideGuideDataUrl: function (kind) { calls.push('captureAiOverrideGuideDataUrl:' + kind); return 'data:image/png;base64,' + kind + 'A'.repeat(1200); },
     capturePlan2dDataUrl: function () { calls.push('capturePlan2dDataUrl'); return 'data:image/png;base64,plan'; },
     makeEdgeDataUrlFromSegmentation: function () { calls.push('makeEdgeDataUrlFromSegmentation'); return Promise.resolve('data:image/png;base64,edge'); },
     // 設計情報は本物の形だけ与える（プロンプト組み立ては本物を走らせる）
@@ -355,7 +355,7 @@ test('内観では通行人を足してよいと書かない', async () => {
   const h = harness({ view: '3d-int', metaView: 'interior' });
   await h.press(ENTRY_IDS[0]);
   await h.press(RUN_ID);
-  assert.match(h.pkg().prompt, /- Do not add people or vehicles\./);
+  assert.match(h.pkg().prompt, /- Do not add people, vehicles, furniture/);
 });
 
 // iOS Safari は data: URL の download 属性を無視して開いてしまう。
@@ -401,11 +401,11 @@ test('ウォークスルーでは画像AIも「撮れない」と押す前に書
 // ── 表現プリセット ────────────────────────────────────────────────────────
 // 生活感の有無はプリセットが決める。以前はチェックボックスだったが、
 // プリセット名が「生活画像」である以上、同じ設定が2か所にあることになる。
-test('プリセットは3つで、既定は生活画像（従来の既定と同じ）', () => {
+test('プリセットは4つで、既定は生活画像（従来の既定と同じ）', () => {
   const h = harness({ view: '3d-ext' });
   // vm の外へ出た配列は realm が違うので deepStrictEqual が通らない。文字列で比べる。
   const ids = h.ctx.AI_IMAGE_PRESETS.map((p) => p.id).join(',');
-  assert.equal(ids, 'life,life-watercolor,architectural');
+  assert.equal(ids, 'life,life-watercolor,architectural,facade-watercolor');
   // 既定は先頭。ここが入れ替わると、既存ユーザーの出力が黙って変わる。
   assert.equal(h.ctx.AI_IMAGE_PRESETS[0].life, true, '既定のプリセットで生活感が消えている');
 });
@@ -416,14 +416,27 @@ test('建築写真プリセットは人を入れない（外観でも）', async
   h.dom.byId['ai-render-preset'].value = 'architectural';
   await h.press(RUN_ID);
   const prompt = h.pkg().prompt;
-  assert.match(prompt, /- Do not add people or vehicles\./,
+  assert.match(prompt, /- Do not add people, vehicles, furniture/,
     '建築写真なのに通行人を足してよいと書いている');
   assert.match(prompt, /Preferred style: photorealistic architectural photography/);
 });
 
-test('生活画像プリセットは外観で人を足してよいと書く（従来どおり）', async () => {
+test('生活画像も構造保持を優先し追加物を要求しない', async () => {
   const h = harness({ view: '3d-ext' });
   await h.press(ENTRY_IDS[0]);
   await h.press(RUN_ID);
-  assert.match(h.pkg().prompt, /You MAY add believable street life/);
+  assert.doesNotMatch(h.pkg().prompt, /You MAY add believable street life|a book left open|empty and unoccupied/);
+});
+
+test('水彩ファサードは画角を保持し絵画表現を禁止しない', async () => {
+ const h=harness({view:'3d-ext'});await h.press(ENTRY_IDS[0]);
+ h.dom.byId['ai-render-preset'].value='facade-watercolor';await h.press(RUN_ID);
+ const prompt=h.pkg().prompt;assert.match(prompt,/architectural facade watercolour/);
+ assert.match(prompt,/vanishing points/);assert.match(prompt,/cut planes/);
+ assert.doesNotMatch(prompt,/avoid painterly or illustration/);
+});
+test('基準と構造ガイドの撮影途中ではイベントループへ戻らない',()=>{
+ const start=html.indexOf('var base=captureCurrent3DDataUrl();',html.indexOf('async function generateAiRenderPackage'));
+ const end=html.indexOf('var metadata=buildAiRenderMetadata',start);
+ assert.doesNotMatch(html.slice(start,end),/await /);
 });
