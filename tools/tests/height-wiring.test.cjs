@@ -338,7 +338,7 @@ function ceilingYsFor(data, floor) {
     sc3: { add: function () {} },
     THREE: {
       Mesh: noop, PointLight: noop, CylinderGeometry: noop,
-      MeshStandardMaterial: function () { return {}; },
+      MeshStandardMaterial: function () { return {userData:{}}; },
       Color: function () { return {}; }
     }
   });
@@ -349,7 +349,7 @@ function ceilingYsFor(data, floor) {
     topLevelVar('CEILING_TEXTURE_TILE_M')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
    .concat(['appearanceWithTextureOrientation', 'resolveRoomCeilingAppearance',
-            'makeRoomCeilingMaterial', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
+            'makeRoomCeilingMaterial', 'roomFloorOffsetMm', 'roomFloorTopY', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
   ctx.buildRooms3D(floor);
   return { got: got, U: ctx.U, floorBaseY: ctx.floorBaseY };
 }

@@ -39,7 +39,8 @@ const PLAYWRIGHT = findPlaywright();
 // 直接読むと、入っていない環境で読み込み自体が落ちて他のテストまで巻き込む。
 const SCRIPT = `
 import { chromium } from ${JSON.stringify(PLAYWRIGHT || '')};
-const b = await chromium.launch();
+const b = await chromium.launch({args:process.platform==='darwin'?['--use-angle=metal']:[]});
+try {
 const page = await b.newPage({ viewport: { width: 375, height: 780 } });
 const errors = [];
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
@@ -60,7 +61,7 @@ await page.evaluate(async () => {
 });
 await page.waitForTimeout(500);
 console.log(JSON.stringify(errors));
-await b.close();
+} finally { await b.close(); }
 `;
 
 function run(cmd, args, opts) {
