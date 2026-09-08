@@ -91,7 +91,7 @@ def make_wall_image(name, base, seed=42):
     かえって不自然に見えるため、等方な微粒子のムラだけを入れる。
     純粋なノイズなのでUVタイルの繰り返しも視認されない。
     """
-    n = 128        # 構造の無いノイズなので解像度は低くてよい(GLBを軽く保つ)
+    n = 512        # Fine mineral finish at the authored physical UV scale
     img = _new_image(name, n)
     rng = random.Random(seed)
     px = [0.0] * (n * n * 4)
@@ -112,7 +112,7 @@ def make_wall_image(name, base, seed=42):
 
 def make_slate_image(name, base):
     """化粧スレート(コロニアル)。働き幅182mm。TILE_ROOF=1.456mに8段。"""
-    n = 256
+    n = 512
     img = _new_image(name, n)
     rows, cols = 8, 4
     rh, cw = n // rows, n // cols
@@ -126,13 +126,13 @@ def make_slate_image(name, base):
             inc = x % cw
             tone = 1.0 + ((r * 7 + c * 3) % 5 - 2) * 0.022
             if inr < 2:
-                tone *= 0.58            # 段の影
+                tone *= 0.76            # 段の影
             elif inr < 4:
-                tone *= 1.14            # 段鼻
+                tone *= 1.06            # 段鼻
             # 縦のスリット(1段おきに半ピッチずらす)
             slit = (inc + (cw // 2 if r % 2 else 0)) % cw
             if slit < 2 and inr >= 3:
-                tone *= 0.72
+                tone *= 0.86
             g = tone * (1.0 + rng.uniform(-0.018, 0.018))
             i = (y * n + x) * 4
             px[i] = min(1.0, base[0] * g)
@@ -200,7 +200,10 @@ def build_materials():
     mats['TRIM'] = matp('NhTrim', (0.30, 0.29, 0.28), rough=0.78)
     mats['FASCIA'] = matp('NhFascia', (0.90, 0.89, 0.86), rough=0.72)
     mats['SASH'] = matp('NhSash', (0.68, 0.69, 0.71), rough=0.32, metal=0.80)
-    mats['GLASS'] = matp('NhGlass', (0.24, 0.34, 0.44), rough=0.06, metal=0.30)
+    mats['GLASS'] = matp('NhGlass', (0.72, 0.83, 0.87), rough=0.09, metal=0.18)
+    mats['GLASS'].node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value=0.24
+    mats['GLASS'].surface_render_method='DITHERED'
+    mats['CURTAIN'] = matp('NhCurtain', (0.67, 0.64, 0.57), rough=0.94)
     mats['FGLASS'] = matp('NhGlassFrost', (0.68, 0.72, 0.75), rough=0.48)
     mats['DOOR'] = matp('NhDoor', (0.30, 0.19, 0.11), rough=0.48)
     mats['DOORD'] = matp('NhDoorDark', (0.21, 0.13, 0.07), rough=0.55)
@@ -224,6 +227,9 @@ def box(mat, cx, cy, cz, sx, sy, sz):
     bpy.ops.object.transform_apply(scale=True)
     if mat:
         ob.data.materials.append(mat)
+        if mat.name in ('NhSash','NhRail','NhFascia','NhDoor','NhDoorDark') and min(sx,sy,sz)>.009:
+            bevel=ob.modifiers.new('Manufactured edge highlight','BEVEL');bevel.width=min(.0015,min(sx,sy,sz)*.12);bevel.segments=2
+            bpy.context.view_layer.objects.active=ob;bpy.ops.object.modifier_apply(modifier=bevel.name)
     return ob
 
 
@@ -323,6 +329,22 @@ def build_sash(M, op, parts):
     parts.append(box(S, u, y_fr + 0.030, z1 - fr / 2, w, 0.060, fr))
     parts.append(box(S, u - w / 2 + fr / 2, y_fr + 0.030, (z0 + z1) / 2, fr, 0.060, h))
     parts.append(box(S, u + w / 2 - fr / 2, y_fr + 0.030, (z0 + z1) / 2, fr, 0.060, h))
+    # Interior recess and softly pleated curtains give glazing depth instead of blue solid panels.
+    if not op.frosted:
+        parts.append(box(M['DARK'],u,.30,(z0+z1)/2,w-.05,.018,h-.05))
+        for side in (-1,1):
+            verts=[];faces=[];steps=max(24,int(w*48))
+            left=u-w/2+.035 if side<0 else u+w*.075
+            right=u-w*.075 if side<0 else u+w/2-.035
+            for k in range(steps+1):
+                x=left+(right-left)*k/steps
+                depth=.21+.017*math.cos((x-u)*math.tau/.065)
+                verts.extend([(x,depth,z0+.045),(x,depth,z1-.035)])
+                if k:faces.append((2*k-2,2*k,2*k+1,2*k-1))
+            mesh=bpy.data.meshes.new('Continuous woven curtain');mesh.from_pydata(verts,[],faces);mesh.materials.append(M['CURTAIN'])
+            curtain=bpy.data.objects.new('Soft curtain folds',mesh);bpy.context.collection.objects.link(curtain)
+            for face in mesh.polygons:face.use_smooth=True
+            parts.append(curtain)
     # ガラス
     parts.append(box(G, u, y_gl, (z0 + z1) / 2, w - fr * 2, 0.018, h - fr * 2))
 
@@ -341,6 +363,13 @@ def build_sash(M, op, parts):
     elif op.kind == 'awning':
         parts.append(box(S, u, y_fr + 0.026, (z0 + z1) / 2, w - fr * 2, 0.048, 0.030))
 
+    # Glazing gaskets, drainage slots and doubled meeting stiles.
+    for side in (-1,1):
+        parts.append(box(M['DARK'],u+side*(w/2-fr-.003),y_gl-.012,(z0+z1)/2,.006,.006,h-2*fr))
+        parts.append(box(M['DARK'],u+side*w*.29,y_fr-.002,z0+.017,.027,.004,.004))
+    if op.kind=='slide2':
+        parts.append(box(S,u+.027,y_fr+.054,(z0+z1)/2,.019,.035,h-2*fr))
+        parts.append(box(M['RAIL'],u+.047,y_fr+.005,z0+h*.46,.014,.018,.095))
     # 額縁(窓周りの化粧枠)
     F = M['FASCIA']
     parts.append(span(F, u - w / 2 - 0.055, u + w / 2 + 0.055, -CASING, 0.004, z1, z1 + 0.055))
@@ -740,6 +769,8 @@ def main(do_export=True):
         dims = ob.dimensions
         print('  %-18s tris=%-5d  %.3f x %.3f x %.3f' % (
             name, len(ob.data.polygons), dims.x, dims.y, dims.z))
+    master=os.path.join(OUT_DIR, '../../..', 'tools/blender/work/original/neighbor_house_kit.blend')
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.abspath(master))
     if do_export:
         path = os.path.join(OUT_DIR, 'neighbor_house_kit.glb')
         size = export(made, path)

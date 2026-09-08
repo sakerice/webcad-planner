@@ -117,7 +117,8 @@ const FNS = [
   'wallHeightMm', 'wallDisplayHeightM',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'buildWall3D'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'
+
 ];
 
 function makeCtx(data) {

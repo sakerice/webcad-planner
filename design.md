@@ -39,7 +39,7 @@
 
 - Do not remove existing tools, categories, IDs, `onclick` handlers, or `data-tool` values.
 - Do not change JSON import/export compatibility.
-- Do not change 2D floor-plan drawing symbols or 3D geometry/rendering logic as part of this design pass.
+- Keep floor-plan geometry and JSON coordinates stable. Rendering-quality changes are supported when validated against existing plans; model-facing corrections belong in model configuration.
 - Do not change color/texture data behavior, snap behavior, copy/paste behavior, or Unity render request behavior.
 - Design changes should be CSS/HTML chrome first; JavaScript should be touched only if needed to keep existing UI state visible.
 
@@ -57,3 +57,17 @@
 - Sidebar categories and generated Furniture Mega Pack menu items remain usable.
 - Color/texture panels and the Unity render dialog remain usable on desktop and mobile.
 - JSON save and import still work.
+
+## Simulation quality (2026-09)
+
+The product promise is 「スマホで、建てる前の暮らしを確かめる」. Prioritize readable dimensions, believable surfaces, and responsive navigation. See [quality review](docs/quality-review/README.md) for the findings and remaining model work.
+
+- Current workspace refinements and shared control tokens live in `assets/ui-refinement.css`.
+- Mobile uses a brand/floor row and a horizontally scrollable view/action row. Keep the first three views visible at 320px width.
+- Furniture catalogue cards show the model thumbnail at a useful size; retain model IDs and category structure.
+- Correct imported material response once before caching, in `assets/js/model-quality.js`. Preserve mixed-material maps; cloth must not respond as metal or polished plastic.
+- New GLBs use metres, Y-up, bottom-centred origin and +Z front. Existing plans keep their rotations. Verify 2D symbols and both selected and instanced 3D paths before changing model orientation.
+
+## Control shape
+
+Horizontal buttons, including active header view buttons, use capsule ends (`border-radius:999px`). Avoid rounded rectangles for these controls; reserve rounded rectangular shapes for vertically elongated elements.

@@ -174,7 +174,7 @@ function makeCtx(items, opts) {
   const ctx = vm.createContext({
     console: console, Math: Math, Number: Number, isFinite: isFinite, isNaN: isNaN,
     Array: Array, Object: Object, JSON: JSON, String: String,
-    SetbackLaw: Law, THREE: THREE, DATA: data, ST: ST, sc3: sc3,
+    getFmpItem:()=>null,SetbackLaw: Law, THREE: THREE, DATA: data, ST: ST, sc3: sc3,
     isInt: !!o.isInt,
     document: { createElement: function () { return fakeCanvas(); } },
     invalidate3D: function () {},

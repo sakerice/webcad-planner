@@ -173,26 +173,24 @@ test('画像AI側のアイコンは、動画のアイコンではない', () => 
   const iconOf = (label) => Array.from(label)[0];
   const still = buttonsCalling('openUnityRenderModal')
     .filter((b) => ['unity-render-toolbar-btn'].indexOf(b.attrs.id) >= 0);
-  assert.equal(still.length, 1, '画像AIの入口(ヘッダー)が見つからない: ' + still.map((s) => s.attrs.id));
+  assert.equal(still.length, 1, '画像AIのヘッダー入口が見つからない: ' + still.map((s) => s.attrs.id));
+
   const icons = still.map((b) => iconOf(b.label));
   icons.forEach((ic, i) => {
     assert.ok(VIDEO_ICONS.indexOf(ic) < 0,
       still[i].attrs.id + ' のアイコン ' + ic + ' は動画のアイコンである');
   });
-  assert.equal(new Set(icons).size, 1, '画像AIの2つの入口でアイコンが揃っていない: ' + icons.join(' '));
+  assert.equal(new Set(icons).size, 1, '画像AIのアイコンが揃っていない: ' + icons.join(' '));
 });
 
-test('動画AI側のアイコンは動画のまま、画像側と別のものである', () => {
-  const iconOf = (label) => Array.from(label)[0];
-  const video = buttonsCalling('openVideoRenderDialog')
-    .filter((b) => ['video-render-toolbar-btn'].indexOf(b.attrs.id) >= 0);
-  assert.equal(video.length, 1, '動画AIの入口(ヘッダー)が見つからない');
-  const vIcons = video.map((b) => iconOf(b.label));
-  assert.equal(new Set(vIcons).size, 1, '動画AIの入口でアイコンが揃っていない: ' + vIcons.join(' '));
-  assert.ok(VIDEO_ICONS.indexOf(vIcons[0]) >= 0, '動画側が動画のアイコンでない: ' + vIcons[0]);
-  const stillIcon = iconOf(buttonsCalling('openUnityRenderModal')
-    .find((b) => b.attrs.id === 'unity-render-toolbar-btn').label);
-  assert.notEqual(stillIcon, vIcons[0], '2つの機能が同じアイコンを使っている');
+test('画像AIと動画AIの入口は異なるSVGアイコンを持つ', () => {
+  const icon = (id) => {
+    const button=html.match(new RegExp('<button[^>]*id="'+id+'"[^>]*>([\\s\\S]*?)</button>'));
+    assert.ok(button, id+'が存在する');
+    const path=button[1].match(/<svg[^>]*class="action-icon"[^>]*>[\s\S]*?<path d="([^"]+)"/);
+    assert.ok(path,id+'に線画アイコンがある');return path[1];
+  };
+  assert.notEqual(icon('unity-render-toolbar-btn'),icon('video-render-toolbar-btn'));
 });
 
 test('ツールバーの呼称が「画像AIレンダー」「動画AIレンダー」で対になっている', () => {
@@ -202,16 +200,17 @@ test('ツールバーの呼称が「画像AIレンダー」「動画AIレンダ�
   const video = byId('video-render-toolbar-btn').label;
   assert.match(still, /画像AIレンダー$/, 'ツールバー(画像): ' + still);
   assert.match(video, /動画AIレンダー$/, 'ツールバー(動画): ' + video);
-  // 3D画面の浮きボタンは削除済み。入口はこのヘッダーの1つだけ。
+  assert.equal(byId('unity-render-fab'), undefined, '3D画面に重複する入口を置かない');
+
 });
 
 test('旧称「AI高品質化用データ」は画面のどこにも残っていない', () => {
   assert.equal(html.indexOf('AI高品質化用データ'), -1);
 });
 
-// 浮きボタン(#unity-render-fab)を消したので、画像AIの入口はヘッダーの1つ。
 test('入口の抽出が壊れていない（入口1つ＋ダイアログの実行ボタン1つ）', () => {
-  assert.ok(STILL_ENTRIES.length >= 1, '画像AIの入口が拾えていない');
+  assert.equal(STILL_ENTRIES.length, 1, '画像AIの入口はヘッダーに統一する');
+
   assert.equal(buttonsCalling('generateAiRenderPackage').length, 1,
     '生成を呼ぶボタンはダイアログの実行ボタンだけであるべき');
 });

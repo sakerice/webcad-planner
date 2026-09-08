@@ -157,7 +157,7 @@ test('名乗った種別は LockTiers で意図した階層になる（既定に
 // 実データそのものを通す。旧 legend の type は three.js のクラス名 "Mesh" のまま
 // なので、type ではなく source（呼び出し側が渡した kind）で見る。
 const LEGEND = JSON.parse(readFileSync(
-  join(__dirname, '..', '..', 'pv', 'renders', 'T94-exterior', 'instance-legend.json'), 'utf8'));
+  join(__dirname, 'fixtures', 'instance-legend.json'), 'utf8'));
 
 test('実データの未分類 34 件は「部屋ごとに 2 つ」で、部屋数と一致する', () => {
   const unnamed = LEGEND.instances.filter((e) => e.source === 'render-object');

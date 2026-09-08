@@ -321,6 +321,7 @@ test('入口の抽出そのものが機能している（12機能すべてにボ
     '画像AIレンダーの入口 unity-render-toolbar-btn が見えていない');
   assert.equal(html.indexOf('unity-render-fab'), -1,
     '削除した浮きボタン #unity-render-fab が復活している');
+
 });
 
 // ── 7. 本題: どの幅でも、どの機能も、入口が1つ以上ある ────────────────────
@@ -387,7 +388,18 @@ test('評価器が知らないメディア特性の上に display を載せて�
     '入口に効く display が、評価器の知らないメディアクエリの下にある');
 });
 
-// 3D画面の右上に出ていた浮きボタン(#unity-render-fab)は削除した。
-// 「スマホの固定ツールバーに潜らない top を持つこと」を見ていた検査は、
-// ボタンごと無くなったので役目を終えている。復活の検知は上の
-// 「入口の抽出そのものが機能している」に置いた。
+// 画像AIはヘッダーに集約し、3D画面には重複する入口を置かない。
+test('画像AIレンダーの入口はヘッダーに統一されている', () => {
+  assert.deepEqual(ENTRIES.openUnityRenderModal.map((n) => n.id).filter(Boolean), ['unity-render-toolbar-btn']);
+});
+
+// A deleted last selector once joined the shared panel list to #statusbar's
+// layout block. The stylesheet remained syntactically valid, but every panel
+// inherited its fixed 30px height. Shared elevation must not share bar geometry.
+test('パネル共通の影にステータスバーの固定寸法が混入しない', () => {
+  const shared = RULES.filter((r) => r.selector === '.common-tools' || r.selector === '.cat-hdr');
+  assert.ok(shared.length > 0);
+  assert.equal(shared.some((r) => r.decls.height && r.decls.height.value === '30px' &&
+    r.decls.bottom && r.decls.bottom.value === '10px'), false);
+});
+

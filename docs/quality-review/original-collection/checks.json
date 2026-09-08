@@ -1,0 +1,232 @@
+{
+  "models": [
+    {
+      "id": "original-sofa",
+      "size": [
+        2.100000020595651,
+        0.8208171044075371,
+        0.899999992681586
+      ],
+      "triangles": 6460,
+      "drawCalls": 16,
+      "heading": [
+        {
+          "name": "Upholstered_back",
+          "z": -0.3130434453487396
+        },
+        {
+          "name": "Upholstered_back001",
+          "z": -0.3130434453487396
+        },
+        {
+          "name": "Upholstered_back002",
+          "z": -0.3130434453487396
+        }
+      ]
+    },
+    {
+      "id": "original-chair",
+      "size": [
+        0.7199999186786572,
+        0.7906703351763407,
+        0.7600000411779959
+      ],
+      "triangles": 4108,
+      "drawCalls": 10,
+      "heading": [
+        {
+          "name": "Upholstered_back",
+          "z": -0.2643478512763977
+        }
+      ]
+    },
+    {
+      "id": "original-bed",
+      "size": [
+        1.600000018119772,
+        0.9800000585753867,
+        2.1500001326203346
+      ],
+      "triangles": 16316,
+      "drawCalls": 6,
+      "heading": [
+        {
+          "name": "Upholstered_headboard",
+          "z": -0.9890000633895397
+        }
+      ]
+    },
+    {
+      "id": "original-table",
+      "size": [
+        1.600000023841858,
+        0.719978845700046,
+        0.8500000238418579
+      ],
+      "triangles": 2932,
+      "drawCalls": 7,
+      "heading": []
+    },
+    {
+      "id": "original-sideboard",
+      "size": [
+        1.399999976158142,
+        0.7600000389058383,
+        0.419999981010678
+      ],
+      "triangles": 4732,
+      "drawCalls": 13,
+      "heading": [
+        {
+          "name": "Door_panel",
+          "z": 0.1932490404009303
+        },
+        {
+          "name": "Door_panel001",
+          "z": 0.1932490404009303
+        },
+        {
+          "name": "Door_panel002",
+          "z": 0.1932490404009303
+        },
+        {
+          "name": "Door_panel003",
+          "z": 0.1932490404009303
+        }
+      ]
+    },
+    {
+      "id": "original-wardrobe",
+      "size": [
+        1,
+        1.900000003230815,
+        0.5799999947553085
+      ],
+      "triangles": 2516,
+      "drawCalls": 7,
+      "heading": [
+        {
+          "name": "Door_panel",
+          "z": 0.26686770703845564
+        },
+        {
+          "name": "Door_panel001",
+          "z": 0.26686770703845564
+        }
+      ]
+    },
+    {
+      "id": "fmp-Sofa01",
+      "size": [
+        4.722904920578003,
+        1.849090956209693,
+        1.9476897120475773
+      ],
+      "triangles": 49568,
+      "drawCalls": 1,
+      "heading": []
+    },
+    {
+      "id": "fmp-Chair01",
+      "size": [
+        0.8878478705883027,
+        1.920327335508773,
+        1.0386067628860474
+      ],
+      "triangles": 3132,
+      "drawCalls": 1,
+      "heading": []
+    },
+    {
+      "id": "fmp-Bed01",
+      "size": [
+        2.6565649509429936,
+        2.23147234430337,
+        4.93263578414917
+      ],
+      "triangles": 23024,
+      "drawCalls": 3,
+      "heading": []
+    },
+    {
+      "id": "fmp-Table01",
+      "size": [
+        2.6359700983329835,
+        1.5924069235325657,
+        1.627375041332566
+      ],
+      "triangles": 76,
+      "drawCalls": 1,
+      "heading": []
+    },
+    {
+      "id": "fmp-Drawer01",
+      "size": [
+        1.1646620631217959,
+        1.4605174435994108,
+        1.6649309396743777
+      ],
+      "triangles": 886,
+      "drawCalls": 1,
+      "heading": []
+    },
+    {
+      "id": "fmp-Closet01",
+      "size": [
+        3.852615356445313,
+        5.596784445771192,
+        1.9563885331153874
+      ],
+      "triangles": 560,
+      "drawCalls": 1,
+      "heading": []
+    }
+  ],
+  "runtime": {
+    "saved": {
+      "fabric": "#a75842"
+    },
+    "changed": [
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842",
+      "a75842"
+    ],
+    "queued": false,
+    "originalMaterial": [
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af",
+      "aab5af"
+    ],
+    "beforeReset": "<div class=\"ph\" style=\"margin-top:12px\">素材・カラー</div><div class=\"model-finish-note\">オリジナル家具 · 素材の表情を保って色を変更</div><div class=\"pr\"><label class=\"pl\" for=\"finish-fabric\">張地</label><input id=\"finish-fabric\" class=\"pi\" type=\"color\" value=\"#a75842\" oninput=\"updateSelectedModelFinish('fabric',this.value)\"></div><div class=\"pr\"><label class=\"pl\" for=\"finish-wood\">木部</label><input id=\"finish-wood\" class=\"pi\" type=\"color\" value=\"#9e7e5d\" oninput=\"updateSelectedModelFinish('wood',this.value)\"></div><button class=\"pbtn sec\" type=\"button\" onclick=\"updateSelectedProp('finishColors',null)\">素材の色を元に戻す</button>",
+    "reset": null,
+    "channels": [
+      {
+        "key": "fabric",
+        "label": "張地",
+        "default": "#aab5af"
+      },
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#9e7e5d"
+      }
+    ]
+  },
+  "errors": []
+}
