@@ -102,8 +102,12 @@ class StorageMeasurement(unittest.TestCase):
 
     def test_accepted_user_plan_keeps_documented_lint_findings_visible(self):
         # This is a delivery audit, not a claim that the user's layout passes.
+        # The remaining findings are design judgements in the user's layout
+        # (window heads, storage ratio, kitchen aisle, work triangle). The
+        # off-grid geometry that used to sit alongside them - 1, 6, 32, 41, 42 -
+        # was corrected by apply_joint_fixes; see that function for why.
         import subprocess, re
-        for filename, expected in [('default_plan.json', [1,6,17,18,23,32,36,41,42]),
+        for filename, expected in [('default_plan.json', [17,18,23,36]),
                                    ('default_plan_3f.json', [18])]:
             result = subprocess.run(['python3', str(ROOT/'tools/lint_plan.py'), str(ROOT/'assets'/filename)], capture_output=True, text=True, check=True)
             self.assertEqual([int(n) for n in re.findall(r'^== (\d+)\.', result.stdout, re.M)], expected)
@@ -127,7 +131,31 @@ class StorageMeasurement(unittest.TestCase):
             subprocess.run(['python3', str(ROOT/'tools/make_default_plan_2f.py'), str(out)], check=True)
             plan = json.loads(out.read_text())
         self.assertEqual(plan, json.loads((ROOT/'assets/default_plan.json').read_text()))
-        self.assertEqual(plan, json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-25.json').read_text()))
+        # The shipped plan is the received original plus exactly the three
+        # off-grid corrections in apply_joint_fixes - nothing else. Diff it
+        # against the kept original so any further drift shows up here.
+        received = json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-25.json').read_text())
+        changed = set()
+        for collection in ('walls', 'rooms', 'items'):
+            before = {o['id']: o for o in received[collection]}
+            after = {o['id']: o for o in plan[collection]}
+            self.assertEqual(before.keys(), after.keys(), collection)
+            for key in before:
+                if before[key] != after[key]:
+                    changed.add((collection, key))
+        self.assertEqual(changed, {('walls', 1014), ('rooms', 'r1027'),
+                                   ('rooms', 'r1030'), ('items', 1243)})
+        walls = {w['id']: w for w in plan['walls']}
+        rooms = {r['id']: r for r in plan['rooms']}
+        items = {i['id']: i for i in plan['items']}
+        self.assertEqual(walls[1014]['y2'], 3040)          # meets wall 1016's centre line
+        self.assertEqual(rooms['r1027']['y'] + rooms['r1027']['d'], 3040)
+        self.assertEqual(rooms['r1030']['y'], 3040)        # stair and hall no longer overlap
+        self.assertEqual(items[1243]['x'] + items[1243]['w'] / 2, 6370)  # on wall 1013
+        self.assertEqual(items[1243]['rot'], 90)
+        for key in received:
+            if key not in ('walls', 'rooms', 'items'):
+                self.assertEqual(received[key], plan[key], key)
         ids = {i['id']: i for i in plan['items']}
         self.assertFalse({1102,1180,1194,1195} & ids.keys())
         self.assertTrue({1228,1229,1230,1231,1233,1234,1235,1236,1237,1238,1240,1241} <= ids.keys())

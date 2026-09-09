@@ -508,5 +508,8 @@ plan.update(review25["metadata"])
 for collection, order in review25["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
+# 受領版に残っていた通り芯からのずれ3か所だけを戻す(間取りは変えない)。
+from default_plan_2f_review import apply_joint_fixes
+apply_joint_fixes(plan)
 with open(out, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=1)
