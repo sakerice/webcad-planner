@@ -1,0 +1,72 @@
+{
+  "worker": "webcad-planner",
+  "url": "https://webcad-planner.cwq06831.workers.dev/",
+  "version": "254a1606-afe4-4aaf-9da4-7ef3cf39d490",
+  "sourceCommit": "e0b895c",
+  "files": [
+    {
+      "file": "index.html",
+      "status": 200,
+      "sha256": "cac1b058cd15e2b53c659394a1a9c9f6dbfc2dc0ce024e91b99f8c459e8d479d",
+      "matches": true
+    },
+    {
+      "file": "assets/default_plan.json",
+      "status": 200,
+      "sha256": "03e92ab707c16d1476a1b61e4fddaa6d5b988ee72a9c80f267760b1df0b25837",
+      "matches": true
+    },
+    {
+      "file": "assets/default_plan_3f.json",
+      "status": 200,
+      "sha256": "13f089e3b6509282b7aac46bb43740f8c551037eeceddd5990f224b10e1dc6ca",
+      "matches": true
+    },
+    {
+      "file": "assets/presets/2f-exterior.jpg",
+      "status": 200,
+      "sha256": "9217bd29b7a3bfef7d97595eb77615e13b62e05ad6339200ef1e2435252afef5",
+      "matches": true
+    },
+    {
+      "file": "assets/presets/3f-exterior.jpg",
+      "status": 200,
+      "sha256": "a654cae31e6c63f0510b30a7f6d9adbd60dd5bb7ce5b28f530917e3aa002b482",
+      "matches": true
+    },
+    {
+      "file": "assets/js/asset-catalogue.js",
+      "status": 200,
+      "sha256": "a8f8a2f87f5a114026a3019070ee8ec44670487124574c61074631ff50809390",
+      "matches": true
+    },
+    {
+      "file": "assets/ui-refinement.css",
+      "status": 200,
+      "sha256": "0acdfa72ef115d36d7f13f2eeb64320ccf4f926c6ef0affc6375ffe09edb3c51",
+      "matches": true
+    }
+  ],
+  "apiRouting": {
+    "status": 404,
+    "type": "application/json; charset=utf-8"
+  },
+  "models": {
+    "2f": {
+      "failed": [],
+      "cached": 47,
+      "rooms": 22,
+      "items": 176
+    },
+    "3f": {
+      "failed": [],
+      "cached": 55,
+      "rooms": 23,
+      "items": 172
+    }
+  },
+  "browserErrors": [],
+  "startupAndSearchChecks": "passed on desktop and mobile",
+  "nodeTestsPassed": 695,
+  "pythonTestsPassed": 16
+}
