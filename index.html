@@ -3785,7 +3785,16 @@ function updateSelectedRoomFloor(value){
   var r=ST.selected;if(!r||r.type!=='room')return;
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);if(!Number.isFinite(n))return;
+  var oldFloor=roomFloorOffsetMm(r);
   saveState();r.floorRaiseMm=Math.max(0,Math.min(600,n));
+  var delta=roomFloorOffsetMm(r)-oldFloor;
+  DATA.items.forEach(function(it){
+    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail')return;
+    if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==r)return;
+    // A floor edit must not move a ceiling attachment, including a deliberately
+    // lowered pendant. Preserve its existing world height and suspension length.
+    it.elev=(Number(it.elev)||0)-delta;
+  });
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
 }
 function selectedRoomFloorHtml(r){
@@ -3888,8 +3897,8 @@ function roomVoidTargetFloor(room){
 function roomIsVoidCeiling(room){
   return !!(room&&room.ceiling&&room.ceiling.type==='void');
 }
-// 吹き抜けの天井高(mm)。roomExplicitCeilingMm と同じ基準(床スラブ下端から
-// 測った値から、後で床スラブぶんを足し戻す)で返す。
+// 吹き抜けの天井高(mm)。床スラブ下端から目標階の天井までを直接算出する。
+// 明示した通常天井の床仕上げ面基準とは異なり、呼び出し側でスラブを足さない。
 function roomVoidCeilingMm(room){
   var from=(room&&room.floor)||1, to=roomVoidTargetFloor(room);
   // **床スラブ下端(floorBaseY)からの高さ**を返す。roomCeilingHeightM の
@@ -4205,7 +4214,8 @@ function roomCeilingHeightM(room){
   var storyM=storyHeightM(floor);
   var mm=roomExplicitCeilingMm(room);
   if(mm===null) return storyM;
-  var h=mm*U+floorSlabHeightMForFloor(floor);
+  // 吹抜は既にスラブ下端から算出済み。2階以上でスラブ厚を二重加算しない。
+  var h=mm*U+(roomIsVoidCeiling(room)?0:floorSlabHeightMForFloor(floor));
   if(h>storyM){
     // 手書きの勾配天井は、上に何も載っていない部屋に限り階高を超えてよい (Task 14-2)。
     // 超えても持ち上がる床が無い -- 小屋裏へ抜けるのが勾配天井の実体だからである。
@@ -5237,7 +5247,7 @@ function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
   var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
-  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U);
+  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)-(r?roomFloorOffsetMm(r):0);
 }
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
@@ -6199,7 +6209,18 @@ function updateProps(){
   }
   if(it.type==='site-rect'){
     html += '<div class="ph" style="margin-top:12px">敷地設定</div>';
-    html += '<div class="pr"><div class="pl">敷地表面</div><select class="pi" onchange="updateSelectedProp(\'siteSurface\',this.value)">'+siteSurfaceOptionsHtml(it.siteSurface)+'</select></div>';
+    html += '<div class="pr"><div class="pl">基本の地表仕上げ</div><select class="pi" onchange="updateSelectedProp(\'siteSurface\',this.value)">'+siteSurfaceOptionsHtml(it.siteSurface)+'</select></div>';
+    if(it.siteBoundary){
+      html += '<div class="pr" style="display:block;font-size:12px;line-height:1.7">この矩形は土地全体の境界です。建物の範囲は外壁の輪郭、庭・駐車場は下の外構仕上げで示します。建築可能範囲を示す線ではありません。</div>';
+    }
+    siteFinishZones(it).forEach(function(z,index){
+      html += '<div class="ph">外構仕上げ '+(index+1)+'</div>';
+      html += '<div class="pr"><div class="pl">用途</div><input class="pi" value="'+escHtml(z.name)+'" onchange="updateSiteZone('+index+',\'name\',this.value)"></div>';
+      html += '<div class="pr"><div class="pl">表面</div><select class="pi" onchange="updateSiteZone('+index+',\'surface\',this.value)">'+siteSurfaceOptionsHtml(z.surface)+'</select></div>';
+      [['x','左端から (mm)'],['y','上端から (mm)'],['w','幅 (mm)'],['d','奥行 (mm)']].forEach(function(f){
+        html += '<div class="pr"><div class="pl">'+f[1]+'</div><input class="pi" type="number" min="0" value="'+z[f[0]]+'" onchange="updateSiteZone('+index+',\''+f[0]+'\',this.value)"></div>';
+      });
+    });
     html += siteSetbackPanelHtml(it);
   }
   if(isWindowLikeType(it.type)){
@@ -7094,11 +7115,11 @@ var _defaultPlanPending=true; // 保存プラン復元やインポートが先�
 // テストはここを読まない(tools/tests/fixtures/ の凍結間取りを読む)。
 var PRESET_PLANS={
   '2f': {file:'assets/default_plan.json',
-         name:'2階建て 4LDK+書斎',
-         desc:'郊外の敷地45坪。吹き抜けリビング・ウッドデッキ・車庫つき'},
+         name:'2階建て 3LDK・アイランドキッチン',
+         desc:'シンクアイランドと13.2㎡の吹き抜け。庭へつながるLDKと、余白を大切にした家'},
   '3f': {file:'assets/default_plan_3f.json',
-         name:'3階建て 3LDK+WIC',
-         desc:'都市の間口3間・敷地25坪。3階の高窓から吹き抜けで2階リビングへ光を落とす'}
+         name:'3階建て 3LDK・大吹き抜け',
+         desc:'全幅5.46m、14.9㎡の吹き抜け。二方向の高窓と、家具を絞った開放的なLDK'}
 };
 var PRESET_CURRENT='2f';
 // 起動時の間取り選択。既定間取りが使われる起動(=保存の復元も共同編集も
@@ -7537,6 +7558,17 @@ function draw2d(){
   if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
   // 5. Other Items
   fi.filter(function(i){return i.type!=='site-rect' && i.type!=='foundation';}).forEach(drawItem2d);
+  // Finish labels stay legible above decks and paving, without extra parcel lines.
+  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect'&&i.siteBoundary;}).forEach(function(it){
+    ctx.save();ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    siteFinishZones(it).forEach(function(z){
+      var x=ST.panX+(it.x+z.x+z.w/2)*sc,y=ST.panY+(it.y+z.y+z.d/2)*sc;
+      var tw=ctx.measureText(z.name).width+12;
+      ctx.fillStyle='rgba(255,255,255,0.92)';ctx.fillRect(x-tw/2,y-10,tw,20);
+      ctx.fillStyle='#334b45';ctx.fillText(z.name,x,y);
+    });
+    ctx.restore();
+  });
 
   // Ghost Previews
   if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
@@ -9089,6 +9121,17 @@ function drawItem2d(it){
       ctx.strokeStyle=strokeMap[surface]||strokeMap.grass; ctx.lineWidth=2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc); ctx.setLineDash([]);
       ctx.fillStyle=fillMap[surface]||fillMap.grass; ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      siteFinishZones(it).forEach(function(z){
+        var zx=-hw+z.x*sc,zy=-hd+z.y*sc;
+        ctx.fillStyle=fillMap[z.surface]||fillMap.grass;ctx.fillRect(zx,zy,z.w*sc,z.d*sc);
+        ctx.strokeStyle=strokeMap[z.surface];ctx.lineWidth=1;ctx.strokeRect(zx,zy,z.w*sc,z.d*sc);
+      });
+      if(it.siteBoundary){
+        ctx.strokeStyle='#334b45';ctx.lineWidth=2;ctx.setLineDash([12,4,2,4]);
+        ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);ctx.setLineDash([]);
+        ctx.fillStyle='#334b45';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+        ctx.fillText('敷地境界（土地全体） '+(it.w*it.d/1e6).toFixed(1)+'㎡',0,-hd-8);
+      }
     }
   }
   ctx.restore();
@@ -12652,14 +12695,18 @@ function applyLightingToScene(refreshSky){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
   var nightMix=LIGHT_SETTINGS.sunSim?solarNightBlend(computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg).altitude):0;
   var indirectScale=1-nightMix*0.84;
-  if(ren) ren.toneMappingExposure=LIGHT_SETTINGS.exposure*(1-nightMix*0.12);
+  // 昼の室内は空からの間接光で素材と間取りが読める明るさにする。
+  // 夜景と配置照明の調整範囲は従来の設定を使う。
+  var daytimeInterior=LIGHT_SETTINGS.timeOfDay==='day' && nightMix<0.1;
+  if(ren) ren.toneMappingExposure=LIGHT_SETTINGS.exposure*(1-nightMix*0.12)*
+    (daytimeInterior && (ST.view==='3d-int' || ST.view==='3d-walk') ? 1.18 : 1);
   if(sc3&&typeof THREE!=='undefined'){
     sc3.traverse(function(o){
       if(o.name==='AmbientLight'){
         // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
         // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
         //  色味が白いベース光に洗い流されてしまう)
-        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?0.6:1);
+        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?1.8:0.6):1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
@@ -12680,11 +12727,11 @@ function applyLightingToScene(refreshSky){
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?0.4:(ST.view==='3d-walk'?0.5:1));
+        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.6:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.5:0.5):1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
-        var cfg=SITE_SURFACE_OPTIONS[siteSurfaceType(o.userData.siteRectRef)]||SITE_SURFACE_OPTIONS.grass;
+        var cfg=SITE_SURFACE_OPTIONS[o.userData.siteZoneSurface||siteSurfaceType(o.userData.siteRectRef)]||SITE_SURFACE_OPTIONS.grass;
         o.material.envMapIntensity=Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env);
         o.material.needsUpdate=true;
       }
@@ -12703,7 +12750,7 @@ function applyLightingToScene(refreshSky){
     }
     // 内観はIBL寄与を大きく抑えて配置ライトを主役にする。ウォークスルーも室内目線のため
     // 大幅に絞る(2.4のままだと昼空のIBLが室内を白く洗い流し、配置ライトの色味が消える)
-    var envBoost=(ST.view==='3d-int')?0.4:(ST.view==='3d-walk'?0.7:2.4);
+    var envBoost=(ST.view==='3d-int')?(daytimeInterior?1.2:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.1:0.7):2.4);
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
@@ -18595,6 +18642,23 @@ function makeGroundSurfaceMaterial(key,w,d,it){
   material.userData.ownedAuxiliaryTextures=material.normalMap?[material.normalMap]:[];
   return material;
 }
+// Surface zones are finishes within one parcel, never extra parcels or setbacks.
+function siteFinishZones(it){
+  return (Array.isArray(it.siteZones)?it.siteZones:[]).map(function(z){
+    var x=Math.max(0,Number(z.x)||0),y=Math.max(0,Number(z.y)||0);
+    return {name:String(z.name||'外構仕上げ'),x:x,y:y,
+      w:Math.max(0,Math.min(Number(z.w)||0,it.w-x)),
+      d:Math.max(0,Math.min(Number(z.d)||0,it.d-y)),
+      surface:SITE_SURFACE_OPTIONS[z.surface]?z.surface:'grass'};
+  }).filter(function(z){return z.w>0&&z.d>0;});
+}
+function updateSiteZone(index,key,value){
+  if(!ST.selected || ST.selected.type!=='site-rect')return;
+  var zones=JSON.parse(JSON.stringify(ST.selected.siteZones||[]));
+  if(!zones[index])return;
+  zones[index][key]=['x','y','w','d'].indexOf(key)>=0?Math.max(0,Number(value)||0):value;
+  updateSelectedProp('siteZones',zones);
+}
 function makeSiteSurfaceMaterial(it,w,d){
   return makeGroundSurfaceMaterial(siteSurfaceType(it),w,d,it);
 }
@@ -18610,6 +18674,13 @@ function build3DSiteRect(grp,it,w,d){
   plane.userData.siteRectRef=it;
   grp.add(plane);
 
+  siteFinishZones(it).forEach(function(z){
+    var zw=z.w/1000,zd=z.d/1000;
+    var mesh=new THREE.Mesh(new THREE.PlaneGeometry(zw,zd),makeGroundSurfaceMaterial(z.surface,zw,zd,it));
+    mesh.rotation.x=-Math.PI/2;
+    mesh.position.set((z.x+z.w/2-it.w/2)/1000,SITE_SURFACE_Y+0.002,(z.y+z.d/2-it.d/2)/1000);
+    mesh.receiveShadow=true;mesh.userData.siteRect=true;mesh.userData.siteRectRef=it;mesh.userData.siteZoneSurface=z.surface;grp.add(mesh);
+  });
   var edgeGeo=new THREE.EdgesGeometry(new THREE.PlaneGeometry(w,d));
   var edgeMat=new THREE.LineBasicMaterial({color:cfg.edge,transparent:true,opacity:0.85});
   var edge=new THREE.LineSegments(edgeGeo,edgeMat);
@@ -22397,7 +22468,7 @@ function collectAiMaterialSummary(plan){
     itemTypes[it.type]=(itemTypes[it.type]||0)+1;
     if(it.type==='site-rect'){
       var surface=siteSurfaceType(it);
-      sites.push({floor:it.floor,x:it.x,y:it.y,w:it.w,d:it.d,surface:surface,surfaceLabel:siteSurfaceLabel(surface)});
+      sites.push({floor:it.floor,x:it.x,y:it.y,w:it.w,d:it.d,surface:surface,surfaceLabel:siteSurfaceLabel(surface),boundary:!!it.siteBoundary,zones:siteFinishZones(it)});
     }
     if(it.type==='roof'){
       var roofTex=materialToken('屋根:',it.texture);

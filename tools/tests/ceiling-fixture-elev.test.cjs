@@ -53,7 +53,7 @@ function topLevelVar(name) {
 }
 
 const FNS = [
-  'foundationHeightMm', 'foundationHeightM',
+  'roomFloorOffsetMm', 'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
@@ -155,3 +155,25 @@ test('保存済みプランの移行は1度だけ走り、屋外の器具は触�
   legacy.items.filter(isFixture).forEach((it) =>
     assert.equal(it.elev, 1500, '2度目で位置が書き換わっている'));
 });
+
+
+test('2階から3階へ抜く天井は上階天井と一致し、スラブ厚を二重加算しない', () => {
+  const data = clone(PLAN);
+  data.rooms = [{id:'v',x:0,y:0,w:5460,d:2730,floor:2,ceiling:{type:'void',toFloor:3}}];
+  const ctx = makeCtx(data);
+  const result = vm.runInContext(`({
+    actual: floorBaseY(2)+roomCeilingHeightM(DATA.rooms[0]),
+    expected: floorBaseY(3)+storyHeightM(3),
+    fixture: ceilingFinishElevationMm(2,1000,1000)
+  })`, ctx);
+  assert.ok(Math.abs(result.actual-result.expected)<1e-8);
+  assert.equal(result.fixture,5208);
+});
+
+ test('raised finished floor keeps the ceiling fixture at the same world height', () => {
+  const data=clone(PLAN), r=data.rooms.find(r=>r.floor===1&&r.x<=900&&r.x+r.w>=900&&r.y<=900&&r.y+r.d>=900);
+  const before=makeCtx(clone(data)).ceilingFinishElevationMm(1,900,900);
+  r.floorRaiseMm=150;
+  const after=makeCtx(data).ceilingFinishElevationMm(1,900,900);
+  assert.equal(after+150,before);
+ });

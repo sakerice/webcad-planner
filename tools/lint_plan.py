@@ -89,7 +89,8 @@ def is_window_dressing(t):
     「カーテンが1枚も無い」判定になって静かに素通りする。
     """
     return ('-Curtain-' in t or t.startswith('fmp-Curtain')
-            or t.startswith('fmp-RollerScreen'))
+            or t.startswith('fmp-RollerScreen')
+            or t.startswith(('original-curtain-open-', 'original-roller-open-')))
 
 
 # ---------------------------------------------------------------- 幾何ヘルパ
@@ -711,9 +712,9 @@ def _ceiling_for_item(data, it):
     """
     cx, cy = center(it)
     r = room_at(data, it.get('floor', 1), cx, cy)
-    if r is None:
-        return CEILING_MM
-    return room_ceiling_mm(r) or CEILING_MM
+    explicit = room_ceiling_mm(r) if r is not None else None
+    slab = 0 if it.get('floor', 1) <= 1 else FLOOR_SLAB_MM
+    return (explicit if explicit is not None else FLOOR_H_MM-slab) - CEILING_FINISH_MM - (r.get("floorRaiseMm", 0) if r else 0)
 
 
 SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
@@ -908,26 +909,63 @@ def check17_window_head_alignment(data):
     return out
 
 
-def check18_storage_ratio(data):
-    """収納率が10%以上あるか。"""
-    out = []
-    NAMES = ('収納', 'WIC', 'CL', 'SIC', '納戸', 'パントリー', '物入',
+def storage_areas(data):
+    """Dedicated storage plus real floor-standing wardrobes/cabinets, without overlap.
+
+    A room label alone missed all reach-in furniture while counting empty narrow
+    walk-in passages. Report both contributions; kitchens/wet-room cabinetry and
+    suspended cabinets do not contribute to this floor-area measure.
+    """
+    names = ('収納', 'WIC', 'CL', 'SIC', '納戸', 'パントリー', '物入',
              'クローゼット', 'リネン', 'シューズ', '押入')
-    total = 0.0
-    store = 0.0
-    for r in data.get('rooms', []):
-        a = (r['w'] * r['d']) / 1e6
-        if (r.get('n') or '').strip() in ('PS',):
-            continue
-        total += a
-        if any(n in (r.get('n') or '') for n in NAMES):
-            store += a
-    if total > 0:
-        ratio = store / total * 100.0
-        if ratio < 10.0:
-            out.append('収納率 %.1f%% (収納 %.1f㎡ / 延床 %.1f㎡)。'
-                       '目安10〜13%%に届いていない' % (ratio, store, total))
-    return out
+    def union_area(boxes):
+        xs = sorted({x for b in boxes for x in (b[0], b[2])})
+        area = 0
+        for left, right in zip(xs, xs[1:]):
+            spans = sorted((b[1], b[3]) for b in boxes if b[0] < right and b[2] > left)
+            lo = hi = None
+            length = 0
+            for y0, y1 in spans:
+                if hi is None or y0 > hi:
+                    if hi is not None: length += hi-lo
+                    lo, hi = y0, y1
+                else: hi = max(hi, y1)
+            if hi is not None: length += hi-lo
+            area += (right-left)*length
+        return area/1e6
+    total = dedicated = furnished = 0
+    for floor in {r.get('floor', 1) for r in data.get('rooms', [])}:
+        rooms = [r for r in data['rooms'] if r.get('floor', 1) == floor and r.get('n') != 'PS']
+        box = lambda r: (r['x'], r['y'], r['x']+r['w'], r['y']+r['d'])
+        total += union_area([box(r) for r in rooms])
+        storage = [box(r) for r in rooms if any(n in r.get('n', '') for n in names)]
+        dedicated += union_area(storage)
+        for it in data.get('items', []):
+            t = it.get('type', '')
+            if it.get('floor', 1) != floor or (it.get('elev') or 0) > 100:
+                continue
+            if not (t.startswith('fmp-Closet') or t.startswith('im0261-Cabinet-') or t in ('original-wardrobe', 'original-sideboard', 'original-shoe-bridge', 'original-shoe-counter', 'original-shoe-tall')):
+                continue
+            if (it.get('rot') or 0) % 90: continue
+            b = aabb(it)
+            for r in rooms:
+                if any(n in r.get('n', '') for n in ('キッチン', '浴室', '洗面', 'トイレ')):
+                    continue
+                rb = box(r)
+                clipped = (max(b[0], rb[0]), max(b[1], rb[1]), min(b[2], rb[2]), min(b[3], rb[3]))
+                if clipped[0] < clipped[2] and clipped[1] < clipped[3]: storage.append(clipped)
+        furnished += union_area(storage)
+    return total, dedicated, furnished-dedicated
+
+
+def check18_storage_ratio(data):
+    """収納室と実在する床置き収納の投影面積を重複なく数える。"""
+    total, dedicated, furniture = storage_areas(data)
+    store = dedicated + furniture
+    if total > 0 and store/total < .10:
+        return ['収納率 %.1f%% (収納室 %.1f㎡ + 家具 %.1f㎡ / 延床 %.1f㎡)。'
+                '目安10〜13%%に届いていない' % (store/total*100, dedicated, furniture, total)]
+    return []
 
 
 def check19_reachability(data):
@@ -1170,7 +1208,7 @@ def check23_kitchen_aisle(data):
     「調理側に1000mm立てるか」を見る。
     """
     out = []
-    CELL, CLEAR = 100.0, 1000.0
+    CELL, CLEAR = 25.0, 1000.0
     pad = CLEAR / 2.0
     for r in data.get('rooms', []):
         if 'キッチン' not in (r.get('n') or ''):
@@ -1196,7 +1234,7 @@ def check23_kitchen_aisle(data):
                     free += 1
                 py += CELL
             px += CELL
-        if free < 3:
+        if free * CELL * CELL < 30000:
             out.append('[%dF] 部屋「%s」に有効幅%.0fmmの立ち位置が取れていない'
                        % (floor, (r.get('n') or '').strip(), CLEAR))
     return out
@@ -1321,7 +1359,7 @@ def check26_storage_facing(data, root=None):
     out = []
     root = root or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
     cat = _load_catalog(root) or {}
-    KEYS = ('Cabinet', 'CABINET', 'Shelf', 'Closet', 'Drawer', 'shelf', 'cabinet')
+    KEYS = ('Cabinet', 'CABINET', 'Shelf', 'Closet', 'Drawer', 'shelf', 'cabinet', 'original-wardrobe', 'original-sideboard', 'original-shoe-bridge', 'original-shoe-counter', 'original-shoe-tall')
     for it in data['items']:
         t = it.get('type', '')
         if not any(k in t for k in KEYS):
@@ -1337,7 +1375,8 @@ def check26_storage_facing(data, root=None):
         (ux, uy), (vx, vy) = axes(it)
         # rot=0 は正面が北(-y)。ローカル -v 方向が正面
         need = 600.0
-        fx, fy = cx - vx * (it['d'] / 2.0 + need / 2.0), cy - vy * (it['d'] / 2.0 + need / 2.0)
+        front_x, front_y = _front_dir(it)
+        fx, fy = cx + front_x * (it['d'] / 2.0 + need / 2.0), cy + front_y * (it['d'] / 2.0 + need / 2.0)
         rect = {'x': fx - it['w'] / 2.0, 'y': fy - need / 2.0, 'w': it['w'], 'd': need,
                 'rot': it.get('rot', 0)}
         box = aabb(rect)
@@ -1501,7 +1540,10 @@ WALL_BACKED_TYPES = (
 
 def _front_dir(it):
     """正面の向き(単位ベクトル)。rot=0 は北(-y)。"""
-    th = math.radians(it.get('rot', 0) or 0)
+    # The Unity washer's configured pi rotation leaves its control panel at +Z.
+    canonical = it.get('type') == 'washer' or it.get('modelFrontAxis') == '+Z' or (
+        it.get('modelFacingVersion') == 1 and it.get('type', '').startswith(('fmp-', 'original-', 'im0261-')))
+    th = math.radians((it.get('rot', 0) or 0) + (180 if canonical else 0))
     return (math.sin(th), -math.cos(th))
 
 
@@ -1666,7 +1708,7 @@ def ceiling_finish_mm(data, floor, cx, cy):
             to = c.get('toFloor')
             to = int(to) if isinstance(to, (int, float)) else floor + 1
             h = (max(floor + 1, to) - floor + 1) * float(FLOOR_H_MM)
-    return h - slab - CEILING_FINISH_MM
+    return h - slab - CEILING_FINISH_MM - (r.get("floorRaiseMm", 0) if r else 0)
 
 
 # 天井に固定する器具。値は「取付面(elev)からモデル上端までの高さ(mm)」。
@@ -1676,6 +1718,7 @@ CEILING_FIXTURES = {
     'light-down': 0.0,
     'light-spot': 0.0,
     'fmp-CeilingFan01': 350.0,
+    'original-laundry-rail': 500.0,
 }
 
 
@@ -1723,8 +1766,7 @@ LIVING_ROOMS = ('LDK', 'リビング', 'ダイニング', '主寝室', '寝室',
 
 def _fwd(it):
     """正面の向き(単位ベクトル)。rot=0 は北(-y)。"""
-    r = math.radians(it.get('rot', 0) or 0)
-    return (math.sin(r), -math.cos(r))
+    return _front_dir(it)
 
 
 def check34_entry_sightline(data):
@@ -1826,12 +1868,21 @@ def check36_work_triangle(data):
     by_floor = {}
     for it in data['items']:
         for role, frag in KEYS.items():
-            if frag in it.get('type', ''):
+            if frag in it.get('type', '') or it.get('kitchenRole') == role:
                 by_floor.setdefault(it.get('floor', 1), {}).setdefault(role, []).append(it)
     for floor, roles in sorted(by_floor.items()):
         if len(roles) < 3:
             continue
-        pts = {k: center(v[0]) for k, v in roles.items()}
+        pts = {}
+        for k, v in roles.items():
+            it = v[0]
+            cx, cy = center(it)
+            point = it.get('kitchenWorkPoint') or {}
+            x, y = point.get('x', 0), point.get('y', 0)
+            if it.get('flipX'): x = -x
+            if it.get('flipY'): y = -y
+            angle = math.radians(it.get('rot', 0))
+            pts[k] = (cx+x*math.cos(angle)-y*math.sin(angle), cy+x*math.sin(angle)+y*math.cos(angle))
         per = 0.0
         legs = []
         keys = list(pts)

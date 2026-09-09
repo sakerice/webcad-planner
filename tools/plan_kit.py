@@ -172,7 +172,7 @@ class Plan(object):
             return 90 if ix > 0 else -90
         return 180 if iy > 0 else 0
 
-    def dress(self, w, kind="curtain", color=None):
+    def dress(self, w, kind="curtain", color=None, opened=False):
         """窓 w にカーテン(またはロールスクリーン)を吊る。
 
         kind="curtain" は900mm幅の片開きを、窓幅を覆う枚数だけ並べる。
@@ -191,6 +191,8 @@ class Plan(object):
             # 裾は窓台の300mm下まで。それ以上下げるとカウンター(天板850)や
             # 洗面台に刺さる
             mid = row[1] if self.catalog[row[1]][2] <= top + 400 - sill else row[2]
+            if opened:
+                mid = "original-roller-open-%d" % row[0]
             dw, dd, dh = self.catalog[mid]
             off = w["d"] / 2.0 + dd / 2.0 + 5
             # 裾は窓台の20mm下まで。それ以上下げるとカウンター(天板850)や
@@ -201,6 +203,9 @@ class Plan(object):
             out.append(self.items[-1])
             return out
         mid = self.CURTAIN_SHORT if sill > 0 else self.CURTAIN_LONG
+        if opened:
+            width = 1300 if w["w"] > 1800 else 900
+            mid = "original-curtain-open-%d-%s" % (width, "short" if sill > 0 else "long")
         dw, dd, dh = self.catalog[mid]
         # 窓幅を覆う最小の枚数。lint は「合計幅 >= 窓幅」を要求する
         n = max(1, int(math.ceil((w["w"] - 20) / float(dw))))
@@ -211,7 +216,8 @@ class Plan(object):
         for i in range(n):
             t = (i - (n - 1) / 2.0) * dw
             self.item(mid, cx + ux * t + ix * off, cy + uy * t + iy * off,
-                      dw, dd, floor, rot=rot, color=color, elev=elev)
+                      dw, dd, floor, rot=rot, color=color, elev=elev,
+                      flipX=(opened and n > 1 and (i == (0 if rot in (0, 90) else n-1))))
             out.append(self.items[-1])
         return out
 
@@ -253,6 +259,7 @@ class Plan(object):
         """
         slab = 0 if floor <= 1 else SLAB_MM
         h = FLOOR_H_MM
+        floor_raise = 0
         for r in self.rooms:
             if r["floor"] != floor:
                 continue
@@ -260,11 +267,12 @@ class Plan(object):
                     and r["y"] <= cy <= r["y"] + r["d"]):
                 continue
             c = r.get("ceiling") or {}
+            floor_raise = r.get("floorRaiseMm", 0)
             if c.get("type") == "void":
                 to = max(floor + 1, int(c.get("toFloor") or floor + 1))
                 h = (to - floor + 1) * FLOOR_H_MM
             break
-        return h - slab - CEILING_FINISH_MM
+        return h - slab - CEILING_FINISH_MM - floor_raise
 
     def ceiling_mounted(self, t, cx, cy, floor, **kw):
         """天井に付ける器具(モデル)を、上端が天井面に来る高さで置く。
@@ -314,3 +322,18 @@ def finish_cascade(base_color, base_texture, floors=(1, 2, 3, 4), walls=None):
             "floors": {str(f): dict(one, linked=False) for f in floors},
             "walls": walls or {},
             "faces": {}}
+
+
+def orient_catalog_furniture(items):
+    """Convert design-facing angles to the selected assets' native +Z fronts.
+
+    The im0261 collection's cabinet doors, TV screens and mirror faces point +Z;
+    the original collection uses the documented +Z contract as well. The older
+    FMP collection uses -Z after runtime normalization. The custom wall AC
+    and exterior AC unit use +Z. Apply only while generating a new preset: existing
+    saved/imported user placements must never be migrated implicitly.
+    """
+    for it in items:
+        if it['type'].startswith(('im0261-', 'original-')) or it['type'] in ('fmp-AirConditionerWall01', 'ac-outdoor'):
+            it['rot'] = (it.get('rot', 0) + 180) % 360
+            it['modelFrontAxis'] = '+Z'
