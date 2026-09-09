@@ -1,0 +1,1692 @@
+{
+  "collections": {
+    "walls": [],
+    "rooms": [],
+    "items": [
+      {
+        "before": {
+          "id": 1131,
+          "type": "lattice-screen",
+          "x": 6.394884621840902e-14,
+          "y": -1370,
+          "w": 3500,
+          "d": 60,
+          "rot": 0,
+          "floor": 1,
+          "flipX": false,
+          "flipY": false,
+          "sScale": 1,
+          "sX": 0,
+          "sY": 0,
+          "color": "#222222",
+          "colorCustom": true,
+          "latticeHeight": 1800,
+          "fencePattern": "vertical",
+          "fenceTopStyle": "even",
+          "elev": 0
+        },
+        "after": null
+      }
+    ]
+  },
+  "metadata": {
+    "floorMetadata": {
+      "1": {
+        "role": "residential",
+        "occupiable": true
+      },
+      "2": {
+        "role": "residential",
+        "occupiable": true
+      },
+      "3": {
+        "role": "roof",
+        "occupiable": false
+      }
+    },
+    "exteriorWallSettings": {
+      "whole": {
+        "linked": false,
+        "color": "#F2F0EB",
+        "texture": "plaster_white",
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "floors": {
+        "1": {
+          "linked": false,
+          "color": "#F2F0EB",
+          "texture": "plaster_white",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "2": {
+          "linked": false,
+          "color": "#F2F0EB",
+          "texture": "plaster_white",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "3": {
+          "linked": false,
+          "color": "#F2F0EB",
+          "texture": "plaster_white",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "4": {
+          "linked": false,
+          "color": "#F2F0EB",
+          "texture": "plaster_white",
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      },
+      "walls": {
+        "1002": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1003": {
+          "color": "#3A3D40",
+          "texture": "galvalume_dark",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1004": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1005": {
+          "color": "#3A3D40",
+          "texture": "galvalume_dark",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1006": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1058": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1059": {
+          "color": "#3A3D40",
+          "texture": "galvalume_dark",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1060": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1061": {
+          "color": "#3A3D40",
+          "texture": "galvalume_dark",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1062": {
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      },
+      "faces": {
+        "1003_-1_0_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      }
+    },
+    "interiorWallSettings": {
+      "whole": {
+        "linked": false,
+        "color": "#EFEDE7",
+        "texture": "wall_int",
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "floors": {
+        "1": {
+          "linked": false,
+          "color": "#EFEDE7",
+          "texture": "wall_int",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "2": {
+          "linked": false,
+          "color": "#EFEDE7",
+          "texture": "wall_int",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "3": {
+          "linked": false,
+          "color": "#EFEDE7",
+          "texture": "wall_int",
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "4": {
+          "linked": false,
+          "color": "#EFEDE7",
+          "texture": "wall_int",
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      },
+      "faces": {
+        "1002_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1002_1_1820_3340": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1002_1_3340_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1002_1_7280_8190": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1003_1_0_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1004_-1_0_6370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1005_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1006_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1006_1_3640_5460": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1006_1_5460_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1007_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1007_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1008_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1008_-1_1820_3340": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1008_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1008_1_1820_3340": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1009_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1009_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1009_1_1820_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1010_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1010_-1_1820_3340": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1010_1_0_3340": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1011_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1011_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1012_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1012_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4550": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_1820_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4550": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1015_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1015_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1016_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1016_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1021_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1021_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1058_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1058_1_3640_6370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1058_1_6370_8190": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1059_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1059_1_3640_4550": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1059_1_4550_5460": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1059_1_5460_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1060_-1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1060_-1_3640_6370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1061_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1061_-1_910_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1062_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1062_1_3640_4550": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1062_1_4550_7280": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1063_-1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1063_1_0_6370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1063_-1_3640_6370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1064_-1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1064_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1065_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1065_1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1066_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1066_1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1067_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1067_1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1068_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1068_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1068_-1_1820_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1069_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1069_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1070_-1_0_2730": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1070_-1_2730_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1070_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1071_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1071_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1072_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1072_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1073_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1073_1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1074_-1_0_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1074_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1074_1_910_1820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1075_-1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1075_1_0_910": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_2830": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_2830": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_2850": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_2850": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_2900": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_2900": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_2970": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_2970": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3000": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3000": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3070": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3070": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3130": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3130": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3160": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3160": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3180": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3180": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3230": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3230": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3270": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3270": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3330": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3330": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3370": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3400": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3400": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3430": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3430": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3460": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3460": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3480": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3480": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3490": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3490": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3500": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3500": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3580": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3580": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_-1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1013_1_0_3640": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4530": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4530": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4520": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4520": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4470": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4470": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4400": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4400": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4360": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4360": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4290": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4290": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4220": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4220": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4190": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4190": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4130": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4130": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4070": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4070": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4050": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4050": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_4010": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_4010": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3990": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3990": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3980": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3980": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3950": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3950": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3890": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3890": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3840": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3840": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3820": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3800": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3800": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3790": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3790": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3780": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3780": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_-1_0_3700": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "1014_1_3640_3700": {
+          "mode": "inherit",
+          "color": null,
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      }
+    },
+    "roofAppearance": {
+      "whole": {
+        "linked": true,
+        "color": "#2B2B2B",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "floors": {
+        "1": {
+          "linked": false,
+          "color": "#2a2a30",
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "2": {
+          "linked": false,
+          "color": "#2a2a30",
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "3": {
+          "linked": false,
+          "color": "#2a2a30",
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        },
+        "4": {
+          "linked": false,
+          "color": "#2a2a30",
+          "texture": null,
+          "textureFlipX": false,
+          "textureFlipY": false
+        }
+      }
+    },
+    "planFixes": {
+      "ceilingFixtureElev": 1
+    },
+    "exteriorDetail": {
+      "gutters": true,
+      "gutterColor": "#2B2B2B"
+    },
+    "viewState": {
+      "twoD": {
+        "zoom": 1.69638210394515,
+        "panX": 302.79262304067794,
+        "panY": 303.5819199614909
+      },
+      "ext": {
+        "pos": [
+          11.996339885852468,
+          27.515667531676648,
+          36.246716972959064
+        ],
+        "target": [
+          5.280000000000001,
+          4.522999826818705,
+          4.9200000476837165
+        ]
+      },
+      "int": {
+        "pos": [
+          1.0559459416193988,
+          14.432254854385869,
+          11.89742159316192
+        ],
+        "target": [
+          4.095,
+          0.4500000000000001,
+          3.04
+        ]
+      }
+    }
+  },
+  "order": {
+    "walls": [
+      1002,
+      1003,
+      1004,
+      1005,
+      1006,
+      1007,
+      1008,
+      1009,
+      1010,
+      1011,
+      1012,
+      1013,
+      1014,
+      1015,
+      1016,
+      1021,
+      1058,
+      1059,
+      1060,
+      1061,
+      1062,
+      1063,
+      1064,
+      1065,
+      1066,
+      1067,
+      1068,
+      1069,
+      1070,
+      1071,
+      1072,
+      1073,
+      1074,
+      1075
+    ],
+    "rooms": [
+      "r1017",
+      "r1018",
+      "r1019",
+      "r1020",
+      "r1023",
+      "r1024",
+      "r1025",
+      "r1026",
+      "r1027",
+      "r1028",
+      "r1030",
+      "r1031",
+      "r1076",
+      "r1077",
+      "r1078",
+      "r1079",
+      "r1080",
+      "r1081",
+      "r1082",
+      "r1083",
+      "rm1239",
+      "rm1242"
+    ],
+    "items": [
+      1001,
+      1056,
+      1022,
+      1032,
+      1033,
+      1034,
+      1035,
+      1036,
+      1037,
+      1038,
+      1039,
+      1040,
+      1041,
+      1042,
+      1043,
+      1044,
+      1046,
+      1047,
+      1048,
+      1049,
+      1050,
+      1051,
+      1052,
+      1053,
+      1054,
+      1055,
+      1057,
+      1084,
+      1085,
+      1086,
+      1087,
+      1088,
+      1089,
+      1090,
+      1091,
+      1092,
+      1093,
+      1094,
+      1095,
+      1096,
+      1097,
+      1098,
+      1099,
+      1100,
+      1101,
+      1103,
+      1104,
+      1105,
+      1106,
+      1109,
+      1110,
+      1111,
+      1112,
+      1113,
+      1114,
+      1115,
+      1116,
+      1117,
+      1118,
+      1119,
+      1120,
+      1121,
+      1122,
+      1123,
+      1124,
+      1125,
+      1126,
+      1127,
+      1128,
+      1129,
+      1130,
+      1132,
+      1133,
+      1134,
+      1135,
+      1136,
+      1137,
+      1138,
+      1139,
+      1140,
+      1141,
+      1142,
+      1143,
+      1144,
+      1145,
+      1146,
+      1147,
+      1148,
+      1149,
+      1150,
+      1151,
+      1152,
+      1153,
+      1155,
+      1156,
+      1157,
+      1158,
+      1159,
+      1160,
+      1161,
+      1162,
+      1163,
+      1164,
+      1165,
+      1166,
+      1167,
+      1168,
+      1169,
+      1170,
+      1171,
+      1172,
+      1173,
+      1174,
+      1175,
+      1176,
+      1177,
+      1178,
+      1179,
+      1181,
+      1182,
+      1183,
+      1184,
+      1185,
+      1186,
+      1187,
+      1188,
+      1189,
+      1190,
+      1191,
+      1192,
+      1193,
+      1196,
+      1197,
+      1198,
+      1199,
+      1200,
+      1201,
+      1202,
+      1203,
+      1204,
+      1205,
+      1206,
+      1207,
+      1208,
+      1209,
+      1210,
+      1211,
+      1212,
+      1213,
+      1214,
+      1215,
+      1216,
+      1217,
+      1218,
+      1219,
+      1220,
+      1221,
+      1222,
+      1223,
+      1224,
+      1225,
+      1226,
+      1227,
+      1228,
+      1229,
+      1230,
+      1231,
+      1233,
+      1234,
+      1235,
+      1236,
+      1237,
+      1238,
+      1240,
+      1241,
+      1243
+    ]
+  }
+}

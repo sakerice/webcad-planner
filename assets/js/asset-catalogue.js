@@ -11,54 +11,55 @@
     var w=Math.round(Number(item.w)),d=Math.round(Number(item.d));
     return Number.isFinite(w)&&Number.isFinite(d)&&w>0&&d>0 ? '幅 '+w+' × 奥行 '+d+' mm' : '';
   }
-  function install(mount,group){
-    var bar=document.createElement('div');bar.className='catalogue-search';
-    var label=document.createElement('label');label.textContent=group+'の一覧を絞り込む';
-    var input=document.createElement('input');input.type='search';input.placeholder='例：ベッド、ソファ、Bed01';
-    input.autocomplete='off';input.id=mount.id+'-search';label.htmlFor=input.id;
+  function installGlobal(sidebar){
+    if(!sidebar) return;
+    if(sidebar._globalCatalogueSearch){sidebar._globalCatalogueSearch();return;}
+    var bar=document.createElement('div');bar.className='catalogue-search';bar.id='object-search';
+    var label=document.createElement('label');label.textContent='すべてのオブジェクトを検索';
+    var field=document.createElement('div');field.className='catalogue-search-field';
+    var input=document.createElement('input');input.type='search';input.placeholder='名前・種類で検索';
+    input.autocomplete='off';input.id='object-search-input';label.htmlFor=input.id;
+    var clear=document.createElement('button');clear.type='button';clear.className='catalogue-search-clear';clear.textContent='×';clear.setAttribute('aria-label','検索をクリア');clear.hidden=true;
+    field.append(input,clear);
     var count=document.createElement('div');count.className='catalogue-count';count.setAttribute('role','status');
-    bar.append(label,input,count);mount.prepend(bar);
-    var sidebar=mount.closest('#sidebar'),common=sidebar&&sidebar.querySelector('.common-tools');
-    if(sidebar&&common&&!sidebar._catalogueResizeObserver){
-      var syncPadding=function(){sidebar.style.setProperty('--catalogue-common-height',common.offsetHeight+'px');};
-      syncPadding();
-      if(typeof ResizeObserver!=='undefined'){
-        sidebar._catalogueResizeObserver=new ResizeObserver(syncPadding);
-        sidebar._catalogueResizeObserver.observe(common);
-      }
-    }
-    function revealSearch(){
-      if(!sidebar||!common||document.activeElement!==input) return;
-      var top=input.getBoundingClientRect().top,limit=common.getBoundingClientRect().bottom+12;
-      if(top<limit) sidebar.scrollTop-=limit-top;
-    }
-    input.addEventListener('focus',function(){requestAnimationFrame(revealSearch);});
-    var cats=Array.from(mount.querySelectorAll('.asset-subcat'));
-    var cards=Array.from(mount.querySelectorAll('.asset-tile'));
-    var saved=null;
-    count.textContent=cards.length+' 点から選べます';
-    input.addEventListener('input',function(){
-      var query=normalize(input.value),total=0;
-      if(query && !saved) saved=cats.map(function(cat){return cat.classList.contains('open');});
-      cats.forEach(function(cat,index){
-        var found=0;
-        cat.querySelectorAll('.asset-tile').forEach(function(card){
-          var visible=matches(card.getAttribute('data-search'),query);
-          card.hidden=!visible;if(visible) found++;
-        });
-        cat.hidden=found===0;
-        if(query) cat.classList.toggle('open',found>0);
-        else if(saved) cat.classList.toggle('open',saved[index]);
-        var arrow=cat.querySelector('.asset-arrow');
-        if(arrow) arrow.textContent=cat.classList.contains('open')?'-':'+';
-        total+=found;
+    var results=document.createElement('div');results.id='object-search-results';results.hidden=true;
+    input.setAttribute('aria-controls',results.id);
+    bar.append(label,field,count);sidebar.querySelector('.common-tools').after(bar);bar.after(results);
+    function entries(){
+      var seen=new Set(),out=[];
+      sidebar.querySelectorAll('.cat-body [data-tool]').forEach(function(card){
+        var tool=card.getAttribute('data-tool');if(!tool||seen.has(tool))return;seen.add(tool);
+        var body=card.closest('.cat-body'),header=body&&body.previousElementSibling;
+        var group=header?header.textContent.replace(/[+−-]/g,'').trim():'';
+        var sub=card.closest('.asset-subcat'),subhead=sub&&sub.querySelector('.asset-subhdr');
+        var text=[group,subhead&&subhead.textContent,card.getAttribute('data-search'),card.getAttribute('title'),card.textContent,tool].join(' ');
+        out.push({card:card,group:group,text:text});
       });
-      count.textContent=query ? (total?total+' 点見つかりました':'該当するアイテムはありません。名前や種類を変えて検索してください。') : cards.length+' 点から選べます';
-      if(!query) saved=null;
-      requestAnimationFrame(revealSearch);
-      if(typeof root.hideAssetPreview==='function') root.hideAssetPreview();
-    });
+      return out;
+    }
+    function update(){
+      var query=normalize(input.value),all=entries(),found=query?all.filter(function(e){return matches(e.text,query);}):[];
+      sidebar.classList.toggle('catalogue-searching',!!query);results.hidden=!query;clear.hidden=!query;
+      results.replaceChildren();
+      count.textContent=query?(found.length?found.length+' 点見つかりました':'該当するオブジェクトはありません。名前や種類を変えて検索してください。'):all.length+' 点から検索できます';
+      var currentGroup=null,grid;
+      found.forEach(function(entry){
+        if(entry.group!==currentGroup){
+          currentGroup=entry.group;var heading=document.createElement('div');heading.className='catalogue-result-heading';heading.textContent=currentGroup;results.append(heading);
+          grid=document.createElement('div');grid.className='catalogue-result-grid';results.append(grid);
+        }
+        var source=entry.card,button=document.createElement('button');button.type='button';button.className='catalogue-result '+source.className;
+        Array.from(source.attributes).forEach(function(a){if(a.name.indexOf('data-')===0||a.name==='title'||a.name.indexOf('onmouse')===0)button.setAttribute(a.name,a.value);});
+        button.innerHTML=source.innerHTML;
+        button.addEventListener('click',function(){source.click();});grid.append(button);
+      });
+      if(typeof root.hideAssetPreview==='function')root.hideAssetPreview();
+    }
+    input.addEventListener('input',update);
+    clear.addEventListener('click',function(){input.value='';update();input.focus();});
+    input.addEventListener('keydown',function(event){if(event.key==='Escape'){event.stopPropagation();input.value='';update();}});
+    sidebar._globalCatalogueSearch=update;update();
   }
-  var api={normalize:normalize,matches:matches,dimensions:dimensions,install:install};
+  var api={normalize:normalize,matches:matches,dimensions:dimensions,installGlobal:installGlobal};
   if(typeof module==='object'&&module.exports) module.exports=api;else root.AssetCatalogue=api;
 })(typeof window==='object'?window:globalThis);
