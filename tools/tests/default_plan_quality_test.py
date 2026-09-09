@@ -102,12 +102,13 @@ class StorageMeasurement(unittest.TestCase):
 
     def test_accepted_user_plan_keeps_documented_lint_findings_visible(self):
         # This is a delivery audit, not a claim that the user's layout passes.
-        # The remaining findings are design judgements in the user's layout
-        # (window heads, storage ratio, kitchen aisle, work triangle). The
-        # off-grid geometry that used to sit alongside them - 1, 6, 32, 41, 42 -
-        # was corrected by apply_joint_fixes; see that function for why.
+        # What is left on the two-storey plan is the user's own judgement:
+        # 17 window heads and 23 the kitchen aisle around their island.
+        # The off-grid geometry (1, 6, 32, 41, 42) went with apply_joint_fixes;
+        # the work triangle (36) with apply_kitchen_triangle and the storage
+        # ratio (18) with apply_bedroom_closet. See those functions for why.
         import subprocess, re
-        for filename, expected in [('default_plan.json', [17,18,23,36]),
+        for filename, expected in [('default_plan.json', [17,23]),
                                    ('default_plan_3f.json', [18])]:
             result = subprocess.run(['python3', str(ROOT/'tools/lint_plan.py'), str(ROOT/'assets'/filename)], capture_output=True, text=True, check=True)
             self.assertEqual([int(n) for n in re.findall(r'^== (\d+)\.', result.stdout, re.M)], expected)
@@ -131,20 +132,31 @@ class StorageMeasurement(unittest.TestCase):
             subprocess.run(['python3', str(ROOT/'tools/make_default_plan_2f.py'), str(out)], check=True)
             plan = json.loads(out.read_text())
         self.assertEqual(plan, json.loads((ROOT/'assets/default_plan.json').read_text()))
-        # The shipped plan is the received original plus exactly the three
-        # off-grid corrections in apply_joint_fixes - nothing else. Diff it
-        # against the kept original so any further drift shows up here.
+        # The shipped plan is the received original plus exactly the documented
+        # corrections - nothing else. Diff it against the kept original so any
+        # further drift shows up right here.
         received = json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-25.json').read_text())
-        changed = set()
+        changed, added, removed = set(), {}, {}
         for collection in ('walls', 'rooms', 'items'):
             before = {o['id']: o for o in received[collection]}
             after = {o['id']: o for o in plan[collection]}
-            self.assertEqual(before.keys(), after.keys(), collection)
-            for key in before:
+            added[collection] = after.keys() - before.keys()
+            removed[collection] = before.keys() - after.keys()
+            for key in before.keys() & after.keys():
                 if before[key] != after[key]:
                     changed.add((collection, key))
-        self.assertEqual(changed, {('walls', 1014), ('rooms', 'r1027'),
-                                   ('rooms', 'r1030'), ('items', 1243)})
+        self.assertEqual(changed, {
+            ('walls', 1014),                                 # joint fixes
+            ('rooms', 'r1027'), ('rooms', 'r1030'), ('items', 1243),
+            ('items', 1163), ('items', 1164), ('items', 1167),   # kitchen triangle
+            ('rooms', 'r1076'),                              # bedroom closet
+            ('items', 1183), ('items', 1184), ('items', 1185),
+            ('items', 1186), ('items', 1144), ('items', 1215),
+        })
+        self.assertEqual(added, {'walls': {1244}, 'rooms': {'rm1244'},
+                                 'items': {1245, 1246}})
+        self.assertEqual(removed, {'walls': set(), 'rooms': set(),
+                                   'items': {1187}})
         walls = {w['id']: w for w in plan['walls']}
         rooms = {r['id']: r for r in plan['rooms']}
         items = {i['id']: i for i in plan['items']}
@@ -153,6 +165,9 @@ class StorageMeasurement(unittest.TestCase):
         self.assertEqual(rooms['r1030']['y'], 3040)        # stair and hall no longer overlap
         self.assertEqual(items[1243]['x'] + items[1243]['w'] / 2, 6370)  # on wall 1013
         self.assertEqual(items[1243]['rot'], 90)
+        self.assertEqual(rooms['rm1244']['n'], 'クローゼット')   # built in, not a wardrobe
+        self.assertEqual((rooms['rm1244']['w'], rooms['rm1244']['d']), (910, 2730))
+        self.assertEqual(rooms['r1076']['w'], 2730)        # 洋室A keeps 4.5 mats
         for key in received:
             if key not in ('walls', 'rooms', 'items'):
                 self.assertEqual(received[key], plan[key], key)

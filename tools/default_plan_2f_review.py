@@ -95,3 +95,92 @@ def apply_joint_fixes(plan):
     door['x']=int(6370-half) if float(6370-half).is_integer() else 6370-half
     door['rot']=90
     return plan
+
+
+def apply_kitchen_triangle(plan):
+    """キッチンの作業三角形を縮める。家具は1つも動かさず、左右の向きだけ返す。
+
+    冷蔵庫が西端(x=3740)、IHが東端(x=6680)、シンクが島の東(x=5680)にあり、
+    三辺合計 7772mm(目安 3600〜6000)。作るたびにキッチンを端から端まで
+    歩かされる。
+
+    IHカウンター(2560)はモデルの+x端に、シンク島(2100)はモデルの-x端に
+    作業点がある。カウンターを左右反転してIHを西端へ、島の反転を解いて
+    シンクを西寄りへ持ってくると、冷蔵庫→シンク→IHが西側にまとまり、
+    シンクとIHが通路を挟んでほぼ正面で向き合う。三辺合計 5528mm。
+    どちらも位置・向き・寸法は変わらないので、通路幅も見た目の構成も動かない。
+    """
+    items={i['id']:i for i in plan['items']}
+    items[1164]['flipX']=True      # 壁付IHカウンター: IHを東端(6680)→西端(5180)へ
+    items[1163]['flipX']=False     # シンク島: シンクを東(5680)→西(4840)へ
+    # 電子レンジがIHの新しい位置(4880..5480)に重なる。カウンターの東側、
+    # 作業三角形の外にある空いた天板へ寄せる。
+    items[1167]['x']=6430
+    return plan
+
+
+def apply_bedroom_closet(plan):
+    """洋室Aの東側1列を造り付けのクローゼットにし、置き家具のワードローブを外す。
+
+    収納率が 8.6%(目安10〜13%)で、収納は各室の置き家具のワードローブ頼み
+    だった。棚を足すのではなく、いちばん広い洋室A(6.1畳)の東の910mm×2730を
+    収納にする。洋室Aは 2730×2730(4.5畳)になり、子ども室4.5畳＋1.5畳の
+    クローゼットという、置き家具に頼らない構成になる。床面積は減らない。
+
+    ここを選んだ理由:
+      - 主寝室は北の1列を空けても、ベッド(1600×2150)と東の既存クローゼットの
+        折れ戸の前600mmが両立しない。どう置いても戸の前が塞がる
+      - 洋室Bは4.6畳しかなく、910mm取ると3.5畳になって寝室として成立しない
+      - 洋室Aは6.1畳あり、ベッドと机を西へ寄せれば折れ戸の前を空けられる
+
+    ベッドは西壁につけ、机はその東隣(北窓の下)へ。エアコンと照明も新しい
+    部屋の中に収まるよう西へ寄せる。部屋の入口・窓は動かさない。
+    """
+    walls={w['id']:w for w in plan['walls']}
+    rooms={r['id']:r for r in plan['rooms']}
+    items={i['id']:i for i in plan['items']}
+
+    room=rooms['r1076']                              # 洋室A
+    north, south = room['y'], room['y']+room['d']    # -600..2130
+    east = room['x']+room['w']                       # 3640
+    SPLIT = east-910                                 # 2730。モジュール線の上
+
+    # 東の1列を収納にし、部屋はその西へ
+    room['w']=SPLIT-room['x']
+    plan['rooms'].append({'id':'rm1244','type':'room','x':SPLIT,'y':north,
+                          'w':east-SPLIT,'d':south-north,'floor':2,
+                          'n':'クローゼット','sScale':1,'sX':0,'sY':0,
+                          'texture':room.get('texture')})
+
+    # 間仕切り壁。仕上げは同じ階の間仕切り(1066)に合わせる
+    like=walls[1066]
+    plan['walls'].append({'id':1244,'x1':SPLIT,'y1':north,'x2':SPLIT,'y2':south,
+                          'floor':2,'thick':like.get('thick',120),
+                          'color':like.get('color'),'texture':like.get('texture'),
+                          'texScale':like.get('texScale',1),
+                          'interiorColor':like.get('interiorColor'),
+                          'interiorTexture':like.get('interiorTexture')})
+
+    # 折れ戸2枚。主寝室のクローゼット(1088/1240)と同じ作りで、部屋のある西向き。
+    # 机の前(y<100)を外して割り付ける。北端の700mmは戸を持たない袖壁になる
+    fold=items[1088]
+    for new_id, cy in ((1245, 490), (1246, 1390)):
+        leaf=dict(fold)
+        leaf.update(id=new_id, x=SPLIT-fold['w']/2.0, y=cy-fold['d']/2.0,
+                    floor=2)
+        plan['items'].append(leaf)
+
+    # 置き家具のワードローブは造り付けに置き換わるので外す
+    plan['items']=[i for i in plan['items'] if i['id']!=1187]
+
+    # ベッドを西壁へ寄せ、机・椅子をその東隣(北窓の下)へ。折れ戸の前600mmを
+    # 空けるため、家具はすべて間仕切りから600mm以上西に収める
+    items[1186]['x']=0                                    # ベッド(西壁づけ)
+    def put_x(item_id, left):
+        items[item_id]['x']=left
+    put_x(1183, 1112)                                     # 机(ベッドの東隣)
+    items[1184]['x']=1636-items[1184]['w']/2.0            # 椅子(机の正面)
+    items[1185]['x']=1112+1049-items[1185]['w']           # 机上のスタンド(東端)
+    items[1144]['x']=1600-items[1144]['w']/2.0            # 壁掛けエアコン
+    items[1215]['x']=1365-items[1215]['w']/2.0            # シーリングライト
+    return plan
