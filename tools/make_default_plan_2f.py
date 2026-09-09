@@ -1,3 +1,4 @@
+from pathlib import Path
 #!/usr/bin/env python3
 """13.25㎡のリビング吹抜と家事動線を中心にした2階建て・3LDKの既定プラン。
 
@@ -492,5 +493,13 @@ from default_plan_review import finish_raised_floors
 finish_raised_floors(plan)
 from default_plan_2f_review import apply_review_23
 apply_review_23(plan)
+# Review 24 is an exact user checkpoint; do not reapply layout corrections.
+from default_plan_review import apply_patch_file
+apply_patch_file(plan, "default_plan_2f_review_24.json")
+review24 = json.loads(Path(__file__).with_name("default_plan_2f_review_24.json").read_text())
+plan.update(review24["metadata"])
+for collection, order in review24["order"].items():
+    by_id = {obj["id"]: obj for obj in plan[collection]}
+    plan[collection] = [by_id[object_id] for object_id in order]
 with open(out, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=1)
