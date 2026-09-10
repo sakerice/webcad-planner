@@ -102,14 +102,15 @@ class StorageMeasurement(unittest.TestCase):
 
     def test_accepted_user_plan_keeps_documented_lint_findings_visible(self):
         # This is a delivery audit, not a claim that the user's layout passes.
-        # What is left on the two-storey plan is the user's own judgement:
-        # 17 window heads and 23 the kitchen aisle around their island.
-        # The off-grid geometry (1, 6, 32, 41, 42) went with apply_joint_fixes;
-        # the work triangle (36) with apply_kitchen_triangle and the storage
-        # ratio (18) with apply_bedroom_closet. See those functions for why.
+        # Every finding here is a deliberate choice in the accepted revisions
+        # (two-storey review 26, three-storey review 23): the arched opening
+        # and short kitchen wall the user added, the oversized extractor hood,
+        # the balcony fence ends they pulled out to close the outer corner, and
+        # the living-room furniture they moved so the room reads as lived-in.
+        # They are recorded, not hidden - shipping is not a claim they pass.
         import subprocess, re
-        for filename, expected in [('default_plan.json', [17,23]),
-                                   ('default_plan_3f.json', [18])]:
+        for filename, expected in [('default_plan.json', [1,11,17,23,32,41]),
+                                   ('default_plan_3f.json', [3,4,5,18,22,26,32])]:
             result = subprocess.run(['python3', str(ROOT/'tools/lint_plan.py'), str(ROOT/'assets'/filename)], capture_output=True, text=True, check=True)
             self.assertEqual([int(n) for n in re.findall(r'^== (\d+)\.', result.stdout, re.M)], expected)
 
@@ -132,10 +133,10 @@ class StorageMeasurement(unittest.TestCase):
             subprocess.run(['python3', str(ROOT/'tools/make_default_plan_2f.py'), str(out)], check=True)
             plan = json.loads(out.read_text())
         self.assertEqual(plan, json.loads((ROOT/'assets/default_plan.json').read_text()))
-        # The shipped plan is the received original plus exactly the documented
-        # corrections - nothing else. Diff it against the kept original so any
-        # further drift shows up right here.
-        received = json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-25.json').read_text())
+        # The shipped plan is the latest received revision (26) plus exactly the
+        # corrections we agreed - nothing else. Diff it against the kept original
+        # so any further drift shows up right here.
+        received = json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-26.json').read_text())
         changed, added, removed = set(), {}, {}
         for collection in ('walls', 'rooms', 'items'):
             before = {o['id']: o for o in received[collection]}
@@ -145,24 +146,25 @@ class StorageMeasurement(unittest.TestCase):
             for key in before.keys() & after.keys():
                 if before[key] != after[key]:
                     changed.add((collection, key))
-        self.assertEqual(changed, {
-            ('walls', 1014),                                 # joint fixes
-            ('rooms', 'r1027'), ('rooms', 'r1030'), ('items', 1243),
-            ('items', 1163), ('items', 1164), ('items', 1167),   # kitchen triangle
-            ('rooms', 'r1076'),                              # bedroom closet
-            ('items', 1183), ('items', 1184), ('items', 1185),
-            ('items', 1186), ('items', 1144), ('items', 1215),
-        })
-        self.assertEqual(added, {'walls': {1244}, 'rooms': {'rm1244'},
-                                 'items': {1245, 1246}})
-        self.assertEqual(removed, {'walls': set(), 'rooms': set(),
-                                   'items': {1187}})
+        # Only the microwave, which the user asked to put back on its catalogue
+        # size after resizing it by accident. Everything else in revision 26 is
+        # deliberate and ships untouched.
+        self.assertEqual(changed, {('items', 1167)})
+        self.assertEqual(added, {'walls': set(), 'rooms': set(), 'items': set()})
+        self.assertEqual(removed, {'walls': set(), 'rooms': set(), 'items': set()})
+        items = {i['id']: i for i in plan['items']}
+        microwave = items[1167]
+        self.assertEqual((microwave['w'], microwave['d']), (340, 351))  # catalogue
+        was = {i['id']: i for i in received['items']}[1167]
+        self.assertEqual(microwave['x'] + microwave['w'] / 2,
+                         was['x'] + was['w'] / 2)          # kept where they put it
+        self.assertEqual(microwave['y'], was['y'])
+        # The corrections we made before revision 26 are still in the design.
         walls = {w['id']: w for w in plan['walls']}
         rooms = {r['id']: r for r in plan['rooms']}
-        items = {i['id']: i for i in plan['items']}
         self.assertEqual(walls[1014]['y2'], 3040)          # meets wall 1016's centre line
         self.assertEqual(rooms['r1027']['y'] + rooms['r1027']['d'], 3040)
-        self.assertEqual(rooms['r1030']['y'], 3040)        # stair and hall no longer overlap
+        self.assertEqual(rooms['r1030']['y'], 3040)        # stair and hall do not overlap
         self.assertEqual(items[1243]['x'] + items[1243]['w'] / 2, 6370)  # on wall 1013
         self.assertEqual(items[1243]['rot'], 90)
         self.assertEqual(rooms['rm1244']['n'], 'クローゼット')   # built in, not a wardrobe
@@ -171,12 +173,29 @@ class StorageMeasurement(unittest.TestCase):
         for key in received:
             if key not in ('walls', 'rooms', 'items'):
                 self.assertEqual(received[key], plan[key], key)
-        ids = {i['id']: i for i in plan['items']}
-        self.assertFalse({1102,1180,1194,1195} & ids.keys())
-        self.assertTrue({1228,1229,1230,1231,1233,1234,1235,1236,1237,1238,1240,1241} <= ids.keys())
-        self.assertEqual(ids[1178]['rot'], 180)
-        self.assertEqual(ids[1115]['latticeHeight'], 2400)
-        self.assertEqual(ids[1116]['latticeHeight'], 2400)
+        self.assertFalse({1102,1180,1194,1195} & items.keys())
+        self.assertTrue({1228,1229,1230,1231,1233,1234,1235,1236,1237,1238,1240,1241} <= items.keys())
+        self.assertEqual(items[1178]['rot'], 180)
+        self.assertEqual(items[1115]['latticeHeight'], 2400)
+        self.assertEqual(items[1116]['latticeHeight'], 2400)
+
+    def test_three_storey_ships_the_received_revision_unchanged(self):
+        import subprocess, tempfile
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d)/'plan.json'
+            subprocess.run(['python3', str(ROOT/'tools/make_default_plan_3f.py'), str(out)], check=True, capture_output=True)
+            plan = json.loads(out.read_text())
+        self.assertEqual(plan, json.loads((ROOT/'assets/default_plan_3f.json').read_text()))
+        received = json.loads((ROOT/'docs/quality-review/default-plans-release/user-plan-3f-23.json').read_text())
+        self.assertEqual(plan, received)   # nothing of ours on top of revision 23
+        # The balcony fence ends the user pulled out to close the outer corner.
+        # Keep them measurable here: the app does not extend fence walls at an
+        # outer corner the way it extends plain walls, so these 60mm are load
+        # bearing for the corner - see docs/quality-review/.../review.md.
+        walls = {w['id']: w for w in plan['walls']}
+        self.assertEqual((walls[1090]['x1'], walls[1090]['x2']), (-60, 3700))
+        self.assertEqual(walls[1091]['x1'], 0)     # side fences stay on axis
+        self.assertEqual(walls[1092]['x1'], 3640)
 
     def test_review23_parking_has_house_side_exit_without_expanding_parcel(self):
         plan = json.loads((ROOT/'tools/tests/fixtures/review23-house-2f.json').read_text())

@@ -515,5 +515,13 @@ apply_joint_fixes(plan)
 # 配置検査で残っていた指摘のうち、間取りとして直せるもの。
 apply_kitchen_triangle(plan)
 apply_bedroom_closet(plan)
+# 最新の受領版(review 26)。ここまでの生成結果を土台に、ユーザーの手直しを載せる。
+# 土台が変わると apply_patch_file が落ちるので、上の3つより後に置く。
+apply_patch_file(plan, "default_plan_2f_review_26.json")
+review26 = json.loads(Path(__file__).with_name("default_plan_2f_review_26.json").read_text())
+plan.update(review26["metadata"])
+for collection, order in review26["order"].items():
+    by_id = {obj["id"]: obj for obj in plan[collection]}
+    plan[collection] = [by_id[object_id] for object_id in order]
 with open(out, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=1)

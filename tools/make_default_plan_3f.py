@@ -510,6 +510,16 @@ from default_plan_review import apply_review
 plan = apply_review(plan)
 from default_plan_site import consolidate_site
 consolidate_site(plan)
+# 最新の受領版(review 23)。ここまでの生成結果を土台に、ユーザーの手直しを載せる。
+import json as _json
+from pathlib import Path as _Path
+from default_plan_review import apply_patch_file
+apply_patch_file(plan, "default_plan_3f_review_23.json")
+_review23 = _json.loads(_Path(__file__).with_name("default_plan_3f_review_23.json").read_text())
+plan.update(_review23["metadata"])
+for _collection, _order in _review23["order"].items():
+    _by_id = {obj["id"]: obj for obj in plan[_collection]}
+    plan[_collection] = [_by_id[_object_id] for _object_id in _order]
 with open(out, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=1)
 print("reviewed layout: %d items" % len(plan["items"]))
