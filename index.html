@@ -14724,6 +14724,14 @@ function buildWall3D(w){
   function addBalconyFencePiece(a,b){
     var segLen=b-a;
     if(segLen<0.03) return;
+    // 出隅の延長が通常壁の枝にしか入っておらず、フェンスは芯線の端で止まって
+    // いた。壁には厚みがあるので、直交する2枚を芯で突き合わせると外側の角に
+    // 「厚/2 × 厚/2」の四角い欠けが残る。編集中のスナップは芯どうしを合わせる
+    // ところまでしかしないので、埋めるのは描画側の仕事。バルコニーの角が
+    // ガタガタに見えるのはこれで、ユーザーが壁を手で伸ばして回避していた。
+    if(a<=0.002) a-=endExtA;
+    if(b>=len-0.002) b+=endExtB;
+    segLen=b-a;
     var mid=(a+b)/2;
     var KASA_H=0.045;
     // 手すりの高さ(バルコニー床天端から笠木下まで)。既定は建築基準法の下限1100mm
@@ -14953,6 +14961,10 @@ function buildWall3D(w){
     wallGroup.add(mesh);
   }
   function addLatticePiece(a,b,yBase,h){
+    // 格子もフェンスと同じで、芯線の端で止めると出隅に四角い欠けが残る。
+    // 縦格子は桟の割り付けを伸びた長さで決めるので、間隔もそのぶん変わる
+    if(a<=0.002) a-=endExtA;
+    if(b>=len-0.002) b+=endExtB;
     var segLen=b-a, barMat=extMat||mat;
     var depth=Math.max(0.035,w.thick*U);
     if(style==='vertical-lattice'){
