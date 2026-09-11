@@ -3950,7 +3950,9 @@ function syncHeightDefaultsUI(){
   var head='<div class="hd-head">'+(per?'<span class="hd-tag"></span>':'')+
     '<span class="hd-col">壁の高さ</span><span class="hd-col">床の高さ</span></div>';
   if(per){
-    body.innerHTML=head+HEIGHT_SETTING_FLOORS.map(function(f){return heightDefaultsRowHtml(f);}).join('');
+    // 上の行が上の階。キャンバスの3Dビューと上下がそろっていないと読み違える。
+    body.innerHTML=head+HEIGHT_SETTING_FLOORS.slice().reverse()
+      .map(function(f){return heightDefaultsRowHtml(f);}).join('');
   }else{
     body.innerHTML=head+heightDefaultsRowHtml(null);
   }
@@ -6374,7 +6376,7 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">テキスト</div><textarea class="pi note-textarea" oninput="updateSelectedNoteText(this.value)" onblur="finishSelectedNoteText()">'+escHtml(it.noteText||'')+'</textarea></div>';
     html += '<div class="pr"><div class="pl">背景色</div><input class="pi" type="color" value="'+(it.color||'#fff3a6')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += selectedModelFinishesHtml(it);
-  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+  html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -6386,7 +6388,7 @@ function updateProps(){
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">両端から測定対象へ垂直に伸びる補助線。負の値で反対側に伸びます</div>';
     html += '<div class="pr"><div class="pl">線の色</div><input class="pi" type="color" value="'+(it.color||'#2f80ed')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += selectedModelFinishesHtml(it);
-  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+  html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -6407,7 +6409,7 @@ function updateProps(){
       ? '<button class="pbtn" data-lock-control type="button" onclick="stopWalkthrough()">再生を停止</button>'
       : '<button class="pbtn" data-lock-control type="button" onclick="playSelectedWalkthroughRoute()">外観3Dで再生</button>';
     html += selectedModelFinishesHtml(it);
-  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+  html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -6483,7 +6485,7 @@ function updateProps(){
       }
     }
     html += selectedModelFinishesHtml(it);
-  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+  html += selectedDeleteButtonHtml();
     setPropsBodyHtml(body,html,it);
     return;
   }
@@ -6704,21 +6706,7 @@ function updateProps(){
     });
     html += '</select></div>';
     html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" value="'+Math.round(it.pitch||30)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
-    // L字・コの字の屋根: 矩形の屋根を複数選んで結合する
-    var roofPartsNow=roofParts(it);
-    var roofMergeN=roofMergeCandidateCount();
-    if(roofPartsNow){
-      html += '<div class="lock-status-note">矩形 '+roofPartsNow.length+' 枚を結合した屋根です。棟・谷・軒樋は結合後の外周から作られます。</div>';
-      html += '<button class="pbtn sec" onclick="splitSelectedRoof()">結合を解除</button>';
-    }
-    if(roofMergeN>0){
-      html += '<button class="pbtn sec" onclick="mergeSelectedRoofs()">選択中の屋根を結合 ('+(roofMergeN+1)+'枚)</button>';
-    }else if(!roofPartsNow){
-      html += '<div class="lock-status-note">L字・コの字の屋根: 屋根をもう1枚置いて Shift+クリック で選び、「選択中の屋根を結合」を押してください。（同じ階・同じ回転・同じ反転の屋根どうしが結合できます）</div>';
-    }
-    if(roofPartsNow&&(it.roofType==='hip-ridge'||it.roofType==='hip-ridge-long')){
-      html += '<div class="lock-status-note">結合した屋根では「大棟あり」の寄棟は寄棟（方形）として架かります。</div>';
-    }
+    html += roofMergeSectionHtml(it);
     var gm=it.gutterMode||'auto';
     html += '<div class="pr"><div class="pl">雨樋</div><select class="pi" onchange="updateSelectedProp(\'gutterMode\',this.value)">';
     html += '<option value="auto"'+(gm==='auto'?' selected':'')+'>自動 (軒樋+竪樋)</option>';
@@ -6786,7 +6774,7 @@ function updateProps(){
   }
   
   html += selectedModelFinishesHtml(it);
-  html += '<button class="pbtn sec" onclick="delSel()">この要素を削除</button>';
+  html += selectedDeleteButtonHtml();
   setPropsBodyHtml(body,html,it);
 }
 function makeBathroomDoorLeaf(w,h,d){
@@ -9886,7 +9874,7 @@ function hitHandle(it,mx,my){
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
 var _ray3d=null, _mouse3d=null, _pick3d={x:0,y:0,t:0};
-var GIZMO_DRAG={active:false,axis:null,ref:null,startX:0,startY:0,orig:null,saved:false};
+var GIZMO_DRAG={active:false,axis:null,ref:null,startX:0,startY:0,orig:null,group:null,saved:false};
 var isInt=false, iMov={}, _skyMesh=null, _gndMesh=null;
 var WALKTHROUGH=null;
 var _cutawayViewKey='';
@@ -12258,11 +12246,20 @@ function remove3DSelectionHelpers(){
     disposeObj(o);
   });
 }
+// 選択中のものすべてに枠を出す。「選択中」の札は主役(ST.selected)だけに付ける --
+// 全部に付けると札が重なって、何を掴んでいるのか却って読めなくなる。
 function add3DSelectionMarker(){
-  if(!sc3 || !ST.selected) return;
+  if(!sc3) return;
   if(WALKTHROUGH) return; // 再生中の視界に選択ボックスを出さない
-  if(ST.selected.type && !shouldRenderItemInCurrent3DView(ST.selected)) return;
-  var box=getSelectionBox3D(ST.selected);
+  var primary=ST.selected;
+  explicit2DSelection().forEach(function(obj){
+    add3DSelectionMarkerFor(obj,obj===primary);
+  });
+}
+function add3DSelectionMarkerFor(target,primary){
+  if(!sc3 || !target) return;
+  if(target.type && !shouldRenderItemInCurrent3DView(target)) return;
+  var box=getSelectionBox3D(target);
   if(box.isEmpty()) return;
   var size=box.getSize(new THREE.Vector3());
   var center=box.getCenter(new THREE.Vector3());
@@ -12309,6 +12306,7 @@ function add3DSelectionMarker(){
   ring.userData={b:true,selectionHelper:true};
   group.add(ring);
 
+  if(!primary){ sc3.add(group); return; }
   var labelCanvas=document.createElement('canvas');
   labelCanvas.width=192; labelCanvas.height=64;
   var lctx=labelCanvas.getContext('2d');
@@ -12418,7 +12416,20 @@ function start3DGizmoDrag(e){
   GIZMO_DRAG.startX=e.clientX;
   GIZMO_DRAG.startY=e.clientY;
   GIZMO_DRAG.orig=JSON.parse(JSON.stringify(ST.selected));
-  GIZMO_DRAG.partialRoots=capturePartial3DMove(ST.selected);
+  // 複数選択しているときはまとめて動かす。ロックされたもの・動かせないものは外す。
+  GIZMO_DRAG.group=explicit2DSelection().filter(function(o){
+    return o && canMoveRef3D(o) && !isObjectLocked(o);
+  }).map(function(o){ return {obj:o,orig:JSON.parse(JSON.stringify(o))}; });
+  if(!GIZMO_DRAG.group.length) GIZMO_DRAG.group=[{obj:ST.selected,orig:GIZMO_DRAG.orig}];
+  // 部分移動(シーンを組み直さずに枝だけ動かす)は全員ぶん取れたときだけ使う。
+  // 1つでも取れなければ、途中だけ動いた絵にしないため全体を組み直す。
+  var roots=[], partialOk=true;
+  GIZMO_DRAG.group.forEach(function(m){
+    var cap=capturePartial3DMove(m.obj);
+    if(!cap){ partialOk=false; return; }
+    roots=roots.concat(cap);
+  });
+  GIZMO_DRAG.partialRoots=partialOk?roots:null;
   GIZMO_DRAG.saved=false;
   if(orbit) orbit.enabled=false;
   return true;
@@ -12434,15 +12445,18 @@ function apply3DGizmoDrag(e){
   var deltaPx=(e.clientX-gd.startX)*basis.sx+(e.clientY-gd.startY)*basis.sy;
   var deltaM=deltaPx/basis.pxPerM;
   var deltaMm=deltaM/U;
-  if(gd.axis==='x'){
-    if(ref.x!==undefined) ref.x=gd.orig.x+deltaMm;
-    else {ref.x1=gd.orig.x1+deltaMm; ref.x2=gd.orig.x2+deltaMm;}
-  } else if(gd.axis==='z'){
-    if(ref.y!==undefined) ref.y=gd.orig.y+deltaMm;
-    else {ref.y1=gd.orig.y1+deltaMm; ref.y2=gd.orig.y2+deltaMm;}
-  } else if(gd.axis==='y' && canMoveRefVertically3D(ref)){
-    ref.elev=Math.max(-5000,Math.min(10000,(gd.orig.elev||0)+deltaMm));
-  }
+  (gd.group||[{obj:ref,orig:gd.orig}]).forEach(function(m){
+    var o=m.obj, og=m.orig;
+    if(gd.axis==='x'){
+      if(o.x!==undefined) o.x=og.x+deltaMm;
+      else {o.x1=og.x1+deltaMm; o.x2=og.x2+deltaMm;}
+    } else if(gd.axis==='z'){
+      if(o.y!==undefined) o.y=og.y+deltaMm;
+      else {o.y1=og.y1+deltaMm; o.y2=og.y2+deltaMm;}
+    } else if(gd.axis==='y' && canMoveRefVertically3D(o)){
+      o.elev=Math.max(-5000,Math.min(10000,(og.elev||0)+deltaMm));
+    }
+  });
   draw2d();
   updateProps();
   var dx=ref.x!==undefined?(ref.x-gd.orig.x)*U:0;
@@ -12457,6 +12471,7 @@ function finish3DGizmoDrag(){
   GIZMO_DRAG.axis=null;
   GIZMO_DRAG.ref=null;
   GIZMO_DRAG.orig=null;
+  GIZMO_DRAG.group=null;
   GIZMO_DRAG.partialRoots=null;
   if(orbit) orbit.enabled=true;
   draw2d();
@@ -12772,18 +12787,67 @@ function doorLeafFaceMaterials(mat,frontSign){
 // L字・コの字の屋根は「矩形の屋根を複数置いて結合する」。
 // 結合すると1つの屋根アイテム(it.parts)になり、外周・棟・谷・軒樋は
 // 結合後の多角形から作られる。
+// 結合できる/できないを **理由つき** で返す。理由を出さないと、屋根を2枚選んで
+// いるのにボタンが現れない理由が画面のどこにも無い(既定の間取りは屋根が2階と
+// 3階に分かれているので、まさにこれが起きる)。
 function roofMergeMembers(){
   var lead=ST.selected;
   if(!lead||lead.type!=='roof') return null;
-  var others=(ST.multiSelected||[]).filter(function(o){
-    return o&&o!==lead&&o.type==='roof'&&(o.floor||1)===(lead.floor||1)&&
-      (o.rot||0)===(lead.rot||0)&&!!o.flipX===!!lead.flipX&&!!o.flipY===!!lead.flipY;
+  var others=[], rejected=[];
+  (ST.multiSelected||[]).forEach(function(o){
+    if(!o||o===lead) return;
+    if(o.type!=='roof'){ rejected.push('屋根ではないものが選ばれています'); return; }
+    if((o.floor||1)!==(lead.floor||1)){
+      rejected.push('別の階('+(o.floor||1)+'F)の屋根が混ざっています。結合できるのは同じ階('+(lead.floor||1)+'F)の屋根どうしです');
+      return;
+    }
+    if((o.rot||0)!==(lead.rot||0)){
+      rejected.push('回転角が違います('+Math.round(o.rot||0)+'° と '+Math.round(lead.rot||0)+'°)。そろえてから結合してください');
+      return;
+    }
+    if(!!o.flipX!==!!lead.flipX||!!o.flipY!==!!lead.flipY){
+      rejected.push('反転(左右/上下)の設定が違います。そろえてから結合してください');
+      return;
+    }
+    others.push(o);
   });
-  return {lead:lead,others:others};
+  // 同じ理由は1回だけ出す
+  rejected=rejected.filter(function(r,i){return rejected.indexOf(r)===i;});
+  return {lead:lead,others:others,rejected:rejected};
 }
 function roofMergeCandidateCount(){
   var m=roofMergeMembers();
   return m?m.others.length:0;
+}
+// 屋根のプロパティ欄に必ず出す「結合」の節。
+// 結合できないときも節ごと消さない -- 消すと、やり方も、できない理由も、
+// 画面のどこにも残らない。
+function roofMergeSectionHtml(it){
+  var parts=roofParts(it);
+  var m=roofMergeMembers();
+  var others=m?m.others.length:0;
+  var rejected=(m&&m.rejected)||[];
+  var html='<div class="ph" style="margin-top:12px">屋根の結合（L字・コの字）</div>';
+  if(parts){
+    html+='<div class="lock-status-note">いま矩形 '+parts.length+' 枚を結合した屋根です。棟・谷・軒樋は結合後の外周から作られます。</div>';
+    html+='<button class="pbtn sec" onclick="splitSelectedRoof()">結合を解除</button>';
+  }
+  if(others>0){
+    html+='<button class="pbtn" onclick="mergeSelectedRoofs()">選択中の屋根を結合（'+(others+1)+'枚）</button>';
+  }else{
+    if(rejected.length){
+      html+='<div class="lock-status-note">いま選んでいる屋根どうしは結合できません。<br>・'+rejected.join('<br>・')+'</div>';
+    }
+    html+='<div class="lock-status-note"><b>やり方</b><br>'+
+      '1. 屋根ツールでもう1枚、同じ階に屋根を置く<br>'+
+      '2. 2枚とも選ぶ（PCは Shift+クリック / タブレットはサイドメニューの「複数選択」をONにしてタップ）<br>'+
+      '3. ここに出る「選択中の屋根を結合」を押す<br>'+
+      '結合できるのは<b>同じ階・同じ回転角・同じ反転</b>の屋根どうしです。</div>';
+  }
+  if(parts&&(it.roofType==='hip-ridge'||it.roofType==='hip-ridge-long')){
+    html+='<div class="lock-status-note">結合した屋根では「大棟あり」の寄棟は寄棟（方形）として架かります。</div>';
+  }
+  return html;
 }
 // ワールド中心(mm) → lead のローカル(mm, flip前)
 function roofWorldCenterToLocalMm(lead,wx,wy){
@@ -12952,11 +13016,25 @@ function handle3DPointerPick(e){
   }
   var previous=ST.selected;
   ST.selectAll=false;
-  ST.selected=ref;
+  // 3Dの選択はずっと ST.selected への代入だけで、複数選択の仕組みが入っていな
+  // かった(デスクトップのShift+クリックでも1つしか選べない)。平面図と同じ扱いに
+  // そろえる: Shiftキー、またはタッチの「複数選択」モードのあいだは足し引きする。
+  if(isMultiSelectModifier(e) && ref){
+    var list=explicit2DSelection();
+    var at=list.indexOf(ref);
+    if(at>=0) list.splice(at,1); else list.push(ref);
+    ST.selected=list.length?list[list.length-1]:null;
+    ST.multiSelected=list.slice(0,-1);
+  }else{
+    // 単独で選び直すときは、平面図で掴んでいた複数選択も必ず捨てる。
+    // 捨てないと、3Dのどこにも出ていない古い選択が残ったまま操作が効く。
+    clearMultiSelection();
+    ST.selected=ref;
+  }
   updateProps();
   draw2d();
   if(ren){
-    if(selectionNeedsFull3DRebuild(previous,ref)) rebuild3D();
+    if(selectionNeedsFull3DRebuild(previous,ST.selected)) rebuild3D();
     else refresh3DSelectionOnly();
   }
 }
@@ -22080,6 +22158,13 @@ function drawDim(){
   }
 }
 
+// 削除ボタンの文言。複数選択しているときに「この要素を削除」とだけ出ていると、
+// 何個消えるのか分からないまま押すことになる。
+function selectedDeleteButtonHtml(){
+  var n=explicit2DSelection().filter(function(o){return !isObjectLocked(o);}).length;
+  return '<button class="pbtn sec" onclick="delSel()">'+
+    (n>1?('選択中の'+n+'個を削除'):'この要素を削除')+'</button>';
+}
 function delSel(){
   if(!ST.selected && !ST.selectAll)return;
   if(WALKTHROUGH){
@@ -22101,13 +22186,17 @@ function delSel(){
     DATA.items=DATA.items.filter(function(i){return i.floor!==ST.floor || isObjectLocked(i);});
     ST.selectAll=false;
   } else {
-    var it=ST.selected;
-    if(isObjectLocked(it)){ updateProps(); draw2d(); return; }
+    // 複数選択しているときは掴んでいるもの全部を消す。以前は ST.selected の
+    // 1つだけを消していたので、3つ選んでも1つしか消えなかった。
+    var targets=explicit2DSelection().filter(function(o){return !isObjectLocked(o);});
+    if(!targets.length){ updateProps(); draw2d(); return; }
     saveState();
-    DATA.walls=DATA.walls.filter(function(w){return w!==it;});
-    DATA.rooms=DATA.rooms.filter(function(r){return r!==it;});
-    DATA.items=DATA.items.filter(function(i){return i!==it;});
+    var kept=function(o){ return targets.indexOf(o)<0; };
+    DATA.walls=DATA.walls.filter(kept);
+    DATA.rooms=DATA.rooms.filter(kept);
+    DATA.items=DATA.items.filter(kept);
     ST.selected=null;
+    clearMultiSelection();
   }
   syncExteriorWallSettings();
   updateProps();

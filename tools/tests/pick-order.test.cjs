@@ -221,6 +221,59 @@ test('「複数選択」は既定OFFの独立した切り替えで、モバイ�
   assert.match(html, /複数選択: OFF<\/button>/);
 });
 
+// ── 3Dビューでの複数選択 ──────────────────────────────────────────────
+// 3Dの選択は ST.selected への代入だけで、複数選択の仕組みが一度も入って
+// いなかった(デスクトップのShift+クリックでも1つしか選べない)。
+test('3Dの選択も複数選択の修飾を見る', () => {
+  const fn = topLevelFunction('handle3DPointerPick');
+  assert.match(fn, /isMultiSelectModifier\(e\)/);
+  assert.match(fn, /ST\.multiSelected=list\.slice\(0,-1\)/);
+  // 単独で選び直したら、平面図で掴んでいた選択は必ず捨てる
+  assert.match(fn, /clearMultiSelection\(\);\s*\n\s*ST\.selected=ref;/);
+});
+
+test('3Dの選択枠は選択中のすべてに出る（札は主役だけ）', () => {
+  const fn = topLevelFunction('add3DSelectionMarker');
+  assert.match(fn, /explicit2DSelection\(\)\.forEach/);
+  const one = topLevelFunction('add3DSelectionMarkerFor');
+  assert.match(one, /if\(!primary\)\{ sc3\.add\(group\); return; \}/);
+});
+
+test('3Dの移動ギズモは選択中をまとめて動かす', () => {
+  const start = topLevelFunction('start3DGizmoDrag');
+  assert.match(start, /GIZMO_DRAG\.group=explicit2DSelection\(\)/);
+  // 部分移動は全員ぶん取れたときだけ。1つでも取れなければ組み直す
+  assert.match(start, /partialOk\?roots:null/);
+  const apply = topLevelFunction('apply3DGizmoDrag');
+  assert.match(apply, /\(gd\.group\|\|\[\{obj:ref,orig:gd\.orig\}\]\)\.forEach/);
+});
+
+test('削除は選択中すべてに効く（1つしか消えなかった）', () => {
+  const fn = topLevelFunction('delSel');
+  assert.match(fn, /var targets=explicit2DSelection\(\)/);
+  assert.match(fn, /DATA\.walls=DATA\.walls\.filter\(kept\)/);
+  const label = topLevelFunction('selectedDeleteButtonHtml');
+  assert.match(label, /選択中の'\+n\+'個を削除/);
+});
+
+// ── 屋根の結合が「なぜできないか」を言う ──────────────────────────────
+test('結合できない屋根を選んだら理由を出す（既定プランは屋根が2階と3階に分かれている）', () => {
+  const fn = topLevelFunction('roofMergeMembers');
+  assert.match(fn, /rejected/);
+  assert.match(fn, /別の階/);
+  assert.match(fn, /回転角が違います/);
+  const section = topLevelFunction('roofMergeSectionHtml');
+  // 結合できないときも節ごと消さない(やり方が画面から消えてしまう)
+  assert.match(section, /やり方/);
+  assert.match(section, /複数選択/);
+  assert.doesNotMatch(section, /return '';/);
+});
+
+test('階ごとの高さは上の行が上の階（3Dビューと上下をそろえる）', () => {
+  const fn = topLevelFunction('syncHeightDefaultsUI');
+  assert.match(fn, /HEIGHT_SETTING_FLOORS\.slice\(\)\.reverse\(\)/);
+});
+
 test('操作ガイドはクリックを通す（平面図の左上が永久に選べなくなっていた）', () => {
   const m = html.match(/#help-box\{[^}]*\}/);
   assert.notEqual(m, null);
