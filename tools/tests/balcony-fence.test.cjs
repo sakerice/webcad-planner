@@ -52,6 +52,8 @@ function grabVar(name) {
 const FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallHeightMm', 'balconyFenceRailHeightM', 'balconySlabHeightMm'
 ];

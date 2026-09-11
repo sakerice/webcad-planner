@@ -103,6 +103,8 @@ const VARS = ['U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'INTERIOR_WALL_DEFAULT', 'F
   'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M', 'WALL_TOP_SAMPLE_STEP_M'];
 const FNS = [
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',

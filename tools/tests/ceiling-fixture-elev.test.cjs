@@ -55,6 +55,8 @@ function topLevelVar(name) {
 const FNS = [
   'roomFloorOffsetMm', 'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',

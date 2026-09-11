@@ -309,6 +309,8 @@ test('外観では PV採光のスイッチが立っていても、仕上げは�
 const WIRE_FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'isPositiveNumber', 'roomFloorOffsetMm', 'roomFloorTopY',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',

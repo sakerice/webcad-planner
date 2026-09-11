@@ -109,6 +109,8 @@ function ctxFor(walls) {
     topLevelVar('WALL_FACE_JITTER_M')
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
+    'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+    'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
     'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
     'wallFullHeightM', 'isPositiveNumber', 'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal',

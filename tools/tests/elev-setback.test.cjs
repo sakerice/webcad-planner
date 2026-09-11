@@ -76,6 +76,8 @@ const BASE_FNS = [
   'isDoorLikeOpeningType', 'isWindowLikeType', 'isOpeningItemType',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallHeightMm', 'wallDisplayHeightM',
   'getObjBounds', 'isFiniteCanvasValue',
