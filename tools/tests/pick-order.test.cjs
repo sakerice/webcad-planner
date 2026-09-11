@@ -183,6 +183,44 @@ test('掴んで動かしたクリックでは巡回しない（掴み直すた�
   assert.equal((tap.match(/MouseEvent\('mousedown'/g) || []).length, 0);
 });
 
+// ── タッチでの複数選択 ────────────────────────────────────────────────
+// タブレットでは複数選択が1つもできなかった。物理Shiftキーが無く、
+// 1本指のドラッグは範囲選択ではなく図面のパンになるため。
+test('複数選択は物理Shiftか「複数選択」モードのとき（仮想Shiftは使わない）', () => {
+  const fn = topLevelFunction('isMultiSelectModifier');
+  assert.match(fn, /ST\.multiSelectMode/);
+  assert.match(fn, /e\.shiftKey/);
+  // 仮想Shift(mobileShift)はモバイルで既定ONなので、流用すると通常のタップが
+  // すべて追加選択になる。ここに混ぜてはいけない。
+  assert.doesNotMatch(fn, /mobileShift/);
+  const ctx = vm.createContext({ ST: { multiSelectMode: false } });
+  vm.runInContext(fn, ctx);
+  assert.equal(ctx.isMultiSelectModifier({}), false);
+  assert.equal(ctx.isMultiSelectModifier({ shiftKey: true }), true);
+  ctx.ST.multiSelectMode = true;
+  assert.equal(ctx.isMultiSelectModifier({}), true);
+});
+
+test('タッチの範囲選択は「複数選択」モードのときだけ（普段の1本指はパンのまま）', () => {
+  const fn = topLevelFunction('touchMarqueeActive');
+  const ctx = vm.createContext({ ST: { multiSelectMode: false }, DRAG: { marquee: null } });
+  vm.runInContext(fn, ctx);
+  assert.equal(ctx.touchMarqueeActive(), false);
+  ctx.DRAG.marquee = {};
+  assert.equal(ctx.touchMarqueeActive(), false, 'モードOFFなら矩形にしない＝パンが効く');
+  ctx.ST.multiSelectMode = true;
+  assert.equal(ctx.touchMarqueeActive(), true);
+  // 1本指のパンの分岐がこの判定で塞がれている
+  const touchMove = html.slice(html.indexOf("canvas.addEventListener('touchmove'"));
+  assert.match(touchMove.slice(0, 1200), /_touch1\.moved&&ST\.tool==='select'&&!touchMarqueeActive\(\)/);
+});
+
+test('「複数選択」は既定OFFの独立した切り替えで、モバイルの欄に出る', () => {
+  assert.match(html, /multiSelectMode:false/);
+  assert.match(html, /id="multi-select-btn"[^>]*onclick="toggleMultiSelectMode\(\)"/);
+  assert.match(html, /複数選択: OFF<\/button>/);
+});
+
 test('操作ガイドはクリックを通す（平面図の左上が永久に選べなくなっていた）', () => {
   const m = html.match(/#help-box\{[^}]*\}/);
   assert.notEqual(m, null);

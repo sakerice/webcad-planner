@@ -3322,6 +3322,8 @@ input[type="reset"]:focus-visible{
       <div class="mobile-only sidebar-mobile-shift">
         <button id="mobile-shift-btn" class="pbtn sec snap-shift-btn active" type="button" onclick="toggleMobileShift()">仮想Shift: ON</button>
         <div class="sidebar-settings-note">ONで回転角度/近接オブジェクトスナップを有効化</div>
+        <button id="multi-select-btn" class="pbtn sec snap-shift-btn" type="button" onclick="toggleMultiSelectMode()">複数選択: OFF</button>
+        <div class="sidebar-settings-note">ONのあいだ、タップで選択に追加／解除。空きスペースをなぞると範囲選択（図面の移動は2本指）</div>
       </div>
       <div class="sidebar-settings-label wall-height-label">壁・床の既定値(mm)</div>
       <!-- 壁ごと・部屋ごとの個別指定が無いときに使う既定値。部屋ごとの天井高ではないので HeightModel は通さない。 -->
@@ -5488,7 +5490,7 @@ var ST = {
   mouseW:{x:0,y:0}, snap:10, showGrid:true, showDim:true,
   placingRot:0,
   isPanning:false, panStart:{x:0,y:0}, panOrigin:{x:0,y:0}, selectAll:false,
-  mobileShift:true, shiftKey:true,
+  mobileShift:true, shiftKey:true, multiSelectMode:false,
   _snapState:null  // stores active edge-snap info for visual feedback
 };
 
@@ -6333,6 +6335,10 @@ function renderFaceRuleControls(kind, wall, faceKey, setting, appearance){
 }
 
 function updateProps(){
+  // 「複数選択: ON (n個)」の表示は選択が変わるたびに更新する。
+  // タッチでは何個掴んでいるかが画面のどこにも出ないと、追加できているのか
+  // 分からない(タブレットではこれが唯一の手掛かりになる)。
+  if(typeof updateMultiSelectButton==='function') updateMultiSelectButton();
   var body = document.getElementById('props-body');
   if(!ST.selected) {
     body.classList.remove('is-locked');
@@ -7610,9 +7616,31 @@ function w2c(wx,wy){return{cx:ST.panX+wx*ST.zoom*0.05, cy:ST.panY+wy*ST.zoom*0.0
 function c2w(cx,cy){return{x:(cx-ST.panX)/(ST.zoom*0.05), y:(cy-ST.panY)/(ST.zoom*0.05)};}
 function snapV(v){return ST.snap?Math.round(v/ST.snap)*ST.snap:Math.round(v);}
 function isShiftLike(e){return !!(ST.mobileShift || (e&&e.shiftKey));}
-// 複数選択は物理Shiftキーのみ。仮想Shiftは配置・移動スナップ専用のため、
-// デフォルトONのモバイル環境で通常タップがすべて追加選択になるのを避ける。
-function isMultiSelectModifier(e){return !!(e&&e.shiftKey);}
+// 複数選択は物理Shiftキーか、タッチ用の「複数選択」モードのとき。
+// 仮想Shift(ST.mobileShift)は **使わない** -- あれは配置・移動スナップ専用で
+// モバイルでは既定ONなので、流用すると通常のタップがすべて追加選択になる。
+// ST.multiSelectMode は既定OFFの独立した切り替えなので、押したときだけ効く。
+function isMultiSelectModifier(e){return !!(ST.multiSelectMode || (e&&e.shiftKey));}
+// タッチでの範囲選択。1本指のドラッグは通常「図面のパン」なので、
+// 複数選択モードのあいだだけ矩形選択に切り替える(パンは2本指で行える)。
+function touchMarqueeActive(){
+  return !!(ST.multiSelectMode && DRAG.marquee);
+}
+function toggleMultiSelectMode(){
+  ST.multiSelectMode=!ST.multiSelectMode;
+  if(!ST.multiSelectMode) DRAG.shiftClick=null;
+  resetPickCycle();
+  updateMultiSelectButton();
+  updateProps();
+  draw2d();
+}
+function updateMultiSelectButton(){
+  var btn=document.getElementById('multi-select-btn');
+  if(!btn) return;
+  var n=(typeof explicit2DSelection==='function')?explicit2DSelection().length:0;
+  btn.textContent=ST.multiSelectMode?('複数選択: ON'+(n>1?' ('+n+'個)':'')):'複数選択: OFF';
+  btn.classList.toggle('active',!!ST.multiSelectMode);
+}
 function isTouchInputDevice(){
   return !!(('ontouchstart' in window) || (navigator.maxTouchPoints&&navigator.maxTouchPoints>0) || (navigator.msMaxTouchPoints&&navigator.msMaxTouchPoints>0));
 }
@@ -25497,7 +25525,7 @@ canvas.addEventListener('touchmove',function(e){
     if(!_touch1.moved&&(Math.abs(t.clientX-_touch1.startX)>8||Math.abs(t.clientY-_touch1.startY)>8)){
       _touch1.moved=true;
     }
-    if(_touch1.moved&&ST.tool==='select'){
+    if(_touch1.moved&&ST.tool==='select'&&!touchMarqueeActive()){
       // Pan when in select mode with no selected item being dragged
       if(!DRAG.active){
         var touchPanSign=CANVAS_TOUCH_FOLLOWS_FINGER?1:-1;
