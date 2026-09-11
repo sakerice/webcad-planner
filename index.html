@@ -6677,7 +6677,8 @@ function updateProps(){
     html += '<div class="ph" style="margin-top:12px">基礎設定</div>';
     html += '<div class="pr"><div class="pl">実寸素材</div><select class="pi" onchange="updateSelectedProp(\'texture\',this.value)"><option value="">色・既存の画像</option>'+Object.keys(SITE_SURFACE_OPTIONS).map(function(key){return '<option value="'+key+'" '+(it.texture===key?'selected':'')+'>'+SITE_SURFACE_OPTIONS[key].label+'</option>';}).join('')+'</select></div>';
     html += '<div class="pr"><div class="pl">基礎厚さ (mm)</div><input class="pi" type="number" min="0" max="2000" step="10" value="'+Math.round(it.foundationHeight)+'" onchange="updateSelectedProp(\'foundationHeight\',+this.value)"></div>';
-    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。</div>';
+    html += '<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.foundationFlashing!==false?'checked':'')+' onchange="updateSelectedProp(\'foundationFlashing\',this.checked)">水切りを付ける</label></div>';
+    html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">基礎厚さ分、家全体の床・壁・家具・屋根が上に持ち上がります。水切りは外壁の下端を受ける金物で、基礎の上に壁が立っているときだけ付きます。</div>';
   }
   if(it.type==='exterior-stair' || it.type==='ramp'){
     if(!it.targetHeight) it.targetHeight=foundationHeightMm()||450;
@@ -19499,15 +19500,44 @@ function build3DFoundation(grp,it,w,d){
     _B(grp,mat,0,h/2,0,w,h,d);
     if(h>0.03) _B(grp,capMat,0,capCenter,0,w+0.02,capH,d+0.02);
   }
-  // 基礎水切り(周回、見付40mm・出15mm)
-  if(!isInt && exteriorDetailEnabled('gutters')){
-    var mizuMat=new THREE.MeshStandardMaterial({color:0x4a4d52,roughness:0.5,metalness:0.4});
+  // 基礎水切り(周回、見付40mm・出15mm)。
+  // 外壁が基礎に載るところで、外装材の下端を受ける金物である。だから
+  // **基礎の上に壁が立っていないなら存在しない**。以前は無条件に回していたので、
+  // 置いただけの基礎に黒い帯が巻かれ、しかも色は 0x4a4d52 の決め打ちだったので
+  // 基礎の色を変えても帯だけ変わらなかった(「色の設定が反映されない謎の板」)。
+  if(!isInt && exteriorDetailEnabled('gutters') && it.foundationFlashing!==false && foundationCarriesWalls(it)){
+    var mizuMat=new THREE.MeshStandardMaterial({
+      // 基礎に色を指定しているなら、その色を落として水切りにする。
+      // 指定が無いときだけ既定の金物色。metalness を下げたのは、0.4 だと
+      // 日陰で空を映して真っ黒(実測 RGB 23,27,41)に見えるため。
+      color:foundationFlashingColor(it),roughness:0.6,metalness:0.15});
     [[0,-d/2-0.0075,w+0.03,0.015],[0,d/2+0.0075,w+0.03,0.015],[-w/2-0.0075,0,0.015,d],[w/2+0.0075,0,0.015,d]].forEach(function(s){
       var mz=new THREE.Mesh(new THREE.BoxGeometry(s[2],0.04,s[3]),mizuMat);
       mz.position.set(s[0],h-0.02,s[1]);
       grp.add(mz);
     });
   }
+}
+// 基礎の上に1階の壁が立っているか。芯線の端点がフットプリントに入っていれば載っている。
+function foundationCarriesWalls(it){
+  if(!it || typeof DATA==='undefined' || !DATA || !DATA.walls) return false;
+  var x0=it.x, x1=it.x+it.w, y0=it.y, y1=it.y+it.d;
+  for(var i=0;i<DATA.walls.length;i++){
+    var w=DATA.walls[i];
+    if((w.floor||1)!==1) continue;
+    var cx=(w.x1+w.x2)/2, cy=(w.y1+w.y2)/2;
+    if(cx>=x0&&cx<=x1&&cy>=y0&&cy<=y1) return true;
+  }
+  return false;
+}
+// 水切りの色。基礎に色を指定してあればそれを暗くしたもの、無ければ既定の金物色。
+function foundationFlashingColor(it){
+  var c=new THREE.Color(0x6a6d72);
+  if(it && it.colorCustom && it.color){
+    try{ c=new THREE.Color(it.color); }catch(e){ return 0x6a6d72; }
+    c.multiplyScalar(0.55);
+  }
+  return c;
 }
 function build3DExteriorStair(grp,it,w,d){
   var h=Math.max(0.02,accessTargetHeightM(it));
