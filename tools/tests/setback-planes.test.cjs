@@ -555,11 +555,14 @@ test('21-3: パネルは「手入力か既定か」をその場で言う', () =>
   const a = siteWith({ zone: 'low1', road: false, north: true });
   const ctxA = makeCtx([a, road()], { selected: a });
   const hA = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctxA);
-  assert.ok(hA.indexOf('（用途地域の既定）') >= 0, hA.slice(0, 400));
+  // 何も入れ替えていないうちは印も断り書きも出さない（欄の数字が既定そのもの）
+  assert.equal(hA.indexOf('は手入力'), -1, hA.slice(0, 400));
   const b = siteWith({ zone: 'low1', road: false, north: true, northBaseMm: 6200 });
   const ctxB = makeCtx([b, road()], { selected: b });
   const hB = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctxB);
-  assert.ok(hB.indexOf('（手入力）') >= 0, hB.slice(0, 400));
+  // 手で入れ替えたら、その欄に印を付け、条文の既定を1行で言う
+  assert.ok(hB.indexOf('は手入力') >= 0, hB.slice(0, 400));
+  assert.ok(hB.indexOf('低層住専5000mm') >= 0, '条文の既定が書かれていない: ' + hB);
   assert.ok(/value="6200"/.test(hB), '欄に手入力の値が出ていない');
 });
 
@@ -738,31 +741,35 @@ test('16: 内観3Dには制限面を出さない（外構の話なので内観�
 test('16(最重要): 北側斜線の無い用途地域では、北側斜線のスイッチを画面に出さない', () => {
   const items = [siteWith({ zone: 'low1', road: false, north: false }), road()];
   const ctx = makeCtx(items, { selected: items[0] });
+  // 文言ではなくスイッチそのもので見る（言い回しを短くしても意図は変わらない）
+  const NORTH = "updateSelectedSetback('north'";
+  const ROAD = "updateSelectedSetback('road'";
   const withNorth = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
-  assert.ok(withNorth.indexOf('北側斜線を表示') >= 0, '低層住専では出る');
+  assert.ok(withNorth.indexOf(NORTH) >= 0, '低層住専では出る');
 
   ['res-other', 'non-res'].forEach(function (z) {
     const it2 = siteWith({ zone: z, road: false, north: false });
     const ctx2 = makeCtx([it2, road()], { selected: it2 });
     const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx2);
-    assert.equal(h.indexOf('北側斜線を表示'), -1, z + ' に北側斜線の欄が出ている');
-    assert.ok(h.indexOf('道路斜線を表示') >= 0, z + ' でも道路斜線は出る');
+    assert.equal(h.indexOf(NORTH), -1, z + ' に北側斜線の欄が出ている');
+    assert.ok(h.indexOf(ROAD) >= 0, z + ' でも道路斜線は出る');
   });
 });
 test('16: 中高層住専では基準高さ 10000mm が欄に入る', () => {
   const it = siteWith({ zone: 'mid2', road: false, north: false });
   const ctx = makeCtx([it, road()], { selected: it });
   const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
-  assert.ok(h.indexOf('北側斜線の基準高さ') >= 0, h);
+  assert.ok(h.indexOf('基準高さ') >= 0, h);
   assert.ok(/value="10000"/.test(h), '欄に 10000 が入っていない: ' + h);
-  assert.ok(h.indexOf('中高層住専 10000mm') >= 0, '条文の既定が書かれていない');
+  // 既定そのものが欄に入っているので、同じ数を併記はしない（印も出ない）
+  assert.equal(h.indexOf('は手入力'), -1, h);
 });
 test('16: 道路が無ければ道路斜線のスイッチも出さない', () => {
   const it = siteWith({ zone: 'low1', road: false, north: false });
   const ctx = makeCtx([it], { selected: it });
   const h = vm.runInContext('siteSetbackPanelHtml(DATA.items[0])', ctx);
-  assert.equal(h.indexOf('道路斜線を表示'), -1);
-  assert.ok(h.indexOf('前面道路が置かれていない') >= 0);
+  assert.equal(h.indexOf("updateSelectedSetback('road'"), -1);
+  assert.ok(h.indexOf('道路を置く') >= 0, '道路が要ることを言っていない: ' + h);
 });
 test('16: 用途地域が未設定のうちは、斜線の欄そのものが出ない', () => {
   const it = siteWith(null);

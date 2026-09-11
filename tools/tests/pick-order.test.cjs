@@ -274,6 +274,57 @@ test('階ごとの高さは上の行が上の階（3Dビューと上下をそろ
   assert.match(fn, /HEIGHT_SETTING_FLOORS\.slice\(\)\.reverse\(\)/);
 });
 
+// ── 3Dのタッチが「残る」問題 ──────────────────────────────────────────
+// OrbitControls が setPointerCapture するのは最初の1本だけなので、2本目以降の
+// 指をキャンバスの外(タブレットでは3Dを囲むサイドメニュー等)で離すと pointerup が
+// 届かず、内部の _pointers に残る。残ったまま次に1本指で触ると「2本指」と
+// 数えられ、回転のはずが拡大縮小になる。
+test('離れた指はOrbitControlsの表から掃除する', () => {
+  const fn = topLevelFunction('release3DStalePointers');
+  assert.match(fn, /orbit\._pointers\.filter/);
+  assert.match(fn, /orbit\._removePointer/);
+  assert.match(fn, /orbit\.state=-1/);        // _STATE.NONE
+  // window で捕まえる(キャンバスに届かない pointerup を拾うのが目的なので
+  // キャンバスに貼っても意味がない)
+  assert.match(html, /window\.addEventListener\('pointerup',note3DPointerUp,true\)/);
+  assert.match(html, /window\.addEventListener\('pointercancel',note3DPointerUp,true\)/);
+
+  const ctx = vm.createContext({
+    orbit: { _pointers: [11, 22], state: 5, _removePointer(e) { this._pointers = this._pointers.filter(id => id !== e.pointerId); } },
+    _t3d: { t1down: true, p2x: 1, p2y: 2 },
+    _live3DPointers: { 11: 1 }                 // 22 はもう離れている
+  });
+  vm.runInContext(fn, ctx);
+  ctx.release3DStalePointers();
+  assert.equal(ctx.orbit._pointers.join(','), '11', '離れた指だけを落とす');
+  assert.equal(ctx.orbit.state, 5, 'まだ指が残っていれば状態は触らない');
+  ctx._live3DPointers = {};
+  ctx.release3DStalePointers();
+  assert.equal(ctx.orbit._pointers.length, 0);
+  assert.equal(ctx.orbit.state, -1, '全部離れたら NONE に戻す');
+  assert.equal(ctx._t3d.t1down, false);
+});
+
+test('内観3D: 2本指から1本離しても、残った指で回転を続けられる', () => {
+  const block = html.slice(html.indexOf('function init3DTouchOnce'));
+  const touchEnd = block.slice(block.indexOf("el.addEventListener('touchend'"));
+  const body = touchEnd.slice(0, touchEnd.indexOf('},{passive:false});'));
+  assert.match(body, /e\.touches&&e\.touches\.length===1/);
+  assert.match(body, /_t3d\.t1down=true/);
+  assert.match(body, /_t3d\.lx=e\.touches\[0\]\.clientX/);
+});
+
+// ── 斜線制限のパネル ──────────────────────────────────────────────────
+test('斜線制限の断り書きは畳む（消さずに、既定では出さない）', () => {
+  const fn = topLevelFunction('siteSetbackPanelHtml');
+  assert.match(fn, /<details class="prop-details">/);
+  // 常に出るのは1行だけ
+  assert.match(fn, /確認申請には使えません/);
+  // 何を見ていないかは畳んだ中に残っている
+  assert.match(fn, /絶対高さ制限（法55条/);
+  assert.match(fn, /日影規制（法56条の2）/);
+});
+
 test('操作ガイドはクリックを通す（平面図の左上が永久に選べなくなっていた）', () => {
   const m = html.match(/#help-box\{[^}]*\}/);
   assert.notEqual(m, null);

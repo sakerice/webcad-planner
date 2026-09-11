@@ -2777,6 +2777,9 @@ body{
   box-shadow:none!important;
 }
 .lock-category-toggle input,.lock-control-label input{flex-shrink:0!important}
+.prop-details{margin-top:6px}
+.prop-details>summary{font-size:10px;color:var(--hp-text-soft);cursor:pointer;padding:3px 0;list-style:revert}
+.prop-details[open]>summary{margin-bottom:2px}
 .lock-status-note{
   font-size:9px!important;
   line-height:1.35!important;
@@ -5978,62 +5981,68 @@ function siteSetbackPanelHtml(it){
   var law=setbackLawApi();
   if(!law) return '';
   var cur=siteSetbackRaw(it);
-  var h='<div class="ph" style="margin-top:12px">斜線制限（建築基準法56条）</div>';
+  var h='<div class="ph" style="margin-top:12px">斜線制限（法56条）</div>';
   h+='<div class="pr"><div class="pl">用途地域</div><select class="pi" onchange="updateSelectedSetback(\'zone\',this.value)">'+setbackZoneOptionsHtml(cur.zone)+'</select></div>';
   if(!cur.zone){
-    h+='<div class="lock-status-note">用途地域を選ぶまで、制限面も寸法も出ません。</div>';
+    h+='<div class="lock-status-note">用途地域を選ぶと制限面が出ます。</div>';
     return h;
   }
   // 前面道路が無ければ道路斜線は成立しない。成立しない設定は出さない。
   // 角地では前面道路が2本以上ある。**全部**の幅員を出す（1本だけ出すと、
   // 出ていない道路の斜線が効いていないように読める）。
   var roads=setbackRoadItems(it).filter(function(r){ return setbackRoadWidthMm(r)>0; });
-  var road=roads.length?roads[0]:null, width=setbackRoadWidthMm(road);
   var eff=siteSetbackEffective(it);
-  if(road && width>0){
-    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線を表示</label></div>';
-    h+='<div class="pr"><div class="pl">道路斜線の勾配 1:</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.roadSlope+'" onchange="updateSelectedSetback(\'roadSlope\',this.value)"></div>';
-    h+='<div class="lock-status-note">'+setbackCustomMark(eff.roadSlopeCustom)+'　条文の既定は住居系 '+law.ROAD_SLOPE_RESIDENTIAL+'・それ以外 '+law.ROAD_SLOPE_OTHER+'。</div>';
-    h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" value="'+
+  // 手入力かどうかは印1つで足りる。条文の既定は「手で入れ替えたときだけ」
+  // 1行で出す。欄の数字が既定そのもののときに「既定は○○」と併記するのは
+  // 同じことを二度言っているだけなので出さない。
+  var anyCustom=false;
+  function mark(on){ if(on) anyCustom=true; return on?'<span style="color:#e94560">*</span>':''; }
+  if(roads.length){
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.road?'checked':'')+' onchange="updateSelectedSetback(\'road\',this.checked)">道路斜線</label></div>';
+    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.roadSlopeCustom,law.ROAD_SLOPE_RESIDENTIAL+' / '+law.ROAD_SLOPE_OTHER)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.roadSlope+'" onchange="updateSelectedSetback(\'roadSlope\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">道路幅員</div><input class="pi" type="text" readonly value="'+
       roads.map(function(r){ return Math.round(setbackRoadWidthMm(r))+'mm'; }).join(' / ')+
-      '（道路アイテムの奥行 D'+(roads.length>1?'・前面道路 '+roads.length+'本':'')+'）" readonly></div>';
-    if(roads.length>1){
-      h+='<div class="lock-status-note">この敷地は<b>'+roads.length+'本の道路に接しています（角地）</b>。'+
-        'それぞれの道路から制限面を引き、どの点でも<b>いちばん低い制限</b>が効きます。</div>';
-    }
+      (roads.length>1?'（角地・'+roads.length+'本）':'')+'"></div>';
   } else {
-    h+='<div class="lock-status-note">前面道路が置かれていないので道路斜線は出せません。「道路」ツールで道路を置いてください。</div>';
+    h+='<div class="lock-status-note">道路を置くと道路斜線が使えます。</div>';
   }
   // 北側斜線は低層住専・中高層住専にしか無い。無い用途地域では欄ごと出さない。
   if(law.hasNorthLimit(cur.zone)){
-    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線を表示</label></div>';
-    h+='<div class="pr"><div class="pl">北側斜線の基準高さ (mm)</div><input class="pi" type="number" min="'+SETBACK_BASE_MIN_MM+'" max="'+SETBACK_BASE_MAX_MM+'" step="100" value="'+eff.northBaseMm+'" onchange="updateSelectedSetback(\'northBaseMm\',this.value)"></div>';
-    h+='<div class="pr"><div class="pl">北側斜線の勾配 1:</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.northSlope+'" onchange="updateSelectedSetback(\'northSlope\',this.value)"></div>';
-    h+='<div class="lock-status-note">基準高さ '+setbackCustomMark(eff.northBaseCustom)+'／勾配 '+setbackCustomMark(eff.northSlopeCustom)+
-      '　条文の既定は低層住専 '+law.NORTH_BASE_LOW_MM+'mm・中高層住専 '+law.NORTH_BASE_MID_MM+'mm、勾配 '+law.NORTH_SLOPE+'。</div>';
+    h+='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(cur.north?'checked':'')+' onchange="updateSelectedSetback(\'north\',this.checked)">北側斜線</label></div>';
+    h+='<div class="pr"><div class="pl">基準高さ (mm)'+mark(eff.northBaseCustom,law.NORTH_BASE_LOW_MM+' / '+law.NORTH_BASE_MID_MM)+'</div><input class="pi" type="number" min="'+SETBACK_BASE_MIN_MM+'" max="'+SETBACK_BASE_MAX_MM+'" step="100" value="'+eff.northBaseMm+'" onchange="updateSelectedSetback(\'northBaseMm\',this.value)"></div>';
+    h+='<div class="pr"><div class="pl">勾配 1:'+mark(eff.northSlopeCustom,law.NORTH_SLOPE)+'</div><input class="pi" type="number" min="'+SETBACK_SLOPE_MIN+'" max="'+SETBACK_SLOPE_MAX+'" step="0.05" value="'+eff.northSlope+'" onchange="updateSelectedSetback(\'northSlope\',this.value)"></div>';
   }
-  h+='<div class="lock-status-note">基準高さと勾配は<b>自治体によって違う</b>ので手で入れ直せます。'+
-    '<b>用途地域を選び直すと、手で入れた数は消えてその地域の既定へ戻ります</b>'+
-    '（用途地域が既定の出どころなので、選び直したあとも前の数が残っていると、'+
-    '画面に出ている地域と効いている数が食い違うため）。</div>';
-  h+='<div class="lock-status-note">制限面を半透明で描き、面より上に出ていた部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。壁の上端も同じ屋根で切られます。家具は削りません（制限面から飛び出した家具は置き方の問題として見えます）。<b>制限面と寸法の表示</b>は「寸法」ボタンで出し入れします（消しても削りは効いたままです）。</div>';
+  if(anyCustom){
+    h+='<div class="lock-status-note"><span style="color:#e94560">*</span> は手入力（用途地域の既定ではありません）。'+
+      '条文の既定は 道路勾配 住居系'+law.ROAD_SLOPE_RESIDENTIAL+'・それ以外'+law.ROAD_SLOPE_OTHER+
+      '／北側 低層住専'+law.NORTH_BASE_LOW_MM+'mm・中高層住専'+law.NORTH_BASE_MID_MM+'mm、勾配'+law.NORTH_SLOPE+'。</div>';
+  }
+  h+='<div class="lock-status-note">⚠ 設計中の当たりを見るための面です。確認申請には使えません。</div>';
+  // 長い断り書きは畳む。**消さない**: 何を見ていないかを書いていないと
+  // 「だいたい合っている」と読まれる。既定で閉じているだけで中身は同じ。
+  h+='<details class="prop-details"><summary>詳しく（効き方と、見ていないもの）</summary>';
+  h+='<div class="lock-status-note">制限面より上に出た部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、'+
+    'その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下）。壁の上端も同じ屋根で切られます。'+
+    '家具は削りません。制限面と寸法の表示は「寸法」ボタンで出し入れします（消しても削りは効いたままです）。</div>';
+  if(roads.length>1){
+    h+='<div class="lock-status-note">角地です。道路ごとに制限面を引き、どの点でもいちばん低い制限が効きます。</div>';
+  }
+  h+='<div class="lock-status-note">基準高さと勾配は自治体によって違うので手で入れ直せます（<span style="color:#e94560">*</span>付きが手入力）。'+
+    '用途地域を選び直すと手入力は消え、その地域の既定に戻ります。</div>';
   // 誤解されると危険なので、何を見ていないのかまで書く。「参考です」だけでは
   // 「だいたい合っている」と読まれる。
   // Task 26-3: 以前はここで「実際の審査より **厳しい側** に出ます」と保証していた。
   // 見ていないのが緩和だけなら本当だが、**絶対高さ制限(法55条)と日影規制は
   // そもそも実装していない**。第一種低層住専で 10.5m に設計しても何も言わない
   // ＝ 緩い側へ振れる道が1本開いている。保証を外し、その1本を名指しする。
-  // (実装はしない。名指しすることがここでの直しである。)
-  h+='<div class="lock-status-note">これは法令適合の判定ではありません。素の条文どおりの面だけを引いており、'+
-    '道路斜線のセットバックによる緩和（法56条2項）・天空率（同7項）・2項道路の中心後退・高低差の緩和を'+
-    '<b>1つも見ていません</b>。緩和を見ていない分は厳しい側へ出ますが、'+
-    '<b>「必ず厳しい側」ではありません</b>: '+
-    '<b>絶対高さ制限（法55条。第一種・第二種低層住専の10m／12m）と日影規制（法56条の2）は未実装で、まったく見ていません。</b>'+
-    'たとえば第一種低層住専で最高高さ10.5mに設計しても、この画面は何も言いません。'+
-    '真北は<b>このプランに保存されている方位（現在 '+setbackNorthDeg()+'°）</b>から取っています。'+
-    '光の設定の「北の方角」スライダがその方位で、動かすとプランに保存されます。'+
-    '敷地が真北を向いていないときは、実際の方位に合わせてください。'+
-    '設計中に当たりを見るための面であって、確認申請に使える判定ではありません。</div>';
+  h+='<div class="lock-status-note">素の条文どおりの面だけを引いています。'+
+    'セットバックによる緩和（法56条2項）・天空率（同7項）・2項道路の中心後退・高低差の緩和は<b>1つも見ていません</b>。'+
+    'そのぶんは厳しい側へ出ますが、<b>「必ず厳しい側」ではありません</b>: '+
+    '<b>絶対高さ制限（法55条。低層住専の10m／12m）と日影規制（法56条の2）は未実装です。</b>'+
+    '第一種低層住専で最高高さ10.5mに設計しても、この画面は何も言いません。</div>';
+  h+='<div class="lock-status-note">真北はこのプランの方位（現在 '+setbackNorthDeg()+'°）から取っています。'+
+    '光の設定の「北の方角」で変えられます。敷地が真北を向いていないときは合わせてください。</div>';
+  h+='</details>';
   return h;
 }
 function updateSelectedSetback(key,val){
@@ -25716,8 +25725,48 @@ function init3DTouchOnce(){
       _t3d.p2x=mx; _t3d.p2y=my;
     }
   },{passive:false});
-  el.addEventListener('touchend',function(e){_t3d.t1down=false;_t3d.p2x=null;},{passive:false});
+  el.addEventListener('touchend',function(e){
+    // 2本指から1本を離したとき、残った指で回転を続けられるようにする。
+    // 以前は指が1本でも離れた瞬間に t1down を落としていたので、残った指の
+    // ドラッグが何も起こさない状態になり、全部離して触り直すまで直らなかった。
+    if(e.touches&&e.touches.length===1){
+      _t3d.t1down=true;
+      _t3d.lx=e.touches[0].clientX; _t3d.ly=e.touches[0].clientY;
+    }else{
+      _t3d.t1down=false;
+    }
+    _t3d.p2x=null; _t3d.p2y=null;
+  },{passive:false});
 }
+// ─── 3Dの指の取りこぼしを掃除する ───────────────────────────────────────
+// OrbitControls が setPointerCapture するのは **最初の1本だけ** である
+// (this._pointers.length === 0 のときにしか呼ばない)。2本目以降の指は捕まって
+// いないので、キャンバスの外 — タブレットでは3Dの周りを囲むサイドメニュー・
+// ツールバー・プロパティ欄 — で離すと、その pointerup がキャンバスに届かず、
+// 指が内部の表 (_pointers) に残り続ける。
+// 残ったまま次に1本指で触ると「2本指」と数えられ、回転のはずが拡大縮小になる。
+// 実際に離れている指を数えて、残骸だけを落とす。
+var _live3DPointers={};
+function note3DPointerDown(e){ if(e&&e.pointerType==='touch') _live3DPointers[e.pointerId]=1; }
+function note3DPointerUp(e){
+  if(e&&e.pointerType==='touch') delete _live3DPointers[e.pointerId];
+  release3DStalePointers();
+}
+function release3DStalePointers(){
+  if(typeof orbit==='undefined'||!orbit||!orbit._pointers) return;
+  var stale=orbit._pointers.filter(function(id){ return !_live3DPointers[id]; });
+  if(!stale.length) return;
+  stale.forEach(function(id){
+    if(typeof orbit._removePointer==='function') orbit._removePointer({pointerId:id});
+  });
+  if(!orbit._pointers.length){
+    orbit.state=-1;                 // _STATE.NONE
+    if(typeof _t3d!=='undefined'&&_t3d){ _t3d.t1down=false; _t3d.p2x=null; _t3d.p2y=null; }
+  }
+}
+window.addEventListener('pointerdown',note3DPointerDown,true);
+window.addEventListener('pointerup',note3DPointerUp,true);
+window.addEventListener('pointercancel',note3DPointerUp,true);
 function getTouchDistE(e){return Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
 
 // Hook into init3D to also set up touch
