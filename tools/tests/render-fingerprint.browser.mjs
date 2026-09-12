@@ -121,8 +121,13 @@ try {
     };
   });
 
-  results['2d-floor1'] = await fingerprint2D(1);
-  results['2d-floor2'] = await fingerprint2D(2);
+  // 2Dも3Dと同じく落ち着くまで待つ。平面図の記号(2D用スプライト画像)は
+  // 非同期に届き、届いた時点で draw2d() がやり直される。**1回目の draw2d だけ**
+  // その画像が乗らないので、指紋が floor1 で44升・floor2 で43升ずれる。
+  // 一発撮りにしていたため、機械の速さ次第でその1回目を掴んでしまい、
+  // 合計87升ずれた状態で落ちることがあった(絵は壊れていないのに落ちる)。
+  results['2d-floor1'] = await settled(() => fingerprint2D(1));
+  results['2d-floor2'] = await settled(() => fingerprint2D(2));
 
   // ── 3D: 外観を決め打ちのカメラで描く ────────────────────────────────
   //
