@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const html=fs.readFileSync('index.html','utf8');
+const html=require('./app-source.cjs').appSource();
 // floorBaseY / floorSlabHeightMForFloor は「階の基準面」を表すだけなので、
 // 従来の floorTopY スタブと同じ値になる最小の差し替えを置く(床スラブ 0)。
 // localSupportTopY は実物を切り出して走らせる -- 下階に既定より高い壁が無い

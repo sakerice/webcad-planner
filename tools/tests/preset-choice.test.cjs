@@ -11,7 +11,7 @@ const { readFileSync, existsSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 
 test('台帳の既定間取りは全ファイルが実在し、壁と部屋を持つ', () => {
   const m = html.match(/var PRESET_PLANS=\{[\s\S]*?\n\};/);

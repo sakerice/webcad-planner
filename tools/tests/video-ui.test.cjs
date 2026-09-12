@@ -19,7 +19,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 const VideoPrompt = require(join(ROOT, 'assets', 'js', 'video-prompt.js'));
 
 // ── index.html からの切り出し（plan-capture.test.cjs と同じやり方）─────────

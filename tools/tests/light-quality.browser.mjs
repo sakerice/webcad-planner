@@ -1,5 +1,7 @@
 process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+// Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
+const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);
 import assert from 'node:assert/strict';
 const b=await chromium.launch({args:['--use-angle=metal']});
 try{const p=await b.newPage({viewport:{width:1000,height:700}});const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text());});await p.goto(process.env.APP_URL||'http://localhost:8932/');await p.waitForFunction(()=>window.THREE);await p.evaluate(()=>init3D());await p.waitForFunction(()=>_skyPhotoCache.common);

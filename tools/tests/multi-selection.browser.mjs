@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+// Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
+const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);
 const browser=await chromium.launch();try{
 const p=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(process.env.APP_URL||'http://localhost:8932/');await p.waitForFunction(()=>window.ST&&window.DATA);await p.waitForSelector('#app-loading',{state:'hidden'});
 // 起動時の「はじめる間取りを選んでください」がキャンバスを覆っている間は、

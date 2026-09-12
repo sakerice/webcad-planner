@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+// Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
+const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);
 const browser=await chromium.launch({args:['--use-angle=metal']});
 const dir='docs/quality-review/original-collection';fs.mkdirSync(dir,{recursive:true});
 try{

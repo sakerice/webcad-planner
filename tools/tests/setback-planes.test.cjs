@@ -15,7 +15,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 const Law = require(join(ROOT, 'assets', 'js', 'setback-law.js'));
 // 間取りは凍結フィクスチャを読む。出荷する assets/default_plan.json を
 // 直接読むと、既定間取りを良くするたびにここが落ちる(役割は tools/tests/fixtures/README.md)。

@@ -18,7 +18,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 
 // ── index.html からの切り出し（video-ui.test.cjs と同じやり方）──────────────
 function topLevelFunction(name) {

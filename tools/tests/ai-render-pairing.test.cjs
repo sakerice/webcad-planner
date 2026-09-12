@@ -9,7 +9,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 
 // ── 小さなパーサ: ある要素の直下の子を、順序どおりに取り出す ───────────────
 function elementAt(src, at) {

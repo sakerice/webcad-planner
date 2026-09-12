@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const html=fs.readFileSync('index.html','utf8');
+const html=require('./app-source.cjs').appSource();
 const ctx={Math};vm.createContext(ctx);vm.runInContext(html.slice(html.indexOf('function computeSunPosition('),html.indexOf('var INTERIOR_WALL_DEFAULT')),ctx);
 test('solar noon follows latitude and seasonal declination',()=>{
  for(const [season,degrees] of [['summer',77.7],['equinox',54.3],['winter',30.9]])assert.ok(Math.abs(ctx.computeSunPosition(12,season,0).altitude*180/Math.PI-degrees)<1e-8);

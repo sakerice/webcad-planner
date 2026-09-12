@@ -17,7 +17,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 
 // ── 1. CSS: <style> を集めてルールへ分解する ──────────────────────────────
 function collectCss(src) {

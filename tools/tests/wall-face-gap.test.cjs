@@ -16,7 +16,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 
 function topLevelFunction(name) {
   const at = html.indexOf('\nfunction ' + name + '(');

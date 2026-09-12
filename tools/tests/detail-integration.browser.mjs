@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');const browser=await chromium.launch({args:['--use-angle=metal']});
+// Playwright は CommonJS なので、名前付きで取れる環境と default 越しの環境がある。
+const _pw=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const chromium=_pw.chromium||(_pw.default&&_pw.default.chromium);const browser=await chromium.launch({args:['--use-angle=metal']});
 const dir='docs/quality-review/detail-loop';
 try{const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/Shader Error|VALIDATE_STATUS|WebGLProgram/.test(m.text()))errors.push(m.text());});
  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('#fmp-exterior-search',{state:'attached'});await page.locator('#bnav-tools').click();await page.evaluate(()=>document.getElementById('fmp-exterior').closest('.cat-body').classList.add('open'));

@@ -1,0 +1,1821 @@
+// 寸法・色・部材の種類といった、アプリ全体で共有する定数と、その読み書き。
+//
+// index.html のインライン script から、中身を1文字も変えずに切り出した。
+// 読み込み順の都合でここが最初に走る。**このファイルのトップレベルで、
+// 後から読まれるファイルの関数を呼んではいけない**(まだ存在しない)。
+// 関数の中から呼ぶぶんには、実行時には全部そろっているので問題ない。
+// ───── CONSTANTS ─────
+var WALL_H = 2400;
+var FLOOR_H = 2700;
+var FLOOR_SLAB_H = 180;
+var U = 0.001;
+var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
+var WALL_COLOR_CUSTOM = {};
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.12, exposure:0.93, env:0.42,
+  sunSim:true, hour:13, season:'equinox', northDeg:0};
+// PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
+// null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
+// 通常の利用者から見た挙動は一切変わらない。値を入れるのはファイル末尾の
+// PVフック(__PV_CAPTURE__.setInteriorDaylight)だけ。形は {sunScale:<倍率>}。
+var PV_INTERIOR_DAYLIGHT=null;
+var LIGHT_PRESETS = {
+  morning:{
+    label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.14,exposure:0.9,env:0.34,
+    sunColor:'#ffd6a3',ambientColor:'#fff2df',hemiSky:'#d7ecff',hemiGround:'#8f7a66',
+    sunPos:{x:-120,y:78,z:85},fogColor:0xd6e7f1,fogNear:70,fogFar:470,interiorBg:0x151821,
+    sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
+  },
+  day:{
+    label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.12,exposure:0.93,env:0.42,
+    sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
+    sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
+    sky:{top:'#2874da',mid:'#549de5',horizon:'#bedcf3',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
+  },
+  evening:{
+    label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.19,exposure:0.84,env:0.28,
+    sunColor:'#ffad62',ambientColor:'#ffe4cc',hemiSky:'#b8a5d8',hemiGround:'#6c5142',
+    sunPos:{x:150,y:46,z:-90},fogColor:0xd8a878,fogNear:65,fogFar:430,interiorBg:0x18131a,
+    sky:{top:'#4d5f91',mid:'#a06f9e',horizon:'#f0a85e',ground:'#5c4a54',sunX:0.82,sunY:0.55,sunCore:'rgba(255,230,186,0.9)',sunGlow:'rgba(255,128,50,0.5)',haze:'rgba(255,145,72,0.38)',cloudAlpha:0.46}
+  },
+  night:{
+    label:'夜',hemi:0.10,sun:0.10,ambient:0.06,room:0.30,exposure:0.76,env:0.12,
+    sunColor:'#c9dcff',ambientColor:'#c9d7ff',hemiSky:'#1d2b5d',hemiGround:'#11131d',
+    sunPos:{x:-70,y:110,z:-120},fogColor:0x1b2544,fogNear:50,fogFar:330,interiorBg:0x070913,
+    sky:{top:'#071028',mid:'#14224c',horizon:'#26365f',ground:'#0b1020',sunX:0.2,sunY:0.23,sunCore:'rgba(222,235,255,0.78)',sunGlow:'rgba(105,145,255,0.24)',haze:'rgba(35,50,95,0.42)',cloudAlpha:0.14}
+  }
+};
+// ─── 太陽軌道シミュレーション(東京近郊 緯度35.7度の簡易モデル) ───
+function computeSunPosition(hour,season,northDeg){
+  var lat=35.7*Math.PI/180;
+  var decl=(season==='summer'?23.4:season==='winter'?-23.4:0)*Math.PI/180;
+  var H=(hour-12)*15*Math.PI/180; // 時角
+  var alt=Math.asin(Math.sin(lat)*Math.sin(decl)+Math.cos(lat)*Math.cos(decl)*Math.cos(H));
+  // 方位角: 0=南、+が西回り
+  var az=Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(lat)-Math.tan(decl)*Math.cos(lat));
+  // ワールド方位へ: 画面奥(-Z)を北とし、northDeg で敷地の向きを回転
+  var azWorld=az+Math.PI+(northDeg||0)*Math.PI/180;
+  var R=220;
+  var y=Math.sin(alt)*R; // Below-horizon sun must remain below the horizon.
+  var horiz=Math.cos(alt)*R;
+  return {
+    x:Math.sin(azWorld)*horiz,
+    y:y,
+    z:-Math.cos(azWorld)*horiz,
+    altitude:alt, azimuth:azWorld
+  };
+}
+// 高度に応じた太陽光の色(低高度=暖色)
+function sunColorForAltitude(alt){
+  var t=Math.max(0,Math.min(1,alt/(Math.PI/3)));
+  var r=Math.round(255);
+  var g=Math.round(158+(250-158)*t);
+  var b=Math.round(88+(244-88)*t);
+  return 'rgb('+r+','+g+','+b+')';
+}
+function solarNightBlend(alt){
+  var t=Math.max(0,Math.min(1,(3-alt*180/Math.PI)/11));
+  return t*t*(3-2*t);
+}
+function sunSimDimFactor(alt){
+  return Math.max(0,Math.min(1,Math.sin(alt)*1.6));
+}
+
+var INTERIOR_WALL_DEFAULT = '#f4f0e8';
+
+function foundationHeightMm(){
+  if(typeof DATA==='undefined' || !DATA || !DATA.items) return 0;
+  var maxH=0;
+  DATA.items.forEach(function(it){
+    if(it && it.type==='foundation'){
+      var h=Number(it.foundationHeight);
+      if(!isFinite(h)) h=450;
+      maxH=Math.max(maxH,Math.max(0,h));
+    }
+  });
+  return Math.max(0,Math.min(2000,maxH));
+}
+function foundationHeightM(){
+  return foundationHeightMm()*U;
+}
+// ─── 壁・床の既定値(グローバル / 階ごと) ──────────────────────────────
+// ここで持つのは「壁ごと・部屋ごとに個別指定していないときに採る値」= 既定値。
+// 個別指定 (wall.wallHeight / room.floorRaiseMm) は従来どおり常に優先される。
+//
+// 日本の住宅は階ごとに階高が違うことが珍しくないので、DATA.heightDefaults.perFloor
+// が真のあいだは DATA.floors[階].wallHeight / .floorRaise を階ごとに読む。
+// これらのフィールドを持たない保存済みプランでは WALL_H / 0 に落ち、
+// 寸法は1mmも動かない。
+var WALL_H_MIN=1800, WALL_H_MAX=4000;
+var DEFAULT_FLOOR_RAISE_MM=0;
+var HEIGHT_SETTING_FLOORS=[1,2,3,4];
+function clampWallHeightMm(v){
+  var n=Number(v);
+  if(!isFinite(n)) return WALL_H;
+  return Math.max(WALL_H_MIN,Math.min(WALL_H_MAX,Math.round(n)));
+}
+function clampFloorRaiseMm(v){
+  var n=Number(v);
+  if(!isFinite(n)) return 0;
+  return Math.max(0,Math.min(600,Math.round(n)));
+}
+function ensureHeightDefaults(plan){
+  plan=plan||(typeof DATA!=='undefined'?DATA:null);
+  if(!plan) return null;
+  if(!plan.heightDefaults||typeof plan.heightDefaults!=='object'||Array.isArray(plan.heightDefaults)) plan.heightDefaults={};
+  if(!plan.floors||typeof plan.floors!=='object'||Array.isArray(plan.floors)) plan.floors={};
+  var hd=plan.heightDefaults;
+  hd.perFloor=!!hd.perFloor;
+  // 保存済みプランの既定値をグローバル変数へ写す。写さないと、保存して読み直した
+  // だけで壁の高さが 2400 に戻る(この設定は今まで保存されていなかった)。
+  if(isFinite(Number(hd.wallHeight))&&Number(hd.wallHeight)>0) WALL_H=clampWallHeightMm(hd.wallHeight);
+  else hd.wallHeight=WALL_H;
+  if(!isFinite(Number(hd.floorRaise))||Number(hd.floorRaise)<0) hd.floorRaise=DEFAULT_FLOOR_RAISE_MM;
+  return hd;
+}
+function perFloorHeightsEnabled(){
+  var plan=(typeof DATA!=='undefined')?DATA:null;
+  var hd=plan?plan.heightDefaults:null;
+  return !!(hd&&hd.perFloor);
+}
+function planFloorHeightEntry(floor){
+  var plan=(typeof DATA!=='undefined')?DATA:null;
+  var floors=plan?plan.floors:null;
+  if(!floors||typeof floors!=='object') return null;
+  var e=floors[String(floor)]!==undefined?floors[String(floor)]:floors[floor];
+  return (e&&typeof e==='object'&&!Array.isArray(e))?e:null;
+}
+// その階の既定の壁高さ(mm)。階ごと設定が OFF か未入力ならグローバル WALL_H。
+function defaultWallHeightMmForFloor(floor){
+  if(perFloorHeightsEnabled()){
+    var e=planFloorHeightEntry(floor);
+    var v=Number(e&&e.wallHeight);
+    // 範囲は wallHeightMm と同じ。UI 用の clampWallHeightMm を呼ばないのは、
+    // 高さモデルだけを切り出して走らせる経路(tools/tests)への依存を増やさないため。
+    if(isFinite(v)&&v>0) return Math.max(300,Math.min(6000,Math.round(v)));
+  }
+  var g=Number(WALL_H);
+  return (isFinite(g)&&g>0)?g:2400;
+}
+// その階の既定の床の高さ(床上げ mm)。部屋に floorRaiseMm があればそちらが優先。
+function defaultFloorRaiseMmForFloor(floor){
+  if(perFloorHeightsEnabled()){
+    var e=planFloorHeightEntry(floor);
+    var v=Number(e&&e.floorRaise);
+    if(isFinite(v)&&v>=0) return Math.max(0,Math.min(600,Math.round(v)));
+  }
+  var plan=(typeof DATA!=='undefined')?DATA:null;
+  var hd=plan?plan.heightDefaults:null;
+  var g=Number(hd&&hd.floorRaise);
+  return (isFinite(g)&&g>=0)?Math.max(0,Math.min(600,Math.round(g))):0;
+}
+// 新しく作る部屋に入れる床の高さ(床上げ mm)。既定値をまだ触っていないプランは
+// 従来どおり 1階=150 / 上階=0。触った時点からはその既定値に従う。
+function newRoomFloorRaiseMm(floor){
+  var f=floor||1;
+  if(perFloorHeightsEnabled()){
+    var e=planFloorHeightEntry(f);
+    if(e&&isFinite(Number(e.floorRaise))) return clampFloorRaiseMm(e.floorRaise);
+  }else{
+    var plan=(typeof DATA!=='undefined')?DATA:null;
+    var hd=plan?plan.heightDefaults:null;
+    if(hd&&hd.floorRaiseSet) return clampFloorRaiseMm(hd.floorRaise);
+  }
+  return f===1?150:0;
+}
+// 既定値を変えたとき、「既定値のまま」だった壁を新しい既定値へ付け替える。
+// 壁は作られた時点の既定値を wallHeight に焼き付けるので、これをしないと
+// サイドメニューで壁を高くしても既存の壁だけが取り残される。
+// 既定と違う値を入れてある壁(手すり壁の1100など)は触らない。
+function retagWallsToDefaultHeight(floor,oldDefault,newDefault){
+  var walls=(typeof DATA!=='undefined'&&DATA&&DATA.walls)?DATA.walls:null;
+  if(!walls||oldDefault===newDefault) return;
+  walls.forEach(function(w){
+    if(floor!==null&&floor!==undefined&&(w.floor||1)!==floor) return;
+    if(w.wallHeight===undefined||Number(w.wallHeight)===oldDefault) w.wallHeight=newDefault;
+  });
+}
+function heightDefaultsChanged(){
+  markDirty();
+  syncHeightDefaultsUI();
+  if(typeof updateProps==='function') updateProps();
+  if(typeof draw2d==='function') draw2d();
+  if(typeof ren!=='undefined'&&ren&&typeof rebuild3D==='function') rebuild3D();
+}
+function setPerFloorHeights(on){
+  var hd=ensureHeightDefaults();
+  if(!hd) return;
+  if(typeof saveState==='function') saveState();
+  var before=HEIGHT_SETTING_FLOORS.map(function(f){return defaultWallHeightMmForFloor(f);});
+  hd.perFloor=!!on;
+  if(hd.perFloor){
+    // ONにした瞬間に家の形が変わらないよう、今の実効値を各階へ書き写す。
+    HEIGHT_SETTING_FLOORS.forEach(function(f,i){
+      var e=DATA.floors[String(f)];
+      if(!e||typeof e!=='object'){ e={}; DATA.floors[String(f)]=e; }
+      if(!isFinite(Number(e.wallHeight))||Number(e.wallHeight)<=0) e.wallHeight=before[i];
+    });
+  }
+  heightDefaultsChanged();
+}
+// floor が null ならグローバル(全階共通)の既定値。
+function setDefaultWallHeight(floor,value){
+  var hd=ensureHeightDefaults();
+  if(!hd) return;
+  var v=clampWallHeightMm(value);
+  if(typeof saveState==='function') saveState();
+  if(floor===null||floor===undefined){
+    var olds=HEIGHT_SETTING_FLOORS.map(function(f){return defaultWallHeightMmForFloor(f);});
+    WALL_H=v; hd.wallHeight=v;
+    HEIGHT_SETTING_FLOORS.forEach(function(f,i){ retagWallsToDefaultHeight(f,olds[i],defaultWallHeightMmForFloor(f)); });
+  }else{
+    var old=defaultWallHeightMmForFloor(floor);
+    var e=DATA.floors[String(floor)];
+    if(!e||typeof e!=='object'){ e={}; DATA.floors[String(floor)]=e; }
+    e.wallHeight=v;
+    retagWallsToDefaultHeight(floor,old,v);
+  }
+  heightDefaultsChanged();
+}
+function setDefaultFloorRaise(floor,value){
+  var hd=ensureHeightDefaults();
+  if(!hd) return;
+  var v=clampFloorRaiseMm(value);
+  if(typeof saveState==='function') saveState();
+  if(floor===null||floor===undefined){
+    var olds=HEIGHT_SETTING_FLOORS.map(function(f){return defaultFloorRaiseMmForFloor(f);});
+    hd.floorRaise=v; hd.floorRaiseSet=true;
+    HEIGHT_SETTING_FLOORS.forEach(function(f,i){ retagRoomsToDefaultRaise(f,olds[i],defaultFloorRaiseMmForFloor(f)); });
+  }else{
+    var old=defaultFloorRaiseMmForFloor(floor);
+    var e=DATA.floors[String(floor)];
+    if(!e||typeof e!=='object'){ e={}; DATA.floors[String(floor)]=e; }
+    e.floorRaise=v;
+    retagRoomsToDefaultRaise(floor,old,v);
+  }
+  heightDefaultsChanged();
+}
+// 壁と同じ理由で、部屋も作られた時点の既定値を floorRaiseMm に焼き付けている。
+function retagRoomsToDefaultRaise(floor,oldDefault,newDefault){
+  var rooms=(typeof DATA!=='undefined'&&DATA&&DATA.rooms)?DATA.rooms:null;
+  if(!rooms||oldDefault===newDefault) return;
+  rooms.forEach(function(r){
+    if((r.floor||1)!==floor) return;
+    if(r.floorRaiseMm===undefined||Number(r.floorRaiseMm)===oldDefault) r.floorRaiseMm=newDefault;
+  });
+}
+function heightDefaultsRowHtml(floor){
+  var tag=(floor===null||floor===undefined)?'':(floor+'F');
+  var arg=(floor===null||floor===undefined)?'null':String(floor);
+  var wallV=defaultWallHeightMmForFloor(floor===null?1:floor);
+  var raiseV=(floor===null||floor===undefined)
+    ? defaultFloorRaiseMmForFloor(1)
+    : defaultFloorRaiseMmForFloor(floor);
+  return '<div class="hd-row">'+
+    (tag?'<span class="hd-tag">'+tag+'</span>':'')+
+    '<input class="pi" type="number" min="'+WALL_H_MIN+'" max="'+WALL_H_MAX+'" step="50" value="'+wallV+'" title="壁の高さ(mm)" onchange="setDefaultWallHeight('+arg+',+this.value)">'+
+    '<input class="pi" type="number" min="0" max="600" step="10" value="'+raiseV+'" title="床の高さ(床上げ mm)" onchange="setDefaultFloorRaise('+arg+',+this.value)">'+
+    '</div>';
+}
+function syncHeightDefaultsUI(){
+  if(typeof document==='undefined') return;
+  var body=document.getElementById('height-defaults-body');
+  var chk=document.getElementById('height-per-floor');
+  if(!body) return;
+  ensureHeightDefaults();
+  var per=perFloorHeightsEnabled();
+  if(chk) chk.checked=per;
+  var head='<div class="hd-head">'+(per?'<span class="hd-tag"></span>':'')+
+    '<span class="hd-col">壁の高さ</span><span class="hd-col">床の高さ</span></div>';
+  if(per){
+    // 上の行が上の階。キャンバスの3Dビューと上下がそろっていないと読み違える。
+    body.innerHTML=head+HEIGHT_SETTING_FLOORS.slice().reverse()
+      .map(function(f){return heightDefaultsRowHtml(f);}).join('');
+  }else{
+    body.innerHTML=head+heightDefaultsRowHtml(null);
+  }
+}
+// 階高(mm)。plan.floors[階].storyHeight が無ければ既定 2700(=FLOOR_H)へ落ちる。
+// 高さフィールドを持たない保存済みプランでは FLOOR_H 定数と完全に同値。
+//
+// **床スラブ+その階の既定の壁高さ を下限にする。** これが無いと、壁を高くしても
+// 上階の始まる高さが据え置かれ、下階の壁が上階へめり込む。壁は階の床スラブの
+// 下端から立つので、階高がそれを下回った時点で必ず突き抜ける。
+function storyHeightMmForFloor(floor){
+  var base=FLOOR_H;
+  if(typeof HeightModel!=='undefined'&&HeightModel&&typeof DATA!=='undefined'&&DATA)
+    base=HeightModel.storyHeightMm(DATA,floor);
+  var need=floorSlabMmForFloor(floor)+defaultWallHeightMmForFloor(floor);
+  return Math.max(base,need);
+}
+function storyHeightM(floor){
+  return storyHeightMmForFloor(floor)*U;
+}
+function floorBaseY(floor){
+  // 階は「その階より下の階の階高の合計」だけ持ち上がる。階高がすべて既定(2700)の
+  // ときは従来式 ((floor-1)*FLOOR_H*U) と1ビットも変わらない。
+  var f=(floor||1), y=foundationHeightM(), i;
+  if(f>=1){
+    for(i=1;i+1<=f;i++) y+=storyHeightM(i);
+    if(i<f) y+=storyHeightM(i)*(f-i);        // 端数階(通常は無い)も従来式と同じ比例
+  }else{
+    for(i=1;i-1>=f;i--) y-=storyHeightM(i-1);
+    if(i>f) y-=storyHeightM(i-1)*(i-f);
+  }
+  return y;
+}
+function floorSlabHeightM(){
+  // FLOOR_SLAB_H は床スラブの厚みで、部屋の天井高とは無関係なので置き換えない。
+  return Math.max(0,FLOOR_SLAB_H||0)*U;
+}
+// その階の床スラブ厚(mm)。1階は基礎の上に直接載るので 0。
+function floorSlabMmForFloor(floor){
+  return (floor||1)<=1 ? 0 : Math.max(0,FLOOR_SLAB_H||0);
+}
+function floorSlabHeightMForFloor(floor){
+  return floorSlabMmForFloor(floor)*U;
+}
+function floorTopY(floor){
+  return floorBaseY(floor)+floorSlabHeightMForFloor(floor);
+}
+// Room finished-floor buildup, measured from the existing floor datum (mm).
+// Missing values retain existing plans exactly; structural storeys stay unchanged.
+function roomFloorOffsetMm(room){
+  var n=Number(room&&room.floorRaiseMm);
+  if(Number.isFinite(n)) return Math.max(0,Math.min(600,n));
+  // 個別指定が無い部屋はサイドメニューの既定値(階ごと設定を含む)を採る。
+  // 既定値は 0 なので、設定していないプランは従来どおり。
+  return defaultFloorRaiseMmForFloor(room&&room.floor);
+}
+// 上階の床が載る天端(m)。下階に「その階の既定より高い壁」が立っていると、
+// その上に載る床はその壁の天端まで持ち上がる。
+// 既定の高さのままの壁しか無い階では floorBaseY(floor) と完全に同値。
+// 矩形は平面mm (x1,y1)-(x2,y2)。
+function localSupportTopY(floor,x1,y1,x2,y2){
+  var f=floor||1;
+  var base=floorBaseY(f);
+  if(f<=1) return base;
+  var walls=(typeof DATA!=='undefined'&&DATA&&DATA.walls)?DATA.walls:null;
+  if(!walls||!walls.length) return base;
+  var below=f-1;
+  var belowTop=floorBaseY(below)+floorSlabHeightMForFloor(below);
+  var top=base;
+  var lox=Math.min(x1,x2), hix=Math.max(x1,x2);
+  var loy=Math.min(y1,y2), hiy=Math.max(y1,y2);
+  for(var i=0;i<walls.length;i++){
+    var w=walls[i];
+    if((w.floor||1)!==below) continue;
+    var v=Number(w.wallHeight);
+    if(!isFinite(v)||v<=0) continue;
+    var t=belowTop+Math.max(300,Math.min(6000,v))*U;
+    if(t<=top+1e-9) continue;
+    // 壁の芯線が対象矩形(壁厚の半分だけ広げたもの)の中を通る長さ。
+    // 角で1点触れているだけの壁は床を支えないので、広げたぶんより長く
+    // 重なっているものだけを支持とみなす。
+    var half=Math.max(0,(Number(w.thick)||120)/2);
+    var span=segmentInsideRectLengthMm(w.x1,w.y1,w.x2,w.y2,lox-half,loy-half,hix+half,hiy+half);
+    if(span<=half+1) continue;   // +1mm は丸め誤差のぶん
+    top=t;
+  }
+  return top;
+}
+// 線分が軸平行矩形の内側を通る長さ(mm)。Liang-Barsky。
+function segmentInsideRectLengthMm(x1,y1,x2,y2,rx0,ry0,rx1,ry1){
+  var dx=x2-x1, dy=y2-y1;
+  var t0=0, t1=1, i, p, q, r;
+  for(i=0;i<4;i++){
+    p=(i===0)?-dx:(i===1)?dx:(i===2)?-dy:dy;
+    q=(i===0)?(x1-rx0):(i===1)?(rx1-x1):(i===2)?(y1-ry0):(ry1-y1);
+    if(p===0){ if(q<0) return 0; continue; }
+    r=q/p;
+    if(p<0){ if(r>t1) return 0; if(r>t0) t0=r; }
+    else { if(r<t0) return 0; if(r<t1) t1=r; }
+  }
+  if(t1<=t0) return 0;
+  return Math.sqrt(dx*dx+dy*dy)*(t1-t0);
+}
+function roomFloorTopY(room){
+  if(!room) return 0;
+  return localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d)
+    +floorSlabHeightMForFloor(room.floor)+roomFloorOffsetMm(room)*U;
+}
+function roomFloorAt(floor,x,y){
+  var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
+  // A smaller explicit room wins over an enclosing whole-floor outline.
+  candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
+  if(candidates.length) return roomFloorTopY(candidates[0]);
+  return localSupportTopY(floor,x,y,x,y)+floorSlabHeightMForFloor(floor);
+}
+function updateSelectedRoomFloor(value){
+  var r=ST.selected;if(!r||r.type!=='room')return;
+  if(isObjectLocked(r)){updateProps();return;}
+  var n=Number(value);if(!Number.isFinite(n))return;
+  var oldFloor=roomFloorOffsetMm(r);
+  saveState();r.floorRaiseMm=Math.max(0,Math.min(600,n));
+  var delta=roomFloorOffsetMm(r)-oldFloor;
+  DATA.items.forEach(function(it){
+    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail')return;
+    if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==r)return;
+    // A floor edit must not move a ceiling attachment, including a deliberately
+    // lowered pendant. Preserve its existing world height and suspension length.
+    it.elev=(Number(it.elev)||0)-delta;
+  });
+  markDirty();updateProps();draw2d();if(ren)rebuild3D();
+}
+function selectedRoomFloorHtml(r){
+  var v=roomFloorOffsetMm(r);
+  return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
+    '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
+    '<option value="">プリセットを選択</option><option value="0">玄関土間・既存基準 ＋0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
+    '<div class="pr"><label class="pl" for="room-floor-raise">床上げ (mm)</label><input id="room-floor-raise" class="pi" type="number" min="0" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
+    '<div class="lock-status-note">この階の既存床を0mmとして指定。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
+}
+var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
+function isContextExteriorItemType(type){
+  return !!CONTEXT_EXTERIOR_TYPES[type];
+}
+function shouldRenderItemInCurrent3DView(it){
+  if(!it) return false;
+  if(isInt && isContextExteriorItemType(it.type)) return false;
+  return true;
+}
+// 外構系オブジェクト: 1階配置時も床・基礎の厚み分を足さず地面(GL)に接地させる
+function isGroundLevelItemType(t){
+  var model=getFmpItem(t);if(model&&model.groundLevel) return true;
+  return t==='site-rect' || t==='foundation' || t==='exterior-stair' || t==='ramp' ||
+    t==='ac-outdoor' || t==='water-heater' || t==='meter-box' || t==='sewer-pit' ||
+    t==='downspout' || t==='gas-heater' ||
+    t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
+    t==='fence' || t==='wood-fence' || t==='lattice-screen';
+}
+// 塀・フェンス・車などはバルコニーの手すり代わり等で2階以上にも置かれるため、
+// 接地(GL=0)は1階配置のときだけ。上階ではその階の床天端に置く
+function isFloorAwareGroundItemType(t){
+  return t==='car' || t==='bicycle' || t==='bicycle-fold' || t==='tree' ||
+    t==='fence' || t==='wood-fence' || t==='lattice-screen';
+}
+// 敷地サーフェス(site-rect)の描画面は GL より 35mm 下(build3DSiteRect)。
+// その上に立つ接地アイテムを GL=0 に置くと 35mm 浮いて見えるので、
+// 中心が敷地サーフェス上にあるものは面の高さへ接地させる。
+// 敷地サーフェスの描画面。素地グラウンド(-0.06)とZファイティングしない範囲で
+// GL に寄せる。ここを下げすぎると基礎やポーチの脚元に隙間が見える
+var SITE_SURFACE_Y = -0.012;
+// アイテムの中心が基礎(=建物が載る土台)の上にあるか。屋内/屋外の判定に使う
+function itemOnFoundation(it){
+  if(!it || !DATA || !DATA.items) return false;
+  var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+  var any=false, on=false;
+  DATA.items.forEach(function(f){
+    if(f.type!=='foundation' || (f.floor||1)!==1) return;
+    any=true;
+    if(cx>=f.x && cx<=f.x+f.w && cy>=f.y && cy<=f.y+f.d) on=true;
+  });
+  return any ? on : true;   // 基礎を置いていないプランは従来どおり床レベル
+}
+function groundYForItem(it){
+  if(it.type==='site-rect' || it.type==='foundation') return 0;
+  var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
+  var on=DATA.items.some(function(s){
+    return s.type==='site-rect' && (s.floor||1)===1 &&
+      cx>=s.x && cx<=s.x+s.w && cy>=s.y && cy<=s.y+s.d;
+  });
+  return on?SITE_SURFACE_Y:0;
+}
+function item3DBaseY(it){
+  if(!it) return 0;
+  if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
+    if(isFloorAwareGroundItemType(it.type) && (it.floor||1)>1) return floorTopY(it.floor);
+    return groundYForItem(it);
+  }
+  if(it.type==='roof') return localSupportTopY(it.floor,it.x,it.y,it.x+(it.w||0),it.y+(it.d||0));
+  // 1階に置いた一般アイテムでも、基礎の外(=屋外)にあるものは地面に置く。
+  // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
+  // 「地面から浮いた謎の矩形」になる
+  if((it.floor||1)===1 && !itemOnFoundation(it)) return groundYForItem(it);
+  return roomFloorAt(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
+
+}
+// 外皮としての壁の高さ(m)。部屋ではなく「その階の壁」の高さ = 階高まで。
+// ここを下げると外壁と上階の床のあいだが外から素通しになるので、下限として使う。
+function wallFullHeightM(floor){
+  return Math.max(defaultWallHeightMmForFloor(floor)*U+floorSlabHeightMForFloor(floor),storyHeightM(floor));
+}
+function isPositiveNumber(v){
+  return typeof v==='number'&&isFinite(v)&&v>0;
+}
+// 部屋に「明示された」天井高(mm)。指定が無ければ null を返す。
+// 保存済みプランは高さフィールドを持たないので必ず null になり、天井は従来どおり
+// 階高いっぱいに置かれる = 既存ユーザーの家の寸法が1mmも動かない。
+// 正の数値だけを指定ありとみなす(HeightModel の num() と同じ門。null や 0 や
+// 文字列は既定へ落ちるので、ここで拾うと逆に家が変わってしまう)。
+// ── 吹き抜け (ceiling.type==='void') ───────────────────────────────────
+// 吹き抜けとは「上階の床を張らず、天井を上の階の天井まで通す」ことである。
+// 高さを数値で書かせてはならない。階高・床スラブ・階数から決まる値なので、
+// 手で計算すると階高を変えた瞬間に上階の天井と食い違い、スラブの小口が
+// 室内に見える(実際、最初の実装は 5280 と手で書いて 120mm 低かった)。
+function roomVoidTargetFloor(room){
+  var from=(room&&room.floor)||1;
+  var raw=Number(room&&room.ceiling&&room.ceiling.toFloor);
+  var to=isFinite(raw)?Math.round(raw):from+1;
+  return Math.max(from+1,to);
+}
+function roomIsVoidCeiling(room){
+  return !!(room&&room.ceiling&&room.ceiling.type==='void');
+}
+// 吹き抜けの天井高(mm)。床スラブ下端から目標階の天井までを直接算出する。
+// 明示した通常天井の床仕上げ面基準とは異なり、呼び出し側でスラブを足さない。
+function roomVoidCeilingMm(room){
+  var from=(room&&room.floor)||1, to=roomVoidTargetFloor(room);
+  // **床スラブ下端(floorBaseY)からの高さ**を返す。roomCeilingHeightM の
+  // 他の枝(平天井・勾配)と基準を揃えるため。ここで床スラブを引いてしまうと
+  // 「床仕上げ面からの高さ」になり、呼び出し側 ceilingFinishElevationMm が
+  // もう一度スラブを引くので二重に引かれる。1階の吹き抜けはスラブ0mmなので
+  // 症状が出ず、2階以上に吹き抜けを作った瞬間に天井が180mm下がる。
+  return Math.round((floorBaseY(to)+storyHeightM(to)-floorBaseY(from))/U);
+}
+// 吹き抜けが成立するか。自分と目標階の間の **全ての階** で、この部屋の足元の
+// 上に部屋が無いこと。直上階だけを見ると2層以上の吹き抜けが作れない。
+function roomVoidFloorsAreOpen(room){
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.rooms) return false;
+  var from=(room.floor||1), to=roomVoidTargetFloor(room), i, r;
+  for(i=0;i<DATA.rooms.length;i++){
+    r=DATA.rooms[i];
+    if(!r||r===room||r.hidden3D) continue;
+    var f=(r.floor||1);
+    if(f<=from||f>to) continue;
+    if(roomsOverlapInPlan(room,r)) return false;
+  }
+  return true;
+}
+// 吹き抜けが作れない理由。作れるなら空文字を返す(黙って平らにしない)。
+function roomVoidBlockReason(room){
+  if(!room) return '';
+  var from=(room.floor||1), to=roomVoidTargetFloor(room), i, r;
+  for(i=0;i<((DATA&&DATA.rooms)||[]).length;i++){
+    r=DATA.rooms[i];
+    if(!r||r===room||r.hidden3D) continue;
+    var f=(r.floor||1);
+    if(f<=from||f>to) continue;
+    if(roomsOverlapInPlan(room,r)){
+      return 'この部屋の上には'+roomDisplayLabel(r)+
+        'が載っています。吹き抜けは上階の床を張らない形なので、抜きたい範囲の'+
+        '上階から部屋を消してください(部屋がある限り床は張られます)。';
+    }
+  }
+  return '';
+}
+function roomExplicitCeilingMm(room){
+  if(!room||typeof HeightModel==='undefined'||!HeightModel) return null;
+  var c=room.ceiling;
+  if(c&&c.type==='void') return roomVoidCeilingMm(room);
+  var sloped=!!(c&&c.type==='sloped');
+  if(!sloped&&!isPositiveNumber(c&&c.heightMm)&&!isPositiveNumber(room.ceilingHeight)) return null;
+  if(sloped){
+    // 勾配天井そのものは Task 2c。ここでは高い側の高さで平らに置く。
+    var shape=HeightModel.ceilingShape(DATA,room);
+    if(shape&&isPositiveNumber(shape.highMm)) return shape.highMm;
+  }
+  return HeightModel.ceilingHeightMm(DATA,room);
+}
+// ── 屋根が天井を決める (Task 12-1) ──────────────────────────────────────
+// 在来工法の勾配天井は「天井を吊るのをやめ、垂木の下端を仕上げ面にする」ことである。
+// だから天井の勾配は屋根の勾配そのもので、独立に決めるものではない。天井面と屋根
+// 下面の間隔は 垂木せい(45〜105mm) + 断熱材 + 通気層(30mm以上) で、実務では合計
+// 200〜300mm。その中央値を既定とする。
+var CEILING_UNDER_ROOF_OFFSET_MM=250;
+// 天井面を屋根から導くのは **ceiling.type==='sloped' を宣言した部屋だけ**。
+// 既存の部屋は屋根の下でも平天井(階高)として描かれてきたので、宣言していない
+// 部屋まで屋根から導くと保存済みの家の天井が全戸で動く。
+function roomDeclaresSlopedCeiling(room){
+  return !!(room&&room.ceiling&&room.ceiling.type==='sloped');
+}
+// ── 勾配天井が成立する階 (Task 14) ──────────────────────────────────────
+// 勾配天井は「天井を吊るのをやめ、屋根裏側へ抜ける」形である。だから上に床が
+// 載っている階では作れない。3階建ての1階に勾配天井は無い -- そこにあるのは屋根
+// ではなく2階の床だから。
+//
+// 「最上階」を **階番号の最大** で決めてはいけない。2階建てに平屋の下屋が付いた
+// 家では、下屋(1階)の部屋の上には何も無いので勾配天井が成立する。判定は必ず
+// **その部屋の真上に部屋があるか** で行う。部屋は床スラブそのもの
+// (buildRoomFloorMeshes が部屋ごとにスラブを建てる)なので、部屋を見れば床を見た
+// ことになる。部屋は回転を持たない(すべて軸平行の矩形)ので重なりは矩形交差でよい。
+//
+// 少しでも重なっていれば「上に部屋がある」とみなす。一部だけ覆われた部屋に勾配を
+// 許すと、覆われた側で天井が上階の床を突き抜ける。
+var ROOM_OVERLAP_EPS_MM=1;
+function roomsOverlapInPlan(a,b){
+  return a.x+a.w>b.x+ROOM_OVERLAP_EPS_MM && b.x+b.w>a.x+ROOM_OVERLAP_EPS_MM &&
+         a.y+a.d>b.y+ROOM_OVERLAP_EPS_MM && b.y+b.d>a.y+ROOM_OVERLAP_EPS_MM;
+}
+// この部屋を覆っている上階の部屋。無ければ null(=その部屋の上は屋根裏)。
+// 複数該当するときは一番下の階のものを返す -- 画面で理由を言うときに、
+// すぐ上に何があるかを名指しできるように。
+function roomAboveRoom(room){
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
+  var f=(room.floor||1), best=null, i, r;
+  for(i=0;i<DATA.rooms.length;i++){
+    r=DATA.rooms[i];
+    if(!r||r===room||r.hidden3D) continue;
+    if((r.floor||1)<=f) continue;
+    if(!roomsOverlapInPlan(room,r)) continue;
+    if(!best||(r.floor||1)<(best.floor||1)) best=r;
+  }
+  return best;
+}
+function roomHasRoomAbove(room){
+  return !!roomAboveRoom(room);
+}
+// 屋根アイテムの footprint が平面上のこの点を覆っているか。回転・フリップは
+// roofLocalPoint が既に持っているので、ローカル座標で矩形に入るかだけを見る
+// (isInsideItem は建具の当たり判定の余白を持っており、屋根の輪郭とは別物)。
+// 谷(2つの制限が交わる線)の向こう側か。setbackClips は「この面のほうが低い
+// (＝この面が効く)側」を表す平面座標の一次式で、値が0以上の側だけがこの屋根の
+// 領分である。制限が1枚だけのプランでは setbackClips が付かないので、
+// 既存の屋根も1枚制限の斜線屋根も、ここは1回も通らない。
+function setbackClipsCoverPlan(cls,xMm,yMm){
+  var i, c;
+  for(i=0;i<cls.length;i++){
+    c=cls[i];
+    if(c.c+c.cx*xMm+c.cy*yMm<0) return false;
+  }
+  return true;
+}
+function roofCoversPlanPoint(it,xMm,yMm){
+  var lp=roofLocalPoint(it,xMm,yMm);
+  // 斜線由来の屋根は、**自分の面がいちばん低い範囲にしか架からない**(Task 25-3)。
+  // 角で2つの制限が交わるところでは、谷の向こうはもう一方の面の屋根の領分である。
+  // 3D に建つ板もそこで切られている(build3DSetbackRoofSlab の setbackOtherPlaneClips)
+  // ので、同じ谷をここでも使う -- 谷の定義は setbackBindingClipPlan 1本しかない。
+  if(it.setbackClips && !setbackClipsCoverPlan(it.setbackClips,xMm,yMm)) return false;
+  // 斜線由来の屋根が凹みのある輪郭を持つとき(Task 18-3)は、その輪郭で見る。
+  // setbackOutline を持たない屋根 -- つまり既存の屋根すべて -- は従来の矩形のまま。
+  if(it.setbackOutline) return setbackOutlineCoversLocal(it.setbackOutline,lp.x,lp.z);
+  // 結合した屋根(L字・コの字)は外接矩形ではなく、結合した矩形の集合で見る。
+  // 外接矩形で見ると、L字の欠けた側にある部屋まで屋根の下になってしまう。
+  var rp=(typeof roofParts==='function')?roofParts(it):null;
+  if(rp){
+    for(var i=0;i<rp.length;i++){
+      var p=rp[i];
+      if(Math.abs(lp.x/U-p.cx)<=p.w/2+1e-3 && Math.abs(lp.z/U-p.cz)<=p.d/2+1e-3) return true;
+    }
+    return false;
+  }
+  return Math.abs(lp.x)<=it.w*U/2+1e-6 && Math.abs(lp.z)<=it.d*U/2+1e-6;
+}
+// 屋根ローカル(m)の点が輪郭の中か。輪郭は重ならない矩形の集まりである。
+function setbackOutlineCoversLocal(ol,x,z){
+  var rs=(ol&&ol.rects)||[], i, r;
+  for(i=0;i<rs.length;i++){
+    r=rs[i];
+    if(x>=r.x0-1e-6&&x<=r.x1+1e-6&&z>=r.z0-1e-6&&z<=r.z1+1e-6) return true;
+  }
+  return false;
+}
+// この部屋の上に載っている roof アイテム。無ければ null。
+// 「載っている」= 部屋の中心が屋根の footprint に入り、かつその屋根の下面(天井面)の
+// 最高点が部屋の床より上にあること(下の階の庇に天井を引きずり下ろさせない)。
+// 複数該当するときは棟が低い方を採る -- 先に頭を押さえるのはそちらだから。
+function roofItemOverRoom(room){
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.items) return null;
+  // 上に部屋がある階では、屋根は「上にある」ものではない -- あいだに床がある。
+  // これが無いと、屋根の階だけを見ていないせいで、既定プラン(部屋1〜3階・屋根3階と
+  // 4階)の1階の部屋が2階分上の屋根から天井をもらう。
+  if(roomHasRoomAbove(room)) return null;
+  var cx=room.x+room.w/2, cy=room.y+room.d/2;
+  var floorY=floorTopY(room.floor);
+  var best=null, bestApex=Infinity;
+  DATA.items.forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    if(!roofCoversPlanPoint(it,cx,cy)) return;
+    var apex=roofCeilingWorldYAt(it,cx,cy);
+    // 中心だけでは軒先を掴んでしまうので、部屋の四隅も見て一番高いところで判定する。
+    [[room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]]
+      .forEach(function(p){
+        var v=roofCeilingWorldYAt(it,p[0],p[1]);
+        if(v>apex) apex=v;
+      });
+    if(apex<=floorY) return;
+    if(apex<bestApex){ bestApex=apex; best=it; }
+  });
+  return best;
+}
+// 屋根の下面(=垂木の載る基準面)の、ワールド Y(m)。
+// **屋根の形の計算はここに書かない**。3D 側が既に使っている roofSurfaceHeightAt
+// (屋根ローカル座標での屋根面高さ) と roofLocalPoint をそのまま呼ぶ。屋根アイテムの
+// 世界での据え付け方 (floorBaseY(floor)+elev) も既存の竪樋判定と同じ式である。
+// この面が「家の中のものが超えられない天井(=屋根裏の底)」であり、天井面も壁の
+// 上端もここで頭を押さえられる。
+function roofUndersideWorldYAt(roofItem,xMm,yMm){
+  var lp=roofLocalPoint(roofItem,xMm,yMm);
+  return floorBaseY(roofItem.floor)+((roofItem.elev||0)*U)
+    +roofSurfaceHeightAt(roofItem,lp.x,lp.z);
+}
+// 屋根下面から CEILING_UNDER_ROOF_OFFSET_MM だけ下げた面の、ワールド Y(m)。
+function roofCeilingWorldYAt(roofItem,xMm,yMm){
+  return roofUndersideWorldYAt(roofItem,xMm,yMm)-CEILING_UNDER_ROOF_OFFSET_MM*U;
+}
+// 部屋の天井の形。**宣言しておらず斜線にも当たっていない部屋では必ず null**を返し、
+// 呼び出し側は従来の平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ
+// 手書きの low/high/direction から形を得る(屋根が載っていない部屋のための上書き)。
+//
+// Task 17: 斜線制限で削られた部屋は、宣言が無くても勾配天井になる。勾配天井は
+// 設計者が宣言するものではなく **切り取りの結果として現れる** ものだからである。
+// ただし別経路は作らない -- 斜線の切り口に架かる片流れ屋根を roof アイテムとして
+// 作り(setbackRoofItems)、ここでは従来どおり「屋根から天井が決まる」枝を通す。
+// reason で「宣言が効いたのか、斜線が効いたのか」を必ず判別できるようにする。
+// 斜線由来の片流れ屋根は斜線制限の節(setbackRoofItems)で作られる。高さモデルだけを
+// 切り出して走らせる経路のために、無ければ「斜線は無い」として通す。
+function setbackRoofsForRoom(room){
+  if(typeof setbackRoofsOverRoom!=='function') return [];
+  return setbackRoofsOverRoom(room);
+}
+function roomCeilingProfile(room){
+  var sbRoofs=setbackRoofsForRoom(room);
+  if(!roomDeclaresSlopedCeiling(room)){
+    if(!sbRoofs.length) return null;
+    // 斜線由来。低い側は持ち上げない(lowY=0)。制限に当たっていない場所の天井は
+    // 元の平天井のまま動かさない(maxY) -- 当たっていない所まで天井を下げない、
+    // というのがこの仕組みの要点である。
+    return {source:'roof',reason:'setback',roof:sbRoofs[0],roofs:sbRoofs,
+      lowY:0,baseY:floorBaseY(room.floor),
+      maxY:floorBaseY(room.floor)+roomCeilingHeightM(room)};
+  }
+  if(typeof HeightModel==='undefined'||!HeightModel) return null;
+  var shape=HeightModel.ceilingShape(DATA,room);
+  if(!shape||shape.type!=='sloped') return null;
+  var baseY=floorBaseY(room.floor);
+  var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
+  var roof=roofItemOverRoom(room);
+  if(roof) return {source:'roof',reason:'declared',roof:roof,
+    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],lowY:lowY,baseY:baseY};
+  if(sbRoofs.length) return {source:'roof',reason:'setback',roof:sbRoofs[0],
+    roofs:sbRoofs,lowY:lowY,baseY:baseY};
+  var highY=roomCeilingHeightM(room);
+  if(lowY>highY) lowY=highY;
+  return {source:'manual',reason:'declared',lowY:lowY,highY:highY,direction:shape.direction,baseY:baseY};
+}
+// 天井面のワールド Y(m)。引数は平面座標(mm)。profile が null の部屋は
+// 従来どおり平らな roomCeilingHeightM。
+function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
+  var baseY=floorBaseY(room&&room.floor);
+  if(!profile) return baseY+roomCeilingHeightM(room);
+  if(profile.source==='roof'){
+    // 頭を押さえるのは「この点を覆っている屋根のうち一番低い下面」。屋根が1枚
+    // (＝斜線を使っていない従来のプラン)なら roofTopLimitAtPlanPoint はその屋根の
+    // 値をそのまま返すので、式は 1 ビットも変わらない。斜線の片流れ屋根が重なる
+    // ときだけ、点ごとに低い方が勝つ。
+    var roofs=profile.roofs||[profile.roof];
+    var roofLim=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
+    if(roofLim===null){
+      // どの屋根も覆っていない位置。斜線由来の勾配は「削られていない位置」なので
+      // 元の平天井のまま。宣言由来は従来どおりその屋根の面を延長する。
+      if(profile.reason==='setback'&&profile.maxY!==undefined) return profile.maxY;
+      roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
+    }
+    var y=roofLim-CEILING_UNDER_ROOF_OFFSET_MM*U;
+    var lowWorld=baseY+profile.lowY;
+    // 軒先側では屋根下面が低い側の天井高より下へ来る。そこは天井を吊ったまま
+    // (平らな部分)にする -- だから勾配は壁の途中から始まり、上辺は折れ線になる。
+    if(y<lowWorld) y=lowWorld;
+    // ただし吊った天井が屋根下面より上へ出ることは無い(低い値を入れると軒先で
+    // 起きる)。壁は屋根下面で切られるので、天井だけ上へ抜けさせると壁と天井の
+    // あいだに隙間が開く。同じ面で両方の頭を押さえる。
+    if(y>roofLim) y=roofLim;
+    // 斜線由来のときだけ、元の平天井より上へは行かせない。
+    if(profile.maxY!==undefined&&y>profile.maxY) y=profile.maxY;
+    return y;
+  }
+  // 手書きの勾配: 高さは (x,z) の一次関数。既存 buildSlopedCeilingGeometry と同式。
+  var u=ceilingSlopeUnit(profile.direction);
+  var span=ceilingSlopeSpan(room,u);
+  var range=span.max-span.min;
+  var s=xMm*U*u.x+yMm*U*u.z;
+  var t=range>1e-9?(s-span.min)/range:1;
+  if(t<0) t=0; else if(t>1) t=1;
+  return baseY+profile.lowY+(profile.highY-profile.lowY)*t;
+}
+// 部屋の天井面をグリッドで実測し、最低/最高と「高い側が指す方位」を返す。
+// 屋根由来の天井は棟で折り返すので、式から最高点を解くのではなく面を測る。
+var _roofCeilingExtentCache={};
+function roomRoofCeilingExtent(room){
+  var roof=roomDeclaresSlopedCeiling(room)?roofItemOverRoom(room):null;
+  if(!roof) return null;
+  if(typeof HeightModel==='undefined'||!HeightModel) return null;
+  var shape=HeightModel.ceilingShape(DATA,room);
+  if(!shape||shape.type!=='sloped') return null;
+  var sbRoofs=setbackRoofsForRoom(room);
+  // 鍵は結果を決めるものを全部含める。含め忘れると古い天井高が残る。
+  var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
+    roof.id,roof.x,roof.y,roof.w,roof.d,roof.floor,roof.rot,roof.elev,
+    roof.roofType,roof.pitch,roof.flipX?1:0,roof.flipY?1:0,
+    floorBaseY(room.floor),floorBaseY(roof.floor),
+    sbRoofs.map(function(r){return r.key;}).join('|')].join(':');
+  if(_roofCeilingExtentCache[key]) return _roofCeilingExtentCache[key];
+  var profile={source:'roof',reason:'declared',roof:roof,
+    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],
+    lowY:shape.lowMm*U+floorSlabHeightMForFloor(room.floor),
+    baseY:floorBaseY(room.floor)};
+  var baseY=floorBaseY(room.floor);
+  var N=12, i, j, px, py, y;
+  var lowY=Infinity, highY=-Infinity, loPt=null, hiPt=null;
+  for(i=0;i<=N;i++) for(j=0;j<=N;j++){
+    px=room.x+room.w*i/N; py=room.y+room.d*j/N;
+    y=roomCeilingWorldYAtMm(room,profile,px,py)-baseY;
+    if(y<lowY){ lowY=y; loPt=[px,py]; }
+    if(y>highY){ highY=y; hiPt=[px,py]; }
+  }
+  // 矢印は高い側を指す。0=北。平面の +Y は南なので北は -y。
+  var dir=0;
+  if(loPt&&hiPt&&(hiPt[0]!==loPt[0]||hiPt[1]!==loPt[1])){
+    dir=Math.atan2(hiPt[0]-loPt[0],-(hiPt[1]-loPt[1]))*180/Math.PI;
+    if(dir<0) dir+=360;
+  }
+  var res={lowY:lowY,highY:highY,direction:dir,profile:profile};
+  _roofCeilingExtentCache[key]=res;
+  return res;
+}
+var _ceilingClampWarned={};
+// 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
+// 階高でクランプしない: それが「2520mm 以下の天井高がまったく効かない」原因だった。
+// 天井高が階高を超えるときだけ階高へ丸める。階高の側を上げると上階の床が持ち上がり
+// 家全体が変わるため、丸めるのは天井の側。丸めたことは黙らせず警告に残す。
+function roomCeilingHeightM(room){
+  // 屋根から導いた勾配天井は、定義からして階高より上へ伸びる(小屋裏を使うのが
+  // 勾配天井の目的)。ここで階高へ丸めると屋根と天井がまた食い違うので丸めない。
+  // roomCeilingProfile を経由すると手書きの枝から再帰するため、屋根の枝だけを見る。
+  var roofExt=roomRoofCeilingExtent(room);
+  if(roofExt) return roofExt.highY;
+  var floor=room&&room.floor;
+  var storyM=storyHeightM(floor);
+  var mm=roomExplicitCeilingMm(room);
+  if(mm===null) return storyM;
+  // 吹抜は既にスラブ下端から算出済み。2階以上でスラブ厚を二重加算しない。
+  var h=mm*U+(roomIsVoidCeiling(room)?0:floorSlabHeightMForFloor(floor));
+  if(h>storyM){
+    // 手書きの勾配天井は、上に何も載っていない部屋に限り階高を超えてよい (Task 14-2)。
+    // 超えても持ち上がる床が無い -- 小屋裏へ抜けるのが勾配天井の実体だからである。
+    // これが無いと既定の 低2200/高3600 が階高2700で 2700 に丸められ、勾配を選んで
+    // 何も入力しない人には必ず平天井が出る。
+    // 緩めるのは **勾配を宣言した部屋だけ**。平天井を階高より上へ置くと、壁は階高
+    // までしか建たないので天井が宙に浮く。上に部屋がある階では従来どおり丸める
+    // (階高の側を上げると上階の床ごと家全体が動くので、丸めるのは天井の側)。
+    // 吹き抜けは「上階の床を張らず、天井を上階の天井まで上げる」ことである。
+    // 上に階そのものはあるのに、その位置だけ部屋が無い場合に限り、平天井でも
+    // 階高を超えてよい。壁は wallCeilingHeightM が隣室の天井高まで建てるので
+    // 天井は宙に浮かない。最上階の平天井を階高で丸めるのは従来どおり
+    // (そこにあるのは吹き抜けではなく小屋裏で、勾配天井の領分である)。
+    if(roomDeclaresSlopedCeiling(room)&&!roomHasRoomAbove(room)) return h;
+    // 宣言された吹き抜け。間の階が全て開いていれば階高を超えてよい。
+    if(roomIsVoidCeiling(room)&&roomVoidFloorsAreOpen(room)) return h;
+    // 数値で階高超えを書いた場合の後方互換。上に階はあるのにこの位置だけ
+    // 部屋が無い(=事実上の吹き抜け)ときに限って通す。
+    var upperExists=false;
+    if(typeof DATA!=='undefined'&&DATA&&DATA.rooms){
+      for(var ri=0;ri<DATA.rooms.length;ri++){
+        var rr=DATA.rooms[ri];
+        if(rr&&!rr.hidden3D&&(rr.floor||1)===(floor||1)+1){ upperExists=true; break; }
+      }
+    }
+    if(!roomHasRoomAbove(room)&&upperExists) return h;
+    var key=((room&&room.id)||'?')+'@'+mm;
+    if(!_ceilingClampWarned[key]){
+      _ceilingClampWarned[key]=1;
+      console.warn('[height] room "'+((room&&(room.n||room.id))||'?')+'" asks for a '+mm+
+        'mm ceiling but the storey is only '+storyHeightMmForFloor(floor)+
+        'mm; the ceiling was clamped to the storey height.');
+    }
+    return storyM;
+  }
+  return h;
+}
+// レンダが実際に置いた天井面の、その階の床面からの高さ(mm)。
+// roomCeilingHeightM は floorBaseY を基準に返す（buildRooms3D の ceilY がそれ）
+// ので、床スラブを持つ階では厚みを引かないと「室内で測れる高さ」にならない。
+// 実測(既定プラン・全部屋が天井高を明示していない): 1階 2700 / 2階・3階 2520。
+function roomRenderedCeilingMm(room){
+  var floor=room&&room.floor;
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U)-Math.max(0,Math.min(600,Number(room&&room.floorRaiseMm)||0));
+}
+// 部屋が勾配天井なら、レンダが実際に置く低い側・高い側の高さ(m, floorBaseY 基準)を返す。
+// 高い側は roomCeilingHeightM をそのまま使う（階高でのクランプを2か所に書かない）。
+// 低い側も高い側で抑え、クランプで高い側が下がったときに低い側が上を越えないようにする。
+// 勾配を宣言していない部屋では null を返す。既存プランはこの関数の外側を通らない。
+function roomCeilingSlopeM(room){
+  var p=roomCeilingProfile(room);
+  if(!p) return null;
+  if(p.source==='manual') return {lowY:p.lowY,highY:p.highY,direction:p.direction,source:'manual'};
+  var ext=roomRoofCeilingExtent(room);
+  if(!ext) return null;
+  return {lowY:ext.lowY,highY:ext.highY,direction:ext.direction,source:'roof'};
+}
+// 平面図のラベルと package.json の記録は、**レンダと同じ経路**で高さを解決する。
+// HeightModel.ceilingShape / ceilingLabel をそのまま呼ぶと、天井高を明示していない
+// 部屋には既定の 2400 が返る。レンダはそういう部屋に階高をそのまま与える
+// (roomCeilingHeightM の意図的な仕様。既定へ落とすと保存済みの家が 300mm 下がる)
+// ので、既定プランでは 2700 / 2520 で描かれた部屋に「CH 2400」と書くことになる。
+// 設計 §12.2 はこのラベルを「生成AIが空間の高さを知る唯一の手がかり」と定義して
+// いるので、このずれはそのまま嘘になる。形(平ら/勾配)と文字の組み立ては
+// HeightModel の1か所に任せ、**数値だけ**をレンダ側から取る。
+function roomRenderedCeilingShape(room){
+  var mm=roomRenderedCeilingMm(room);
+  // 勾配天井は 3D で実際に傾く (roomCeilingSlopeM / buildSlopedCeilingGeometry)
+  // ようになったので、ラベルは範囲と向きを言ってよい。数値はどちらも
+  // **レンダが置いた面**から取る: 高い側は roomRenderedCeilingMm、低い側も
+  // 同じ経路 (roomCeilingSlopeM) が階高でクランプした後の値。
+  // 11-3(B) の抑制はここにあった。存在しない傾きを書かないためのもので、
+  // 傾きが実在するようになったので外した。
+  var slope=roomCeilingSlopeM(room);
+  if(!slope) return {type:'flat',heightMm:mm};
+  // どちらが効いたか(屋根か、屋根が載っていない部屋のための手書きの上書きか)を
+  // package.json へそのまま残す。判定器と生成AIが天井の出どころを追えるように。
+  return {type:'sloped',
+    lowMm:Math.round((slope.lowY-floorSlabHeightMForFloor(room&&room.floor))/U),
+    highMm:mm,
+    direction:slope.direction,
+    source:slope.source||'manual',
+    roofOffsetMm:slope.source==='roof'?CEILING_UNDER_ROOF_OFFSET_MM:undefined};
+}
+function roomRenderedCeilingLabel(room){
+  var shape=roomRenderedCeilingShape(room);
+  // 書式(矢印の表を含む)は HeightModel にしかない。写し取らずに呼び直す。
+  return HeightModel.ceilingLabel(DATA,
+    shape.type==='sloped'
+      ? {ceiling:{type:'sloped',lowMm:shape.lowMm,highMm:shape.highMm,direction:shape.direction}}
+      : {ceiling:{heightMm:shape.heightMm}});
+}
+function roomAtPointOnFloor(floor,x,y){
+  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
+  var rooms=DATA.rooms, i, r;
+  for(i=0;i<rooms.length;i++){
+    r=rooms[i];
+    if(!r||r.floor!==floor||r.hidden3D) continue;
+    if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d) return r;
+  }
+  return null;
+}
+// 壁の両側を数点サンプリングし、接する部屋の天井高の最大値と、
+// 「両側とも部屋に囲まれているか(=内部間仕切りか)」を返す。
+function wallAdjacentRoomsCeiling(w){
+  var res={maxM:0,found:false,enclosed:true};
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1){ res.enclosed=false; return res; }
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r,h;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(!r){ res.enclosed=false; continue; }
+      res.found=true;
+      h=roomCeilingHeightM(r);
+      if(h>res.maxM) res.maxM=h;
+    }
+  }
+  return res;
+}
+// ── 壁の上辺を勾配に沿わせる (Task 12-2) ────────────────────────────────
+// 上辺は**折れ線**である。勾配は壁の途中から始まることがあり(軒側の平天井が
+// 終わるところ)、切妻なら棟で折り返して山形になる。だから台形では足りず、
+// 長さ方向にサンプリングして各点で天井面の高さを引く。
+//
+// この壁が勾配天井の部屋に接しているか。接していなければ null を返し、
+// 呼び出し側は従来の「まっすぐな上辺」の枝をそのまま通る。
+function wallTouchesSlopedCeiling(w){
+  if(!w) return false;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return false;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(r&&roomCeilingProfile(r)) return true;
+    }
+  }
+  return false;
+}
+// ── 壁の上端を屋根の下面で切る (Task 15) ──────────────────────────────
+// 在来工法では外壁は桁(軒の高さ)まで立ち、その上の妻壁は屋根なりの三角形になる。
+// **壁が屋根を突き抜けることはない。** だから壁の頭を押さえるのは天井ではなく
+// 屋根の下面である。天井はそこから CEILING_UNDER_ROOF_OFFSET_MM だけ下がった面
+// なので、壁はその 250mm ぶん上、屋根の裏側まで立ってよい。
+//
+// Task 2b の「外皮に面する壁は階高を下限にする」はそのまま残す。あれは
+// **屋根が無い**(平らな屋根の下で天井だけ下げた)場合の規則で、外壁と上階の床の
+// あいだに家の外まで抜けるスリットが開くのを塞いでいる。屋根がある位置では
+// 屋根下面が上限になり、下限より先に上限が効く。そこにスリットは開かない --
+// 空いた分は屋根そのものが塞ぐからである(実測で確かめること)。
+// 屋根が無い位置では上限が無く、従来どおり下限だけが効く。
+//
+// その点を覆っている屋根が複数あれば **低い方** が勝つ。先に頭を押さえるのは
+// そちらだから(roofItemOverRoom が棟の低い屋根を採るのと同じ理由)。
+function roofTopLimitAtPlanPoint(roofs,xMm,yMm){
+  if(!roofs||!roofs.length) return null;
+  var best=null, i, it, y;
+  for(i=0;i<roofs.length;i++){
+    it=roofs[i];
+    // 屋根が覆っていない位置では切らない(= 従来どおり)。
+    if(!it||!roofCoversPlanPoint(it,xMm,yMm)) continue;
+    y=roofUndersideWorldYAt(it,xMm,yMm);
+    if(best===null||y<best) best=y;
+  }
+  return best;
+}
+// 壁は厚みを持つ。上端を芯の位置だけで切ると、勾配を横切る向きの壁では外面/内面の
+// 上端が屋根面より上に出る(120mm厚・30度勾配で 36.6mm 実測した)。芯と両面の3点で
+// 見て、いちばん低い屋根面に合わせる。屋根が覆っていない点は数に入れない。
+function wallRoofTopLimitWorldY(w,roofs,xMm,yMm){
+  if(!roofs||!roofs.length) return null;
+  var best=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return best;
+  var nx=-dy/len, ny=dx/len;
+  var halfMm=Math.max(wallExteriorFaceOffsetM(w),wallInteriorFaceOffsetM(w))/U;
+  var s,v;
+  for(s=-1;s<=1;s+=2){
+    v=roofTopLimitAtPlanPoint(roofs,xMm+nx*halfMm*s,yMm+ny*halfMm*s);
+    if(v!==null&&(best===null||v<best)) best=v;
+  }
+  return best;
+}
+// この壁の頭を押さえる屋根。壁の両側をサンプリングし、天井を屋根から導いている
+// 部屋(roomCeilingProfile の source==='roof')の屋根だけを集める。
+// 勾配を宣言していないプランでは常に空になるので、切る処理そのものが起きない
+// = 保存済みの家のジオメトリは1頂点も動かない。
+function wallLimitingRoofs(w){
+  var out=[];
+  if(!w) return out;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return out;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var i,s,t,px,py,r,p;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(!r) continue;
+      p=roomCeilingProfile(r);
+      if(!p||p.source!=='roof'||!p.roof) continue;
+      // 斜線の片流れ屋根も同じ「壁の頭を押さえる屋根」として渡す。屋根が1枚の
+      // 従来のプランでは p.roofs===[p.roof] なので集まる中身は変わらない。
+      (p.roofs||[p.roof]).forEach(function(rf){
+        if(rf&&out.indexOf(rf)<0) out.push(rf);
+      });
+    }
+  }
+  return out;
+}
+// 壁の長さ方向の位置 t(0..1) における上辺の高さ(m、その階の floorBaseY 基準)。
+// 両側の部屋のうち**高い方**を採る(既存規則。低い方に合わせると高い側の部屋に
+// 穴が開く)。minH は「これ以上は下げない」下限で、外壁には外皮の高さを渡す
+// -- 屋根が無いところで外壁を天井まで切ると、下げた部屋の上でファサードに
+// 水平のスリットが貫通する(Task 2b の実測)。
+// roofs はその壁の頭を押さえる屋根(wallLimitingRoofs)。渡さなければ切らない。
+function wallTopHeightAtM(w,t,fallbackH,minH,roofs){
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var lenMm=Math.sqrt(dx*dx+dy*dy);
+  if(lenMm<1) return fallbackH;
+  var nx=-dy/lenMm, ny=dx/lenMm;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var fy=floorBaseY(w.floor);
+  function sampleAt(tt){
+    var px=w.x1+dx*tt, py=w.y1+dy*tt, best=null, s, r, qx, qy, h;
+    for(s=-1;s<=1;s+=2){
+      qx=px+nx*off*s; qy=py+ny*off*s;
+      r=roomAtPointOnFloor(w.floor,qx,qy);
+      if(!r) continue;
+      h=roomCeilingWorldYAtMm(r,roomCeilingProfile(r),qx,qy)-fy;
+      if(best===null||h>best) best=h;
+    }
+    return best;
+  }
+  var best=sampleAt(t);
+  // 壁は交点(センターライン)まで伸びているので、両端の数十mmはどの部屋にも
+  // 入らない。そこで壁の高さいっぱいへ戻すと、間仕切りの両端に天井を突き抜ける
+  // 出っ張りが残る。内側へ歩いて最初に見つかった部屋の値を延長する。
+  if(best===null){
+    var step=1/32, k, tt;
+    for(k=1;k<=16&&best===null;k++){
+      tt=t+(t<0.5?step*k:-step*k);
+      if(tt<0||tt>1) break;
+      best=sampleAt(tt);
+    }
+  }
+  if(best===null) best=fallbackH;
+  if(minH!==undefined&&best<minH) best=minH;
+  // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
+  var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
+  if(lim!==null&&best>lim-fy) best=lim-fy;
+  return best;
+}
+// ── 壁の上端の折れ線を1か所で決める (Task 24-1) ────────────────────────
+// 壁の頭を削る条件は「勾配天井に接しているか」「外皮に面しているか(下限)」
+// 「頭を押さえる屋根はどれか」の3つである。**3D と図面はこの1つを通す。**
+// 判定を2か所に置くと、どちらかを直した日に立面図と3Dが黙って食い違う。
+// 削りの対象でない壁では null を返し、呼び出し側は従来の「まっすぐな上辺」の
+// 枝をそのまま通る(= 勾配も斜線も使っていないプランは1頂点も動かない)。
+// isOuter は既に求めてあれば渡す(buildWall3D は extSpans から持っている)。
+function wallTopCutEnv(w,isOuter){
+  if(!wallTouchesSlopedCeiling(w)) return null;
+  if(isOuter===undefined)
+    isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
+  return {
+    minH:isOuter?wallFullHeightM(w&&w.floor):undefined,
+    roofs:wallLimitingRoofs(w)
+  };
+}
+// 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
+// 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
+// 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
+var WALL_TOP_SAMPLE_STEP_M=0.06;
+// 同じ直線に乗っている点を落とす(高さの差が 0.5mm 未満)。図面の点列を短くする
+// ためだけのもので、0.5mm は立面図が既に採っている段差の判定と同じ値である。
+function wallTopProfileSimplify(pts){
+  var out=[pts[0]], i, a, b, c, span, mid;
+  for(i=1;i<pts.length-1;i++){
+    a=out[out.length-1]; b=pts[i]; c=pts[i+1];
+    span=c[0]-a[0];
+    mid=span>1e-9 ? a[1]+(c[1]-a[1])*((b[0]-a[0])/span) : b[1];
+    if(Math.abs(b[1]-mid)>=0.0005) out.push(b);
+  }
+  out.push(pts[pts.length-1]);
+  return out;
+}
+// 壁の上端の折れ線。[[t(0..1), 高さm], ...] を t 昇順で返す。高さはその階の
+// floorBaseY 基準で、壁自身の高さ(wallDisplayHeightM)は超えない -- 3D の
+// slopedTopAt と同じ頭打ちである。
+// **実際には削られていない壁では null**。立面図はこれを受け取って上端を引く。
+function wallTopProfileM(w){
+  var env=wallTopCutEnv(w);
+  if(!env) return null;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var lenMm=Math.sqrt(dx*dx+dy*dy);
+  if(lenMm<1) return null;
+  var fullH=wallDisplayHeightM(w);
+  var n=Math.max(2,Math.min(400,Math.ceil((lenMm*U)/WALL_TOP_SAMPLE_STEP_M)));
+  var pts=[], flat=true, i, t, h;
+  for(i=0;i<=n;i++){
+    t=i/n;
+    h=wallTopHeightAtM(w,t,fullH,env.minH,env.roofs);
+    if(h>fullH) h=fullH;
+    if(h<0.001) h=0.001;
+    pts.push([t,h]);
+    if(Math.abs(h-fullH)>=0.0005) flat=false;
+  }
+  if(flat) return null;   // 頭を押さえる物が無かった = 従来のまっすぐな上辺
+  return wallTopProfileSimplify(pts);
+}
+// 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
+// 最大値を採る。低い方に合わせて切ると高い側の部屋に穴が開くので、最大値以外は
+// 選べない。ただし片側でも部屋に面していない壁(=外皮に面する壁)は階高まで伸ばす:
+// そこを天井高まで下げると、外壁と上階の床のあいだに家の外まで抜ける穴が開く。
+function wallCeilingHeightM(w){
+  var envelopeM=wallFullHeightM(w&&w.floor);
+  if(!w) return envelopeM;
+  var adj=wallAdjacentRoomsCeiling(w);
+  if(!adj.found) return envelopeM;
+  var h=adj.enclosed ? adj.maxM : Math.max(adj.maxM,envelopeM);
+  var cap=wallStackedAboveCapM(w);
+  return (cap!==null && cap<h) ? cap : h;
+}
+// この壁とほぼ同じ線・同じ区間に **上階の壁** が在るか。在るなら、そこから
+// 上は上階の壁が受け持つので、吹き抜けの天井まで伸ばしてはいけない。
+// 伸ばすと同じ場所に壁が2枚立ち、
+//   - 外から見て重なった面がちらつく
+//   - 上階の壁に開けた窓の背後が下階の壁で塞がれる
+// という2つが同時に起きる(3階の吹き抜けの高窓がこれで見えなくなっていた)。
+// 一部しか覆われていない場合は切らない。切ると覆われていない側に穴が開く。
+function wallStackedAboveCapM(w){
+  if(!w || !DATA || !DATA.walls) return null;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return null;
+  var ux=dx/len, uy=dy/len;
+  var half=((w.thick||120)/2)+40;
+  var up=(w.floor|0)+1, spans=[], i, o, odx, ody, olen, p1, p2, t1, t2;
+  for(i=0;i<DATA.walls.length;i++){
+    o=DATA.walls[i];
+    if(o===w || (o.floor|0)!==up) continue;
+    odx=o.x2-o.x1; ody=o.y2-o.y1;
+    olen=Math.sqrt(odx*odx+ody*ody);
+    if(olen<1) continue;
+    if(Math.abs((odx/olen)*ux+(ody/olen)*uy)<0.999) continue;   // 平行でない
+    p1=-(o.x1-w.x1)*uy+(o.y1-w.y1)*ux;
+    p2=-(o.x2-w.x1)*uy+(o.y2-w.y1)*ux;
+    if(Math.abs(p1)>half || Math.abs(p2)>half) continue;        // 同じ線に乗っていない
+    t1=(o.x1-w.x1)*ux+(o.y1-w.y1)*uy;
+    t2=(o.x2-w.x1)*ux+(o.y2-w.y1)*uy;
+    spans.push([Math.max(0,Math.min(t1,t2)),Math.min(len,Math.max(t1,t2))]);
+  }
+  if(!spans.length) return null;
+  spans.sort(function(a,b){return a[0]-b[0];});
+  var covered=0, curA=spans[0][0], curB=spans[0][1];
+  for(i=1;i<spans.length;i++){
+    if(spans[i][0]>curB){ covered+=Math.max(0,curB-curA); curA=spans[i][0]; curB=spans[i][1]; }
+    else if(spans[i][1]>curB) curB=spans[i][1];
+  }
+  covered+=Math.max(0,curB-curA);
+  if(covered<len*0.95) return null;
+  return Math.max(0.3,floorBaseY(up)-floorBaseY(w.floor|0));
+}
+
+var ISIZES = {
+  bath:{w:1600,d:1600}, toilet:{w:380,d:680}, sink:{w:750,d:560},
+  kitchen:{w:2550,d:650}, fridge:{w:650,d:700}, washer:{w:640,d:640},
+  sofa:{w:2100,d:850}, loveseat_2p:{w:1500,d:850}, low_table:{w:900,d:500},
+  'dining-table':{w:1200,d:800}, dining_6:{w:1600,d:900}, round_table_4:{w:1000,d:1000},
+  'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
+  futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
+  'custom-block':{w:900,d:450},
+  'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
+  memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
+  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
+  balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:2083,d:4790}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
+
+  // 隣家の既定は 8P×7P(7280×6370) = 1階46.4m² / 2階建て延べ約28坪。
+  // 日本の建売住宅の最も標準的な規模で、910モジュールにも正確に載る。
+  'neighbor-building':{w:5200,d:3600}, 'neighbor-house':{w:7280,d:6370}, road:{w:9000,d:4000}, 'utility-pole':{w:350,d:350},
+  'ac-outdoor':{w:800,d:300}, 'water-heater':{w:630,d:760}, 'gas-heater':{w:470,d:240}, 'meter-box':{w:180,d:120}, 'sewer-pit':{w:300,d:300},
+  'downspout':{w:150,d:150},
+  foundation:{w:7280,d:4095}, 'exterior-stair':{w:910,d:1200}, ramp:{w:1200,d:2400},
+  'door-swing':{w:780,d:780}, 'door-swing-s':{w:650,d:650}, 'door-slide':{w:1650,d:150}, 'door-fold':{w:780,d:420}, 'door-fold-w':{w:1650,d:420}, 'door-slide-s':{w:780,d:150}, 'door-pocket':{w:780,d:150},
+  window:{w:1650,d:150}, 'window-door':{w:1650,d:180}, 'door-front':{w:940,d:200},
+  'door-opening':{w:780,d:160}, 'door-opening-arch':{w:900,d:160},
+  'site-rect':{w:10000,d:8000},
+  'roof':{w:7280,d:4095}
+};
+// LIXIL系サッシ呼称寸法プリセット(W×H mm)。sill はまぐさ高2000基準。
+var WINDOW_STD_PRESETS=[
+  {id:'02607', label:'02607 縦すべり出し W260×H770',   w:260,  h:770,  kind:'window', win:'casement'},
+  {id:'03613', label:'03613 縦すべり出し W405×H1370',  w:405,  h:1370, kind:'window', win:'casement'},
+  {id:'06905', label:'06905 引違い W690×H570',        w:690,  h:570,  kind:'window'},
+  {id:'07409', label:'07409 引違い W780×H970',        w:780,  h:970,  kind:'window'},
+  {id:'11909', label:'11909 引違い W1235×H970',       w:1235, h:970,  kind:'window'},
+  {id:'16509', label:'16509 引違い W1690×H970',       w:1690, h:970,  kind:'window'},
+  {id:'16511', label:'16511 引違い W1690×H1170',      w:1690, h:1170, kind:'window'},
+  {id:'16513', label:'16513 引違い W1690×H1370',      w:1690, h:1370, kind:'window'},
+  {id:'16520', label:'16520 掃き出し W1690×H2030',    w:1690, h:2030, kind:'window-door'},
+  {id:'25620', label:'25620 掃き出し W2600×H2030',    w:2600, h:2030, kind:'window-door'},
+  {id:'F03613', label:'FIX 03613 W405×H1370',        w:405,  h:1370, kind:'window', win:'fix'},
+  {id:'F06013', label:'FIX 06013 W600×H1370',        w:600,  h:1370, kind:'window', win:'fix'},
+  {id:'F11913', label:'FIX 11913 W1235×H1370',       w:1235, h:1370, kind:'window', win:'fix'},
+  {id:'F16503', label:'FIX 16503 W1690×H370 (高窓)',  w:1690, h:370,  kind:'window', win:'fix', sill:1800}
+];
+function windowStdSill(p){ if(p.sill!==undefined) return p.sill; return p.kind==='window-door' ? 0 : Math.max(0, 2000 - p.h); }
+function windowStdPresetById(id){
+  for(var i=0;i<WINDOW_STD_PRESETS.length;i++){ if(WINDOW_STD_PRESETS[i].id===id) return WINDOW_STD_PRESETS[i]; }
+  return null;
+}
+// 窓種別の実効値。すべり出し規格を選んだ既存プランは windowKind='sliding' で保存されているため、
+// 規格側の win:'casement' を優先して框なしとして扱う(過去プラン互換)
+function effectiveWindowKind(it){
+  if(it.windowKind==='fix'||it.windowKind==='casement') return it.windowKind;
+  var p=it.windowStd?windowStdPresetById(it.windowStd):null;
+  if(p&&p.win==='casement') return 'casement';
+  return it.windowKind||'sliding';
+}
+// LIXILアルミ樹脂複合サッシ風カラー(シャイングレーがカタログ標準色)。未設定(undefined)時は既存プラン互換のため現行色を維持する。
+// 室内照明の色温度プリセット(JIS光色区分の近似色)
+var LIGHT_KELVIN_PRESETS=[
+  {label:'電球色', color:'#ffd9a6'},
+  {label:'温白色', color:'#ffe9cc'},
+  {label:'昼白色', color:'#fff8f0'},
+  {label:'昼光色', color:'#eef3ff'}
+];
+var SASH_COLORS=[
+  {hex:'#9a9da1', label:'シャイングレー'},
+  {hex:'#22252a', label:'ブラック'},
+  {hex:'#f2f2f0', label:'ホワイト'}
+];
+// 室内開きドアの規格幅プリセット(LIXIL実勢値ベース)
+var DOOR_STD_WIDTHS=[
+  {w:650, label:'W650 (トイレ・洗面)'},
+  {w:750, label:'W750 (標準)'},
+  {w:780, label:'W780 (標準・広め)'}
+];
+function applyDoorWidthPreset(w){
+  var it=ST.selected;
+  if(!it || !isInteriorSwingDoorType(it.type)) return;
+  if(isObjectLocked(it)){ updateProps(); return; }
+  w=Number(w);
+  if(!isFinite(w) || w<=0) return;
+  saveState();
+  var oldCx=(it.x||0)+(it.w||0)/2, oldCy=(it.y||0)+(it.d||0)/2;
+  it.w=w; it.d=w;
+  it.x=oldCx-it.w/2; it.y=oldCy-it.d/2;
+  draw2d();
+  if(ren) rebuild3D();
+  updateProps();
+}
+function applyWindowStdPreset(id){
+  var it=ST.selected;
+  if(!it || !isWindowLikeType(it.type)) return;
+  if(isObjectLocked(it)){ updateProps(); return; }
+  var p=null;
+  for(var i=0;i<WINDOW_STD_PRESETS.length;i++){ if(WINDOW_STD_PRESETS[i].id===id){p=WINDOW_STD_PRESETS[i];break;} }
+  if(!p) return;
+  saveState();
+  var oldCx=(it.x||0)+(it.w||0)/2, oldCy=(it.y||0)+(it.d||0)/2;
+  it.w=p.w;
+  it.x=oldCx-it.w/2; it.y=oldCy-(it.d||150)/2;
+  it.windowSill=windowStdSill(p);
+  it.windowHeight=p.h;
+  it.windowStd=p.id;
+  if(it.type==='window'){
+    if(p.win) it.windowKind=p.win;
+    else if(p.kind==='window') it.windowKind='sliding';
+  }
+  normalizeWindowVerticalProps(it,'windowHeight');
+  draw2d();
+  if(ren) rebuild3D();
+  updateProps();
+}
+var ICOLORS = {
+  bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
+  fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
+  'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
+  'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
+  'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
+  foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
+  'door-swing':'#f8e8c0','door-swing-s':'#f8e8c0','door-slide':'#f8e8c0','door-fold':'#f8e8c0','door-fold-w':'#f8e8c0','door-slide-s':'#f8e8c0','door-pocket':'#f8e8c0',
+  window:'#c0e4f8','window-door':'#b8dcff','door-front':'#f8d0a0',
+  'door-opening':'#f6efe2','door-opening-arch':'#f6efe2','site-rect':'rgba(100,160,100,0.1)',
+  'roof':'rgba(50,50,80,0.12)'
+};
+// GLTF_MAP: PBR furniture GLBs. Some assets are exported from Unity Furniture Mega Pack via glTFast.
+var GLTF_MAP = {
+  'sofa':'assets/models/unity_exported/Sofa01.glb', 'loveseat_2p':'assets/models/unity_exported/Sofa02.glb',
+  'bed-d':'assets/models/unity_exported/Bed01.glb', 'bed-s':'assets/models/unity_exported/Bed01.glb',
+  'semi_double_bed':'assets/models/unity_exported/Bed01.glb',
+  'dining-table':'assets/models/dining_table.glb', 'dining_6':'assets/models/dining_table.glb',
+  'tv':'assets/models/unity_exported/MediaConsole.glb',
+  'bath':'assets/models/unity_exported/BathTub01.glb',
+  'toilet':'assets/models/unity_exported/Toilet01.glb',
+  'sink':'assets/models/unity_exported/WashBasin01.glb',
+  'desk':'assets/models/desk.glb',
+  'closet':'assets/models/unity_exported/Closet01.glb', 'shoe_cabinet':'assets/models/unity_exported/Drawer01.glb',
+  'fridge':'assets/models/unity_exported/Refrigerator01.glb', 'washer':'assets/models/unity_exported/Washing_Machine.glb'
+};
+var _modelCache = {};
+var _modelLoading = {};
+var _modelFailed = {};
+var UNITY_FURNITURE_MODELS = {
+  table:'assets/models/unity_exported/Table01.glb',
+  chair:'assets/models/unity_exported/Chair01.glb',
+  kitchenCabinet:'assets/models/unity_exported/CabinetA01.glb',
+  kitchenSink:'assets/models/unity_exported/CabinetA_Sink.glb',
+  kitchenStove:'assets/models/unity_exported/GasStove01.glb'
+};
+var GLTF_MODEL_CONFIG = {
+  loveseat_2p:{rotY:Math.PI},
+  toilet:{rotY:Math.PI},
+  'bed-d':{rotY:Math.PI},
+  'bed-s':{rotY:Math.PI},
+  semi_double_bed:{rotY:Math.PI},
+  tv:{uniformFit:true, fitScale:1.12, rotY:-Math.PI/2, removeTallSkinny:true, groundMesh:'mediaConsole_body'},
+  washer:{rotY:Math.PI},
+  fridge:{metalness:0.04},
+  'fmp-Refrigerator01':{metalness:0.04},
+  'fmp-Refrigerator02':{metalness:0.04},
+  'fmp-Refrigerator03':{metalness:0.04},
+  'fmp-Refrigerator04':{metalness:0.04},
+  'fmp-Refrigerator05':{metalness:0.04},
+  'fmp-Refrigerator06':{metalness:0.04},
+  'fmp-Refrigerator07':{metalness:0.04}
+};
+var EXTERIOR_MODEL_IDS={'ac-outdoor':'original-ac-unit','water-heater':'original-tank','gas-heater':'original-gas-unit','meter-box':'original-meter','sewer-pit':'original-drain-cover'};
+var EXTERIOR_MODEL_URLS={};Object.keys(EXTERIOR_MODEL_IDS).forEach(function(type){EXTERIOR_MODEL_URLS[type]='assets/models/original/'+EXTERIOR_MODEL_IDS[type]+'.glb';});
+function getItemFinishModel(type){return getFmpItem(type)||getFmpItem(EXTERIOR_MODEL_IDS[type]);}
+function buildDetailedExterior(grp,it,w,d,h){
+  var url=EXTERIOR_MODEL_URLS[it.type];
+  if(!url || !ensureGltfModel(url)) return false;
+  var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
+  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness);grp.add(clone);return true;
+}
+var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
+var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';
+var CUSTOM_MODEL_MANIFEST_URL = 'assets/models/custom/manifest.json';
+var FMP_MANIFEST_SOURCES = [
+  {url:FMP_MANIFEST_URL, globalName:'FMP_MANIFEST'},
+  {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'},
+  {url:CUSTOM_MODEL_MANIFEST_URL, globalName:'CUSTOM_MODEL_MANIFEST'}
+];
+var FMP_ITEMS = {};
+var FMP_TOP_IMAGES = {};
+var FMP_TOP_CROPS = {};
+var LEGACY_FMP_TYPE_MAP = {
+  bath:'fmp-BathTub01',
+  toilet:'fmp-Toilet01',
+  sink:'fmp-WashBasin01',
+  kitchen:'fmp-CabinetA01',
+  fridge:'fmp-Refrigerator01',
+  sofa:'fmp-Sofa01',
+  loveseat_2p:'fmp-Sofa02',
+  'dining-table':'fmp-Table01',
+  dining_6:'fmp-Table01',
+  low_table:'fmp-Table01',
+  'bed-d':'fmp-Bed01',
+  'bed-s':'fmp-Bed01',
+  semi_double_bed:'fmp-Bed01',
+  desk:'fmp-Table01',
+  closet:'fmp-Closet01',
+  shoe_cabinet:'fmp-Drawer01'
+};
+function isFmpItemType(type){ return !!(type && FMP_ITEMS[type]); }
+function getFmpItem(type){ return FMP_ITEMS[type]||null; }
+function bestFmpType(type){ return LEGACY_FMP_TYPE_MAP[type]||type; }
+function getItemDefaultSize(type){
+  type=bestFmpType(type);
+  var fmp=getFmpItem(type);
+  if(fmp) return {w:fmp.w||900,d:fmp.d||900,h:fmp.h||600};
+  return ISIZES[type]||{w:900,d:900};
+}
+function hasCustomPlanSize(it){
+  if(!it || it.w===undefined || it.d===undefined) return false;
+  var sz=getItemDefaultSize(it.type);
+  return Math.abs((it.w||0)-(sz.w||0))>1 || Math.abs((it.d||0)-(sz.d||0))>1;
+}
+function escHtml(s){
+  return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function isAppearanceColorInput(inp){
+  // Every native color input must keep the same DOM node for as long as the
+  // browser's picker is open. Replacing the node from an onchange handler
+  // dismisses the picker on iOS (and some Android browsers) after one tap.
+  return !!(inp && inp.matches && inp.matches('input[type="color"]') && !inp.disabled);
+}
+var _activeAppearanceColorInput = null;
+function beginAppearanceColorInput(inp){
+  if(isAppearanceColorInput(inp)) _activeAppearanceColorInput=inp;
+}
+function isAppearanceColorInputActive(){
+  return !!_activeAppearanceColorInput;
+}
+function releaseAppearanceColorInput(commit){
+  if(!_activeAppearanceColorInput) return;
+  _activeAppearanceColorInput=null;
+  if(commit) setTimeout(commitAppearanceColorEdits,0);
+}
+function initNativeColorInputs(){
+  if(initNativeColorInputs._done) return;
+  initNativeColorInputs._done=true;
+  document.addEventListener('pointerdown',function(e){
+    var inp=e.target&&e.target.closest?e.target.closest('input[type="color"]'):null;
+    if(isAppearanceColorInput(inp)){
+      beginAppearanceColorInput(inp);
+    } else {
+      releaseAppearanceColorInput(true);
+    }
+  },true);
+  document.addEventListener('focusin',function(e){
+    if(isAppearanceColorInput(e.target)) beginAppearanceColorInput(e.target);
+    else releaseAppearanceColorInput(true);
+  },true);
+  document.addEventListener('input',function(e){
+    if(isAppearanceColorInput(e.target)) beginAppearanceColorInput(e.target);
+  },true);
+  document.addEventListener('change',function(e){
+    if(isAppearanceColorInput(e.target)){
+      beginAppearanceColorInput(e.target);
+      // Do not commit/render here. Mobile browsers can emit `change` for each
+      // sampled color while their picker is still open; rendering would remove
+      // the input node and force-close that picker. The edit is committed when
+      // the user returns to the page and interacts with a non-color control.
+    }
+  },true);
+}
+function mergeFurnitureMegaManifest(manifest){
+  (manifest.items||[]).forEach(function(item){
+    FMP_ITEMS[item.id]=item;
+  });
+}
+function applyFurnitureMegaManifest(manifests){
+  FMP_ITEMS={};
+  (Array.isArray(manifests)?manifests:[manifests]).forEach(function(manifest){
+    if(manifest) mergeFurnitureMegaManifest(manifest);
+  });
+  normalizeLegacyFurnitureItems();
+  renderFurnitureMegaLibrary();
+  renderOpeningModelToolMenus();
+  draw2d();
+  if(ren) rebuild3D();
+}
+function loadFurnitureManifestSource(src){
+  return fetch(src.url,{cache:'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('manifest '+r.status);
+    return r.json();
+  }).catch(function(err){
+    if(window[src.globalName]) return window[src.globalName];
+    console.warn('Furniture manifest not loaded:',src.url,err);
+    return null;
+  });
+}
+function loadFurnitureMegaLibrary(){
+  Promise.all(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource)).then(function(manifests){
+    manifests=manifests.filter(Boolean);
+    if(manifests.length) applyFurnitureMegaManifest(manifests);
+  });
+}
+function isBuildingComponentFmpItem(item){
+  return !!(item && (item.category==='ドア' || item.category==='窓'));
+}
+function isInteriorSwingDoorType(type){
+  return type==='door-swing' || type==='door-swing-s';
+}
+function isClassroomDoorModel(item){
+  return !!(item && item.category==='ドア' && /^Classroom-door-/i.test(item.name||''));
+}
+function getOpeningModelItem(it){
+  var model=getFmpItem(it&&it.openingModel);
+  if(!model) return null;
+  if(isWindowLikeType(it.type) && model.category==='窓') return model;
+  if(isInteriorSwingDoorType(it.type) && model.category==='ドア') return model;
+  return null;
+}
+var OPENING_DOOR_MODEL_TOOL_PREFIX='opening-door-model:';
+var OPENING_WINDOW_MODEL_TOOL_PREFIX='opening-window-model:';
+function openingDoorModelToolId(modelId){
+  return OPENING_DOOR_MODEL_TOOL_PREFIX+(modelId||'default');
+}
+function openingWindowModelToolId(modelId){
+  return OPENING_WINDOW_MODEL_TOOL_PREFIX+(modelId||'default');
+}
+function getOpeningModelToolPreset(tool){
+  if(typeof tool!=='string') return null;
+  if(tool.indexOf(OPENING_DOOR_MODEL_TOOL_PREFIX)===0){
+    var doorModelId=tool.slice(OPENING_DOOR_MODEL_TOOL_PREFIX.length);
+    if(doorModelId==='default') return {
+      kind:'door', baseType:'door-swing', openingModel:'', model:null, label:'開き戸: デフォルト'
+    };
+    if(doorModelId==='small') return {
+      kind:'door', baseType:'door-swing-s', openingModel:'', model:null, label:'開き戸: 小'
+    };
+    if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
+    var doorModel=getFmpItem(doorModelId);
+    if(!doorModel || !isClassroomDoorModel(doorModel)) return null;
+    return {
+      kind:'door', baseType:'door-swing', openingModel:doorModelId, model:doorModel, label:'開き戸: '+doorModel.name
+    };
+  }
+  if(tool.indexOf(OPENING_WINDOW_MODEL_TOOL_PREFIX)===0){
+    var windowModelId=tool.slice(OPENING_WINDOW_MODEL_TOOL_PREFIX.length);
+    if(windowModelId==='default') return {
+      kind:'window', baseType:'window', openingModel:'', model:null, label:'窓: 引違い'
+    };
+    if(windowModelId==='fix') return {
+      kind:'window', baseType:'window', openingModel:'', model:null, windowKind:'fix', label:'窓: FIX(はめ殺し)'
+    };
+    if(windowModelId==='window-door') return {
+      kind:'window', baseType:'window-door', openingModel:'', model:null, label:'窓: 掃き出し'
+    };
+    var windowModel=getFmpItem(windowModelId);
+    if(!windowModel || windowModel.category!=='窓') return null;
+    return {
+      kind:'window', baseType:'window', openingModel:windowModelId, model:windowModel, label:'窓: '+windowModel.name
+    };
+  }
+  return null;
+}
+function openingToolTileHtml(tool,label,icon,item,extraClass){
+  var title=item&&item.name?item.name:label;
+  var cls='asset-tile opening-model-tile '+(extraClass||'');
+  var html='<button class="'+escHtml(cls)+'" type="button" data-tool="'+escHtml(tool)+'" onclick="chooseOpeningModelTool(\''+escHtml(tool)+'\')" title="'+escHtml(title)+'"';
+  if(item&&item.thumb){
+    html+=' onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'"';
+  }
+  html+='>';
+  if(item&&item.thumb) html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
+  else html+='<span class="opening-model-thumb">'+icon+'</span>';
+  html+='<div class="asset-name">'+escHtml(label)+'</div></button>';
+  return html;
+}
+function renderOpeningModelToolMenus(){
+  renderOpeningDoorModelToolMenu();
+  renderOpeningWindowModelToolMenu();
+  AssetCatalogue.installGlobal(document.getElementById('sidebar'));
+}
+function renderOpeningDoorModelToolMenu(){
+  var mount=document.getElementById('opening-door-model-tools');
+  if(!mount) return;
+  var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isClassroomDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
+  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="開き戸"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>開き戸・浴室ドア</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+  html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
+  html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');
+  ['swing','fold'].forEach(function(kind){html+=openingToolTileHtml(openingDoorModelToolId('bath-clear-'+kind),'浴室・透明'+(kind==='fold'?'折り戸':'開き戸'),'',{thumb:'assets/icons/bath-'+kind+'.svg'},'');});
+  doors.forEach(function(item){
+    html+=openingToolTileHtml(openingDoorModelToolId(item.id),item.name,'🚪',item,'');
+  });
+  html+='</div></div>';
+  mount.innerHTML=html;
+}
+function renderOpeningWindowModelToolMenu(){
+  var mount=document.getElementById('opening-window-model-tools');
+  if(!mount) return;
+  var windows=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item&&item.category==='窓';}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="窓"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v16H3ZM12 4v16M3 12h18"/></svg></span><span>窓</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+  html+=openingToolTileHtml(openingWindowModelToolId(''),'引違い','',{thumb:'assets/models/previews-v2/standard-window-slide-thumb.png'},'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('fix'),'FIX窓','',{thumb:'assets/models/previews-v2/standard-window-fix-thumb.png'},'opening-model-default-tile opening-window-tile');
+  html+=openingToolTileHtml(openingWindowModelToolId('window-door'),'掃き出し','',{thumb:'assets/models/previews-v2/standard-window-door-thumb.png'},'opening-model-default-tile opening-window-tile');
+  windows.forEach(function(item){
+    html+=openingToolTileHtml(openingWindowModelToolId(item.id),item.name,'🪟',item,'opening-window-tile');
+  });
+  html+='</div></div>';
+  mount.innerHTML=html;
+}
+function renderFurnitureMegaLibrary(){
+  var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
+  Object.keys(mounts).forEach(function(group){
+    var mount=mounts[group]; if(!mount) return;
+    var cats={};
+    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item.group===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
+      (cats[item.category]||(cats[item.category]=[])).push(item);
+    });
+    var html='';
+    Object.keys(cats).sort().forEach(function(cat){
+      cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
+      html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+      cats[cat].forEach(function(item){
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+        html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
+        html+=(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
+        html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
+      });
+      html+='</div></div>';
+    });
+    mount.innerHTML=html;
+
+  });
+}
+function toggleAssetCat(el){
+  var wrap=el.parentElement, mark=el.querySelector('span:last-child');
+  if(!wrap) return;
+  wrap.classList.toggle('open');
+  if(mark) mark.textContent=wrap.classList.contains('open')?'-':'+';
+}
+// 上面画像がまだ読めていない家具の代替表示（drawItem2d）。数値をここに置くのは、
+// 動画パッケージ側の事後検証 findPlanPlaceholderInstances が同じ値から
+// 「この画素はプレースホルダでありうるか」を逆算するため。表を2つ持たない。
+var PLAN_PLACEHOLDER_RGB=[210,215,225];
+var PLAN_PLACEHOLDER_ALPHA=0.72;
+var PLAN_PLACEHOLDER_FILL='rgba('+PLAN_PLACEHOLDER_RGB.join(',')+','+PLAN_PLACEHOLDER_ALPHA+')';
+function getFmpTopImage(item){
+  if(!item||!item.top) return null;
+  if(!FMP_TOP_IMAGES[item.id]){
+    var img=new Image();
+    img.onload=function(){draw2d();};
+    img.src=item.top;
+    FMP_TOP_IMAGES[item.id]=img;
+  }
+  return FMP_TOP_IMAGES[item.id];
+}
+function getTopImageCrop(img,key){
+  if(!img || !img.complete || !img.naturalWidth || !img.naturalHeight) return null;
+  key=key||img.src||'';
+  if(FMP_TOP_CROPS[key]) return FMP_TOP_CROPS[key];
+  var full={sx:0,sy:0,sw:img.naturalWidth,sh:img.naturalHeight};
+  try{
+    var c=document.createElement('canvas');
+    c.width=img.naturalWidth; c.height=img.naturalHeight;
+    var cx=c.getContext('2d',{willReadFrequently:true});
+    cx.drawImage(img,0,0);
+    var data=cx.getImageData(0,0,c.width,c.height).data;
+    var minX=c.width,minY=c.height,maxX=-1,maxY=-1;
+    for(var y=0;y<c.height;y++){
+      for(var x=0;x<c.width;x++){
+        if(data[(y*c.width+x)*4+3]<=4) continue;
+        if(x<minX) minX=x;
+        if(y<minY) minY=y;
+        if(x>maxX) maxX=x;
+        if(y>maxY) maxY=y;
+      }
+    }
+    if(maxX>=minX && maxY>=minY){
+      var pad=Math.max(2,Math.round(Math.min(c.width,c.height)*0.01));
+      minX=Math.max(0,minX-pad);
+      minY=Math.max(0,minY-pad);
+      maxX=Math.min(c.width-1,maxX+pad);
+      maxY=Math.min(c.height-1,maxY+pad);
+      full={sx:minX,sy:minY,sw:maxX-minX+1,sh:maxY-minY+1};
+    }
+  }catch(err){
+    // If a future image is cross-origin/tainted, fall back to the full image.
+  }
+  FMP_TOP_CROPS[key]=full;
+  return full;
+}
+function drawFmpTopImage(img,item,dx,dy,dw,dh){
+  var crop=getTopImageCrop(img,item&&item.id);
+  if(crop){
+    ctx.drawImage(img,crop.sx,crop.sy,crop.sw,crop.sh,dx,dy,dw,dh);
+  } else {
+    ctx.drawImage(img,dx,dy,dw,dh);
+  }
+}
+function getFmpTopBaseRotationRad(item){
+  if(item && (item.previewVersion===2 || /^im0261-/.test(item.id||'') || /^fmp-/.test(item.id||''))) return 0;
+  return Math.PI;
+}
+function getFmpTopRotationRad(item){
+  var rot=getFmpTopBaseRotationRad(item);
+  if(item && item.topRot!==undefined && isFinite(+item.topRot)){
+    rot+=Number(item.topRot)*Math.PI/180;
+  }
+  var cfg=item ? GLTF_MODEL_CONFIG[item.id] : null;
+  if(cfg){
+    if(cfg.planRot!==undefined) rot+=cfg.planRot;
+    else if(cfg.rotY!==undefined) rot-=cfg.rotY;
+  }
+  return rot;
+}
+function drawFmpTopImageOriented(img,item,w,h){
+  var rot=getFmpTopRotationRad(item);
+  var quarter=Math.round(rot/(Math.PI/2));
+  var oddQuarter=Math.abs(quarter)%2===1;
+  ctx.save();
+  if(rot) ctx.rotate(rot);
+  drawFmpTopImage(img,item,-(oddQuarter?h:w)/2,-(oddQuarter?w:h)/2,oddQuarter?h:w,oddQuarter?w:h);
+  ctx.restore();
+}
+function showAssetPreview(el,e){
+  if(window.matchMedia('(hover: none), (pointer: coarse)').matches){hideAssetPreview();return;}
+  var pv=document.getElementById('asset-preview'); if(!pv) return;
+  var img=pv.querySelector('img'), label=pv.querySelector('div');
+  img.src=el.getAttribute('data-preview')||'';
+  label.textContent=el.getAttribute('data-preview-name')||'';
+  pv.classList.add('show');
+  moveAssetPreview(e);
+}
+function moveAssetPreview(e){
+  var pv=document.getElementById('asset-preview'); if(!pv||!pv.classList.contains('show')) return;
+  var pad=14, w=pv.offsetWidth||212, h=pv.offsetHeight||236;
+  var x=e.clientX+pad, y=e.clientY+pad;
+  if(x+w>window.innerWidth-8) x=e.clientX-w-pad;
+  if(y+h>window.innerHeight-8) y=window.innerHeight-h-8;
+  pv.style.left=Math.max(8,x)+'px';
+  pv.style.top=Math.max(8,y)+'px';
+}
+function hideAssetPreview(){
+  var pv=document.getElementById('asset-preview'); if(pv) pv.classList.remove('show');
+}
+// PBR Textures (lazy-loaded)
+var _pbrTex = {};
+var _textureRefreshPending = false;
+var _repeatSafeTexCache = {};
+function scheduleTextureSceneRefresh(){
+  if(_textureRefreshPending) return;
+  _textureRefreshPending = true;
+  setTimeout(function(){
+    _textureRefreshPending = false;
+    if(ren) rebuild3D();
+    if(typeof invalidate3D==='function') invalidate3D();
+  }, 50);
+}
+function pbrTex(name) {
+  if (_pbrTex[name]) return _pbrTex[name];
+  var loader = new THREE.TextureLoader();
+  var t = loader.load('assets/textures/' + name, function(){
+    if(ren) t.anisotropy = ren.capabilities.getMaxAnisotropy();
+    scheduleTextureSceneRefresh();
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  _pbrTex[name] = t;
+  return t;
+}
+function pbrTexLinear(name) {
+  if (!name) return null;
+  if (_pbrTex['_lin_'+name]) return _pbrTex['_lin_'+name];
+  var loader = new THREE.TextureLoader();
+  var t = loader.load('assets/textures/' + name, function(){
+    if(ren) t.anisotropy = ren.capabilities.getMaxAnisotropy();
+    scheduleTextureSceneRefresh();
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  _pbrTex['_lin_'+name] = t;
+  return t;
+}
+
+var ILABELS = {
+  kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',
+  sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
+  'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
+  'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
+  'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
+  'ac-outdoor':'エアコン室外機', 'water-heater':'貯湯タンク（エコキュート）', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
+  foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
+  'door-swing':'開戸','door-swing-s':'開戸(小)','door-slide':'引戸','door-fold':'折戸(片開き)','door-fold-w':'折戸(両開き)','door-slide-s':'片引き戸','door-pocket':'引込み戸',window:'窓','window-door':'引き違い窓','door-front':'玄関',
+  'door-opening':'開口','door-opening-arch':'アーチ開口','site-rect':'敷地',
+  'roof':'屋根'
+};

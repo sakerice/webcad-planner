@@ -136,9 +136,21 @@ try {
     window.ensureGltfModel = function () { return false; };
     setView('3d-ext');
   });
-  await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
+  // 空のテクスチャなど、一部は遅れて届いて明るさを変える。決め打ちの待ち時間に
+  // すると、機械が混んでいるときだけ落ちる検査になる。**同じ指紋が2回続けて
+  // 出るまで**待って、落ち着いたことを確かめてから採る。
+  async function settled(capture) {
+    let prev = null;
+    for (let i = 0; i < 20; i++) {
+      const now = await capture();
+      if (prev && now.join() === prev.join()) return now;
+      prev = now;
+      await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
+    }
+    throw new Error('描画が落ち着かない(10秒待っても指紋が変わり続ける)');
+  }
 
-  results['3d-ext'] = await page.evaluate(({ cols, rows, levels }) => {
+  const capture3D = () => page.evaluate(({ cols, rows, levels }) => {
     // 視点を決め打ちにする。OrbitControls の慣性が残っていると毎回わずかに動く。
     if (orbit) { orbit.target.set(0, 1.2, 0); }
     camExt.position.set(18, 12, 22);
@@ -152,6 +164,8 @@ try {
     gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
     return window.__grid(buf, w, h, cols, rows, levels, true);
   }, { cols: COLS, rows: ROWS, levels: LEVELS });
+
+  results['3d-ext'] = await settled(capture3D);
 
   assert.deepEqual(errors, [], 'ページで例外が出ている');
 } finally {

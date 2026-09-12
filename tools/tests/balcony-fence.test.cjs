@@ -14,7 +14,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 
 // 入れ子の関数も切り出せる版(addBalconyFencePiece は buildWall3D の中にある)

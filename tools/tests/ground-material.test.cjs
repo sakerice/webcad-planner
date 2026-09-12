@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const s=fs.readFileSync('index.html','utf8');
+const s=require('./app-source.cjs').appSource();
 const cfg=s.slice(s.indexOf('var SITE_SURFACE_OPTIONS ='),s.indexOf('function siteSurfaceType'));
 const fn=s.slice(s.indexOf('function makeGroundSurfaceMaterial'),s.indexOf('function makeSiteSurfaceMaterial'));
 test('small surfaces retain physical scale; normal maps are linear and nonmetallic',()=>{

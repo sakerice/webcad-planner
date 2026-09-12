@@ -20,7 +20,7 @@ const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
-const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const html = require('./app-source.cjs').appSource();
 const Law = require(join(ROOT, 'assets', 'js', 'setback-law.js'));
 const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 
