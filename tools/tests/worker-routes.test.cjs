@@ -1,11 +1,9 @@
-// Worker の振り分けと、AI ルートの門番。
+// Worker の振り分けと、AI ルートの入口。
 //
-// worker.mjs は1枚に共通の道具・共有ルーム・HTTPの振り分けが同居していて、
-// テストが1件も無かった。AI の呼び出しはここに鍵を置くことになるので、
-// 分けたうえで「鍵が無いとき」「変な要求が来たとき」の振る舞いを固定する。
-//
-// モデルを実際に呼ぶところ(callModel)はまだ実装していない。ここで見るのは
-// その手前——**呼ぶ前に弾くべきものを弾けているか**である。
+// 見ているのは「モデルを呼ぶ前に弾くべきものを弾けているか」と
+// 「返ってきたものを検めてから渡しているか」。実際に Bedrock が署名を
+// 受け付けるかどうかは、鍵が要るのでここでは確かめられない（鍵を設定した
+// あとで tools/probe_bedrock.cjs を1回走らせて確かめる）。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
@@ -24,9 +22,40 @@ async function post(path, body, env) {
   return router.fetch(request, env);
 }
 
-// 1x1 の PNG。中身は問わないので、形だけ整っていればよい。
-const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==';
+// AI ルートを直接呼ぶ（fetch を差し替えたいとき）。
+async function callAi(path, body, env, fetchImpl) {
+  const { handleAi } = await mod('worker/routes-ai.mjs');
+  const url = new URL('https://example.test' + path);
+  const request = new Request(url, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  });
+  return handleAi(request, env, url, { fetchImpl });
+}
 
+// 1x1 の PNG。中身は問わないので形だけ整っていればよい。
+const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==';
+const AWS_ENV = { AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE', AWS_SECRET_ACCESS_KEY: 'secret-value-do-not-leak' };
+
+// Bedrock の Converse がこの形で返す。
+function converseReply(obj) {
+  return new Response(JSON.stringify({
+    output: { message: { content: [{ text: JSON.stringify(obj) }] } },
+    usage: { inputTokens: 2000, outputTokens: 1500 },
+    stopReason: 'end_turn',
+  }), { status: 200 });
+}
+
+const GOOD_PLAN = {
+  walls: [
+    { x1: 0, y1: 0, x2: 7280, y2: 0, thick: 120, floor: 1 },
+    { x1: 7280, y1: 0, x2: 7280, y2: 4095, thick: 120, floor: 1 },
+  ],
+  rooms: [{ x: 0, y: 0, w: 2730, d: 1820, n: '洋室', floor: 1 }],
+  items: [{ type: 'window', x: 1365, y: 0, w: 1690, d: 150, rot: 0, floor: 1 }],
+  notes: ['右下の収納は寸法が読めなかった'],
+};
+
+// ── 振り分け ──────────────────────────────────────────────────────────
 test('/api/ 以外は静的ファイルへ素通しする', async () => {
   const { default: router } = await mod('worker/router.mjs');
   let asked = null;
@@ -45,71 +74,151 @@ test('知らない /api/ のパスは 404（静的ファイルへ落とさない
   assert.equal(assetsCalled, false);
 });
 
-test('鍵が設定されていなければ、AI は呼ばずに 503 と手順を返す', async () => {
-  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, {});
+test('GET は受けない（AIの呼び出しは副作用も費用もあるので）', async () => {
+  const { default: router } = await mod('worker/router.mjs');
+  const res = await router.fetch(new Request('https://example.test/api/ai/import-plan'), AWS_ENV);
+  assert.equal(res.status, 405);
+});
+
+// ── 鍵が無いとき ──────────────────────────────────────────────────────
+test('AWS の鍵が無ければ、間取り読み取りは呼ばずに 503 と手順を返す', async () => {
+  const res = await post('/api/ai/import-plan', { image: PNG }, {});
   assert.equal(res.status, 503);
   const body = await res.json();
   assert.equal(body.error, 'ai_not_configured');
   assert.match(body.message, /wrangler secret/, '何をすればよいかが書いてあること');
 });
 
+test('OpenAI の鍵が無ければ、レンダーは呼ばずに 503', async () => {
+  const res = await post('/api/ai/render', { image: PNG, prompt: 'x' }, {});
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).error, 'ai_not_configured');
+});
+
 test('鍵はどの応答にも出てこない', async () => {
-  const env = { AI_API_KEY: 'sk-secret-value', AI_PROVIDER: 'someprovider' };
-  for (const path of ['/api/ai/render', '/api/ai/import-plan']) {
-    const res = await post(path, { image: PNG, prompt: 'x' }, env);
-    const text = await res.text();
-    assert.ok(!text.includes('sk-secret-value'), path + ' の応答に鍵が混ざっている');
+  const env = { ...AWS_ENV, OPENAI_API_KEY: 'sk-secret-value' };
+  const cases = [
+    ['/api/ai/render', { image: PNG, prompt: 'x' }],
+    ['/api/ai/import-plan', { image: 'こわれた' }],
+  ];
+  for (const [path, body] of cases) {
+    const text = await (await post(path, body, env)).text();
+    assert.ok(!text.includes('secret-value'), path + ' の応答に鍵が混ざっている');
+    assert.ok(!text.includes('sk-secret'), path + ' の応答に鍵が混ざっている');
   }
 });
 
+// ── 入口の検査 ────────────────────────────────────────────────────────
 test('画像が data URL でなければ、モデルを呼ぶ前に 400', async () => {
-  const env = { AI_API_KEY: 'k' };
+  let called = false;
+  const fetchImpl = () => { called = true; return converseReply(GOOD_PLAN); };
   for (const image of [undefined, '', 'https://example.com/a.png', 'data:text/plain;base64,AAAA']) {
-    const res = await post('/api/ai/render', { image, prompt: 'x' }, env);
+    const res = await callAi('/api/ai/import-plan', { image }, AWS_ENV, fetchImpl);
     assert.equal(res.status, 400, JSON.stringify(image) + ' が通ってしまった');
   }
+  assert.equal(called, false, '弾くべきものでモデルを呼んでいる（お金がかかる）');
 });
 
-test('指示文が無い・長すぎるものは 400', async () => {
-  const env = { AI_API_KEY: 'k' };
+test('レンダーは指示文が無い・長すぎるものを 400 で弾く', async () => {
+  const env = { OPENAI_API_KEY: 'k' };
   assert.equal((await post('/api/ai/render', { image: PNG, prompt: '   ' }, env)).status, 400);
   assert.equal((await post('/api/ai/render', { image: PNG, prompt: 'あ'.repeat(9000) }, env)).status, 400);
 });
 
-test('正しい要求は、未実装(501)まで進む', async () => {
-  const res = await post('/api/ai/render', { image: PNG, prompt: '木造2階建ての外観' }, { AI_API_KEY: 'k' });
-  assert.equal(res.status, 501);
-  assert.equal((await res.json()).error, 'ai_not_implemented');
+// ── 国内処理の担保 ────────────────────────────────────────────────────
+test('日本国内に閉じないモデルが設定されていたら、送らずに止める', async () => {
+  let called = false;
+  const fetchImpl = () => { called = true; return converseReply(GOOD_PLAN); };
+  const env = { ...AWS_ENV, BEDROCK_PLAN_MODEL: 'global.anthropic.claude-opus-5' };
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, env, fetchImpl);
+  assert.equal(res.status, 500);
+  assert.equal((await res.json()).error, 'ai_model_not_japan_resident');
+  assert.equal(called, false, '送ってしまってからでは取り返しがつかない');
 });
 
-test('GET は受けない（AIの呼び出しは副作用があるので）', async () => {
-  const { default: router } = await mod('worker/router.mjs');
-  const res = await router.fetch(new Request('https://example.test/api/ai/render'), { AI_API_KEY: 'k' });
-  assert.equal(res.status, 405);
+test('既定のモデルは日本国内に閉じている', async () => {
+  const { bedrockConfig, isJapanResident, DEFAULT_PLAN_MODEL } = await mod('worker/bedrock.mjs');
+  assert.ok(isJapanResident(DEFAULT_PLAN_MODEL), '既定が jp. で始まっていない');
+  assert.equal(bedrockConfig({}).region, 'ap-northeast-1');
+  assert.equal(isJapanResident('global.anthropic.claude-opus-5'), false);
+  assert.equal(isJapanResident('anthropic.claude-opus-4-8'), false);
 });
 
-// ── AI が返した間取りの門番 ────────────────────────────────────────
+// ── 呼んだあと ────────────────────────────────────────────────────────
+test('読めた間取りは、検めて均してから返す', async () => {
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV, () => converseReply(GOOD_PLAN));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.deepEqual(body.summary, { walls: 2, rooms: 1, items: 1, floors: [1] });
+  assert.ok(body.plan.rooms[0].id, 'id が振られている');
+  assert.deepEqual(body.notes, ['右下の収納は寸法が読めなかった'], 'AIが読めなかったことは利用者に見せる');
+  assert.deepEqual(body.usage, { inputTokens: 2000, outputTokens: 1500 }, '原価を測れるように使用量を返す');
+});
+
+test('前置きや ``` で囲まれた返事からも JSON を取り出す', async () => {
+  const { extractJson } = await mod('worker/bedrock.mjs');
+  const want = { walls: [], rooms: [], items: [] };
+  assert.deepEqual(extractJson(JSON.stringify(want)), want);
+  assert.deepEqual(extractJson('```json\n' + JSON.stringify(want) + '\n```'), want);
+  assert.deepEqual(extractJson('読み取りました。\n' + JSON.stringify(want)), want);
+  assert.equal(extractJson('すみません、読めませんでした'), null);
+  assert.equal(extractJson(''), null);
+});
+
 test('読み込める形でない間取りは 422 で、理由を添えて返す', async () => {
-  const { finishImportedPlan } = await mod('worker/routes-ai.mjs');
-  const res = finishImportedPlan({ walls: [{ x1: 0, y1: 0, x2: 0, y2: 0, thick: 120 }], rooms: [], items: [] });
+  // 長さゼロの壁。芯線が点なので面が張れない。
+  const broken = { walls: [{ x1: 0, y1: 0, x2: 0, y2: 0, thick: 120 }], rooms: [], items: [] };
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV, () => converseReply(broken));
   assert.equal(res.status, 422);
   const body = await res.json();
   assert.equal(body.error, 'ai_invalid_plan');
   assert.ok(body.problems.length > 0, 'なぜ駄目なのかが返ること');
 });
 
-test('読み込める間取りは、均して要約を添えて返す', async () => {
-  const { finishImportedPlan } = await mod('worker/routes-ai.mjs');
-  const res = finishImportedPlan({
-    walls: [{ x1: 0, y1: 0, x2: '4000', y2: 0, thick: 120 }],
-    rooms: [{ x: 0, y: 0, w: 4000, d: 3000 }],
-    items: [],
-  });
-  assert.equal(res.status, 200);
+test('JSON になっていない返事は 502', async () => {
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV,
+    () => new Response(JSON.stringify({ output: { message: { content: [{ text: 'わかりません' }] } } }), { status: 200 }));
+  assert.equal(res.status, 502);
+  assert.equal((await res.json()).error, 'ai_bad_response');
+});
+
+test('Bedrock 側のエラーは 502 にして、本文をそのまま流さない', async () => {
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV,
+    () => new Response(JSON.stringify({ message: 'The security token included in the request is invalid' }), { status: 403 }));
+  assert.equal(res.status, 502);
   const body = await res.json();
-  assert.equal(body.plan.walls[0].x2, 4000, '文字列の数値が数値になっている');
-  assert.ok(body.plan.rooms[0].id, 'id が振られている');
-  assert.deepEqual(body.summary, { walls: 1, rooms: 1, items: 0, floors: [1] });
+  assert.equal(body.error, 'ai_upstream_error');
+  assert.equal(body.status, 403);
+});
+
+// ── 送っている中身 ────────────────────────────────────────────────────
+test('東京の bedrock-runtime へ、画像と指示文を1往復で送っている', async () => {
+  let sent = null;
+  await callAi('/api/ai/import-plan', { image: PNG, hint: '1階だけの図です' }, AWS_ENV, async (req) => {
+    sent = { url: req.url, auth: req.headers.get('authorization'), body: JSON.parse(await req.text()) };
+    return converseReply(GOOD_PLAN);
+  });
+  assert.match(sent.url, /^https:\/\/bedrock-runtime\.ap-northeast-1\.amazonaws\.com\/model\/jp\.anthropic\./);
+  assert.match(sent.url, /\/converse$/);
+  assert.match(sent.auth, /^AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE\/\d{8}\/ap-northeast-1\/bedrock\/aws4_request, SignedHeaders=/);
+  assert.ok(!sent.auth.includes('secret-value'), '署名ヘッダに秘密鍵そのものが出ていない');
+  assert.equal(sent.body.messages.length, 1, '1往復で収める（往復を増やすと原価が倍になる）');
+  assert.equal(sent.body.messages[0].content[0].image.format, 'png');
+  assert.equal(sent.body.messages[0].content[0].image.source.bytes, PNG.split(',')[1]);
+  assert.equal(sent.body.inferenceConfig.temperature, 0, '図面の読み取りは創作ではない');
+  assert.match(sent.body.messages[0].content[1].text, /1階だけの図です/, '利用者の補足が渡っている');
+});
+
+test('指示文は、読ませる範囲と座標の約束を明示している', async () => {
+  const { buildPlanPrompt, ALLOWED_ITEM_TYPES } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  assert.match(p, /910/, '日本の住宅の基本寸法');
+  assert.match(p, /ミリメートル/);
+  assert.match(p, /芯/, '壁は芯線であること');
+  assert.match(p, /家具/, '家具を読ませない指示');
+  for (const t of ['window', 'door-swing', 'stair']) assert.ok(ALLOWED_ITEM_TYPES.includes(t));
+  // 使える種類を列挙して渡している（列挙が空なら指示として成り立たない）
+  for (const t of ALLOWED_ITEM_TYPES) assert.match(p, new RegExp(t.replace(/-/g, '\\-')));
 });
 
 // ── 移した部分が変わっていないこと ──────────────────────────────────
@@ -127,10 +236,8 @@ test('差分の当て方は元のまま（追加・更新・削除・フィー�
 
 test('共有の門番はゆるいまま（整理で仕様を変えていない）', async () => {
   const { validPlan } = await mod('worker/shared.mjs');
-  // 長さゼロの壁を持つ間取りも、いままでどおり共有できる
   assert.equal(validPlan({ walls: [{ x1: 0, y1: 0, x2: 0, y2: 0 }], items: [], rooms: [] }), true);
-  // 真偽値そのものではなく真偽で見る。元の式が plan && ... で、
-  // null を渡すと null が返る。そこまで含めて変えていない。
+  // 元の式が plan && ... なので null を渡すと null が返る。そこまで含めて変えていない。
   assert.ok(!validPlan({ walls: [], items: [] }));
   assert.ok(!validPlan(null));
 });
