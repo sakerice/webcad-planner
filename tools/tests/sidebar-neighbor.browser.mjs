@@ -7,7 +7,7 @@ const browser=await chromium.launch({args:['--use-angle=metal']});
 try{
  for(const width of [390,1280]){
   const page=await browser.newPage({viewport:{width,height:900},isMobile:width===390,hasTouch:width===390});const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('.sidebar-credits');
+  await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForSelector('.sidebar-credits');await page.evaluate(()=>{const m=document.getElementById('preset-choice-modal');if(m)m.classList.remove('show');});
   assert.equal(await page.locator('.sidebar-settings .sidebar-credits').count(),0);
   const icons=page.locator('.opening-model-default-tile img');assert.equal(await icons.count(),5);
   await icons.evaluateAll(images=>Promise.all(images.map(i=>{i.loading='eager';return i.decode();})));

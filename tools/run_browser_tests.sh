@@ -12,15 +12,28 @@ cd "$(dirname "$0")/.."
 PORT=${PORT:-8932}
 
 # Playwright の場所。明示指定が無ければ npx のキャッシュから拾う。
+#
+# キャッシュには複数のバージョンが残っていることがあり、**そのうち一部は
+# ブラウザ本体をダウンロードしていない**。ただ見つけた順に使うと
+# 「Executable doesn't exist」で落ちる。ブラウザ本体まで在るものを選ぶ。
 if [ -z "$PLAYWRIGHT_MODULE" ]; then
-  d=$(find "$HOME/.npm/_npx" -maxdepth 3 -type d -name playwright 2>/dev/null | head -1)
-  # ESM からはディレクトリを import できないので入口のファイルを指す
-  [ -n "$d" ] && PLAYWRIGHT_MODULE="$d/index.js"
+  for d in $(find "$HOME/.npm/_npx" -maxdepth 3 -type d -name playwright 2>/dev/null); do
+    # ESM からはディレクトリを import できないので入口のファイルを指す
+    if node -e "
+      const p=require('$d');
+      const fs=require('node:fs');
+      process.exit(fs.existsSync(p.chromium.executablePath())?0:1);
+    " 2>/dev/null; then
+      PLAYWRIGHT_MODULE="$d/index.js"
+      break
+    fi
+  done
 fi
 if [ -z "$PLAYWRIGHT_MODULE" ]; then
-  echo "Playwright が見つからない。先に 'npx playwright install chromium' を一度実行してください。" >&2
+  echo "使える Playwright が見つからない。'npx playwright install chromium' を一度実行してください。" >&2
   exit 1
 fi
+echo "Playwright: $PLAYWRIGHT_MODULE"
 export PLAYWRIGHT_MODULE
 
 # 検査用の静的サーバ。既に上がっていればそれを使う。

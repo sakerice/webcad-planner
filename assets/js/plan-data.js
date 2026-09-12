@@ -295,5 +295,17 @@ if(window.location.protocol!=='file:'){
 }
 SPRITE_IMG1.onload = onSheetLoad;
 SPRITE_IMG2.onload = onSheetLoad;
-SPRITE_IMG1.src = 'assets/japanese_floorplan_parts_sprite_gpt.png';
-SPRITE_IMG2.src = 'assets/japanese_floorplan_parts_sprite_gpt_2.png';
+// 読み込みの開始は、残りの <script> が出そろってから (DOMContentLoaded)。
+//
+// onSheetLoad は draw2d() を呼び、draw2d は本体側の関数(drawDim など)を使う。
+// インライン script 1枚だった頃は、そこに到達する時点で全部の関数が
+// そろっていた。外部ファイルに分けると script と script の合間にも
+// イベントが走れるので、画像がブラウザのキャッシュに載っている再読み込みの
+// ときだけ、本体より先に draw2d() が動いて
+// 「drawDim is not defined」で落ちていた。
+function startSpriteSheetLoad(){
+  SPRITE_IMG1.src = 'assets/japanese_floorplan_parts_sprite_gpt.png';
+  SPRITE_IMG2.src = 'assets/japanese_floorplan_parts_sprite_gpt_2.png';
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startSpriteSheetLoad);
+else startSpriteSheetLoad();

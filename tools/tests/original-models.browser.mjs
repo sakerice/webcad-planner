@@ -7,7 +7,7 @@ const browser=await chromium.launch({args:['--use-angle=metal']});
 const dir='docs/quality-review/original-collection';fs.mkdirSync(dir,{recursive:true});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>init3D());
+ await page.goto(process.env.APP_URL||'http://localhost:8932/');await page.waitForFunction(()=>window.THREE&&getFmpItem('original-sofa'));await page.evaluate(()=>{const m=document.getElementById('preset-choice-modal');if(m)m.classList.remove('show');});await page.evaluate(()=>init3D());
  const results=await page.evaluate(async()=>{
   const items=Object.values(FMP_ITEMS).filter(i=>i.provenance==='original').concat(['fmp-Sofa01','fmp-Chair01','fmp-Bed01','fmp-Table01','fmp-Drawer01','fmp-Closet01'].map(id=>FMP_ITEMS[id]));const results=[];
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.setSize(640,640);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
