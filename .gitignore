@@ -26,3 +26,9 @@ assets/models/unity_exported_orig/
 *.blend1
 pv/renders/
 __pycache__/
+
+# 作業の出力置き場(AIレンダーの生成物など)。成果物はコミットせず output/ に貯める
+output/
+# Claude Code がエージェント用に切る作業場
+.claude/worktrees/
+.claude/launch.json
