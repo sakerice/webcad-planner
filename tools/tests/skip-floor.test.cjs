@@ -68,9 +68,11 @@ const FNS = [
   'setbackOutlineCoversLocal', 'wallFullHeightM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
+  'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
   'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
   'stairRunEndsMm', 'stairUpperSpanM', 'stairRiseInfo',
+  'stairRailSides', 'stairSideHasWall', 'stairRailMountFor',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
@@ -375,6 +377,74 @@ test('同じレベルの部屋に続く辺は lower ではない(段差線を引
   assert.equal(g.roomSkipOpenSides(g.DATA.rooms[1]).e, false);
 });
 
+// ══ 7-b. 段差の上に立つ壁 ══════════════════════════════════════════════
+// 「壁をスキップフロアにつけるのが困難」への対応。
+// 段差の上に立つ壁は、足元も段差の上から立たせないと、中空にした床下へ
+// 板が垂れ下がる。ただし段差の境界の壁は蹴上げ面を兼ねるので下まで下ろす。
+// 自動判定に当たらない置き方のために、明示の指定も受ける。
+function wallOnPlatformHouse() {
+  const h = skipHouse({ skip: 1200 });
+  // 段差の上だけを通る間仕切り壁(両側とも段差の上)。
+  // 2400 は既定の壁高さで、wallDisplayHeightM ではそれが「指定なし」の番兵に
+  // なる。明示した高さの経路を測るので、既定と違う値にする。
+  h.walls.push({ id: 'inner', floor: 1, x1: 4500, y1: 500, x2: 6500, y2: 500,
+                 thick: 120, wallHeight: 2100 });
+  return h;
+}
+
+test('両側とも段差の上の壁は、足元も段差の上から立つ', () => {
+  const g = heights(wallOnPlatformHouse());
+  const inner = g.DATA.walls[1];
+  assert.equal(g.wallSkipFootMm(inner), 1200, '床下へ垂れ下がっている');
+  assert.equal(Math.round((g.wallBaseSupportY(inner) - g.floorBaseY(1)) / g.U), 1200);
+  // 高さは足元から測るので、天端は 1200+2100。
+  assert.equal(Math.round(g.wallDisplayHeightM(inner) / g.U), 3300);
+});
+
+test('段差の境界の壁は、足元を下ろしたまま(蹴上げ面を兼ねる)', () => {
+  const g = heights(wallOnPlatformHouse());
+  const edge = g.DATA.walls[0];        // 段差の境界
+  edge.wallHeight = 1100;
+  assert.equal(g.wallSkipFootMm(edge), 0, '境界の壁が持ち上がると低い側に穴が開く');
+  assert.equal(Math.round((g.wallBaseSupportY(edge) - g.floorBaseY(1)) / g.U), 0);
+  // 高さは守る側(段差の上)から測る。
+  assert.equal(Math.round(g.wallDisplayHeightM(edge) / g.U), 1200 + 1100);
+});
+
+test('壁の基準を「階の床」にすると、段差を無視して床から測る', () => {
+  const g = heights(wallOnPlatformHouse());
+  const inner = g.DATA.walls[1];
+  inner.baseLevel = 'floor';
+  assert.equal(g.wallSkipBaseMm(inner), 0);
+  assert.equal(g.wallSkipFootMm(inner), 0);
+  assert.equal(Math.round(g.wallDisplayHeightM(inner) / g.U), 2100);
+});
+
+test('壁の基準を「段差の上」にすると、判定に当たらなくても段差から測る', () => {
+  const h = skipHouse({ skip: 1200 });
+  // 部屋の外(段差の判定に当たらない場所)に置いた壁。
+  h.walls.push({ id: 'far', floor: 1, x1: 8000, y1: 500, x2: 9000, y2: 500,
+                 thick: 120, wallHeight: 1100, baseLevel: 'skip' });
+  const g = heights(h);
+  const far = g.DATA.walls[1];
+  assert.equal(g.floorMaxSkipLevelMm(1), 1200);
+  assert.equal(g.wallSkipBaseMm(far), 1200);
+  assert.equal(Math.round(g.wallDisplayHeightM(far) / g.U), 1200 + 1100);
+});
+
+test('段差の無い家では、壁の足元も基準も 0 のまま', () => {
+  const g = heights(skipHouse({}));
+  const w = g.DATA.walls[0];
+  assert.equal(g.wallSkipFootMm(w), 0);
+  assert.equal(g.wallSkipBaseMm(w), 0);
+  assert.equal(g.floorMaxSkipLevelMm(1), 0);
+});
+
+test('壁のプロパティ欄から足元の基準を選べる', () => {
+  assert.match(html, /baseLevel/);
+  assert.match(html, /段差の上から/);
+});
+
 // ══ 8-b2. 段差から上の階へ上がる階段 ═══════════════════════════════════
 // 「スキップフロアから上の階へ登る階段が作れない」の再発防止。
 // 上り高さを「その階の床 → 上階の床」で測り、足元は **その階にある階段の
@@ -436,6 +506,76 @@ test('歩行の坂面も、階段グループごとの上り高さで測る', ()
   assert.match(body, /stairGroupRiseM\(it\)/, '階ごとの上り高さで割っている');
   assert.match(body, /offM/, '足元の高さを返していない');
   assert.match(sliceFunction('walkUpdateGround'), /\.offM/);
+});
+
+// ══ 8-b3. 階段の手すり ═════════════════════════════════════════════════
+// 左右どちらに付けるかは利用者が選ぶ。壁付けか柱建てかは、その側に壁が
+// 沿っているかで決まる(造作棚と同じ考え)。自動が当たらない置き方のために
+// 明示も受ける -- 自動だけにすると「作れない納まり」が出る。
+function railHouse(opts) {
+  const o = opts || {};
+  return {
+    floors: {},
+    rooms: [{ id: 'r1', n: '室', floor: 1, x: 0, y: 0, w: 6000, d: 6000 }],
+    // 階段の右側(ローカル +x = rot 0 なので世界 +x)に沿う壁。
+    walls: o.wall ? [{ id: 'wr', floor: 1, x1: 2000, y1: 500, x2: 2000, y2: 3300, thick: 120 }] : [],
+    items: [Object.assign({ id: 'st', type: 'stair', floor: 1,
+      x: 1000, y: 500, w: 910, d: 2730, rot: 0 }, o.stair || {})]
+  };
+}
+
+test('手すりは省略すれば付かない（従来どおり）', () => {
+  const g = heights(railHouse({}));
+  assert.deepEqual([...g.stairRailSides(g.DATA.items[0])], []);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'none' })], []);
+});
+
+test('左右・両側を選べる', () => {
+  const g = heights(railHouse({}));
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'left' })], ['left']);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'right' })], ['right']);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'both' })], ['left', 'right']);
+});
+
+test('その側に壁が沿っていれば壁付け、離れていれば柱建て', () => {
+  const g = heights(railHouse({ wall: true, stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairSideHasWall(st, 'right'), true, '沿っている壁を見つけられていない');
+  assert.equal(g.stairSideHasWall(st, 'left'), false);
+  assert.equal(g.stairRailMountFor(st, 'right'), 'wall');
+  assert.equal(g.stairRailMountFor(st, 'left'), 'post');
+});
+
+test('壁が無ければ両側とも柱建て', () => {
+  const g = heights(railHouse({ stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairRailMountFor(st, 'right'), 'post');
+  assert.equal(g.stairRailMountFor(st, 'left'), 'post');
+});
+
+test('取り付け方を明示すると、自動判定より優先する', () => {
+  const g = heights(railHouse({ wall: true, stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  st.stairRailMount = 'post';
+  assert.equal(g.stairRailMountFor(st, 'right'), 'post', '明示が効いていない');
+  st.stairRailMount = 'wall';
+  assert.equal(g.stairRailMountFor(st, 'left'), 'wall');
+  delete st.stairRailMount;
+  assert.equal(g.stairRailMountFor(st, 'right'), 'wall', '明示を外したら自動へ戻る');
+});
+
+test('3Dは、直階段も廻り階段も手すりをこの1か所から読む', () => {
+  assert.match(html, /function build3DStairRails\(/);
+  assert.match(sliceFunction('build3DStairRails'), /stairRailMountFor\(/);
+  // 手すりは階段の種類ごとの走行の形に沿うので、それぞれの階段から渡す。
+  assert.match(sliceFunction('build3DOpenStraightStair'), /build3DStairRails\(/);
+  assert.match(sliceFunction('build3DWinderCorner'), /build3DStairRails\(/);
+});
+
+test('階段のプロパティ欄から手すりを選べる', () => {
+  assert.match(html, /stairRail/);
+  assert.match(html, /両側/);
+  assert.match(html, /壁付け/);
 });
 
 // ══ 8-c. 階段の下 ══════════════════════════════════════════════════════
