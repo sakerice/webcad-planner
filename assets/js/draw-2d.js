@@ -1581,7 +1581,9 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(107,86,54,0.8)';
       ctx.lineWidth=Math.max(1,sc*14);
       ctx.beginPath();
-      if((it.fencePattern||'vertical')==='horizontal'){
+      // 向きは意匠から。fencePattern は指定の無い保存済みプランの読み替えに使う。
+      var lInf=railInfillOf(it);
+      if(lInf==='bars'||lInf==='wires'){
         for(var lh=0; lh<3; lh++){
           var ly=-hd+(it.d*sc)*(lh+0.5)/3;
           ctx.moveTo(-hw,ly); ctx.lineTo(hw,ly);

@@ -1173,27 +1173,12 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
-    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
-    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
   }
   if(it.type==='lattice-screen'){
     if(!it.latticeHeight) it.latticeHeight=1600;
     if(!it.fencePattern) it.fencePattern='vertical';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
     html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.latticeHeight)+'" onchange="updateSelectedProp(\'latticeHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">格子方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
-    [['vertical','縦格子'],['horizontal','横格子']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
-    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
-    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">高さZ(mm)で浮かせて、バルコニーのルーバーや室内間仕切りに使えます</div>';
   }
   if(isContextExteriorItemType(it.type)){
@@ -1346,8 +1331,8 @@ function updateProps(){
         stairRailSides(it).map(function(sd){
           return (sd==='left'?'左':'右')+'は'+(stairRailMountFor(it,sd)==='wall'?'壁付け':'柱建て');
         }).join('、')+
-        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。手すりの色は階段の板とは別に持ちます。'+
-        (rmount==='auto'?'（自動は、その側に階段と平行な壁が沿っていれば壁付けにします。）':'')+'</div>';
+        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm。色は階段の板とは別です。'+
+        (rmount==='auto'?'自動は、階段と平行な壁が沿っていれば壁付けにします。':'')+'</div>';
     }
     // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
     // 組み合わせで決まるので、ここで選ぶのは1枚ごとの作りだけ。
@@ -1358,9 +1343,9 @@ function updateProps(){
       '<option value="skeleton"'+(sstyle==='skeleton'?' selected':'')+'>スケルトン（蹴込み板なし）</option>'+
       '</select></div>';
     html += '<div class="lock-status-note">'+({
-        open:'側面が見える形です。階段下は素通しなので、造作棚を置けば収納にできます。',
-        box:'階段下を塞いだ箱型です。階段室の空気が上下階で素通しになりません。下を収納にしたいときは、埋めずにひな壇のまま造作棚を置いてください。',
-        skeleton:'蹴込み板の無いオープン階段です。光と視線が抜けます。小さなお子さんや高齢の方が使うなら、箱型かひな壇の方が安全です。'
+        open:'階段下は素通し。造作棚を置けば収納にできます。',
+        box:'階段下を塞ぎます。下を収納にしたいなら、ひな壇のまま造作棚を置いてください。',
+        skeleton:'蹴込み板なし。光と視線が抜けます。'
       }[sstyle])+'</div>';
     // 足元。段差のある階でだけ出す。
     if(floorMaxSkipLevelMm(it.floor) > 0){
@@ -1410,12 +1395,14 @@ function updateProps(){
     html += '<div class="ph" style="margin-top:12px">格子</div>';
     html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
-    html += railingDesignHtml(it,{label:'格子の意匠',autoLabel:'指定しない（上の「格子方向」にしたがう）',frameDefault:'#b09468',capToggle:true,note:'意匠を選ぶと、上の「格子方向」より優先します。'});
-    html += '<div class="lock-status-note">格子の内法は '+latticeClearMm(it)+'mm です。'+
-      (latticeClearMm(it)>110
-        ? '手すりとして使うなら 110mm 以下が目安です（子どもがすり抜けない寸法）。'
-        : '手すりとして使える内法です。')+
-      '部屋の中に置くと、その部屋の床（段差の上を含む）に立ちます。</div>';
+    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
+    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += railingDesignHtml(it,{label:'格子の意匠',frameDefault:'#b09468',capToggle:true});
+    html += '<div class="lock-status-note">格子の内法 '+latticeClearMm(it)+'mm。'+
+      (latticeClearMm(it)>110?'手すりには 110mm 以下が目安です。':'手すりとして使える内法です。')+'</div>';
   }
   if(isColumnType(it.type)) {
     html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+columnHeightMm(it)+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';

@@ -469,47 +469,45 @@ function stairRailColorOf(it){
 // 意匠と色を選ぶ欄。**階段の手すりと格子柵で同じものを出す**。
 // 語彙をそろえておかないと、同じ家の中で手すりだけ浮く。
 // opts.label        見出し
-// opts.autoLabel    これを渡すと「指定しない」を先頭に置く(格子柵は
-//                   従来の『格子方向』へ落ちるので、戻れる道を残す)
+// opts.autoLabel    これを渡すと「指定しない」を先頭に置く
 // opts.frameDefault 骨の色が未指定のときに色見本へ出す色
 function railingDesignHtml(it,opts){
   opts=opts||{};
   var q=String.fromCharCode(39);
+  var hasCap=opts.capToggle?latticeHasCap(it):true;
+  // 部材のあり／なしは、その部材を細かく決める欄より **先**。後ろに置くと、
+  // 先に目に入った「笠木の色」を選んだ人が、付けたつもりで付いていない
+  // 状態になる(「格子柵に笠木が出ない」の正体はこれだった)。
+  var html='';
+  if(opts.capToggle){
+    html+='<div class="pr"><div class="pl">笠木（手すり）</div>'+
+      '<select class="pi" onchange="updateSelectedProp('+q+'latticeCap'+q+',this.value==='+q+'on'+q+'?true:undefined)">'+
+      '<option value="off"'+(hasCap?'':' selected')+'>なし（目隠し）</option>'+
+      '<option value="on"'+(hasCap?' selected':'')+'>あり（手すり）</option>'+
+      '</select></div>';
+  }
   var cur=(RAIL_INFILL_VALUES.indexOf(it&&it.railInfill)>=0)?it.railInfill:(opts.autoLabel?'':railInfillOf(it));
   function opt(v,label){
     return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>';
   }
-  var html='<div class="pr"><div class="pl">'+(opts.label||'意匠')+'</div>'+
+  html+='<div class="pr"><div class="pl">'+(opts.label||'意匠')+'</div>'+
     '<select class="pi" onchange="updateSelectedProp('+q+'railInfill'+q+',this.value||undefined)">'+
     (opts.autoLabel?opt('',opts.autoLabel):'')+
-    opt('bars','横桟（笠木＋支柱＋水平の桟）')+
-    opt('wires','横ワイヤー（細い丸鋼を等間隔に）')+
-    opt('baluster','縦格子（木の子柱を並べる）')+
-    opt('none','桟なし（笠木と支柱だけ）')+
+    opt('bars','横桟')+
+    opt('wires','横ワイヤー')+
+    opt('baluster','縦格子')+
+    opt('none','桟なし')+
     '</select></div>';
   if(railInfillOf(it)==='bars')
     html+='<div class="pr"><div class="pl">横桟の本数</div><input class="pi" type="number" min="0" max="12" step="1" value="'+
       railBarCount(it)+'" onchange="updateSelectedProp('+q+'railBars'+q+',+this.value)"></div>';
-  // 笠木のあり／なし。**色より先に**出す。色だけ先に出すと、色を選んだ人が
-  // 「笠木を付けた」と思い込み、実際には出ない(実際そうなり「格子柵に笠木が
-  // 出ない時がある」として報告された)。
-  var hasCap=opts.capToggle?latticeHasCap(it):true;
-  if(opts.capToggle){
-    html+='<div class="pr"><div class="pl">笠木（手すり）</div>'+
-      '<select class="pi" onchange="updateSelectedProp('+q+'latticeCap'+q+',this.value==='+q+'on'+q+'?true:undefined)">'+
-      '<option value="off"'+(hasCap?'':' selected')+'>なし（目隠しとして使う）</option>'+
-      '<option value="on"'+(hasCap?' selected':'')+'>あり（手すりとして使う）</option>'+
-      '</select></div>';
-  }
   // 笠木の色は、笠木があるときだけ。無い部材の色を選ばせない。
   if(hasCap)
     html+='<div class="pr"><div class="pl">笠木の色（木）</div><input class="pi" type="color" value="'+
       railCapColorOf(it)+'" onchange="updateSelectedProp('+q+'railCapColor'+q+',this.value)"></div>';
   html+='<div class="pr"><div class="pl">骨の色（支柱・桟）</div><input class="pi" type="color" value="'+
     (railFrameColorOf(it)||opts.frameDefault||'#2b2f33')+'" onchange="updateSelectedProp('+q+'railFrameColor'+q+',this.value)"></div>';
-  html+='<div class="lock-status-note">意匠と色は階段の手すりと格子柵で同じ設定です。家の中でそろえられます。'+
-    (railFrameColorOf(it)?'':'骨の色は、変えるまでは部材ごとの既定のままです。')+
-    (opts.note||'')+'</div>';
+  html+='<div class="lock-status-note">階段の手すりと共通の設定です。'+(opts.note||'')+'</div>';
   return html;
 }
 // ── 格子柵 ────────────────────────────────────────────────────────────────
