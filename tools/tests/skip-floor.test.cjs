@@ -55,13 +55,14 @@ const FNS = [
   'segmentInsideRectLengthMm', 'localSupportTopY', 'floorHasSkipLevel', 'wallBaseSupportY', 'wallLiftMm',
   'roomSkipLevelMm', 'roomSkipCavityMm', 'roomSkipEdgeNeighbors', 'roomSkipOpenSides',
   'isColumnType', 'columnHeightMm', 'wallSkipBaseMm',
+  'rectMinusRect', 'subtractRectsFromRect', 'polyAsAxisRectMm',
   'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'roomFloorAt', 'roomStoreyFloorAt',
   'itemIsUnderPlatform', 'item3DBaseY',
   'roomAtPointOnFloor', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove', 'roomDeclaresSlopedCeiling',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingCapM', 'roomCeilingHeightM', 'roomRenderedCeilingMm',
-  'roomLevelLabel',
+  'roomLevelLabel', 'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
@@ -93,7 +94,8 @@ function heights(data) {
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
     topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
     topLevelVar('SHELF_BOARD_T_MM'),
-    topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM')
+    topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
+    topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
   ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
   return ctx;
 }
@@ -191,6 +193,22 @@ test('天井高を明示しない段差部屋では、天井は動かない(頭�
   const up = g.DATA.rooms[1];
   assert.equal(Math.round(g.roomCeilingHeightM(up) / g.U), 2700, '天井が勝手に上がっている');
   assert.equal(g.roomRenderedCeilingMm(up), 1500, '頭上の実寸が 階高-段差 になっていない');
+});
+
+// 天井の上限が伸びてよいのは **自分が段差を持っている部屋だけ**。
+// 境界の壁が高いだけで隣の部屋の天井まで上げると、その部屋に既に付いている
+// 照明が天井から取り残される(実際にそうなり、「ライトが天井に追従していない」
+// として報告された)。
+test('段差を持たない部屋の天井は、隣の壁が高くても階高のまま', () => {
+  const h = skipHouse({ skip: 1200, wallOnPlatform: 2400 });
+  // 段差の境界の壁を高くする。この壁は低い側の部屋の縁も通る。
+  h.walls[0].wallHeight = 2200;
+  const g = heights(h);
+  const low = g.DATA.rooms[0];
+  assert.equal(g.roomSkipLevelMm(low), 0);
+  assert.equal(Math.round(g.roomCeilingCapM(low) / g.U), 2700,
+    '段差を持たない部屋の天井が、隣の高い壁につられて上がっている');
+  assert.equal(Math.round(g.roomCeilingHeightM(low) / g.U), 2700);
 });
 
 test('段差の上に高い壁が立つと、天井の上限もその壁の天端まで伸びる', () => {
@@ -378,6 +396,54 @@ test('階段のプロパティ欄から階段の下を選べる', () => {
   assert.match(html, /埋める（箱型）/);
 });
 
+// ══ 10-b2. 段差の天板は、階段の開口で外周面も切れる ════════════════════
+// 「階段が重なった所で、段差の縦の板が残る」の再発防止。
+// THREE.ExtrudeGeometry は外形と穴の壁を別々に作るので、穴が外形の辺に接しても
+// 外周の壁は切れない。段差の天板は矩形の差に割って作り、面を本当に途切れさせる。
+test('矩形から矩形を引くと、残りの矩形に割れる', () => {
+  const g = heights(skipHouse({}));
+  // 中に浮いた穴 → 上下左右の4枚
+  let out = g.rectMinusRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+                            { x0: 40, y0: 40, x1: 60, y1: 60 });
+  assert.equal(out.length, 4);
+  assert.equal(out.reduce((a, r) => a + (r.x1 - r.x0) * (r.y1 - r.y0), 0), 100 * 100 - 20 * 20);
+  // 辺に接した穴 → 3枚(接した側には何も残らない)
+  out = g.rectMinusRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+                        { x0: 0, y0: 40, x1: 30, y1: 60 });
+  assert.equal(out.length, 3);
+  assert.ok(out.every((r) => !(r.x0 < 30 && r.y0 >= 40 && r.y1 <= 60 && r.x0 === 0)),
+    '接した辺に矩形が残っている');
+  // 重なりが無ければそのまま
+  out = g.rectMinusRect({ x0: 0, y0: 0, x1: 10, y1: 10 }, { x0: 50, y0: 50, x1: 60, y1: 60 });
+  assert.equal(out.length, 1);
+});
+
+test('穴が複数でも順に引ける', () => {
+  const g = heights(skipHouse({}));
+  const out = g.subtractRectsFromRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+    [{ x0: 0, y0: 0, x1: 20, y1: 20 }, { x0: 80, y0: 80, x1: 100, y1: 100 }]);
+  const area = out.reduce((a, r) => a + (r.x1 - r.x0) * (r.y1 - r.y0), 0);
+  assert.equal(area, 100 * 100 - 20 * 20 - 20 * 20);
+});
+
+test('軸に沿った穴だけを矩形として読む(回した階段は従来の経路へ落とす)', () => {
+  const g = heights(skipHouse({}));
+  const axis = [{ x: 1, z: 2 }, { x: 3, z: 2 }, { x: 3, z: 5 }, { x: 1, z: 5 }];
+  // vm の外へ出た素のオブジェクトは prototype が違うので、値で比べる。
+  const rc = g.polyAsAxisRectMm(axis);
+  assert.deepEqual([rc.x0, rc.y0, rc.x1, rc.y1], [1000, 2000, 3000, 5000]);
+  const rotated = [{ x: 1, z: 2 }, { x: 3, z: 2.5 }, { x: 2.5, z: 5 }, { x: 1, z: 5 }];
+  assert.equal(g.polyAsAxisRectMm(rotated), null);
+});
+
+test('段差の天板は、階段の開口があるときは矩形に割って作る', () => {
+  const body = sliceFunction('buildRooms3D');
+  assert.match(body, /buildSkipDeckMeshes\(/, '天板を割って作る経路が無い');
+  const deck = sliceFunction('buildSkipDeckMeshes');
+  assert.match(deck, /subtractRectsFromRect\(/);
+  assert.match(deck, /polyAsAxisRectMm\(/);
+});
+
 // ══ 10-c. 柱 ═══════════════════════════════════════════════════════════
 test('柱は角柱と円柱の2種類あり、高さは範囲に丸めて読む', () => {
   const g = heights(skipHouse({}));
@@ -446,6 +512,62 @@ test('3Dの段は、反転した階段では逆向きに積む', () => {
 test('歩行の坂面も、反転した階段では逆向きに上る', () => {
   const body = sliceFunction('walkLevelStairGroundAt');
   assert.match(body, /reversed/, '足元の坂面が反転を見ていない');
+});
+
+// ══ 10-d. 天井付けの器具が天井に追従する ═══════════════════════════════
+// 「ライトが天井に追従していない」の再発防止。天井が動く操作は段差・床上げ・
+// 天井高・天井の種類と複数あり、どれか1つだけを直しても残りで取り残される。
+function houseWithLight(opts) {
+  const h = skipHouse(opts || {});
+  // 段差の上の部屋の天井にダウンライトを1つ。
+  h.items.push({ id: 'dl', type: 'light-down', floor: 1,
+                 x: 5000, y: 1900, w: 180, d: 180, rot: 0, elev: 2538 });
+  return h;
+}
+
+test('天井からの下がりを保つ（直付けは直付けのまま）', () => {
+  const g = heights(houseWithLight({}));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  // 天井 2700、CEILING_FINISH 12 → 直付けは 2688。まず基準を合わせる。
+  dl.elev = g.roomCeilingElevationMm(up);
+  const flush = dl.elev;
+  g.shiftRoomCeilingFixtures(up, -500);
+  assert.equal(dl.elev, flush - 500);
+});
+
+test('段差を付けると、天井付けの器具は天井と一緒に動く', () => {
+  const g = heights(houseWithLight({ ceilingMm: 2200 }));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  dl.elev = g.roomCeilingElevationMm(up);          // 天井に直付け
+  g.followRoomCeiling(up, function () { up.skipLevelMm = 1200; });
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up),
+    '段差を付けたら器具が天井から取り残された');
+});
+
+test('意図して下げたペンダントは、下がりを保ったまま動く', () => {
+  const g = heights(houseWithLight({ ceilingMm: 2200 }));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  dl.elev = g.roomCeilingElevationMm(up) - 400;    // 400mm 下げてある
+  g.followRoomCeiling(up, function () { up.skipLevelMm = 1200; });
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up) - 400, '下がりが変わった');
+});
+
+test('床上げでは天井が動かないので、器具の世界での高さは変わらない', () => {
+  const g = heights(houseWithLight({}));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  const worldBefore = g.roomFloorTopY(up) + dl.elev * g.U;
+  g.followRoomCeiling(up, function () { up.floorRaiseMm = 150; });
+  const worldAfter = g.roomFloorTopY(up) + dl.elev * g.U;
+  assert.ok(Math.abs(worldAfter - worldBefore) < 1e-9, '床上げで照明が動いた');
+});
+
+test('天井を書き換える経路は1か所(updateSelectedProp)を通る', () => {
+  const body = sliceFunction('updateSelectedProp');
+  assert.match(body, /roomCeilingElevationMm\(ST\.selected\)/, '天井の前後を測っていない');
+  assert.match(body, /shiftRoomCeilingFixtures\(/, '天井の書き換えで器具が追従しない');
+  // 段差・床上げも同じ規則へ寄せてある。
+  assert.match(sliceFunction('updateSelectedRoomSkipLevel'), /followRoomCeiling\(/);
+  assert.match(sliceFunction('updateSelectedRoomFloor'), /followRoomCeiling\(/);
 });
 
 // ══ 11. 造作棚 ══════════════════════════════════════════════════════════
