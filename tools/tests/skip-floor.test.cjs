@@ -783,10 +783,34 @@ test('意匠と色の欄は、階段の手すりと格子柵で同じものを�
   assert.ok(bars.indexOf('value="5"') >= 0, '横桟の本数が今の値を出していない');
 });
 
+test('格子柵の欄は、笠木のあり/なしを色より先に出す', () => {
+  const g = heights(railHouse({}));
+  const opts = { label: '格子の意匠', capToggle: true, frameDefault: '#b09468' };
+
+  // 笠木なし: 切り替えは出るが、無い部材の色は選ばせない。
+  const off = g.railingDesignHtml({ type: 'lattice-screen' }, opts);
+  assert.ok(off.indexOf('笠木（手すり）') >= 0, '笠木のあり/なしが出ていない');
+  assert.ok(off.indexOf('笠木の色') < 0, '笠木が無いのに笠木の色を出している');
+  assert.ok(off.indexOf('latticeCap') >= 0, '笠木の切り替えがつながっていない');
+
+  // 笠木あり: 色が出る。順番は **切り替えが先、色が後**。
+  const on = g.railingDesignHtml({ type: 'lattice-screen', latticeCap: true }, opts);
+  const at切替 = on.indexOf('笠木（手すり）'), at色 = on.indexOf('笠木の色');
+  assert.ok(at色 >= 0, '笠木があるのに色を出していない');
+  assert.ok(at切替 >= 0 && at切替 < at色,
+    '笠木の色が切り替えより先に出ている（色だけ選んで「付けた」と思い込む）');
+
+  // 階段の手すりには「笠木なし」が無いので、切り替えは出さず色だけ出す。
+  const stair = g.railingDesignHtml({ type: 'stair' }, { label: '手すりの意匠' });
+  assert.ok(stair.indexOf('笠木（手すり）') < 0, '階段に要らない切り替えを出している');
+  assert.ok(stair.indexOf('笠木の色') >= 0, '階段の笠木の色が選べない');
+});
+
 test('意匠と色の欄は、階段の手すりと格子柵の両方の設定に出ている', () => {
   assert.match(html, /function railingDesignHtml\(/);
   assert.match(html, /railingDesignHtml\(it,\{label:'手すりの意匠'\}\)/);
   assert.match(html, /railingDesignHtml\(it,\{label:'格子の意匠'/);
+  assert.match(html, /capToggle:true/, '格子柵の笠木の切り替えが共通の欄に寄っていない');
 });
 
 test('手すりは丸棒の羅列ではなく、断面を走行に沿って押し出す', () => {
