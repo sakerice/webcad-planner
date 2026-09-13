@@ -53,6 +53,9 @@ function mkItem(type,x,y,rot,floor,w,d){
   if(type==='foundation'){
     item.foundationHeight=450;
   }
+  if(type==='column'||type==='column-round'){
+    item.columnHeight=2400;
+  }
   if(type==='shelf-built-in'){
     item.shelfCount=3;
     item.shelfHeight=900;

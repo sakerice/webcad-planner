@@ -3251,6 +3251,8 @@ input[type="reset"]:focus-visible{
     <div class="cat-body">
       <div class="stool" data-tool="wall" onclick="setTool('wall')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v14H3ZM3 13h18M9 6v7M15 13v7"/></svg>壁を描く</div>
       <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋(矩形)</div>
+      <div class="stool" data-tool="column" onclick="setTool('column')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v16H9ZM6 4h12M6 20h12"/></svg>角柱</div>
+      <div class="stool" data-tool="column-round" onclick="setTool('column-round')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5c0-.8 1.3-1.5 3-1.5s3 .7 3 1.5v13c0 .8-1.3 1.5-3 1.5s-3-.7-3-1.5ZM9 5.5c0 .8 1.3 1.5 3 1.5s3-.7 3-1.5M6 4h12M6 20h12"/></svg>円柱</div>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18v11H3ZM3 15h18M7 10v11M12 10v11M17 10v11"/></svg>バルコニー</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>階段・屋根 <span>+</span></div>
@@ -9996,7 +9998,14 @@ function stairGroupIsLevel(seed){
   if(!seed||!isStairPartType(seed.type)) return false;
   return getConnectedStairParts(seed).some(isLevelStairPart);
 }
-// レベル階段の足元と天端(ワールドm)。走行軸の両端 300mm 外側の床の高さを採る。
+// レベル階段の足元・天端と、置かれた向き(ワールドm)。
+//
+// 階段は常に **自分のローカル +奥行き方向** へ上る(3Dの段も2Dの踏み板線もそう)。
+// だから両端の高さの min/max だけを見ると、逆向きに置かれた階段が「最上段の
+// 踏板から始まる」形で描かれる。階段自身の向きで低い側・高い側を判定し、
+// 逆を向いていれば reversed を立てて、段を積む向きの方を合わせる。
+// 向きの規約(rot / flipY)は stairBounds2D・buildItem3D と同じ。
+//
 // 端が段差の外へ出ていない(両端が同じ高さ)ときは、その階にある最大の段差へ
 // 上がるものとみなす -- 黙って高さ0の階段を描くよりは、意図に近い。
 function stairLevelSpanM(seed){
@@ -10006,14 +10015,17 @@ function stairLevelSpanM(seed){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
     minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
   });
-  var fl=seed.floor||1, out=300, a, b;
-  if((maxX-minX)>=(maxY-minY)){
-    a={x:minX-out,y:(minY+maxY)/2}; b={x:maxX+out,y:(minY+maxY)/2};
-  }else{
-    a={x:(minX+maxX)/2,y:minY-out}; b={x:(minX+maxX)/2,y:maxY+out};
-  }
-  var ya=roomFloorAt(fl,a.x,a.y), yb=roomFloorAt(fl,b.x,b.y);
-  var lo=Math.min(ya,yb), hi=Math.max(ya,yb);
+  var fl=seed.floor||1, out=300;
+  var rad=(Number(seed.rot)||0)*Math.PI/180;
+  var sgn=seed.flipY?-1:1;
+  var ux=-Math.sin(rad)*sgn, uy=Math.cos(rad)*sgn;     // ローカル +奥行き のワールド向き
+  var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  var half=(Math.abs((maxX-minX)*ux)+Math.abs((maxY-minY)*uy))/2+out;
+  var down={x:cx-ux*half, y:cy-uy*half};               // 階段の下端の先
+  var up={x:cx+ux*half, y:cy+uy*half};                 // 階段の上端の先
+  var yDown=roomFloorAt(fl,down.x,down.y), yUp=roomFloorAt(fl,up.x,up.y);
+  var lo=Math.min(yDown,yUp), hi=Math.max(yDown,yUp);
+  var reversed=(yDown>yUp+0.005);
   if(hi-lo<0.05){
     var base=floorTopY(fl), maxLvl=0;
     DATA.rooms.forEach(function(r){
@@ -10021,9 +10033,14 @@ function stairLevelSpanM(seed){
       var v=roomSkipLevelMm(r)+roomFloorOffsetMm(r);
       if(v>maxLvl) maxLvl=v;
     });
-    lo=base; hi=base+maxLvl*U;
+    lo=base; hi=base+maxLvl*U; reversed=false;
   }
-  return {baseY:lo, topY:hi, riseM:Math.max(0.05,hi-lo)};
+  return {baseY:lo, topY:hi, riseM:Math.max(0.05,hi-lo), reversed:reversed};
+}
+// このレベル階段が、置かれた向きと逆に上る必要があるか。
+// レベル階段でなければ常に false(上の階へ上がる階段の向きは利用者のもの)。
+function stairLevelReversed(it){
+  return stairGroupIsLevel(it) ? !!stairLevelSpanM(it).reversed : false;
 }
 // この階段グループが上る高さ(m)。行き先の宣言で経路が分かれる。
 function stairGroupRiseM(it){
@@ -11367,8 +11384,21 @@ function buildItem3D(it){
     if(it.type==='stair-corner'){
       build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
     } else {
-      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps);
+      // 段差を上る階段が段差と逆を向いて置かれていたら、段を積む向きだけ合わせる。
+      // 平面の footprint は動かさない(利用者が置いた位置は変えない)。
+      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps,stairLevelReversed(it));
     }
+  }
+  else if(isColumnType(it.type)){
+    // 角柱は幅×奥行きの箱、円柱は幅と奥行きの小さい方を直径にした円柱。
+    // どちらも足元は item3DBaseY(=段差の下に置けば構造床)から立つ。
+    var colGeo=(it.type==='column-round')
+      ? new THREE.CylinderGeometry(Math.min(w3,d3)/2,Math.min(w3,d3)/2,h,24)
+      : new THREE.BoxGeometry(w3,h,d3);
+    var colMesh=new THREE.Mesh(colGeo,new THREE.MeshStandardMaterial({color:col,roughness:0.75}));
+    colMesh.position.y=h/2;
+    colMesh.castShadow=true; colMesh.receiveShadow=true;
+    grp.add(colMesh);
   }
   else if(it.type==='shelf-built-in'){
     build3DShelfBuiltIn(grp,it,w3,d3,h,col);
@@ -11395,7 +11425,7 @@ function build3DShelfBuiltIn(grp,it,w3,d3,h,col){
   var T=SHELF_BOARD_T_MM*U;
   var mat=new THREE.MeshStandardMaterial({color:col,roughness:0.62,metalness:0.0});
   var n=shelfBoardCount(it);
-  var wallBacked=shelfIsWallSupported(it);
+  var wallBacked=(shelfSideBoards(it)==='none');
   var backSign=it.flipY?1:-1;
   var boardW=wallBacked?w3:Math.max(0.05,w3-T*2);
   for(var k=1;k<=n;k++){
@@ -12658,6 +12688,7 @@ function getItemHeightValue(it){
   if(it && isContextExteriorItemType(it.type)) return getContextExteriorHeight(it);
   if(it && it.type==='balcony') return balconySlabHeightMm();
   if(it && it.type==='shelf-built-in') return shelfHeightMm(it);
+  if(it && isColumnType(it.type)) return columnHeightMm(it);
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
   if(it && it.type==='lattice-screen') return Math.max(300,Math.min(3000,it.latticeHeight||1600));
   if(it && it.type==='foundation') {
@@ -12668,8 +12699,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,'shelf-built-in':900,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,'shelf-built-in':0xd8cdb4,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,column:2400,'column-round':2400,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,'shelf-built-in':900,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,column:0xcfc6b6,'column-round':0xcfc6b6,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,'shelf-built-in':0xd8cdb4,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -12720,7 +12751,10 @@ function addStairRiserPanel(grp,mat,a,b,y,h,thickness){
 // 側桁から柱を立てるのは吹き抜け側だけ。その取り合い(どの区間が壁沿いかの
 // 判定と壁付け金物)を実装せずに一律で板から生やすのは近似であり、品質未達。
 // 法の要求(手すり義務)はその納まりごと作れるようになってから入れる。
-function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
+// reverse=true のときは、段をローカル +奥行き ではなく -奥行き へ積む。
+// 使うのは「段差を上る階段が、段差と逆を向いて置かれた」とき(stairLevelSpanM)。
+// 形は同じで z を裏返すだけなので、踏面・蹴上げ・接合代の納まりは変わらない。
+function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,reverse){
   steps=Math.max(1,steps||6);
   var treadD=d/steps;
   var rise=partRise/steps;
@@ -12737,8 +12771,9 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
     // 踏板の裏側を蹴込み板厚ぶんだけ延ばし、両部材の前面を揃える。
     // 見える段鼻ではなく、上端を面接触させるための隠れた接合代。
     var treadDepth=treadD+riserT;
+    var zSign=reverse?-1:1;
     var tread=new THREE.Mesh(new THREE.BoxGeometry(w,treadT,treadDepth),mat);
-    tread.position.set(0,topY-treadT/2,(z0-riserT+z1)/2);
+    tread.position.set(0,topY-treadT/2,zSign*((z0-riserT+z1)/2));
     tread.castShadow=true;
     tread.receiveShadow=true;
     grp.add(tread);
@@ -12750,7 +12785,7 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
     var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
     // 蹴込み板を下段踏板の後端へ載せ、接合部だけ1.5mm食い込ませる。
     // 線接触による光漏れを防ぎ、上端は上段踏板の下面で正確に止める。
-    riser.position.set(0,riserBottom+riserH/2,z0-riserT/2);
+    riser.position.set(0,riserBottom+riserH/2,zSign*(z0-riserT/2));
     riser.castShadow=true;
     riser.receiveShadow=true;
     grp.add(riser);
@@ -13864,27 +13899,6 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   out.slab=slab;
   return out;
 }
-// スキップフロアの段差の立ち上がり(蹴上げ面)。低いレベルに面していない辺だけを
-// 塞ぐ -- 面している辺は開けたままにして、そこが段差の下の収納スペースになる。
-// y0 はその階の構造床天端、y1 は段差の天板の下端。
-function buildSkipPlatformSkirts(r,matFloor,y0,y1){
-  var h=y1-y0;
-  if(h<=0.001) return;
-  var open=roomSkipOpenSides(r);
-  var mat=makeFloorSlabMaterial(matFloor);
-  var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
-  var T=Math.max(0.06,Math.min(0.12,Math.max(80,FLOOR_SLAB_H||180)*U));
-  function panel(w3,d3,x,z){
-    var m=new THREE.Mesh(new THREE.BoxGeometry(w3,h,d3),mat);
-    m.position.set(x,y0+h/2,z);
-    m.castShadow=true; m.receiveShadow=true;
-    mark3DSelectable(m,r,'room'); sc3.add(m);
-  }
-  if(!open.n) panel(rw,T,rcx,r.y*U+T/2);
-  if(!open.s) panel(rw,T,rcx,(r.y+r.d)*U-T/2);
-  if(!open.w) panel(T,rd,r.x*U+T/2,rcz);
-  if(!open.e) panel(T,rd,(r.x+r.w)*U-T/2,rcz);
-}
 // 部屋の直上に上階の部屋または屋根があるかを、部屋内の代表点で判定する。
 // 屋根は回転できるため isInsideItem を使い、わずかな接触だけでは天井を作らない。
 function roomHasCoverAbove(r){
@@ -14158,7 +14172,8 @@ function buildRooms3D(flFilt){
       var under=buildRoomFloorMeshes(r,matFloor,slabH,slabBaseY,storeyTopY,stairHoles);
       if(under.slabBody){ mark3DSelectable(under.slabBody,r,'room'); sc3.add(under.slabBody); }
       mark3DSelectable(under.slab,r,'room'); sc3.add(under.slab);
-      buildSkipPlatformSkirts(r,matFloor,storeyTopY,floorY-deckM);
+      // 立ち上がり(蹴上げ面)は**作らない**。段差の下を壁で囲うか、柱で持たせるか、
+      // 奥の壁を支えにして手前を開けるかは設計そのもので、置くのは利用者である。
       var deck=buildRoomFloorMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles);
       if(deck.slabBody){ mark3DSelectable(deck.slabBody,r,'room'); sc3.add(deck.slabBody); }
       mark3DSelectable(deck.slab,r,'room'); sc3.add(deck.slab);
@@ -14506,8 +14521,10 @@ function walkLevelStairGroundAt(xMm,zMm,floor,marginMm){
     if(it.floor!==floor || !isLevelStairPart(it)) continue;
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
     if(t===null) continue;
+    var span=stairLevelSpanM(it);
+    if(span.reversed) t=1-t;     // 段を積む向きと足元の坂面をそろえる
     var sri=stairRiseInfo(it);
-    var y=stairLevelSpanM(it).baseY+sri.base+t*sri.rise-top;
+    var y=span.baseY+sri.base+t*sri.rise-top;
     if(best===null || y>best) best=y;
   }
   return best;
@@ -15761,6 +15778,13 @@ function placeItem(type,wx,wy){
     it.x=objectPlaced.x; it.y=objectPlaced.y;
   }
   applyDefaultPlacementElevation(it);
+  // 段差の上に置いた柱は、段差の下を持たせるためのものとみなして、
+  // 足元をその階の構造床へ下ろし、高さを段差に合わせる。毎回入力させるものではない。
+  if(isColumnType(it.type)){
+    var colRoom=roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2);
+    var cavity=roomSkipCavityMm(colRoom);
+    if(cavity>0){ it.baseLevel='under'; it.columnHeight=cavity; }
+  }
   DATA.items.push(it);ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   syncToolUi();

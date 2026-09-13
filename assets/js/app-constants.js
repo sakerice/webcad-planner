@@ -366,6 +366,10 @@ function roomSkipLevelMm(room){
 }
 // 段差の下に、物を入れられる空間ができるか。
 // 厚みは段差(構造)と床上げ(仕上げ)の合計で見る。
+//
+// **この空間をアプリが塞ぐことはしない。** 段差の下を壁で囲うのか、柱で持たせるのか、
+// 奥の壁を支えにして手前を開けるのかは設計そのものなので、置くのは利用者である。
+// 自動で板を立てると、引いた覚えのない壁が「奥の壁」として現れる。
 function roomSkipCavityMm(room){
   if(!room) return 0;
   var t=roomSkipLevelMm(room)+roomFloorOffsetMm(room);
@@ -385,11 +389,11 @@ function floorHasSkipLevel(floor){
   }
   return false;
 }
-// 段差の下の空間が開いている側。**低いレベルの床に面している辺だけ**が開く。
-// 部屋が無い側(外)は閉じる -- そこは外壁か基礎で、覗ける場所ではないからである。
-// 戻り値の n/s/w/e は平面座標の -y / +y / -x / +x 側。
-function roomSkipOpenSides(room){
-  var out={n:false,s:false,w:false,e:false};
+// 段差の各辺の向こうに何があるか。'lower' 低いレベルの部屋 / 'same' 同じレベルの部屋 /
+// 'none' 部屋が無い(外・廊下など)。n/s/w/e は平面座標の -y / +y / -x / +x 側。
+// 一部でも低いレベルに面していれば 'lower' を採る -- そこが実際に見える蹴上げ面だから。
+function roomSkipEdgeNeighbors(room){
+  var out={n:'none',s:'none',w:'none',e:'none'};
   if(!room||typeof DATA==='undefined'||!DATA||!DATA.rooms) return out;
   var mine=roomSkipLevelMm(room)+roomFloorOffsetMm(room);
   if(mine<=0) return out;
@@ -406,16 +410,42 @@ function roomSkipOpenSides(room){
       var r2=roomAtPointOnFloor(room.floor,p.x,p.y);
       if(!r2||r2===room) continue;
       var lvl=roomSkipLevelMm(r2)+roomFloorOffsetMm(r2);
-      if(mine-lvl>=100){ out[e[0]]=true; return; }
+      if(mine-lvl>=100){ out[e[0]]='lower'; return; }
+      if(out[e[0]]==='none') out[e[0]]='same';
     }
   });
   return out;
 }
+// 低いレベルに面している辺。平面図の段差線が引かれるのはここ。
+function roomSkipOpenSides(room){
+  var e=roomSkipEdgeNeighbors(room);
+  return {n:e.n==='lower', s:e.s==='lower', w:e.w==='lower', e:e.e==='lower'};
+}
+// ── 柱 ────────────────────────────────────────────────────────────────────
+// 角柱(column)と円柱(column-round)。スキップフロアの段差の下を開けたまま
+// 持たせるためのものだが、使い道はそれに限らない(下屋・ポーチ・大開口の中間柱)。
+// 高さは既定 2400。段差の下へ置いたときは、置いた場所の段差の高さへ合わせる
+// (placeItem が書き込む) -- 毎回入力させるようなものではない。
+function columnHeightMm(it){
+  var n=Number(it&&it.columnHeight);
+  return (isFinite(n)&&n>0)?Math.max(100,Math.min(6000,Math.round(n))):2400;
+}
+function isColumnType(t){ return t==='column'||t==='column-round'; }
 // ── 造作棚 ────────────────────────────────────────────────────────────────
 // 「その場で作り付けた棚」である。実物と同じく、壁に付けば壁が棚板を支えるので
 // 縦板は要らず、何も無いところに置けば両端に縦板を立てないと棚板が落ちる。
-// どちらになるかは**置いた場所から決まる**ので、利用者に選ばせない。
+//
+// **どちらにするかは利用者が決める。** 置いた場所から自動で判定もするが、
+// 「背面が壁の面から 140mm 以内で、幅方向が壁と15度以内で平行」という条件は
+// 回転や反転を掛けた棚では当てるのが難しく、自動だけにすると
+// 「縦板の無い棚が作れない」状態になる。既定は自動、明示があればそちらが勝つ。
 var SHELF_BOARD_T_MM=25;
+// 'auto'(既定) | 'none' 縦板なし(壁が支える) | 'both' 両端に縦板
+function shelfSideBoards(it){
+  var v=it&&it.shelfSides;
+  if(v==='none'||v==='both') return v;
+  return shelfIsWallSupported(it)?'none':'both';
+}
 function shelfBoardCount(it){
   var n=Number(it&&it.shelfCount);
   return (isFinite(n)&&n>=1)?Math.min(8,Math.round(n)):3;
@@ -1533,7 +1563,7 @@ var ISIZES = {
   'dining-table':{w:1200,d:800}, dining_6:{w:1600,d:900}, round_table_4:{w:1000,d:1000},
   'bed-d':{w:1400,d:1950}, 'bed-s':{w:970,d:1950}, semi_double_bed:{w:1200,d:1950},
   futon_set:{w:1000,d:2100}, desk:{w:1200,d:600}, tv:{w:1200,d:400},
-  'custom-block':{w:900,d:450},
+  'custom-block':{w:900,d:450}, column:{w:180,d:180}, 'column-round':{w:180,d:180},
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
   closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, 'shelf-built-in':{w:1800,d:350}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
@@ -1641,7 +1671,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', 'shelf-built-in':'#e6dcc8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', column:'#cfc6b6', 'column-round':'#cfc6b6', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', 'shelf-built-in':'#e6dcc8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
@@ -2108,7 +2138,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱','shelf-built-in':'造作棚',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック',column:'角柱','column-round':'円柱','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱','shelf-built-in':'造作棚',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   'ac-outdoor':'エアコン室外機', 'water-heater':'貯湯タンク（エコキュート）', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',
