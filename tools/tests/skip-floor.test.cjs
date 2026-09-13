@@ -783,6 +783,15 @@ test('意匠と色の欄は、階段の手すりと格子柵で同じものを�
   assert.ok(bars.indexOf('value="5"') >= 0, '横桟の本数が今の値を出していない');
 });
 
+test('格子柵の向きは「意匠」だけで決まる(同じことを決める欄を2つ置かない)', () => {
+  // 上の方にあった『格子方向』は畳んだ。離れた場所に同じことを決める欄が
+  // 2つあると、先に目に入った方を触って「効かない」と見える。
+  assert.ok(html.indexOf('格子方向') < 0, '『格子方向』の欄が残っている');
+  // 2D も意匠から向きを読む。fencePattern は保存済みプランの読み替え専用。
+  const body = sliceFunction('drawItem2d');
+  assert.match(body, /railInfillOf\(it\)/, '2D が意匠を見ていない');
+});
+
 test('格子柵の欄は、笠木のあり/なしを色より先に出す', () => {
   const g = heights(railHouse({}));
   const opts = { label: '格子の意匠', capToggle: true, frameDefault: '#b09468' };
@@ -797,8 +806,10 @@ test('格子柵の欄は、笠木のあり/なしを色より先に出す', () =
   const on = g.railingDesignHtml({ type: 'lattice-screen', latticeCap: true }, opts);
   const at切替 = on.indexOf('笠木（手すり）'), at色 = on.indexOf('笠木の色');
   assert.ok(at色 >= 0, '笠木があるのに色を出していない');
-  assert.ok(at切替 >= 0 && at切替 < at色,
-    '笠木の色が切り替えより先に出ている（色だけ選んで「付けた」と思い込む）');
+  // 切り替えは **いちばん上**。意匠より下に落ちただけでも、先に目に入った欄を
+  // 触って「付けたつもり」になる事故がまた起きる。
+  assert.ok(at切替 >= 0 && at切替 < on.indexOf('格子の意匠') && at切替 < at色,
+    '笠木のあり/なしが先頭に出ていない');
 
   // 階段の手すりには「笠木なし」が無いので、切り替えは出さず色だけ出す。
   const stair = g.railingDesignHtml({ type: 'stair' }, { label: '手すりの意匠' });
