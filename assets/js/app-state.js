@@ -1341,11 +1341,12 @@ function updateProps(){
         '<option value="wall"'+(rmount==='wall'?' selected':'')+'>壁付け</option>'+
         '<option value="post"'+(rmount==='post'?' selected':'')+'>柱建て</option>'+
         '</select></div>';
+      html += '<div class="pr"><div class="pl">手すりの色</div><input class="pi" type="color" value="'+stairRailColorOf(it)+'" onchange="updateSelectedProp(\'stairRailColor\',this.value)"></div>';
       html += '<div class="lock-status-note">'+
         stairRailSides(it).map(function(sd){
           return (sd==='left'?'左':'右')+'は'+(stairRailMountFor(it,sd)==='wall'?'壁付け':'柱建て');
         }).join('、')+
-        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。'+
+        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。手すりの色は階段の板とは別です（金物は色の指定に従いません）。'+
         (rmount==='auto'?'（自動は、その側に階段と平行な壁が沿っていれば壁付けにします。）':'')+'</div>';
     }
     // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の

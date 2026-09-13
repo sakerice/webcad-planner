@@ -74,6 +74,8 @@ const FNS = [
   'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
   'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
+  'railPolylineYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
+  'stairRailColorOf', 'canSetItemTexture',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
@@ -94,12 +96,18 @@ function heights(data) {
     roomDisplayLabel: () => '部屋',
     roomRoofCeilingExtent: () => null,
     roomCeilingProfile: () => null,
-    roomRenderedCeilingLabel: () => 'CH 2400'
+    roomRenderedCeilingLabel: () => 'CH 2400',
+    // canSetItemTexture が見る種類の判定。階段以外はこの検査の対象外。
+    isCustomBlockType: () => false,
+    isDoorItemType: () => false
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
     topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
     topLevelVar('SHELF_BOARD_T_MM'),
+    topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
+    topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
+    topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
   ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
@@ -631,6 +639,53 @@ test('取り付け方を明示すると、自動判定より優先する', () =>
   assert.equal(g.stairRailMountFor(st, 'left'), 'wall');
   delete st.stairRailMount;
   assert.equal(g.stairRailMountFor(st, 'right'), 'wall', '明示を外したら自動へ戻る');
+});
+
+test('子柱と親柱の丈は、その位置の手すり芯から逆算する', () => {
+  // 定数で出すと、斜めの手すりに対して最大で蹴上げの半分ずれ、
+  // 届かない子柱と突き抜ける子柱が混ざる。
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /railPolylineYAt\(line, ?s\.x, ?s\.z\)/, '子柱の丈が手すり芯から出ていない');
+  assert.match(body, /railPolylineYAt\(line, ?p\.x, ?p\.z\)/, '親柱の丈が手すり芯から出ていない');
+});
+
+test('子柱は踏板の上に立つ（蹴込みの上に浮かない）', () => {
+  const g = heights(railHouse({ stair: { stairRail: 'both' } }));
+  // 段鼻の点を2つ与えると、その区間の子柱はすべて手前の段の高さに座る。
+  const raw = [{ x: 0, y: 0.2, z: 0 }, { x: 0, y: 0.4, z: 0.24 }];
+  const seats = g.stairBalusterSeats(raw);
+  assert.ok(seats.length >= 2, '踏板あたり2本以上立っていない');
+  seats.forEach((s) => {
+    assert.equal(s.y, 0.2, '次の段の高さに混ざっている');
+    assert.ok(s.z > 0 && s.z < 0.24, '踏板の外に出ている');
+  });
+});
+
+test('折れ線の高さを内挿して返せる', () => {
+  const g = heights(railHouse({}));
+  const line = [{ x: 0, y: 1, z: 0 }, { x: 0, y: 2, z: 1 }];
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, 0.5) - 1.5) < 1e-9);
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, -1) - 1) < 1e-9, '端の外は端の高さで止める');
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, 9) - 2) < 1e-9);
+});
+
+test('手すりの色は、階段の板とは別に持てる', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.stairRailColorOf({}), '#9c7749', '既定の木色が変わっている');
+  assert.equal(g.stairRailColorOf({ stairRailColor: '#223344' }), '#223344');
+  assert.equal(g.stairRailColorOf({ stairRailColor: 'red' }), '#9c7749', '色でない値は既定へ');
+  // アイテム色の一括適用が手すりを塗り潰さないこと。
+  const body = sliceFunction('applyItemColorToGroup');
+  assert.match(body, /ownColor/, '手すりまでアイテム色で塗られる');
+  assert.match(sliceFunction('build3DStairRails'), /userData\.ownColor=true/);
+});
+
+test('階段の板にテクスチャを貼れる（画像トリミングの欄と対になる）', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.canSetItemTexture({ type: 'stair' }), true);
+  assert.equal(g.canSetItemTexture({ type: 'stair-corner' }), true);
+  assert.equal(g.canSetItemTexture({ type: 'stair-landing' }), true);
+  assert.match(sliceFunction('buildItem3D'), /makeItemTextureMaterial\(it/);
 });
 
 test('3Dは、直階段も廻り階段も手すりをこの1か所から読む', () => {
