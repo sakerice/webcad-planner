@@ -429,6 +429,50 @@ function roomSkipOpenSides(room){
 function stairUnderFilled(it){
   return !!(it&&it.stairUnder==='filled');
 }
+// ── 矩形の差 ──────────────────────────────────────────────────────────────
+// 段差の天板に階段の開口を開けるために使う。
+//
+// THREE.ExtrudeGeometry は外形と穴の壁を**別々に**作るので、穴が外形の辺に
+// 接していても外周の壁は切れない。段差の天板は小口が室内から見えるので、
+// そこに板が1枚残って階段をまたぐ。穴として開けるのではなく、矩形の差に
+// 割って作れば、面は本当に途切れる。
+// 矩形は {x0,y0,x1,y1}(mm、平面座標)。
+function rectMinusRect(a,h){
+  var out=[];
+  var ox0=Math.max(a.x0,h.x0), ox1=Math.min(a.x1,h.x1);
+  var oy0=Math.max(a.y0,h.y0), oy1=Math.min(a.y1,h.y1);
+  if(ox1-ox0<=0.001||oy1-oy0<=0.001) return [a];      // 重なっていない
+  if(oy0-a.y0>0.001) out.push({x0:a.x0,y0:a.y0,x1:a.x1,y1:oy0});
+  if(a.y1-oy1>0.001) out.push({x0:a.x0,y0:oy1,x1:a.x1,y1:a.y1});
+  if(ox0-a.x0>0.001) out.push({x0:a.x0,y0:oy0,x1:ox0,y1:oy1});
+  if(a.x1-ox1>0.001) out.push({x0:ox1,y0:oy0,x1:a.x1,y1:oy1});
+  return out;
+}
+function subtractRectsFromRect(rect,holes){
+  var rects=[rect];
+  (holes||[]).forEach(function(h){
+    var next=[];
+    rects.forEach(function(r){ next=next.concat(rectMinusRect(r,h)); });
+    rects=next;
+  });
+  return rects;
+}
+// 穴の多角形(ワールドm)が軸に沿った矩形なら {x0,y0,x1,y1}(mm) を返す。
+// 回した階段は矩形にならないので null を返し、呼び出し側は従来の穴の経路へ落ちる。
+function polyAsAxisRectMm(poly){
+  if(!poly||poly.length!==4) return null;
+  var xs=poly.map(function(p){return p.x;}), zs=poly.map(function(p){return p.z;});
+  var x0=Math.min.apply(null,xs), x1=Math.max.apply(null,xs);
+  var z0=Math.min.apply(null,zs), z1=Math.max.apply(null,zs);
+  var eps=0.001;
+  for(var i=0;i<4;i++){
+    var p=poly[i];
+    if(Math.abs(p.x-x0)>eps&&Math.abs(p.x-x1)>eps) return null;
+    if(Math.abs(p.z-z0)>eps&&Math.abs(p.z-z1)>eps) return null;
+  }
+  if(x1-x0<eps||z1-z0<eps) return null;
+  return {x0:Math.round(x0/U),y0:Math.round(z0/U),x1:Math.round(x1/U),y1:Math.round(z1/U)};
+}
 // ── 柱 ────────────────────────────────────────────────────────────────────
 // 角柱(column)と円柱(column-round)。スキップフロアの段差の下を開けたまま
 // 持たせるためのものだが、使い道はそれに限らない(下屋・ポーチ・大開口の中間柱)。
@@ -655,15 +699,11 @@ function updateSelectedRoomFloor(value){
   var r=ST.selected;if(!r||r.type!=='room')return;
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);if(!Number.isFinite(n))return;
-  var oldFloor=roomFloorOffsetMm(r);
-  saveState();r.floorRaiseMm=Math.max(0,Math.min(600,n));
-  var delta=roomFloorOffsetMm(r)-oldFloor;
-  DATA.items.forEach(function(it){
-    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail')return;
-    if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==r)return;
-    // A floor edit must not move a ceiling attachment, including a deliberately
-    // lowered pendant. Preserve its existing world height and suspension length.
-    it.elev=(Number(it.elev)||0)-delta;
+  saveState();
+  // 床上げでは天井は動かないので、天井からの下がりを保つ = 世界での高さを保つ。
+  // 意図して下げたペンダントもそのまま。追従の規則は followRoomCeiling の1か所。
+  followRoomCeiling(r,function(){
+    r.floorRaiseMm=Math.max(0,Math.min(600,n));
   });
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
 }
@@ -677,21 +717,13 @@ function updateSelectedRoomSkipLevel(value){
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);
   if(!Number.isFinite(n)) return;
-  var beforeFloor=roomSkipLevelMm(r);
-  var beforeCeil=roomCeilingHeightM(r);
   if(typeof saveState==='function') saveState();
-  var v=Math.max(0,Math.min(SKIP_LEVEL_MAX_MM,Math.round(n/50)*50));
-  if(v>0) r.skipLevelMm=v; else delete r.skipLevelMm;
-  var dFloor=roomSkipLevelMm(r)-beforeFloor;
-  var dCeil=Math.round((roomCeilingHeightM(r)-beforeCeil)/U);
-  var fix=dCeil-dFloor;
-  if(fix!==0){
-    DATA.items.forEach(function(it){
-      if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail') return;
-      if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==r) return;
-      it.elev=(Number(it.elev)||0)+fix;
-    });
-  }
+  // 段差では床も天井も動く。天井付けの器具は天井からの下がりを保つ
+  // (天井が同じだけ上がれば動かない)。規則は followRoomCeiling の1か所。
+  followRoomCeiling(r,function(){
+    var v=Math.max(0,Math.min(SKIP_LEVEL_MAX_MM,Math.round(n/50)*50));
+    if(v>0) r.skipLevelMm=v; else delete r.skipLevelMm;
+  });
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
 }
 // スキップフロアの欄。段差を持たない部屋にも出す -- 「ここから作れる」ことが
@@ -1141,14 +1173,21 @@ function roomRoofCeilingExtent(room){
   return res;
 }
 var _ceilingClampWarned={};
-// 天井が届いてよい上限(m, floorBaseY 基準)。**その部屋の真上にある物の下端**である。
-// 下階に既定より高い壁が無ければ localSupportTopY は floorBaseY をそのまま返すので、
-// この値は階高と完全に同値になる = 既存プランの天井は1mmも動かない。
-// スキップフロアの上に高い壁を立てた部屋では、その壁の天端まで天井を張れる。
+// 天井が届いてよい上限(m, floorBaseY 基準)。
+//
+// 既定は階高。**階高を超えてよいのは、自分が段差を持っている部屋だけ**である。
+// そこでは段差ぶん床が上がっているので、階高で丸めると頭上が潰れる。上限は
+// その部屋の真上にある物の下端(localSupportTopY)まで。
+//
+// 段差を持たない部屋にまでこれを広げてはいけない。localSupportTopY は
+// 「矩形を跨ぐ下階の壁の最大」なので、**境界の壁が1本高いだけで隣の部屋の
+// 天井まで上がり**、その部屋に既に付いている照明が天井から取り残される。
+// 丸めるのは天井の側、というのは Task 2b から変えていない方針でもある。
 function roomCeilingCapM(room){
   var floor=(room&&room.floor)||1;
   var storyM=storyHeightM(floor);
   if(!room||!isFinite(room.x)||!isFinite(room.y)) return storyM;
+  if(roomSkipLevelMm(room)<=0) return storyM;
   var localM=localSupportTopY(floor+1,room.x,room.y,room.x+room.w,room.y+room.d)-floorBaseY(floor);
   return localM>storyM?localM:storyM;
 }

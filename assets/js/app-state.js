@@ -59,14 +59,48 @@ var CEILING_FINISH_M=0.012;
 //   roomCeilingHeightM ... 床スラブ下端(floorBaseY)から
 //   item の elev       ... 床仕上げ面(floorTopY)から
 //   天井面のメッシュ    ... ceilY - CEILING_FINISH_M
+// 部屋の天井仕上げ面の高さ(mm)。**その部屋の仕上げ床から**測る(= elev と同じ基準)。
+// スキップフロアの段差も床上げも引く。elev は仕上げ床からなので、段差ぶん床が
+// 上がっていれば、天井までの寸法はその分だけ縮む。
+function roomCeilingElevationMm(room){
+  if(!room||!isFinite(room.x)) return null;
+  var fl=room.floor||1;
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)
+    -(roomFloorOffsetMm(room)+roomSkipLevelMm(room));
+}
 function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
-  var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
-  // スキップフロアの段差も引く。elev は「その部屋の仕上げ床から」なので、
-  // 段差ぶん床が上がっていれば、天井までの寸法はその分だけ縮む。
-  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)
-    -(r?roomFloorOffsetMm(r)+roomSkipLevelMm(r):0);
+  if(r) return roomCeilingElevationMm(r);
+  return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U);
+}
+// 天井付けの器具(照明・物干し)を、天井の動きに追従させる。
+//
+// **保つのは「天井からの下がり」である。** 天井に直付けのものは直付けのまま、
+// 意図して下げてあるペンダントはその下がりのまま動く。elev は仕上げ床からなので、
+// 動かす量は「床から天井までの高さ」の差そのものになる。
+//
+// 天井が動く操作は、段差・床上げ・天井高・天井の種類と複数ある。**どれか1つだけを
+// 直しても、残りで器具が取り残される**ので、書き込む側を1か所に集めてここを通す。
+function shiftRoomCeilingFixtures(room,deltaMm){
+  if(!room||!deltaMm||typeof DATA==='undefined'||!DATA||!DATA.items) return 0;
+  var n=0;
+  DATA.items.forEach(function(it){
+    if(!it) return;
+    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail') return;
+    if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==room) return;
+    it.elev=(Number(it.elev)||0)+deltaMm;
+    n++;
+  });
+  return n;
+}
+// 天井が動きうる書き換えを包む。前後の天井高を測り、差のぶんだけ器具を動かす。
+function followRoomCeiling(room,mutate){
+  var before=roomCeilingElevationMm(room);
+  mutate();
+  if(before===null) return;
+  var after=roomCeilingElevationMm(room);
+  if(after!==null&&after!==before) shiftRoomCeilingFixtures(room,after-before);
 }
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
@@ -1419,6 +1453,9 @@ function updateSelectedProp(p,v,noSave){
     updateProps();
     return;
   }
+  // 天井を書き換えると、その部屋の天井付けの器具も一緒に動く。
+  // 平天井・勾配・吹き抜けの切り替えはすべてここ(p==='ceiling')を通る。
+  var ceilBefore=(p==='ceiling')?roomCeilingElevationMm(ST.selected):null;
   if(p==='color') ST.selected.colorCustom=true;
   if(isLightItemType(ST.selected.type) && p==='lightColor'){
     ST.selected.color=v;
@@ -1446,6 +1483,11 @@ function updateSelectedProp(p,v,noSave){
   if(p==='ceiling'){
     if(!v) delete ST.selected.ceiling;
     delete ST.selected.ceilingHeight;
+    if(ceilBefore!==null){
+      var ceilAfter=roomCeilingElevationMm(ST.selected);
+      if(ceilAfter!==null&&ceilAfter!==ceilBefore)
+        shiftRoomCeilingFixtures(ST.selected,ceilAfter-ceilBefore);
+    }
   }
   // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
   // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。

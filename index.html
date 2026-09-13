@@ -13924,6 +13924,38 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   out.slab=slab;
   return out;
 }
+// 段差の天板を、開口で割った矩形の集まりとして作る。
+//
+// 穴として開ける(ExtrudeGeometry)と、外形の壁が穴をまたいで残る -- 段差の
+// 天板は小口が室内から見えるので、そこに板が1枚立って階段を横切る。
+// 矩形の差に割れば、面は本当に途切れる。
+// 回した階段など、開口が軸に沿った矩形にならないときは null を返し、
+// 呼び出し側は従来の穴の経路へ落ちる。
+function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
+  var rects=[];
+  for(var i=0;i<(holes||[]).length;i++){
+    var rc=polyAsAxisRectMm(holes[i]);
+    if(!rc) return null;
+    rects.push(rc);
+  }
+  var pieces=subtractRectsFromRect({x0:r.x,y0:r.y,x1:r.x+r.w,y1:r.y+r.d},rects);
+  var bodyMat=makeFloorSlabMaterial(matFloor);
+  pieces.forEach(function(p){
+    var w3=(p.x1-p.x0)*U, d3=(p.y1-p.y0)*U;
+    if(w3<=0.002||d3<=0.002) return;
+    var cx=(p.x0+p.x1)/2*U, cz=(p.y0+p.y1)/2*U;
+    var body=new THREE.Mesh(new THREE.BoxGeometry(w3,deckM,d3),bodyMat);
+    body.position.set(cx,yBottom+deckM/2,cz);
+    body.castShadow=true; body.receiveShadow=true;
+    mark3DSelectable(body,r,'room'); sc3.add(body);
+    var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
+    face.rotation.x=-Math.PI/2;
+    face.position.set(cx,yTop+0.004,cz);
+    face.receiveShadow=true;
+    mark3DSelectable(face,r,'room'); sc3.add(face);
+  });
+  return pieces.length;
+}
 // 部屋の直上に上階の部屋または屋根があるかを、部屋内の代表点で判定する。
 // 屋根は回転できるため isInsideItem を使い、わずかな接触だけでは天井を作らない。
 function roomHasCoverAbove(r){
@@ -14199,9 +14231,13 @@ function buildRooms3D(flFilt){
       mark3DSelectable(under.slab,r,'room'); sc3.add(under.slab);
       // 立ち上がり(蹴上げ面)は**作らない**。段差の下を壁で囲うか、柱で持たせるか、
       // 奥の壁を支えにして手前を開けるかは設計そのもので、置くのは利用者である。
-      var deck=buildRoomFloorMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles);
-      if(deck.slabBody){ mark3DSelectable(deck.slabBody,r,'room'); sc3.add(deck.slabBody); }
-      mark3DSelectable(deck.slab,r,'room'); sc3.add(deck.slab);
+      // 開口があるときは矩形に割って作る。穴として開けると外形の壁が
+      // 開口をまたいで残り、階段を横切る板になる。
+      if(buildSkipDeckMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles)===null){
+        var deck=buildRoomFloorMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles);
+        if(deck.slabBody){ mark3DSelectable(deck.slabBody,r,'room'); sc3.add(deck.slabBody); }
+        mark3DSelectable(deck.slab,r,'room'); sc3.add(deck.slab);
+      }
     } else {
       var floorMeshes=buildRoomFloorMeshes(r,matFloor,buildupM,slabBaseY,floorY,platformHoles);
       if(floorMeshes.slabBody){
