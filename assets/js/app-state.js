@@ -1296,12 +1296,27 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
   }
+  if(isColumnType(it.type)) {
+    html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+columnHeightMm(it)+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';
+    html += '<div class="lock-status-note">'+(it.baseLevel==='under'
+      ? '段差の下に立っています。高さは段差に合わせてあります。'
+      : '太さは上の幅・奥行きで変えられます。段差の下に置くと、足元と高さが段差に合います。')+'</div>';
+  }
   if(it.type === 'shelf-built-in') {
     html += '<div class="pr"><div class="pl">棚の高さ (mm)</div><input class="pi" type="number" min="150" max="2700" step="50" value="'+shelfHeightMm(it)+'" onchange="updateSelectedProp(\'shelfHeight\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">棚板の枚数</div><input class="pi" type="number" min="1" max="8" step="1" value="'+shelfBoardCount(it)+'" onchange="updateSelectedProp(\'shelfCount\',+this.value)"></div>';
-    html += '<div class="lock-status-note">'+(shelfIsWallSupported(it)
-      ? '背面が壁に接しているので、壁が棚板を支えます（縦板なし）。壁から離すと縦板が付きます。'
-      : '壁から離れているので、両端に縦板を立てた独立の棚になります。背面を壁に寄せると縦板が消えます。')+'</div>';
+    var sides = (it.shelfSides==='none'||it.shelfSides==='both') ? it.shelfSides : 'auto';
+    html += '<div class="pr"><div class="pl">縦板</div><select class="pi" onchange="updateSelectedProp(\'shelfSides\',this.value===\'auto\'?undefined:this.value)">'+
+      '<option value="auto"'+(sides==='auto'?' selected':'')+'>自動（壁に付いていれば無し）</option>'+
+      '<option value="none"'+(sides==='none'?' selected':'')+'>なし（壁で支える）</option>'+
+      '<option value="both"'+(sides==='both'?' selected':'')+'>あり（両端に立てる）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">'+(shelfSideBoards(it)==='none'
+      ? 'いまは縦板なしです。棚板は壁に支えられている納まりになります。'
+      : 'いまは両端に縦板が立っています。壁で支える納まりにするなら「なし」を選んでください。')+
+      (sides==='auto'
+        ? '（自動は、背面が壁に接していれば縦板なしにします。回転や反転を掛けた棚では当たらないことがあるので、その場合は明示してください。）'
+        : '')+'</div>';
   }
   // 段差のある部屋の中に居るものだけ、置く高さの基準を選ばせる。
   // 段差の無い家では欄そのものが出ないので、既存の操作は1つも増えない。
