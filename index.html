@@ -11535,21 +11535,50 @@ function build3DBalcony(grp,it,w3,d3,h){
 // 格子柵(家具): 高さZ(elev)で浮かせてバルコニーのルーバーや室内間仕切りに
 // 使える自立パネル。フェンスと同じく縦格子/横格子・上端の揃い/不揃いを選べる
 function buildLatticeScreen3D(grp,it,w3,d3,h){
-  var baseColor=it.colorCustom?it.color:0xb09468;
+  // 骨(格子・框)の色。**明示されたときだけ**そちらを使う。省略時は従来どおり
+  // アイテム色(または既定の木色)なので、保存済みプランの見た目は変わらない。
+  var frameCol=railFrameColorOf(it);
+  var baseColor=frameCol||(it.colorCustom?it.color:0xb09468);
   function slatMat(surfaceW,surfaceH){
+    if(frameCol) return new THREE.MeshStandardMaterial({color:new THREE.Color(frameCol),roughness:0.4,metalness:0.5});
     return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.18}) ||
       new THREE.MeshStandardMaterial({color:baseColor,roughness:0.82,metalness:0.03});
   }
   // 枠・桟はスラットと同系色(わずかに暗いだけ)にして、
   // 「別部品の黒いフレーム」に見えないよう馴染ませる
-  var railColor=new THREE.Color(it.colorCustom?it.color:'#b09468');
-  railColor.multiplyScalar(0.85);
-  var railMat=makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
-    new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04});
+  var railColor=new THREE.Color(frameCol||(it.colorCustom?it.color:'#b09468'));
+  if(!frameCol) railColor.multiplyScalar(0.85);
+  var railMat=frameCol
+    ? new THREE.MeshStandardMaterial({color:railColor,roughness:0.4,metalness:0.5})
+    : (makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
+       new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04}));
   var depth=Math.max(d3,0.05);
-  var pattern=it.fencePattern||'vertical';
+  // 意匠は手すりと同じ語彙で選ぶ(railInfillOf)。指定が無ければ、
+  // 従来の fencePattern から縦格子/横桟へ写す。
+  var infill=railInfillOf(it);
+  var pattern=(infill==='bars'||infill==='wires')?'horizontal':'vertical';
   var variedTop=(it.fenceTopStyle||'even')==='varied';
-  if(pattern==='horizontal'){
+  if(infill==='none'){
+    // 框だけ。笠木と支柱で見せる納まり。
+    var stileW0=0.06;
+    _B(grp,railMat,-w3/2+stileW0/2,h/2,0,stileW0,h,depth);
+    _B(grp,railMat, w3/2-stileW0/2,h/2,0,stileW0,h,depth);
+  } else if(infill==='wires'){
+    // 横ワイヤー: 細い丸鋼を、内法が 110mm 以下になる本数で渡す。
+    var stileW1=0.05;
+    _B(grp,railMat,-w3/2+stileW1/2,h/2,0,stileW1,h,depth);
+    _B(grp,railMat, w3/2-stileW1/2,h/2,0,stileW1,h,depth);
+    var wireD=STAIR_RAIL_WIRE_DIA_MM*U;
+    var rows=Math.max(2,Math.ceil((h-0.1)/STAIR_BALUSTER_GAP_MAX_M)-1);
+    for(var wi=1;wi<=rows;wi++){
+      var wy=0.05+(h-0.1)*wi/(rows+1);
+      var wire=new THREE.Mesh(new THREE.CylinderGeometry(wireD/2,wireD/2,w3-stileW1*2,12),railMat);
+      wire.rotation.z=Math.PI/2;           // 既定の +Y 向きを横へ倒す
+      wire.position.set(0,wy,0);
+      wire.castShadow=true;
+      grp.add(wire);
+    }
+  } else if(pattern==='horizontal'){
     // 横格子: 両端の縦框の間に横桟を渡す(不揃い=桟の長さを交互に変える)
     var stileW=0.06;
     _B(grp,railMat,-w3/2+stileW/2,h/2,0,stileW,h,depth);
@@ -11587,9 +11616,10 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
   }
   // 笠木。手すりとして使うときは、掴める天端が要る。
   // 目隠しとして使う従来の格子柵には出さない(既定は無し)。
+  // 色は手すりと同じ語彙(railCapColorOf)から来るので、家の中でそろえられる。
   if(latticeHasCap(it)){
-    var capMat=stairRailWoodMaterial(null);
-    var capH=0.045, capD=depth+0.05;
+    var capMat=stairRailWoodMaterial(it);
+    var capH=STAIR_RAIL_CAP_H_MM*U, capD=Math.max(depth+0.05,STAIR_RAIL_CAP_W_MM*U);
     _B(grp,capMat,0,h+capH/2,0,w3+0.04,capH,capD);
   }
 }
@@ -12910,20 +12940,43 @@ function stairUnderFillMaterial(){
 var STAIR_RAIL_END_EXT_M=0.15;      // 壁付けで端部を段の外へ伸ばす長さ
 var STAIR_RAIL_BRACKET_PITCH_M=0.9; // ブラケットの間隔
 var STAIR_BALUSTER_GAP_MAX_M=0.11;  // 子柱の内法の上限(子どもがすり抜けない)
-var STAIR_NEWEL_MM=80;              // 親柱の見付
-var STAIR_BALUSTER_MM=28;           // 子柱の見付
+var STAIR_NEWEL_MM=80;              // 縦格子のときの親柱の見付
+var STAIR_BALUSTER_MM=28;           // 縦格子のときの子柱の見付
+// 横桟・横ワイヤーの意匠の寸法。参考にした住宅の納まりに合わせてある。
+var STAIR_RAIL_CAP_W_MM=62;         // 笠木の見付(幅)
+var STAIR_RAIL_CAP_H_MM=38;         // 笠木の見込(高さ)
+var STAIR_RAIL_POST_W_MM=40;        // 支柱の見付(走行方向)
+var STAIR_RAIL_POST_T_MM=12;        // 支柱の厚み(平鋼)
+var STAIR_RAIL_BAR_W_MM=30;         // 横桟の見付
+var STAIR_RAIL_BAR_T_MM=8;          // 横桟の厚み
+var STAIR_RAIL_WIRE_DIA_MM=9;       // 横ワイヤーの径
+var STAIR_RAIL_POST_PITCH_M=0.95;   // 支柱の間隔
+var STAIR_RAIL_WALL_W_MM=40;        // 壁付け手すりの見付
+var STAIR_RAIL_WALL_H_MM=55;        // 壁付け手すりの見込
 // 手すりの色は階段の板とは別に持つ。実物でも手すりだけ樹種や色を変えるのは
 // 普通で、階段の色を変えた瞬間に手すりまで同じ色になるのは作りとしておかしい。
-// 省略時は木色。金物(ブラケット)はさらに別で、色の指定には従わない。
-function stairRailColorOf(it){
-  var c=it&&it.stairRailColor;
-  return (typeof c==='string'&&/^#/.test(c))?c:'#9c7749';
-}
+// 色の解決は手すり・柵で共通(railCapColorOf / railFrameColorOf)。
+// ブラケット類はさらに別で、色の指定には従わない。
 function stairRailWoodMaterial(it){
-  return new THREE.MeshStandardMaterial({color:new THREE.Color(stairRailColorOf(it)),roughness:0.42,metalness:0.02});
+  return new THREE.MeshStandardMaterial({color:new THREE.Color(railCapColorOf(it)),roughness:0.40,metalness:0.02});
+}
+function stairRailFrameMaterial(it){
+  return new THREE.MeshStandardMaterial({color:new THREE.Color(stairRailFrameColorOf(it)),roughness:0.38,metalness:0.55});
 }
 function stairRailMetalMaterial(){
   return new THREE.MeshStandardMaterial({color:0xb6bbc0,roughness:0.32,metalness:0.75});
+}
+// 角を丸めた矩形の断面。丸棒を1本通すより笠木らしく見え、平鋼にも使える。
+function stairRailRoundedRectShape(w,h,r){
+  var s=new THREE.Shape();
+  var x=-w/2, y=-h/2;
+  r=Math.max(0.0002,Math.min(r,Math.min(w,h)/2-0.0001));
+  s.moveTo(x+r,y);
+  s.lineTo(x+w-r,y); s.quadraticCurveTo(x+w,y,x+w,y+r);
+  s.lineTo(x+w,y+h-r); s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  s.lineTo(x+r,y+h); s.quadraticCurveTo(x,y+h,x,y+h-r);
+  s.lineTo(x,y+r); s.quadraticCurveTo(x,y,x+r,y);
+  return s;
 }
 // 折れ線上の、(x,z) にいちばん近い点の高さ。平面で最近傍のセグメントを探し、
 // その上で内挿する。子柱・親柱の丈はここから決める。
@@ -13014,100 +13067,122 @@ function stairRailStationsAlong(line,pitchM){
 function build3DStairRails(grp,it,pathBySide){
   var sides=stairRailSides(it);
   if(!sides.length) return;
-  var railR=STAIR_RAIL_DIA_MM*U/2;
   var railH=STAIR_RAIL_HEIGHT_MM*U;
-  var wood=stairRailWoodMaterial(it), metal=stairRailMetalMaterial();
+  var wood=stairRailWoodMaterial(it);
+  var frame=stairRailFrameMaterial(it);
+  var metal=stairRailMetalMaterial();
   var UP=new THREE.Vector3(0,1,0);
-  function rod(a,b,r,mat,seg){
+  // 断面を線分に沿って押し出す。丸棒を並べるのと違い、笠木や平鋼の「向き」が出る。
+  function sweep(shape,a,b,mat){
     var dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z;
     var len=Math.sqrt(dx*dx+dy*dy+dz*dz);
-    if(len<0.003) return;
-    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg||16),mat);
-    m.position.set((a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
-    m.quaternion.setFromUnitVectors(UP,new THREE.Vector3(dx/len,dy/len,dz/len));
-    m.castShadow=true;
-    m.userData.ownColor=true;
-    grp.add(m);
-  }
-  function ball(p,r,mat){
-    var m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat);
-    m.position.set(p.x,p.y,p.z);
-    m.castShadow=true;
-    m.userData.ownColor=true;
-    grp.add(m);
-  }
-  function box(w,h,d,p,mat){
-    var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-    m.position.set(p.x,p.y,p.z);
+    if(len<0.004) return;
+    var dir=new THREE.Vector3(dx/len,dy/len,dz/len);
+    var right=new THREE.Vector3().crossVectors(UP,dir);
+    if(right.lengthSq()<1e-8) right.set(1,0,0);
+    right.normalize();
+    var up=new THREE.Vector3().crossVectors(dir,right).normalize();
+    var geo=new THREE.ExtrudeGeometry(shape,{depth:len,bevelEnabled:false,curveSegments:6});
+    var m=new THREE.Mesh(geo,mat);
+    m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right,up,dir));
+    m.position.set(a.x,a.y,a.z);
     m.castShadow=true; m.receiveShadow=true;
     m.userData.ownColor=true;
     grp.add(m);
+  }
+  function sweepPath(shape,line,mat){
+    for(var i=0;i+1<line.length;i++) sweep(shape,line[i],line[i+1],mat);
+  }
+  function boxAt(w,h,d,p,mat,quat){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+    m.position.set(p.x,p.y,p.z);
+    if(quat) m.quaternion.copy(quat);
+    m.castShadow=true; m.receiveShadow=true;
+    m.userData.ownColor=true;
+    grp.add(m);
+  }
+  function yawTo(dir){
+    return new THREE.Quaternion().setFromAxisAngle(UP,Math.atan2(dir.x||0,dir.z||1));
   }
   sides.forEach(function(side){
     var raw=pathBySide(side);
     if(!raw||raw.length<2) return;
     var mount=stairRailMountFor(it,side);
-    var newelW=STAIR_NEWEL_MM*U, balW=STAIR_BALUSTER_MM*U;
-    // 手すり芯の線。壁付けは段の外へ伸ばし、柱建ては親柱の芯まで。
-    var line=(mount==='wall')
-      ? stairRailExtendEnds(raw,STAIR_RAIL_END_EXT_M)
-      : raw.slice();
-    line=line.map(function(p){
-      return {x:p.x, y:p.y+railH, z:p.z, outX:p.outX||0, outZ:p.outZ||0};
-    });
-    // 丸棒。折れ点は球で丸める。
-    var i;
-    for(i=0;i+1<line.length;i++) rod(line[i],line[i+1],railR,wood);
-    for(i=1;i+1<line.length;i++) ball(line[i],railR,wood);
-    var head=line[0], tail=line[line.length-1];
+    var infill=railInfillOf(it);
+    var capW=STAIR_RAIL_CAP_W_MM*U, capH=STAIR_RAIL_CAP_H_MM*U;
     if(mount==='wall'){
-      // 端部は壁側へ曲げて納める(袖が引っかからないようにする定石)。
-      [head,tail].forEach(function(end){
-        var mid={x:end.x+end.outX*0.05, y:end.y-0.02, z:end.z+end.outZ*0.05};
-        var back={x:end.x+end.outX*0.085, y:end.y-0.05, z:end.z+end.outZ*0.085};
-        rod(end,mid,railR,wood);
-        rod(mid,back,railR,wood);
-        ball(mid,railR,wood);
-        ball(back,railR,wood);
+      // 壁付け。角断面を壁に沿わせ、端部は壁側へ下げて納める。
+      var wline=stairRailExtendEnds(raw,STAIR_RAIL_END_EXT_M).map(function(p){
+        return {x:p.x, y:p.y+railH, z:p.z, outX:p.outX||0, outZ:p.outZ||0};
       });
-      // ブラケット: 壁プレート → アーム → 受け(棒の向きに沿わせる)。
-      stairRailStationsAlong(line,STAIR_RAIL_BRACKET_PITCH_M).forEach(function(p){
+      var wallShape=stairRailRoundedRectShape(STAIR_RAIL_WALL_W_MM*U,STAIR_RAIL_WALL_H_MM*U,0.008);
+      sweepPath(wallShape,wline,wood);
+      [wline[0],wline[wline.length-1]].forEach(function(end){
+        sweep(wallShape,end,
+          {x:end.x+end.outX*0.085, y:end.y-0.055, z:end.z+end.outZ*0.085},wood);
+      });
+      stairRailStationsAlong(wline,STAIR_RAIL_BRACKET_PITCH_M).forEach(function(p){
         var nx=p.outX||0, nz=p.outZ||0;
-        var wall={x:p.x+nx*0.075, y:p.y, z:p.z+nz*0.075};
-        var plate=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.01,20),metal);
-        plate.position.set(wall.x,wall.y,wall.z);
+        var plate=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.01,20),metal);
+        plate.position.set(p.x+nx*0.07,p.y,p.z+nz*0.07);
         plate.quaternion.setFromUnitVectors(UP,new THREE.Vector3(nx||1,0,nz));
         plate.userData.ownColor=true;
         grp.add(plate);
-        rod(wall,{x:p.x+nx*0.012,y:p.y,z:p.z+nz*0.012},0.008,metal,12);
-        // 受けは手すりを抱く輪。棒の向きに軸を合わせる。
-        var d=p.dir||{x:0,y:0,z:1};
-        var saddle=new THREE.Mesh(new THREE.CylinderGeometry(railR*1.3,railR*1.3,0.018,20),metal);
-        saddle.position.set(p.x,p.y,p.z);
-        saddle.quaternion.setFromUnitVectors(UP,new THREE.Vector3(d.x,d.y,d.z).normalize());
-        saddle.userData.ownColor=true;
-        grp.add(saddle);
+        sweep(stairRailRoundedRectShape(0.016,0.016,0.005),
+          {x:p.x+nx*0.07,y:p.y,z:p.z+nz*0.07},
+          {x:p.x+nx*0.012,y:p.y,z:p.z+nz*0.012},metal);
       });
       return;
     }
-    // 柱建て。親柱は両端の踏板の上、頭に笠木を載せる。
-    [raw[0],raw[raw.length-1]].forEach(function(p){
-      var railY=railPolylineYAt(line,p.x,p.z);
-      var top=railY+0.045;                   // 手すりより少し上で切る
-      var h=Math.max(0.12,top-p.y);
-      box(newelW,h,newelW,{x:p.x,y:p.y+h/2,z:p.z},wood);
-      box(newelW+0.02,0.024,newelW+0.02,{x:p.x,y:top+0.012,z:p.z},wood);   // 笠木
+    // ── 柱建て ──
+    var seatLine=raw.map(function(q){return {x:q.x,y:q.y,z:q.z};});
+    var line=raw.map(function(p){return {x:p.x,y:p.y+railH,z:p.z};});
+    var capShape=stairRailRoundedRectShape(capW,capH,0.01);
+    sweepPath(capShape,line,wood);
+    if(infill==='baluster'){
+      // 縦格子。親柱 + 子柱。笠木は上で通してある。
+      var newelW=STAIR_NEWEL_MM*U, balW=STAIR_BALUSTER_MM*U;
+      [raw[0],raw[raw.length-1]].forEach(function(p){
+        var top=railPolylineYAt(line,p.x,p.z)-capH/2;
+        var h=Math.max(0.12,top-p.y);
+        boxAt(newelW,h,newelW,{x:p.x,y:p.y+h/2,z:p.z},wood);
+      });
+      stairBalusterSeats(raw).forEach(function(s){
+        var top=railPolylineYAt(line,s.x,s.z)-capH/2;
+        var h=top-s.y;
+        if(h<=0.02) return;
+        boxAt(balW,h,balW,{x:s.x,y:s.y+h/2,z:s.z},wood);
+      });
+      return;
+    }
+    // 支柱(平鋼)。両端と、その間をおよそ STAIR_RAIL_POST_PITCH_M 間隔で。
+    var postW=STAIR_RAIL_POST_W_MM*U, postT=STAIR_RAIL_POST_T_MM*U;
+    stairRailStationsAlong(line,STAIR_RAIL_POST_PITCH_M,0.03).forEach(function(p){
+      var seatY=railPolylineYAt(seatLine,p.x,p.z);
+      var top=p.y-capH/2;
+      var h=top-seatY;
+      if(h<=0.05) return;
+      boxAt(postW,h,postT,{x:p.x,y:seatY+h/2,z:p.z},frame,yawTo(p.dir));
     });
-    // 子柱。踏板の上に立て、丈はその位置の手すり芯の下端まで。
-    stairBalusterSeats(raw).forEach(function(s){
-      var railY=railPolylineYAt(line,s.x,s.z);
-      var h=railY-railR-s.y;
-      if(h<=0.02) return;
-      box(balW,h,balW,{x:s.x,y:s.y+h/2,z:s.z},wood);
-    });
-    // 端の手すりは親柱に受けられる。先端は丸めて納める。
-    ball(head,railR,wood);
-    ball(tail,railR,wood);
+    if(infill==='none') return;
+    // 水平材。笠木の下端と段鼻の線のあいだを等分し、走行に平行に通す。
+    var isWire=(infill==='wires');
+    var clearH=Math.max(0.05,railH-capH/2);
+    var count=isWire
+      ? Math.max(2,Math.ceil(clearH/STAIR_BALUSTER_GAP_MAX_M)-1)
+      : railBarCount(it);
+    var shape=isWire
+      ? stairRailRoundedRectShape(STAIR_RAIL_WIRE_DIA_MM*U,STAIR_RAIL_WIRE_DIA_MM*U,STAIR_RAIL_WIRE_DIA_MM*U/2)
+      : stairRailRoundedRectShape(STAIR_RAIL_BAR_T_MM*U,STAIR_RAIL_BAR_W_MM*U,0.002);
+    var k;
+    for(k=1;k<=count;k++){
+      var frac=k/(count+1);
+      var barLine=line.map(function(p,i){
+        var top=p.y-capH/2, seat=seatLine[i].y;
+        return {x:p.x, y:top-(top-seat)*frac, z:p.z};
+      });
+      sweepPath(shape,barLine,frame);
+    }
   });
 }
 // 踊り場。段を持たない平らな板で、手前までの段が積み上がった高さに座る。

@@ -138,6 +138,10 @@
         ['none', 'left', 'right', 'both'].indexOf(it.stairRail) < 0) {
       warnings.push(where + ': 階段の手すり "' + it.stairRail + '" は none / left / right / both のどれでもないので手すり無しとして読む');
     }
+    if (it.railInfill !== undefined &&
+        ['bars', 'wires', 'baluster', 'none'].indexOf(it.railInfill) < 0) {
+      warnings.push(where + ': 手すり・柵の意匠 "' + it.railInfill + '" は bars / wires / baluster / none のどれでもないので横桟として読む');
+    }
     if (it.stairRailMount !== undefined && it.stairRailMount !== 'wall' && it.stairRailMount !== 'post') {
       warnings.push(where + ': 手すりの付け方 "' + it.stairRailMount + '" は wall / post のどちらでもないので自動判定で読む');
     }
