@@ -12954,22 +12954,32 @@ function stairRailExtendEnds(path,extM){
     .concat(path)
     .concat([step(path[path.length-1],path[path.length-2],extM)]);
 }
-// 子柱を立てる位置。**踏板の上**に立てる。段と段のあいだ(蹴込みの上)に置くと
-// 宙に浮くので、各踏板の中で 1/4 と 3/4 の位置に 2本ずつ置く。
-// 内法が STAIR_BALUSTER_GAP_MAX_M を超えるときは、その踏板の中で本数を増やす。
+// 子柱を立てる位置。
+//
+// **点の列は踏板の「中央」を結んでいる**。だから点と点のあいだは蹴込みをまたぎ、
+// 区間の後半はもう次の段の上である。そこへ手前の段の高さで立てると、子柱が
+// 次の踏板を下から貫く。区間を分けるのではなく、**踏板1枚の中**で分ける。
+//
+// 踏面の奥行きは前後の点との間隔から採り、その中に内法が
+// STAIR_BALUSTER_GAP_MAX_M 以下になる本数を並べる。端は段鼻・蹴込みに
+// かからないよう少し内側へ寄せる。
 function stairBalusterSeats(raw){
   var out=[], i, j;
   var balW=STAIR_BALUSTER_MM*U;
-  for(i=0;i+1<raw.length;i++){
-    var a=raw[i], b=raw[i+1];
-    var dx=b.x-a.x, dz=b.z-a.z;
-    var span=Math.sqrt(dx*dx+dz*dz);
-    if(span<1e-6) continue;
-    var n=Math.max(2,Math.ceil(span/(STAIR_BALUSTER_GAP_MAX_M+balW)));
+  for(i=0;i<raw.length;i++){
+    var p=raw[i];
+    var ref=raw[i+1]||raw[i-1];
+    if(!ref) continue;
+    var dx=ref.x-p.x, dz=ref.z-p.z;
+    var going=Math.sqrt(dx*dx+dz*dz);
+    if(going<1e-6) continue;
+    var ux=dx/going, uz=dz/going;
+    var usable=going*0.9;                       // 段鼻・蹴込みへ寄せすぎない
+    var n=Math.max(2,Math.ceil(usable/(STAIR_BALUSTER_GAP_MAX_M+balW)));
     for(j=0;j<n;j++){
-      var s=(j+0.5)/n;
-      // 高さは **その踏板** のもの。次の段の高さへ混ぜない。
-      out.push({x:a.x+dx*s, y:a.y, z:a.z+dz*s});
+      var off=((j+0.5)/n-0.5)*usable;           // 踏板の中だけに散らす
+      // 高さは **その踏板** のもの。隣の段の高さへ混ぜない。
+      out.push({x:p.x+ux*off, y:p.y, z:p.z+uz*off});
     }
   }
   return out;

@@ -649,16 +649,30 @@ test('子柱と親柱の丈は、その位置の手すり芯から逆算する',
   assert.match(body, /railPolylineYAt\(line, ?p\.x, ?p\.z\)/, '親柱の丈が手すり芯から出ていない');
 });
 
-test('子柱は踏板の上に立つ（蹴込みの上に浮かない）', () => {
+test('子柱は、その踏板の中だけに立つ（隣の踏板を貫かない）', () => {
   const g = heights(railHouse({ stair: { stairRail: 'both' } }));
-  // 段鼻の点を2つ与えると、その区間の子柱はすべて手前の段の高さに座る。
-  const raw = [{ x: 0, y: 0.2, z: 0 }, { x: 0, y: 0.4, z: 0.24 }];
+  // 点の列は **踏板の中央** を結ぶ。踏面は各点の前後 going/2 に広がる。
+  const going = 0.24;
+  const raw = [
+    { x: 0, y: 0.2, z: 0 },
+    { x: 0, y: 0.4, z: going },
+    { x: 0, y: 0.6, z: going * 2 }
+  ];
   const seats = g.stairBalusterSeats(raw);
-  assert.ok(seats.length >= 2, '踏板あたり2本以上立っていない');
+  assert.ok(seats.length >= 6, '踏板あたり2本以上立っていない: ' + seats.length);
   seats.forEach((s) => {
-    assert.equal(s.y, 0.2, '次の段の高さに混ざっている');
-    assert.ok(s.z > 0 && s.z < 0.24, '踏板の外に出ている');
+    // 自分の高さの踏板を探し、その踏面の中に収まっていること。
+    const own = raw.filter((p) => Math.abs(p.y - s.y) < 1e-9)[0];
+    assert.ok(own, 'どの踏板にも属さない高さで立っている: ' + s.y);
+    assert.ok(Math.abs(s.z - own.z) <= going / 2 + 1e-9,
+      '踏板の外(隣の段の上)に立っている: z=' + s.z + ' 踏板中央=' + own.z);
   });
+  // 隣り合う子柱の内法が 110mm を超えない。
+  const zs = seats.map((s) => s.z).sort((a, b) => a - b);
+  for (let i = 0; i + 1 < zs.length; i++) {
+    assert.ok(zs[i + 1] - zs[i] - 0.028 <= 0.111,
+      '子柱の内法が広すぎる: ' + Math.round((zs[i + 1] - zs[i] - 0.028) * 1000) + 'mm');
+  }
 });
 
 test('折れ線の高さを内挿して返せる', () => {
