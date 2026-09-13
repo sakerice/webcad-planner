@@ -346,6 +346,136 @@ function roomFloorOffsetMm(room){
   // 既定値は 0 なので、設定していないプランは従来どおり。
   return defaultFloorRaiseMmForFloor(room&&room.floor);
 }
+// ── スキップフロア (同じ階の中の段差) ─────────────────────────────────────
+// room.floorRaiseMm が「仕上げの段差」(天井は動かない) なのに対し、
+// room.skipLevelMm は「その区画ごと床も天井も持ち上がる」段差である。
+// 2つは足し算で効く -- +400 の小上がりの上にさらに +150 の畳寄せ、が書ける。
+//
+// **省略時は 0。** 既存プランはこのフィールドを持たないので、床も天井も壁も
+// 階段も1mmも動かない。これがこの機能の後方互換のすべてである。
+var SKIP_LEVEL_MAX_MM=2400;
+// 段差の下を「空間」として扱う下限。これを下回る小上がりの下には何も入らないので
+// 従来どおり中身の詰まった塊として描く。
+var SKIP_CAVITY_MIN_MM=400;
+function roomSkipLevelMm(room){
+  if(!room) return 0;
+  if(typeof HeightModel!=='undefined'&&HeightModel&&HeightModel.skipLevelMm)
+    return HeightModel.skipLevelMm((typeof DATA!=='undefined')?DATA:null,room);
+  var n=Number(room.skipLevelMm);
+  return (isFinite(n)&&n>0)?Math.min(Math.round(n),SKIP_LEVEL_MAX_MM):0;
+}
+// 段差の下に、物を入れられる空間ができるか。
+// 厚みは段差(構造)と床上げ(仕上げ)の合計で見る。
+function roomSkipCavityMm(room){
+  if(!room) return 0;
+  var t=roomSkipLevelMm(room)+roomFloorOffsetMm(room);
+  return t>=SKIP_CAVITY_MIN_MM ? t : 0;
+}
+// その階に段差を持つ部屋が1つでもあるか。
+// 段差を使っていないプラン(=保存済みのほぼ全部)で、壁1本ごとに部屋を
+// なめ直すのを避けるための早い出口である。ここが false なら、段差まわりの
+// 計算は1つも走らない。
+function floorHasSkipLevel(floor){
+  var rooms=(typeof DATA!=='undefined'&&DATA&&DATA.rooms)?DATA.rooms:null;
+  if(!rooms) return false;
+  var f=floor||1;
+  for(var i=0;i<rooms.length;i++){
+    var r=rooms[i];
+    if(r&&!r.hidden3D&&(r.floor||1)===f&&roomSkipLevelMm(r)>0) return true;
+  }
+  return false;
+}
+// 段差の下の空間が開いている側。**低いレベルの床に面している辺だけ**が開く。
+// 部屋が無い側(外)は閉じる -- そこは外壁か基礎で、覗ける場所ではないからである。
+// 戻り値の n/s/w/e は平面座標の -y / +y / -x / +x 側。
+function roomSkipOpenSides(room){
+  var out={n:false,s:false,w:false,e:false};
+  if(!room||typeof DATA==='undefined'||!DATA||!DATA.rooms) return out;
+  var mine=roomSkipLevelMm(room)+roomFloorOffsetMm(room);
+  if(mine<=0) return out;
+  var off=300, fr=[0.2,0.5,0.8];
+  var edges=[
+    ['n',function(t){return {x:room.x+room.w*t, y:room.y-off};}],
+    ['s',function(t){return {x:room.x+room.w*t, y:room.y+room.d+off};}],
+    ['w',function(t){return {x:room.x-off, y:room.y+room.d*t};}],
+    ['e',function(t){return {x:room.x+room.w+off, y:room.y+room.d*t};}]
+  ];
+  edges.forEach(function(e){
+    for(var i=0;i<fr.length;i++){
+      var p=e[1](fr[i]);
+      var r2=roomAtPointOnFloor(room.floor,p.x,p.y);
+      if(!r2||r2===room) continue;
+      var lvl=roomSkipLevelMm(r2)+roomFloorOffsetMm(r2);
+      if(mine-lvl>=100){ out[e[0]]=true; return; }
+    }
+  });
+  return out;
+}
+// ── 造作棚 ────────────────────────────────────────────────────────────────
+// 「その場で作り付けた棚」である。実物と同じく、壁に付けば壁が棚板を支えるので
+// 縦板は要らず、何も無いところに置けば両端に縦板を立てないと棚板が落ちる。
+// どちらになるかは**置いた場所から決まる**ので、利用者に選ばせない。
+var SHELF_BOARD_T_MM=25;
+function shelfBoardCount(it){
+  var n=Number(it&&it.shelfCount);
+  return (isFinite(n)&&n>=1)?Math.min(8,Math.round(n)):3;
+}
+function shelfHeightMm(it){
+  var n=Number(it&&it.shelfHeight);
+  return (isFinite(n)&&n>0)?Math.max(150,Math.min(2700,Math.round(n))):900;
+}
+// 背面が同じ階の壁に接しているか。接していれば壁が棚板を支える(縦板なし)。
+// 「接している」は、背面の中央が壁の面から 140mm 以内で、かつ棚の幅方向が
+// 壁とほぼ平行(15度以内)であること。斜めに突き刺さった棚を壁付け扱いすると、
+// 支えの無い板が宙に浮く。
+function shelfIsWallSupported(it){
+  if(!it||typeof DATA==='undefined'||!DATA||!DATA.walls) return false;
+  var rad=(Number(it.rot)||0)*Math.PI/180;
+  var cos=Math.cos(rad), sin=Math.sin(rad);
+  var cx=(Number(it.x)||0)+(Number(it.w)||0)/2, cy=(Number(it.y)||0)+(Number(it.d)||0)/2;
+  var backSign=it.flipY?1:-1;
+  var half=(Number(it.d)||0)/2*backSign;
+  var bx=cx-half*sin, by=cy+half*cos;
+  for(var i=0;i<DATA.walls.length;i++){
+    var w=DATA.walls[i];
+    if(!w||(w.floor||1)!==(it.floor||1)) continue;
+    var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) continue;
+    var ux=dx/len, uy=dy/len;
+    if(Math.abs(ux*cos+uy*sin)<0.966) continue;        // 15度以内で平行
+    var t=((bx-w.x1)*ux+(by-w.y1)*uy)/len;
+    if(t<-0.05||t>1.05) continue;                      // 壁の区間の外
+    var px=w.x1+dx*Math.max(0,Math.min(1,t)), py=w.y1+dy*Math.max(0,Math.min(1,t));
+    if(Math.hypot(bx-px,by-py)<=(Number(w.thick)||120)/2+140) return true;
+  }
+  return false;
+}
+// この壁が接している部屋の段差の最大値(mm)。壁は2つの部屋の境界にあるので、
+// 「どちらのレベルから測るか」を決める必要がある。**高い側**を採るのは、
+// 段差の縁に立てる腰壁・手すり壁がそこを守るためのものだからである
+// (低い側から測ると、持ち上がった床の上では手すりが埋まる)。
+// サンプリングの仕方は wallAdjacentRoomsCeiling と同じにしてある。
+function wallSkipBaseMm(w){
+  if(!w) return 0;
+  if(!floorHasSkipLevel(w.floor)) return 0;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return 0;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var best=0, i, s, t, px, py, r, v;
+  for(i=0;i<5;i++){
+    t=(i+0.5)/5;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
+      if(!r) continue;
+      v=roomSkipLevelMm(r);
+      if(v>best) best=v;
+    }
+  }
+  return best;
+}
 // 上階の床が載る天端(m)。下階に「その階の既定より高い壁」が立っていると、
 // その上に載る床はその壁の天端まで持ち上がる。
 // 既定の高さのままの壁しか無い階では floorBaseY(floor) と完全に同値。
@@ -359,6 +489,9 @@ function localSupportTopY(floor,x1,y1,x2,y2){
   var below=f-1;
   var belowTop=floorBaseY(below)+floorSlabHeightMForFloor(below);
   var top=base;
+  // 段差を使っていない階では、壁1本ごとに wallSkipBaseMm を呼ぶ必要がない。
+  // 判定は階に1回で足りる。
+  var skipBelow=floorHasSkipLevel(below);
   var lox=Math.min(x1,x2), hix=Math.max(x1,x2);
   var loy=Math.min(y1,y2), hiy=Math.max(y1,y2);
   for(var i=0;i<walls.length;i++){
@@ -366,7 +499,10 @@ function localSupportTopY(floor,x1,y1,x2,y2){
     if((w.floor||1)!==below) continue;
     var v=Number(w.wallHeight);
     if(!isFinite(v)||v<=0) continue;
-    var t=belowTop+Math.max(300,Math.min(6000,v))*U;
+    // 段差の上に立つ壁は、その段差ぶん高いところで天端を迎える。これを足さないと
+    // 「スキップフロアの上に立てた壁」が下階の床から測られ、その上に載るはずの
+    // 2階の床が段差ぶん低いままになる (= 段差の天井を突き抜ける)。
+    var t=belowTop+((skipBelow?wallSkipBaseMm(w):0)+Math.max(300,Math.min(6000,v)))*U;
     if(t<=top+1e-9) continue;
     // 壁の芯線が対象矩形(壁厚の半分だけ広げたもの)の中を通る長さ。
     // 角で1点触れているだけの壁は床を支えないので、広げたぶんより長く
@@ -377,6 +513,59 @@ function localSupportTopY(floor,x1,y1,x2,y2){
     top=t;
   }
   return top;
+}
+// 壁の足元(m)。壁は原則としてその階の床スラブ下端 floorBaseY から立てる
+// (段差の蹴上げ面を兼ねるので、下ろさないと低い側に穴が開く)。
+// 例外は「芯線の**全体**が、より高い支持の上に載っている壁」で、この壁は
+// その持ち上がった床から立てる。一部しか載っていない壁を持ち上げると、
+// 載っていない側に穴が開く -- wallStackedAboveCapM が「全部覆われているときだけ
+// 切る」のと同じ理由である。
+// 下階に高い壁が無い家では localSupportTopY が floorBaseY をそのまま返すので、
+// この関数は floorBaseY と完全に同値になる。
+function wallBaseSupportY(w){
+  var fl=(w&&w.floor)||1;
+  var base=floorBaseY(fl);
+  if(!w||fl<=1) return base;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1) return base;
+  var nx=-dy/len, ny=dx/len;
+  var off=Math.max((w.thick||120)/2+40,100);
+  // まず「この階のどこかに持ち上がった支持があるか」を1回だけ測る。
+  // 座標の全域を渡すと localSupportTopY は下階の全ての壁を見るので、その結果は
+  // どの部屋・どの点の値よりも必ず大きいか等しい。ここで持ち上がりが無ければ、
+  // 点ごとに測り直す必要は無い(下階に高い壁が無い家 = 保存済みのほぼ全部は、
+  // ここで帰る)。範囲は PlanSchema.LIMITS.COORD_MM と同じ「座標の限界」。
+  var ANY=1000000;
+  if(localSupportTopY(fl,-ANY,-ANY,ANY,ANY)<=base+1e-9) return base;
+  // 壁が実際に載るのは**床スラブ**なので、支持はその点を含む部屋の矩形で測る
+  // (点だけで測ると、下階の壁の真上にしか支持が無いことになり、同じ部屋の中で
+  // 壁の足元が床から外れる)。壁は2部屋の境界にあるので両側を見て、
+  // **低い方**を採る。高い方に合わせると低い側に穴が開く。
+  function supportAt(px,py){
+    var r=roomAtPointOnFloor(fl,px,py);
+    return r ? localSupportTopY(fl,r.x,r.y,r.x+r.w,r.y+r.d)
+             : localSupportTopY(fl,px,py,px,py);
+  }
+  var minTop=Infinity, i, s, t, px, py, v;
+  for(i=0;i<=8;i++){
+    t=i/8;
+    px=w.x1+dx*t; py=w.y1+dy*t;
+    for(s=-1;s<=1;s+=2){
+      v=supportAt(px+nx*off*s,py+ny*off*s);
+      if(v<minTop) minTop=v;
+    }
+  }
+  return (isFinite(minTop)&&minTop>base+1e-9)?minTop:base;
+}
+// 壁が floorBaseY からどれだけ持ち上がって立つか(mm)。
+// 同じ階の段差の上に立つ (wallSkipBaseMm) か、下階の高い壁に載っている
+// (wallBaseSupportY) かのどちらか高い方。どちらも無ければ 0。
+function wallLiftMm(w){
+  if(!w) return 0;
+  var byFloorBelow=Math.round((wallBaseSupportY(w)-floorBaseY(w.floor||1))/U);
+  var bySkip=wallSkipBaseMm(w);
+  var v=Math.max(0,byFloorBelow,bySkip);
+  return isFinite(v)?v:0;
 }
 // 線分が軸平行矩形の内側を通る長さ(mm)。Liang-Barsky。
 function segmentInsideRectLengthMm(x1,y1,x2,y2,rx0,ry0,rx1,ry1){
@@ -396,7 +585,14 @@ function segmentInsideRectLengthMm(x1,y1,x2,y2,rx0,ry0,rx1,ry1){
 function roomFloorTopY(room){
   if(!room) return 0;
   return localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d)
-    +floorSlabHeightMForFloor(room.floor)+roomFloorOffsetMm(room)*U;
+    +floorSlabHeightMForFloor(room.floor)+(roomSkipLevelMm(room)+roomFloorOffsetMm(room))*U;
+}
+// 段差の**下**(= その階の構造床の天端)。段差の下の空間に物を置くときの基準で、
+// 段差を持たない部屋では roomFloorTopY と同値 (床上げは仕上げなので含めない)。
+function roomStoreyFloorTopY(room){
+  if(!room) return 0;
+  return localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d)
+    +floorSlabHeightMForFloor(room.floor);
 }
 function roomFloorAt(floor,x,y){
   var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
@@ -404,6 +600,18 @@ function roomFloorAt(floor,x,y){
   candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
   if(candidates.length) return roomFloorTopY(candidates[0]);
   return localSupportTopY(floor,x,y,x,y)+floorSlabHeightMForFloor(floor);
+}
+// 段差の**下**の床(m)。roomFloorAt と同じ部屋の選び方で、段差と床上げだけを足さない。
+// 段差を持たない場所では roomFloorAt と (床上げを除いて) 同じ値になる。
+function roomStoreyFloorAt(floor,x,y){
+  var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
+  candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
+  if(candidates.length) return roomStoreyFloorTopY(candidates[0]);
+  return localSupportTopY(floor,x,y,x,y)+floorSlabHeightMForFloor(floor);
+}
+// このアイテムが「段差の下」に置かれているか。
+function itemIsUnderPlatform(it){
+  return !!(it&&it.baseLevel==='under');
 }
 function updateSelectedRoomFloor(value){
   var r=ST.selected;if(!r||r.type!=='room')return;
@@ -420,6 +628,59 @@ function updateSelectedRoomFloor(value){
     it.elev=(Number(it.elev)||0)-delta;
   });
   markDirty();updateProps();draw2d();if(ren)rebuild3D();
+}
+// スキップフロアの段差を変える。床上げ(updateSelectedRoomFloor)と違うのは、
+// **明示された天井高を持つ部屋では天井も一緒に上がる**ことである。だから
+// 天井付きの器具(照明・物干し)の補正量は「床の上がり」ではなく
+// 「天井の上がりとの差」で決める。天井が同じだけ上がれば補正は 0 になる。
+function updateSelectedRoomSkipLevel(value){
+  var r=ST.selected;
+  if(!r||r.type!=='room') return;
+  if(isObjectLocked(r)){updateProps();return;}
+  var n=Number(value);
+  if(!Number.isFinite(n)) return;
+  var beforeFloor=roomSkipLevelMm(r);
+  var beforeCeil=roomCeilingHeightM(r);
+  if(typeof saveState==='function') saveState();
+  var v=Math.max(0,Math.min(SKIP_LEVEL_MAX_MM,Math.round(n/50)*50));
+  if(v>0) r.skipLevelMm=v; else delete r.skipLevelMm;
+  var dFloor=roomSkipLevelMm(r)-beforeFloor;
+  var dCeil=Math.round((roomCeilingHeightM(r)-beforeCeil)/U);
+  var fix=dCeil-dFloor;
+  if(fix!==0){
+    DATA.items.forEach(function(it){
+      if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail') return;
+      if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==r) return;
+      it.elev=(Number(it.elev)||0)+fix;
+    });
+  }
+  markDirty();updateProps();draw2d();if(ren)rebuild3D();
+}
+// スキップフロアの欄。段差を持たない部屋にも出す -- 「ここから作れる」ことが
+// 分からないと、床上げの 600mm 上限で詰まったまま終わる。
+function selectedRoomSkipHtml(r){
+  var v=roomSkipLevelMm(r);
+  var cavity=roomSkipCavityMm(r);
+  var html='<div class="ph" style="margin-top:12px">スキップフロア</div>'+
+    '<div class="pr"><div class="pl">段差プリセット</div><select class="pi" onchange="updateSelectedRoomSkipLevel(this.value)">'+
+    '<option value="0"'+(v===0?' selected':'')+'>なし（同じ床）</option>'+
+    '<option value="400"'+(v===400?' selected':'')+'>小上がり ＋400mm</option>'+
+    '<option value="800"'+(v===800?' selected':'')+'>＋800mm</option>'+
+    '<option value="1200"'+(v===1200?' selected':'')+'>中2階 ＋1200mm</option>'+
+    '<option value="1600"'+(v===1600?' selected':'')+'>＋1600mm</option>'+
+    '</select></div>'+
+    '<div class="pr"><label class="pl" for="room-skip-level">段差 (mm)</label><input id="room-skip-level" class="pi" type="number" min="0" max="'+SKIP_LEVEL_MAX_MM+'" step="50" value="'+v+'" onchange="updateSelectedRoomSkipLevel(this.value)"></div>';
+  if(v===0){
+    html+='<div class="lock-status-note">床上げ（上の欄）は天井の位置を変えない仕上げの段差です。こちらは床も天井も一緒に持ち上がります。'+
+      '天井高を指定していない部屋では天井は動かないので、段差を付けたら天井高も入れてください。</div>';
+  }else{
+    html+='<div class="lock-status-note">この部屋の床は ＋'+v+'mm。天井高・家具・建具・歩行高さがこの床を基準にします。現在の天井高は '+roomRenderedCeilingMm(r)+'mm です。'+
+      (cavity>0
+        ? '床下 '+cavity+'mm ぶんは空間として開きます（低いレベルに面した側だけ開口）。造作棚を置いて収納にしてください。'
+        : '床下は '+SKIP_CAVITY_MIN_MM+'mm 未満なので中身の詰まった段差として描きます。')+
+      '段差の上り下りには、階段の「行き先」を「同じ階の段差」にした階段を置いてください。</div>';
+  }
+  return html;
 }
 function selectedRoomFloorHtml(r){
   var v=roomFloorOffsetMm(r);
@@ -491,6 +752,14 @@ function item3DBaseY(it){
   // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
   // 「地面から浮いた謎の矩形」になる
   if((it.floor||1)===1 && !itemOnFoundation(it)) return groundYForItem(it);
+  // レベル階段は段差の低い側から立ち上がる。平面の中心が持ち上がった床の上に
+  // 載っていても、足元はあくまで低い側である。
+  if(typeof stairGroupIsLevel==='function'&&stairGroupIsLevel(it))
+    return stairLevelSpanM(it).baseY;
+  // 段差の下に置くと宣言されたものは、持ち上がった床ではなくその階の構造床へ。
+  // 造作棚を段差の下の空間に入れるための経路である。
+  if(itemIsUnderPlatform(it))
+    return roomStoreyFloorAt(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
   return roomFloorAt(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
 
 }
@@ -834,6 +1103,17 @@ function roomRoofCeilingExtent(room){
   return res;
 }
 var _ceilingClampWarned={};
+// 天井が届いてよい上限(m, floorBaseY 基準)。**その部屋の真上にある物の下端**である。
+// 下階に既定より高い壁が無ければ localSupportTopY は floorBaseY をそのまま返すので、
+// この値は階高と完全に同値になる = 既存プランの天井は1mmも動かない。
+// スキップフロアの上に高い壁を立てた部屋では、その壁の天端まで天井を張れる。
+function roomCeilingCapM(room){
+  var floor=(room&&room.floor)||1;
+  var storyM=storyHeightM(floor);
+  if(!room||!isFinite(room.x)||!isFinite(room.y)) return storyM;
+  var localM=localSupportTopY(floor+1,room.x,room.y,room.x+room.w,room.y+room.d)-floorBaseY(floor);
+  return localM>storyM?localM:storyM;
+}
 // 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
 // 階高でクランプしない: それが「2520mm 以下の天井高がまったく効かない」原因だった。
 // 天井高が階高を超えるときだけ階高へ丸める。階高の側を上げると上階の床が持ち上がり
@@ -845,11 +1125,13 @@ function roomCeilingHeightM(room){
   var roofExt=roomRoofCeilingExtent(room);
   if(roofExt) return roofExt.highY;
   var floor=room&&room.floor;
-  var storyM=storyHeightM(floor);
+  var storyM=roomCeilingCapM(room);
   var mm=roomExplicitCeilingMm(room);
   if(mm===null) return storyM;
   // 吹抜は既にスラブ下端から算出済み。2階以上でスラブ厚を二重加算しない。
-  var h=mm*U+(roomIsVoidCeiling(room)?0:floorSlabHeightMForFloor(floor));
+  // スキップフロアの段差は足す: 明示した天井高は**その区画の床から**測る値なので、
+  // 段差ぶん持ち上げないと、床だけ上がって天井が据え置かれ頭上が潰れる。
+  var h=mm*U+(roomIsVoidCeiling(room)?0:floorSlabHeightMForFloor(floor)+roomSkipLevelMm(room)*U);
   if(h>storyM){
     // 手書きの勾配天井は、上に何も載っていない部屋に限り階高を超えてよい (Task 14-2)。
     // 超えても持ち上がる床が無い -- 小屋裏へ抜けるのが勾配天井の実体だからである。
@@ -893,7 +1175,9 @@ function roomCeilingHeightM(room){
 // 実測(既定プラン・全部屋が天井高を明示していない): 1階 2700 / 2階・3階 2520。
 function roomRenderedCeilingMm(room){
   var floor=room&&room.floor;
-  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U)-Math.max(0,Math.min(600,Number(room&&room.floorRaiseMm)||0));
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(floor))/U)
+    -Math.max(0,Math.min(600,Number(room&&room.floorRaiseMm)||0))
+    -roomSkipLevelMm(room);
 }
 // 部屋が勾配天井なら、レンダが実際に置く低い側・高い側の高さ(m, floorBaseY 基準)を返す。
 // 高い側は roomCeilingHeightM をそのまま使う（階高でのクランプを2か所に書かない）。
@@ -941,6 +1225,19 @@ function roomRenderedCeilingLabel(room){
     shape.type==='sloped'
       ? {ceiling:{type:'sloped',lowMm:shape.lowMm,highMm:shape.highMm,direction:shape.direction}}
       : {ceiling:{heightMm:shape.heightMm}});
+}
+// 段差の表記。段差の無い部屋では空文字。JIS の平面図でも「FL+1200」と書くので、
+// 画面の注記と図面で同じ文字列を使う。
+function roomLevelLabel(room){
+  var v=roomSkipLevelMm(room);
+  return v>0 ? ('FL+'+v) : '';
+}
+// 平面図に出す1行。段差があれば段差を先に、天井高を後ろに置く
+// (床の高さが分からないと天井高の基準が読めないため)。
+function roomHeightLabel(room){
+  var lvl=roomLevelLabel(room);
+  var ch=roomRenderedCeilingLabel(room);
+  return lvl ? (lvl+' / '+ch) : ch;
 }
 function roomAtPointOnFloor(floor,x,y){
   if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
@@ -1239,7 +1536,7 @@ var ISIZES = {
   'custom-block':{w:900,d:450},
   'light-ceiling':{w:450,d:450}, 'light-down':{w:180,d:180}, 'light-spot':{w:260,d:180},
   memo:{w:760,d:460}, 'walk-route':{w:3000,d:140},
-  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
+  closet:{w:1800,d:600}, shoe_cabinet:{w:1200,d:400}, 'shelf-built-in':{w:1800,d:350}, stair:{w:910,d:2730}, 'stair-corner':{w:910,d:910},
   balcony:{w:1820,d:910}, tree:{w:1500,d:1500}, car:{w:2083,d:4790}, bicycle:{w:580,d:1850}, 'bicycle-fold':{w:550,d:1450}, fence:{w:1820,d:120}, 'wood-fence':{w:1820,d:120}, 'lattice-screen':{w:1800,d:60},
 
   // 隣家の既定は 8P×7P(7280×6370) = 1階46.4m² / 2階建て延べ約28坪。
@@ -1344,7 +1641,7 @@ var ICOLORS = {
   bath:'#b8d4f0', toilet:'#d4e8f0', sink:'#c8e0f8', kitchen:'#f0d8a8',
   fridge:'#d0e8d0', sofa:'#e0c8a8', 'dining-table':'#f0e0b0',
   'bed-d':'#d8d0e8','bed-s':'#d8d0e8', desk:'#c8d8e0',
-  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
+  tv:'#1a1a1a', 'custom-block':'#c9d7ee', 'light-ceiling':'#fff6dd', 'light-down':'#fff6dd', 'light-spot':'#fff6dd', memo:'#fff3a6', ruler:'#2f80ed', 'walk-route':'#10b981', closet:'#e8d8c8', 'shelf-built-in':'#e6dcc8', stair:'#e8e0c8', 'stair-corner':'#e8e0c8', balcony:'#c8e8c8', car:'#c8c8d8', bicycle:'#a8b4c4', 'bicycle-fold':'#d8a878', fence:'#909080', 'wood-fence':'#9a7a3a', 'lattice-screen':'#b09468',
   'neighbor-building':'#8f98a3','neighbor-house':'#b9bcc2',road:'#55585c','utility-pole':'#8c9297',
   'ac-outdoor':'#d8dadc', 'water-heater':'#e8e9eb', 'gas-heater':'#e8e9eb', 'meter-box':'#c8cacc', 'sewer-pit':'#6f7275', 'downspout':'#9aa0a5',
   foundation:'#b8b2a8','exterior-stair':'#b8b2a8',ramp:'#b8b2a8',
@@ -1811,7 +2108,7 @@ var ILABELS = {
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
   'dining-table':'食卓(4)','dining_6':'食卓(6)','round_table_4':'円卓',
   'bed-d':'ベッド(D)','bed-s':'ベッド(S)','semi_double_bed':'ベッド(SD)',futon_set:'布団',
-  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
+  desk:'デスク',tv:'TV','custom-block':'任意ブロック','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト',memo:'メモ',ruler:'定規','walk-route':'ウォークルート',closet:'収納',shoe_cabinet:'下駄箱','shelf-built-in':'造作棚',stair:'階段','stair-corner':'階段コーナー',balcony:'バルコニー',car:'自動車',bicycle:'自転車','bicycle-fold':'折りたたみ自転車',fence:'塀','wood-fence':'フェンス','lattice-screen':'格子柵',
   'neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱',
   'ac-outdoor':'エアコン室外機', 'water-heater':'貯湯タンク（エコキュート）', 'gas-heater':'ガス給湯器(壁掛け)', 'meter-box':'電気メーター', 'sewer-pit':'汚水枡', 'downspout':'竪樋',
   foundation:'基礎','exterior-stair':'外構階段',ramp:'スロープ',

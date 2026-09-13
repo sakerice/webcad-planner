@@ -63,7 +63,10 @@ function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
   var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
-  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)-(r?roomFloorOffsetMm(r):0);
+  // スキップフロアの段差も引く。elev は「その部屋の仕上げ床から」なので、
+  // 段差ぶん床が上がっていれば、天井までの寸法はその分だけ縮む。
+  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)
+    -(r?roomFloorOffsetMm(r)+roomSkipLevelMm(r):0);
 }
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
@@ -1254,6 +1257,18 @@ function updateProps(){
   if(isStairPartType(it.type)) {
     var sri = stairRiseInfo(it);
     var orderVal = it.stairOrder !== undefined ? it.stairOrder : (sri.index + 1);
+    // 行き先。平面だけからは「上の階へ上がる階段」と「同じ階の段差を上る階段」を
+    // 区別できないので宣言させる。省略は従来どおり上の階。
+    var target = (it.stairTarget === 'level') ? 'level' : 'upper';
+    html += '<div class="pr"><div class="pl">行き先</div><select class="pi" onchange="updateSelectedProp(\'stairTarget\',this.value===\'level\'?\'level\':undefined)">'+
+      '<option value="upper"'+(target==='upper'?' selected':'')+'>上の階</option>'+
+      '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（スキップフロア）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
+      (sri.steps||getStairStepCount(it))+'段。'+
+      (target==='level'
+        ? '同じ階の段差を上ります。上階の床には穴を開けません。'
+        : '上の階の床まで上がります。')+'</div>';
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
   }
@@ -1281,12 +1296,30 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
   }
+  if(it.type === 'shelf-built-in') {
+    html += '<div class="pr"><div class="pl">棚の高さ (mm)</div><input class="pi" type="number" min="150" max="2700" step="50" value="'+shelfHeightMm(it)+'" onchange="updateSelectedProp(\'shelfHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">棚板の枚数</div><input class="pi" type="number" min="1" max="8" step="1" value="'+shelfBoardCount(it)+'" onchange="updateSelectedProp(\'shelfCount\',+this.value)"></div>';
+    html += '<div class="lock-status-note">'+(shelfIsWallSupported(it)
+      ? '背面が壁に接しているので、壁が棚板を支えます（縦板なし）。壁から離すと縦板が付きます。'
+      : '壁から離れているので、両端に縦板を立てた独立の棚になります。背面を壁に寄せると縦板が消えます。')+'</div>';
+  }
+  // 段差のある部屋の中に居るものだけ、置く高さの基準を選ばせる。
+  // 段差の無い家では欄そのものが出ないので、既存の操作は1つも増えない。
+  if(it.type !== 'room' && it.type !== 'wall' && !isOpeningItemType(it.type) &&
+     roomSkipCavityMm(roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2)) > 0) {
+    var under = it.baseLevel === 'under';
+    html += '<div class="pr"><div class="pl">置く高さ</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'under\'?\'under\':undefined)">'+
+      '<option value="floor"'+(under?'':' selected')+'>段差の上（この部屋の床）</option>'+
+      '<option value="under"'+(under?' selected':'')+'>段差の下（床下の空間）</option>'+
+      '</select></div>';
+  }
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
     html += selectedRoomFloorHtml(it);
+    html += selectedRoomSkipHtml(it);
     html += selectedRoomCeilingHtml(it);
     html += selectedRoomCeilingFinishHtml(it);
   }
@@ -1393,6 +1426,9 @@ function updateSelectedProp(p,v,noSave){
   // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
   // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
   if(p==='setback' && !v) delete ST.selected.setback;
+  // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
+  // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
+  if((p==='stairTarget'||p==='baseLevel') && !v) delete ST.selected[p];
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;

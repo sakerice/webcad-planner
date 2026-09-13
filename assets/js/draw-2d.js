@@ -476,9 +476,30 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
   }
 }
 
+// 段差のある部屋の輪郭。平面図では段差が見えないので、線を引かないと
+// 「なぜこの部屋だけ天井が高いのか」が図面から読めない。
+// JIS の段差表現に倣い、低いレベルに面した辺だけを太い実線で引く
+// (外壁側・同じレベルの側は段差ではないので引かない)。
+function drawSkipLevelEdges2d(room){
+  if(roomSkipLevelMm(room)<=0) return;
+  var open=roomSkipOpenSides(room);
+  if(!open.n&&!open.s&&!open.w&&!open.e) return;
+  var a=w2c(room.x,room.y), b=w2c(room.x+room.w,room.y+room.d);
+  ctx.save();
+  ctx.strokeStyle='rgba(40,60,90,0.75)';
+  ctx.lineWidth=Math.max(1.6,ST.zoom*0.09);
+  ctx.setLineDash([]);
+  function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  if(open.n) line(a.cx,a.cy,b.cx,a.cy);
+  if(open.s) line(a.cx,b.cy,b.cx,b.cy);
+  if(open.w) line(a.cx,a.cy,a.cx,b.cy);
+  if(open.e) line(b.cx,a.cy,b.cx,b.cy);
+  ctx.restore();
+}
 function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
+    drawSkipLevelEdges2d(l);
     drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l);
     drawCeilingLabel2d(l);
   });
@@ -493,9 +514,13 @@ function drawRoomLbls(){
 // roomCeilingHeightM(=レンダの経路)から解決する。HeightModel.ceilingLabel を
 // 直接呼ぶと、明示の無い部屋に既定 2400 と書いて絵と食い違う。
 function drawCeilingLabel2d(room){
-  if(!planCaptureCeilingLabels()) return;
+  // 天井高は「キャプチャのときだけ」だが、**床の段差は編集中も出す**。
+  // 段差は平面図では見えないので、編集画面で分からないと、どの部屋を
+  // 持ち上げたのかが自分の記憶にしか残らない。
+  var lvl=roomLevelLabel(room);
+  if(!planCaptureCeilingLabels()&&!lvl) return;
   if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
-  var text=roomRenderedCeilingLabel(room);
+  var text=planCaptureCeilingLabels()?roomHeightLabel(room):lvl;
   var p=w2c(room.x+room.w/2,room.y+room.d/2);
   var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);

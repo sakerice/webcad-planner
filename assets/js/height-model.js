@@ -14,7 +14,8 @@
     loftMaxMm: 1400,
     firstFloorLevelMm: 400,
     slopedLowMm: 2200,
-    slopedHighMm: 3600
+    slopedHighMm: 3600,
+    skipLevelMaxMm: 2400
   };
 
   var ARROWS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
@@ -42,6 +43,18 @@
     var raw = entry ? entry.storyHeight : undefined;
     var v = num(raw, DEFAULTS.storyHeightMm);
     return v < MIN_STORY_HEIGHT_MM ? MIN_STORY_HEIGHT_MM : v;
+  }
+
+  // スキップフロアの段差 (mm)。**同じ階の中で床ごと持ち上がる高さ**で、
+  // room.floorRaiseMm (仕上げの段差・天井は動かない) とは別物である。
+  // 省略時は 0 -- 既存プランはこのフィールドを持たないので、床も天井も1mmも動かない。
+  //
+  // 上限を 2400 にしてあるのは、これを超えると「同じ階の中の段差」ではなく
+  // もう1つの階になるからである (階高の既定が 2700)。
+  function skipLevelMm(plan, room) {
+    var raw = room ? room.skipLevelMm : undefined;
+    if (typeof raw !== 'number' || !isFinite(raw) || raw <= 0) return 0;
+    return Math.min(Math.round(raw), DEFAULTS.skipLevelMaxMm);
   }
 
   function ceilingHeightMm(plan, room) {
@@ -88,6 +101,7 @@
     DEFAULTS: DEFAULTS,
     MIN_STORY_HEIGHT_MM: MIN_STORY_HEIGHT_MM,
     storyHeightMm: storyHeightMm,
+    skipLevelMm: skipLevelMm,
     ceilingHeightMm: ceilingHeightMm,
     ceilingShape: ceilingShape,
     ceilingLabel: ceilingLabel
