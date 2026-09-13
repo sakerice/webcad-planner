@@ -421,6 +421,25 @@ function roomSkipOpenSides(room){
   var e=roomSkipEdgeNeighbors(room);
   return {n:e.n==='lower', s:e.s==='lower', w:e.w==='lower', e:e.e==='lower'};
 }
+// ── 格子柵 ────────────────────────────────────────────────────────────────
+// もとは外構の目隠しだが、スキップフロアや吹き抜けの手すりにも使える。
+// 手すりとして使うには、格子の間隔(子どもがすり抜けない内法)と、掴める笠木が
+// 選べる必要がある。既定値は従来の見た目(間隔95/見付55/笠木なし)のまま。
+function latticePitchMm(it){
+  var n=Number(it&&it.latticePitch);
+  return (isFinite(n)&&n>0)?Math.max(30,Math.min(600,Math.round(n))):95;
+}
+function latticeSlatMm(it){
+  var n=Number(it&&it.latticeSlat);
+  return (isFinite(n)&&n>0)?Math.max(15,Math.min(200,Math.round(n))):55;
+}
+// 格子の内法(mm)。手すりとして使うときは 110mm 以下が目安。
+function latticeClearMm(it){
+  return Math.max(0,latticePitchMm(it)-latticeSlatMm(it));
+}
+function latticeHasCap(it){
+  return !!(it&&it.latticeCap);
+}
 // ── 階段の手すり ──────────────────────────────────────────────────────────
 // どちら側に付けるかは利用者が選ぶ(平面からは決まらない)。
 // 壁付けか柱建てかは、その側に壁が沿っているかで決まる -- 実物と同じく、
@@ -428,7 +447,7 @@ function roomSkipOpenSides(room){
 // 自動が当たらない置き方(壁から少し離した階段など)のために明示も受ける。
 // 省略時は手すり無し = 保存済みプランの階段は1本も増えない。
 var STAIR_RAIL_HEIGHT_MM=800;      // 段鼻からの手すり高さ。住宅の実務値
-var STAIR_RAIL_DIA_MM=38;          // 手すり径
+var STAIR_RAIL_DIA_MM=35;          // 手すり径。住宅用の標準(握りやすさの実務値)
 function stairRailSides(it){
   var v=it&&it.stairRail;
   if(v==='left') return ['left'];
@@ -474,13 +493,27 @@ function stairRailMountFor(it,side){
   if(m==='wall'||m==='post') return m;
   return stairSideHasWall(it,side)?'wall':'post';
 }
-// ── 階段下 ────────────────────────────────────────────────────────────────
-// 階段は踏板と蹴込み板だけで作ってある(スケルトン階段)。実際の住宅では
-// 階段下を塞いだ箱型の方が多く、塞げば階段室の空気が上下階で素通しにならない。
-// どちらにするかは設計なので選ばせる。**省略時は従来どおり素通し**で、
-// 保存済みプランの階段は1枚も増えない。
+// ── 階段の外観の形状 ──────────────────────────────────────────────────────
+// 昇降の形(直・かね折れ・折り返し・回り)は置く部材の組み合わせで決まるが、
+// 外観の形状は1枚ごとの作りである。実務で言い分けられている3つを持つ:
+//
+//   'open'     ひな壇  踏板+蹴込み板、側面は露出、階段下は素通し（既定）
+//   'box'      箱型    階段下を塞ぐ。下は収納やトイレに使える
+//   'skeleton' スケルトン 蹴込み板が無い。光と視線が抜ける（オープン階段）
+//
+// **省略時は 'open' = 従来どおり**なので、保存済みプランは1枚も変わらない。
+// 旧フィールド stairUnder==='filled' は箱型として読む(先に入れた指定の互換)。
+function stairStyleOf(it){
+  var v=it&&it.stairStyle;
+  if(v==='box'||v==='skeleton'||v==='open') return v;
+  return (it&&it.stairUnder==='filled')?'box':'open';
+}
 function stairUnderFilled(it){
-  return !!(it&&it.stairUnder==='filled');
+  return stairStyleOf(it)==='box';
+}
+// 蹴込み板を張るか。スケルトン階段は張らない。
+function stairHasRisers(it){
+  return stairStyleOf(it)!=='skeleton';
 }
 // ── 矩形の差 ──────────────────────────────────────────────────────────────
 // 段差の天板に階段の開口を開けるために使う。
@@ -912,7 +945,13 @@ function groundYForItem(it){
 function item3DBaseY(it){
   if(!it) return 0;
   if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
-    if(isFloorAwareGroundItemType(it.type) && (it.floor||1)>1) return floorTopY(it.floor);
+    if(isFloorAwareGroundItemType(it.type)){
+      // 部屋の中に置かれたものは、その部屋の床に立つ(段差の上を含む)。
+      // 格子柵をスキップフロアの手すりに使うには、地面ではなく床が基準になる。
+      var fr=roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
+      if(fr) return roomFloorTopY(fr);
+      if((it.floor||1)>1) return floorTopY(it.floor);
+    }
     return groundYForItem(it);
   }
   if(it.type==='roof') return localSupportTopY(it.floor,it.x,it.y,it.x+(it.w||0),it.y+(it.d||0));
@@ -920,10 +959,13 @@ function item3DBaseY(it){
   // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
   // 「地面から浮いた謎の矩形」になる
   if((it.floor||1)===1 && !itemOnFoundation(it)) return groundYForItem(it);
-  // レベル階段は段差の低い側から立ち上がる。平面の中心が持ち上がった床の上に
-  // 載っていても、足元はあくまで低い側である。
-  if(typeof stairGroupIsLevel==='function'&&stairGroupIsLevel(it))
-    return stairLevelSpanM(it).baseY;
+  // 階段の足元は、階段グループとして1か所で決める(stairLevelSpanM /
+  // stairUpperSpanM)。パーツの中心から採ると、段差の上から始まる階段が
+  // footprint の中心のはみ出しだけで低い側から始まってしまう。
+  if(typeof isStairPartType==='function'&&isStairPartType(it.type)){
+    if(stairGroupIsLevel(it)) return stairLevelSpanM(it).baseY;
+    return stairUpperSpanM(it).baseY;
+  }
   // 段差の下に置くと宣言されたものは、持ち上がった床ではなくその階の構造床へ。
   // 造作棚を段差の下の空間に入れるための経路である。
   if(itemIsUnderPlatform(it))

@@ -10070,10 +10070,27 @@ function stairRunEndsMm(seed,outMm){
 // 局所的に持ち上がっていれば、そこに合わせる。
 // 段差も高い壁も無い家では、従来の
 // floorTopY(nf) - floorTopY(fl) - stairFloorBuildupM(fl) と同値になる。
+// 上の階へ上がる階段の足元(ワールドm)。
+//
+// **下端の先にある床**を採る。パーツの中心で採ると、段差(スキップフロア)の
+// 上から始まる階段が、footprint の中心が段差からはみ出しただけで低い側から
+// 始まってしまう(2730mm の直階段は小さな段差に収まらないので、普通に起きる)。
+// 下端の先にも部屋が無いときだけ、従来どおり各パーツの中心から採る。
+// item.baseLevel==='skip' なら、判定に頼らずその階の段差から始める。
+function stairFootY(seed,ends){
+  var fl=(seed&&seed.floor)||1;
+  if(seed&&seed.baseLevel==='skip') return floorTopY(fl)+floorMaxSkipLevelMm(fl)*U;
+  if(seed&&seed.baseLevel==='floor') return floorTopY(fl);
+  var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
+  if(r) return roomFloorTopY(r);
+  return Math.min.apply(null,ends.group.map(function(o){
+    return roomFloorAt(fl,(o.x||0)+(o.w||0)/2,(o.y||0)+(o.d||0)/2);
+  }));
+}
 function stairUpperSpanM(seed){
   var fl=(seed&&seed.floor)||1, nf=fl+1;
   var ends=stairRunEndsMm(seed);
-  var baseY=Math.min.apply(null,ends.group.map(function(o){return item3DBaseY(o);}));
+  var baseY=stairFootY(seed,ends);
   var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
                DATA.rooms.some(function(r){return r.floor===nf;}) ||
                DATA.items.some(function(i){return i.floor===nf;});
@@ -11531,7 +11548,9 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
     _B(grp,railMat,-w3/2+stileW/2,h/2,0,stileW,h,depth);
     _B(grp,railMat, w3/2-stileW/2,h/2,0,stileW,h,depth);
     var span=w3-stileW*2;
-    var boardH=0.07, gap=0.055;
+    // 見付と間隔は、明示されたときだけそれに従う。既定は従来の見た目のまま。
+    var boardH=(it.latticeSlat!==undefined)?latticeSlatMm(it)*U:0.07;
+    var gap=(it.latticePitch!==undefined)?Math.max(0.01,latticePitchMm(it)*U-boardH):0.055;
     var rows=Math.max(2,Math.floor((h-0.06)/(boardH+gap)));
     for(var r=0;r<rows;r++){
       var y=0.05+boardH/2+r*(boardH+gap);
@@ -11541,7 +11560,8 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
     }
   } else {
     // 縦格子: スラット+上下(または背面)の通し枠。不揃い=スラット高を交互に変える
-    var bw=0.055, pitch=0.095;
+    // 見付と間隔は選べる。手すりとして使うときは内法 110mm 以下が目安。
+    var bw=latticeSlatMm(it)*U, pitch=latticePitchMm(it)*U;
     var count=Math.max(3,Math.round(w3/pitch));
     for(var i=0;i<count;i++){
       var x=-w3/2+(i+0.5)*w3/count;
@@ -11557,6 +11577,13 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
       _B(grp,railMat,0,h-0.025,0,w3,0.05,depth*0.8);
       _B(grp,railMat,0,0.025,0,w3,0.05,depth*0.8);
     }
+  }
+  // 笠木。手すりとして使うときは、掴める天端が要る。
+  // 目隠しとして使う従来の格子柵には出さない(既定は無し)。
+  if(latticeHasCap(it)){
+    var capMat=stairRailWoodMaterial();
+    var capH=0.045, capD=depth+0.05;
+    _B(grp,capMat,0,h+capH/2,0,w3+0.04,capH,capD);
   }
 }
 
@@ -12796,6 +12823,7 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,r
   var riserT=Math.min(0.018,Math.max(0.012,treadD*0.055));
   var jointOverlap=0.0015;
   var railPath=[];
+  var withRisers=stairHasRisers(it);
   for(var si=0;si<steps;si++){
     var z0=-d/2+treadD*si;
     var z1=z0+treadD;
@@ -12813,15 +12841,19 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,r
 
     // 蹴込み板は下段踏面から上段踏板の下面まで。上端を踏板へ重ねないため、
     // 角度によって余分な横板や二重ポリゴンに見える形状を作らない。
-    var riserBottom=prevY-jointOverlap;
-    var riserH=Math.max(0.01,(topY-treadT)-riserBottom);
-    var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
-    // 蹴込み板を下段踏板の後端へ載せ、接合部だけ1.5mm食い込ませる。
-    // 線接触による光漏れを防ぎ、上端は上段踏板の下面で正確に止める。
-    riser.position.set(0,riserBottom+riserH/2,zSign*(z0-riserT/2));
-    riser.castShadow=true;
-    riser.receiveShadow=true;
-    grp.add(riser);
+    // スケルトン階段(オープン階段)は蹴込み板を張らない -- 光と視線が抜けるのが
+    // この形の目的なので、板を入れたらスケルトンではなくなる。
+    if(withRisers){
+      var riserBottom=prevY-jointOverlap;
+      var riserH=Math.max(0.01,(topY-treadT)-riserBottom);
+      var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
+      // 蹴込み板を下段踏板の後端へ載せ、接合部だけ1.5mm食い込ませる。
+      // 線接触による光漏れを防ぎ、上端は上段踏板の下面で正確に止める。
+      riser.position.set(0,riserBottom+riserH/2,zSign*(z0-riserT/2));
+      riser.castShadow=true;
+      riser.receiveShadow=true;
+      grp.add(riser);
+    }
 
     railPath.push({y:topY, z:zSign*((z0+z1)/2)});
     // 階段下を塞ぐ(箱型階段)。段ごとに、足元から踏板の下面までを埋める。
@@ -12855,56 +12887,155 @@ function stairUnderFillMaterial(){
 // 階段の手すり。
 //
 // 付ける側は利用者が選び(stairRailSides)、壁付けか柱建てかは、その側に壁が
-// 沿っているかで決まる(stairRailMountFor)。壁付けはブラケットで壁から出し、
-// 柱建ては支柱を立てる。どちらも段鼻から STAIR_RAIL_HEIGHT_MM の高さを通る。
+// 沿っているかで決まる(stairRailMountFor)。走行の形は階段の種類で違うので、
+// **手すりが通る点の列** を階段の側から渡してもらい、ここでは金物と木部を
+// 並べる。pathBySide(side) は [{x,y,z,outX,outZ}] をローカル座標で返す。
 //
-// 走行の形は階段の種類で違う(直階段は一直線、廻り階段は折れる)ので、
-// **手すりが通る点の列** を階段の側から渡してもらい、ここでは棒と支えを
-// 並べるだけにする。pathBySide(side) は [{x,y,z}] をローカル座標で返す。
+// 納まりは住宅用手すりの実務に合わせる:
+//   壁付け  丸棒 φ35 + ブラケット(壁プレート・アーム・受け)を 900mm 間隔。
+//           端部は壁側へ折り返す(袖が引っかからないようにする定石)。
+//   柱建て  親柱 75角を両端に、その間に子柱 32角。子柱の内法は 110mm 以下
+//           (子どもがすり抜けない寸法)。笠木は同じ丸棒を通す。
+// どちらも段鼻から STAIR_RAIL_HEIGHT_MM。丸棒の継ぎ目と端は球で丸める。
+var STAIR_RAIL_END_EXT_M=0.15;      // 端部を段の外へ伸ばす長さ
+var STAIR_RAIL_BRACKET_PITCH_M=0.9; // ブラケットの間隔
+var STAIR_BALUSTER_GAP_MAX_M=0.11;  // 子柱の内法の上限
+function stairRailWoodMaterial(){
+  return new THREE.MeshStandardMaterial({color:0x9c7749,roughness:0.42,metalness:0.02});
+}
+function stairRailMetalMaterial(){
+  return new THREE.MeshStandardMaterial({color:0xb6bbc0,roughness:0.32,metalness:0.75});
+}
+// 点の列の両端を、走行の向きへ少し伸ばす。段の真上で切れた手すりは掴み損ねる。
+function stairRailExtendEnds(path,extM){
+  if(path.length<2) return path.slice();
+  function step(from,to,d){
+    var dx=to.x-from.x, dy=to.y-from.y, dz=to.z-from.z;
+    var len=Math.sqrt(dx*dx+dy*dy+dz*dz)||1;
+    return {x:from.x-dx/len*d, y:from.y-dy/len*d, z:from.z-dz/len*d,
+            outX:from.outX, outZ:from.outZ};
+  }
+  var head=step(path[0],path[1],extM);
+  var tail=step(path[path.length-1],path[path.length-2],extM);
+  return [head].concat(path,[tail]);
+}
 function build3DStairRails(grp,it,pathBySide){
   var sides=stairRailSides(it);
   if(!sides.length) return;
   var railR=STAIR_RAIL_DIA_MM*U/2;
   var railH=STAIR_RAIL_HEIGHT_MM*U;
-  var mat=new THREE.MeshStandardMaterial({color:0x8a6a45,roughness:0.5,metalness:0.05});
-  var metal=new THREE.MeshStandardMaterial({color:0x9aa0a5,roughness:0.45,metalness:0.6});
+  var wood=stairRailWoodMaterial(), metal=stairRailMetalMaterial();
+  function bar(a,b,r,mat){
+    var dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z;
+    var len=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    if(len<0.004) return;
+    var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,14),mat);
+    m.position.set((a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),
+      new THREE.Vector3(dx/len,dy/len,dz/len));
+    m.castShadow=true;
+    grp.add(m);
+  }
+  function ball(p,r,mat){
+    var m=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),mat);
+    m.position.set(p.x,p.y,p.z);
+    m.castShadow=true;
+    grp.add(m);
+  }
   sides.forEach(function(side){
-    var path=pathBySide(side);
-    if(!path||path.length<2) return;
+    var raw=pathBySide(side);
+    if(!raw||raw.length<2) return;
     var mount=stairRailMountFor(it,side);
-    var prev=null;
-    path.forEach(function(p,i){
-      var cur={x:p.x, y:p.y+railH, z:p.z};
-      if(prev){
-        var dx=cur.x-prev.x, dy=cur.y-prev.y, dz=cur.z-prev.z;
-        var len=Math.sqrt(dx*dx+dy*dy+dz*dz);
-        if(len>0.01){
-          var bar=new THREE.Mesh(new THREE.CylinderGeometry(railR,railR,len,12),mat);
-          bar.position.set((prev.x+cur.x)/2,(prev.y+cur.y)/2,(prev.z+cur.z)/2);
-          // 既定の +Y 向きの円柱を、区間の向きへ倒す。
-          bar.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),
-            new THREE.Vector3(dx/len,dy/len,dz/len));
-          bar.castShadow=true;
-          grp.add(bar);
-        }
-      }
-      // 支え。壁付けはブラケット(壁側へ出す)、柱建ては支柱(下へ落とす)。
-      if(i%2===0||i===path.length-1){
-        if(mount==='wall'){
-          var br=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.018,0.018),metal);
-          br.position.set(cur.x+(p.outX||0)*0.03,cur.y,cur.z+(p.outZ||0)*0.03);
-          grp.add(br);
-        }else{
-          var h=Math.max(0.05,railH-railR);
-          var post=new THREE.Mesh(new THREE.BoxGeometry(0.04,h,0.04),mat);
-          post.position.set(cur.x,cur.y-railR-h/2,cur.z);
-          post.castShadow=true;
-          grp.add(post);
-        }
-      }
-      prev=cur;
+    // 手すりが通る線(段鼻から railH)。両端は段の外へ少し伸ばす。
+    var line=stairRailExtendEnds(raw,STAIR_RAIL_END_EXT_M).map(function(p){
+      return {x:p.x, y:p.y+railH, z:p.z, outX:p.outX||0, outZ:p.outZ||0};
     });
+    // 丸棒。継ぎ目は球で丸めて、折れ点に角が立たないようにする。
+    for(var i=0;i+1<line.length;i++) bar(line[i],line[i+1],railR,wood);
+    for(var j=1;j+1<line.length;j++) ball(line[j],railR,wood);
+    var head=line[0], tail=line[line.length-1];
+    if(mount==='wall'){
+      // 端部の折り返し。壁側へ曲げて先端を丸める。
+      [head,tail].forEach(function(end){
+        var back={x:end.x+end.outX*0.09, y:end.y, z:end.z+end.outZ*0.09};
+        bar(end,back,railR,wood);
+        ball(back,railR,wood);
+      });
+      // ブラケット。壁プレート + アーム + 受け。
+      stairRailStationsAlong(line,STAIR_RAIL_BRACKET_PITCH_M).forEach(function(p){
+        var wall={x:p.x+p.outX*0.075, y:p.y, z:p.z+p.outZ*0.075};
+        var plate=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.01,16),metal);
+        plate.position.set(wall.x,wall.y,wall.z);
+        plate.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),
+          new THREE.Vector3(p.outX||1,0,p.outZ||0));
+        grp.add(plate);
+        bar(wall,{x:p.x,y:p.y-railR*0.4,z:p.z},0.008,metal);
+        var saddle=new THREE.Mesh(new THREE.CylinderGeometry(railR*1.25,railR*1.25,0.016,14),metal);
+        saddle.position.set(p.x,p.y-railR*0.75,p.z);
+        grp.add(saddle);
+      });
+    }else{
+      // 柱建て。両端に親柱、その間に子柱。子柱は踏板の上に立てる。
+      var newelW=0.075, balW=0.032;
+      [raw[0],raw[raw.length-1]].forEach(function(p){
+        var top=p.y+railH;
+        var h=Math.max(0.1,top-p.y+0.02);
+        var newel=new THREE.Mesh(new THREE.BoxGeometry(newelW,h,newelW),wood);
+        newel.position.set(p.x,p.y+h/2,p.z);
+        newel.castShadow=true;
+        grp.add(newel);
+      });
+      stairBalusterSeats(raw).forEach(function(s){
+        var h=Math.max(0.05,railH-railR);
+        var bal=new THREE.Mesh(new THREE.BoxGeometry(balW,h,balW),wood);
+        bal.position.set(s.x,s.y+h/2,s.z);
+        bal.castShadow=true;
+        grp.add(bal);
+      });
+    }
   });
+}
+// 線に沿って、おおよそ pitch 間隔の点を返す(両端は少し内側に寄せる)。
+function stairRailStationsAlong(line,pitchM){
+  var segs=[], total=0, i;
+  for(i=0;i+1<line.length;i++){
+    var a=line[i], b=line[i+1];
+    var len=Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2)+Math.pow(b.z-a.z,2));
+    segs.push({a:a,b:b,len:len,at:total});
+    total+=len;
+  }
+  if(total<=0.01) return [];
+  var n=Math.max(2,Math.round(total/pitchM)+1);
+  var out=[], k;
+  for(k=0;k<n;k++){
+    var d=0.06+(total-0.12)*(n===1?0:k/(n-1));
+    for(i=0;i<segs.length;i++){
+      var s=segs[i];
+      if(d<=s.at+s.len||i===segs.length-1){
+        var t=s.len>0?Math.max(0,Math.min(1,(d-s.at)/s.len)):0;
+        out.push({x:s.a.x+(s.b.x-s.a.x)*t, y:s.a.y+(s.b.y-s.a.y)*t, z:s.a.z+(s.b.z-s.a.z)*t,
+                  outX:s.a.outX, outZ:s.a.outZ});
+        break;
+      }
+    }
+  }
+  return out;
+}
+// 子柱を立てる位置。**踏板の上**に立てるので、段ごとの点(raw)の高さをそのまま
+// 使い、内法が STAIR_BALUSTER_GAP_MAX_M を超えないよう段の中にも足す。
+function stairBalusterSeats(raw){
+  var out=[], i, j;
+  for(i=0;i+1<raw.length;i++){
+    var a=raw[i], b=raw[i+1];
+    var dx=b.x-a.x, dz=b.z-a.z;
+    var span=Math.sqrt(dx*dx+dz*dz);
+    var n=Math.max(1,Math.ceil(span/(STAIR_BALUSTER_GAP_MAX_M+0.032)));
+    for(j=0;j<n;j++){
+      var t=(j+0.5)/n;
+      out.push({x:a.x+dx*t, y:a.y, z:a.z+dz*t});   // 高さはその段の踏板
+    }
+  }
+  return out;
 }
 // 踊り場。段を持たない平らな板で、手前までの段が積み上がった高さに座る。
 // かね折れ(L字)・折り返し(U字)の曲がりを、廻り段ではなくこれで作る。
