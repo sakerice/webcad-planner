@@ -71,7 +71,8 @@ const FNS = [
   'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
   'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
-  'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairUpperSpanM', 'stairRiseInfo',
+  'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairUpperSpanM', 'stairRiseInfo',
+  'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
   'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
@@ -475,6 +476,74 @@ test('段差の上に立つ階段は、段差の上から上階の床まで上�
   assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 3780 - 1200);
 });
 
+test('段差からはみ出す大きさの階段でも、足元は段差の上から始まる', () => {
+  // 2730mm の直階段は小さな段差(3000×4000)に収まらず、footprint の中心が
+  // 段差の外へ出る。中心で足元を採ると低い側から始まってしまっていた。
+  const h = skipHouse({ skip: 1200, wallOnPlatform: 2400, upperRoom: true });
+  // 下端が段差の上、上端が段差の外へ抜ける置き方。
+  // 段差の部屋は y 0..4000。階段は y 3200..5930 なので、**中心(4565)は段差の外**。
+  h.items.push({ id: 'st_out', type: 'stair', floor: 1,
+                 x: 5000, y: 3200, w: 910, d: 2730, rot: 0 });
+  const g = heights(h);
+  const st = g.DATA.items[0];
+  const ends = g.stairRunEndsMm(st);
+  // 中心で採ると低い側(0)、下端の先で採ると段差の上(1200)。
+  assert.equal(Math.round(g.roomFloorAt(1, st.x + st.w / 2, st.y + st.d / 2) / g.U), 0);
+  assert.equal(Math.round(g.roomFloorAt(1, ends.down.x, ends.down.y) / g.U), 1200);
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 1200,
+    '足元が段差の上になっていない');
+  assert.equal(Math.round(g.item3DBaseY(st) / g.U), 1200, '3Dの足元がずれている');
+});
+
+test('足元を「段差の上」と明示すれば、判定に頼らず段差から始まる', () => {
+  const h = skipHouse({ skip: 1200, upperRoom: true });
+  // 段差からも部屋からも外れた場所に置いた階段。
+  h.items.push({ id: 'st_far', type: 'stair', floor: 1,
+                 x: 9000, y: 500, w: 910, d: 2730, rot: 0, baseLevel: 'skip' });
+  const g = heights(h);
+  const st = g.DATA.items[0];
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 1200);
+  st.baseLevel = 'floor';
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 0);
+});
+
+test('階段の形状は 箱型 / ひな壇 / スケルトン から選べる', () => {
+  const g = heights(stairHouse(undefined));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairStyleOf(st), 'open', '既定が変わっている');
+  assert.equal(g.stairHasRisers(st), true);
+  st.stairStyle = 'skeleton';
+  assert.equal(g.stairHasRisers(st), false, 'スケルトンで蹴込み板が残る');
+  assert.equal(g.stairUnderFilled(st), false);
+  st.stairStyle = 'box';
+  assert.equal(g.stairUnderFilled(st), true);
+  assert.equal(g.stairHasRisers(st), true);
+  // 先に入れた stairUnder は箱型として読む(互換)。
+  delete st.stairStyle;
+  st.stairUnder = 'filled';
+  assert.equal(g.stairStyleOf(st), 'box');
+});
+
+test('3Dは、スケルトンで蹴込み板を作らない', () => {
+  const body = sliceFunction('build3DOpenStraightStair');
+  assert.match(body, /stairHasRisers\(it\)/);
+  assert.match(body, /if\(withRisers\)/);
+});
+
+test('格子柵は、間隔・見付・笠木を選べる（手すりとして使うため）', () => {
+  const g = heights(skipHouse({}));
+  assert.equal(g.latticePitchMm({}), 95, '既定の見た目が変わっている');
+  assert.equal(g.latticeSlatMm({}), 55);
+  assert.equal(g.latticeHasCap({}), false);
+  assert.equal(g.latticePitchMm({ latticePitch: 140 }), 140);
+  assert.equal(g.latticeSlatMm({ latticeSlat: 30 }), 30);
+  assert.equal(g.latticeClearMm({ latticePitch: 140, latticeSlat: 30 }), 110);
+  assert.equal(g.latticeHasCap({ latticeCap: true }), true);
+  // 範囲外は丸める。
+  assert.equal(g.latticePitchMm({ latticePitch: 9999 }), 600);
+  assert.equal(g.latticeSlatMm({ latticeSlat: 1 }), 15);
+});
+
 test('同じ階に別の階段があっても、足元は混ざらない', () => {
   const g = heights(upperStairHouse({ skip: 1200, wallOnPlatform: 2400, otherStair: true }));
   const onPlatform = g.DATA.items[0], onFloor = g.DATA.items[1];
@@ -663,9 +732,23 @@ test('階段の下を埋めると、直階段も廻り階段も塞ぐ', () => {
   assert.match(caller, /stairUnderFilled\(it\)/, '階段下の指定を3Dの生成へ渡していない');
 });
 
-test('階段のプロパティ欄から階段の下を選べる', () => {
-  assert.match(html, /stairUnder/);
-  assert.match(html, /埋める（箱型）/);
+test('階段のプロパティ欄から外観の形状を選べる', () => {
+  assert.match(html, /stairStyle/);
+  assert.match(html, /箱型（階段下を塞ぐ）/);
+  assert.match(html, /スケルトン（蹴込み板なし）/);
+  assert.match(html, /ひな壇（側面が見える/);
+});
+
+test('段差のある階では、階段の足元も選べる', () => {
+  assert.match(html, /階段の足元/);
+  assert.match(html, /段差の上から/);
+});
+
+test('格子柵のプロパティ欄から間隔・見付・笠木を選べる', () => {
+  assert.match(html, /格子の間隔/);
+  assert.match(html, /格子の見付/);
+  assert.match(html, /latticeCap/);
+  assert.match(html, /手すりとして使う/);
 });
 
 // ══ 10-b2. 段差の天板は、階段の開口で外周面も切れる ════════════════════

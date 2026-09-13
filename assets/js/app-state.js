@@ -1348,15 +1348,31 @@ function updateProps(){
         '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。'+
         (rmount==='auto'?'（自動は、その側に階段と平行な壁が沿っていれば壁付けにします。）':'')+'</div>';
     }
-    // 階段下。素通しの鉄砲階段か、塞いだ箱型か。
-    var under = stairUnderFilled(it) ? 'filled' : 'open';
-    html += '<div class="pr"><div class="pl">階段の下</div><select class="pi" onchange="updateSelectedProp(\'stairUnder\',this.value===\'filled\'?\'filled\':undefined)">'+
-      '<option value="open"'+(under==='open'?' selected':'')+'>空ける（踏板と蹴込み板だけ）</option>'+
-      '<option value="filled"'+(under==='filled'?' selected':'')+'>埋める（箱型）</option>'+
+    // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
+    // 組み合わせで決まるので、ここで選ぶのは1枚ごとの作りだけ。
+    var sstyle = stairStyleOf(it);
+    html += '<div class="pr"><div class="pl">階段の形状</div><select class="pi" onchange="updateSelectedProp(\'stairStyle\',this.value===\'open\'?undefined:this.value)">'+
+      '<option value="open"'+(sstyle==='open'?' selected':'')+'>ひな壇（側面が見える・階段下は素通し）</option>'+
+      '<option value="box"'+(sstyle==='box'?' selected':'')+'>箱型（階段下を塞ぐ）</option>'+
+      '<option value="skeleton"'+(sstyle==='skeleton'?' selected':'')+'>スケルトン（蹴込み板なし）</option>'+
       '</select></div>';
-    html += '<div class="lock-status-note">'+(under==='filled'
-      ? '階段下を塞いでいます。階段室の空気が上下階で素通しになりません。'
-      : '階段下は素通しです。塞ぐと箱型階段になります。階段下を収納にしたいときは、埋めずに造作棚を置いてください。')+'</div>';
+    html += '<div class="lock-status-note">'+({
+        open:'側面が見える形です。階段下は素通しなので、造作棚を置けば収納にできます。',
+        box:'階段下を塞いだ箱型です。階段室の空気が上下階で素通しになりません。下を収納にしたいときは、埋めずにひな壇のまま造作棚を置いてください。',
+        skeleton:'蹴込み板の無いオープン階段です。光と視線が抜けます。小さなお子さんや高齢の方が使うなら、箱型かひな壇の方が安全です。'
+      }[sstyle])+'</div>';
+    // 足元。段差のある階でだけ出す。
+    if(floorMaxSkipLevelMm(it.floor) > 0){
+      var sbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
+      html += '<div class="pr"><div class="pl">階段の足元</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(sbase==='auto'?' selected':'')+'>自動（下端の先の床から）</option>'+
+        '<option value="floor"'+(sbase==='floor'?' selected':'')+'>階の床から</option>'+
+        '<option value="skip"'+(sbase==='skip'?' selected':'')+'>段差の上から</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">いまの足元は ＋'+
+        Math.round((stairUpperSpanM(it).baseY - floorTopY(it.floor))/U)+'mm です。'+
+        '自動は階段の下端の先にある床を見ます（部材の中心ではないので、段差からはみ出す大きさの階段でも段差の上から始まります）。</div>';
+    }
     html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
       (sri.steps||getStairStepCount(it))+'段。'+
       (target==='level'
@@ -1388,6 +1404,20 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">位置 X: <span class="texture-crop-value">'+Math.round(it.sX||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sX||0)+'" oninput="updateSelectedTextureCrop(\'sX\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
       html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
+  }
+  if(it.type === 'lattice-screen') {
+    html += '<div class="ph" style="margin-top:12px">格子</div>';
+    html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">笠木（手すり）</div><select class="pi" onchange="updateSelectedProp(\'latticeCap\',this.value===\'on\'?true:undefined)">'+
+      '<option value="off"'+(latticeHasCap(it)?'':' selected')+'>なし（目隠しとして使う）</option>'+
+      '<option value="on"'+(latticeHasCap(it)?' selected':'')+'>あり（手すりとして使う）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">格子の内法は '+latticeClearMm(it)+'mm です。'+
+      (latticeClearMm(it)>110
+        ? '手すりとして使うなら 110mm 以下が目安です（子どもがすり抜けない寸法）。'
+        : '手すりとして使える内法です。')+
+      '部屋の中に置くと、その部屋の床（段差の上を含む）に立ちます。</div>';
   }
   if(isColumnType(it.type)) {
     html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+columnHeightMm(it)+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';
