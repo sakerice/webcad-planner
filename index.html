@@ -12994,6 +12994,19 @@ function railPolylineYAt(line,x,z){
   }
   return best?best.y:(line.length?line[0].y:0);
 }
+// 踏板の天端は**段ごとの段**であって、斜めの直線ではない。段鼻を結んだ線を
+// railPolylineYAt で内挿すると、踏板の中央から外れた位置で最大で蹴上げの半分
+// ずれる(支柱が踏板から浮く・めり込む。実際そうなり「手すりが階段の横板から
+// 浮く」として報告された)。足元は**いちばん近い踏板**の高さをそのまま採る。
+function railStepYAt(line,x,z){
+  var best=null,i;
+  for(i=0;i<line.length;i++){
+    var dx=x-line[i].x, dz=z-line[i].z;
+    var d2=dx*dx+dz*dz;
+    if(best===null||d2<best.d2) best={d2:d2,y:line[i].y};
+  }
+  return best?best.y:0;
+}
 // 線の両端を、走行の向きへ少し伸ばす。段の真上で切れた手すりは掴み損ねる。
 function stairRailExtendEnds(path,extM){
   if(path.length<2) return path.slice();
@@ -13158,7 +13171,7 @@ function build3DStairRails(grp,it,pathBySide){
     // 支柱(平鋼)。両端と、その間をおよそ STAIR_RAIL_POST_PITCH_M 間隔で。
     var postW=STAIR_RAIL_POST_W_MM*U, postT=STAIR_RAIL_POST_T_MM*U;
     stairRailStationsAlong(line,STAIR_RAIL_POST_PITCH_M,0.03).forEach(function(p){
-      var seatY=railPolylineYAt(seatLine,p.x,p.z);
+      var seatY=railStepYAt(seatLine,p.x,p.z);
       var top=p.y-capH/2;
       var h=top-seatY;
       if(h<=0.05) return;
