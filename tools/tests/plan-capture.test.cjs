@@ -396,7 +396,7 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('perFloorHeightsEnabled'), topLevelFunction('planFloorHeightEntry'),
     topLevelFunction('defaultWallHeightMmForFloor'), topLevelFunction('defaultFloorRaiseMmForFloor'),
     topLevelFunction('floorSlabMmForFloor'), topLevelFunction('localSupportTopY'), topLevelFunction('floorHasSkipLevel'),
-    topLevelFunction('wallSkipBaseMm'), topLevelFunction('roomAtPointOnFloor'),
+    topLevelFunction('wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm'), topLevelFunction('roomAtPointOnFloor'),
     topLevelFunction('segmentInsideRectLengthMm'),
     topLevelFunction('floorSlabHeightM'), topLevelFunction('floorSlabHeightMForFloor'),
     topLevelFunction('floorBaseY'), topLevelFunction('floorTopY'),

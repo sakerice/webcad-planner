@@ -1326,6 +1326,28 @@ function updateProps(){
       '<option value="upper"'+(target==='upper'?' selected':'')+'>上の階</option>'+
       '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（スキップフロア）</option>'+
       '</select></div>';
+    // 手すり。付ける側は選ばせ、壁付けか柱建てかは置いた場所から決める。
+    var rail = ({left:'left',right:'right',both:'both'})[it.stairRail] || 'none';
+    html += '<div class="pr"><div class="pl">手すり</div><select class="pi" onchange="updateSelectedProp(\'stairRail\',this.value===\'none\'?undefined:this.value)">'+
+      '<option value="none"'+(rail==='none'?' selected':'')+'>なし</option>'+
+      '<option value="left"'+(rail==='left'?' selected':'')+'>左側</option>'+
+      '<option value="right"'+(rail==='right'?' selected':'')+'>右側</option>'+
+      '<option value="both"'+(rail==='both'?' selected':'')+'>両側</option>'+
+      '</select></div>';
+    if(rail !== 'none'){
+      var rmount = (it.stairRailMount==='wall'||it.stairRailMount==='post') ? it.stairRailMount : 'auto';
+      html += '<div class="pr"><div class="pl">手すりの付け方</div><select class="pi" onchange="updateSelectedProp(\'stairRailMount\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(rmount==='auto'?' selected':'')+'>自動（壁が沿っていれば壁付け）</option>'+
+        '<option value="wall"'+(rmount==='wall'?' selected':'')+'>壁付け</option>'+
+        '<option value="post"'+(rmount==='post'?' selected':'')+'>柱建て</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">'+
+        stairRailSides(it).map(function(sd){
+          return (sd==='left'?'左':'右')+'は'+(stairRailMountFor(it,sd)==='wall'?'壁付け':'柱建て');
+        }).join('、')+
+        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。'+
+        (rmount==='auto'?'（自動は、その側に階段と平行な壁が沿っていれば壁付けにします。）':'')+'</div>';
+    }
     // 階段下。素通しの鉄砲階段か、塞いだ箱型か。
     var under = stairUnderFilled(it) ? 'filled' : 'open';
     html += '<div class="pr"><div class="pl">階段の下</div><select class="pi" onchange="updateSelectedProp(\'stairUnder\',this.value===\'filled\'?\'filled\':undefined)">'+
@@ -1411,6 +1433,20 @@ function updateProps(){
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
+    // 段差のある階でだけ、足元と高さの基準を選ばせる。
+    // 自動は「接する部屋の段差」から判断するが、部屋の外を通る壁や、
+    // 部屋の縁からわずかに外れた壁では当たらない。そのための明示。
+    if(floorMaxSkipLevelMm(it.floor) > 0) {
+      var wbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
+      html += '<div class="ph" style="margin-top:12px">スキップフロア</div>';
+      html += '<div class="pr"><div class="pl">壁の基準</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(wbase==='auto'?' selected':'')+'>自動（接する部屋から判断）</option>'+
+        '<option value="floor"'+(wbase==='floor'?' selected':'')+'>階の床から</option>'+
+        '<option value="skip"'+(wbase==='skip'?' selected':'')+'>段差の上から</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">いまの足元は ＋'+wallSkipFootMm(it)+'mm、高さの基準は ＋'+wallSkipBaseMm(it)+'mm です。'+
+        '両側とも段差の上にある壁だけ足元が上がります（段差の境界の壁は蹴上げ面を兼ねるので下ろしたまま）。</div>';
+    }
     html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';

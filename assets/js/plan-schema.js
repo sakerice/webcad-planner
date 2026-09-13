@@ -80,6 +80,9 @@
         LIMITS.MIN_WALL_THICK_MM + '〜' + LIMITS.MAX_WALL_THICK_MM + 'mm)');
     }
     checkFloor(w.floor, where, errors);
+    if (w.baseLevel !== undefined && w.baseLevel !== 'floor' && w.baseLevel !== 'skip') {
+      warnings.push(where + ': 壁の基準 "' + w.baseLevel + '" は floor / skip のどちらでもないので自動判定で読む');
+    }
   }
 
   function checkRoom(r, where, errors, warnings) {
@@ -128,6 +131,13 @@
     }
     if (it.baseLevel !== undefined && it.baseLevel !== 'floor' && it.baseLevel !== 'under') {
       warnings.push(where + ': 置く高さの基準 "' + it.baseLevel + '" は floor / under のどちらでもないので床の上として読む');
+    }
+    if (it.stairRail !== undefined &&
+        ['none', 'left', 'right', 'both'].indexOf(it.stairRail) < 0) {
+      warnings.push(where + ': 階段の手すり "' + it.stairRail + '" は none / left / right / both のどれでもないので手すり無しとして読む');
+    }
+    if (it.stairRailMount !== undefined && it.stairRailMount !== 'wall' && it.stairRailMount !== 'post') {
+      warnings.push(where + ': 手すりの付け方 "' + it.stairRailMount + '" は wall / post のどちらでもないので自動判定で読む');
     }
     if (it.stairUnder !== undefined && it.stairUnder !== 'open' && it.stairUnder !== 'filled') {
       warnings.push(where + ': 階段の下 "' + it.stairUnder + '" は open / filled のどちらでもないので素通しとして読む');

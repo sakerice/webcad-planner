@@ -421,6 +421,59 @@ function roomSkipOpenSides(room){
   var e=roomSkipEdgeNeighbors(room);
   return {n:e.n==='lower', s:e.s==='lower', w:e.w==='lower', e:e.e==='lower'};
 }
+// ── 階段の手すり ──────────────────────────────────────────────────────────
+// どちら側に付けるかは利用者が選ぶ(平面からは決まらない)。
+// 壁付けか柱建てかは、その側に壁が沿っているかで決まる -- 実物と同じく、
+// 壁があれば壁に付け、無ければ支柱を立てる。造作棚と同じ考え方である。
+// 自動が当たらない置き方(壁から少し離した階段など)のために明示も受ける。
+// 省略時は手すり無し = 保存済みプランの階段は1本も増えない。
+var STAIR_RAIL_HEIGHT_MM=800;      // 段鼻からの手すり高さ。住宅の実務値
+var STAIR_RAIL_DIA_MM=38;          // 手すり径
+function stairRailSides(it){
+  var v=it&&it.stairRail;
+  if(v==='left') return ['left'];
+  if(v==='right') return ['right'];
+  if(v==='both') return ['left','right'];
+  return [];
+}
+// この側に壁が沿っているか。階段の走行軸と平行(15度以内)で、側面の線から
+// 250mm 以内を通り、走行の半分以上に重なっている壁を「沿っている」とみなす。
+function stairSideHasWall(it,side){
+  if(!it||typeof DATA==='undefined'||!DATA||!DATA.walls) return false;
+  var rad=(Number(it.rot)||0)*Math.PI/180;
+  var cos=Math.cos(rad), sin=Math.sin(rad);
+  var runSgn=it.flipY?-1:1, sideSgn=(side==='right'?1:-1)*(it.flipX?-1:1);
+  var ux=-sin*runSgn, uy=cos*runSgn;              // 走行の向き
+  var vx=cos*sideSgn, vy=sin*sideSgn;             // 側面の向き
+  var cx=(Number(it.x)||0)+(Number(it.w)||0)/2, cy=(Number(it.y)||0)+(Number(it.d)||0)/2;
+  var half=(Number(it.w)||0)/2;
+  var sx=cx+vx*half, sy=cy+vy*half;               // 側面の線の中点
+  var runLen=Number(it.d)||0;
+  for(var i=0;i<DATA.walls.length;i++){
+    var w=DATA.walls[i];
+    if(!w||(w.floor||1)!==(it.floor||1)) continue;
+    var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) continue;
+    var wx=dx/len, wy=dy/len;
+    if(Math.abs(wx*ux+wy*uy)<0.966) continue;     // 走行軸と平行でない
+    // 側面の線からの距離(走行軸に直交する向きの成分)
+    var offA=(w.x1-sx)*vx+(w.y1-sy)*vy;
+    var offB=(w.x2-sx)*vx+(w.y2-sy)*vy;
+    var near=Math.min(Math.abs(offA),Math.abs(offB));
+    if(near>(Number(w.thick)||120)/2+250) continue;
+    // 走行方向の重なり
+    var tA=(w.x1-sx)*ux+(w.y1-sy)*uy, tB=(w.x2-sx)*ux+(w.y2-sy)*uy;
+    var lo=Math.max(Math.min(tA,tB),-runLen/2), hi=Math.min(Math.max(tA,tB),runLen/2);
+    if(hi-lo>=runLen*0.5) return true;
+  }
+  return false;
+}
+// 'wall' 壁付け | 'post' 柱建て。明示があれば自動判定より優先する。
+function stairRailMountFor(it,side){
+  var m=it&&it.stairRailMount;
+  if(m==='wall'||m==='post') return m;
+  return stairSideHasWall(it,side)?'wall':'post';
+}
 // ── 階段下 ────────────────────────────────────────────────────────────────
 // 階段は踏板と蹴込み板だけで作ってある(スケルトン階段)。実際の住宅では
 // 階段下を塞いだ箱型の方が多く、塞げば階段室の空気が上下階で素通しにならない。
@@ -532,31 +585,73 @@ function shelfIsWallSupported(it){
   }
   return false;
 }
-// この壁が接している部屋の段差の最大値(mm)。壁は2つの部屋の境界にあるので、
-// 「どちらのレベルから測るか」を決める必要がある。**高い側**を採るのは、
-// 段差の縁に立てる腰壁・手すり壁がそこを守るためのものだからである
-// (低い側から測ると、持ち上がった床の上では手すりが埋まる)。
+// その階にある段差の最大値(mm)。壁の基準を「段差の上」と明示したときに使う
+// -- 判定に当たらない置き方(部屋の外を通る壁など)でも段差から測れるように。
+function floorMaxSkipLevelMm(floor){
+  var rooms=(typeof DATA!=='undefined'&&DATA&&DATA.rooms)?DATA.rooms:null;
+  if(!rooms) return 0;
+  var f=floor||1, best=0;
+  for(var i=0;i<rooms.length;i++){
+    var r=rooms[i];
+    if(!r||r.hidden3D||(r.floor||1)!==f) continue;
+    var v=roomSkipLevelMm(r);
+    if(v>best) best=v;
+  }
+  return best;
+}
+// この壁が接している部屋の段差の、最小値と最大値(mm)。
 // サンプリングの仕方は wallAdjacentRoomsCeiling と同じにしてある。
-function wallSkipBaseMm(w){
-  if(!w) return 0;
-  if(!floorHasSkipLevel(w.floor)) return 0;
+// どちらの部屋にも面していない側は「段差なし(0)」として数える -- 外に面した
+// 側があるなら、その壁は下まで下ろさないと足元に穴が開くからである。
+function wallSkipLevelsMm(w){
+  var out={min:0,max:0};
+  if(!w||!floorHasSkipLevel(w.floor)) return out;
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
   var len=Math.sqrt(dx*dx+dy*dy);
-  if(len<1) return 0;
+  if(len<1) return out;
   var nx=-dy/len, ny=dx/len;
   var off=Math.max((w.thick||120)/2+40,100);
-  var best=0, i, s, t, px, py, r, v;
+  var lo=Infinity, hi=0, i, s, t, px, py, r, v;
   for(i=0;i<5;i++){
     t=(i+0.5)/5;
     px=w.x1+dx*t; py=w.y1+dy*t;
     for(s=-1;s<=1;s+=2){
       r=roomAtPointOnFloor(w.floor,px+nx*off*s,py+ny*off*s);
-      if(!r) continue;
-      v=roomSkipLevelMm(r);
-      if(v>best) best=v;
+      v=r?roomSkipLevelMm(r):0;
+      if(v<lo) lo=v;
+      if(v>hi) hi=v;
     }
   }
-  return best;
+  out.min=isFinite(lo)?lo:0;
+  out.max=hi;
+  return out;
+}
+// 壁の高さを測る基準(mm)。壁は2つの部屋の境界にあるので、
+// 「どちらのレベルから測るか」を決める必要がある。**高い側**を採るのは、
+// 段差の縁に立てる腰壁・手すり壁がそこを守るためのものだからである
+// (低い側から測ると、持ち上がった床の上では手すりが埋まる)。
+//
+// wall.baseLevel で明示できる: 'floor' は段差を無視して階の床から、
+// 'skip' はその階の段差から。省略時は上の自動判定。
+function wallSkipBaseMm(w){
+  if(!w) return 0;
+  if(w.baseLevel==='floor') return 0;
+  var lv=wallSkipLevelsMm(w);
+  if(w.baseLevel==='skip') return Math.max(lv.max,floorMaxSkipLevelMm(w.floor));
+  return lv.max;
+}
+// 壁の足元を持ち上げる量(mm)。
+//
+// **両側とも段差の上にあるときだけ持ち上げる。** 段差の下は中空なので、
+// 持ち上げないと間仕切り壁が床下へ垂れ下がる。片側でも低いレベルに面して
+// いれば下ろしたまま -- その壁は段差の蹴上げ面を兼ねており、持ち上げると
+// 低い側の足元に穴が開く。
+function wallSkipFootMm(w){
+  if(!w) return 0;
+  if(w.baseLevel==='floor') return 0;
+  var lv=wallSkipLevelsMm(w);
+  if(w.baseLevel==='skip') return Math.max(lv.max,floorMaxSkipLevelMm(w.floor));
+  return lv.min;
 }
 // 上階の床が載る天端(m)。下階に「その階の既定より高い壁」が立っていると、
 // その上に載る床はその壁の天端まで持ち上がる。
@@ -607,7 +702,8 @@ function localSupportTopY(floor,x1,y1,x2,y2){
 function wallBaseSupportY(w){
   var fl=(w&&w.floor)||1;
   var base=floorBaseY(fl);
-  if(!w||fl<=1) return base;
+  if(!w) return base;
+  if(fl<=1) return base+wallSkipFootMm(w)*U;
   var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.sqrt(dx*dx+dy*dy);
   if(len<1) return base;
   var nx=-dy/len, ny=dx/len;
@@ -618,7 +714,7 @@ function wallBaseSupportY(w){
   // 点ごとに測り直す必要は無い(下階に高い壁が無い家 = 保存済みのほぼ全部は、
   // ここで帰る)。範囲は PlanSchema.LIMITS.COORD_MM と同じ「座標の限界」。
   var ANY=1000000;
-  if(localSupportTopY(fl,-ANY,-ANY,ANY,ANY)<=base+1e-9) return base;
+  if(localSupportTopY(fl,-ANY,-ANY,ANY,ANY)<=base+1e-9) return base+wallSkipFootMm(w)*U;
   // 壁が実際に載るのは**床スラブ**なので、支持はその点を含む部屋の矩形で測る
   // (点だけで測ると、下階の壁の真上にしか支持が無いことになり、同じ部屋の中で
   // 壁の足元が床から外れる)。壁は2部屋の境界にあるので両側を見て、
@@ -637,7 +733,9 @@ function wallBaseSupportY(w){
       if(v<minTop) minTop=v;
     }
   }
-  return (isFinite(minTop)&&minTop>base+1e-9)?minTop:base;
+  var top=(isFinite(minTop)&&minTop>base+1e-9)?minTop:base;
+  // 同じ階の段差の上に立つ壁は、そのぶんも足元が上がる。
+  return top+wallSkipFootMm(w)*U;
 }
 // 壁が floorBaseY からどれだけ持ち上がって立つか(mm)。
 // 同じ階の段差の上に立つ (wallSkipBaseMm) か、下階の高い壁に載っている

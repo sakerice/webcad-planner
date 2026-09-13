@@ -48,7 +48,7 @@ const FNS = [
   'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
   'storyHeightMmForFloor', 'storyHeightM',
   'floorSlabMmForFloor', 'floorSlabHeightM', 'floorSlabHeightMForFloor',
-  'floorBaseY', 'floorTopY', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'roomSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
+  'floorBaseY', 'floorTopY', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
   'wallFullHeightM', 'wallHeightMm',
   'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'roomFloorAt'
 ];
