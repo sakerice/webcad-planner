@@ -76,7 +76,7 @@ const DRAW_FNS = [
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue',
-  'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
+  'isStairPartType', 'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   // 平面図の部屋ラベルは段差(FL+1200)も書く
   'roomLevelLabel', 'roomSkipLevelMm'
 ];

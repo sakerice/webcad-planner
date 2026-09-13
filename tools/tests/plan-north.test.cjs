@@ -68,7 +68,7 @@ function jisdrawIife() {
 }
 
 const NORTH_FNS = [
-  'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
+  'isStairPartType', 'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
   'compassSector', 'compassNameJa', 'compassCode',
   'planDirBearingDeg', 'elevationDirNameJa', 'elevationSheetLabel', 'elevationDirCode',
   'computeSunPosition'

@@ -1331,7 +1331,7 @@ function drawItem2d(it){
     }
   } else {
     var hw = it.w*sc/2, hd = it.d*sc/2;
-    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
+    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='stair-landing' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
     var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type) || isPlanSymbol);
     if(!doorSymbolOnly){
       ctx.fillStyle=getItem2dFillColor(it);
@@ -1424,6 +1424,22 @@ function drawItem2d(it){
       ctx.beginPath();
       ctx.moveTo(0,hd*0.72); ctx.lineTo(-sAw,hd*0.72-sAl); ctx.lineTo(sAw,hd*0.72-sAl); ctx.closePath(); ctx.fill();
       drawStairUpText(it,sc,Math.max(6*sc,5),hd*0.68);
+    } else if(it.type === 'stair-landing') {
+      // 踊り場は段を持たないので段鼻線を引かない。外形と昇り方向だけ。
+      ctx.save();
+      ctx.globalAlpha=0.30;
+      ctx.fillStyle=getItem2dFillColor(it);
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.restore();
+      ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
+      ctx.stroke();
+      var lAw=Math.max(5*sc,4), lAl=Math.min(hd*0.17,Math.max(10*sc,9));
+      ctx.beginPath();
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(-lAw,hd*0.72-lAl); ctx.lineTo(lAw,hd*0.72-lAl); ctx.closePath(); ctx.fill();
     } else if(it.type === 'stair-corner') {
       // 廻り3段コーナーのJIS流平面記号: 外形+内側隅から放射する段鼻線+昇り歩行線(1/4弧の矢印)。
       // 3Dモデル(build3DWinderCorner)と同じ割付で、下辺から入り右下の内側隅を廻って右辺へ抜ける。
@@ -2121,7 +2137,12 @@ function applyWallDrag(cx,cy,e){
 }
 
 function isStairPartType(type){
-  return type==='stair'||type==='stair-corner';
+  return type==='stair'||type==='stair-corner'||type==='stair-landing';
+}
+// 踊り場。階段の部材だが段を持たない -- かね折れ(L字)・折り返し(U字)の
+// 曲がりを、廻り段ではなく平らな板で作るためのものである。
+function isStairLandingType(type){
+  return type==='stair-landing';
 }
 function isCustomBlockType(type){
   return type==='custom-block';

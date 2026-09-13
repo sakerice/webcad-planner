@@ -3259,6 +3259,7 @@ input[type="reset"]:focus-visible{
     <div class="cat-body">
       <div class="stool" data-tool="stair" onclick="setTool('stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 17h18M3 13h18M3 9h18M12 19V5M9 7l3-3 3 3"/></svg>階段</div>
       <div class="stool" data-tool="stair-corner" onclick="setTool('stair-corner')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v6H9v12ZM3 9h6M3 13h6M3 17h6M9 3v6M13 3v6M17 3v6M6 19V6h13"/></svg>階段コーナー</div>
+      <div class="stool" data-tool="stair-landing" onclick="setTool('stair-landing')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 15h8M3 11h8M3 7h8M11 7v14M11 7h10"/></svg>踊り場</div>
       <div class="stool" data-tool="roof" onclick="setTool('roof')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>屋根</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg>建具 <span>+</span></div>
@@ -9968,7 +9969,8 @@ function stairPartsTouch(a,b){
 }
 function getConnectedStairParts(seed){
   var all=DATA.items.filter(function(o){
-    return o.floor===seed.floor && (o.type==='stair'||o.type==='stair-corner');
+    // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
+    return o.floor===seed.floor && isStairPartType(o.type);
   });
   var group=[], queue=[seed], seen={};
   seen[seed.id]=true;
@@ -10008,26 +10010,55 @@ function stairGroupIsLevel(seed){
 //
 // 端が段差の外へ出ていない(両端が同じ高さ)ときは、その階にある最大の段差へ
 // 上がるものとみなす -- 黙って高さ0の階段を描くよりは、意図に近い。
-// 階段グループの走行軸の、下端・上端の少し先の点(平面mm)とグループ本体。
+// 階段パーツ1枚の、下端(dir=-1)/上端(dir=+1)の少し先の点(平面mm)。
 // 向きの規約(rot / flipY)は stairBounds2D・buildItem3D と同じ。
-// 「同じ階の段差へ」も「上の階へ」も、どちらの端に何が在るかはここで測る。
-function stairRunEndsMm(seed,outMm){
+function stairPartEndMm(it,dir,outMm){
+  var rad=(Number(it.rot)||0)*Math.PI/180;
+  var sgn=it.flipY?-1:1;
+  var ux=-Math.sin(rad)*sgn, uy=Math.cos(rad)*sgn;     // ローカル +奥行き のワールド向き
+  var cx=(Number(it.x)||0)+(Number(it.w)||0)/2, cy=(Number(it.y)||0)+(Number(it.d)||0)/2;
+  var half=(Number(it.d)||0)/2+((outMm===undefined)?300:outMm);
+  return {x:cx+dir*ux*half, y:cy+dir*uy*half};
+}
+// 階段グループを、下から上への順に並べる。並び順は stairOrder、無ければ
+// 走行軸方向の位置。**どのパーツを種にしても同じ並びになる**ことが要る --
+// 上り高さはグループの性質で、種にしたパーツで変わってはいけない。
+function stairGroupOrdered(seed){
   var group=getConnectedStairParts(seed);
+  if(group.length<=1) return group;
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
     minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
   });
-  var out=(outMm===undefined)?300:outMm;
-  var rad=(Number(seed.rot)||0)*Math.PI/180;
-  var sgn=seed.flipY?-1:1;
-  var ux=-Math.sin(rad)*sgn, uy=Math.cos(rad)*sgn;     // ローカル +奥行き のワールド向き
-  var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
-  var half=(Math.abs((maxX-minX)*ux)+Math.abs((maxY-minY)*uy))/2+out;
+  var sortByX=(maxX-minX)>=(maxY-minY);
+  var autoPos={};
+  group.slice().sort(function(a,b){
+    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
+    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
+    return ac-bc;
+  }).forEach(function(o,i){autoPos[o.id]=i+1;});
+  group.sort(function(a,b){
+    var ao=(a.stairOrder!==undefined&&isFinite(a.stairOrder))?+a.stairOrder:autoPos[a.id];
+    var bo=(b.stairOrder!==undefined&&isFinite(b.stairOrder))?+b.stairOrder:autoPos[b.id];
+    if(ao!==bo) return ao-bo;
+    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
+    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
+    return ac-bc;
+  });
+  return group;
+}
+// 階段グループの走行の、下端・上端の少し先の点(平面mm)とグループ本体。
+// 端は **いちばん下のパーツの下端** と **いちばん上のパーツの上端** から採る。
+// グループの外接矩形と種の向きで出していた頃は、折り返し階段のように
+// 途中で向きが変わる形で、種にしたパーツによって上り高さが変わっていた。
+function stairRunEndsMm(seed,outMm){
+  var group=stairGroupOrdered(seed);
+  var first=group[0]||seed, last=group[group.length-1]||seed;
   return {
     group:group,
-    down:{x:cx-ux*half, y:cy-uy*half},                 // 階段の下端の先
-    up:{x:cx+ux*half, y:cy+uy*half}                    // 階段の上端の先
+    down:stairPartEndMm(first,-1,outMm),
+    up:stairPartEndMm(last,1,outMm)
   };
 }
 // 上の階へ上がる階段の足元と天端(ワールドm)。
@@ -10058,7 +10089,9 @@ function stairLevelSpanM(seed){
   var down=ends.down, up=ends.up;
   var yDown=roomFloorAt(fl,down.x,down.y), yUp=roomFloorAt(fl,up.x,up.y);
   var lo=Math.min(yDown,yUp), hi=Math.max(yDown,yUp);
-  var reversed=(yDown>yUp+0.005);
+  // 段を積む向きはパーツごとなので、反転の判定は**そのパーツ自身の向き**で見る。
+  var sd=stairPartEndMm(seed,-1), su=stairPartEndMm(seed,1);
+  var reversed=(roomFloorAt(fl,sd.x,sd.y)>roomFloorAt(fl,su.x,su.y)+0.005);
   if(hi-lo<0.05){
     var base=floorTopY(fl), maxLvl=0;
     DATA.rooms.forEach(function(r){
@@ -10081,29 +10114,9 @@ function stairGroupRiseM(it){
   return stairUpperSpanM(it).riseM;
 }
 function stairRiseInfo(it){
-  var group=getConnectedStairParts(it);
+  var group=stairGroupOrdered(it);
   var totalRise=stairGroupRiseM(it);
   if(group.length<=1) return {index:0,count:1,base:0,rise:totalRise,steps:getStairStepCount(it)};
-  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  group.forEach(function(o){
-    minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
-    minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
-  });
-  var sortByX=(maxX-minX)>=(maxY-minY);
-  var autoPos={};
-  group.slice().sort(function(a,b){
-    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
-    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
-    return ac-bc;
-  }).forEach(function(o,i){autoPos[o.id]=i+1;});
-  group.sort(function(a,b){
-    var ao=(a.stairOrder!==undefined&&isFinite(a.stairOrder))?+a.stairOrder:autoPos[a.id];
-    var bo=(b.stairOrder!==undefined&&isFinite(b.stairOrder))?+b.stairOrder:autoPos[b.id];
-    if(ao!==bo) return ao-bo;
-    var ac=sortByX?a.x+a.w/2:a.y+a.d/2;
-    var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
-    return ac-bc;
-  });
   var idx=Math.max(0,group.indexOf(it));
   var totalSteps=0, beforeSteps=0;
   group.forEach(function(o,i){
@@ -10120,6 +10133,8 @@ function stairRiseInfo(it){
 // 直階段の段数。2Dの踏み板線と3Dの段数はともにこの関数を参照し、常に一致する。
 function getStairStepCount(it){
   if(!it) return 3;
+  // 踊り場は段を持たない。上り高さを分け合わないので 0 を返す。
+  if(isStairLandingType(it.type)) return 0;
   if(it.type==='stair-corner') return 3;
   // レベル階段は段差ぶんしか上らないので、段数も実際の上り高さから出す。
   // 上階へ上がる階段の段数を階高から出しているのは従来どおり(実際の上り高さに
@@ -11390,13 +11405,15 @@ function buildItem3D(it){
     edges.position.y=h/2;
     grp.add(edges);
   }
-  else if(it.type==='stair'||it.type==='stair-corner'){
+  else if(isStairPartType(it.type)){
     var riseInfo=stairRiseInfo(it);
     var baseRise=riseInfo.base, partRise=riseInfo.rise;
     var sSteps=riseInfo.steps||getStairStepCount(it),sH=partRise/sSteps,sD=d3/sSteps;
     var sMat=new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6}),rMat=new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
     var underFilled=stairUnderFilled(it);
-    if(it.type==='stair-corner'){
+    if(isStairLandingType(it.type)){
+      build3DStairLanding(grp,sMat,w3,d3,baseRise,underFilled,it);
+    } else if(it.type==='stair-corner'){
       build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise,underFilled,it);
     } else {
       // 段差を上る階段が段差と逆を向いて置かれていたら、段を積む向きだけ合わせる。
@@ -12714,8 +12731,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,column:2400,'column-round':2400,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,'shelf-built-in':900,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,column:0xcfc6b6,'column-round':0xcfc6b6,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,'shelf-built-in':0xd8cdb4,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,column:2400,'column-round':2400,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,'shelf-built-in':900,stair:20,'stair-corner':20,'stair-landing':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,column:0xcfc6b6,'column-round':0xcfc6b6,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,'shelf-built-in':0xd8cdb4,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,'stair-landing':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -12887,6 +12904,33 @@ function build3DStairRails(grp,it,pathBySide){
       }
       prev=cur;
     });
+  });
+}
+// 踊り場。段を持たない平らな板で、手前までの段が積み上がった高さに座る。
+// かね折れ(L字)・折り返し(U字)の曲がりを、廻り段ではなくこれで作る。
+// 階段下を塞ぐ指定があれば、板の下も足元まで埋める。
+function build3DStairLanding(grp,mat,w,d,baseRise,filled,it){
+  var deckT=Math.min(0.036,Math.max(0.028,0.032));
+  var deck=new THREE.Mesh(new THREE.BoxGeometry(w,deckT,d),mat);
+  deck.position.set(0,baseRise-deckT/2,0);
+  deck.castShadow=true; deck.receiveShadow=true;
+  grp.add(deck);
+  if(filled){
+    var fillH=baseRise-deckT;
+    if(fillH>0.002){
+      var fill=new THREE.Mesh(new THREE.BoxGeometry(w,fillH,d),stairUnderFillMaterial());
+      fill.position.set(0,fillH/2,0);
+      fill.castShadow=true; fill.receiveShadow=true;
+      grp.add(fill);
+    }
+  }
+  // 手すりは踊り場の上を水平に渡す。段鼻の線が平らになっただけである。
+  build3DStairRails(grp,it,function(side){
+    var sideSgn=(side==='right')?1:-1;
+    var inset=(stairRailMountFor(it,side)==='wall')?0.06:0.045;
+    var x=sideSgn*(w/2-inset);
+    return [{x:x,y:baseRise,z:-d/2,outX:sideSgn,outZ:0},
+            {x:x,y:baseRise,z:d/2,outX:sideSgn,outZ:0}];
   });
 }
 function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise,filled,it){
@@ -13882,7 +13926,7 @@ function stairwellQuadsForFloor(floor){
   if(belowFloor<1) return [];
   return DATA.items.filter(function(it){
     // レベル階段は上階へ抜けないので、上階の床に穴を開けてはいけない。
-    return it.floor===belowFloor && (it.type==='stair'||it.type==='stair-corner') &&
+    return it.floor===belowFloor && isStairPartType(it.type) &&
       !isLevelStairPart(it) && !it.hidden3D;
   }).map(stairQuadOf);
 }
@@ -21182,7 +21226,7 @@ var JISDRAW=(function(){
   }
   function stairsToSvg(floor,LW){
     var out='';
-    DATA.items.filter(function(it){return (it.floor||1)===floor && (it.type==='stair'||it.type==='stair-corner');}).forEach(function(it){
+    DATA.items.filter(function(it){return (it.floor||1)===floor && isStairPartType(it.type);}).forEach(function(it){
       out+=stairSymbolSvg(it,LW);
     });
     return out;

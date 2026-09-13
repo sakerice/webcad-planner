@@ -53,6 +53,10 @@ function mkItem(type,x,y,rot,floor,w,d){
   if(type==='foundation'){
     item.foundationHeight=450;
   }
+  if(type==='stair-landing'){
+    // 踊り場は段を持たない。並び順は自動判定に任せる。
+    item.w=1820; item.d=910;
+  }
   if(type==='column'||type==='column-round'){
     item.columnHeight=2400;
   }
