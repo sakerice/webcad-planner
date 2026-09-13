@@ -129,6 +129,9 @@
     if (it.baseLevel !== undefined && it.baseLevel !== 'floor' && it.baseLevel !== 'under') {
       warnings.push(where + ': 置く高さの基準 "' + it.baseLevel + '" は floor / under のどちらでもないので床の上として読む');
     }
+    if (it.stairUnder !== undefined && it.stairUnder !== 'open' && it.stairUnder !== 'filled') {
+      warnings.push(where + ': 階段の下 "' + it.stairUnder + '" は open / filled のどちらでもないので素通しとして読む');
+    }
     if (it.shelfSides !== undefined && it.shelfSides !== 'none' && it.shelfSides !== 'both') {
       warnings.push(where + ': 造作棚の縦板 "' + it.shelfSides + '" は none / both のどちらでもないので自動判定で読む');
     }

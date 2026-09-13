@@ -68,7 +68,7 @@ const FNS = [
   'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
   'stairFloorBuildupM', 'stairGroupTotalRiseM', 'stairRiseInfo',
   'stairStepCount', 'getStairStepCount',
-  'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor',
+  'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
 ];
 
@@ -352,6 +352,30 @@ test('同じレベルの部屋に続く辺は lower ではない(段差線を引
   const g = heights(h);
   assert.equal(g.roomSkipEdgeNeighbors(g.DATA.rooms[1]).e, 'same');
   assert.equal(g.roomSkipOpenSides(g.DATA.rooms[1]).e, false);
+});
+
+// ══ 8-c. 階段の下 ══════════════════════════════════════════════════════
+test('階段の下は、省略すれば従来どおり素通し', () => {
+  const g = heights(stairHouse(undefined));
+  assert.equal(g.stairUnderFilled(g.DATA.items[0]), false);
+  assert.equal(g.stairUnderFilled({ stairUnder: 'open' }), false);
+  assert.equal(g.stairUnderFilled({ stairUnder: 'filled' }), true);
+});
+
+test('階段の下を埋めると、直階段も廻り階段も塞ぐ', () => {
+  const straight = sliceFunction('build3DOpenStraightStair');
+  assert.match(straight, /filled/, '直階段が階段下の指定を受け取っていない');
+  assert.match(straight, /stairUnderFillMaterial\(/);
+  const winder = sliceFunction('build3DWinderCorner');
+  assert.match(winder, /filled/, '廻り階段が階段下の指定を受け取っていない');
+  assert.match(winder, /stairUnderFillMaterial\(/);
+  const caller = sliceFunction('buildItem3D');
+  assert.match(caller, /stairUnderFilled\(it\)/, '階段下の指定を3Dの生成へ渡していない');
+});
+
+test('階段のプロパティ欄から階段の下を選べる', () => {
+  assert.match(html, /stairUnder/);
+  assert.match(html, /埋める（箱型）/);
 });
 
 // ══ 10-c. 柱 ═══════════════════════════════════════════════════════════

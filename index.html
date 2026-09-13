@@ -11381,12 +11381,13 @@ function buildItem3D(it){
     var baseRise=riseInfo.base, partRise=riseInfo.rise;
     var sSteps=riseInfo.steps||getStairStepCount(it),sH=partRise/sSteps,sD=d3/sSteps;
     var sMat=new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6}),rMat=new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
+    var underFilled=stairUnderFilled(it);
     if(it.type==='stair-corner'){
-      build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
+      build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise,underFilled);
     } else {
       // 段差を上る階段が段差と逆を向いて置かれていたら、段を積む向きだけ合わせる。
       // 平面の footprint は動かさない(利用者が置いた位置は変えない)。
-      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps,stairLevelReversed(it));
+      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps,stairLevelReversed(it),underFilled);
     }
   }
   else if(isColumnType(it.type)){
@@ -12754,7 +12755,7 @@ function addStairRiserPanel(grp,mat,a,b,y,h,thickness){
 // reverse=true のときは、段をローカル +奥行き ではなく -奥行き へ積む。
 // 使うのは「段差を上る階段が、段差と逆を向いて置かれた」とき(stairLevelSpanM)。
 // 形は同じで z を裏返すだけなので、踏面・蹴上げ・接合代の納まりは変わらない。
-function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,reverse){
+function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,reverse,filled){
   steps=Math.max(1,steps||6);
   var treadD=d/steps;
   var rise=partRise/steps;
@@ -12789,9 +12790,27 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,r
     riser.castShadow=true;
     riser.receiveShadow=true;
     grp.add(riser);
+
+    // 階段下を塞ぐ(箱型階段)。段ごとに、足元から踏板の下面までを埋める。
+    // 埋めるのは**この階段の足元(grp の原点)から**なので、下に別のパーツが
+    // 続く踊り場付きの階段でも、床まで通した1つの塊になる。
+    if(filled){
+      var fillH=topY-treadT;
+      if(fillH>0.002){
+        var fill=new THREE.Mesh(new THREE.BoxGeometry(w,fillH,treadD),stairUnderFillMaterial());
+        fill.position.set(0,fillH/2,zSign*((z0+z1)/2));
+        fill.castShadow=true; fill.receiveShadow=true;
+        grp.add(fill);
+      }
+    }
   }
 }
-function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
+// 階段下を塞ぐ面の材質。仕上げは壁と同じ扱い(塗り壁・クロス)なので、
+// 踏板や蹴込み板の木ではなく内装色にそろえる。
+function stairUnderFillMaterial(){
+  return new THREE.MeshStandardMaterial({color:0xefede7,roughness:0.9,metalness:0});
+}
+function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise,filled){
   var steps=3;
   var inner=[w/2,d/2];
   var outer=[
@@ -12835,6 +12854,12 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
     var panelA=[a[0]+outX*riserT/2,a[1]+outZ*riserT/2];
     var panelB=[b[0]+outX*riserT/2,b[1]+outZ*riserT/2];
     addStairRiserPanel(grp,riserMat||mat,panelA,panelB,baseRise+prevH-jointOverlap,Math.max(0.01,stepRise-treadT+jointOverlap),riserT);
+
+    // 階段下を塞ぐ。踏板の形(延長する前の多角形)のまま足元まで下ろす。
+    if(filled){
+      var fillH=baseRise+h-treadT;
+      if(fillH>0.002) _PRISM(grp,stairUnderFillMaterial(),treadPolys[s],fillH,0);
+    }
   }
 }
 function applySelectableColor(mat,color){
