@@ -1264,6 +1264,15 @@ function updateProps(){
       '<option value="upper"'+(target==='upper'?' selected':'')+'>上の階</option>'+
       '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（スキップフロア）</option>'+
       '</select></div>';
+    // 階段下。素通しの鉄砲階段か、塞いだ箱型か。
+    var under = stairUnderFilled(it) ? 'filled' : 'open';
+    html += '<div class="pr"><div class="pl">階段の下</div><select class="pi" onchange="updateSelectedProp(\'stairUnder\',this.value===\'filled\'?\'filled\':undefined)">'+
+      '<option value="open"'+(under==='open'?' selected':'')+'>空ける（踏板と蹴込み板だけ）</option>'+
+      '<option value="filled"'+(under==='filled'?' selected':'')+'>埋める（箱型）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">'+(under==='filled'
+      ? '階段下を塞いでいます。階段室の空気が上下階で素通しになりません。'
+      : '階段下は素通しです。塞ぐと箱型階段になります。階段下を収納にしたいときは、埋めずに造作棚を置いてください。')+'</div>';
     html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
       (sri.steps||getStairStepCount(it))+'段。'+
       (target==='level'
