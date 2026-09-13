@@ -10008,21 +10008,54 @@ function stairGroupIsLevel(seed){
 //
 // 端が段差の外へ出ていない(両端が同じ高さ)ときは、その階にある最大の段差へ
 // 上がるものとみなす -- 黙って高さ0の階段を描くよりは、意図に近い。
-function stairLevelSpanM(seed){
+// 階段グループの走行軸の、下端・上端の少し先の点(平面mm)とグループ本体。
+// 向きの規約(rot / flipY)は stairBounds2D・buildItem3D と同じ。
+// 「同じ階の段差へ」も「上の階へ」も、どちらの端に何が在るかはここで測る。
+function stairRunEndsMm(seed,outMm){
   var group=getConnectedStairParts(seed);
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
     minY=Math.min(minY,o.y); maxY=Math.max(maxY,o.y+o.d);
   });
-  var fl=seed.floor||1, out=300;
+  var out=(outMm===undefined)?300:outMm;
   var rad=(Number(seed.rot)||0)*Math.PI/180;
   var sgn=seed.flipY?-1:1;
   var ux=-Math.sin(rad)*sgn, uy=Math.cos(rad)*sgn;     // ローカル +奥行き のワールド向き
   var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
   var half=(Math.abs((maxX-minX)*ux)+Math.abs((maxY-minY)*uy))/2+out;
-  var down={x:cx-ux*half, y:cy-uy*half};               // 階段の下端の先
-  var up={x:cx+ux*half, y:cy+uy*half};                 // 階段の上端の先
+  return {
+    group:group,
+    down:{x:cx-ux*half, y:cy-uy*half},                 // 階段の下端の先
+    up:{x:cx+ux*half, y:cy+uy*half}                    // 階段の上端の先
+  };
+}
+// 上の階へ上がる階段の足元と天端(ワールドm)。
+//
+// 足元は **この階段グループ自身が立っている床**。以前は stairFloorBuildupM が
+// 「その階にある階段のいちばん低い足元」を返しており、段差の上に立つ階段が
+// 同じ階の別の階段(普通の床に立つもの)の足元で測られて、上階を突き抜けていた。
+// 天端は **上階の床を、階段の上端の先で測ったもの**。下階の高い壁で上階の床が
+// 局所的に持ち上がっていれば、そこに合わせる。
+// 段差も高い壁も無い家では、従来の
+// floorTopY(nf) - floorTopY(fl) - stairFloorBuildupM(fl) と同値になる。
+function stairUpperSpanM(seed){
+  var fl=(seed&&seed.floor)||1, nf=fl+1;
+  var ends=stairRunEndsMm(seed);
+  var baseY=Math.min.apply(null,ends.group.map(function(o){return item3DBaseY(o);}));
+  var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
+               DATA.rooms.some(function(r){return r.floor===nf;}) ||
+               DATA.items.some(function(i){return i.floor===nf;});
+  // 上階が無いときの上り高さ。階高であって天井高ではないので置き換えない。
+  if(!hasUpper) return {baseY:baseY, topY:baseY+FLOOR_H*U, riseM:FLOOR_H*U};
+  var topY=roomFloorAt(nf,ends.up.x,ends.up.y);
+  if(topY<baseY+0.5) topY=baseY+0.5;
+  return {baseY:baseY, topY:topY, riseM:topY-baseY};
+}
+function stairLevelSpanM(seed){
+  var ends=stairRunEndsMm(seed);
+  var group=ends.group, fl=seed.floor||1;
+  var down=ends.down, up=ends.up;
   var yDown=roomFloorAt(fl,down.x,down.y), yUp=roomFloorAt(fl,up.x,up.y);
   var lo=Math.min(yDown,yUp), hi=Math.max(yDown,yUp);
   var reversed=(yDown>yUp+0.005);
@@ -10045,26 +10078,7 @@ function stairLevelReversed(it){
 // この階段グループが上る高さ(m)。行き先の宣言で経路が分かれる。
 function stairGroupRiseM(it){
   if(stairGroupIsLevel(it)) return stairLevelSpanM(it).riseM;
-  return stairGroupTotalRiseM(it&&it.floor);
-}
-// 階段グループの総蹴上げ高さ(m)。上階が存在する場合は
-// 「当階の床仕上げ面 → 上階の床仕上げ面」の実差分まで上がる
-// (1F→2Fは階高+スラブ厚、2F→3F以上は両階にスラブがあるため階高ちょうど。
-//  固定で+スラブ厚すると2F→3Fで1段分上へ突き抜ける)
-function stairFloorBuildupM(floor){
-  // レベル階段は上階へ行かないので、上階までの上り高さの計算には関わらせない。
-  var parts=DATA.items.filter(function(it){return it.floor===floor&&isStairPartType(it.type)&&!isLevelStairPart(it);});
-  if(!parts.length)return 0;
-  return Math.min.apply(null,parts.map(function(it){return item3DBaseY(it)-floorTopY(floor);}));
-}
-function stairGroupTotalRiseM(floor){
-  var fl=floor||1, nf=fl+1;
-  var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
-               DATA.rooms.some(function(r){return r.floor===nf;}) ||
-               DATA.items.some(function(i){return i.floor===nf;});
-  // 上階が無いときの階段の上り高さ。階高であって天井高ではないので置き換えない。
-  if(!hasUpper) return FLOOR_H*U;
-  return Math.max(0.5,floorTopY(nf)-floorTopY(fl)-stairFloorBuildupM(fl));
+  return stairUpperSpanM(it).riseM;
 }
 function stairRiseInfo(it){
   var group=getConnectedStairParts(it);
@@ -14567,9 +14581,14 @@ function walkStairSampleAt(xMm,zMm,floor,marginMm){
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
     if(t===null) continue;
     var sri=stairRiseInfo(it);
-    var frac=(sri.base+t*sri.rise)/Math.max(0.001,stairGroupTotalRiseM(floor));
+    // 上り高さは**階段グループごと**。階ごとの合計で割ると、同じ階に足元の
+    // 違う階段が2本あるとき(段差の上と普通の床)にどちらかが狂う。
+    var rise=stairGroupRiseM(it);
+    var frac=(sri.base+t*sri.rise)/Math.max(0.001,rise);
     frac=Math.max(0,Math.min(1,frac));
-    if(!best || frac>best.frac) best={frac:frac};
+    // 足元の高さ(その階の床天端から)も、グループ自身の足元から出す。
+    var offM=stairUpperSpanM(it).baseY+sri.base+t*sri.rise-floorTopY(floor);
+    if(!best || frac>best.frac) best={frac:frac, offM:offM};
   }
   return best;
 }
@@ -14620,11 +14639,9 @@ function walkUpdateGround(snap){
   var levelOff=walkLevelStairGroundAt(xMm,zMm,fl);
   if(levelOff!==null){ WALK.groundOff=levelOff; return; }
   if(walkFloorHasData(fl+1)){
-    var storyUp=floorTopY(fl+1)-floorTopY(fl);
     var up=walkStairSampleAt(xMm,zMm,fl);
     if(up){
-      var stairBase=stairFloorBuildupM(fl);
-      var newOff=stairBase+up.frac*(storyUp-stairBase);
+      var newOff=up.offM;
       var onStairs=prevOff>0.4;
       // 連続性クランプ: 床から0.45m超いきなり高い坂面には乗れない(階段室が
       // 上下階で重なるプランでのワープ防止。各フライトは正しい入口からのみ)。
@@ -14636,9 +14653,10 @@ function walkUpdateGround(snap){
           var dOff=newOff-prevOff;
           newOff=prevOff+Math.max(-0.3,Math.min(0.3,dOff));
         }
-        if(newOff>=storyUp*0.955){
+        if(up.frac>=0.955){
           walkSetFloor(fl+1);
-          WALK.groundOff=0;
+          // 上階の床も局所的に持ち上がっていることがあるので、0 と決めつけない。
+          WALK.groundOff=roomFloorAt(fl+1,xMm,zMm)-floorTopY(fl+1);
         } else {
           WALK.groundOff=newOff;
         }
@@ -14653,12 +14671,10 @@ function walkUpdateGround(snap){
     // 踏み出したときだけ(下半分の吹き抜け縁は床として扱い、大落下させない)
     var down=walkStairSampleAt(xMm,zMm,fl-1,0);
     if(down){
-      var storyDown=floorTopY(fl)-floorTopY(fl-1);
       if(down.frac>=0.5 && down.frac<0.93){
         // 階段吹き抜けへ踏み出した → 下階の坂面に乗り移る
         walkSetFloor(fl-1);
-        var stairBaseDown=stairFloorBuildupM(fl-1);
-        WALK.groundOff=stairBaseDown+down.frac*(storyDown-stairBaseDown);
+        WALK.groundOff=down.offM;
         return;
       }
       // 最上段付近は上階床(踊り場)として、下半分の上空は床縁として扱う
@@ -21044,7 +21060,7 @@ var JISDRAW=(function(){
   // 屋根(roof)は最上階の1つ上のフロア番号に配置される設計であり、また外構・バルコニー等は
   // 「居室」ではないため、これらのアイテムだけがfloor+1にあっても「上階が存在する」とはみなさない
   // (既存のisGroundLevelItemType/isContextExteriorItemTypeによる外構判定と一貫させる。
-  //  stairGroupTotalRiseM内のhasUpper:11228-11230は階高計算用の別判定でJISDRAW外のため変更しない)。
+  //  stairUpperSpanM内のhasUpperは階高計算用の別判定でJISDRAW外のため変更しない)。
   function isRoofOrOutdoorOnlyItemType(t){
     return t==='roof' || t==='balcony' || isGroundLevelItemType(t) || isContextExteriorItemType(t);
   }

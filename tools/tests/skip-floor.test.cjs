@@ -70,7 +70,7 @@ const FNS = [
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
   'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
-  'stairFloorBuildupM', 'stairGroupTotalRiseM', 'stairRiseInfo',
+  'stairRunEndsMm', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
@@ -373,6 +373,69 @@ test('同じレベルの部屋に続く辺は lower ではない(段差線を引
   const g = heights(h);
   assert.equal(g.roomSkipEdgeNeighbors(g.DATA.rooms[1]).e, 'same');
   assert.equal(g.roomSkipOpenSides(g.DATA.rooms[1]).e, false);
+});
+
+// ══ 8-b2. 段差から上の階へ上がる階段 ═══════════════════════════════════
+// 「スキップフロアから上の階へ登る階段が作れない」の再発防止。
+// 上り高さを「その階の床 → 上階の床」で測り、足元は **その階にある階段の
+// いちばん低いもの** を採っていた。段差の上に立つ階段は足元が段差の上なのに、
+// 同じ階の別の階段(普通の床に立つもの)の足元が使われ、上階を突き抜けていた。
+function upperStairHouse(opts) {
+  const o = opts || {};
+  const h = skipHouse({ skip: o.skip, wallOnPlatform: o.wallOnPlatform, upperRoom: true });
+  // 段差の上に立つ「上の階へ」の階段。
+  h.items.push({ id: 'st_up', type: 'stair', floor: 1,
+                 x: 4300, y: 600, w: 910, d: 2730, rot: 0 });
+  if (o.otherStair) {
+    // 低い側にもう1本。足元が混ざらないことを見る。
+    h.items.push({ id: 'st_low', type: 'stair', floor: 1,
+                   x: 500, y: 600, w: 910, d: 2730, rot: 0 });
+  }
+  return h;
+}
+
+test('段差の上に立つ階段は、段差の上から上階の床まで上がる', () => {
+  const g = heights(upperStairHouse({ skip: 1200, wallOnPlatform: 2400 }));
+  const st = g.DATA.items[0];
+  const span = g.stairUpperSpanM(st);
+  // 足元は段差の上。
+  assert.equal(Math.round(span.baseY / g.U), 1200);
+  // 天端は、段差の上の壁(1200+2400=3600)に載った2階の床 3600+180。
+  assert.equal(Math.round(span.topY / g.U), 3780);
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 3780 - 1200);
+});
+
+test('同じ階に別の階段があっても、足元は混ざらない', () => {
+  const g = heights(upperStairHouse({ skip: 1200, wallOnPlatform: 2400, otherStair: true }));
+  const onPlatform = g.DATA.items[0], onFloor = g.DATA.items[1];
+  assert.equal(Math.round(g.stairUpperSpanM(onPlatform).baseY / g.U), 1200);
+  assert.equal(Math.round(g.stairUpperSpanM(onFloor).baseY / g.U), 0,
+    '低い側の階段の足元が段差に引きずられている');
+});
+
+test('段差も高い壁も無い家では、上り高さは従来の式と同値', () => {
+  const g = heights(upperStairHouse({}));
+  const st = g.DATA.items[0];
+  // 従来は floorTopY(2) - floorTopY(1) - (階段の足元) だった。
+  // 足元が床と同じ(段差なし)この家では、1階の床 0 → 2階の床 2700+180。
+  assert.equal(Math.round(g.floorTopY(1) / g.U), 0);
+  assert.equal(Math.round(g.floorTopY(2) / g.U), 2880);
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 0);
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 2880);
+});
+
+test('上の階が無ければ、従来どおり階高ぶん上がる', () => {
+  const h = skipHouse({});
+  h.items.push({ id: 'st', type: 'stair', floor: 1, x: 500, y: 600, w: 910, d: 2730, rot: 0 });
+  const g = heights(h);
+  assert.equal(Math.round(g.stairGroupRiseM(g.DATA.items[0]) / g.U), 2700);
+});
+
+test('歩行の坂面も、階段グループごとの上り高さで測る', () => {
+  const body = sliceFunction('walkStairSampleAt');
+  assert.match(body, /stairGroupRiseM\(it\)/, '階ごとの上り高さで割っている');
+  assert.match(body, /offM/, '足元の高さを返していない');
+  assert.match(sliceFunction('walkUpdateGround'), /\.offM/);
 });
 
 // ══ 8-c. 階段の下 ══════════════════════════════════════════════════════
