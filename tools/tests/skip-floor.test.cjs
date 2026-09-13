@@ -63,6 +63,9 @@ const FNS = [
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingCapM', 'roomCeilingHeightM', 'roomRenderedCeilingMm',
   'roomLevelLabel', 'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling',
+  'ceilingFinishElevationMm', 'ceilingAttachElevationMm', 'roofTopLimitAtPlanPoint',
+  'roofCoversPlanPoint', 'roofUndersideWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'setbackOutlineCoversLocal', 'wallFullHeightM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
@@ -568,6 +571,63 @@ test('天井を書き換える経路は1か所(updateSelectedProp)を通る', ()
   // 段差・床上げも同じ規則へ寄せてある。
   assert.match(sliceFunction('updateSelectedRoomSkipLevel'), /followRoomCeiling\(/);
   assert.match(sliceFunction('updateSelectedRoomFloor'), /followRoomCeiling\(/);
+});
+
+// ══ 10-e. 屋外の天井付け器具は、上の屋根の下面に付く ═══════════════════
+// 「軒下のダウンライトが上の屋根にくっついていない」の再発防止。
+// 部屋の外は「天井が無い」として触らずにいたため、固定の既定値のまま軒から
+// 離れて浮いていた。屋根が架かっていればその下面が取り付け面である。
+function porchHouse() {
+  return {
+    floors: {}, walls: [],
+    rooms: [{ id: 'in', n: '室', floor: 1, x: 0, y: 0, w: 4000, d: 4000 }],
+    items: [
+      // 室の外(ポーチ)に架かる片流れ屋根。
+      { id: 'rf', type: 'roof', floor: 2, x: 4000, y: 0, w: 3000, d: 4000,
+        rot: 0, elev: 0, roofType: 'mono', pitch: 3 },
+      // その真下、部屋の外に置いたダウンライト。
+      { id: 'dl', type: 'light-down', floor: 1, x: 5400, y: 1900, w: 180, d: 180,
+        rot: 0, elev: 2600 }
+    ]
+  };
+}
+
+test('部屋の中の器具は、従来どおり天井仕上げ面に付く', () => {
+  const h = porchHouse();
+  h.items.push({ id: 'dl2', type: 'light-down', floor: 1, x: 1900, y: 1900,
+                 w: 180, d: 180, rot: 0, elev: 0 });
+  const g = heights(h);
+  const inside = g.DATA.items[2];
+  assert.equal(g.ceilingAttachElevationMm(inside),
+    g.ceilingFinishElevationMm(1, 1990, 1990));
+});
+
+test('部屋の外でも、上に屋根が架かっていればその下面に付く', () => {
+  const g = heights(porchHouse());
+  const dl = g.DATA.items[1];
+  assert.equal(g.roomAtPointOnFloor(1, 5490, 1990), null, '部屋の外に置けていない');
+  const want = g.ceilingAttachElevationMm(dl);
+  assert.notEqual(want, null, '屋根の下なのに取り付け面が出ていない');
+  // 取り付けたときの世界での高さが、屋根の下面(仕上げ12mmぶん下)と一致する。
+  const roofs = g.DATA.items.filter((o) => o.type === 'roof');
+  const under = g.roofTopLimitAtPlanPoint(roofs, 5490, 1990);
+  const world = g.item3DBaseY(dl) + want * g.U;
+  assert.ok(Math.abs(world - (under - g.CEILING_FINISH_M)) < 0.002,
+    '屋根の下面から離れている: ' + Math.round(world / g.U) + ' vs ' + Math.round((under - g.CEILING_FINISH_M) / g.U));
+});
+
+test('部屋の外で上に何も無ければ、取り付け面は出ない(触らない)', () => {
+  const h = porchHouse();
+  h.items[1].x = 9000;            // 屋根の外へ出す
+  const g = heights(h);
+  assert.equal(g.ceilingAttachElevationMm(g.DATA.items[1]), null);
+});
+
+test('保存済みプランの移行と新規配置は、この1か所を通る', () => {
+  assert.match(html, /function ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('snapOutdoorCeilingFixturesToRoof'), /ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('ensureLightDefaults'), /ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('normalizeLegacyFurnitureItems'), /snapOutdoorCeilingFixturesToRoof\(/);
 });
 
 // ══ 11. 造作棚 ══════════════════════════════════════════════════════════

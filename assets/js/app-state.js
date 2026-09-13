@@ -102,6 +102,29 @@ function followRoomCeiling(room,mutate){
   var after=roomCeilingElevationMm(room);
   if(after!==null&&after!==before) shiftRoomCeilingFixtures(room,after-before);
 }
+// 天井付けの器具が「くっつく面」の取付高さ(mm, **そのアイテムの足元から**)。
+//
+// 部屋の中なら天井仕上げ面。部屋の外でも、**上に屋根が架かっていればその下面**が
+// 取り付け面である(軒天のダウンライト、ポーチの照明)。屋外を一律に「天井が無い」
+// として触らずにいたため、固定の既定値のまま軒から離れて浮いていた。
+// 上に何も無い場所では null を返し、呼び出し側は触らない。
+//
+// **足元が部屋と屋外で違う**ことに注意する。屋内は床仕上げ面、屋外は地面
+// (item3DBaseY が返す)。屋根の下面はワールドの高さなので、足元を引いて戻す。
+function ceilingAttachElevationMm(it){
+  if(!it) return null;
+  var fl=it.floor||1;
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  if(roomAtPointOnFloor(fl,cx,cy)) return ceilingFinishElevationMm(fl,cx,cy);
+  var items=(typeof DATA!=='undefined'&&DATA&&DATA.items)?DATA.items:null;
+  if(!items) return null;
+  var roofs=items.filter(function(o){
+    return o&&o.type==='roof'&&!o.hidden3D&&(o.floor||1)>=fl;
+  });
+  var under=roofTopLimitAtPlanPoint(roofs,cx,cy);
+  if(under===null) return null;
+  return Math.round((under-CEILING_FINISH_M-item3DBaseY(it))/U);
+}
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
 // 部屋が分かるなら、その部屋の天井(吹き抜けを含む)に合わせる。
@@ -118,8 +141,13 @@ function ensureLightDefaults(it){
   if(!isFinite(Number(it.lightRange))) it.lightRange=it.lightKind==='spot'?5200:(it.lightKind==='down'?4400:5600);
   if(!isFinite(Number(it.lightAngle))) it.lightAngle=it.lightKind==='spot'?32:64;
   if(it.lightCastShadow===undefined) it.lightCastShadow=true;
-  if(!isFinite(Number(it.elev)))
-    it.elev=defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2);
+  if(!isFinite(Number(it.elev))){
+    // 軒下に置いた照明は、上の屋根の下面へ付ける。屋内は従来どおり天井へ。
+    var attach=ceilingAttachElevationMm(it);
+    it.elev=(attach===null)
+      ? defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2)
+      : Math.max(1800,attach);
+  }
   it.color=it.lightColor;
   return it;
 }

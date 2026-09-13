@@ -19467,9 +19467,40 @@ function snapCeilingFixturesToCeiling(){
   if(moved) console.info('[WebCAD] 天井付けの器具 '+moved+'個を天井面へ寄せ直しました');
   return moved;
 }
+// 屋外(部屋の外)にある天井付けの器具を、上に架かる屋根の下面へ寄せ直す。
+//
+// snapCeilingFixturesToCeiling は「屋外は天井が無い」として屋外を除いていた。
+// しかし軒天やポーチには屋根の下面という取り付け面があり、除かれたままの器具は
+// 固定の既定値(既定プランでは elev 2600)で軒から離れて浮いていた。
+// **1度だけ**走らせる。印は上の移行とは別に持つ -- 上は既に済んだ印が付いている
+// プランがあり、同じ印を使うとこの寄せ直しが一度も走らない。
+var PLAN_FIX_OUTDOOR_CEILING_FIXTURES='outdoorCeilingFixtureElev';
+function snapOutdoorCeilingFixturesToRoof(){
+  if(!DATA||!DATA.items) return 0;
+  if(!DATA.planFixes||typeof DATA.planFixes!=='object') DATA.planFixes={};
+  if(DATA.planFixes[PLAN_FIX_OUTDOOR_CEILING_FIXTURES]) return 0;
+  DATA.planFixes[PLAN_FIX_OUTDOOR_CEILING_FIXTURES]=1;
+  var moved=0;
+  DATA.items.forEach(function(it){
+    if(!it) return;
+    var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+    if(topOff===undefined) return;
+    var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+    if(roomAtPointOnFloor(it.floor||1,cx,cy)) return;   // 屋内は上の移行の領分
+    var want=ceilingAttachElevationMm(it);
+    if(want===null) return;                             // 上に屋根が無い場所は触らない
+    want-=topOff;
+    if(Math.abs((Number(it.elev)||0)-want)<=1) return;
+    it.elev=want;
+    moved++;
+  });
+  if(moved) console.info('[WebCAD] 軒下の天井付け器具 '+moved+'個を屋根の下面へ寄せ直しました');
+  return moved;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
   snapCeilingFixturesToCeiling();
+  snapOutdoorCeilingFixturesToRoof();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){
