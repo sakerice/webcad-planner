@@ -1410,11 +1410,7 @@ function updateProps(){
     html += '<div class="ph" style="margin-top:12px">格子</div>';
     html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
-    html += railingDesignHtml(it,{label:'格子の意匠',autoLabel:'指定しない（上の「格子方向」にしたがう）',frameDefault:'#b09468',note:'意匠を選ぶと、上の「格子方向」より優先します。'});
-    html += '<div class="pr"><div class="pl">笠木（手すり）</div><select class="pi" onchange="updateSelectedProp(\'latticeCap\',this.value===\'on\'?true:undefined)">'+
-      '<option value="off"'+(latticeHasCap(it)?'':' selected')+'>なし（目隠しとして使う）</option>'+
-      '<option value="on"'+(latticeHasCap(it)?' selected':'')+'>あり（手すりとして使う）</option>'+
-      '</select></div>';
+    html += railingDesignHtml(it,{label:'格子の意匠',autoLabel:'指定しない（上の「格子方向」にしたがう）',frameDefault:'#b09468',capToggle:true,note:'意匠を選ぶと、上の「格子方向」より優先します。'});
     html += '<div class="lock-status-note">格子の内法は '+latticeClearMm(it)+'mm です。'+
       (latticeClearMm(it)>110
         ? '手すりとして使うなら 110mm 以下が目安です（子どもがすり抜けない寸法）。'
