@@ -110,7 +110,7 @@ function ctxFor(walls) {
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
     'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-    'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+    'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
     'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
     'wallFullHeightM', 'isPositiveNumber', 'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal',
@@ -118,9 +118,9 @@ function ctxFor(walls) {
     'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
     'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM',
-    'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM', 'wallHeightMm', 'wallDisplayHeightM',
+    'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM', 'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
     'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
     'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'
 

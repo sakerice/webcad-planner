@@ -6,7 +6,7 @@ test('legacy neighbour migration preserves placement and runs only once',()=>{
 });
 test('new exterior fixtures sit at ground datum, independently of indoor floor elevation',()=>{
  const s={getFmpItem:t=>t==='original-mailbox'?{groundLevel:true}:null};const ground=fn('isGroundLevelItemType',s);assert.equal(ground('original-mailbox'),true);assert.equal(ground('original-sofa'),false);
- const base=fn('item3DBaseY',{isGroundLevelItemType:ground,isContextExteriorItemType:()=>false,isFloorAwareGroundItemType:()=>false,groundYForItem:()=>0,itemOnFoundation:()=>true,roomFloorAt:()=>.15});assert.equal(base({type:'original-mailbox',floor:1}),0);assert.equal(base({type:'original-sofa',floor:1}),.15);
+ const base=fn('item3DBaseY',{itemIsUnderPlatform:()=>false,stairGroupIsLevel:()=>false,isGroundLevelItemType:ground,isContextExteriorItemType:()=>false,isFloorAwareGroundItemType:()=>false,groundYForItem:()=>0,itemOnFoundation:()=>true,roomFloorAt:()=>.15});assert.equal(base({type:'original-mailbox',floor:1}),0);assert.equal(base({type:'original-sofa',floor:1}),.15);
 });
 test('roughness-only finish clones the requested surface and preserves map and cache',()=>{
  const {applyFinishes}=require('../../assets/js/model-quality.js');const map={};const m={userData:{finishChannel:'wood'},roughness:.62,map,clone(){return {...this};}};const fixed={userData:{},roughness:.4,clone(){return {...this};}};const mesh={isMesh:true,material:[m,fixed]};applyFinishes({traverse:f=>f(mesh)},null,{wood:.22});assert.equal(mesh.material[0].roughness,.22);assert.equal(m.roughness,.62);assert.equal(mesh.material[0].map,map);assert.equal(mesh.material[1],fixed);

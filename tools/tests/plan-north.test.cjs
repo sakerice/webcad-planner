@@ -86,9 +86,9 @@ const DRAW_FNS = [
   'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'roomSkipLevelMm', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-  'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',
+  'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue'
 ];
 const DRAW_VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'FLOOR_H', 'FLOOR_SLAB_H'];

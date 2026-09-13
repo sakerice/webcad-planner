@@ -48,9 +48,9 @@ const FNS = [
   'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
   'storyHeightMmForFloor', 'storyHeightM',
   'floorSlabMmForFloor', 'floorSlabHeightM', 'floorSlabHeightMForFloor',
-  'floorBaseY', 'floorTopY', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorBaseY', 'floorTopY', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'roomSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
   'wallFullHeightM', 'wallHeightMm',
-  'roomFloorOffsetMm', 'roomFloorTopY', 'roomFloorAt'
+  'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'roomFloorAt'
 ];
 
 function ctxFor(data) {

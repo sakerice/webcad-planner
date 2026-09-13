@@ -33,6 +33,7 @@
     MAX_WALL_THICK_MM: 1000,
     MIN_SIZE_MM: 1,           // 部屋・物の幅/奥行き
     MAX_SIZE_MM: 200000,
+    MAX_SKIP_LEVEL_MM: 2400,  // スキップフロアの段差。これを超えるともう1つの階
     MIN_FLOOR: 1,
     MAX_FLOOR: 5,             // 3階建て + その上に載る屋根アイテムぶんの余裕
     MAX_OBJECTS: 20000        // 1プランの総数。これ以上は描画が実用にならない
@@ -92,6 +93,17 @@
     }
     checkFloor(r.floor, where, errors);
     if (r.n !== undefined && typeof r.n !== 'string') warnings.push(where + ': 部屋名が文字列でない');
+    // スキップフロアの段差。読み込めなくはないので errors ではなく warnings。
+    // 範囲外は HeightModel 側で丸まるので、丸まることだけ伝える。
+    if (r.skipLevelMm !== undefined) {
+      var sk = num(r.skipLevelMm);
+      if (sk === null || sk < 0) {
+        warnings.push(where + ': 段差(skipLevelMm) が数値でないので段差なしとして読む');
+      } else if (sk > LIMITS.MAX_SKIP_LEVEL_MM) {
+        warnings.push(where + ': 段差 ' + sk + 'mm は上限 ' + LIMITS.MAX_SKIP_LEVEL_MM +
+          'mm を超えるので丸めて読む(それ以上は別の階として作るもの)');
+      }
+    }
   }
 
   function checkItem(it, where, errors, warnings) {
@@ -110,6 +122,13 @@
     var rot = num(it.rot);
     if (it.rot !== undefined && rot === null) errors.push(where + ': 回転角が数値でない');
     checkFloor(it.floor, where, errors);
+    // 階段の行き先と、置く高さの基準。見慣れない値は既定として読む。
+    if (it.stairTarget !== undefined && it.stairTarget !== 'upper' && it.stairTarget !== 'level') {
+      warnings.push(where + ': 階段の行き先 "' + it.stairTarget + '" は upper / level のどちらでもないので上の階として読む');
+    }
+    if (it.baseLevel !== undefined && it.baseLevel !== 'floor' && it.baseLevel !== 'under') {
+      warnings.push(where + ': 置く高さの基準 "' + it.baseLevel + '" は floor / under のどちらでもないので床の上として読む');
+    }
   }
 
   function checkFloor(v, where, errors) {
