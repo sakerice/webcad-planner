@@ -74,7 +74,7 @@ const FNS = [
   'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
   'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
-  'railPolylineYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
+  'railPolylineYAt', 'railStepYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
   'railInfillOf', 'railBarCount', 'railCapColorOf', 'railFrameColorOf',
   'stairRailFrameColorOf', 'stairRailColorOf', 'railingDesignHtml', 'canSetItemTexture',
   'stairStepCount', 'getStairStepCount',
@@ -109,6 +109,7 @@ function heights(data) {
     topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
     topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'), topLevelVar('RAIL_INFILL_VALUES'),
+    topLevelVar('STAIR_RAIL_HEIGHT_MM'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
   ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
@@ -711,6 +712,44 @@ test('笠木の色と骨の色は、手すり・柵で同じフィールドか�
   assert.equal(g.railFrameColorOf({ railFrameColor: '#000000' }), '#000000');
   assert.equal(g.stairRailFrameColorOf({}), '#2b2f33', '階段の骨の既定が黒でない');
   assert.equal(g.stairRailFrameColorOf({ railFrameColor: '#884400' }), '#884400');
+});
+
+test('支柱の足元は、斜めの線ではなく「その位置にある踏板」に座る', () => {
+  const g = heights(railHouse({}));
+  const going = 0.2275, rise = 0.1912;          // 2730mm / 12段 相当
+  const raw = [];
+  for (let i = 0; i < 13; i++) raw.push({ x: 0, y: (i + 1) * rise, z: i * going, outX: 1, outZ: 0 });
+
+  // 段鼻を結んだ線は斜めなので、内挿すると踏板から浮く/めり込む。
+  const mid = { x: 0, z: going * 0.5 };
+  const ramp = g.railPolylineYAt(raw, mid.x, mid.z);
+  const step = g.railStepYAt(raw, mid.x, mid.z);
+  assert.ok(Math.abs(ramp - raw[0].y) > rise * 0.4, '内挿だと踏板からずれるはずの位置を選べていない');
+  assert.ok(Math.abs(step - raw[0].y) < 1e-9, '足元がその踏板の高さになっていない');
+
+  // 支柱を立てる位置すべてで、足元が実在の踏板と一致する。
+  const railH = g.STAIR_RAIL_HEIGHT_MM * g.U;
+  const line = raw.map(p => ({ x: p.x, y: p.y + railH, z: p.z }));
+  const stations = g.stairRailStationsAlong(line, 0.95);
+  assert.ok(stations.length >= 3, '支柱の位置が取れていない');
+  let worst = 0;
+  stations.forEach((p) => {
+    const seat = g.railStepYAt(raw, p.x, p.z);
+    // その位置に実際にある踏板(段鼻の点のうち、いちばん近いもの)。
+    let tread = raw[0].y;
+    for (let i = 0; i < raw.length; i++) if (p.z >= raw[i].z - going / 2 - 1e-9) tread = raw[i].y;
+    worst = Math.max(worst, Math.abs(seat - tread));
+  });
+  assert.ok(worst < 1e-9, '支柱が踏板から浮いている(最大 ' + Math.round(worst * 1000) + 'mm)');
+
+  // 平らな踊り場では、内挿でも段でも同じ答えになる(壊していない)。
+  const flat = [{ x: 0, y: 1, z: 0 }, { x: 0, y: 1, z: 1 }];
+  assert.ok(Math.abs(g.railStepYAt(flat, 0, 0.5) - 1) < 1e-9);
+});
+
+test('3Dの手すりは、足元を段として読む(斜めの線で内挿しない)', () => {
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /railStepYAt\(seatLine/, '支柱の足元が段になっていない');
 });
 
 test('意匠と色の欄は、階段の手すりと格子柵で同じものを出す', () => {
