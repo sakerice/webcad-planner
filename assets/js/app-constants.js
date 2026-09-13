@@ -421,6 +421,84 @@ function roomSkipOpenSides(room){
   var e=roomSkipEdgeNeighbors(room);
   return {n:e.n==='lower', s:e.s==='lower', w:e.w==='lower', e:e.e==='lower'};
 }
+// ── 手すり・柵の意匠 ──────────────────────────────────────────────────────
+// 階段の手すりと格子柵は、実物では同じ語彙で選ぶ部材である(笠木・支柱・
+// 横桟か縦格子か)。設定の言葉を分けると、同じ家の中で意匠がそろわない。
+// **どちらも同じフィールドで決める**。
+//
+//   railInfill  'bars'(既定) 横桟 / 'wires' 横ワイヤー /
+//               'baluster' 縦格子 / 'none' 笠木と支柱だけ
+//   railCapColor    笠木(木)の色
+//   railFrameColor  骨(支柱・桟・ワイヤー)の色
+//   railBars        横桟の本数
+//
+// 省略時は、それぞれの部材がこれまで持っていた見た目へ落ちる:
+//   階段の手すり … 横桟(参考にした納まりの標準)
+//   格子柵        … fencePattern から縦格子/横桟へ写す(従来の見た目のまま)
+var RAIL_INFILL_VALUES=['bars','wires','baluster','none'];
+function railInfillOf(it){
+  var v=it&&it.railInfill;
+  if(RAIL_INFILL_VALUES.indexOf(v)>=0) return v;
+  // 旧フィールドからの読み替え。格子柵は fencePattern を持っている。
+  if(it&&it.type==='lattice-screen')
+    return (it.fencePattern==='horizontal')?'bars':'baluster';
+  return 'bars';
+}
+function railBarCount(it){
+  var n=Number(it&&it.railBars);
+  return (isFinite(n)&&n>=0)?Math.max(0,Math.min(12,Math.round(n))):3;
+}
+function railCapColorOf(it){
+  var c=(it&&it.railCapColor)||(it&&it.stairRailColor);
+  return (typeof c==='string'&&/^#/.test(c))?c:'#9c7749';
+}
+// 骨の色。**明示されたときだけ**返す。省略時は null を返し、呼び出し側は
+// これまでの色(アイテム色や部材ごとの既定)をそのまま使う -- 保存済みプランの
+// 見た目を変えないため。
+function railFrameColorOf(it){
+  var c=it&&it.railFrameColor;
+  return (typeof c==='string'&&/^#/.test(c))?c:null;
+}
+// 階段の手すりは骨の色に既定を持つ(参考にした納まりは黒い金物)。
+function stairRailFrameColorOf(it){
+  return railFrameColorOf(it)||'#2b2f33';
+}
+function stairRailColorOf(it){
+  return railCapColorOf(it);
+}
+// 意匠と色を選ぶ欄。**階段の手すりと格子柵で同じものを出す**。
+// 語彙をそろえておかないと、同じ家の中で手すりだけ浮く。
+// opts.label        見出し
+// opts.autoLabel    これを渡すと「指定しない」を先頭に置く(格子柵は
+//                   従来の『格子方向』へ落ちるので、戻れる道を残す)
+// opts.frameDefault 骨の色が未指定のときに色見本へ出す色
+function railingDesignHtml(it,opts){
+  opts=opts||{};
+  var q=String.fromCharCode(39);
+  var cur=(RAIL_INFILL_VALUES.indexOf(it&&it.railInfill)>=0)?it.railInfill:(opts.autoLabel?'':railInfillOf(it));
+  function opt(v,label){
+    return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>';
+  }
+  var html='<div class="pr"><div class="pl">'+(opts.label||'意匠')+'</div>'+
+    '<select class="pi" onchange="updateSelectedProp('+q+'railInfill'+q+',this.value||undefined)">'+
+    (opts.autoLabel?opt('',opts.autoLabel):'')+
+    opt('bars','横桟（笠木＋支柱＋水平の桟）')+
+    opt('wires','横ワイヤー（細い丸鋼を等間隔に）')+
+    opt('baluster','縦格子（木の子柱を並べる）')+
+    opt('none','桟なし（笠木と支柱だけ）')+
+    '</select></div>';
+  if(railInfillOf(it)==='bars')
+    html+='<div class="pr"><div class="pl">横桟の本数</div><input class="pi" type="number" min="0" max="12" step="1" value="'+
+      railBarCount(it)+'" onchange="updateSelectedProp('+q+'railBars'+q+',+this.value)"></div>';
+  html+='<div class="pr"><div class="pl">笠木の色（木）</div><input class="pi" type="color" value="'+
+    railCapColorOf(it)+'" onchange="updateSelectedProp('+q+'railCapColor'+q+',this.value)"></div>';
+  html+='<div class="pr"><div class="pl">骨の色（支柱・桟）</div><input class="pi" type="color" value="'+
+    (railFrameColorOf(it)||opts.frameDefault||'#2b2f33')+'" onchange="updateSelectedProp('+q+'railFrameColor'+q+',this.value)"></div>';
+  html+='<div class="lock-status-note">意匠と色は階段の手すりと格子柵で同じ設定です。家の中でそろえられます。'+
+    (railFrameColorOf(it)?'':'骨の色は、変えるまでは部材ごとの既定のままです。')+
+    (opts.note||'')+'</div>';
+  return html;
+}
 // ── 格子柵 ────────────────────────────────────────────────────────────────
 // もとは外構の目隠しだが、スキップフロアや吹き抜けの手すりにも使える。
 // 手すりとして使うには、格子の間隔(子どもがすり抜けない内法)と、掴める笠木が

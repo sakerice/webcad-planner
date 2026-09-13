@@ -1341,12 +1341,12 @@ function updateProps(){
         '<option value="wall"'+(rmount==='wall'?' selected':'')+'>壁付け</option>'+
         '<option value="post"'+(rmount==='post'?' selected':'')+'>柱建て</option>'+
         '</select></div>';
-      html += '<div class="pr"><div class="pl">手すりの色</div><input class="pi" type="color" value="'+stairRailColorOf(it)+'" onchange="updateSelectedProp(\'stairRailColor\',this.value)"></div>';
+      html += railingDesignHtml(it,{label:'手すりの意匠'});
       html += '<div class="lock-status-note">'+
         stairRailSides(it).map(function(sd){
           return (sd==='left'?'左':'右')+'は'+(stairRailMountFor(it,sd)==='wall'?'壁付け':'柱建て');
         }).join('、')+
-        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。手すりの色は階段の板とは別です（金物は色の指定に従いません）。'+
+        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm の高さを通ります。手すりの色は階段の板とは別に持ちます。'+
         (rmount==='auto'?'（自動は、その側に階段と平行な壁が沿っていれば壁付けにします。）':'')+'</div>';
     }
     // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
@@ -1410,6 +1410,7 @@ function updateProps(){
     html += '<div class="ph" style="margin-top:12px">格子</div>';
     html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
+    html += railingDesignHtml(it,{label:'格子の意匠',autoLabel:'指定しない（上の「格子方向」にしたがう）',frameDefault:'#b09468',note:'意匠を選ぶと、上の「格子方向」より優先します。'});
     html += '<div class="pr"><div class="pl">笠木（手すり）</div><select class="pi" onchange="updateSelectedProp(\'latticeCap\',this.value===\'on\'?true:undefined)">'+
       '<option value="off"'+(latticeHasCap(it)?'':' selected')+'>なし（目隠しとして使う）</option>'+
       '<option value="on"'+(latticeHasCap(it)?' selected':'')+'>あり（手すりとして使う）</option>'+

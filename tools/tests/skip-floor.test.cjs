@@ -75,7 +75,8 @@ const FNS = [
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
   'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
   'railPolylineYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
-  'stairRailColorOf', 'canSetItemTexture',
+  'railInfillOf', 'railBarCount', 'railCapColorOf', 'railFrameColorOf',
+  'stairRailFrameColorOf', 'stairRailColorOf', 'railingDesignHtml', 'canSetItemTexture',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
@@ -107,7 +108,7 @@ function heights(data) {
     topLevelVar('SHELF_BOARD_T_MM'),
     topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
-    topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'),
+    topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'), topLevelVar('RAIL_INFILL_VALUES'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
     topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
   ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
@@ -681,6 +682,80 @@ test('折れ線の高さを内挿して返せる', () => {
   assert.ok(Math.abs(g.railPolylineYAt(line, 0, 0.5) - 1.5) < 1e-9);
   assert.ok(Math.abs(g.railPolylineYAt(line, 0, -1) - 1) < 1e-9, '端の外は端の高さで止める');
   assert.ok(Math.abs(g.railPolylineYAt(line, 0, 9) - 2) < 1e-9);
+});
+
+test('手すり・柵の意匠は、同じ語彙で選べる', () => {
+  const g = heights(railHouse({}));
+  // 既定は横桟。木の縦格子を並べたものではない。
+  assert.equal(g.railInfillOf({}), 'bars');
+  assert.equal(g.railInfillOf({ railInfill: 'wires' }), 'wires');
+  assert.equal(g.railInfillOf({ railInfill: 'baluster' }), 'baluster');
+  assert.equal(g.railInfillOf({ railInfill: 'none' }), 'none');
+  assert.equal(g.railInfillOf({ railInfill: 'なんとか' }), 'bars', '見慣れない値は既定へ');
+  // 格子柵は、指定が無ければ従来の見た目(fencePattern)から写す。
+  assert.equal(g.railInfillOf({ type: 'lattice-screen' }), 'baluster');
+  assert.equal(g.railInfillOf({ type: 'lattice-screen', fencePattern: 'horizontal' }), 'bars');
+  assert.equal(g.railInfillOf({ type: 'lattice-screen', fencePattern: 'vertical', railInfill: 'wires' }), 'wires',
+    '明示が旧フィールドより優先しない');
+  assert.equal(g.railBarCount({}), 3);
+  assert.equal(g.railBarCount({ railBars: 99 }), 12);
+});
+
+test('笠木の色と骨の色は、手すり・柵で同じフィールドから来る', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.railCapColorOf({}), '#9c7749');
+  assert.equal(g.railCapColorOf({ railCapColor: '#112233' }), '#112233');
+  assert.equal(g.railCapColorOf({ stairRailColor: '#445566' }), '#445566', '先に入れた指定が読めない');
+  // 骨は明示されたときだけ。省略時は部材ごとの既定へ落とす。
+  assert.equal(g.railFrameColorOf({}), null);
+  assert.equal(g.railFrameColorOf({ railFrameColor: '#000000' }), '#000000');
+  assert.equal(g.stairRailFrameColorOf({}), '#2b2f33', '階段の骨の既定が黒でない');
+  assert.equal(g.stairRailFrameColorOf({ railFrameColor: '#884400' }), '#884400');
+});
+
+test('意匠と色の欄は、階段の手すりと格子柵で同じものを出す', () => {
+  const g = heights(railHouse({}));
+  const stair = g.railingDesignHtml({ type: 'stair', stairRail: 'both' }, { label: '手すりの意匠' });
+  // 4つの意匠がそろって選べる。既定(横桟)が選ばれている。
+  ['bars', 'wires', 'baluster', 'none'].forEach((v) => {
+    assert.ok(stair.indexOf('value="' + v + '"') >= 0, v + ' が選べない');
+  });
+  assert.ok(stair.indexOf('value="bars" selected') >= 0, '既定の横桟が選ばれていない');
+  assert.ok(stair.indexOf('横桟の本数') >= 0, '横桟のときは本数を出す');
+  assert.ok(stair.indexOf('railCapColor') >= 0 && stair.indexOf('railFrameColor') >= 0,
+    '笠木と骨の色が別々に選べない');
+  assert.ok(stair.indexOf('value="#2b2f33"') >= 0, '階段の骨の既定(黒)が色見本に出ていない');
+
+  // 格子柵も同じ関数から。骨の既定だけ部材に合わせて変わる。
+  const lattice = g.railingDesignHtml(
+    { type: 'lattice-screen' },
+    { label: '格子の意匠', autoLabel: '指定しない', frameDefault: '#b09468' });
+  ['bars', 'wires', 'baluster', 'none'].forEach((v) => {
+    assert.ok(lattice.indexOf('value="' + v + '"') >= 0, v + ' が格子柵で選べない');
+  });
+  assert.ok(lattice.indexOf('value="" selected') >= 0, '未指定へ戻す道が無い');
+  assert.ok(lattice.indexOf('value="#b09468"') >= 0, '格子柵の骨の既定が出ていない');
+  assert.ok(lattice.indexOf('横桟の本数') < 0, '既定が縦格子の格子柵に横桟の本数を出している');
+
+  // 明示したものは選ばれた状態で戻る。
+  const wires = g.railingDesignHtml({ railInfill: 'wires' }, {});
+  assert.ok(wires.indexOf('value="wires" selected') >= 0);
+  const bars = g.railingDesignHtml({ railInfill: 'bars', railBars: 5 }, {});
+  assert.ok(bars.indexOf('value="5"') >= 0, '横桟の本数が今の値を出していない');
+});
+
+test('意匠と色の欄は、階段の手すりと格子柵の両方の設定に出ている', () => {
+  assert.match(html, /function railingDesignHtml\(/);
+  assert.match(html, /railingDesignHtml\(it,\{label:'手すりの意匠'\}\)/);
+  assert.match(html, /railingDesignHtml\(it,\{label:'格子の意匠'/);
+});
+
+test('手すりは丸棒の羅列ではなく、断面を走行に沿って押し出す', () => {
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /ExtrudeGeometry/, '断面の押し出しになっていない');
+  assert.match(body, /stairRailRoundedRectShape\(/, '角断面の笠木が無い');
+  assert.match(body, /makeBasis/, '押し出しの向きをそろえていない');
+  assert.doesNotMatch(body, /CylinderGeometry\(railR/, '丸棒の羅列が残っている');
 });
 
 test('手すりの色は、階段の板とは別に持てる', () => {
