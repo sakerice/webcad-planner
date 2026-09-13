@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const html=require('./app-source.cjs').appSource();
 function fn(name,s){const a=html.indexOf('function '+name+'('),b=html.indexOf('\nfunction ',a+1);vm.createContext(s);vm.runInContext(html.slice(a,b),s);return s[name];}
 test('legacy neighbour migration preserves placement and runs only once',()=>{
- const old={type:'neighbor-house',rot:37,x:10,y:20,w:7280,d:6370,flipX:true};const current={type:'neighbor-house',rot:0,neighborFacingVersion:1};const s={DATA:{items:[old,current]},snapCeilingFixturesToCeiling:()=>{},ST:{},getFmpItem:()=>null,bestFmpType:t=>t};const normalize=fn('normalizeLegacyFurnitureItems',s);normalize();assert.equal(old.rot,217);assert.equal(current.rot,0);normalize();assert.equal(old.rot,217);assert.equal(old.x,10);assert.equal(old.flipX,true);
+ const old={type:'neighbor-house',rot:37,x:10,y:20,w:7280,d:6370,flipX:true};const current={type:'neighbor-house',rot:0,neighborFacingVersion:1};const s={DATA:{items:[old,current]},snapCeilingFixturesToCeiling:()=>{},snapOutdoorCeilingFixturesToRoof:()=>{},ST:{},getFmpItem:()=>null,bestFmpType:t=>t};const normalize=fn('normalizeLegacyFurnitureItems',s);normalize();assert.equal(old.rot,217);assert.equal(current.rot,0);normalize();assert.equal(old.rot,217);assert.equal(old.x,10);assert.equal(old.flipX,true);
 });
 test('new exterior fixtures sit at ground datum, independently of indoor floor elevation',()=>{
  const s={getFmpItem:t=>t==='original-mailbox'?{groundLevel:true}:null};const ground=fn('isGroundLevelItemType',s);assert.equal(ground('original-mailbox'),true);assert.equal(ground('original-sofa'),false);
