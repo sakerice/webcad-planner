@@ -71,8 +71,8 @@ const FNS = [
   'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
   'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
   'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
-  'stairRunEndsMm', 'stairUpperSpanM', 'stairRiseInfo',
-  'stairRailSides', 'stairSideHasWall', 'stairRailMountFor',
+  'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairUpperSpanM', 'stairRiseInfo',
+  'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
   'stairStepCount', 'getStairStepCount',
   'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
   'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
@@ -576,6 +576,72 @@ test('階段のプロパティ欄から手すりを選べる', () => {
   assert.match(html, /stairRail/);
   assert.match(html, /両側/);
   assert.match(html, /壁付け/);
+});
+
+// ══ 8-b4. 踊り場 ═══════════════════════════════════════════════════════
+// かね折れ(L字)・折り返し(U字)の階段は、曲がりを廻り段で作るか踊り場で作る。
+// 廻り段(stair-corner)は在ったが踊り場が無く、踊り場付きの形が組めなかった。
+function landingHouse() {
+  return {
+    floors: {},
+    rooms: [{ id: 'r1', n: '室', floor: 1, x: 0, y: 0, w: 6000, d: 8000 },
+            { id: 'r2', n: '2階', floor: 2, x: 0, y: 0, w: 6000, d: 8000 }],
+    walls: [],
+    items: [
+      // 下の直進 → 踊り場 → 上の直進(折り返し)
+      { id: 'sA', type: 'stair', floor: 1, x: 1000, y: 1000, w: 910, d: 1820, rot: 0, stairOrder: 1 },
+      { id: 'sL', type: 'stair-landing', floor: 1, x: 1000, y: 2820, w: 1820, d: 910, rot: 0, stairOrder: 2 },
+      { id: 'sB', type: 'stair', floor: 1, x: 1910, y: 3730, w: 910, d: 1820, rot: 0, stairOrder: 3 }
+    ]
+  };
+}
+
+test('踊り場は階段の部材として扱われる', () => {
+  const g = heights(landingHouse());
+  assert.equal(g.isStairPartType('stair-landing'), true, '階段のグループに入らない');
+  assert.equal(g.isStairLandingType('stair-landing'), true);
+  assert.equal(g.isStairLandingType('stair'), false);
+});
+
+test('踊り場は段数を持たない（上り高さを分け合わない）', () => {
+  const g = heights(landingHouse());
+  const landing = g.DATA.items[1];
+  assert.equal(g.getStairStepCount(landing), 0);
+  const info = g.stairRiseInfo(landing);
+  assert.equal(info.rise, 0, '踊り場が高さを持っている');
+});
+
+test('踊り場は、手前までの段が積み上がった高さに座る', () => {
+  const g = heights(landingHouse());
+  const a = g.DATA.items[0], landing = g.DATA.items[1], b = g.DATA.items[2];
+  const ia = g.stairRiseInfo(a), il = g.stairRiseInfo(landing), ib = g.stairRiseInfo(b);
+  // 下の直進の天端 = 踊り場の座面 = 上の直進の足元。
+  assert.ok(Math.abs((ia.base + ia.rise) - il.base) < 1e-9,
+    '踊り場が段とつながっていない: 下の天端 ' + Math.round((ia.base + ia.rise) / g.U) +
+    ' / 踊り場の座面 ' + Math.round(il.base / g.U) +
+    ' / 段数 ' + [a, landing, b].map((o) => g.getStairStepCount(o)).join(',') +
+    ' / 並び ' + g.stairGroupOrdered(a).map((o) => o.id).join('-'));
+  assert.ok(Math.abs(il.base - ib.base) < 1e-9, '上の直進が踊り場から始まっていない');
+  // 全体では上階の床まで上がる。
+  assert.ok(Math.abs((ib.base + ib.rise) - g.stairGroupRiseM(a)) < 1e-9);
+});
+
+test('踊り場だけの階段でも、段数0で割り算が壊れない', () => {
+  const h = landingHouse();
+  h.items = [h.items[1]];
+  const g = heights(h);
+  const info = g.stairRiseInfo(g.DATA.items[0]);
+  assert.ok(isFinite(info.base) && isFinite(info.rise), 'NaN になっている');
+});
+
+test('踊り場は3Dで平らな板として作られ、段は作らない', () => {
+  assert.match(html, /function build3DStairLanding\(/);
+  assert.match(sliceFunction('buildItem3D'), /isStairLandingType\(it\.type\)/);
+});
+
+test('踊り場がツールとして置ける', () => {
+  assert.match(html, /data-tool="stair-landing"/);
+  assert.match(html, /'stair-landing':'踊り場'/);
 });
 
 // ══ 8-c. 階段の下 ══════════════════════════════════════════════════════
