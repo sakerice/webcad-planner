@@ -5918,13 +5918,37 @@ function fitShadowCamera(sunLight) {
   if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
 var _tablet3DRebuildQueued=false;
+// 直前の再構築に実際かかった時間(ms)。当て推量より実測を優先するために持つ。
+var _last3DRebuildMs=0;
+// これを超えたら「固まったように見える」とみなし、次回から先に画面を返して
+// インジケーターを出す。100ms を超えると操作が即時に感じられなくなる、という
+// 一般的な目安の上に、オーバーレイの最小表示 (APP_LOADING_MIN_MS=260ms) を
+// 足しても待ち時間が伸びたと感じない範囲を取ってある。
+var HEAVY_3D_REBUILD_MS=200;
 function perform3DRebuild(){
   if(!sc3) return;
+  var t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   build3D();
   if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+  var t1=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+  _last3DRebuildMs=t1-t0;
 }
+// 「重い」はマシンとプランで決まる。入力機器では決まらない。
+//
+// 以前はここが touch 判定で始まっていたため、マウスのPCでは間取りがどれだけ
+// 大きくても同期のまま再構築していた。実測: 219アイテムの間取りで
+// 「3Dで一時的に非表示」1回につき 287ms 画面が固まり、その間なんの表示も
+// 出ない(= ユーザーからは「反映されない」に見える)。
+//
+// 1回目は当て推量に頼るしかないので従来の数え上げを残すが、2回目からは
+// 直前の実測を見る。触っている機械が遅ければ勝手にインジケーター側へ、
+// 速ければ勝手に同期側へ寄る。
 function isLikelyHeavy3DRebuild(){
-  if(!isTouchInputDevice() || ST.view==='2d') return false;
+  if(ST.view==='2d') return false;
+  if(_last3DRebuildMs>=HEAVY_3D_REBUILD_MS) return true;
+  // 一度でも速いと分かっている間取りに、毎回オーバーレイを出さない。
+  if(_last3DRebuildMs>0) return false;
+  if(!isTouchInputDevice()) return false;
   var walls=(DATA.walls||[]).length;
   var rooms=(DATA.rooms||[]).length;
   var items=(DATA.items||[]).length;
@@ -5946,14 +5970,12 @@ function rebuild3D(){
   if(_tablet3DRebuildQueued) return;
   _tablet3DRebuildQueued=true;
   showAppLoading('3Dを更新中');
-  requestAnimationFrame(function(){
-    setTimeout(function(){
-      try{perform3DRebuild();}
-      finally{
-        _tablet3DRebuildQueued=false;
-        hideAppLoading();
-      }
-    },0);
+  runAfterNextPaint(function(){
+    try{perform3DRebuild();}
+    finally{
+      _tablet3DRebuildQueued=false;
+      hideAppLoading();
+    }
   });
 }
 
@@ -15581,6 +15603,21 @@ function loop3D(){
 var APP_LOADING_MIN_MS = 260;
 var _appLoadingShownAt = 0;
 var _appLoadingHideTimer = null;
+// 「インジケーターを出す → 一度ブラウザへ描画を返す → 重い処理」の待ち方。
+//
+// requestAnimationFrame だけに預けると、フレームが来ない環境では**永久に進まない**。
+// 背面タブ・最小化・ヘッドレスがそれで、画面はオーバーレイに覆われたまま止まる。
+// 実測: ヘッドレス Chromium では 120 秒待ってもコールバックが来なかった。
+// 描画が来ればそれを使い(通常はこちらが先)、来なければタイマーで進む。
+function runAfterNextPaint(fn){
+  var done=false;
+  function once(){ if(done) return; done=true; fn(); }
+  if(typeof requestAnimationFrame==='function'){
+    requestAnimationFrame(function(){ setTimeout(once,0); });
+  }
+  // 保険。通常は rAF(約16ms)+setTimeout(0) が先に走るので、ここは使われない。
+  setTimeout(once,120);
+}
 function showAppLoading(label){
   var el=document.getElementById('app-loading');
   var text=document.getElementById('app-loading-text');
@@ -15603,20 +15640,18 @@ function hideAppLoading(){
 }
 function runWithAppLoading(label,work){
   showAppLoading(label);
-  requestAnimationFrame(function(){
-    setTimeout(function(){
-      try{
-        var result=work&&work();
-        if(result&&typeof result.then==='function'){
-          result.then(hideAppLoading,function(err){console.error(err);hideAppLoading();});
-        }else{
-          hideAppLoading();
-        }
-      }catch(err){
-        console.error(err);
+  runAfterNextPaint(function(){
+    try{
+      var result=work&&work();
+      if(result&&typeof result.then==='function'){
+        result.then(hideAppLoading,function(err){console.error(err);hideAppLoading();});
+      }else{
         hideAppLoading();
       }
-    },0);
+    }catch(err){
+      console.error(err);
+      hideAppLoading();
+    }
   });
 }
 function setViewWithLoading(v){
@@ -18792,7 +18827,7 @@ function planFloorTopImageEntries(floor){
   var out=[];
   (DATA.items||[]).forEach(function(it){
     if(it.floor!==floor) return;
-    var fmp=getItemFinishModel(it.type);
+    var fmp=planTopImageModelFor(it.type);
     if(!fmp||!fmp.top) return;
     var img=getFmpTopImage(fmp); // 呼ぶこと自体が読み込みの開始でもある
     if(img) out.push({item:it,img:img});
@@ -18816,61 +18851,17 @@ async function waitForPlanFloorTopImages(floor,timeoutMs){
   }
   return {floor:floor,images:entries.length,pending:pending,waitedMs:Date.now()-started};
 }
-// 待った「つもり」を信じない。出力された画素だけを見て、家具が本当に描かれたかを
-// 事後検証する。考え方は pv/tools/truth-render/check_scene_readiness.py と同じで、
-// 待ちの成否とは独立に、出てきたものを測る。
-// プレースホルダは単色の塗りつぶし矩形なので、部材の中心に取った小さな正方形の
-// 中に色が1つしか無ければ、上面写真に差し替わっていない候補になる。
+// 待った「つもり」を信じない。ただし**画素から逆算はしない**。
+// 撮った絵を描いたのは draw2d であり、灰色のプレースホルダで代替したかどうかは
+// その場で分岐した側が知っている。capturePlan2dDataUrl はその1回の描画のあいだ
+// だけ PLAN_CAPTURE_PLACEHOLDERS に書かせる（assets/js/draw-2d.js）。待ちの
+// 戻り値 (img.complete) ではなく、実際に出力された絵の作られ方を見るという
+// 意図はそのまま、推定の入る余地だけを無くしたことになる。
 //
-// ただし「単色」だけでは足りない。実測: 読み込みが**終わった**後の
-// fmp-CabinetD03 / D04 の天板は真っ白 (#ffffff) の単色で、これを数えると
-// 正常なパッケージが弾かれる。そこで色そのものも見る。プレースホルダは
-// 不透明な背景 B の上に rgba(210,215,225,0.72) を重ねた結果なので、B を逆算して
-// 0..255 に収まるかを問う。収まらなければ、どんな背景からも作れない色＝
-// プレースホルダではない。実測で #ffffff は落ち (B_r=370.7)、読み込み前の
-// #dde1e7 / #d5dae3 は通る。
-function planPlaceholderCouldBe(r,g,b){
-  var a=PLAN_PLACEHOLDER_ALPHA, inv=1-a, c=[r,g,b], i;
-  for(i=0;i<3;i++){
-    var back=(c[i]-a*PLAN_PLACEHOLDER_RGB[i])/inv;
-    if(back<-1.5||back>256.5) return false; // 丸め1段ぶんの余裕
-  }
-  return true;
-}
-// view は「その画像を撮ったときの座標系」。撮影中にパン・ズーム・倍率を変えた
-// なら、それを渡さないと判定は画像の別の場所を見る（＝黙って何も検出しなくなる）。
-// 省略時は現在の表示 = 撮影時と同じ、という Task 3 以来の前提のまま。
-function findPlanPlaceholderInstances(imageData,floor,view){
-  var found=[];
-  if(!imageData||!imageData.data) return found;
-  var d=imageData.data, W=imageData.width, H=imageData.height;
-  var vw=view||ST;
-  var sc=vw.zoom*0.05;
-  planFloorTopImageEntries(floor).forEach(function(e){
-    var it=e.item;
-    var pose=getItemDisplayPose(it);
-    var ccx=vw.panX+pose.x*sc, ccy=vw.panY+pose.y*sc;
-    // どの回転角でも矩形の内側に収まる正方形の半辺 (0.35 < 1/(2*sqrt2))
-    var half=Math.floor(Math.min(it.w,it.d)*sc*0.35);
-    if(half<3) return;                       // 数画素の部材は判定材料にならない
-    var x0=Math.max(0,Math.round(ccx-half)), x1=Math.min(W-1,Math.round(ccx+half));
-    var y0=Math.max(0,Math.round(ccy-half)), y1=Math.min(H-1,Math.round(ccy+half));
-    if(x1-x0<5||y1-y0<5) return;             // 画面外・見切れは判定しない
-    var first=-1, distinct=1, x, y;
-    for(y=y0;y<=y1&&distinct<2;y++){
-      for(x=x0;x<=x1;x++){
-        var p=(y*W+x)*4;
-        var v=(d[p]<<16)|(d[p+1]<<8)|d[p+2];
-        if(first<0){ first=v; continue; }
-        if(v!==first){ distinct=2; break; }
-      }
-    }
-    if(distinct<2&&planPlaceholderCouldBe((first>>16)&255,(first>>8)&255,first&255)){
-      found.push({id:it.id,type:it.type,color:'#'+('000000'+first.toString(16)).slice(-6),
-        x:x0,y:y0,w:x1-x0+1,h:y1-y0+1});
-    }
-  });
-  return found;
+// 逆算をやめた理由は draw-2d.js の PLAN_CAPTURE_PLACEHOLDERS に書いてある
+// （天面が一様な色の部材を必ず誤検出する。実測: 室外機）。
+function planCapturePlaceholderRoster(){
+  return (typeof PLAN_CAPTURE_PLACEHOLDERS!=='undefined'?PLAN_CAPTURE_PLACEHOLDERS:[]).slice();
 }
 function decodePngDataUrlToImageData(dataUrl){
   return new Promise(function(resolve,reject){
@@ -19186,10 +19177,19 @@ function videoRenderViewRefusalText(){
     'どちらかを表示し、撮りたい画角にしてから'+
     'もう一度「動画AI用データを作る」を押してください。';
 }
+// 名指しできないエラーは直せない。「4件」とだけ言われたユーザーは、平面図の
+// どこを見ればいいのか分からない。型の名前と ID を並べる（多すぎるときは畳む）。
+function planPlaceholderNames(placeholders){
+  var names=placeholders.slice(0,6).map(function(p){
+    return itemTypeLabel(p.type)+'(ID '+p.id+')';
+  }).join('、');
+  return placeholders.length>6 ? names+' ほか'+(placeholders.length-6)+'件' : names;
+}
 function planPlaceholderError(placeholders,topImages){
   return new Error('平面図の家具 '+placeholders.length+' 件が灰色のプレースホルダのままです'+
-    '（上面画像 '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
-    'ms 待っても読めていません）。このまま渡すと、生成AIは家具の無い部屋を見ます。');
+    '（'+planPlaceholderNames(placeholders)+'）。'+
+    '上面画像は '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
+    'ms 待っても読めていません。このまま渡すと、生成AIは家具の無い部屋を見ます。');
 }
 async function generateVideoRenderPackage(options){
   var opt=options||{};
@@ -19222,11 +19222,12 @@ async function generateVideoRenderPackage(options){
       fit:true,scale:planCaptureScaleForVideo()});
     if(!planRef) throw new Error('平面図の撮影に失敗しました。');
     var planView=PLAN_CAPTURE_VIEW;
+    // 名簿は撮った直後に受け取る（次に誰かが draw2d を呼べば入れ替わる）。
+    var planPh=planCapturePlaceholderRoster();
+    if(planPh.length) throw planPlaceholderError(planPh,planTop);
     var planIm=await decodePngDataUrlToImageData(planRef);
     // 撮ったものを測る。値は記録するだけで、下限は設けない（拒否は撤回した）。
     var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
-    var planPh=findPlanPlaceholderInstances(planIm,planFloor,planView);
-    if(planPh.length) throw planPlaceholderError(planPh,planTop);
     // 部材の名指しは DATA から作る（真実源は DATA で、legend の方が派生物）。
     // camera は渡さない。3Dの目線の高さは平面図の構図と無関係で、
     // 「床から1.5m」と書けば真上からの参照と矛盾する。
@@ -19325,13 +19326,14 @@ async function generateVideoRenderPackage(options){
   // 撮影中だけ変えた構図は finally で戻っているので、撮った絵を画素で読む側にも
   // 重ねる側にも、ST ではなく「撮ったときの座標系」を渡す。
   var planView=PLAN_CAPTURE_VIEW;
+  // 名簿は撮った直後に受け取る（次に誰かが draw2d を呼べば入れ替わる）。
+  var placeholders=planCapturePlaceholderRoster();
+  if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var planIm=await decodePngDataUrlToImageData(plan);
   // 家がこの図の何割を占めるかは測って記録するだけ（カメラを入れた分だけ主題は
   // 小さく写る。それはこの図の目的が家の描写ではないからで、不良ではない）。
   var contextRatio=planSubjectFrameRatio(planSubjectBoundsMm(floor),planView,
     planIm.width,planIm.height);
-  var placeholders=findPlanPlaceholderInstances(planIm,floor,planView);
-  if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var planContext=await drawPlanCameraOverlay(plan,camera,planView);
 
   // 4) プロンプト。光を書けなかったら黙って続けない。

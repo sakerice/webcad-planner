@@ -309,11 +309,18 @@ function selectedLockControlHtml(it){
 }
 // AIレンダーの画角調整などのため、オブジェクト単位で3D表示を一時制御できるようにする。
 // 壁: 自動カットアウェイの上書き(常に表示/非表示)。アイテム・部屋: 非表示チェック
+//
+// **ロック中でも操作できる (data-lock-control)。** 編集ロックが止めるのは
+// 「削除・移動・寸法/座標変更」であり(ロック中の注記もそう名乗っている)、
+// 見えているかどうかは間取りの形を変えない。ここを他の入力と一緒に disabled に
+// していたため、住設カテゴリ(照明・キッチン・浴室…)をロックすると照明だけ
+// 3Dから外せない、という形で出ていた。まとめて戻す clearAll3DHidden は
+// 最初からロックを見ていないので、片方だけがロックを見ている状態でもあった。
 function selectedVisibilityControlHtml(it){
   if(!it) return '';
   if(it.x1!==undefined && it.x2!==undefined){
     var v=it.vis3D||'auto';
-    var html='<div class="pr"><div class="pl">3D表示</div><select class="pi" onchange="updateSelectedProp(\'vis3D\',this.value===\'auto\'?\'\':this.value)">';
+    var html='<div class="pr"><div class="pl">3D表示</div><select data-lock-control class="pi" onchange="updateSelectedProp(\'vis3D\',this.value===\'auto\'?\'\':this.value)">';
     html+='<option value="auto"'+(v==='auto'||v===''?' selected':'')+'>自動(内観で自動透過)</option>';
     html+='<option value="show"'+(v==='show'?' selected':'')+'>常に表示(透過しない)</option>';
     html+='<option value="hide"'+(v==='hide'?' selected':'')+'>一時的に非表示</option>';
@@ -322,12 +329,12 @@ function selectedVisibilityControlHtml(it){
     return html;
   }
   if(it.type==='room'){
-    var html2='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示(床・天井)</label></div>';
+    var html2='<div class="pr"><label class="lock-control-label"><input data-lock-control type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示(床・天井)</label></div>';
     if(it.hidden3D) html2+='<div class="lock-status-note">3Dビューに表示されません(2Dでは編集できます)。</div>';
     return html2;
   }
   if(it.type){
-    var html3='<div class="pr"><label class="lock-control-label"><input type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示</label></div>';
+    var html3='<div class="pr"><label class="lock-control-label"><input data-lock-control type="checkbox" '+(it.hidden3D?'checked':'')+' onchange="updateSelectedProp(\'hidden3D\',this.checked)">3Dで一時的に非表示</label></div>';
     if(it.hidden3D) html3+='<div class="lock-status-note">3Dビューに表示されません(2Dでは編集できます)。</div>';
     return html3;
   }
@@ -1484,10 +1491,44 @@ function makeBathroomDoorLeaf(w,h,d){
   bar('Meeting rail',0,-.08,w,.023,d,frame);
   return g;
 }
+// Size presets swap authored cabinet layouts; equipment is not stretched.
+function selectedKitchenConfigurationHtml(it,model){
+  if(!model.kitchenModules)return '';
+  var labels={sink:'シンク',hob:'IH',gas:'ガス',drawer:'引出し',dishwasher:'食洗機'};
+  var html='<div class="ph" style="margin-top:12px">キッチン構成</div>';
+  var family=model.kitchenFamily;
+  var choices=family?Object.values(FMP_ITEMS).filter(function(m){return m.kitchenFamily===family && (family==='drawer'||m.kitchenDishwasher===model.kitchenDishwasher);}).sort(function(a,b){return family==='peninsula'?a.d-b.d:a.w-b.w;}):[];
+  if(choices.length>1){
+    html+='<div class="pr"><label class="pl" for="kitchen-size">'+(family==='peninsula'?'奥行':'間口')+'</label><select id="kitchen-size" class="pi" onchange="updateSelectedKitchenVariant(this.value)">';
+    choices.forEach(function(m){html+='<option value="'+escHtml(m.id)+'" '+(m.id===it.type?'selected':'')+'>'+escHtml(m.name)+'</option>';});
+    html+='</select></div>';
+  }
+  if(model.kitchenDishwasherVariant){
+    html+='<div class="pr"><label class="pl" for="kitchen-dishwasher">食洗機</label><select id="kitchen-dishwasher" class="pi" onchange="updateSelectedKitchenDishwasher(this.value)"><option value="no" '+(!model.kitchenDishwasher?'selected':'')+'>なし（収納BOX）</option><option value="yes" '+(model.kitchenDishwasher?'selected':'')+'>あり（幅450mm）</option></select></div>';
+  }
+  html+='<div class="model-finish-note">正面から左→右：' +model.kitchenModules.map(function(m){return (labels[m.kind]||m.kind)+' '+m.width;}).join(' / ')+' mm<br>天板高850mm。機器寸法を保った構成です。</div>';
+  return html;
+}
+function updateSelectedKitchenDishwasher(value){
+  var it=ST.selected;if(!it||isObjectLocked(it)||['yes','no'].indexOf(value)<0)return;
+  var model=getFmpItem(it.type);
+  if(!model||!model.kitchenDishwasherVariant||model.kitchenDishwasher===(value==='yes'))return;
+  var next=getFmpItem(model.kitchenDishwasherVariant);
+  if(!next||next.w!==model.w||next.d!==model.d)return;
+  saveState();it.type=next.id;
+  draw2d();if(ren)rebuild3D();updateProps();
+}
+function updateSelectedKitchenVariant(id){
+  var it=ST.selected;if(!it||isObjectLocked(it))return;
+  var current=getFmpItem(it.type),next=getFmpItem(id);
+  if(!current||!next||!current.kitchenFamily||current.kitchenFamily!==next.kitchenFamily||it.type===id)return;
+  saveState();it.type=id;it.w=next.w;it.d=next.d;
+  draw2d();if(ren)rebuild3D();updateProps();
+}
 function selectedModelFinishesHtml(it){
   var model=getItemFinishModel(it.type);
   if(!model || !model.finishChannels) return '';
-  var html='<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">素材の表情を保って色を変更</div>';
+  var html=selectedKitchenConfigurationHtml(it,model)+'<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">素材の表情を保って色を変更</div>';
   if(model.mirrorOption) html+='<div class="pr"><label class="pl" for="shoe-mirror">姿見</label><input id="shoe-mirror" type="checkbox" '+(it.showMirror?'checked':'')+' onchange="updateSelectedProp(\'showMirror\',this.checked)"></div>';
   model.finishChannels.forEach(function(channel){
     var value=(it.finishColors&&it.finishColors[channel.key])||channel.default;
@@ -1520,7 +1561,13 @@ function updateSelectedModelRoughness(channel,value){
 }
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
-  if(isObjectLocked(ST.selected) && p!=='locked'){ updateProps(); return; }
+  // ロックが止めるのは削除・移動・寸法/座標変更。3D表示の一時切り替えは
+  // 間取りの形を変えないので、ロック中でも通す(UI 側も data-lock-control)。
+  // 増やすときは「間取りの形を変えないか」で判断する(ロック中の注記が
+  // 名乗っている範囲を超えない)。関数の中に置くのは、この判定だけを
+  // node:vm で切り出して走らせている検査があるため。
+  var lockAllowed=['locked','hidden3D','vis3D'];
+  if(isObjectLocked(ST.selected) && lockAllowed.indexOf(p)<0){ updateProps(); return; }
   var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
   if(keepColorPickerOpen) markAppearanceColorDirty();
   else if(!noSave) saveState();
