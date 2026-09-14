@@ -199,6 +199,26 @@ function planSubjectFrameRatio(bounds,view,W,H){
 // 最後に撮った平面図の座標系。撮影中だけ変えたパン・ズーム・倍率を、撮った画像を
 // 画素で調べる側（プレースホルダ検出・構図の検査）へ渡すために残す。
 var PLAN_CAPTURE_VIEW=null;
+// 撮影中に「上面画像が間に合わず、灰色のプレースホルダで代替した」部材の名簿。
+// 撮った絵そのものを描いた draw2d が、その場で take した分岐を書き残す。
+//
+// **以前はここを画素から逆算していた（findPlanPlaceholderInstances）。**
+// 部材の中心に取った小さな正方形が単色で、かつその色がプレースホルダ色から
+// 作りうる範囲に入っていればプレースホルダだ、という推定である。これは
+// 「天面が均一な色の部材」を必ず誤検出する。実測: 室外機 (ac-outdoor) の
+// 上面画像は読み込み**完了後**も中央が一様な #d8dada で、逆算は
+// 背景 B=(231,226,200) から作れると答える。正常なパッケージが
+// 「家具5件が灰色のプレースホルダのまま」で拒否された。
+// 画素は「何色か」しか答えられず、「なぜその色か」は答えられない。
+// 分岐そのものを記録すれば推定は要らない。
+var PLAN_CAPTURE_PLACEHOLDERS=[];
+// 2Dの上面画像として使うモデル。待つ側 (waitForPlanFloorTopImages) と
+// 描く側 (drawItem2d) が別々に解決すると、片方だけが知っている部材
+// (自動車のフォールバック) が「待たれないまま灰色で描かれる」。1か所に置く。
+function planTopImageModelFor(type){
+  return getItemFinishModel(type)
+    ||(type==='car'?{id:'context-car',top:'assets/models/previews-v2/context-car-top.png',previewVersion:2}:null);
+}
 // 撮影中の倍率。文字の大きさの**下限**だけがこれを見る。下限（10px 等）は
 // 「画面で読める大きさ」のための値で、画素を増やしただけで図の中の文字が
 // 相対的に縮むのは倍率の副作用でしかない。通常表示と等倍キャプチャでは 1 で、
@@ -243,6 +263,8 @@ function capturePlan2dDataUrl(options){
     // 撮った画像を画素で調べる側は、この座標系で読む必要がある。
     PLAN_CAPTURE_VIEW={panX:ST.panX,panY:ST.panY,zoom:ST.zoom,
       width:canvas.width,height:canvas.height,floor:ST.floor,scale:scale};
+    // この1回の draw2d が書き込む。読む側は撮った直後に受け取ること。
+    PLAN_CAPTURE_PLACEHOLDERS=[];
     draw2d();
     return canvas.toDataURL(opt.mimeType||'image/png');
   }finally{
@@ -1299,15 +1321,16 @@ function drawItem2d(it){
   }
   var spriteKey=SPRITE_MAP[it.type];
   var s = spriteKey ? SPRITE_JSON.sprites[spriteKey] : null;
-  var fmp=getItemFinishModel(it.type)||(it.type==='car'?{id:'context-car',top:'assets/models/previews-v2/context-car-top.png',previewVersion:2}:null);
+  var fmp=planTopImageModelFor(it.type);
   if(fmp){
     var topImg=getFmpTopImage(fmp);
     var hwF=it.w*sc/2, hdF=it.d*sc/2;
     if(topImg && topImg.complete && topImg.naturalWidth>0){
       drawFmpTopImageOriented(topImg,fmp,it.w*sc,it.d*sc);
     } else {
-      // 色は PLAN_PLACEHOLDER_* に置いてある。findPlanPlaceholderInstances が
-      // 「この画素はプレースホルダでありうるか」を逆算するのに同じ値を要るため。
+      // 撮影中なら、代替で描いたことをここで書き残す。動画AI用パッケージは
+      // この名簿だけを見て「灰色のまま渡してしまうか」を決める。
+      if(PLAN_CAPTURE) PLAN_CAPTURE_PLACEHOLDERS.push({id:it.id,type:it.type,floor:it.floor});
       ctx.fillStyle=PLAN_PLACEHOLDER_FILL;
       ctx.fillRect(-hwF,-hdF,it.w*sc,it.d*sc);
       ctx.strokeStyle='rgba(0,0,0,0.35)';
