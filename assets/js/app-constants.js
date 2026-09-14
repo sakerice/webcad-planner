@@ -1806,6 +1806,12 @@ function pbrTexLinear(name) {
   return t;
 }
 
+// 部材の型を人が読む名前にする。ユーザーに見せる文面（エラーの名指しなど）は
+// id ではなく名前で語る。FMP のモデル名が最優先で、無ければ日本語ラベル。
+function itemTypeLabel(type){
+  var fmp=getFmpItem(type);
+  return (fmp&&fmp.name)||ILABELS[type]||type||'要素';
+}
 var ILABELS = {
   kitchen:'キッチン',bath:'バス',toilet:'トイレ',sink:'洗面',fridge:'冷蔵庫',washer:'洗濯機',
   sofa:'3Pソファ',loveseat_2p:'2Pソファ',low_table:'ローテーブル',
