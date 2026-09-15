@@ -20,7 +20,7 @@ var WALL_COLOR_CUSTOM = {};
 // 露出は「上げても白飛びしない上限の手前」で決めた。実測では 1.06/1.12/1.18/1.25
 // のいずれも最大チャンネル252以上の画素は 0.00% で、1.18 までは明るさと
 // コントラストが素直に増える(外観 平均 145.2→153.4)。
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.40, sun:1.10, ambient:0.10, room:0.12, exposure:1.18, env:0.62,
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.40, sun:1.10, ambient:0.10, room:0.22, exposure:1.18, env:0.62,
   sunSim:true, hour:13, season:'equinox', northDeg:0};
 // PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
 // null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
@@ -51,7 +51,7 @@ var INTERIOR_SUN_SCALE = 0.55;
 //   S1.08 C1.10 B0.984 → ばらつき 47.7 / 彩度 0.404 / 青の飽和 0.56%
 //   S1.08 C1.14 B0.978 → ばらつき 48.9 / 彩度 0.412 / 青の飽和 0.87%
 // もう一段強くしたいときは C を 1.10 まで。空が持たなくなるのはその先。
-var GRADE_SATURATION = 1.35;
+var GRADE_SATURATION = 1.18;
 var GRADE_CONTRAST = 1.10;
 var GRADE_LIFT = 1.05;
 // ホワイトバランス。**上を向いた面は半球光の「空」側と空からの間接光しか
@@ -68,6 +68,10 @@ var GRADE_BALANCE = [1.00, 1.00, 1.00];
 // 空を「間接光として使うとき」だけ落とす彩度。見える空の色はそのまま。
 // 1.0 = 空の青をそのまま光として配る(上を向いた面が一様に青くかぶる)。
 var ENV_LIGHT_SATURATION = 0.45;
+// 暗部の受け。影を強くすると黒が 0 に張り付いて形が読めなくなるので、
+// この値より下は 0 へ漸近させて段差を残す(上端の softClip の裏返し)。
+var GRADE_TOE = 0.055;
+var GRADE_TOE_SLOPE = 2.2;
 var LIGHT_PRESETS = {
   morning:{
     label:'朝',hemi:0.27,sun:0.92,ambient:0.11,room:0.14,exposure:1.14,env:0.50,
@@ -76,7 +80,7 @@ var LIGHT_PRESETS = {
     sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
   },
   day:{
-    label:'昼',hemi:0.40,sun:1.10,ambient:0.10,room:0.12,exposure:1.18,env:0.62,
+    label:'昼',hemi:0.40,sun:1.10,ambient:0.10,room:0.22,exposure:1.18,env:0.62,
     // 昼だけ半球光が純白＋灰色＝**色を持たない塗りつぶし**だった(朝・夕は元から色付き)。
     // 上から空色・下から土の反射に変えると、面の向きで寒色と暖色が分かれ、
     // 明るさを上げずに彩度と立体感が出る。

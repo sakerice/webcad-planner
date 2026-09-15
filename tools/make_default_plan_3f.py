@@ -254,11 +254,11 @@ for ix, iy, irot, fl, iel, ox, oy, orot in AC_PAIRS:
 # 道路・電柱・隣家。隣地境界まで910mmの近さで3階建てが建つ
 item("road", 2730, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70)
 item("neighbor-house", 10920, 4000, 7280, 6370, 1, rot=180,
-     color="#d7c1a3", contextFloors=3, contextHeight=9300, contextGhost=True)
+     color="#ffffff", contextFloors=3, contextHeight=9300, contextGhost=True)
 item("neighbor-house", -5460, 4000, 7280, 6370, 1, rot=180,
-     color="#c9c2b4", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-house", 2730, -4095, 7280, 6370, 1, rot=0,
-     color="#b9bcc2", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 
 # ══════════════════════════ 1F 家具 ══════════════════════════
 # ── 浴室 (1坪UB)

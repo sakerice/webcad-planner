@@ -1,0 +1,35 @@
+{
+  "video": {
+    "title": "3Dから自宅カフェの暮らしへ",
+    "purpose": "間取りを保った生活イメージへの変化",
+    "aspect_ratio": "2632:2282",
+    "total_duration_seconds": 10
+  },
+  "references": [
+    {
+      "id": "base",
+      "path": "/Users/nariiwa/Projects/webcad-planner/pv/candidates/home-cafe-20260915/source/base_render.png",
+      "status": "approved",
+      "role": "user supplied start frame"
+    }
+  ],
+  "shots": [
+    {
+      "id": "cafe_01",
+      "duration_seconds": 10,
+      "incoming_state": "無人の元3D",
+      "visible_change": "写実化し夫婦と3組の客が現れる",
+      "outgoing_handoff": "コーヒーとケーキを楽しむ生活",
+      "camera": "同じ俯瞰方向で5%のみ寄る",
+      "prompt": "A single continuous 10-second architectural transformation film starting EXACTLY from the supplied 3D CAD cutaway of this Japanese ground-floor home cafe. 0-1 seconds: original unoccupied CAD appearance. 1-4 seconds: a gentle seamless material-and-life dissolve transforms ONLY surface realism, light and occupancy into a photorealistic working home cafe; architecture stays rigidly registered, never rebuilt. 4-10 seconds: living cafe with subtle natural human motion. A married couple runs the cafe: one apron-wearing spouse prepares coffee at the existing kitchen counter, the other carries a small tray of coffee and cake along the clear kitchen-side aisle. Three distinct pairs of adult customers sit on the EXISTING correctly oriented chairs at three of the four small tables, including the separate raised left platform table and two right tables. They softly converse, lift coffee cups and take small bites of cake; believable scale, anatomy and seated contact, feet on correct floor level. Remaining table stays available. Coffee cups and cake plates sit on tables. Existing TV shows a calm coastal landscape with no text. CRITICAL: this is the FIRST FLOOR, upper floor and ceiling are hidden for visualization ONLY, not absent physically. Keep them invisible but calculate light as if they block all overhead sunlight: gentle window-side daylight and warm downlights, no sun through missing ceiling, no deep indoor tree shadows. Preserve all four separate tables, all chairs, wall divisions, exact stair geometry, raised platform, black railings, five-blade fan, all doors/windows, kitchen island with sink on its RIGHT side as supplied, exterior deck and plants. No added furniture or changed layout. Camera moves only in an extremely slow smooth 5 percent push-in across entire shot, same elevated orientation, no orbit, pan, tilt, sudden zoom or cuts. Keep all table groups and stairs within frame. Human movement modest and coherent, no teleporting after dissolve, no floating or fused bodies. Refined warm neutral photographic materials. No text, logos, captions, watermark, music or speech."
+    }
+  ],
+  "generation": {
+    "model": "Standard",
+    "resolution": 720,
+    "sound": "off",
+    "estimated_credit": 10,
+    "starting_credit": 11.14,
+    "board_id": "a9d8a5d75c4341bd866f04c43cec09c0"
+  }
+}
