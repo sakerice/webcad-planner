@@ -4015,6 +4015,8 @@ function makeGradeShader(){ return {
     'uniform float gLift;',
     'uniform vec3 gBalance;',
     'varying vec2 vUv;',
+    '#define GRADE_TOE '+GRADE_TOE.toFixed(4),
+    '#define GRADE_TOE_SLOPE '+GRADE_TOE_SLOPE.toFixed(4),
     '// 上端は硬く切らずに 1.0 へ漸近させる。切ると、傾けたぶんだけ増えた高輝度側が',
     '// そのまま白飛びになる(実測: 内観で画素の 2.04% が振り切れ、青は 1.19%)。',
     '// 漸近させれば同じ傾きでも白飛びは 0.00% になる。',
@@ -4024,13 +4026,21 @@ function makeGradeShader(){ return {
     '  float t = ( x - knee ) / ( 1.0 - knee );',
     '  return knee + ( 1.0 - knee ) * ( 1.0 - exp( -t ) );',
     '}',
+    '// 下端も同じ理屈で 0 へ漸近させる。影を強くすると、暗部が 0 に張り付いて',
+    '// 形が読めない黒になる。ここで受けておけば、同じ影の強さでも段差が残る。',
+    'float softToe( float x ){',
+    '  if ( x >= GRADE_TOE ) return x;',
+    '  float t = ( GRADE_TOE - x ) / GRADE_TOE;',
+    '  return GRADE_TOE * exp( -t * GRADE_TOE_SLOPE );',
+    '}',
     'void main(){',
     '  vec4 texel = texture2D( tDiffuse, vUv );',
     '  vec3 c = texel.rgb * gBalance;',
     '  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );',
     '  c = vec3( l ) + ( c - vec3( l ) ) * gSaturation;',
     '  c = ( ( c - 0.5 ) * gContrast + 0.5 ) * gLift;',
-    '  c = vec3( softClip( max( c.r, 0.0 ) ), softClip( max( c.g, 0.0 ) ), softClip( max( c.b, 0.0 ) ) );',
+    '  c = vec3( softToe( max( c.r, 0.0 ) ), softToe( max( c.g, 0.0 ) ), softToe( max( c.b, 0.0 ) ) );',
+    '  c = vec3( softClip( c.r ), softClip( c.g ), softClip( c.b ) );',
     '  gl_FragColor = vec4( clamp( c, 0.0, 1.0 ), texel.a );',
     '}'
   ].join('\n')
@@ -4147,7 +4157,7 @@ function init3D(){
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       var n8ao = new THREE.N8AOPass(sc3, camExt, wrap.clientWidth, wrap.clientHeight);
       n8ao.configuration.aoRadius = 0.35;
-      n8ao.configuration.intensity = 1.6;
+      n8ao.configuration.intensity = 1.9;
       n8ao.configuration.distanceFalloff = 0.7;
       n8ao.configuration.screenSpaceRadius = false;
       n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
@@ -6013,11 +6023,15 @@ function isLikelyHeavy3DRebuild(){
   // 壁・部屋は複数面を生成し、GLB家具は複数サブメッシュを持つため重めに数える。
   return walls*2+rooms*3+items+modelItems*5>=90;
 }
-function rebuild3D(){
+// quiet=true はインジケーターを出さずに組み直す。**選択のように「絵が変わらない」
+// 操作**で使う。選択は FMP 家具で個別メッシュへ切り替わるため全再構築が走るが、
+// 見た目は変わらないのにオーバーレイだけが出ると、操作のたびに画面が暗転して
+// 「重くなった」と受け取られる。待ちを見せる価値があるのは、結果が変わる操作だけ。
+function rebuild3D(quiet){
   if(!sc3) return;
   var loadingEl=document.getElementById('app-loading');
   var loadingAlreadyVisible=!!(loadingEl&&loadingEl.classList.contains('show'));
-  if(!isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
+  if(quiet || !isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
     perform3DRebuild();
     return;
   }
@@ -6926,7 +6940,7 @@ function handle3DPointerPick(e){
   updateProps();
   draw2d();
   if(ren){
-    if(selectionNeedsFull3DRebuild(previous,ST.selected)) rebuild3D();
+    if(selectionNeedsFull3DRebuild(previous,ST.selected)) rebuild3D(true);
     else refresh3DSelectionOnly();
   }
 }
@@ -7145,7 +7159,7 @@ function applyLightingToScene(refreshSky){
         // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
         // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
         //  色味が白いベース光に洗い流されてしまう)
-        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?1.25:0.6):1);
+        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?0.75:0.6):1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
@@ -7198,7 +7212,7 @@ function applyLightingToScene(refreshSky){
     // 床は地面の色を拾い、金属とガラスは映り込みを得る。ベース光を薄くした分を
     // ここへ回す。内観・ウォークスルーを外観より低く抑えるのは従来どおりで、
     // 配置照明の色が洗い流されないようにするため。
-    var envBoost=(ST.view==='3d-int')?(daytimeInterior?2.6:0.4):(ST.view==='3d-walk'?(daytimeInterior?2.4:0.7):2.4);
+    var envBoost=(ST.view==='3d-int')?(daytimeInterior?2.1:0.4):(ST.view==='3d-walk'?(daytimeInterior?2.0:0.7):2.4);
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
@@ -15490,8 +15504,16 @@ function updateWalkMode(now){
       }
       return false;
     }
+    // **いま立っている場所自体が「通れない」とき**は、判定を外して動かす。
+    // 壁へ少しめり込む・階段の踏み面から半歩外れる、といった状態になると、
+    // 自分の足元も行き先も同じ「通れない」判定に入り、前も後ろも横も塞がって
+    // 二度と出られなくなる(報告: 壁をわずかにすり抜けた位置と、階段で頻発)。
+    // 出られない状態を作らないことを、壁を抜けさせないことより優先する。
+    var stuckHere=stepBlocked(WALK.x/U,WALK.z/U);
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
-    if(!stepBlocked(nx/U,nz/U)){
+    if(stuckHere){
+      WALK.x=nx; WALK.z=nz;
+    } else if(!stepBlocked(nx/U,nz/U)){
       WALK.x=nx; WALK.z=nz;
     } else if(!stepBlocked(nx/U,WALK.z/U)){
       WALK.x=nx;

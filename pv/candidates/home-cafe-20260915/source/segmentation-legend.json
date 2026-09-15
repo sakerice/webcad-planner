@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "legend": {
+    "#ff4b4b": "walls: exterior and interior wall solids",
+    "#54c878": "rooms/floor slabs: interior room floor surfaces",
+    "#7b61ff": "roof: all roof parts",
+    "#19c7ff": "windows/glass: windows, window doors, and glazing",
+    "#ffc928": "doors/openings: doors, entrance doors, and wall openings",
+    "#4f8cff": "fixtures/equipment: toilet, bath, sink, washer, fridge, kitchen equipment",
+    "#d45cff": "furniture/other placed items",
+    "#70b85f": "exterior objects: balcony, tree, fence, wood fence, car, exterior stair, ramp, foundation, lattice, and equipment",
+    "#a87948": "neighboring buildings outside the designed site",
+    "#5c6370": "public road and pavement outside the designed site",
+    "#f08c46": "utility infrastructure: poles and related exterior utilities",
+    "#d9dde5": "unclassified helper geometry",
+    "#ffffff": "sky/background",
+    "#d8bb80": "site surface: sand (砂地（締め固め）), only inside site rectangles",
+    "#43b047": "site surface: grass (芝生（自然草地）), only inside site rectangles",
+    "#9c8f78": "site surface: gravel (砂利), only inside site rectangles",
+    "#bfc3c7": "site surface: concrete (コンクリート（経年）), only inside site rectangles",
+    "#e2ded2": "neutral outside-site context ground, not lawn"
+  },
+  "siteContext": {
+    "hasSite": true,
+    "sites": [
+      {
+        "floor": 1,
+        "x": -910,
+        "y": -1820,
+        "w": 11375,
+        "d": 13195,
+        "surface": "gravel",
+        "surfaceLabel": "砂利",
+        "boundary": true,
+        "zones": [
+          {
+            "name": "プライベートテラス・植栽",
+            "x": 120,
+            "y": 8500,
+            "w": 7160,
+            "d": 1890,
+            "surface": "grass"
+          },
+          {
+            "name": "駐車スペース",
+            "x": 120,
+            "y": 10390,
+            "w": 7160,
+            "d": 2805,
+            "surface": "concrete"
+          },
+          {
+            "name": "玄関アプローチ・駐輪",
+            "x": 7280,
+            "y": 8500,
+            "w": 3975,
+            "d": 4695,
+            "surface": "concrete"
+          }
+        ]
+      }
+    ]
+  }
+}

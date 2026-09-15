@@ -296,12 +296,12 @@ item("road", 5280, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70
 # 東西の隣家はこの家と同じ道路(南)に面するので、玄関側=南を向く(rot=180)。
 # 既定の rot=0 のままだと3軒とも道路に背を向けて建つ
 item("neighbor-house", 14560, 3485, 7280, 6370, 1, rot=180,
-     color="#d7c1a3", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-house", -4960, 3985, 7280, 6370, 1, rot=180,
-     color="#c9c2b4", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 # 北の家は反対側(北)の道路に面するので、こちらへは背面(北向き=rot 0)を見せる
 item("neighbor-house", 4340, -4615, 7280, 6370, 1, rot=0,
-     color="#b9bcc2", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-building", -3200, SY1 + 6850, 5200, 3600, 1,
      color="#8f98a3", contextFloors=3, contextHeight=9150, contextGhost=True)
 
