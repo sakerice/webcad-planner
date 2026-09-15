@@ -20,7 +20,7 @@ var WALL_COLOR_CUSTOM = {};
 // 露出は「上げても白飛びしない上限の手前」で決めた。実測では 1.06/1.12/1.18/1.25
 // のいずれも最大チャンネル252以上の画素は 0.00% で、1.18 までは明るさと
 // コントラストが素直に増える(外観 平均 145.2→153.4)。
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.34, sun:1.10, ambient:0.10, room:0.12, exposure:1.18, env:0.62,
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.40, sun:1.10, ambient:0.10, room:0.12, exposure:1.18, env:0.62,
   sunSim:true, hour:13, season:'equinox', northDeg:0};
 // PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
 // null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
@@ -31,6 +31,29 @@ var PV_INTERIOR_DAYLIGHT=null;
 // 入る。1.0(屋外と同じ)だと床が飛び、0 だと陰影が消える。実測で 0.55 が、
 // 家具の影が出て床が飛ばない範囲の中央あたりだった。
 var INTERIOR_SUN_SCALE = 0.55;
+// 仕上げ(グレーディング)。**明るさは動かさず、コントラストと発色だけを上げる**。
+// ポストの最後で、sRGB に載った画面全体に1回だけ掛ける(index.html の GRADE_SHADER)。
+//
+// 露出を上げても絵は良くならないことを実測している: 1.18→2.3 で平均は 154.9→183.4 に
+// 上がる一方、明るい側はほとんど動かず(上位1%が 196→214)、中央値だけが 172→208 へ
+// 詰まっていく。明るくなるのではなく、全部が同じ明るさへ寄って眠くなる。
+// 彩度も 0.339→0.289 へ落ちる。だから明るさではなく、階調の傾きと彩度を触る。
+//
+// **傾けたら、その分だけ明るさを戻すこと(GRADE_LIFT)。** これを忘れると逆効果になる。
+// この絵は中央値が中間グレーより上にある(高輝度寄りの)絵なので、中間を支点に
+// 傾けると画素の大半が上へ動き、sRGB の詰まった側に集まって、かえって平坦になる。
+// 実測(補正なし・傾き1.12): ばらつき 45.5→38.2、彩度 0.339→0.286 と両方悪化した。
+//
+// 値は「平均輝度を据え置いたまま」実測で選んだ(既定間取り・外観3D)。上限は
+// **青空の青チャンネルが振り切れる手前**に置いてある。振り切れると空がべたっとした
+// 一色になり、写真として最初に安っぽく見えるのがそこだから。
+//   S1.08 C1.06 B0.99 → ばらつき 46.3 / 彩度 0.393 / 青の飽和 0.00%  ← これ
+//   S1.08 C1.10 B0.984 → ばらつき 47.7 / 彩度 0.404 / 青の飽和 0.56%
+//   S1.08 C1.14 B0.978 → ばらつき 48.9 / 彩度 0.412 / 青の飽和 0.87%
+// もう一段強くしたいときは C を 1.10 まで。空が持たなくなるのはその先。
+var GRADE_SATURATION = 1.08;
+var GRADE_CONTRAST = 1.06;
+var GRADE_LIFT = 0.99;
 var LIGHT_PRESETS = {
   morning:{
     label:'朝',hemi:0.27,sun:0.92,ambient:0.11,room:0.14,exposure:1.14,env:0.50,
@@ -39,8 +62,12 @@ var LIGHT_PRESETS = {
     sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
   },
   day:{
-    label:'昼',hemi:0.34,sun:1.10,ambient:0.10,room:0.12,exposure:1.18,env:0.62,
-    sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
+    label:'昼',hemi:0.40,sun:1.10,ambient:0.10,room:0.12,exposure:1.18,env:0.62,
+    // 昼だけ半球光が純白＋灰色＝**色を持たない塗りつぶし**だった(朝・夕は元から色付き)。
+    // 上から空色・下から土の反射に変えると、面の向きで寒色と暖色が分かれ、
+    // 明るさを上げずに彩度と立体感が出る。実測: 彩度 0.372→0.393。
+    // 色を付けると白より暗くなるぶん(空側の輝度が約17%落ちる)、hemi を 0.34→0.40 へ戻している。
+    sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#bcd9f5',hemiGround:'#8a7a63',
     sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
     sky:{top:'#2874da',mid:'#549de5',horizon:'#bedcf3',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
   },
