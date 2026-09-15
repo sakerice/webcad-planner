@@ -2,7 +2,7 @@
   function create(T,texture){
     return new T.ShaderMaterial({
       name:'PhotographicSky',side:T.BackSide,depthWrite:false,toneMapped:false,
-      uniforms:{cloudMap:{value:texture},sunDirection:{value:new T.Vector3(1,2,1).normalize()},night:{value:0},warmth:{value:0},haze:{value:0.2},coverage:{value:0.45},environmentMode:{value:0}},
+      uniforms:{cloudMap:{value:texture},sunDirection:{value:new T.Vector3(1,2,1).normalize()},night:{value:0},warmth:{value:0},haze:{value:0.2},coverage:{value:0.45},environmentMode:{value:0},envSaturation:{value:1}},
       vertexShader:'varying vec2 skyUv; varying vec3 skyDirection; void main(){skyUv=uv;skyDirection=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
       fragmentShader:`
         uniform sampler2D cloudMap;
@@ -12,6 +12,7 @@
         uniform float haze;
         uniform float coverage;
         uniform float environmentMode;
+        uniform float envSaturation;
         varying vec2 skyUv;
         varying vec3 skyDirection;
         // Overlap translated tiles with periodic weights. No UV reflection.
@@ -60,6 +61,13 @@
           float glow=pow(alignment,160.0)*0.18;
           float disk=smoothstep(0.99994,0.99998,alignment);
           color+=mix(vec3(1.0,0.93,0.74),vec3(1.0,0.48,0.16),warmth)*(glow+disk)*(1.0-night);
+          // 間接光として読むときだけ、色を落として使う(見える空の色は変えない)。
+          // 空の青をそのまま光として配ると、上を向いた面 -- 地面・床・天板・屋根 --
+          // が一様に青くかぶる。実測: 本来暖色グレーの地面が「青が赤より +62」。
+          // 画面側を暖色へ振って打ち消すと、今度は日向の白い面まで黄ばむ。
+          // 光の側の彩度を落とせば、陰の青かぶりだけが減り、日向は白いまま残る。
+          float envLuma=dot(color,vec3(0.2126,0.7152,0.0722));
+          color=mix(color,mix(vec3(envLuma),color,envSaturation),environmentMode);
           color=mix(color,vec3(0.12)*(1.0-night*0.95),environmentMode*(1.0-smoothstep(-0.12,0.02,dir.y)));
           gl_FragColor=vec4(color,1.0);
           #include <colorspace_fragment>
