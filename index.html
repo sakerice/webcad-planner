@@ -3997,14 +3997,19 @@ function hide3DEngineNotice(){
 // の順に1回だけ掛ける。値と選び方は GRADE_* (assets/js/app-constants.js) にある。
 // 恒等(彩度1・傾き1・明るさ1)にすると、掛ける前と画素が一致することを検査で見ている。
 var _gradePass=null;
-var GRADE_SHADER={
-  uniforms:{tDiffuse:{value:null},gSaturation:{value:1},gContrast:{value:1},gLift:{value:1}},
+// THREE はモジュール側が後から window に載せるので、**定義時に THREE を触らない**。
+// ここで new THREE.Vector3 を書くと、このインライン script の評価時点で例外になり、
+// 以降の関数定義ごと落ちる(実際に setView が undefined を読んで壊れた)。
+function makeGradeShader(){ return {
+  uniforms:{tDiffuse:{value:null},gSaturation:{value:1},gContrast:{value:1},gLift:{value:1},
+    gBalance:{value:new THREE.Vector3(1,1,1)}},
   vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
   fragmentShader:[
     'uniform sampler2D tDiffuse;',
     'uniform float gSaturation;',
     'uniform float gContrast;',
     'uniform float gLift;',
+    'uniform vec3 gBalance;',
     'varying vec2 vUv;',
     '// 上端は硬く切らずに 1.0 へ漸近させる。切ると、傾けたぶんだけ増えた高輝度側が',
     '// そのまま白飛びになる(実測: 内観で画素の 2.04% が振り切れ、青は 1.19%)。',
@@ -4017,7 +4022,7 @@ var GRADE_SHADER={
     '}',
     'void main(){',
     '  vec4 texel = texture2D( tDiffuse, vUv );',
-    '  vec3 c = texel.rgb;',
+    '  vec3 c = texel.rgb * gBalance;',
     '  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );',
     '  c = vec3( l ) + ( c - vec3( l ) ) * gSaturation;',
     '  c = ( ( c - 0.5 ) * gContrast + 0.5 ) * gLift;',
@@ -4025,12 +4030,13 @@ var GRADE_SHADER={
     '  gl_FragColor = vec4( clamp( c, 0.0, 1.0 ), texel.a );',
     '}'
   ].join('\n')
-};
+}; }
 function applyGradeSettings(){
   if(!_gradePass) return;
   _gradePass.uniforms.gSaturation.value=GRADE_SATURATION;
   _gradePass.uniforms.gContrast.value=GRADE_CONTRAST;
   _gradePass.uniforms.gLift.value=GRADE_LIFT;
+  _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
 }
 function init3D(){
   if(ren) return;
@@ -4151,7 +4157,7 @@ function init3D(){
       // 仕上げ(コントラストと彩度)。OutputPass が sRGB へ載せた**後**の値を扱うので、
       // 表示空間そのままで傾けられる。ここより前(リニア空間)でやると、中央値が
       // 中間より上にあるこの手の絵では持ち上げにしかならず、かえって平坦になる。
-      _gradePass = new THREE.ShaderPass(GRADE_SHADER);
+      _gradePass = new THREE.ShaderPass(makeGradeShader());
       applyGradeSettings();
       composer.addPass(_gradePass);
     } catch(e) { console.error('Composer init failed', e); composer = null; }
@@ -7046,8 +7052,11 @@ function refreshEnvironmentFromSky(){
       var sky=new THREE.Mesh(geometry,_skyMesh.material);
       environmentScene.add(sky);
       sky.material.uniforms.environmentMode.value=1;
+      if(sky.material.uniforms.envSaturation) sky.material.uniforms.envSaturation.value=ENV_LIGHT_SATURATION;
       try{rt=_pmremGen.fromScene(environmentScene,0,0.1,300);}
-      finally{sky.material.uniforms.environmentMode.value=0;geometry.dispose();}
+      finally{sky.material.uniforms.environmentMode.value=0;
+        if(sky.material.uniforms.envSaturation) sky.material.uniforms.envSaturation.value=1;
+        geometry.dispose();}
     }else{
       var skyTex=makeSkyTexture(true);
       skyTex.mapping=THREE.EquirectangularReflectionMapping;
