@@ -4015,7 +4015,11 @@ function init3D(){
   ren.shadowMap.autoUpdate=false;
   ren.shadowMap.needsUpdate=true;
   ren.outputColorSpace = THREE.SRGBColorSpace;
-  ren.toneMapping = THREE.ACESFilmicToneMapping;
+  // ACES は映画用のカーブで、中間調を落として色を灰へ寄せる。建築の
+  // シミュレーションで要るのは「白飛びしない」ことと「素材の色がそのまま出る」
+  // ことなので、Khronos PBR Neutral を使う。ハイライトだけを穏やかに丸め、
+  // 中間調と彩度はほぼ素通しする。実測(既定間取り・外観3D): 彩度 0.249 → 0.34。
+  ren.toneMapping = THREE.NeutralToneMapping;
   ren.toneMappingExposure = LIGHT_SETTINGS.exposure;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
@@ -4097,7 +4101,7 @@ function init3D(){
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       var n8ao = new THREE.N8AOPass(sc3, camExt, wrap.clientWidth, wrap.clientHeight);
       n8ao.configuration.aoRadius = 0.35;
-      n8ao.configuration.intensity = 1.3;
+      n8ao.configuration.intensity = 1.6;
       n8ao.configuration.distanceFalloff = 0.7;
       n8ao.configuration.screenSpaceRadius = false;
       n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
@@ -7086,28 +7090,33 @@ function applyLightingToScene(refreshSky){
         // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
         // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
         //  色味が白いベース光に洗い流されてしまう)
-        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?1.8:0.6):1);
+        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?1.25:0.6):1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
         // 通常は PV_INTERIOR_DAYLIGHT が null なので interiorMode の値も
         // sunScale(=1、乗算しても値が変わらない)も従来と同一。
         var pvSunScale=PV_INTERIOR_DAYLIGHT?(PV_INTERIOR_DAYLIGHT.sunScale||1):1;
+        // 内観3Dの太陽。以前はここで 0 にしていたため、内観は全方向の白い光だけで
+        // 照らされ、面の向きの差が出ない＝間取り図に色を塗っただけの絵になっていた。
+        // 天井を作らない見せ方なので直射がそのまま入るが、屋外と同じ強さだと
+        // 床が飛ぶ。弱めた太陽を影付きで入れて、家具の接地と部屋の奥行きを出す。
         var interiorMode=(ST.view==='3d-int'||isInt) && !PV_INTERIOR_DAYLIGHT;
-        o.castShadow=!interiorMode;
+        var interiorSunScale=INTERIOR_SUN_SCALE;
+        o.castShadow=true;
         if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
           var sp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
           o.position.set(sp.x,sp.y,sp.z);
           if(o.color) o.color.set(sunColorForAltitude(sp.altitude));
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale*(1-(Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2)*0.35);
+          o.intensity=LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale*(1-(Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2)*0.35)*(interiorMode?interiorSunScale:1);
         } else {
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*pvSunScale;
+          o.intensity=LIGHT_SETTINGS.sun*pvSunScale*(interiorMode?interiorSunScale:1);
           if(o.color) o.color.set(preset.sunColor||'#ffffff');
           var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.6:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.5:0.5):1));
+        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.25:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.25:0.5):1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
@@ -7130,7 +7139,11 @@ function applyLightingToScene(refreshSky){
     }
     // 内観はIBL寄与を大きく抑えて配置ライトを主役にする。ウォークスルーも室内目線のため
     // 大幅に絞る(2.4のままだと昼空のIBLが室内を白く洗い流し、配置ライトの色味が消える)
-    var envBoost=(ST.view==='3d-int')?(daytimeInterior?1.2:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.1:0.7):2.4);
+    // 空からの光(IBL)は、白いベース光と違って向きと色を持つ。壁は空の青を、
+    // 床は地面の色を拾い、金属とガラスは映り込みを得る。ベース光を薄くした分を
+    // ここへ回す。内観・ウォークスルーを外観より低く抑えるのは従来どおりで、
+    // 配置照明の色が洗い流されないようにするため。
+    var envBoost=(ST.view==='3d-int')?(daytimeInterior?2.6:0.4):(ST.view==='3d-walk'?(daytimeInterior?2.4:0.7):2.4);
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){

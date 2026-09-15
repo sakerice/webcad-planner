@@ -11,28 +11,41 @@ var FLOOR_SLAB_H = 180;
 var U = 0.001;
 var WALL_COLORS = { 1:'#5c3820', 2:'#e8e0cc', 3:'#e8e0cc', 4:'#e8e0cc' };
 var WALL_COLOR_CUSTOM = {};
-var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.38, sun:0.78, ambient:0.16, room:0.12, exposure:0.93, env:0.42,
+// 光の配分。**白いベース光(ambient)を薄く、空からの光(env)と太陽を厚く**。
+// 以前は ambient/hemi の白い全方向光が主で、env は 0.42 に抑えられていた。
+// 白い光をどの面にも同じだけ足すと、面の向きの差＝陰影が消え、素材の色も
+// 白に寄る。実測(既定間取り・内観3D): 平均輝度 138.5 / コントラスト 40.7 /
+// 彩度 0.155 という、明るくもないのに色も形も出ていない絵になっていた。
+// 太陽と空を主役に組み直して 165.4 / 42.1 / 0.231。
+// 露出は「上げても白飛びしない上限の手前」で決めた。実測では 1.06/1.12/1.18/1.25
+// のいずれも最大チャンネル252以上の画素は 0.00% で、1.18 までは明るさと
+// コントラストが素直に増える(外観 平均 145.2→153.4)。
+var LIGHT_SETTINGS = {timeOfDay:'day',hemi:0.34, sun:1.10, ambient:0.10, room:0.12, exposure:1.18, env:0.62,
   sunSim:true, hour:13, season:'equinox', northDeg:0};
 // PVキャプチャ(?pvCapture=1)専用の内観採光スイッチ。既定は null。
 // null のあいだ内観3Dはこれまでどおり「天井を作らない・太陽は消灯」で、
 // 通常の利用者から見た挙動は一切変わらない。値を入れるのはファイル末尾の
 // PVフック(__PV_CAPTURE__.setInteriorDaylight)だけ。形は {sunScale:<倍率>}。
 var PV_INTERIOR_DAYLIGHT=null;
+// 内観3Dで太陽をどれだけ弱めるか。天井を作らない見せ方なので直射がそのまま
+// 入る。1.0(屋外と同じ)だと床が飛び、0 だと陰影が消える。実測で 0.55 が、
+// 家具の影が出て床が飛ばない範囲の中央あたりだった。
+var INTERIOR_SUN_SCALE = 0.55;
 var LIGHT_PRESETS = {
   morning:{
-    label:'朝',hemi:0.30,sun:0.64,ambient:0.18,room:0.14,exposure:0.9,env:0.34,
+    label:'朝',hemi:0.27,sun:0.92,ambient:0.11,room:0.14,exposure:1.14,env:0.50,
     sunColor:'#ffd6a3',ambientColor:'#fff2df',hemiSky:'#d7ecff',hemiGround:'#8f7a66',
     sunPos:{x:-120,y:78,z:85},fogColor:0xd6e7f1,fogNear:70,fogFar:470,interiorBg:0x151821,
     sky:{top:'#6f9dcb',mid:'#b7d7ee',horizon:'#ffd7a6',ground:'#f5e7c9',sunX:0.22,sunY:0.34,sunCore:'rgba(255,240,205,0.95)',sunGlow:'rgba(255,176,91,0.44)',haze:'rgba(255,220,168,0.42)',cloudAlpha:0.62}
   },
   day:{
-    label:'昼',hemi:0.38,sun:0.78,ambient:0.16,room:0.12,exposure:0.93,env:0.42,
+    label:'昼',hemi:0.34,sun:1.10,ambient:0.10,room:0.12,exposure:1.18,env:0.62,
     sunColor:'#ffffff',ambientColor:'#ffffff',hemiSky:'#ffffff',hemiGround:'#777777',
     sunPos:{x:100,y:200,z:100},fogColor:0xb8d4f0,fogNear:80,fogFar:500,interiorBg:0x12121a,
     sky:{top:'#2874da',mid:'#549de5',horizon:'#bedcf3',ground:'#f4f7ec',sunX:0.78,sunY:0.2,sunCore:'rgba(255,255,235,0.95)',sunGlow:'rgba(255,249,205,0.45)',haze:'rgba(255,245,215,0.55)',cloudAlpha:1}
   },
   evening:{
-    label:'夕方',hemi:0.22,sun:0.62,ambient:0.16,room:0.19,exposure:0.84,env:0.28,
+    label:'夕方',hemi:0.20,sun:0.88,ambient:0.10,room:0.19,exposure:1.07,env:0.42,
     sunColor:'#ffad62',ambientColor:'#ffe4cc',hemiSky:'#b8a5d8',hemiGround:'#6c5142',
     sunPos:{x:150,y:46,z:-90},fogColor:0xd8a878,fogNear:65,fogFar:430,interiorBg:0x18131a,
     sky:{top:'#4d5f91',mid:'#a06f9e',horizon:'#f0a85e',ground:'#5c4a54',sunX:0.82,sunY:0.55,sunCore:'rgba(255,230,186,0.9)',sunGlow:'rgba(255,128,50,0.5)',haze:'rgba(255,145,72,0.38)',cloudAlpha:0.46}
