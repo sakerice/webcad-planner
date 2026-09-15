@@ -45,12 +45,13 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 window.THREE = Object.assign({}, THREE_NS, {
   OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader,
   DRACOLoader: DRACOLoader, KTX2Loader: KTX2Loader,
   EffectComposer: EffectComposer, RenderPass: RenderPass, OutputPass: OutputPass,
-  UnrealBloomPass: UnrealBloomPass,
+  UnrealBloomPass: UnrealBloomPass, ShaderPass: ShaderPass,
   BufferGeometryUtils: {mergeGeometries: mergeGeometries}
 });
 // N8AO(高品質AO)は任意ロード: 失敗してもアプリは素のレンダラーで動作する
@@ -3996,6 +3997,45 @@ function hide3DEngineNotice(){
   var el=document.getElementById('c3d-engine-notice');
   if(el) el.style.display='none';
 }
+// 仕上げ(グレーディング)のシェーダー。画面全体に対して、彩度 → 傾き → 明るさ戻し、
+// の順に1回だけ掛ける。値と選び方は GRADE_* (assets/js/app-constants.js) にある。
+// 恒等(彩度1・傾き1・明るさ1)にすると、掛ける前と画素が一致することを検査で見ている。
+var _gradePass=null;
+var GRADE_SHADER={
+  uniforms:{tDiffuse:{value:null},gSaturation:{value:1},gContrast:{value:1},gLift:{value:1}},
+  vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:[
+    'uniform sampler2D tDiffuse;',
+    'uniform float gSaturation;',
+    'uniform float gContrast;',
+    'uniform float gLift;',
+    'varying vec2 vUv;',
+    '// 上端は硬く切らずに 1.0 へ漸近させる。切ると、傾けたぶんだけ増えた高輝度側が',
+    '// そのまま白飛びになる(実測: 内観で画素の 2.04% が振り切れ、青は 1.19%)。',
+    '// 漸近させれば同じ傾きでも白飛びは 0.00% になる。',
+    'float softClip( float x ){',
+    '  const float knee = 0.86;',
+    '  if ( x <= knee ) return x;',
+    '  float t = ( x - knee ) / ( 1.0 - knee );',
+    '  return knee + ( 1.0 - knee ) * ( 1.0 - exp( -t ) );',
+    '}',
+    'void main(){',
+    '  vec4 texel = texture2D( tDiffuse, vUv );',
+    '  vec3 c = texel.rgb;',
+    '  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );',
+    '  c = vec3( l ) + ( c - vec3( l ) ) * gSaturation;',
+    '  c = ( ( c - 0.5 ) * gContrast + 0.5 ) * gLift;',
+    '  c = vec3( softClip( max( c.r, 0.0 ) ), softClip( max( c.g, 0.0 ) ), softClip( max( c.b, 0.0 ) ) );',
+    '  gl_FragColor = vec4( clamp( c, 0.0, 1.0 ), texel.a );',
+    '}'
+  ].join('\n')
+};
+function applyGradeSettings(){
+  if(!_gradePass) return;
+  _gradePass.uniforms.gSaturation.value=GRADE_SATURATION;
+  _gradePass.uniforms.gContrast.value=GRADE_CONTRAST;
+  _gradePass.uniforms.gLift.value=GRADE_LIFT;
+}
 function init3D(){
   if(ren) return;
   if(typeof window.THREE==='undefined'){
@@ -4112,6 +4152,12 @@ function init3D(){
       _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
       composer.addPass(_bloomPass);
       composer.addPass(new THREE.OutputPass());
+      // 仕上げ(コントラストと彩度)。OutputPass が sRGB へ載せた**後**の値を扱うので、
+      // 表示空間そのままで傾けられる。ここより前(リニア空間)でやると、中央値が
+      // 中間より上にあるこの手の絵では持ち上げにしかならず、かえって平坦になる。
+      _gradePass = new THREE.ShaderPass(GRADE_SHADER);
+      applyGradeSettings();
+      composer.addPass(_gradePass);
     } catch(e) { console.error('Composer init failed', e); composer = null; }
   }
 
