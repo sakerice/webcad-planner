@@ -26,18 +26,24 @@ cp index.html dist/
 cp -r assets/. dist/assets/
 # Only the reviewed, registered original collection belongs in the delivery.
 # Keep bulk Blender candidates locally for further work, not in the public build.
-python3 - <<'PYMODELS'
-import json
-from pathlib import Path
-registered=set()
-for path in Path('assets/models').glob('*/manifest.json'):
-    manifest=json.loads(path.read_text())
-    if isinstance(manifest,dict):
-        registered.update(item.get('model','') for item in manifest.get('items',[]))
-for path in Path('dist/assets/models/original').glob('*.glb'):
-    if path.relative_to('dist').as_posix() not in registered:
-        path.unlink()
-PYMODELS
+# node で書いてあるのは、Workers Builds のビルド環境に python3 がある保証が
+# 無いため。node は wrangler が動く以上かならず在る。
+node - <<'JSMODELS'
+const fs=require('node:fs'), path=require('node:path');
+const registered=new Set();
+for(const dir of fs.readdirSync('assets/models',{withFileTypes:true})){
+  if(!dir.isDirectory()) continue;
+  const f=path.join('assets/models',dir.name,'manifest.json');
+  if(!fs.existsSync(f)) continue;
+  let m; try{ m=JSON.parse(fs.readFileSync(f,'utf8')); }catch(e){ continue; }
+  if(m && Array.isArray(m.items)) for(const it of m.items) if(it && it.model) registered.add(it.model);
+}
+const out='dist/assets/models/original';
+if(fs.existsSync(out)) for(const name of fs.readdirSync(out)){
+  if(!name.endsWith('.glb')) continue;
+  if(!registered.has(path.posix.join('assets/models/original',name))) fs.unlinkSync(path.join(out,name));
+}
+JSMODELS
 echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
