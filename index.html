@@ -3492,20 +3492,25 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div class="ph">この機能について</div>
-    <div class="unity-render-status">ハウスメーカーの間取り図を読み取って、壁・部屋・開口・階段を起こします。家具は読み取りません（あとからカタログで置けます）。読み取りは日本国内(東京・大阪)で処理されます。図面に施主名や住所が入っている場合は、次の手順で図面の部分だけを囲んでください。囲んだ範囲の外側は送信されません。</div>
+    <div class="unity-render-status">ハウスメーカーの間取り図を読み取って、壁・部屋・開口・階段を起こします。家具は読み取りません（あとからカタログで置けます）。読み取りは日本国内(東京・大阪)で処理されます。PDFはそのまま読めます。複数ページあれば、各ページを各階として一度に読みます。</div>
 
-    <div class="ph">1. 間取り図の画像を選ぶ</div>
+    <div class="ph">1. 間取り図のPDFか画像を選ぶ</div>
     <div class="unity-render-actions">
-      <input type="file" id="plan-import-file" accept="image/*" onchange="onPlanImportFile(this)">
+      <input type="file" id="plan-import-file" accept="application/pdf,image/*" onchange="onPlanImportFile(this)">
       <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="resetPlanImport()">やり直す</button>
     </div>
 
     <div id="plan-import-step2" style="display:none">
-      <div class="ph">2. 図面の部分だけを囲む</div>
-      <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
-      <div class="unity-render-actions">
-        <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
-        <span id="plan-import-crop-size" class="airx-source-note"></span>
+      <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
+           図面が写っていない画像のときだけ、囲むと精度が上がる。
+           PDF はそのまま送るので、この枠ごと出さない。 -->
+      <div id="plan-import-crop">
+        <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
+        <div class="unity-render-actions">
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
+          <span id="plan-import-crop-size" class="airx-source-note"></span>
+        </div>
       </div>
       <div class="unity-render-config">
         <div>

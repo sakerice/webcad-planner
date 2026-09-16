@@ -17,14 +17,21 @@
 (function (root) {
   'use strict';
 
-  // 送る画像の長辺の上限。モデル側でどのみち縮小されるので、これ以上送っても
-  // 精度は上がらず、通信量と時間だけが増える。
-  var MAX_SEND_PX = 1568;
+  // 送る画像の長辺の上限。
+  //
+  // 1568 にしていたが、**それでは図面の寸法の文字が潰れて読めない**。
+  // 実測では 7280 を 7290 と誤読し、そこから全体が狂っていた。2400 まで
+  // 上げると4辺の寸法線がすべて検算を通るようになる。入力トークンは
+  // 2,854→4,241 に増えるが、入力は1トークン $0.0000003 なので誤差。
+  // 読み違いを直すための思考が減るぶん、**むしろ安くなる**。
+  var MAX_SEND_PX = 2400;
   // 画面に出すプレビューの長辺。大きな写真をそのまま描くと操作が重くなる。
   var MAX_PREVIEW_PX = 1200;
 
   var ST = {
     image: null,        // 読み込んだ画像 (Image)
+    pdf: null,          // PDFを選んだときの data URL（変換せずそのまま送る）
+    fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
     result: null,       // 読み取り結果 {plan, summary, notes, warnings, usage}
@@ -44,7 +51,7 @@
     var m = $('plan-import-modal');
     if (!m) return;
     m.classList.add('show');
-    if (!ST.image) resetPlanImport();
+    if (!ST.image && !ST.pdf) resetPlanImport();
   }
 
   function closePlanImport() {
@@ -53,11 +60,12 @@
   }
 
   function resetPlanImport() {
-    ST.image = null; ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
+    ST.image = null; ST.pdf = null; ST.fileName = '';
+    ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
     var f = $('plan-import-file'); if (f) f.value = '';
     show('plan-import-step2', false);
     show('plan-import-step3', false);
-    setStatus('間取り図の画像を選んでください。PDFのときは、先に画像にしてから選んでください。');
+    setStatus('間取り図のPDFか画像を選んでください。PDFはそのまま読めます。');
     syncPlanImportButtons();
   }
 
@@ -65,22 +73,46 @@
   function onPlanImportFile(input) {
     var file = input && input.files && input.files[0];
     if (!file) return;
+    ST.fileName = file.name || '';
+
+    // PDF はそのまま送る。ベクターなので、こちらで画像に変換するより
+    // AI 側で開いたほうが寸法の文字がはっきり読める。切り出しも要らない。
+    // 複数ページあれば各ページが各階として一度に読まれる。
+    if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
+      var pdfReader = new FileReader();
+      pdfReader.onload = function (e) {
+        ST.pdf = e.target.result;
+        ST.image = null; ST.crop = null; ST.result = null;
+        show('plan-import-step2', true);
+        show('plan-import-crop', false);      // PDFは囲む操作が要らない
+        show('plan-import-step3', false);
+        setStatus('PDFはそのまま読み取ります。切り出しは要りません。'
+          + '複数ページあれば、各ページを各階として読みます。');
+        syncPlanImportButtons();
+      };
+      pdfReader.onerror = function () { setStatus('ファイルを読めませんでした。'); };
+      pdfReader.readAsDataURL(file);
+      return;
+    }
+
     if (!/^image\//.test(file.type)) {
-      setStatus('画像ファイルを選んでください（PNG / JPEG / WebP）。PDFは先に画像にしてください。');
+      setStatus('PDF か画像（PNG / JPEG / WebP）を選んでください。');
       return;
     }
     var reader = new FileReader();
     reader.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        ST.image = img;
-        // 最初は全体を選んでおく。狭めるのは利用者の仕事。
+        ST.image = img; ST.pdf = null;
+        // 最初は全体を選んでおく。狭めるのは利用者の任意。
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
         ST.result = null;
         show('plan-import-step2', true);
+        show('plan-import-crop', true);
         show('plan-import-step3', false);
         drawPlanImportPreview();
-        setStatus('図面の部分だけをドラッグで囲んでください。表題欄や俯瞰図を外すと、正確に読めて費用も下がります。');
+        setStatus('このまま読み取れます。図面が紙面の一部にしか写っていない場合は、'
+          + '図面の部分だけをドラッグで囲むと、より正確に読めます（任意）。');
         syncPlanImportButtons();
       };
       img.onerror = function () { setStatus('この画像を開けませんでした。別の形式で試してください。'); };
@@ -193,7 +225,7 @@
 
   function syncPlanImportButtons() {
     var run = $('plan-import-run');
-    if (run) run.disabled = !ST.image || ST.busy;
+    if (run) run.disabled = (!ST.image && !ST.pdf) || ST.busy;
     var apply = $('plan-import-apply');
     if (apply) apply.disabled = !ST.result || ST.busy;
     var size = $('plan-import-crop-size');
@@ -206,8 +238,9 @@
 
   // ── 3. 読み取る ────────────────────────────────────────────────────
   function runPlanImport() {
-    if (!ST.image || ST.busy) return;
-    var image = croppedDataUrl();
+    if (ST.busy) return;
+    // PDF はそのまま。画像は切り出して(囲んでいなければ全体を)送る。
+    var image = ST.pdf || croppedDataUrl();
     if (!image) return;
     ST.busy = true; ST.result = null;
     show('plan-import-step3', false);

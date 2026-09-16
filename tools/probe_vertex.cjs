@@ -93,15 +93,20 @@ function keyFile() {
     console.error('使い方: node tools/probe_vertex.cjs <画像ファイル> [--hint "..."] [--model ...] [--out plan.json]');
     process.exit(2);
   }
-  const FORMATS = { '.png': 'png', '.jpg': 'jpeg', '.jpeg': 'jpeg', '.webp': 'webp' };
-  const format = FORMATS[extname(file).toLowerCase()];
-  if (!format) {
-    console.error(`${file}: png / jpg / webp のみ。PDF は先に画像にしてください（macOS なら sips -s format png in.pdf --out out.png）`);
+  // PDF もそのまま渡せる。ベクターなので、画像に変換するより Gemini 側で
+  // 開いたほうが寸法の文字がはっきり読める。
+  const TYPES = {
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp', '.pdf': 'application/pdf',
+  };
+  const mimeType = TYPES[extname(file).toLowerCase()];
+  if (!mimeType) {
+    console.error(`${file}: png / jpg / webp / pdf のみ`);
     process.exit(2);
   }
 
   const base64 = readFileSync(file).toString('base64');
-  console.log(`図面   : ${file} (${Math.round(base64.length * 3 / 4 / 1024)} KB)`);
+  console.log(`図面   : ${file} (${Math.round(base64.length * 3 / 4 / 1024)} KB, ${mimeType})`);
   console.log(`モデル : ${model} @ ${location}（プロジェクト ${project}）`);
   if (opt('hint')) console.log(`補足   : ${opt('hint')}`);
   console.log('送信中…');
@@ -111,7 +116,7 @@ function keyFile() {
     config: { credentials, project, location, model },
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint: opt('hint') || '' }),
-    image: { format, base64 },
+    image: { mimeType, base64 },
     maxOutputTokens: Number(opt('max-tokens') || 32768),
     thinkingBudget: Number(opt('thinking') || 8192),
   });
@@ -137,6 +142,10 @@ function keyFile() {
     }
   }
 
+  // 生の返事も残す。形が想定と違ったとき、もう一度お金を払わずに調べられる。
+  if (opt('out')) {
+    writeFileSync(String(opt('out')).replace(/\.json$/, '') + '.raw.txt', result.text);
+  }
   const parsed = vertex.extractJson(result.text);
   if (!parsed) {
     console.error('\nJSON を取り出せませんでした。返事の先頭 500 文字:');
@@ -146,7 +155,7 @@ function keyFile() {
 
   const plan = decodeCompactPlan(parsed);
   // 部屋はAIに出させず、壁と文字から計算する（両方出させると食い違う）
-  const labels = Array.isArray(parsed.labels) ? parsed.labels : [];
+  const labels = plan.labels;
   const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
   plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
   const checked = PlanSchema.validatePlan(plan);
@@ -172,9 +181,9 @@ function keyFile() {
       console.log(`  ${side.padEnd(7)} 総 ${total}  = ${parts.join(' + ')}  ${ok}`);
     }
   }
-  if (Array.isArray(parsed.notes) && parsed.notes.length) {
+  if (plan.notes.length) {
     console.log('\nAIが読めなかったと言っていること:');
-    for (const n of parsed.notes) console.log('  - ' + n);
+    for (const n of plan.notes) console.log('  - ' + n);
   }
   if (checked.warnings.length) {
     console.log('\n警告:');

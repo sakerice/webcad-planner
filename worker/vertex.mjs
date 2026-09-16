@@ -73,7 +73,12 @@ export async function generate({ config, system, text, image, maxOutputTokens = 
   }
 
   const parts = [];
-  if (image) parts.push({ inline_data: { mime_type: "image/" + image.format, data: image.base64 } });
+  // 画像だけでなく PDF もそのまま渡せる。PDF はベクターなので、こちらで
+  // 画像に変換するより Gemini 側で開いたほうが文字がはっきり読める。
+  if (image) {
+    var mime = image.mimeType || ("image/" + image.format);
+    parts.push({ inline_data: { mime_type: mime, data: image.base64 } });
+  }
   parts.push({ text });
 
   const body = JSON.stringify({

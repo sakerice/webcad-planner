@@ -41,13 +41,22 @@ export async function handleAi(request, env, url, deps = {}) {
   return json({ error: "not_found" }, 404);
 }
 
-// data URL を検める。画像以外や、上限を超えるものはここで落とす。
+// data URL を検める。扱えない種類や、上限を超えるものはここで落とす。
+//
+// **PDF もそのまま受ける。** ベクターなので、ブラウザで画像に変換してから
+// 送るより、Gemini 側で開いたほうが寸法の文字がはっきり読める。実測でも
+// PDF直送が最良だった(4辺の寸法線がすべて検算を通り、3階建てを1回で読めた)。
+const ACCEPTED_TYPES = {
+  "image/png": true, "image/jpeg": true, "image/webp": true, "application/pdf": true,
+};
 function readImage(value, field) {
   if (typeof value !== "string" || !value) return { error: `${field} が無い` };
-  const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(value);
-  if (!m) return { error: `${field} は data:image/png|jpeg|webp;base64, の形で送ること` };
+  const m = /^data:([a-z]+\/[a-z+.-]+);base64,([A-Za-z0-9+/=]+)$/.exec(value);
+  if (!m || !ACCEPTED_TYPES[m[1]]) {
+    return { error: `${field} は PNG / JPEG / WebP / PDF を data:...;base64, の形で送ること` };
+  }
   if (m[2].length * 3 / 4 > MAX_IMAGE_BYTES) return { error: `${field} が大きすぎる(上限 ${MAX_IMAGE_BYTES} バイト)` };
-  return { format: m[1] === "jpeg" ? "jpeg" : m[1], base64: m[2] };
+  return { mimeType: m[1], base64: m[2] };
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────
@@ -77,7 +86,7 @@ async function aiImportPlan(payload, env, deps) {
     config,
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint }),
-    image: { format: image.format, base64: image.base64 },
+    image: { mimeType: image.mimeType, base64: image.base64 },
     fetchImpl: deps.fetchImpl,
   });
   if (!result.ok) {
@@ -100,7 +109,7 @@ export function finishImportedPlan(parsed, usage) {
   // 両方出させると食い違い、同じ図面で部屋が3〜9個に変動した。壁から
   // 作れば、壁と部屋は必ず一致する。寸法の読み違いもここで吸収する
   // (実測で 227.5→275、455→450 の読み違いを確認している)。
-  const labels = Array.isArray(parsed.labels) ? parsed.labels : [];
+  const labels = plan.labels;
   const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
   plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
   const checked = planProblems(plan);
@@ -117,7 +126,7 @@ export function finishImportedPlan(parsed, usage) {
     summary: PlanSchema.summarize(normalized),
     warnings: checked.warnings,
     // モデルが「読めなかった」と言っていることは、そのまま利用者に見せる。
-    notes: Array.isArray(parsed.notes) ? parsed.notes.slice(0, 20).map(String) : [],
+    notes: plan.notes.slice(0, 20),
     usage: usage || null,
   });
 }

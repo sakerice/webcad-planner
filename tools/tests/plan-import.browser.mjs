@@ -143,8 +143,63 @@ try {
     () => /まだAIの読み取りを使えません/.test(document.getElementById('plan-import-status').textContent),
     null, { timeout: 10000 });
 
+  // ── PDF はそのまま送る（囲む操作を出さない） ──────────────────────
+  //
+  // PDFはベクターなので、ブラウザで画像に変換するよりAI側で開いたほうが
+  // 寸法の文字がはっきり読める。実測でもPDF直送が最良だった。
+  await page.evaluate(() => { resetPlanImport(); });
+  const pdfBytes = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
+  await page.locator('#plan-import-file').setInputFiles({
+    name: 'madori.pdf', mimeType: 'application/pdf', buffer: pdfBytes,
+  });
+  await page.waitForFunction(() => PlanImport.state.pdf !== null, null, { timeout: 5000 });
+  assert.equal(await page.locator('#plan-import-crop').isVisible(), false,
+    'PDFなのに囲む操作を出している（利用者に不要な手間をかけている）');
+  assert.match(await page.locator('#plan-import-status').textContent(), /そのまま読み取ります/);
+  assert.equal(await page.locator('#plan-import-run').isDisabled(), false, 'PDFで読み取りボタンが押せない');
+
+  // ── 複数階の取り込み ────────────────────────────────────────────────
+  //
+  // PDFが複数ページなら各ページが各階になる。壁が階ごとに入ることを見る。
+  await page.evaluate(() => {
+    window.fetch = async (url, opts) => {
+      window.__sentBody = JSON.parse(opts.body);
+      const wallsFor = (f) => ([
+        { id: 'w' + f + 'a', floor: f, x1: 0, y1: 0, x2: 7280, y2: 0, thick: 120 },
+        { id: 'w' + f + 'b', floor: f, x1: 7280, y1: 0, x2: 7280, y2: 4095, thick: 120 },
+        { id: 'w' + f + 'c', floor: f, x1: 7280, y1: 4095, x2: 0, y2: 4095, thick: 120 },
+        { id: 'w' + f + 'd', floor: f, x1: 0, y1: 4095, x2: 0, y2: 0, thick: 120 },
+      ]);
+      return new Response(JSON.stringify({
+        plan: {
+          walls: [...wallsFor(1), ...wallsFor(2)],
+          rooms: [
+            { id: 'r1', floor: 1, x: 0, y: 0, w: 7280, d: 4095, n: '洋室' },
+            { id: 'r2', floor: 2, x: 0, y: 0, w: 7280, d: 4095, n: 'LDK' },
+          ],
+          items: [],
+        },
+        summary: { walls: 8, rooms: 2, items: 0, floors: [1, 2] },
+        notes: [], warnings: [],
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    };
+  });
+  await page.locator('#plan-import-run').click();
+  await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });
+  const pdfSent = await page.evaluate(() => String(window.__sentBody.image).slice(0, 28));
+  assert.equal(pdfSent, 'data:application/pdf;base64,', 'PDFをそのまま送っていない: ' + pdfSent);
+  assert.match(await page.locator('#plan-import-summary').textContent(), /階 1・2/, '階の表示が出ていない');
+
+  await page.locator('#plan-import-apply').click();
+  const floors = await page.evaluate(() => ({
+    walls: DATA.walls.length,
+    byFloor: [1, 2].map((f) => DATA.rooms.filter((r) => r.floor === f).map((r) => r.n)),
+  }));
+  assert.equal(floors.walls, 8, '2階ぶんの壁が入っていない');
+  assert.deepEqual(floors.byFloor, [['洋室'], ['LDK']], '階ごとの部屋が入っていない');
+
   assert.deepEqual(errors, [], 'ページで例外が出ている');
-  console.log('間取り図の読み取り: 選ぶ→囲む→読み取る→取り込む が通った');
+  console.log('間取り図の読み取り: 画像もPDFも、選ぶ→読み取る→取り込む が通った');
 } finally {
   await browser.close();
 }
