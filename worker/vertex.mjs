@@ -57,7 +57,11 @@ export function vertexConfig(env) {
 // maxOutputTokens: 図面1枚ぶんの JSON は、壁が多いと8千トークンでは足りない。
 // 足りないと finishReason=MAX_TOKENS で**途中で切れた JSON** が返り、
 // 読み取り自体は課金されているのに1件も使えない、という一番損な失敗になる。
-export async function generate({ config, system, text, image, maxOutputTokens = 32768, fetchImpl = fetch, now }) {
+// thinkingBudget: 思考にも上限を置く。**上限が無いと費用に上限が無い。**
+// 実際、検算を促す指示を入れたら思考だけで32,765トークンを使い切り、
+// 答えが0トークンのまま打ち切られた(課金だけされて1件も使えない)。
+// 答えのJSONは2,000〜3,700トークンなので、出力の上限は思考ぶんを足した値。
+export async function generate({ config, system, text, image, maxOutputTokens = 32768, thinkingBudget = 8192, fetchImpl = fetch, now }) {
   const auth = await getAccessToken(config.credentials, { fetchImpl, now });
   if (!auth.ok) return { ok: false, status: auth.status, message: "認証に失敗しました: " + auth.message };
 
@@ -76,7 +80,10 @@ export async function generate({ config, system, text, image, maxOutputTokens = 
     contents: [{ role: "user", parts }],
     systemInstruction: system ? { parts: [{ text: system }] } : undefined,
     // 図面の読み取りは創作ではないので、ぶれさせない。
-    generationConfig: { temperature: 0, maxOutputTokens, responseMimeType: "application/json" },
+    generationConfig: {
+      temperature: 0, maxOutputTokens, responseMimeType: "application/json",
+      thinkingConfig: { thinkingBudget },
+    },
   });
 
   const response = await fetchImpl(new Request(url, {

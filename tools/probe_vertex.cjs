@@ -112,6 +112,7 @@ function keyFile() {
     text: buildPlanPrompt({ hint: opt('hint') || '' }),
     image: { format, base64 },
     maxOutputTokens: Number(opt('max-tokens') || 32768),
+    thinkingBudget: Number(opt('thinking') || 8192),
   });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
 
@@ -151,6 +152,19 @@ function keyFile() {
     console.log('\n部屋:');
     for (const r of plan.rooms) {
       console.log(`  ${String(r.n || '(名前なし)').padEnd(14)} ${r.w}×${r.d}mm  (${r.x},${r.y})  ${(r.w * r.d / 1656200).toFixed(1)}帖`);
+    }
+  }
+  // 手順1〜2で読んだ寸法線。内訳の合計が総寸法と合っているかを、こちらでも検算する。
+  if (parsed.dims && typeof parsed.dims === 'object') {
+    console.log('\n読んだ寸法線:');
+    for (const side of ['top', 'bottom', 'left', 'right']) {
+      const d = parsed.dims[side];
+      if (!Array.isArray(d)) continue;
+      const total = Number(d[0]);
+      const parts = Array.isArray(d[1]) ? d[1].map(Number) : [];
+      const sum = parts.reduce((a, b) => a + b, 0);
+      const ok = Math.abs(sum - total) < 1 ? '✓' : `✗ 合計${sum}`;
+      console.log(`  ${side.padEnd(7)} 総 ${total}  = ${parts.join(' + ')}  ${ok}`);
     }
   }
   if (Array.isArray(parsed.notes) && parsed.notes.length) {
