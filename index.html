@@ -15027,6 +15027,9 @@ function get3DFrameInterval(){
 // ヘッダーから起動し、3Dモデルの中に目線カメラで立つ。右下の十字キー/矢印キーで
 // 前後移動・その場回転、右上のミニマップのタップで移動。閉まっているドアには
 // 接近すると90度まで開くアニメーションが走る
+// ミニマップ上端に空ける帯の高さ(px)。ここに「○F タップで移動」を描き、
+// 間取りはこれより下だけに収める。
+var WALK_MAP_LABEL_BAND=34;
 var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0,eyePreset:'stand'};
 var _doorAnims=[];
 // ドアの開閉希望状態(0=閉/1=開)をプランアイテム単位で保持する。
@@ -15208,6 +15211,79 @@ function walkUpdateGround(snap){
   if(!snap && target-prevOff>WALK_MAX_STEP_UP_M) return;
   WALK.groundOff=target;
 }
+// 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
+// 玄関の内側は「壁は無いが立てない」場所になりやすい。実測(既定間取り):
+// 玄関ドアから内側0.9mの決め打ち位置は、内開きの玄関ドアが開いた先と重なり、
+// 開始直後の視界が平均輝度 4.8/255・正面9cmに面、という真っ暗な状態だった。
+//
+// **開き戸は障害に数える**(開いた扉が床を占めるため)。引戸と窓は数えない。
+// 上に立つもの(敷地・基礎・デッキ)と屋根は障害ではない。ここを除かないと
+// 敷地が階全体を覆っているせいでどの点も塞がり、逃げ場が無くなる。
+var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
+var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
+function walkSpawnObstructed(xMm,zMm,fl){
+  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
+  // 点そのものは家具の外なので素通りしてしまう。
+  var r=WALK_PLAYER_RADIUS_MM;
+  var probes=[[xMm,zMm],[xMm+r,zMm],[xMm-r,zMm],[xMm,zMm+r],[xMm,zMm-r]];
+  return (DATA.items||[]).some(function(it){
+    if(!it || (it.floor||1)!==fl) return false;
+    if(isPlanAnnotationType(it.type)) return false;
+    if(isLightItemType(it.type)) return false;
+    if(WALK_SPAWN_FLOORLIKE_TYPES[it.type]) return false;
+    if(isPlacementSurfaceItem(it)) return false;
+    var swing=isSwingDoorType(it.type);
+    if(isOpeningItemType(it.type) && !swing) return false;
+    if(!swing && getItemTopElevation(it)<WALK_SPAWN_MIN_OBSTACLE_MM) return false;
+    return probes.some(function(q){ return isInsideItem(it,q[0],q[1]); });
+  });
+}
+// 空いている立ち位置を、その階の部屋の中から探す。狙いの点に一番近いものを返す。
+function walkSpawnClearNear(xMm,zMm,fl){
+  var step=250, margin=WALK_PLAYER_RADIUS_MM+60;
+  var best=null,bestD=Infinity;
+  (DATA.rooms||[]).filter(function(r){return r.floor===fl;}).forEach(function(r){
+    var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
+    for(var x=r.x+margin;x<=x1;x+=step){
+      for(var y=r.y+margin;y<=y1;y+=step){
+        var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
+        if(d>=bestD) continue;
+        if(walkSpawnObstructed(x,y,fl)) continue;
+        bestD=d; best={x:x,y:y};
+      }
+    }
+  });
+  return best;
+}
+// 立った場所から一番見通しの利く向き。壁に張り付いて始まると、正面が
+// 一色の面で埋まって「何も見えない」第一印象になる(実測: 正面0.86mが壁)。
+// 12方向へ 200mm ずつ進めて、壁に当たるまでの距離が最大の向きを選ぶ。
+// 狙いの向き(部屋の中心など)があるときは、同じくらい開けていればそちらを優先する。
+function walkBestFacing(xMm,zMm,fl,preferYaw){
+  var best=null,bestScore=-Infinity;
+  for(var i=0;i<12;i++){
+    var yaw=i*Math.PI/6;
+    var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
+    for(var d=200; d<=8000; d+=200){
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      reach=d;
+    }
+    var bonus=0;
+    if(typeof preferYaw==='number'){
+      var diff=Math.abs(((yaw-preferYaw+Math.PI*3)%(Math.PI*2))-Math.PI);
+      // **狙いから90度を超える向きは捨てる。** 玄関に立つと、一番見通しが利くのは
+      // たいてい「開けっ放しの玄関から屋外」で、そちらを向いて始まってしまう
+      // (実測: 正面894m＝ドアの開口を抜けて空が見えていた)。家の中を向く範囲で選ぶ。
+      if(diff>Math.PI/2) continue;
+      // 見通しが同等なら狙い優先。最大1.2m分のおまけ。
+      bonus=(1-diff/Math.PI)*1200;
+    }
+    var score=reach+bonus;
+    if(score>bestScore){ bestScore=score; best=yaw; }
+  }
+  return best;
+}
 function walkSpawn(){
   WALK.floor=ST.floor||1;
   var fl=WALK.floor;
@@ -15223,18 +15299,31 @@ function walkSpawn(){
       // 建物内側へ0.9m入った位置に立ち、部屋側を向く
       var cen=big?{x:(big.x+big.w/2),y:(big.y+big.d/2)}:{x:wi.x,y:wi.y};
       var sideIn=((cen.x-wi.x)*nx+(cen.y-wi.y)*nz)>=0?1:-1;
-      px=(wi.x+nx*sideIn*900)*U; pz=(wi.y+nz*sideIn*900)*U;
+      // 玄関から入る体験は保ちつつ、扉の可動域や下駄箱の中に立たないよう
+      // 空くまで奥へ寄せる。0.9m は「扉のすぐ内側」で、内開きの扉とよく重なる。
+      for(var depth=900; depth<=3600; depth+=300){
+        var cx2=wi.x+nx*sideIn*depth, cy2=wi.y+nz*sideIn*depth;
+        if(walkSpawnObstructed(cx2,cy2,fl)) continue;
+        px=cx2*U; pz=cy2*U; break;
+      }
       tx=cen.x*U; tz=cen.y*U;
     }
   }
   if(px===null){
-    if(big){ px=(big.x+big.w/2)*U; pz=(big.y+big.d/2)*U; tx=px; tz=pz-1; }
+    // 玄関から入れないときは、一番広い部屋の中央付近で空いている場所に立つ。
+    var aim=big?{x:big.x+big.w/2,y:big.y+big.d/2}:null;
+    var spot=aim?walkSpawnClearNear(aim.x,aim.y,fl):null;
+    if(spot){ px=spot.x*U; pz=spot.y*U; tx=aim.x*U; tz=aim.y*U; }
+    else if(big){ px=(big.x+big.w/2)*U; pz=(big.y+big.d/2)*U; tx=px; tz=pz-1; }
     else { px=4; pz=2; tx=4; tz=1; }
+    if(spot && Math.abs(tx-px)<1e-6 && Math.abs(tz-pz)<1e-6){ tz=pz-1; }
   }
   WALK.x=px; WALK.z=pz;
   WALK.pitch=0;
   WALK.groundOff=0;
-  WALK.yaw=Math.atan2(-(tx-px),-(tz-pz));
+  var aimYaw=Math.atan2(-(tx-px),-(tz-pz));
+  var open=walkBestFacing(px/U,pz/U,fl,aimYaw);
+  WALK.yaw=(typeof open==='number')?open:aimYaw;
   walkUpdateGround(true);
 }
 function walkApplyCamera(){
@@ -15251,9 +15340,12 @@ function walkMapTransform(){
   if(!isFinite(mnX)){mnX=0;mnY=0;mxX=9100;mxY=9100;}
   var cv=document.getElementById('walk-minimap');
   // 30px角丸カード内で線やラベルが角へ寄りすぎない共通内余白。
-  var pad=24, sw=cv.width-pad*2, sh=cv.height-pad*2;
+  // 上だけ広いのは「○F タップで移動」の帯を空けるため。**間取りはこの帯の下に
+  // 収まるように縮めて配置する**ので、どんな形の間取りでも文字と重ならない。
+  // 文字を避けて描くのではなく、描く領域そのものを文字の下へ限定するのが要点。
+  var pad=24, padTop=WALK_MAP_LABEL_BAND, sw=cv.width-pad*2, sh=cv.height-padTop-pad;
   var sc=Math.min(sw/Math.max(1,mxX-mnX),sh/Math.max(1,mxY-mnY));
-  var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=pad+(sh-(mxY-mnY)*sc)/2;
+  var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=padTop+(sh-(mxY-mnY)*sc)/2;
   return {sc:sc,ox:ox,oy:oy,mnX:mnX,mnY:mnY};
 }
 function drawWalkMinimap(){
@@ -15290,9 +15382,11 @@ function drawWalkMinimap(){
   ctx.fillStyle='#e94560';
   ctx.beginPath(); ctx.arc(pxm,pzm,5,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
-  // 階表示
+  // 階表示。walkMapTransform が上端に同じ高さの帯を空けているので、
+  // 間取りの形がどうであれここへは線が来ない。
   ctx.fillStyle='#33415e'; ctx.font='bold 11px sans-serif';
-  ctx.fillText(fl+'F タップで移動',24,29);
+  ctx.textBaseline='alphabetic';
+  ctx.fillText(fl+'F タップで移動',24,WALK_MAP_LABEL_BAND-9);
 }
 function walkMinimapTap(ev){
   var cv=document.getElementById('walk-minimap');
