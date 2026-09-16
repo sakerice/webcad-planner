@@ -77,11 +77,15 @@ function vertexReply(obj) {
 }
 
 const GOOD_PLAN = {
+  // 部屋は渡さない。**壁と文字から計算される**のが正しい振る舞い。
   walls: [
     { x1: 0, y1: 0, x2: 7280, y2: 0, thick: 120, floor: 1 },
     { x1: 7280, y1: 0, x2: 7280, y2: 4095, thick: 120, floor: 1 },
+    { x1: 7280, y1: 4095, x2: 0, y2: 4095, thick: 120, floor: 1 },
+    { x1: 0, y1: 4095, x2: 0, y2: 0, thick: 120, floor: 1 },
+    { x1: 3640, y1: 0, x2: 3640, y2: 4095, thick: 120, floor: 1 },
   ],
-  rooms: [{ x: 0, y: 0, w: 2730, d: 1820, n: '洋室', floor: 1 }],
+  labels: [{ text: '洋室', x: 1800, y: 2000, floor: 1 }],
   items: [{ type: 'window', x: 1365, y: 0, w: 1690, d: 150, rot: 0, floor: 1 }],
   notes: ['右下の収納は寸法が読めなかった'],
 };
@@ -160,12 +164,18 @@ test('レンダーは指示文が無い・長すぎるものを 400 で弾く', 
 // 日本国内から出ないことの検査は tools/tests/vertex-region.test.cjs にある。
 
 // ── 呼んだあと ────────────────────────────────────────────────────────
-test('読めた間取りは、検めて均してから返す', async () => {
+test('部屋はAIに出させず、壁と文字から計算する', async () => {
   const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV, vertexFetch(() => vertexReply(GOOD_PLAN)));
   assert.equal(res.status, 200);
   const body = await res.json();
-  assert.deepEqual(body.summary, { walls: 2, rooms: 1, items: 1, floors: [1] });
-  assert.ok(body.plan.rooms[0].id, 'id が振られている');
+  // 間仕切り1本で2部屋。AIは部屋を1つも渡していない。
+  assert.equal(body.summary.rooms, 2, '壁から部屋を作れていない: ' + JSON.stringify(body.plan.rooms));
+  assert.equal(body.summary.walls, 5);
+  const named = body.plan.rooms.find((r) => r.n === '洋室');
+  assert.ok(named, '図の文字が部屋名になっていない');
+  assert.deepEqual({ x: named.x, y: named.y, w: named.w, d: named.d },
+    { x: 0, y: 0, w: 3640, d: 4095 }, '文字の位置にある領域に名前が付いていない');
+  assert.ok(body.plan.rooms.every((r) => r.id), 'id が振られている');
   assert.deepEqual(body.notes, ['右下の収納は寸法が読めなかった'], 'AIが読めなかったことは利用者に見せる');
   assert.deepEqual(body.usage,
     { inputTokens: 2000, answerTokens: 1500, thoughtTokens: 500, outputTokens: 2000, totalTokens: 4000 },

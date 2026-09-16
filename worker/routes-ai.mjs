@@ -16,6 +16,7 @@
 // 家の3D画像で個人情報を含まないので、そちらは国外のサービスでよい。
 // (東京で動く画像生成モデルはそもそも無い)
 import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs";
+import PlanRooms from "../assets/js/plan-rooms.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
 
@@ -95,6 +96,13 @@ async function aiImportPlan(payload, env, deps) {
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage) {
   const plan = decodeCompactPlan(parsed);
+  // 部屋はAIに出させず、**壁と文字から計算する**。
+  // 両方出させると食い違い、同じ図面で部屋が3〜9個に変動した。壁から
+  // 作れば、壁と部屋は必ず一致する。寸法の読み違いもここで吸収する
+  // (実測で 227.5→275、455→450 の読み違いを確認している)。
+  const labels = Array.isArray(parsed.labels) ? parsed.labels : [];
+  const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
+  plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
   const checked = planProblems(plan);
   if (!checked.ok) {
     return json({

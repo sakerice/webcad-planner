@@ -64,6 +64,7 @@ function keyFile() {
   const { getAccessToken } = await import(pathToFileURL(join(ROOT, 'worker', 'google-auth.mjs')).href);
   const { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-prompt.mjs')).href);
   const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
+  const PlanRooms = require(join(ROOT, 'assets', 'js', 'plan-rooms.js'));
 
   const location = opt('location') || vertex.DEFAULT_LOCATION;
   const project = opt('project') || credentials.project_id;
@@ -144,6 +145,10 @@ function keyFile() {
   }
 
   const plan = decodeCompactPlan(parsed);
+  // 部屋はAIに出させず、壁と文字から計算する（両方出させると食い違う）
+  const labels = Array.isArray(parsed.labels) ? parsed.labels : [];
+  const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
+  plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
   const checked = PlanSchema.validatePlan(plan);
   const s = PlanSchema.summarize(plan);
   console.log(`\n読み取り: 壁 ${s.walls} / 部屋 ${s.rooms} / 開口・階段 ${s.items} / 階 ${s.floors.join(',') || '-'}`);
