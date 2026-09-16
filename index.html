@@ -3168,7 +3168,6 @@ input[type="reset"]:focus-visible{
   <div class="tsep"></div>
   <div class="toolbar-actions" role="group" aria-label="表示と書き出し">
   <button class="tbtn active" id="btn-2d" onclick="setView('2d')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h18v18H3ZM3 12h8V3M11 12h10M11 17v4"/></svg> 平面図</button>
-  <button class="tbtn" id="btn-ceiling-design" onclick="CeilingDesigner.open()">天井デザイン</button>
   <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10 12 3l9 7v11H3ZM8 21v-7h5v7M16 12h2v3h-2Z"/></svg> 外観3D</button>
   <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v16H3ZM3 4l5 4v8l-5 4M21 4l-5 4v8l5 4M8 8h8M8 16h8"/></svg> 内観3D</button>
   <button class="tbtn" id="btn-3dw" onclick="setViewWithLoading('3d-walk')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M10 21l2-7 3 3v4M12 14l-2-5-3 4M10 9l4-1 3 4h3"/></svg> ウォークスルー</button>
@@ -3250,10 +3249,13 @@ input[type="reset"]:focus-visible{
       <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20v-4h6v-4h6V8h8v12ZM2 20h20M3 23h18"/></svg>外構階段</div>
       <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20 21 5v15ZM3 20h18"/></svg>スロープ</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋・壁 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋・壁・天井 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="wall" onclick="setTool('wall')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v14H3ZM3 13h18M9 6v7M15 13v7"/></svg>壁を描く</div>
       <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋(矩形)</div>
+      <div class="stool" data-tool="ceiling-lower" onclick="setTool('ceiling-lower')" title="天井ビューで対角の2点を指定"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V5h5v4h8V5h5v15M12 12v6M9 15l3 3 3-3"/></svg>下げ天井</div>
+      <div class="stool" data-tool="ceiling-raise" onclick="setTool('ceiling-raise')" title="天井ビューで対角の2点を指定"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V9h5V5h8v4h5v11M12 18v-6M9 15l3-3 3 3"/></svg>折り上げ天井</div>
+      <p id="ceiling-note" class="model-finish-note" role="status" hidden></p>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18v11H3ZM3 15h18M7 10v11M12 10v11M17 10v11"/></svg>バルコニー</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>階段・屋根 <span>+</span></div>
@@ -3337,13 +3339,17 @@ input[type="reset"]:focus-visible{
       <!-- 壁ごと・部屋ごとの個別指定が無いときに使う既定値。部屋ごとの天井高ではないので HeightModel は通さない。 -->
       <label class="height-perfloor-toggle"><input type="checkbox" id="height-per-floor" onchange="setPerFloorHeights(this.checked)"><span>階ごとに設定する</span></label>
       <div id="height-defaults-body"></div>
-      <div class="sidebar-settings-note">「床の高さ」は部屋の床上げ（仕上げ床）の既定値です。壁ごと・部屋ごとに指定した寸法はこちらより優先されます。壁を高くすると、その上の階が始まる高さも上がります。</div>
+      <div class="sidebar-settings-note">標準の階高＝壁の高さ＋床厚。室内高さ＝壁の高さ−部屋の床上げ−天井下げ。床の上下は部屋の設定で指定します。旧保存プランは、ここで高さを変更するまで従来の高さ基準を保持します。</div>
     </div>
     <a class="sidebar-credits" href="assets/model-credits.html" target="_blank" rel="noopener">3D素材の出典</a>
   </div>
   <div id="asset-preview"><img alt=""><div></div></div>
 
   <div id="canvas-area">
+    <div id="surface-control" role="group" aria-label="現在のビューの表示対象">
+      <label id="surface-context" for="surface-sel">平面図の表示</label>
+      <select id="surface-sel" aria-label="編集対象" onchange="CeilingDesigner.setSurface(this.value)"><option value="floor">床ビュー</option><option value="ceiling">天井ビュー</option></select>
+    </div>
     <canvas id="c2d"></canvas>
     <div id="c3d-wrap">
       <div id="walk-hud" style="display:none">
@@ -5914,6 +5920,7 @@ function build3D(){
   // 斜線制限で実際に削る。設定が無ければ setbackPlanes() が空を返して何も触らない。
   // 世界座標で切るので matrixWorld を更新したあとに置く。
   applySetbackCut();
+  if(typeof CeilingDesigner!=='undefined')CeilingDesigner.carveRecesses(sc3);
   // 板は断面そのものなので、削り直す必要が無い(面の上に載っているだけである)。
   build3DSetbackRoofs(_sbSections);
   sc3.updateMatrixWorld(true);
@@ -6235,6 +6242,7 @@ function canMoveRef3D(ref){
   return !!(ref && ((ref.x!==undefined && ref.y!==undefined) || (ref.x1!==undefined && ref.y1!==undefined)));
 }
 function canMoveRefVertically3D(ref){
+  if(ref&&ref.type==='ceiling-area')return false;
   return !!(ref && ref.x!==undefined && ref.y!==undefined && canSetItemElevation(ref));
 }
 function add3DMoveGizmo(){
@@ -6904,6 +6912,7 @@ function selectionNeedsFull3DRebuild(previous,next){
 }
 
 function handle3DPointerPick(e){
+  if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.pickPlacement(e))return;
   // 'erase' (タップで消す削除ツール) は、UI のどこからも選べない状態にしてある。
   // 意図的に外したものであり、到達できないのは不具合ではない。
   // 理由: タップ1回で配置物が消えるため、軽く触れただけで気づかないうちに
@@ -11142,6 +11151,7 @@ function build3DLightItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
+  if(it.type==='ceiling-area')return;
   if(it.hidden3D) return;
   if(!shouldRenderItemInCurrent3DView(it)) return;
   if(isPlanAnnotationType(it.type)) return;
@@ -14005,7 +14015,7 @@ function buildSlopedCeilingGeometry(r,holes,profile){
   }
   var pos=geo.attributes.position, i;
   for(i=0;i<pos.count;i++){
-    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-0.012);
+    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012));
   }
   pos.needsUpdate=true;
   geo.computeVertexNormals();
@@ -14038,10 +14048,10 @@ function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,profile){
   } else if(!holes||!holes.length){
     ceiling=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeiling);
     ceiling.rotation.x=-Math.PI/2;
-    ceiling.position.set(rcx,ceilY-0.012,rcz);
+    ceiling.position.set(rcx,ceilY-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012),rcz);
   } else {
     ceiling=new THREE.Mesh(buildRoomCeilingShapeGeometry(r,holes),matCeiling);
-    ceiling.position.y=ceilY-0.012;
+    ceiling.position.y=ceilY-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012);
   }
   // 影の設定も生成時に確定させる。再構築(GLB読み込み完了後の
   // scheduleGltfRebuild3D など)でメッシュは作り直されるため、後から
@@ -14078,7 +14088,8 @@ function buildRooms3D(flFilt){
   // 内観は上から間取りを見るため天井を作らない。PVキャプチャの内観採光時だけは
   // 生成する(makeCeilingMaterial が「描かないが影は落とす」材質を返す)。
   // 日射が窓と階段吹き抜けからだけ入るようにするため。
-  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT) ? makeCeilingMaterial() : null;
+  var ceilingEditing=isInt&&typeof CeilingDesigner!=='undefined'&&CeilingDesigner.active();
+  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT||ceilingEditing) ? makeCeilingMaterial() : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
   var ceilingStairQuadsByFloor={};
@@ -14095,16 +14106,18 @@ function buildRooms3D(flFilt){
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
 
+    if(!ceilingEditing){
     var matFloor=makeRoomFloorMaterial(r);
     
     var slabH=floorSlabHeightMForFloor(r.floor);
     var stairHoles=stairwellHolesForRoom(r,stairQuadsByFloor);
-    var floorMeshes=buildRoomFloorMeshes(r,matFloor,slabH+roomFloorOffsetMm(r)*U,ry,floorY,stairHoles);
+    var floorMeshes=buildRoomFloorMeshes(r,matFloor,Math.max(0,floorY-localSupportTopY(r.floor,r.x,r.y,r.x+r.w,r.y+r.d)),localSupportTopY(r.floor,r.x,r.y,r.x+r.w,r.y+r.d),floorY,stairHoles);
     if(floorMeshes.slabBody){
       mark3DSelectable(floorMeshes.slabBody,r,'room');
       sc3.add(floorMeshes.slabBody);
     }
     mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
+    }
 
     if(matCeiling&&roomHasCoverAbove(r)){
       // 現在階の階段は、その上端にあたる天井にも開口を必要とする。
@@ -14115,8 +14128,12 @@ function buildRooms3D(flFilt){
       // 勾配を宣言していない部屋では null。従来の平らな枝をそのまま通る。
       // 材質は部屋ごと。仕上げを持たない部屋では matCeiling がそのまま返る
       // (=平らな天井も勾配天井も、同じ1つの仕上げが乗る)。
-      if(typeof CeilingDesigner!=='undefined' && r.ceilingAreas && r.ceilingAreas.length) sc3.add(CeilingDesigner.ceilingGroup(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
-      else sc3.add(buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
+      if(typeof CeilingDesigner!=='undefined' && CeilingDesigner.areas(r).length) sc3.add(CeilingDesigner.ceilingGroup(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
+      else {
+        var ceilingMesh=buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r));
+        if(ceilingEditing)mark3DSelectable(ceilingMesh,r,'room');
+        sc3.add(ceilingMesh);
+      }
     }
 
 	    // Ceiling downlights
@@ -15269,7 +15286,7 @@ function syncToolUi(){
     else assets[j].classList.remove('active');
   }
   var preset=getOpeningModelToolPreset(ST.tool);
-  var toolNames={select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト','neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱'};
+  var toolNames={'ceiling-lower':'下げ天井','ceiling-raise':'折り上げ天井',select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト','neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱'};
   document.getElementById('st-tool').textContent='ツール: '+(preset?preset.label:(toolNames[ST.tool]||ST.tool));
 }
 function setTool(t){
@@ -15413,6 +15430,7 @@ canvas.onmousedown=function(e){
   else if(ST.tool==='erase') handleErase(wx,wy);
   else if(ST.tool==='wall') handleWallClick(wx,wy,e);
   else if(isLineAnnotationTool(ST.tool)) handleLineAnnotationClick(ST.tool,w.x,w.y,e);
+  else if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool)) CeilingDesigner.drawClick(wx,wy);
   else if(ST.tool==='room-rect') handleRoomClick(wx,wy);
   else if(ST.tool==='site-rect') handleSiteClick(wx,wy);
   else placeItem(ST.tool,wx,wy);
@@ -15471,6 +15489,7 @@ function collect2DPickCandidates(cx,cy,wx,wy,opt){
   opt=opt||{};
   var floor=ST.floor, out=[];
   function add(obj,kind,idx){
+    if(typeof CeilingDesigner!=='undefined'&&!CeilingDesigner.visible(obj))return;
     out.push({obj:obj,kind:kind,idx:idx,stack:objectStackOrder(obj),rank:PICK_RANK[kind]});
   }
   DATA.items.forEach(function(it,i){
@@ -15585,7 +15604,7 @@ canvas.addEventListener('mouseup',function(){
     var m=DRAG.marquee;DRAG.marquee=null;
     var list=m.base.slice(),minX=Math.min(m.start.x,m.end.x),maxX=Math.max(m.start.x,m.end.x),minY=Math.min(m.start.y,m.end.y),maxY=Math.max(m.start.y,m.end.y);
     if(Math.hypot(maxX-minX,maxY-minY)*ST.zoom*.05>=4){
-      DATA.items.concat(DATA.walls,DATA.rooms).filter(function(obj){return (obj.floor||1)===ST.floor;}).forEach(function(obj){
+      DATA.items.concat(DATA.walls,DATA.rooms).filter(function(obj){return (obj.floor||1)===ST.floor&&(typeof CeilingDesigner==='undefined'||CeilingDesigner.visible(obj));}).forEach(function(obj){
         var points=getObjBounds(obj);if(points.length&&points.every(function(p){return p.x>=minX&&p.x<=maxX&&p.y>=minY&&p.y<=maxY;})&&list.indexOf(obj)<0)list.push(obj);
       });
     }
@@ -16475,10 +16494,20 @@ window.addEventListener('keydown', function(e){
   var key=(e.key||'').toLowerCase();
   if((e.metaKey || e.ctrlKey) && (key==='y' || (key==='z' && e.shiftKey))){ e.preventDefault(); redoAction(); return; }
   if((e.metaKey || e.ctrlKey) && key === 'z'){ e.preventDefault(); undoAction(); return; }
-  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){
+    e.preventDefault();
+    if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.active()){
+      ST.selectAll=false;ST.multiSelected=DATA.items.concat(DATA.walls,DATA.rooms).filter(function(o){return o.floor===ST.floor&&CeilingDesigner.visible(o);});ST.selected=ST.multiSelected[0]||null;
+    }else{ST.selectAll=true;ST.selected=null;}
+    updateProps();draw2d();
+  }
   if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
     e.preventDefault();
     if(isObjectLocked(ST.selected)){ updateProps(); return; }
+    if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.zone(ST.selected)){
+      var ceilingAxis=(e.key==='ArrowLeft'||e.key==='ArrowRight')?'x':'y';
+      updateSelectedProp(ceilingAxis,ST.selected[ceilingAxis]+(e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1)*(ST.snap||1));return;
+    }
     saveState();
     var step=ST.snap||1, dx=0, dy=0;
     if(e.key==='ArrowLeft') dx=-step;

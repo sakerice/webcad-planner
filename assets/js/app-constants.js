@@ -274,6 +274,7 @@ function setPerFloorHeights(on){
       var e=DATA.floors[String(f)];
       if(!e||typeof e!=='object'){ e={}; DATA.floors[String(f)]=e; }
       if(!isFinite(Number(e.wallHeight))||Number(e.wallHeight)<=0) e.wallHeight=before[i];
+      if(e.floorThickness===undefined)e.floorThickness=hd.floorThickness===undefined?180:hd.floorThickness;
     });
   }
   heightDefaultsChanged();
@@ -284,6 +285,7 @@ function setDefaultWallHeight(floor,value){
   if(!hd) return;
   var v=clampWallHeightMm(value);
   if(typeof saveState==='function') saveState();
+  hd.modelVersion=2;
   if(floor===null||floor===undefined){
     var olds=HEIGHT_SETTING_FLOORS.map(function(f){return defaultWallHeightMmForFloor(f);});
     WALL_H=v; hd.wallHeight=v;
@@ -328,13 +330,11 @@ function heightDefaultsRowHtml(floor){
   var tag=(floor===null||floor===undefined)?'':(floor+'F');
   var arg=(floor===null||floor===undefined)?'null':String(floor);
   var wallV=defaultWallHeightMmForFloor(floor===null?1:floor);
-  var raiseV=(floor===null||floor===undefined)
-    ? defaultFloorRaiseMmForFloor(1)
-    : defaultFloorRaiseMmForFloor(floor);
+  var raiseV=defaultFloorThicknessMm(floor===null?1:floor);
   return '<div class="hd-row">'+
     (tag?'<span class="hd-tag">'+tag+'</span>':'')+
     '<input class="pi" type="number" min="'+WALL_H_MIN+'" max="'+WALL_H_MAX+'" step="50" value="'+wallV+'" title="壁の高さ(mm)" onchange="setDefaultWallHeight('+arg+',+this.value)">'+
-    '<input class="pi" type="number" min="0" max="600" step="10" value="'+raiseV+'" title="床の高さ(床上げ mm)" onchange="setDefaultFloorRaise('+arg+',+this.value)">'+
+    '<input class="pi" type="number" min="20" max="1000" step="10" value="'+raiseV+'" title="床厚(mm)" onchange="setDefaultFloorThickness('+arg+',+this.value)">'+
     '</div>';
 }
 function syncHeightDefaultsUI(){
@@ -346,7 +346,7 @@ function syncHeightDefaultsUI(){
   var per=perFloorHeightsEnabled();
   if(chk) chk.checked=per;
   var head='<div class="hd-head">'+(per?'<span class="hd-tag"></span>':'')+
-    '<span class="hd-col">壁の高さ</span><span class="hd-col">床の高さ</span></div>';
+    '<span class="hd-col">壁の高さ</span><span class="hd-col">床厚</span></div>';
   if(per){
     // 上の行が上の階。キャンバスの3Dビューと上下がそろっていないと読み違える。
     body.innerHTML=head+HEIGHT_SETTING_FLOORS.slice().reverse()
@@ -361,7 +361,26 @@ function syncHeightDefaultsUI(){
 // **床スラブ+その階の既定の壁高さ を下限にする。** これが無いと、壁を高くしても
 // 上階の始まる高さが据え置かれ、下階の壁が上階へめり込む。壁は階の床スラブの
 // 下端から立つので、階高がそれを下回った時点で必ず突き抜ける。
+// Version 2 uses finished standard floor → standard ceiling as the wall height.
+// Unversioned saved plans keep their original datum until a height setting is edited.
+function usesFinishedHeightModel(){
+  return typeof DATA!=='undefined'&&DATA&&DATA.heightDefaults&&DATA.heightDefaults.modelVersion===2;
+}
+function defaultFloorThicknessMm(floor){
+  var hd=DATA.heightDefaults||{},e=perFloorHeightsEnabled()?planFloorHeightEntry(floor):null;
+  var n=Number(e&&e.floorThickness!==undefined?e.floorThickness:hd.floorThickness);
+  return Number.isFinite(n)?Math.max(20,Math.min(1000,n)):180;
+}
+function setDefaultFloorThickness(floor,value){
+  var n=Number(value);if(!Number.isFinite(n))return;
+  saveState();var hd=ensureHeightDefaults();hd.modelVersion=2;
+  n=Math.max(20,Math.min(1000,Math.round(n)));
+  if(floor===null||floor===undefined)hd.floorThickness=n;
+  else{var e=DATA.floors[String(floor)]||(DATA.floors[String(floor)]={});e.floorThickness=n;}
+  heightDefaultsChanged();
+}
 function storyHeightMmForFloor(floor){
+  if(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())return defaultWallHeightMmForFloor(floor)+defaultFloorThicknessMm(floor);
   var base=FLOOR_H;
   if(typeof HeightModel!=='undefined'&&HeightModel&&typeof DATA!=='undefined'&&DATA)
     base=HeightModel.storyHeightMm(DATA,floor);
@@ -390,6 +409,7 @@ function floorSlabHeightM(){
 }
 // その階の床スラブ厚(mm)。1階は基礎の上に直接載るので 0。
 function floorSlabMmForFloor(floor){
+  if(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())return defaultFloorThicknessMm(floor);
   return (floor||1)<=1 ? 0 : Math.max(0,FLOOR_SLAB_H||0);
 }
 function floorSlabHeightMForFloor(floor){
@@ -402,7 +422,7 @@ function floorTopY(floor){
 // Missing values retain existing plans exactly; structural storeys stay unchanged.
 function roomFloorOffsetMm(room){
   var n=Number(room&&room.floorRaiseMm);
-  if(Number.isFinite(n)) return Math.max(0,Math.min(600,n));
+  if(Number.isFinite(n)) return Math.max(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-Math.max(0,floorSlabMmForFloor(room.floor)-20):0,Math.min(600,n));
   // 個別指定が無い部屋はサイドメニューの既定値(階ごと設定を含む)を採る。
   // 既定値は 0 なので、設定していないプランは従来どおり。
   return defaultFloorRaiseMmForFloor(room&&room.floor);
@@ -471,7 +491,10 @@ function updateSelectedRoomFloor(value){
   if(isObjectLocked(r)){updateProps();return;}
   var n=Number(value);if(!Number.isFinite(n))return;
   var oldFloor=roomFloorOffsetMm(r);
-  saveState();r.floorRaiseMm=Math.max(0,Math.min(600,n));
+  var minimum=typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-Math.max(0,floorSlabMmForFloor(r.floor)-20):0;
+  var candidate=Math.max(minimum,Math.min(600,n));
+  if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.floorLoweringLimit)candidate=Math.max(candidate,CeilingDesigner.floorLoweringLimit(r));
+  saveState();r.floorRaiseMm=candidate;
   var delta=roomFloorOffsetMm(r)-oldFloor;
   DATA.items.forEach(function(it){
     if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail')return;
@@ -487,8 +510,8 @@ function selectedRoomFloorHtml(r){
   return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
     '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
     '<option value="">プリセットを選択</option><option value="0">玄関土間・既存基準 ＋0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
-    '<div class="pr"><label class="pl" for="room-floor-raise">床上げ (mm)</label><input id="room-floor-raise" class="pi" type="number" min="0" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
-    '<div class="lock-status-note">この階の既存床を0mmとして指定。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
+    '<div class="pr"><label class="pl" for="room-floor-raise">床の上下 (mm)</label><input id="room-floor-raise" class="pi" type="number" min="'+(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-(floorSlabMmForFloor(r.floor)-20):0)+'" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
+    '<div class="lock-status-note">この階の標準床面を0mmとして指定。正は床上げ、負は床下げ（床厚内・残り20mmまで）。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
 }
 var CONTEXT_EXTERIOR_TYPES = {'neighbor-building':1,'neighbor-house':1,road:1,'utility-pole':1};
 function isContextExteriorItemType(type){
@@ -496,6 +519,7 @@ function isContextExteriorItemType(type){
 }
 function shouldRenderItemInCurrent3DView(it){
   if(!it) return false;
+  if(isInt&&typeof CeilingDesigner!=='undefined'&&CeilingDesigner.active()&&!CeilingDesigner.fixture(it)&&!CeilingDesigner.zone(it))return false;
   if(isInt && isContextExteriorItemType(it.type)) return false;
   return true;
 }

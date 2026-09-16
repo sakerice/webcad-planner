@@ -307,7 +307,7 @@ test('勾配を選んだら、天井を確認できるビューと壁の上辺�
   ctx.updateSelectedCeilingType('sloped');
   const h = ctx.selectedRoomCeilingHtml(room);
   assert.ok(h.indexOf('外観3D') !== -1, '天井を確認できるビューを言っていない');
-  assert.ok(h.indexOf('天井デザインの見上げ3D') !== -1);
+  assert.ok(h.indexOf('内観3Dの天井ビュー') !== -1);
   assert.ok(h.indexOf('壁の上辺は内観3Dでも勾配に沿って切れます') !== -1);
   // 平らのときは出さない（無関係な注意書きで埋めない）
   ctx.updateSelectedCeilingType('flat');

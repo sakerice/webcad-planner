@@ -496,18 +496,85 @@ def check8_stairs(data):
 # 決まりごとなので、片方だけ直すと必ず食い違う。
 FLOOR_H_MM = 2700       # 階高 (index.html の FLOOR_H)
 FLOOR_SLAB_MM = 180     # 床スラブ (index.html の FLOOR_SLAB_H)
+WALL_H_MM = 2400        # 壁の高さの既定 (index.html の WALL_H)
+FLOOR_THICK_MM = 180    # 床厚の既定 (高さモデルv2)
 
 
-def room_ceiling_mm(room):
-    """その部屋の天井高(床天端から測ったmm)。吹き抜けは階高から計算する。"""
+# 高さモデルv2 (heightDefaults.modelVersion===2)。
+#
+# 壁の高さが「仕上げ床 → 仕上げ天井」になり、1階も床スラブを持ち、
+# 階高 = 壁の高さ + 床厚 になる。天井仕上げ厚の12mmは壁の高さに含まれる。
+# 印の無い(=v2以前に保存された)プランは、従来の式のまま読む。
+#
+# アプリ側は assets/js/app-constants.js の usesFinishedHeightModel /
+# defaultWallHeightMmForFloor / defaultFloorThicknessMm / storyHeightMmForFloor。
+# **式はアプリ・生成器・この検査の3か所にあり、1か所だけ直すと必ず食い違う。**
+def uses_finished_height_model(data):
+    hd = data.get('heightDefaults') or {}
+    return hd.get('modelVersion') == 2
+
+
+def _floor_height_entry(data, floor):
+    hd = data.get('heightDefaults') or {}
+    if not hd.get('perFloor'):
+        return {}
+    floors = data.get('floors') or {}
+    e = floors.get(str(floor), floors.get(floor))
+    return e if isinstance(e, dict) else {}
+
+
+def _height_setting(data, floor, key, default, lo, hi):
+    hd = data.get('heightDefaults') or {}
+    v = _floor_height_entry(data, floor).get(key, hd.get(key))
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return float(default)
+    if v <= 0:
+        return float(default)
+    return max(lo, min(hi, round(v)))
+
+
+def wall_height_mm(data, floor):
+    return _height_setting(data, floor, 'wallHeight', WALL_H_MM, 300, 6000)
+
+
+def floor_thickness_mm(data, floor):
+    return _height_setting(data, floor, 'floorThickness', FLOOR_THICK_MM, 20, 1000)
+
+
+def story_height_mm(data, floor):
+    """その階の階高(mm)。v2は 壁の高さ + 床厚、従来は一律 2700。"""
+    if uses_finished_height_model(data):
+        return wall_height_mm(data, floor) + floor_thickness_mm(data, floor)
+    return float(FLOOR_H_MM)
+
+
+def floor_slab_mm(data, floor):
+    """その階の床スラブ厚(mm)。従来は1階だけ0(基礎の上に直接載る)。"""
+    if uses_finished_height_model(data):
+        return floor_thickness_mm(data, floor)
+    return 0.0 if floor <= 1 else float(FLOOR_SLAB_MM)
+
+
+def void_span_mm(data, room):
+    """吹き抜けが貫く階の階高の合計(mm)。階ごとに階高が違っても足し上げる。"""
     floor = room.get('floor', 1)
-    slab = 0 if floor <= 1 else FLOOR_SLAB_MM
+    c = room.get('ceiling') or {}
+    to = c.get('toFloor')
+    to = int(to) if isinstance(to, (int, float)) else floor + 1
+    to = max(floor + 1, to)
+    return sum(story_height_mm(data, f) for f in range(floor, to + 1))
+
+
+def room_ceiling_mm(room, data=None):
+    """その部屋の天井高(床天端から測ったmm)。吹き抜けは階高から計算する。"""
+    data = data if data is not None else {}
+    floor = room.get('floor', 1)
+    slab = floor_slab_mm(data, floor)
     c = room.get('ceiling') or {}
     if c.get('type') == 'void':
-        to = c.get('toFloor')
-        to = int(to) if isinstance(to, (int, float)) else floor + 1
-        to = max(floor + 1, to)
-        return (to - floor + 1) * FLOOR_H_MM - slab
+        return void_span_mm(data, room) - slab
     mm = c.get('heightMm') or room.get('ceilingHeight')
     if isinstance(mm, (int, float)) and mm > 0:
         return float(mm) - slab
@@ -530,11 +597,11 @@ def check9_light_elev(data):
         if not is_light(it['type']):
             continue
         floor = it.get('floor', 1)
-        ceiling = 2700 if floor <= 1 else 2520
+        ceiling = story_height_mm(data, floor) - floor_slab_mm(data, floor)
         cx, cy = center(it)
         r = room_at(data, floor, cx, cy)
         if r is not None:
-            mm = room_ceiling_mm(r)
+            mm = room_ceiling_mm(r, data)
             if mm:
                 ceiling = mm
         elev = it.get('elev', 0) or 0
@@ -712,9 +779,12 @@ def _ceiling_for_item(data, it):
     """
     cx, cy = center(it)
     r = room_at(data, it.get('floor', 1), cx, cy)
-    explicit = room_ceiling_mm(r) if r is not None else None
-    slab = 0 if it.get('floor', 1) <= 1 else FLOOR_SLAB_MM
-    return (explicit if explicit is not None else FLOOR_H_MM-slab) - CEILING_FINISH_MM - (r.get("floorRaiseMm", 0) if r else 0)
+    floor = it.get('floor', 1)
+    explicit = room_ceiling_mm(r, data) if r is not None else None
+    slab = floor_slab_mm(data, floor)
+    finish = 0.0 if uses_finished_height_model(data) else CEILING_FINISH_MM
+    base = explicit if explicit is not None else story_height_mm(data, floor) - slab
+    return base - finish - (r.get("floorRaiseMm", 0) if r else 0)
 
 
 SLIDE_DOOR_TYPES = {'door-slide', 'door-slide-s', 'door-pocket',
@@ -1699,16 +1769,14 @@ def ceiling_finish_mm(data, floor, cx, cy):
     3つの基準が食い違っていたのが「照明が天井から浮く / 天井裏に埋まる」原因
     だったので、式は3か所に同じものを置き、この検査で結果を突き合わせる。
     """
-    slab = 0.0 if floor <= 1 else float(FLOOR_SLAB_MM)
+    slab = floor_slab_mm(data, floor)
     r = room_at(data, floor, cx, cy)
-    h = float(FLOOR_H_MM)
-    if r is not None:
-        c = r.get('ceiling') or {}
-        if c.get('type') == 'void':
-            to = c.get('toFloor')
-            to = int(to) if isinstance(to, (int, float)) else floor + 1
-            h = (max(floor + 1, to) - floor + 1) * float(FLOOR_H_MM)
-    return h - slab - CEILING_FINISH_MM - (r.get("floorRaiseMm", 0) if r else 0)
+    h = story_height_mm(data, floor)
+    if r is not None and (r.get('ceiling') or {}).get('type') == 'void':
+        h = void_span_mm(data, r)
+    # v2は壁の高さがそのまま仕上げ天井面なので、仕上げ厚を引かない。
+    finish = 0.0 if uses_finished_height_model(data) else CEILING_FINISH_MM
+    return h - slab - finish - (r.get("floorRaiseMm", 0) if r else 0)
 
 
 # 天井に固定する器具。値は「取付面(elev)からモデル上端までの高さ(mm)」。

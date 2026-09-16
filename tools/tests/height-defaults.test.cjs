@@ -44,6 +44,7 @@ function topLevelVar(name) {
 
 const FNS = [
   'foundationHeightMm', 'foundationHeightM',
+  'usesFinishedHeightModel', 'defaultFloorThicknessMm',
   'perFloorHeightsEnabled', 'planFloorHeightEntry',
   'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
   'storyHeightMmForFloor', 'storyHeightM',
@@ -172,4 +173,24 @@ test('既定値はプランに保存される（保存して開き直すと壁�
   // 読み込み経路で必ず呼ばれる
   const load = html.slice(html.indexOf('async function loadPlanFromStorage('));
   assert.match(load.slice(0, 2000), /ensureHeightDefaults\(\);/);
+});
+
+// New height semantics are opt-in by data version; legacy cases above remain intact.
+test('v2: all storeys including 1F are wall height + slab; room offsets consume interior space', () => {
+ const g=ctxFor(house({heightDefaults:{modelVersion:2,floorThickness:180}}));
+ for(const f of [1,2,3]){assert.equal(g.storyHeightMmForFloor(f),2580);assert.equal(g.floorSlabMmForFloor(f),180);}
+ const base=g.foundationHeightM();
+ assert.ok(Math.abs(g.floorBaseY(4)-(base+3*2.58))<1e-9);
+ const r={floor:2,x:0,y:0,w:2000,d:2000,floorRaiseMm:150};
+ const ceiling=g.floorBaseY(2)+g.storyHeightM(2);
+ assert.ok(Math.abs((ceiling-g.roomFloorTopY(r))/.001-2250)<1e-6);
+ r.floorRaiseMm=-100;assert.ok(Math.abs((ceiling-g.roomFloorTopY(r))/.001-2500)<1e-6);
+ r.floorRaiseMm=-999;assert.equal(g.roomFloorOffsetMm(r),-160);
+});
+test('v2: floor-specific wall/slab settings accumulate independently', () => {
+ const g=ctxFor(house({heightDefaults:{modelVersion:2,perFloor:true,floorThickness:180},floors:{1:{wallHeight:2500,floorThickness:220},2:{wallHeight:2400,floorThickness:300}}}));
+ assert.equal(g.storyHeightMmForFloor(1),2720);assert.equal(g.storyHeightMmForFloor(2),2700);
+ assert.ok(Math.abs(g.floorBaseY(3)-g.foundationHeightM()-5.42)<1e-9);
+ const roundTrip=JSON.parse(JSON.stringify(g.DATA));const restored=ctxFor(roundTrip);
+ assert.equal(restored.floorBaseY(3),g.floorBaseY(3));
 });

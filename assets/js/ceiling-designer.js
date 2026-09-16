@@ -1,108 +1,180 @@
-/* Ceiling areas are room-local millimetres. Existing plans need no migration. */
+/* Native plan/interior ceiling layer; legacy room-local areas migrate losslessly. */
 (function(){
 'use strict';
-function areas(r){return (r.ceilingAreas||[]).map(a=>{const x=Math.max(0,Number(a.x)||0),y=Math.max(0,Number(a.y)||0);return {...a,x,y,w:Math.min(Number(a.w)||0,r.w-x),d:Math.min(Number(a.d)||0,r.d-y),offset:Math.max(-800,Math.min(800,Number(a.offset)||0))};}).filter(a=>a.w>0&&a.d>0&&a.offset);}
+function areas(r){return ((r.ceilingAreas||[]).concat(DATA.items.filter(it=>it.type==='ceiling-area'&&roomFor(it)===r).map(it=>({...it,x:it.x-r.x,y:it.y-r.y})))).map(a=>{const x=Math.max(0,Number(a.x)||0),y=Math.max(0,Number(a.y)||0);return {...a,x,y,w:Math.min(Number(a.w)||0,r.w-x),d:Math.min(Number(a.d)||0,r.d-y),offset:Math.max(-800,Math.min(800,Number(a.offset)||0))};}).filter(a=>a.w>0&&a.d>0&&a.offset);}
 function offsetAt(r,x,y){const a=areas(r).find(a=>x>=r.x+a.x&&x<=r.x+a.x+a.w&&y>=r.y+a.y&&y<=r.y+a.y+a.d);return a?a.offset:0;}
 function fixtures(){return DATA.items.filter(it=>it.floor===ST.floor&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined)));}
 function ceilingGroup(r,ceilY,mat,holes,profile){
  if(profile||!areas(r).length)return buildRoomCeilingMesh(r,ceilY,mat,holes,profile);
+ const inset=typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:.012;
  const group=new THREE.Group();group.userData={b:true,ceiling:true,roomId:r.id};const aa=areas(r);const all=(holes||[]).slice();
  aa.forEach(a=>all.push([{x:(r.x+a.x)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y+a.d)*U},{x:(r.x+a.x)*U,z:(r.y+a.y+a.d)*U}]));
- group.add(buildRoomCeilingMesh(r,ceilY,mat,all,null));
+ const base=buildRoomCeilingMesh(r,ceilY,mat,all,null);if(active())mark3DSelectable(base,r,'room');group.add(base);
  aa.forEach(a=>{
   const m=mat.clone();m.map=null;m.color.set(a.color||'#eee8dd');m.side=THREE.DoubleSide;
-  const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=ceilY+a.offset*U-.012;
-  const face=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);face.rotation.x=Math.PI/2;face.position.set(x,y,z);face.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};group.add(face);
-  const h=Math.abs(a.offset)*U,mid=(ceilY-.012+y)/2;
-  [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),m);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};group.add(side);});
+  const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=ceilY+a.offset*U-inset;
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);face.rotation.x=Math.PI/2;face.position.set(x,y,z);face.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};const ref=DATA.items.find(it=>it.type==='ceiling-area'&&it.id===a.id);if(ref)mark3DSelectable(face,ref,'item');group.add(face);
+  const h=Math.abs(a.offset)*U,mid=(ceilY-inset+y)/2;
+  [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),m);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};if(ref)mark3DSelectable(side,ref,'item');group.add(side);});
  });return group;
 }
-let dialog,cv,view,controls,renderer,scene,camera,mode='plan',tool='select',selection=null,drag=null,scale=1,ox=0,oy=0,revision=0,viewZoom=1,panX=0,panY=0;
-function rooms(){return DATA.rooms.filter(r=>r.floor===ST.floor&&!r.hidden3D);}
-function selected(){if(!selection)return null;const r=DATA.rooms.find(r=>r.id===selection.room);return r?{r,a:(r.ceilingAreas||[]).find(a=>a.id===selection.id)}:null;}
-function status(t){dialog.querySelector('[data-status]').textContent=t;}
-function isFlat(r){return !roomCeilingProfile(r)&&roomHasCoverAbove(r);}
-function valid(r,a,skip){
- if(!['x','y','w','d','offset'].every(k=>Number.isFinite(a[k])))return '寸法は数値で指定してください。';
- if(!isFlat(r))return '平天井の部屋に配置してください。勾配天井・吹き抜けは対象外です。';
- if(a.w<100||a.d<100||a.x<0||a.y<0||a.x+a.w>r.w||a.y+a.d>r.d)return '範囲を部屋の中に収め、幅・奥行を100mm以上にしてください。';
- if((r.ceilingAreas||[]).some(b=>b.id!==skip&&a.x<b.x+b.w+5&&a.x+a.w+5>b.x&&a.y<b.y+b.d+5&&a.y+a.d+5>b.y))return '天井範囲同士は5mm以上離してください。';
- if(a.x<5||a.y<5||a.x+a.w>r.w-5||a.y+a.d>r.d-5)return '壁から5mm以上内側に配置してください。';
- if(a.offset>0&&floorBaseY(r.floor)+roomCeilingHeightM(r)+a.offset*U>floorBaseY(r.floor)+storyHeightM(r.floor)-.02)return '折り上げる余裕がありません。部屋の天井高を先に下げてください。';
- if(!Number.isFinite(a.offset)||Math.abs(a.offset)<10||Math.abs(a.offset)>800)return '段差は10〜800mmで指定してください。';
- const other={};other[r.floor]=stairwellQuadsForFloor(r.floor+1);
- const holes=stairwellHolesForRoom(r,other);
- if(holes.some(poly=>{const xs=poly.map(p=>p.x/U-r.x),ys=poly.map(p=>p.z/U-r.y);return a.x<Math.max(...xs)&&a.x+a.w>Math.min(...xs)&&a.y<Math.max(...ys)&&a.y+a.d>Math.min(...ys);}))return '階段の吹き抜けと重なる範囲には配置できません。';
+function active(){return !!ST.ceilingView&&(ST.view==='2d'||ST.view==='3d-int');}
+function zone(it){return it&&it.type==='ceiling-area';}
+function fixture(it){return it&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined));}
+function visible(it){return zone(it)?active():!active()||fixture(it)||it.type==='room'||it.x1!==undefined;}
+function roomFor(it){return DATA.rooms.find(r=>r.floor===it.floor&&it.x+it.w/2>=r.x&&it.x+it.w/2<=r.x+r.w&&it.y+it.d/2>=r.y&&it.y+it.d/2<=r.y+r.d);}
+function migrate(){
+ DATA.rooms.forEach(r=>{if(!r.ceilingAreas?.length)return;r.ceilingAreas.forEach(a=>{if(!DATA.items.some(it=>it.id===a.id&&zone(it)))DATA.items.push({...a,type:'ceiling-area',floor:r.floor,x:r.x+a.x,y:r.y+a.y,rot:0});});delete r.ceilingAreas;});
+}
+function validItem(it){
+ const r=roomFor(it);if(!r||roomCeilingProfile(r)||!roomHasCoverAbove(r))return '平天井の部屋内に配置してください。';
+ if(isObjectLocked(r))return '部屋がロックされています。';
+ if(!['x','y','w','d','offset'].every(k=>Number.isFinite(it[k])))return '寸法を数値で指定してください。';
+ if(it.rot)return '天井範囲は部屋に沿った矩形で配置してください。';
+ if(it.w<100||it.d<100||it.x<r.x+5||it.y<r.y+5||it.x+it.w>r.x+r.w-5||it.y+it.d>r.y+r.d-5)return '範囲は部屋の内側に収めてください（壁から5mm以上）。';
+ if(Math.abs(it.offset)<10||Math.abs(it.offset)>800)return '段差は10〜800mmで指定してください。';
+ if(it.offset>0){const limit=raisingLimit(r,it);if(it.offset>limit.mm)return 'この範囲の折り上げ上限は＋'+limit.mm+'mmです（'+limit.reason+'、仕上げの残り20mmを確保）。';}
+ if(DATA.items.some(b=>zone(b)&&b.id!==it.id&&b.floor===it.floor&&it.x<b.x+b.w+5&&it.x+it.w+5>b.x&&it.y<b.y+b.d+5&&it.y+it.d+5>b.y))return '天井範囲が重なっています。';
+ const holes=stairwellHolesForRoom(r,{[r.floor]:stairwellQuadsForFloor(r.floor+1)});
+ if(holes.some(poly=>it.x<Math.max(...poly.map(p=>p.x/U))&&it.x+it.w>Math.min(...poly.map(p=>p.x/U))&&it.y<Math.max(...poly.map(p=>p.z/U))&&it.y+it.d>Math.min(...poly.map(p=>p.z/U))))return '階段の吹き抜けには配置できません。';
  return '';
 }
-function mutate(r,fn){
- if(isObjectLocked(r)){status('ロック中の部屋は変更できません。');return false;}
- const mounts=DATA.items.filter(it=>it.floor===r.floor&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined))&&roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)===r).map(it=>({it,old:offsetAt(r,it.x+it.w/2,it.y+it.d/2)}));
- saveState();fn();mounts.forEach(({it,old})=>{if(Number.isFinite(Number(it.elev)))it.elev=Number(it.elev)+offsetAt(r,it.x+it.w/2,it.y+it.d/2)-old;});
- draw2d();if(ren)rebuild3D();refresh();status('変更を反映しました。');return true;
+function message(text){const el=document.getElementById('ceiling-note');if(el){el.textContent=text;el.hidden=!text;}}
+function hasAreas(){return DATA.items.some(zone)||DATA.rooms.some(r=>r.ceilingAreas?.length);}
+function snapshot(){return {zones:DATA.items.filter(zone).map(it=>({it,state:{...it}})),mounts:DATA.items.filter(fixture).map(it=>({it,height:ceilingFinishElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2)}))};}
+function reconcile(before){
+ let error='';before.zones.forEach(({it,state})=>{if(!DATA.items.includes(it))return;const invalid=validItem(it);if(invalid){Object.assign(it,state);error=invalid;}});
+ before.mounts.forEach(({it,height})=>{if(DATA.items.includes(it)&&Number.isFinite(Number(it.elev)))it.elev=Number(it.elev)+ceilingFinishElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2)-height;});
+ if(error)message(error);
 }
-function bounds(){const rr=rooms();return rr.length?{x:Math.min(...rr.map(r=>r.x)),y:Math.min(...rr.map(r=>r.y)),x2:Math.max(...rr.map(r=>r.x+r.w)),y2:Math.max(...rr.map(r=>r.y+r.d))}:{x:0,y:0,x2:6000,y2:6000};}
-function draw(){if(!dialog?.open)return;const box=cv.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);cv.width=Math.max(1,box.width*ratio);cv.height=Math.max(1,box.height*ratio);const c=cv.getContext('2d');c.scale(ratio,ratio);const W=box.width,H=box.height,b=bounds();scale=viewZoom*Math.min((W-70)/Math.max(b.x2-b.x,100),(H-70)/Math.max(b.y2-b.y,100));ox=(W-(b.x2-b.x)*scale)/2-b.x*scale+panX;oy=(H-(b.y2-b.y)*scale)/2-b.y*scale+panY;c.fillStyle='#f2f0eb';c.fillRect(0,0,W,H);
- rooms().forEach(r=>{c.fillStyle=r.ceilingColor||'#fffdfa';c.strokeStyle='#838b88';c.lineWidth=2;c.fillRect(ox+r.x*scale,oy+r.y*scale,r.w*scale,r.d*scale);c.strokeRect(ox+r.x*scale,oy+r.y*scale,r.w*scale,r.d*scale);c.fillStyle='#737c77';c.font='12px system-ui';c.fillText((r.n||r.name||'部屋')+' · 天井',ox+r.x*scale+8,oy+r.y*scale+18,Math.max(10,r.w*scale-16));
- areas(r).forEach(a=>{c.fillStyle=a.color||'#e4ddd1';c.strokeStyle=selection?.id===a.id?'#d3455e':'#8b8176';c.lineWidth=selection?.id===a.id?3:1.5;c.setLineDash(a.offset>0?[5,3]:[]);c.fillRect(ox+(r.x+a.x)*scale,oy+(r.y+a.y)*scale,a.w*scale,a.d*scale);c.strokeRect(ox+(r.x+a.x)*scale,oy+(r.y+a.y)*scale,a.w*scale,a.d*scale);c.setLineDash([]);c.fillStyle='#4c5550';c.fillText((a.offset<0?'下げ ':'折り上げ +')+a.offset+'mm',ox+(r.x+a.x)*scale+6,oy+(r.y+a.y)*scale+17);});});
- fixtures().forEach(it=>{const x=ox+(it.x+it.w/2)*scale,y=oy+(it.y+it.d/2)*scale,fan=/fan/i.test(it.type);c.save();c.translate(x,y);c.rotate((it.rot||0)*Math.PI/180);c.strokeStyle=selection?.item===it.id?'#d3455e':'#527b86';c.lineWidth=2;c.beginPath();c.arc(0,0,Math.max(5,(fan?it.w*.45:it.w*.35)*scale),0,Math.PI*2);c.stroke();if(fan){for(let i=0;i<3;i++){c.rotate(Math.PI*2/3);c.beginPath();c.moveTo(0,0);c.lineTo(Math.max(9,it.w*.4*scale),0);c.stroke();}}else{c.beginPath();c.moveTo(-4,0);c.lineTo(4,0);c.moveTo(0,-4);c.lineTo(0,4);c.stroke();}c.restore();});
- if(drag?.end&&!drag.create&&!drag.pan){const dx=drag.end.x-drag.start.x,dy=drag.end.y-drag.start.y;c.strokeStyle='#d3455e';c.lineWidth=2;c.setLineDash([5,4]);if(drag.a)c.strokeRect(ox+(drag.r.x+drag.x+dx)*scale,oy+(drag.r.y+drag.y+dy)*scale,drag.a.w*scale,drag.a.d*scale);else if(drag.it){c.beginPath();c.arc(ox+(drag.x+dx+drag.it.w/2)*scale,oy+(drag.y+dy+drag.it.d/2)*scale,Math.max(6,drag.it.w*scale/2),0,Math.PI*2);c.stroke();}c.setLineDash([]);}
- if(drag?.create){const x=Math.min(drag.start.x,drag.end.x),y=Math.min(drag.start.y,drag.end.y);c.fillStyle='#d3455e22';c.strokeStyle='#d3455e';c.fillRect(ox+x*scale,oy+y*scale,Math.abs(drag.end.x-drag.start.x)*scale,Math.abs(drag.end.y-drag.start.y)*scale);c.strokeRect(ox+x*scale,oy+y*scale,Math.abs(drag.end.x-drag.start.x)*scale,Math.abs(drag.end.y-drag.start.y)*scale);}
+function isTool(t){return t==='ceiling-lower'||t==='ceiling-raise';}
+function drawClick(x,y){
+ if(!active())return;
+ if(!ST.drawing){ST.drawing=true;ST.drawPts=[{x,y}];draw2d();return;}
+ const p=ST.drawPts[0],it={id:nextId++,type:'ceiling-area',floor:ST.floor,x:Math.min(x,p.x),y:Math.min(y,p.y),w:Math.abs(x-p.x),d:Math.abs(y-p.y),rot:0,offset:ST.tool==='ceiling-raise'?150:-150,color:'#e4ddd1'};
+ const error=validItem(it);ST.drawing=false;ST.drawPts=[];
+ if(error){message(error);draw2d();return;}
+ const before=snapshot();saveState();DATA.items.push(it);reconcile(before);setTool('select');ST.selected=it;updateProps();draw2d();if(ren)rebuild3D();
 }
-function fields(){const el=dialog.querySelector('[data-fields]'),s=selected(),it=selection?.item&&DATA.items.find(it=>it.id===selection.item);el.replaceChildren();
- function number(label,value,apply){const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='number';input.step='50';input.value=value;input.onchange=()=>apply(Number(input.value));l.append(input);el.append(l);}
- if(s?.a){const {r,a}=s;number('X（部屋内 mm）',a.x,v=>updateArea('x',v));number('Y（部屋内 mm）',a.y,v=>updateArea('y',v));number('幅 mm',a.w,v=>updateArea('w',v));number('奥行 mm',a.d,v=>updateArea('d',v));number('天井からの段差 mm',a.offset,v=>updateArea('offset',v));const l=document.createElement('label');l.textContent='仕上げ色';const input=document.createElement('input');input.type='color';input.value=a.color||'#e4ddd1';input.onchange=()=>updateArea('color',input.value);l.append(input);el.append(l);}
- else if(s?.r){const r=s.r;number('部屋の天井高 mm',Math.round((roomCeilingHeightM(r)-floorSlabHeightMForFloor(r.floor))/U),v=>{if(!Number.isFinite(v)||v<1800||v>4000||isObjectLocked(r))return;saveState();const previous=roomCeilingHeightM(r);r.ceiling={type:'flat',heightMm:v};const delta=(roomCeilingHeightM(r)-previous)/U;fixtures().filter(it=>roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)===r).forEach(it=>{it.elev=Number(it.elev)+delta;});refresh();});}
- else if(it){const p=document.createElement('p');p.textContent=getFmpItem(it.type)?.name||({'light-down':'ダウンライト','light-ceiling':'シーリングライト','light-spot':'スポットライト'}[it.type]||it.type);el.append(p);number('回転 °',it.rot||0,v=>{if(!Number.isFinite(v)||isObjectLocked(it))return;saveState();it.rot=v;refresh();});number('取付高さ mm',it.elev||0,v=>{if(!Number.isFinite(v)||isObjectLocked(it))return;saveState();it.elev=v;refresh();});}
- else el.textContent='範囲や器具を選ぶと寸法を編集できます。器具・範囲はドラッグで移動。';
- dialog.querySelector('[data-delete]').disabled=!(s?.a||it);
+function drawArea(it){
+ if(!active())return;const sc=ST.zoom*.05,x=ST.panX+it.x*sc,y=ST.panY+it.y*sc;
+ ctx.save();ctx.fillStyle=it.color||'#e4ddd1';ctx.globalAlpha=.8;ctx.fillRect(x,y,it.w*sc,it.d*sc);ctx.globalAlpha=1;ctx.strokeStyle=ST.selected===it?'#e94560':'#8e8375';ctx.lineWidth=1.5;ctx.setLineDash(it.offset>0?[5,3]:[]);ctx.strokeRect(x,y,it.w*sc,it.d*sc);ctx.setLineDash([]);ctx.fillStyle='#56534b';ctx.font='12px sans-serif';ctx.fillText((it.offset<0?'下げ ':'折り上げ +')+it.offset+'mm',x+5,y+17,Math.max(10,it.w*sc-10));ctx.restore();if(ST.selected===it&&ST.tool==='select')drawHandles(it,x+it.w*sc/2,y+it.d*sc/2,it.w*sc/2,it.d*sc/2,sc);
 }
-function updateArea(k,v){const s=selected();if(!s?.a||s.a[k]===v)return;const next={...s.a,[k]:v};const error=valid(s.r,next,s.a.id);if(error){status(error);fields();return;}mutate(s.r,()=>Object.assign(s.a,next));}
-function point(e){const b=cv.getBoundingClientRect();return{x:Math.round(((e.clientX-b.left-ox)/scale)/50)*50,y:Math.round(((e.clientY-b.top-oy)/scale)/50)*50};}
-function down(e){if(e.button!==0)return;const p=point(e);cv.setPointerCapture(e.pointerId);const r=rooms().find(r=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.d);if(tool==='pan'){drag={pan:true,startClient:{x:e.clientX,y:e.clientY},x:panX,y:panY};return;}if(!r)return;
- if(tool==='lower'||tool==='raise'){drag={create:true,r,start:p,end:p};return;}
- if(tool!=='select'){
-  if(!isFlat(r)||isObjectLocked(r)){status('平天井のロックされていない部屋を選んでください。');return;}
-  saveState();const it=mkItem(tool,p.x,p.y,0,ST.floor);it.x=p.x-it.w/2;it.y=p.y-it.d/2;it.elev=ceilingFinishElevationMm(ST.floor,p.x,p.y)-(typeof CEILING_FIXTURE_TOP_MM!=='undefined'?(CEILING_FIXTURE_TOP_MM[it.type]||0):0);DATA.items.push(it);selection={item:it.id};tool='select';dialog.querySelector('[data-tool]').value=tool;refresh();return;
+function props(it){
+ document.getElementById('props-title').textContent='天井範囲 の設定';
+ let html=selectedLockControlHtml(it)+'<div class="ph">天井の範囲</div>';
+ [['x','X位置'],['y','Y位置'],['w','幅'],['d','奥行'],['offset','段差（下げは負）']].forEach(([key,label])=>{html+='<div class="pr"><label class="pl">'+label+' mm</label><input class="pi" data-ceiling-field="'+key+'" type="number" step="10" value="'+(Math.round(it[key]*100)/100)+'" onchange="updateSelectedProp(\''+key+'\',Number(this.value))"></div>';});
+ html+='<div class="pr"><label class="pl">仕上げ色</label><input class="pi" type="color" value="'+(it.color||'#e4ddd1')+'" onchange="updateSelectedProp(\'color\',this.value)"></div><p class="model-finish-note">通常のハンドルで移動・サイズ変更できます。照明の取付高さは天井の変更に追従します。</p>'+selectedDeleteButtonHtml();
+ setPropsBodyHtml(document.getElementById('props-body'),html,it);
+ const name=document.getElementById('mob-prop-name');if(name)name.textContent='天井範囲';
+ const size=document.getElementById('mob-prop-size');if(size)size.textContent=it.w+' × '+it.d+' mm';
+}
+let floorCamera=null;
+function ceilingCamera(){
+ if(ST.view!=='3d-int'||!ST.ceilingView||!camExt||!orbit)return;
+ const rr=DATA.rooms.filter(r=>r.floor===ST.floor);if(!rr.length)return;
+ const x1=Math.min(...rr.map(r=>r.x)),x2=Math.max(...rr.map(r=>r.x+r.w)),z1=Math.min(...rr.map(r=>r.y)),z2=Math.max(...rr.map(r=>r.y+r.d));
+ const x=(x1+x2)*U/2,z=(z1+z2)*U/2,h=floorBaseY(ST.floor)+roomCeilingHeightM(rr[0]);
+ const half=Math.min(camExt.fov*Math.PI/360,Math.atan(Math.tan(camExt.fov*Math.PI/360)*camExt.aspect)),radius=Math.hypot((x2-x1)*U,(z2-z1)*U,2.7)/2,distance=radius/Math.sin(half)*1.18;
+ orbit.maxPolarAngle=Math.PI-.01;orbit.minPolarAngle=.01;camExt.up.set(0,1,0);orbit.target.set(x,h,z);camExt.position.set(x,h-distance*.94,z+distance*.342);orbit.update();
+}
+function syncUI(){
+ const control=document.getElementById('surface-sel');document.getElementById('surface-control').hidden=ST.view!=='2d'&&ST.view!=='3d-int';
+ document.getElementById('surface-context').textContent=ST.view==='3d-int'?'内観3Dの表示':'平面図の表示';control.value=ST.ceilingView?'ceiling':'floor';
+ if(ST.view==='2d'||ST.view==='3d-int')document.getElementById('st-mode').textContent='モード:'+(ST.view==='2d'?'平面図':'内観3D')+(active()?' · 天井':'');
+}
+function setSurface(value){
+ migrate();const enabled=value==='ceiling';if(ST.ceilingView===enabled)return;
+ if(ST.view==='3d-int'&&camExt&&orbit){if(enabled)floorCamera={pos:camExt.position.clone(),target:orbit.target.clone(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};else if(floorCamera){camExt.position.copy(floorCamera.pos);orbit.target.copy(floorCamera.target);orbit.minPolarAngle=floorCamera.min;orbit.maxPolarAngle=floorCamera.max;orbit.update();}}
+ ST.ceilingView=enabled;ST.selected=null;clearMultiSelection();ST.drawing=false;ST.drawPts=[];setTool('select');syncUI();draw2d();updateProps();if(ren)rebuild3D();if(enabled)ceilingCamera();
+}
+function editOperation(fn){return function(){if(!hasAreas())return fn.apply(this,arguments);const before=snapshot();const result=fn.apply(this,arguments);reconcile(before);draw2d();if(ren)rebuild3D();return result;};}
+// Reuse the application's edit pipeline, selection state, history and camera.
+const originalDrag=applyHandleDrag;
+applyHandleDrag=function(){if(zone(ST.selected)&&DRAG.handle==='rot')return;const before=hasAreas()?snapshot():null;originalDrag.apply(this,arguments);if(before)reconcile(before);};
+const originalUpdate=updateSelectedProp;
+updateSelectedProp=function(key,value){if(zone(ST.selected)&&key!=='locked'){const trial={...ST.selected,[key]:value},error=validItem(trial);if(error){message(error);updateProps();return;}}return editOperation(originalUpdate).apply(this,arguments);};
+removeObjectRef=editOperation(removeObjectRef);delSel=editOperation(delSel);
+const originalGizmo=apply3DGizmoDrag;
+apply3DGizmoDrag=function(){const before=hasAreas()?snapshot():null;if(zone(GIZMO_DRAG.ref))GIZMO_DRAG.partialRoots=null;originalGizmo.apply(this,arguments);if(before){reconcile(before);draw2d();if(ren)rebuild3D();}};
+const originalStash=stashCurrentCamera;
+stashCurrentCamera=function(){if(ST.view==='3d-int'&&ST.ceilingView)return;return originalStash.apply(this,arguments);};
+const originalView=setView;
+setView=function(v){if(ST.ceilingView&&v!=='2d'&&v!=='3d-int')setSurface('floor');originalView(v);syncUI();if(ST.ceilingView&&v==='3d-int'){floorCamera={pos:camExt.position.clone(),target:orbit.target.clone(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};ceilingCamera();}};
+const originalFloor=onFloorChange;
+onFloorChange=function(){originalFloor.apply(this,arguments);syncUI();if(ST.ceilingView)ceilingCamera();};
+const originalFit=resetView;
+resetView=function(){originalFit.apply(this,arguments);if(active()&&ST.view==='3d-int')ceilingCamera();};
+const originalTool=setTool;
+setTool=function(t){if(isTool(t)){if(ST.view!=='2d'&&ST.view!=='3d-int')setView('2d');if(!ST.ceilingView)setSurface('ceiling');message('対角の2点を指定して天井範囲を作成します。');}originalTool(t);};
+const originalPaste=pasteCopiedObject;
+pasteCopiedObject=function(){const before=snapshot();const result=originalPaste();if(result&&zone(ST.selected)){const it=ST.selected;let error=validItem(it);if(error){const r=roomFor(it);if(r){outer:for(let y=r.y+50;y+it.d<=r.y+r.d-5;y+=100)for(let x=r.x+50;x+it.w<=r.x+r.w-5;x+=100){it.x=x;it.y=y;if(!validItem(it)){error='';break outer;}}}if(error){DATA.items=DATA.items.filter(o=>o!==it);ST.selected=null;message('貼り付け先に空き範囲がありません。');}}updateProps();draw2d();if(ren)rebuild3D();}reconcile(before);draw2d();if(ren)rebuild3D();return result;};
+function pickPlacement(e){
+ if(!active()||ST.view!=='3d-int'||(!isTool(ST.tool)&&!fixture({type:ST.tool})))return false;
+ const rect=ren.domElement.getBoundingClientRect(),ray=new THREE.Raycaster();
+ ray.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,1-(e.clientY-rect.top)/rect.height*2),camExt);
+ const meshes=[];sc3.traverse(o=>{if(o.isMesh&&o.visible&&o.userData.ceiling)meshes.push(o);});
+ const hit=ray.intersectObjects(meshes,false)[0];if(!hit)return true;
+ const x=snapV(hit.point.x/U),y=snapV(hit.point.z/U);
+ if(isTool(ST.tool))drawClick(x,y);else{placeItem(ST.tool,x,y);rebuild3D();}return true;
+}
+// Determine the remaining material from the very same floor/roof surfaces used to render.
+function raisingLimit(r,it){
+ const base=floorBaseY(r.floor)+roomCeilingHeightM(r),rect=it||r;
+ let max=Infinity,reason='上階の床厚';
+ DATA.rooms.filter(u=>u.floor===r.floor+1&&roomsOverlapInPlan(rect,u)).forEach(u=>{
+  const y=roomFloorTopY(u)-.02;if(y<max){max=y;reason='上階の床厚・床下げ';}
+ });
+ if(max===Infinity){
+  const roofs=DATA.items.filter(o=>o.type==='roof'&&!o.hidden3D&&o.floor>r.floor);
+  // Roof surfaces are piecewise linear; sample footprint corners and interior as well.
+  for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){
+   const x=rect.x+rect.w*i/8,z=rect.y+rect.d*j/8;
+   const covered=roofs.filter(o=>roofCoversPlanPoint(o,x,z));
+   if(!covered.length)return {mm:0,reason:'屋根のない範囲'};
+   for(const roof of covered){const y=roofUndersideWorldYAt(roof,x,z)-.02;if(y<max){max=y;reason='屋根の上面';}}
+  }
  }
- const it=fixtures().slice().reverse().find(it=>Math.hypot(p.x-it.x-it.w/2,p.y-it.y-it.d/2)<Math.max(it.w,it.d,250)/2);
- if(it){selection={item:it.id};drag={it,start:p,x:it.x,y:it.y};}
- else{const a=(r.ceilingAreas||[]).slice().reverse().find(a=>p.x>=r.x+a.x&&p.x<=r.x+a.x+a.w&&p.y>=r.y+a.y&&p.y<=r.y+a.y+a.d);selection={room:r.id,id:a?.id};if(a)drag={r,a,start:p,x:a.x,y:a.y};}
- refresh(false);
+ return {mm:Math.max(0,Math.floor((max-base)/U+1e-6)),reason};
 }
-function move(e){if(!drag)return;if(drag.pan){panX=drag.x+e.clientX-drag.startClient.x;panY=drag.y+e.clientY-drag.startClient.y;draw();return;}const p=point(e);if(drag.create){drag.end=p;draw();return;}drag.end=p;draw();}
-function up(e){if(!drag)return;const d=drag;drag=null;if(d.pan)return;const p=point(e);
- if(d.create){const a={id:'ceiling-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),x:Math.min(d.start.x,p.x)-d.r.x,y:Math.min(d.start.y,p.y)-d.r.y,w:Math.abs(p.x-d.start.x),d:Math.abs(p.y-d.start.y),offset:tool==='lower'?-150:150,color:'#e4ddd1'};const error=valid(d.r,a);if(error){status(error);draw();return;}mutate(d.r,()=>{(d.r.ceilingAreas||(d.r.ceilingAreas=[])).push(a);selection={room:d.r.id,id:a.id};});}
- else if(p.x!==d.start.x||p.y!==d.start.y){const x=d.x+p.x-d.start.x,y=d.y+p.y-d.start.y;if(d.a){const next={...d.a,x,y},error=valid(d.r,next,d.a.id);if(error)status(error);else mutate(d.r,()=>Object.assign(d.a,next));}
- else if(!isObjectLocked(d.it)){const newRoom=roomAtPointOnFloor(d.it.floor,x+d.it.w/2,y+d.it.d/2);if(newRoom&&isFlat(newRoom)){const old=ceilingFinishElevationMm(d.it.floor,d.it.x+d.it.w/2,d.it.y+d.it.d/2);saveState();d.it.x=x;d.it.y=y;d.it.elev=Number(d.it.elev)+ceilingFinishElevationMm(d.it.floor,x+d.it.w/2,y+d.it.d/2)-old;refresh();}}}
- draw();
+function floorLoweringLimit(r){
+ let min=-Math.max(0,floorSlabMmForFloor(r.floor)-20);
+ DATA.rooms.filter(b=>b.floor===r.floor-1).forEach(b=>areas(b).filter(a=>a.offset>0).forEach(a=>{
+  const rect={x:b.x+a.x,y:b.y+a.y,w:a.w,d:a.d};if(!roomsOverlapInPlan(r,rect))return;
+  const top=floorBaseY(b.floor)+roomCeilingHeightM(b)+a.offset*U;
+  const floor=localSupportTopY(r.floor,r.x,r.y,r.x+r.w,r.y+r.d)+floorSlabHeightMForFloor(r.floor);
+  min=Math.max(min,Math.ceil((top+.02-floor)/U-1e-6));
+ }));return min;
 }
-async function render3D(){if(mode!=='3d'||!dialog.open)return;const token=++revision;init3D();
- if(!renderer){renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;view.append(renderer.domElement);let pressed;renderer.domElement.addEventListener('pointerdown',e=>{pressed={x:e.clientX,y:e.clientY};});renderer.domElement.addEventListener('pointerup',e=>{if(!scene||!pressed||Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y)>5)return;const b=renderer.domElement.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1),camera);for(const hit of ray.intersectObject(scene,true)){let o=hit.object;while(o){if(o.userData.ceilingAreaId){selection={room:o.userData.roomId,id:o.userData.ceilingAreaId};fields();return;}if(o.userData.selectRef&&fixtures().some(it=>it.id===o.userData.selectRef.id)){selection={item:o.userData.selectRef.id};fields();return;}if(o.userData.roomId){selection={room:o.userData.roomId};fields();return;}o=o.parent;}}});camera=new THREE.PerspectiveCamera(50,1,.01,200);controls=new THREE.OrbitControls(camera,renderer.domElement);controls.addEventListener('change',()=>{if(scene)renderer.render(scene,camera);});}
- const old=scene;scene=new THREE.Scene();scene.background=new THREE.Color('#e8eceb');scene.add(new THREE.HemisphereLight(0xeaf3ff,0xffffff,2.2));const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(2,-4,3);scene.add(light);
- rooms().forEach(r=>{if(!roomHasCoverAbove(r))return;scene.add(ceilingGroup(r,floorBaseY(r.floor)+roomCeilingHeightM(r),makeRoomCeilingMaterial(r,new THREE.MeshStandardMaterial({color:'#faf8f3',roughness:.9,side:THREE.DoubleSide})),stairwellHolesForRoom(r,{[r.floor]:stairwellQuadsForFloor(r.floor+1)}),roomCeilingProfile(r)));});
- rooms().forEach(r=>{if(!roomHasCoverAbove(r))return;const y=floorBaseY(r.floor)+roomCeilingHeightM(r)-.018;const points=[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.d],[r.x,r.y+r.d],[r.x,r.y]].map(p=>new THREE.Vector3(p[0]*U,y,p[1]*U));const g=new THREE.BufferGeometry().setFromPoints(points);scene.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xaaa79e})));});
- for(const it of fixtures()){const m=getFmpItem(it.type);if(m&&!_modelCache[m.model]){try{const g=await new Promise((res,rej)=>getGltfLoader().load(m.model,res,undefined,rej));ModelQuality.prepare(g.scene,m.model);_modelCache[m.model]=g.scene;}catch(e){status('一部の器具モデルを読み込めませんでした。');}}
- if(token!==revision||!dialog.open)return;const original=sc3;const selectedBefore=ST.selected;try{sc3=scene;ST.selected=it;buildItem3D(it);}finally{sc3=original;ST.selected=selectedBefore;}}
- const b=bounds(),x=(b.x+b.x2)*U/2,z=(b.y+b.y2)*U/2,h=floorBaseY(ST.floor)+(rooms()[0]?roomCeilingHeightM(rooms()[0]):2.4),extent=Math.max(b.x2-b.x,b.y2-b.y)*U;
- if(!render3D.keep){controls.target.set(x,h-.1,z);camera.position.set(x,h-Math.max(3,extent*1.5),z+Math.max(.3,extent*.45));camera.up.set(0,0,-1);controls.update();render3D.keep=true;}
- renderer.setSize(view.clientWidth,view.clientHeight);camera.aspect=view.clientWidth/view.clientHeight;camera.updateProjectionMatrix();renderer.render(scene,camera);
- if(old)disposePreview(old);
+// Subtract a world-space rectangular recess from generated floor/roof triangles.
+// The ceiling surface and its fascia close the cut. No per-frame shader or renderer.
+function cutMesh(mesh,box){
+ const original=mesh.geometry;if(!original?.attributes.position)return;
+ const bounds=new THREE.Box3().setFromObject(mesh);if(!bounds.intersectsBox(box))return;
+ const src=original.index?original.toNonIndexed():original.clone(),attrs=src.attributes;
+ const names=Object.keys(attrs),out=Object.fromEntries(names.map(k=>[k,[]])),groups=[];
+ const p=attrs.position;
+ function vertex(i){const a={};for(const k of names){const at=attrs[k];a[k]=Array.from({length:at.itemSize},(_,j)=>at.array[i*at.itemSize+j]);}a.world=new THREE.Vector3(...a.position).applyMatrix4(mesh.matrixWorld);return a;}
+ function mix(a,b,t){const v={};for(const k of names)v[k]=a[k].map((x,i)=>x+(b[k][i]-x)*t);v.world=a.world.clone().lerp(b.world,t);return v;}
+ function split(poly,axis,value,sign){const inside=[],outside=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],da=(a.world[axis]-value)*sign,db=(b.world[axis]-value)*sign;(da>=0?inside:outside).push(a);if((da>=0)!==(db>=0)){const v=mix(a,b,da/(da-db));inside.push(v);outside.push(v);}}return {inside,outside};}
+ function emit(poly,material){if(poly.length<3)return;const start=out.position.length/3;for(let i=1;i<poly.length-1;i++)for(const v of [poly[0],poly[i],poly[i+1]])for(const k of names)out[k].push(...v[k]);const count=out.position.length/3-start,last=groups.at(-1);if(last&&last.materialIndex===material)last.count+=count;else groups.push({start,count,materialIndex:material});}
+ const planes=[['x',box.min.x,1],['x',box.max.x,-1],['z',box.min.z,1],['z',box.max.z,-1],['y',box.max.y,-1],['y',box.min.y,1]];
+ for(let i=0;i<p.count;i+=3){let poly=[vertex(i),vertex(i+1),vertex(i+2)];const material=(src.groups.find(g=>i>=g.start&&i<g.start+g.count)||{}).materialIndex||0;for(const plane of planes){if(!poly.length)break;const parts=split(poly,...plane);emit(parts.outside,material);poly=parts.inside;}}
+ const geo=new THREE.BufferGeometry();for(const k of names)geo.setAttribute(k,new THREE.Float32BufferAttribute(out[k],attrs[k].itemSize));for(const g of groups)geo.addGroup(g.start,g.count,g.materialIndex);geo.computeBoundingBox();geo.computeBoundingSphere();mesh.geometry=geo;src.dispose();original.dispose();
 }
-function disposePreview(s){const cachedG=new Set(),cachedM=new Set();Object.values(_modelCache).forEach(g=>g.traverse?.(o=>{if(o.geometry)cachedG.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).filter(Boolean).forEach(m=>cachedM.add(m));}));s.traverse(o=>{if(o.geometry&&!cachedG.has(o.geometry))o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).filter(Boolean).forEach(m=>{if(!cachedM.has(m))m.dispose();});});}
-function refresh(rebuild=true){draw();fields();if(mode==='3d'&&rebuild)render3D();if(rebuild){draw2d();if(ren)rebuild3D();}}
-function open(){
- if(!dialog){dialog=document.createElement('dialog');dialog.className='ceiling-designer';dialog.innerHTML='<header><strong>天井デザイン</strong><span>天井伏図 · 床の平面図と同じ向き</span><button data-close>閉じる</button></header><nav><button data-plan>天井伏図</button><button data-3d>見上げ3D</button><label>階 <select data-floor></select></label><select data-tool aria-label="天井ツール"><option value="select">選択・移動</option><option value="pan">表示を移動</option><option value="lower">下げ天井を描く</option><option value="raise">折り上げ天井を描く</option><option value="light-ceiling">シーリングライト</option><option value="light-down">ダウンライト</option><option value="light-spot">スポットライト</option></select><button data-zoom-in aria-label="拡大">＋</button><button data-zoom-out aria-label="縮小">−</button><button data-fit>全体</button><button data-undo>Undo</button><button data-redo>Redo</button></nav><section><div class="ceiling-stage"><canvas aria-label="天井伏図"></canvas><div class="ceiling-3d" hidden></div></div><aside><h3>選択範囲・器具</h3><div data-fields></div><button data-delete>選択を削除</button><p data-status>ツールを選び、部屋内をドラッグして範囲を作成。段差は下げが負、折り上げが正です。</p></aside></section>';document.body.append(dialog);cv=dialog.querySelector('canvas');view=dialog.querySelector('.ceiling-3d');cv.addEventListener('wheel',e=>{e.preventDefault();viewZoom=Math.max(.5,Math.min(8,viewZoom*(e.deltaY<0?1.1:1/1.1)));draw();},{passive:false});cv.onpointerdown=down;cv.onpointermove=move;cv.onpointerup=up;cv.onpointercancel=()=>{drag=null;draw();};
- dialog.querySelector('[data-zoom-in]').onclick=()=>{if(mode==='3d'){camera.position.sub(controls.target).multiplyScalar(.8).add(controls.target);controls.update();}else{viewZoom=Math.min(8,viewZoom*1.3);draw();}};dialog.querySelector('[data-zoom-out]').onclick=()=>{if(mode==='3d'){camera.position.sub(controls.target).multiplyScalar(1.25).add(controls.target);controls.update();}else{viewZoom=Math.max(.5,viewZoom/1.3);draw();}};dialog.querySelector('[data-fit]').onclick=()=>{viewZoom=1;panX=panY=0;render3D.keep=false;refresh();};
- dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.onclose=()=>{revision++;if(scene){disposePreview(scene);scene=null;}draw2d();if(ren)rebuild3D();};dialog.querySelector('[data-plan]').onclick=()=>switchMode('plan');dialog.querySelector('[data-3d]').onclick=()=>switchMode('3d');dialog.querySelector('[data-tool]').onchange=e=>{tool=e.target.value;switchMode('plan');};
- dialog.querySelector('[data-undo]').onclick=()=>{undoAction();selection=null;refresh();};dialog.querySelector('[data-redo]').onclick=()=>{redoAction();selection=null;refresh();};dialog.querySelector('[data-floor]').onchange=e=>{ST.floor=Number(e.target.value);ST.selected=null;document.getElementById('floor-sel').value=String(ST.floor);document.getElementById('st-floor').textContent='フロア:'+ST.floor+'F';selection=null;render3D.keep=false;refresh();};
- dialog.querySelector('[data-delete]').onclick=()=>{const s=selected();if(s?.a)mutate(s.r,()=>{s.r.ceilingAreas=s.r.ceilingAreas.filter(a=>a.id!==s.a.id);selection=null;});else{const it=DATA.items.find(it=>it.id===selection?.item);if(it&&!isObjectLocked(it)){saveState();DATA.items=DATA.items.filter(a=>a!==it);selection=null;refresh();}}};
- new ResizeObserver(()=>{draw();if(mode==='3d')render3D();}).observe(dialog);
- }
- const floor=dialog.querySelector('[data-floor]');floor.replaceChildren();[...new Set(DATA.rooms.map(r=>r.floor))].sort((a,b)=>a-b).forEach(f=>{const o=new Option(f+'F',f);o.selected=f===ST.floor;floor.add(o);});
- const tools=dialog.querySelector('[data-tool]');tools.querySelectorAll('[data-fixture]').forEach(o=>o.remove());Object.values(FMP_ITEMS).filter(m=>typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[m.id]!==undefined).forEach(m=>{const o=new Option(m.name,m.id);o.dataset.fixture='1';tools.add(o);});
- dialog.showModal();viewZoom=1;panX=panY=0;render3D.keep=false;switchMode('plan');
+function carveRecesses(scene){
+ const cuts=[];DATA.rooms.forEach(r=>areas(r).filter(a=>a.offset>0).forEach(a=>{
+  const base=floorBaseY(r.floor)+roomCeilingHeightM(r);
+  cuts.push({floor:r.floor,box:new THREE.Box3(new THREE.Vector3((r.x+a.x)*U,base-.02,(r.y+a.y)*U),new THREE.Vector3((r.x+a.x+a.w)*U,base+a.offset*U+.001,(r.y+a.y+a.d)*U))});
+ }));if(!cuts.length)return;
+ scene.updateMatrixWorld(true);
+ scene.traverse(mesh=>{if(!mesh.isMesh||mesh.isInstancedMesh)return;const ref=mesh.userData?.selectRef;if(!ref||mesh.userData.ceiling)return;
+  if(ref.type!=='roof'&&ref.type!=='room')return;
+  for(const cut of cuts)if(ref.type==='roof'?ref.floor>cut.floor:ref.floor===cut.floor+1)cutMesh(mesh,cut.box);
+ });
 }
-function switchMode(m){mode=m;cv.hidden=m!=='plan';view.hidden=m!=='3d';dialog.querySelector('header span').textContent=m==='plan'?'天井伏図 · 床の平面図と同じ向き':'天井を下から確認 · ドラッグで回転';dialog.querySelector('[data-plan]').classList.toggle('active',m==='plan');dialog.querySelector('[data-3d]').classList.toggle('active',m==='3d');refresh();}
-window.CeilingDesigner={open,areas,offsetAt,ceilingGroup,valid};
+// The model and view adapter intentionally have no canvas, renderer or dialog of their own.
+window.CeilingDesigner={active,zone,fixture,visible,areas,offsetAt,ceilingGroup,migrate,isTool,drawClick,drawArea,props,setSurface,validItem,ceilingCamera,pickPlacement,raisingLimit,floorLoweringLimit,carveRecesses};
+ILABELS['ceiling-area']='天井範囲';
+syncUI();
 })();
