@@ -477,11 +477,11 @@ test('欄の書き込み先は天井のフィールド（床や汎用カラー�
     '色が効かなくなることを黙っている: ' + h);
 });
 
-test('天井面が外観3Dでしか見えないことを、その場で言う', () => {
+test('天井面が天井を確認できるビューを、その場で言う', () => {
   const ctx = uiCtx({ rooms: [] });
   const h = ctx.selectedRoomCeilingFinishHtml(select(ctx, room()));
-  assert.ok(h.indexOf('外観3D') !== -1, '外観3Dでしか見えないことを言っていない');
-  assert.ok(h.indexOf('内観3Dは天井を作りません') !== -1);
+  assert.ok(h.indexOf('外観3D') !== -1, '天井を確認できるビューを言っていない');
+  assert.ok(h.indexOf('天井デザインの見上げ3D') !== -1);
   assert.ok(h.indexOf('勾配天井にも同じ仕上げが乗ります') !== -1);
 });
 

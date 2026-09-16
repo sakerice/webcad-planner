@@ -63,7 +63,7 @@ function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
   var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
-  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)-(r?roomFloorOffsetMm(r):0);
+  return Math.round((hM-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)-(r?roomFloorOffsetMm(r):0)+(r&&typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
 }
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
@@ -411,7 +411,7 @@ function selectedRoomCeilingHtml(it){
       html+='<div class="lock-status-note">高い側 '+shape.highMm+'mm は階高 '+storyMm+'mm を超えていますが、この部屋の上には部屋がないので丸めずにそのまま描いています（小屋裏へ抜ける形です）。</div>';
     }
   }
-  html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
+  html+='<div class="lock-status-note">勾配天井の天井面は天井デザインの見上げ3D・外観3D・ウォークスルーで確認できます。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
 }
 // 天井の仕上げ（色・テクスチャ）の欄 (Task 22)。
@@ -441,7 +441,7 @@ function selectedRoomCeilingFinishHtml(it){
     html+='<div class="lock-status-note">テクスチャを設定しているあいだ、天井カラーは効きません（画像が優先されます）。</div>';
   }
   // 「設定したのに何も起きない」に見える2つの場合を、その場で言う。
-  html+='<div class="lock-status-note">天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。平らな天井にも勾配天井にも同じ仕上げが乗ります。</div>';
+  html+='<div class="lock-status-note">天井面は天井デザインの見上げ3D・外観3D・ウォークスルーで確認できます。平らな天井にも勾配天井にも同じ仕上げが乗ります。</div>';
   if(typeof roomHasCoverAbove==='function'&&!roomHasCoverAbove(it)){
     html+='<div class="lock-status-note">この部屋の上には部屋も屋根もありません。天井面そのものが作られないので、仕上げを設定しても外観3Dには出ません（上に屋根を載せると出ます）。</div>';
   }
