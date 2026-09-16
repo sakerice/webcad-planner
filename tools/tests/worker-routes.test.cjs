@@ -1,9 +1,9 @@
 // Worker の振り分けと、AI ルートの入口。
 //
 // 見ているのは「モデルを呼ぶ前に弾くべきものを弾けているか」と
-// 「返ってきたものを検めてから渡しているか」。実際に Bedrock が署名を
-// 受け付けるかどうかは、鍵が要るのでここでは確かめられない（鍵を設定した
-// あとで tools/probe_bedrock.cjs を1回走らせて確かめる）。
+// 「返ってきたものを検めてから渡しているか」。日本国内から出ないことは
+// tools/tests/vertex-region.test.cjs が見る。実物の Vertex AI を叩く確認は
+// 鍵が要るので tools/probe_vertex.cjs で行う。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
@@ -34,14 +34,45 @@ async function callAi(path, body, env, fetchImpl) {
 
 // 1x1 の PNG。中身は問わないので形だけ整っていればよい。
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==';
-const AWS_ENV = { AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE', AWS_SECRET_ACCESS_KEY: 'secret-value-do-not-leak' };
+// 署名の経路を本物どおり通したいので、検査用の鍵をその場で作る。
+// 偽物の文字列だと署名の時点で失敗し、その先(送信内容・応答の扱い)を
+// 1件も見られない。
+async function makeTestKey() {
+  const pair = await crypto.subtle.generateKey(
+    { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' },
+    true, ['sign', 'verify'],
+  );
+  const der = await crypto.subtle.exportKey('pkcs8', pair.privateKey);
+  const b64 = Buffer.from(der).toString('base64').replace(/(.{64})/g, '$1\n');
+  return `-----BEGIN PRIVATE KEY-----\n${b64}\n-----END PRIVATE KEY-----\n`;
+}
+let VERTEX_ENV;
+test('検査用の鍵を用意する', async () => {
+  VERTEX_ENV = {
+    GOOGLE_SERVICE_ACCOUNT_JSON: JSON.stringify({
+      client_email: 'plan-import@example.iam.gserviceaccount.com',
+      private_key: await makeTestKey(),
+      project_id: 'example-project',
+      token_uri: 'https://oauth2.googleapis.com/token',
+    }),
+  };
+});
 
-// Bedrock の Converse がこの形で返す。
-function converseReply(obj) {
+// 署名を通さずに呼び出しの中身を見たいので、トークン窓口の応答も差し替える。
+function vertexFetch(onGenerate) {
+  return async (req) => {
+    if (String(req.url).includes('oauth2')) {
+      return new Response(JSON.stringify({ access_token: 'test-token', expires_in: 3600 }), { status: 200 });
+    }
+    return onGenerate(req);
+  };
+}
+
+// Vertex AI の generateContent がこの形で返す。
+function vertexReply(obj) {
   return new Response(JSON.stringify({
-    output: { message: { content: [{ text: JSON.stringify(obj) }] } },
-    usage: { inputTokens: 2000, outputTokens: 1500 },
-    stopReason: 'end_turn',
+    candidates: [{ content: { parts: [{ text: JSON.stringify(obj) }] }, finishReason: 'STOP' }],
+    usageMetadata: { promptTokenCount: 2000, candidatesTokenCount: 1500, thoughtsTokenCount: 500, totalTokenCount: 4000 },
   }), { status: 200 });
 }
 
@@ -76,12 +107,12 @@ test('知らない /api/ のパスは 404（静的ファイルへ落とさない
 
 test('GET は受けない（AIの呼び出しは副作用も費用もあるので）', async () => {
   const { default: router } = await mod('worker/router.mjs');
-  const res = await router.fetch(new Request('https://example.test/api/ai/import-plan'), AWS_ENV);
+  const res = await router.fetch(new Request('https://example.test/api/ai/import-plan'), VERTEX_ENV);
   assert.equal(res.status, 405);
 });
 
 // ── 鍵が無いとき ──────────────────────────────────────────────────────
-test('AWS の鍵が無ければ、間取り読み取りは呼ばずに 503 と手順を返す', async () => {
+test('Google の鍵が無ければ、間取り読み取りは呼ばずに 503 と手順を返す', async () => {
   const res = await post('/api/ai/import-plan', { image: PNG }, {});
   assert.equal(res.status, 503);
   const body = await res.json();
@@ -96,7 +127,7 @@ test('OpenAI の鍵が無ければ、レンダーは呼ばずに 503', async () 
 });
 
 test('鍵はどの応答にも出てこない', async () => {
-  const env = { ...AWS_ENV, OPENAI_API_KEY: 'sk-secret-value' };
+  const env = { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-secret-value' };
   const cases = [
     ['/api/ai/render', { image: PNG, prompt: 'x' }],
     ['/api/ai/import-plan', { image: 'こわれた' }],
@@ -111,9 +142,9 @@ test('鍵はどの応答にも出てこない', async () => {
 // ── 入口の検査 ────────────────────────────────────────────────────────
 test('画像が data URL でなければ、モデルを呼ぶ前に 400', async () => {
   let called = false;
-  const fetchImpl = () => { called = true; return converseReply(GOOD_PLAN); };
+  const fetchImpl = vertexFetch(() => { called = true; return vertexReply(GOOD_PLAN); });
   for (const image of [undefined, '', 'https://example.com/a.png', 'data:text/plain;base64,AAAA']) {
-    const res = await callAi('/api/ai/import-plan', { image }, AWS_ENV, fetchImpl);
+    const res = await callAi('/api/ai/import-plan', { image }, VERTEX_ENV, fetchImpl);
     assert.equal(res.status, 400, JSON.stringify(image) + ' が通ってしまった');
   }
   assert.equal(called, false, '弾くべきものでモデルを呼んでいる（お金がかかる）');
@@ -126,37 +157,23 @@ test('レンダーは指示文が無い・長すぎるものを 400 で弾く', 
 });
 
 // ── 国内処理の担保 ────────────────────────────────────────────────────
-test('日本国内に閉じないモデルが設定されていたら、送らずに止める', async () => {
-  let called = false;
-  const fetchImpl = () => { called = true; return converseReply(GOOD_PLAN); };
-  const env = { ...AWS_ENV, BEDROCK_PLAN_MODEL: 'global.anthropic.claude-opus-5' };
-  const res = await callAi('/api/ai/import-plan', { image: PNG }, env, fetchImpl);
-  assert.equal(res.status, 500);
-  assert.equal((await res.json()).error, 'ai_model_not_japan_resident');
-  assert.equal(called, false, '送ってしまってからでは取り返しがつかない');
-});
-
-test('既定のモデルは日本国内に閉じている', async () => {
-  const { bedrockConfig, isJapanResident, DEFAULT_PLAN_MODEL } = await mod('worker/bedrock.mjs');
-  assert.ok(isJapanResident(DEFAULT_PLAN_MODEL), '既定が jp. で始まっていない');
-  assert.equal(bedrockConfig({}).region, 'ap-northeast-1');
-  assert.equal(isJapanResident('global.anthropic.claude-opus-5'), false);
-  assert.equal(isJapanResident('anthropic.claude-opus-4-8'), false);
-});
+// 日本国内から出ないことの検査は tools/tests/vertex-region.test.cjs にある。
 
 // ── 呼んだあと ────────────────────────────────────────────────────────
 test('読めた間取りは、検めて均してから返す', async () => {
-  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV, () => converseReply(GOOD_PLAN));
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV, vertexFetch(() => vertexReply(GOOD_PLAN)));
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.deepEqual(body.summary, { walls: 2, rooms: 1, items: 1, floors: [1] });
   assert.ok(body.plan.rooms[0].id, 'id が振られている');
   assert.deepEqual(body.notes, ['右下の収納は寸法が読めなかった'], 'AIが読めなかったことは利用者に見せる');
-  assert.deepEqual(body.usage, { inputTokens: 2000, outputTokens: 1500 }, '原価を測れるように使用量を返す');
+  assert.deepEqual(body.usage,
+    { inputTokens: 2000, answerTokens: 1500, thoughtTokens: 500, outputTokens: 2000, totalTokens: 4000 },
+    '原価を測れるように使用量を返す。思考ぶんは課金対象なので出力に含め、内訳も残す');
 });
 
 test('前置きや ``` で囲まれた返事からも JSON を取り出す', async () => {
-  const { extractJson } = await mod('worker/bedrock.mjs');
+  const { extractJson } = await mod('worker/vertex.mjs');
   const want = { walls: [], rooms: [], items: [] };
   assert.deepEqual(extractJson(JSON.stringify(want)), want);
   assert.deepEqual(extractJson('```json\n' + JSON.stringify(want) + '\n```'), want);
@@ -168,7 +185,7 @@ test('前置きや ``` で囲まれた返事からも JSON を取り出す', asy
 test('読み込める形でない間取りは 422 で、理由を添えて返す', async () => {
   // 長さゼロの壁。芯線が点なので面が張れない。
   const broken = { walls: [{ x1: 0, y1: 0, x2: 0, y2: 0, thick: 120 }], rooms: [], items: [] };
-  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV, () => converseReply(broken));
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV, vertexFetch(() => vertexReply(broken)));
   assert.equal(res.status, 422);
   const body = await res.json();
   assert.equal(body.error, 'ai_invalid_plan');
@@ -176,15 +193,15 @@ test('読み込める形でない間取りは 422 で、理由を添えて返す
 });
 
 test('JSON になっていない返事は 502', async () => {
-  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV,
-    () => new Response(JSON.stringify({ output: { message: { content: [{ text: 'わかりません' }] } } }), { status: 200 }));
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV,
+    vertexFetch(() => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'わかりません' }] } }] }), { status: 200 })));
   assert.equal(res.status, 502);
   assert.equal((await res.json()).error, 'ai_bad_response');
 });
 
-test('Bedrock 側のエラーは 502 にして、本文をそのまま流さない', async () => {
-  const res = await callAi('/api/ai/import-plan', { image: PNG }, AWS_ENV,
-    () => new Response(JSON.stringify({ message: 'The security token included in the request is invalid' }), { status: 403 }));
+test('Vertex 側のエラーは 502 にして、本文をそのまま流さない', async () => {
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV,
+    vertexFetch(() => new Response(JSON.stringify({ error: { message: 'Permission denied on resource project' } }), { status: 403 })));
   assert.equal(res.status, 502);
   const body = await res.json();
   assert.equal(body.error, 'ai_upstream_error');
@@ -192,21 +209,23 @@ test('Bedrock 側のエラーは 502 にして、本文をそのまま流さな�
 });
 
 // ── 送っている中身 ────────────────────────────────────────────────────
-test('東京の bedrock-runtime へ、画像と指示文を1往復で送っている', async () => {
+test('東京の窓口へ、画像と指示文を1往復で送っている', async () => {
   let sent = null;
-  await callAi('/api/ai/import-plan', { image: PNG, hint: '1階だけの図です' }, AWS_ENV, async (req) => {
-    sent = { url: req.url, auth: req.headers.get('authorization'), body: JSON.parse(await req.text()) };
-    return converseReply(GOOD_PLAN);
-  });
-  assert.match(sent.url, /^https:\/\/bedrock-runtime\.ap-northeast-1\.amazonaws\.com\/model\/jp\.anthropic\./);
-  assert.match(sent.url, /\/converse$/);
-  assert.match(sent.auth, /^AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE\/\d{8}\/ap-northeast-1\/bedrock\/aws4_request, SignedHeaders=/);
-  assert.ok(!sent.auth.includes('secret-value'), '署名ヘッダに秘密鍵そのものが出ていない');
-  assert.equal(sent.body.messages.length, 1, '1往復で収める（往復を増やすと原価が倍になる）');
-  assert.equal(sent.body.messages[0].content[0].image.format, 'png');
-  assert.equal(sent.body.messages[0].content[0].image.source.bytes, PNG.split(',')[1]);
-  assert.equal(sent.body.inferenceConfig.temperature, 0, '図面の読み取りは創作ではない');
-  assert.match(sent.body.messages[0].content[1].text, /1階だけの図です/, '利用者の補足が渡っている');
+  await callAi('/api/ai/import-plan', { image: PNG, hint: '1階だけの図です' }, VERTEX_ENV,
+    vertexFetch(async (req) => {
+      sent = { url: req.url, auth: req.headers.get('authorization'), body: JSON.parse(await req.text()) };
+      return vertexReply(GOOD_PLAN);
+    }));
+  assert.match(sent.url, /^https:\/\/asia-northeast1-aiplatform\.googleapis\.com\//, '東京の窓口ではない');
+  assert.match(sent.url, /\/locations\/asia-northeast1\//);
+  assert.match(sent.url, /:generateContent$/);
+  assert.match(sent.auth, /^Bearer /);
+  assert.ok(!sent.auth.includes('secret-value-do-not-leak'), '認証ヘッダに秘密鍵そのものが出ている');
+  assert.equal(sent.body.contents.length, 1, '1往復で収める（往復を増やすと原価が倍になる）');
+  assert.equal(sent.body.contents[0].parts[0].inline_data.mime_type, 'image/png');
+  assert.equal(sent.body.contents[0].parts[0].inline_data.data, PNG.split(',')[1]);
+  assert.equal(sent.body.generationConfig.temperature, 0, '図面の読み取りは創作ではない');
+  assert.match(sent.body.contents[0].parts[1].text, /1階だけの図です/, '利用者の補足が渡っている');
 });
 
 test('指示文は、読ませる範囲と座標の約束を明示している', async () => {

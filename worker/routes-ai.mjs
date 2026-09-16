@@ -8,16 +8,16 @@
 //
 // 2つの機能で提供元が違う理由
 // --------------------------
-//   POST /api/ai/import-plan  間取り図 → プランJSON  … Amazon Bedrock (東京・大阪)
+//   POST /api/ai/import-plan  間取り図 → プランJSON  … Vertex AI Gemini (東京)
 //   POST /api/ai/render       3Dの画像 → 写実的な画像 … OpenAI (未実装)
 //
-// 間取り図には施主名・敷地住所が入りうるので、処理を日本国内に閉じられる
-// Bedrock を使う。一方レンダーの入力は利用者自身が作った家の3D画像で個人情報を
-// 含まないうえ、Bedrock 東京の画像生成モデルは 2026-09-30 に無くなるため、
-// そちらは国外のサービスになる。
+// 間取り図には施主名・敷地住所が入りうるので、東京リージョンで処理を閉じ
+// られる Vertex AI の Gemini を使う。一方レンダーの入力は利用者自身が作った
+// 家の3D画像で個人情報を含まないので、そちらは国外のサービスでよい。
+// (東京で動く画像生成モデルはそもそも無い)
 import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs";
-import { bedrockConfig, converse, extractJson, isJapanResident } from "./bedrock.mjs";
-import { SYSTEM_PROMPT, buildPlanPrompt } from "./plan-prompt.mjs";
+import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
+import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -56,23 +56,23 @@ async function aiImportPlan(payload, env, deps) {
 
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
-  const config = bedrockConfig(env);
+  const config = vertexConfig(env);
   if (!config.configured) {
     return json({
       error: "ai_not_configured",
-      message: "AWS の鍵がこの環境に設定されていません。wrangler secret put AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY で設定してください。",
+      message: "Google の鍵がこの環境に設定されていません。wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON で設定してください。",
     }, 503);
   }
-  // 国内に閉じない設定で間取り図を送ってしまう事故を、ここで止める。
-  // 送ってしまってから気づいても取り返しがつかない。
-  if (!isJapanResident(config.model) && env.ALLOW_NON_JP_PLAN_MODEL !== "1") {
+  // 日本国内ではないリージョンへ間取り図を送ってしまう事故を、ここで止める。
+  // グローバル窓口はエラーにならず黙って国外へ出るので、送る前に弾く。
+  if (!isJapanLocation(config.location)) {
     return json({
-      error: "ai_model_not_japan_resident",
-      message: `間取り図は個人情報を含みうるため、日本国内で処理するモデル(jp. で始まるID)しか使えません。いまの設定: ${config.model}`,
+      error: "ai_region_not_japan",
+      message: `間取り図は個人情報を含みうるため、日本国内のリージョンでしか処理できません。いまの設定: ${config.location}`,
     }, 500);
   }
 
-  const result = await converse({
+  const result = await generate({
     config,
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint }),
@@ -94,11 +94,7 @@ async function aiImportPlan(payload, env, deps) {
 //
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage) {
-  const plan = {
-    walls: Array.isArray(parsed.walls) ? parsed.walls : [],
-    rooms: Array.isArray(parsed.rooms) ? parsed.rooms : [],
-    items: Array.isArray(parsed.items) ? parsed.items : [],
-  };
+  const plan = decodeCompactPlan(parsed);
   const checked = planProblems(plan);
   if (!checked.ok) {
     return json({

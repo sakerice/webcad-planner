@@ -92,3 +92,27 @@ ${ALLOWED_ITEM_TYPES.map((t) => "- " + t).join("\n")}
 ${hint ? `\n# 利用者からの補足\n${hint}\n` : ""}
 JSONだけを出力してください。`;
 }
+
+// モデルの出力を、アプリが使う形にそろえる。
+//
+// 項目名つきのオブジェクトで返る前提だが、**詰めた配列で返ってくることも
+// ある**ので両方受ける。1件=1配列を試した結果は plan-import の計測記録の
+// とおりで、思考ぶんが増えて逆に高くついたため採用していない。
+export function decodeCompactPlan(parsed) {
+  const out = { walls: [], rooms: [], items: [] };
+  if (!parsed || typeof parsed !== "object") return out;
+  const num = (v) => (typeof v === "number" ? v : Number(v));
+  for (const w of Array.isArray(parsed.walls) ? parsed.walls : []) {
+    if (Array.isArray(w)) out.walls.push({ x1: num(w[0]), y1: num(w[1]), x2: num(w[2]), y2: num(w[3]), thick: num(w[4]), floor: num(w[5]) || 1 });
+    else if (w && typeof w === "object") out.walls.push(w);
+  }
+  for (const r of Array.isArray(parsed.rooms) ? parsed.rooms : []) {
+    if (Array.isArray(r)) out.rooms.push({ x: num(r[0]), y: num(r[1]), w: num(r[2]), d: num(r[3]), floor: num(r[4]) || 1, n: r[5] == null ? "" : String(r[5]) });
+    else if (r && typeof r === "object") out.rooms.push(r);
+  }
+  for (const it of Array.isArray(parsed.items) ? parsed.items : []) {
+    if (Array.isArray(it)) out.items.push({ type: String(it[0]), x: num(it[1]), y: num(it[2]), w: num(it[3]), d: num(it[4]), rot: num(it[5]) || 0, floor: num(it[6]) || 1 });
+    else if (it && typeof it === "object") out.items.push(it);
+  }
+  return out;
+}
