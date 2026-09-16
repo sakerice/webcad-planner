@@ -597,13 +597,14 @@ def check9_light_elev(data):
         if not is_light(it['type']):
             continue
         floor = it.get('floor', 1)
-        ceiling = story_height_mm(data, floor) - floor_slab_mm(data, floor)
         cx, cy = center(it)
         r = room_at(data, floor, cx, cy)
-        if r is not None:
-            mm = room_ceiling_mm(r, data)
-            if mm:
-                ceiling = mm
+        if r is None:
+            continue          # 屋外(ポーチの軒下など)は天井が無い。check33 と同じ扱い
+        ceiling = story_height_mm(data, floor) - floor_slab_mm(data, floor)
+        mm = room_ceiling_mm(r, data)
+        if mm:
+            ceiling = mm
         elev = it.get('elev', 0) or 0
         if elev > ceiling:
             vio(out, it, '照明の elev %.0fmm が天井高 %.0fmm を超えている'
