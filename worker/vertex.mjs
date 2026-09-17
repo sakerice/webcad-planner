@@ -61,7 +61,10 @@ export function vertexConfig(env) {
 // 実際、検算を促す指示を入れたら思考だけで32,765トークンを使い切り、
 // 答えが0トークンのまま打ち切られた(課金だけされて1件も使えない)。
 // 答えのJSONは2,000〜3,700トークンなので、出力の上限は思考ぶんを足した値。
-export async function generate({ config, system, text, image, maxOutputTokens = 32768, thinkingBudget = 8192, fetchImpl = fetch, now }) {
+// responseSchema: 出力の形は**お願いではなく制約**にする。指示文に
+// 「こういうJSONで返してください」と書くだけでは守られないことがある
+// (実測で、位置の項目名が box_2d から box へ勝手に変わって返った)。
+export async function generate({ config, system, text, image, maxOutputTokens = 32768, thinkingBudget = 8192, responseSchema = null, fetchImpl = fetch, now }) {
   const auth = await getAccessToken(config.credentials, { fetchImpl, now });
   if (!auth.ok) return { ok: false, status: auth.status, message: "認証に失敗しました: " + auth.message };
 
@@ -88,6 +91,7 @@ export async function generate({ config, system, text, image, maxOutputTokens = 
     generationConfig: {
       temperature: 0, maxOutputTokens, responseMimeType: "application/json",
       thinkingConfig: { thinkingBudget },
+      ...(responseSchema ? { responseSchema } : {}),
     },
   });
 

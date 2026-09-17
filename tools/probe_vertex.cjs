@@ -63,6 +63,7 @@ function keyFile() {
   const vertex = await import(pathToFileURL(join(ROOT, 'worker', 'vertex.mjs')).href);
   const { getAccessToken } = await import(pathToFileURL(join(ROOT, 'worker', 'google-auth.mjs')).href);
   const { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-prompt.mjs')).href);
+  const { PLAN_RESPONSE_SCHEMA } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-response-schema.mjs')).href);
   const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
   const PlanRooms = require(join(ROOT, 'assets', 'js', 'plan-rooms.js'));
 
@@ -117,6 +118,7 @@ function keyFile() {
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint: opt('hint') || '' }),
     image: { mimeType, base64 },
+    responseSchema: PLAN_RESPONSE_SCHEMA,
     maxOutputTokens: Number(opt('max-tokens') || 32768),
     thinkingBudget: Number(opt('thinking') || 8192),
   });
@@ -169,16 +171,28 @@ function keyFile() {
     }
   }
   // 手順1〜2で読んだ寸法線。内訳の合計が総寸法と合っているかを、こちらでも検算する。
-  if (parsed.dims && typeof parsed.dims === 'object') {
-    console.log('\n読んだ寸法線:');
+  // **AIの自己申告を信じない。** 合っていると言いながら合っていないことがある。
+  const edgeJa = { top: '上辺', bottom: '下辺', left: '左辺', right: '右辺' };
+  for (const dims of plan.dims) {
+    if (!dims || typeof dims !== 'object') continue;
+    const floor = dims.floor == null ? '' : `（${dims.floor}階）`;
+    const lines = [];
     for (const side of ['top', 'bottom', 'left', 'right']) {
-      const d = parsed.dims[side];
-      if (!Array.isArray(d)) continue;
-      const total = Number(d[0]);
-      const parts = Array.isArray(d[1]) ? d[1].map(Number) : [];
+      const d = dims[side];
+      if (!d) continue;
+      // 本筋は {total, parts}。古い保存は [total, [parts]] の形。
+      const total = Number(Array.isArray(d) ? d[0] : d.total);
+      const raw = Array.isArray(d) ? d[1] : d.parts;
+      const parts = Array.isArray(raw) ? raw.map(Number) : [];
+      if (!isFinite(total)) continue;
       const sum = parts.reduce((a, b) => a + b, 0);
-      const ok = Math.abs(sum - total) < 1 ? '✓' : `✗ 合計${sum}`;
-      console.log(`  ${side.padEnd(7)} 総 ${total}  = ${parts.join(' + ')}  ${ok}`);
+      const ok = !parts.length ? '（内訳なし）'
+        : Math.abs(sum - total) < 1 ? '✓' : `✗ 内訳の合計が ${sum} で合わない`;
+      lines.push(`  ${edgeJa[side]}  総 ${total}  = ${parts.join(' + ')}  ${ok}`);
+    }
+    if (lines.length) {
+      console.log(`\n読んだ寸法線${floor}:`);
+      console.log(lines.join('\n'));
     }
   }
   if (plan.notes.length) {

@@ -19,6 +19,7 @@ import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs"
 import PlanRooms from "../assets/js/plan-rooms.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
+import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -87,6 +88,7 @@ async function aiImportPlan(payload, env, deps) {
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint }),
     image: { mimeType: image.mimeType, base64: image.base64 },
+    responseSchema: PLAN_RESPONSE_SCHEMA,
     fetchImpl: deps.fetchImpl,
   });
   if (!result.ok) {
