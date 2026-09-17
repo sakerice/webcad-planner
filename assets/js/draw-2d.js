@@ -499,9 +499,30 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
   }
 }
 
+// 段差のある部屋の輪郭。平面図では段差が見えないので、線を引かないと
+// 「なぜこの部屋だけ天井が高いのか」が図面から読めない。
+// JIS の段差表現に倣い、低いレベルに面した辺だけを太い実線で引く
+// (外壁側・同じレベルの側は段差ではないので引かない)。
+function drawSkipLevelEdges2d(room){
+  if(roomSkipLevelMm(room)<=0) return;
+  var open=roomSkipOpenSides(room);
+  if(!open.n&&!open.s&&!open.w&&!open.e) return;
+  var a=w2c(room.x,room.y), b=w2c(room.x+room.w,room.y+room.d);
+  ctx.save();
+  ctx.strokeStyle='rgba(40,60,90,0.75)';
+  ctx.lineWidth=Math.max(1.6,ST.zoom*0.09);
+  ctx.setLineDash([]);
+  function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  if(open.n) line(a.cx,a.cy,b.cx,a.cy);
+  if(open.s) line(a.cx,b.cy,b.cx,b.cy);
+  if(open.w) line(a.cx,a.cy,a.cx,b.cy);
+  if(open.e) line(b.cx,a.cy,b.cx,b.cy);
+  ctx.restore();
+}
 function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
+    drawSkipLevelEdges2d(l);
     drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l);
     drawCeilingLabel2d(l);
   });
@@ -516,9 +537,13 @@ function drawRoomLbls(){
 // roomCeilingHeightM(=レンダの経路)から解決する。HeightModel.ceilingLabel を
 // 直接呼ぶと、明示の無い部屋に既定 2400 と書いて絵と食い違う。
 function drawCeilingLabel2d(room){
-  if(!planCaptureCeilingLabels()) return;
+  // 天井高は「キャプチャのときだけ」だが、**床の段差は編集中も出す**。
+  // 段差は平面図では見えないので、編集画面で分からないと、どの部屋を
+  // 持ち上げたのかが自分の記憶にしか残らない。
+  var lvl=roomLevelLabel(room);
+  if(!planCaptureCeilingLabels()&&!lvl) return;
   if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
-  var text=roomRenderedCeilingLabel(room);
+  var text=planCaptureCeilingLabels()?roomHeightLabel(room):lvl;
   var p=w2c(room.x+room.w/2,room.y+room.d/2);
   var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);
@@ -1331,7 +1356,7 @@ function drawItem2d(it){
     }
   } else {
     var hw = it.w*sc/2, hd = it.d*sc/2;
-    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
+    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='stair-landing' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
     var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type) || isPlanSymbol);
     if(!doorSymbolOnly){
       ctx.fillStyle=getItem2dFillColor(it);
@@ -1424,6 +1449,22 @@ function drawItem2d(it){
       ctx.beginPath();
       ctx.moveTo(0,hd*0.72); ctx.lineTo(-sAw,hd*0.72-sAl); ctx.lineTo(sAw,hd*0.72-sAl); ctx.closePath(); ctx.fill();
       drawStairUpText(it,sc,Math.max(6*sc,5),hd*0.68);
+    } else if(it.type === 'stair-landing') {
+      // 踊り場は段を持たないので段鼻線を引かない。外形と昇り方向だけ。
+      ctx.save();
+      ctx.globalAlpha=0.30;
+      ctx.fillStyle=getItem2dFillColor(it);
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.restore();
+      ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
+      ctx.stroke();
+      var lAw=Math.max(5*sc,4), lAl=Math.min(hd*0.17,Math.max(10*sc,9));
+      ctx.beginPath();
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(-lAw,hd*0.72-lAl); ctx.lineTo(lAw,hd*0.72-lAl); ctx.closePath(); ctx.fill();
     } else if(it.type === 'stair-corner') {
       // 廻り3段コーナーのJIS流平面記号: 外形+内側隅から放射する段鼻線+昇り歩行線(1/4弧の矢印)。
       // 3Dモデル(build3DWinderCorner)と同じ割付で、下辺から入り右下の内側隅を廻って右辺へ抜ける。
@@ -1565,7 +1606,9 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(107,86,54,0.8)';
       ctx.lineWidth=Math.max(1,sc*14);
       ctx.beginPath();
-      if((it.fencePattern||'vertical')==='horizontal'){
+      // 向きは意匠から。fencePattern は指定の無い保存済みプランの読み替えに使う。
+      var lInf=railInfillOf(it);
+      if(lInf==='bars'||lInf==='wires'){
         for(var lh=0; lh<3; lh++){
           var ly=-hd+(it.d*sc)*(lh+0.5)/3;
           ctx.moveTo(-hw,ly); ctx.lineTo(hw,ly);
@@ -2121,7 +2164,12 @@ function applyWallDrag(cx,cy,e){
 }
 
 function isStairPartType(type){
-  return type==='stair'||type==='stair-corner';
+  return type==='stair'||type==='stair-corner'||type==='stair-landing';
+}
+// 踊り場。階段の部材だが段を持たない -- かね折れ(L字)・折り返し(U字)の
+// 曲がりを、廻り段ではなく平らな板で作るためのものである。
+function isStairLandingType(type){
+  return type==='stair-landing';
 }
 function isCustomBlockType(type){
   return type==='custom-block';

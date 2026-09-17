@@ -102,11 +102,11 @@ const HEIGHT_FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
   // Task 12-1: 屋根から天井を導く経路。宣言していない部屋はここを通らない。
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
@@ -115,10 +115,10 @@ const HEIGHT_FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',
-  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
+  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
   'roomAtPointOnFloor', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
   'wallStackedAboveCapM',
-  'wallHeightMm', 'wallDisplayHeightM'
+  'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY'
 ];
 
 // data を食わせた高さの計算機。DATA はコンテキストの変数なので、テストごとに
@@ -334,6 +334,11 @@ function ceilingYsFor(data, floor) {
     applyTextureFlip: function () {},
     roomHasCoverAbove: function () { return true; },
     stairwellQuadsForFloor: function () { return []; },
+    levelStairQuadsForFloor: function () { return []; },
+    roomSkipCavityMm: function () { return 0; },
+    roomSkipLevelMm: function () { return 0; },
+    buildSkipPlatformSkirts: function () {},
+    roomStoreyFloorTopY: function () { return 0; },
     stairwellHolesForRoom: function () { return []; },
     mark3DSelectable: function () {},
     makeAutoLightFixtureMesh: noop,
@@ -351,7 +356,7 @@ function ceilingYsFor(data, floor) {
     topLevelVar('CEILING_TEXTURE_TILE_M')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
    .concat(['appearanceWithTextureOrientation', 'resolveRoomCeilingAppearance',
-            'makeRoomCeilingMaterial', 'roomFloorOffsetMm', 'roomFloorTopY', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
+            'makeRoomCeilingMaterial', 'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
   ctx.buildRooms3D(floor);
   return { got: got, U: ctx.U, floorBaseY: ctx.floorBaseY };
 }

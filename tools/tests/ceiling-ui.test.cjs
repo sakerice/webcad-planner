@@ -76,7 +76,7 @@ const FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
@@ -86,8 +86,8 @@ const FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomVoidBlockReason', 'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
-  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
+  'roomVoidBlockReason', 'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
+  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
   'roofTypeOptions', 'objectIdLabel',
   // Task 13 で足したもの
   'roomCeilingTypeValue', 'roomFlatCeilingInputMm', 'roofTypeLabel',
@@ -95,11 +95,16 @@ const FNS = [
   'roomDisplayLabel', 'roomSlopedCeilingBlockReason',
   'selectedRoomCeilingHtml',
   'updateSelectedCeilingType', 'updateSelectedFlatCeilingMm', 'updateSelectedSlopedCeiling',
-  'updateSelectedProp'
+  'updateSelectedProp',
+  // 天井を書き換えると、その部屋の天井付け器具も追従する
+  'roomFloorOffsetMm', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
+  'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling'
 ];
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
-  'CEILING_HEIGHT_PRESETS_MM'];
+  'CEILING_HEIGHT_PRESETS_MM',
+  // 天井を書き換えると、その部屋の天井付け器具も追従する(updateSelectedProp)
+  'CEILING_FINISH_M', 'CEILING_FIXTURE_TOP_MM'];
 
 // ── 家 ────────────────────────────────────────────────────────────────────
 // 2階の部屋2つ。切妻屋根は A の上だけに載り、B の上には無い。

@@ -59,11 +59,79 @@ var CEILING_FINISH_M=0.012;
 //   roomCeilingHeightM ... 床スラブ下端(floorBaseY)から
 //   item の elev       ... 床仕上げ面(floorTopY)から
 //   天井面のメッシュ    ... ceilY - CEILING_FINISH_M
+// 部屋の天井仕上げ面の高さ(mm)。**その部屋の仕上げ床から**測る(= elev と同じ基準)。
+// スキップフロアの段差も床上げも引く。elev は仕上げ床からなので、段差ぶん床が
+// 上がっていれば、天井までの寸法はその分だけ縮む。
+// 天井高から引く仕上げ厚。**高さモデルv2では引かない。** 壁の高さが仕上げ床から
+// 仕上げ天井までなので、ここでもう一度引くと器具が天井裏へ12mm埋まる。
+// 印(heightDefaults.modelVersion)の無いプランは従来どおり引く。
+function ceilingFinishThicknessM(){
+  return (typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?0:CEILING_FINISH_M;
+}
+function roomCeilingElevationMm(room){
+  if(!room||!isFinite(room.x)) return null;
+  var fl=room.floor||1;
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U)
+    -(roomFloorOffsetMm(room)+roomSkipLevelMm(room));
+}
 function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
-  var hM=r?roomCeilingHeightM(r):wallFullHeightM(fl);
-  return Math.round((hM-floorSlabHeightMForFloor(fl)-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:CEILING_FINISH_M))/U)-(r?roomFloorOffsetMm(r):0)+(r&&typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+  // 天井範囲(下げ天井・折り上げ天井)の段差は、**その場所に付く器具だけ**が追う。
+  // 部屋そのものの天井高(roomCeilingElevationMm)には入れない。
+  if(r) return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+  return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U);
+}
+// 天井付けの器具(照明・物干し)を、天井の動きに追従させる。
+//
+// **保つのは「天井からの下がり」である。** 天井に直付けのものは直付けのまま、
+// 意図して下げてあるペンダントはその下がりのまま動く。elev は仕上げ床からなので、
+// 動かす量は「床から天井までの高さ」の差そのものになる。
+//
+// 天井が動く操作は、段差・床上げ・天井高・天井の種類と複数ある。**どれか1つだけを
+// 直しても、残りで器具が取り残される**ので、書き込む側を1か所に集めてここを通す。
+function shiftRoomCeilingFixtures(room,deltaMm){
+  if(!room||!deltaMm||typeof DATA==='undefined'||!DATA||!DATA.items) return 0;
+  var n=0;
+  DATA.items.forEach(function(it){
+    if(!it) return;
+    if(CEILING_FIXTURE_TOP_MM[it.type]===undefined && it.type!=='original-laundry-rail') return;
+    if(roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2)!==room) return;
+    it.elev=(Number(it.elev)||0)+deltaMm;
+    n++;
+  });
+  return n;
+}
+// 天井が動きうる書き換えを包む。前後の天井高を測り、差のぶんだけ器具を動かす。
+function followRoomCeiling(room,mutate){
+  var before=roomCeilingElevationMm(room);
+  mutate();
+  if(before===null) return;
+  var after=roomCeilingElevationMm(room);
+  if(after!==null&&after!==before) shiftRoomCeilingFixtures(room,after-before);
+}
+// 天井付けの器具が「くっつく面」の取付高さ(mm, **そのアイテムの足元から**)。
+//
+// 部屋の中なら天井仕上げ面。部屋の外でも、**上に屋根が架かっていればその下面**が
+// 取り付け面である(軒天のダウンライト、ポーチの照明)。屋外を一律に「天井が無い」
+// として触らずにいたため、固定の既定値のまま軒から離れて浮いていた。
+// 上に何も無い場所では null を返し、呼び出し側は触らない。
+//
+// **足元が部屋と屋外で違う**ことに注意する。屋内は床仕上げ面、屋外は地面
+// (item3DBaseY が返す)。屋根の下面はワールドの高さなので、足元を引いて戻す。
+function ceilingAttachElevationMm(it){
+  if(!it) return null;
+  var fl=it.floor||1;
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  if(roomAtPointOnFloor(fl,cx,cy)) return ceilingFinishElevationMm(fl,cx,cy);
+  var items=(typeof DATA!=='undefined'&&DATA&&DATA.items)?DATA.items:null;
+  if(!items) return null;
+  var roofs=items.filter(function(o){
+    return o&&o.type==='roof'&&!o.hidden3D&&(o.floor||1)>=fl;
+  });
+  var under=roofTopLimitAtPlanPoint(roofs,cx,cy);
+  if(under===null) return null;
+  return Math.round((under-CEILING_FINISH_M-item3DBaseY(it))/U);
 }
 // 照明の既定の取付高さ。旧実装は wallFullHeightM-160 という当て推量で、
 // 1階は天井から148mm下に浮き、2階は32mm上=天井裏に埋まっていた。
@@ -81,8 +149,13 @@ function ensureLightDefaults(it){
   if(!isFinite(Number(it.lightRange))) it.lightRange=it.lightKind==='spot'?5200:(it.lightKind==='down'?4400:5600);
   if(!isFinite(Number(it.lightAngle))) it.lightAngle=it.lightKind==='spot'?32:64;
   if(it.lightCastShadow===undefined) it.lightCastShadow=true;
-  if(!isFinite(Number(it.elev)))
-    it.elev=defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2);
+  if(!isFinite(Number(it.elev))){
+    // 軒下に置いた照明は、上の屋根の下面へ付ける。屋内は従来どおり天井へ。
+    var attach=ceilingAttachElevationMm(it);
+    it.elev=(attach===null)
+      ? defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2)
+      : Math.max(1800,attach);
+  }
   it.color=it.lightColor;
   return it;
 }
@@ -1116,27 +1189,12 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
-    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
-    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
   }
   if(it.type==='lattice-screen'){
     if(!it.latticeHeight) it.latticeHeight=1600;
     if(!it.fencePattern) it.fencePattern='vertical';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
     html += '<div class="pr"><div class="pl">高さ H (mm)</div><input class="pi" type="number" min="300" max="3000" step="50" value="'+Math.round(it.latticeHeight)+'" onchange="updateSelectedProp(\'latticeHeight\',+this.value)"></div>';
-    html += '<div class="pr"><div class="pl">格子方向</div><select class="pi" onchange="updateSelectedProp(\'fencePattern\',this.value)">';
-    [['vertical','縦格子'],['horizontal','横格子']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fencePattern||'vertical')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
-    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
-    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
-      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
-    });
-    html += '</select></div>';
     html += '<div class="pr" style="font-size:10px;color:#889;padding:0 2px 6px">高さZ(mm)で浮かせて、バルコニーのルーバーや室内間仕切りに使えます</div>';
   }
   if(isContextExteriorItemType(it.type)){
@@ -1262,6 +1320,66 @@ function updateProps(){
   if(isStairPartType(it.type)) {
     var sri = stairRiseInfo(it);
     var orderVal = it.stairOrder !== undefined ? it.stairOrder : (sri.index + 1);
+    // 行き先。平面だけからは「上の階へ上がる階段」と「同じ階の段差を上る階段」を
+    // 区別できないので宣言させる。省略は従来どおり上の階。
+    var target = (it.stairTarget === 'level') ? 'level' : 'upper';
+    html += '<div class="pr"><div class="pl">行き先</div><select class="pi" onchange="updateSelectedProp(\'stairTarget\',this.value===\'level\'?\'level\':undefined)">'+
+      '<option value="upper"'+(target==='upper'?' selected':'')+'>上の階</option>'+
+      '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（スキップフロア）</option>'+
+      '</select></div>';
+    // 手すり。付ける側は選ばせ、壁付けか柱建てかは置いた場所から決める。
+    var rail = ({left:'left',right:'right',both:'both'})[it.stairRail] || 'none';
+    html += '<div class="pr"><div class="pl">手すり</div><select class="pi" onchange="updateSelectedProp(\'stairRail\',this.value===\'none\'?undefined:this.value)">'+
+      '<option value="none"'+(rail==='none'?' selected':'')+'>なし</option>'+
+      '<option value="left"'+(rail==='left'?' selected':'')+'>左側</option>'+
+      '<option value="right"'+(rail==='right'?' selected':'')+'>右側</option>'+
+      '<option value="both"'+(rail==='both'?' selected':'')+'>両側</option>'+
+      '</select></div>';
+    if(rail !== 'none'){
+      var rmount = (it.stairRailMount==='wall'||it.stairRailMount==='post') ? it.stairRailMount : 'auto';
+      html += '<div class="pr"><div class="pl">手すりの付け方</div><select class="pi" onchange="updateSelectedProp(\'stairRailMount\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(rmount==='auto'?' selected':'')+'>自動（壁が沿っていれば壁付け）</option>'+
+        '<option value="wall"'+(rmount==='wall'?' selected':'')+'>壁付け</option>'+
+        '<option value="post"'+(rmount==='post'?' selected':'')+'>柱建て</option>'+
+        '</select></div>';
+      html += railingDesignHtml(it,{label:'手すりの意匠'});
+      html += '<div class="lock-status-note">'+
+        stairRailSides(it).map(function(sd){
+          return (sd==='left'?'左':'右')+'は'+(stairRailMountFor(it,sd)==='wall'?'壁付け':'柱建て');
+        }).join('、')+
+        '。段鼻から '+STAIR_RAIL_HEIGHT_MM+'mm。色は階段の板とは別です。'+
+        (rmount==='auto'?'自動は、階段と平行な壁が沿っていれば壁付けにします。':'')+'</div>';
+    }
+    // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
+    // 組み合わせで決まるので、ここで選ぶのは1枚ごとの作りだけ。
+    var sstyle = stairStyleOf(it);
+    html += '<div class="pr"><div class="pl">階段の形状</div><select class="pi" onchange="updateSelectedProp(\'stairStyle\',this.value===\'open\'?undefined:this.value)">'+
+      '<option value="open"'+(sstyle==='open'?' selected':'')+'>ひな壇（側面が見える・階段下は素通し）</option>'+
+      '<option value="box"'+(sstyle==='box'?' selected':'')+'>箱型（階段下を塞ぐ）</option>'+
+      '<option value="skeleton"'+(sstyle==='skeleton'?' selected':'')+'>スケルトン（蹴込み板なし）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">'+({
+        open:'階段下は素通し。造作棚を置けば収納にできます。',
+        box:'階段下を塞ぎます。下を収納にしたいなら、ひな壇のまま造作棚を置いてください。',
+        skeleton:'蹴込み板なし。光と視線が抜けます。'
+      }[sstyle])+'</div>';
+    // 足元。段差のある階でだけ出す。
+    if(floorMaxSkipLevelMm(it.floor) > 0){
+      var sbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
+      html += '<div class="pr"><div class="pl">階段の足元</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(sbase==='auto'?' selected':'')+'>自動（下端の先の床から）</option>'+
+        '<option value="floor"'+(sbase==='floor'?' selected':'')+'>階の床から</option>'+
+        '<option value="skip"'+(sbase==='skip'?' selected':'')+'>段差の上から</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">いまの足元は ＋'+
+        Math.round((stairUpperSpanM(it).baseY - floorTopY(it.floor))/U)+'mm です。'+
+        '自動は階段の下端の先にある床を見ます（部材の中心ではないので、段差からはみ出す大きさの階段でも段差の上から始まります）。</div>';
+    }
+    html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
+      (sri.steps||getStairStepCount(it))+'段。'+
+      (target==='level'
+        ? '同じ階の段差を上ります。上階の床には穴を開けません。'
+        : '上の階の床まで上がります。')+'</div>';
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
   }
@@ -1289,17 +1407,77 @@ function updateProps(){
       html += '<div class="pr"><div class="pl">位置 Y: <span class="texture-crop-value">'+Math.round(it.sY||0)+'</span></div><input class="pi" type="range" min="-300" max="300" step="10" value="'+(it.sY||0)+'" oninput="updateSelectedTextureCrop(\'sY\',+this.value,this)" onchange="finishSelectedTextureCrop()"></div>';
     }
   }
+  if(it.type === 'lattice-screen') {
+    html += '<div class="ph" style="margin-top:12px">格子</div>';
+    html += '<div class="pr"><div class="pl">格子の間隔 (mm)</div><input class="pi" type="number" min="30" max="600" step="5" value="'+latticePitchMm(it)+'" onchange="updateSelectedProp(\'latticePitch\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">格子の見付 (mm)</div><input class="pi" type="number" min="15" max="200" step="5" value="'+latticeSlatMm(it)+'" onchange="updateSelectedProp(\'latticeSlat\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">上端形状</div><select class="pi" onchange="updateSelectedProp(\'fenceTopStyle\',this.value)">';
+    [['even','上端を揃える'],['varied','上端を不揃いにする']].forEach(function(opt){
+      html += '<option value="'+opt[0]+'" '+((it.fenceTopStyle||'even')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
+    });
+    html += '</select></div>';
+    html += railingDesignHtml(it,{label:'格子の意匠',frameDefault:'#b09468',capToggle:true});
+    html += '<div class="lock-status-note">格子の内法 '+latticeClearMm(it)+'mm。'+
+      (latticeClearMm(it)>110?'手すりには 110mm 以下が目安です。':'手すりとして使える内法です。')+'</div>';
+  }
+  if(isColumnType(it.type)) {
+    html += '<div class="pr"><div class="pl">柱の高さ (mm)</div><input class="pi" type="number" min="100" max="6000" step="50" value="'+columnHeightMm(it)+'" onchange="updateSelectedProp(\'columnHeight\',+this.value)"></div>';
+    html += '<div class="lock-status-note">'+(it.baseLevel==='under'
+      ? '段差の下に立っています。高さは段差に合わせてあります。'
+      : '太さは上の幅・奥行きで変えられます。段差の下に置くと、足元と高さが段差に合います。')+'</div>';
+  }
+  if(it.type === 'shelf-built-in') {
+    html += '<div class="pr"><div class="pl">棚の高さ (mm)</div><input class="pi" type="number" min="150" max="2700" step="50" value="'+shelfHeightMm(it)+'" onchange="updateSelectedProp(\'shelfHeight\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">棚板の枚数</div><input class="pi" type="number" min="1" max="8" step="1" value="'+shelfBoardCount(it)+'" onchange="updateSelectedProp(\'shelfCount\',+this.value)"></div>';
+    var sides = (it.shelfSides==='none'||it.shelfSides==='both') ? it.shelfSides : 'auto';
+    html += '<div class="pr"><div class="pl">縦板</div><select class="pi" onchange="updateSelectedProp(\'shelfSides\',this.value===\'auto\'?undefined:this.value)">'+
+      '<option value="auto"'+(sides==='auto'?' selected':'')+'>自動（壁に付いていれば無し）</option>'+
+      '<option value="none"'+(sides==='none'?' selected':'')+'>なし（壁で支える）</option>'+
+      '<option value="both"'+(sides==='both'?' selected':'')+'>あり（両端に立てる）</option>'+
+      '</select></div>';
+    html += '<div class="lock-status-note">'+(shelfSideBoards(it)==='none'
+      ? 'いまは縦板なしです。棚板は壁に支えられている納まりになります。'
+      : 'いまは両端に縦板が立っています。壁で支える納まりにするなら「なし」を選んでください。')+
+      (sides==='auto'
+        ? '（自動は、背面が壁に接していれば縦板なしにします。回転や反転を掛けた棚では当たらないことがあるので、その場合は明示してください。）'
+        : '')+'</div>';
+  }
+  // 段差のある部屋の中に居るものだけ、置く高さの基準を選ばせる。
+  // 段差の無い家では欄そのものが出ないので、既存の操作は1つも増えない。
+  if(it.type !== 'room' && it.type !== 'wall' && !isOpeningItemType(it.type) &&
+     roomSkipCavityMm(roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2)) > 0) {
+    var under = it.baseLevel === 'under';
+    html += '<div class="pr"><div class="pl">置く高さ</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'under\'?\'under\':undefined)">'+
+      '<option value="floor"'+(under?'':' selected')+'>段差の上（この部屋の床）</option>'+
+      '<option value="under"'+(under?' selected':'')+'>段差の下（床下の空間）</option>'+
+      '</select></div>';
+  }
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
     html += selectedTextureFlipControlsHtml(it);
     html += selectedRoomFloorHtml(it);
+    html += selectedRoomSkipHtml(it);
     html += selectedRoomCeilingHtml(it);
     html += selectedRoomCeilingFinishHtml(it);
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
+    // 段差のある階でだけ、足元と高さの基準を選ばせる。
+    // 自動は「接する部屋の段差」から判断するが、部屋の外を通る壁や、
+    // 部屋の縁からわずかに外れた壁では当たらない。そのための明示。
+    if(floorMaxSkipLevelMm(it.floor) > 0) {
+      var wbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
+      html += '<div class="ph" style="margin-top:12px">スキップフロア</div>';
+      html += '<div class="pr"><div class="pl">壁の基準</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
+        '<option value="auto"'+(wbase==='auto'?' selected':'')+'>自動（接する部屋から判断）</option>'+
+        '<option value="floor"'+(wbase==='floor'?' selected':'')+'>階の床から</option>'+
+        '<option value="skip"'+(wbase==='skip'?' selected':'')+'>段差の上から</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">いまの足元は ＋'+wallSkipFootMm(it)+'mm、高さの基準は ＋'+wallSkipBaseMm(it)+'mm です。'+
+        '両側とも段差の上にある壁だけ足元が上がります（段差の境界の壁は蹴上げ面を兼ねるので下ろしたまま）。</div>';
+    }
     html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
@@ -1410,6 +1588,9 @@ function updateSelectedProp(p,v,noSave){
     updateProps();
     return;
   }
+  // 天井を書き換えると、その部屋の天井付けの器具も一緒に動く。
+  // 平天井・勾配・吹き抜けの切り替えはすべてここ(p==='ceiling')を通る。
+  var ceilBefore=(p==='ceiling')?roomCeilingElevationMm(ST.selected):null;
   if(p==='color') ST.selected.colorCustom=true;
   if(isLightItemType(ST.selected.type) && p==='lightColor'){
     ST.selected.color=v;
@@ -1437,10 +1618,18 @@ function updateSelectedProp(p,v,noSave){
   if(p==='ceiling'){
     if(!v) delete ST.selected.ceiling;
     delete ST.selected.ceilingHeight;
+    if(ceilBefore!==null){
+      var ceilAfter=roomCeilingElevationMm(ST.selected);
+      if(ceilAfter!==null&&ceilAfter!==ceilBefore)
+        shiftRoomCeilingFixtures(ST.selected,ceilAfter-ceilBefore);
+    }
   }
   // 斜線制限も同じ扱い: 「未設定」へ戻したら受け口ごと消す。undefined を残すと
   // 保存 JSON には出ないのにメモリ上のプランは「設定あり」に見える。
   if(p==='setback' && !v) delete ST.selected.setback;
+  // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
+  // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
+  if((p==='stairTarget'||p==='baseLevel') && !v) delete ST.selected[p];
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;

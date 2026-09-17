@@ -72,11 +72,13 @@ const DRAW_FNS = [
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomSkipLevelMm', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
-  'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM',
+  'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue',
-  'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg'
+  'isStairPartType', 'normalizeNorthDeg', 'planNorthDeg', 'syncNorthFromPlan', 'setPlanNorthDeg',
+  // 平面図の部屋ラベルは段差(FL+1200)も書く
+  'roomLevelLabel', 'roomSkipLevelMm'
 ];
 const DRAW_VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'FLOOR_H', 'FLOOR_SLAB_H'];
 const DRAW_OBJ_VARS = ['LEGACY_FMP_TYPE_MAP'];

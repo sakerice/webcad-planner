@@ -36,19 +36,39 @@ fi
 echo "Playwright: $PLAYWRIGHT_MODULE"
 export PLAYWRIGHT_MODULE
 
-# 検査用の静的サーバ。既に上がっていればそれを使う。
-STARTED=0
-if ! curl -sf -o /dev/null "http://localhost:$PORT/index.html"; then
-  python3 -m http.server "$PORT" >/dev/null 2>&1 &
-  SERVER_PID=$!
-  STARTED=1
-  trap 'kill $SERVER_PID 2>/dev/null' EXIT INT TERM
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
-    curl -sf -o /dev/null "http://localhost:$PORT/index.html" && break
-    sleep 0.5
+# 検査用の静的サーバ。**必ず自分で立てる。空いているポートを探す。**
+#
+# 以前は「既に上がっていればそれを使う」作りだった。この作業ディレクトリを
+# 複数 (git worktree で別のブランチを同時に見るなど) 開いていると、
+# 先に立っていた**別のディレクトリのサーバ**に当たり、そちらの index.html を
+# 検査してしまう。落ちないぶん質が悪い——直したはずの不具合がまだ出る、
+# 直していない不具合が消える、という形で現れる。
+if [ -n "$APP_URL" ]; then
+  STARTED=0                      # 呼び出し側が場所を指定したときは従う
+else
+  STARTED=0
+  for try in $(seq 0 20); do
+    candidate=$((PORT + try))
+    # そのポートに何か居るなら次へ
+    curl -sf -o /dev/null --max-time 1 "http://localhost:$candidate/" && continue
+    python3 -m http.server "$candidate" >/dev/null 2>&1 &
+    SERVER_PID=$!
+    sleep 0.3
+    if curl -sf -o /dev/null --max-time 2 "http://localhost:$candidate/index.html"; then
+      PORT=$candidate
+      STARTED=1
+      trap 'kill $SERVER_PID 2>/dev/null' EXIT INT TERM
+      break
+    fi
+    kill $SERVER_PID 2>/dev/null
   done
+  if [ $STARTED -eq 0 ]; then
+    echo "静的サーバを立てられませんでした ($PORT 番から20個試しました)" >&2
+    exit 1
+  fi
+  export APP_URL="http://localhost:$PORT/"
 fi
-export APP_URL="http://localhost:$PORT/"
+echo "検査対象: $APP_URL ($(pwd))"
 
 if [ $# -gt 0 ]; then
   files=""
