@@ -19341,7 +19341,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);

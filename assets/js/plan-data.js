@@ -173,6 +173,7 @@ function chooseBlankPlan(){
   closePresetChoice();
   _defaultPlanPending=false;_presetLoadRevision++;
   DATA={walls:[],items:[],rooms:[],floors:{},heightDefaults:{modelVersion:2,floorThickness:180},floorMetadata:{},exteriorWallSettings:null,interiorWallSettings:null,roofAppearance:null,startMode:'blank'};
+  resetHeightGlobalsForPlanLoad();
   PRESET_CURRENT='blank';nextId=1;ST.selected=null;ST.floor=1;
   document.getElementById('floor-sel').value='1';
   document.getElementById('props').classList.remove('show');

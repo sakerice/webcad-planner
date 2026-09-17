@@ -523,5 +523,15 @@ plan.update(review26["metadata"])
 for collection, order in review26["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
+# 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
+# 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
+# 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
+# 1階2688 / 2階以上2508 は、この間取りがこれまで持っていた天井の高さ。
+# 手直しの取り込み(plan.update)より後に置く。あちらに同じ鍵があると消える。
+plan["heightDefaults"] = {"modelVersion": 2, "perFloor": True,
+                          "wallHeight": 2688, "floorThickness": 180}
+plan["floors"] = {str(f): {"wallHeight": 2688 if f == 1 else 2508,
+                           "floorThickness": 180}
+                  for f in (1, 2, 3)}
 with open(out, "w", encoding="utf-8") as f:
     json.dump(plan, f, ensure_ascii=False, indent=1)

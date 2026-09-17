@@ -6,6 +6,9 @@
 // 関数の中から呼ぶぶんには、実行時には全部そろっているので問題ない。
 // ───── CONSTANTS ─────
 var WALL_H = 2400;
+// 壁の高さの既定。プランが壁の高さを持っていないときに戻す先で、WALL_H の初期値と
+// 同じ値。ずれていないことは tools/tests/height-defaults.test.cjs が見ている。
+var DEFAULT_WALL_H_MM = 2400;
 var FLOOR_H = 2700;
 var FLOOR_SLAB_H = 180;
 var U = 0.001;
@@ -192,6 +195,17 @@ function ensureHeightDefaults(plan){
   else hd.wallHeight=WALL_H;
   if(!isFinite(Number(hd.floorRaise))||Number(hd.floorRaise)<0) hd.floorRaise=DEFAULT_FLOOR_RAISE_MM;
   return hd;
+}
+// 別のプランを読み込むときに呼ぶ。
+//
+// WALL_H は「いま編集しているプランの壁の高さ」を持つ変数で、
+// ensureHeightDefaults がプランから写す。ところが**プランが壁の高さを
+// 持っていないとき**は逆にグローバルの値をプランへ書くので、読み込んだ
+// プランが前のプランの高さを引き継いでしまう。既定プランが壁の高さを
+// 持つようになって、これが見えるようになった(読み込んだ間取りが288mm
+// 高く建つ)。プランを差し替える側で、先に既定へ戻す。
+function resetHeightGlobalsForPlanLoad(){
+  WALL_H=DEFAULT_WALL_H_MM;
 }
 function perFloorHeightsEnabled(){
   var plan=(typeof DATA!=='undefined')?DATA:null;
