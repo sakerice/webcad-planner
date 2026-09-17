@@ -65,7 +65,7 @@
     var f = $('plan-import-file'); if (f) f.value = '';
     show('plan-import-step2', false);
     show('plan-import-step3', false);
-    setStatus('間取り図のPDFか画像を選んでください。PDFはそのまま読めます。');
+    setStatus('間取り図のPDFか画像を選んでください。');
     syncPlanImportButtons();
   }
 
@@ -86,8 +86,7 @@
         show('plan-import-step2', true);
         show('plan-import-crop', false);      // PDFは囲む操作が要らない
         show('plan-import-step3', false);
-        setStatus('PDFはそのまま読み取ります。切り出しは要りません。'
-          + '複数ページあれば、各ページを各階として読みます。');
+        setStatus('読み取れます。');
         syncPlanImportButtons();
       };
       pdfReader.onerror = function () { setStatus('ファイルを読めませんでした。'); };

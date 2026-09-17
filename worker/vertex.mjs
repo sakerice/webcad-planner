@@ -64,7 +64,7 @@ export function vertexConfig(env) {
 // responseSchema: 出力の形は**お願いではなく制約**にする。指示文に
 // 「こういうJSONで返してください」と書くだけでは守られないことがある
 // (実測で、位置の項目名が box_2d から box へ勝手に変わって返った)。
-export async function generate({ config, system, text, docs, image, maxOutputTokens = 32768, thinkingBudget = 8192, responseSchema = null, fetchImpl = fetch, now }) {
+export async function generate({ config, system, text, docs, image, images, maxOutputTokens = 32768, thinkingBudget = 8192, responseSchema = null, fetchImpl = fetch, now }) {
   const auth = await getAccessToken(config.credentials, { fetchImpl, now });
   if (!auth.ok) return { ok: false, status: auth.status, message: "認証に失敗しました: " + auth.message };
 
@@ -78,9 +78,12 @@ export async function generate({ config, system, text, docs, image, maxOutputTok
   const parts = [];
   // 画像だけでなく PDF もそのまま渡せる。PDF はベクターなので、こちらで
   // 画像に変換するより Gemini 側で開いたほうが文字がはっきり読める。
-  if (image) {
-    var mime = image.mimeType || ("image/" + image.format);
-    parts.push({ inline_data: { mime_type: mime, data: image.base64 } });
+  // 画像は複数渡せる。読み取った結果を描き起こして元図と見比べさせる、
+  // といった使い方をする。
+  for (const one of Array.isArray(images) ? images : (image ? [image] : [])) {
+    if (!one) continue;
+    const mime = one.mimeType || ("image/" + one.format);
+    parts.push({ inline_data: { mime_type: mime, data: one.base64 } });
   }
   // 仕様書は依頼文と別の部品として渡す。混ぜると、どこまでが決まりで
   // どこからが今回の依頼かの境目が無くなる。

@@ -17,6 +17,7 @@
 // (東京で動く画像生成モデルはそもそも無い)
 import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs";
 import PlanRooms from "../assets/js/plan-rooms.js";
+import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
@@ -110,13 +111,20 @@ async function aiImportPlan(payload, env, deps) {
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage) {
   const plan = decodeCompactPlan(parsed);
-  // 部屋はAIに出させず、**壁と文字から計算する**。
-  // 両方出させると食い違い、同じ図面で部屋が3〜9個に変動した。壁から
-  // 作れば、壁と部屋は必ず一致する。寸法の読み違いもここで吸収する
-  // (実測で 227.5→275、455→450 の読み違いを確認している)。
-  const labels = plan.labels;
-  const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
-  plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
+  // 壁はAIに出させず、**部屋と部屋の境目から作る**。
+  // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
+  // という失敗が残った(実測で13本中12本は通り芯にぴったり載っていた)。
+  // 壁の端点は、その壁が仕切っている部屋から決まるものだからである。
+  if (plan.floors.length) {
+    const built = PlanGrid.buildFloors(plan.floors);
+    plan.walls = built.walls;
+    plan.rooms = built.rooms;
+    for (const m of built.problems) plan.notes.push(m);
+  } else if (plan.walls.length) {
+    // 古い形で壁が直に返ってきた場合だけ、壁と文字から部屋を計算する。
+    const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
+    plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, plan.labels, { floor: f }));
+  }
   const checked = planProblems(plan);
   if (!checked.ok) {
     return json({

@@ -49,6 +49,18 @@ test('長方形でない部屋の表し方を手順として持っている', as
   assert.match(buildPlanPrompt(), /長方形でない部屋は、複数の長方形に分けて/);
 });
 
+test('items の座標の決め方が手順にある', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  // 部屋には座標の導き方があるのに items には無く、玄関や階段が根拠なく
+  // 置かれていた。設備は部屋の中、扉は部屋と部屋の境界、窓は部屋と外の境界。
+  assert.match(p, /その部屋の\n範囲の中に収める|部屋の範囲の中に収める/,
+    '設備を部屋の中に収める指示が無い');
+  assert.match(p, /2つの部屋が接する境界の上に置く/, '扉を部屋の境界に置く指示が無い');
+  assert.match(p, /部屋と建物の外が接する境界の上に置く/, '窓を外周に置く指示が無い');
+  assert.match(p, /玄関ドアは、玄関と建物の外が/, '玄関ドアの置き場所の指示が無い');
+});
+
 test('室名の無い部屋を、何をもってその部屋とするかが手順にある', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
@@ -69,7 +81,7 @@ test('手順は、順に何を埋めるかだけを言う', async () => {
     assert.ok(p.includes(field), `${field} を埋める手順が無い`);
   }
   assert.match(p, /手順1/);
-  assert.match(p, /手順14/);
+  assert.match(p, /手順16/);
 });
 
 test('手順に仕様の写しを持たない', async () => {
