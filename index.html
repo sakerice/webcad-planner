@@ -13916,13 +13916,23 @@ function roomHasCoverAbove(r){
 // transparent+opacity<=0.03 は、このアプリが既に「ガイド画像(segmentation/depth/
 // normal/instance)には存在しないものとして扱う」印として使っている
 // (aiGuideObjectShouldHide、内観カットアウェイ壁)ので、同じ印を付けておく。
+// 天井の面は「上に在るもの(上階の床スラブ・屋根)の下端」とぴったり同じ高さに来る。
+// 高さモデルv2では壁の高さが仕上げ天井までなので、これは**そういう作りであって
+// ずれではない**。同じ高さの2枚は、どちらが手前かが画素ごとに入れ替わり、視点が
+// 動くとちらつく(ウォークスルーで顕著)。幾何を動かして隙間を作ると、今度は天井の
+// 高さや器具の取付面がその分だけ嘘になる。描画の深度だけを天井側へ寄せて、
+// 「下から見たら天井の仕上げが勝つ」を決める。
+function withCeilingDepthBias(mat){
+  if(mat){ mat.polygonOffset=true; mat.polygonOffsetFactor=-1; mat.polygonOffsetUnits=-1; }
+  return mat;
+}
 function makeCeilingMaterial(){
   if(PV_INTERIOR_DAYLIGHT && isInt){
     return new THREE.MeshBasicMaterial({
       colorWrite:false, depthWrite:false, transparent:true, opacity:0, side:THREE.DoubleSide
     });
   }
-  return new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+  return withCeilingDepthBias(new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
 }
 // ── 部屋ごとの天井の仕上げ (Task 22) ────────────────────────────────────────
 // 床の仕上げ(makeRoomFloorMaterial が読む r.texture / r.textureFlipX /
@@ -13967,11 +13977,11 @@ function makeRoomCeilingMaterial(r,baseMat){
       applyTextureFlip(tex,ap);
       // 既定の天井材と違うのは map だけにする。粗さ・金属度・両面描画を揃えて
       // おかないと、仕上げを1つ設定した部屋だけ質感が飛ぶ。
-      return new THREE.MeshStandardMaterial({map:tex,color:0xffffff,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+      return withCeilingDepthBias(new THREE.MeshStandardMaterial({map:tex,color:0xffffff,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
     }
   }
   if(ap.color){
-    return new THREE.MeshStandardMaterial({color:ap.color,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+    return withCeilingDepthBias(new THREE.MeshStandardMaterial({color:ap.color,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
   }
   return baseMat;
 }
