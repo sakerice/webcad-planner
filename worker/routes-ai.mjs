@@ -26,9 +26,11 @@ import { planKnowledge } from "./plan-knowledge.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+// 1回に読むページ数の上限。各ページが各階になる。
+const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
 const MAX_HINT_CHARS = 500;
-const MAX_AI_REQUEST_BYTES = MAX_IMAGE_BYTES + 256 * 1024;
+const MAX_AI_REQUEST_BYTES = MAX_IMAGE_BYTES * 4 + 256 * 1024;
 
 export function handlesAi(pathname) {
   return pathname.startsWith("/api/ai/");
@@ -65,8 +67,17 @@ function readImage(value, field) {
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────
 async function aiImportPlan(payload, env, deps) {
-  const image = readImage(payload && payload.image, "image");
-  if (image.error) return json({ error: "invalid_request", message: image.error }, 400);
+  // PDF はブラウザ側でページごとの画像にしてから送られてくる。
+  // 1枚だけの古い形(image)も受ける。
+  const raw = Array.isArray(payload && payload.images) && payload.images.length
+    ? payload.images.slice(0, MAX_PAGES)
+    : [payload && payload.image];
+  const images = [];
+  for (let i = 0; i < raw.length; i++) {
+    const one = readImage(raw[i], raw.length > 1 ? `images[${i}]` : "image");
+    if (one.error) return json({ error: "invalid_request", message: one.error }, 400);
+    images.push(one);
+  }
 
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
@@ -91,7 +102,7 @@ async function aiImportPlan(payload, env, deps) {
     system: SYSTEM_PROMPT,
     docs: [planKnowledge(), planSpec()],
     text: buildPlanPrompt({ hint }),
-    image: { mimeType: image.mimeType, base64: image.base64 },
+    images: images.map((i) => ({ mimeType: i.mimeType, base64: i.base64 })),
     responseSchema: PLAN_RESPONSE_SCHEMA,
     fetchImpl: deps.fetchImpl,
   });

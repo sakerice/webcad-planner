@@ -19,18 +19,20 @@
 
   // 送る画像の長辺の上限。
   //
-  // 1568 にしていたが、**それでは図面の寸法の文字が潰れて読めない**。
-  // 実測では 7280 を 7290 と誤読し、そこから全体が狂っていた。2400 まで
-  // 上げると4辺の寸法線がすべて検算を通るようになる。入力トークンは
-  // 2,854→4,241 に増えるが、入力は1トークン $0.0000003 なので誤差。
-  // 読み違いを直すための思考が減るぶん、**むしろ安くなる**。
-  var MAX_SEND_PX = 2400;
+  // AI 側が読む解像度には頭打ちがある。実測（同じ1ページ）:
+  //
+  //   768〜2072px … 1,821 トークン
+  //   3072px      … 3,369 トークン
+  //   6144px      … 3,369 トークン（増えない）
+  //
+  // 3072 を超えて送っても読まれる情報は増えず、通信量だけが増える。
+  var MAX_SEND_PX = 3072;
   // 画面に出すプレビューの長辺。大きな写真をそのまま描くと操作が重くなる。
   var MAX_PREVIEW_PX = 1200;
 
   var ST = {
     image: null,        // 読み込んだ画像 (Image)
-    pdf: null,          // PDFを選んだときの data URL（変換せずそのまま送る）
+    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列)
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
@@ -51,7 +53,7 @@
     var m = $('plan-import-modal');
     if (!m) return;
     m.classList.add('show');
-    if (!ST.image && !ST.pdf) resetPlanImport();
+    if (!ST.image && !ST.pages) resetPlanImport();
   }
 
   function closePlanImport() {
@@ -60,7 +62,7 @@
   }
 
   function resetPlanImport() {
-    ST.image = null; ST.pdf = null; ST.fileName = '';
+    ST.image = null; ST.pages = null; ST.fileName = '';
     ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
     var f = $('plan-import-file'); if (f) f.value = '';
     show('plan-import-step2', false);
@@ -75,19 +77,35 @@
     if (!file) return;
     ST.fileName = file.name || '';
 
-    // PDF はそのまま送る。ベクターなので、こちらで画像に変換するより
-    // AI 側で開いたほうが寸法の文字がはっきり読める。切り出しも要らない。
-    // 複数ページあれば各ページが各階として一度に読まれる。
+    // PDF は、こちらでページごとの画像にしてから送る。
+    //
+    // 以前はそのまま送っていたが、**1ページあたり約260トークンしか使われて
+    // いなかった**(768画素角のタイル1枚ぶん)。画像にすれば1ページ3,369
+    // トークンまで使われる。詳しくは assets/js/pdf-pages.js の実測値。
     if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
       var pdfReader = new FileReader();
       pdfReader.onload = function (e) {
-        ST.pdf = e.target.result;
-        ST.image = null; ST.crop = null; ST.result = null;
-        show('plan-import-step2', true);
-        show('plan-import-crop', false);      // PDFは囲む操作が要らない
-        show('plan-import-step3', false);
-        setStatus('読み取れます。');
-        syncPlanImportButtons();
+        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null;
+        setStatus('PDFを開いています…');
+        if (typeof PdfPages === 'undefined' || !PdfPages) {
+          setStatus('PDFを開く部品がありません。画像にしてからお試しください。');
+          return;
+        }
+        PdfPages.renderPages(e.target.result, {
+          maxPx: MAX_SEND_PX,
+          onProgress: function (n, total) { setStatus('PDFを開いています… ' + n + ' / ' + total + 'ページ'); },
+        }).then(function (pages) {
+          if (!pages.length) { setStatus('このPDFにページがありません。'); return; }
+          ST.pages = pages;
+          show('plan-import-step2', true);
+          show('plan-import-crop', false);
+          show('plan-import-step3', false);
+          setStatus(pages.length + 'ページを読み取ります。');
+          syncPlanImportButtons();
+        }).catch(function (err) {
+          setStatus('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
+          syncPlanImportButtons();
+        });
       };
       pdfReader.onerror = function () { setStatus('ファイルを読めませんでした。'); };
       pdfReader.readAsDataURL(file);
@@ -102,7 +120,7 @@
     reader.onload = function (e) {
       var img = new Image();
       img.onload = function () {
-        ST.image = img; ST.pdf = null;
+        ST.image = img; ST.pages = null;
         // 最初は全体を選んでおく。狭めるのは利用者の任意。
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
         ST.result = null;
@@ -224,7 +242,7 @@
 
   function syncPlanImportButtons() {
     var run = $('plan-import-run');
-    if (run) run.disabled = (!ST.image && !ST.pdf) || ST.busy;
+    if (run) run.disabled = (!ST.image && !ST.pages) || ST.busy;
     var apply = $('plan-import-apply');
     if (apply) apply.disabled = !ST.result || ST.busy;
     var size = $('plan-import-crop-size');
@@ -238,9 +256,9 @@
   // ── 3. 読み取る ────────────────────────────────────────────────────
   function runPlanImport() {
     if (ST.busy) return;
-    // PDF はそのまま。画像は切り出して(囲んでいなければ全体を)送る。
-    var image = ST.pdf || croppedDataUrl();
-    if (!image) return;
+    // PDFはページごとの画像、画像は切り出して(囲んでいなければ全体を)送る。
+    var images = ST.pages || (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
+    if (!images.length) return;
     ST.busy = true; ST.result = null;
     show('plan-import-step3', false);
     syncPlanImportButtons();
@@ -250,7 +268,7 @@
     fetch('/api/ai/import-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ image: image, hint: hint }),
+      body: JSON.stringify({ images: images, hint: hint }),
     }).then(function (res) {
       return res.json().then(function (body) { return { status: res.status, body: body }; });
     }).then(function (r) {
