@@ -135,6 +135,17 @@ try {
   assert.deepEqual(after.rooms, ['洋室']);
   assert.equal(after.hasColor, true, 'アプリの既定値がそろっていない（ensure* を通していない）');
 
+  // 開口は、AIが答えた「中心」から、アプリの決まり（左上の角）へ直っていること。
+  // 直さないと幅の半分ぶんずれる（幅1690の窓なら845mm）。3Dで見て気づいた。
+  const opening = await page.evaluate(() => {
+    const it = DATA.items.find((i) => i.type === 'window');
+    const wall = DATA.walls.find((w) => w.y1 === 0 && w.y2 === 0);
+    return it && wall ? { cx: it.x + it.w / 2, cy: it.y + it.d / 2, wallY: wall.y1 } : null;
+  });
+  assert.ok(opening, '窓が取り込まれていない');
+  assert.equal(opening.cx, 1365, '窓の中心が、AIの答えた位置(1365)からずれている');
+  assert.equal(opening.cy, opening.wallY, '窓が壁の芯に載っていない（中心↔角の変換ができていない）');
+
   // ── 鍵が無いときの案内 ────────────────────────────────────────────
   await page.evaluate(() => {
     window.fetch = async () => new Response(

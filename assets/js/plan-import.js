@@ -354,7 +354,19 @@
       });
     });
     (plan.items || []).forEach(function (it) {
-      var made = mkItem(it.type, it.x, it.y, it.rot || 0, it.floor || 1, it.w, it.d);
+      // **アプリのアイテムは x,y が左上の角。** AIには「開口の中心」で
+      // 答えさせているので、ここで角へ直す。直さないと開口が幅の半分ぶん
+      // ずれる（幅1690の窓なら845mm）。3Dで見て初めて気づいた食い違い。
+      //
+      // 中心で答えさせているのは、そのほうがモデルにとって自然で誤りが
+      // 少ないから。変換はこちら側の仕事にする。
+      var w = it.w, d = it.d;
+      if (w == null || d == null) {
+        var sz = (typeof getItemDefaultSize === 'function') ? getItemDefaultSize(it.type) : { w: 0, d: 0 };
+        if (w == null) w = sz.w;
+        if (d == null) d = sz.d;
+      }
+      var made = mkItem(it.type, it.x - w / 2, it.y - d / 2, it.rot || 0, it.floor || 1, it.w, it.d);
       out.items.push(made);
     });
     return out;
