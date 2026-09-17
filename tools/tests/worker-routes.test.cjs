@@ -235,19 +235,33 @@ test('東京の窓口へ、画像と指示文を1往復で送っている', asyn
   assert.equal(sent.body.contents[0].parts[0].inline_data.mime_type, 'image/png');
   assert.equal(sent.body.contents[0].parts[0].inline_data.data, PNG.split(',')[1]);
   assert.equal(sent.body.generationConfig.temperature, 0, '図面の読み取りは創作ではない');
-  assert.match(sent.body.contents[0].parts[1].text, /1階だけの図です/, '利用者の補足が渡っている');
+  // 送るものは4つ。画像 / 読み取りの例 / 仕様書 / 今回の依頼。
+  // 役割ごとに別の部品にしてある。
+  const texts = sent.body.contents[0].parts.filter((p) => p.text).map((p) => p.text);
+  assert.equal(texts.length, 3, '例・仕様書・依頼文が別の部品になっていない');
+  assert.match(texts[0], /日本の住宅の平面図を読む/, '読み取りの例が渡っていない');
+  assert.match(texts[1], /house-planner mobile 取り込みデータ仕様/, '仕様書が渡っていない');
+  assert.match(texts[2], /1階だけの図です/, '利用者の補足が渡っている');
 });
 
-test('指示文は、読ませる範囲と座標の約束を明示している', async () => {
-  const { buildPlanPrompt, ALLOWED_ITEM_TYPES } = await mod('worker/plan-prompt.mjs');
+test('送るものは役割ごとに分かれている（役割・仕様・手順）', async () => {
+  const { SYSTEM_PROMPT, buildPlanPrompt, ALLOWED_ITEM_TYPES } = await mod('worker/plan-prompt.mjs');
+  const { planSpec } = await mod('worker/plan-spec.mjs');
+
+  // 役割: 何をする人で、何を出すか。
+  assert.match(SYSTEM_PROMPT, /JSON/);
+
+  // 仕様: 単位・座標・項目・使える種類。ここだけを見れば形が分かる。
+  const spec = planSpec();
+  assert.match(spec, /ミリメートル/);
+  assert.match(spec, /原点 \(0,0\)/);
+  for (const t of ALLOWED_ITEM_TYPES) assert.match(spec, new RegExp(t.replace(/-/g, '\\-')));
+
+  // 手順: どの順に何を埋めるか。仕様の写しを持たない。
   const p = buildPlanPrompt();
-  assert.match(p, /910/, '日本の住宅の基本寸法');
-  assert.match(p, /ミリメートル/);
-  assert.match(p, /芯/, '壁は芯線であること');
-  assert.match(p, /家具/, '家具を読ませない指示');
-  for (const t of ['window', 'door-swing', 'stair']) assert.ok(ALLOWED_ITEM_TYPES.includes(t));
-  // 使える種類を列挙して渡している（列挙が空なら指示として成り立たない）
-  for (const t of ALLOWED_ITEM_TYPES) assert.match(p, new RegExp(t.replace(/-/g, '\\-')));
+  assert.match(p, /手順1/);
+  assert.ok(!p.includes('ミリメートル'), '単位が手順にも書かれている（仕様と二重）');
+  assert.ok(!/window\b/.test(p), '使える種類が手順にも書かれている（仕様と二重）');
 });
 
 // ── 移した部分が変わっていないこと ──────────────────────────────────

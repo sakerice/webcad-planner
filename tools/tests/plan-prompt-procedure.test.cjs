@@ -1,16 +1,20 @@
-// 図面を読む「段取り」が指示文に残っているか。
+// 送るものが、役割ごとに分かれたままか。
 //
 // なぜ在るのか
 // ------------
-// 読み取りの精度は、何を先に決めるかでほぼ決まる。実測で分かったこと:
+// 指示文は、失敗を見つけるたびに一文ずつ足して膨らんだ。役割の宣言も、
+// データの仕様も、読み取りの段取りも、注意書きも、ひとつの文章に混ざっていた。
+// そうなると、仕様として参照したいときに、どれが決まりでどれが助言か
+// 分からなくなる。直すときも、どこを直せばよいか決められない。
 //
-//   - 各階を紙の上の位置のまま並べる(1階 y=0..4095 / 2階 y=4095..8190)。
-//     上下階が重ならず、基礎も屋根もあらぬ位置に付く。
-//   - 間仕切り壁を1本落とすと、部屋は壁から計算されるので2部屋が1つになる。
-//   - 「合計が合うまで読み直す」と思考だけで32,765トークンを使い切り、
-//     答えが0トークンのまま打ち切られる(課金だけされて1件も使えない)。
+// いまは3つに分けてある。
 //
-// どれも段取りの問題で、直した文が消えると同じ失敗が戻る。
+//   役割   SYSTEM_PROMPT        何をする人で、何を出すか
+//   仕様   worker/plan-spec.mjs データの構成・項目・単位・使える種類
+//   手順   buildPlanPrompt      どの順に何を埋めるか
+//
+// ここが見張るのは**分かれたままであること**。どれかに他の役割が混ざり
+// 始めたら落ちる。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
@@ -18,78 +22,86 @@ const { pathToFileURL } = require('node:url');
 
 const ROOT = join(__dirname, '..', '..');
 const mod = (p) => import(pathToFileURL(join(ROOT, p)).href);
-const prompt = async () => (await mod('worker/plan-prompt.mjs')).buildPlanPrompt();
 
-test('階ごとにくり返す段取りになっている', async () => {
-  const p = await prompt();
-  assert.match(p, /階の数だけ.*くり返/s, '階ごとのくり返しになっていない');
-  assert.match(p, /手順0/, '全体を見る手順が無い');
+test('役割は、何をして何を出すかだけを言う', async () => {
+  const { SYSTEM_PROMPT } = await mod('worker/plan-prompt.mjs');
+  assert.match(SYSTEM_PROMPT, /間取り図/);
+  assert.match(SYSTEM_PROMPT, /JSON/);
+  // 手順や項目名が紛れ込んでいないこと
+  assert.ok(!/手順/.test(SYSTEM_PROMPT), '役割に手順が混ざっている');
+  assert.ok(!/rooms|items|dims/.test(SYSTEM_PROMPT), '役割に項目名が混ざっている');
 });
 
-test('階段を壁より先に置く（上下階をつなぐ基準だから）', async () => {
-  const p = await prompt();
-  const stair = p.indexOf('階段を置く');
-  const walls = p.indexOf('外周の壁を置く');
-  assert.ok(stair > 0 && walls > 0, '階段と外周の手順が見つからない');
-  assert.ok(stair < walls, '階段が壁より後になっている。上下階を合わせる基準が無くなる');
+test('検算を手順として持っている', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  // 検算を抜いたら、下辺の内訳から 227.5 が1つ落ちたまま通った(合計 7052.5、
+  // 総寸法 7280)。読む→確かめる→直す、の「確かめる」は作業の一段であって
+  // 注意書きではない。
+  assert.match(buildPlanPrompt(), /内訳の合計が総寸法と一致することを確かめる/);
+  // 読めない箇所が1つだけなら、その値は差で決まる。実測で、寸法の文字に
+  // 補助線が重なって読めない箇所があり、モデルはそれを捨てて不一致のまま進んだ。
+  assert.match(buildPlanPrompt(), /読めない箇所が1つだけの場合は/);
 });
 
-test('部屋を先に捉えてから、その輪郭を壁にする', async () => {
-  const p = await prompt();
-  // 壁から先に引くと間仕切りの引き忘れに気づけない。部屋を数えてから
-  // その境界を引かせることで、抜けが見つかる。
-  assert.match(p, /部屋の区画を目で捉え/, '部屋を先に捉える手順が無い');
-  assert.match(p, /輪郭を、?壁として引/, '捉えた部屋の輪郭を壁にする指示が無い');
+test('長方形でない部屋の表し方を手順として持っている', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  // 試した図面の洋室がL字だった。長方形ひとつでは表せない。
+  assert.match(buildPlanPrompt(), /長方形でない部屋は、複数の長方形に分けて/);
 });
 
-test('検算は1回だけ（思考が止まらなくなる）', async () => {
-  const p = await prompt();
-  assert.match(p, /一度だけ/, '検算を1回に限る指示が無い');
-  assert.match(p, /何度も読み直さない/, '読み直しを止める指示が無い');
-});
-
-test('全階で座標系はひとつ、という注意が残っている', async () => {
-  const p = await prompt();
-  assert.match(p, /全階で座標系はひとつ/);
-  assert.match(p, /4095\.\.8190/, '紙の位置のまま積む誤りの実例が消えている');
-});
-
-test('補ってよいものと、いけないものを分けている', async () => {
-  const p = await prompt();
-  assert.match(p, /補ってよい/, '確実に決まるものを補う許可が無い');
-  assert.match(p, /補ってはいけない/, '根拠の無い補完を止める指示が無い');
-  // 読めない画像は必ず来る。決められるものは決め、決められないものは省く。
-  assert.match(p, /欠けているのが\*\*1つだけ\*\*|欠けているのが1つだけ/,
-    '差から一意に決まる場合の許可が無い');
-  assert.match(p, /ふつう在るからという理由で足す/, '「ありそう」で足すのを止める指示が無い');
-  assert.match(p, /notes に/, '補った根拠を書かせていない');
-});
-
-test('部屋と基礎と屋根はアプリが作る、と伝えている', async () => {
-  const p = await prompt();
-  for (const [layer, who] of [['部屋', '壁から計算'], ['基礎', '自動で作る'], ['屋根', '自動で作る']]) {
-    assert.ok(p.includes(layer), `${layer} の説明が無い`);
+test('室名の無い部屋を、何をもってその部屋とするかが手順にある', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  // 図面に室名が書かれていない部屋は多い。置かれている設備から決まる。
+  for (const [fixture, name] of [['浴槽', '浴室'], ['洗面台', '洗面所'], ['便器', 'トイレ'],
+                                 ['階段', '階段室'], ['玄関ドア', '玄関'], ['流し台', 'キッチン'],
+                                 ['通路', '廊下']]) {
+    assert.ok(p.includes(fixture) && p.includes(name),
+      fixture + ' から ' + name + ' を作る手順が無い');
   }
-  assert.match(p, /壁の精度が、?そのまま家の精度/, '壁がすべてを決めることが伝わっていない');
 });
 
-test('建具の向きは指定させない（壁から決まる）', async () => {
-  const p = await prompt();
-  // assets/js/draw-2d.js の getOpeningWallInfo が最寄りの壁(400mm以内)へ
-  // 吸着させ、向きも壁から取る。AIに出させても使われない。
-  assert.match(p, /向き\(rot\)は指定しなくて構いません|向きの指定は不要/,
-    '使われない回転を出させようとしている');
-  assert.match(p, /400mm/, '壁に載せる許容範囲が書かれていない');
+test('手順は、順に何を埋めるかだけを言う', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  // 出力の各項目に、それを埋める手順がある
+  for (const field of ['dims', 'width', 'depth', 'rooms', 'name', 'items']) {
+    assert.ok(p.includes(field), `${field} を埋める手順が無い`);
+  }
+  assert.match(p, /手順1/);
+  assert.match(p, /手順14/);
 });
 
-test('家具は読ませない', async () => {
-  const p = await prompt();
-  assert.match(p, /家具（ベッド・ソファ・食卓・テレビ・棚）は出力しません/);
+test('手順に仕様の写しを持たない', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const { ALLOWED_ITEM_TYPES } = await mod('worker/plan-item-spec.mjs');
+  const p = buildPlanPrompt();
+  assert.ok(!p.includes('ミリメートル'), '単位は仕様の側にある');
+  assert.ok(!/原点/.test(p), '座標系は仕様の側にある');
+  for (const t of ALLOWED_ITEM_TYPES) {
+    assert.ok(!p.includes(t), `使える種類 "${t}" が手順にも書かれている`);
+  }
+});
+
+test('手順に注意書きを持ち込まない', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  // 失敗を見つけるたびに足した「間違えやすい」「〜しないこと」の類。
+  // 足しはじめると際限が無く、手順が読めなくなる。
+  for (const word of ['間違えやすい', '気をつけ', '注意', '誤り:', 'こと。**']) {
+    assert.ok(!p.includes(word), `手順に注意書き「${word}」が入っている`);
+  }
 });
 
 test('補足(hint)は末尾に足される', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
-  const p = buildPlanPrompt({ hint: '1階だけの図です' });
-  assert.match(p, /1階だけの図です/);
+  assert.match(buildPlanPrompt({ hint: '1階だけの図です' }), /1階だけの図です/);
   assert.ok(!buildPlanPrompt().includes('利用者からの補足'), '補足が無いのに見出しが出ている');
+});
+
+test('手順は短いままにする', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  // 目安。超えたら、仕様か注意書きが混ざり始めている。
+  assert.ok(buildPlanPrompt().length < 1200,
+    '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });

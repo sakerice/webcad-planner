@@ -21,11 +21,11 @@ test('階ごとの入れ子で返させる（読み取りの手順と同じ形�
   const floors = s.properties.floors;
   assert.equal(floors.type, 'ARRAY');
   const f = floors.items.properties;
-  for (const k of ['floor', 'dims', 'walls', 'labels', 'items']) {
+  for (const k of ['floor', 'dims', 'width', 'depth', 'rooms', 'items']) {
     assert.ok(f[k], `階の中に ${k} が無い`);
   }
-  assert.deepEqual(floors.items.required, ['floor', 'walls'],
-    '階と壁は必須。どちらが欠けても家にならない');
+  assert.deepEqual(floors.items.required, ['floor', 'width', 'depth', 'rooms'],
+    '階・大きさ・部屋は必須。どれが欠けても家にならない');
 });
 
 test('使える種類は enum で縛る（知らない名前は返せない）', async () => {
@@ -36,23 +36,29 @@ test('使える種類は enum で縛る（知らない名前は返せない）',
     '種類の一覧が仕様とずれている');
 });
 
-test('項目の意味は schema の側に書く', async () => {
+test('schema が持つのは形だけ（意味は仕様書、段取りは手順）', async () => {
   const { PLAN_RESPONSE_SCHEMA: s } = await mod('worker/plan-response-schema.mjs');
-  const f = s.properties.floors.items.properties;
-  // 中心か左上の角か。ここを取り違えると開口が半分ぶんずれる(実測で845mm)。
-  assert.match(f.items.items.properties.x.description, /中心/);
-  // 壁は芯線。外形の寸法線は芯々。
-  assert.match(f.walls.items.description, /芯/);
-  // 室名は位置だけ。範囲はアプリが壁から計算する。
-  assert.match(f.labels.description, /範囲は出さない/);
-  // 内訳の合計は総寸法と一致すること。
-  assert.match(f.dims.properties.top.properties.parts.description, /合計/);
+  const walk = (node, path) => {
+    if (!node || typeof node !== 'object') return;
+    if (typeof node.description === 'string') {
+      assert.ok(node.description.length <= 24,
+        path + ' の説明が長い（' + node.description.length + '文字）。意味は仕様書の側へ');
+      for (const w of ['227.5', 'こと', 'ない。', '**']) {
+        assert.ok(!node.description.includes(w),
+          path + ' の説明に「' + w + '」が入っている。決まりや助言は schema の外へ');
+      }
+    }
+    if (node.properties) for (const k of Object.keys(node.properties)) walk(node.properties[k], path + '.' + k);
+    if (node.items) walk(node.items, path + '[]');
+  };
+  walk(s, '');
 });
 
-test('部屋はAIに出させない（壁から計算する）', async () => {
+test('壁はAIに出させない（部屋の境目から作る）', async () => {
   const { PLAN_RESPONSE_SCHEMA: s } = await mod('worker/plan-response-schema.mjs');
   const f = s.properties.floors.items.properties;
-  assert.ok(!f.rooms, '部屋を出させようとしている。壁と食い違うと直しようがない');
+  assert.ok(!f.walls, '壁を出させようとしている。部屋と食い違うと直しようがない');
+  assert.ok(f.rooms, '部屋が無い');
 });
 
 test('形の説明が指示文の本文に戻ってきていない', async () => {
@@ -83,25 +89,27 @@ test('階ごとの入れ子を、階つきの平らな並びに開く', async ()
   const { decodeCompactPlan } = await mod('worker/plan-prompt.mjs');
   const out = decodeCompactPlan({
     floors: [
-      { floor: 1, walls: [{ x1: 0, y1: 0, x2: 7280, y2: 0 }], labels: [{ text: '洋室', x: 100, y: 100 }],
+      { floor: 1, width: 7280, depth: 4095,
+        rooms: [{ name: '洋室', parts: [{ x0: 0, y0: 0, x1: 3185, y1: 1365 }] }],
         items: [{ type: 'stair', x: 3000, y: 2000, w: 910 }] },
-      { floor: 2, walls: [{ x1: 0, y1: 0, x2: 7280, y2: 0 }] },
+      { floor: 2, width: 7280, depth: 4095, rooms: [] },
     ],
-    notes: ['下辺の内訳が1つ欠けていたので差から補った'],
+    notes: ['下辺の内訳が1つ欠けていた'],
   });
-  assert.equal(out.walls.length, 2);
-  assert.deepEqual(out.walls.map((w) => w.floor), [1, 2], '階が1件ずつに配られていない');
-  assert.equal(out.labels[0].floor, 1);
-  assert.equal(out.items[0].floor, 1);
+  assert.equal(out.floors.length, 2);
+  assert.deepEqual(out.floors.map((f) => f.floor), [1, 2]);
+  assert.equal(out.floors[0].width, 7280);
+  assert.equal(out.floors[0].rooms.length, 1);
+  assert.equal(out.items[0].floor, 1, '階が1件ずつに配られていない');
   assert.equal(out.notes.length, 1);
 });
 
 test('1件ずつが自分で階を持っていれば、そちらを尊重する', async () => {
   const { decodeCompactPlan } = await mod('worker/plan-prompt.mjs');
   const out = decodeCompactPlan({
-    floors: [{ floor: 1, walls: [{ x1: 0, y1: 0, x2: 10, y2: 0, floor: 3 }] }],
+    floors: [{ floor: 1, width: 10, depth: 10, rooms: [], items: [{ type: 'window', x: 1, y: 0, w: 900, floor: 3 }] }],
   });
-  assert.equal(out.walls[0].floor, 3);
+  assert.equal(out.items[0].floor, 3);
 });
 
 test('古い平らな形も読める', async () => {

@@ -64,8 +64,11 @@ function keyFile() {
   const { getAccessToken } = await import(pathToFileURL(join(ROOT, 'worker', 'google-auth.mjs')).href);
   const { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-prompt.mjs')).href);
   const { PLAN_RESPONSE_SCHEMA } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-response-schema.mjs')).href);
+  const { planSpec } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-spec.mjs')).href);
+  const { planKnowledge } = await import(pathToFileURL(join(ROOT, 'worker', 'plan-knowledge.mjs')).href);
   const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
   const PlanRooms = require(join(ROOT, 'assets', 'js', 'plan-rooms.js'));
+  const PlanGrid = require(join(ROOT, 'assets', 'js', 'plan-grid.js'));
 
   const location = opt('location') || vertex.DEFAULT_LOCATION;
   const project = opt('project') || credentials.project_id;
@@ -116,6 +119,7 @@ function keyFile() {
   const result = await vertex.generate({
     config: { credentials, project, location, model },
     system: SYSTEM_PROMPT,
+    docs: [planKnowledge(), planSpec()],
     text: buildPlanPrompt({ hint: opt('hint') || '' }),
     image: { mimeType, base64 },
     responseSchema: PLAN_RESPONSE_SCHEMA,
@@ -156,10 +160,18 @@ function keyFile() {
   }
 
   const plan = decodeCompactPlan(parsed);
-  // 部屋はAIに出させず、壁と文字から計算する（両方出させると食い違う）
-  const labels = plan.labels;
-  const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
-  plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, labels, { floor: f }));
+  // 壁はAIに出させず、升目の塗り分けの境目から作る。
+  // 壁の端点は、その壁が仕切っている部屋から決まるもので、独立した情報ではない。
+  if (plan.floors.length) {
+    const built = PlanGrid.buildFloors(plan.floors);
+    plan.walls = built.walls;
+    plan.rooms = built.rooms;
+    for (const m of built.problems) plan.notes.push('(取り込み時) ' + m);
+  } else if (plan.walls.length) {
+    // 古い形で壁が直に返ってきた場合だけ、これまでどおり壁から部屋を計算する。
+    const floors = [...new Set(plan.walls.map((w) => w.floor || 1))];
+    plan.rooms = floors.flatMap((f) => PlanRooms.roomsFromWalls(plan.walls, plan.labels, { floor: f }));
+  }
   const checked = PlanSchema.validatePlan(plan);
   const s = PlanSchema.summarize(plan);
   console.log(`\n読み取り: 壁 ${s.walls} / 部屋 ${s.rooms} / 開口・階段 ${s.items} / 階 ${s.floors.join(',') || '-'}`);

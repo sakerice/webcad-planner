@@ -2,17 +2,14 @@
 //
 // なぜ在るのか
 // ------------
-// これまで出力の形はプロンプトの本文に書いていた。つまり**お願い**だった。
-// 実測で、位置の項目名が box_2d から box へ勝手に変わって返ったことがある。
-// お願いは破られる。Vertex AI の generationConfig.responseSchema を使えば、
-// 形はモデルの気分ではなく API の制約になる。
+// 出力の形をプロンプトの本文に書いていた頃、実測で位置の項目名が box_2d から
+// box へ勝手に変わって返った。お願いは破られる。Vertex AI の
+// generationConfig.responseSchema を使えば、形はモデルの気分ではなく API の
+// 制約になる。
 //
-// もうひとつの狙いは、**項目の意味をプロンプトの本文から追い出す**こと。
-// 「x,y は開口の中心です」といった説明は、本文に長々と書くと手順が読みにくく
-// なるうえ、項目と説明が離れて食い違う。description に書けば項目に貼り付く。
-//
-// 形は「階ごとの入れ子」にしてある。読み取りの手順が階ごとのくり返しなので、
-// 出力もそのとおりの形にするほうが、モデルにとっても素直になる。
+// ここが持つのは **形だけ**。項目の意味は worker/plan-spec.mjs の仕様書に、
+// 読み取りの段取りは worker/plan-prompt.mjs の手順にある。description は
+// どの項目かが分かる最小限にとどめ、説明を二重に持たない。
 import { ALLOWED_ITEM_TYPES } from "./plan-item-spec.mjs";
 
 const mm = (description) => ({ type: "NUMBER", description });
@@ -20,57 +17,59 @@ const mm = (description) => ({ type: "NUMBER", description });
 // 寸法線1辺ぶん。総寸法と、その内訳の並び。
 const EDGE = {
   type: "OBJECT",
-  description: "その辺の寸法線。総寸法と内訳",
+  description: "その辺の寸法線",
   properties: {
-    total: mm("その辺の総寸法(mm)。いちばん外側の寸法線の数値"),
+    total: mm("その辺の総寸法"),
     parts: {
       type: "ARRAY",
-      description: "内訳の数値を、左から(縦の辺なら上から)順に並べたもの。合計は total と一致すること",
-      items: mm("内訳ひとつ(mm)。227.5 や 1137.5 のような .5 で終わる値もそのまま入れる"),
+      description: "内訳",
+      items: mm("内訳ひとつ"),
     },
   },
   propertyOrdering: ["total", "parts"],
 };
 
-const WALL = {
+const PART = {
   type: "OBJECT",
-  description: "壁1枚。芯線(壁の中心を通る線)の線分で表す",
+  description: "部屋が占める長方形",
   properties: {
-    x1: mm("始点のx(mm)"),
-    y1: mm("始点のy(mm)"),
-    x2: mm("終点のx(mm)"),
-    y2: mm("終点のy(mm)"),
-    thick: mm("壁の厚み(mm)。図に書かれていなければ外周も間仕切りも 120"),
+    x0: { type: "NUMBER", description: "左端のx" },
+    y0: { type: "NUMBER", description: "上端のy" },
+    x1: { type: "NUMBER", description: "右端のx" },
+    y1: { type: "NUMBER", description: "下端のy" },
   },
-  required: ["x1", "y1", "x2", "y2"],
-  propertyOrdering: ["x1", "y1", "x2", "y2", "thick"],
+  required: ["x0", "y0", "x1", "y1"],
+  propertyOrdering: ["x0", "y0", "x1", "y1"],
 };
 
-const LABEL = {
+const ROOM = {
   type: "OBJECT",
-  description: "図に書かれている室名の文字と、その文字がある位置",
+  description: "部屋",
   properties: {
-    text: {
+    name: {
       type: "STRING",
-      description: "図に書かれているとおりの室名。畳数の表記((4.5帖)など)は含めない。読めない文字は出さない",
+      description: "室名",
     },
-    x: mm("その文字の中心のx(mm)"),
-    y: mm("その文字の中心のy(mm)"),
+    parts: {
+      type: "ARRAY",
+      description: "その部屋が占める長方形",
+      items: PART,
+    },
   },
-  required: ["text", "x", "y"],
-  propertyOrdering: ["text", "x", "y"],
+  required: ["name", "parts"],
+  propertyOrdering: ["name", "parts"],
 };
 
 const ITEM = {
   type: "OBJECT",
-  description: "建具・階段・水まわりの設備のひとつ",
+  description: "建具・階段・設備",
   properties: {
-    type: { type: "STRING", enum: ALLOWED_ITEM_TYPES, description: "ものの種類" },
-    x: mm("**中心**のx(mm)。左上の角ではない"),
-    y: mm("**中心**のy(mm)。左上の角ではない"),
-    w: mm("幅(mm)。壁に沿う向きの長さ。建具なら開口の幅"),
-    d: mm("奥行き(mm)。壁に直交する向きの長さ。建具は壁の厚みぶん程度でよい"),
-    rot: mm("回転(度)。0で幅が東西を向く。建具は壁から自動で決まるので省略してよい"),
+    type: { type: "STRING", enum: ALLOWED_ITEM_TYPES, description: "種類" },
+    x: mm("中心のx"),
+    y: mm("中心のy"),
+    w: mm("幅"),
+    d: mm("奥行き"),
+    rot: mm("回転角(度)"),
   },
   required: ["type", "x", "y", "w"],
   propertyOrdering: ["type", "x", "y", "w", "d", "rot"],
@@ -78,24 +77,35 @@ const ITEM = {
 
 const FLOOR = {
   type: "OBJECT",
-  description: "1つの階。平面図1枚ぶん",
+  description: "1つの階",
   properties: {
     floor: {
       type: "INTEGER",
-      description: "何階か。1階なら1、2階なら2。図の見出し(「1階平面図」など)で判断する",
+      description: "階数",
     },
     dims: {
       type: "OBJECT",
-      description: "読み取った寸法線。4辺それぞれ。読めない辺は省く",
+      description: "寸法線",
       properties: { top: EDGE, bottom: EDGE, left: EDGE, right: EDGE },
       propertyOrdering: ["top", "bottom", "left", "right"],
     },
-    walls: { type: "ARRAY", description: "この階の壁。外周と間仕切りの両方", items: WALL },
-    labels: { type: "ARRAY", description: "この階に書かれている室名。範囲は出さない", items: LABEL },
-    items: { type: "ARRAY", description: "この階の建具・階段・水まわりの設備", items: ITEM },
+    width: {
+      type: "NUMBER",
+      description: "建物の総幅",
+    },
+    depth: {
+      type: "NUMBER",
+      description: "建物の総奥行き",
+    },
+    rooms: {
+      type: "ARRAY",
+      description: "この階の部屋",
+      items: ROOM,
+    },
+    items: { type: "ARRAY", description: "この階の建具・階段・設備", items: ITEM },
   },
-  required: ["floor", "walls"],
-  propertyOrdering: ["floor", "dims", "walls", "labels", "items"],
+  required: ["floor", "width", "depth", "rooms"],
+  propertyOrdering: ["floor", "dims", "width", "depth", "rooms", "items"],
 };
 
 export const PLAN_RESPONSE_SCHEMA = {
@@ -103,14 +113,12 @@ export const PLAN_RESPONSE_SCHEMA = {
   properties: {
     floors: {
       type: "ARRAY",
-      description: "階ごとの読み取り結果。図にある階の数だけ並べる",
+      description: "階ごとの読み取り結果",
       items: FLOOR,
     },
     notes: {
       type: "ARRAY",
-      description:
-        "読めなかったところ、他の情報から補って決めたところを、日本語で1行ずつ。" +
-        "補ったものは「何を、何から、どう決めたか」を書く",
+      description: "読み取りの記録",
       items: { type: "STRING" },
     },
   },
