@@ -46,4 +46,31 @@ if [ "${SKIP_DEPLOY:-0}" = "1" ]; then
   echo "Skipping deploy because SKIP_DEPLOY=1"
   exit 0
 fi
+
+# 本番へ出すのは main だけ。
+#
+# このスクリプトは末尾で wrangler deploy を実行する。「ビルドするだけ」の
+# つもりで実行すると、そのまま本番(cad-planner.srapps.us)が差し替わる。
+# 実際に feature ブランチの内容を本番へ出す事故が起きた。
+#
+# 本番は main から出す。作業ブランチから出すことはない。
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+if [ "$branch" != "main" ]; then
+  echo ""
+  echo "デプロイを中止しました。いまのブランチは '$branch' です。"
+  echo "本番へ出せるのは main だけです。dist/ の作成は終わっています。"
+  echo ""
+  echo "ビルドだけしたいとき:  SKIP_DEPLOY=1 bash build.sh"
+  exit 1
+fi
+
+# main でも、origin/main と中身が違えば止める。手元だけの変更は本番に出さない。
+git fetch --quiet origin main 2>/dev/null || true
+if ! git diff --quiet FETCH_HEAD -- . 2>/dev/null; then
+  echo ""
+  echo "デプロイを中止しました。origin/main と中身が違います。"
+  echo "先に push してレビューを通してください。"
+  exit 1
+fi
+
 npx wrangler deploy
