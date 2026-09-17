@@ -8,3 +8,6 @@ work/original/*
 
 !work/original/original-kitchen-island.blend
 !work/original/original-kitchen-cooking.blend
+# モジュール式キッチン(build_kitchen_system.py が書き出す)。名前を1つずつ並べると
+# 構成を増やすたびに編集用データだけ抜け落ちる。まとめて通す。
+!work/original/original-kitchen-*.blend
