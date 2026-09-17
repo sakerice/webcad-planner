@@ -94,6 +94,7 @@ try {
         summary: { walls: 4, rooms: 1, items: 1, floors: [1] },
         notes: ['右下の収納は寸法が読めなかった'],
         warnings: [],
+        usage: { inputTokens: 2600, answerTokens: 2300, thoughtTokens: 8200, outputTokens: 10500, totalTokens: 13100 },
       }), { status: 200, headers: { 'content-type': 'application/json' } });
     };
   });
@@ -114,6 +115,9 @@ try {
   assert.match(rooms, /2730×1820mm/);
   assert.match(rooms, /約3\.0帖/, '帖数の換算が合っていない');
   assert.match(await page.locator('#plan-import-notes').textContent(), /読めなかった/);
+  // 1回いくらかかったかは毎回見せる（使う側からは費用が見えないので）
+  assert.match(await page.locator('#plan-import-cost').textContent(), /費用: 約 .*円/,
+    '費用が表示されていない');
 
   // ── 取り込む ──────────────────────────────────────────────────────
   page.on('dialog', (d) => d.accept());

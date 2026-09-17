@@ -303,6 +303,21 @@
           }).join('\n')
         : '部屋を読み取れませんでした。';
     }
+    // 1回いくらかかったかを、毎回その場で見せる。推定ではなく実測の
+    // トークン数から出す。費用は使う側からは見えないので、見えるようにする。
+    var cost = $('plan-import-cost');
+    if (cost) {
+      var u = body.usage;
+      if (u && u.inputTokens) {
+        // 単価は gemini-2.5-flash（$0.30 / $2.50 per 1M）。$1=¥150 と置いた概算。
+        var yen = (u.inputTokens / 1e6 * 0.30 + u.outputTokens / 1e6 * 2.50) * 150;
+        cost.textContent = 'この読み取りの費用: 約 ' + yen.toFixed(1) + '円'
+          + '（入力 ' + u.inputTokens + ' / 出力 ' + u.outputTokens
+          + (u.thoughtTokens ? '（うち思考 ' + u.thoughtTokens + '）' : '') + ' トークン）';
+      } else {
+        cost.textContent = '';
+      }
+    }
     var notes = $('plan-import-notes');
     if (notes) {
       var lines = [];
