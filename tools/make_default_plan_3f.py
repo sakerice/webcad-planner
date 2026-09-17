@@ -525,11 +525,12 @@ for _collection, _order in _review23["order"].items():
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
 # 1階2688 / 2階以上2508 は、この間取りがこれまで持っていた天井の高さ。
 # 手直しの取り込み(plan.update)より後に置く。あちらに同じ鍵があると消える。
-plan["heightDefaults"] = {"modelVersion": 2, "perFloor": True,
-                          "wallHeight": 2688, "floorThickness": 180}
-plan["floors"] = {str(f): {"wallHeight": 2688 if f == 1 else 2508,
-                           "floorThickness": 180}
-                  for f in (1, 2, 3, 4)}
+from plan_kit import height_defaults
+from plan_kit import tidy_numbers
+plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3, 4))
 with open(out, "w", encoding="utf-8") as f:
-    json.dump(plan, f, ensure_ascii=False, indent=1)
+    # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに
+    # なるので、`python3 tools/make_default_plan_3f.py && git diff --exit-code` で
+    # 「生成器が出荷物を再現するか」を確かめられる。
+    json.dump(tidy_numbers(plan), f, ensure_ascii=False, separators=(",", ":"))
 print("reviewed layout: %d items" % len(plan["items"]))
