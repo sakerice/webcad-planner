@@ -7,15 +7,33 @@ function fixtures(){return DATA.items.filter(it=>it.floor===ST.floor&&(isLightIt
 function ceilingGroup(r,ceilY,mat,holes,profile){
  if(profile||!areas(r).length)return buildRoomCeilingMesh(r,ceilY,mat,holes,profile);
  const inset=typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:.012;
+ // 天井範囲の見えがかり。テクスチャを設定したらそれを貼り、無ければ色で塗る
+ // (部屋の天井仕上げと同じ決まり: 画像が優先)。タイルの大きさも部屋の天井と
+ // 同じ CEILING_TEXTURE_TILE_M。ここで別の数を持ち込むと、同じ画像が段差の
+ // 中だけ違う大きさで出る。
+ const faceMaterial=(base,a,w,d)=>{
+  const m=base.clone();m.side=THREE.DoubleSide;
+  if(a.texture&&typeof getTexture3D==='function'){
+   const tex=cloneRepeatReadyTexture(getTexture3D(a.texture));
+   if(tex){tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
+    setTextureRepeatNoDistort(tex,w,d,CEILING_TEXTURE_TILE_M);
+    applyTextureFlip(tex,{textureFlipX:a.textureFlipX,textureFlipY:a.textureFlipY});
+    m.map=tex;m.color.set(0xffffff);return m;}
+  }
+  m.map=null;m.color.set(a.color||'#eee8dd');return m;
+ };
  const group=new THREE.Group();group.userData={b:true,ceiling:true,roomId:r.id};const aa=areas(r);const all=(holes||[]).slice();
  aa.forEach(a=>all.push([{x:(r.x+a.x)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y+a.d)*U},{x:(r.x+a.x)*U,z:(r.y+a.y+a.d)*U}]));
  const base=buildRoomCeilingMesh(r,ceilY,mat,all,null);if(active())mark3DSelectable(base,r,'room');group.add(base);
  aa.forEach(a=>{
-  const m=mat.clone();m.map=null;m.color.set(a.color||'#eee8dd');m.side=THREE.DoubleSide;
+  const m=faceMaterial(mat,a,a.w*U,a.d*U);
+  // 段差の立ち上がり(見付け)は色のまま。面に貼った画像を細い帯へ引き伸ばすと
+  // 柄が溶けて、かえって納まりが読めなくなる。
+  const fascia=m.map?faceMaterial(mat,{color:a.color},0,0):m;
   const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=ceilY+a.offset*U-inset;
   const face=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);face.rotation.x=Math.PI/2;face.position.set(x,y,z);face.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};const ref=DATA.items.find(it=>it.type==='ceiling-area'&&it.id===a.id);if(ref)mark3DSelectable(face,ref,'item');group.add(face);
   const h=Math.abs(a.offset)*U,mid=(ceilY-inset+y)/2;
-  [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),m);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};if(ref)mark3DSelectable(side,ref,'item');group.add(side);});
+  [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),fascia);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};if(ref)mark3DSelectable(side,ref,'item');group.add(side);});
  });return group;
 }
 function active(){return !!ST.ceilingView&&(ST.view==='2d'||ST.view==='3d-int');}
@@ -64,7 +82,12 @@ function props(it){
  document.getElementById('props-title').textContent='天井範囲 の設定';
  let html=selectedLockControlHtml(it)+'<div class="ph">天井の範囲</div>';
  [['x','X位置'],['y','Y位置'],['w','幅'],['d','奥行'],['offset','段差（下げは負）']].forEach(([key,label])=>{html+='<div class="pr"><label class="pl">'+label+' mm</label><input class="pi" data-ceiling-field="'+key+'" type="number" step="10" value="'+(Math.round(it[key]*100)/100)+'" onchange="updateSelectedProp(\''+key+'\',Number(this.value))"></div>';});
- html+='<div class="pr"><label class="pl">仕上げ色</label><input class="pi" type="color" value="'+(it.color||'#e4ddd1')+'" onchange="updateSelectedProp(\'color\',this.value)"></div><p class="model-finish-note">通常のハンドルで移動・サイズ変更できます。照明の取付高さは天井の変更に追従します。</p>'+selectedDeleteButtonHtml();
+ html+='<div class="pr"><label class="pl">仕上げ色</label><input class="pi" type="color" value="'+(it.color||'#e4ddd1')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>'
+  +selectedTextureUploadHtml(it,'仕上げテクスチャ')
+  +(it.texture?'<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>':'')
+  +selectedTextureFlipControlsHtml(it)
+  +(it.texture?'<div class="lock-status-note">テクスチャを設定しているあいだ、仕上げ色は段差の立ち上がりにだけ効きます（部屋の天井仕上げと同じ決まりです）。</div>':'')
+  +'<p class="model-finish-note">通常のハンドルで移動・サイズ変更できます。照明の取付高さは天井の変更に追従します。</p>'+selectedDeleteButtonHtml();
  setPropsBodyHtml(document.getElementById('props-body'),html,it);
  const name=document.getElementById('mob-prop-name');if(name)name.textContent='天井範囲';
  const size=document.getElementById('mob-prop-size');if(size)size.textContent=it.w+' × '+it.d+' mm';

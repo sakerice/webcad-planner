@@ -6230,7 +6230,9 @@ function add3DSelectionMarkerFor(target,primary){
   var labelTex=new THREE.CanvasTexture(labelCanvas);
   labelTex.colorSpace=THREE.SRGBColorSpace;
   var label=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex,transparent:true,depthTest:false}));
-  label.position.set(center.x,box.max.y+0.42,center.z);
+  // 天井に付くものは下から見る。札を上に出すと天井裏に隠れて読めない。
+  var labelY=(target.type==='ceiling-area')?box.min.y-0.42:box.max.y+0.42;
+  label.position.set(center.x,labelY,center.z);
   label.scale.set(1.15,0.38,1);
   label.userData={b:true,selectionHelper:true};
   group.add(label);
@@ -6253,7 +6255,9 @@ function add3DMoveGizmo(){
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
   var size=box.getSize(new THREE.Vector3());
-  center.y=Math.max(box.max.y+0.08,center.y);
+  // 天井のものは下へ、それ以外は上へ。掴む矢印が面の向こう側に出ないようにする。
+  center.y=(ST.selected.type==='ceiling-area')
+    ? Math.min(box.min.y-0.08,center.y) : Math.max(box.max.y+0.08,center.y);
   var group=new THREE.Group();
   group.userData={b:true,moveGizmo:true};
   var len=Math.max(0.55,Math.min(1.35,Math.max(size.x,size.y,size.z)*0.55));
@@ -6300,7 +6304,9 @@ function getGizmoDragBasis(axis,ref){
   var box=getSelectionBox3D(ref);
   if(box.isEmpty()) return null;
   var center=box.getCenter(new THREE.Vector3());
-  center.y=Math.max(box.max.y+0.08,center.y);
+  // add3DMoveGizmo と同じ位置。ここがずれると、掴んだ矢印と動く量が食い違う。
+  center.y=(ref&&ref.type==='ceiling-area')
+    ? Math.min(box.min.y-0.08,center.y) : Math.max(box.max.y+0.08,center.y);
   var dir=axis==='x'?new THREE.Vector3(1,0,0):(axis==='z'?new THREE.Vector3(0,0,1):new THREE.Vector3(0,1,0));
   var rect=ren.domElement.getBoundingClientRect();
   function project(v){
@@ -6413,6 +6419,23 @@ function getSelectionBox3D(ref){
     box.set(
       new THREE.Vector3(ref.x*U,ry,(ref.y||0)*U),
       new THREE.Vector3((ref.x+ref.w)*U,ry+0.12,(ref.y+ref.d)*U)
+    );
+    return box;
+  }
+  if(ref.type==='ceiling-area'){
+    // 天井範囲は天井面に貼り付く。ほかのアイテムと同じ「床から elev」の式で
+    // 箱を作ると、**天井の範囲を選んでいるのに選択枠と札だけが床に出る。**
+    // 箱は段差の立ち上がり(天井面 ⇔ 段差の面)を包む。
+    var cfl=ref.floor||1;
+    var croom=(typeof roomAtPointOnFloor==='function')
+      ? roomAtPointOnFloor(cfl,ref.x+ref.w/2,ref.y+ref.d/2) : null;
+    var ceilY=floorBaseY(cfl)+(croom?roomCeilingHeightM(croom):wallFullHeightM(cfl));
+    var faceY=ceilY+(Number(ref.offset)||0)*U;
+    var lo=Math.min(faceY,ceilY), hi=Math.max(faceY,ceilY);
+    if(hi-lo<0.06){ lo=faceY-0.03; hi=faceY+0.03; }  // 段差が浅くても掴める厚みを残す
+    box.set(
+      new THREE.Vector3(ref.x*U,lo,(ref.y||0)*U),
+      new THREE.Vector3((ref.x+ref.w)*U,hi,(ref.y+ref.d)*U)
     );
     return box;
   }

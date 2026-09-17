@@ -32,7 +32,34 @@ try{
   if(copy)delSel();
   const legacy={id:'legacy-test',x:1800,y:1800,w:300,d:300,offset:-100};testRoom.ceilingAreas=[legacy];CeilingDesigner.migrate();CeilingDesigner.migrate();const migrated=DATA.items.filter(it=>it.id==='legacy-test');const migration=migrated.length===1&&migrated[0].x===testRoom.x+1800;DATA.items=DATA.items.filter(it=>it.id!=='legacy-test');ST.selected=DATA.items.find(it=>it.id===zoneId);updateProps();draw2d();return {rejected,copyValid,migration};
  });assert.deepEqual(edits,{rejected:true,copyValid:true,migration:true});
+ // 天井にもテクスチャを貼れること。部屋の天井仕上げと同じで、画像は色より優先する。
+ await p.evaluate(()=>{window.testPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEUlEQVR4nGM4saUHjhiI4wAAUSEggY6IxYgAAAAASUVORK5CYII=';
+  const z=DATA.items.find(it=>it.id===zoneId);ST.selected=z;updateProps();updateSelectedProp('texture',testPng);});
+ // 画像が読み終わるまで待つ。読み込み中は色のまま描く(部屋の天井仕上げと同じ)。
+ await p.waitForFunction(()=>isTextureImageReady(getTexture3D(testPng)));
+ const tex=await p.evaluate(()=>{
+  const r=DATA.rooms.find(r=>r.id===testRoom.id);
+  const g=CeilingDesigner.ceilingGroup(r,floorBaseY(r.floor)+roomCeilingHeightM(r),new THREE.MeshStandardMaterial(),[],null);
+  const faces=g.children.filter(o=>o.geometry&&o.geometry.type==='PlaneGeometry'&&o.userData.ceilingAreaId===zoneId);
+  const sides=g.children.filter(o=>o.geometry&&o.geometry.type==='BoxGeometry'&&o.userData.ceilingAreaId===zoneId);
+  const saved=JSON.parse(serializeDataSnapshot()).items.find(it=>it.id===zoneId);
+  return {face:!!(faces[0]&&faces[0].material.map),sides:sides.length,sideTextured:sides.some(o=>!!o.material.map),
+   panel:!!document.querySelector('#props-body input[type=file]'),saved:!!saved.texture};});
+ assert.ok(tex.face,'天井範囲の面にテクスチャが乗らない');
+ assert.equal(tex.sideTextured,false,'段差の立ち上がりにまで画像が引き伸ばされている');
+ assert.ok(tex.sides>0,'段差の立ち上がりが作られていない（空振りの検査になっている）');
+ assert.ok(tex.panel,'設定欄にテクスチャの入口が無い');
+ assert.ok(tex.saved,'テクスチャが保存されない');
+ await p.evaluate(()=>{updateSelectedProp('texture',null);});
  await p.screenshot({path:`${dir}/plan.png`});await p.evaluate(()=>{setView('3d-int');window.nativeRenderer=ren;});await p.waitForTimeout(1200);await p.locator('#app-loading').waitFor({state:'hidden'});await p.screenshot({path:`${dir}/underside.png`});assert.equal(await p.evaluate(()=>ren===nativeRenderer&&ST.view==='3d-int'&&sc3.children.some(o=>o.userData.ceiling)),true);
+ // 選択の枠・札・ギズモは getSelectionBox3D から作る。天井範囲をほかのアイテムと
+ // 同じ「床から elev」で扱うと、**天井を選んでいるのに枠と札だけ床に出る**。
+ const marker=await p.evaluate(()=>{const z=DATA.items.find(it=>it.id===zoneId),b=getSelectionBox3D(z);
+  const r=roomAtPointOnFloor(z.floor,z.x+z.w/2,z.y+z.d/2);
+  return {lo:b.min.y,hi:b.max.y,ceiling:floorBaseY(z.floor)+roomCeilingHeightM(r),floor:floorTopY(z.floor),step:Math.abs(z.offset)*U};});
+ assert.ok(Math.abs(marker.hi-marker.ceiling)<.01,'選択枠の上端が天井面に無い '+marker.hi+' / '+marker.ceiling);
+ assert.ok(Math.abs((marker.hi-marker.lo)-marker.step)<.01,'選択枠が段差の厚みになっていない '+(marker.hi-marker.lo)+' / '+marker.step);
+ assert.ok(marker.lo-marker.floor>1.5,'選択枠が床のそばに出ている（床からの高さ '+(marker.lo-marker.floor)+'m）');
  await p.selectOption('#surface-sel','floor');await p.waitForFunction(()=>!sc3.children.some(o=>o.userData.ceiling));assert.equal(await p.evaluate(()=>ren===nativeRenderer&&!ST.ceilingView&&!sc3.children.some(o=>o.userData.ceiling)),true);
  await p.evaluate(()=>{setView('2d');CeilingDesigner.setSurface('ceiling');ST.selected=DATA.items.find(it=>it.id===zoneId);delSel();});assert.equal(await p.evaluate(()=>DATA.items.some(it=>it.id===zoneId)),false);await p.evaluate(()=>undoAction());assert.equal(await p.evaluate(()=>DATA.items.some(it=>it.id===zoneId)),true);
  await p.setViewportSize({width:390,height:844});await p.evaluate(()=>resetView());await p.screenshot({path:`${dir}/mobile.png`});assert.deepEqual(errors,[]);fs.writeFileSync(`${dir}/checks.json`,JSON.stringify({...result,errors,nativeViews:true},null,2));console.log('Native plan clicks, properties, fixture attachment, Undo/Redo, delete, persistence, same 3D renderer and mobile: passed');
