@@ -49,16 +49,41 @@ test('長方形でない部屋の表し方を手順として持っている', as
   assert.match(buildPlanPrompt(), /長方形でない部屋は、複数の長方形に分けて/);
 });
 
+test('階段は上下の向きと、廻り部分の接し方まで指示する', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  assert.match(p, /rot は上る向きに合わせる/, '階段の向きの指示が無い');
+  assert.match(p, /辺を接して/, '廻り部分を直進部分に接して置く指示が無い');
+  assert.match(p, /間を空けない/, '離れて置かれるのを止める指示が無い');
+});
+
+test('カタログの品物は大きさを変えさせない', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  // 階段・設備はアプリのカタログの品物なので、寸法を変えると3Dの納まりが崩れる。
+  assert.match(p, /w と d は仕様の既定値のまま変えない/, '既定寸法を守らせる指示が無い');
+  // 建具は逆に、図の寸法どおりにする。
+  assert.match(p, /図に描かれている開口の幅/, '扉の幅を図から取る指示が無い');
+  assert.match(p, /図に描かれている窓の幅/, '窓の幅を図から取る指示が無い');
+});
+
+test('長方形でない部屋を、見直しの手順で拾わせる', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  assert.match(p, /輪郭に凹みがあるのに parts が1つなら/, 'L字の取りこぼしに気づかせる指示が無い');
+  assert.match(p, /入れた部屋を見直す/, '最後の見直しの手順が無い');
+});
+
 test('items の座標の決め方が手順にある', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
   // 部屋には座標の導き方があるのに items には無く、玄関や階段が根拠なく
   // 置かれていた。設備は部屋の中、扉は部屋と部屋の境界、窓は部屋と外の境界。
-  assert.match(p, /その部屋の\n範囲の中に収める|部屋の範囲の中に収める/,
-    '設備を部屋の中に収める指示が無い');
+  assert.match(p, /範囲の中に収める/, '設備を部屋の中に収める指示が無い');
   assert.match(p, /2つの部屋が接する境界の上に置く/, '扉を部屋の境界に置く指示が無い');
   assert.match(p, /部屋と建物の外が接する境界の上に置く/, '窓を外周に置く指示が無い');
-  assert.match(p, /玄関ドアは、玄関と建物の外が/, '玄関ドアの置き場所の指示が無い');
+  assert.match(p, /玄関ドアは、玄関と\s*建物の外が接する境界の上に置く/,
+    '玄関ドアの置き場所の指示が無い');
 });
 
 test('室名の無い部屋を、何をもってその部屋とするかが手順にある', async () => {
@@ -81,7 +106,7 @@ test('手順は、順に何を埋めるかだけを言う', async () => {
     assert.ok(p.includes(field), `${field} を埋める手順が無い`);
   }
   assert.match(p, /手順1/);
-  assert.match(p, /手順16/);
+  assert.match(p, /手順18/);
 });
 
 test('手順に仕様の写しを持たない', async () => {
@@ -90,7 +115,11 @@ test('手順に仕様の写しを持たない', async () => {
   const p = buildPlanPrompt();
   assert.ok(!p.includes('ミリメートル'), '単位は仕様の側にある');
   assert.ok(!/原点/.test(p), '座標系は仕様の側にある');
+  // 階段だけは例外。直進する部分と向きが変わる部分は別の種類で、どちらを
+  // どこに置くかが手順そのものなので、名前を出さないと指示にならない。
+  const spellOut = new Set(['stair', 'stair-corner']);
   for (const t of ALLOWED_ITEM_TYPES) {
+    if (spellOut.has(t)) continue;
     assert.ok(!p.includes(t), `使える種類 "${t}" が手順にも書かれている`);
   }
 });
@@ -114,6 +143,6 @@ test('補足(hint)は末尾に足される', async () => {
 test('手順は短いままにする', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   // 目安。超えたら、仕様か注意書きが混ざり始めている。
-  assert.ok(buildPlanPrompt().length < 1200,
+  assert.ok(buildPlanPrompt().length < 2200,
     '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });

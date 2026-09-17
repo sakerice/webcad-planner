@@ -105,7 +105,12 @@ notes は、図から読み取れなかった箇所、および他の記載か�
 
 ${itemTypeTable()}
 
-既定は、図から大きさが読み取れない場合に用いる値。
+既定は、アプリのカタログにある品物の寸法。
+
+| 種類 | w と d |
+|---|---|
+| 階段・設備（bath / toilet / sink / kitchen / stair / stair-corner / balcony） | 既定の値を用いる |
+| 建具（window / window-door / door-swing / door-slide-s / door-fold / door-opening / door-front） | 図から読み取った寸法を用いる |
 
 ## アプリが生成する要素
 
