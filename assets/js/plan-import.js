@@ -353,6 +353,23 @@
         textureFlipX: false, textureFlipY: false,
       });
     });
+    // 壁から決まる構造部材（基礎・屋根）をここで足す。
+    //
+    // AIには出させない。基礎は1階の壁の外形そのもの、屋根は最上階の外形＋軒で
+    // 一意に決まるので、読み取りの精度に左右されず必ず正しく置ける。
+    // これが無いと、出来上がるのは「家」ではなく「壁の集まり」になる。
+    var structure = (typeof PlanStructure !== 'undefined' && PlanStructure)
+      ? PlanStructure.structureFor(plan.walls) : [];
+    structure.forEach(function (st) {
+      var made = mkItem(st.type, st.x, st.y, st.rot || 0, st.floor, st.w, st.d);
+      // 種類ごとの欄（基礎の高さ・屋根の形）は mkItem の既定値より、
+      // 壁から決めたこちらの値を優先する。
+      Object.keys(st).forEach(function (k) {
+        if (['type', 'x', 'y', 'w', 'd', 'rot', 'floor'].indexOf(k) < 0) made[k] = st[k];
+      });
+      out.items.push(made);
+    });
+
     (plan.items || []).forEach(function (it) {
       // **アプリのアイテムは x,y が左上の角。** AIには「開口の中心」で
       // 答えさせているので、ここで角へ直す。直さないと開口が幅の半分ぶん
