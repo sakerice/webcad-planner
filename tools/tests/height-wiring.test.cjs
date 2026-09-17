@@ -12,7 +12,7 @@ const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
 const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
 
 test('height-model.js が読み込まれている', () => {
-  assert.match(html, /<script src="assets\/js\/height-model\.js"><\/script>/);
+  assert.match(html, /<script src="assets\/js\/height-model\.js(?:\?v=[a-f0-9]+)?"><\/script>/);
 });
 
 test('既定値の定数は現行値のまま残っている（他の参照が壊れないように）', () => {

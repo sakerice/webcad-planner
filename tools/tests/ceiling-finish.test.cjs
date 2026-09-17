@@ -97,6 +97,7 @@ function fakeTexture(key) {
 const MAT_FNS = [
   'textureImageAspect', 'setTextureRepeatNoDistort', 'applyTextureFlip',
   'appearanceWithTextureOrientation',
+  'withCeilingDepthBias',
   'makeCeilingMaterial', 'resolveRoomCeilingAppearance', 'makeRoomCeilingMaterial'
 ];
 
@@ -159,6 +160,10 @@ test('既定の天井材質そのものは、色も粗さも両面描画も今�
   assert.equal(m.metalness, 0);
   assert.equal(m.side, 2);
   assert.equal(m.map, undefined);
+  // 上階の床スラブ・屋根の下端とちょうど同じ高さに来るので、深度は天井側へ寄せる。
+  // 外すと、見上げたときに1画素ごとにどちらが手前か入れ替わってちらつく。
+  assert.equal(m.polygonOffset, true);
+  assert.ok(m.polygonOffsetFactor < 0 && m.polygonOffsetUnits < 0);
 });
 
 test('UIが名乗る既定色は、makeCeilingMaterial が実際に使う色と同じ', () => {
@@ -322,7 +327,7 @@ const WIRE_FNS = [
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
   'textureImageAspect', 'setTextureRepeatNoDistort', 'applyTextureFlip',
-  'appearanceWithTextureOrientation', 'makeCeilingMaterial',
+  'appearanceWithTextureOrientation', 'withCeilingDepthBias', 'makeCeilingMaterial',
   'resolveRoomCeilingAppearance', 'makeRoomCeilingMaterial', 'buildRooms3D'
 ];
 const WIRE_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
@@ -482,11 +487,11 @@ test('欄の書き込み先は天井のフィールド（床や汎用カラー�
     '色が効かなくなることを黙っている: ' + h);
 });
 
-test('天井面が外観3Dでしか見えないことを、その場で言う', () => {
+test('天井面が天井を確認できるビューを、その場で言う', () => {
   const ctx = uiCtx({ rooms: [] });
   const h = ctx.selectedRoomCeilingFinishHtml(select(ctx, room()));
-  assert.ok(h.indexOf('外観3D') !== -1, '外観3Dでしか見えないことを言っていない');
-  assert.ok(h.indexOf('内観3Dは天井を作りません') !== -1);
+  assert.ok(h.indexOf('外観3D') !== -1, '天井を確認できるビューを言っていない');
+  assert.ok(h.indexOf('内観3Dの天井ビュー') !== -1);
   assert.ok(h.indexOf('勾配天井にも同じ仕上げが乗ります') !== -1);
 });
 

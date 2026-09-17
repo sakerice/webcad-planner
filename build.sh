@@ -24,6 +24,8 @@ rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models
 cp index.html dist/
 cp -r assets/. dist/assets/
+# HTML and its scripts/styles must advance together, even with a warm browser cache.
+python3 tools/version_page_assets.py dist/index.html
 # Only the reviewed, registered original collection belongs in the delivery.
 # Keep bulk Blender candidates locally for further work, not in the public build.
 # node で書いてあるのは、Workers Builds のビルド環境に python3 がある保証が

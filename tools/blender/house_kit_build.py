@@ -526,23 +526,33 @@ def build_entry(M, wall=None, name='nh_seg_entry'):
     ex.append(box(M['SASH'], 0, RECESS + 0.03, dh - fr / 2, dw, 0.09, fr))
     # 親扉(W800)+ 子扉(W390)
     px_main = -dw / 2 + fr + 0.400
-    ex.append(box(M['DOOR'], px_main, RECESS + 0.055, dh / 2, 0.800, 0.045, dh - fr * 2))
+    main_door=box(M['DOOR'], px_main, RECESS + 0.055, dh / 2, 0.800, 0.045, dh - fr * 2)
+    for side in (-1,1):
+        cut=box(M['DOOR'],px_main+side*.20,RECESS+.055,dh*.60,.075,.16,1.30)
+        bpy.context.view_layer.objects.active=main_door
+        modifier=main_door.modifiers.new('Glazing aperture','BOOLEAN');modifier.operation='DIFFERENCE';modifier.object=cut
+        bpy.ops.object.modifier_apply(modifier=modifier.name);bpy.data.objects.remove(cut,do_unlink=True)
+    ex.append(main_door)
     px_sub = dw / 2 - fr - 0.195
     ex.append(box(M['DOOR'], px_sub, RECESS + 0.055, dh / 2, 0.390, 0.045, dh - fr * 2))
-    ex.append(box(M['DOORD'], 0, RECESS + 0.052, dh / 2, 0.014, 0.050, dh - fr * 2))
+    ex.append(box(M['DOORD'], 0, RECESS + 0.012, dh / 2, 0.014, 0.050, dh - fr * 2))
     # 採光スリット(縦2本)
     for s in (-1, 1):
-        ex.append(box(M['GLASS'], px_main + s * 0.20, RECESS + 0.078, dh * 0.60, 0.075, 0.016, 1.30))
-    ex.append(box(M['DOORD'], px_sub, RECESS + 0.080, dh * 0.60, 0.070, 0.012, 1.30))
+        ex.append(box(M['GLASS'], px_main + s * 0.20, RECESS + 0.022, dh * 0.60, 0.075, 0.016, 1.30))
+    ex.append(box(M['DOORD'], px_sub, RECESS + 0.020, dh * 0.60, 0.070, 0.012, 1.30))
     # ハンドル(プッシュプル)
-    ex.append(box(M['RAIL'], px_main + 0.325, RECESS + 0.095, dh * 0.50, 0.030, 0.040, 1.10))
+    ex.append(box(M['RAIL'], px_main + 0.325, RECESS - 0.020, dh * 0.50, 0.030, 0.040, 1.10))
+    # Pull handle stand-offs and cylinder are on the outdoor face of the door.
+    for z in (dh * .5 - .44, dh * .5 + .44):
+        ex.append(box(M['RAIL'], px_main + .325, RECESS + .005, z, .042, .055, .045))
+    ex.append(cyl(M['RAIL'], px_main + .325, RECESS + .022, dh*.5+.20, .018, .012, 'y', 16))
     # 上がり框の沓摺
     ex.append(box(M['RAIL'], 0, RECESS + 0.045, 0.012, dw - fr, 0.070, 0.024))
     # ポーチ庇(出600・水切り付)
     ex.append(box(M['FASCIA'], 0, -0.300, dh + 0.150, 1.820, 0.600, 0.070))
     ex.append(box(M['TRIM'], 0, -0.598, dh + 0.150, 1.820, 0.036, 0.100))
-    for s in (-1, 1):
-        ex.append(box(M['FASCIA'], s * 0.60, -0.135, dh + 0.30, 0.045, 0.230, 0.24))
+    # Wall flashing seals the canopy; concealed cantilever fixings, no fins above it.
+    ex.append(box(M['TRIM'], 0, -0.014, dh + 0.198, 1.820, 0.028, 0.060))
     # ポーチ灯・インターホン・表札
     ex.append(box(M['FASCIA'], dw / 2 + 0.190, -0.045, 2.000, 0.100, 0.090, 0.230))
     ex.append(box(M['DARK'], -w / 2 + 0.150, -0.020, 1.350, 0.090, 0.040, 0.130))
@@ -571,11 +581,13 @@ def build_garage(M, wall=None, name='nh_seg_garage'):
 
     ex = []
     # まぐさ(化粧梁)・ガイドレール
-    ex.append(box(M['SASH'], 0, 0.075, gh + 0.075, gw + 0.24, 0.150, 0.150))
+    ex.append(box(M['SASH'], 0, -0.020, gh + 0.075, gw + 0.24, 0.060, 0.150))
     for s in (-1, 1):
-        ex.append(box(M['SASH'], s * (gw / 2 + 0.055), 0.075, (gh + 0.15) / 2, 0.110, 0.150, gh + 0.15))
+        ex.append(box(M['SASH'], s * (gw / 2 + 0.055), -0.020, (gh + 0.15) / 2, 0.110, 0.060, gh + 0.15))
     # シャッター(巻き上げ途中: 上部400mmだけ降ろした状態)
-    ex.append(box(M['SHUT'], 0, 0.055, gh - 0.200, gw, 0.040, 0.400))
+    # Separate horizontal slats avoid stretched/rotated shutter texture bands.
+    for i in range(8):
+        ex.append(box(M['RAIL'], 0, 0.055, gh - (i+.5)*.05, gw, .040, .048))
     ex.append(box(M['SASH'], 0, 0.055, gh - 0.408, gw, 0.055, 0.030))
     # 土間コンクリート
     ex.append(box(M['GARAF'], 0, 0.900, 0.015, gw - 0.04, 2.100, 0.030))
@@ -586,7 +598,10 @@ def build_garage(M, wall=None, name='nh_seg_garage'):
     ex.append(box(M['GARA'], 0, 1.930, gh / 2, gw - 0.04, 0.060, gh))
     # 天井のライン照明・奥の物置棚
     ex.append(box(M['FASCIA'], 0, 0.900, gh - 0.055, 0.110, 1.200, 0.040))
-    ex.append(box(M['GARA'], gw / 2 - 0.35, 1.700, 0.900, 0.640, 0.360, 1.800))
+    # Open storage rack rather than a solid block inside the parking bay.
+    for x in (gw/2-.65, gw/2-.07):
+        for y in (1.55,1.85):ex.append(box(M['RAIL'], x, y, .88, .025,.025,1.76))
+    for z in (.12,.62,1.12,1.72):ex.append(box(M['RAIL'], gw/2-.36,1.70,z,.61,.34,.025))
     for e in ex:
         shade_flat(e)
     return join_as(name, [skin] + ex)
@@ -659,10 +674,16 @@ def build_balcony(M):
     k.append(box(M['RAIL'], 0, -bd + t / 2, 1.250, bw + 0.04, t + 0.04, 0.045))
     k.append(box(M['RAIL'], -bw / 2 + t / 2, -bd / 2 - 0.01, 1.250, t + 0.04, bd - 0.02, 0.045))
     k.append(box(M['RAIL'], bw / 2 - t / 2, -bd / 2 - 0.01, 1.250, t + 0.04, bd - 0.02, 0.045))
-    # 物干し金物
-    for s in (-1, 1):
-        k.append(box(M['RAIL'], s * 0.55, -bd + 0.22, 1.520, 0.032, 0.032, 0.500))
-        k.append(box(M['RAIL'], s * 0.55, -bd + 0.30, 1.760, 0.030, 0.200, 0.030))
+    # Two parapet-mounted posts, with backing plates and inward support arms.
+    for side in (-1, 1):
+        x = side * 0.55
+        k.append(box(M['RAIL'], x, -bd + t + 0.018, 0.970, 0.090, 0.036, 0.300))
+        k.append(box(M['RAIL'], x, -bd + t + 0.040, 1.335, 0.032, 0.032, 0.850))
+        k.append(box(M['RAIL'], x, -bd + t + 0.180, 1.745, 0.032, 0.310, 0.030))
+        for z in (0.865, 1.065):
+            k.append(cyl(M['RAIL'], x, -bd + t + 0.040, z, 0.010, 0.012, 'y', 12))
+    # Clothes pole rests on both arms; caps terminate the tube.
+    k.append(cyl(M['RAIL'], 0, -bd + t + 0.285, 1.776, 0.016, 1.300, 'x', 20))
     # ドレン
     k.append(cyl(M['RAIL'], bw / 2 - 0.16, -bd + 0.10, 0.02, 0.026, 0.10, 'z', 8))
     ex += k

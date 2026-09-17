@@ -62,17 +62,25 @@ var CEILING_FINISH_M=0.012;
 // 部屋の天井仕上げ面の高さ(mm)。**その部屋の仕上げ床から**測る(= elev と同じ基準)。
 // スキップフロアの段差も床上げも引く。elev は仕上げ床からなので、段差ぶん床が
 // 上がっていれば、天井までの寸法はその分だけ縮む。
+// 天井高から引く仕上げ厚。**高さモデルv2では引かない。** 壁の高さが仕上げ床から
+// 仕上げ天井までなので、ここでもう一度引くと器具が天井裏へ12mm埋まる。
+// 印(heightDefaults.modelVersion)の無いプランは従来どおり引く。
+function ceilingFinishThicknessM(){
+  return (typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?0:CEILING_FINISH_M;
+}
 function roomCeilingElevationMm(room){
   if(!room||!isFinite(room.x)) return null;
   var fl=room.floor||1;
-  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U)
+  return Math.round((roomCeilingHeightM(room)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U)
     -(roomFloorOffsetMm(room)+roomSkipLevelMm(room));
 }
 function ceilingFinishElevationMm(floor,cx,cy){
   var fl=floor||1;
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
-  if(r) return roomCeilingElevationMm(r);
-  return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-CEILING_FINISH_M)/U);
+  // 天井範囲(下げ天井・折り上げ天井)の段差は、**その場所に付く器具だけ**が追う。
+  // 部屋そのものの天井高(roomCeilingElevationMm)には入れない。
+  if(r) return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+  return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U);
 }
 // 天井付けの器具(照明・物干し)を、天井の動きに追従させる。
 //
@@ -476,7 +484,7 @@ function selectedRoomCeilingHtml(it){
       html+='<div class="lock-status-note">高い側 '+shape.highMm+'mm は階高 '+storyMm+'mm を超えていますが、この部屋の上には部屋がないので丸めずにそのまま描いています（小屋裏へ抜ける形です）。</div>';
     }
   }
-  html+='<div class="lock-status-note">勾配天井の天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
+  html+='<div class="lock-status-note">勾配天井の天井面は内観3Dの天井ビュー・外観3D・ウォークスルーで確認できます。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
 }
 // 天井の仕上げ（色・テクスチャ）の欄 (Task 22)。
@@ -506,7 +514,7 @@ function selectedRoomCeilingFinishHtml(it){
     html+='<div class="lock-status-note">テクスチャを設定しているあいだ、天井カラーは効きません（画像が優先されます）。</div>';
   }
   // 「設定したのに何も起きない」に見える2つの場合を、その場で言う。
-  html+='<div class="lock-status-note">天井面が見えるのは外観3Dだけです（内観3Dは天井を作りません）。平らな天井にも勾配天井にも同じ仕上げが乗ります。</div>';
+  html+='<div class="lock-status-note">天井面は内観3Dの天井ビュー・外観3D・ウォークスルーで確認できます。平らな天井にも勾配天井にも同じ仕上げが乗ります。</div>';
   if(typeof roomHasCoverAbove==='function'&&!roomHasCoverAbove(it)){
     html+='<div class="lock-status-note">この部屋の上には部屋も屋根もありません。天井面そのものが作られないので、仕上げを設定しても外観3Dには出ません（上に屋根を載せると出ます）。</div>';
   }
@@ -945,6 +953,7 @@ function updateProps(){
   }
   document.getElementById('props').classList.add('show');
   var it = ST.selected;
+  if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.zone(it)){CeilingDesigner.props(it);return;}
   if(it.sScale === undefined) { it.sScale = 1; it.sX = 0; it.sY = 0; }
   var html = '';
   var fmpInfo=getFmpItem(it.type);

@@ -1,0 +1,12 @@
+#surface-sel{height:32px;padding:0 28px 0 12px;border:1px solid var(--border,#ddd);border-radius:999px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:12px;cursor:pointer}
+
+/* This control belongs to the drawing viewport, not global navigation. */
+#surface-control{position:fixed;z-index:334;top:calc(82px + var(--safe-top,0px));right:calc(14px + var(--safe-r,0px));display:flex;align-items:center;gap:10px;padding:6px 8px 6px 16px;border:1px solid #e6e8eb;border-radius:999px;background:#fff;box-shadow:var(--hp-shadow-soft);color:var(--hp-text);white-space:nowrap}
+#surface-control[hidden]{display:none!important}
+#surface-context{font-size:11px;font-weight:600;color:#697480}
+#surface-control #surface-sel{min-height:36px;background:#f4f6f8;border-color:transparent}
+@media(max-width:768px){#surface-control{top:calc(124px + var(--safe-top,0px));right:calc(12px + var(--safe-r,0px));gap:8px;padding-left:12px}#surface-control #surface-sel{min-height:40px}}
+
+/* Stack with the existing right-hand properties card; retain mobile sheet behavior. */
+@media(min-width:769px){body:has(#surface-control:not([hidden])) #props{top:calc(140px + var(--safe-top,0px))!important}}
+@media(max-width:768px){body:has(#surface-control:not([hidden])) #help-box{top:calc(184px + var(--safe-top,0px))!important}}

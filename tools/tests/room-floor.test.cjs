@@ -37,7 +37,9 @@ test('editing the floor preserves ceiling and pendant world heights without movi
    CEILING_FINISH_M:0.012,roomCeilingHeightM:()=>2.7,U:0.001});
  c.DATA.items=[{type:'light-down',floor:1,x:100,y:100,w:100,d:100,elev:2400},{type:'original-laundry-rail',floor:1,x:100,y:100,w:100,d:100,elev:2100},{type:'original-bed',floor:1,x:100,y:100,w:100,d:100,elev:0}];
  vm.runInContext([
-   html.slice(html.indexOf('function roomCeilingElevationMm('),html.indexOf('function ceilingFinishElevationMm(')),
+   // 仕上げ厚は ceilingFinishThicknessM が決める(高さモデルv2では0)。
+   // roomCeilingElevationMm が呼ぶので、その手前から切り出す。
+   html.slice(html.indexOf('function ceilingFinishThicknessM('),html.indexOf('function ceilingFinishElevationMm(')),
    html.slice(html.indexOf('function shiftRoomCeilingFixtures('),html.indexOf('// 天井が動きうる書き換えを包む')),
    html.slice(html.indexOf('function followRoomCeiling('),html.indexOf('function contextStoryHeightMm(')),
    html.slice(html.indexOf('function updateSelectedRoomFloor('),html.indexOf('function selectedRoomFloorHtml('))

@@ -44,6 +44,7 @@ function topLevelVar(name) {
 
 const FNS = [
   'foundationHeightMm', 'foundationHeightM',
+  'usesFinishedHeightModel', 'defaultFloorThicknessMm',
   'perFloorHeightsEnabled', 'planFloorHeightEntry',
   'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
   'storyHeightMmForFloor', 'storyHeightM',
@@ -172,4 +173,71 @@ test('既定値はプランに保存される（保存して開き直すと壁�
   // 読み込み経路で必ず呼ばれる
   const load = html.slice(html.indexOf('async function loadPlanFromStorage('));
   assert.match(load.slice(0, 2000), /ensureHeightDefaults\(\);/);
+});
+
+// New height semantics are opt-in by data version; legacy cases above remain intact.
+test('v2: all storeys including 1F are wall height + slab; room offsets consume interior space', () => {
+ const g=ctxFor(house({heightDefaults:{modelVersion:2,floorThickness:180}}));
+ for(const f of [1,2,3]){assert.equal(g.storyHeightMmForFloor(f),2580);assert.equal(g.floorSlabMmForFloor(f),180);}
+ const base=g.foundationHeightM();
+ assert.ok(Math.abs(g.floorBaseY(4)-(base+3*2.58))<1e-9);
+ const r={floor:2,x:0,y:0,w:2000,d:2000,floorRaiseMm:150};
+ const ceiling=g.floorBaseY(2)+g.storyHeightM(2);
+ assert.ok(Math.abs((ceiling-g.roomFloorTopY(r))/.001-2250)<1e-6);
+ r.floorRaiseMm=-100;assert.ok(Math.abs((ceiling-g.roomFloorTopY(r))/.001-2500)<1e-6);
+ r.floorRaiseMm=-999;assert.equal(g.roomFloorOffsetMm(r),-160);
+});
+test('v2: floor-specific wall/slab settings accumulate independently', () => {
+ const g=ctxFor(house({heightDefaults:{modelVersion:2,perFloor:true,floorThickness:180},floors:{1:{wallHeight:2500,floorThickness:220},2:{wallHeight:2400,floorThickness:300}}}));
+ assert.equal(g.storyHeightMmForFloor(1),2720);assert.equal(g.storyHeightMmForFloor(2),2700);
+ assert.ok(Math.abs(g.floorBaseY(3)-g.foundationHeightM()-5.42)<1e-9);
+ const roundTrip=JSON.parse(JSON.stringify(g.DATA));const restored=ctxFor(roundTrip);
+ assert.equal(restored.floorBaseY(3),g.floorBaseY(3));
+});
+
+// ── 別のプランを読み込んだとき、前のプランの壁の高さが残らないこと ──────────
+//
+// WALL_H は「いま編集しているプランの壁の高さ」を持つ変数。ensureHeightDefaults は
+// プランが値を持っていればそれを写し、**持っていなければ逆にグローバルの値を
+// プランへ書く**。そのため、壁の高さを持つ既定間取りを見たあとに、持っていない
+// プランを読み込むと、読み込んだ家が288mm高く建つ。
+function loadCtx(data) {
+  const ctx = vm.createContext({ console, HeightModel, DATA: data, Number, Math, isFinite });
+  vm.runInContext([
+    topLevelVar('WALL_H'), topLevelVar('DEFAULT_WALL_H_MM'),
+    topLevelVar('WALL_H_MIN'),      // WALL_H_MAX も同じ1行にある
+    topLevelVar('DEFAULT_FLOOR_RAISE_MM'),
+    topLevelFunction('clampWallHeightMm'),
+    topLevelFunction('ensureHeightDefaults'),
+    topLevelFunction('resetHeightGlobalsForPlanLoad')
+  ].join('\n'), ctx);
+  return ctx;
+}
+
+test('壁の高さの既定は1か所の数字（WALL_H の初期値と戻す先が同じ）', () => {
+  assert.match(html, /var WALL_H = 2400;/);
+  assert.match(html, /var DEFAULT_WALL_H_MM = 2400;/);
+});
+
+test('壁の高さを持たないプランを読み込むと、既定に戻る（前のプランを引き継がない）', () => {
+  const ctx = loadCtx({ heightDefaults: { wallHeight: 2688 }, floors: {} });
+  ctx.ensureHeightDefaults();
+  assert.equal(ctx.WALL_H, 2688, '保存された壁の高さが読めていない');
+
+  ctx.DATA = { heightDefaults: {}, floors: {} };   // 高さを持たないプランを読み込む
+  ctx.resetHeightGlobalsForPlanLoad();
+  ctx.ensureHeightDefaults();
+  assert.equal(ctx.WALL_H, 2400, '前のプランの壁の高さが残っている');
+  assert.equal(ctx.DATA.heightDefaults.wallHeight, 2400, '前のプランの値が書き込まれている');
+});
+
+test('プランを差し替える経路は、必ず高さの既定を戻してからそろえる', () => {
+  // 読み込みの手順は3か所(ファイル取り込み・白紙・共同編集の同期)にある。
+  // 1か所でも抜けると「エラーは出ないのに家の高さだけ違う」壊れ方をする。
+  const doImport = html.slice(html.indexOf('function doImport('), html.indexOf('function doImport(') + 1600);
+  assert.match(doImport, /resetHeightGlobalsForPlanLoad\(\)/);
+  assert.match(doImport, /ensureHeightDefaults\(\)/);
+  const blank = html.slice(html.indexOf('function chooseBlankPlan('), html.indexOf('function chooseBlankPlan(') + 1200);
+  assert.match(blank, /resetHeightGlobalsForPlanLoad\(\)/);
+  assert.match(blank, /ensureHeightDefaults\(\)/);
 });

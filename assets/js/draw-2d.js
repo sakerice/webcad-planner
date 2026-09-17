@@ -289,7 +289,7 @@ function draw2d(){
   if(ST.showGrid && planCaptureShows('grid')) drawGrid();
   var sc=ST.zoom*0.05;
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
-  var fi=DATA.items.filter(function(i){return i.floor===ST.floor;});
+  var fi=DATA.items.filter(function(i){return i.floor===ST.floor&&(typeof CeilingDesigner==='undefined'||CeilingDesigner.visible(i));});
 
   // 0. Floor below ghost – 1つ下のフロアをうっすら表示（2F編集時に1Fが見える）
   var ghostFloor = ST.floor - 1;
@@ -305,7 +305,7 @@ function draw2d(){
   }
 
   // 1. Sites (1F-only Base Layer)
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
     drawItem2d(i);
     if(ST.selected===i && ST.tool==='select'){
       var ccx=ST.panX+(i.x+i.w/2)*sc, ccy=ST.panY+(i.y+i.d/2)*sc;
@@ -313,7 +313,7 @@ function draw2d(){
     }
   });
   // 2. Foundation (above site, below building plan)
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='foundation';}).forEach(drawItem2d);
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='foundation';}).forEach(drawItem2d);
   // 3. Rooms
   DATA.rooms.filter(function(r){return r.floor===ST.floor;}).forEach(function(r){
     var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
@@ -331,10 +331,11 @@ function draw2d(){
   // 4. Walls
   fw.forEach(drawWall2d);
   if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
+  fi.sort(function(a,b){return (a.type==='ceiling-area'?0:1)-(b.type==='ceiling-area'?0:1);});
   // 5. Other Items
   fi.filter(function(i){return i.type!=='site-rect' && i.type!=='foundation';}).forEach(drawItem2d);
   // Finish labels stay legible above decks and paving, without extra parcel lines.
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect'&&i.siteBoundary;}).forEach(function(it){
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='site-rect'&&i.siteBoundary;}).forEach(function(it){
     ctx.save();ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     siteFinishZones(it).forEach(function(z){
       var x=ST.panX+(it.x+z.x+z.w/2)*sc,y=ST.panY+(it.y+z.y+z.d/2)*sc;
@@ -346,7 +347,7 @@ function draw2d(){
   });
 
   // Ghost Previews
-  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && ((ST.tool==='room-rect'||(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool))) || (ST.tool==='site-rect'&&ST.floor===1))) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var x1=Math.min(p1.x,p2.x), y1=Math.min(p1.y,p2.y), rw=Math.abs(p1.x-p2.x), rd=Math.abs(p1.y-p2.y);
     ctx.strokeStyle='rgba(48,128,232,0.5)'; ctx.setLineDash([5,5]);
@@ -379,7 +380,7 @@ function draw2d(){
     drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
   }
   // ── Room-rect preview dimensions ──
-  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect'||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && ((ST.tool==='room-rect'||(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool)))||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var rw=Math.abs(snapV(p2.x)-p1.x), rd=Math.abs(snapV(p2.y)-p1.y);
     if(rw>50&&rd>50) drawRectDim(Math.min(p1.x,snapV(p2.x)), Math.min(p1.y,snapV(p2.y)), rw, rd);
@@ -1271,6 +1272,7 @@ function drawStairUpText(it,sc,x,y,align){
 }
 
 function drawItem2d(it){
+  if(it.type==='ceiling-area'){if(typeof CeilingDesigner!=='undefined')CeilingDesigner.drawArea(it);return;}
   // メモ・定規・ウォークルートは注記。判定は isPlanAnnotationType に一本化する
   if(isPlanAnnotationType(it.type) && !planCaptureShows('annotations')) return;
   var sc=ST.zoom*0.05;
@@ -2003,7 +2005,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
   edges.forEach(function(p){
     ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.fill(); ctx.stroke();
   });
-  if(o.type !== 'room'){
+  if(o.type !== 'room' && o.type !== 'ceiling-area'){
     ctx.beginPath(); ctx.moveTo(0,-hd); ctx.lineTo(0,-hd-30); ctx.stroke();
     ctx.fillStyle='#3080e8'; ctx.beginPath(); ctx.arc(0,-hd-30,7,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
@@ -2341,7 +2343,7 @@ function hitHandle(it,mx,my){
     {lx:hw,ly:0,t:'e'},{lx:hw,ly:hd,t:'se'},{lx:0,ly:hd,t:'s'},
     {lx:-hw,ly:hd,t:'sw'},{lx:-hw,ly:0,t:'w'}
   ];
-  if(it.type !== 'room') handles.push({lx:0,ly:-hd-30,t:'rot'});
+  if(it.type !== 'room' && it.type !== 'ceiling-area') handles.push({lx:0,ly:-hd-30,t:'rot'});
   for(var i=0;i<handles.length;i++){
     if(Math.abs(lx-handles[i].lx)<10&&Math.abs(ly-handles[i].ly)<10) return handles[i].t;
   }
