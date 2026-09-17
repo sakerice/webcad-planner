@@ -177,9 +177,10 @@ test('部屋はAIに出させず、壁と文字から計算する', async () => 
     { x: 0, y: 0, w: 3640, d: 4095 }, '文字の位置にある領域に名前が付いていない');
   assert.ok(body.plan.rooms.every((r) => r.id), 'id が振られている');
   assert.deepEqual(body.notes, ['右下の収納は寸法が読めなかった'], 'AIが読めなかったことは利用者に見せる');
+  // 原価を測れるように使用量を返す。思考ぶんは課金対象なので出力に含め、内訳も残す。
+  // ページごとに1回ずつ送るので、何回ぶんの合計かも残す。
   assert.deepEqual(body.usage,
-    { inputTokens: 2000, answerTokens: 1500, thoughtTokens: 500, outputTokens: 2000, totalTokens: 4000 },
-    '原価を測れるように使用量を返す。思考ぶんは課金対象なので出力に含め、内訳も残す');
+    { calls: 1, inputTokens: 2000, answerTokens: 1500, thoughtTokens: 500, outputTokens: 2000, totalTokens: 4000 });
 });
 
 test('前置きや ``` で囲まれた返事からも JSON を取り出す', async () => {
@@ -292,4 +293,66 @@ test('ルームIDの形が違えば Durable Object を作らない', async () =>
   const res = await router.fetch(new Request('https://example.test/api/rooms/short'), env);
   assert.equal(res.status, 404);
   assert.equal(touched, false);
+});
+
+// ── ページごとに送る ────────────────────────────────────────────────
+//
+// **1回のリクエストに画像は1枚だけ。** 複数枚を1回に入れると、各画像が
+// 768画素角のタイル1枚に縮められる。実測(3072画素の同じ図面):
+//
+//   1枚 3,368 トークン / 2枚 530 トークン / 3枚 788 トークン
+//
+// 枚数を増やすほど1枚あたりの解像度が落ち、寸法の文字が読めなくなる。
+test('ページごとに1回ずつ送る（1回に画像を詰め込まない）', async () => {
+  const sent = [];
+  const twoFloors = (floor) => ({
+    floors: [{ floor, width: 3640, depth: 4095,
+      rooms: [{ name: floor === 1 ? '洋室' : '寝室', parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }],
+  });
+  let n = 0;
+  await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, VERTEX_ENV,
+    vertexFetch(async (req) => {
+      const body = JSON.parse(await req.text());
+      sent.push(body);
+      return vertexReply(twoFloors(++n));
+    }));
+  assert.equal(sent.length, 3, 'ページの数だけ送っていない');
+  for (const body of sent) {
+    const imgs = body.contents[0].parts.filter((p) => p.inline_data);
+    assert.equal(imgs.length, 1, '1回のリクエストに画像を複数入れている');
+  }
+});
+
+test('ページごとの補足に、何ページ目かを入れる', async () => {
+  const seen = [];
+  await callAi('/api/ai/import-plan', { images: [PNG, PNG], hint: '東西に長い家です' }, VERTEX_ENV,
+    vertexFetch(async (req) => {
+      const body = JSON.parse(await req.text());
+      seen.push(body.contents[0].parts.filter((p) => p.text).pop().text);
+      return vertexReply({ floors: [{ floor: seen.length, width: 3640, depth: 4095, rooms: [] }] });
+    }));
+  assert.match(seen[0], /1ページ目/);
+  assert.match(seen[1], /2ページ目/);
+  assert.match(seen[0], /東西に長い家です/, '利用者の補足が消えている');
+});
+
+test('同じ階が2回来たら、ページの並び順を正とする', async () => {
+  // 見出しの無い図面では階を取り違える。全ページが1階と答えると家にならない。
+  let n = 0;
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, VERTEX_ENV,
+    vertexFetch(async () => {
+      n++;
+      return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095,
+        rooms: [{ name: '洋室' + n, parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] });
+    }));
+  const body = await res.json();
+  assert.deepEqual(body.summary.floors, [1, 2, 3], '全ページが同じ階になっている');
+});
+
+test('使用量は全ページの合計になる', async () => {
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, VERTEX_ENV,
+    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })));
+  const body = await res.json();
+  assert.equal(body.usage.calls, 2, '何回送ったかが残っていない');
+  assert.equal(body.usage.inputTokens, 4000, 'ページぶんの合計になっていない');
 });

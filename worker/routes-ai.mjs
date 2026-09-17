@@ -97,24 +97,77 @@ async function aiImportPlan(payload, env, deps) {
     }, 500);
   }
 
-  const result = await generate({
+  // **1回のリクエストに画像は1枚だけ。** 複数枚を1回に入れると、各画像が
+  // 768画素角のタイル1枚に縮められる。実測(3072画素の同じ図面):
+  //
+  //   1枚  3,368 トークン
+  //   2枚    530 トークン（258×2）
+  //   3枚    788 トークン（258×3）
+  //
+  // つまり枚数を増やすほど1枚あたりの解像度が落ちる。寸法の文字が読めなく
+  // なるので、ページごとに分けて送る。回数は増えるが、読めない読み取りに
+  // 払うほうが無駄である。
+  const calls = images.map((img, i) => generate({
     config,
     system: SYSTEM_PROMPT,
     docs: [planKnowledge(), planSpec()],
-    text: buildPlanPrompt({ hint }),
-    images: images.map((i) => ({ mimeType: i.mimeType, base64: i.base64 })),
+    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+    image: { mimeType: img.mimeType, base64: img.base64 },
     responseSchema: PLAN_RESPONSE_SCHEMA,
     fetchImpl: deps.fetchImpl,
-  });
-  if (!result.ok) {
-    return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
+  }));
+  const results = await Promise.all(calls);
+
+  const failed = results.find((r) => !r.ok);
+  if (failed) {
+    return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
   }
 
-  const parsed = extractJson(result.text);
-  if (!parsed) {
-    return json({ error: "ai_bad_response", message: "AI の返事から JSON を取り出せませんでした。" }, 502);
+  const pages = [];
+  for (const r of results) {
+    const parsed = extractJson(r.text);
+    if (!parsed) {
+      return json({ error: "ai_bad_response", message: "AI の返事から JSON を取り出せませんでした。" }, 502);
+    }
+    pages.push(parsed);
   }
-  return finishImportedPlan(parsed, result.usage);
+  return finishImportedPlan(pages.length === 1 ? pages[0] : { floors: mergeFloors(pages) }, sumUsage(results));
+}
+
+// ページごとの補足。何ページ目かを伝えると、階の取り違えが減る。
+function pageHint(hint, index, total) {
+  if (total <= 1) return hint;
+  const page = `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
+  return hint ? `${page}\n${hint}` : page;
+}
+
+// ページごとの読み取りを、1つの家にまとめる。
+//
+// 見出し(「2階平面図」など)から階を判断させているが、書かれていない図面も
+// ある。同じ階が2つ来たら、ページの並び順を正とする。
+function mergeFloors(pages) {
+  const out = [];
+  const used = new Set();
+  pages.forEach((page, i) => {
+    const floors = Array.isArray(page && page.floors) ? page.floors : [];
+    for (const f of floors) {
+      if (!f || typeof f !== "object") continue;
+      let floor = Number(f.floor);
+      if (!Number.isFinite(floor) || floor < 1 || used.has(floor)) floor = i + 1;
+      used.add(floor);
+      out.push({ ...f, floor });
+    }
+  });
+  return out;
+}
+
+function sumUsage(results) {
+  const keys = ["inputTokens", "answerTokens", "thoughtTokens", "outputTokens", "totalTokens"];
+  const out = { calls: results.length };
+  for (const k of keys) {
+    out[k] = results.reduce((n, r) => n + Number((r.usage && r.usage[k]) || 0), 0);
+  }
+  return out;
 }
 
 // モデルの出力から、渡してよい間取りを作る。
