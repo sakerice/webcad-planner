@@ -89,37 +89,28 @@ function readImage(value, field) {
 //
 // 切り出しは画面側で行う。ここは位置を答えるだけ。画素を持っているのは
 // ブラウザのほうで、PDFならその範囲を高い解像度で描き直せるため。
-async function aiFindPlan(payload, env, deps, request) {
-  const image = readImage(payload && payload.image, "image");
-  if (image.error) return json({ error: "invalid_request", message: image.error }, 400);
-
-  const config = vertexConfig(env);
-  if (!config.configured) return json({ error: "ai_not_configured", message: "鍵が設定されていません。" }, 503);
-  if (!isJapanLocation(config.location)) {
-    return json({ error: "ai_region_not_japan", message: `いまの設定: ${config.location}` }, 500);
+// 位置を探すほうは、安いモデルでよい。大きな領域を1つ答えるだけ。
+//
+// **gemini-2.5-flash を使う。** 実測（同じページ、正解は縦 0.240〜0.600）:
+//
+//   gemini-2.5-flash  0.240〜0.600  ほぼ一致       ¥0.2
+//   gpt-5.4-mini      0.184〜0.308  上端だけを切る  ¥0.1
+//
+// 安いモデルならどれでもよいわけではない。gpt-5.4-mini は寸法線の帯だけを
+// 返し、そこを切り出して送った結果、読み取りが「図面が無い」と答えた。
+// Vertex が混んでいたのを見て測らずに切り替えたのが誤りだった。
+//
+// Vertex が使えない環境では OpenAI に回す。そのときは読み取りと同じモデルを
+// 使う（安いモデルで外すくらいなら、切り出しを捨てるか、良いモデルで当てる）。
+function locateProvider(env) {
+  const want = (env && env.AI_LOCATE_PROVIDER) || "";
+  const vertex = vertexConfig(env);
+  if (want !== "openai" && vertex.configured) return { kind: "vertex" };
+  const openai = openaiConfig(env);
+  if (openai.configured) {
+    return { kind: "openai", config: { ...openai, model: (env && env.AI_LOCATE_MODEL) || "gpt-6-astra" } };
   }
-
-  const quota = await takeQuota(request, env, COST_LOCATE);
-  if (!quota.ok) {
-    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
-  }
-
-  const result = await generate({
-    config: { ...config, model: (env && env.AI_LOCATE_MODEL) || "gemini-2.5-flash" },
-    system: LOCATE_SYSTEM,
-    text: LOCATE_PROMPT,
-    image: { mimeType: image.mimeType, base64: image.base64 },
-    responseSchema: LOCATE_SCHEMA,
-    // 位置が分かればよく、寸法の文字は読まない。考える必要も無い。
-    maxOutputTokens: 512,
-    thinkingBudget: 0,
-    fetchImpl: deps.fetchImpl,
-  });
-  if (!result.ok) return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
-
-  const parsed = extractJson(result.text);
-  const box = normalizeBox(parsed);
-  return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
+  return { kind: "vertex" };
 }
 
 // 図面の読み取りを、どこへ投げるか。
@@ -134,9 +125,6 @@ async function aiFindPlan(payload, env, deps, request) {
 // Astra だけが、L字の部屋を長方形2つで表し、廻り階段を直進部分に接して置いた。
 // どちらも他の2つでは指示を変えても出なかったもので、**モデルの世代の差**。
 // 思考トークンは gpt-5 の1/10（1,552 対 15,360）で、迷わずに答えている。
-//
-// 位置を探すほう(find-plan)は安い Gemini のまま。大きな領域を1つ答えるだけで、
-// そこに ¥40 を払う理由が無い。
 function importProvider(env) {
   const want = (env && env.AI_IMPORT_PROVIDER) || "";
   const openai = openaiConfig(env);
@@ -145,6 +133,44 @@ function importProvider(env) {
     return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
   }
   return { kind: "vertex" };
+}
+
+async function aiFindPlan(payload, env, deps, request) {
+  const image = readImage(payload && payload.image, "image");
+  if (image.error) return json({ error: "invalid_request", message: image.error }, 400);
+
+  const provider = locateProvider(env);
+  if (provider.kind === "vertex") {
+    const config = vertexConfig(env);
+    if (!config.configured) return json({ error: "ai_not_configured", message: "鍵が設定されていません。" }, 503);
+    if (!isJapanLocation(config.location)) {
+      return json({ error: "ai_region_not_japan", message: `いまの設定: ${config.location}` }, 500);
+    }
+    provider.config = { ...config, model: (env && env.AI_LOCATE_MODEL) || "gemini-2.5-flash" };
+  }
+
+  const quota = await takeQuota(request, env, COST_LOCATE);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
+  }
+
+  const common = {
+    system: LOCATE_SYSTEM,
+    text: LOCATE_PROMPT,
+    image: { mimeType: image.mimeType, base64: image.base64 },
+    // 位置が分かればよく、寸法の文字は読まない。考える必要も無い。
+    maxOutputTokens: 512,
+    fetchImpl: deps.fetchImpl,
+  };
+  const result = provider.kind === "openai"
+    ? await openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(LOCATE_SCHEMA) } })
+    : await generate({ ...common, config: provider.config, responseSchema: LOCATE_SCHEMA, thinkingBudget: 0 });
+
+  if (!result.ok) return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
+
+  const parsed = extractJson(result.text);
+  const box = normalizeBox(parsed);
+  return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────

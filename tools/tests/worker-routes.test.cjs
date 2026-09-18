@@ -477,7 +477,12 @@ test('OPENAI_MODEL と AI_IMPORT_PROVIDER で切り替えられる', async () =>
   assert.match(url, /aiplatform\.googleapis\.com/, 'vertex に倒せていない');
 });
 
-test('図面の位置を探すほうは安いモデルのまま（¥40を払う理由が無い）', async () => {
+test('図面の位置は gemini-2.5-flash に聞く（安くて当たるから）', async () => {
+  // 実測（同じページ、正解は縦 0.240〜0.600）:
+  //   gemini-2.5-flash  0.240〜0.600  ほぼ一致       ¥0.2
+  //   gpt-5.4-mini      0.184〜0.308  上端だけを切る  ¥0.1
+  // 安ければどれでもよいわけではない。外した範囲で切り出すと、読み取りが
+  // 「図面が無い」と答えて何も返らなくなる。
   let url = null;
   await callAi('/api/ai/find-plan', { image: PNG },
     { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test' },
@@ -485,6 +490,6 @@ test('図面の位置を探すほうは安いモデルのまま（¥40を払う�
       url = req.url;
       return vertexReply({ found: true, x0: 100, y0: 100, x1: 900, y1: 900 });
     }));
-  assert.match(url, /aiplatform\.googleapis\.com/, '位置探しまで OpenAI へ行っている');
+  assert.match(url, /aiplatform\.googleapis\.com/, 'OpenAI の鍵があると位置探しまで持っていかれている');
   assert.match(url, /gemini-2\.5-flash/, '安いモデルを使っていない');
 });

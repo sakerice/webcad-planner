@@ -82,14 +82,21 @@
   //
   // 切り出せなかったページは、ページ全体のまま送る。切り出しは上乗せであって、
   // 失敗したら読めなくなる、という作りにはしない。
+  // 位置探しに待てる時間。**上限が要る。** 実測で、AI 側が混んでいるときに
+  // 1回200秒かかったことがある。切り出しは上乗せであって、これを待つために
+  // 読み取りが始まらないのでは本末転倒。時間切れならページ全体のまま送る。
+  var LOCATE_TIMEOUT_MS = 25000;
+
   function locate(smallDataUrl) {
-    return fetch('/api/ai/find-plan', {
+    var asked = fetch('/api/ai/find-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ image: smallDataUrl }),
     }).then(function (res) { return res.json(); })
       .then(function (body) { return (body && body.box) || null; })
       .catch(function () { return null; });
+    var giveUp = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, LOCATE_TIMEOUT_MS); });
+    return Promise.race([asked, giveUp]);
   }
 
   // ── 1. 画像を選ぶ ──────────────────────────────────────────────────
@@ -128,18 +135,24 @@
         }).then(function (pages) {
           if (!pages || !pages.length) return [];
           // ページごとに、図面の部分だけを高い解像度で描き直す。
+          //
+          // 位置はまとめて聞く。順番に聞くと、1ページぶんの待ちがページ数だけ
+          // 積み上がる。描き直しはこちらの処理なので、聞き終えてから順に行う。
+          setStatus('図面の位置を探しています…');
           var out = pages.slice();
-          var next = function (i) {
-            if (i >= pages.length) return out;
-            setStatus('図面の位置を探しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
-            return locate((smalls && smalls[i]) || pages[i]).then(function (box) {
-              if (!box) return next(i + 1);
-              return PdfPages.renderRegion(pdfData, i + 1, box, { maxPx: MAX_SEND_PX })
+          return Promise.all(pages.map(function (page, i) {
+            return locate((smalls && smalls[i]) || page);
+          })).then(function (boxes) {
+            var next = function (i) {
+              if (i >= pages.length) return out;
+              if (!boxes[i]) return next(i + 1);
+              setStatus('図面を切り出しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
+              return PdfPages.renderRegion(pdfData, i + 1, boxes[i], { maxPx: MAX_SEND_PX })
                 .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
                 .catch(function () { return next(i + 1); });
-            });
-          };
-          return Promise.resolve(next(0));
+            };
+            return Promise.resolve(next(0));
+          });
         }).then(function (pages) {
           if (!pages || !pages.length) return;
           ST.pages = pages;
