@@ -88,8 +88,90 @@
     });
   }
 
+  // ページの一部分だけを、長辺 maxPx で描き直す。
+  //
+  // **縮小した絵を拡大するのではなく、PDFから描き直す。** ベクターなので、
+  // 切り出した範囲を大きく描けば、その範囲の線と文字がそのぶん鮮明になる。
+  // 紙面の6%しかない平面図を、上限いっぱいの解像度で送れるようになる。
+  //
+  //   box … {x0,y0,x1,y1} 0〜1 の割合。ページの左上が (0,0)
+  function renderRegion(dataUrl, pageNo, box, options) {
+    options = options || {};
+    var maxPx = options.maxPx || MAX_PAGE_PX;
+    return loadPdfjs().then(function (pdfjs) {
+      var bin = atob(String(dataUrl).replace(/^data:[^,]*,/, ''));
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return pdfjs.getDocument({ data: bytes }).promise;
+    }).then(function (doc) {
+      return doc.getPage(pageNo);
+    }).then(function (page) {
+      var base = page.getViewport({ scale: 1 });
+      var w = base.width * (box.x1 - box.x0);
+      var h = base.height * (box.y1 - box.y0);
+      if (!(w > 0) || !(h > 0)) return null;
+      var scale = maxPx / Math.max(w, h);
+      var view = page.getViewport({ scale: scale });
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // 切り出したい範囲が原点に来るようにずらしてから描く。
+      ctx.translate(-base.width * box.x0 * scale, -base.height * box.y0 * scale);
+      return page.render({ canvasContext: ctx, viewport: view }).promise.then(function () {
+        return canvas.toDataURL('image/png');
+      });
+    });
+  }
+
+  // 画像（PDFでないもの）の一部分を切り出す。こちらは元の画素しか無いので、
+  // 拡大はしない。切り出して、上限を超えていれば縮めるだけ。
+  function cropImage(img, box, options) {
+    options = options || {};
+    var maxPx = options.maxPx || MAX_PAGE_PX;
+    var sx = Math.round(img.naturalWidth * box.x0);
+    var sy = Math.round(img.naturalHeight * box.y0);
+    var sw = Math.round(img.naturalWidth * (box.x1 - box.x0));
+    var sh = Math.round(img.naturalHeight * (box.y1 - box.y0));
+    if (!(sw > 0) || !(sh > 0)) return null;
+    var scale = Math.min(1, maxPx / Math.max(sw, sh));
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(sw * scale);
+    canvas.height = Math.round(sh * scale);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png');
+  }
+
+  // 位置を聞くために送る、小さい絵。位置が分かればよいので粗くてよい。
+  function shrink(dataUrl, maxPx) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, (maxPx || 1024) / Math.max(img.naturalWidth, img.naturalHeight));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = function () { reject(new Error('画像を開けませんでした')); };
+      img.src = dataUrl;
+    });
+  }
+
   return {
     renderPages: renderPages,
+    renderRegion: renderRegion,
+    cropImage: cropImage,
+    shrink: shrink,
     MAX_PAGE_PX: MAX_PAGE_PX,
     MAX_PAGES: MAX_PAGES,
   };

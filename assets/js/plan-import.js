@@ -71,6 +71,29 @@
     syncPlanImportButtons();
   }
 
+  // ── 図面の部分だけにする ────────────────────────────────────────────
+  //
+  // 紙面の中で平面図が小さいことが多い。試した図面は**ページ面積の約6%**で、
+  // ページ全体を送ると寸法の文字が縦3〜4画素になり読めなかった。
+  //
+  // AI が読む解像度には頭打ちがあるので、**その枠を平面図だけで使う**。
+  // 位置は安いモデルに1回聞く（1ページ ¥0.5 前後）。紙面の構成はメーカーごとに
+  // 違い、写真ではなおさら決まった形が無いので、画素の解析では当てにならない。
+  //
+  // 切り出せなかったページは、ページ全体のまま送る。切り出しは上乗せであって、
+  // 失敗したら読めなくなる、という作りにはしない。
+  function locate(dataUrl) {
+    return PdfPages.shrink(dataUrl, 1024).then(function (small) {
+      return fetch('/api/ai/find-plan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ image: small }),
+      }).then(function (res) { return res.json(); });
+    }).then(function (body) {
+      return (body && body.box) || null;
+    }).catch(function () { return null; });
+  }
+
   // ── 1. 画像を選ぶ ──────────────────────────────────────────────────
   function onPlanImportFile(input) {
     var file = input && input.files && input.files[0];
@@ -91,11 +114,27 @@
           setStatus('PDFを開く部品がありません。画像にしてからお試しください。');
           return;
         }
-        PdfPages.renderPages(e.target.result, {
+        var pdfData = e.target.result;
+        PdfPages.renderPages(pdfData, {
           maxPx: MAX_SEND_PX,
           onProgress: function (n, total) { setStatus('PDFを開いています… ' + n + ' / ' + total + 'ページ'); },
         }).then(function (pages) {
-          if (!pages.length) { setStatus('このPDFにページがありません。'); return; }
+          if (!pages.length) { setStatus('このPDFにページがありません。'); return []; }
+          // ページごとに、図面の部分だけを高い解像度で描き直す。
+          var out = pages.slice();
+          var next = function (i) {
+            if (i >= pages.length) return out;
+            setStatus('図面の位置を探しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
+            return locate(pages[i]).then(function (box) {
+              if (!box) return next(i + 1);
+              return PdfPages.renderRegion(pdfData, i + 1, box, { maxPx: MAX_SEND_PX })
+                .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
+                .catch(function () { return next(i + 1); });
+            });
+          };
+          return Promise.resolve(next(0));
+        }).then(function (pages) {
+          if (!pages || !pages.length) return;
           ST.pages = pages;
           show('plan-import-step2', true);
           show('plan-import-crop', false);

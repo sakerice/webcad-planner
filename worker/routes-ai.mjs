@@ -23,6 +23,7 @@ import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
 import { planKnowledge } from "./plan-knowledge.mjs";
+import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -51,6 +52,7 @@ export async function handleAi(request, env, url, deps = {}) {
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
+  if (url.pathname === "/api/ai/find-plan") return aiFindPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
 }
@@ -71,6 +73,43 @@ function readImage(value, field) {
   }
   if (m[2].length * 3 / 4 > MAX_IMAGE_BYTES) return { error: `${field} が大きすぎる(上限 ${MAX_IMAGE_BYTES} バイト)` };
   return { mimeType: m[1], base64: m[2] };
+}
+
+// ── 紙面のどこに平面図があるか ──────────────────────────────────────
+//
+// 切り出しは画面側で行う。ここは位置を答えるだけ。画素を持っているのは
+// ブラウザのほうで、PDFならその範囲を高い解像度で描き直せるため。
+async function aiFindPlan(payload, env, deps, request) {
+  const image = readImage(payload && payload.image, "image");
+  if (image.error) return json({ error: "invalid_request", message: image.error }, 400);
+
+  const config = vertexConfig(env);
+  if (!config.configured) return json({ error: "ai_not_configured", message: "鍵が設定されていません。" }, 503);
+  if (!isJapanLocation(config.location)) {
+    return json({ error: "ai_region_not_japan", message: `いまの設定: ${config.location}` }, 500);
+  }
+
+  const quota = await takeQuota(request, env, 1);
+  if (!quota.ok) {
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの回数を使い切りました。" }, 429);
+  }
+
+  const result = await generate({
+    config: { ...config, model: (env && env.AI_LOCATE_MODEL) || "gemini-2.5-flash" },
+    system: LOCATE_SYSTEM,
+    text: LOCATE_PROMPT,
+    image: { mimeType: image.mimeType, base64: image.base64 },
+    responseSchema: LOCATE_SCHEMA,
+    // 位置が分かればよく、寸法の文字は読まない。考える必要も無い。
+    maxOutputTokens: 512,
+    thinkingBudget: 0,
+    fetchImpl: deps.fetchImpl,
+  });
+  if (!result.ok) return json({ error: "ai_upstream_error", status: result.status, message: result.message }, 502);
+
+  const parsed = extractJson(result.text);
+  const box = normalizeBox(parsed);
+  return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────

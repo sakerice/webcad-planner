@@ -57,6 +57,18 @@ test('階段は上下の向きと、廻り部分の接し方まで指示する',
   assert.match(p, /間を空けない/, '離れて置かれるのを止める指示が無い');
 });
 
+test('階段は部屋と重なってよい（階段下の収納・トイレを消さない）', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const { planSpec } = await mod('worker/plan-spec.mjs');
+  // 日本の住宅では階段の下がトイレや収納になっていることが多い。
+  // 部屋どうしは重ねられない(重ねると壁が消える)が、階段は物なので重ねてよい。
+  // 「階段のある場所は階段室」にすると、室名のある収納やトイレが消える。
+  assert.match(buildPlanPrompt(), /階段は部屋と重なってよい/, '階段を重ねてよいと伝えていない');
+  assert.match(buildPlanPrompt(), /室名が書かれて\s*いれば、その部屋として入れる/,
+    '階段下に室名があるときの扱いが無い');
+  assert.match(planSpec(), /物は部屋と重なってよい/, '仕様に重なりの扱いが無い');
+});
+
 test('カタログの品物は大きさを変えさせない', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
