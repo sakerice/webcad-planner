@@ -47,20 +47,25 @@ export class AiQuota {
     }
 
     await this.state.storage.put({ [totalKey]: total + cost, [whoKey]: mine + cost });
-    // 数えた日ぶんは 2 日で捨てる。古い日の数は誰も見ない。
-    await this.state.storage.setAlarm(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    if (!total) await this.forgetOldDays(day);
     return this.reply({ ok: true, scope: "who", limit: perDay, remaining: perDay - mine - cost });
   }
 
   // 古い日の数を捨てる。放っておくと日付ぶんだけ増え続ける。
-  async alarm() {
-    const keep = new Set([0, 1].map((back) =>
-      new Date(Date.now() - back * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)));
+  //
+  // **目覚まし(setAlarm)は使わない。** 1日の最初の1回だけ、その場で捨てる。
+  // 掃除のために毎回書き込みを増やすと、この1つの Durable Object に全員の
+  // 要求が集まっているぶん、詰まりやすくなる。
+  async forgetOldDays(today) {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const keep = new Set([today, yesterday]);
     const all = await this.state.storage.list();
+    const stale = [];
     for (const key of all.keys()) {
       const day = String(key).split(":")[1];
-      if (day && !keep.has(day)) await this.state.storage.delete(key);
+      if (day && !keep.has(day)) stale.push(key);
     }
+    if (stale.length) await this.state.storage.delete(stale);
   }
 
   reply(body) {

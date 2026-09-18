@@ -27,9 +27,9 @@ async function waitForResponse(id, config, fetchImpl, sleep) {
   const until = Date.now() + POLL_TIMEOUT_MS;
   while (Date.now() < until) {
     await sleep(POLL_INTERVAL_MS);
-    const res = await fetchImpl(`${ENDPOINT}/${id}`, {
+    const res = await fetchImpl(new Request(`${ENDPOINT}/${id}`, {
       headers: { authorization: "Bearer " + config.apiKey },
-    });
+    }));
     const raw = await res.text();
     if (!res.ok) return { ok: false, status: res.status, raw };
     let data;
@@ -112,11 +112,13 @@ export async function generate({
 
   let response;
   try {
-    response = await fetchImpl(ENDPOINT, {
+    // vertex.mjs と同じく Request で渡す。呼び出し側(検査を含む)が受け取る形を
+    // 一致させておく。
+    response = await fetchImpl(new Request(ENDPOINT, {
       method: "POST",
       headers: { authorization: "Bearer " + config.apiKey, "content-type": "application/json" },
       body,
-    });
+    }));
   } catch (e) {
     const why = (e && e.cause && (e.cause.code || e.cause.message)) || "";
     return { ok: false, status: 502, message: "OpenAI へ届きませんでした: " + (e && e.message ? e.message : e) + (why ? ` (${why})` : "") };

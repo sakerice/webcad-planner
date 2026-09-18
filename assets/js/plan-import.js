@@ -82,16 +82,14 @@
   //
   // 切り出せなかったページは、ページ全体のまま送る。切り出しは上乗せであって、
   // 失敗したら読めなくなる、という作りにはしない。
-  function locate(dataUrl) {
-    return PdfPages.shrink(dataUrl, 1024).then(function (small) {
-      return fetch('/api/ai/find-plan', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ image: small }),
-      }).then(function (res) { return res.json(); });
-    }).then(function (body) {
-      return (body && body.box) || null;
-    }).catch(function () { return null; });
+  function locate(smallDataUrl) {
+    return fetch('/api/ai/find-plan', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: smallDataUrl }),
+    }).then(function (res) { return res.json(); })
+      .then(function (body) { return (body && body.box) || null; })
+      .catch(function () { return null; });
   }
 
   // ── 1. 画像を選ぶ ──────────────────────────────────────────────────
@@ -115,17 +113,26 @@
           return;
         }
         var pdfData = e.target.result;
+        var smalls = null;
         PdfPages.renderPages(pdfData, {
           maxPx: MAX_SEND_PX,
           onProgress: function (n, total) { setStatus('PDFを開いています… ' + n + ' / ' + total + 'ページ'); },
         }).then(function (pages) {
           if (!pages.length) { setStatus('このPDFにページがありません。'); return []; }
+          // 位置を聞くための小さい版も、PDFから描く。大きい絵を画像として
+          // 読み直すと、画面が隠れているあいだ復号が返ってこない。
+          return PdfPages.renderPages(pdfData, { maxPx: 1024 }).then(function (small) {
+            smalls = small;
+            return pages;
+          });
+        }).then(function (pages) {
+          if (!pages || !pages.length) return [];
           // ページごとに、図面の部分だけを高い解像度で描き直す。
           var out = pages.slice();
           var next = function (i) {
             if (i >= pages.length) return out;
             setStatus('図面の位置を探しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
-            return locate(pages[i]).then(function (box) {
+            return locate((smalls && smalls[i]) || pages[i]).then(function (box) {
               if (!box) return next(i + 1);
               return PdfPages.renderRegion(pdfData, i + 1, box, { maxPx: MAX_SEND_PX })
                 .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })

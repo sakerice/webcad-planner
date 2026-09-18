@@ -39,7 +39,7 @@ test('壁と、壁でないものの例がある', async () => {
 
 test('長方形でない部屋と、室名の無い部屋の例がある', async () => {
   const s = await kb();
-  assert.match(s, /2つの長方形/);
+  assert.match(s, /長方形2つで表す/);
   for (const n of ['浴室', '洗面所', 'トイレ', '階段室', '廊下', '玄関']) {
     assert.ok(s.includes(n), `室名の無い部屋の例に ${n} が無い`);
   }

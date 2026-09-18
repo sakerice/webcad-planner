@@ -112,7 +112,9 @@ ${itemTypeTable()}
 
 | 種類 | w と d |
 |---|---|
-| 階段・設備（bath / toilet / sink / kitchen / stair / stair-corner / balcony） | 既定の値を用いる |
+| 設備（bath / toilet / sink / kitchen） | 既定の値を用いる |
+| 階段（stair / stair-corner） | w は既定の値。d は段数に応じて図から読み取った長さ |
+| balcony | 図から読み取った寸法を用いる |
 | 建具（window / window-door / door-swing / door-slide-s / door-fold / door-opening / door-front） | 図から読み取った寸法を用いる |
 
 ## アプリが生成する要素

@@ -43,10 +43,17 @@ test('検算を手順として持っている', async () => {
   assert.match(buildPlanPrompt(), /読めない箇所が1つだけの場合は/);
 });
 
-test('長方形でない部屋の表し方を手順として持っている', async () => {
+test('長方形でない部屋を、ふつうの部屋より先に見つけさせる', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
-  // 試した図面の洋室がL字だった。長方形ひとつでは表せない。
-  assert.match(buildPlanPrompt(), /長方形でない部屋は、複数の長方形に分けて/);
+  const p = buildPlanPrompt();
+  // 試した図面の洋室がL字だった。ふつうの部屋の手順に注意書きとして添えても
+  // 従わなかったので、**独立した手順として、しかも先に**置く。
+  const lshape = p.indexOf('輪郭が長方形でない部屋');
+  const named = p.indexOf('室名が書かれているものを入れる');
+  assert.ok(lshape > 0, 'L字を探す手順が無い');
+  assert.ok(named > 0, '室名のある部屋の手順が無い');
+  assert.ok(lshape < named, 'L字の手順が、ふつうの部屋より後になっている');
+  assert.match(p, /この手順は飛ばさない/, '飛ばされたときに何が起きるかが書かれていない');
 });
 
 test('階段は上下の向きと、廻り部分の接し方まで指示する', async () => {
@@ -79,11 +86,34 @@ test('カタログの品物は大きさを変えさせない', async () => {
   assert.match(p, /図に描かれている窓の幅/, '窓の幅を図から取る指示が無い');
 });
 
-test('長方形でない部屋を、見直しの手順で拾わせる', async () => {
+test('部屋の面積を検算させる（L字の取りこぼしに気づく唯一の手）', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
-  assert.match(p, /輪郭に凹みがあるのに parts が1つなら/, 'L字の取りこぼしに気づかせる指示が無い');
-  assert.match(p, /入れた部屋を見直す/, '最後の見直しの手順が無い');
+  // L字を長方形1つで済ませる誤りは、手順に書いても直らなかった。寸法線で
+  // 効いたのは検算だったので、同じ手を面積に当てる。合計が width×depth に
+  // 足りなければ、どこかの部屋が凹みを埋めている。
+  assert.match(p, /部屋の面積を検算する/, '面積の検算が無い');
+  assert.match(p, /width × depth と一致するか/, '何と比べるのかが無い');
+  assert.match(p, /手順6の見落とし/, '足りないときの原因が示されていない');
+  assert.match(p, /輪郭に凹みがあるのに parts が1つの部屋がある/, 'L字の取りこぼしに気づかせる指示が無い');
+});
+
+test('階段の折り返しを見直させる', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  assert.match(p, /段が向きを変えていれば/, '折り返しの見分け方が無い');
+  assert.match(p, /段の番号が折り返している/, '図の上での見分け方が無い');
+  assert.match(p, /階段を見直す/, '最後の見直しが無い');
+});
+
+test('階段の長さは図に従わせる（段数で決まるため）', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const { planSpec } = await mod('worker/plan-spec.mjs');
+  // 「既定寸法を変えるな」と「図のとおりに再現しろ」が矛盾していた。
+  // 実測で、モデル自身が「階段の奥行きを図に合わせたが指示と矛盾する
+  // 可能性がある」と申告した。長さは段数で決まるので図に従う。
+  assert.match(buildPlanPrompt(), /w は仕様の既定値のまま。d は図の段の数に合わせた長さ/);
+  assert.match(planSpec(), /d は段数に応じて図から読み取った長さ/);
 });
 
 test('items の座標の決め方が手順にある', async () => {
@@ -118,7 +148,7 @@ test('手順は、順に何を埋めるかだけを言う', async () => {
     assert.ok(p.includes(field), `${field} を埋める手順が無い`);
   }
   assert.match(p, /手順1/);
-  assert.match(p, /手順18/);
+  assert.match(p, /手順20/);
 });
 
 test('手順に仕様の写しを持たない', async () => {
@@ -155,6 +185,6 @@ test('補足(hint)は末尾に足される', async () => {
 test('手順は短いままにする', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   // 目安。超えたら、仕様か注意書きが混ざり始めている。
-  assert.ok(buildPlanPrompt().length < 2200,
+  assert.ok(buildPlanPrompt().length < 2600,
     '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });

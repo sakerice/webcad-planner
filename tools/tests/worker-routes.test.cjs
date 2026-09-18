@@ -388,17 +388,19 @@ function quotaEnv(extra) {
 }
 
 test('使う前に数える（送ってから断ると費用は戻らない）', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '10' });
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '100' });
   let called = 0;
   await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
     vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
   assert.equal(seen.length, 1, '数を取りに行っていない');
-  assert.equal(seen[0].cost, 3, 'ページ数ぶんで数えていない（リクエスト数で数えている）');
+  // 数えるのは回数ではなく「点」。呼び出しによって費用が10倍以上違うため。
+  // 図面1枚の読み取りが10点。3ページなら30点。
+  assert.equal(seen[0].cost, 30, 'ページ数ぶんで数えていない（リクエスト数で数えている）');
   assert.equal(called, 3);
 });
 
 test('上限を超えたら、AIを呼ばずに断る', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '2' });
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '20' });
   let called = 0;
   const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
     vertexFetch(async () => { called++; return vertexReply({ floors: [] }); }));
@@ -418,11 +420,71 @@ test('数の仕組みが無い環境では通す（機能まで止めない）',
 });
 
 test('数える相手は接続元。上限は環境変数で変えられる', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '7', AI_DAILY_TOTAL: '99' });
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '70', AI_DAILY_TOTAL: '990' });
   await callAi('/api/ai/import-plan', { image: PNG }, env,
     vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })),
     { 'cf-connecting-ip': '203.0.113.9' });
   assert.equal(seen[0].who, '203.0.113.9');
-  assert.equal(seen[0].perDay, 7);
-  assert.equal(seen[0].totalPerDay, 99);
+  assert.equal(seen[0].perDay, 70);
+  assert.equal(seen[0].totalPerDay, 990);
+});
+
+// ── どのモデルに読ませるか ──────────────────────────────────────────
+//
+// 実測（同じ切り出し画像・同じ指示文・同じ仕様書、1階の図面1枚）:
+//
+//                    費用   所要   L字  廻り階段  寸法線4辺
+//   gemini-2.5-pro   ¥16    79秒   ✗     ✗       ✓
+//   gpt-5            ¥26   140秒   ✗     ✗       右辺✗
+//   gpt-6-astra      ¥40    73秒   ✓     ✓       ✓
+//
+// L字の部屋と廻り階段は、他の2つでは手順を書き直しても出なかった。
+test('鍵があれば OpenAI へ送る（既定は gpt-6-astra）', async () => {
+  let sent = null;
+  const env = { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test' };
+  await callAi('/api/ai/import-plan', { image: PNG }, env, async (req) => {
+    sent = { url: req.url, auth: req.headers.get('authorization'), body: JSON.parse(await req.text()) };
+    return new Response(JSON.stringify({
+      status: 'completed',
+      output: [{ content: [{ text: JSON.stringify({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }) }] }],
+      usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  });
+  assert.match(sent.url, /api\.openai\.com/, 'OpenAI へ送っていない');
+  assert.equal(sent.body.model, 'gpt-6-astra');
+  assert.match(sent.auth, /^Bearer /);
+  assert.ok(!JSON.stringify(sent.body).includes('sk-test'), '本文にキーが混ざっている');
+});
+
+test('OPENAI_MODEL と AI_IMPORT_PROVIDER で切り替えられる', async () => {
+  let model = null;
+  await callAi('/api/ai/import-plan', { image: PNG },
+    { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test', OPENAI_MODEL: 'gpt-5.6-sol' },
+    async (req) => {
+      model = JSON.parse(await req.text()).model;
+      return new Response(JSON.stringify({
+        status: 'completed',
+        output: [{ content: [{ text: JSON.stringify({ floors: [] }) }] }], usage: {},
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    });
+  assert.equal(model, 'gpt-5.6-sol');
+
+  // provider を vertex に倒せば、キーがあっても Gemini へ行く
+  let url = null;
+  await callAi('/api/ai/import-plan', { image: PNG },
+    { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test', AI_IMPORT_PROVIDER: 'vertex' },
+    vertexFetch(async (req) => { url = req.url; return vertexReply({ floors: [] }); }));
+  assert.match(url, /aiplatform\.googleapis\.com/, 'vertex に倒せていない');
+});
+
+test('図面の位置を探すほうは安いモデルのまま（¥40を払う理由が無い）', async () => {
+  let url = null;
+  await callAi('/api/ai/find-plan', { image: PNG },
+    { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test' },
+    vertexFetch(async (req) => {
+      url = req.url;
+      return vertexReply({ found: true, x0: 100, y0: 100, x1: 900, y1: 900 });
+    }));
+  assert.match(url, /aiplatform\.googleapis\.com/, '位置探しまで OpenAI へ行っている');
+  assert.match(url, /gemini-2\.5-flash/, '安いモデルを使っていない');
 });

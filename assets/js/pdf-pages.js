@@ -49,6 +49,17 @@
     return loading;
   }
 
+  // 1ページを描く。
+  //
+  // **intent: 'print' を指定する。** 既定の 'display' だと、pdf.js は描画を
+  // 少しずつ進めるのに requestAnimationFrame を使う。画面が隠れているあいだ
+  // これは呼ばれないので、**利用者が別のタブへ移ると読み取りが止まったまま
+  // 戻らない**（実測で、画面を隠すと 600画素のページすら描き終わらなかった）。
+  // 'print' なら待たずに進む。線画なので描かれる絵は変わらない。
+  function renderTo(page, ctx, view) {
+    return page.render({ canvasContext: ctx, viewport: view, intent: 'print' }).promise;
+  }
+
   // data URL (application/pdf) を、ページごとの PNG の data URL にする。
   //
   //   onProgress(何ページ目, 全ページ数) … 進み具合を画面に出すため
@@ -78,7 +89,7 @@
           // 図面は白地。透過のまま送ると背景が黒く出ることがある。
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          return page.render({ canvasContext: ctx, viewport: view }).promise.then(function () {
+          return renderTo(page, ctx, view).then(function () {
             pages.push(canvas.toDataURL('image/png'));
             return next(n + 1);
           });
@@ -120,7 +131,7 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       // 切り出したい範囲が原点に来るようにずらしてから描く。
       ctx.translate(-base.width * box.x0 * scale, -base.height * box.y0 * scale);
-      return page.render({ canvasContext: ctx, viewport: view }).promise.then(function () {
+      return renderTo(page, ctx, view).then(function () {
         return canvas.toDataURL('image/png');
       });
     });
@@ -147,31 +158,29 @@
     return canvas.toDataURL('image/png');
   }
 
-  // 位置を聞くために送る、小さい絵。位置が分かればよいので粗くてよい。
-  function shrink(dataUrl, maxPx) {
-    return new Promise(function (resolve, reject) {
-      var img = new Image();
-      img.onload = function () {
-        var scale = Math.min(1, (maxPx || 1024) / Math.max(img.naturalWidth, img.naturalHeight));
-        var canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.naturalWidth * scale);
-        canvas.height = Math.round(img.naturalHeight * scale);
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = function () { reject(new Error('画像を開けませんでした')); };
-      img.src = dataUrl;
-    });
+  // 読み込み済みの画像を、小さくして返す。位置を聞くのに使う。
+  //
+  // **data URL から Image で読み直さないこと。** 画面が隠れているあいだ、
+  // 大きな画像の復号は後回しにされ、onload が返ってこない（実測で、
+  // 3072画素のページを読み直す処理がそこで止まったまま戻らなかった）。
+  // PDF なら小さい版も PDF から描けばよく、画像なら既に読み込んだものがある。
+  function shrinkImage(img, maxPx) {
+    var scale = Math.min(1, (maxPx || 1024) / Math.max(img.naturalWidth, img.naturalHeight));
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png');
   }
 
   return {
     renderPages: renderPages,
     renderRegion: renderRegion,
     cropImage: cropImage,
-    shrink: shrink,
+    shrinkImage: shrinkImage,
     MAX_PAGE_PX: MAX_PAGE_PX,
     MAX_PAGES: MAX_PAGES,
   };

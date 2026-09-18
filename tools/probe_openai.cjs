@@ -15,12 +15,17 @@ const { pathToFileURL } = require('node:url');
 const ROOT = join(__dirname, '..');
 const args = process.argv.slice(2);
 function opt(name) { const i = args.indexOf('--' + name); return i >= 0 ? args[i + 1] : null; }
-const file = args.find((a, i) => !a.startsWith('--') && !String(args[i - 1] || '').startsWith('--'));
+// 画像は複数渡せる。**OpenAI は画像ごとにタイル分割する**ので、1枚を分けて
+// 渡すと実効解像度が上がる（1枚だけだと短辺768画素まで縮められる）。
+const files = args.filter((a, i) => !a.startsWith('--') && !String(args[i - 1] || '').startsWith('--'));
+const file = files[0];
 
 // 1回あたりの費用を出すための単価（米ドル / 100万トークン）。
 // **公式の料金表で確かめた値ではない。** 目安として出すだけなので、
 // 請求額が出たらそちらを正とすること。--rate-in / --rate-out で上書きできる。
 const RATES = {
+  'gpt-6-astra': { in: 10, out: 50 },
+  'gpt-5.6-sol': { in: 4, out: 20 },
   'gpt-5': { in: 1.25, out: 10 },
   'gpt-5-mini': { in: 0.25, out: 2 },
 };
@@ -48,9 +53,12 @@ const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   }
   if (!file) { console.error('読ませる画像を指定してください。'); process.exit(1); }
 
-  const mimeType = MIME[extname(file).toLowerCase()];
-  if (!mimeType) { console.error('PNG / JPEG / WebP を指定してください。'); process.exit(1); }
-  const bytes = readFileSync(file);
+  const images = [];
+  for (const f of files) {
+    const mt = MIME[extname(f).toLowerCase()];
+    if (!mt) { console.error(`${f}: PNG / JPEG / WebP を指定してください。`); process.exit(1); }
+    images.push({ mimeType: mt, base64: readFileSync(f).toString('base64'), path: f });
+  }
 
   const load = (p) => import(pathToFileURL(join(ROOT, p)).href);
   const { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } = await load('worker/plan-prompt.mjs');
@@ -62,7 +70,7 @@ const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   const PlanGrid = require(join(ROOT, 'assets', 'js', 'plan-grid.js'));
 
   const model = opt('model') || 'gpt-5';
-  console.log(`図面   : ${file} (${Math.round(bytes.length / 1024)} KB, ${mimeType})`);
+  console.log(`図面   : ${images.map((i) => i.path).join(', ')}`);
   console.log(`モデル : ${model}`);
   if (opt('hint')) console.log(`補足   : ${opt('hint')}`);
   console.log('送信中…');
@@ -73,7 +81,7 @@ const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
     system: SYSTEM_PROMPT,
     docs: [planKnowledge(), planSpec()],
     text: buildPlanPrompt({ hint: opt('hint') || '' }),
-    image: { mimeType, base64: bytes.toString('base64') },
+    images: images.map((i) => ({ mimeType: i.mimeType, base64: i.base64 })),
     maxOutputTokens: Number(opt('max-tokens') || 32768),
   });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);

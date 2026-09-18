@@ -19,6 +19,7 @@ import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs"
 import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
+import { openaiConfig, generate as openaiGenerate, toJsonSchema } from "./openai.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -27,14 +28,23 @@ import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./pla
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-// 1日に使える AI の呼び出し回数。**図面1枚につき1回**呼ぶので、
-// 8ページのPDFなら1リクエストで8回ぶんになる。
+// 1日に使える量。**回数ではなく「点」で数える。**
 //
-// /api/ai/* には認証が無い。URLを知っていれば誰でも呼べ、1回 ¥4〜16 が
-// そのまま請求される。ここが費用の歯止めになる。
-// 環境変数 AI_DAILY_TOTAL / AI_DAILY_PER_USER で上書きできる。
-const DEFAULT_DAILY_TOTAL = 300;     // 全体。だいたい1日 ¥1,200 が上限になる
-const DEFAULT_DAILY_PER_USER = 24;   // 1つの接続元。3ページのPDFなら8回ぶん
+// 呼び出しによって費用が10倍以上違う。回数で数えると、安い呼び出しを基準に
+// すれば財布が危なく、高い呼び出しを基準にすれば安い機能まで使えなくなる。
+//
+//   図面の位置を探す  1点  （gemini-2.5-flash、実測 ¥0.2）
+//   図面を読み取る   10点  （gpt-6-astra、実測 ¥40 / 図面1枚）
+//
+// **1点あたりおよそ ¥4。** 3ページのPDFを1回取り込むと 3 + 30 = 33点 ≒ ¥120。
+//
+// /api/ai/* には認証が無い。URLを知っていれば誰でも呼べ、そのまま請求される。
+// ここが費用の歯止めになる。環境変数 AI_DAILY_TOTAL / AI_DAILY_PER_USER で
+// 上書きできる。モデルを変えたら COST を見直すこと。
+const COST_LOCATE = 1;
+const COST_IMPORT_PAGE = 10;
+const DEFAULT_DAILY_TOTAL = 1000;    // 全体。1日およそ ¥4,000 が上限になる
+const DEFAULT_DAILY_PER_USER = 100;  // 1つの接続元。3ページの取り込み3回ぶん
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
@@ -89,9 +99,9 @@ async function aiFindPlan(payload, env, deps, request) {
     return json({ error: "ai_region_not_japan", message: `いまの設定: ${config.location}` }, 500);
   }
 
-  const quota = await takeQuota(request, env, 1);
+  const quota = await takeQuota(request, env, COST_LOCATE);
   if (!quota.ok) {
-    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの回数を使い切りました。" }, 429);
+    return json({ error: "ai_quota_exceeded", scope: quota.scope, message: "本日ぶんの読み取りを使い切りました。明日またお試しください。" }, 429);
   }
 
   const result = await generate({
@@ -112,6 +122,31 @@ async function aiFindPlan(payload, env, deps, request) {
   return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
 }
 
+// 図面の読み取りを、どこへ投げるか。
+//
+// 実測（同じ切り出し画像・同じ指示文・同じ仕様書、1階の図面1枚）:
+//
+//                    費用   所要   L字  廻り階段  寸法線4辺
+//   gemini-2.5-pro   ¥16    79秒   ✗     ✗       ✓
+//   gpt-5            ¥26   140秒   ✗     ✗       右辺✗
+//   gpt-6-astra      ¥40    73秒   ✓     ✓       ✓
+//
+// Astra だけが、L字の部屋を長方形2つで表し、廻り階段を直進部分に接して置いた。
+// どちらも他の2つでは指示を変えても出なかったもので、**モデルの世代の差**。
+// 思考トークンは gpt-5 の1/10（1,552 対 15,360）で、迷わずに答えている。
+//
+// 位置を探すほう(find-plan)は安い Gemini のまま。大きな領域を1つ答えるだけで、
+// そこに ¥40 を払う理由が無い。
+function importProvider(env) {
+  const want = (env && env.AI_IMPORT_PROVIDER) || "";
+  const openai = openaiConfig(env);
+  if (want === "vertex") return { kind: "vertex" };
+  if (want === "openai" || openai.configured) {
+    return { kind: "openai", config: { ...openai, model: (env && env.OPENAI_MODEL) || "gpt-6-astra" } };
+  }
+  return { kind: "vertex" };
+}
+
 // ── 間取り図 → プランJSON ────────────────────────────────────────────
 async function aiImportPlan(payload, env, deps, request) {
   // PDF はブラウザ側でページごとの画像にしてから送られてくる。
@@ -129,52 +164,52 @@ async function aiImportPlan(payload, env, deps, request) {
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
   // 使う前に数える。**送ってから断ると費用は戻らない。**
-  const quota = await takeQuota(request, env, images.length);
+  const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
   if (!quota.ok) {
     return json({
       error: "ai_quota_exceeded",
       scope: quota.scope,
-      message: quota.scope === "total"
-        ? "本日ぶんの読み取り回数を使い切りました。明日またお試しください。"
-        : `本日ぶんの読み取り回数を使い切りました（1日 ${quota.limit} 枚まで）。明日またお試しください。`,
+      message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
     }, 429);
   }
 
-  const config = vertexConfig(env);
-  if (!config.configured) {
-    return json({
-      error: "ai_not_configured",
-      message: "Google の鍵がこの環境に設定されていません。wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON で設定してください。",
-    }, 503);
-  }
-  // 日本国内ではないリージョンへ間取り図を送ってしまう事故を、ここで止める。
-  // グローバル窓口はエラーにならず黙って国外へ出るので、送る前に弾く。
-  if (!isJapanLocation(config.location)) {
-    return json({
-      error: "ai_region_not_japan",
-      message: `間取り図は個人情報を含みうるため、日本国内のリージョンでしか処理できません。いまの設定: ${config.location}`,
-    }, 500);
+  const provider = importProvider(env);
+  if (provider.kind === "vertex") {
+    const config = vertexConfig(env);
+    if (!config.configured) {
+      return json({
+        error: "ai_not_configured",
+        message: "AI の鍵がこの環境に設定されていません。"
+          + " wrangler secret put OPENAI_API_KEY か GOOGLE_SERVICE_ACCOUNT_JSON で設定してください。",
+      }, 503);
+    }
+    // 日本国内ではないリージョンへ間取り図を送ってしまう事故を、ここで止める。
+    // グローバル窓口はエラーにならず黙って国外へ出るので、送る前に弾く。
+    if (!isJapanLocation(config.location)) {
+      return json({
+        error: "ai_region_not_japan",
+        message: `間取り図は個人情報を含みうるため、日本国内のリージョンでしか処理できません。いまの設定: ${config.location}`,
+      }, 500);
+    }
+    provider.config = config;
   }
 
-  // **1回のリクエストに画像は1枚だけ。** 複数枚を1回に入れると、各画像が
-  // 768画素角のタイル1枚に縮められる。実測(3072画素の同じ図面):
-  //
-  //   1枚  3,368 トークン
-  //   2枚    530 トークン（258×2）
-  //   3枚    788 トークン（258×3）
-  //
-  // つまり枚数を増やすほど1枚あたりの解像度が落ちる。寸法の文字が読めなく
-  // なるので、ページごとに分けて送る。回数は増えるが、読めない読み取りに
-  // 払うほうが無駄である。
-  const calls = images.map((img, i) => generate({
-    config,
-    system: SYSTEM_PROMPT,
-    docs: [planKnowledge(), planSpec()],
-    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
-    image: { mimeType: img.mimeType, base64: img.base64 },
-    responseSchema: PLAN_RESPONSE_SCHEMA,
-    fetchImpl: deps.fetchImpl,
-  }));
+  const calls = images.map((img, i) => {
+    const common = {
+      system: SYSTEM_PROMPT,
+      docs: [planKnowledge(), planSpec()],
+      text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+      image: { mimeType: img.mimeType, base64: img.base64 },
+      fetchImpl: deps.fetchImpl,
+    };
+    if (provider.kind === "openai") {
+      return openaiGenerate({
+        ...common,
+        config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) },
+      });
+    }
+    return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
+  });
   const results = await Promise.all(calls);
 
   const failed = results.find((r) => !r.ok);
@@ -205,12 +240,20 @@ async function takeQuota(request, env, count) {
   const id = env.AI_QUOTA.idFromName("ai-usage");
   const url = `https://ai-quota/take?cost=${count}&who=${encodeURIComponent(who)}`
     + `&perDay=${perDay}&totalPerDay=${totalPerDay}`;
+  // **数の仕組みが止まっても、機能まで止めない。**
+  // 数は1つの Durable Object に集まるので、そこが詰まると全員が待たされる。
+  // 実測で、詰まったときに要求がハンドラまで届かず40秒返らないことがあった。
+  // 待つのは短くし、返ってこなければ通す。
+  const pass = { ok: true, scope: "error", limit: 0, remaining: 0 };
   try {
-    const res = await env.AI_QUOTA.get(id).fetch(url);
+    const res = await Promise.race([
+      env.AI_QUOTA.get(id).fetch(url),
+      new Promise((resolve) => setTimeout(() => resolve(null), 5000)),
+    ]);
+    if (!res) return pass;
     return await res.json();
   } catch (e) {
-    // 数えられないときは通す。数の仕組みが落ちて機能まで止まるほうが困る。
-    return { ok: true, scope: "error", limit: 0, remaining: 0 };
+    return pass;
   }
 }
 
