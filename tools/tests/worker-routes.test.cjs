@@ -388,7 +388,7 @@ function quotaEnv(extra) {
 }
 
 test('使う前に数える（送ってから断ると費用は戻らない）', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '100' });
+  const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '5' });
   let called = 0;
   await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
     vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
@@ -400,9 +400,10 @@ test('使う前に数える（送ってから断ると費用は戻らない）',
 });
 
 test('上限を超えたら、AIを呼ばずに断る', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '20' });
+  // 1回 = 33点。3ページの取り込みは 3×10 = 30点で収まるので、4ページで超える。
+  const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '1' });
   let called = 0;
-  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG, PNG] }, env,
     vertexFetch(async () => { called++; return vertexReply({ floors: [] }); }));
   assert.equal(res.status, 429);
   assert.equal(called, 0, '上限を超えているのに AI を呼んでいる（費用が出ている）');
@@ -420,12 +421,12 @@ test('数の仕組みが無い環境では通す（機能まで止めない）',
 });
 
 test('数える相手は接続元。上限は環境変数で変えられる', async () => {
-  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '70', AI_DAILY_TOTAL: '990' });
+  const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '2', AI_DAILY_IMPORTS_TOTAL: '30' });
   await callAi('/api/ai/import-plan', { image: PNG }, env,
     vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })),
     { 'cf-connecting-ip': '203.0.113.9' });
   assert.equal(seen[0].who, '203.0.113.9');
-  assert.equal(seen[0].perDay, 70);
+  assert.equal(seen[0].perDay, 66, '1回=33点で換算していない');
   assert.equal(seen[0].totalPerDay, 990);
 });
 
@@ -492,4 +493,48 @@ test('図面の位置は gemini-2.5-flash に聞く（安くて当たるから�
     }));
   assert.match(url, /aiplatform\.googleapis\.com/, 'OpenAI の鍵があると位置探しまで持っていかれている');
   assert.match(url, /gemini-2\.5-flash/, '安いモデルを使っていない');
+});
+
+// ── 本日あと何回使えるか ────────────────────────────────────────────
+//
+// 全体の上限があるので、自分が使っていなくても使えないことがある。
+// 押してから断られるより、押す前に分かっているほうがよい。
+test('残り回数は、数えずに見るだけ', async () => {
+  const seen = [];
+  const stub = { fetch: async (url) => {
+    const u = new URL(url);
+    seen.push({ peek: u.searchParams.get('peek'), cost: Number(u.searchParams.get('cost')),
+                perDay: Number(u.searchParams.get('perDay')), totalPerDay: Number(u.searchParams.get('totalPerDay')) });
+    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 66, totalRemaining: 330 }));
+  } };
+  const env = { ...VERTEX_ENV, AI_QUOTA: { idFromName: () => 'id', get: () => stub } };
+  const { handleAi } = await mod('worker/routes-ai.mjs');
+  const url = new URL('https://example.test/api/ai/quota');
+  // 何も変えないので GET で受ける。POST 限定にしていると画面から見に行けない。
+  const res = await handleAi(new Request(url), env, url, {});
+  const body = await res.json();
+  assert.equal(seen[0].peek, '1', '見るだけになっていない（数えてしまう）');
+  assert.equal(seen[0].cost, 0);
+  assert.equal(body.left, 2, '残り66点 = 2回ぶん にならない');
+  assert.equal(body.perUser, 2, '既定は ひとり1日2回');
+  assert.equal(body.total, 10, '既定は 全体1日10回');
+});
+
+test('上限は「回数」で設定する（点は内部の数え方）', async () => {
+  const seen = [];
+  const stub = { fetch: async (url) => {
+    const u = new URL(url);
+    seen.push({ perDay: Number(u.searchParams.get('perDay')), totalPerDay: Number(u.searchParams.get('totalPerDay')) });
+    return new Response(JSON.stringify({ ok: true, remaining: 0 }));
+  } };
+  const env = {
+    ...VERTEX_ENV, AI_DAILY_IMPORTS_PER_USER: '5', AI_DAILY_IMPORTS_TOTAL: '40',
+    AI_QUOTA: { idFromName: () => 'id', get: () => stub },
+  };
+  const { handleAi } = await mod('worker/routes-ai.mjs');
+  const url = new URL('https://example.test/api/ai/quota');
+  await handleAi(new Request(url), env, url, {});
+  // 1回 = 33点（3ページのPDFで 3×(1+10)）
+  assert.equal(seen[0].perDay, 165);
+  assert.equal(seen[0].totalPerDay, 1320);
 });

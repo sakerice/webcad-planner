@@ -31,6 +31,8 @@ export class AiQuota {
     const who = url.searchParams.get("who") || "unknown";
     const perDay = Math.max(1, Number(url.searchParams.get("perDay")) || 0);
     const totalPerDay = Math.max(1, Number(url.searchParams.get("totalPerDay")) || 0);
+    // peek のときは数えずに残りだけ返す。画面に「本日あと何回」を出すため。
+    const peek = url.searchParams.get("peek") === "1";
     const day = new Date().toISOString().slice(0, 10);
 
     const totalKey = `total:${day}`;
@@ -39,11 +41,18 @@ export class AiQuota {
     const total = Number(used.get(totalKey) || 0);
     const mine = Number(used.get(whoKey) || 0);
 
+    const leftTotal = Math.max(0, totalPerDay - total);
+    const leftMine = Math.max(0, perDay - mine);
+    if (peek) {
+      return this.reply({ ok: leftTotal > 0 && leftMine > 0, scope: "peek",
+        limit: perDay, remaining: Math.min(leftMine, leftTotal),
+        totalLimit: totalPerDay, totalRemaining: leftTotal });
+    }
     if (total + cost > totalPerDay) {
-      return this.reply({ ok: false, scope: "total", limit: totalPerDay, remaining: Math.max(0, totalPerDay - total) });
+      return this.reply({ ok: false, scope: "total", limit: totalPerDay, remaining: leftTotal });
     }
     if (mine + cost > perDay) {
-      return this.reply({ ok: false, scope: "who", limit: perDay, remaining: Math.max(0, perDay - mine) });
+      return this.reply({ ok: false, scope: "who", limit: perDay, remaining: leftMine });
     }
 
     await this.state.storage.put({ [totalKey]: total + cost, [whoKey]: mine + cost });

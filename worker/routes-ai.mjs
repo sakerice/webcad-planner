@@ -43,8 +43,23 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 // 上書きできる。モデルを変えたら COST を見直すこと。
 const COST_LOCATE = 1;
 const COST_IMPORT_PAGE = 10;
-const DEFAULT_DAILY_TOTAL = 1000;    // 全体。1日およそ ¥4,000 が上限になる
-const DEFAULT_DAILY_PER_USER = 100;  // 1つの接続元。3ページの取り込み3回ぶん
+// 「1回の取り込み」の目安。3ページのPDFで 3×(1+10) = 33点。
+// 上限は**回数で**設定する（点は内部の数え方で、設定する人が意識するものではない）。
+const POINTS_PER_IMPORT = 33;
+const DEFAULT_IMPORTS_TOTAL = 10;    // 全体。1日およそ ¥1,200
+const DEFAULT_IMPORTS_PER_USER = 2;  // 1つの接続元
+
+function quotaLimits(env) {
+  const perUser = Number((env && env.AI_DAILY_IMPORTS_PER_USER) || DEFAULT_IMPORTS_PER_USER);
+  const total = Number((env && env.AI_DAILY_IMPORTS_TOTAL) || DEFAULT_IMPORTS_TOTAL);
+  return {
+    imports: { perUser, total },
+    points: {
+      perUser: Math.max(1, Math.round(perUser * POINTS_PER_IMPORT)),
+      total: Math.max(1, Math.round(total * POINTS_PER_IMPORT)),
+    },
+  };
+}
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
@@ -56,6 +71,9 @@ export function handlesAi(pathname) {
 }
 
 export async function handleAi(request, env, url, deps = {}) {
+  // 残り回数を見るだけの窓口。**何も変えないので GET で受ける。**
+  if (url.pathname === "/api/ai/quota") return aiQuota(env, request);
+
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   let payload;
@@ -89,6 +107,23 @@ function readImage(value, field) {
 //
 // 切り出しは画面側で行う。ここは位置を答えるだけ。画素を持っているのは
 // ブラウザのほうで、PDFならその範囲を高い解像度で描き直せるため。
+// 本日あと何回使えるか。**数えずに見るだけ。**
+//
+// 全体の上限があるので、自分が使っていなくても使えないことがある。
+// 押してから断られるより、押す前に分かっているほうがよい。
+async function aiQuota(env, request) {
+  const limits = quotaLimits(env);
+  const seen = await takeQuota(request, env, 0, true);
+  const left = Number(seen.remaining);
+  return json({
+    // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
+    left: Number.isFinite(left) ? Math.floor(left / POINTS_PER_IMPORT) : null,
+    perUser: limits.imports.perUser,
+    total: limits.imports.total,
+    counted: Boolean(env && env.AI_QUOTA),
+  });
+}
+
 // 位置を探すほうは、安いモデルでよい。大きな領域を1つ答えるだけ。
 //
 // **gemini-2.5-flash を使う。** 実測（同じページ、正解は縦 0.240〜0.600）:
@@ -258,14 +293,14 @@ async function aiImportPlan(payload, env, deps, request) {
 //
 // 数える相手は接続元のIPアドレス。利用者の口座の仕組みがまだ無いため。
 // 定額サブスクと使用回数制限を入れるときは、ここを口座ごとに替える。
-async function takeQuota(request, env, count) {
+async function takeQuota(request, env, count, peek) {
   if (!env || !env.AI_QUOTA) return { ok: true, scope: "none", limit: 0, remaining: 0 };
   const who = (request && request.headers.get("cf-connecting-ip")) || "unknown";
-  const perDay = Number(env.AI_DAILY_PER_USER) || DEFAULT_DAILY_PER_USER;
-  const totalPerDay = Number(env.AI_DAILY_TOTAL) || DEFAULT_DAILY_TOTAL;
+  const limits = quotaLimits(env);
   const id = env.AI_QUOTA.idFromName("ai-usage");
   const url = `https://ai-quota/take?cost=${count}&who=${encodeURIComponent(who)}`
-    + `&perDay=${perDay}&totalPerDay=${totalPerDay}`;
+    + `&perDay=${limits.points.perUser}&totalPerDay=${limits.points.total}`
+    + (peek ? "&peek=1" : "");
   // **数の仕組みが止まっても、機能まで止めない。**
   // 数は1つの Durable Object に集まるので、そこが詰まると全員が待たされる。
   // 実測で、詰まったときに要求がハンドラまで届かず40秒返らないことがあった。

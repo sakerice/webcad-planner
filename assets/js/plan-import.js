@@ -54,6 +54,25 @@
     if (!m) return;
     m.classList.add('show');
     if (!ST.image && !ST.pages) resetPlanImport();
+    showQuota();
+  }
+
+  // 本日あと何回使えるかを出す。
+  //
+  // **全体の上限がある**ので、自分が使っていなくても使えないことがある。
+  // 押してから断られるより、押す前に分かっているほうがよい。
+  function showQuota() {
+    var box = $('plan-import-quota');
+    if (!box) return;
+    fetch('/api/ai/quota').then(function (r) { return r.json(); }).then(function (q) {
+      if (!q || !q.counted || q.left === null || q.left === undefined) { box.style.display = 'none'; return; }
+      box.style.display = '';
+      box.textContent = q.left > 0
+        ? '本日あと ' + q.left + ' 回 読み取れます（1日に ひとり ' + q.perUser + ' 回まで／全体 ' + q.total + ' 回まで）'
+        : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
+      var run = $('plan-import-run');
+      if (run && q.left <= 0) run.disabled = true;
+    }).catch(function () { box.style.display = 'none'; });
   }
 
   function closePlanImport() {
@@ -332,10 +351,11 @@
       return res.json().then(function (body) { return { status: res.status, body: body }; });
     }).then(function (r) {
       ST.busy = false;
-      if (r.status !== 200) { showPlanImportError(r.status, r.body); syncPlanImportButtons(); return; }
+      if (r.status !== 200) { showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return; }
       ST.result = r.body;
       renderPlanImportResult(r.body);
       syncPlanImportButtons();
+      showQuota();
     }).catch(function (e) {
       ST.busy = false;
       setStatus('通信に失敗しました: ' + (e && e.message ? e.message : e));
@@ -529,6 +549,7 @@
     croppedDataUrl: croppedDataUrl,
     toAppObjects: toAppObjects,
     showPlanImportError: showPlanImportError,
+    showQuota: showQuota,
     renderPlanImportResult: renderPlanImportResult,
     MAX_SEND_PX: MAX_SEND_PX,
   };

@@ -239,6 +239,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .unity-render-title{font-weight:700;color:#fff}
 .unity-render-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer}
 .unity-render-status{line-height:1.6;color:#cce;background:#101a33;border:1px solid #24385f;border-radius:6px;padding:10px;margin-bottom:10px;white-space:pre-wrap}
+.airx-alpha{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#3a2a10;border:1px solid #7a5a20;color:#e8c98a;font-size:11px;vertical-align:1px}
 .unity-render-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .unity-render-actions a{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .unity-render-actions a.disabled{opacity:0.55;cursor:not-allowed}
@@ -3492,7 +3493,8 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div class="ph">この機能について</div>
-    <div class="unity-render-status">間取り図を読み取って、この間取りとして起こします。</div>
+    <div class="unity-render-status">間取り図を読み取って、この間取りとして起こします。<span class="airx-alpha">α版</span></div>
+    <div class="unity-render-status" id="plan-import-quota" style="display:none"></div>
 
     <div class="ph">1. 間取り図のPDFか画像を選ぶ</div>
     <div class="unity-render-actions">
