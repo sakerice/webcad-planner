@@ -12,4 +12,5 @@ import router from "./worker/router.mjs";
 
 export default router;
 export { CollaborationRoom } from "./worker/collab-room.mjs";
+export { AiQuota } from "./worker/ai-quota.mjs";
 export { applyPatch } from "./worker/shared.mjs";

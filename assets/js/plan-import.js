@@ -293,9 +293,11 @@
       ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。図面の部分だけを大きく囲み直すと通ることがあります。',
       ai_bad_response: 'AIが間取りとして答えられませんでした。図面がはっきり写るように囲み直してください。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
+      ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
       invalid_request: '送った画像に問題がありました。',
     };
     var text = map[code] || ('読み取れませんでした（' + status + ' ' + code + '）。');
+    if (code === 'ai_quota_exceeded' && body && body.message) text = body.message;
     if (body && body.problems && body.problems.length) {
       text += '\n' + body.problems.slice(0, 5).join('\n');
     }

@@ -23,11 +23,13 @@ async function post(path, body, env) {
 }
 
 // AI ルートを直接呼ぶ（fetch を差し替えたいとき）。
-async function callAi(path, body, env, fetchImpl) {
+async function callAi(path, body, env, fetchImpl, headers) {
   const { handleAi } = await mod('worker/routes-ai.mjs');
   const url = new URL('https://example.test' + path);
   const request = new Request(url, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(headers || {}) },
+    body: JSON.stringify(body),
   });
   return handleAi(request, env, url, { fetchImpl });
 }
@@ -355,4 +357,72 @@ test('使用量は全ページの合計になる', async () => {
   const body = await res.json();
   assert.equal(body.usage.calls, 2, '何回送ったかが残っていない');
   assert.equal(body.usage.inputTokens, 4000, 'ページぶんの合計になっていない');
+});
+
+// ── 費用の歯止め ──────────────────────────────────────────────────
+//
+// /api/ai/* には認証が無い。URLを知っていれば誰でも呼べ、1回 ¥4〜16 が
+// そのまま請求される。図面1枚につき1回 AI を呼ぶので、8ページのPDFなら
+// 1リクエストで8回ぶん。ここが最後の砦になる。
+function quotaEnv(extra) {
+  // 数を持つ Durable Object の代わり。呼ばれた内容を覚えておく。
+  const seen = [];
+  let used = 0;
+  const stub = {
+    fetch: async (url) => {
+      const u = new URL(url);
+      const cost = Number(u.searchParams.get('cost'));
+      const perDay = Number(u.searchParams.get('perDay'));
+      seen.push({ cost, who: u.searchParams.get('who'), perDay, totalPerDay: Number(u.searchParams.get('totalPerDay')) });
+      if (used + cost > perDay) {
+        return new Response(JSON.stringify({ ok: false, scope: 'who', limit: perDay, remaining: perDay - used }));
+      }
+      used += cost;
+      return new Response(JSON.stringify({ ok: true, scope: 'who', limit: perDay, remaining: perDay - used }));
+    },
+  };
+  return {
+    env: { ...VERTEX_ENV, ...extra, AI_QUOTA: { idFromName: () => 'id', get: () => stub } },
+    seen,
+  };
+}
+
+test('使う前に数える（送ってから断ると費用は戻らない）', async () => {
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '10' });
+  let called = 0;
+  await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
+    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
+  assert.equal(seen.length, 1, '数を取りに行っていない');
+  assert.equal(seen[0].cost, 3, 'ページ数ぶんで数えていない（リクエスト数で数えている）');
+  assert.equal(called, 3);
+});
+
+test('上限を超えたら、AIを呼ばずに断る', async () => {
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '2' });
+  let called = 0;
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, env,
+    vertexFetch(async () => { called++; return vertexReply({ floors: [] }); }));
+  assert.equal(res.status, 429);
+  assert.equal(called, 0, '上限を超えているのに AI を呼んでいる（費用が出ている）');
+  const body = await res.json();
+  assert.equal(body.error, 'ai_quota_exceeded');
+  assert.match(body.message, /使い切りました/, '利用者に何が起きたか伝わらない');
+});
+
+test('数の仕組みが無い環境では通す（機能まで止めない）', async () => {
+  let called = 0;
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV,
+    vertexFetch(async () => { called++; return vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] }); }));
+  assert.equal(res.status, 200);
+  assert.equal(called, 1);
+});
+
+test('数える相手は接続元。上限は環境変数で変えられる', async () => {
+  const { env, seen } = quotaEnv({ AI_DAILY_PER_USER: '7', AI_DAILY_TOTAL: '99' });
+  await callAi('/api/ai/import-plan', { image: PNG }, env,
+    vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })),
+    { 'cf-connecting-ip': '203.0.113.9' });
+  assert.equal(seen[0].who, '203.0.113.9');
+  assert.equal(seen[0].perDay, 7);
+  assert.equal(seen[0].totalPerDay, 99);
 });

@@ -26,6 +26,14 @@ import { planKnowledge } from "./plan-knowledge.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+// 1日に使える AI の呼び出し回数。**図面1枚につき1回**呼ぶので、
+// 8ページのPDFなら1リクエストで8回ぶんになる。
+//
+// /api/ai/* には認証が無い。URLを知っていれば誰でも呼べ、1回 ¥4〜16 が
+// そのまま請求される。ここが費用の歯止めになる。
+// 環境変数 AI_DAILY_TOTAL / AI_DAILY_PER_USER で上書きできる。
+const DEFAULT_DAILY_TOTAL = 300;     // 全体。だいたい1日 ¥1,200 が上限になる
+const DEFAULT_DAILY_PER_USER = 24;   // 1つの接続元。3ページのPDFなら8回ぶん
 // 1回に読むページ数の上限。各ページが各階になる。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
@@ -42,7 +50,7 @@ export async function handleAi(request, env, url, deps = {}) {
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
-  if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps);
+  if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
 }
@@ -66,7 +74,7 @@ function readImage(value, field) {
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────
-async function aiImportPlan(payload, env, deps) {
+async function aiImportPlan(payload, env, deps, request) {
   // PDF はブラウザ側でページごとの画像にしてから送られてくる。
   // 1枚だけの古い形(image)も受ける。
   const raw = Array.isArray(payload && payload.images) && payload.images.length
@@ -80,6 +88,18 @@ async function aiImportPlan(payload, env, deps) {
   }
 
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+
+  // 使う前に数える。**送ってから断ると費用は戻らない。**
+  const quota = await takeQuota(request, env, images.length);
+  if (!quota.ok) {
+    return json({
+      error: "ai_quota_exceeded",
+      scope: quota.scope,
+      message: quota.scope === "total"
+        ? "本日ぶんの読み取り回数を使い切りました。明日またお試しください。"
+        : `本日ぶんの読み取り回数を使い切りました（1日 ${quota.limit} 枚まで）。明日またお試しください。`,
+    }, 429);
+  }
 
   const config = vertexConfig(env);
   if (!config.configured) {
@@ -132,6 +152,27 @@ async function aiImportPlan(payload, env, deps) {
     pages.push(parsed);
   }
   return finishImportedPlan(pages.length === 1 ? pages[0] : { floors: mergeFloors(pages) }, sumUsage(results));
+}
+
+// 使った枚数を数える。Durable Object が数の持ち主。
+//
+// 数える相手は接続元のIPアドレス。利用者の口座の仕組みがまだ無いため。
+// 定額サブスクと使用回数制限を入れるときは、ここを口座ごとに替える。
+async function takeQuota(request, env, count) {
+  if (!env || !env.AI_QUOTA) return { ok: true, scope: "none", limit: 0, remaining: 0 };
+  const who = (request && request.headers.get("cf-connecting-ip")) || "unknown";
+  const perDay = Number(env.AI_DAILY_PER_USER) || DEFAULT_DAILY_PER_USER;
+  const totalPerDay = Number(env.AI_DAILY_TOTAL) || DEFAULT_DAILY_TOTAL;
+  const id = env.AI_QUOTA.idFromName("ai-usage");
+  const url = `https://ai-quota/take?cost=${count}&who=${encodeURIComponent(who)}`
+    + `&perDay=${perDay}&totalPerDay=${totalPerDay}`;
+  try {
+    const res = await env.AI_QUOTA.get(id).fetch(url);
+    return await res.json();
+  } catch (e) {
+    // 数えられないときは通す。数の仕組みが落ちて機能まで止まるほうが困る。
+    return { ok: true, scope: "error", limit: 0, remaining: 0 };
+  }
 }
 
 // ページごとの補足。何ページ目かを伝えると、階の取り違えが減る。
