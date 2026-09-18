@@ -25,6 +25,7 @@ import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
 import { planKnowledge } from "./plan-knowledge.mjs";
 import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
+import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -43,10 +44,13 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 // 上書きできる。モデルを変えたら COST を見直すこと。
 const COST_LOCATE = 1;
 const COST_IMPORT_PAGE = 10;
-// 「1回の取り込み」の目安。3ページのPDFで 3×(1+10) = 33点。
+// 見直しは、元の図面と「答えを描き直した絵」の2枚を見て、全体を作り直させる。
+// 入力の画像が1枚増えるが出力は同じなので、読み取りと同じ重さとして数える。
+const COST_REVISE_PAGE = 10;
+// 「1回の取り込み」の目安。3ページのPDFで 3×(1+10+10) = 63点。
 // 上限は**回数で**設定する（点は内部の数え方で、設定する人が意識するものではない）。
-const POINTS_PER_IMPORT = 33;
-const DEFAULT_IMPORTS_TOTAL = 10;    // 全体。1日およそ ¥1,200
+const POINTS_PER_IMPORT = 63;
+const DEFAULT_IMPORTS_TOTAL = 5;     // 全体。1日およそ ¥1,100
 const DEFAULT_IMPORTS_PER_USER = 2;  // 1つの接続元
 
 function quotaLimits(env) {
@@ -80,6 +84,7 @@ export async function handleAi(request, env, url, deps = {}) {
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
+  if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/find-plan") return aiFindPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
@@ -234,59 +239,139 @@ async function aiImportPlan(payload, env, deps, request) {
     }, 429);
   }
 
-  const provider = importProvider(env);
-  if (provider.kind === "vertex") {
-    const config = vertexConfig(env);
-    if (!config.configured) {
-      return json({
-        error: "ai_not_configured",
-        message: "AI の鍵がこの環境に設定されていません。"
-          + " wrangler secret put OPENAI_API_KEY か GOOGLE_SERVICE_ACCOUNT_JSON で設定してください。",
-      }, 503);
-    }
-    // 日本国内ではないリージョンへ間取り図を送ってしまう事故を、ここで止める。
-    // グローバル窓口はエラーにならず黙って国外へ出るので、送る前に弾く。
-    if (!isJapanLocation(config.location)) {
-      return json({
-        error: "ai_region_not_japan",
-        message: `間取り図は個人情報を含みうるため、日本国内のリージョンでしか処理できません。いまの設定: ${config.location}`,
-      }, 500);
-    }
-    provider.config = config;
+  const provider = resolveImportProvider(env);
+  if (provider.error) return provider.error;
+
+  const results = await Promise.all(images.map((img, i) => askForPlan(provider, {
+    system: SYSTEM_PROMPT,
+    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+    images: [{ mimeType: img.mimeType, base64: img.base64 }],
+    fetchImpl: deps.fetchImpl,
+  })));
+
+  const pages = collectPages(results);
+  if (pages.error) return pages.error;
+  return finishImportedPlan(
+    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    sumUsage(results),
+    // 見直しのために、**モデルが答えたそのままの形**をページごとに返す。
+    // アプリが組み立てたあとの形では、本人に自分の答えとして見せられない。
+    { pages: pages.list },
+  );
+}
+
+// ── 自分の答えを見直させる ───────────────────────────────────────────
+//
+// 読み取りの直後に、画面が「答えを平面図として描き直した絵」を作って送ってくる。
+// 元の図面とその絵を並べて渡し、違うところを直させる。
+//
+// **失敗しても、読み取りの結果は画面側に残っている。** ここが落ちたときは
+// 見直す前のものがそのまま使われる。見直しは上積みであって、必須の工程ではない。
+async function aiRevisePlan(payload, env, deps, request) {
+  const raw = Array.isArray(payload && payload.images) ? payload.images.slice(0, MAX_PAGES) : [];
+  const renders = Array.isArray(payload && payload.renders) ? payload.renders.slice(0, MAX_PAGES) : [];
+  const pagesIn = Array.isArray(payload && payload.pages) ? payload.pages.slice(0, MAX_PAGES) : [];
+  if (!raw.length || raw.length !== renders.length || raw.length !== pagesIn.length) {
+    return json({ error: "invalid_request", message: "images / renders / pages は同じ数だけ送ること" }, 400);
   }
 
-  const calls = images.map((img, i) => {
-    const common = {
-      system: SYSTEM_PROMPT,
-      docs: [planKnowledge(), planSpec()],
-      text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
-      image: { mimeType: img.mimeType, base64: img.base64 },
-      fetchImpl: deps.fetchImpl,
-    };
-    if (provider.kind === "openai") {
-      return openaiGenerate({
-        ...common,
-        config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) },
-      });
+  const pairs = [];
+  for (let i = 0; i < raw.length; i++) {
+    const original = readImage(raw[i], `images[${i}]`);
+    if (original.error) return json({ error: "invalid_request", message: original.error }, 400);
+    const drawn = readImage(renders[i], `renders[${i}]`);
+    if (drawn.error) return json({ error: "invalid_request", message: drawn.error }, 400);
+    if (!pagesIn[i] || typeof pagesIn[i] !== "object") {
+      return json({ error: "invalid_request", message: `pages[${i}] が読み取り結果の形ではない` }, 400);
     }
-    return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
-  });
-  const results = await Promise.all(calls);
+    pairs.push({ original, drawn, page: pagesIn[i] });
+  }
 
+  const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
+
+  const quota = await takeQuota(request, env, pairs.length * COST_REVISE_PAGE);
+  if (!quota.ok) {
+    return json({
+      error: "ai_quota_exceeded",
+      scope: quota.scope,
+      message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
+    }, 429);
+  }
+
+  const provider = resolveImportProvider(env);
+  if (provider.error) return provider.error;
+
+  const results = await Promise.all(pairs.map((pair, i) => askForPlan(provider, {
+    system: REVISE_SYSTEM,
+    text: buildRevisePrompt({
+      json: JSON.stringify(pair.page),
+      hint: pageHint(hint, i, pairs.length),
+    }),
+    // **元の図面が先、描き直した絵が後。** 指示文がこの順で呼んでいる。
+    images: [
+      { mimeType: pair.original.mimeType, base64: pair.original.base64 },
+      { mimeType: pair.drawn.mimeType, base64: pair.drawn.base64 },
+    ],
+    fetchImpl: deps.fetchImpl,
+  })));
+
+  const pages = collectPages(results);
+  if (pages.error) return pages.error;
+  return finishImportedPlan(
+    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    sumUsage(results),
+    { pages: pages.list, revised: true },
+  );
+}
+
+// 読み取りを投げる先を決めて、鍵とリージョンを検める。
+// 読み取りと見直しで同じ手続きを二度書かないため、ここに1つだけ置く。
+function resolveImportProvider(env) {
+  const provider = importProvider(env);
+  if (provider.kind !== "vertex") return provider;
+  const config = vertexConfig(env);
+  if (!config.configured) {
+    return { error: json({
+      error: "ai_not_configured",
+      message: "AI の鍵がこの環境に設定されていません。"
+        + " wrangler secret put OPENAI_API_KEY か GOOGLE_SERVICE_ACCOUNT_JSON で設定してください。",
+    }, 503) };
+  }
+  // 日本国内ではないリージョンへ間取り図を送ってしまう事故を、ここで止める。
+  // グローバル窓口はエラーにならず黙って国外へ出るので、送る前に弾く。
+  if (!isJapanLocation(config.location)) {
+    return { error: json({
+      error: "ai_region_not_japan",
+      message: `間取り図は個人情報を含みうるため、日本国内のリージョンでしか処理できません。いまの設定: ${config.location}`,
+    }, 500) };
+  }
+  return { ...provider, config };
+}
+
+// 1回ぶんの問い合わせ。提供元による書き方の違いは、ここだけに閉じる。
+function askForPlan(provider, { system, text, images, fetchImpl }) {
+  const common = { system, docs: [planKnowledge(), planSpec()], text, images, fetchImpl };
+  if (provider.kind === "openai") {
+    return openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
+  }
+  return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
+}
+
+// 返事の束を、ページごとのJSONにほどく。1つでも駄目なら全体を失敗にする。
+function collectPages(results) {
   const failed = results.find((r) => !r.ok);
   if (failed) {
-    return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
+    return { error: json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502) };
   }
-
-  const pages = [];
+  const list = [];
   for (const r of results) {
     const parsed = extractJson(r.text);
     if (!parsed) {
-      return json({ error: "ai_bad_response", message: "AI の返事から JSON を取り出せませんでした。" }, 502);
+      return { error: json({ error: "ai_bad_response", message: "AI の返事から JSON を取り出せませんでした。" }, 502) };
     }
-    pages.push(parsed);
+    list.push(parsed);
   }
-  return finishImportedPlan(pages.length === 1 ? pages[0] : { floors: mergeFloors(pages) }, sumUsage(results));
+  return { list };
 }
 
 // 使った枚数を数える。Durable Object が数の持ち主。
@@ -357,7 +442,7 @@ function sumUsage(results) {
 // モデルの出力から、渡してよい間取りを作る。
 //
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
-export function finishImportedPlan(parsed, usage) {
+export function finishImportedPlan(parsed, usage, extra) {
   const plan = decodeCompactPlan(parsed);
   // 壁はAIに出させず、**部屋と部屋の境目から作る**。
   // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
@@ -389,6 +474,7 @@ export function finishImportedPlan(parsed, usage) {
     // モデルが「読めなかった」と言っていることは、そのまま利用者に見せる。
     notes: plan.notes.slice(0, 20),
     usage: usage || null,
+    ...(extra || {}),
   });
 }
 

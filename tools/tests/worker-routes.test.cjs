@@ -400,10 +400,10 @@ test('使う前に数える（送ってから断ると費用は戻らない）',
 });
 
 test('上限を超えたら、AIを呼ばずに断る', async () => {
-  // 1回 = 33点。3ページの取り込みは 3×10 = 30点で収まるので、4ページで超える。
+  // 1回 = 63点。読み取りは1ページ10点なので、6ページ(60点)までは収まり、7ページで超える。
   const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '1' });
   let called = 0;
-  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG, PNG] }, env,
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG, PNG, PNG, PNG, PNG] }, env,
     vertexFetch(async () => { called++; return vertexReply({ floors: [] }); }));
   assert.equal(res.status, 429);
   assert.equal(called, 0, '上限を超えているのに AI を呼んでいる（費用が出ている）');
@@ -426,8 +426,8 @@ test('数える相手は接続元。上限は環境変数で変えられる', as
     vertexFetch(async () => vertexReply({ floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] })),
     { 'cf-connecting-ip': '203.0.113.9' });
   assert.equal(seen[0].who, '203.0.113.9');
-  assert.equal(seen[0].perDay, 66, '1回=33点で換算していない');
-  assert.equal(seen[0].totalPerDay, 990);
+  assert.equal(seen[0].perDay, 126, '1回=63点で換算していない');
+  assert.equal(seen[0].totalPerDay, 1890);
 });
 
 // ── どのモデルに読ませるか ──────────────────────────────────────────
@@ -505,7 +505,7 @@ test('残り回数は、数えずに見るだけ', async () => {
     const u = new URL(url);
     seen.push({ peek: u.searchParams.get('peek'), cost: Number(u.searchParams.get('cost')),
                 perDay: Number(u.searchParams.get('perDay')), totalPerDay: Number(u.searchParams.get('totalPerDay')) });
-    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 66, totalRemaining: 330 }));
+    return new Response(JSON.stringify({ ok: true, scope: 'peek', remaining: 126, totalRemaining: 630 }));
   } };
   const env = { ...VERTEX_ENV, AI_QUOTA: { idFromName: () => 'id', get: () => stub } };
   const { handleAi } = await mod('worker/routes-ai.mjs');
@@ -515,9 +515,9 @@ test('残り回数は、数えずに見るだけ', async () => {
   const body = await res.json();
   assert.equal(seen[0].peek, '1', '見るだけになっていない（数えてしまう）');
   assert.equal(seen[0].cost, 0);
-  assert.equal(body.left, 2, '残り66点 = 2回ぶん にならない');
+  assert.equal(body.left, 2, '残り126点 = 2回ぶん にならない');
   assert.equal(body.perUser, 2, '既定は ひとり1日2回');
-  assert.equal(body.total, 10, '既定は 全体1日10回');
+  assert.equal(body.total, 5, '既定は 全体1日5回');
 });
 
 test('上限は「回数」で設定する（点は内部の数え方）', async () => {
@@ -534,7 +534,57 @@ test('上限は「回数」で設定する（点は内部の数え方）', async
   const { handleAi } = await mod('worker/routes-ai.mjs');
   const url = new URL('https://example.test/api/ai/quota');
   await handleAi(new Request(url), env, url, {});
-  // 1回 = 33点（3ページのPDFで 3×(1+10)）
-  assert.equal(seen[0].perDay, 165);
-  assert.equal(seen[0].totalPerDay, 1320);
+  // 1回 = 63点（3ページのPDFで 3×(1+10+10) … 位置探し・読み取り・見直し）
+  assert.equal(seen[0].perDay, 315);
+  assert.equal(seen[0].totalPerDay, 2520);
+});
+
+// ── 自分の答えを見直させる ───────────────────────────────────────────
+//
+// 読み取りは1回投げて1回答えを受け取るだけで、モデルは自分の書いた座標が
+// 間取りとしてどう見えるかを一度も見ていなかった。画面が答えを平面図として
+// 描き直し、元の図面と並べてもう一度渡す。
+const ONE_FLOOR = { floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] };
+
+test('読み取りは、見直しのために素のJSONをページごとに返す', async () => {
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, VERTEX_ENV,
+    vertexFetch(async () => vertexReply(ONE_FLOOR)));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.pages.length, 2, 'ページごとの素のJSONが返っていない');
+  assert.equal(body.pages[0].floors[0].width, 3640,
+    'アプリが組み立てたあとの形になっている（本人に自分の答えとして見せられない）');
+});
+
+test('見直しは、元の図面を先に、描き直した絵を後に渡す', async () => {
+  let sent = null;
+  const res = await callAi('/api/ai/revise-plan',
+    { images: [PNG], renders: [PNG], pages: [ONE_FLOOR] }, VERTEX_ENV,
+    vertexFetch(async (req) => { sent = JSON.parse(await req.text()); return vertexReply(ONE_FLOOR); }));
+  assert.equal(res.status, 200);
+  const parts = sent.contents[0].parts;
+  const images = parts.filter((p) => p.inline_data);
+  assert.equal(images.length, 2, '画像を2枚渡していない（見比べる相手が無い）');
+  const text = parts.filter((p) => p.text).map((p) => p.text).join('\n');
+  assert.match(text, /1枚目の画像/, 'どちらがどちらか伝えていない');
+  assert.match(text, /"width":\s*3640/, '自分が作ったJSONを渡していない');
+  const body = await res.json();
+  assert.equal(body.revised, true, '見直した結果であることが分からない');
+});
+
+test('見直しは、画像と絵とJSONの数が揃っていなければ送らない', async () => {
+  let called = 0;
+  const res = await callAi('/api/ai/revise-plan',
+    { images: [PNG, PNG], renders: [PNG], pages: [ONE_FLOOR] }, VERTEX_ENV,
+    vertexFetch(async () => { called++; return vertexReply(ONE_FLOOR); }));
+  assert.equal(res.status, 400);
+  assert.equal(called, 0, '対応の取れない組み合わせのまま AI を呼んでいる（費用が出ている）');
+});
+
+test('見直しも回数を数える（読み取りと同じ重さ）', async () => {
+  const { env, seen } = quotaEnv({ AI_DAILY_IMPORTS_PER_USER: '2' });
+  await callAi('/api/ai/revise-plan',
+    { images: [PNG, PNG, PNG], renders: [PNG, PNG, PNG], pages: [ONE_FLOOR, ONE_FLOOR, ONE_FLOOR] }, env,
+    vertexFetch(async () => vertexReply(ONE_FLOOR)));
+  assert.equal(seen[0].cost, 30, '3ページの見直しが 3×10点 になっていない');
 });

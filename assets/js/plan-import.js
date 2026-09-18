@@ -350,17 +350,120 @@
     }).then(function (res) {
       return res.json().then(function (body) { return { status: res.status, body: body }; });
     }).then(function (r) {
-      ST.busy = false;
-      if (r.status !== 200) { showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return; }
-      ST.result = r.body;
-      renderPlanImportResult(r.body);
-      syncPlanImportButtons();
-      showQuota();
+      if (r.status !== 200) {
+        ST.busy = false;
+        showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
+      }
+      return revisePlanImport(images, hint, r.body).then(function (body) {
+        ST.busy = false;
+        ST.result = body;
+        renderPlanImportResult(body);
+        syncPlanImportButtons();
+        showQuota();
+      });
     }).catch(function (e) {
       ST.busy = false;
       setStatus('通信に失敗しました: ' + (e && e.message ? e.message : e));
       syncPlanImportButtons();
     });
+  }
+
+  // ── 3b. AI に自分の答えを見直させる ────────────────────────────────
+  //
+  // 読み取りは、これまで投げて一度答えを受け取るだけだった。モデルは自分の
+  // 書いた座標が間取りとしてどう見えるかを一度も見ていない。
+  //
+  // そこで、答えをこちらで平面図として描き直し(assets/js/plan-review-draw.js)、
+  // 元の図面と並べてもう一度渡す。数字の列では気づけない誤り——部屋が隣へ
+  // 食い込む、玄関が飲み込まれて消える、階の輪郭が揃わない——は、絵にすると
+  // 一目で分かる。
+  //
+  // **上積みであって、必須の工程ではない。** 描けなかったとき、通信に失敗した
+  // とき、上限に達したときは、見直す前の結果をそのまま使う。ここで落ちて
+  // 読み取り自体を失うほうが損である。
+  function revisePlanImport(images, hint, body) {
+    var pages = (body && body.pages) || [];
+    if (!pages.length || typeof PlanReviewDraw === 'undefined') return Promise.resolve(body);
+
+    var renders = [];
+    try {
+      for (var i = 0; i < pages.length; i++) {
+        var drawn = PlanReviewDraw.drawPage(pages[i]);
+        if (!drawn) return Promise.resolve(body);
+        renders.push(drawn);
+      }
+    } catch (e) { return Promise.resolve(body); }
+    if (renders.length !== images.length) return Promise.resolve(body);
+
+    setStatus('読み取った間取りを描き起こして、AIに見直させています… 30秒ほどかかります。');
+    return fetch('/api/ai/revise-plan', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ images: images, renders: renders, pages: pages, hint: hint }),
+    }).then(function (res) {
+      return res.json().then(function (out) { return { status: res.status, body: out }; });
+    }).then(function (r) {
+      if (r.status !== 200 || !r.body || !r.body.plan) {
+        body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
+        return body;
+      }
+      // 費用は2回ぶんの合計で見せる。片方だけ出すと実際より安く見える。
+      r.body.usage = addUsage(body.usage, r.body.usage);
+      r.body.reviewImages = renders;
+      r.body.reviewChanges = reviewChanges(pages, r.body.pages || []);
+      return r.body;
+    }).catch(function () {
+      body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
+      return body;
+    });
+  }
+
+  // 見直しで何が変わったかを、利用者の言葉にする。
+  //
+  // **黙って直すと、直ったことも直し損ねたことも分からない。** 費用を2回ぶん
+  // 払っている以上、何が変わったかは見えているべきである。
+  function reviewChanges(before, after) {
+    var bf = {}, lines = [];
+    flatFloors(before).forEach(function (f) { bf[f.floor] = f; });
+    flatFloors(after).forEach(function (a) {
+      var b = bf[a.floor];
+      if (!b) return;
+      var n = a.floor + '階';
+      if (Math.round(a.width) !== Math.round(b.width)) {
+        lines.push(n + 'の間口を ' + Math.round(b.width) + ' → ' + Math.round(a.width) + 'mm に直しました。');
+      }
+      if (Math.round(a.depth) !== Math.round(b.depth)) {
+        lines.push(n + 'の奥行きを ' + Math.round(b.depth) + ' → ' + Math.round(a.depth) + 'mm に直しました。');
+      }
+      var bn = roomNames(b), an = roomNames(a);
+      var gone = bn.filter(function (x) { return an.indexOf(x) < 0; });
+      var came = an.filter(function (x) { return bn.indexOf(x) < 0; });
+      if (came.length) lines.push(n + 'に ' + came.join('・') + ' を足しました。');
+      if (gone.length) lines.push(n + 'から ' + gone.join('・') + ' を外しました。');
+      var bl = partCounts(b), al = partCounts(a);
+      if (bl !== al) lines.push(n + 'の部屋の形（長方形の数）を ' + bl + ' → ' + al + ' に直しました。');
+    });
+    return lines;
+  }
+
+  function flatFloors(pages) {
+    var out = [];
+    (pages || []).forEach(function (p) { ((p && p.floors) || []).forEach(function (f) { out.push(f); }); });
+    return out;
+  }
+  function roomNames(floor) {
+    return ((floor && floor.rooms) || []).map(function (r) { return String(r.name || '(名前なし)'); });
+  }
+  function partCounts(floor) {
+    return ((floor && floor.rooms) || []).reduce(function (n, r) { return n + ((r.parts || []).length); }, 0);
+  }
+
+  function addUsage(a, b) {
+    if (!a) return b; if (!b) return a;
+    var out = {};
+    ['calls', 'inputTokens', 'answerTokens', 'thoughtTokens', 'outputTokens', 'totalTokens']
+      .forEach(function (k) { out[k] = (Number(a[k]) || 0) + (Number(b[k]) || 0); });
+    return out;
   }
 
   // 失敗の理由を、利用者が次に何をすればよいか分かる言葉で出す。
@@ -407,8 +510,9 @@
     if (cost) {
       var u = body.usage;
       if (u && u.inputTokens) {
-        // 単価は gemini-2.5-flash（$0.30 / $2.50 per 1M）。$1=¥150 と置いた概算。
-        var yen = (u.inputTokens / 1e6 * 0.30 + u.outputTokens / 1e6 * 2.50) * 150;
+        // 単価は gpt-6-astra（$10 / $50 per 1M）。$1=¥150 と置いた概算。
+        // **モデルを替えたらここも替える。** 実際より安く見えるのが一番まずい。
+        var yen = (u.inputTokens / 1e6 * 10 + u.outputTokens / 1e6 * 50) * 150;
         cost.textContent = 'この読み取りの費用: 約 ' + yen.toFixed(1) + '円'
           + '（入力 ' + u.inputTokens + ' / 出力 ' + u.outputTokens
           + (u.thoughtTokens ? '（うち思考 ' + u.thoughtTokens + '）' : '') + ' トークン）';
@@ -419,6 +523,13 @@
     var notes = $('plan-import-notes');
     if (notes) {
       var lines = [];
+      if (body.revised) {
+        var ch = body.reviewChanges || [];
+        lines.push('・AIが自分の読み取りを平面図として見直しました'
+          + (ch.length ? '（' + ch.length + '件を直しました）。' : '（直すところはありませんでした）。'));
+        ch.forEach(function (c) { lines.push('　・' + c); });
+      }
+      if (body.reviewNote) lines.push('・' + body.reviewNote);
       (body.notes || []).forEach(function (n) { lines.push('・' + n); });
       (body.warnings || []).forEach(function (w) { lines.push('・' + w); });
       notes.textContent = lines.length ? lines.join('\n') : '特にありません。';
@@ -551,6 +662,7 @@
     showPlanImportError: showPlanImportError,
     showQuota: showQuota,
     renderPlanImportResult: renderPlanImportResult,
+    reviewChanges: reviewChanges,
     MAX_SEND_PX: MAX_SEND_PX,
   };
 }(typeof self !== 'undefined' ? self : this));
