@@ -73,8 +73,8 @@ export function itemTypeTable() {
   ].join("\n");
   return [
     rows(OPENING_TYPES, "建具・開口 — 壁の上に載せる。最寄りの壁へ自動で吸い付くので向きの指定は不要"),
-    rows(STAIR_TYPES, "階段 — 上下階で同じ位置に置く"),
+    rows(STAIR_TYPES, "階段 — その階から上の階へ上る。上下階で同じ位置に置き、いちばん上の階には置かない"),
     rows(FIXTURE_TYPES, "水まわりの設備 — 図に描かれているものだけ"),
-    rows(OUTDOOR_TYPES, "屋外"),
+    rows(OUTDOOR_TYPES, "屋外 — 建物の外の床。部屋ではなく物として置く"),
   ].join("\n");
 }

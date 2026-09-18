@@ -188,3 +188,33 @@ test('手順は短いままにする', async () => {
   assert.ok(buildPlanPrompt().length < 2600,
     '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });
+
+// 実測で起きた読み違い。どれも「指示が無かった」ことが原因だった。
+test('外構を部屋にしない（バルコニーは物として置く）', async () => {
+  // 実測で、玄関ポーチ(455×2275)が1階の部屋になり、バルコニーは2階の部屋と
+  // 物の両方に入った。部屋にすると床と壁ができてしまう。
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const p = buildPlanPrompt();
+  assert.match(p, /建物の外は rooms に入れない/, '屋外を部屋から外す指示が無い');
+  assert.match(p, /ポーチ・テラス・デッキ/, '何が屋外なのかの例が無い');
+  assert.match(p, /バルコニーとして\s*items に入れる/, 'バルコニーを物として置く手順が無い');
+});
+
+test('玄関は、外から入ってこられる場所として探させる', async () => {
+  // 実測で、玄関ドアの内側が別の部屋(KB置き場)に食われ、玄関が1つも
+  // 作られなかった。「玄関ドアと土間がある部屋」だけでは足りない。
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  assert.match(buildPlanPrompt(), /外から家の中へ入ってくる場所/, '玄関の定義が無い');
+});
+
+test('階段の上下を意識させる', async () => {
+  const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
+  const { itemTypeTable } = await mod('worker/plan-item-spec.mjs');
+  // 上る向きは図に描かれている。どこを見れば分かるかを言う。
+  assert.match(buildPlanPrompt(), /UP/, '上る向きの読み取り方が無い');
+  // 階の間の決まりは仕様の側（データの意味そのものなので）。
+  assert.match(itemTypeTable(), /上下階で同じ位置に置き、いちばん上の階には置かない/,
+    '階段が階をまたぐ物であることが仕様に無い');
+  // 手順の側は、読み直して揃える作業だけを持つ。
+  assert.match(buildPlanPrompt(), /下の階と位置が揃っているか/, '階段の見直しに位置の確認が無い');
+});

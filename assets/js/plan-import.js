@@ -497,7 +497,7 @@
 
   function renderPlanImportResult(body) {
     var s = body.summary || {};
-    setStatus('読み取りました。下の内容でよければ取り込んでください。');
+    setStatus('下書きができました。取り込んだあと、手で直して仕上げてください。');
     var head = $('plan-import-summary');
     if (head) {
       head.textContent = '壁 ' + (s.walls || 0) + ' / 部屋 ' + (s.rooms || 0) +
@@ -610,7 +610,7 @@
   function applyPlanImport() {
     if (!ST.result || !ST.result.plan) return;
     if (typeof DATA !== 'undefined' && DATA && ((DATA.walls || []).length || (DATA.rooms || []).length)) {
-      if (!confirm('いまの間取りを、読み取った間取りで置き換えます。よろしいですか？')) return;
+      if (!confirm('いまの間取りを、読み取った下書きで置き換えます。よろしいですか？')) return;
     }
     var plan = toAppObjects(ST.result.plan);
     // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
