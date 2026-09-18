@@ -20,7 +20,7 @@ import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, toJsonSchema } from "./openai.mjs";
-import { SYSTEM_PROMPT, buildPlanPrompt, decodeCompactPlan } from "./plan-prompt.mjs";
+import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
 import { planKnowledge } from "./plan-knowledge.mjs";
@@ -307,6 +307,10 @@ async function aiRevisePlan(payload, env, deps, request) {
       json: JSON.stringify(pair.page),
       hint: pageHint(hint, i, pairs.length),
     }),
+    // **手順も渡す。** 見直しは全体を作り直させるので、読み取りと同じ手順が要る。
+    // 渡さずに作り直させたところ、室名から畳数を除くという手順7の決まりが
+    // 破られた（「Living Dining Kitchen」→「LDK（13.7帖）」）。
+    docs: [planKnowledge(), planSpec(), planProcedure()],
     // **元の図面が先、描き直した絵が後。** 指示文がこの順で呼んでいる。
     images: [
       { mimeType: pair.original.mimeType, base64: pair.original.base64 },
@@ -349,8 +353,8 @@ function resolveImportProvider(env) {
 }
 
 // 1回ぶんの問い合わせ。提供元による書き方の違いは、ここだけに閉じる。
-function askForPlan(provider, { system, text, images, fetchImpl }) {
-  const common = { system, docs: [planKnowledge(), planSpec()], text, images, fetchImpl };
+function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
+  const common = { system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl };
   if (provider.kind === "openai") {
     return openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
   }

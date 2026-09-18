@@ -588,3 +588,16 @@ test('見直しも回数を数える（読み取りと同じ重さ）', async ()
     vertexFetch(async () => vertexReply(ONE_FLOOR)));
   assert.equal(seen[0].cost, 30, '3ページの見直しが 3×10点 になっていない');
 });
+
+test('見直しにも、読み取りと同じ手順を渡す', async () => {
+  // 手順を渡さずに作り直させたところ、室名から畳数を除くという手順7の決まりが
+  // 破られた（実測:「Living Dining Kitchen」→「LDK（13.7帖）」）。
+  // 指示文で「手順は前と同じです」と言うだけでは、前がどこにも無い。
+  let sent = null;
+  await callAi('/api/ai/revise-plan',
+    { images: [PNG], renders: [PNG], pages: [ONE_FLOOR] }, VERTEX_ENV,
+    vertexFetch(async (req) => { sent = JSON.parse(await req.text()); return vertexReply(ONE_FLOOR); }));
+  const text = sent.contents[0].parts.filter((p) => p.text).map((p) => p.text).join('\n');
+  assert.match(text, /畳数の表記は除く/, '見直しの側から手順が見えていない');
+  assert.match(text, /取り込みデータ仕様/, '見直しの側から仕様書が見えていない');
+});

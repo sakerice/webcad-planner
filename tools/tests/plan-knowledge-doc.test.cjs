@@ -61,7 +61,13 @@ test('送信時に、知識・仕様・手順を別々の部品として渡し�
   const { readFileSync } = require('node:fs');
   for (const f of ['worker/routes-ai.mjs', 'tools/probe_vertex.cjs']) {
     const src = readFileSync(join(ROOT, f), 'utf8');
-    assert.match(src, /docs:\s*\[planKnowledge\(\),\s*planSpec\(\)\]/,
-      `${f} が知識と仕様を渡していない`);
+    // 3つ目(手順)が続くことがある。並べて渡していること自体を見る。
+    assert.match(src, /\[planKnowledge\(\),\s*planSpec\(\)/,
+      `${f} が知識と仕様を別々の部品として渡していない`);
   }
+  // 見直しは全体を作り直させるので、手順まで渡す。渡さないと、手順にしか
+  // 書いていない決まり(室名から畳数を除く等)が見直しで破られる。
+  const src = readFileSync(join(ROOT, 'worker/routes-ai.mjs'), 'utf8');
+  assert.match(src, /\[planKnowledge\(\),\s*planSpec\(\),\s*planProcedure\(\)\]/,
+    '見直しに手順を渡していない');
 });
