@@ -411,6 +411,7 @@
       r.body.usage = addUsage(body.usage, r.body.usage);
       r.body.reviewImages = renders;
       r.body.reviewChanges = reviewChanges(pages, r.body.pages || []);
+      r.body.beforePages = pages;   // 見直す前の答え。何が変わったかを後から確かめるため
       return r.body;
     }).catch(function () {
       body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
@@ -422,34 +423,42 @@
   //
   // **黙って直すと、直ったことも直し損ねたことも分からない。** 費用を2回ぶん
   // 払っている以上、何が変わったかは見えているべきである。
+  // **階の番号で突き合わせない。** 見直しはページごとに投げているので、前と後は
+  // ページの順で1対1に並ぶ。番号で突き合わせると、同じ番号を名乗る階が2つ
+  // あったときに別の階どうしを比べてしまう。実測で、3ページ目が「2階」と
+  // 読まれ、2ページ目の2階と3ページ目の2階を比べて「2階に趣味部屋を足した」
+  // といった出鱈目が並んだ（アプリに渡る間取りのほうは mergeFloors が
+  // ページ順で番号を振り直すので正しい）。
   function reviewChanges(before, after) {
-    var bf = {}, lines = [];
-    flatFloors(before).forEach(function (f) { bf[f.floor] = f; });
-    flatFloors(after).forEach(function (a) {
-      var b = bf[a.floor];
-      if (!b) return;
-      var n = a.floor + '階';
-      if (Math.round(a.width) !== Math.round(b.width)) {
-        lines.push(n + 'の間口を ' + Math.round(b.width) + ' → ' + Math.round(a.width) + 'mm に直しました。');
-      }
-      if (Math.round(a.depth) !== Math.round(b.depth)) {
-        lines.push(n + 'の奥行きを ' + Math.round(b.depth) + ' → ' + Math.round(a.depth) + 'mm に直しました。');
-      }
-      var bn = roomNames(b), an = roomNames(a);
-      var gone = bn.filter(function (x) { return an.indexOf(x) < 0; });
-      var came = an.filter(function (x) { return bn.indexOf(x) < 0; });
-      if (came.length) lines.push(n + 'に ' + came.join('・') + ' を足しました。');
-      if (gone.length) lines.push(n + 'から ' + gone.join('・') + ' を外しました。');
-      var bl = partCounts(b), al = partCounts(a);
-      if (bl !== al) lines.push(n + 'の部屋の形（長方形の数）を ' + bl + ' → ' + al + ' に直しました。');
+    var lines = [];
+    (before || []).forEach(function (bp, page) {
+      var ap = (after || [])[page];
+      if (!ap) return;
+      var bfs = (bp && bp.floors) || [];
+      ((ap && ap.floors) || []).forEach(function (a, i) {
+        var b = bfs[i];
+        if (!b) return;
+        var n = (Number(a.floor) || (page + 1)) + '階';
+        if (Number(a.floor) !== Number(b.floor)) {
+          lines.push((page + 1) + 'ページ目を ' + (Number(b.floor) || '?') + '階 → '
+            + (Number(a.floor) || '?') + '階 に直しました。');
+        }
+        if (Math.round(a.width) !== Math.round(b.width)) {
+          lines.push(n + 'の間口を ' + Math.round(b.width) + ' → ' + Math.round(a.width) + 'mm に直しました。');
+        }
+        if (Math.round(a.depth) !== Math.round(b.depth)) {
+          lines.push(n + 'の奥行きを ' + Math.round(b.depth) + ' → ' + Math.round(a.depth) + 'mm に直しました。');
+        }
+        var bn = roomNames(b), an = roomNames(a);
+        var gone = bn.filter(function (x) { return an.indexOf(x) < 0; });
+        var came = an.filter(function (x) { return bn.indexOf(x) < 0; });
+        if (came.length) lines.push(n + 'に ' + came.join('・') + ' を足しました。');
+        if (gone.length) lines.push(n + 'から ' + gone.join('・') + ' を外しました。');
+        var bl = partCounts(b), al = partCounts(a);
+        if (bl !== al) lines.push(n + 'の部屋の形（長方形の数）を ' + bl + ' → ' + al + ' に直しました。');
+      });
     });
     return lines;
-  }
-
-  function flatFloors(pages) {
-    var out = [];
-    (pages || []).forEach(function (p) { ((p && p.floors) || []).forEach(function (f) { out.push(f); }); });
-    return out;
   }
   function roomNames(floor) {
     return ((floor && floor.rooms) || []).map(function (r) { return String(r.name || '(名前なし)'); });

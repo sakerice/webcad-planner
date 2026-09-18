@@ -33,8 +33,20 @@ assert.deepStrictEqual(out, ['1階の部屋の形（長方形の数）を 1 → 
 out = changes([page(1, 7280, 4095, [room('洋室')])], [page(1, 7280, 4095, [room('洋室')])]);
 assert.deepStrictEqual(out, []);
 
-// 読み取れなかった階を勝手に増やさない（対応する階が無ければ触らない）
-out = changes([page(1, 7280, 4095, [room('洋室')])], [page(3, 5915, 3640, [room('趣味部屋')])]);
+// **階の番号ではなく、ページの順で突き合わせる。**
+//
+// 見直しはページごとに投げているので、前と後はページの順で1対1に並ぶ。
+// 番号で突き合わせると、同じ番号を名乗る階が2つあったときに別の階どうしを
+// 比べてしまう。実測で、3ページ目が「2階」と読まれ、2ページ目の2階と
+// 3ページ目の2階を比べて「2階に趣味部屋を足した」と出た。
+const before = [page(2, 7280, 4095, [room('LDK')]), page(2, 5915, 3640, [room('趣味部屋')])];
+const after  = [page(2, 7280, 4095, [room('LDK')]), page(3, 5915, 3640, [room('趣味部屋')])];
+out = changes(before, after);
+assert.deepStrictEqual(out, ['2ページ目を 2階 → 3階 に直しました。'],
+  '別のページの階どうしを比べている');
+
+// ページ数が合わなければ、余ったほうは触らない
+out = changes([page(1, 7280, 4095, [room('洋室')])], []);
 assert.deepStrictEqual(out, []);
 
 console.log('plan-review-changes: ok');
