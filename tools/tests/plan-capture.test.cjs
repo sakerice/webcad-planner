@@ -395,7 +395,8 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('storyHeightMmForFloor'), topLevelFunction('storyHeightM'),
     topLevelFunction('perFloorHeightsEnabled'), topLevelFunction('planFloorHeightEntry'),
     topLevelFunction('defaultWallHeightMmForFloor'), topLevelFunction('defaultFloorRaiseMmForFloor'),
-    topLevelFunction('floorSlabMmForFloor'), topLevelFunction('localSupportTopY'),
+    topLevelFunction('floorSlabMmForFloor'), topLevelFunction('localSupportTopY'), topLevelFunction('floorHasSkipLevel'),
+    topLevelFunction('wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm'), topLevelFunction('roomAtPointOnFloor'),
     topLevelFunction('segmentInsideRectLengthMm'),
     topLevelFunction('floorSlabHeightM'), topLevelFunction('floorSlabHeightMForFloor'),
     topLevelFunction('floorBaseY'), topLevelFunction('floorTopY'),
@@ -403,6 +404,7 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('roomVoidTargetFloor'), topLevelFunction('roomIsVoidCeiling'),
     topLevelFunction('roomVoidCeilingMm'), topLevelFunction('roomVoidFloorsAreOpen'),
     topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
+    topLevelFunction('roomCeilingCapM'), topLevelFunction('segmentInsideRectLengthMm'),
     topLevelFunction('roomsOverlapInPlan'), topLevelFunction('roomAboveRoom'),
     topLevelFunction('roomHasRoomAbove'),
     topLevelFunction('roomDeclaresSlopedCeiling'), topLevelFunction('roofCoversPlanPoint'), topLevelFunction('setbackOutlineCoversLocal'),
@@ -415,6 +417,9 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('roomCeilingSlopeM'),
     topLevelFunction('roomRenderedCeilingMm'), topLevelFunction('roomRenderedCeilingShape'),
     topLevelFunction('roomRenderedCeilingLabel'),
+    topLevelFunction('roomLevelLabel'),
+    topLevelFunction('roomHeightLabel'),
+    topLevelFunction('roomSkipLevelMm'),
     topLevelFunction('drawCeilingLabel2d')
   ], {
     DATA: data, HeightModel: HeightModel, ctx: ctx2d,
@@ -486,7 +491,18 @@ function drawSandbox(parts, extra) {
     Math: Math, Number: Number, String: String, Boolean: Boolean, Array: Array,
     Object: Object, JSON: JSON, isFinite: isFinite, isNaN: isNaN,
     parseInt: parseInt, parseFloat: parseFloat,
-    DRAG: { active: false }
+    DRAG: { active: false },
+    // 天井ビュー(assets/js/ceiling-designer.js)は index.html が必ず読むので、
+    // 実行時に CeilingDesigner が無いことはない。この砂場は未知のグローバルを
+    // 「記録するだけの空関数」にするため、置かないと typeof の番人をすり抜けて
+    // CeilingDesigner.visible が「関数でない」で落ちる。天井ビューに入って
+    // いないときの本物と同じ答えを返す。
+    CeilingDesigner: {
+      active() { return false; },
+      visible() { return true; },
+      isTool() { return false; },
+      drawArea() {}
+    }
   }, extra || {});
   const sb = new Proxy(base, {
     has() { return true; },

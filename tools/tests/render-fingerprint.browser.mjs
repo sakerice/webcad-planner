@@ -58,9 +58,13 @@ try {
   await page.evaluate((plan) => {
     window._defaultPlanPending = false;
     DATA = JSON.parse(JSON.stringify(plan));
+    // 高さの設定も doImport と同じ順に通す。ここを飛ばすと、**先に読まれていた
+    // 既定間取りの壁の高さがグローバルに残ったまま**この間取りが建ち、
+    // 指紋が既定間取りの都合で動く。
+    resetHeightGlobalsForPlanLoad();
     syncNorthFromPlan(); ensureObjectIds();
     ensureExteriorWallSettings(); ensureInteriorWallSettings();
-    ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings();
+    ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings();
     normalizeLegacyFurnitureItems();
     clearEditHistory();
   }, PLAN);

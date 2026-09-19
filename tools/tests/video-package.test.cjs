@@ -117,21 +117,59 @@ test('階を撮る前に家具の上面画像を待つ', () => {
   assert.match(pkg, /waitForPlanFloorTopImages\(/);
 });
 
-test('待ちを信じず、出てきた画素でプレースホルダを検出する', () => {
-  const finder = bodyOf('function findPlanPlaceholderInstances', 3000);
-  // 出力画素を見る。待ちの結果 (img.complete) を見るのではない。
-  assert.match(finder, /imageData|\.data\[/);
-  assert.doesNotMatch(finder, /\.complete/);
-  assert.match(pkg, /findPlanPlaceholderInstances\(/);
+// 待ちの戻り値 (img.complete) ではなく、撮った絵を描いた draw2d が実際に
+// 灰色で代替したかどうかを見る。
+test('待ちを信じず、描いた側が残した名簿でプレースホルダを検出する', () => {
+  const roster = bodyOf('function planCapturePlaceholderRoster', 600);
+  assert.match(roster, /PLAN_CAPTURE_PLACEHOLDERS/);
+  assert.doesNotMatch(roster, /\.complete/);
+  assert.match(pkg, /planCapturePlaceholderRoster\(/);
 });
 
-test('プレースホルダの色は描画側と1か所を共有する（表を2つ持たない）', () => {
-  // 逆算に使う定数が描画側とずれたら、検出は静かに効かなくなる。
+// 画素からの逆算 (findPlanPlaceholderInstances) は撤去した。天面が一様な色の
+// 部材（実測: 室外機 #d8dada）を必ず誤検出し、正常なパッケージを拒否していた。
+// 戻ってきたら同じ事故が戻る。
+test('プレースホルダの判定を画素から逆算し直さない', () => {
+  // 呼び出しと定義だけを禁じる（撤去の理由を書いたコメントは残してよい）。
+  assert.doesNotMatch(html, /findPlanPlaceholderInstances\s*\(/);
+  assert.doesNotMatch(html, /planPlaceholderCouldBe\s*\(/);
+});
+
+test('名簿は描いた1回ぶんだけを持ち、灰色で代替した分岐がその場で書く', () => {
+  const draw = readFileSync(join(__dirname, '..', '..', 'assets', 'js', 'draw-2d.js'), 'utf8');
+  // 撮影のたびに空にする（前の撮影の名簿を持ち越さない）
+  assert.match(draw, /PLAN_CAPTURE_PLACEHOLDERS=\[\];\s*\n\s*draw2d\(\);/);
+  // 書くのはプレースホルダで塗る分岐だけ。通常表示では書かない (PLAN_CAPTURE 中のみ)
+  const at = draw.indexOf('ctx.fillStyle=PLAN_PLACEHOLDER_FILL;');
+  assert.notEqual(at, -1);
+  const around = draw.slice(at - 400, at);
+  assert.match(around, /if\(PLAN_CAPTURE\) PLAN_CAPTURE_PLACEHOLDERS\.push\(/);
+});
+
+test('プレースホルダの色は描画側の1か所にしか無い', () => {
   assert.match(html, /var PLAN_PLACEHOLDER_RGB=/);
   assert.match(html, /ctx\.fillStyle=PLAN_PLACEHOLDER_FILL;/);
-  const could = bodyOf('function planPlaceholderCouldBe', 800);
-  assert.match(could, /PLAN_PLACEHOLDER_ALPHA/);
-  assert.match(could, /PLAN_PLACEHOLDER_RGB/);
+});
+
+// 「4件」とだけ言われたユーザーは平面図のどこを見ればいいのか分からない。
+test('灰色のまま残った部材は名指しされる', () => {
+  const err = bodyOf('function planPlaceholderError', 600);
+  assert.match(err, /planPlaceholderNames\(/);
+  const names = bodyOf('function planPlaceholderNames', 600);
+  assert.match(names, /itemTypeLabel\(/);
+});
+
+// 待つ側と描く側が別々にモデルを解決すると、片方だけが知っている部材
+// (自動車のフォールバック) が待たれないまま灰色で描かれる。
+test('上面画像のモデル解決は待つ側と描く側で1か所', () => {
+  const draw = readFileSync(join(__dirname, '..', '..', 'assets', 'js', 'draw-2d.js'), 'utf8');
+  assert.match(draw, /function planTopImageModelFor\(/);
+  const entries = bodyOf('function planFloorTopImageEntries', 800);
+  assert.match(entries, /planTopImageModelFor\(/);
+  const item = draw.slice(draw.indexOf('function drawItem2d('));
+  assert.match(item, /var fmp=planTopImageModelFor\(it\.type\);/);
+  // 車のフォールバックを描く側だけが持たない
+  assert.equal(item.indexOf("it.type==='car'?{id:'context-car'"), -1);
 });
 
 test('プレースホルダが残っていたら黙って書き出さない', () => {
@@ -277,10 +315,10 @@ test('平面図ソースは表示中の階を撮り、暗黙に切り替えな�
     'plan branch must not switch view or floor behind the user');
 });
 
-test('平面図ソースでも家具の上面画像を待ち、画素で確かめる', () => {
+test('平面図ソースでも家具の上面画像を待ち、撮った絵の名簿で確かめる', () => {
   const branch = planBranch();
   assert.match(branch, /waitForPlanFloorTopImages\(/);
-  assert.match(branch, /findPlanPlaceholderInstances\(/);
+  assert.match(branch, /planCapturePlaceholderRoster\(/);
 });
 
 // ── Task 7c-2: 平面図経路にも部材の名指しを戻す ─────────────────────────
@@ -506,17 +544,17 @@ const VIDEO_FNS = [
   'getObjBounds', 'objectIdLabel',
   'isPlanSubjectObject', 'planSubjectBoundsMm', 'planContextBoundsMm', 'planFitViewFor',
   'planSubjectFrameRatio', 'planEmptyFloorRefusal',
-  'videoRenderViewRefusalText', 'planPlaceholderError',
+  'videoRenderViewRefusalText', 'planPlaceholderError', 'planPlaceholderNames',
   'videoSourceLabel', 'resolveVideoPreset', 'composeVideoPromptOrThrow',
   'videoShadowLiftRecord', 'videoPlanWithheldRecord', 'videoPackageJson',
   'planInstanceList',
   // 高さ（package.json の heightModel はレンダと同じ経路で解く）
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
     'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
@@ -524,7 +562,7 @@ const VIDEO_FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',
-  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
+  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
   'videoHeightModelRecord',
   'generateVideoRenderPackage'
 ];
@@ -594,7 +632,10 @@ function harness(opts) {
       registry.set(u, im);
       return u;
     },
-    findPlanPlaceholderInstances: function () { return o.placeholders || []; },
+    planCapturePlaceholderRoster: function () { return (o.placeholders || []).slice(); },
+    // 名前の表そのもの (ILABELS / FMP_ITEMS) はここでは要らない。文面が型を
+    // 名指しで通しているかだけを見る。
+    itemTypeLabel: function (t) { return '〔' + t + '〕'; },
     videoCameraDescriptor: function (floor) {
       return { mode: 'exterior', floor: floor, posM: [20, 6, 6], targetM: [5, 4, 1],
                hFovDeg: 60, aspect: 1.5, eyeHeightM: 1.5, floorBaseYM: 0 };

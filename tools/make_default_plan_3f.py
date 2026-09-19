@@ -254,11 +254,11 @@ for ix, iy, irot, fl, iel, ox, oy, orot in AC_PAIRS:
 # 道路・電柱・隣家。隣地境界まで910mmの近さで3階建てが建つ
 item("road", 2730, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70)
 item("neighbor-house", 10920, 4000, 7280, 6370, 1, rot=180,
-     color="#d7c1a3", contextFloors=3, contextHeight=9300, contextGhost=True)
+     color="#ffffff", contextFloors=3, contextHeight=9300, contextGhost=True)
 item("neighbor-house", -5460, 4000, 7280, 6370, 1, rot=180,
-     color="#c9c2b4", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-house", 2730, -4095, 7280, 6370, 1, rot=0,
-     color="#b9bcc2", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 
 # ══════════════════════════ 1F 家具 ══════════════════════════
 # ── 浴室 (1坪UB)
@@ -520,6 +520,17 @@ plan.update(_review23["metadata"])
 for _collection, _order in _review23["order"].items():
     _by_id = {obj["id"]: obj for obj in plan[_collection]}
     plan[_collection] = [_by_id[_object_id] for _object_id in _order]
+# 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
+# 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
+# 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
+# 1階2688 / 2階以上2508 は、この間取りがこれまで持っていた天井の高さ。
+# 手直しの取り込み(plan.update)より後に置く。あちらに同じ鍵があると消える。
+from plan_kit import height_defaults
+from plan_kit import tidy_numbers
+plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3, 4))
 with open(out, "w", encoding="utf-8") as f:
-    json.dump(plan, f, ensure_ascii=False, indent=1)
+    # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに
+    # なるので、`python3 tools/make_default_plan_3f.py && git diff --exit-code` で
+    # 「生成器が出荷物を再現するか」を確かめられる。
+    json.dump(tidy_numbers(plan), f, ensure_ascii=False, separators=(",", ":"))
 print("reviewed layout: %d items" % len(plan["items"]))

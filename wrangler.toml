@@ -2,6 +2,16 @@ name = "webcad-planner"
 main = "worker.mjs"
 compatibility_date = "2026-07-26"
 
+# Workers Builds(Gitからの自動デプロイ)は、ダッシュボードにビルドコマンドが
+# 設定されていないと、いきなり `wrangler versions upload` を実行する。
+# dist/ は .gitignore 対象でリポジトリに無いため、そのままでは
+# 「assets.directory が存在しない」で必ず失敗する。
+# ここに書いておけば wrangler がアップロードの前に dist/ を作る。
+# SKIP_DEPLOY=1 は build.sh 末尾の `npx wrangler deploy` を止めるため
+# (ここでの用途はビルドだけで、配信は wrangler 側が行う)。
+[build]
+command = "SKIP_DEPLOY=1 bash build.sh"
+
 [assets]
 directory = "dist"
 not_found_handling = "single-page-application"

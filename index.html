@@ -45,12 +45,13 @@ import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 window.THREE = Object.assign({}, THREE_NS, {
   OrbitControls: OrbitControls, GLTFLoader: GLTFLoader, RGBELoader: RGBELoader,
   DRACOLoader: DRACOLoader, KTX2Loader: KTX2Loader,
   EffectComposer: EffectComposer, RenderPass: RenderPass, OutputPass: OutputPass,
-  UnrealBloomPass: UnrealBloomPass,
+  UnrealBloomPass: UnrealBloomPass, ShaderPass: ShaderPass,
   BufferGeometryUtils: {mergeGeometries: mergeGeometries}
 });
 // N8AO(高品質AO)は任意ロード: 失敗してもアプリは素のレンダラーで動作する
@@ -3128,6 +3129,7 @@ input[type="reset"]:focus-visible{
 .airx-dialog .airx-check{display:flex;align-items:center;gap:6px;margin-top:8px}
 </style>
 <link rel="stylesheet" href="assets/ui-refinement.css">
+<link rel="stylesheet" href="assets/ceiling-designer.css">
 </head>
 <body>
 <div id="app-loading" aria-live="polite" aria-busy="true">
@@ -3253,16 +3255,22 @@ input[type="reset"]:focus-visible{
       <div class="stool" data-tool="exterior-stair" onclick="setTool('exterior-stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20v-4h6v-4h6V8h8v12ZM2 20h20M3 23h18"/></svg>外構階段</div>
       <div class="stool" data-tool="ramp" onclick="setTool('ramp')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20 21 5v15ZM3 20h18"/></svg>スロープ</div>
     </div>
-    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋・壁 <span>+</span></div>
+    <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋・壁・天井 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="wall" onclick="setTool('wall')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v14H3ZM3 13h18M9 6v7M15 13v7"/></svg>壁を描く</div>
       <div class="stool" data-tool="room-rect" onclick="setTool('room-rect')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 12h8V3M11 12h10M11 16v5"/></svg>部屋(矩形)</div>
+      <div class="stool" data-tool="ceiling-lower" onclick="setTool('ceiling-lower')" title="天井ビューで対角の2点を指定"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V5h5v4h8V5h5v15M12 12v6M9 15l3 3 3-3"/></svg>下げ天井</div>
+      <div class="stool" data-tool="ceiling-raise" onclick="setTool('ceiling-raise')" title="天井ビューで対角の2点を指定"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V9h5V5h8v4h5v11M12 18v-6M9 15l3-3 3 3"/></svg>折り上げ天井</div>
+      <p id="ceiling-note" class="model-finish-note" role="status" hidden></p>
+      <div class="stool" data-tool="column" onclick="setTool('column')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v16H9ZM6 4h12M6 20h12"/></svg>角柱</div>
+      <div class="stool" data-tool="column-round" onclick="setTool('column-round')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5.5c0-.8 1.3-1.5 3-1.5s3 .7 3 1.5v13c0 .8-1.3 1.5-3 1.5s-3-.7-3-1.5ZM9 5.5c0 .8 1.3 1.5 3 1.5s3-.7 3-1.5M6 4h12M6 20h12"/></svg>円柱</div>
       <div class="stool" data-tool="balcony" onclick="setTool('balcony')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18v11H3ZM3 15h18M7 10v11M12 10v11M17 10v11"/></svg>バルコニー</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>階段・屋根 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="stair" onclick="setTool('stair')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 17h18M3 13h18M3 9h18M12 19V5M9 7l3-3 3 3"/></svg>階段</div>
       <div class="stool" data-tool="stair-corner" onclick="setTool('stair-corner')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v6H9v12ZM3 9h6M3 13h6M3 17h6M9 3v6M13 3v6M17 3v6M6 19V6h13"/></svg>階段コーナー</div>
+      <div class="stool" data-tool="stair-landing" onclick="setTool('stair-landing')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V3h18v18ZM3 15h8M3 11h8M3 7h8M11 7v14M11 7h10"/></svg>踊り場</div>
       <div class="stool" data-tool="roof" onclick="setTool('roof')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11 12 3l10 8M5 10v11h14V10M5 21v-4h4v-4h4V9"/></svg>屋根</div>
     </div>
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg>建具 <span>+</span></div>
@@ -3286,6 +3294,7 @@ input[type="reset"]:focus-visible{
     <div class="cat-hdr" onclick="toggleCat(this)"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5M5 16h14M5 11H2v9h20v-9h-3v5M5 20v2M19 20v2M12 4v12"/></svg>家具 <span>+</span></div>
     <div class="cat-body">
       <div class="stool" data-tool="custom-block" onclick="setTool('custom-block')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7 12 3l8 4v10l-8 4-8-4ZM4 7l8 4 8-4M12 11v10M9 6h6M12 4v4"/></svg>任意ブロック</div>
+      <div class="stool" data-tool="shelf-built-in" onclick="setTool('shelf-built-in')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18M3 10h18M3 16h18M3 4v14M21 4v14"/></svg>造作棚</div>
       <div class="stool" data-tool="futon_set" onclick="setTool('futon_set')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6ZM8 5h8v4H8ZM6 11h12"/></svg>布団セット</div>
       <div class="stool" data-tool="lattice-screen" onclick="setTool('lattice-screen')"><svg class="menu-category-icon menu-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v17H3ZM6 4v17M10 4v17M14 4v17M18 4v17M3 8h18M3 17h18"/></svg>格子柵</div>
       <div id="fmp-furniture"></div>
@@ -3340,13 +3349,17 @@ input[type="reset"]:focus-visible{
       <!-- 壁ごと・部屋ごとの個別指定が無いときに使う既定値。部屋ごとの天井高ではないので HeightModel は通さない。 -->
       <label class="height-perfloor-toggle"><input type="checkbox" id="height-per-floor" onchange="setPerFloorHeights(this.checked)"><span>階ごとに設定する</span></label>
       <div id="height-defaults-body"></div>
-      <div class="sidebar-settings-note">「床の高さ」は部屋の床上げ（仕上げ床）の既定値です。壁ごと・部屋ごとに指定した寸法はこちらより優先されます。壁を高くすると、その上の階が始まる高さも上がります。</div>
+      <div class="sidebar-settings-note">標準の階高＝壁の高さ＋床厚。室内高さ＝壁の高さ−部屋の床上げ−天井下げ。床の上下は部屋の設定で指定します。旧保存プランは、ここで高さを変更するまで従来の高さ基準を保持します。</div>
     </div>
     <a class="sidebar-credits" href="assets/model-credits.html" target="_blank" rel="noopener">3D素材の出典</a>
   </div>
   <div id="asset-preview"><img alt=""><div></div></div>
 
   <div id="canvas-area">
+    <div id="surface-control" role="group" aria-label="現在のビューの表示対象">
+      <label id="surface-context" for="surface-sel">平面図の表示</label>
+      <select id="surface-sel" aria-label="編集対象" onchange="CeilingDesigner.setSurface(this.value)"><option value="floor">床ビュー</option><option value="ceiling">天井ビュー</option></select>
+    </div>
     <canvas id="c2d"></canvas>
     <div id="c3d-wrap">
       <div id="walk-hud" style="display:none">
@@ -4062,6 +4075,61 @@ function hide3DEngineNotice(){
   var el=document.getElementById('c3d-engine-notice');
   if(el) el.style.display='none';
 }
+// 仕上げ(グレーディング)のシェーダー。画面全体に対して、彩度 → 傾き → 明るさ戻し、
+// の順に1回だけ掛ける。値と選び方は GRADE_* (assets/js/app-constants.js) にある。
+// 恒等(彩度1・傾き1・明るさ1)にすると、掛ける前と画素が一致することを検査で見ている。
+var _gradePass=null;
+// THREE はモジュール側が後から window に載せるので、**定義時に THREE を触らない**。
+// ここで new THREE.Vector3 を書くと、このインライン script の評価時点で例外になり、
+// 以降の関数定義ごと落ちる(実際に setView が undefined を読んで壊れた)。
+function makeGradeShader(){ return {
+  uniforms:{tDiffuse:{value:null},gSaturation:{value:1},gContrast:{value:1},gLift:{value:1},
+    gBalance:{value:new THREE.Vector3(1,1,1)}},
+  vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:[
+    'uniform sampler2D tDiffuse;',
+    'uniform float gSaturation;',
+    'uniform float gContrast;',
+    'uniform float gLift;',
+    'uniform vec3 gBalance;',
+    'varying vec2 vUv;',
+    '#define GRADE_TOE '+GRADE_TOE.toFixed(4),
+    '#define GRADE_TOE_SLOPE '+GRADE_TOE_SLOPE.toFixed(4),
+    '// 上端は硬く切らずに 1.0 へ漸近させる。切ると、傾けたぶんだけ増えた高輝度側が',
+    '// そのまま白飛びになる(実測: 内観で画素の 2.04% が振り切れ、青は 1.19%)。',
+    '// 漸近させれば同じ傾きでも白飛びは 0.00% になる。',
+    'float softClip( float x ){',
+    '  const float knee = 0.86;',
+    '  if ( x <= knee ) return x;',
+    '  float t = ( x - knee ) / ( 1.0 - knee );',
+    '  return knee + ( 1.0 - knee ) * ( 1.0 - exp( -t ) );',
+    '}',
+    '// 下端も同じ理屈で 0 へ漸近させる。影を強くすると、暗部が 0 に張り付いて',
+    '// 形が読めない黒になる。ここで受けておけば、同じ影の強さでも段差が残る。',
+    'float softToe( float x ){',
+    '  if ( x >= GRADE_TOE ) return x;',
+    '  float t = ( GRADE_TOE - x ) / GRADE_TOE;',
+    '  return GRADE_TOE * exp( -t * GRADE_TOE_SLOPE );',
+    '}',
+    'void main(){',
+    '  vec4 texel = texture2D( tDiffuse, vUv );',
+    '  vec3 c = texel.rgb * gBalance;',
+    '  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );',
+    '  c = vec3( l ) + ( c - vec3( l ) ) * gSaturation;',
+    '  c = ( ( c - 0.5 ) * gContrast + 0.5 ) * gLift;',
+    '  c = vec3( softToe( max( c.r, 0.0 ) ), softToe( max( c.g, 0.0 ) ), softToe( max( c.b, 0.0 ) ) );',
+    '  c = vec3( softClip( c.r ), softClip( c.g ), softClip( c.b ) );',
+    '  gl_FragColor = vec4( clamp( c, 0.0, 1.0 ), texel.a );',
+    '}'
+  ].join('\n')
+}; }
+function applyGradeSettings(){
+  if(!_gradePass) return;
+  _gradePass.uniforms.gSaturation.value=GRADE_SATURATION;
+  _gradePass.uniforms.gContrast.value=GRADE_CONTRAST;
+  _gradePass.uniforms.gLift.value=GRADE_LIFT;
+  _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
+}
 function init3D(){
   if(ren) return;
   if(typeof window.THREE==='undefined'){
@@ -4081,7 +4149,11 @@ function init3D(){
   ren.shadowMap.autoUpdate=false;
   ren.shadowMap.needsUpdate=true;
   ren.outputColorSpace = THREE.SRGBColorSpace;
-  ren.toneMapping = THREE.ACESFilmicToneMapping;
+  // ACES は映画用のカーブで、中間調を落として色を灰へ寄せる。建築の
+  // シミュレーションで要るのは「白飛びしない」ことと「素材の色がそのまま出る」
+  // ことなので、Khronos PBR Neutral を使う。ハイライトだけを穏やかに丸め、
+  // 中間調と彩度はほぼ素通しする。実測(既定間取り・外観3D): 彩度 0.249 → 0.34。
+  ren.toneMapping = THREE.NeutralToneMapping;
   ren.toneMappingExposure = LIGHT_SETTINGS.exposure;
   ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
   ren.setSize(wrap.clientWidth,wrap.clientHeight);
@@ -4163,7 +4235,7 @@ function init3D(){
       composer.addPass(new THREE.RenderPass(sc3, camExt));
       var n8ao = new THREE.N8AOPass(sc3, camExt, wrap.clientWidth, wrap.clientHeight);
       n8ao.configuration.aoRadius = 0.35;
-      n8ao.configuration.intensity = 1.3;
+      n8ao.configuration.intensity = 1.9;
       n8ao.configuration.distanceFalloff = 0.7;
       n8ao.configuration.screenSpaceRadius = false;
       n8ao.configuration.gammaCorrection = false; // 後段のOutputPassがsRGB変換するため二重補正を防ぐ
@@ -4174,6 +4246,12 @@ function init3D(){
       _bloomPass.enabled = (LIGHT_SETTINGS.timeOfDay==='night');
       composer.addPass(_bloomPass);
       composer.addPass(new THREE.OutputPass());
+      // 仕上げ(コントラストと彩度)。OutputPass が sRGB へ載せた**後**の値を扱うので、
+      // 表示空間そのままで傾けられる。ここより前(リニア空間)でやると、中央値が
+      // 中間より上にあるこの手の絵では持ち上げにしかならず、かえって平坦になる。
+      _gradePass = new THREE.ShaderPass(makeGradeShader());
+      applyGradeSettings();
+      composer.addPass(_gradePass);
     } catch(e) { console.error('Composer init failed', e); composer = null; }
   }
 
@@ -5916,6 +5994,7 @@ function build3D(){
   // 斜線制限で実際に削る。設定が無ければ setbackPlanes() が空を返して何も触らない。
   // 世界座標で切るので matrixWorld を更新したあとに置く。
   applySetbackCut();
+  if(typeof CeilingDesigner!=='undefined')CeilingDesigner.carveRecesses(sc3);
   // 板は断面そのものなので、削り直す必要が無い(面の上に載っているだけである)。
   build3DSetbackRoofs(_sbSections);
   sc3.updateMatrixWorld(true);
@@ -5984,13 +6063,37 @@ function fitShadowCamera(sunLight) {
   if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
 var _tablet3DRebuildQueued=false;
+// 直前の再構築に実際かかった時間(ms)。当て推量より実測を優先するために持つ。
+var _last3DRebuildMs=0;
+// これを超えたら「固まったように見える」とみなし、次回から先に画面を返して
+// インジケーターを出す。100ms を超えると操作が即時に感じられなくなる、という
+// 一般的な目安の上に、オーバーレイの最小表示 (APP_LOADING_MIN_MS=260ms) を
+// 足しても待ち時間が伸びたと感じない範囲を取ってある。
+var HEAVY_3D_REBUILD_MS=200;
 function perform3DRebuild(){
   if(!sc3) return;
+  var t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   build3D();
   if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+  var t1=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+  _last3DRebuildMs=t1-t0;
 }
+// 「重い」はマシンとプランで決まる。入力機器では決まらない。
+//
+// 以前はここが touch 判定で始まっていたため、マウスのPCでは間取りがどれだけ
+// 大きくても同期のまま再構築していた。実測: 219アイテムの間取りで
+// 「3Dで一時的に非表示」1回につき 287ms 画面が固まり、その間なんの表示も
+// 出ない(= ユーザーからは「反映されない」に見える)。
+//
+// 1回目は当て推量に頼るしかないので従来の数え上げを残すが、2回目からは
+// 直前の実測を見る。触っている機械が遅ければ勝手にインジケーター側へ、
+// 速ければ勝手に同期側へ寄る。
 function isLikelyHeavy3DRebuild(){
-  if(!isTouchInputDevice() || ST.view==='2d') return false;
+  if(ST.view==='2d') return false;
+  if(_last3DRebuildMs>=HEAVY_3D_REBUILD_MS) return true;
+  // 一度でも速いと分かっている間取りに、毎回オーバーレイを出さない。
+  if(_last3DRebuildMs>0) return false;
+  if(!isTouchInputDevice()) return false;
   var walls=(DATA.walls||[]).length;
   var rooms=(DATA.rooms||[]).length;
   var items=(DATA.items||[]).length;
@@ -5999,11 +6102,15 @@ function isLikelyHeavy3DRebuild(){
   // 壁・部屋は複数面を生成し、GLB家具は複数サブメッシュを持つため重めに数える。
   return walls*2+rooms*3+items+modelItems*5>=90;
 }
-function rebuild3D(){
+// quiet=true はインジケーターを出さずに組み直す。**選択のように「絵が変わらない」
+// 操作**で使う。選択は FMP 家具で個別メッシュへ切り替わるため全再構築が走るが、
+// 見た目は変わらないのにオーバーレイだけが出ると、操作のたびに画面が暗転して
+// 「重くなった」と受け取られる。待ちを見せる価値があるのは、結果が変わる操作だけ。
+function rebuild3D(quiet){
   if(!sc3) return;
   var loadingEl=document.getElementById('app-loading');
   var loadingAlreadyVisible=!!(loadingEl&&loadingEl.classList.contains('show'));
-  if(!isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
+  if(quiet || !isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
     perform3DRebuild();
     return;
   }
@@ -6012,14 +6119,12 @@ function rebuild3D(){
   if(_tablet3DRebuildQueued) return;
   _tablet3DRebuildQueued=true;
   showAppLoading('3Dを更新中');
-  requestAnimationFrame(function(){
-    setTimeout(function(){
-      try{perform3DRebuild();}
-      finally{
-        _tablet3DRebuildQueued=false;
-        hideAppLoading();
-      }
-    },0);
+  runAfterNextPaint(function(){
+    try{perform3DRebuild();}
+    finally{
+      _tablet3DRebuildQueued=false;
+      hideAppLoading();
+    }
   });
 }
 
@@ -6199,7 +6304,9 @@ function add3DSelectionMarkerFor(target,primary){
   var labelTex=new THREE.CanvasTexture(labelCanvas);
   labelTex.colorSpace=THREE.SRGBColorSpace;
   var label=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex,transparent:true,depthTest:false}));
-  label.position.set(center.x,box.max.y+0.42,center.z);
+  // 天井に付くものは下から見る。札を上に出すと天井裏に隠れて読めない。
+  var labelY=(target.type==='ceiling-area')?box.min.y-0.42:box.max.y+0.42;
+  label.position.set(center.x,labelY,center.z);
   label.scale.set(1.15,0.38,1);
   label.userData={b:true,selectionHelper:true};
   group.add(label);
@@ -6211,6 +6318,7 @@ function canMoveRef3D(ref){
   return !!(ref && ((ref.x!==undefined && ref.y!==undefined) || (ref.x1!==undefined && ref.y1!==undefined)));
 }
 function canMoveRefVertically3D(ref){
+  if(ref&&ref.type==='ceiling-area')return false;
   return !!(ref && ref.x!==undefined && ref.y!==undefined && canSetItemElevation(ref));
 }
 function add3DMoveGizmo(){
@@ -6221,7 +6329,9 @@ function add3DMoveGizmo(){
   if(box.isEmpty()) return;
   var center=box.getCenter(new THREE.Vector3());
   var size=box.getSize(new THREE.Vector3());
-  center.y=Math.max(box.max.y+0.08,center.y);
+  // 天井のものは下へ、それ以外は上へ。掴む矢印が面の向こう側に出ないようにする。
+  center.y=(ST.selected.type==='ceiling-area')
+    ? Math.min(box.min.y-0.08,center.y) : Math.max(box.max.y+0.08,center.y);
   var group=new THREE.Group();
   group.userData={b:true,moveGizmo:true};
   var len=Math.max(0.55,Math.min(1.35,Math.max(size.x,size.y,size.z)*0.55));
@@ -6268,7 +6378,9 @@ function getGizmoDragBasis(axis,ref){
   var box=getSelectionBox3D(ref);
   if(box.isEmpty()) return null;
   var center=box.getCenter(new THREE.Vector3());
-  center.y=Math.max(box.max.y+0.08,center.y);
+  // add3DMoveGizmo と同じ位置。ここがずれると、掴んだ矢印と動く量が食い違う。
+  center.y=(ref&&ref.type==='ceiling-area')
+    ? Math.min(box.min.y-0.08,center.y) : Math.max(box.max.y+0.08,center.y);
   var dir=axis==='x'?new THREE.Vector3(1,0,0):(axis==='z'?new THREE.Vector3(0,0,1):new THREE.Vector3(0,1,0));
   var rect=ren.domElement.getBoundingClientRect();
   function project(v){
@@ -6381,6 +6493,23 @@ function getSelectionBox3D(ref){
     box.set(
       new THREE.Vector3(ref.x*U,ry,(ref.y||0)*U),
       new THREE.Vector3((ref.x+ref.w)*U,ry+0.12,(ref.y+ref.d)*U)
+    );
+    return box;
+  }
+  if(ref.type==='ceiling-area'){
+    // 天井範囲は天井面に貼り付く。ほかのアイテムと同じ「床から elev」の式で
+    // 箱を作ると、**天井の範囲を選んでいるのに選択枠と札だけが床に出る。**
+    // 箱は段差の立ち上がり(天井面 ⇔ 段差の面)を包む。
+    var cfl=ref.floor||1;
+    var croom=(typeof roomAtPointOnFloor==='function')
+      ? roomAtPointOnFloor(cfl,ref.x+ref.w/2,ref.y+ref.d/2) : null;
+    var ceilY=floorBaseY(cfl)+(croom?roomCeilingHeightM(croom):wallFullHeightM(cfl));
+    var faceY=ceilY+(Number(ref.offset)||0)*U;
+    var lo=Math.min(faceY,ceilY), hi=Math.max(faceY,ceilY);
+    if(hi-lo<0.06){ lo=faceY-0.03; hi=faceY+0.03; }  // 段差が浅くても掴める厚みを残す
+    box.set(
+      new THREE.Vector3(ref.x*U,lo,(ref.y||0)*U),
+      new THREE.Vector3((ref.x+ref.w)*U,hi,(ref.y+ref.d)*U)
     );
     return box;
   }
@@ -6822,7 +6951,9 @@ function isDoorItemType(type){
   return isDoorLikeOpeningType(type) && !isNoDoorOpeningType(type);
 }
 function canSetItemTexture(it){
-  return !!(it && (isCustomBlockType(it.type) || it.type==='fence' || it.type==='wood-fence' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isDoorItemType(it.type)));
+  // 階段の板(踏板・蹴込み板・踊り場)にも貼れる。画像トリミングの欄だけ出て
+  // 貼る先が無い状態だった。
+  return !!(it && (isCustomBlockType(it.type) || it.type==='fence' || it.type==='wood-fence' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isDoorItemType(it.type) || isStairPartType(it.type)));
 }
 
 function pickSelectable3D(e){
@@ -6880,6 +7011,7 @@ function selectionNeedsFull3DRebuild(previous,next){
 }
 
 function handle3DPointerPick(e){
+  if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.pickPlacement(e))return;
   // 'erase' (タップで消す削除ツール) は、UI のどこからも選べない状態にしてある。
   // 意図的に外したものであり、到達できないのは不具合ではない。
   // 理由: タップ1回で配置物が消えるため、軽く触れただけで気づかないうちに
@@ -6912,7 +7044,7 @@ function handle3DPointerPick(e){
   updateProps();
   draw2d();
   if(ren){
-    if(selectionNeedsFull3DRebuild(previous,ST.selected)) rebuild3D();
+    if(selectionNeedsFull3DRebuild(previous,ST.selected)) rebuild3D(true);
     else refresh3DSelectionOnly();
   }
 }
@@ -7044,8 +7176,11 @@ function refreshEnvironmentFromSky(){
       var sky=new THREE.Mesh(geometry,_skyMesh.material);
       environmentScene.add(sky);
       sky.material.uniforms.environmentMode.value=1;
+      if(sky.material.uniforms.envSaturation) sky.material.uniforms.envSaturation.value=ENV_LIGHT_SATURATION;
       try{rt=_pmremGen.fromScene(environmentScene,0,0.1,300);}
-      finally{sky.material.uniforms.environmentMode.value=0;geometry.dispose();}
+      finally{sky.material.uniforms.environmentMode.value=0;
+        if(sky.material.uniforms.envSaturation) sky.material.uniforms.envSaturation.value=1;
+        geometry.dispose();}
     }else{
       var skyTex=makeSkyTexture(true);
       skyTex.mapping=THREE.EquirectangularReflectionMapping;
@@ -7128,28 +7263,33 @@ function applyLightingToScene(refreshSky){
         // 内観・ウォークスルーは配置ライトを主役にするためベース光を絞る
         // (ウォークスルーで外観用のフル環境光が入ると、ユーザー設定ライトの
         //  色味が白いベース光に洗い流されてしまう)
-        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?1.8:0.6):1);
+        o.intensity=LIGHT_SETTINGS.ambient*indirectScale*((ST.view==='3d-int'||ST.view==='3d-walk'||isInt)?(daytimeInterior?0.75:0.6):1);
         if(o.color) o.color.set(preset.ambientColor||'#ffffff');
       } else if(o.name==='SunLight'){
         // PVキャプチャの内観採光時のみ、内観でも太陽を実光源として点ける。
         // 通常は PV_INTERIOR_DAYLIGHT が null なので interiorMode の値も
         // sunScale(=1、乗算しても値が変わらない)も従来と同一。
         var pvSunScale=PV_INTERIOR_DAYLIGHT?(PV_INTERIOR_DAYLIGHT.sunScale||1):1;
+        // 内観3Dの太陽。以前はここで 0 にしていたため、内観は全方向の白い光だけで
+        // 照らされ、面の向きの差が出ない＝間取り図に色を塗っただけの絵になっていた。
+        // 天井を作らない見せ方なので直射がそのまま入るが、屋外と同じ強さだと
+        // 床が飛ぶ。弱めた太陽を影付きで入れて、家具の接地と部屋の奥行きを出す。
         var interiorMode=(ST.view==='3d-int'||isInt) && !PV_INTERIOR_DAYLIGHT;
-        o.castShadow=!interiorMode;
+        var interiorSunScale=INTERIOR_SUN_SCALE;
+        o.castShadow=true;
         if(LIGHT_SETTINGS.sunSim && LIGHT_SETTINGS.timeOfDay!=='night'){
           var sp=computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg);
           o.position.set(sp.x,sp.y,sp.z);
           if(o.color) o.color.set(sunColorForAltitude(sp.altitude));
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale*(1-(Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2)*0.35);
+          o.intensity=LIGHT_SETTINGS.sun*sunSimDimFactor(sp.altitude)*pvSunScale*(1-(Number.isFinite(LIGHT_SETTINGS.haze)?LIGHT_SETTINGS.haze:0.2)*0.35)*(interiorMode?interiorSunScale:1);
         } else {
-          o.intensity=interiorMode?0:LIGHT_SETTINGS.sun*pvSunScale;
+          o.intensity=LIGHT_SETTINGS.sun*pvSunScale*(interiorMode?interiorSunScale:1);
           if(o.color) o.color.set(preset.sunColor||'#ffffff');
           var p=preset.sunPos||LIGHT_PRESETS.day.sunPos;
           o.position.set(p.x,p.y,p.z);
         }
       } else if(o.name==='HemiLight'){
-        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.6:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.5:0.5):1));
+        o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.25:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.25:0.5):1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
         if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
@@ -7172,7 +7312,11 @@ function applyLightingToScene(refreshSky){
     }
     // 内観はIBL寄与を大きく抑えて配置ライトを主役にする。ウォークスルーも室内目線のため
     // 大幅に絞る(2.4のままだと昼空のIBLが室内を白く洗い流し、配置ライトの色味が消える)
-    var envBoost=(ST.view==='3d-int')?(daytimeInterior?1.2:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.1:0.7):2.4);
+    // 空からの光(IBL)は、白いベース光と違って向きと色を持つ。壁は空の青を、
+    // 床は地面の色を拾い、金属とガラスは映り込みを得る。ベース光を薄くした分を
+    // ここへ回す。内観・ウォークスルーを外観より低く抑えるのは従来どおりで、
+    // 配置照明の色が洗い流されないようにするため。
+    var envBoost=(ST.view==='3d-int')?(daytimeInterior?2.1:0.4):(ST.view==='3d-walk'?(daytimeInterior?2.0:0.7):2.4);
     sc3.environmentIntensity=Math.max(0.04, LIGHT_SETTINGS.env*envBoost*envFactor);
     if(refreshSky) refreshSkyTexture();
     if(ST.view==='3d-int'){
@@ -8057,7 +8201,12 @@ function wallHeightMm(w){
 function wallDisplayHeightM(w){
   // ここの既定値は「既定値のまま=個別指定なし」を判定する番兵で、高さの取得ではない。
   if(!w || w.wallHeight===undefined || isNaN(Number(w.wallHeight)) || Number(w.wallHeight)===defaultWallHeightMmForFloor(w.floor)) return wallCeilingHeightM(w);
-  return Math.max(0.3,wallHeightMm(w)*U+floorSlabHeightMForFloor(w.floor));
+  // 個別指定の高さは「その壁が立っているレベルの床から」測る。段差の縁に立てた
+  // 腰壁 1100 は、持ち上がった床から 1100 でなければ意味がない。
+  // 持ち上がりは2種類ある: 同じ階の段差 (wallSkipBaseMm) と、下階の高い壁に
+  // 載っていること (wallBaseSupportY)。高い方を採る。
+  // 段差も高い壁も無い家では両方 0 なので、従来と1ビットも変わらない。
+  return Math.max(0.3,(wallLiftMm(w)+wallHeightMm(w))*U+floorSlabHeightMForFloor(w.floor));
 }
 // バルコニーフェンス(手すり壁)の手すり高さ(m)。**バルコニーの床天端から**
 // 測る。建築基準法の2階以上の手すり1100mm以上がここの起点なので、階の床基準
@@ -8945,7 +9094,14 @@ function wallFacadeEndLimitM(w,atEnd){
 }
 function buildWall3D(w){
   if(w.vis3D==='hide') return;
-  var fl=w.floor, fy=floorBaseY(fl);
+  // 足元は原則 floorBaseY。芯線の全体が下階の高い壁(スキップフロアの上に立つ壁を
+  // 含む)に載っている壁だけ、その天端から立つ。下階に高い壁が無ければ同値。
+  var fl=w.floor, fy=wallBaseSupportY(w);
+  // 壁の高さ・勾配の頭打ち・開口の位置は、すべて **fy を 0 とする座標**で組み立てる。
+  // 高さモデル側 (wallDisplayHeightM / wallTopHeightAtM / wallFullHeightM) は
+  // floorBaseY を 0 とするので、その差だけ引いて frame をそろえる。
+  // 下階に高い壁が無い家では 0 なので、従来と1ビットも変わらない。
+  var wallLiftM=fy-floorBaseY(fl);
   var slabH=floorSlabHeightMForFloor(fl);
   var x1=w.x1*U,z1=w.y1*U,x2=w.x2*U,z2=w.y2*U;
   var dx=x2-x1,dz=z2-z1,len=Math.sqrt(dx*dx+dz*dz);
@@ -8988,7 +9144,7 @@ function buildWall3D(w){
   var extMat=isOuter?makeExteriorWallMaterial(w,fl,len):null;
   var style=w.wallStyle||'solid';
   var bandRange=getWallBandRange(w);
-  var wallH=wallDisplayHeightM(w);
+  var wallH=Math.max(0.3,wallDisplayHeightM(w)-wallLiftM);
   var baseNormalX=-dirZ, baseNormalZ=dirX;
   // 上辺を勾配に沿わせるのは、勾配天井を宣言した部屋に接している壁だけ。
   // 宣言していないプランでは topEnv が null のまま = ジオメトリは1頂点も動かない。
@@ -9005,7 +9161,9 @@ function buildWall3D(w){
   function slopedTopAt(alongM,yBase,h){
     var t=len>0?alongM/len:0;
     if(t<0) t=0; else if(t>1) t=1;
-    var top=wallTopHeightAtM(w,t,yBase+h,slopedTopMinH,slopedTopRoofs)+WALL_TOP_OVERSHOOT_M;
+    // wallTopHeightAtM は floorBaseY 基準。fallback も同じ基準へ上げてから渡し、
+    // 返ってきた値を fy 基準へ下ろす。
+    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs)-wallLiftM+WALL_TOP_OVERSHOOT_M;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
       w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t);
@@ -9429,7 +9587,9 @@ function buildWall3D(w){
     // 原因になっていた。ドア側は建具の納まり上の余白が必要なため従来通り。
     var openW=isWindowLikeType(it.type) ? Math.min(len, Math.max(it.w*U,0.1)) : Math.min(len, Math.max(it.w*U+0.08, 0.45));
     if(isWindowLikeType(it.type)){
-      var sillM=item3DBaseY(it)-floorBaseY(fl)+windowSillMm(it)*U;
+      // 開口の高さは**壁の足元 fy から**測る。壁が持ち上がった床から立つときに
+      // floorBaseY で測ると、その差ぶん窓が壁の中へ沈む。
+      var sillM=item3DBaseY(it)-fy+windowSillMm(it)*U;
       var whM=Math.max(0.2,Math.min(windowHeightMm(it)*U,wallH-sillM-0.05));
       openings.push({
         a:Math.max(0,c-openW/2),
@@ -9443,7 +9603,7 @@ function buildWall3D(w){
         a:Math.max(0,c-openW/2),
         b:Math.min(len,c+openW/2),
         kind:'door',
-        h:item3DBaseY(it)-floorBaseY(fl)+doorHeightMm(it)*U,
+        h:item3DBaseY(it)-fy+doorHeightMm(it)*U,
         arch:isArchOpeningType(it.type)
       });
     }
@@ -10019,7 +10179,8 @@ function stairPartsTouch(a,b){
 }
 function getConnectedStairParts(seed){
   var all=DATA.items.filter(function(o){
-    return o.floor===seed.floor && (o.type==='stair'||o.type==='stair-corner');
+    // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
+    return o.floor===seed.floor && isStairPartType(o.type);
   });
   var group=[], queue=[seed], seen={};
   seen[seed.id]=true;
@@ -10035,28 +10196,46 @@ function getConnectedStairParts(seed){
   }
   return group;
 }
-// 階段グループの総蹴上げ高さ(m)。上階が存在する場合は
-// 「当階の床仕上げ面 → 上階の床仕上げ面」の実差分まで上がる
-// (1F→2Fは階高+スラブ厚、2F→3F以上は両階にスラブがあるため階高ちょうど。
-//  固定で+スラブ厚すると2F→3Fで1段分上へ突き抜ける)
-function stairFloorBuildupM(floor){
-  var parts=DATA.items.filter(function(it){return it.floor===floor&&isStairPartType(it.type);});
-  if(!parts.length)return 0;
-  return Math.min.apply(null,parts.map(function(it){return item3DBaseY(it)-floorTopY(floor);}));
+// ── 同じ階の中の段差を上る階段 (スキップフロア) ──────────────────────────
+// 階段は既定では「上の階へ上がるもの」である。スキップフロアでは、同じ階の中の
+// 段差を数段で上る階段が要る。行き先は**宣言させる**: 平面だけからは、上階へ
+// 上がる階段なのか段差を上る階段なのかを区別できないからである。
+// 省略時は 'upper' なので、保存済みプランの階段は1段も変わらない。
+function isLevelStairPart(it){
+  return !!(it && isStairPartType(it.type) && it.stairTarget==='level');
 }
-function stairGroupTotalRiseM(floor){
-  var fl=floor||1, nf=fl+1;
-  var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
-               DATA.rooms.some(function(r){return r.floor===nf;}) ||
-               DATA.items.some(function(i){return i.floor===nf;});
-  // 上階が無いときの階段の上り高さ。階高であって天井高ではないので置き換えない。
-  if(!hasUpper) return FLOOR_H*U;
-  return Math.max(0.5,floorTopY(nf)-floorTopY(fl)-stairFloorBuildupM(fl));
+// 繋がった段のうち1つでも 'level' を宣言していれば、そのグループ全体がレベル階段。
+// 繋がっている段は1本の階段なので、途中で行き先が変わることはない。
+function stairGroupIsLevel(seed){
+  if(!seed||!isStairPartType(seed.type)) return false;
+  return getConnectedStairParts(seed).some(isLevelStairPart);
 }
-function stairRiseInfo(it){
-  var group=getConnectedStairParts(it);
-  var totalRise=stairGroupTotalRiseM(it.floor);
-  if(group.length<=1) return {index:0,count:1,base:0,rise:totalRise,steps:getStairStepCount(it)};
+// レベル階段の足元・天端と、置かれた向き(ワールドm)。
+//
+// 階段は常に **自分のローカル +奥行き方向** へ上る(3Dの段も2Dの踏み板線もそう)。
+// だから両端の高さの min/max だけを見ると、逆向きに置かれた階段が「最上段の
+// 踏板から始まる」形で描かれる。階段自身の向きで低い側・高い側を判定し、
+// 逆を向いていれば reversed を立てて、段を積む向きの方を合わせる。
+// 向きの規約(rot / flipY)は stairBounds2D・buildItem3D と同じ。
+//
+// 端が段差の外へ出ていない(両端が同じ高さ)ときは、その階にある最大の段差へ
+// 上がるものとみなす -- 黙って高さ0の階段を描くよりは、意図に近い。
+// 階段パーツ1枚の、下端(dir=-1)/上端(dir=+1)の少し先の点(平面mm)。
+// 向きの規約(rot / flipY)は stairBounds2D・buildItem3D と同じ。
+function stairPartEndMm(it,dir,outMm){
+  var rad=(Number(it.rot)||0)*Math.PI/180;
+  var sgn=it.flipY?-1:1;
+  var ux=-Math.sin(rad)*sgn, uy=Math.cos(rad)*sgn;     // ローカル +奥行き のワールド向き
+  var cx=(Number(it.x)||0)+(Number(it.w)||0)/2, cy=(Number(it.y)||0)+(Number(it.d)||0)/2;
+  var half=(Number(it.d)||0)/2+((outMm===undefined)?300:outMm);
+  return {x:cx+dir*ux*half, y:cy+dir*uy*half};
+}
+// 階段グループを、下から上への順に並べる。並び順は stairOrder、無ければ
+// 走行軸方向の位置。**どのパーツを種にしても同じ並びになる**ことが要る --
+// 上り高さはグループの性質で、種にしたパーツで変わってはいけない。
+function stairGroupOrdered(seed){
+  var group=getConnectedStairParts(seed);
+  if(group.length<=1) return group;
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
@@ -10077,6 +10256,94 @@ function stairRiseInfo(it){
     var bc=sortByX?b.x+b.w/2:b.y+b.d/2;
     return ac-bc;
   });
+  return group;
+}
+// 階段グループの走行の、下端・上端の少し先の点(平面mm)とグループ本体。
+// 端は **いちばん下のパーツの下端** と **いちばん上のパーツの上端** から採る。
+// グループの外接矩形と種の向きで出していた頃は、折り返し階段のように
+// 途中で向きが変わる形で、種にしたパーツによって上り高さが変わっていた。
+function stairRunEndsMm(seed,outMm){
+  var group=stairGroupOrdered(seed);
+  var first=group[0]||seed, last=group[group.length-1]||seed;
+  return {
+    group:group,
+    down:stairPartEndMm(first,-1,outMm),
+    up:stairPartEndMm(last,1,outMm)
+  };
+}
+// 上の階へ上がる階段の足元と天端(ワールドm)。
+//
+// 足元は **この階段グループ自身が立っている床**。以前は stairFloorBuildupM が
+// 「その階にある階段のいちばん低い足元」を返しており、段差の上に立つ階段が
+// 同じ階の別の階段(普通の床に立つもの)の足元で測られて、上階を突き抜けていた。
+// 天端は **上階の床を、階段の上端の先で測ったもの**。下階の高い壁で上階の床が
+// 局所的に持ち上がっていれば、そこに合わせる。
+// 段差も高い壁も無い家では、従来の
+// floorTopY(nf) - floorTopY(fl) - stairFloorBuildupM(fl) と同値になる。
+// 上の階へ上がる階段の足元(ワールドm)。
+//
+// **下端の先にある床**を採る。パーツの中心で採ると、段差(スキップフロア)の
+// 上から始まる階段が、footprint の中心が段差からはみ出しただけで低い側から
+// 始まってしまう(2730mm の直階段は小さな段差に収まらないので、普通に起きる)。
+// 下端の先にも部屋が無いときだけ、従来どおり各パーツの中心から採る。
+// item.baseLevel==='skip' なら、判定に頼らずその階の段差から始める。
+function stairFootY(seed,ends){
+  var fl=(seed&&seed.floor)||1;
+  if(seed&&seed.baseLevel==='skip') return floorTopY(fl)+floorMaxSkipLevelMm(fl)*U;
+  if(seed&&seed.baseLevel==='floor') return floorTopY(fl);
+  var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
+  if(r) return roomFloorTopY(r);
+  return Math.min.apply(null,ends.group.map(function(o){
+    return roomFloorAt(fl,(o.x||0)+(o.w||0)/2,(o.y||0)+(o.d||0)/2);
+  }));
+}
+function stairUpperSpanM(seed){
+  var fl=(seed&&seed.floor)||1, nf=fl+1;
+  var ends=stairRunEndsMm(seed);
+  var baseY=stairFootY(seed,ends);
+  var hasUpper=DATA.walls.some(function(w){return w.floor===nf;}) ||
+               DATA.rooms.some(function(r){return r.floor===nf;}) ||
+               DATA.items.some(function(i){return i.floor===nf;});
+  // 上階が無いときの上り高さ。階高であって天井高ではないので置き換えない。
+  if(!hasUpper) return {baseY:baseY, topY:baseY+FLOOR_H*U, riseM:FLOOR_H*U};
+  var topY=roomFloorAt(nf,ends.up.x,ends.up.y);
+  if(topY<baseY+0.5) topY=baseY+0.5;
+  return {baseY:baseY, topY:topY, riseM:topY-baseY};
+}
+function stairLevelSpanM(seed){
+  var ends=stairRunEndsMm(seed);
+  var group=ends.group, fl=seed.floor||1;
+  var down=ends.down, up=ends.up;
+  var yDown=roomFloorAt(fl,down.x,down.y), yUp=roomFloorAt(fl,up.x,up.y);
+  var lo=Math.min(yDown,yUp), hi=Math.max(yDown,yUp);
+  // 段を積む向きはパーツごとなので、反転の判定は**そのパーツ自身の向き**で見る。
+  var sd=stairPartEndMm(seed,-1), su=stairPartEndMm(seed,1);
+  var reversed=(roomFloorAt(fl,sd.x,sd.y)>roomFloorAt(fl,su.x,su.y)+0.005);
+  if(hi-lo<0.05){
+    var base=floorTopY(fl), maxLvl=0;
+    DATA.rooms.forEach(function(r){
+      if(!r||r.hidden3D||(r.floor||1)!==fl) return;
+      var v=roomSkipLevelMm(r)+roomFloorOffsetMm(r);
+      if(v>maxLvl) maxLvl=v;
+    });
+    lo=base; hi=base+maxLvl*U; reversed=false;
+  }
+  return {baseY:lo, topY:hi, riseM:Math.max(0.05,hi-lo), reversed:reversed};
+}
+// このレベル階段が、置かれた向きと逆に上る必要があるか。
+// レベル階段でなければ常に false(上の階へ上がる階段の向きは利用者のもの)。
+function stairLevelReversed(it){
+  return stairGroupIsLevel(it) ? !!stairLevelSpanM(it).reversed : false;
+}
+// この階段グループが上る高さ(m)。行き先の宣言で経路が分かれる。
+function stairGroupRiseM(it){
+  if(stairGroupIsLevel(it)) return stairLevelSpanM(it).riseM;
+  return stairUpperSpanM(it).riseM;
+}
+function stairRiseInfo(it){
+  var group=stairGroupOrdered(it);
+  var totalRise=stairGroupRiseM(it);
+  if(group.length<=1) return {index:0,count:1,base:0,rise:totalRise,steps:getStairStepCount(it)};
   var idx=Math.max(0,group.indexOf(it));
   var totalSteps=0, beforeSteps=0;
   group.forEach(function(o,i){
@@ -10093,7 +10360,14 @@ function stairRiseInfo(it){
 // 直階段の段数。2Dの踏み板線と3Dの段数はともにこの関数を参照し、常に一致する。
 function getStairStepCount(it){
   if(!it) return 3;
+  // 踊り場は段を持たない。上り高さを分け合わないので 0 を返す。
+  if(isStairLandingType(it.type)) return 0;
   if(it.type==='stair-corner') return 3;
+  // レベル階段は段差ぶんしか上らないので、段数も実際の上り高さから出す。
+  // 上階へ上がる階段の段数を階高から出しているのは従来どおり(実際の上り高さに
+  // 変えると、保存済みプランの階段の段数が黙って変わる)。
+  if(stairGroupIsLevel(it))
+    return stairStepCount(Math.round(stairGroupRiseM(it)/U), it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
   // 段数の元になるのは階高。天井高ではないので置き換えない。
   return stairStepCount(FLOOR_H, it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
 }
@@ -11106,6 +11380,7 @@ function build3DLightItem(grp,it,w3,d3){
 }
 
 function buildItem3D(it){
+  if(it.type==='ceiling-area')return;
   if(it.hidden3D) return;
   if(!shouldRenderItemInCurrent3DView(it)) return;
   if(isPlanAnnotationType(it.type)) return;
@@ -11358,16 +11633,40 @@ function buildItem3D(it){
     edges.position.y=h/2;
     grp.add(edges);
   }
-  else if(it.type==='stair'||it.type==='stair-corner'){
+  else if(isStairPartType(it.type)){
     var riseInfo=stairRiseInfo(it);
     var baseRise=riseInfo.base, partRise=riseInfo.rise;
     var sSteps=riseInfo.steps||getStairStepCount(it),sH=partRise/sSteps,sD=d3/sSteps;
-    var sMat=new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6}),rMat=new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
-    if(it.type==='stair-corner'){
-      build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise);
+    // 踏板・蹴込み板。テクスチャを貼っていればそれを使う(画像トリミングの欄と対)。
+    // 色は it.color(アイテム色)で塗られるので、ここでは既定の木色を置くだけ。
+    var sMat=makeItemTextureMaterial(it,w3,Math.max(0.2,d3),'repeat',0xffffff,{lighting:true,roughness:0.6,envMapIntensity:0.18}) ||
+      new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6});
+    var rMat=makeItemTextureMaterial(it,w3,Math.max(0.1,sH||0.2),'repeat',0xffffff,{lighting:true,roughness:0.7,envMapIntensity:0.16}) ||
+      new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
+    var underFilled=stairUnderFilled(it);
+    if(isStairLandingType(it.type)){
+      build3DStairLanding(grp,sMat,w3,d3,baseRise,underFilled,it);
+    } else if(it.type==='stair-corner'){
+      build3DWinderCorner(grp,sMat,rMat,w3,d3,baseRise,partRise,underFilled,it);
     } else {
-      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps);
+      // 段差を上る階段が段差と逆を向いて置かれていたら、段を積む向きだけ合わせる。
+      // 平面の footprint は動かさない(利用者が置いた位置は変えない)。
+      build3DOpenStraightStair(grp,sMat,rMat,w3,d3,baseRise,partRise,sSteps,stairLevelReversed(it),underFilled,it);
     }
+  }
+  else if(isColumnType(it.type)){
+    // 角柱は幅×奥行きの箱、円柱は幅と奥行きの小さい方を直径にした円柱。
+    // どちらも足元は item3DBaseY(=段差の下に置けば構造床)から立つ。
+    var colGeo=(it.type==='column-round')
+      ? new THREE.CylinderGeometry(Math.min(w3,d3)/2,Math.min(w3,d3)/2,h,24)
+      : new THREE.BoxGeometry(w3,h,d3);
+    var colMesh=new THREE.Mesh(colGeo,new THREE.MeshStandardMaterial({color:col,roughness:0.75}));
+    colMesh.position.y=h/2;
+    colMesh.castShadow=true; colMesh.receiveShadow=true;
+    grp.add(colMesh);
+  }
+  else if(it.type==='shelf-built-in'){
+    build3DShelfBuiltIn(grp,it,w3,d3,h,col);
   }
   else{
     var matSide=new THREE.MeshStandardMaterial({color:col,roughness:0.85});
@@ -11382,6 +11681,42 @@ function buildItem3D(it){
 function balconySlabHeightMm(){
   // バルコニーのスラブ厚。天井高とは無関係なので置き換えない。
   return Math.max(80,Math.min(400,FLOOR_SLAB_H||180));
+}
+// 造作棚。壁に付いていれば棚板だけ(縦板なし・壁が支える)、何も無いところに
+// 置かれていれば両端に縦板を立てる。どちらになるかは置いた場所が決める
+// (shelfIsWallSupported)。棚板は上端から等間隔に下ろす -- 一番上が天板になり、
+// 壁付けの見え方(壁に直接板が刺さっている)と合う。
+function build3DShelfBuiltIn(grp,it,w3,d3,h,col){
+  var T=SHELF_BOARD_T_MM*U;
+  var mat=new THREE.MeshStandardMaterial({color:col,roughness:0.62,metalness:0.0});
+  var n=shelfBoardCount(it);
+  var wallBacked=(shelfSideBoards(it)==='none');
+  var backSign=it.flipY?1:-1;
+  var boardW=wallBacked?w3:Math.max(0.05,w3-T*2);
+  for(var k=1;k<=n;k++){
+    var y=h*k/n;
+    var b=new THREE.Mesh(new THREE.BoxGeometry(boardW,T,d3),mat);
+    b.position.set(0,y-T/2,0);
+    b.castShadow=true; b.receiveShadow=true;
+    grp.add(b);
+  }
+  if(!wallBacked){
+    [-1,1].forEach(function(s){
+      var p2=new THREE.Mesh(new THREE.BoxGeometry(T,h,d3),mat);
+      p2.position.set(s*(w3-T)/2,h/2,0);
+      p2.castShadow=true; p2.receiveShadow=true;
+      grp.add(p2);
+    });
+  }else{
+    // 壁付けでも棚柱(ダボレール)は見える。これが無いと板が壁から生えて見える。
+    var railT=0.014;
+    [-1,1].forEach(function(s){
+      var rail=new THREE.Mesh(new THREE.BoxGeometry(railT,h,railT),mat);
+      rail.position.set(s*Math.max(0,w3/2-0.07),h/2,backSign*(d3/2-railT));
+      rail.receiveShadow=true;
+      grp.add(rail);
+    });
+  }
 }
 function build3DBalcony(grp,it,w3,d3,h){
   var slabH=Math.max(0.08,Math.min(0.4,h||balconySlabHeightMm()*U));
@@ -11409,27 +11744,58 @@ function build3DBalcony(grp,it,w3,d3,h){
 // 格子柵(家具): 高さZ(elev)で浮かせてバルコニーのルーバーや室内間仕切りに
 // 使える自立パネル。フェンスと同じく縦格子/横格子・上端の揃い/不揃いを選べる
 function buildLatticeScreen3D(grp,it,w3,d3,h){
-  var baseColor=it.colorCustom?it.color:0xb09468;
+  // 骨(格子・框)の色。**明示されたときだけ**そちらを使う。省略時は従来どおり
+  // アイテム色(または既定の木色)なので、保存済みプランの見た目は変わらない。
+  var frameCol=railFrameColorOf(it);
+  var baseColor=frameCol||(it.colorCustom?it.color:0xb09468);
   function slatMat(surfaceW,surfaceH){
+    if(frameCol) return new THREE.MeshStandardMaterial({color:new THREE.Color(frameCol),roughness:0.4,metalness:0.5});
     return makeItemTextureMaterial(it,surfaceW,surfaceH,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.18}) ||
       new THREE.MeshStandardMaterial({color:baseColor,roughness:0.82,metalness:0.03});
   }
   // 枠・桟はスラットと同系色(わずかに暗いだけ)にして、
   // 「別部品の黒いフレーム」に見えないよう馴染ませる
-  var railColor=new THREE.Color(it.colorCustom?it.color:'#b09468');
-  railColor.multiplyScalar(0.85);
-  var railMat=makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
-    new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04});
+  var railColor=new THREE.Color(frameCol||(it.colorCustom?it.color:'#b09468'));
+  if(!frameCol) railColor.multiplyScalar(0.85);
+  var railMat=frameCol
+    ? new THREE.MeshStandardMaterial({color:railColor,roughness:0.4,metalness:0.5})
+    : (makeItemTextureMaterial(it,w3,0.05,'repeat',0xffffff,{lighting:true,roughness:0.85,envMapIntensity:0.14}) ||
+       new THREE.MeshStandardMaterial({color:railColor,roughness:0.85,metalness:0.04}));
   var depth=Math.max(d3,0.05);
-  var pattern=it.fencePattern||'vertical';
+  // 意匠は手すりと同じ語彙で選ぶ(railInfillOf)。指定が無ければ、
+  // 従来の fencePattern から縦格子/横桟へ写す。
+  var infill=railInfillOf(it);
+  var pattern=(infill==='bars'||infill==='wires')?'horizontal':'vertical';
   var variedTop=(it.fenceTopStyle||'even')==='varied';
-  if(pattern==='horizontal'){
+  if(infill==='none'){
+    // 框だけ。笠木と支柱で見せる納まり。
+    var stileW0=0.06;
+    _B(grp,railMat,-w3/2+stileW0/2,h/2,0,stileW0,h,depth);
+    _B(grp,railMat, w3/2-stileW0/2,h/2,0,stileW0,h,depth);
+  } else if(infill==='wires'){
+    // 横ワイヤー: 細い丸鋼を、内法が 110mm 以下になる本数で渡す。
+    var stileW1=0.05;
+    _B(grp,railMat,-w3/2+stileW1/2,h/2,0,stileW1,h,depth);
+    _B(grp,railMat, w3/2-stileW1/2,h/2,0,stileW1,h,depth);
+    var wireD=STAIR_RAIL_WIRE_DIA_MM*U;
+    var rows=Math.max(2,Math.ceil((h-0.1)/STAIR_BALUSTER_GAP_MAX_M)-1);
+    for(var wi=1;wi<=rows;wi++){
+      var wy=0.05+(h-0.1)*wi/(rows+1);
+      var wire=new THREE.Mesh(new THREE.CylinderGeometry(wireD/2,wireD/2,w3-stileW1*2,12),railMat);
+      wire.rotation.z=Math.PI/2;           // 既定の +Y 向きを横へ倒す
+      wire.position.set(0,wy,0);
+      wire.castShadow=true;
+      grp.add(wire);
+    }
+  } else if(pattern==='horizontal'){
     // 横格子: 両端の縦框の間に横桟を渡す(不揃い=桟の長さを交互に変える)
     var stileW=0.06;
     _B(grp,railMat,-w3/2+stileW/2,h/2,0,stileW,h,depth);
     _B(grp,railMat, w3/2-stileW/2,h/2,0,stileW,h,depth);
     var span=w3-stileW*2;
-    var boardH=0.07, gap=0.055;
+    // 見付と間隔は、明示されたときだけそれに従う。既定は従来の見た目のまま。
+    var boardH=(it.latticeSlat!==undefined)?latticeSlatMm(it)*U:0.07;
+    var gap=(it.latticePitch!==undefined)?Math.max(0.01,latticePitchMm(it)*U-boardH):0.055;
     var rows=Math.max(2,Math.floor((h-0.06)/(boardH+gap)));
     for(var r=0;r<rows;r++){
       var y=0.05+boardH/2+r*(boardH+gap);
@@ -11439,7 +11805,8 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
     }
   } else {
     // 縦格子: スラット+上下(または背面)の通し枠。不揃い=スラット高を交互に変える
-    var bw=0.055, pitch=0.095;
+    // 見付と間隔は選べる。手すりとして使うときは内法 110mm 以下が目安。
+    var bw=latticeSlatMm(it)*U, pitch=latticePitchMm(it)*U;
     var count=Math.max(3,Math.round(w3/pitch));
     for(var i=0;i<count;i++){
       var x=-w3/2+(i+0.5)*w3/count;
@@ -11455,6 +11822,14 @@ function buildLatticeScreen3D(grp,it,w3,d3,h){
       _B(grp,railMat,0,h-0.025,0,w3,0.05,depth*0.8);
       _B(grp,railMat,0,0.025,0,w3,0.05,depth*0.8);
     }
+  }
+  // 笠木。手すりとして使うときは、掴める天端が要る。
+  // 目隠しとして使う従来の格子柵には出さない(既定は無し)。
+  // 色は手すりと同じ語彙(railCapColorOf)から来るので、家の中でそろえられる。
+  if(latticeHasCap(it)){
+    var capMat=stairRailWoodMaterial(it);
+    var capH=STAIR_RAIL_CAP_H_MM*U, capD=Math.max(depth+0.05,STAIR_RAIL_CAP_W_MM*U);
+    _B(grp,capMat,0,h+capH/2,0,w3+0.04,capH,capD);
   }
 }
 
@@ -12033,35 +12408,28 @@ function buildNhKitRoof(grp,mats,kit,w3,d3,baseY){
     [-1,1].forEach(function(end){addContextBox(grp,R,end*(rw/2+.01),gy,side*(rd/2+.045),.006,.055,.11,true,true);});
     var count=Math.ceil(rw/.6);for(var k=0;k<=count;k++)addContextBox(grp,T,-rw/2+rw*k/count,gy-.029,side*(rd/2+.025),.017,.013,.12,true,true);
   });
-  // 棟包み
+  // Folded flashing follows the roof planes, rather than hovering above them.
   var ridge=getHipRoofRidgeSpec(rw,rd);
-  var topY=baseY+rh;
-  if(ridge.half>0.04){
-    if(ridge.axis==='x') addContextBox(grp,T,0,topY+0.035,0,ridge.half*2+0.30,0.075,0.26,true,true);
-    else addContextBox(grp,T,0,topY+0.035,0,0.26,0.075,ridge.half*2+0.30,true,true);
-  } else {
-    addContextBox(grp,T,0,topY+0.035,0,0.26,0.075,0.26,true,true);
+  function roofY(x,z){
+    var hx=rw/2-(ridge.axis==='x'?ridge.half:0),hz=rd/2-(ridge.axis==='z'?ridge.half:0);
+    return baseY+rh*Math.max(0,Math.min((rw/2-Math.abs(x))/hx,(rd/2-Math.abs(z))/hz));
   }
-  // 隅棟包み(寄棟の稜線)
-  var hipLen=Math.sqrt(Math.pow(Math.min(rw,rd)/2,2)+rh*rh);
-  var hipAng=Math.atan2(rh,Math.min(rw,rd)/2);
-  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s){
-    var ex=s[0]*rw/2, ez=s[1]*rd/2;
-    var tx=(ridge.axis==='x')?s[0]*ridge.half:0;
-    var tz=(ridge.axis==='x')?0:s[1]*ridge.half;
-    if(ridge.half<0.04){ tx=0; tz=0; }
-    var dx=tx-ex, dz=tz-ez;
-    var run=Math.sqrt(dx*dx+dz*dz);
-    if(run<0.05) return;
-    var len=Math.sqrt(run*run+rh*rh);
-    var m=new THREE.Mesh(new THREE.BoxGeometry(len+0.12,0.055,0.17),T);
-    m.position.set((ex+tx)/2,baseY+rh/2+0.06,(ez+tz)/2);
-    m.rotation.y=Math.atan2(-dz,dx);
-    m.rotateZ(Math.atan2(rh,run));
-    m.castShadow=true; m.receiveShadow=true;
-    m.updateMatrix(); m.matrixAutoUpdate=false;
-    grp.add(m);
-  });
+  function cap(ax,az,bx,bz){
+    var dx=bx-ax,dz=bz-az,len=Math.hypot(dx,dz);if(len<.001)return;
+    var px=-dz/len*.075,pz=dx/len*.075,v=[];
+    [[ax,az],[bx,bz]].forEach(function(p){[-1,0,1].forEach(function(side){
+      var x=Math.max(-rw/2,Math.min(rw/2,p[0]+px*side));
+      var z=Math.max(-rd/2,Math.min(rd/2,p[1]+pz*side));
+      v.push(x,roofY(x,z)+(side===0?.014:.008),z);
+    });});
+    var ids=[0,3,4,0,4,1,1,4,5,1,5,2];
+    for(var i=0;i<ids.length;i+=3){var a=ids[i]*3,b=ids[i+1]*3,c=ids[i+2]*3;
+      if((v[b+2]-v[a+2])*(v[c]-v[a])-(v[b]-v[a])*(v[c+2]-v[a+2])<0){var tmp=ids[i+1];ids[i+1]=ids[i+2];ids[i+2]=tmp;}}
+    var g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(ids);g.computeVertexNormals();
+    var m=new THREE.Mesh(g,T);m.name='Neighbor roof folded ridge flashing';m.castShadow=true;m.receiveShadow=true;grp.add(m);
+  }
+  if(ridge.half>0)cap(ridge.axis==='x'?-ridge.half:0,ridge.axis==='z'?-ridge.half:0,ridge.axis==='x'?ridge.half:0,ridge.axis==='z'?ridge.half:0);
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s){cap(s[0]*rw/2,s[1]*rd/2,ridge.axis==='x'?s[0]*ridge.half:0,ridge.axis==='z'?s[1]*ridge.half:0);});
   return rh;
 }
 function buildNeighborHouseKit(grp,it,w3,d3){
@@ -12098,9 +12466,14 @@ function buildNeighborHouseKit(grp,it,w3,d3){
     return true;
   }
 
-  // 室内(開口の奥)。中まで作り込まず、暗い箱で「抜け」を止める
-  addContextBox(grp,mats.NhDark,0,bodyH/2,0,Math.max(0.2,w3-.72),bodyH,
-                Math.max(0.2,d3-.72),false,false);
+  // Opaque interior backing must leave the actual garage cavity open.
+  var ix=Math.max(.1,w3/2-.36),iz=Math.max(.1,d3/2-.36);
+  function core(x0,x1,y0,y1,z0,z1){if(x1>x0&&y1>y0&&z1>z0)addContextBox(grp,mats.NhDark,(x0+x1)/2,(y0+y1)/2,(z0+z1)/2,x1-x0,y1-y0,z1-z0,false,false);}
+  if(L.garage){
+    var left=Math.max(-ix,L.garage.x-1.23),right=Math.min(ix,L.garage.x+1.23),back=Math.min(iz,-d3/2+2.02);
+    core(-ix,left,0,bodyH,-iz,iz);core(right,ix,0,bodyH,-iz,iz);
+    core(left,right,2.36,bodyH,-iz,iz);core(left,right,0,2.36,back,iz);
+  }else core(-ix,ix,0,bodyH,-iz,iz);
 
   var faces=[
     {face:'front',row:L.rowW,len:w3},{face:'back',row:L.rowW,len:w3},
@@ -12322,6 +12695,8 @@ function createHipRoofMesh(w,d,baseY,roofH,mat){
   }
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  // Exterior normals: roof upward, underside downward (previous winding was inverted).
+  for(var i=0;i<idx.length;i+=3){var swap=idx[i+1];idx[i+1]=idx[i+2];idx[i+2]=swap;}
   geo.setIndex(idx);
   // Keep the hip roof planes crisp; shared vertices make context roofs look softly warped.
   geo=geo.toNonIndexed();
@@ -12617,6 +12992,8 @@ function getItemHeightValue(it){
   if(it && isLightItemType(it.type)) return 80;
   if(it && isContextExteriorItemType(it.type)) return getContextExteriorHeight(it);
   if(it && it.type==='balcony') return balconySlabHeightMm();
+  if(it && it.type==='shelf-built-in') return shelfHeightMm(it);
+  if(it && isColumnType(it.type)) return columnHeightMm(it);
   if(it && it.type==='wood-fence') return Math.max(300,Math.min(3000,it.fenceHeight||1600));
   if(it && it.type==='lattice-screen') return Math.max(300,Math.min(3000,it.latticeHeight||1600));
   if(it && it.type==='foundation') {
@@ -12627,8 +13004,8 @@ function getItemHeightValue(it){
   if(it && (it.type==='exterior-stair' || it.type==='ramp')) return Math.max(0,Math.min(2000,it.targetHeight||foundationHeightMm()||450));
   return getItemH(it&&it.type);
 }
-function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,stair:20,'stair-corner':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
-function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
+function getItemH(type){var fmp=getFmpItem(type); if(fmp) return fmp.h||400; if(isContextExteriorItemType(type)) return defaultContextExteriorHeight(type); return {kitchen:850,bath:500,toilet:380,sink:800,fridge:1800,washer:900,sofa:750,desk:720,'dining-table':730,dining_6:730,round_table_4:730,low_table:400,'bed-d':550,'bed-s':550,tv:1100,'custom-block':900,column:2400,'column-round':2400,'light-ceiling':80,'light-down':80,'light-spot':120,closet:2100,'shelf-built-in':900,stair:20,'stair-corner':20,'stair-landing':20,balcony:balconySlabHeightMm(),car:1620,bicycle:1000,'bicycle-fold':1020,fence:800,'wood-fence':1600,'lattice-screen':1600,'ac-outdoor':630,'water-heater':1850,'gas-heater':700,'meter-box':250,'sewer-pit':20,'downspout':5450,foundation:450,'exterior-stair':450,ramp:450}[type]||400;}
+function getItemCol(type){return {kitchen:0xc8c0a0,bath:0xe8f4ff,toilet:0xf0f0f0,sink:0xe8f0ff,fridge:0xd0e8d0,washer:0xffffff,sofa:0xc8a870,'dining-table':0xd4a84a,'bed-d':0xe8d8c0,desk:0x9a8060,tv:0x181818,'custom-block':0xc9d7ee,column:0xcfc6b6,'column-round':0xcfc6b6,'light-ceiling':0xfff6dd,'light-down':0xfff6dd,'light-spot':0xfff6dd,'shelf-built-in':0xd8cdb4,car:0xd0d0dc,fence:0x888878,'wood-fence':0x9a7a3a,'lattice-screen':0xb09468,'neighbor-building':0x8f98a3,'neighbor-house':0xb9bcc2,road:0x55585c,'utility-pole':0x8c9297,'ac-outdoor':0xd8dadc,'water-heater':0xe8e9eb,'gas-heater':0xe8e9eb,'meter-box':0xc8cacc,'sewer-pit':0x6f7275,'downspout':0x9aa0a5,foundation:0xb8b2a8,'exterior-stair':0xb8b2a8,ramp:0xb8b2a8,stair:0xe8e0c8,'stair-corner':0xe8e0c8,'stair-landing':0xe8e0c8,bicycle:0xa8b4c4,'bicycle-fold':0xd8a878}[type]||0xdddddd;}
 
 // ─── Furniture geometry builders ───
 function _PRISM(g,mat,pts,h,baseY){
@@ -12679,7 +13056,10 @@ function addStairRiserPanel(grp,mat,a,b,y,h,thickness){
 // 側桁から柱を立てるのは吹き抜け側だけ。その取り合い(どの区間が壁沿いかの
 // 判定と壁付け金物)を実装せずに一律で板から生やすのは近似であり、品質未達。
 // 法の要求(手すり義務)はその納まりごと作れるようになってから入れる。
-function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
+// reverse=true のときは、段をローカル +奥行き ではなく -奥行き へ積む。
+// 使うのは「段差を上る階段が、段差と逆を向いて置かれた」とき(stairLevelSpanM)。
+// 形は同じで z を裏返すだけなので、踏面・蹴上げ・接合代の納まりは変わらない。
+function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps,reverse,filled,it){
   steps=Math.max(1,steps||6);
   var treadD=d/steps;
   var rise=partRise/steps;
@@ -12688,6 +13068,8 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
   var treadT=Math.min(0.036,Math.max(0.028,rise*0.18));
   var riserT=Math.min(0.018,Math.max(0.012,treadD*0.055));
   var jointOverlap=0.0015;
+  var railPath=[];
+  var withRisers=stairHasRisers(it);
   for(var si=0;si<steps;si++){
     var z0=-d/2+treadD*si;
     var z1=z0+treadD;
@@ -12696,27 +13078,365 @@ function build3DOpenStraightStair(grp,mat,riserMat,w,d,baseRise,partRise,steps){
     // 踏板の裏側を蹴込み板厚ぶんだけ延ばし、両部材の前面を揃える。
     // 見える段鼻ではなく、上端を面接触させるための隠れた接合代。
     var treadDepth=treadD+riserT;
+    var zSign=reverse?-1:1;
     var tread=new THREE.Mesh(new THREE.BoxGeometry(w,treadT,treadDepth),mat);
-    tread.position.set(0,topY-treadT/2,(z0-riserT+z1)/2);
+    tread.position.set(0,topY-treadT/2,zSign*((z0-riserT+z1)/2));
     tread.castShadow=true;
     tread.receiveShadow=true;
     grp.add(tread);
 
     // 蹴込み板は下段踏面から上段踏板の下面まで。上端を踏板へ重ねないため、
     // 角度によって余分な横板や二重ポリゴンに見える形状を作らない。
-    var riserBottom=prevY-jointOverlap;
-    var riserH=Math.max(0.01,(topY-treadT)-riserBottom);
-    var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
-    // 蹴込み板を下段踏板の後端へ載せ、接合部だけ1.5mm食い込ませる。
-    // 線接触による光漏れを防ぎ、上端は上段踏板の下面で正確に止める。
-    riser.position.set(0,riserBottom+riserH/2,z0-riserT/2);
-    riser.castShadow=true;
-    riser.receiveShadow=true;
-    grp.add(riser);
+    // スケルトン階段(オープン階段)は蹴込み板を張らない -- 光と視線が抜けるのが
+    // この形の目的なので、板を入れたらスケルトンではなくなる。
+    if(withRisers){
+      var riserBottom=prevY-jointOverlap;
+      var riserH=Math.max(0.01,(topY-treadT)-riserBottom);
+      var riser=new THREE.Mesh(new THREE.BoxGeometry(w,riserH,riserT),riserMat||mat);
+      // 蹴込み板を下段踏板の後端へ載せ、接合部だけ1.5mm食い込ませる。
+      // 線接触による光漏れを防ぎ、上端は上段踏板の下面で正確に止める。
+      riser.position.set(0,riserBottom+riserH/2,zSign*(z0-riserT/2));
+      riser.castShadow=true;
+      riser.receiveShadow=true;
+      grp.add(riser);
+    }
+
+    railPath.push({y:topY, z:zSign*((z0+z1)/2)});
+    // 階段下を塞ぐ(箱型階段)。段ごとに、足元から踏板の下面までを埋める。
+    // 埋めるのは**この階段の足元(grp の原点)から**なので、下に別のパーツが
+    // 続く踊り場付きの階段でも、床まで通した1つの塊になる。
+    if(filled){
+      var fillH=topY-treadT;
+      if(fillH>0.002){
+        var fill=new THREE.Mesh(new THREE.BoxGeometry(w,fillH,treadD),stairUnderFillMaterial());
+        fill.position.set(0,fillH/2,zSign*((z0+z1)/2));
+        fill.castShadow=true; fill.receiveShadow=true;
+        grp.add(fill);
+      }
+    }
   }
+  // 直階段の手すりは、段鼻の線に沿った一直線。側面から少し内側を通す。
+  build3DStairRails(grp,it,function(side){
+    var sideSgn=(side==='right')?1:-1;
+    var inset=(stairRailMountFor(it,side)==='wall')?0.06:0.045;
+    var x=sideSgn*(w/2-inset);
+    return railPath.map(function(p){
+      return {x:x, y:p.y, z:p.z, outX:sideSgn, outZ:0};
+    });
+  });
 }
-function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
+// 階段下を塞ぐ面の材質。仕上げは壁と同じ扱い(塗り壁・クロス)なので、
+// 踏板や蹴込み板の木ではなく内装色にそろえる。
+function stairUnderFillMaterial(){
+  return new THREE.MeshStandardMaterial({color:0xefede7,roughness:0.9,metalness:0});
+}
+// 階段の手すり。
+//
+// 付ける側は利用者が選び(stairRailSides)、壁付けか柱建てかは、その側に壁が
+// 沿っているかで決まる(stairRailMountFor)。走行の形は階段の種類で違うので、
+// **踏板の段鼻を結んだ点の列** を階段の側から渡してもらう。
+// pathBySide(side) は [{x,y,z,outX,outZ}] をローカル座標で返す。
+//
+// 納まりは住宅用手すりの実務に合わせる:
+//   壁付け  丸棒 φ35。ブラケット(壁プレート・アーム・受け)を 900mm 間隔。
+//           受けは棒の向きに沿わせる。端部は壁側へ曲げて納める。
+//   柱建て  親柱 80角(頭に笠木)+ 子柱 28角。子柱の内法は 110mm 以下。
+//           手すりは親柱の間を通し、親柱に受けられる。
+//
+// **子柱と親柱の高さは、その位置の手すり芯から逆算する**(railPolylineYAt)。
+// 定数で出すと斜めの手すりに対して最大で蹴上げの半分ずれ、届かない子柱と
+// 突き抜ける子柱が混ざる。
+var STAIR_RAIL_END_EXT_M=0.15;      // 壁付けで端部を段の外へ伸ばす長さ
+var STAIR_RAIL_BRACKET_PITCH_M=0.9; // ブラケットの間隔
+var STAIR_BALUSTER_GAP_MAX_M=0.11;  // 子柱の内法の上限(子どもがすり抜けない)
+var STAIR_NEWEL_MM=80;              // 縦格子のときの親柱の見付
+var STAIR_BALUSTER_MM=28;           // 縦格子のときの子柱の見付
+// 横桟・横ワイヤーの意匠の寸法。参考にした住宅の納まりに合わせてある。
+var STAIR_RAIL_CAP_W_MM=62;         // 笠木の見付(幅)
+var STAIR_RAIL_CAP_H_MM=38;         // 笠木の見込(高さ)
+var STAIR_RAIL_POST_W_MM=40;        // 支柱の見付(走行方向)
+var STAIR_RAIL_POST_T_MM=12;        // 支柱の厚み(平鋼)
+var STAIR_RAIL_BAR_W_MM=30;         // 横桟の見付
+var STAIR_RAIL_BAR_T_MM=8;          // 横桟の厚み
+var STAIR_RAIL_WIRE_DIA_MM=9;       // 横ワイヤーの径
+var STAIR_RAIL_POST_PITCH_M=0.95;   // 支柱の間隔
+var STAIR_RAIL_WALL_W_MM=40;        // 壁付け手すりの見付
+var STAIR_RAIL_WALL_H_MM=55;        // 壁付け手すりの見込
+// 手すりの色は階段の板とは別に持つ。実物でも手すりだけ樹種や色を変えるのは
+// 普通で、階段の色を変えた瞬間に手すりまで同じ色になるのは作りとしておかしい。
+// 色の解決は手すり・柵で共通(railCapColorOf / railFrameColorOf)。
+// ブラケット類はさらに別で、色の指定には従わない。
+function stairRailWoodMaterial(it){
+  return new THREE.MeshStandardMaterial({color:new THREE.Color(railCapColorOf(it)),roughness:0.40,metalness:0.02});
+}
+function stairRailFrameMaterial(it){
+  return new THREE.MeshStandardMaterial({color:new THREE.Color(stairRailFrameColorOf(it)),roughness:0.38,metalness:0.55});
+}
+function stairRailMetalMaterial(){
+  return new THREE.MeshStandardMaterial({color:0xb6bbc0,roughness:0.32,metalness:0.75});
+}
+// 角を丸めた矩形の断面。丸棒を1本通すより笠木らしく見え、平鋼にも使える。
+function stairRailRoundedRectShape(w,h,r){
+  var s=new THREE.Shape();
+  var x=-w/2, y=-h/2;
+  r=Math.max(0.0002,Math.min(r,Math.min(w,h)/2-0.0001));
+  s.moveTo(x+r,y);
+  s.lineTo(x+w-r,y); s.quadraticCurveTo(x+w,y,x+w,y+r);
+  s.lineTo(x+w,y+h-r); s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  s.lineTo(x+r,y+h); s.quadraticCurveTo(x,y+h,x,y+h-r);
+  s.lineTo(x,y+r); s.quadraticCurveTo(x,y,x+r,y);
+  return s;
+}
+// 折れ線上の、(x,z) にいちばん近い点の高さ。平面で最近傍のセグメントを探し、
+// その上で内挿する。子柱・親柱の丈はここから決める。
+function railPolylineYAt(line,x,z){
+  var best=null, i;
+  for(i=0;i+1<line.length;i++){
+    var a=line[i], b=line[i+1];
+    var dx=b.x-a.x, dz=b.z-a.z;
+    var len2=dx*dx+dz*dz;
+    var t=len2>1e-12?((x-a.x)*dx+(z-a.z)*dz)/len2:0;
+    if(t<0) t=0; else if(t>1) t=1;
+    var px=a.x+dx*t, pz=a.z+dz*t;
+    var d2=(x-px)*(x-px)+(z-pz)*(z-pz);
+    if(best===null||d2<best.d2) best={d2:d2, y:a.y+(b.y-a.y)*t};
+  }
+  return best?best.y:(line.length?line[0].y:0);
+}
+// 踏板の天端は**段ごとの段**であって、斜めの直線ではない。段鼻を結んだ線を
+// railPolylineYAt で内挿すると、踏板の中央から外れた位置で最大で蹴上げの半分
+// ずれる(支柱が踏板から浮く・めり込む。実際そうなり「手すりが階段の横板から
+// 浮く」として報告された)。足元は**いちばん近い踏板**の高さをそのまま採る。
+function railStepYAt(line,x,z){
+  var best=null,i;
+  for(i=0;i<line.length;i++){
+    var dx=x-line[i].x, dz=z-line[i].z;
+    var d2=dx*dx+dz*dz;
+    if(best===null||d2<best.d2) best={d2:d2,y:line[i].y};
+  }
+  return best?best.y:0;
+}
+// 線の両端を、走行の向きへ少し伸ばす。段の真上で切れた手すりは掴み損ねる。
+function stairRailExtendEnds(path,extM){
+  if(path.length<2) return path.slice();
+  function step(from,to,d){
+    var dx=to.x-from.x, dy=to.y-from.y, dz=to.z-from.z;
+    var len=Math.sqrt(dx*dx+dy*dy+dz*dz)||1;
+    return {x:from.x-dx/len*d, y:from.y-dy/len*d, z:from.z-dz/len*d,
+            outX:from.outX, outZ:from.outZ};
+  }
+  return [step(path[0],path[1],extM)]
+    .concat(path)
+    .concat([step(path[path.length-1],path[path.length-2],extM)]);
+}
+// 子柱を立てる位置。
+//
+// **点の列は踏板の「中央」を結んでいる**。だから点と点のあいだは蹴込みをまたぎ、
+// 区間の後半はもう次の段の上である。そこへ手前の段の高さで立てると、子柱が
+// 次の踏板を下から貫く。区間を分けるのではなく、**踏板1枚の中**で分ける。
+//
+// 踏面の奥行きは前後の点との間隔から採り、その中に内法が
+// STAIR_BALUSTER_GAP_MAX_M 以下になる本数を並べる。端は段鼻・蹴込みに
+// かからないよう少し内側へ寄せる。
+function stairBalusterSeats(raw){
+  var out=[], i, j;
+  var balW=STAIR_BALUSTER_MM*U;
+  for(i=0;i<raw.length;i++){
+    var p=raw[i];
+    var ref=raw[i+1]||raw[i-1];
+    if(!ref) continue;
+    var dx=ref.x-p.x, dz=ref.z-p.z;
+    var going=Math.sqrt(dx*dx+dz*dz);
+    if(going<1e-6) continue;
+    var ux=dx/going, uz=dz/going;
+    var usable=going*0.9;                       // 段鼻・蹴込みへ寄せすぎない
+    var n=Math.max(2,Math.ceil(usable/(STAIR_BALUSTER_GAP_MAX_M+balW)));
+    for(j=0;j<n;j++){
+      var off=((j+0.5)/n-0.5)*usable;           // 踏板の中だけに散らす
+      // 高さは **その踏板** のもの。隣の段の高さへ混ぜない。
+      out.push({x:p.x+ux*off, y:p.y, z:p.z+uz*off});
+    }
+  }
+  return out;
+}
+// 線に沿って、おおよそ pitch 間隔の点を返す(両端は少し内側に寄せる)。
+function stairRailStationsAlong(line,pitchM){
+  var segs=[], total=0, i;
+  for(i=0;i+1<line.length;i++){
+    var a=line[i], b=line[i+1];
+    var len=Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2)+Math.pow(b.z-a.z,2));
+    segs.push({a:a,b:b,len:len,at:total});
+    total+=len;
+  }
+  if(total<=0.02) return [];
+  var n=Math.max(2,Math.round(total/pitchM)+1);
+  var out=[], k;
+  for(k=0;k<n;k++){
+    var d=0.12+(total-0.24)*(n<=1?0:k/(n-1));
+    for(i=0;i<segs.length;i++){
+      var s=segs[i];
+      if(d<=s.at+s.len||i===segs.length-1){
+        var tt=s.len>0?Math.max(0,Math.min(1,(d-s.at)/s.len)):0;
+        out.push({x:s.a.x+(s.b.x-s.a.x)*tt, y:s.a.y+(s.b.y-s.a.y)*tt, z:s.a.z+(s.b.z-s.a.z)*tt,
+                  outX:s.a.outX, outZ:s.a.outZ,
+                  dir:{x:(s.b.x-s.a.x)/(s.len||1), y:(s.b.y-s.a.y)/(s.len||1), z:(s.b.z-s.a.z)/(s.len||1)}});
+        break;
+      }
+    }
+  }
+  return out;
+}
+function build3DStairRails(grp,it,pathBySide){
+  var sides=stairRailSides(it);
+  if(!sides.length) return;
+  var railH=STAIR_RAIL_HEIGHT_MM*U;
+  var wood=stairRailWoodMaterial(it);
+  var frame=stairRailFrameMaterial(it);
+  var metal=stairRailMetalMaterial();
+  var UP=new THREE.Vector3(0,1,0);
+  // 断面を線分に沿って押し出す。丸棒を並べるのと違い、笠木や平鋼の「向き」が出る。
+  function sweep(shape,a,b,mat){
+    var dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z;
+    var len=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    if(len<0.004) return;
+    var dir=new THREE.Vector3(dx/len,dy/len,dz/len);
+    var right=new THREE.Vector3().crossVectors(UP,dir);
+    if(right.lengthSq()<1e-8) right.set(1,0,0);
+    right.normalize();
+    var up=new THREE.Vector3().crossVectors(dir,right).normalize();
+    var geo=new THREE.ExtrudeGeometry(shape,{depth:len,bevelEnabled:false,curveSegments:6});
+    var m=new THREE.Mesh(geo,mat);
+    m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right,up,dir));
+    m.position.set(a.x,a.y,a.z);
+    m.castShadow=true; m.receiveShadow=true;
+    m.userData.ownColor=true;
+    grp.add(m);
+  }
+  function sweepPath(shape,line,mat){
+    for(var i=0;i+1<line.length;i++) sweep(shape,line[i],line[i+1],mat);
+  }
+  function boxAt(w,h,d,p,mat,quat){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+    m.position.set(p.x,p.y,p.z);
+    if(quat) m.quaternion.copy(quat);
+    m.castShadow=true; m.receiveShadow=true;
+    m.userData.ownColor=true;
+    grp.add(m);
+  }
+  function yawTo(dir){
+    return new THREE.Quaternion().setFromAxisAngle(UP,Math.atan2(dir.x||0,dir.z||1));
+  }
+  sides.forEach(function(side){
+    var raw=pathBySide(side);
+    if(!raw||raw.length<2) return;
+    var mount=stairRailMountFor(it,side);
+    var infill=railInfillOf(it);
+    var capW=STAIR_RAIL_CAP_W_MM*U, capH=STAIR_RAIL_CAP_H_MM*U;
+    if(mount==='wall'){
+      // 壁付け。角断面を壁に沿わせ、端部は壁側へ下げて納める。
+      var wline=stairRailExtendEnds(raw,STAIR_RAIL_END_EXT_M).map(function(p){
+        return {x:p.x, y:p.y+railH, z:p.z, outX:p.outX||0, outZ:p.outZ||0};
+      });
+      var wallShape=stairRailRoundedRectShape(STAIR_RAIL_WALL_W_MM*U,STAIR_RAIL_WALL_H_MM*U,0.008);
+      sweepPath(wallShape,wline,wood);
+      [wline[0],wline[wline.length-1]].forEach(function(end){
+        sweep(wallShape,end,
+          {x:end.x+end.outX*0.085, y:end.y-0.055, z:end.z+end.outZ*0.085},wood);
+      });
+      stairRailStationsAlong(wline,STAIR_RAIL_BRACKET_PITCH_M).forEach(function(p){
+        var nx=p.outX||0, nz=p.outZ||0;
+        var plate=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.01,20),metal);
+        plate.position.set(p.x+nx*0.07,p.y,p.z+nz*0.07);
+        plate.quaternion.setFromUnitVectors(UP,new THREE.Vector3(nx||1,0,nz));
+        plate.userData.ownColor=true;
+        grp.add(plate);
+        sweep(stairRailRoundedRectShape(0.016,0.016,0.005),
+          {x:p.x+nx*0.07,y:p.y,z:p.z+nz*0.07},
+          {x:p.x+nx*0.012,y:p.y,z:p.z+nz*0.012},metal);
+      });
+      return;
+    }
+    // ── 柱建て ──
+    var seatLine=raw.map(function(q){return {x:q.x,y:q.y,z:q.z};});
+    var line=raw.map(function(p){return {x:p.x,y:p.y+railH,z:p.z};});
+    var capShape=stairRailRoundedRectShape(capW,capH,0.01);
+    sweepPath(capShape,line,wood);
+    if(infill==='baluster'){
+      // 縦格子。親柱 + 子柱。笠木は上で通してある。
+      var newelW=STAIR_NEWEL_MM*U, balW=STAIR_BALUSTER_MM*U;
+      [raw[0],raw[raw.length-1]].forEach(function(p){
+        var top=railPolylineYAt(line,p.x,p.z)-capH/2;
+        var h=Math.max(0.12,top-p.y);
+        boxAt(newelW,h,newelW,{x:p.x,y:p.y+h/2,z:p.z},wood);
+      });
+      stairBalusterSeats(raw).forEach(function(s){
+        var top=railPolylineYAt(line,s.x,s.z)-capH/2;
+        var h=top-s.y;
+        if(h<=0.02) return;
+        boxAt(balW,h,balW,{x:s.x,y:s.y+h/2,z:s.z},wood);
+      });
+      return;
+    }
+    // 支柱(平鋼)。両端と、その間をおよそ STAIR_RAIL_POST_PITCH_M 間隔で。
+    var postW=STAIR_RAIL_POST_W_MM*U, postT=STAIR_RAIL_POST_T_MM*U;
+    stairRailStationsAlong(line,STAIR_RAIL_POST_PITCH_M,0.03).forEach(function(p){
+      var seatY=railStepYAt(seatLine,p.x,p.z);
+      var top=p.y-capH/2;
+      var h=top-seatY;
+      if(h<=0.05) return;
+      boxAt(postW,h,postT,{x:p.x,y:seatY+h/2,z:p.z},frame,yawTo(p.dir));
+    });
+    if(infill==='none') return;
+    // 水平材。笠木の下端と段鼻の線のあいだを等分し、走行に平行に通す。
+    var isWire=(infill==='wires');
+    var clearH=Math.max(0.05,railH-capH/2);
+    var count=isWire
+      ? Math.max(2,Math.ceil(clearH/STAIR_BALUSTER_GAP_MAX_M)-1)
+      : railBarCount(it);
+    var shape=isWire
+      ? stairRailRoundedRectShape(STAIR_RAIL_WIRE_DIA_MM*U,STAIR_RAIL_WIRE_DIA_MM*U,STAIR_RAIL_WIRE_DIA_MM*U/2)
+      : stairRailRoundedRectShape(STAIR_RAIL_BAR_T_MM*U,STAIR_RAIL_BAR_W_MM*U,0.002);
+    var k;
+    for(k=1;k<=count;k++){
+      var frac=k/(count+1);
+      var barLine=line.map(function(p,i){
+        var top=p.y-capH/2, seat=seatLine[i].y;
+        return {x:p.x, y:top-(top-seat)*frac, z:p.z};
+      });
+      sweepPath(shape,barLine,frame);
+    }
+  });
+}
+// 踊り場。段を持たない平らな板で、手前までの段が積み上がった高さに座る。
+// かね折れ(L字)・折り返し(U字)の曲がりを、廻り段ではなくこれで作る。
+// 階段下を塞ぐ指定があれば、板の下も足元まで埋める。
+function build3DStairLanding(grp,mat,w,d,baseRise,filled,it){
+  var deckT=Math.min(0.036,Math.max(0.028,0.032));
+  var deck=new THREE.Mesh(new THREE.BoxGeometry(w,deckT,d),mat);
+  deck.position.set(0,baseRise-deckT/2,0);
+  deck.castShadow=true; deck.receiveShadow=true;
+  grp.add(deck);
+  if(filled){
+    var fillH=baseRise-deckT;
+    if(fillH>0.002){
+      var fill=new THREE.Mesh(new THREE.BoxGeometry(w,fillH,d),stairUnderFillMaterial());
+      fill.position.set(0,fillH/2,0);
+      fill.castShadow=true; fill.receiveShadow=true;
+      grp.add(fill);
+    }
+  }
+  // 手すりは踊り場の上を水平に渡す。段鼻の線が平らになっただけである。
+  build3DStairRails(grp,it,function(side){
+    var sideSgn=(side==='right')?1:-1;
+    var inset=(stairRailMountFor(it,side)==='wall')?0.06:0.045;
+    var x=sideSgn*(w/2-inset);
+    return [{x:x,y:baseRise,z:-d/2,outX:sideSgn,outZ:0},
+            {x:x,y:baseRise,z:d/2,outX:sideSgn,outZ:0}];
+  });
+}
+function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise,filled,it){
   var steps=3;
+  var railOuter=[], railInner=[];
   var inner=[w/2,d/2];
   var outer=[
     [-w/2,d/2],
@@ -12759,7 +13479,25 @@ function build3DWinderCorner(grp,mat,riserMat,w,d,baseRise,partRise){
     var panelA=[a[0]+outX*riserT/2,a[1]+outZ*riserT/2];
     var panelB=[b[0]+outX*riserT/2,b[1]+outZ*riserT/2];
     addStairRiserPanel(grp,riserMat||mat,panelA,panelB,baseRise+prevH-jointOverlap,Math.max(0.01,stepRise-treadT+jointOverlap),riserT);
+
+    // 階段下を塞ぐ。踏板の形(延長する前の多角形)のまま足元まで下ろす。
+    if(filled){
+      var fillH=baseRise+h-treadT;
+      if(fillH>0.002) _PRISM(grp,stairUnderFillMaterial(),treadPolys[s],fillH,0);
+    }
+    railOuter.push({x:outer[s===0?0:(s===1?2:4)][0], z:outer[s===0?0:(s===1?2:4)][1], y:baseRise+h});
+    railInner.push({x:inner[0], z:inner[1], y:baseRise+h});
   }
+  // 廻り階段の手すりは、外周の折れ線(左)と内隅(右)に沿う。
+  // 左右の名前は直階段と同じ規約(ローカル -x が left)。
+  build3DStairRails(grp,it,function(side){
+    var pts=(side==='left')?railOuter:railInner;
+    var inset=(stairRailMountFor(it,side)==='wall')?0.06:0.045;
+    var sgn=(side==='left')?1:-1;      // 外周は内側へ、内隅は外側へ寄せる
+    return pts.map(function(p){
+      return {x:p.x+sgn*inset, y:p.y, z:p.z+sgn*inset*0, outX:-sgn, outZ:0};
+    });
+  });
 }
 function applySelectableColor(mat,color){
   if(!color) return mat;
@@ -13238,6 +13976,9 @@ function applyItemColorToGroup(grp,color){
   if(!color) return;
   grp.traverse(function(o){
     if(!o.isMesh || !o.material) return;
+    // 手すりのように **その部材だけの色** を持つものは、アイテム色で塗り潰さない。
+    // ここを通すと、階段の色を変えた瞬間に手すりも金物も同じ色になる。
+    if(o.userData && o.userData.ownColor) return;
     // 面ごとに別マテリアルを持つメッシュ(custom-blockの天端など)にも効かせる
     if(Array.isArray(o.material)) o.material=o.material.map(function(m){return applySelectableColor(m,color);});
     else o.material=applySelectableColor(o.material,color);
@@ -13668,20 +14409,30 @@ function build3DTree(grp,h,spread){
 // 階段(1つ下の階に配置)がちょうど上る先の階の床には、実際に上り続けられるよう
 // 階段の平面フットプリントぶんの穴を開ける。回転した階段矩形もそのまま扱えるよう、
 // 中心+ローカル4隅を rotation.y=-rot*PI/180 と同じ規則で回転して穴の輪郭にする。
+function stairQuadOf(it){
+  var cx=(it.x+it.w/2)*U, cz=(it.y+it.d/2)*U;
+  var hw=it.w/2*U, hd=it.d/2*U;
+  var th=-(it.rot||0)*Math.PI/180;
+  var cos=Math.cos(th), sin=Math.sin(th);
+  return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
+    return {x:cx+p[0]*cos+p[1]*sin, z:cz-p[0]*sin+p[1]*cos};
+  });
+}
+// 同じ階の段差を上る階段が、持ち上がった床と平面で重なっている範囲。
+// 重なったまま床を張ると階段が床に飲まれるので、床の側に穴を開ける。
+function levelStairQuadsForFloor(floor){
+  return DATA.items.filter(function(it){
+    return it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
+  }).map(stairQuadOf);
+}
 function stairwellQuadsForFloor(floor){
   var belowFloor=floor-1;
   if(belowFloor<1) return [];
   return DATA.items.filter(function(it){
-    return it.floor===belowFloor && (it.type==='stair'||it.type==='stair-corner') && !it.hidden3D;
-  }).map(function(it){
-    var cx=(it.x+it.w/2)*U, cz=(it.y+it.d/2)*U;
-    var hw=it.w/2*U, hd=it.d/2*U;
-    var th=-(it.rot||0)*Math.PI/180;
-    var cos=Math.cos(th), sin=Math.sin(th);
-    return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
-      return {x:cx+p[0]*cos+p[1]*sin, z:cz-p[0]*sin+p[1]*cos};
-    });
-  });
+    // レベル階段は上階へ抜けないので、上階の床に穴を開けてはいけない。
+    return it.floor===belowFloor && isStairPartType(it.type) &&
+      !isLevelStairPart(it) && !it.hidden3D;
+  }).map(stairQuadOf);
 }
 // Sutherland-Hodgman: 凸多角形(階段の穴)を軸並行の矩形(部屋の範囲)でクリップする。
 // 階段が部屋境界をまたぐ場合でも、穴が部屋の外形からはみ出して形状生成が壊れないようにする
@@ -13813,6 +14564,38 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   out.slab=slab;
   return out;
 }
+// 段差の天板を、開口で割った矩形の集まりとして作る。
+//
+// 穴として開ける(ExtrudeGeometry)と、外形の壁が穴をまたいで残る -- 段差の
+// 天板は小口が室内から見えるので、そこに板が1枚立って階段を横切る。
+// 矩形の差に割れば、面は本当に途切れる。
+// 回した階段など、開口が軸に沿った矩形にならないときは null を返し、
+// 呼び出し側は従来の穴の経路へ落ちる。
+function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
+  var rects=[];
+  for(var i=0;i<(holes||[]).length;i++){
+    var rc=polyAsAxisRectMm(holes[i]);
+    if(!rc) return null;
+    rects.push(rc);
+  }
+  var pieces=subtractRectsFromRect({x0:r.x,y0:r.y,x1:r.x+r.w,y1:r.y+r.d},rects);
+  var bodyMat=makeFloorSlabMaterial(matFloor);
+  pieces.forEach(function(p){
+    var w3=(p.x1-p.x0)*U, d3=(p.y1-p.y0)*U;
+    if(w3<=0.002||d3<=0.002) return;
+    var cx=(p.x0+p.x1)/2*U, cz=(p.y0+p.y1)/2*U;
+    var body=new THREE.Mesh(new THREE.BoxGeometry(w3,deckM,d3),bodyMat);
+    body.position.set(cx,yBottom+deckM/2,cz);
+    body.castShadow=true; body.receiveShadow=true;
+    mark3DSelectable(body,r,'room'); sc3.add(body);
+    var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
+    face.rotation.x=-Math.PI/2;
+    face.position.set(cx,yTop+0.004,cz);
+    face.receiveShadow=true;
+    mark3DSelectable(face,r,'room'); sc3.add(face);
+  });
+  return pieces.length;
+}
 // 部屋の直上に上階の部屋または屋根があるかを、部屋内の代表点で判定する。
 // 屋根は回転できるため isInsideItem を使い、わずかな接触だけでは天井を作らない。
 function roomHasCoverAbove(r){
@@ -13847,13 +14630,23 @@ function roomHasCoverAbove(r){
 // transparent+opacity<=0.03 は、このアプリが既に「ガイド画像(segmentation/depth/
 // normal/instance)には存在しないものとして扱う」印として使っている
 // (aiGuideObjectShouldHide、内観カットアウェイ壁)ので、同じ印を付けておく。
+// 天井の面は「上に在るもの(上階の床スラブ・屋根)の下端」とぴったり同じ高さに来る。
+// 高さモデルv2では壁の高さが仕上げ天井までなので、これは**そういう作りであって
+// ずれではない**。同じ高さの2枚は、どちらが手前かが画素ごとに入れ替わり、視点が
+// 動くとちらつく(ウォークスルーで顕著)。幾何を動かして隙間を作ると、今度は天井の
+// 高さや器具の取付面がその分だけ嘘になる。描画の深度だけを天井側へ寄せて、
+// 「下から見たら天井の仕上げが勝つ」を決める。
+function withCeilingDepthBias(mat){
+  if(mat){ mat.polygonOffset=true; mat.polygonOffsetFactor=-1; mat.polygonOffsetUnits=-1; }
+  return mat;
+}
 function makeCeilingMaterial(){
   if(PV_INTERIOR_DAYLIGHT && isInt){
     return new THREE.MeshBasicMaterial({
       colorWrite:false, depthWrite:false, transparent:true, opacity:0, side:THREE.DoubleSide
     });
   }
-  return new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+  return withCeilingDepthBias(new THREE.MeshStandardMaterial({color:0xf4f1ea,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
 }
 // ── 部屋ごとの天井の仕上げ (Task 22) ────────────────────────────────────────
 // 床の仕上げ(makeRoomFloorMaterial が読む r.texture / r.textureFlipX /
@@ -13898,11 +14691,11 @@ function makeRoomCeilingMaterial(r,baseMat){
       applyTextureFlip(tex,ap);
       // 既定の天井材と違うのは map だけにする。粗さ・金属度・両面描画を揃えて
       // おかないと、仕上げを1つ設定した部屋だけ質感が飛ぶ。
-      return new THREE.MeshStandardMaterial({map:tex,color:0xffffff,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+      return withCeilingDepthBias(new THREE.MeshStandardMaterial({map:tex,color:0xffffff,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
     }
   }
   if(ap.color){
-    return new THREE.MeshStandardMaterial({color:ap.color,roughness:0.96,metalness:0,side:THREE.DoubleSide});
+    return withCeilingDepthBias(new THREE.MeshStandardMaterial({color:ap.color,roughness:0.96,metalness:0,side:THREE.DoubleSide}));
   }
   return baseMat;
 }
@@ -13969,7 +14762,7 @@ function buildSlopedCeilingGeometry(r,holes,profile){
   }
   var pos=geo.attributes.position, i;
   for(i=0;i<pos.count;i++){
-    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-0.012);
+    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012));
   }
   pos.needsUpdate=true;
   geo.computeVertexNormals();
@@ -14002,10 +14795,10 @@ function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,profile){
   } else if(!holes||!holes.length){
     ceiling=new THREE.Mesh(new THREE.PlaneGeometry(rw,rd),matCeiling);
     ceiling.rotation.x=-Math.PI/2;
-    ceiling.position.set(rcx,ceilY-0.012,rcz);
+    ceiling.position.set(rcx,ceilY-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012),rcz);
   } else {
     ceiling=new THREE.Mesh(buildRoomCeilingShapeGeometry(r,holes),matCeiling);
-    ceiling.position.y=ceilY-0.012;
+    ceiling.position.y=ceilY-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012);
   }
   // 影の設定も生成時に確定させる。再構築(GLB読み込み完了後の
   // scheduleGltfRebuild3D など)でメッシュは作り直されるため、後から
@@ -14042,9 +14835,11 @@ function buildRooms3D(flFilt){
   // 内観は上から間取りを見るため天井を作らない。PVキャプチャの内観採光時だけは
   // 生成する(makeCeilingMaterial が「描かないが影は落とす」材質を返す)。
   // 日射が窓と階段吹き抜けからだけ入るようにするため。
-  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT) ? makeCeilingMaterial() : null;
+  var ceilingEditing=isInt&&typeof CeilingDesigner!=='undefined'&&CeilingDesigner.active();
+  var matCeiling=(!isInt||PV_INTERIOR_DAYLIGHT||ceilingEditing) ? makeCeilingMaterial() : null;
   // 階段が上りきる先の階の床には、実際に通り抜けられるよう吹き抜け穴を開ける
   var stairQuadsByFloor={};
+  var levelStairQuadsByFloor={};
   var ceilingStairQuadsByFloor={};
   DATA.rooms.forEach(function(r){
     if(stairQuadsByFloor[r.floor]===undefined) stairQuadsByFloor[r.floor]=stairwellQuadsForFloor(r.floor);
@@ -14059,16 +14854,51 @@ function buildRooms3D(flFilt){
     var rw=r.w*U, rd=r.d*U;
     var rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
 
+    if(!ceilingEditing){
     var matFloor=makeRoomFloorMaterial(r);
-    
+
     var slabH=floorSlabHeightMForFloor(r.floor);
     var stairHoles=stairwellHolesForRoom(r,stairQuadsByFloor);
-    var floorMeshes=buildRoomFloorMeshes(r,matFloor,slabH+roomFloorOffsetMm(r)*U,ry,floorY,stairHoles);
-    if(floorMeshes.slabBody){
-      mark3DSelectable(floorMeshes.slabBody,r,'room');
-      sc3.add(floorMeshes.slabBody);
+    // 同じ階の段差を上る階段が持ち上がった床と重なっていれば、その床にも穴を開ける。
+    // 段差を持たない部屋では levelStairQuadsForFloor が空なので何も起きない。
+    if(levelStairQuadsByFloor[r.floor]===undefined)
+      levelStairQuadsByFloor[r.floor]=levelStairQuadsForFloor(r.floor);
+    var platformHoles=(roomSkipLevelMm(r)>0)
+      ? stairHoles.concat(stairwellHolesForRoom(r,levelStairQuadsByFloor))
+      : stairHoles;
+    // 床の立ち上がり全体(構造スラブ + スキップフロアの段差 + 床上げ)。
+    // 支持が持ち上がっていない家では slabBaseY===ry で、従来と1ビットも変わらない。
+    var buildupM=slabH+(roomSkipLevelMm(r)+roomFloorOffsetMm(r))*U;
+    var slabBaseY=floorY-buildupM;
+    var cavityMm=roomSkipCavityMm(r);
+    if(cavityMm>0){
+      // 段差が 400mm 以上ある部屋は、床下を**空間**として作る。
+      // 下: その階の構造床(= 段差の下に物を置くときの基準)
+      // 上: 段差の天板(デッキ)
+      // 横: 低いレベルに面していない側だけ立ち上がりで塞ぐ
+      var deckM=Math.max(slabH,Math.max(80,FLOOR_SLAB_H||180)*U);
+      var storeyTopY=roomStoreyFloorTopY(r);
+      var under=buildRoomFloorMeshes(r,matFloor,slabH,slabBaseY,storeyTopY,stairHoles);
+      if(under.slabBody){ mark3DSelectable(under.slabBody,r,'room'); sc3.add(under.slabBody); }
+      mark3DSelectable(under.slab,r,'room'); sc3.add(under.slab);
+      // 立ち上がり(蹴上げ面)は**作らない**。段差の下を壁で囲うか、柱で持たせるか、
+      // 奥の壁を支えにして手前を開けるかは設計そのもので、置くのは利用者である。
+      // 開口があるときは矩形に割って作る。穴として開けると外形の壁が
+      // 開口をまたいで残り、階段を横切る板になる。
+      if(buildSkipDeckMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles)===null){
+        var deck=buildRoomFloorMeshes(r,matFloor,deckM,floorY-deckM,floorY,platformHoles);
+        if(deck.slabBody){ mark3DSelectable(deck.slabBody,r,'room'); sc3.add(deck.slabBody); }
+        mark3DSelectable(deck.slab,r,'room'); sc3.add(deck.slab);
+      }
+    } else {
+      var floorMeshes=buildRoomFloorMeshes(r,matFloor,buildupM,slabBaseY,floorY,platformHoles);
+      if(floorMeshes.slabBody){
+        mark3DSelectable(floorMeshes.slabBody,r,'room');
+        sc3.add(floorMeshes.slabBody);
+      }
+      mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
     }
-    mark3DSelectable(floorMeshes.slab,r,'room'); sc3.add(floorMeshes.slab);
+    }
 
     if(matCeiling&&roomHasCoverAbove(r)){
       // 現在階の階段は、その上端にあたる天井にも開口を必要とする。
@@ -14079,7 +14909,12 @@ function buildRooms3D(flFilt){
       // 勾配を宣言していない部屋では null。従来の平らな枝をそのまま通る。
       // 材質は部屋ごと。仕上げを持たない部屋では matCeiling がそのまま返る
       // (=平らな天井も勾配天井も、同じ1つの仕上げが乗る)。
-      sc3.add(buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
+      if(typeof CeilingDesigner!=='undefined' && CeilingDesigner.areas(r).length) sc3.add(CeilingDesigner.ceilingGroup(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r)));
+      else {
+        var ceilingMesh=buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling),ceilingHoles,roomCeilingProfile(r));
+        if(ceilingEditing)mark3DSelectable(ceilingMesh,r,'room');
+        sc3.add(ceilingMesh);
+      }
     }
 
 	    // Ceiling downlights
@@ -14315,6 +15150,9 @@ function get3DFrameInterval(){
 // ヘッダーから起動し、3Dモデルの中に目線カメラで立つ。右下の十字キー/矢印キーで
 // 前後移動・その場回転、右上のミニマップのタップで移動。閉まっているドアには
 // 接近すると90度まで開くアニメーションが走る
+// ミニマップ上端に空ける帯の高さ(px)。ここに「○F タップで移動」を描き、
+// 間取りはこれより下だけに収める。
+var WALK_MAP_LABEL_BAND=34;
 var WALK={active:false,x:0,z:0,yaw:0,floor:1,keys:{},prevFov:null,moving:false,_mapT:0,eyePreset:'stand'};
 var _doorAnims=[];
 // ドアの開閉希望状態(0=閉/1=開)をプランアイテム単位で保持する。
@@ -14350,39 +15188,71 @@ function toggleWalkEyePreset(){
   if(typeof invalidate3D==='function') invalidate3D();
 }
 // ── 階段の昇降(坂面近似) ──────────────────────────────
+// 階段パーツ1枚の中での進行率(0..1)。乗っていなければ null。
+// 上り先(上の階 / 同じ階の段差)で経路が分かれても、パーツ内の位置の出し方は
+// 同じなので、ここを唯一の入口にする。
+function stairLocalProgress(it,xMm,zMm,marginMm){
+  var margin=(marginMm===undefined)?120:marginMm;
+  var cx=it.x+it.w/2, cy=it.y+it.d/2;
+  var r=(it.rot||0)*Math.PI/180;
+  var dx=xMm-cx, dy=zMm-cy;
+  var lx=dx*Math.cos(r)+dy*Math.sin(r);
+  var ly=-dx*Math.sin(r)+dy*Math.cos(r);
+  if(it.flipX) lx=-lx;
+  if(it.flipY) ly=-ly;
+  if(Math.abs(lx)>it.w/2+margin || Math.abs(ly)>it.d/2+margin) return null;
+  var t;
+  if(it.type==='stair-corner'){
+    // 廻り階段: 内側隅(ローカル右下 w/2,d/2)まわりの角度で進行率を出す。
+    // 下辺(entry, 角度-π)→右辺(exit, -π/2)
+    var vx=lx-it.w/2, vy=ly-it.d/2;
+    var a=Math.atan2(vy,vx);
+    if(a>Math.PI/2) a-=Math.PI*2;
+    t=(a+Math.PI)/(Math.PI/2);
+  } else {
+    // 直進階段: -d/2(下端)→+d/2(上端)
+    t=(ly+it.d/2)/Math.max(1,it.d);
+  }
+  return Math.max(0,Math.min(1,t));
+}
 // プレイヤー位置が階段パーツ(stair / stair-corner)の上にあるとき、
 // パーツ内の進行率tから「そのフロア床からの高さ」を坂面として返す。
 // 衝突判定は従来通り円(シリンダー)のまま、足元の高さだけを変える。
 function walkStairSampleAt(xMm,zMm,floor,marginMm){
-  var margin=(marginMm===undefined)?120:marginMm, best=null;
+  var best=null;
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
     if(it.floor!==floor || !isStairPartType(it.type)) continue;
-    var cx=it.x+it.w/2, cy=it.y+it.d/2;
-    var r=(it.rot||0)*Math.PI/180;
-    var dx=xMm-cx, dy=zMm-cy;
-    var lx=dx*Math.cos(r)+dy*Math.sin(r);
-    var ly=-dx*Math.sin(r)+dy*Math.cos(r);
-    if(it.flipX) lx=-lx;
-    if(it.flipY) ly=-ly;
-    if(Math.abs(lx)>it.w/2+margin || Math.abs(ly)>it.d/2+margin) continue;
-    var t;
-    if(it.type==='stair-corner'){
-      // 廻り階段: 内側隅(ローカル右下 w/2,d/2)まわりの角度で進行率を出す。
-      // 下辺(entry, 角度-π)→右辺(exit, -π/2)
-      var vx=lx-it.w/2, vy=ly-it.d/2;
-      var a=Math.atan2(vy,vx);
-      if(a>Math.PI/2) a-=Math.PI*2;
-      t=(a+Math.PI)/(Math.PI/2);
-    } else {
-      // 直進階段: -d/2(下端)→+d/2(上端)
-      t=(ly+it.d/2)/Math.max(1,it.d);
-    }
-    t=Math.max(0,Math.min(1,t));
+    // レベル階段は階をまたがない。上下階の遷移を扱うこの経路には入れない。
+    if(isLevelStairPart(it)) continue;
+    var t=stairLocalProgress(it,xMm,zMm,marginMm);
+    if(t===null) continue;
     var sri=stairRiseInfo(it);
-    var frac=(sri.base+t*sri.rise)/Math.max(0.001,stairGroupTotalRiseM(floor));
+    // 上り高さは**階段グループごと**。階ごとの合計で割ると、同じ階に足元の
+    // 違う階段が2本あるとき(段差の上と普通の床)にどちらかが狂う。
+    var rise=stairGroupRiseM(it);
+    var frac=(sri.base+t*sri.rise)/Math.max(0.001,rise);
     frac=Math.max(0,Math.min(1,frac));
-    if(!best || frac>best.frac) best={frac:frac};
+    // 足元の高さ(その階の床天端から)も、グループ自身の足元から出す。
+    var offM=stairUpperSpanM(it).baseY+sri.base+t*sri.rise-floorTopY(floor);
+    if(!best || frac>best.frac) best={frac:frac, offM:offM};
+  }
+  return best;
+}
+// 同じ階の段差を上る階段の上に居るときの足元の高さ(その階の床天端からのm)。
+// 乗っていなければ null。階は変わらない。
+function walkLevelStairGroundAt(xMm,zMm,floor,marginMm){
+  var best=null, top=floorTopY(floor);
+  for(var i=0;i<DATA.items.length;i++){
+    var it=DATA.items[i];
+    if(it.floor!==floor || !isLevelStairPart(it)) continue;
+    var t=stairLocalProgress(it,xMm,zMm,marginMm);
+    if(t===null) continue;
+    var span=stairLevelSpanM(it);
+    if(span.reversed) t=1-t;     // 段を積む向きと足元の坂面をそろえる
+    var sri=stairRiseInfo(it);
+    var y=span.baseY+sri.base+t*sri.rise-top;
+    if(best===null || y>best) best=y;
   }
   return best;
 }
@@ -14412,12 +15282,13 @@ function walkUpdateGround(snap){
   // 行き先フロアが存在する階段だけを坂面化する。
   // (間取り図の慣習で2Fにも同じ階段が描かれるが、3Fが無ければただの床として扱う)
   var prevOff=WALK.groundOff||0;
+  // 同じ階の段差を上る階段。階は変えず、足元だけを坂面にする。
+  var levelOff=walkLevelStairGroundAt(xMm,zMm,fl);
+  if(levelOff!==null){ WALK.groundOff=levelOff; return; }
   if(walkFloorHasData(fl+1)){
-    var storyUp=floorTopY(fl+1)-floorTopY(fl);
     var up=walkStairSampleAt(xMm,zMm,fl);
     if(up){
-      var stairBase=stairFloorBuildupM(fl);
-      var newOff=stairBase+up.frac*(storyUp-stairBase);
+      var newOff=up.offM;
       var onStairs=prevOff>0.4;
       // 連続性クランプ: 床から0.45m超いきなり高い坂面には乗れない(階段室が
       // 上下階で重なるプランでのワープ防止。各フライトは正しい入口からのみ)。
@@ -14429,9 +15300,10 @@ function walkUpdateGround(snap){
           var dOff=newOff-prevOff;
           newOff=prevOff+Math.max(-0.3,Math.min(0.3,dOff));
         }
-        if(newOff>=storyUp*0.955){
+        if(up.frac>=0.955){
           walkSetFloor(fl+1);
-          WALK.groundOff=0;
+          // 上階の床も局所的に持ち上がっていることがあるので、0 と決めつけない。
+          WALK.groundOff=roomFloorAt(fl+1,xMm,zMm)-floorTopY(fl+1);
         } else {
           WALK.groundOff=newOff;
         }
@@ -14446,18 +15318,167 @@ function walkUpdateGround(snap){
     // 踏み出したときだけ(下半分の吹き抜け縁は床として扱い、大落下させない)
     var down=walkStairSampleAt(xMm,zMm,fl-1,0);
     if(down){
-      var storyDown=floorTopY(fl)-floorTopY(fl-1);
       if(down.frac>=0.5 && down.frac<0.93){
         // 階段吹き抜けへ踏み出した → 下階の坂面に乗り移る
         walkSetFloor(fl-1);
-        var stairBaseDown=stairFloorBuildupM(fl-1);
-        WALK.groundOff=stairBaseDown+down.frac*(storyDown-stairBaseDown);
+        WALK.groundOff=down.offM;
         return;
       }
       // 最上段付近は上階床(踊り場)として、下半分の上空は床縁として扱う
     }
   }
-  WALK.groundOff=roomFloorAt(fl,xMm,zMm)-floorTopY(fl);
+  // 段差そのものは登れない。階段を使わずに 400mm を超える段差へ乗り移ることは
+  // 現実に無いし、乗れてしまうとスキップフロアの縁を歩いただけで壁を抜けたように
+  // 上へ出る。テレポート(snap)は免除する -- スポーン地点は段差の上のこともある。
+  var target=roomFloorAt(fl,xMm,zMm)-floorTopY(fl);
+  if(!snap && target-prevOff>WALK_MAX_STEP_UP_M) return;
+  WALK.groundOff=target;
+}
+// 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
+// 玄関の内側は「壁は無いが立てない」場所になりやすい。実測(既定間取り):
+// 玄関ドアから内側0.9mの決め打ち位置は、内開きの玄関ドアが開いた先と重なり、
+// 開始直後の視界が平均輝度 4.8/255・正面9cmに面、という真っ暗な状態だった。
+//
+// **開き戸は障害に数える**(開いた扉が床を占めるため)。引戸と窓は数えない。
+// 上に立つもの(敷地・基礎・デッキ)と屋根は障害ではない。ここを除かないと
+// 敷地が階全体を覆っているせいでどの点も塞がり、逃げ場が無くなる。
+var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
+var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
+function walkSpawnObstructed(xMm,zMm,fl){
+  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
+  // 点そのものは家具の外なので素通りしてしまう。
+  var r=WALK_PLAYER_RADIUS_MM;
+  var probes=[[xMm,zMm],[xMm+r,zMm],[xMm-r,zMm],[xMm,zMm+r],[xMm,zMm-r]];
+  return (DATA.items||[]).some(function(it){
+    if(!it || (it.floor||1)!==fl) return false;
+    if(isPlanAnnotationType(it.type)) return false;
+    if(isLightItemType(it.type)) return false;
+    if(WALK_SPAWN_FLOORLIKE_TYPES[it.type]) return false;
+    if(isPlacementSurfaceItem(it)) return false;
+    var swing=isSwingDoorType(it.type);
+    if(isOpeningItemType(it.type) && !swing) return false;
+    if(!swing && getItemTopElevation(it)<WALK_SPAWN_MIN_OBSTACLE_MM) return false;
+    return probes.some(function(q){ return isInsideItem(it,q[0],q[1]); });
+  });
+}
+// 空いている立ち位置を、その階の部屋の中から探す。狙いの点に一番近いものを返す。
+function walkSpawnClearNear(xMm,zMm,fl){
+  var step=250, margin=WALK_PLAYER_RADIUS_MM+60;
+  var best=null,bestD=Infinity;
+  (DATA.rooms||[]).filter(function(r){return r.floor===fl;}).forEach(function(r){
+    var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
+    for(var x=r.x+margin;x<=x1;x+=step){
+      for(var y=r.y+margin;y<=y1;y+=step){
+        var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
+        if(d>=bestD) continue;
+        if(walkSpawnObstructed(x,y,fl)) continue;
+        bestD=d; best={x:x,y:y};
+      }
+    }
+  });
+  return best;
+}
+// 立った場所から一番見通しの利く向き。壁に張り付いて始まると、正面が
+// 一色の面で埋まって「何も見えない」第一印象になる(実測: 正面0.86mが壁)。
+// 12方向へ 200mm ずつ進めて、壁に当たるまでの距離が最大の向きを選ぶ。
+// 狙いの向き(部屋の中心など)があるときは、同じくらい開けていればそちらを優先する。
+function walkBestFacing(xMm,zMm,fl,preferYaw){
+  var best=null,bestScore=-Infinity;
+  for(var i=0;i<12;i++){
+    var yaw=i*Math.PI/6;
+    var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
+    for(var d=200; d<=8000; d+=200){
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      reach=d;
+    }
+    var bonus=0;
+    if(typeof preferYaw==='number'){
+      var diff=Math.abs(((yaw-preferYaw+Math.PI*3)%(Math.PI*2))-Math.PI);
+      // **狙いから90度を超える向きは捨てる。** 玄関に立つと、一番見通しが利くのは
+      // たいてい「開けっ放しの玄関から屋外」で、そちらを向いて始まってしまう
+      // (実測: 正面894m＝ドアの開口を抜けて空が見えていた)。家の中を向く範囲で選ぶ。
+      if(diff>Math.PI/2) continue;
+      // 見通しが同等なら狙い優先。最大1.2m分のおまけ。
+      bonus=(1-diff/Math.PI)*1200;
+    }
+    var score=reach+bonus;
+    if(score>bestScore){ bestScore=score; best=yaw; }
+  }
+  return best;
+}
+// 立ち位置が塞がっているか。walkBlockedAt は**壁しか見ない**ので、
+// 玄関の内側は「壁は無いが立てない」場所になりやすい。実測(既定間取り):
+// 玄関ドアから内側0.9mの決め打ち位置は、内開きの玄関ドアが開いた先と重なり、
+// 開始直後の視界が平均輝度 4.8/255・正面9cmに面、という真っ暗な状態だった。
+//
+// **開き戸は障害に数える**(開いた扉が床を占めるため)。引戸と窓は数えない。
+// 上に立つもの(敷地・基礎・デッキ)と屋根は障害ではない。ここを除かないと
+// 敷地が階全体を覆っているせいでどの点も塞がり、逃げ場が無くなる。
+var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
+var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
+function walkSpawnObstructed(xMm,zMm,fl){
+  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
+  // 点そのものは家具の外なので素通りしてしまう。
+  var r=WALK_PLAYER_RADIUS_MM;
+  var probes=[[xMm,zMm],[xMm+r,zMm],[xMm-r,zMm],[xMm,zMm+r],[xMm,zMm-r]];
+  return (DATA.items||[]).some(function(it){
+    if(!it || (it.floor||1)!==fl) return false;
+    if(isPlanAnnotationType(it.type)) return false;
+    if(isLightItemType(it.type)) return false;
+    if(WALK_SPAWN_FLOORLIKE_TYPES[it.type]) return false;
+    if(isPlacementSurfaceItem(it)) return false;
+    var swing=isSwingDoorType(it.type);
+    if(isOpeningItemType(it.type) && !swing) return false;
+    if(!swing && getItemTopElevation(it)<WALK_SPAWN_MIN_OBSTACLE_MM) return false;
+    return probes.some(function(q){ return isInsideItem(it,q[0],q[1]); });
+  });
+}
+// 空いている立ち位置を、その階の部屋の中から探す。狙いの点に一番近いものを返す。
+function walkSpawnClearNear(xMm,zMm,fl){
+  var step=250, margin=WALK_PLAYER_RADIUS_MM+60;
+  var best=null,bestD=Infinity;
+  (DATA.rooms||[]).filter(function(r){return r.floor===fl;}).forEach(function(r){
+    var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
+    for(var x=r.x+margin;x<=x1;x+=step){
+      for(var y=r.y+margin;y<=y1;y+=step){
+        var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
+        if(d>=bestD) continue;
+        if(walkSpawnObstructed(x,y,fl)) continue;
+        bestD=d; best={x:x,y:y};
+      }
+    }
+  });
+  return best;
+}
+// 立った場所から一番見通しの利く向き。壁に張り付いて始まると、正面が
+// 一色の面で埋まって「何も見えない」第一印象になる(実測: 正面0.86mが壁)。
+// 12方向へ 200mm ずつ進めて、壁に当たるまでの距離が最大の向きを選ぶ。
+// 狙いの向き(部屋の中心など)があるときは、同じくらい開けていればそちらを優先する。
+function walkBestFacing(xMm,zMm,fl,preferYaw){
+  var best=null,bestScore=-Infinity;
+  for(var i=0;i<12;i++){
+    var yaw=i*Math.PI/6;
+    var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
+    for(var d=200; d<=8000; d+=200){
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      reach=d;
+    }
+    var bonus=0;
+    if(typeof preferYaw==='number'){
+      var diff=Math.abs(((yaw-preferYaw+Math.PI*3)%(Math.PI*2))-Math.PI);
+      // **狙いから90度を超える向きは捨てる。** 玄関に立つと、一番見通しが利くのは
+      // たいてい「開けっ放しの玄関から屋外」で、そちらを向いて始まってしまう
+      // (実測: 正面894m＝ドアの開口を抜けて空が見えていた)。家の中を向く範囲で選ぶ。
+      if(diff>Math.PI/2) continue;
+      // 見通しが同等なら狙い優先。最大1.2m分のおまけ。
+      bonus=(1-diff/Math.PI)*1200;
+    }
+    var score=reach+bonus;
+    if(score>bestScore){ bestScore=score; best=yaw; }
+  }
+  return best;
 }
 function walkSpawn(){
   WALK.floor=ST.floor||1;
@@ -14474,18 +15495,31 @@ function walkSpawn(){
       // 建物内側へ0.9m入った位置に立ち、部屋側を向く
       var cen=big?{x:(big.x+big.w/2),y:(big.y+big.d/2)}:{x:wi.x,y:wi.y};
       var sideIn=((cen.x-wi.x)*nx+(cen.y-wi.y)*nz)>=0?1:-1;
-      px=(wi.x+nx*sideIn*900)*U; pz=(wi.y+nz*sideIn*900)*U;
+      // 玄関から入る体験は保ちつつ、扉の可動域や下駄箱の中に立たないよう
+      // 空くまで奥へ寄せる。0.9m は「扉のすぐ内側」で、内開きの扉とよく重なる。
+      for(var depth=900; depth<=3600; depth+=300){
+        var cx2=wi.x+nx*sideIn*depth, cy2=wi.y+nz*sideIn*depth;
+        if(walkSpawnObstructed(cx2,cy2,fl)) continue;
+        px=cx2*U; pz=cy2*U; break;
+      }
       tx=cen.x*U; tz=cen.y*U;
     }
   }
   if(px===null){
-    if(big){ px=(big.x+big.w/2)*U; pz=(big.y+big.d/2)*U; tx=px; tz=pz-1; }
+    // 玄関から入れないときは、一番広い部屋の中央付近で空いている場所に立つ。
+    var aim=big?{x:big.x+big.w/2,y:big.y+big.d/2}:null;
+    var spot=aim?walkSpawnClearNear(aim.x,aim.y,fl):null;
+    if(spot){ px=spot.x*U; pz=spot.y*U; tx=aim.x*U; tz=aim.y*U; }
+    else if(big){ px=(big.x+big.w/2)*U; pz=(big.y+big.d/2)*U; tx=px; tz=pz-1; }
     else { px=4; pz=2; tx=4; tz=1; }
+    if(spot && Math.abs(tx-px)<1e-6 && Math.abs(tz-pz)<1e-6){ tz=pz-1; }
   }
   WALK.x=px; WALK.z=pz;
   WALK.pitch=0;
   WALK.groundOff=0;
-  WALK.yaw=Math.atan2(-(tx-px),-(tz-pz));
+  var aimYaw=Math.atan2(-(tx-px),-(tz-pz));
+  var open=walkBestFacing(px/U,pz/U,fl,aimYaw);
+  WALK.yaw=(typeof open==='number')?open:aimYaw;
   walkUpdateGround(true);
 }
 function walkApplyCamera(){
@@ -14502,9 +15536,12 @@ function walkMapTransform(){
   if(!isFinite(mnX)){mnX=0;mnY=0;mxX=9100;mxY=9100;}
   var cv=document.getElementById('walk-minimap');
   // 30px角丸カード内で線やラベルが角へ寄りすぎない共通内余白。
-  var pad=24, sw=cv.width-pad*2, sh=cv.height-pad*2;
+  // 上だけ広いのは「○F タップで移動」の帯を空けるため。**間取りはこの帯の下に
+  // 収まるように縮めて配置する**ので、どんな形の間取りでも文字と重ならない。
+  // 文字を避けて描くのではなく、描く領域そのものを文字の下へ限定するのが要点。
+  var pad=24, padTop=WALK_MAP_LABEL_BAND, sw=cv.width-pad*2, sh=cv.height-padTop-pad;
   var sc=Math.min(sw/Math.max(1,mxX-mnX),sh/Math.max(1,mxY-mnY));
-  var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=pad+(sh-(mxY-mnY)*sc)/2;
+  var ox=pad+(sw-(mxX-mnX)*sc)/2, oy=padTop+(sh-(mxY-mnY)*sc)/2;
   return {sc:sc,ox:ox,oy:oy,mnX:mnX,mnY:mnY};
 }
 function drawWalkMinimap(){
@@ -14541,9 +15578,11 @@ function drawWalkMinimap(){
   ctx.fillStyle='#e94560';
   ctx.beginPath(); ctx.arc(pxm,pzm,5,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
-  // 階表示
+  // 階表示。walkMapTransform が上端に同じ高さの帯を空けているので、
+  // 間取りの形がどうであれここへは線が来ない。
   ctx.fillStyle='#33415e'; ctx.font='bold 11px sans-serif';
-  ctx.fillText(fl+'F タップで移動',24,29);
+  ctx.textBaseline='alphabetic';
+  ctx.fillText(fl+'F タップで移動',24,WALK_MAP_LABEL_BAND-9);
 }
 function walkMinimapTap(ev){
   var cv=document.getElementById('walk-minimap');
@@ -14691,6 +15730,9 @@ function getWallDoorGapsMm(w){
   });
   return gaps;
 }
+// 階段を使わずに登れる段差の上限(m)。玄関框(150)や小上がり(400)は跨げるが、
+// スキップフロア(通常 800 以上)は階段からしか上がれない。
+var WALK_MAX_STEP_UP_M=0.4;
 var _walkCollWalls=null, _walkCollFloor=null;
 function buildWalkCollisionCache(floor){
   _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
@@ -14743,10 +15785,25 @@ function updateWalkMode(now){
       // 誘導する。コーナーから直階段へ接続する境界も両方の判定が重なるため連続する。
       var stairTarget=walkStairSampleAt(txM,tzM,WALK.floor,120);
       if(stairHere || stairTarget) return !stairTarget;
-      return walkBlockedAt(txM,tzM,WALK.floor);
+      if(walkBlockedAt(txM,tzM,WALK.floor)) return true;
+      // 段差の壁。階段の上に居ない状態で、登れない高さの床へは踏み出せない。
+      if(walkLevelStairGroundAt(WALK.x/U,WALK.z/U,WALK.floor,0)===null &&
+         walkLevelStairGroundAt(txM,tzM,WALK.floor,120)===null){
+        var here=floorTopY(WALK.floor)+(WALK.groundOff||0);
+        if(roomFloorAt(WALK.floor,txM,tzM)-here>WALK_MAX_STEP_UP_M) return true;
+      }
+      return false;
     }
+    // **いま立っている場所自体が「通れない」とき**は、判定を外して動かす。
+    // 壁へ少しめり込む・階段の踏み面から半歩外れる、といった状態になると、
+    // 自分の足元も行き先も同じ「通れない」判定に入り、前も後ろも横も塞がって
+    // 二度と出られなくなる(報告: 壁をわずかにすり抜けた位置と、階段で頻発)。
+    // 出られない状態を作らないことを、壁を抜けさせないことより優先する。
+    var stuckHere=stepBlocked(WALK.x/U,WALK.z/U);
     // 壁への軸別スライド: 斜めに壁へ突っ込んでも、通れる軸方向にはそのまま進める
-    if(!stepBlocked(nx/U,nz/U)){
+    if(stuckHere){
+      WALK.x=nx; WALK.z=nz;
+    } else if(!stepBlocked(nx/U,nz/U)){
       WALK.x=nx; WALK.z=nz;
     } else if(!stepBlocked(nx/U,WALK.z/U)){
       WALK.x=nx;
@@ -14926,6 +15983,21 @@ function loop3D(){
 var APP_LOADING_MIN_MS = 260;
 var _appLoadingShownAt = 0;
 var _appLoadingHideTimer = null;
+// 「インジケーターを出す → 一度ブラウザへ描画を返す → 重い処理」の待ち方。
+//
+// requestAnimationFrame だけに預けると、フレームが来ない環境では**永久に進まない**。
+// 背面タブ・最小化・ヘッドレスがそれで、画面はオーバーレイに覆われたまま止まる。
+// 実測: ヘッドレス Chromium では 120 秒待ってもコールバックが来なかった。
+// 描画が来ればそれを使い(通常はこちらが先)、来なければタイマーで進む。
+function runAfterNextPaint(fn){
+  var done=false;
+  function once(){ if(done) return; done=true; fn(); }
+  if(typeof requestAnimationFrame==='function'){
+    requestAnimationFrame(function(){ setTimeout(once,0); });
+  }
+  // 保険。通常は rAF(約16ms)+setTimeout(0) が先に走るので、ここは使われない。
+  setTimeout(once,120);
+}
 function showAppLoading(label){
   var el=document.getElementById('app-loading');
   var text=document.getElementById('app-loading-text');
@@ -14948,20 +16020,18 @@ function hideAppLoading(){
 }
 function runWithAppLoading(label,work){
   showAppLoading(label);
-  requestAnimationFrame(function(){
-    setTimeout(function(){
-      try{
-        var result=work&&work();
-        if(result&&typeof result.then==='function'){
-          result.then(hideAppLoading,function(err){console.error(err);hideAppLoading();});
-        }else{
-          hideAppLoading();
-        }
-      }catch(err){
-        console.error(err);
+  runAfterNextPaint(function(){
+    try{
+      var result=work&&work();
+      if(result&&typeof result.then==='function'){
+        result.then(hideAppLoading,function(err){console.error(err);hideAppLoading();});
+      }else{
         hideAppLoading();
       }
-    },0);
+    }catch(err){
+      console.error(err);
+      hideAppLoading();
+    }
   });
 }
 function setViewWithLoading(v){
@@ -15117,7 +16187,7 @@ function syncToolUi(){
     else assets[j].classList.remove('active');
   }
   var preset=getOpeningModelToolPreset(ST.tool);
-  var toolNames={select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト','neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱'};
+  var toolNames={'ceiling-lower':'下げ天井','ceiling-raise':'折り上げ天井',select:'選択・変形',erase:'削除',wall:'壁',memo:'メモ',ruler:'定規','walk-route':'ウォーク','light-ceiling':'シーリングライト','light-down':'ダウンライト','light-spot':'スポットライト','neighbor-building':'周辺ビル','neighbor-house':'隣家',road:'道路','utility-pole':'電柱'};
   document.getElementById('st-tool').textContent='ツール: '+(preset?preset.label:(toolNames[ST.tool]||ST.tool));
 }
 function setTool(t){
@@ -15261,6 +16331,7 @@ canvas.onmousedown=function(e){
   else if(ST.tool==='erase') handleErase(wx,wy);
   else if(ST.tool==='wall') handleWallClick(wx,wy,e);
   else if(isLineAnnotationTool(ST.tool)) handleLineAnnotationClick(ST.tool,w.x,w.y,e);
+  else if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool)) CeilingDesigner.drawClick(wx,wy);
   else if(ST.tool==='room-rect') handleRoomClick(wx,wy);
   else if(ST.tool==='site-rect') handleSiteClick(wx,wy);
   else placeItem(ST.tool,wx,wy);
@@ -15319,6 +16390,7 @@ function collect2DPickCandidates(cx,cy,wx,wy,opt){
   opt=opt||{};
   var floor=ST.floor, out=[];
   function add(obj,kind,idx){
+    if(typeof CeilingDesigner!=='undefined'&&!CeilingDesigner.visible(obj))return;
     out.push({obj:obj,kind:kind,idx:idx,stack:objectStackOrder(obj),rank:PICK_RANK[kind]});
   }
   DATA.items.forEach(function(it,i){
@@ -15433,7 +16505,7 @@ canvas.addEventListener('mouseup',function(){
     var m=DRAG.marquee;DRAG.marquee=null;
     var list=m.base.slice(),minX=Math.min(m.start.x,m.end.x),maxX=Math.max(m.start.x,m.end.x),minY=Math.min(m.start.y,m.end.y),maxY=Math.max(m.start.y,m.end.y);
     if(Math.hypot(maxX-minX,maxY-minY)*ST.zoom*.05>=4){
-      DATA.items.concat(DATA.walls,DATA.rooms).filter(function(obj){return (obj.floor||1)===ST.floor;}).forEach(function(obj){
+      DATA.items.concat(DATA.walls,DATA.rooms).filter(function(obj){return (obj.floor||1)===ST.floor&&(typeof CeilingDesigner==='undefined'||CeilingDesigner.visible(obj));}).forEach(function(obj){
         var points=getObjBounds(obj);if(points.length&&points.every(function(p){return p.x>=minX&&p.x<=maxX&&p.y>=minY&&p.y<=maxY;})&&list.indexOf(obj)<0)list.push(obj);
       });
     }
@@ -15617,6 +16689,13 @@ function placeItem(type,wx,wy){
     it.x=objectPlaced.x; it.y=objectPlaced.y;
   }
   applyDefaultPlacementElevation(it);
+  // 段差の上に置いた柱は、段差の下を持たせるためのものとみなして、
+  // 足元をその階の構造床へ下ろし、高さを段差に合わせる。毎回入力させるものではない。
+  if(isColumnType(it.type)){
+    var colRoom=roomAtPointOnFloor(it.floor,it.x+it.w/2,it.y+it.d/2);
+    var cavity=roomSkipCavityMm(colRoom);
+    if(cavity>0){ it.baseLevel='under'; it.columnHeight=cavity; }
+  }
   DATA.items.push(it);ST.placingRot=0;
   ST.tool='select'; ST.selected=it; updateProps();
   syncToolUi();
@@ -16323,10 +17402,20 @@ window.addEventListener('keydown', function(e){
   var key=(e.key||'').toLowerCase();
   if((e.metaKey || e.ctrlKey) && (key==='y' || (key==='z' && e.shiftKey))){ e.preventDefault(); redoAction(); return; }
   if((e.metaKey || e.ctrlKey) && key === 'z'){ e.preventDefault(); undoAction(); return; }
-  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){ e.preventDefault(); ST.selectAll=true; ST.selected=null; updateProps(); draw2d(); }
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a'){
+    e.preventDefault();
+    if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.active()){
+      ST.selectAll=false;ST.multiSelected=DATA.items.concat(DATA.walls,DATA.rooms).filter(function(o){return o.floor===ST.floor&&CeilingDesigner.visible(o);});ST.selected=ST.multiSelected[0]||null;
+    }else{ST.selectAll=true;ST.selected=null;}
+    updateProps();draw2d();
+  }
   if(ST.selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0){
     e.preventDefault();
     if(isObjectLocked(ST.selected)){ updateProps(); return; }
+    if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.zone(ST.selected)){
+      var ceilingAxis=(e.key==='ArrowLeft'||e.key==='ArrowRight')?'x':'y';
+      updateSelectedProp(ceilingAxis,ST.selected[ceilingAxis]+(e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1)*(ST.snap||1));return;
+    }
     saveState();
     var step=ST.snap||1, dx=0, dy=0;
     if(e.key==='ArrowLeft') dx=-step;
@@ -18130,7 +19219,7 @@ function planFloorTopImageEntries(floor){
   var out=[];
   (DATA.items||[]).forEach(function(it){
     if(it.floor!==floor) return;
-    var fmp=getItemFinishModel(it.type);
+    var fmp=planTopImageModelFor(it.type);
     if(!fmp||!fmp.top) return;
     var img=getFmpTopImage(fmp); // 呼ぶこと自体が読み込みの開始でもある
     if(img) out.push({item:it,img:img});
@@ -18154,61 +19243,17 @@ async function waitForPlanFloorTopImages(floor,timeoutMs){
   }
   return {floor:floor,images:entries.length,pending:pending,waitedMs:Date.now()-started};
 }
-// 待った「つもり」を信じない。出力された画素だけを見て、家具が本当に描かれたかを
-// 事後検証する。考え方は pv/tools/truth-render/check_scene_readiness.py と同じで、
-// 待ちの成否とは独立に、出てきたものを測る。
-// プレースホルダは単色の塗りつぶし矩形なので、部材の中心に取った小さな正方形の
-// 中に色が1つしか無ければ、上面写真に差し替わっていない候補になる。
+// 待った「つもり」を信じない。ただし**画素から逆算はしない**。
+// 撮った絵を描いたのは draw2d であり、灰色のプレースホルダで代替したかどうかは
+// その場で分岐した側が知っている。capturePlan2dDataUrl はその1回の描画のあいだ
+// だけ PLAN_CAPTURE_PLACEHOLDERS に書かせる（assets/js/draw-2d.js）。待ちの
+// 戻り値 (img.complete) ではなく、実際に出力された絵の作られ方を見るという
+// 意図はそのまま、推定の入る余地だけを無くしたことになる。
 //
-// ただし「単色」だけでは足りない。実測: 読み込みが**終わった**後の
-// fmp-CabinetD03 / D04 の天板は真っ白 (#ffffff) の単色で、これを数えると
-// 正常なパッケージが弾かれる。そこで色そのものも見る。プレースホルダは
-// 不透明な背景 B の上に rgba(210,215,225,0.72) を重ねた結果なので、B を逆算して
-// 0..255 に収まるかを問う。収まらなければ、どんな背景からも作れない色＝
-// プレースホルダではない。実測で #ffffff は落ち (B_r=370.7)、読み込み前の
-// #dde1e7 / #d5dae3 は通る。
-function planPlaceholderCouldBe(r,g,b){
-  var a=PLAN_PLACEHOLDER_ALPHA, inv=1-a, c=[r,g,b], i;
-  for(i=0;i<3;i++){
-    var back=(c[i]-a*PLAN_PLACEHOLDER_RGB[i])/inv;
-    if(back<-1.5||back>256.5) return false; // 丸め1段ぶんの余裕
-  }
-  return true;
-}
-// view は「その画像を撮ったときの座標系」。撮影中にパン・ズーム・倍率を変えた
-// なら、それを渡さないと判定は画像の別の場所を見る（＝黙って何も検出しなくなる）。
-// 省略時は現在の表示 = 撮影時と同じ、という Task 3 以来の前提のまま。
-function findPlanPlaceholderInstances(imageData,floor,view){
-  var found=[];
-  if(!imageData||!imageData.data) return found;
-  var d=imageData.data, W=imageData.width, H=imageData.height;
-  var vw=view||ST;
-  var sc=vw.zoom*0.05;
-  planFloorTopImageEntries(floor).forEach(function(e){
-    var it=e.item;
-    var pose=getItemDisplayPose(it);
-    var ccx=vw.panX+pose.x*sc, ccy=vw.panY+pose.y*sc;
-    // どの回転角でも矩形の内側に収まる正方形の半辺 (0.35 < 1/(2*sqrt2))
-    var half=Math.floor(Math.min(it.w,it.d)*sc*0.35);
-    if(half<3) return;                       // 数画素の部材は判定材料にならない
-    var x0=Math.max(0,Math.round(ccx-half)), x1=Math.min(W-1,Math.round(ccx+half));
-    var y0=Math.max(0,Math.round(ccy-half)), y1=Math.min(H-1,Math.round(ccy+half));
-    if(x1-x0<5||y1-y0<5) return;             // 画面外・見切れは判定しない
-    var first=-1, distinct=1, x, y;
-    for(y=y0;y<=y1&&distinct<2;y++){
-      for(x=x0;x<=x1;x++){
-        var p=(y*W+x)*4;
-        var v=(d[p]<<16)|(d[p+1]<<8)|d[p+2];
-        if(first<0){ first=v; continue; }
-        if(v!==first){ distinct=2; break; }
-      }
-    }
-    if(distinct<2&&planPlaceholderCouldBe((first>>16)&255,(first>>8)&255,first&255)){
-      found.push({id:it.id,type:it.type,color:'#'+('000000'+first.toString(16)).slice(-6),
-        x:x0,y:y0,w:x1-x0+1,h:y1-y0+1});
-    }
-  });
-  return found;
+// 逆算をやめた理由は draw-2d.js の PLAN_CAPTURE_PLACEHOLDERS に書いてある
+// （天面が一様な色の部材を必ず誤検出する。実測: 室外機）。
+function planCapturePlaceholderRoster(){
+  return (typeof PLAN_CAPTURE_PLACEHOLDERS!=='undefined'?PLAN_CAPTURE_PLACEHOLDERS:[]).slice();
 }
 function decodePngDataUrlToImageData(dataUrl){
   return new Promise(function(resolve,reject){
@@ -18524,10 +19569,19 @@ function videoRenderViewRefusalText(){
     'どちらかを表示し、撮りたい画角にしてから'+
     'もう一度「動画AI用データを作る」を押してください。';
 }
+// 名指しできないエラーは直せない。「4件」とだけ言われたユーザーは、平面図の
+// どこを見ればいいのか分からない。型の名前と ID を並べる（多すぎるときは畳む）。
+function planPlaceholderNames(placeholders){
+  var names=placeholders.slice(0,6).map(function(p){
+    return itemTypeLabel(p.type)+'(ID '+p.id+')';
+  }).join('、');
+  return placeholders.length>6 ? names+' ほか'+(placeholders.length-6)+'件' : names;
+}
 function planPlaceholderError(placeholders,topImages){
   return new Error('平面図の家具 '+placeholders.length+' 件が灰色のプレースホルダのままです'+
-    '（上面画像 '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
-    'ms 待っても読めていません）。このまま渡すと、生成AIは家具の無い部屋を見ます。');
+    '（'+planPlaceholderNames(placeholders)+'）。'+
+    '上面画像は '+topImages.images+' 枚中 '+topImages.pending+' 枚が '+topImages.waitedMs+
+    'ms 待っても読めていません。このまま渡すと、生成AIは家具の無い部屋を見ます。');
 }
 async function generateVideoRenderPackage(options){
   var opt=options||{};
@@ -18560,11 +19614,12 @@ async function generateVideoRenderPackage(options){
       fit:true,scale:planCaptureScaleForVideo()});
     if(!planRef) throw new Error('平面図の撮影に失敗しました。');
     var planView=PLAN_CAPTURE_VIEW;
+    // 名簿は撮った直後に受け取る（次に誰かが draw2d を呼べば入れ替わる）。
+    var planPh=planCapturePlaceholderRoster();
+    if(planPh.length) throw planPlaceholderError(planPh,planTop);
     var planIm=await decodePngDataUrlToImageData(planRef);
     // 撮ったものを測る。値は記録するだけで、下限は設けない（拒否は撤回した）。
     var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
-    var planPh=findPlanPlaceholderInstances(planIm,planFloor,planView);
-    if(planPh.length) throw planPlaceholderError(planPh,planTop);
     // 部材の名指しは DATA から作る（真実源は DATA で、legend の方が派生物）。
     // camera は渡さない。3Dの目線の高さは平面図の構図と無関係で、
     // 「床から1.5m」と書けば真上からの参照と矛盾する。
@@ -18663,13 +19718,14 @@ async function generateVideoRenderPackage(options){
   // 撮影中だけ変えた構図は finally で戻っているので、撮った絵を画素で読む側にも
   // 重ねる側にも、ST ではなく「撮ったときの座標系」を渡す。
   var planView=PLAN_CAPTURE_VIEW;
+  // 名簿は撮った直後に受け取る（次に誰かが draw2d を呼べば入れ替わる）。
+  var placeholders=planCapturePlaceholderRoster();
+  if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var planIm=await decodePngDataUrlToImageData(plan);
   // 家がこの図の何割を占めるかは測って記録するだけ（カメラを入れた分だけ主題は
   // 小さく写る。それはこの図の目的が家の描写ではないからで、不良ではない）。
   var contextRatio=planSubjectFrameRatio(planSubjectBoundsMm(floor),planView,
     planIm.width,planIm.height);
-  var placeholders=findPlanPlaceholderInstances(planIm,floor,planView);
-  if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var planContext=await drawPlanCameraOverlay(plan,camera,planView);
 
   // 4) プロンプト。光を書けなかったら黙って続けない。
@@ -19193,7 +20249,7 @@ function doImport(inp){
   var file=inp.files[0];if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
+    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
     catch(ex){alert('読み込みエラー:'+ex.message);}
   };
   r.readAsText(file);
@@ -19238,9 +20294,40 @@ function snapCeilingFixturesToCeiling(){
   if(moved) console.info('[WebCAD] 天井付けの器具 '+moved+'個を天井面へ寄せ直しました');
   return moved;
 }
+// 屋外(部屋の外)にある天井付けの器具を、上に架かる屋根の下面へ寄せ直す。
+//
+// snapCeilingFixturesToCeiling は「屋外は天井が無い」として屋外を除いていた。
+// しかし軒天やポーチには屋根の下面という取り付け面があり、除かれたままの器具は
+// 固定の既定値(既定プランでは elev 2600)で軒から離れて浮いていた。
+// **1度だけ**走らせる。印は上の移行とは別に持つ -- 上は既に済んだ印が付いている
+// プランがあり、同じ印を使うとこの寄せ直しが一度も走らない。
+var PLAN_FIX_OUTDOOR_CEILING_FIXTURES='outdoorCeilingFixtureElev';
+function snapOutdoorCeilingFixturesToRoof(){
+  if(!DATA||!DATA.items) return 0;
+  if(!DATA.planFixes||typeof DATA.planFixes!=='object') DATA.planFixes={};
+  if(DATA.planFixes[PLAN_FIX_OUTDOOR_CEILING_FIXTURES]) return 0;
+  DATA.planFixes[PLAN_FIX_OUTDOOR_CEILING_FIXTURES]=1;
+  var moved=0;
+  DATA.items.forEach(function(it){
+    if(!it) return;
+    var topOff=CEILING_FIXTURE_TOP_MM[it.type];
+    if(topOff===undefined) return;
+    var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+    if(roomAtPointOnFloor(it.floor||1,cx,cy)) return;   // 屋内は上の移行の領分
+    var want=ceilingAttachElevationMm(it);
+    if(want===null) return;                             // 上に屋根が無い場所は触らない
+    want-=topOff;
+    if(Math.abs((Number(it.elev)||0)-want)<=1) return;
+    it.elev=want;
+    moved++;
+  });
+  if(moved) console.info('[WebCAD] 軒下の天井付け器具 '+moved+'個を屋根の下面へ寄せ直しました');
+  return moved;
+}
 function normalizeLegacyFurnitureItems(){
   if(!DATA||!DATA.items) return;
   snapCeilingFixturesToCeiling();
+  snapOutdoorCeilingFixturesToRoof();
   DATA.items=DATA.items.filter(function(it){return it && it.type!=='tv';});
   if(ST && ST.selected && ST.selected.type==='tv') ST.selected=null;
   DATA.items.forEach(function(it){
@@ -20784,7 +21871,7 @@ var JISDRAW=(function(){
   // 屋根(roof)は最上階の1つ上のフロア番号に配置される設計であり、また外構・バルコニー等は
   // 「居室」ではないため、これらのアイテムだけがfloor+1にあっても「上階が存在する」とはみなさない
   // (既存のisGroundLevelItemType/isContextExteriorItemTypeによる外構判定と一貫させる。
-  //  stairGroupTotalRiseM内のhasUpper:11228-11230は階高計算用の別判定でJISDRAW外のため変更しない)。
+  //  stairUpperSpanM内のhasUpperは階高計算用の別判定でJISDRAW外のため変更しない)。
   function isRoofOrOutdoorOnlyItemType(t){
     return t==='roof' || t==='balcony' || isGroundLevelItemType(t) || isContextExteriorItemType(t);
   }
@@ -20828,7 +21915,7 @@ var JISDRAW=(function(){
   }
   function stairsToSvg(floor,LW){
     var out='';
-    DATA.items.filter(function(it){return (it.floor||1)===floor && (it.type==='stair'||it.type==='stair-corner');}).forEach(function(it){
+    DATA.items.filter(function(it){return (it.floor||1)===floor && isStairPartType(it.type);}).forEach(function(it){
       out+=stairSymbolSvg(it,LW);
     });
     return out;
@@ -20942,6 +22029,13 @@ var JISDRAW=(function(){
         var gap=fsName*0.7;
         out+='<text x="'+cx+'" y="'+(cy-gap*0.5)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsName+'" fill="#000">'+name+'</text>';
         out+='<text x="'+cx+'" y="'+(cy+gap*1.1)+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsArea+'" fill="#000">'+tatami+'</text>';
+      }
+      // 段差は平面図では見えない。床の高さが分からないと部屋の関係が読めないので
+      // 「FL+1200」を畳数の下に添える。段差の無い部屋には何も出ない。
+      var lvl=roomLevelLabel(r);
+      if(lvl){
+        var fsLvl=clampFsToWidth(lvl,LW.text*0.8,maxTextW,minFs);
+        out+='<text x="'+cx+'" y="'+(cy+(nameOmit?fsLvl*1.9:fsLvl*3.0))+'" text-anchor="middle" font-family="\'Noto Sans JP\',sans-serif" font-size="'+fsLvl+'" fill="#000">'+escSvgText(lvl)+'</text>';
       }
     });
     return out;
@@ -21667,5 +22761,6 @@ updateMobileShiftButton();
   }catch(e){ console.error('[pv-capture] hook init failed',e); }
 })();
 </script>
+<script src="assets/js/ceiling-designer.js"></script>
 </body>
 </html>

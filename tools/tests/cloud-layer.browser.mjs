@@ -8,7 +8,7 @@ try {
   const page=await browser.newPage({viewport:{width:1000,height:650}});
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.TEST_URL||'http://localhost:8932/');
+  await page.goto(process.env.APP_URL||process.env.TEST_URL||'http://localhost:8932/');
   await page.waitForFunction(()=>window.THREE);
   await page.evaluate(()=>init3D());
   await page.waitForFunction(()=>_skyPhotoCache.common);

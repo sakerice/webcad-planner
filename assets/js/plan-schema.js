@@ -33,6 +33,7 @@
     MAX_WALL_THICK_MM: 1000,
     MIN_SIZE_MM: 1,           // 部屋・物の幅/奥行き
     MAX_SIZE_MM: 200000,
+    MAX_SKIP_LEVEL_MM: 2400,  // スキップフロアの段差。これを超えるともう1つの階
     MIN_FLOOR: 1,
     MAX_FLOOR: 5,             // 3階建て + その上に載る屋根アイテムぶんの余裕
     MAX_OBJECTS: 20000        // 1プランの総数。これ以上は描画が実用にならない
@@ -79,6 +80,9 @@
         LIMITS.MIN_WALL_THICK_MM + '〜' + LIMITS.MAX_WALL_THICK_MM + 'mm)');
     }
     checkFloor(w.floor, where, errors);
+    if (w.baseLevel !== undefined && w.baseLevel !== 'floor' && w.baseLevel !== 'skip') {
+      warnings.push(where + ': 壁の基準 "' + w.baseLevel + '" は floor / skip のどちらでもないので自動判定で読む');
+    }
   }
 
   function checkRoom(r, where, errors, warnings) {
@@ -92,6 +96,17 @@
     }
     checkFloor(r.floor, where, errors);
     if (r.n !== undefined && typeof r.n !== 'string') warnings.push(where + ': 部屋名が文字列でない');
+    // スキップフロアの段差。読み込めなくはないので errors ではなく warnings。
+    // 範囲外は HeightModel 側で丸まるので、丸まることだけ伝える。
+    if (r.skipLevelMm !== undefined) {
+      var sk = num(r.skipLevelMm);
+      if (sk === null || sk < 0) {
+        warnings.push(where + ': 段差(skipLevelMm) が数値でないので段差なしとして読む');
+      } else if (sk > LIMITS.MAX_SKIP_LEVEL_MM) {
+        warnings.push(where + ': 段差 ' + sk + 'mm は上限 ' + LIMITS.MAX_SKIP_LEVEL_MM +
+          'mm を超えるので丸めて読む(それ以上は別の階として作るもの)');
+      }
+    }
   }
 
   function checkItem(it, where, errors, warnings) {
@@ -110,6 +125,36 @@
     var rot = num(it.rot);
     if (it.rot !== undefined && rot === null) errors.push(where + ': 回転角が数値でない');
     checkFloor(it.floor, where, errors);
+    // 階段の行き先と、置く高さの基準。見慣れない値は既定として読む。
+    if (it.stairTarget !== undefined && it.stairTarget !== 'upper' && it.stairTarget !== 'level') {
+      warnings.push(where + ': 階段の行き先 "' + it.stairTarget + '" は upper / level のどちらでもないので上の階として読む');
+    }
+    // 置く高さの基準。物は floor / under、階段は floor / skip を使う。
+    if (it.baseLevel !== undefined &&
+        ['floor', 'under', 'skip'].indexOf(it.baseLevel) < 0) {
+      warnings.push(where + ': 置く高さの基準 "' + it.baseLevel + '" は floor / under / skip のどれでもないので自動判定で読む');
+    }
+    if (it.stairRail !== undefined &&
+        ['none', 'left', 'right', 'both'].indexOf(it.stairRail) < 0) {
+      warnings.push(where + ': 階段の手すり "' + it.stairRail + '" は none / left / right / both のどれでもないので手すり無しとして読む');
+    }
+    if (it.railInfill !== undefined &&
+        ['bars', 'wires', 'baluster', 'none'].indexOf(it.railInfill) < 0) {
+      warnings.push(where + ': 手すり・柵の意匠 "' + it.railInfill + '" は bars / wires / baluster / none のどれでもないので横桟として読む');
+    }
+    if (it.stairRailMount !== undefined && it.stairRailMount !== 'wall' && it.stairRailMount !== 'post') {
+      warnings.push(where + ': 手すりの付け方 "' + it.stairRailMount + '" は wall / post のどちらでもないので自動判定で読む');
+    }
+    if (it.stairStyle !== undefined &&
+        ['open', 'box', 'skeleton'].indexOf(it.stairStyle) < 0) {
+      warnings.push(where + ': 階段の形状 "' + it.stairStyle + '" は open / box / skeleton のどれでもないのでひな壇として読む');
+    }
+    if (it.stairUnder !== undefined && it.stairUnder !== 'open' && it.stairUnder !== 'filled') {
+      warnings.push(where + ': 階段の下 "' + it.stairUnder + '" は open / filled のどちらでもないので素通しとして読む');
+    }
+    if (it.shelfSides !== undefined && it.shelfSides !== 'none' && it.shelfSides !== 'both') {
+      warnings.push(where + ': 造作棚の縦板 "' + it.shelfSides + '" は none / both のどちらでもないので自動判定で読む');
+    }
   }
 
   function checkFloor(v, where, errors) {

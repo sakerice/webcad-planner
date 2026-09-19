@@ -26,7 +26,7 @@ function loadFunction(name,sandbox){
  vm.createContext(sandbox);vm.runInContext(html.slice(start,end),sandbox);return sandbox[name];
 }
 test('configured furniture cannot bypass facing/material correction when deselected',()=>{
- const sandbox={ren:{},snapCeilingFixturesToCeiling:()=>{},ST:{selected:null},GLTF_MODEL_CONFIG:{bed:{rotY:Math.PI}}};
+ const sandbox={ren:{},snapCeilingFixturesToCeiling:()=>{},snapOutdoorCeilingFixturesToRoof:()=>{},ST:{selected:null},GLTF_MODEL_CONFIG:{bed:{rotY:Math.PI}}};
  const queue=loadFunction('queueFmpInstance',sandbox);
  assert.equal(queue('bed.glb',{type:'bed'},{}),false);
 });
@@ -46,13 +46,13 @@ test('coated refrigerator shell is not treated as bare metal',()=>{
 });
 test('existing furniture preserves physical facing and migration is idempotent',()=>{
  const item={type:'fmp-Sofa01',rot:90};
- const sandbox={DATA:{items:[item]},snapCeilingFixturesToCeiling:()=>{},ST:{selected:null},getFmpItem:()=>({category:'ソファ'}),bestFmpType:t=>t};
+ const sandbox={DATA:{items:[item]},snapCeilingFixturesToCeiling:()=>{},snapOutdoorCeilingFixturesToRoof:()=>{},ST:{selected:null},getFmpItem:()=>({category:'ソファ'}),bestFmpType:t=>t};
  const normalize=loadFunction('normalizeLegacyFurnitureItems',sandbox);
  normalize();assert.equal(item.rot,270);assert.equal(item.modelFacingVersion,1);normalize();assert.equal(item.rot,270);
 });
 test('car migration preserves old placement while new car assets use +Z front',()=>{
  const {sourceYaw}=require('../../assets/js/model-quality.js');assert.equal(sourceYaw('assets/models/refined/car_sedan_v3.glb'),Math.PI);
- const item={type:'car',rot:0};const s={DATA:{items:[item]},snapCeilingFixturesToCeiling:()=>{},ST:{selected:null},getFmpItem:()=>null,bestFmpType:t=>t};
+ const item={type:'car',rot:0};const s={DATA:{items:[item]},snapCeilingFixturesToCeiling:()=>{},snapOutdoorCeilingFixturesToRoof:()=>{},ST:{selected:null},getFmpItem:()=>null,bestFmpType:t=>t};
  const normalize=loadFunction('normalizeLegacyFurnitureItems',s);normalize();assert.equal(item.rot,180);normalize();assert.equal(item.rot,180);
 });
 test('every catalogue entry references existing 3D, thumbnail and plan assets',()=>{

@@ -296,12 +296,12 @@ item("road", 5280, SY1 + 2275, 30000, 4550, 1, color="#55585c", contextHeight=70
 # 東西の隣家はこの家と同じ道路(南)に面するので、玄関側=南を向く(rot=180)。
 # 既定の rot=0 のままだと3軒とも道路に背を向けて建つ
 item("neighbor-house", 14560, 3485, 7280, 6370, 1, rot=180,
-     color="#d7c1a3", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-house", -4960, 3985, 7280, 6370, 1, rot=180,
-     color="#c9c2b4", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 # 北の家は反対側(北)の道路に面するので、こちらへは背面(北向き=rot 0)を見せる
 item("neighbor-house", 4340, -4615, 7280, 6370, 1, rot=0,
-     color="#b9bcc2", contextFloors=2, contextHeight=6300, contextGhost=True)
+     color="#ffffff", contextFloors=2, contextHeight=6300, contextGhost=True)
 item("neighbor-building", -3200, SY1 + 6850, 5200, 3600, 1,
      color="#8f98a3", contextFloors=3, contextHeight=9150, contextGhost=True)
 
@@ -523,5 +523,16 @@ plan.update(review26["metadata"])
 for collection, order in review26["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
+# 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
+# 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
+# 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
+# 1階2688 / 2階以上2508 は、この間取りがこれまで持っていた天井の高さ。
+# 手直しの取り込み(plan.update)より後に置く。あちらに同じ鍵があると消える。
+from plan_kit import height_defaults
+from plan_kit import tidy_numbers
+plan["heightDefaults"], plan["floors"] = height_defaults((1, 2, 3))
 with open(out, "w", encoding="utf-8") as f:
-    json.dump(plan, f, ensure_ascii=False, indent=1)
+    # 出荷するファイルは詰めて書く(配信量)。生成器の出力が出荷物そのものに
+    # なるので、`python3 tools/make_default_plan_2f.py && git diff --exit-code` で
+    # 「生成器が出荷物を再現するか」を確かめられる。
+    json.dump(tidy_numbers(plan), f, ensure_ascii=False, separators=(",", ":"))

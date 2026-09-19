@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+from plan_kit import ceiling_finish_mm
+
 
 def apply_review(plan):
     patch = json.loads(Path(__file__).with_name('default_plan_3f_user_review.json').read_text())
@@ -76,5 +78,7 @@ def finish_raised_floors(plan):
             continue
         floor = item['floor']
         c = room.get('ceiling') or {}
-        span = max(floor+1, c.get('toFloor', floor+1))-floor+1 if c.get('type') == 'void' else 1
-        item['elev'] = span*2700-(180 if floor > 1 else 0)-12-room.get('floorRaiseMm', 0)-offsets[item['type']]
+        void_to = c.get('toFloor', floor+1) if c.get('type') == 'void' else None
+        # 式は plan_kit に1つだけ置く(ここに書き写すと、片方だけ直して食い違う)。
+        item['elev'] = (ceiling_finish_mm(floor, void_to, room.get('floorRaiseMm', 0))
+                        - offsets[item['type']])

@@ -199,6 +199,26 @@ function planSubjectFrameRatio(bounds,view,W,H){
 // 最後に撮った平面図の座標系。撮影中だけ変えたパン・ズーム・倍率を、撮った画像を
 // 画素で調べる側（プレースホルダ検出・構図の検査）へ渡すために残す。
 var PLAN_CAPTURE_VIEW=null;
+// 撮影中に「上面画像が間に合わず、灰色のプレースホルダで代替した」部材の名簿。
+// 撮った絵そのものを描いた draw2d が、その場で take した分岐を書き残す。
+//
+// **以前はここを画素から逆算していた（findPlanPlaceholderInstances）。**
+// 部材の中心に取った小さな正方形が単色で、かつその色がプレースホルダ色から
+// 作りうる範囲に入っていればプレースホルダだ、という推定である。これは
+// 「天面が均一な色の部材」を必ず誤検出する。実測: 室外機 (ac-outdoor) の
+// 上面画像は読み込み**完了後**も中央が一様な #d8dada で、逆算は
+// 背景 B=(231,226,200) から作れると答える。正常なパッケージが
+// 「家具5件が灰色のプレースホルダのまま」で拒否された。
+// 画素は「何色か」しか答えられず、「なぜその色か」は答えられない。
+// 分岐そのものを記録すれば推定は要らない。
+var PLAN_CAPTURE_PLACEHOLDERS=[];
+// 2Dの上面画像として使うモデル。待つ側 (waitForPlanFloorTopImages) と
+// 描く側 (drawItem2d) が別々に解決すると、片方だけが知っている部材
+// (自動車のフォールバック) が「待たれないまま灰色で描かれる」。1か所に置く。
+function planTopImageModelFor(type){
+  return getItemFinishModel(type)
+    ||(type==='car'?{id:'context-car',top:'assets/models/previews-v2/context-car-top.png',previewVersion:2}:null);
+}
 // 撮影中の倍率。文字の大きさの**下限**だけがこれを見る。下限（10px 等）は
 // 「画面で読める大きさ」のための値で、画素を増やしただけで図の中の文字が
 // 相対的に縮むのは倍率の副作用でしかない。通常表示と等倍キャプチャでは 1 で、
@@ -243,6 +263,8 @@ function capturePlan2dDataUrl(options){
     // 撮った画像を画素で調べる側は、この座標系で読む必要がある。
     PLAN_CAPTURE_VIEW={panX:ST.panX,panY:ST.panY,zoom:ST.zoom,
       width:canvas.width,height:canvas.height,floor:ST.floor,scale:scale};
+    // この1回の draw2d が書き込む。読む側は撮った直後に受け取ること。
+    PLAN_CAPTURE_PLACEHOLDERS=[];
     draw2d();
     return canvas.toDataURL(opt.mimeType||'image/png');
   }finally{
@@ -267,7 +289,7 @@ function draw2d(){
   if(ST.showGrid && planCaptureShows('grid')) drawGrid();
   var sc=ST.zoom*0.05;
   var fw=DATA.walls.filter(function(w){return w.floor===ST.floor;});
-  var fi=DATA.items.filter(function(i){return i.floor===ST.floor;});
+  var fi=DATA.items.filter(function(i){return i.floor===ST.floor&&(typeof CeilingDesigner==='undefined'||CeilingDesigner.visible(i));});
 
   // 0. Floor below ghost – 1つ下のフロアをうっすら表示（2F編集時に1Fが見える）
   var ghostFloor = ST.floor - 1;
@@ -283,7 +305,7 @@ function draw2d(){
   }
 
   // 1. Sites (1F-only Base Layer)
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='site-rect';}).forEach(function(i){
     drawItem2d(i);
     if(ST.selected===i && ST.tool==='select'){
       var ccx=ST.panX+(i.x+i.w/2)*sc, ccy=ST.panY+(i.y+i.d/2)*sc;
@@ -291,7 +313,7 @@ function draw2d(){
     }
   });
   // 2. Foundation (above site, below building plan)
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='foundation';}).forEach(drawItem2d);
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='foundation';}).forEach(drawItem2d);
   // 3. Rooms
   DATA.rooms.filter(function(r){return r.floor===ST.floor;}).forEach(function(r){
     var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
@@ -309,10 +331,11 @@ function draw2d(){
   // 4. Walls
   fw.forEach(drawWall2d);
   if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
+  fi.sort(function(a,b){return (a.type==='ceiling-area'?0:1)-(b.type==='ceiling-area'?0:1);});
   // 5. Other Items
   fi.filter(function(i){return i.type!=='site-rect' && i.type!=='foundation';}).forEach(drawItem2d);
   // Finish labels stay legible above decks and paving, without extra parcel lines.
-  if(ST.floor===1) DATA.items.filter(function(i){return i.type==='site-rect'&&i.siteBoundary;}).forEach(function(it){
+  if(ST.floor===1&&!ST.ceilingView) DATA.items.filter(function(i){return i.type==='site-rect'&&i.siteBoundary;}).forEach(function(it){
     ctx.save();ctx.font='11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     siteFinishZones(it).forEach(function(z){
       var x=ST.panX+(it.x+z.x+z.w/2)*sc,y=ST.panY+(it.y+z.y+z.d/2)*sc;
@@ -324,7 +347,7 @@ function draw2d(){
   });
 
   // Ghost Previews
-  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect' || (ST.tool==='site-rect'&&ST.floor===1))) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && ((ST.tool==='room-rect'||(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool))) || (ST.tool==='site-rect'&&ST.floor===1))) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var x1=Math.min(p1.x,p2.x), y1=Math.min(p1.y,p2.y), rw=Math.abs(p1.x-p2.x), rd=Math.abs(p1.y-p2.y);
     ctx.strokeStyle='rgba(48,128,232,0.5)'; ctx.setLineDash([5,5]);
@@ -357,7 +380,7 @@ function draw2d(){
     drawPlacementDim(mx, my, sz.w, sz.d, ST.placingRot||0);
   }
   // ── Room-rect preview dimensions ──
-  if(ST.drawing && planCaptureShows('toolOverlays') && (ST.tool==='room-rect'||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
+  if(ST.drawing && planCaptureShows('toolOverlays') && ((ST.tool==='room-rect'||(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.isTool(ST.tool)))||(ST.tool==='site-rect'&&ST.floor===1)) && ST.drawPts.length>0) {
     var p1=ST.drawPts[0], p2=ST.mouseW;
     var rw=Math.abs(snapV(p2.x)-p1.x), rd=Math.abs(snapV(p2.y)-p1.y);
     if(rw>50&&rd>50) drawRectDim(Math.min(p1.x,snapV(p2.x)), Math.min(p1.y,snapV(p2.y)), rw, rd);
@@ -476,9 +499,30 @@ function drawAreaTag(cx,cy,w,d,name,isSelected){
   }
 }
 
+// 段差のある部屋の輪郭。平面図では段差が見えないので、線を引かないと
+// 「なぜこの部屋だけ天井が高いのか」が図面から読めない。
+// JIS の段差表現に倣い、低いレベルに面した辺だけを太い実線で引く
+// (外壁側・同じレベルの側は段差ではないので引かない)。
+function drawSkipLevelEdges2d(room){
+  if(roomSkipLevelMm(room)<=0) return;
+  var open=roomSkipOpenSides(room);
+  if(!open.n&&!open.s&&!open.w&&!open.e) return;
+  var a=w2c(room.x,room.y), b=w2c(room.x+room.w,room.y+room.d);
+  ctx.save();
+  ctx.strokeStyle='rgba(40,60,90,0.75)';
+  ctx.lineWidth=Math.max(1.6,ST.zoom*0.09);
+  ctx.setLineDash([]);
+  function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+  if(open.n) line(a.cx,a.cy,b.cx,a.cy);
+  if(open.s) line(a.cx,b.cy,b.cx,b.cy);
+  if(open.w) line(a.cx,a.cy,a.cx,b.cy);
+  if(open.e) line(b.cx,a.cy,b.cx,b.cy);
+  ctx.restore();
+}
 function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
+    drawSkipLevelEdges2d(l);
     drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l);
     drawCeilingLabel2d(l);
   });
@@ -493,9 +537,13 @@ function drawRoomLbls(){
 // roomCeilingHeightM(=レンダの経路)から解決する。HeightModel.ceilingLabel を
 // 直接呼ぶと、明示の無い部屋に既定 2400 と書いて絵と食い違う。
 function drawCeilingLabel2d(room){
-  if(!planCaptureCeilingLabels()) return;
+  // 天井高は「キャプチャのときだけ」だが、**床の段差は編集中も出す**。
+  // 段差は平面図では見えないので、編集画面で分からないと、どの部屋を
+  // 持ち上げたのかが自分の記憶にしか残らない。
+  var lvl=roomLevelLabel(room);
+  if(!planCaptureCeilingLabels()&&!lvl) return;
   if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
-  var text=roomRenderedCeilingLabel(room);
+  var text=planCaptureCeilingLabels()?roomHeightLabel(room):lvl;
   var p=w2c(room.x+room.w/2,room.y+room.d/2);
   var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);
@@ -1224,6 +1272,7 @@ function drawStairUpText(it,sc,x,y,align){
 }
 
 function drawItem2d(it){
+  if(it.type==='ceiling-area'){if(typeof CeilingDesigner!=='undefined')CeilingDesigner.drawArea(it);return;}
   // メモ・定規・ウォークルートは注記。判定は isPlanAnnotationType に一本化する
   if(isPlanAnnotationType(it.type) && !planCaptureShows('annotations')) return;
   var sc=ST.zoom*0.05;
@@ -1274,15 +1323,16 @@ function drawItem2d(it){
   }
   var spriteKey=SPRITE_MAP[it.type];
   var s = spriteKey ? SPRITE_JSON.sprites[spriteKey] : null;
-  var fmp=getItemFinishModel(it.type)||(it.type==='car'?{id:'context-car',top:'assets/models/previews-v2/context-car-top.png',previewVersion:2}:null);
+  var fmp=planTopImageModelFor(it.type);
   if(fmp){
     var topImg=getFmpTopImage(fmp);
     var hwF=it.w*sc/2, hdF=it.d*sc/2;
     if(topImg && topImg.complete && topImg.naturalWidth>0){
       drawFmpTopImageOriented(topImg,fmp,it.w*sc,it.d*sc);
     } else {
-      // 色は PLAN_PLACEHOLDER_* に置いてある。findPlanPlaceholderInstances が
-      // 「この画素はプレースホルダでありうるか」を逆算するのに同じ値を要るため。
+      // 撮影中なら、代替で描いたことをここで書き残す。動画AI用パッケージは
+      // この名簿だけを見て「灰色のまま渡してしまうか」を決める。
+      if(PLAN_CAPTURE) PLAN_CAPTURE_PLACEHOLDERS.push({id:it.id,type:it.type,floor:it.floor});
       ctx.fillStyle=PLAN_PLACEHOLDER_FILL;
       ctx.fillRect(-hwF,-hdF,it.w*sc,it.d*sc);
       ctx.strokeStyle='rgba(0,0,0,0.35)';
@@ -1306,7 +1356,7 @@ function drawItem2d(it){
     }
   } else {
     var hw = it.w*sc/2, hd = it.d*sc/2;
-    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
+    var isPlanSymbol=(it.type==='stair' || it.type==='stair-corner' || it.type==='stair-landing' || it.type==='door-slide' || it.type==='window' || it.type==='window-door');
     var doorSymbolOnly=(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front' || isNoDoorOpeningType(it.type) || isPlanSymbol);
     if(!doorSymbolOnly){
       ctx.fillStyle=getItem2dFillColor(it);
@@ -1399,6 +1449,22 @@ function drawItem2d(it){
       ctx.beginPath();
       ctx.moveTo(0,hd*0.72); ctx.lineTo(-sAw,hd*0.72-sAl); ctx.lineTo(sAw,hd*0.72-sAl); ctx.closePath(); ctx.fill();
       drawStairUpText(it,sc,Math.max(6*sc,5),hd*0.68);
+    } else if(it.type === 'stair-landing') {
+      // 踊り場は段を持たないので段鼻線を引かない。外形と昇り方向だけ。
+      ctx.save();
+      ctx.globalAlpha=0.30;
+      ctx.fillStyle=getItem2dFillColor(it);
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.restore();
+      ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
+      ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
+      ctx.stroke();
+      var lAw=Math.max(5*sc,4), lAl=Math.min(hd*0.17,Math.max(10*sc,9));
+      ctx.beginPath();
+      ctx.moveTo(0,hd*0.72); ctx.lineTo(-lAw,hd*0.72-lAl); ctx.lineTo(lAw,hd*0.72-lAl); ctx.closePath(); ctx.fill();
     } else if(it.type === 'stair-corner') {
       // 廻り3段コーナーのJIS流平面記号: 外形+内側隅から放射する段鼻線+昇り歩行線(1/4弧の矢印)。
       // 3Dモデル(build3DWinderCorner)と同じ割付で、下辺から入り右下の内側隅を廻って右辺へ抜ける。
@@ -1540,7 +1606,9 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(107,86,54,0.8)';
       ctx.lineWidth=Math.max(1,sc*14);
       ctx.beginPath();
-      if((it.fencePattern||'vertical')==='horizontal'){
+      // 向きは意匠から。fencePattern は指定の無い保存済みプランの読み替えに使う。
+      var lInf=railInfillOf(it);
+      if(lInf==='bars'||lInf==='wires'){
         for(var lh=0; lh<3; lh++){
           var ly=-hd+(it.d*sc)*(lh+0.5)/3;
           ctx.moveTo(-hw,ly); ctx.lineTo(hw,ly);
@@ -1937,7 +2005,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
   edges.forEach(function(p){
     ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.fill(); ctx.stroke();
   });
-  if(o.type !== 'room'){
+  if(o.type !== 'room' && o.type !== 'ceiling-area'){
     ctx.beginPath(); ctx.moveTo(0,-hd); ctx.lineTo(0,-hd-30); ctx.stroke();
     ctx.fillStyle='#3080e8'; ctx.beginPath(); ctx.arc(0,-hd-30,7,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
@@ -2096,7 +2164,12 @@ function applyWallDrag(cx,cy,e){
 }
 
 function isStairPartType(type){
-  return type==='stair'||type==='stair-corner';
+  return type==='stair'||type==='stair-corner'||type==='stair-landing';
+}
+// 踊り場。階段の部材だが段を持たない -- かね折れ(L字)・折り返し(U字)の
+// 曲がりを、廻り段ではなく平らな板で作るためのものである。
+function isStairLandingType(type){
+  return type==='stair-landing';
 }
 function isCustomBlockType(type){
   return type==='custom-block';
@@ -2270,7 +2343,7 @@ function hitHandle(it,mx,my){
     {lx:hw,ly:0,t:'e'},{lx:hw,ly:hd,t:'se'},{lx:0,ly:hd,t:'s'},
     {lx:-hw,ly:hd,t:'sw'},{lx:-hw,ly:0,t:'w'}
   ];
-  if(it.type !== 'room') handles.push({lx:0,ly:-hd-30,t:'rot'});
+  if(it.type !== 'room' && it.type !== 'ceiling-area') handles.push({lx:0,ly:-hd-30,t:'rot'});
   for(var i=0;i<handles.length;i++){
     if(Math.abs(lx-handles[i].lx)<10&&Math.abs(ly-handles[i].ly)<10) return handles[i].t;
   }

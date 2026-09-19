@@ -27,9 +27,65 @@ import math
 
 M = 910             # 1モジュール(半間=455 / 1間=910)
 WALL_T = 120
-FLOOR_H_MM = 2700       # 階高
-SLAB_MM = 180           # 2階以上の床スラブ
-CEILING_FINISH_MM = 12  # 天井仕上げ面の厚み(index.html の CEILING_FINISH_M)
+# 高さモデルv2。**壁の高さ = 仕上げ床 → 仕上げ天井**で、1階も床スラブを持つ。
+# 階高 = 壁の高さ + 床厚。天井仕上げ厚の12mmは壁の高さに含まれる。
+#
+# ここの値は、生成したプランの heightDefaults として書き出すものと同じ。
+# アプリ(assets/js/app-constants.js)・この生成器・検査(tools/lint_plan.py)の
+# 3か所が同じ数字を見ていないと、照明が天井から浮くか天井裏に埋まる。
+WALL_MM = {1: 2688}     # 階ごとの壁の高さ。書いていない階は下の既定
+WALL_MM_DEFAULT = 2508
+FLOOR_THICK_MM = 180    # 床厚(全階)
+
+
+def tidy_numbers(value):
+    """整数で表せる数は整数で書き出す。
+
+    レビューの手直しは JSON から読むので、座標が float になって戻ってくる。
+    そのまま書くと "x":0.0 のようになり、出荷ファイルの数字の見た目が
+    間取りを直すたびに揺れる。値は変えず、書き方だけそろえる。
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, dict):
+        return {k: tidy_numbers(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [tidy_numbers(v) for v in value]
+    return value
+
+
+def wall_height_mm(floor):
+    return WALL_MM.get(floor, WALL_MM_DEFAULT)
+
+
+def story_height_mm(floor):
+    return wall_height_mm(floor) + FLOOR_THICK_MM
+
+
+def height_defaults(floors_range):
+    """プランに書き出す高さの設定。floors_range は屋根の階まで含めた階の並び。"""
+    floors = {str(f): {"wallHeight": wall_height_mm(f),
+                       "floorThickness": FLOOR_THICK_MM}
+              for f in floors_range}
+    return ({"modelVersion": 2, "perFloor": True,
+             "wallHeight": wall_height_mm(1), "floorThickness": FLOOR_THICK_MM},
+            floors)
+
+
+def ceiling_finish_mm(floor, void_to=None, floor_raise=0):
+    """天井仕上げ面の高さ(mm)。**その階の仕上げ床から測る** = elev と同じ基準。
+
+    アプリの ceilingFinishElevationMm と同じ値になること。吹き抜けは貫く階の
+    階高を足し上げる(階ごとに階高が違っても正しくなる)。
+    """
+    if void_to:
+        to = max(floor + 1, int(void_to))
+        h = sum(story_height_mm(f) for f in range(floor, to + 1))
+    else:
+        h = story_height_mm(floor)
+    return h - FLOOR_THICK_MM - floor_raise
 
 # サッシの呼称 → 開口幅(mm)。頭の F は FIX。
 WIN_W = {"02607": 260, "03613": 405, "06905": 690, "07409": 780,
@@ -257,8 +313,7 @@ class Plan(object):
         天井裏に埋まる」原因だった。index.html の ceilingFinishElevationMm と
         同じ値になること。食い違いは lint の check33 が止める。
         """
-        slab = 0 if floor <= 1 else SLAB_MM
-        h = FLOOR_H_MM
+        void_to = None
         floor_raise = 0
         for r in self.rooms:
             if r["floor"] != floor:
@@ -269,10 +324,9 @@ class Plan(object):
             c = r.get("ceiling") or {}
             floor_raise = r.get("floorRaiseMm", 0)
             if c.get("type") == "void":
-                to = max(floor + 1, int(c.get("toFloor") or floor + 1))
-                h = (to - floor + 1) * FLOOR_H_MM
+                void_to = c.get("toFloor") or floor + 1
             break
-        return h - slab - CEILING_FINISH_MM - floor_raise
+        return ceiling_finish_mm(floor, void_to, floor_raise)
 
     def ceiling_mounted(self, t, cx, cy, floor, **kw):
         """天井に付ける器具(モデル)を、上端が天井面に来る高さで置く。

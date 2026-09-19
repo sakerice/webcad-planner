@@ -76,7 +76,7 @@ const FNS = [
   'foundationHeightMm', 'foundationHeightM',
   'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomAtPointOnFloor', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
@@ -86,8 +86,8 @@ const FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomVoidBlockReason', 'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
-  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel',
+  'roomVoidBlockReason', 'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
+  'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
   'roofTypeOptions', 'objectIdLabel',
   // Task 13 で足したもの
   'roomCeilingTypeValue', 'roomFlatCeilingInputMm', 'roofTypeLabel',
@@ -95,11 +95,16 @@ const FNS = [
   'roomDisplayLabel', 'roomSlopedCeilingBlockReason',
   'selectedRoomCeilingHtml',
   'updateSelectedCeilingType', 'updateSelectedFlatCeilingMm', 'updateSelectedSlopedCeiling',
-  'updateSelectedProp'
+  'updateSelectedProp',
+  // 天井を書き換えると、その部屋の天井付け器具も追従する
+  'roomFloorOffsetMm', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
+  'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling'
 ];
 const VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
-  'CEILING_HEIGHT_PRESETS_MM'];
+  'CEILING_HEIGHT_PRESETS_MM',
+  // 天井を書き換えると、その部屋の天井付け器具も追従する(updateSelectedProp)
+  'CEILING_FINISH_M', 'CEILING_FIXTURE_TOP_MM'];
 
 // ── 家 ────────────────────────────────────────────────────────────────────
 // 2階の部屋2つ。切妻屋根は A の上だけに載り、B の上には無い。
@@ -300,14 +305,14 @@ test('向きに 0（北）を入れても既定へ落ちない', () => {
   assert.equal(ctx.roomCeilingSlopeM(room).direction, 0);
 });
 
-test('勾配を選んだら、外観3Dでしか見えないことと壁の上辺は内観でも従うことを言う', () => {
+test('勾配を選んだら、天井を確認できるビューと壁の上辺は内観でも従うことを言う', () => {
   const data = house();
   const ctx = makeCtx(data);
   const room = select(ctx, data.rooms[1]);
   ctx.updateSelectedCeilingType('sloped');
   const h = ctx.selectedRoomCeilingHtml(room);
-  assert.ok(h.indexOf('外観3D') !== -1, '外観3Dでしか見えないことを言っていない');
-  assert.ok(h.indexOf('内観3Dは天井を作りません') !== -1);
+  assert.ok(h.indexOf('外観3D') !== -1, '天井を確認できるビューを言っていない');
+  assert.ok(h.indexOf('内観3Dの天井ビュー') !== -1);
   assert.ok(h.indexOf('壁の上辺は内観3Dでも勾配に沿って切れます') !== -1);
   // 平らのときは出さない（無関係な注意書きで埋めない）
   ctx.updateSelectedCeilingType('flat');

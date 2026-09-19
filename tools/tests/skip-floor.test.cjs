@@ -1,0 +1,1300 @@
+// スキップフロア(同じ階の中の段差)の検査。
+//
+// 測り方は height-wiring.test.cjs と同じで、index.html / assets/js から高さの
+// 関数を波括弧の対応で切り出し、node:vm の上で**実際に走らせて**値を見る。
+// grep のアサーションは書き方を変えただけで素通りするので、数値で押さえる。
+//
+// この検査でいちばん大事なのは 1 番目 --「段差を持たないプランが1mmも動かない」
+// である。スキップフロアは既存の高さモデル(床上げ・天井高・階高・壁高)の全部に
+// 手を入れるので、そこが保てているかを他の何より先に見る。
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
+
+const ROOT = join(__dirname, '..', '..');
+const html = require('./app-source.cjs').appSource();
+const HeightModel = require(join(ROOT, 'assets', 'js', 'height-model.js'));
+const PlanSchema = require(join(ROOT, 'assets', 'js', 'plan-schema.js'));
+const PLAN = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'house-2f.json'), 'utf8'));
+
+// 名前で関数を1つ切り出す。波括弧の対応で切るので、文字列・コメントの中の
+// 括弧に引っかからないよう、その3つの状態だけは追う。
+function sliceFunction(name) {
+  let at = html.indexOf('\nfunction ' + name + '(');
+  assert.notEqual(at, -1, 'function ' + name + ' がソースに無い');
+  const start = at + 1;
+  let i = html.indexOf('{', start);
+  let depth = 0, line = false, block = false, str = null;
+  for (; i < html.length; i++) {
+    const c = html[i], n = html[i + 1];
+    if (line) { if (c === '\n') line = false; continue; }
+    if (block) { if (c === '*' && n === '/') { block = false; i++; } continue; }
+    if (str) { if (c === '\\') { i++; continue; } if (c === str) str = null; continue; }
+    if (c === '/' && n === '/') { line = true; i++; continue; }
+    if (c === '/' && n === '*') { block = true; i++; continue; }
+    if (c === '"' || c === "'" || c === '`') { str = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) return html.slice(start, i + 1); }
+  }
+  assert.fail('function ' + name + ' の閉じ括弧が見つからない');
+}
+function topLevelVar(name) {
+  const m = html.match(new RegExp('\\nvar ' + name + '\\s*=[^;\\n]*;'));
+  assert.notEqual(m, null, 'var ' + name + ' がソースに無い');
+  return m[0];
+}
+
+const FNS = [
+  'foundationHeightMm', 'foundationHeightM',
+  'storyHeightMmForFloor', 'storyHeightM',
+  'perFloorHeightsEnabled', 'planFloorHeightEntry',
+  'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
+  'floorSlabMmForFloor', 'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
+  'segmentInsideRectLengthMm', 'localSupportTopY', 'floorHasSkipLevel', 'wallBaseSupportY', 'wallLiftMm',
+  'roomSkipLevelMm', 'roomSkipCavityMm', 'roomSkipEdgeNeighbors', 'roomSkipOpenSides',
+  'isColumnType', 'columnHeightMm', 'wallSkipBaseMm',
+  'rectMinusRect', 'subtractRectsFromRect', 'polyAsAxisRectMm',
+  'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'roomFloorAt', 'roomStoreyFloorAt',
+  'itemIsUnderPlatform', 'item3DBaseY',
+  'roomAtPointOnFloor', 'isPositiveNumber',
+  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove', 'roomDeclaresSlopedCeiling',
+  'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
+  'roomExplicitCeilingMm', 'roomCeilingCapM', 'roomCeilingHeightM', 'roomRenderedCeilingMm',
+  'roomLevelLabel', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
+  'roomCeilingElevationMm', 'shiftRoomCeilingFixtures', 'followRoomCeiling',
+  'ceilingFinishElevationMm', 'ceilingAttachElevationMm', 'roofTopLimitAtPlanPoint',
+  'roofCoversPlanPoint', 'roofUndersideWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
+  'setbackOutlineCoversLocal', 'wallFullHeightM',
+  'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
+  'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
+  'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
+  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'getConnectedStairParts',
+  'isLevelStairPart', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
+  'stairPartEndMm', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairUpperSpanM', 'stairRiseInfo',
+  'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
+  'stairRailSides', 'stairSideHasWall', 'stairRailMountFor', 'isStairLandingType',
+  'railPolylineYAt', 'railStepYAt', 'stairBalusterSeats', 'stairRailExtendEnds', 'stairRailStationsAlong',
+  'railInfillOf', 'railBarCount', 'railCapColorOf', 'railFrameColorOf',
+  'stairRailFrameColorOf', 'stairRailColorOf', 'railingDesignHtml', 'canSetItemTexture',
+  'stairStepCount', 'getStairStepCount',
+  'stairQuadOf', 'levelStairQuadsForFloor', 'stairwellQuadsForFloor', 'stairUnderFilled',
+  'shelfBoardCount', 'shelfHeightMm', 'shelfIsWallSupported', 'shelfSideBoards'
+];
+
+function heights(data) {
+  const ctx = vm.createContext({
+    console: { warn() {}, log() {} },
+    HeightModel: HeightModel,
+    DATA: data,
+    ISIZES: { stair: { w: 910, d: 2730 }, 'stair-corner': { w: 910, d: 910 } },
+    // item3DBaseY の外構まわりの枝はこの検査の対象外なので、通らないように固定する。
+    isGroundLevelItemType: () => false,
+    isContextExteriorItemType: () => false,
+    isFloorAwareGroundItemType: () => false,
+    groundYForItem: () => 0,
+    itemOnFoundation: () => true,
+    roomDisplayLabel: () => '部屋',
+    roomRoofCeilingExtent: () => null,
+    roomCeilingProfile: () => null,
+    roomRenderedCeilingLabel: () => 'CH 2400',
+    // canSetItemTexture が見る種類の判定。階段以外はこの検査の対象外。
+    isCustomBlockType: () => false,
+    isDoorItemType: () => false
+  });
+  vm.runInContext([
+    topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
+    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
+    topLevelVar('SHELF_BOARD_T_MM'),
+    topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
+    topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
+    topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'), topLevelVar('RAIL_INFILL_VALUES'),
+    topLevelVar('STAIR_RAIL_HEIGHT_MM'),
+    topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
+    topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
+  ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
+  return ctx;
+}
+
+// ── 試験用の家 ────────────────────────────────────────────────────────────
+// 1階に「低い側」と「段差の上」の2部屋。段差の上には壁を1本立てられる。
+function skipHouse(opts) {
+  const o = opts || {};
+  const rooms = [
+    { id: 'low', n: 'LDK', floor: 1, x: 0, y: 0, w: 4000, d: 4000 },
+    { id: 'up', n: '書斎', floor: 1, x: 4000, y: 0, w: 3000, d: 4000 }
+  ];
+  if (o.skip !== undefined) rooms[1].skipLevelMm = o.skip;
+  if (o.raise !== undefined) rooms[1].floorRaiseMm = o.raise;
+  if (o.ceilingMm !== undefined) rooms[1].ceiling = { type: 'flat', heightMm: o.ceilingMm };
+  if (o.upperRoom) rooms.push({ id: 'f2', n: '2階', floor: 2, x: 4000, y: 0, w: 3000, d: 4000 });
+  const walls = [
+    // 段差の境界に立つ壁。両側が部屋なので wallCeilingHeightM は天井高を採る。
+    { id: 'wsep', floor: 1, x1: 4000, y1: 0, x2: 4000, y2: 4000, thick: 120 }
+  ];
+  if (o.wallOnPlatform !== undefined) {
+    // 段差の上だけを通る壁(両端とも「段差の上」の部屋の中)。
+    walls.push({ id: 'wup', floor: 1, x1: 4500, y1: 500, x2: 6500, y2: 500,
+                 thick: 120, wallHeight: o.wallOnPlatform });
+  }
+  if (o.wallHalfOn !== undefined) {
+    // 低い側と段差の上にまたがる壁。
+    walls.push({ id: 'whalf', floor: 1, x1: 1000, y1: 2000, x2: 6000, y2: 2000,
+                 thick: 120, wallHeight: o.wallHalfOn });
+  }
+  return { floors: {}, rooms: rooms, walls: walls, items: (o.items || []) };
+}
+
+// ══ 1. 段差を持たないプランが1mmも動かない ══════════════════════════════
+test('段差を持たない部屋では、床天端は従来の式(基礎+スラブ+床上げ)のまま', () => {
+  const g = heights(PLAN);
+  g.DATA.rooms.forEach((r) => {
+    assert.equal(g.roomSkipLevelMm(r), 0, '保存済みプランに段差が現れている');
+    const expected = g.floorBaseY(r.floor) + g.floorSlabHeightMForFloor(r.floor)
+      + g.roomFloorOffsetMm(r) * g.U;
+    assert.ok(Math.abs(g.roomFloorTopY(r) - expected) < 1e-9,
+      r.id + ' の床天端が従来の式とずれている');
+  });
+});
+
+test('段差を持たない家では、天井の上限は階高と完全に同値', () => {
+  const g = heights(PLAN);
+  g.DATA.rooms.forEach((r) => {
+    assert.ok(Math.abs(g.roomCeilingCapM(r) - g.storyHeightM(r.floor)) < 1e-9,
+      r.id + ' の天井の上限が階高からずれている');
+  });
+});
+
+test('段差を持たない家では、壁の足元も持ち上がりも 0 のまま', () => {
+  const g = heights(PLAN);
+  g.DATA.walls.forEach((w) => {
+    assert.ok(Math.abs(g.wallBaseSupportY(w) - g.floorBaseY(w.floor)) < 1e-9,
+      w.id + ' の壁の足元が floorBaseY からずれている');
+    assert.equal(g.wallLiftMm(w), 0, w.id + ' の壁が持ち上がっている');
+  });
+});
+
+// ══ 2. 段差そのもの ═════════════════════════════════════════════════════
+test('段差 1200mm の部屋の床は、その階の床から 1200mm 上がる', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  const low = g.DATA.rooms[0], up = g.DATA.rooms[1];
+  assert.equal(Math.round((g.roomFloorTopY(up) - g.roomFloorTopY(low)) / g.U), 1200);
+});
+
+test('段差と床上げは足し算になる(構造の段差の上に仕上げの段差が乗る)', () => {
+  const g = heights(skipHouse({ skip: 400, raise: 150 }));
+  const up = g.DATA.rooms[1];
+  assert.equal(Math.round((g.roomFloorTopY(up) - g.floorBaseY(1)) / g.U), 550);
+  // 段差の下(構造床)は段差も床上げも含まない。
+  assert.equal(Math.round((g.roomStoreyFloorTopY(up) - g.floorBaseY(1)) / g.U), 0);
+});
+
+test('上限 2400mm を超える段差は丸めて読む(それ以上は別の階)', () => {
+  const g = heights(skipHouse({ skip: 9000 }));
+  assert.equal(g.roomSkipLevelMm(g.DATA.rooms[1]), 2400);
+});
+
+// ══ 3-4. 天井 ═══════════════════════════════════════════════════════════
+test('天井高を明示した段差部屋では、天井も段差ぶん一緒に上がる', () => {
+  const g = heights(skipHouse({ skip: 1200, ceilingMm: 2200, wallOnPlatform: 2400 }));
+  const up = g.DATA.rooms[1];
+  // 天井面は floorBaseY 基準。1階はスラブ 0 なので 1200+2200。
+  assert.equal(Math.round(g.roomCeilingHeightM(up) / g.U), 3400);
+  // 室内で測れる高さ(その部屋の床から)は、指定した 2200 のまま。
+  assert.equal(g.roomRenderedCeilingMm(up), 2200);
+});
+
+test('天井高を明示しない段差部屋では、天井は動かない(頭上がその分低くなる)', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  const up = g.DATA.rooms[1];
+  assert.equal(Math.round(g.roomCeilingHeightM(up) / g.U), 2700, '天井が勝手に上がっている');
+  assert.equal(g.roomRenderedCeilingMm(up), 1500, '頭上の実寸が 階高-段差 になっていない');
+});
+
+// 天井の上限が伸びてよいのは **自分が段差を持っている部屋だけ**。
+// 境界の壁が高いだけで隣の部屋の天井まで上げると、その部屋に既に付いている
+// 照明が天井から取り残される(実際にそうなり、「ライトが天井に追従していない」
+// として報告された)。
+test('段差を持たない部屋の天井は、隣の壁が高くても階高のまま', () => {
+  const h = skipHouse({ skip: 1200, wallOnPlatform: 2400 });
+  // 段差の境界の壁を高くする。この壁は低い側の部屋の縁も通る。
+  h.walls[0].wallHeight = 2200;
+  const g = heights(h);
+  const low = g.DATA.rooms[0];
+  assert.equal(g.roomSkipLevelMm(low), 0);
+  assert.equal(Math.round(g.roomCeilingCapM(low) / g.U), 2700,
+    '段差を持たない部屋の天井が、隣の高い壁につられて上がっている');
+  assert.equal(Math.round(g.roomCeilingHeightM(low) / g.U), 2700);
+});
+
+test('段差の上に高い壁が立つと、天井の上限もその壁の天端まで伸びる', () => {
+  const g = heights(skipHouse({ skip: 1200, wallOnPlatform: 2400 }));
+  const up = g.DATA.rooms[1];
+  // 壁の天端 = 段差 1200 + 壁高 2400 = 3600。階高 2700 より高いので上限が伸びる。
+  assert.equal(Math.round(g.roomCeilingCapM(up) / g.U), 3600);
+  // 低い側の部屋の上には高い壁が無いので、上限は階高のまま。
+  assert.equal(Math.round(g.roomCeilingCapM(g.DATA.rooms[0]) / g.U), 2700);
+});
+
+// ══ 5-6. 上に載るものだけが上がる ═══════════════════════════════════════
+test('段差の上に立つ壁の天端は 段差+壁高 になり、その上に載る床だけが上がる', () => {
+  const g = heights(skipHouse({ skip: 1200, wallOnPlatform: 2400, upperRoom: true }));
+  const f2 = g.DATA.rooms[2];
+  // 2階の床は、段差の上の壁の天端 3600 + 2階の床スラブ 180。
+  assert.equal(Math.round(g.roomFloorTopY(f2) / g.U), 3600 + 180);
+  // 段差の外(低い側の真上)は従来どおり階高のまま。
+  assert.equal(Math.round(g.localSupportTopY(2, 0, 0, 3000, 3000) / g.U), 2700);
+});
+
+test('一部しか高い支持に載っていない壁は、足元が floorBaseY のまま', () => {
+  const g = heights(skipHouse({ skip: 1200, wallOnPlatform: 2400, upperRoom: true }));
+  // 低い側と段差の上にまたがる2階の壁。
+  g.DATA.walls.push({ id: 'w2half', floor: 2, x1: 1000, y1: 1000, x2: 6000, y2: 1000, thick: 120 });
+  const w = g.DATA.walls[g.DATA.walls.length - 1];
+  assert.ok(Math.abs(g.wallBaseSupportY(w) - g.floorBaseY(2)) < 1e-9,
+    'またがった壁を持ち上げると、載っていない側に穴が開く');
+});
+
+test('全体が高い支持に載っている壁だけが、持ち上がった床から立つ', () => {
+  const g = heights(skipHouse({ skip: 1200, wallOnPlatform: 2400, upperRoom: true }));
+  g.DATA.walls.push({ id: 'w2on', floor: 2, x1: 4500, y1: 1000, x2: 6500, y2: 1000, thick: 120 });
+  const w = g.DATA.walls[g.DATA.walls.length - 1];
+  assert.equal(Math.round(g.wallBaseSupportY(w) / g.U), 3600);
+  assert.equal(g.wallLiftMm(w), 3600 - 2700);
+});
+
+// ══ 7. 段差の縁の腰壁 ═══════════════════════════════════════════════════
+test('段差の縁の腰壁 1100mm は、持ち上がった床から 1100mm になる', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  // 段差の境界の壁に 1100 を入れる(手すり壁)。
+  g.DATA.walls[0].wallHeight = 1100;
+  const top = Math.round(g.wallDisplayHeightM(g.DATA.walls[0]) / g.U);
+  assert.equal(top, 1200 + 1100, '低い側の床から測ると、持ち上がった床では手すりが埋まる');
+});
+
+test('段差の無い家では、壁ごとの高さ指定は従来どおり床から測る', () => {
+  const g = heights(skipHouse({}));
+  g.DATA.walls[0].wallHeight = 1100;
+  assert.equal(Math.round(g.wallDisplayHeightM(g.DATA.walls[0]) / g.U), 1100);
+});
+
+// ══ 8-9. 同じ階の段差を上る階段 ═════════════════════════════════════════
+function stairHouse(target) {
+  const h = skipHouse({ skip: 1200 });
+  h.items.push({
+    id: 'st1', type: 'stair', floor: 1, x: 2400, y: 500, w: 910, d: 1600, rot: 0,
+    stairTarget: target
+  });
+  return h;
+}
+
+test("行き先を宣言しない階段は、従来どおり上の階へ上がる", () => {
+  const g = heights(stairHouse(undefined));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairGroupIsLevel(st), false);
+  // 上階が無いので従来どおり階高ぶん。
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 2700);
+});
+
+test("行き先を『同じ階の段差』にすると、上り高さが段差と一致する", () => {
+  const g = heights(stairHouse('level'));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairGroupIsLevel(st), true);
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 1200);
+});
+
+test('レベル階段の段数は、上り高さに追従する(階高からは出さない)', () => {
+  const g = heights(stairHouse('level'));
+  const st = g.DATA.items[0];
+  // 1200mm を蹴上げ 200mm 目標で割ると 6段。踏面の制約(奥行1600/150=10)には収まる。
+  assert.equal(g.getStairStepCount(st), 6);
+  const g2 = heights(stairHouse(undefined));
+  assert.equal(g2.getStairStepCount(g2.DATA.items[0]), g2.stairStepCount(2700, 1600));
+});
+
+test('レベル階段は低い側の床から立ち上がる(段差の上に浮かない)', () => {
+  const g = heights(stairHouse('level'));
+  const st = g.DATA.items[0];
+  assert.equal(Math.round(g.item3DBaseY(st) / g.U), 0);
+});
+
+test('レベル階段は上階の床に穴を開けない', () => {
+  const g = heights(stairHouse('level'));
+  assert.deepEqual(g.stairwellQuadsForFloor(2), [], '同じ階の段差を上る階段が上階を抜いている');
+  // 代わりに、同じ階の持ち上がった床に開ける穴として数えられる。
+  assert.equal(g.levelStairQuadsForFloor(1).length, 1);
+});
+
+test('上の階へ上がる階段は、従来どおり上階の床に穴を開ける', () => {
+  const g = heights(stairHouse(undefined));
+  assert.equal(g.stairwellQuadsForFloor(2).length, 1);
+  assert.deepEqual(g.levelStairQuadsForFloor(1), []);
+});
+
+// ══ 10. 段差の下に置く ══════════════════════════════════════════════════
+test('段差の下に置くと宣言したアイテムは、その階の構造床に置かれる', () => {
+  const h = skipHouse({ skip: 1200 });
+  h.items.push({ id: 'sh1', type: 'shelf-built-in', floor: 1, x: 4200, y: 200,
+                 w: 1800, d: 350, rot: 0, baseLevel: 'under' });
+  h.items.push({ id: 'sh2', type: 'shelf-built-in', floor: 1, x: 4200, y: 2200,
+                 w: 1800, d: 350, rot: 0 });
+  const g = heights(h);
+  assert.equal(Math.round(g.item3DBaseY(g.DATA.items[0]) / g.U), 0, '段差の下に入っていない');
+  assert.equal(Math.round(g.item3DBaseY(g.DATA.items[1]) / g.U), 1200, '段差の上に乗っていない');
+});
+
+test('段差が 400mm 以上あるときだけ、床下が空間として扱われる', () => {
+  assert.equal(heights(skipHouse({ skip: 1200 })).roomSkipCavityMm(
+    heights(skipHouse({ skip: 1200 })).DATA.rooms[1]), 1200);
+  const small = heights(skipHouse({ skip: 300 }));
+  assert.equal(small.roomSkipCavityMm(small.DATA.rooms[1]), 0);
+  const none = heights(skipHouse({}));
+  assert.equal(none.roomSkipCavityMm(none.DATA.rooms[1]), 0);
+});
+
+test('床下が開くのは、低いレベルに面した辺だけ', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  const sides = g.roomSkipOpenSides(g.DATA.rooms[1]);
+  assert.equal(sides.w, true, '低い側(西)に面した辺が開いていない');
+  assert.equal(sides.e, false, '部屋の無い側(外)まで開いている');
+  assert.equal(sides.n, false);
+  assert.equal(sides.s, false);
+});
+
+// ══ 10-b. 段差の下は、アプリが塞がない ══════════════════════════════════
+// 「奥に壁ができる」の再発防止。段差の立ち上がりを自動で作っていたため、
+// 引いた覚えのない板が現れていた。床下を囲うのは設計そのものなので置くのは利用者。
+test('アプリは段差の立ち上がり(蹴上げ面)を作らない', () => {
+  assert.doesNotMatch(html, /function buildSkipPlatformSkirts\(/,
+    '段差の下を自動で塞ぐと、引いた覚えのない壁が現れる');
+  const body = sliceFunction('buildRooms3D');
+  assert.doesNotMatch(body, /Skirt/, '床の生成から立ち上がりを作っている');
+});
+
+test('段差の辺の向こうに何があるかは、平面図の段差線のために残っている', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  const up = g.DATA.rooms[1];
+  assert.equal(g.roomSkipEdgeNeighbors(up).w, 'lower');
+  assert.equal(g.roomSkipEdgeNeighbors(up).e, 'none');
+  assert.equal(g.roomSkipOpenSides(up).w, true);
+  assert.equal(g.roomSkipOpenSides(up).e, false);
+});
+
+test('同じレベルの部屋に続く辺は lower ではない(段差線を引かない)', () => {
+  const h = skipHouse({ skip: 1200 });
+  h.rooms.push({ id: 'up2', n: '書斎2', floor: 1, x: 7000, y: 0, w: 2000, d: 4000, skipLevelMm: 1200 });
+  const g = heights(h);
+  assert.equal(g.roomSkipEdgeNeighbors(g.DATA.rooms[1]).e, 'same');
+  assert.equal(g.roomSkipOpenSides(g.DATA.rooms[1]).e, false);
+});
+
+// ══ 7-b. 段差の上に立つ壁 ══════════════════════════════════════════════
+// 「壁をスキップフロアにつけるのが困難」への対応。
+// 段差の上に立つ壁は、足元も段差の上から立たせないと、中空にした床下へ
+// 板が垂れ下がる。ただし段差の境界の壁は蹴上げ面を兼ねるので下まで下ろす。
+// 自動判定に当たらない置き方のために、明示の指定も受ける。
+function wallOnPlatformHouse() {
+  const h = skipHouse({ skip: 1200 });
+  // 段差の上だけを通る間仕切り壁(両側とも段差の上)。
+  // 2400 は既定の壁高さで、wallDisplayHeightM ではそれが「指定なし」の番兵に
+  // なる。明示した高さの経路を測るので、既定と違う値にする。
+  h.walls.push({ id: 'inner', floor: 1, x1: 4500, y1: 500, x2: 6500, y2: 500,
+                 thick: 120, wallHeight: 2100 });
+  return h;
+}
+
+test('両側とも段差の上の壁は、足元も段差の上から立つ', () => {
+  const g = heights(wallOnPlatformHouse());
+  const inner = g.DATA.walls[1];
+  assert.equal(g.wallSkipFootMm(inner), 1200, '床下へ垂れ下がっている');
+  assert.equal(Math.round((g.wallBaseSupportY(inner) - g.floorBaseY(1)) / g.U), 1200);
+  // 高さは足元から測るので、天端は 1200+2100。
+  assert.equal(Math.round(g.wallDisplayHeightM(inner) / g.U), 3300);
+});
+
+test('段差の境界の壁は、足元を下ろしたまま(蹴上げ面を兼ねる)', () => {
+  const g = heights(wallOnPlatformHouse());
+  const edge = g.DATA.walls[0];        // 段差の境界
+  edge.wallHeight = 1100;
+  assert.equal(g.wallSkipFootMm(edge), 0, '境界の壁が持ち上がると低い側に穴が開く');
+  assert.equal(Math.round((g.wallBaseSupportY(edge) - g.floorBaseY(1)) / g.U), 0);
+  // 高さは守る側(段差の上)から測る。
+  assert.equal(Math.round(g.wallDisplayHeightM(edge) / g.U), 1200 + 1100);
+});
+
+test('壁の基準を「階の床」にすると、段差を無視して床から測る', () => {
+  const g = heights(wallOnPlatformHouse());
+  const inner = g.DATA.walls[1];
+  inner.baseLevel = 'floor';
+  assert.equal(g.wallSkipBaseMm(inner), 0);
+  assert.equal(g.wallSkipFootMm(inner), 0);
+  assert.equal(Math.round(g.wallDisplayHeightM(inner) / g.U), 2100);
+});
+
+test('壁の基準を「段差の上」にすると、判定に当たらなくても段差から測る', () => {
+  const h = skipHouse({ skip: 1200 });
+  // 部屋の外(段差の判定に当たらない場所)に置いた壁。
+  h.walls.push({ id: 'far', floor: 1, x1: 8000, y1: 500, x2: 9000, y2: 500,
+                 thick: 120, wallHeight: 1100, baseLevel: 'skip' });
+  const g = heights(h);
+  const far = g.DATA.walls[1];
+  assert.equal(g.floorMaxSkipLevelMm(1), 1200);
+  assert.equal(g.wallSkipBaseMm(far), 1200);
+  assert.equal(Math.round(g.wallDisplayHeightM(far) / g.U), 1200 + 1100);
+});
+
+test('段差の無い家では、壁の足元も基準も 0 のまま', () => {
+  const g = heights(skipHouse({}));
+  const w = g.DATA.walls[0];
+  assert.equal(g.wallSkipFootMm(w), 0);
+  assert.equal(g.wallSkipBaseMm(w), 0);
+  assert.equal(g.floorMaxSkipLevelMm(1), 0);
+});
+
+test('壁のプロパティ欄から足元の基準を選べる', () => {
+  assert.match(html, /baseLevel/);
+  assert.match(html, /段差の上から/);
+});
+
+// ══ 8-b2. 段差から上の階へ上がる階段 ═══════════════════════════════════
+// 「スキップフロアから上の階へ登る階段が作れない」の再発防止。
+// 上り高さを「その階の床 → 上階の床」で測り、足元は **その階にある階段の
+// いちばん低いもの** を採っていた。段差の上に立つ階段は足元が段差の上なのに、
+// 同じ階の別の階段(普通の床に立つもの)の足元が使われ、上階を突き抜けていた。
+function upperStairHouse(opts) {
+  const o = opts || {};
+  const h = skipHouse({ skip: o.skip, wallOnPlatform: o.wallOnPlatform, upperRoom: true });
+  // 段差の上に立つ「上の階へ」の階段。
+  h.items.push({ id: 'st_up', type: 'stair', floor: 1,
+                 x: 4300, y: 600, w: 910, d: 2730, rot: 0 });
+  if (o.otherStair) {
+    // 低い側にもう1本。足元が混ざらないことを見る。
+    h.items.push({ id: 'st_low', type: 'stair', floor: 1,
+                   x: 500, y: 600, w: 910, d: 2730, rot: 0 });
+  }
+  return h;
+}
+
+test('段差の上に立つ階段は、段差の上から上階の床まで上がる', () => {
+  const g = heights(upperStairHouse({ skip: 1200, wallOnPlatform: 2400 }));
+  const st = g.DATA.items[0];
+  const span = g.stairUpperSpanM(st);
+  // 足元は段差の上。
+  assert.equal(Math.round(span.baseY / g.U), 1200);
+  // 天端は、段差の上の壁(1200+2400=3600)に載った2階の床 3600+180。
+  assert.equal(Math.round(span.topY / g.U), 3780);
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 3780 - 1200);
+});
+
+test('段差からはみ出す大きさの階段でも、足元は段差の上から始まる', () => {
+  // 2730mm の直階段は小さな段差(3000×4000)に収まらず、footprint の中心が
+  // 段差の外へ出る。中心で足元を採ると低い側から始まってしまっていた。
+  const h = skipHouse({ skip: 1200, wallOnPlatform: 2400, upperRoom: true });
+  // 下端が段差の上、上端が段差の外へ抜ける置き方。
+  // 段差の部屋は y 0..4000。階段は y 3200..5930 なので、**中心(4565)は段差の外**。
+  h.items.push({ id: 'st_out', type: 'stair', floor: 1,
+                 x: 5000, y: 3200, w: 910, d: 2730, rot: 0 });
+  const g = heights(h);
+  const st = g.DATA.items[0];
+  const ends = g.stairRunEndsMm(st);
+  // 中心で採ると低い側(0)、下端の先で採ると段差の上(1200)。
+  assert.equal(Math.round(g.roomFloorAt(1, st.x + st.w / 2, st.y + st.d / 2) / g.U), 0);
+  assert.equal(Math.round(g.roomFloorAt(1, ends.down.x, ends.down.y) / g.U), 1200);
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 1200,
+    '足元が段差の上になっていない');
+  assert.equal(Math.round(g.item3DBaseY(st) / g.U), 1200, '3Dの足元がずれている');
+});
+
+test('足元を「段差の上」と明示すれば、判定に頼らず段差から始まる', () => {
+  const h = skipHouse({ skip: 1200, upperRoom: true });
+  // 段差からも部屋からも外れた場所に置いた階段。
+  h.items.push({ id: 'st_far', type: 'stair', floor: 1,
+                 x: 9000, y: 500, w: 910, d: 2730, rot: 0, baseLevel: 'skip' });
+  const g = heights(h);
+  const st = g.DATA.items[0];
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 1200);
+  st.baseLevel = 'floor';
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 0);
+});
+
+test('階段の形状は 箱型 / ひな壇 / スケルトン から選べる', () => {
+  const g = heights(stairHouse(undefined));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairStyleOf(st), 'open', '既定が変わっている');
+  assert.equal(g.stairHasRisers(st), true);
+  st.stairStyle = 'skeleton';
+  assert.equal(g.stairHasRisers(st), false, 'スケルトンで蹴込み板が残る');
+  assert.equal(g.stairUnderFilled(st), false);
+  st.stairStyle = 'box';
+  assert.equal(g.stairUnderFilled(st), true);
+  assert.equal(g.stairHasRisers(st), true);
+  // 先に入れた stairUnder は箱型として読む(互換)。
+  delete st.stairStyle;
+  st.stairUnder = 'filled';
+  assert.equal(g.stairStyleOf(st), 'box');
+});
+
+test('3Dは、スケルトンで蹴込み板を作らない', () => {
+  const body = sliceFunction('build3DOpenStraightStair');
+  assert.match(body, /stairHasRisers\(it\)/);
+  assert.match(body, /if\(withRisers\)/);
+});
+
+test('格子柵は、間隔・見付・笠木を選べる（手すりとして使うため）', () => {
+  const g = heights(skipHouse({}));
+  assert.equal(g.latticePitchMm({}), 95, '既定の見た目が変わっている');
+  assert.equal(g.latticeSlatMm({}), 55);
+  assert.equal(g.latticeHasCap({}), false);
+  assert.equal(g.latticePitchMm({ latticePitch: 140 }), 140);
+  assert.equal(g.latticeSlatMm({ latticeSlat: 30 }), 30);
+  assert.equal(g.latticeClearMm({ latticePitch: 140, latticeSlat: 30 }), 110);
+  assert.equal(g.latticeHasCap({ latticeCap: true }), true);
+  // 範囲外は丸める。
+  assert.equal(g.latticePitchMm({ latticePitch: 9999 }), 600);
+  assert.equal(g.latticeSlatMm({ latticeSlat: 1 }), 15);
+});
+
+test('同じ階に別の階段があっても、足元は混ざらない', () => {
+  const g = heights(upperStairHouse({ skip: 1200, wallOnPlatform: 2400, otherStair: true }));
+  const onPlatform = g.DATA.items[0], onFloor = g.DATA.items[1];
+  assert.equal(Math.round(g.stairUpperSpanM(onPlatform).baseY / g.U), 1200);
+  assert.equal(Math.round(g.stairUpperSpanM(onFloor).baseY / g.U), 0,
+    '低い側の階段の足元が段差に引きずられている');
+});
+
+test('段差も高い壁も無い家では、上り高さは従来の式と同値', () => {
+  const g = heights(upperStairHouse({}));
+  const st = g.DATA.items[0];
+  // 従来は floorTopY(2) - floorTopY(1) - (階段の足元) だった。
+  // 足元が床と同じ(段差なし)この家では、1階の床 0 → 2階の床 2700+180。
+  assert.equal(Math.round(g.floorTopY(1) / g.U), 0);
+  assert.equal(Math.round(g.floorTopY(2) / g.U), 2880);
+  assert.equal(Math.round(g.stairUpperSpanM(st).baseY / g.U), 0);
+  assert.equal(Math.round(g.stairGroupRiseM(st) / g.U), 2880);
+});
+
+test('上の階が無ければ、従来どおり階高ぶん上がる', () => {
+  const h = skipHouse({});
+  h.items.push({ id: 'st', type: 'stair', floor: 1, x: 500, y: 600, w: 910, d: 2730, rot: 0 });
+  const g = heights(h);
+  assert.equal(Math.round(g.stairGroupRiseM(g.DATA.items[0]) / g.U), 2700);
+});
+
+test('歩行の坂面も、階段グループごとの上り高さで測る', () => {
+  const body = sliceFunction('walkStairSampleAt');
+  assert.match(body, /stairGroupRiseM\(it\)/, '階ごとの上り高さで割っている');
+  assert.match(body, /offM/, '足元の高さを返していない');
+  assert.match(sliceFunction('walkUpdateGround'), /\.offM/);
+});
+
+// ══ 8-b3. 階段の手すり ═════════════════════════════════════════════════
+// 左右どちらに付けるかは利用者が選ぶ。壁付けか柱建てかは、その側に壁が
+// 沿っているかで決まる(造作棚と同じ考え)。自動が当たらない置き方のために
+// 明示も受ける -- 自動だけにすると「作れない納まり」が出る。
+function railHouse(opts) {
+  const o = opts || {};
+  return {
+    floors: {},
+    rooms: [{ id: 'r1', n: '室', floor: 1, x: 0, y: 0, w: 6000, d: 6000 }],
+    // 階段の右側(ローカル +x = rot 0 なので世界 +x)に沿う壁。
+    walls: o.wall ? [{ id: 'wr', floor: 1, x1: 2000, y1: 500, x2: 2000, y2: 3300, thick: 120 }] : [],
+    items: [Object.assign({ id: 'st', type: 'stair', floor: 1,
+      x: 1000, y: 500, w: 910, d: 2730, rot: 0 }, o.stair || {})]
+  };
+}
+
+test('手すりは省略すれば付かない（従来どおり）', () => {
+  const g = heights(railHouse({}));
+  assert.deepEqual([...g.stairRailSides(g.DATA.items[0])], []);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'none' })], []);
+});
+
+test('左右・両側を選べる', () => {
+  const g = heights(railHouse({}));
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'left' })], ['left']);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'right' })], ['right']);
+  assert.deepEqual([...g.stairRailSides({ stairRail: 'both' })], ['left', 'right']);
+});
+
+test('その側に壁が沿っていれば壁付け、離れていれば柱建て', () => {
+  const g = heights(railHouse({ wall: true, stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairSideHasWall(st, 'right'), true, '沿っている壁を見つけられていない');
+  assert.equal(g.stairSideHasWall(st, 'left'), false);
+  assert.equal(g.stairRailMountFor(st, 'right'), 'wall');
+  assert.equal(g.stairRailMountFor(st, 'left'), 'post');
+});
+
+test('壁が無ければ両側とも柱建て', () => {
+  const g = heights(railHouse({ stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  assert.equal(g.stairRailMountFor(st, 'right'), 'post');
+  assert.equal(g.stairRailMountFor(st, 'left'), 'post');
+});
+
+test('取り付け方を明示すると、自動判定より優先する', () => {
+  const g = heights(railHouse({ wall: true, stair: { stairRail: 'both' } }));
+  const st = g.DATA.items[0];
+  st.stairRailMount = 'post';
+  assert.equal(g.stairRailMountFor(st, 'right'), 'post', '明示が効いていない');
+  st.stairRailMount = 'wall';
+  assert.equal(g.stairRailMountFor(st, 'left'), 'wall');
+  delete st.stairRailMount;
+  assert.equal(g.stairRailMountFor(st, 'right'), 'wall', '明示を外したら自動へ戻る');
+});
+
+test('子柱と親柱の丈は、その位置の手すり芯から逆算する', () => {
+  // 定数で出すと、斜めの手すりに対して最大で蹴上げの半分ずれ、
+  // 届かない子柱と突き抜ける子柱が混ざる。
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /railPolylineYAt\(line, ?s\.x, ?s\.z\)/, '子柱の丈が手すり芯から出ていない');
+  assert.match(body, /railPolylineYAt\(line, ?p\.x, ?p\.z\)/, '親柱の丈が手すり芯から出ていない');
+});
+
+test('子柱は、その踏板の中だけに立つ（隣の踏板を貫かない）', () => {
+  const g = heights(railHouse({ stair: { stairRail: 'both' } }));
+  // 点の列は **踏板の中央** を結ぶ。踏面は各点の前後 going/2 に広がる。
+  const going = 0.24;
+  const raw = [
+    { x: 0, y: 0.2, z: 0 },
+    { x: 0, y: 0.4, z: going },
+    { x: 0, y: 0.6, z: going * 2 }
+  ];
+  const seats = g.stairBalusterSeats(raw);
+  assert.ok(seats.length >= 6, '踏板あたり2本以上立っていない: ' + seats.length);
+  seats.forEach((s) => {
+    // 自分の高さの踏板を探し、その踏面の中に収まっていること。
+    const own = raw.filter((p) => Math.abs(p.y - s.y) < 1e-9)[0];
+    assert.ok(own, 'どの踏板にも属さない高さで立っている: ' + s.y);
+    assert.ok(Math.abs(s.z - own.z) <= going / 2 + 1e-9,
+      '踏板の外(隣の段の上)に立っている: z=' + s.z + ' 踏板中央=' + own.z);
+  });
+  // 隣り合う子柱の内法が 110mm を超えない。
+  const zs = seats.map((s) => s.z).sort((a, b) => a - b);
+  for (let i = 0; i + 1 < zs.length; i++) {
+    assert.ok(zs[i + 1] - zs[i] - 0.028 <= 0.111,
+      '子柱の内法が広すぎる: ' + Math.round((zs[i + 1] - zs[i] - 0.028) * 1000) + 'mm');
+  }
+});
+
+test('折れ線の高さを内挿して返せる', () => {
+  const g = heights(railHouse({}));
+  const line = [{ x: 0, y: 1, z: 0 }, { x: 0, y: 2, z: 1 }];
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, 0.5) - 1.5) < 1e-9);
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, -1) - 1) < 1e-9, '端の外は端の高さで止める');
+  assert.ok(Math.abs(g.railPolylineYAt(line, 0, 9) - 2) < 1e-9);
+});
+
+test('手すり・柵の意匠は、同じ語彙で選べる', () => {
+  const g = heights(railHouse({}));
+  // 既定は横桟。木の縦格子を並べたものではない。
+  assert.equal(g.railInfillOf({}), 'bars');
+  assert.equal(g.railInfillOf({ railInfill: 'wires' }), 'wires');
+  assert.equal(g.railInfillOf({ railInfill: 'baluster' }), 'baluster');
+  assert.equal(g.railInfillOf({ railInfill: 'none' }), 'none');
+  assert.equal(g.railInfillOf({ railInfill: 'なんとか' }), 'bars', '見慣れない値は既定へ');
+  // 格子柵は、指定が無ければ従来の見た目(fencePattern)から写す。
+  assert.equal(g.railInfillOf({ type: 'lattice-screen' }), 'baluster');
+  assert.equal(g.railInfillOf({ type: 'lattice-screen', fencePattern: 'horizontal' }), 'bars');
+  assert.equal(g.railInfillOf({ type: 'lattice-screen', fencePattern: 'vertical', railInfill: 'wires' }), 'wires',
+    '明示が旧フィールドより優先しない');
+  assert.equal(g.railBarCount({}), 3);
+  assert.equal(g.railBarCount({ railBars: 99 }), 12);
+});
+
+test('笠木の色と骨の色は、手すり・柵で同じフィールドから来る', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.railCapColorOf({}), '#9c7749');
+  assert.equal(g.railCapColorOf({ railCapColor: '#112233' }), '#112233');
+  assert.equal(g.railCapColorOf({ stairRailColor: '#445566' }), '#445566', '先に入れた指定が読めない');
+  // 骨は明示されたときだけ。省略時は部材ごとの既定へ落とす。
+  assert.equal(g.railFrameColorOf({}), null);
+  assert.equal(g.railFrameColorOf({ railFrameColor: '#000000' }), '#000000');
+  assert.equal(g.stairRailFrameColorOf({}), '#2b2f33', '階段の骨の既定が黒でない');
+  assert.equal(g.stairRailFrameColorOf({ railFrameColor: '#884400' }), '#884400');
+});
+
+test('支柱の足元は、斜めの線ではなく「その位置にある踏板」に座る', () => {
+  const g = heights(railHouse({}));
+  const going = 0.2275, rise = 0.1912;          // 2730mm / 12段 相当
+  const raw = [];
+  for (let i = 0; i < 13; i++) raw.push({ x: 0, y: (i + 1) * rise, z: i * going, outX: 1, outZ: 0 });
+
+  // 段鼻を結んだ線は斜めなので、内挿すると踏板から浮く/めり込む。
+  const mid = { x: 0, z: going * 0.5 };
+  const ramp = g.railPolylineYAt(raw, mid.x, mid.z);
+  const step = g.railStepYAt(raw, mid.x, mid.z);
+  assert.ok(Math.abs(ramp - raw[0].y) > rise * 0.4, '内挿だと踏板からずれるはずの位置を選べていない');
+  assert.ok(Math.abs(step - raw[0].y) < 1e-9, '足元がその踏板の高さになっていない');
+
+  // 支柱を立てる位置すべてで、足元が実在の踏板と一致する。
+  const railH = g.STAIR_RAIL_HEIGHT_MM * g.U;
+  const line = raw.map(p => ({ x: p.x, y: p.y + railH, z: p.z }));
+  const stations = g.stairRailStationsAlong(line, 0.95);
+  assert.ok(stations.length >= 3, '支柱の位置が取れていない');
+  let worst = 0;
+  stations.forEach((p) => {
+    const seat = g.railStepYAt(raw, p.x, p.z);
+    // その位置に実際にある踏板(段鼻の点のうち、いちばん近いもの)。
+    let tread = raw[0].y;
+    for (let i = 0; i < raw.length; i++) if (p.z >= raw[i].z - going / 2 - 1e-9) tread = raw[i].y;
+    worst = Math.max(worst, Math.abs(seat - tread));
+  });
+  assert.ok(worst < 1e-9, '支柱が踏板から浮いている(最大 ' + Math.round(worst * 1000) + 'mm)');
+
+  // 平らな踊り場では、内挿でも段でも同じ答えになる(壊していない)。
+  const flat = [{ x: 0, y: 1, z: 0 }, { x: 0, y: 1, z: 1 }];
+  assert.ok(Math.abs(g.railStepYAt(flat, 0, 0.5) - 1) < 1e-9);
+});
+
+test('3Dの手すりは、足元を段として読む(斜めの線で内挿しない)', () => {
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /railStepYAt\(seatLine/, '支柱の足元が段になっていない');
+});
+
+test('意匠と色の欄は、階段の手すりと格子柵で同じものを出す', () => {
+  const g = heights(railHouse({}));
+  const stair = g.railingDesignHtml({ type: 'stair', stairRail: 'both' }, { label: '手すりの意匠' });
+  // 4つの意匠がそろって選べる。既定(横桟)が選ばれている。
+  ['bars', 'wires', 'baluster', 'none'].forEach((v) => {
+    assert.ok(stair.indexOf('value="' + v + '"') >= 0, v + ' が選べない');
+  });
+  assert.ok(stair.indexOf('value="bars" selected') >= 0, '既定の横桟が選ばれていない');
+  assert.ok(stair.indexOf('横桟の本数') >= 0, '横桟のときは本数を出す');
+  assert.ok(stair.indexOf('railCapColor') >= 0 && stair.indexOf('railFrameColor') >= 0,
+    '笠木と骨の色が別々に選べない');
+  assert.ok(stair.indexOf('value="#2b2f33"') >= 0, '階段の骨の既定(黒)が色見本に出ていない');
+
+  // 格子柵も同じ関数から。骨の既定だけ部材に合わせて変わる。
+  const lattice = g.railingDesignHtml(
+    { type: 'lattice-screen' },
+    { label: '格子の意匠', autoLabel: '指定しない', frameDefault: '#b09468' });
+  ['bars', 'wires', 'baluster', 'none'].forEach((v) => {
+    assert.ok(lattice.indexOf('value="' + v + '"') >= 0, v + ' が格子柵で選べない');
+  });
+  assert.ok(lattice.indexOf('value="" selected') >= 0, '未指定へ戻す道が無い');
+  assert.ok(lattice.indexOf('value="#b09468"') >= 0, '格子柵の骨の既定が出ていない');
+  assert.ok(lattice.indexOf('横桟の本数') < 0, '既定が縦格子の格子柵に横桟の本数を出している');
+
+  // 明示したものは選ばれた状態で戻る。
+  const wires = g.railingDesignHtml({ railInfill: 'wires' }, {});
+  assert.ok(wires.indexOf('value="wires" selected') >= 0);
+  const bars = g.railingDesignHtml({ railInfill: 'bars', railBars: 5 }, {});
+  assert.ok(bars.indexOf('value="5"') >= 0, '横桟の本数が今の値を出していない');
+});
+
+test('格子柵の向きは「意匠」だけで決まる(同じことを決める欄を2つ置かない)', () => {
+  // 上の方にあった『格子方向』は畳んだ。離れた場所に同じことを決める欄が
+  // 2つあると、先に目に入った方を触って「効かない」と見える。
+  assert.ok(html.indexOf('格子方向') < 0, '『格子方向』の欄が残っている');
+  // 2D も意匠から向きを読む。fencePattern は保存済みプランの読み替え専用。
+  const body = sliceFunction('drawItem2d');
+  assert.match(body, /railInfillOf\(it\)/, '2D が意匠を見ていない');
+});
+
+test('格子柵の欄は、笠木のあり/なしを色より先に出す', () => {
+  const g = heights(railHouse({}));
+  const opts = { label: '格子の意匠', capToggle: true, frameDefault: '#b09468' };
+
+  // 笠木なし: 切り替えは出るが、無い部材の色は選ばせない。
+  const off = g.railingDesignHtml({ type: 'lattice-screen' }, opts);
+  assert.ok(off.indexOf('笠木（手すり）') >= 0, '笠木のあり/なしが出ていない');
+  assert.ok(off.indexOf('笠木の色') < 0, '笠木が無いのに笠木の色を出している');
+  assert.ok(off.indexOf('latticeCap') >= 0, '笠木の切り替えがつながっていない');
+
+  // 笠木あり: 色が出る。順番は **切り替えが先、色が後**。
+  const on = g.railingDesignHtml({ type: 'lattice-screen', latticeCap: true }, opts);
+  const at切替 = on.indexOf('笠木（手すり）'), at色 = on.indexOf('笠木の色');
+  assert.ok(at色 >= 0, '笠木があるのに色を出していない');
+  // 切り替えは **いちばん上**。意匠より下に落ちただけでも、先に目に入った欄を
+  // 触って「付けたつもり」になる事故がまた起きる。
+  assert.ok(at切替 >= 0 && at切替 < on.indexOf('格子の意匠') && at切替 < at色,
+    '笠木のあり/なしが先頭に出ていない');
+
+  // 階段の手すりには「笠木なし」が無いので、切り替えは出さず色だけ出す。
+  const stair = g.railingDesignHtml({ type: 'stair' }, { label: '手すりの意匠' });
+  assert.ok(stair.indexOf('笠木（手すり）') < 0, '階段に要らない切り替えを出している');
+  assert.ok(stair.indexOf('笠木の色') >= 0, '階段の笠木の色が選べない');
+});
+
+test('意匠と色の欄は、階段の手すりと格子柵の両方の設定に出ている', () => {
+  assert.match(html, /function railingDesignHtml\(/);
+  assert.match(html, /railingDesignHtml\(it,\{label:'手すりの意匠'\}\)/);
+  assert.match(html, /railingDesignHtml\(it,\{label:'格子の意匠'/);
+  assert.match(html, /capToggle:true/, '格子柵の笠木の切り替えが共通の欄に寄っていない');
+});
+
+test('手すりは丸棒の羅列ではなく、断面を走行に沿って押し出す', () => {
+  const body = sliceFunction('build3DStairRails');
+  assert.match(body, /ExtrudeGeometry/, '断面の押し出しになっていない');
+  assert.match(body, /stairRailRoundedRectShape\(/, '角断面の笠木が無い');
+  assert.match(body, /makeBasis/, '押し出しの向きをそろえていない');
+  assert.doesNotMatch(body, /CylinderGeometry\(railR/, '丸棒の羅列が残っている');
+});
+
+test('手すりの色は、階段の板とは別に持てる', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.stairRailColorOf({}), '#9c7749', '既定の木色が変わっている');
+  assert.equal(g.stairRailColorOf({ stairRailColor: '#223344' }), '#223344');
+  assert.equal(g.stairRailColorOf({ stairRailColor: 'red' }), '#9c7749', '色でない値は既定へ');
+  // アイテム色の一括適用が手すりを塗り潰さないこと。
+  const body = sliceFunction('applyItemColorToGroup');
+  assert.match(body, /ownColor/, '手すりまでアイテム色で塗られる');
+  assert.match(sliceFunction('build3DStairRails'), /userData\.ownColor=true/);
+});
+
+test('階段の板にテクスチャを貼れる（画像トリミングの欄と対になる）', () => {
+  const g = heights(railHouse({}));
+  assert.equal(g.canSetItemTexture({ type: 'stair' }), true);
+  assert.equal(g.canSetItemTexture({ type: 'stair-corner' }), true);
+  assert.equal(g.canSetItemTexture({ type: 'stair-landing' }), true);
+  assert.match(sliceFunction('buildItem3D'), /makeItemTextureMaterial\(it/);
+});
+
+test('3Dは、直階段も廻り階段も手すりをこの1か所から読む', () => {
+  assert.match(html, /function build3DStairRails\(/);
+  assert.match(sliceFunction('build3DStairRails'), /stairRailMountFor\(/);
+  // 手すりは階段の種類ごとの走行の形に沿うので、それぞれの階段から渡す。
+  assert.match(sliceFunction('build3DOpenStraightStair'), /build3DStairRails\(/);
+  assert.match(sliceFunction('build3DWinderCorner'), /build3DStairRails\(/);
+});
+
+test('階段のプロパティ欄から手すりを選べる', () => {
+  assert.match(html, /stairRail/);
+  assert.match(html, /両側/);
+  assert.match(html, /壁付け/);
+});
+
+// ══ 8-b4. 踊り場 ═══════════════════════════════════════════════════════
+// かね折れ(L字)・折り返し(U字)の階段は、曲がりを廻り段で作るか踊り場で作る。
+// 廻り段(stair-corner)は在ったが踊り場が無く、踊り場付きの形が組めなかった。
+function landingHouse() {
+  return {
+    floors: {},
+    rooms: [{ id: 'r1', n: '室', floor: 1, x: 0, y: 0, w: 6000, d: 8000 },
+            { id: 'r2', n: '2階', floor: 2, x: 0, y: 0, w: 6000, d: 8000 }],
+    walls: [],
+    items: [
+      // 下の直進 → 踊り場 → 上の直進(折り返し)
+      { id: 'sA', type: 'stair', floor: 1, x: 1000, y: 1000, w: 910, d: 1820, rot: 0, stairOrder: 1 },
+      { id: 'sL', type: 'stair-landing', floor: 1, x: 1000, y: 2820, w: 1820, d: 910, rot: 0, stairOrder: 2 },
+      { id: 'sB', type: 'stair', floor: 1, x: 1910, y: 3730, w: 910, d: 1820, rot: 0, stairOrder: 3 }
+    ]
+  };
+}
+
+test('踊り場は階段の部材として扱われる', () => {
+  const g = heights(landingHouse());
+  assert.equal(g.isStairPartType('stair-landing'), true, '階段のグループに入らない');
+  assert.equal(g.isStairLandingType('stair-landing'), true);
+  assert.equal(g.isStairLandingType('stair'), false);
+});
+
+test('踊り場は段数を持たない（上り高さを分け合わない）', () => {
+  const g = heights(landingHouse());
+  const landing = g.DATA.items[1];
+  assert.equal(g.getStairStepCount(landing), 0);
+  const info = g.stairRiseInfo(landing);
+  assert.equal(info.rise, 0, '踊り場が高さを持っている');
+});
+
+test('踊り場は、手前までの段が積み上がった高さに座る', () => {
+  const g = heights(landingHouse());
+  const a = g.DATA.items[0], landing = g.DATA.items[1], b = g.DATA.items[2];
+  const ia = g.stairRiseInfo(a), il = g.stairRiseInfo(landing), ib = g.stairRiseInfo(b);
+  // 下の直進の天端 = 踊り場の座面 = 上の直進の足元。
+  assert.ok(Math.abs((ia.base + ia.rise) - il.base) < 1e-9,
+    '踊り場が段とつながっていない: 下の天端 ' + Math.round((ia.base + ia.rise) / g.U) +
+    ' / 踊り場の座面 ' + Math.round(il.base / g.U) +
+    ' / 段数 ' + [a, landing, b].map((o) => g.getStairStepCount(o)).join(',') +
+    ' / 並び ' + g.stairGroupOrdered(a).map((o) => o.id).join('-'));
+  assert.ok(Math.abs(il.base - ib.base) < 1e-9, '上の直進が踊り場から始まっていない');
+  // 全体では上階の床まで上がる。
+  assert.ok(Math.abs((ib.base + ib.rise) - g.stairGroupRiseM(a)) < 1e-9);
+});
+
+test('踊り場だけの階段でも、段数0で割り算が壊れない', () => {
+  const h = landingHouse();
+  h.items = [h.items[1]];
+  const g = heights(h);
+  const info = g.stairRiseInfo(g.DATA.items[0]);
+  assert.ok(isFinite(info.base) && isFinite(info.rise), 'NaN になっている');
+});
+
+test('踊り場は3Dで平らな板として作られ、段は作らない', () => {
+  assert.match(html, /function build3DStairLanding\(/);
+  assert.match(sliceFunction('buildItem3D'), /isStairLandingType\(it\.type\)/);
+});
+
+test('踊り場がツールとして置ける', () => {
+  assert.match(html, /data-tool="stair-landing"/);
+  assert.match(html, /'stair-landing':'踊り場'/);
+});
+
+// ══ 8-c. 階段の下 ══════════════════════════════════════════════════════
+test('階段の下は、省略すれば従来どおり素通し', () => {
+  const g = heights(stairHouse(undefined));
+  assert.equal(g.stairUnderFilled(g.DATA.items[0]), false);
+  assert.equal(g.stairUnderFilled({ stairUnder: 'open' }), false);
+  assert.equal(g.stairUnderFilled({ stairUnder: 'filled' }), true);
+});
+
+test('階段の下を埋めると、直階段も廻り階段も塞ぐ', () => {
+  const straight = sliceFunction('build3DOpenStraightStair');
+  assert.match(straight, /filled/, '直階段が階段下の指定を受け取っていない');
+  assert.match(straight, /stairUnderFillMaterial\(/);
+  const winder = sliceFunction('build3DWinderCorner');
+  assert.match(winder, /filled/, '廻り階段が階段下の指定を受け取っていない');
+  assert.match(winder, /stairUnderFillMaterial\(/);
+  const caller = sliceFunction('buildItem3D');
+  assert.match(caller, /stairUnderFilled\(it\)/, '階段下の指定を3Dの生成へ渡していない');
+});
+
+test('階段のプロパティ欄から外観の形状を選べる', () => {
+  assert.match(html, /stairStyle/);
+  assert.match(html, /箱型（階段下を塞ぐ）/);
+  assert.match(html, /スケルトン（蹴込み板なし）/);
+  assert.match(html, /ひな壇（側面が見える/);
+});
+
+test('段差のある階では、階段の足元も選べる', () => {
+  assert.match(html, /階段の足元/);
+  assert.match(html, /段差の上から/);
+});
+
+test('格子柵のプロパティ欄から間隔・見付・笠木を選べる', () => {
+  assert.match(html, /格子の間隔/);
+  assert.match(html, /格子の見付/);
+  assert.match(html, /latticeCap/);
+  assert.match(html, /手すりとして使う/);
+});
+
+// ══ 10-b2. 段差の天板は、階段の開口で外周面も切れる ════════════════════
+// 「階段が重なった所で、段差の縦の板が残る」の再発防止。
+// THREE.ExtrudeGeometry は外形と穴の壁を別々に作るので、穴が外形の辺に接しても
+// 外周の壁は切れない。段差の天板は矩形の差に割って作り、面を本当に途切れさせる。
+test('矩形から矩形を引くと、残りの矩形に割れる', () => {
+  const g = heights(skipHouse({}));
+  // 中に浮いた穴 → 上下左右の4枚
+  let out = g.rectMinusRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+                            { x0: 40, y0: 40, x1: 60, y1: 60 });
+  assert.equal(out.length, 4);
+  assert.equal(out.reduce((a, r) => a + (r.x1 - r.x0) * (r.y1 - r.y0), 0), 100 * 100 - 20 * 20);
+  // 辺に接した穴 → 3枚(接した側には何も残らない)
+  out = g.rectMinusRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+                        { x0: 0, y0: 40, x1: 30, y1: 60 });
+  assert.equal(out.length, 3);
+  assert.ok(out.every((r) => !(r.x0 < 30 && r.y0 >= 40 && r.y1 <= 60 && r.x0 === 0)),
+    '接した辺に矩形が残っている');
+  // 重なりが無ければそのまま
+  out = g.rectMinusRect({ x0: 0, y0: 0, x1: 10, y1: 10 }, { x0: 50, y0: 50, x1: 60, y1: 60 });
+  assert.equal(out.length, 1);
+});
+
+test('穴が複数でも順に引ける', () => {
+  const g = heights(skipHouse({}));
+  const out = g.subtractRectsFromRect({ x0: 0, y0: 0, x1: 100, y1: 100 },
+    [{ x0: 0, y0: 0, x1: 20, y1: 20 }, { x0: 80, y0: 80, x1: 100, y1: 100 }]);
+  const area = out.reduce((a, r) => a + (r.x1 - r.x0) * (r.y1 - r.y0), 0);
+  assert.equal(area, 100 * 100 - 20 * 20 - 20 * 20);
+});
+
+test('軸に沿った穴だけを矩形として読む(回した階段は従来の経路へ落とす)', () => {
+  const g = heights(skipHouse({}));
+  const axis = [{ x: 1, z: 2 }, { x: 3, z: 2 }, { x: 3, z: 5 }, { x: 1, z: 5 }];
+  // vm の外へ出た素のオブジェクトは prototype が違うので、値で比べる。
+  const rc = g.polyAsAxisRectMm(axis);
+  assert.deepEqual([rc.x0, rc.y0, rc.x1, rc.y1], [1000, 2000, 3000, 5000]);
+  const rotated = [{ x: 1, z: 2 }, { x: 3, z: 2.5 }, { x: 2.5, z: 5 }, { x: 1, z: 5 }];
+  assert.equal(g.polyAsAxisRectMm(rotated), null);
+});
+
+test('段差の天板は、階段の開口があるときは矩形に割って作る', () => {
+  const body = sliceFunction('buildRooms3D');
+  assert.match(body, /buildSkipDeckMeshes\(/, '天板を割って作る経路が無い');
+  const deck = sliceFunction('buildSkipDeckMeshes');
+  assert.match(deck, /subtractRectsFromRect\(/);
+  assert.match(deck, /polyAsAxisRectMm\(/);
+});
+
+// ══ 10-c. 柱 ═══════════════════════════════════════════════════════════
+test('柱は角柱と円柱の2種類あり、高さは範囲に丸めて読む', () => {
+  const g = heights(skipHouse({}));
+  assert.equal(g.isColumnType('column'), true);
+  assert.equal(g.isColumnType('column-round'), true);
+  assert.equal(g.isColumnType('shelf-built-in'), false);
+  assert.equal(g.columnHeightMm({}), 2400);
+  assert.equal(g.columnHeightMm({ columnHeight: 99999 }), 6000);
+  assert.equal(g.columnHeightMm({ columnHeight: 1170 }), 1170);
+});
+
+test('柱が部屋・壁メニューから置ける', () => {
+  assert.match(html, /data-tool="column"/);
+  assert.match(html, /data-tool="column-round"/);
+  assert.match(html, /column:'角柱','column-round':'円柱'/);
+});
+
+test('段差の上に置いた柱は、足元が段差の下へ下り、高さが段差に合う', () => {
+  const body = sliceFunction('placeItem');
+  assert.match(body, /isColumnType\(it\.type\)/, '柱を置いたときの段差の扱いが無い');
+  assert.match(body, /roomSkipCavityMm\(/);
+  assert.match(body, /baseLevel='under'/);
+});
+
+test('柱は3Dで角柱と円柱に描き分ける', () => {
+  const body = sliceFunction('buildItem3D');
+  assert.match(body, /CylinderGeometry/, '円柱が箱で描かれている');
+  assert.match(body, /isColumnType\(it\.type\)/);
+});
+
+// ══ 8-b. レベル階段の向き ═══════════════════════════════════════════════
+// 「横板から始まる」の再発防止。階段自身がどちら向きに上るかを見ずに
+// 両端の min/max だけを採っていたため、逆向きに置くと最上段から始まっていた。
+test('レベル階段は、低い側から段差へ向かって上る(置き方によらず)', () => {
+  // rot 0: ローカル下端は -y 側。低い側(西の部屋)は x<4000 なので、
+  // この向きでは下端も上端も低い側に居る → bbox の走行軸で決まる。
+  // 向きの判定そのものは、下端が高い側に来る置き方で測る。
+  const h = skipHouse({ skip: 1200 });
+  // rot 90 だと ローカル下端(0,-d/2) は +x 側 = 段差の上を向く。
+  // 走行軸が段差の境(x=4000)をまたぐ位置に置く。
+  h.items.push({ id: 'st_rev', type: 'stair', floor: 1,
+                 x: 3545, y: 500, w: 910, d: 1400, rot: 90, stairTarget: 'level' });
+  const g = heights(h);
+  const span = g.stairLevelSpanM(g.DATA.items[0]);
+  assert.equal(span.reversed, true, '下端が段差の上を向いていることを検出できていない');
+  assert.equal(Math.round(span.baseY / g.U), 0, '足元は低い側のまま');
+  assert.equal(Math.round(span.riseM / g.U), 1200);
+});
+
+test('正しい向きに置いたレベル階段は反転しない', () => {
+  const h = skipHouse({ skip: 1200 });
+  // rot -90(=270) なら ローカル下端は -x 側 = 低い側を向く。
+  h.items.push({ id: 'st_fwd', type: 'stair', floor: 1,
+                 x: 3545, y: 500, w: 910, d: 1400, rot: -90, stairTarget: 'level' });
+  const g = heights(h);
+  assert.equal(g.stairLevelSpanM(g.DATA.items[0]).reversed, false);
+});
+
+test('3Dの段は、反転した階段では逆向きに積む', () => {
+  const body = sliceFunction('build3DOpenStraightStair');
+  assert.match(body, /reverse/, '反転を受け取っていない');
+  const caller = sliceFunction('buildItem3D');
+  assert.match(caller, /stairLevelReversed\(/, '反転を3Dの生成へ渡していない');
+});
+
+test('歩行の坂面も、反転した階段では逆向きに上る', () => {
+  const body = sliceFunction('walkLevelStairGroundAt');
+  assert.match(body, /reversed/, '足元の坂面が反転を見ていない');
+});
+
+// ══ 10-d. 天井付けの器具が天井に追従する ═══════════════════════════════
+// 「ライトが天井に追従していない」の再発防止。天井が動く操作は段差・床上げ・
+// 天井高・天井の種類と複数あり、どれか1つだけを直しても残りで取り残される。
+function houseWithLight(opts) {
+  const h = skipHouse(opts || {});
+  // 段差の上の部屋の天井にダウンライトを1つ。
+  h.items.push({ id: 'dl', type: 'light-down', floor: 1,
+                 x: 5000, y: 1900, w: 180, d: 180, rot: 0, elev: 2538 });
+  return h;
+}
+
+test('天井からの下がりを保つ（直付けは直付けのまま）', () => {
+  const g = heights(houseWithLight({}));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  // 天井 2700、CEILING_FINISH 12 → 直付けは 2688。まず基準を合わせる。
+  dl.elev = g.roomCeilingElevationMm(up);
+  const flush = dl.elev;
+  g.shiftRoomCeilingFixtures(up, -500);
+  assert.equal(dl.elev, flush - 500);
+});
+
+test('段差を付けると、天井付けの器具は天井と一緒に動く', () => {
+  const g = heights(houseWithLight({ ceilingMm: 2200 }));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  dl.elev = g.roomCeilingElevationMm(up);          // 天井に直付け
+  g.followRoomCeiling(up, function () { up.skipLevelMm = 1200; });
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up),
+    '段差を付けたら器具が天井から取り残された');
+});
+
+test('意図して下げたペンダントは、下がりを保ったまま動く', () => {
+  const g = heights(houseWithLight({ ceilingMm: 2200 }));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  dl.elev = g.roomCeilingElevationMm(up) - 400;    // 400mm 下げてある
+  g.followRoomCeiling(up, function () { up.skipLevelMm = 1200; });
+  assert.equal(dl.elev, g.roomCeilingElevationMm(up) - 400, '下がりが変わった');
+});
+
+test('床上げでは天井が動かないので、器具の世界での高さは変わらない', () => {
+  const g = heights(houseWithLight({}));
+  const up = g.DATA.rooms[1], dl = g.DATA.items[0];
+  const worldBefore = g.roomFloorTopY(up) + dl.elev * g.U;
+  g.followRoomCeiling(up, function () { up.floorRaiseMm = 150; });
+  const worldAfter = g.roomFloorTopY(up) + dl.elev * g.U;
+  assert.ok(Math.abs(worldAfter - worldBefore) < 1e-9, '床上げで照明が動いた');
+});
+
+test('天井を書き換える経路は1か所(updateSelectedProp)を通る', () => {
+  const body = sliceFunction('updateSelectedProp');
+  assert.match(body, /roomCeilingElevationMm\(ST\.selected\)/, '天井の前後を測っていない');
+  assert.match(body, /shiftRoomCeilingFixtures\(/, '天井の書き換えで器具が追従しない');
+  // 段差・床上げも同じ規則へ寄せてある。
+  assert.match(sliceFunction('updateSelectedRoomSkipLevel'), /followRoomCeiling\(/);
+  assert.match(sliceFunction('updateSelectedRoomFloor'), /followRoomCeiling\(/);
+});
+
+// ══ 10-e. 屋外の天井付け器具は、上の屋根の下面に付く ═══════════════════
+// 「軒下のダウンライトが上の屋根にくっついていない」の再発防止。
+// 部屋の外は「天井が無い」として触らずにいたため、固定の既定値のまま軒から
+// 離れて浮いていた。屋根が架かっていればその下面が取り付け面である。
+function porchHouse() {
+  return {
+    floors: {}, walls: [],
+    rooms: [{ id: 'in', n: '室', floor: 1, x: 0, y: 0, w: 4000, d: 4000 }],
+    items: [
+      // 室の外(ポーチ)に架かる片流れ屋根。
+      { id: 'rf', type: 'roof', floor: 2, x: 4000, y: 0, w: 3000, d: 4000,
+        rot: 0, elev: 0, roofType: 'mono', pitch: 3 },
+      // その真下、部屋の外に置いたダウンライト。
+      { id: 'dl', type: 'light-down', floor: 1, x: 5400, y: 1900, w: 180, d: 180,
+        rot: 0, elev: 2600 }
+    ]
+  };
+}
+
+test('部屋の中の器具は、従来どおり天井仕上げ面に付く', () => {
+  const h = porchHouse();
+  h.items.push({ id: 'dl2', type: 'light-down', floor: 1, x: 1900, y: 1900,
+                 w: 180, d: 180, rot: 0, elev: 0 });
+  const g = heights(h);
+  const inside = g.DATA.items[2];
+  assert.equal(g.ceilingAttachElevationMm(inside),
+    g.ceilingFinishElevationMm(1, 1990, 1990));
+});
+
+test('部屋の外でも、上に屋根が架かっていればその下面に付く', () => {
+  const g = heights(porchHouse());
+  const dl = g.DATA.items[1];
+  assert.equal(g.roomAtPointOnFloor(1, 5490, 1990), null, '部屋の外に置けていない');
+  const want = g.ceilingAttachElevationMm(dl);
+  assert.notEqual(want, null, '屋根の下なのに取り付け面が出ていない');
+  // 取り付けたときの世界での高さが、屋根の下面(仕上げ12mmぶん下)と一致する。
+  const roofs = g.DATA.items.filter((o) => o.type === 'roof');
+  const under = g.roofTopLimitAtPlanPoint(roofs, 5490, 1990);
+  const world = g.item3DBaseY(dl) + want * g.U;
+  assert.ok(Math.abs(world - (under - g.CEILING_FINISH_M)) < 0.002,
+    '屋根の下面から離れている: ' + Math.round(world / g.U) + ' vs ' + Math.round((under - g.CEILING_FINISH_M) / g.U));
+});
+
+test('部屋の外で上に何も無ければ、取り付け面は出ない(触らない)', () => {
+  const h = porchHouse();
+  h.items[1].x = 9000;            // 屋根の外へ出す
+  const g = heights(h);
+  assert.equal(g.ceilingAttachElevationMm(g.DATA.items[1]), null);
+});
+
+test('保存済みプランの移行と新規配置は、この1か所を通る', () => {
+  assert.match(html, /function ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('snapOutdoorCeilingFixturesToRoof'), /ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('ensureLightDefaults'), /ceilingAttachElevationMm\(/);
+  assert.match(sliceFunction('normalizeLegacyFurnitureItems'), /snapOutdoorCeilingFixturesToRoof\(/);
+});
+
+// ══ 11. 造作棚 ══════════════════════════════════════════════════════════
+test('背面が壁に接した造作棚は、壁が支えるので縦板を持たない', () => {
+  const h = skipHouse({});
+  // 壁 wsep は x=4000 の垂直線。棚を左に寄せ、背面(ローカル -y 側)を壁へ向ける。
+  // 中心 (3825,1175)、rot 90 なので背面は +x 側 = (4000,1175) で壁の芯に接する。
+  h.items.push({ id: 'sh', type: 'shelf-built-in', floor: 1, rot: 90,
+                 x: 2925, y: 1000, w: 1800, d: 350 });
+  const g = heights(h);
+  assert.equal(g.shelfIsWallSupported(g.DATA.items[0]), true);
+});
+
+test('壁から離れた造作棚は、両端に縦板を立てる', () => {
+  const h = skipHouse({});
+  h.items.push({ id: 'sh', type: 'shelf-built-in', floor: 1, rot: 0,
+                 x: 1000, y: 1500, w: 1800, d: 350 });
+  const g = heights(h);
+  assert.equal(g.shelfIsWallSupported(g.DATA.items[0]), false);
+});
+
+test('造作棚の縦板は、明示があれば自動判定より優先する', () => {
+  const h = skipHouse({});
+  // 壁から離れた棚。自動なら縦板あり。
+  h.items.push({ id: 'sh', type: 'shelf-built-in', floor: 1, rot: 0,
+                 x: 1000, y: 1500, w: 1800, d: 350 });
+  const g = heights(h);
+  const sh = g.DATA.items[0];
+  assert.equal(g.shelfSideBoards(sh), 'both', '自動の既定が変わっている');
+  sh.shelfSides = 'none';
+  assert.equal(g.shelfSideBoards(sh), 'none', '「縦板なし」を選んでも効いていない');
+  sh.shelfSides = 'both';
+  assert.equal(g.shelfSideBoards(sh), 'both');
+  delete sh.shelfSides;
+  assert.equal(g.shelfSideBoards(sh), 'both', '明示を外したら自動へ戻る');
+});
+
+test('3Dの造作棚は、縦板の有無をこの1か所から読む', () => {
+  const body = sliceFunction('build3DShelfBuiltIn');
+  assert.match(body, /shelfSideBoards\(it\)/, '自動判定を直接呼んでいる(明示が効かない)');
+});
+
+test('造作棚の棚板の枚数と高さは、範囲に丸めて読む', () => {
+  const g = heights(skipHouse({}));
+  assert.equal(g.shelfBoardCount({}), 3);
+  assert.equal(g.shelfBoardCount({ shelfCount: 99 }), 8);
+  assert.equal(g.shelfHeightMm({}), 900);
+  assert.equal(g.shelfHeightMm({ shelfHeight: 99999 }), 2700);
+});
+
+// ══ 12. 平面図の表記・取り込みの検査 ════════════════════════════════════
+test('段差のある部屋だけが FL+ の表記を持つ', () => {
+  const g = heights(skipHouse({ skip: 1200 }));
+  assert.equal(g.roomLevelLabel(g.DATA.rooms[1]), 'FL+1200');
+  assert.equal(g.roomLevelLabel(g.DATA.rooms[0]), '');
+});
+
+test('取り込みの検査は、範囲外の段差と見慣れない行き先を警告に挙げる', () => {
+  const res = PlanSchema.validatePlan({
+    walls: [{ x1: 0, y1: 0, x2: 1000, y2: 0, thick: 120 }],
+    rooms: [{ x: 0, y: 0, w: 1000, d: 1000, skipLevelMm: 9000 }],
+    items: [{ type: 'stair', x: 0, y: 0, stairTarget: 'sideways' },
+            { type: 'shelf-built-in', x: 0, y: 0, baseLevel: 'ceiling' }]
+  });
+  assert.equal(res.ok, true, '読み込めなくしてはいけない(警告にとどめる)');
+  assert.ok(res.warnings.some((w) => /段差 9000mm/.test(w)));
+  assert.ok(res.warnings.some((w) => /行き先 "sideways"/.test(w)));
+  assert.ok(res.warnings.some((w) => /基準 "ceiling"/.test(w)));
+});
+
+// ══ 配線の検査(値では測れないもの) ══════════════════════════════════════
+test('段差が 400mm 以上ある部屋は、床下を空間として作る(塊のままにしない)', () => {
+  const body = sliceFunction('buildRooms3D');
+  assert.match(body, /roomSkipCavityMm\(r\)/, '床下を空けるかどうかを見ていない');
+  assert.match(body, /roomStoreyFloorTopY\(r\)/, '床下の底(その階の構造床)を作っていない');
+});
+
+test('歩行では、階段を使わずに登れる段差に上限がある', () => {
+  assert.match(html, /var WALK_MAX_STEP_UP_M\s*=/);
+  const body = sliceFunction('walkUpdateGround');
+  assert.match(body, /WALK_MAX_STEP_UP_M/, '段差を無条件に登れると壁を抜けたように上がる');
+  assert.match(body, /walkLevelStairGroundAt\(/, 'レベル階段の坂面が歩行に効いていない');
+});
+
+test('部屋のプロパティ欄からスキップフロアを設定できる', () => {
+  assert.match(html, /function selectedRoomSkipHtml\(/);
+  assert.match(html, /function updateSelectedRoomSkipLevel\(/);
+  assert.match(html, /selectedRoomSkipHtml\(it\)/);
+});
+
+test('階段のプロパティ欄から行き先を選べる', () => {
+  assert.match(html, /stairTarget/);
+  assert.match(html, /同じ階の段差/);
+});
+
+test('造作棚がツールとして置ける', () => {
+  assert.match(html, /data-tool="shelf-built-in"/);
+  assert.match(html, /'shelf-built-in':'造作棚'/);
+});

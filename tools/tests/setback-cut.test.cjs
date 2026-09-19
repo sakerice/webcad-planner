@@ -129,7 +129,7 @@ const FNS = [
   // 高さモデル（既存）
   'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
   'perFloorHeightsEnabled', 'planFloorHeightEntry', 'defaultWallHeightMmForFloor', 'defaultFloorRaiseMmForFloor',
-  'floorSlabMmForFloor', 'localSupportTopY', 'segmentInsideRectLengthMm',
+  'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
@@ -139,7 +139,7 @@ const FNS = [
   'roomCeilingProfile', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
-  'roomExplicitCeilingMm', 'roomCeilingHeightM',
+  'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
   'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   // 斜線（Task 16）
