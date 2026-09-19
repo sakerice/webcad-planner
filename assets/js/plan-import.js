@@ -250,16 +250,33 @@
     g.strokeRect(x, y, w, h);
   }
 
+  // 実際に絵が描かれている範囲と、その倍率。
+  //
+  // **canvas は object-fit: contain で表示している。** 幅は 100%、高さは
+  // 上限(52dvh)付き。縦長の画像だと高さが上限に当たり、**要素の箱のほうが
+  // 絵より横に広くなる**。contain は絵を箱の中央に収めるので、左右に余白が
+  // できる。getBoundingClientRect が返すのは箱なので、余白を差し引かずに
+  // 座標を換算すると、囲みの始点がその分ずれる。
+  //
+  // 余白が無いときは left/top は箱のままで、倍率も縦横で同じになる。
+  function fitContain(rect, cw, ch) {
+    var scale = Math.min(rect.width / cw, rect.height / ch);
+    if (!(scale > 0) || !isFinite(scale)) scale = 1;
+    return {
+      left: rect.left + (rect.width - cw * scale) / 2,
+      top: rect.top + (rect.height - ch * scale) / 2,
+      scale: scale,
+    };
+  }
+
   function canvasPointToImage(e) {
     var c = $('plan-import-canvas');
-    var rect = c.getBoundingClientRect();
     var t = (e.touches && e.touches[0]) || e;
     var s = previewScale();
-    // getBoundingClientRect は CSS 上の大きさ。canvas の画素とは限らない。
-    var sx = c.width / rect.width, sy = c.height / rect.height;
+    var fit = fitContain(c.getBoundingClientRect(), c.width, c.height);
     return {
-      x: Math.max(0, Math.min(ST.image.naturalWidth, (t.clientX - rect.left) * sx / s)),
-      y: Math.max(0, Math.min(ST.image.naturalHeight, (t.clientY - rect.top) * sy / s)),
+      x: Math.max(0, Math.min(ST.image.naturalWidth, (t.clientX - fit.left) / fit.scale / s)),
+      y: Math.max(0, Math.min(ST.image.naturalHeight, (t.clientY - fit.top) / fit.scale / s)),
     };
   }
 
@@ -672,6 +689,7 @@
     showQuota: showQuota,
     renderPlanImportResult: renderPlanImportResult,
     reviewChanges: reviewChanges,
+    fitContain: fitContain,
     MAX_SEND_PX: MAX_SEND_PX,
   };
 }(typeof self !== 'undefined' ? self : this));
