@@ -32,3 +32,8 @@ output/
 # Claude Code がエージェント用に切る作業場
 .claude/worktrees/
 .claude/launch.json
+
+# Worker をローカルで動かすときの秘密情報。**絶対にコミットしない**。
+# Vertex AI のサービスアカウントの秘密鍵が入る。
+.dev.vars
+.dev.vars.*

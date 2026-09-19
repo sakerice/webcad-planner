@@ -240,6 +240,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .unity-render-title{font-weight:700;color:#fff}
 .unity-render-close{width:30px;height:30px;border:1px solid #2a4080;border-radius:4px;background:#0f3460;color:#fff;cursor:pointer}
 .unity-render-status{line-height:1.6;color:#cce;background:#101a33;border:1px solid #24385f;border-radius:6px;padding:10px;margin-bottom:10px;white-space:pre-wrap}
+.airx-alpha{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#3a2a10;border:1px solid #7a5a20;color:#e8c98a;font-size:11px;vertical-align:1px}
 .unity-render-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .unity-render-actions a{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .unity-render-actions a.disabled{opacity:0.55;cursor:not-allowed}
@@ -263,6 +264,10 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
    .video-render-files で pre-wrap に上書きされていた。折り返しは共通にする。 */
 .unity-render-cmd{color:#aac;background:#0b1226;border:1px solid #24385f;border-radius:6px;padding:8px;overflow:auto;white-space:pre-wrap}
 
+#plan-import-modal{display:none;position:fixed;inset:0;background:rgba(5,9,18,0.64);z-index:900;align-items:center;justify-content:center;padding:16px}
+#plan-import-modal.show{display:flex}
+/* 囲む操作をするので、指のスクロールに持っていかれないようにする */
+.plan-import-canvas{display:block;width:100%;height:auto;max-height:52dvh;object-fit:contain;background:#0f172a;border:1px solid #24385f;border-radius:6px;cursor:crosshair;touch-action:none}
 #unity-render-toolbar-btn{display:none}
 #unity-render-toolbar-btn.show{display:inline-flex}
 /* JIS図面出力モーダル: 印刷プレビューなので常に白背景・ダイアログchromeのみ既存モーダル配色を踏襲 */
@@ -3188,6 +3193,7 @@ input[type="reset"]:focus-visible{
   <!-- 入口はダイアログを開くだけ。撮影も生成もしない(動画AIと同じ)。生成は
        ダイアログの「データ作成」にある #ai-render-run を押してから走る。
        設定(仕上げメモ・生活感・平面図同梱)を変えてから生成できるのが要点。 -->
+  <button class="tbtn" id="plan-import-toolbar-btn" onclick="openPlanImport()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v16H3ZM3 10h18M9 10v10"/><path d="M14 14h4M16 12v4"/></svg> 間取り図から下書き</button>
   <button class="tbtn" id="unity-render-toolbar-btn" onclick="openUnityRenderModal()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h5l2-3h4l2 3h5v14H3ZM16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg> 画像AIレンダー</button>
   <button class="tbtn" id="video-render-toolbar-btn" onclick="openVideoRenderDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5h18v15H3ZM3 10h18M7 5l3 5M14 5l3 5M10 13l5 2-5 3Z"/></svg> 動画AIレンダー</button>
   <button class="tbtn mob-hide" id="jis-drawing-toolbar-btn" onclick="openJisDrawingDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 2h10l4 4v16H5ZM15 2v5h4M8 11h8v6H8ZM12 11v6M8 20h8"/></svg> JIS図面</button>
@@ -3486,7 +3492,65 @@ input[type="reset"]:focus-visible{
     <div class="preset-choice-title" id="preset-choice-title">はじめる間取りを選んでください</div>
     <div class="preset-choice-sub">あとから自由に作り替えられます。保存済みのプランはツールバーの「読込」から開けます。</div>
     <div class="preset-choice-grid" id="preset-choice-grid"></div>
+    <button type="button" class="preset-blank-btn" onclick="closePresetChoice();openPlanImport()"><span>間取り図の画像から下書きを作る</span><small>ハウスメーカーの間取り図を読み取って、壁と部屋の下書きを起こします。そのあと手で直して仕上げます</small></button>
     <button type="button" class="preset-blank-btn" onclick="chooseBlankPlan()"><span>白紙から始める</span><small>間取りを使わず、敷地や部屋から自由に作成</small></button>
+  </div>
+</div>
+<!-- 間取り図の読み取り。文字の大きさは .airx-dialog の4段階に乗せる
+     (画像AI/動画AIと同じ型。ここで font-size を足さないこと)。 -->
+<div id="plan-import-modal" onclick="if(event.target===this)closePlanImport()">
+  <div class="unity-render-card airx-dialog" role="dialog" aria-modal="true" aria-labelledby="plan-import-title">
+    <div class="unity-render-head">
+      <div class="unity-render-title" id="plan-import-title">間取り図から下書きを作る</div>
+      <button class="unity-render-close" onclick="closePlanImport()">×</button>
+    </div>
+
+    <div class="ph">この機能について</div>
+    <div class="unity-render-status">間取り図を読み取って、<b>下書き</b>を起こします。そのまま使える完成品にはなりません。寸法の読み違いや、部屋・建具の取りこぼしが残るので、取り込んだあと手で直してください。<span class="airx-alpha">α版</span></div>
+    <div class="unity-render-status" id="plan-import-quota" style="display:none"></div>
+
+    <div class="ph">1. 間取り図のPDFか画像を選ぶ</div>
+    <div class="unity-render-actions">
+      <input type="file" id="plan-import-file" accept="application/pdf,image/*" onchange="onPlanImportFile(this)">
+      <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="resetPlanImport()">やり直す</button>
+    </div>
+
+    <div id="plan-import-step2" style="display:none">
+      <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
+           図面が写っていない画像のときだけ、囲むと精度が上がる。
+           PDF はそのまま送るので、この枠ごと出さない。 -->
+      <div id="plan-import-crop">
+        <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
+        <div class="unity-render-actions">
+          <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
+          <span id="plan-import-crop-size" class="airx-source-note"></span>
+        </div>
+      </div>
+      <div class="unity-render-config">
+        <div>
+          <label for="plan-import-hint">補足（任意）</label>
+          <input id="plan-import-hint" type="text" placeholder="例: 2階の平面図です / 尺モジュールです">
+        </div>
+      </div>
+      <div class="unity-render-actions">
+        <button id="plan-import-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runPlanImport()">この範囲を読み取る</button>
+      </div>
+    </div>
+
+    <div id="plan-import-status" class="unity-render-status"></div>
+
+    <div id="plan-import-step3" style="display:none">
+      <div class="ph">3. できた下書き</div>
+      <div id="plan-import-summary" class="unity-render-status"></div>
+      <div id="plan-import-cost" class="airx-source-note"></div>
+      <div id="plan-import-rooms" class="unity-render-cmd"></div>
+      <div class="ph">AIが直したこと・読めなかったこと</div>
+      <div id="plan-import-notes" class="unity-render-cmd"></div>
+      <div class="unity-render-actions">
+        <button id="plan-import-apply" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport()">この下書きを取り込む</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="unity-render-modal" onclick="if(event.target===this)closeUnityRenderModal()">
@@ -3691,6 +3755,12 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/app-state.js"></script>
 <script src="assets/js/plan-data.js"></script>
 <script src="assets/js/draw-2d.js"></script>
+<!-- plan-rooms / plan-structure / pdf-pages は plan-import より先に読む（取り込み時に使う） -->
+<script src="assets/js/plan-rooms.js"></script>
+<script src="assets/js/plan-structure.js"></script>
+<script src="assets/js/pdf-pages.js"></script>
+<script src="assets/js/plan-review-draw.js"></script>
+<script src="assets/js/plan-import.js"></script>
 <script>
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;

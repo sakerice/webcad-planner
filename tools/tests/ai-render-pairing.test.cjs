@@ -234,12 +234,20 @@ test('「この機能について」は進捗や結果で上書きされない',
 });
 
 test('「この機能について」には、書き換えられない説明文が入っている', () => {
-  const heads = [...html.matchAll(/<div class="ph">この機能について<\/div>\s*<div([^>]*)>([^<]{20,})</g)];
-  assert.equal(heads.length, 2, '2つのダイアログ両方に説明文が要る');
-  heads.forEach((m) => {
+  // もとは index.html 全体で数えて「ちょうど2つ」としていた。同じ作法に従う
+  // 3つ目のダイアログ(間取り図の読み取り)を足しただけで落ちたので、
+  // **2つのダイアログそれぞれの中**を見るように変えた。数ではなく中身を見る。
+  const re = /<div class="ph">この機能について<\/div>\s*<div([^>]*)>([^<]{20,})</;
+  for (const [name, card] of [['画像AI', STILL], ['動画AI', VIDEO]]) {
+    const m = re.exec(card.inner);
+    assert.ok(m, name + 'のダイアログに「この機能について」の説明文が無い');
     assert.ok(!/\bid=/.test(m[1]),
-      '説明文に id があると、また上書きされる: ' + m[1]);
-  });
+      name + 'の説明文に id があると、また上書きされる: ' + m[1]);
+  }
+  // 作法を守らない説明文が他に増えていないか(id 付きは書き換えられてしまう)。
+  for (const m of html.matchAll(/<div class="ph">この機能について<\/div>\s*<div([^>]*)>/g)) {
+    assert.ok(!/\bid=/.test(m[1]), '説明文に id が付いている: ' + m[1]);
+  }
 });
 
 // ガイド画像を含めるかどうかは、尺とは無関係の設定。同じ枠に入れていたため

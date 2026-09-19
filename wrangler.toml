@@ -27,6 +27,15 @@ preview_bucket_name = "webcad-shared-plans-preview"
 name = "ROOMS"
 class_name = "CollaborationRoom"
 
+# AI の使用回数を数える。/api/ai/* には認証が無いので、ここが費用の歯止め。
+[[durable_objects.bindings]]
+name = "AI_QUOTA"
+class_name = "AiQuota"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = [ "CollaborationRoom" ]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = [ "AiQuota" ]
