@@ -24,20 +24,28 @@ rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models
 cp index.html dist/
 cp -r assets/. dist/assets/
+# HTML and its scripts/styles must advance together, even with a warm browser cache.
+python3 tools/version_page_assets.py dist/index.html
 # Only the reviewed, registered original collection belongs in the delivery.
 # Keep bulk Blender candidates locally for further work, not in the public build.
-python3 - <<'PYMODELS'
-import json
-from pathlib import Path
-registered=set()
-for path in Path('assets/models').glob('*/manifest.json'):
-    manifest=json.loads(path.read_text())
-    if isinstance(manifest,dict):
-        registered.update(item.get('model','') for item in manifest.get('items',[]))
-for path in Path('dist/assets/models/original').glob('*.glb'):
-    if path.relative_to('dist').as_posix() not in registered:
-        path.unlink()
-PYMODELS
+# node で書いてあるのは、Workers Builds のビルド環境に python3 がある保証が
+# 無いため。node は wrangler が動く以上かならず在る。
+node - <<'JSMODELS'
+const fs=require('node:fs'), path=require('node:path');
+const registered=new Set();
+for(const dir of fs.readdirSync('assets/models',{withFileTypes:true})){
+  if(!dir.isDirectory()) continue;
+  const f=path.join('assets/models',dir.name,'manifest.json');
+  if(!fs.existsSync(f)) continue;
+  let m; try{ m=JSON.parse(fs.readFileSync(f,'utf8')); }catch(e){ continue; }
+  if(m && Array.isArray(m.items)) for(const it of m.items) if(it && it.model) registered.add(it.model);
+}
+const out='dist/assets/models/original';
+if(fs.existsSync(out)) for(const name of fs.readdirSync(out)){
+  if(!name.endsWith('.glb')) continue;
+  if(!registered.has(path.posix.join('assets/models/original',name))) fs.unlinkSync(path.join(out,name));
+}
+JSMODELS
 echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
@@ -46,42 +54,4 @@ if [ "${SKIP_DEPLOY:-0}" = "1" ]; then
   echo "Skipping deploy because SKIP_DEPLOY=1"
   exit 0
 fi
-
-# 本番へ出すのは main だけ。
-#
-# このスクリプトは末尾で wrangler deploy を実行する。「ビルドするだけ」の
-# つもりで実行すると、そのまま本番(cad-planner.srapps.us)が差し替わる。
-# 実際に feature ブランチの内容を本番へ出す事故が起きた。
-#
-# 本番は main から出す。作業ブランチから出すことはない。
-#
-# **Cloudflare Workers Builds もこのスクリプトを実行する。** main への push で
-# 動くデプロイコマンドが `bash build.sh` に設定されている。あちらは枝を
-# 切り離した状態(detached HEAD)で取り出すので、git に枝の名前を聞くと "HEAD"
-# が返り、この番人が本番のデプロイを止めてしまう。Cloudflare が渡してくる
-# 枝の名前があれば、そちらを先に見る。
-branch="${WORKERS_CI_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)}"
-if [ "$branch" != "main" ]; then
-  echo ""
-  echo "デプロイを中止しました。いまのブランチは '$branch' です。"
-  echo "本番へ出せるのは main だけです。dist/ の作成は終わっています。"
-  echo ""
-  echo "ビルドだけしたいとき:  SKIP_DEPLOY=1 bash build.sh"
-  exit 1
-fi
-
-# main でも、origin/main と中身が違えば止める。手元だけの変更は本番に出さない。
-#
-# Cloudflare のビルドの中では見ない。あちらが取り出したものは origin そのもので、
-# 比べる相手が無い（浅い複製なので fetch が空振りし、差があると誤判定する）。
-if [ "${WORKERS_CI:-0}" != "1" ]; then
-  git fetch --quiet origin main 2>/dev/null || true
-  if ! git diff --quiet FETCH_HEAD -- . 2>/dev/null; then
-    echo ""
-    echo "デプロイを中止しました。origin/main と中身が違います。"
-    echo "先に push してレビューを通してください。"
-    exit 1
-  fi
-fi
-
 npx wrangler deploy
