@@ -229,6 +229,13 @@ async function aiImportPlan(payload, env, deps, request) {
 
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
+  // **数を引く前に、投げられる状態かを確かめる。**
+  // 鍵が無い・リージョンが日本でない、といった断り方は AI を一度も呼ばない。
+  // それで回数を減らすと、利用者は何もできないまま持ち分を失う（実測で、鍵を
+  // 入れる前に試した1回が本番の回数を消費した）。
+  const provider = resolveImportProvider(env);
+  if (provider.error) return provider.error;
+
   // 使う前に数える。**送ってから断ると費用は戻らない。**
   const quota = await takeQuota(request, env, images.length * COST_IMPORT_PAGE);
   if (!quota.ok) {
@@ -238,9 +245,6 @@ async function aiImportPlan(payload, env, deps, request) {
       message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
     }, 429);
   }
-
-  const provider = resolveImportProvider(env);
-  if (provider.error) return provider.error;
 
   const results = await Promise.all(images.map((img, i) => askForPlan(provider, {
     system: SYSTEM_PROMPT,
@@ -289,6 +293,9 @@ async function aiRevisePlan(payload, env, deps, request) {
 
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
+  const provider = resolveImportProvider(env);
+  if (provider.error) return provider.error;
+
   const quota = await takeQuota(request, env, pairs.length * COST_REVISE_PAGE);
   if (!quota.ok) {
     return json({
@@ -297,9 +304,6 @@ async function aiRevisePlan(payload, env, deps, request) {
       message: "本日ぶんの読み取りを使い切りました。明日またお試しください。",
     }, 429);
   }
-
-  const provider = resolveImportProvider(env);
-  if (provider.error) return provider.error;
 
   const results = await Promise.all(pairs.map((pair, i) => askForPlan(provider, {
     system: REVISE_SYSTEM,

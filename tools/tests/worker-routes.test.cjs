@@ -601,3 +601,19 @@ test('見直しにも、読み取りと同じ手順を渡す', async () => {
   assert.match(text, /畳数の表記は除く/, '見直しの側から手順が見えていない');
   assert.match(text, /取り込みデータ仕様/, '見直しの側から仕様書が見えていない');
 });
+
+test('投げられない状態のときは、回数を減らさない', async () => {
+  // 実測で、本番に鍵を入れる前に試した1回が、その日の持ち分を消費した。
+  // 鍵が無い・リージョンが日本でない、といった断り方は AI を一度も呼ばない。
+  // それで回数を減らすと、利用者は何もできないまま持ち分を失う。
+  for (const [path, body] of [
+    ['/api/ai/import-plan', { images: [PNG] }],
+    ['/api/ai/revise-plan', { images: [PNG], renders: [PNG], pages: [ONE_FLOOR] }],
+  ]) {
+    const { env, seen } = quotaEnv({});
+    const res = await callAi(path, body, { ...env, GOOGLE_SERVICE_ACCOUNT_JSON: '', OPENAI_API_KEY: '' },
+      vertexFetch(async () => vertexReply(ONE_FLOOR)));
+    assert.equal(res.status, 503, `${path} が 503 を返していない`);
+    assert.deepStrictEqual(seen, [], `${path} で、鍵が無いのに回数を数えている`);
+  }
+});
