@@ -54,7 +54,13 @@ fi
 # 実際に feature ブランチの内容を本番へ出す事故が起きた。
 #
 # 本番は main から出す。作業ブランチから出すことはない。
-branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+#
+# **Cloudflare Workers Builds もこのスクリプトを実行する。** main への push で
+# 動くデプロイコマンドが `bash build.sh` に設定されている。あちらは枝を
+# 切り離した状態(detached HEAD)で取り出すので、git に枝の名前を聞くと "HEAD"
+# が返り、この番人が本番のデプロイを止めてしまう。Cloudflare が渡してくる
+# 枝の名前があれば、そちらを先に見る。
+branch="${WORKERS_CI_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)}"
 if [ "$branch" != "main" ]; then
   echo ""
   echo "デプロイを中止しました。いまのブランチは '$branch' です。"
@@ -65,12 +71,17 @@ if [ "$branch" != "main" ]; then
 fi
 
 # main でも、origin/main と中身が違えば止める。手元だけの変更は本番に出さない。
-git fetch --quiet origin main 2>/dev/null || true
-if ! git diff --quiet FETCH_HEAD -- . 2>/dev/null; then
-  echo ""
-  echo "デプロイを中止しました。origin/main と中身が違います。"
-  echo "先に push してレビューを通してください。"
-  exit 1
+#
+# Cloudflare のビルドの中では見ない。あちらが取り出したものは origin そのもので、
+# 比べる相手が無い（浅い複製なので fetch が空振りし、差があると誤判定する）。
+if [ "${WORKERS_CI:-0}" != "1" ]; then
+  git fetch --quiet origin main 2>/dev/null || true
+  if ! git diff --quiet FETCH_HEAD -- . 2>/dev/null; then
+    echo ""
+    echo "デプロイを中止しました。origin/main と中身が違います。"
+    echo "先に push してレビューを通してください。"
+    exit 1
+  fi
 fi
 
 npx wrangler deploy
