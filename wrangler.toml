@@ -12,6 +12,15 @@ compatibility_date = "2026-07-26"
 [build]
 command = "SKIP_DEPLOY=1 bash build.sh"
 
+# 本番で落ちたとき、例外の文面が読めるようにしておく。
+#
+# 無効のままだと、残るのは Cloudflare が返す HTML のエラーページだけで、
+# 「HTTP 500 だった」以上のことが分からない。実測で、読み取りが本番で落ちた
+# 原因の特定に、推測からの往復を何度も重ねることになった。
+# 無料プランでも1日20万件まで記録できる。
+[observability]
+enabled = true
+
 [assets]
 directory = "dist"
 not_found_handling = "single-page-application"

@@ -617,3 +617,90 @@ test('投げられない状態のときは、回数を減らさない', async ()
     assert.deepStrictEqual(seen, [], `${path} で、鍵が無いのに回数を数えている`);
   }
 });
+
+// ── 投げて、あとから取りに行く ───────────────────────────────────────
+//
+// Cloudflare Workers の無料プランは、1つのリクエストから出せる外向きの通信を
+// 50回までに制限している。OpenAI は考えている間「まだです」を返すので、3秒
+// おきに Worker の中で問い合わせると図面3枚で70回を超える。実測で、本番の
+// 読み取りが HTTP 500 で落ちた。
+const OPENAI_ENV = { ...VERTEX_ENV, OPENAI_API_KEY: 'sk-test' };
+
+// OpenAI の応答を装う。queued を返せば「まだ出来ていない」。
+function openaiFetch(onPost, onGet) {
+  return async (req) => {
+    const url = String(req.url);
+    if (req.method === 'POST' && /\/responses$/.test(url)) return onPost(req);
+    return onGet(url);
+  };
+}
+function openaiBody(obj) {
+  return JSON.stringify({
+    id: 'resp_test_1', status: 'completed',
+    output: [{ content: [{ text: JSON.stringify(obj) }] }],
+    usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 },
+  });
+}
+
+test('読み取りは、投げたら受付番号だけ返す（待たない）', async () => {
+  let posts = 0, gets = 0;
+  const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, OPENAI_ENV,
+    openaiFetch(
+      async () => { posts++; return new Response(JSON.stringify({ id: 'resp_' + posts, status: 'queued' }), { status: 200 }); },
+      async () => { gets++; return new Response(openaiBody(ONE_FLOOR), { status: 200 }); }));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(posts, 3, '図面の枚数だけ投げていない');
+  assert.equal(gets, 0, '投げた通信の中で答えを待っている（上限に当たる作り）');
+  assert.equal(body.jobs.length, 3, '受付番号を返していない');
+  assert.ok(!body.plan, 'まだ出来ていないのに間取りを返している');
+});
+
+test('受付番号には署名が要る（他人の間取りを引けない）', async () => {
+  // 番号だけで結果を引けると、番号を知った誰でも他人の間取りを取り出せる。
+  // 間取り図は個人情報を含みうる。
+  const res = await callAi('/api/ai/plan-result', { jobs: ['resp_someone_else.0000'] }, OPENAI_ENV,
+    openaiFetch(async () => new Response('{}', { status: 200 }),
+                async () => new Response(openaiBody(ONE_FLOOR), { status: 200 })));
+  assert.equal(res.status, 400);
+  const body = await res.json();
+  assert.match(body.message, /受付番号/, '断る理由が利用者に伝わらない');
+});
+
+test('取りに行くのは、受付番号の数だけ。まだなら pending を返す', async () => {
+  let started = null;
+  const start = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, OPENAI_ENV,
+    openaiFetch(async () => new Response(JSON.stringify({ id: 'resp_a', status: 'queued' }), { status: 200 }),
+                async () => new Response('{}', { status: 200 })));
+  started = (await start.json()).jobs;
+  assert.equal(started.length, 2);
+
+  // まだ出来ていない
+  let gets = 0;
+  let res = await callAi('/api/ai/plan-result', { jobs: started }, OPENAI_ENV,
+    openaiFetch(async () => new Response('{}', { status: 200 }),
+                async () => { gets++; return new Response(JSON.stringify({ id: 'resp_a', status: 'in_progress' }), { status: 200 }); }));
+  assert.equal(res.status, 200);
+  let body = await res.json();
+  assert.equal(gets, 2, '1回の問い合わせで、受付番号の数を超えて通信している');
+  assert.equal(body.pending, true);
+  assert.equal(body.done, 0);
+  assert.equal(body.total, 2);
+
+  // 出来た
+  res = await callAi('/api/ai/plan-result', { jobs: started }, OPENAI_ENV,
+    openaiFetch(async () => new Response('{}', { status: 200 }),
+                async () => new Response(openaiBody(ONE_FLOOR), { status: 200 })));
+  body = await res.json();
+  assert.ok(body.plan, '全部そろったのに間取りを返していない');
+  assert.equal(body.pages.length, 2);
+});
+
+test('Vertex は受付番号を使わず、そのまま間取りを返す', async () => {
+  // あちらは投げた同じ通信で答えが返るので、分ける必要がない。
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV,
+    vertexFetch(async () => vertexReply(ONE_FLOOR)));
+  const body = await res.json();
+  assert.ok(body.plan, 'Vertex で間取りが返っていない');
+  assert.ok(!body.jobs, 'Vertex なのに受付番号を返している');
+});

@@ -19,7 +19,7 @@ import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs"
 import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
-import { openaiConfig, generate as openaiGenerate, toJsonSchema } from "./openai.mjs";
+import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
@@ -85,6 +85,7 @@ export async function handleAi(request, env, url, deps = {}) {
 
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
+  if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
   if (url.pathname === "/api/ai/find-plan") return aiFindPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/render") return aiRender(payload, env, deps);
   return json({ error: "not_found" }, 404);
@@ -246,13 +247,15 @@ async function aiImportPlan(payload, env, deps, request) {
     }, 429);
   }
 
-  const results = await Promise.all(images.map((img, i) => askForPlan(provider, {
+  const asks = images.map((img, i) => ({
     system: SYSTEM_PROMPT,
     text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
     images: [{ mimeType: img.mimeType, base64: img.base64 }],
     fetchImpl: deps.fetchImpl,
-  })));
+  }));
+  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
+  const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -305,7 +308,7 @@ async function aiRevisePlan(payload, env, deps, request) {
     }, 429);
   }
 
-  const results = await Promise.all(pairs.map((pair, i) => askForPlan(provider, {
+  const asks = pairs.map((pair, i) => ({
     system: REVISE_SYSTEM,
     text: buildRevisePrompt({
       json: JSON.stringify(pair.page),
@@ -321,8 +324,10 @@ async function aiRevisePlan(payload, env, deps, request) {
       { mimeType: pair.drawn.mimeType, base64: pair.drawn.base64 },
     ],
     fetchImpl: deps.fetchImpl,
-  })));
+  }));
+  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
 
+  const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
@@ -363,6 +368,99 @@ function askForPlan(provider, { system, text, images, docs, fetchImpl }) {
     return openaiGenerate({ ...common, config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) } });
   }
   return generate({ ...common, config: provider.config, responseSchema: PLAN_RESPONSE_SCHEMA });
+}
+
+// **投げるだけ。答えは待たない。**
+//
+// Cloudflare Workers の無料プランは、1つのリクエストから出せる外向きの通信を
+// 50回までに制限している。OpenAI は考えている間「まだです」を返すので、3秒
+// おきに問い合わせると図面3枚で70回を超える（実測: 本番で HTTP 500）。
+// 投げたら受付番号を返し、繰り返し見に行く役はブラウザに持たせる。
+//
+// Vertex は投げた同じ通信で答えが返るので、この形にする必要がない。
+function startPlanJob(provider, { system, text, images, docs, fetchImpl }) {
+  return startJob({
+    config: { ...provider.config, schema: toJsonSchema(PLAN_RESPONSE_SCHEMA) },
+    system, docs: docs || [planKnowledge(), planSpec()], text, images, fetchImpl,
+  });
+}
+
+// まとめて投げて、受付番号を返す。1回の通信は「投げる」ぶんだけで済む。
+async function startPlanJobs(provider, asks, env) {
+  const started = await Promise.all(asks.map((ask) => startPlanJob(provider, ask)));
+  const failed = started.find((r) => !r.ok);
+  if (failed) return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
+  const jobs = [];
+  for (const one of started) jobs.push(await jobToken(one.id, env));
+  return json({ jobs });
+}
+
+// 受付番号に署名を付ける。
+//
+// 番号だけで結果を引けると、番号を知った誰でも他人の間取りを取り出せる。
+// 間取り図は個人情報を含みうるので、**こちらが出した番号であることを確かめて
+// から**でないと渡さない。鍵は env の秘密から導く。外へは出ない。
+async function signJob(id, env) {
+  const secret = (env && (env.OPENAI_API_KEY || env.GOOGLE_SERVICE_ACCOUNT_JSON)) || "";
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode("plan-job:" + secret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(String(id)));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+}
+
+async function jobToken(id, env) { return `${id}.${await signJob(id, env)}`; }
+
+async function readJobToken(token, env) {
+  const raw = String(token || "");
+  const cut = raw.lastIndexOf(".");
+  if (cut < 1) return null;
+  const id = raw.slice(0, cut), sig = raw.slice(cut + 1);
+  const want = await signJob(id, env);
+  if (sig.length !== want.length) return null;
+  let same = 0;
+  for (let i = 0; i < want.length; i++) same |= sig.charCodeAt(i) ^ want.charCodeAt(i);
+  return same === 0 ? id : null;
+}
+
+// ── 出来たかどうかを見に行く ─────────────────────────────────────────
+//
+// ブラウザが数秒おきに呼ぶ。**1回につき、受付番号の数だけしか通信しない。**
+// まだなら pending を返す。全部そろったところで間取りに組み立てる。
+//
+// 回数はここでは数えない。投げるときに数え終えている。
+async function aiPlanResult(payload, env, deps) {
+  const tokens = Array.isArray(payload && payload.jobs) ? payload.jobs.slice(0, MAX_PAGES) : [];
+  if (!tokens.length) return json({ error: "invalid_request", message: "jobs が無い" }, 400);
+
+  const provider = resolveImportProvider(env);
+  if (provider.error) return provider.error;
+  if (provider.kind !== "openai") {
+    return json({ error: "invalid_request", message: "この提供元は受付番号を使わない" }, 400);
+  }
+
+  const ids = [];
+  for (const token of tokens) {
+    const id = await readJobToken(token, env);
+    if (!id) return json({ error: "invalid_request", message: "受付番号が正しくありません。" }, 400);
+    ids.push(id);
+  }
+
+  const got = await Promise.all(ids.map((id) => fetchJob({ config: provider.config, id, fetchImpl: deps.fetchImpl })));
+  const failed = got.find((g) => !g.ok);
+  if (failed) return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
+
+  const done = got.filter((g) => g.done).length;
+  if (done < got.length) return json({ pending: true, done, total: got.length });
+
+  const results = got.map((g) => readResult(g.data));
+  const pages = collectPages(results);
+  if (pages.error) return pages.error;
+  return finishImportedPlan(
+    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    sumUsage(results),
+    { pages: pages.list, revised: Boolean(payload && payload.revised) },
+  );
 }
 
 // 返事の束を、ページごとのJSONにほどく。1つでも駄目なら全体を失敗にする。

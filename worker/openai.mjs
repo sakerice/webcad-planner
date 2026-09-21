@@ -18,28 +18,60 @@ const ENDPOINT = "https://api.openai.com/v1/responses";
 //
 // 1本の接続を保ったまま答えを待つと、間取り図の読み取りのように考える時間が
 // 長い依頼では接続が先に切れる（Node の既定は5分で UND_ERR_HEADERS_TIMEOUT）。
-// Cloudflare Workers にも同じ制約がある。OpenAI の background を使い、
-// 受付だけしてもらってから、出来たかどうかを見に行く。
+// OpenAI の background を使い、受付だけしてもらってから、出来たかを見に行く。
+//
+// **待つ役はここでは持たない。** Cloudflare Workers の無料プランは、1つの
+// リクエストから出せる外向きの通信を50回までに制限している。3秒おきの
+// 問い合わせを Worker の中で回すと、図面3枚で70回を超えて落ちる（実測: 本番で
+// HTTP 500）。投げる(startJob)と取りに行く(fetchJob)を分け、繰り返す役は
+// 呼び出し側 —— 実際にはブラウザ —— に持たせる。
+//
+// generate() は両者を続けて呼ぶだけの形で残してある。上限の無いところ
+// (tools/probe_openai.cjs や検査)からはこちらを使う。
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 15 * 60 * 1000;
+const DONE = { completed: 1, failed: 1, incomplete: 1, cancelled: 1 };
 
 async function waitForResponse(id, config, fetchImpl, sleep) {
   const until = Date.now() + POLL_TIMEOUT_MS;
   while (Date.now() < until) {
     await sleep(POLL_INTERVAL_MS);
-    const res = await fetchImpl(new Request(`${ENDPOINT}/${id}`, {
-      headers: { authorization: "Bearer " + config.apiKey },
-    }));
-    const raw = await res.text();
-    if (!res.ok) return { ok: false, status: res.status, raw };
-    let data;
-    try { data = JSON.parse(raw); } catch (e) { return { ok: false, status: 502, raw }; }
-    if (data.status === "completed" || data.status === "failed"
-        || data.status === "incomplete" || data.status === "cancelled") {
-      return { ok: true, data };
-    }
+    const got = await fetchJob({ config, id, fetchImpl });
+    if (!got.ok) return { ok: false, status: got.status, raw: got.message };
+    if (got.done) return { ok: true, data: got.data };
   }
   return { ok: false, status: 504, raw: "待っても出来上がりませんでした。" };
+}
+
+// 出来たかどうかを1回だけ見に行く。**繰り返さない。**
+//
+//   { ok, done, data }            まだなら done:false
+//   { ok:false, status, message } 取りに行けなかった
+export async function fetchJob({ config, id, fetchImpl = fetch }) {
+  if (!config || !config.apiKey) {
+    return { ok: false, status: 503, message: "OpenAI のキーがこの環境に設定されていません。" };
+  }
+  let res;
+  try {
+    res = await fetchImpl(new Request(`${ENDPOINT}/${encodeURIComponent(id)}`, {
+      headers: { authorization: "Bearer " + config.apiKey },
+    }));
+  } catch (e) {
+    return { ok: false, status: 502, message: "OpenAI へ届きませんでした。" };
+  }
+  const raw = await res.text();
+  if (!res.ok) return { ok: false, status: res.status, message: safeReason(raw) };
+  let data;
+  try { data = JSON.parse(raw); } catch (e) {
+    return { ok: false, status: 502, message: "OpenAI の返事を JSON として読めませんでした。" };
+  }
+  return { ok: true, done: Boolean(DONE[data.status]), data };
+}
+
+// **キーが混ざらないよう、本文をそのまま流さない。**
+function safeReason(raw) {
+  try { return String(JSON.parse(raw).error.message || "").slice(0, 300); }
+  catch (e) { return String(raw).slice(0, 300); }
 }
 
 export function openaiConfig(env) {
@@ -78,10 +110,38 @@ export function toJsonSchema(node) {
   return out;
 }
 
+// 依頼を投げて、受付番号だけ受け取る。**答えは待たない。**
+export async function startJob({
+  config, system, text, docs, image, images,
+  maxOutputTokens = 32768, fetchImpl = fetch,
+}) {
+  const started = await postRequest({ config, system, text, docs, image, images, maxOutputTokens, fetchImpl });
+  if (!started.ok) return started;
+  const data = started.data;
+  // すでに出来上がって返ってくることもある。そのときは番号を返しつつ中身も渡す。
+  return { ok: true, id: data.id, done: Boolean(DONE[data.status]), data };
+}
+
 export async function generate({
   config, system, text, docs, image, images,
   maxOutputTokens = 32768, fetchImpl = fetch,
   sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
+}) {
+  const started = await postRequest({ config, system, text, docs, image, images, maxOutputTokens, fetchImpl });
+  if (!started.ok) return started;
+  let data = started.data;
+  // 受け付けただけの状態なら、出来上がるまで見に行く。
+  if (data.id && !DONE[data.status]) {
+    const waited = await waitForResponse(data.id, config, fetchImpl, sleep);
+    if (!waited.ok) return { ok: false, status: waited.status, message: safeReason(waited.raw) };
+    data = waited.data;
+  }
+  return readResult(data);
+}
+
+// 受け付けてもらうところまで。投げる側も待つ側も、ここを共有する。
+async function postRequest({
+  config, system, text, docs, image, images, maxOutputTokens, fetchImpl,
 }) {
   if (!config || !config.apiKey) {
     return { ok: false, status: 503, message: "OpenAI のキーがこの環境に設定されていません。" };
@@ -125,28 +185,17 @@ export async function generate({
   }
 
   const raw = await response.text();
-  if (!response.ok) {
-    // **キーが混ざらないよう、本文をそのまま流さない。**
-    let reason = "";
-    try { reason = String(JSON.parse(raw).error.message || "").slice(0, 300); } catch (e) { reason = raw.slice(0, 300); }
-    return { ok: false, status: response.status, message: reason };
-  }
+  if (!response.ok) return { ok: false, status: response.status, message: safeReason(raw) };
 
   let data;
   try { data = JSON.parse(raw); } catch (e) {
     return { ok: false, status: 502, message: "OpenAI の返事を JSON として読めませんでした。" };
   }
+  return { ok: true, data };
+}
 
-  // 受け付けただけの状態なら、出来上がるまで見に行く。
-  if (data.id && (data.status === "queued" || data.status === "in_progress")) {
-    const waited = await waitForResponse(data.id, config, fetchImpl, sleep);
-    if (!waited.ok) {
-      let reason = String(waited.raw || "").slice(0, 300);
-      try { reason = String(JSON.parse(waited.raw).error.message || "").slice(0, 300); } catch (e) { /* そのまま */ }
-      return { ok: false, status: waited.status, message: reason };
-    }
-    data = waited.data;
-  }
+// 出来上がった返事を、こちらの形に直す。
+export function readResult(data) {
   if (data.status === "failed") {
     return { ok: false, status: 502, message: String((data.error && data.error.message) || "OpenAI 側で失敗しました。").slice(0, 300) };
   }
