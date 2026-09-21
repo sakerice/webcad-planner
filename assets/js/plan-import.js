@@ -365,6 +365,10 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, hint: hint }),
     }).then(readReply).then(function (r) {
+      return waitForJobs(r, { onProgress: function (done, total) {
+        setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
+      } });
+    }).then(function (r) {
       if (r.status !== 200) {
         ST.busy = false;
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
@@ -382,6 +386,41 @@
       syncPlanImportButtons();
       showQuota();
     });
+  }
+
+  // 受付番号を受け取ったら、出来上がるまで数秒おきに見に行く。
+  //
+  // **待つ役をこちら側に置く。** サーバが待つと、1つのリクエストから出せる
+  // 外向きの通信の上限（Cloudflare の無料プランで50回）に当たって落ちる。
+  // 3秒おきの問い合わせを図面3枚ぶん回すと70回を超え、本番で HTTP 500 になった。
+  //
+  // こちらから短い問い合わせを繰り返せば、1回あたりの通信は図面の枚数ぶんで
+  // 済む。**つなぎっぱなしの接続も無くなる**ので、回線が切れたりタブが眠ったり
+  // しても、そこで読み取りが失われることがない。
+  var JOB_POLL_MS = 3000;
+  var JOB_TIMEOUT_MS = 15 * 60 * 1000;
+
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // 受付番号が入っていなければ、そのまま返す（Vertex は投げた通信で答えが返る）。
+  function waitForJobs(first, opts) {
+    opts = opts || {};
+    if (first.status !== 200 || !first.body || !first.body.jobs) return Promise.resolve(first);
+    var jobs = first.body.jobs;
+    var until = Date.now() + JOB_TIMEOUT_MS;
+    function once() {
+      if (Date.now() > until) return { status: 504, body: null };
+      return fetch('/api/ai/plan-result', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ jobs: jobs, revised: Boolean(opts.revised) }),
+      }).then(readReply).then(function (r) {
+        if (r.status !== 200 || !r.body || !r.body.pending) return r;
+        if (opts.onProgress) opts.onProgress(r.body.done, r.body.total);
+        return delay(JOB_POLL_MS).then(once);
+      });
+    }
+    return once();
   }
 
   // 返事を読む。**JSON とは限らない。**
@@ -431,6 +470,10 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, renders: renders, pages: pages, hint: hint }),
     }).then(readReply).then(function (r) {
+      return waitForJobs(r, { revised: true, onProgress: function (done, total) {
+        setStatus('AIに見直させています… ' + done + ' / ' + total + ' 枚が終わりました。');
+      } });
+    }).then(function (r) {
       if (r.status !== 200 || !r.body || !r.body.plan) {
         body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
         return body;
