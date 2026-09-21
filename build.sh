@@ -61,11 +61,27 @@ check_cloudflare_asset_sizes
 # **既定を逆にする。** 名前が build なら build しかしない。配信は
 # tools/deploy.sh という別の名前の、別の操作にする。
 #
-# Workers Builds(Gitからの自動デプロイ)への影響は無い。あちらは
-# wrangler.toml の [build] command で `SKIP_DEPLOY=1 bash build.sh` を呼び、
-# dist/ を作らせるだけで、配信は wrangler 自身が行う。この変更後も同じ
-# コマンドが同じ dist/ を作って終了コード0で返る。SKIP_DEPLOY はもう
-# 読んでいないが、付いていても害は無いのでコマンドは変えていない。
+# ただし **Workers Builds(Gitからの自動デプロイ)だけは例外**にする。
+#
+# main の deploy command は Cloudflare のダッシュボードにあり、リポジトリから
+# 読めない。記録では `bash build.sh` が設定されている（docs のメモ）。もし
+# そうなら、ここから配信を抜くと **main にマージしても本番が更新されなく
+# なる**。黙って止まるのがいちばん困るので、CI からの実行だけは通す。
+#
+# 見分け方は WORKERS_CI。Cloudflare Workers Builds が自分で入れる環境変数で、
+# 手元にもエージェントにも無い。加えて、ビルド段階
+# (`[build] command = "SKIP_DEPLOY=1 bash build.sh"`)では配信しない——
+# あそこは dist/ を作らせるためだけの呼び出しである。
+#
+#   ビルド段階(CI)   WORKERS_CI=1, SKIP_DEPLOY=1 → 作るだけ
+#   配信段階(CI)     WORKERS_CI=1               → 配信する
+#   手元・エージェント  WORKERS_CI 無し            → 作るだけ
+if [ -n "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
+  echo "Workers Builds からの実行です。配信します。"
+  npx wrangler deploy
+  exit 0
+fi
+
 echo
 echo "dist/ を作りました。**本番には出していません。**"
 echo "本番へ出すときは: bash tools/deploy.sh"

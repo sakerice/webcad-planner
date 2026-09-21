@@ -71,6 +71,14 @@ esac
 #
 # **ここが本命の経路。** origin/main に commit が載った時点で、Cloudflare が
 # 本番を差し替える。人の目に「デプロイ」と映らないので、いちばん危ない。
+# build.sh は CI(WORKERS_CI)からの実行だけ配信する。**その名札を手元で
+# 偽れないようにする。** `WORKERS_CI=1 bash build.sh` と打てば配信できて
+# しまうので、この環境変数に触るコマンドごと止める。
+case "$CMD" in
+  *"WORKERS_CI"*)
+    deny "WORKERS_CI は Cloudflare のビルド環境が入れるものです。手元で名乗ると配信が起きます。" ;;
+esac
+
 case "$CMD" in
   *"gh pr merge"*)
     deny "PR のマージは origin/main への反映＝本番デプロイです。人が実行してください。" ;;

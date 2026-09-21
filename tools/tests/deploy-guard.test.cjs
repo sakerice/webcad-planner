@@ -11,7 +11,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
-const { readFileSync, existsSync, mkdtempSync, rmSync } = require('node:fs');
+const { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { execFileSync, spawnSync } = require('node:child_process');
 
@@ -20,15 +20,42 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
 test('build.sh は、ビルドするだけで本番に出さない', () => {
   const src = read('build.sh');
-  // 行頭のコマンドとしての wrangler 呼び出しが無いこと（説明の文中は除く）
+  // 配信は WORKERS_CI(Cloudflare のビルド環境)の中だけ。**その外では出さない。**
   const lines = src.split('\n').filter((l) => !l.trim().startsWith('#'));
-  for (const line of lines) {
-    assert.ok(!/wrangler\s+(deploy|versions)/.test(line),
-      `build.sh がデプロイを実行している: ${line.trim()}`);
-  }
+  const deploys = lines.filter((l) => /wrangler\s+(deploy|versions)/.test(l));
+  assert.equal(deploys.length, 1, `配信の行が ${deploys.length} 本ある（1本だけのはず）`);
+  assert.match(src, /if \[ -n "\$\{WORKERS_CI:-\}" \] && \[ "\$\{SKIP_DEPLOY:-0\}" != "1" \]/,
+    '配信が WORKERS_CI の中に閉じていない');
   // 出さないことを、実行した人に伝えていること
   assert.match(src, /本番には出していません/, 'ビルドだけだと伝えていない');
   assert.match(src, /tools\/deploy\.sh/, '本番へ出す手順を案内していない');
+});
+
+test('build.sh は、CI を名乗らないかぎり配信しない（実際に走らせる）', () => {
+  // 3通りを走らせて、配信の行に達するかどうかだけを見る。
+  // wrangler は実際には呼ばせない——PATH の先頭に偽物を置く。
+  const bin = mkdtempSync(join(tmpdir(), 'fakebin-'));
+  const flag = join(bin, 'called');
+  writeFileSync(join(bin, 'npx'), `#!/bin/bash\necho "$@" >> "${flag}"\n`, { mode: 0o755 });
+
+  const run = (env) => {
+    rmSync(flag, { force: true });
+    const out = spawnSync('bash', ['build.sh'], {
+      cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, ...env, PATH: `${bin}:${process.env.PATH}` },
+    });
+    assert.equal(out.status, 0, `build.sh が落ちた: ${out.stderr}`);
+    return existsSync(flag) ? readFileSync(flag, 'utf8') : '';
+  };
+
+  // 手元・エージェント: 配信しない
+  assert.equal(run({}), '', '手元の実行で配信しようとした');
+  // CI のビルド段階: 配信しない（dist/ を作らせるだけの呼び出し）
+  assert.equal(run({ WORKERS_CI: '1', SKIP_DEPLOY: '1' }), '', 'ビルド段階で配信しようとした');
+  // CI の配信段階: 配信する（ここを塞ぐと main にマージしても本番が更新されない）
+  assert.match(run({ WORKERS_CI: '1' }), /wrangler deploy/, 'CI からの配信が止まっている');
+
+  rmSync(bin, { recursive: true, force: true });
 });
 
 test('Workers Builds のビルドコマンドは、これまでどおり通る', () => {
@@ -73,6 +100,8 @@ test('フックが、本番を触るコマンドを実際に止める', () => {
   blocked('npx wrangler versions ' + 'upload');
   blocked('npx wrangler ' + 'secret put OPENAI_API_KEY');
   blocked('bash tools/' + 'deploy.sh');
+  // CI の名札を手元で名乗れば配信できてしまう。そこも塞ぐ。
+  blocked('WORKERS' + '_CI=1 bash build.sh');
 
   // 通す。調べるだけのものと、ふだんの作業を止めない。
   allowed('bash build.sh');
