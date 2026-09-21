@@ -12,8 +12,18 @@
 # のようにつなげた形や、スクリプトの中に隠れた呼び出しには当たらない。
 # **ここは受け取ったコマンド文字列の全体を見る。**
 #
+# **本番へ出る経路は、wrangler だけではない。**
+#
+#   1. wrangler の配信コマンド             … 手元から直接
+#   2. origin/main へのマージ / push        … Cloudflare Workers Builds が拾う
+#   3. main への push(pv/storyboard 配下)   … .github/workflows/deploy-pv-storyboard.yml
+#
+# 2 と 3 は「デプロイ」という語がどこにも出てこない。`git push origin main` と
+# `gh pr merge` が、そのまま本番の差し替えである。ここで一緒に止める。
+#
 # 止めるのは「本番の中身が変わる」操作だけ。調べるだけのもの
-# (deployments list / versions list / whoami / tail) は通す。
+# (deployments list / versions list / whoami / tail / status / log) は通す。
+# 枝への push と PR を作ることは通す（そこまでは本番に出ない）。
 #
 # 出し方: 標準入力に Claude Code が渡す JSON。deny するときは
 # permissionDecision に deny を返す（利用者が「許可」を選ぶ余地も無くなる）。
@@ -55,6 +65,37 @@ case "$CMD" in
   #  止まった)。
   *"bash tools/deploy.sh"*|*"sh tools/deploy.sh"*|*"./tools/deploy.sh"*|*"bash ./tools/deploy.sh"*)
     deny "本番へ出す手順は、端末から人が実行するものです。" ;;
+esac
+
+# ── main へ載せる操作 ────────────────────────────────────────────────
+#
+# **ここが本命の経路。** origin/main に commit が載った時点で、Cloudflare が
+# 本番を差し替える。人の目に「デプロイ」と映らないので、いちばん危ない。
+case "$CMD" in
+  *"gh pr merge"*)
+    deny "PR のマージは origin/main への反映＝本番デプロイです。人が実行してください。" ;;
+  *"gh workflow run"*)
+    deny "ワークフローの手動実行は公開物を差し替えます。人が実行してください。" ;;
+  *"gh api"*"/merges"*|*"gh api"*"/merge"*)
+    deny "API 経由のマージも本番デプロイです。人が実行してください。" ;;
+esac
+
+case "$CMD" in
+  *"git push"*)
+    # 枝への push は通す。**main へ向かう push だけ**を止める。
+    case "$CMD" in
+      *" main"*|*":main"*|*"main:"*|*"/main"*)
+        deny "main への push は本番デプロイ(Cloudflare Workers Builds)を起こします。人が実行してください。" ;;
+    esac
+    # 宛先を書かない push は、いまの枝に出る。main に居るなら止める。
+    #
+    # **symbolic-ref を使う。** rev-parse --abbrev-ref HEAD は、コミットが
+    # 1つも無いリポジトリで失敗し、枝名が空になる（検査で捕まえた）。
+    BRANCH=$(git -C "${CLAUDE_PROJECT_DIR:-.}" symbolic-ref --short HEAD 2>/dev/null || echo "")
+    if [ "$BRANCH" = "main" ]; then
+      deny "いま main に居ます。この push は本番デプロイになります。人が実行してください。"
+    fi
+    ;;
 esac
 
 exit 0

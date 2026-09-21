@@ -11,7 +11,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
-const { readFileSync, existsSync } = require('node:fs');
+const { readFileSync, existsSync, mkdtempSync, rmSync } = require('node:fs');
+const { tmpdir } = require('node:os');
 const { execFileSync, spawnSync } = require('node:child_process');
 
 const ROOT = join(__dirname, '..', '..');
@@ -80,6 +81,65 @@ test('フックが、本番を触るコマンドを実際に止める', () => {
   allowed('git status');
   allowed('node --test tools/tests/*.test.cjs');
   allowed('python3 tools/lint_plan.py');
+});
+
+// **本番へ出る経路は wrangler だけではない。**
+//
+//   origin/main へのマージ / push  → Cloudflare Workers Builds が本番を差し替える
+//   main への push(pv/storyboard)  → .github/workflows/deploy-pv-storyboard.yml
+//
+// どちらも「デプロイ」という語が出てこない。`git push origin main` と
+// `gh pr merge` が、そのまま本番の差し替えである。
+test('main へ載せる操作を止め、枝の作業は止めない', () => {
+  const hook = join(ROOT, 'tools', 'deny-deploy.sh');
+  const ask = (command) => execFileSync('bash', [hook], {
+    input: JSON.stringify({ tool_input: { command } }), encoding: 'utf8',
+    env: { ...process.env, CLAUDE_PROJECT_DIR: ROOT },
+  });
+  const blocked = (command) => assert.ok(ask(command).includes('"permissionDecision":"deny"'),
+    `本番に出る操作を通した: ${command}`);
+  const allowed = (command) => assert.equal(ask(command).trim(), '',
+    `枝の作業を止めた: ${command}`);
+
+  blocked('git push origin main');
+  blocked('git push -u origin main');
+  blocked('git push origin HEAD:main');
+  blocked('git push --force origin main');
+  blocked('gh pr ' + 'merge 41');
+  blocked('gh pr ' + 'merge --squash --auto 41');
+  blocked('gh workflow ' + 'run deploy-pv-storyboard.yml');
+
+  // 枝で仕事をする経路は塞がない。ここを塞ぐと作業が回らない。
+  allowed('git push');
+  allowed('git push -u origin claude/some-feature');
+  allowed('git push origin HEAD');
+  allowed('gh pr create --title x --body y');
+  allowed('gh pr view 41');
+  allowed('git status');
+  allowed('git fetch origin');
+  allowed('git merge origin/main');   // main を**取り込む**のは安全
+});
+
+test('main に居るときは、宛先を書かない push も止める', () => {
+  // 宛先を書かない push は、いまの枝に出る。main に居れば本番に出る。
+  const repo = mkdtempSync(join(tmpdir(), 'pushguard-'));
+  execFileSync('git', ['init', '-q', '-b', 'main', repo]);
+  const out = execFileSync('bash', [join(ROOT, 'tools', 'deny-deploy.sh')], {
+    input: JSON.stringify({ tool_input: { command: 'git push' } }), encoding: 'utf8',
+    env: { ...process.env, CLAUDE_PROJECT_DIR: repo },
+  });
+  assert.ok(out.includes('"permissionDecision":"deny"'), 'main に居るのに push を通した');
+  rmSync(repo, { recursive: true, force: true });
+});
+
+test('自動デプロイの引き金が、検査の知っているものと一致している', () => {
+  // ワークフローが増えたり引き金が変わったら、ここが落ちる。
+  // **落ちたら門を広げる。** 検査を消さない。
+  const wf = read('.github/workflows/deploy-pv-storyboard.yml');
+  assert.match(wf, /branches:\s*\n\s*-\s*main/, 'main 以外でも出るようになっている');
+  assert.match(wf, /workflow_dispatch/, '手動実行の口が変わっている');
+  // Cloudflare 側は wrangler.toml の [build] があること＝Git からの自動デプロイ
+  assert.match(read('wrangler.toml'), /\[build\]/, 'Workers Builds の設定が無い');
 });
 
 test('プロジェクトの設定が、フックと拒否の両方を持っている', () => {

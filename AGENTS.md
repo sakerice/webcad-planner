@@ -6,9 +6,19 @@
 これは端末から人が実行する。エージェント・スクリプト・CI からは通らない
 （標準入力が端末でなければ何もしない）。
 
-`wrangler` の `deploy` / `versions deploy` / `versions upload` / `rollback` /
-`secret` は、`.claude/settings.json` のフック（`tools/deny-deploy.sh`）が実行前に
-止める。`&&` でつなげた書き方や、スクリプトの中に隠れた呼び出しでも止まる。
+**本番へ出る経路は wrangler だけではない。** 次の3つがあり、`.claude/settings.json`
+のフック（`tools/deny-deploy.sh`）が実行前にすべて止める。`&&` でつなげた書き方や、
+スクリプトの中に隠れた呼び出しでも止まる。
+
+| 経路 | 引き金 | 出る先 |
+|---|---|---|
+| 手元から直接 | `wrangler` の `deploy` / `versions deploy` / `versions upload` / `rollback` / `secret` | 本番 |
+| Cloudflare Workers Builds | **origin/main への push / マージ** | 本番 |
+| GitHub Actions | **main への push**（`pv/storyboard` 配下）、`gh workflow run` | PV の Pages |
+
+2つ目と3つ目には「デプロイ」という語が出てこない。**`git push origin main` と
+`gh pr merge` が、そのまま本番の差し替えである。** 枝への push と `gh pr create` は
+通る（そこまでは本番に出ない）。
 
 **止まったら、迂回しない。** 本番を差し替える必要があるときは、何をなぜ出すのかを
 伝えて、人に実行してもらう。この門は、検証のつもりの1行で本番が差し替わる事故が

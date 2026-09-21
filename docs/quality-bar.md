@@ -41,4 +41,4 @@
 
 - `python3 tools/lint_plan.py` 違反0(全10チェック)
 - `node tools/catalogue_gap.mjs` — カタログの過不足と実寸。結論は docs/catalogue-gap.md
-- `node --test tools/tests/*.test.cjs` が全件通ること（現在 1084/1084）
+- `node --test tools/tests/*.test.cjs` が全件通ること（現在 1087/1087）
