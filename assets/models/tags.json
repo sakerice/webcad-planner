@@ -7645,6 +7645,16 @@
     "room": 1
    }
   },
+  "original-bathtub": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.72,
+    "room": 1
+   }
+  },
   "original-bed": {
    "kind": "bed",
    "mount": "floor",
@@ -8166,6 +8176,26 @@
     "kind": 1,
     "mount": 0.66,
     "room": 0.94
+   }
+  },
+  "original-toilet": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 1
+   }
+  },
+  "original-vanity": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 1
    }
   },
   "original-wardrobe": {

@@ -79,9 +79,11 @@ export function realSizeReport() {
     out.push({
       kind, ja: (TAGS.kinds[kind] || {}).ja || kind, what: spec.what,
       stock: stock.length, fits: ok.length,
-      biggest: stock.length
-        ? stock.slice().sort((a, b) => b.w * b.d - a.w * a.d)[0]
-        : null,
+      // **「いちばん大きいもの」ではなく「実寸に合ういちばん大きいもの」。**
+      // 面積で並べると、1600×750 の湯船より 1099×1099 の角形が上に来て、
+      // 正しい寸法の在庫が入ったことが表から見えない。
+      biggest: (ok.length ? ok : stock).slice()
+        .sort((a, b) => b.w * b.d - a.w * a.d)[0] || null,
     });
   }
   return out.sort((a, b) => a.fits - b.fits || b.stock - a.stock);
@@ -115,8 +117,8 @@ if (process.argv[1] && process.argv[1].endsWith("catalogue_gap.mjs")) {
     process.stdout.write("\n\n寸法が日本の住宅に合っているか\n\n");
     for (const r of realSizeReport()) {
       const mark = r.fits === 0 ? "!" : " ";
-      const big = r.biggest ? `最大 ${Math.round(r.biggest.w)}×${Math.round(r.biggest.d)}` : "在庫なし";
-      process.stdout.write(`${mark} ${pad(r.ja, 20)}${pad(`${r.fits}/${r.stock} 点`, 12)}${pad(big, 18)}${r.what}\n`);
+      const big = r.biggest ? `${r.fits ? "合う最大" : "最大"} ${Math.round(r.biggest.w)}×${Math.round(r.biggest.d)}` : "在庫なし";
+      process.stdout.write(`${mark} ${pad(r.ja, 20)}${pad(`${r.fits}/${r.stock} 点`, 12)}${pad(big, 20)}${r.what}\n`);
     }
     const unused = unusedStock();
     process.stdout.write(`\n出番の無い在庫 ${unused.reduce((n, u) => n + u.stock, 0)} 点: `
