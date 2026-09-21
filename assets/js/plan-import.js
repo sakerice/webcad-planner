@@ -364,9 +364,7 @@
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, hint: hint }),
-    }).then(function (res) {
-      return res.json().then(function (body) { return { status: res.status, body: body }; });
-    }).then(function (r) {
+    }).then(readReply).then(function (r) {
       if (r.status !== 200) {
         ST.busy = false;
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
@@ -378,10 +376,25 @@
         syncPlanImportButtons();
         showQuota();
       });
-    }).catch(function (e) {
+    }).catch(function () {
       ST.busy = false;
-      setStatus('通信に失敗しました: ' + (e && e.message ? e.message : e));
+      setStatus('サーバに接続できませんでした。通信の状態を確かめて、もう一度お試しください。');
       syncPlanImportButtons();
+      showQuota();
+    });
+  }
+
+  // 返事を読む。**JSON とは限らない。**
+  //
+  // 失敗の中身は Cloudflare が作ることがあり、そのときは HTML のエラーページが
+  // 返る。res.json() をそのまま呼ぶと JSON の構文エラーになり、その文面
+  // (「Unexpected token \'<\', "<!DOCTYPE "...」) が利用者の画面に出ていた。
+  // 読む側の事情であって、利用者には何の意味も無い。
+  function readReply(res) {
+    return res.text().then(function (text) {
+      var body = null;
+      try { body = JSON.parse(text); } catch (e) { body = null; }
+      return { status: res.status, body: body };
     });
   }
 
@@ -417,9 +430,7 @@
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, renders: renders, pages: pages, hint: hint }),
-    }).then(function (res) {
-      return res.json().then(function (out) { return { status: res.status, body: out }; });
-    }).then(function (r) {
+    }).then(readReply).then(function (r) {
       if (r.status !== 200 || !r.body || !r.body.plan) {
         body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
         return body;
@@ -504,7 +515,15 @@
       ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
       invalid_request: '送った画像に問題がありました。',
     };
-    var text = map[code] || ('読み取れませんでした（' + status + ' ' + code + '）。');
+    var byStatus = {
+      500: 'サーバ側でエラーが起きました。少し待ってからもう一度お試しください。',
+      502: 'AI側と通信できませんでした。少し待ってからもう一度お試しください。',
+      503: 'いまこの機能を使えません。少し待ってからもう一度お試しください。',
+      504: '時間がかかりすぎて、通信が切れました。ページ数の少ない図面でお試しください。',
+      524: '時間がかかりすぎて、通信が切れました。ページ数の少ない図面でお試しください。',
+    };
+    var text = map[code] || byStatus[status]
+      || ('読み取れませんでした（' + status + (code ? ' ' + code : '') + '）。');
     if (code === 'ai_quota_exceeded' && body && body.message) text = body.message;
     if (body && body.problems && body.problems.length) {
       text += '\n' + body.problems.slice(0, 5).join('\n');
