@@ -374,11 +374,18 @@
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
       }
       return maybeRevisePlanImport(images, hint, r.body).then(function (body) {
-        ST.busy = false;
-        ST.result = body;
-        renderPlanImportResult(body);
-        syncPlanImportButtons();
-        showQuota();
+        // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
+        // 判断が得られなければ、これまでどおり下書きだけを渡す。
+        var finish = (typeof PlanFinish === 'undefined' || !body.plan)
+          ? Promise.resolve(null) : PlanFinish.analyze(body.plan);
+        return finish.then(function (out) {
+          body.finish = out;
+          ST.busy = false;
+          ST.result = body;
+          renderPlanImportResult(body);
+          syncPlanImportButtons();
+          showQuota();
+        });
       });
     }).catch(function () {
       ST.busy = false;
@@ -665,6 +672,13 @@
       if (body.reviewSkipped) {
         lines.push('・読み取りの辻褄が合っていたので、見直しは省きました（その分の費用と時間はかかっていません）。');
       }
+      // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
+      if (body.finish) {
+        var swaps = (body.finish.picks || []).length;
+        var lacks = PlanFinish.missingLines(body.finish).length;
+        if (swaps) lines.push('・水まわり ' + swaps + ' 点を、部屋の広さに合うモデルに差し替えます。');
+        if (lacks) lines.push('・取り込んだあと、足りないもの ' + lacks + ' 件を道具の一覧に出します。');
+      }
       if (body.reviewNote) lines.push('・' + body.reviewNote);
       (body.notes || []).forEach(function (n) { lines.push('・' + n); });
       (body.warnings || []).forEach(function (w) { lines.push('・' + w); });
@@ -739,6 +753,11 @@
     if (typeof DATA !== 'undefined' && DATA && ((DATA.walls || []).length || (DATA.rooms || []).length)) {
       if (!confirm('いまの間取りを、読み取った下書きで置き換えます。よろしいですか？')) return;
     }
+    // 水まわりの既定モデルを、部屋に合うものへ差し替えてから組み立てる。
+    // **中心は動かさない。** 寸法だけが入れ替わるので、図面どおりの位置に残る。
+    if (ST.result.finish && typeof PlanFinish !== 'undefined') {
+      PlanFinish.applyPicks(ST.result.plan, ST.result.finish.picks);
+    }
     var plan = toAppObjects(ST.result.plan);
     // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
     root._defaultPlanPending = false;
@@ -757,6 +776,9 @@
     if (typeof resetView === 'function') resetView();
     if (typeof draw2d === 'function') draw2d();
     if (typeof rebuild3D === 'function') rebuild3D();
+    // 足りないものを道具の一覧に出す。**ここは閉じたあとも残る。**
+    // 1つ置いてから次を置く、という使い方になるため。
+    if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
     closePlanImport();
   }
 

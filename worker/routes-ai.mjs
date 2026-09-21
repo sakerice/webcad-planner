@@ -27,6 +27,7 @@ import { planKnowledge } from "./plan-knowledge.mjs";
 import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
 import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
+import { nameRooms, pickModels, missingByRoom, MAX_ROOMS, MAX_SLOTS } from "./plan-finish.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -84,6 +85,7 @@ export async function handleAi(request, env, url, deps = {}) {
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
+  if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/plan-result") return aiPlanResult(payload, env, deps);
@@ -213,6 +215,41 @@ async function aiFindPlan(payload, env, deps, request) {
   const parsed = extractJson(result.text);
   const box = normalizeBox(parsed);
   return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
+}
+
+// ── 読み取ったあとの「仕上げ」 ───────────────────────────────────────
+//
+// 部屋の種別と、設備のモデルを決める。足りないものは種別から計算で出る。
+//
+// **回数を数えない。** ここが呼ぶのは Jev だけで、1回の判断が入力数百
+// トークン、出力は無料。読み取り(¥40/ページ)とは桁が3つ違う。数の仕組みは
+// 1つの Durable Object に集まるので、安い呼び出しまで通すと、そこが
+// 高い呼び出しの待ち行列になる。
+//
+// 代わりに**1回で投げられる判断の数を抑える**(部屋40・設備24・候補8)。
+// 認証が無い窓口なので、上限は要求の形のほうで持つ。
+async function aiFinishPlan(payload, env, deps) {
+  const rooms = Array.isArray(payload && payload.rooms) ? payload.rooms : [];
+  const slots = Array.isArray(payload && payload.slots) ? payload.slots : [];
+  if (!rooms.length && !slots.length) {
+    return json({ error: "invalid_request", message: "rooms か slots が要る" }, 400);
+  }
+  if (rooms.length > MAX_ROOMS || slots.length > MAX_SLOTS) {
+    return json({ error: "invalid_request", message: "1回に送れる数を超えている" }, 400);
+  }
+
+  const [named, picks] = await Promise.all([
+    nameRooms(rooms, env, deps),
+    pickModels(slots, env, deps),
+  ]);
+
+  // 足りないものは、種別が決まったあとで数える。
+  const byId = new Map(rooms.map((r) => [r.id, r]));
+  const missing = missingByRoom(named.map((r) => ({
+    id: r.id, type: r.type, kinds: (byId.get(r.id) || {}).kinds || [],
+  })));
+
+  return json({ rooms: named, picks, missing });
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────

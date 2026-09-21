@@ -118,3 +118,36 @@ test('アプリは tags.json を読んで見出しに使う', () => {
   // 読めなかったときは、これまでどおり category で並ぶこと
   assert.match(src, /\(item&&item\.kindJa\)\|\|\(item&&item\.category\)/, 'タグが無いときの並びが元に戻らない');
 });
+
+// カタログの過不足を数える検査（docs/catalogue-gap.md）。
+//
+// **死んだ検査にしない。** 範囲を広げすぎると全部が合格になり、寸法の
+// 食い違いを見逃す。いま分かっている食い違いを名指しで押さえておく。
+test('実寸の検査が、実際に食い違いを捕まえる', async () => {
+  const { realSizeOk } = await import(pathToFileURL(join(ROOT, 'tools', 'catalogue-vocab.mjs')).href);
+  // 日本の標準寸法は通る
+  assert.equal(realSizeOk('bathtub', 1600, 750), true, '1坪UBの湯船を弾いている');
+  assert.equal(realSizeOk('toilet', 380, 680), true, '標準の便器を弾いている');
+  assert.equal(realSizeOk('desk', 1000, 600), true, '学習机を弾いている');
+  assert.equal(realSizeOk('kitchen-unit', 2550, 650), true, '間口2550のキッチンを弾いている');
+  // 向きが入れ替わっていても通る
+  assert.equal(realSizeOk('bathtub', 750, 1600), true);
+  // いま在庫にある寸法は落ちる
+  assert.equal(realSizeOk('toilet', 371, 572), false, '小さすぎる便器を通している');
+  assert.equal(realSizeOk('desk', 1050, 420), false, '奥行の足りない机を通している');
+  assert.equal(realSizeOk('bathtub', 569, 428), false, '湯船でないものを通している');
+  // 範囲の無い分類は判定しない
+  assert.equal(realSizeOk('decor', 100, 100), null);
+});
+
+test('過不足の表が、数えられる形で出る', async () => {
+  const { gapReport, realSizeReport } = await import(pathToFileURL(join(ROOT, 'tools', 'catalogue_gap.mjs')).href);
+  const rows = gapReport();
+  assert.ok(rows.length > 20, '要るものを数えられていない');
+  for (const row of rows) {
+    assert.ok(TAGS.kinds[row.kind], `${row.kind} が語彙に無い（room-program.js と語彙が食い違っている）`);
+    assert.ok(row.needed > 0 && row.rooms.length, `${row.kind} に要る数か部屋が無い`);
+  }
+  const sizes = realSizeReport();
+  assert.ok(sizes.some((s) => s.fits === 0), '実寸に合う在庫が0の品を見つけられていない');
+});
