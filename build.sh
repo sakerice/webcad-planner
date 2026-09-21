@@ -50,8 +50,22 @@ echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
 check_cloudflare_asset_sizes
-if [ "${SKIP_DEPLOY:-0}" = "1" ]; then
-  echo "Skipping deploy because SKIP_DEPLOY=1"
-  exit 0
-fi
-npx wrangler deploy
+
+# **ここでは配信しない。ビルドするだけ。**
+#
+# 以前は末尾で `npx wrangler deploy` を実行し、SKIP_DEPLOY=1 を付けたときだけ
+# 止まる形だった。つまり「ビルドを確かめよう」と思って `bash build.sh` と
+# 打つと、そのまま本番が入れ替わった。実際、検証のつもりで実行して本番を
+# 差し替える事故が起きている。
+#
+# **既定を逆にする。** 名前が build なら build しかしない。配信は
+# tools/deploy.sh という別の名前の、別の操作にする。
+#
+# Workers Builds(Gitからの自動デプロイ)への影響は無い。あちらは
+# wrangler.toml の [build] command で `SKIP_DEPLOY=1 bash build.sh` を呼び、
+# dist/ を作らせるだけで、配信は wrangler 自身が行う。この変更後も同じ
+# コマンドが同じ dist/ を作って終了コード0で返る。SKIP_DEPLOY はもう
+# 読んでいないが、付いていても害は無いのでコマンドは変えていない。
+echo
+echo "dist/ を作りました。**本番には出していません。**"
+echo "本番へ出すときは: bash tools/deploy.sh"
