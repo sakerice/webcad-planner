@@ -2117,6 +2117,20 @@ var FMP_MANIFEST_SOURCES = [
   {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'},
   {url:CUSTOM_MODEL_MANIFEST_URL, globalName:'CUSTOM_MODEL_MANIFEST'}
 ];
+// カタログ753点の分類。tools/tag_catalogue.mjs が作る。
+//
+// なぜ別のファイルなのか
+// ----------------------
+// manifest の category は、取り込み元3つのフォルダ構造をそのまま引きずって
+// いる。同じものが別の名前に散り(キッチンが4か所、収納が4か所)、中身の
+// 取り違えもある(「窓」にシェルフ、「絵画」にシェルフ、「家電」に冷蔵庫)。
+//
+// **category は消さない。** 保存済みのプランはモデルを名前で持っているので、
+// 分類を差し替えるのではなく、その上に新しい軸(kind)を足す。
+//
+// 読めなければ、これまでどおり category で並べる。
+var CATALOGUE_TAGS_URL = 'assets/models/tags.json';
+var CATALOGUE_TAGS = null;
 var FMP_ITEMS = {};
 var FMP_TOP_IMAGES = {};
 var FMP_TOP_CROPS = {};
@@ -2204,7 +2218,40 @@ function initNativeColorInputs(){
 function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
     FMP_ITEMS[item.id]=item;
+    applyCatalogueTag(item);
   });
+}
+// 分類を1点に貼る。タグが無ければ何もしない(これまでどおり category で並ぶ)。
+//
+// **検索語は tags.json が持っている。** Jev は文章を書けないので、「浴槽」を
+// 「バスタブ」「風呂」でも引けるようにする語は人が書いたものである。
+// ここでモデル名に混ぜておけば、検索の仕組み(assets/js/asset-catalogue.js)は
+// 何も変えずにその語で引けるようになる。
+function applyCatalogueTag(item){
+  if(!item || !CATALOGUE_TAGS || !CATALOGUE_TAGS.items) return;
+  var tag=CATALOGUE_TAGS.items[item.id]; if(!tag) return;
+  var kind=(CATALOGUE_TAGS.kinds||{})[tag.kind];
+  item.kind=tag.kind;
+  item.mount=tag.mount||null;
+  item.room=tag.room||null;
+  if(kind){
+    item.kindJa=kind.ja;
+    item.kindGroup=kind.group;
+    item.searchWords=[kind.ja].concat(kind.search||[]).join(' ');
+  }
+}
+// 並べる見出し。タグがあれば kind、無ければこれまでの category。
+function catalogueHeading(item){
+  return (item&&item.kindJa)||(item&&item.category)||'その他';
+}
+// どの大分類の引き出しに入れるか。
+//
+// **メニューの並びだけを直す。** item.group はこのあとも元のままにしておく。
+// あれは assets/js/lock-tiers.js の段位（住設=LOCKED / 家具=SOFT）を決めて
+// いて、分類を貼り直したせいで凍結されていたものが黙って自由になる、という
+// 倒れ方をさせたくない。見た目の置き場所と、守りの強さは別の話である。
+function catalogueGroup(item){
+  return (item&&item.kindGroup)||(item&&item.group)||'家具';
 }
 function applyFurnitureMegaManifest(manifests){
   FMP_ITEMS={};
@@ -2228,8 +2275,14 @@ function loadFurnitureManifestSource(src){
   });
 }
 function loadFurnitureMegaLibrary(){
-  Promise.all(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource)).then(function(manifests){
-    manifests=manifests.filter(Boolean);
+  // 分類は**マニフェストと一緒に取りに行く**。あとから足すと、一度
+  // 古い並びで描いてから描き直すことになり、開いた小見出しが畳まれる。
+  var tags=fetch(CATALOGUE_TAGS_URL,{cache:'no-store'}).then(function(r){
+    return r.ok?r.json():null;
+  }).catch(function(){ return null; });
+  Promise.all([tags].concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
+    CATALOGUE_TAGS=all[0]||null;
+    var manifests=all.slice(1).filter(Boolean);
     if(manifests.length) applyFurnitureMegaManifest(manifests);
   });
 }
@@ -2344,15 +2397,16 @@ function renderFurnitureMegaLibrary(){
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var cats={};
-    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item.group===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
-      (cats[item.category]||(cats[item.category]=[])).push(item);
+    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return catalogueGroup(item)===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
+      var head=catalogueHeading(item);
+      (cats[head]||(cats[head]=[])).push(item);
     });
     var html='';
     Object.keys(cats).sort().forEach(function(cat){
       cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
       html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
         html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
         html+=(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
         html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
