@@ -87,3 +87,48 @@ test('アプリが finishes.json を読み、部位を画面へ渡している',
   // マニフェストが自前で持つものは触らない（自作モデルは登録時に既定色を拾う）
   assert.match(src, /item\.finishChannels&&item\.finishChannels\.length/, '既存の部位を上書きしている');
 });
+
+// ── テクスチャ（壁と同じ資産を、家具にも貼れるようにする） ──────────
+//
+// 壁は色のほかにテクスチャを貼れるのに、カタログのモデルは色だけだった。
+// 仕様を分ける理由が無いので揃えた。**貼れることと、実寸で貼れることの両方**
+// を見る。
+test('仕上げの指定は、1か所の一覧で管理されている', () => {
+  const src = read('index.html');
+  assert.match(src, /var FINISH_PROPS\s*=\s*\['finishColors','finishRoughness','finishTextures'\]/,
+    '仕上げの項目一覧が無い');
+  // **インスタンシングの除外条件がこの一覧を見ていること。**
+  // 見ていないと、新しい項目を足したときに「指定したのに何も起きない」になる。
+  // 実際 finishTextures を足したとき、同じモデルが1つにまとめられて無視された。
+  assert.match(src, /if\(it\.colorCustom \|\| FINISH_PROPS\.some\(/,
+    'インスタンシングの除外条件が一覧を見ていない');
+});
+
+test('テクスチャは、壁と同じ資産・同じ実寸で貼る', () => {
+  const src = read('index.html');
+  assert.match(src, /var FINISH_TEXTURE_DEPS\s*=\s*\{/, '資産の解決が無い');
+  assert.match(src, /tileM:\s*function\(key,fallback\)\{ return texTileM\(key,fallback\); \}/,
+    '壁と同じ実寸(TEX_TILE_M)を使っていない');
+
+  const mq = read('assets/js/model-quality.js');
+  assert.match(mq, /function metresPerUv/, 'UVの実寸換算が無い');
+  // **三角形ごとの中央値を採る。** 面積の合計で割ると、アトラスの外れ値に
+  // 引きずられる(1.2mのクローゼットに repeat=15 が出た)。
+  assert.match(mq, /samples\[samples\.length>>1\]/, '中央値を採っていない');
+  assert.match(mq, /own\.map=map/, 'テクスチャを差し替えていない');
+  // 差し替えたら、元の柄をほどく処理はかけない(二重に効く)
+  assert.match(mq, /neutralizeFinish:false/, '差し替え後に元の柄の処理が残っている');
+});
+
+test('画面から素材を選べ、戻すと色・素材・艶がすべて戻る', () => {
+  const src = read('assets/js/app-state.js');
+  assert.match(src, /var MODEL_FINISH_TEXTURES=/, '素材の選択肢が無い');
+  assert.match(src, /function updateSelectedModelTexture/, '素材を変える窓口が無い');
+  assert.match(src, /finish-texture-/, '部位ごとの素材の欄が無い');
+  // 色だけ戻して柄が残ると、押したのに元に戻らない、という見え方になる
+  const reset = /function updateSelectedModelFinishReset\(\)\{[\s\S]*?\n\}/.exec(src);
+  assert.ok(reset, '戻す窓口が無い');
+  for (const key of ['finishColors', 'finishTextures', 'finishRoughness']) {
+    assert.ok(reset[0].includes(key), `戻すときに ${key} を消していない`);
+  }
+});

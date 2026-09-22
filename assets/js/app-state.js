@@ -1542,6 +1542,15 @@ function selectedModelFinishesHtml(it){
   model.finishChannels.forEach(function(channel){
     var value=(it.finishColors&&it.finishColors[channel.key])||channel.default;
     html+='<div class="pr"><label class="pl" for="finish-'+channel.key+'">'+escHtml(channel.label)+'</label><input id="finish-'+channel.key+'" class="pi" type="color" value="'+escHtml(value)+'" oninput="updateSelectedModelFinish(\''+channel.key+'\',this.value)"></div>';
+    // **壁と同じ資産から選ばせる。** 壁は色のほかにテクスチャを貼れるのに
+    // カタログのモデルは色だけ、という分かれ方をしていた。仕様を分ける理由が
+    // 無いので揃える。「元の柄のまま」を既定にし、選んだときだけ差し替える。
+    var texture=(it.finishTextures&&it.finishTextures[channel.key])||'';
+    html+='<div class="pr"><label class="pl" for="finish-texture-'+channel.key+'">'+escHtml(channel.label)+'の素材</label><select id="finish-texture-'+channel.key+'" class="pi" onchange="updateSelectedModelTexture(\''+channel.key+'\',this.value)">';
+    MODEL_FINISH_TEXTURES.forEach(function(option){
+      html+='<option value="'+option[0]+'" '+(texture===option[0]?'selected':'')+'>'+escHtml(option[1])+'</option>';
+    });
+    html+='</select></div>';
     if(channel.key!=='fabric'&&channel.key!=='accent'){
       var current=it.finishRoughness&&it.finishRoughness[channel.key];
       html+='<div class="pr"><label class="pl" for="finish-roughness-'+channel.key+'">'+escHtml(channel.label)+'の艶</label><select id="finish-roughness-'+channel.key+'" class="pi" onchange="updateSelectedModelRoughness(\''+channel.key+'\',this.value)">';
@@ -1549,8 +1558,32 @@ function selectedModelFinishesHtml(it){
       html+='</select></div>';
     }
   });
-  html+='<button class="pbtn sec" type="button" onclick="updateSelectedProp(\'finishColors\',null)">素材の色を元に戻す</button>';
+  html+='<button class="pbtn sec" type="button" onclick="updateSelectedModelFinishReset()">素材の色を元に戻す</button>';
   return html;
+}
+// カタログのモデルに貼れる素材。**壁・床と同じ資産**(index.html の
+// ASSET_TEX_MAP)から、家具に載せて意味のあるものだけを並べる。
+// 地面(砂利・芝)や屋根瓦は出さない——家具に貼る理由が無い。
+var MODEL_FINISH_TEXTURES=[
+  ['','元の柄のまま'],
+  ['wood_oak','オーク'],
+  ['wood_floor','木目（複合）'],
+  ['wood_cedar','杉板'],
+  ['plaster','塗り壁'],
+  ['plaster_white','塗り壁（白）'],
+  ['tile_floor','タイル'],
+  ['concrete','コンクリート'],
+  ['galvalume_dark','ガルバ（黒）'],
+  ['stone','石']
+];
+function updateSelectedModelTexture(channel,value){
+  if(!ST.selected)return;
+  var model=getItemFinishModel(ST.selected.type);
+  if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;}))return;
+  if(value!=='' && !MODEL_FINISH_TEXTURES.some(function(o){return o[0]===value;}))return;
+  var textures=Object.assign({},ST.selected.finishTextures||{});
+  if(value==='')delete textures[channel];else textures[channel]=value;
+  updateSelectedProp('finishTextures',Object.keys(textures).length?textures:null);
 }
 function updateSelectedModelFinish(channel,value){
   if(!ST.selected || !/^#[0-9a-f]{6}$/i.test(value||'')) return;
@@ -1558,6 +1591,14 @@ function updateSelectedModelFinish(channel,value){
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;})) return;
   var colors=Object.assign({},ST.selected.finishColors||{});colors[channel]=value;
   updateSelectedProp('finishColors',colors);
+}
+// **色だけでなく素材と艶も戻す。** 色だけ戻して柄が残ると、押したのに
+// 元に戻らない、という見え方になる。
+function updateSelectedModelFinishReset(){
+  if(!ST.selected)return;
+  updateSelectedProp('finishColors',null);
+  updateSelectedProp('finishTextures',null);
+  updateSelectedProp('finishRoughness',null);
 }
 function updateSelectedModelRoughness(channel,value){
   if(!ST.selected)return;

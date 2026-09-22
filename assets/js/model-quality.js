@@ -70,8 +70,53 @@
     finishReferences=merge(SEED_REFERENCES,data&&data.references);
     finishDefaults=(data&&data.defaults)||{};
   }
-  function applyFinishes(scene,colors,roughness){
+  // UVの1辺が実世界の何メートルに当たるか。
+  //
+  // **家具のUVは物によってばらばら**なので、テクスチャをそのまま貼ると、
+  // 同じ木目が机では板幅30mm、クローゼットでは300mmに見える。面の世界面積と
+  // UV面積の比から密度を出して、壁と同じ実寸(TEX_TILE_M)で貼れるようにする。
+  //
+  // 壁は面の寸法から直接タイル数を出せるが、家具は箱ではないのでこの方法になる。
+  function metresPerUv(mesh){
+    var g=mesh.geometry,uv=g&&g.attributes&&g.attributes.uv,pos=g&&g.attributes&&g.attributes.position;
+    if(!uv||!pos) return 0;
+    var index=g.index, count=index?index.count:pos.count, world=0, area=0;
+    var m=mesh.matrixWorld, a={},b={},c={};
+    function at(i,out){
+      var k=index?index.getX(i):i;
+      out.x=pos.getX(k);out.y=pos.getY(k);out.z=pos.getZ(k);out.u=uv.getX(k);out.v=uv.getY(k);
+      // 世界座標へ（行列の適用は three.js に任せず、必要な3成分だけ自前で）
+      var e=m.elements,x=out.x,y=out.y,z=out.z;
+      out.wx=e[0]*x+e[4]*y+e[8]*z+e[12];
+      out.wy=e[1]*x+e[5]*y+e[9]*z+e[13];
+      out.wz=e[2]*x+e[6]*y+e[10]*z+e[14];
+    }
+    // **三角形ごとの密度を集めて、中央値を採る。**
+    // 面積の合計どうしで割ると、アトラス(1枚の絵に部位を詰め込んだUV)の
+    // 外れ値に引きずられる。実測で、1.2mのクローゼットに repeat=15 が出た
+    // (板幅が10分の1になる)。中央値なら、その品の大半の面に合う。
+    var step=Math.max(3,Math.floor(count/900)*3);   // 大きいメッシュは間引いて測る
+    var samples=[];
+    for(var i=0;i+2<count;i+=step){
+      at(i,a);at(i+1,b);at(i+2,c);
+      var ux=b.wx-a.wx,uy=b.wy-a.wy,uz=b.wz-a.wz,vx=c.wx-a.wx,vy=c.wy-a.wy,vz=c.wz-a.wz;
+      var cx=uy*vz-uz*vy,cy=uz*vx-ux*vz,cz=ux*vy-uy*vx;
+      world=Math.sqrt(cx*cx+cy*cy+cz*cz)/2;
+      area=Math.abs((b.u-a.u)*(c.v-a.v)-(c.u-a.u)*(b.v-a.v))/2;
+      if(world>1e-9&&area>1e-9) samples.push(Math.sqrt(world/area));
+    }
+    if(!samples.length) return 0;
+    samples.sort(function(x,y){return x-y;});
+    return samples[samples.length>>1];
+  }
+
+  /**
+   * 色・艶・テクスチャを部位ごとに当てる。
+   * @param deps {texture,normal,tileM} アプリ側の資産解決。無ければテクスチャは当てない。
+   */
+  function applyFinishes(scene,colors,roughness,textures,deps){
     colors=colors&&typeof colors==='object'?colors:{};roughness=roughness&&typeof roughness==='object'?roughness:{};
+    textures=textures&&typeof textures==='object'?textures:{};deps=deps||{};
     scene.traverse(function(mesh){
       if(!mesh.isMesh || !mesh.material) return;
       function finish(material){
@@ -79,8 +124,31 @@
         var value=channel&&colors[channel];
         var hasColor=/^#[0-9a-f]{6}$/i.test(value||'')&&material.color;
         var r=channel&&roughness[channel],hasRoughness=typeof r==='number'&&isFinite(r)&&r>=.15&&r<=1;
-        if(!hasColor&&!hasRoughness) return material;
-        var own=material.clone();if(hasColor){own.color.set(value);if(material.map&&material.userData.neutralizeFinish)neutralizeFinish(own);}if(hasRoughness) own.roughness=r;return own;
+        var key=channel&&textures[channel];
+        var map=key&&typeof deps.texture==='function'?deps.texture(key):null;
+        if(!hasColor&&!hasRoughness&&!map) return material;
+        var own=material.clone();
+        if(map){
+          // **柄を差し替えたら、元の柄をほどく処理は要らない。** 指定色は
+          // 新しい柄にそのまま掛かる(neutralizeFinish は元の柄の色味を
+          // 消すためのもので、差し替え後にかけると二重に効く)。
+          var metres=metresPerUv(mesh);
+          var tile=typeof deps.tileM==='function'?deps.tileM(key,0.9):0.9;
+          if(metres>0&&tile>0){
+            var repeat=metres/tile;
+            if(isFinite(repeat)&&repeat>0){ map.repeat.set(repeat,repeat); map.needsUpdate=true; }
+          }
+          own.map=map;
+          var normal=typeof deps.normal==='function'?deps.normal(key):null;
+          if(normal){ if(map.repeat) normal.repeat.copy(map.repeat); own.normalMap=normal; }
+          own.userData=Object.assign({},own.userData,{neutralizeFinish:false});
+          if(hasColor) own.color.set(value);
+        }else if(hasColor){
+          own.color.set(value);
+          if(material.map&&material.userData.neutralizeFinish)neutralizeFinish(own);
+        }
+        if(hasRoughness) own.roughness=r;
+        return own;
       }
       mesh.material=Array.isArray(mesh.material)?mesh.material.map(finish):finish(mesh.material);
     });

@@ -2107,7 +2107,7 @@ function buildDetailedExterior(grp,it,w,d,h){
   var url=EXTERIOR_MODEL_URLS[it.type];
   if(!url || !ensureGltfModel(url)) return false;
   var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
-  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness);grp.add(clone);return true;
+  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness,it.finishTextures,typeof FINISH_TEXTURE_DEPS==='object'?FINISH_TEXTURE_DEPS:null);grp.add(clone);return true;
 }
 var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
 var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';

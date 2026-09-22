@@ -3863,6 +3863,18 @@ function normalizeDataImageMime(src){
   if(!type || head.indexOf('data:image/'+type+';')===0) return src;
   return 'data:image/'+type+';base64,'+body;
 }
+// カタログのモデルへテクスチャを当てるときの、資産の解決。
+//
+// **壁と同じ資産・同じ実寸(TEX_TILE_M)を使う。** 別仕立てにすると、壁は
+// 板幅105mmなのに家具だけ別の大きさ、という揃わない状態になる。
+// 仕上げの指定。**増やしたらここに足す。** インスタンシングの除外条件と
+// 3Dの組み立ての両方がこの一覧を見る。
+var FINISH_PROPS = ['finishColors','finishRoughness','finishTextures'];
+var FINISH_TEXTURE_DEPS = {
+  texture: function(key){ return cloneRepeatReadyTexture(getTexture3D(key)); },
+  normal:  function(key){ var n=getTextureNormal3D(key); return n?cloneRepeatReadyTexture(n):null; },
+  tileM:   function(key,fallback){ return texTileM(key,fallback); }
+};
 function getTexture3D(key) {
   if (!key) return null;
   if (_texCache[key]) return _texCache[key];
@@ -11400,7 +11412,7 @@ function buildItem3D(it){
       if(queueFmpInstance(fmp.model,it,grp)) return;
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
-      ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness);
+      ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness,it.finishTextures,FINISH_TEXTURE_DEPS);
       if(fmp.mirrorOption && it.showMirror){
         var spec=fmp.mirrorOption,sx=it.w/fmp.w,sy=getItemHeightValue(it)/fmp.h;
         var mirror=new THREE.Mesh(new THREE.BoxGeometry(spec.w*sx,spec.h*sy,.004),new THREE.MeshStandardMaterial({color:0xe1e7e8,metalness:1,roughness:.035}));
@@ -13843,7 +13855,11 @@ function queueFmpInstance(url,it,grp){
   if(it.flipX || it.flipY) return false;
   // Configured models must match the selected clone (rotation/material overrides).
   if(GLTF_MODEL_CONFIG[it.type]) return false;
-  if(it.colorCustom || (it.finishColors && Object.keys(it.finishColors).length) || (it.finishRoughness && Object.keys(it.finishRoughness).length)) return false;
+  // 仕上げを指定したものはインスタンス化しない。**1つでも漏らすと、その
+  // 指定は黙って無視される**(同じモデルが1つのインスタンスにまとめられ、
+  // applyFinishes を通らないため)。finishTextures を足したときに実際に
+  // 起きた。項目を増やすときは FINISH_PROPS に足すこと。
+  if(it.colorCustom || FINISH_PROPS.some(function(k){ return it[k] && Object.keys(it[k]).length; })) return false;
   if(!getGltfNativeBox(url)) return false;
   grp.updateMatrix();
   var fitMatrix=computeBoxFitLocalMatrix(url,it.w*U,getItemHeightValue(it)*U,it.d*U);
