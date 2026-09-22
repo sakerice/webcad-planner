@@ -32,10 +32,44 @@
     material.customProgramCacheKey=function(){return 'neutral-model-finish-v1';};
     material.needsUpdate=true;
   }
-  var externalFinishes={
-    'assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__BOLIA_sofa_Ivory.glb':{'BOLIA-Ivory':'wood','sofa-e5ybetgdh45y.002':'fabric','sofa-e5ybetgdh45y.003':'accent'},
+  // 外部アセットの「色を変えられる部位」。
+  //
+  // **もとは2点だけ手書きしてあった。** 685点中684点がテクスチャ付きで、
+  // applySelectableColor はテクスチャ付きを対象外にするため、外部アセットは
+  // ほぼ色を変えられない状態だった。仕組み(neutralizeFinish)は足りていて、
+  // 配線されていなかっただけなので、tools/assign_finish_channels.mjs が
+  // 全点ぶんを assets/models/finishes.json に貼り、ここへ差し込む。
+  //
+  // 読めなければ空のまま。**その場合はこれまでどおり色を変えられないだけで、
+  // モデルの見た目は変わらない。**
+  // **人が実物を見て決めた2点は、ここに残す。** finishes.json が読めなかった
+  // ときでも、前と同じだけは効く(検査 tools/tests/model-details.test.cjs が
+  // これを見ている)。読めたら、その上に全点ぶんがかぶさる。
+  var SEED_FINISHES={
+    'assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__BOLIA_sofa_Ivory.glb':
+      {'BOLIA-Ivory':'wood','sofa-e5ybetgdh45y.002':'fabric','sofa-e5ybetgdh45y.003':'accent'},
     'assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-43693.glb':{'43693':'wood'}
   };
+  var SEED_REFERENCES={
+    'assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__BOLIA_sofa_Ivory.glb':{'BOLIA-Ivory':.3},
+    'assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-43693.glb':{'43693':.08}
+  };
+  function merge(base,extra){
+    var out={};Object.keys(base).forEach(function(k){out[k]=Object.assign({},base[k]);});
+    Object.keys(extra||{}).forEach(function(k){out[k]=Object.assign(out[k]||{},extra[k]);});
+    return out;
+  }
+  var externalFinishes=merge(SEED_FINISHES,null);
+  var finishReferences=merge(SEED_REFERENCES,null);
+  // 部位ごとの代表値。**測れなかった柄はこれを使う。**
+  // 既定の1のままだと、柄の平均輝度が0.36なら指定色が約1/3の明るさで出る。
+  // 値の出どころは tools/measure_finish_references.py（測れたぶんの中央値）。
+  var finishDefaults={};
+  function setFinishes(data){
+    externalFinishes=merge(SEED_FINISHES,data&&data.models);
+    finishReferences=merge(SEED_REFERENCES,data&&data.references);
+    finishDefaults=(data&&data.defaults)||{};
+  }
   function applyFinishes(scene,colors,roughness){
     colors=colors&&typeof colors==='object'?colors:{};roughness=roughness&&typeof roughness==='object'?roughness:{};
     scene.traverse(function(mesh){
@@ -63,11 +97,19 @@
       if(!mesh.isMesh) return;
       mesh.castShadow=true; mesh.receiveShadow=true;
       (Array.isArray(mesh.material)?mesh.material:[mesh.material]).forEach(function(m){repairMaterial(m,url);
-        var channel=externalFinishes[url]&&externalFinishes[url][m.name];if(channel){m.userData=m.userData||{};m.userData.finishChannel=channel;m.userData.neutralizeFinish=true;if(channel==='wood')m.userData.finishReference=/bed-43693/.test(url)?.08:.3;}
+        var channel=externalFinishes[url]&&externalFinishes[url][m.name];
+        if(channel){
+          m.userData=m.userData||{};m.userData.finishChannel=channel;m.userData.neutralizeFinish=true;
+          // 柄を輝度に落とすときの基準値。**人が実物を見て決めたものだけ持つ。**
+          // 機械が貼ったぶんには無いので既定(1)で効く。暗い木目ほど小さい値が要る。
+          var ref=finishReferences[url]&&finishReferences[url][m.name];
+          if(typeof ref!=='number') ref=finishDefaults[channel];
+          if(typeof ref==='number') m.userData.finishReference=ref;
+        }
       });
     });
   }
-  var api={applyFinishes:applyFinishes,repairMaterial:repairMaterial,prepare:prepare,sourceYaw:sourceYaw};
+  var api={applyFinishes:applyFinishes,repairMaterial:repairMaterial,prepare:prepare,sourceYaw:sourceYaw,setFinishes:setFinishes};
   if(typeof module==='object'&&module.exports) module.exports=api;
   else root.ModelQuality=api;
 })(typeof window==='object'?window:globalThis);

@@ -2131,6 +2131,14 @@ var FMP_MANIFEST_SOURCES = [
 // 読めなければ、これまでどおり category で並べる。
 var CATALOGUE_TAGS_URL = 'assets/models/tags.json';
 var CATALOGUE_TAGS = null;
+// 外部アセットの「色を変えられる部位」。tools/assign_finish_channels.mjs が作る。
+//
+// **仕組みは前からあり、手書きの2点にしか繋がっていなかった。** 685点中684点が
+// テクスチャ付きで、applySelectableColor はテクスチャ付きを避けるため、外部
+// アセットはほぼ色を変えられなかった。ここを全点に配線する。
+// 読めなければ、これまでどおり色を変えられないだけ(見た目は変わらない)。
+var CATALOGUE_FINISHES_URL = 'assets/models/finishes.json';
+var CATALOGUE_FINISHES = null;
 var FMP_ITEMS = {};
 var FMP_TOP_IMAGES = {};
 var FMP_TOP_CROPS = {};
@@ -2219,6 +2227,7 @@ function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
     FMP_ITEMS[item.id]=item;
     applyCatalogueTag(item);
+    applyFinishChannels(item);
   });
 }
 // 分類を1点に貼る。タグが無ければ何もしない(これまでどおり category で並ぶ)。
@@ -2240,6 +2249,30 @@ function applyCatalogueTag(item){
     item.searchWords=[kind.ja].concat(kind.search||[]).join(' ');
   }
 }
+// 色を変えられる部位を、モデル1点ぶん組み立てる。
+//
+// 画面(assets/js/app-state.js の selectedModelFinishesHtml)は
+// `finishChannels` を回すだけなので、ここに入れれば全点で操作が出る。
+// **マニフェストが自前で持っているものは触らない**(自作モデルは登録時に
+// GLB から既定色を拾っていて、そちらのほうが正確)。
+function applyFinishChannels(item){
+  if(!item || (item.finishChannels&&item.finishChannels.length)) return;
+  if(!CATALOGUE_FINISHES || !CATALOGUE_FINISHES.models) return;
+  var map=CATALOGUE_FINISHES.models[item.model]; if(!map) return;
+  var fixed=CATALOGUE_FINISHES.fixed||[];
+  var meta=CATALOGUE_FINISHES.channels||{};
+  var seen={},out=[];
+  Object.keys(map).forEach(function(material){
+    var key=map[material];
+    // ガラスは色を変えない。操作を出すと、押しても何も起きない欄になる。
+    if(!key||seen[key]||fixed.indexOf(key)>=0) return;
+    seen[key]=1;
+    var m=meta[key]||{};
+    out.push({key:key,label:m.ja||key,default:m.color||'#cccccc'});
+  });
+  if(out.length) item.finishChannels=out;
+}
+
 // 並べる見出し。タグがあれば kind、無ければこれまでの category。
 function catalogueHeading(item){
   return (item&&item.kindJa)||(item&&item.category)||'その他';
@@ -2277,12 +2310,15 @@ function loadFurnitureManifestSource(src){
 function loadFurnitureMegaLibrary(){
   // 分類は**マニフェストと一緒に取りに行く**。あとから足すと、一度
   // 古い並びで描いてから描き直すことになり、開いた小見出しが畳まれる。
-  var tags=fetch(CATALOGUE_TAGS_URL,{cache:'no-store'}).then(function(r){
+  var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
-  }).catch(function(){ return null; });
-  Promise.all([tags].concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
+  }).catch(function(){ return null; });};
+  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+    .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
     CATALOGUE_TAGS=all[0]||null;
-    var manifests=all.slice(1).filter(Boolean);
+    CATALOGUE_FINISHES=all[1]||null;
+    if(CATALOGUE_FINISHES && typeof ModelQuality==='object') ModelQuality.setFinishes(CATALOGUE_FINISHES);
+    var manifests=all.slice(2).filter(Boolean);
     if(manifests.length) applyFurnitureMegaManifest(manifests);
   });
 }
