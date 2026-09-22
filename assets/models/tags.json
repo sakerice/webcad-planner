@@ -1,7 +1,7 @@
 {
  "version": 1,
  "model": "typesafe/jev",
- "generated": "2026-09-21",
+ "generated": "2026-09-22",
  "kinds": {
   "kitchen-unit": {
    "group": "住設",
@@ -7645,6 +7645,26 @@
     "room": 1
    }
   },
+  "original-ac-wall": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.33
+   }
+  },
+  "original-ac-wall-wide": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.92
+   }
+  },
   "original-bathtub": {
    "kind": "bathtub",
    "mount": "builtin",
@@ -7713,6 +7733,26 @@
     "kind": 1,
     "mount": 0.7,
     "room": 0.28
+   }
+  },
+  "original-desk": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.67
+   }
+  },
+  "original-desk-work": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "study",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 1
    }
   },
   "original-drain-cover": {

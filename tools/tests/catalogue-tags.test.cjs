@@ -35,7 +35,7 @@ function searchText(item) {
 
 test('753点すべてに分類が付いている', () => {
   const items = catalogueItems();
-  assert.equal(items.length, 756, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
+  assert.equal(items.length, 760, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
   const missing = items.filter((i) => !TAGS.items[i.id]);
   assert.deepEqual(missing.map((i) => i.id), [], '分類の無い品がある（node tools/tag_catalogue.mjs --resume で貼れる）');
 });
@@ -148,6 +148,13 @@ test('過不足の表が、数えられる形で出る', async () => {
     assert.ok(TAGS.kinds[row.kind], `${row.kind} が語彙に無い（room-program.js と語彙が食い違っている）`);
     assert.ok(row.needed > 0 && row.rooms.length, `${row.kind} に要る数か部屋が無い`);
   }
+  // **検査が生きていること。** はじめは「実寸に合う在庫が0の品がある」と
+  // 書いていたが、机を作ったら0の品が無くなって落ちた。**直すべきは検査の
+  // 書き方のほう**で、範囲を緩めることではない。見たいのは「範囲が緩すぎて
+  // 全部合格になっていない」こと。
   const sizes = realSizeReport();
-  assert.ok(sizes.some((s) => s.fits === 0), '実寸に合う在庫が0の品を見つけられていない');
+  assert.ok(sizes.some((s) => s.stock > 0 && s.fits < s.stock),
+    '実寸の範囲が緩すぎる（在庫が全部合格している）');
+  assert.ok(sizes.some((s) => s.fits > 0),
+    '実寸の範囲が厳しすぎる（合格する在庫が1点も無い）');
 });

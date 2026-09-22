@@ -938,7 +938,10 @@ def check15_window_outside_clearance(data):
 def check16_ac_pairing(data):
     """エアコン室内機と室外機が1対1で、配管長3m以内に対応しているか。"""
     out = []
-    ins = [i for i in data['items'] if 'AirConditioner' in i.get('type', '')]
+    # **新しく作った室内機も数える。** ID を1つだけ見ていると、モデルを
+    # 足したときに黙って検査の外へ出る(実際 original-ac-wall* が漏れていた)。
+    ins = [i for i in data['items']
+           if 'AirConditioner' in i.get('type', '') or i.get('type', '').startswith('original-ac-wall')]
     outs = [o for o in data['items'] if o.get('type') == 'ac-outdoor']
     used = set()
     for i in ins:
@@ -1596,7 +1599,8 @@ def check28_curtain_fit(data, root=None):
 FRONTED_TYPES = (
     'washer', 'fmp-Refrigerator', 'fmp-Toilet', 'fmp-WashBasin',
     'fmp-BathroomVanity', 'fmp-GasStove', 'fmp-Bed', 'fmp-Sofa', 'fmp-Chair',
-    'fmp-Table', 'fmp-AirConditionerWall', 'ac-outdoor', 'neighbor-house',
+    'fmp-Table', 'fmp-AirConditionerWall', 'original-ac-wall', 'ac-outdoor',
+    'original-desk', 'neighbor-house',
     'Tv-MEGA', 'Sofa', 'Chair', 'Table-MEGA', 'Tableset', 'Shelf-MEGA',
     'Cabinet-MEGA', 'CABINET', 'Closet', 'Mirror-MEGA', 'Painting-MEGA',
     'Desk', 'Kitchen-MEGA',

@@ -2180,6 +2180,90 @@ window.CUSTOM_MODEL_MANIFEST = {
           "default": "#e7e2d9"
         }
       ]
+    },
+    {
+      "id": "original-ac-wall",
+      "name": "壁掛けエアコン（6〜10畳）",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 798,
+      "d": 235,
+      "h": 295,
+      "model": "assets/models/original/original-ac-wall.glb",
+      "thumb": "assets/models/previews-v2/original-ac-wall-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-wall-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2000
+    },
+    {
+      "id": "original-ac-wall-wide",
+      "name": "壁掛けエアコン（14〜20畳）",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 890,
+      "d": 330,
+      "h": 295,
+      "model": "assets/models/original/original-ac-wall-wide.glb",
+      "thumb": "assets/models/previews-v2/original-ac-wall-wide-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-wall-wide-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2000
+    },
+    {
+      "id": "original-desk",
+      "name": "学習机（片袖3段）",
+      "sourceFolder": "Desks",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1000,
+      "d": 600,
+      "h": 720,
+      "model": "assets/models/original/original-desk.glb",
+      "thumb": "assets/models/previews-v2/original-desk-thumb.png",
+      "top": "assets/models/previews-v2/original-desk-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_desks.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#c9a97e"
+        }
+      ]
+    },
+    {
+      "id": "original-desk-work",
+      "name": "ワークデスク（書斎・幅1400）",
+      "sourceFolder": "Desks",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1400,
+      "d": 700,
+      "h": 730,
+      "model": "assets/models/original/original-desk-work.glb",
+      "thumb": "assets/models/previews-v2/original-desk-work-thumb.png",
+      "top": "assets/models/previews-v2/original-desk-work-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_desks.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#c9a97e"
+        }
+      ]
     }
   ]
 };
