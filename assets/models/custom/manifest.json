@@ -2264,6 +2264,54 @@
           "default": "#c9a97e"
         }
       ]
+    },
+    {
+      "id": "original-door-flush",
+      "name": "室内ドア（フラッシュ戸）",
+      "sourceFolder": "Doors",
+      "group": "家具",
+      "category": "ドア",
+      "w": 755,
+      "d": 70,
+      "h": 1990,
+      "model": "assets/models/original/original-door-flush.glb",
+      "thumb": "assets/models/previews-v2/original-door-flush-thumb.png",
+      "top": "assets/models/previews-v2/original-door-flush-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_doors.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "面材",
+          "default": "#c7a883"
+        }
+      ]
+    },
+    {
+      "id": "original-door-slit",
+      "name": "室内ドア（採光スリット）",
+      "sourceFolder": "Doors",
+      "group": "家具",
+      "category": "ドア",
+      "w": 755,
+      "d": 70,
+      "h": 1990,
+      "model": "assets/models/original/original-door-slit.glb",
+      "thumb": "assets/models/previews-v2/original-door-slit-thumb.png",
+      "top": "assets/models/previews-v2/original-door-slit-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_doors.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "面材",
+          "default": "#c7a883"
+        }
+      ]
     }
   ]
 }

@@ -2292,9 +2292,20 @@ function isBuildingComponentFmpItem(item){
 function isInteriorSwingDoorType(type){
   return type==='door-swing' || type==='door-swing-s';
 }
-function isClassroomDoorModel(item){
-  return !!(item && item.category==='ドア' && /^Classroom-door-/i.test(item.name||''));
+// 開口(開き戸)へ割り当てられる扉のモデル。
+//
+// **もとは教室のドア5点しか出せなかった。** `Classroom-door-*` という名前で
+// 絞っていたためで、住宅用の建具を足しても、カタログに在るのにメニューへ
+// 出てこない状態だった。ID で自作のものを拾い足す。
+//
+// `家具>ドア` の残り5点(丸窓付き・600幅の物置戸など)は住宅の室内建具では
+// ないので、これまでどおり出さない。
+function isOpeningDoorModel(item){
+  if(!item || item.category!=='ドア') return false;
+  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'');
 }
+// 旧名。呼んでいるところが残っていても動くように。
+function isClassroomDoorModel(item){ return isOpeningDoorModel(item); }
 function getOpeningModelItem(it){
   var model=getFmpItem(it&&it.openingModel);
   if(!model) return null;
@@ -2322,7 +2333,7 @@ function getOpeningModelToolPreset(tool){
     };
     if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
     var doorModel=getFmpItem(doorModelId);
-    if(!doorModel || !isClassroomDoorModel(doorModel)) return null;
+    if(!doorModel || !isOpeningDoorModel(doorModel)) return null;
     return {
       kind:'door', baseType:'door-swing', openingModel:doorModelId, model:doorModel, label:'開き戸: '+doorModel.name
     };
@@ -2367,7 +2378,7 @@ function renderOpeningModelToolMenus(){
 function renderOpeningDoorModelToolMenu(){
   var mount=document.getElementById('opening-door-model-tools');
   if(!mount) return;
-  var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isClassroomDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
+  var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isOpeningDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="開き戸"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>開き戸・浴室ドア</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
   html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
   html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');

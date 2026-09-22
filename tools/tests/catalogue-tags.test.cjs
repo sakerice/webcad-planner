@@ -35,7 +35,7 @@ function searchText(item) {
 
 test('753点すべてに分類が付いている', () => {
   const items = catalogueItems();
-  assert.equal(items.length, 760, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
+  assert.equal(items.length, 762, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
   const missing = items.filter((i) => !TAGS.items[i.id]);
   assert.deepEqual(missing.map((i) => i.id), [], '分類の無い品がある（node tools/tag_catalogue.mjs --resume で貼れる）');
 });

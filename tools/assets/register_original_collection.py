@@ -2,7 +2,7 @@
 from pathlib import Path
 import json,struct
 R=Path(__file__).resolve().parents[2];items=[]
-for source in ['original-collection.json','exterior-collection.json','entry-storage-collection.json','sanitary-collection.json','essentials-collection.json']:
+for source in ['original-collection.json','exterior-collection.json','entry-storage-collection.json','sanitary-collection.json','essentials-collection.json','doors-collection.json']:
  items+=json.loads((R/'tools/blender'/source).read_text())['items']
 for item in items:
  b=(R/item['model']).read_bytes();j=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]])
