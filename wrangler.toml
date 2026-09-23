@@ -27,6 +27,13 @@ not_found_handling = "single-page-application"
 binding = "ASSETS"
 run_worker_first = [ "/api/*" ]
 
+# 読み取りの周りの「文章は要らないが判断は要る」ところで Jev を呼ぶ。
+# worker/jev.mjs を見ること。**鍵が要らない**(バインディング経由)ので、
+# この Worker に新しい秘密が増えない。送り先も増えない。
+# 無くても動く。無ければ門が開きっぱなしになり、門が無かった頃と同じ動きになる。
+[ai]
+binding = "AI"
+
 [[r2_buckets]]
 binding = "PLANS"
 bucket_name = "webcad-shared-plans"

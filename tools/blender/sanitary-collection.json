@@ -1,0 +1,58 @@
+{
+  "items": [
+    {
+      "id": "original-bathtub",
+      "name": "浴槽（1坪ユニットバス用）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "バスルーム",
+      "w": 1600,
+      "d": 750,
+      "h": 600,
+      "model": "assets/models/original/original-bathtub.glb",
+      "thumb": "assets/models/previews-v2/original-bathtub-thumb.png",
+      "top": "assets/models/previews-v2/original-bathtub-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py"
+    },
+    {
+      "id": "original-toilet",
+      "name": "便器（タンク付き）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "トイレ",
+      "w": 390,
+      "d": 700,
+      "h": 800,
+      "model": "assets/models/original/original-toilet.glb",
+      "thumb": "assets/models/previews-v2/original-toilet-thumb.png",
+      "top": "assets/models/previews-v2/original-toilet-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py"
+    },
+    {
+      "id": "original-vanity",
+      "name": "洗面化粧台（間口750・三面鏡）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "洗面台",
+      "w": 750,
+      "d": 505,
+      "h": 1850,
+      "model": "assets/models/original/original-vanity.glb",
+      "thumb": "assets/models/previews-v2/original-vanity-thumb.png",
+      "top": "assets/models/previews-v2/original-vanity-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py",
+      "finishChannels": [
+        { "key": "door", "label": "扉", "default": "#e7e2d9" }
+      ]
+    }
+  ]
+}

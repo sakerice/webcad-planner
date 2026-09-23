@@ -107,7 +107,9 @@ dress(win(4350, BD, 1, "25620", 0, 2030))                    # LDK南 大開口
 dress(win(1400, BD, 1, "16520", 0, 2030))                    # 洋室南 掃き出し
 dress(win(4440, 0, 1, "07409", 950, 1080), "roller")                   # キッチン北(カウンター上)
 win(2600, 0, 1, "06905", 2100, 250, kind="fix")       # 洗面北(採光FIX)
-win(7735, 0, 1, "06905", 1460, 570)                   # 階段上部の高窓
+# 上端を北面の他の2枚(洗面北・浴室北の採光FIX)と 2350 で揃える。
+# **同じ幅・同じ規格の高窓が3枚並ぶのに、1枚だけ上端が2030だった。**
+win(7735, 0, 1, "06905", 1780, 570)                   # 階段上部の高窓
 win(900, 0, 1, "06905", 2100, 250, kind="fix")        # 浴室北(採光FIX)
 dress(win(0, 4950, 1, "11909", 950, 1080, vertical=True))    # 洋室西
 win(0, 6400, 1, "03613", 660, 1370, vertical=True, kind="casement")   # 洋室西スリット
@@ -521,6 +523,18 @@ apply_patch_file(plan, "default_plan_2f_review_26.json")
 review26 = json.loads(Path(__file__).with_name("default_plan_2f_review_26.json").read_text())
 plan.update(review26["metadata"])
 for collection, order in review26["order"].items():
+    by_id = {obj["id"]: obj for obj in plan[collection]}
+    plan[collection] = [by_id[object_id] for object_id in order]
+# 受領版26に残った通り芯からのずれ2か所を戻す(間取りは変えない)。
+from default_plan_2f_review import apply_review_26_joints
+apply_review_26_joints(plan)
+# 最新の受領版(review 27)。門柱・車・道路の位置。ここまでの生成結果を土台に
+# 載せるので、上の通り芯の戻しより後に置く(土台が変わると apply_patch_file が
+# 止まる)。差分は tools/make_review_patch.py で作る。
+apply_patch_file(plan, "default_plan_2f_review_27.json")
+review27 = json.loads(Path(__file__).with_name("default_plan_2f_review_27.json").read_text())
+plan.update(review27["metadata"])
+for collection, order in review27["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。

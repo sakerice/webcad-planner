@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(npx wrangler deploy*)",
+      "Bash(wrangler deploy*)",
+      "Bash(npx wrangler versions deploy*)",
+      "Bash(wrangler versions deploy*)",
+      "Bash(npx wrangler versions upload*)",
+      "Bash(wrangler versions upload*)",
+      "Bash(npx wrangler pages deploy*)",
+      "Bash(wrangler pages deploy*)",
+      "Bash(npx wrangler rollback*)",
+      "Bash(wrangler rollback*)",
+      "Bash(npx wrangler secret*)",
+      "Bash(wrangler secret*)",
+      "Bash(bash tools/deploy.sh*)",
+      "Bash(sh tools/deploy.sh*)",
+      "Bash(./tools/deploy.sh*)",
+      "Bash(git push origin main*)",
+      "Bash(git push -u origin main*)",
+      "Bash(git push --force origin main*)",
+      "Bash(gh pr merge*)",
+      "Bash(gh workflow run*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/deny-deploy.sh\"",
+            "timeout": 10,
+            "statusMessage": "本番を触るコマンドでないか見ています"
+          }
+        ]
+      }
+    ]
+  }
+}

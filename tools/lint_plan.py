@@ -63,6 +63,37 @@ def is_neighbor(t):
     return t.startswith('neighbor-')
 
 
+# いま検査しているプラン。is_furniture() が基礎の高さを見るために要る。
+# 検査関数はプランを引数で受け取るが、is_furniture は各所から1要素だけで
+# 呼ばれるので、ここで持つ。set_current_plan() は main と自己検査が呼ぶ。
+_CURRENT_PLAN = None
+
+
+def set_current_plan(data):
+    global _CURRENT_PLAN
+    _CURRENT_PLAN = data
+
+
+def _floor_like_max_mm(it):
+    """「その上に立つ物」とみなせる高さの上限(mm)。
+
+    1階の床の高さ(基礎+スラブ)まで。基礎を持たない階や基礎が読めないときは
+    従来どおり500mm。**数字を固定で持たない**のは、基礎高さがプランごとに
+    違うため(この値を固定にしていて玄関ドアが開かなくなった)。
+    """
+    data = _CURRENT_PLAN
+    if not data:
+        return 500.0
+    base = None
+    for other in data.get('items', []):
+        if other.get('type') == 'foundation':
+            base = float(other.get('foundationHeight') or 0)
+            break
+    if base is None:
+        return 500.0
+    return max(500.0, base + FLOOR_SLAB_MM)
+
+
 def is_furniture(it):
     """建具・照明・注記・敷地/構造/外構系 以外を「家具」とみなす。"""
     t = it.get('type', '')
@@ -70,10 +101,16 @@ def is_furniture(it):
         return False
     if is_light(t) or is_neighbor(t):
         return False
-    # 高さ500mm以下の custom-block は床仕上げ・段(デッキ/ポーチ/目地)扱い。
-    # 家具ではないので、ドアの開閉域や家具重なりの対象から外す
-    if t == 'custom-block' and (it.get('customHeight') or 900) <= 500:
-        return False
+    # 床仕上げ・段(デッキ/ポーチ/土間)の custom-block は家具ではない。
+    # ドアの開閉域や家具重なりの対象から外す。
+    #
+    # **高さの上限を500mm固定にしていたのが誤りだった。** 基礎450mm+スラブ
+    # 180mmの家では、玄関の床が地面から630mm。そこへ着けるポーチは600mm台に
+    # なる。500mmで切ると、**すべての玄関ドアが「ポーチが当たって5度しか
+    # 開かない」**になる。実際に3階建ての既定プランで出た。
+    # 建物の1階床(基礎+スラブ)までの高さは「立つ物」として扱う。
+    if t == 'custom-block':
+        return (it.get('customHeight') or 900) > _floor_like_max_mm(it)
     # カーテン・ロールスクリーンは窓に付く物、カーペットは床仕上げ。
     # 重なり・窓前チェックの対象外
     if is_window_dressing(t) or '-Carpet-' in t:
@@ -938,7 +975,10 @@ def check15_window_outside_clearance(data):
 def check16_ac_pairing(data):
     """エアコン室内機と室外機が1対1で、配管長3m以内に対応しているか。"""
     out = []
-    ins = [i for i in data['items'] if 'AirConditioner' in i.get('type', '')]
+    # **新しく作った室内機も数える。** ID を1つだけ見ていると、モデルを
+    # 足したときに黙って検査の外へ出る(実際 original-ac-wall* が漏れていた)。
+    ins = [i for i in data['items']
+           if 'AirConditioner' in i.get('type', '') or i.get('type', '').startswith('original-ac-wall')]
     outs = [o for o in data['items'] if o.get('type') == 'ac-outdoor']
     used = set()
     for i in ins:
@@ -962,7 +1002,14 @@ def check16_ac_pairing(data):
 
 
 def check17_window_head_alignment(data):
-    """同一階・同一外壁面で窓の上端(sill+height)の種類が2を超えていないか。"""
+    """同一階・同一の面で窓の上端(sill+height)の種類が2を超えていないか。
+
+    **「面」は向きではなく、窓が乗っている壁の位置で決める。** 向きだけで
+    まとめると、北面と南面が同じ「NS面」に入る。既定プランでこれが起き、
+    南の掃き出し窓(上端2030)と北の高窓(2350)が「揃っていない」と出ていた。
+    別の外壁面なので、揃える理由が無い。**設計を歪めないと通せない指摘は、
+    見落としと同じくらい害がある。**
+    """
     out = []
     groups = {}
     for it in data['items']:
@@ -970,13 +1017,18 @@ def check17_window_head_alignment(data):
             continue
         top = (it.get('windowSill') or 0) + (it.get('windowHeight') or 0)
         rot = int(round((it.get('rot', 0) or 0))) % 180
-        key = (it.get('floor', 1), 'NS' if rot == 0 else 'EW')
+        cx, cy = center(it)
+        # 面を代表する座標。南北向きの窓なら y、東西向きなら x。
+        # 壁の厚みと納まりで数十mmばらつくので 500mm の枠にまとめる。
+        face_pos = int(round((cy if rot == 0 else cx) / 500.0)) * 500
+        key = (it.get('floor', 1), 'NS' if rot == 0 else 'EW', face_pos)
         groups.setdefault(key, {}).setdefault(top, []).append(it)
-    for (floor, face), tops in sorted(groups.items()):
+    for (floor, face, pos), tops in sorted(groups.items()):
         if len(tops) > 2:
             desc = ', '.join('%dmm×%d枚' % (t, len(v)) for t, v in sorted(tops.items()))
-            out.append('[%dF] %s面: 窓上端が%d種類ある(%s)'
-                       % (floor, face, len(tops), desc))
+            out.append('[%dF] %s面(%s=%dmm付近): 窓上端が%d種類ある(%s)'
+                       % (floor, face, 'y' if face == 'NS' else 'x', pos,
+                          len(tops), desc))
     return out
 
 
@@ -1596,7 +1648,8 @@ def check28_curtain_fit(data, root=None):
 FRONTED_TYPES = (
     'washer', 'fmp-Refrigerator', 'fmp-Toilet', 'fmp-WashBasin',
     'fmp-BathroomVanity', 'fmp-GasStove', 'fmp-Bed', 'fmp-Sofa', 'fmp-Chair',
-    'fmp-Table', 'fmp-AirConditionerWall', 'ac-outdoor', 'neighbor-house',
+    'fmp-Table', 'fmp-AirConditionerWall', 'original-ac-wall', 'ac-outdoor',
+    'original-desk', 'neighbor-house',
     'Tv-MEGA', 'Sofa', 'Chair', 'Table-MEGA', 'Tableset', 'Shelf-MEGA',
     'Cabinet-MEGA', 'CABINET', 'Closet', 'Mirror-MEGA', 'Painting-MEGA',
     'Desk', 'Kitchen-MEGA',
@@ -2655,6 +2708,7 @@ def main(argv):
     data.setdefault('walls', [])
     data.setdefault('rooms', [])
     data.setdefault('items', [])
+    set_current_plan(data)
 
     print('lint_plan: %s' % path)
     print('walls=%d rooms=%d items=%d' % (

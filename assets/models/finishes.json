@@ -1,0 +1,2535 @@
+{
+ "version": 1,
+ "channels": {
+  "body": {
+   "ja": "本体",
+   "color": "#cfc9c1",
+   "what": "The whole piece; the model has no separate parts"
+  },
+  "wood": {
+   "ja": "木部",
+   "color": "#b08a5e",
+   "what": "Wooden frame, panel, leg or door front"
+  },
+  "fabric": {
+   "ja": "張地",
+   "color": "#b9b3a8",
+   "what": "Upholstery, mattress, blanket, cushion, curtain or rug"
+  },
+  "leather": {
+   "ja": "革",
+   "color": "#7a5a44",
+   "what": "Leather upholstery"
+  },
+  "metal": {
+   "ja": "金物",
+   "color": "#b0b4b8",
+   "what": "Metal leg, handle, rail or trim"
+  },
+  "ceramic": {
+   "ja": "陶器",
+   "color": "#f2f2f0",
+   "what": "Sanitary ware, basin, tile"
+  },
+  "stone": {
+   "ja": "石・タイル",
+   "color": "#cfcac2",
+   "what": "Stone or tiled surface, worktop"
+  },
+  "glass": {
+   "ja": "ガラス",
+   "color": "#cfd9dd",
+   "what": "Transparent glass; not recoloured"
+  },
+  "accent": {
+   "ja": "アクセント",
+   "color": "#8fa3a8",
+   "what": "A small second colour: piping, inlay, a contrasting panel"
+  }
+ },
+ "fixed": [
+  "glass"
+ ],
+ "references": {
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__BOLIA_sofa_Ivory.glb": {
+   "BOLIA-Ivory": 0.3
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-43693.glb": {
+   "43693": 0.08
+  },
+  "assets/models/furniture_mega/glb/BathTub02.glb": {
+   "mat_Bathroom": 0.536
+  },
+  "assets/models/furniture_mega/glb/BathTub05.glb": {
+   "mat_Bathroom": 0.536
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity03.glb": {
+   "mat_Bathroom": 0.536
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity06.glb": {
+   "mat_Bathroom": 0.536
+  },
+  "assets/models/furniture_mega/glb/Bed33.glb": {
+   "mat_Mattress": 0.38,
+   "mat_BedFrame": 0.242
+  },
+  "assets/models/furniture_mega/glb/Bed34.glb": {
+   "mat_Mattress": 0.38,
+   "mat_BedFrame": 0.242
+  },
+  "assets/models/furniture_mega/glb/Bed35.glb": {
+   "mat_Mattress": 0.38,
+   "mat_BedFrame": 0.242
+  },
+  "assets/models/furniture_mega/glb/Bed36.glb": {
+   "mat_Mattress": 0.38,
+   "mat_BedFrame": 0.242
+  },
+  "assets/models/furniture_mega/glb/CabinetA07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetACorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetACorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetB07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetBCorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetBCorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetC07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetCCorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetCCorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetD07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetDCorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetDCorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetE07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetECorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetECorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetF07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetFCorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetFCorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetG07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetGCorner01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/CabinetGCorner02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/Chair21.glb": {
+   "mat_Chair21": 0.506
+  },
+  "assets/models/furniture_mega/glb/Chair23.glb": {
+   "mat_Chair23": 0.25
+  },
+  "assets/models/furniture_mega/glb/Closet11.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet13.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet14.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet15.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet16.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet31.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet32.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet33.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet35.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet36.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet37.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet39.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet40.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/Closet41.glb": {
+   "mat_Closet": 0.422
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust01.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust02.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust04.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust05.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust07.glb": {
+   "mat_Kitchen": 0.358
+  },
+  "assets/models/furniture_mega/glb/Sofa48.glb": {
+   "mat_SectionalSofaLeather": 0.143
+  },
+  "assets/models/furniture_mega/glb/Table01.glb": {
+   "mat_Table01": 0.167
+  },
+  "assets/models/furniture_mega/glb/Table02.glb": {
+   "mat_Table02": 0.157
+  },
+  "assets/models/furniture_mega/glb/Table03.glb": {
+   "mat_Table03": 0.278
+  },
+  "assets/models/furniture_mega/glb/Table04.glb": {
+   "mat_Table04": 0.172
+  },
+  "assets/models/furniture_mega/glb/Table05.glb": {
+   "mat_Table05": 0.118
+  },
+  "assets/models/furniture_mega/glb/Table06.glb": {
+   "mat_Table06": 0.114
+  },
+  "assets/models/furniture_mega/glb/Table08.glb": {
+   "mat_Table08": 0.133
+  },
+  "assets/models/furniture_mega/glb/Table09.glb": {
+   "mat_Table09": 0.354
+  },
+  "assets/models/furniture_mega/glb/Table10.glb": {
+   "mat_Table10": 0.276
+  },
+  "assets/models/furniture_mega/glb/Table21.glb": {
+   "mat_Table21": 0.2
+  },
+  "assets/models/furniture_mega/glb/Table22.glb": {
+   "mat_Table22": 0.386
+  },
+  "assets/models/furniture_mega/glb/Table23.glb": {
+   "mat_Table23": 0.173
+  },
+  "assets/models/furniture_mega/glb/Table26.glb": {
+   "mat_Table26": 0.145
+  },
+  "assets/models/furniture_mega/glb/Table27.glb": {
+   "mat_Table27": 0.103
+  },
+  "assets/models/furniture_mega/glb/Table28.glb": {
+   "mat_Table28": 0.058
+  },
+  "assets/models/furniture_mega/glb/Table30.glb": {
+   "mat_Table30": 0.376
+  },
+  "assets/models/furniture_mega/glb/Table31.glb": {
+   "mat_Table31": 0.082
+  },
+  "assets/models/furniture_mega/glb/Table33.glb": {
+   "mat_Table33": 0.298
+  },
+  "assets/models/furniture_mega/glb/Table34.glb": {
+   "mat_Table34": 0.386
+  },
+  "assets/models/furniture_mega/glb/Table35.glb": {
+   "mat_Table35": 0.048
+  },
+  "assets/models/furniture_mega/glb/Table37.glb": {
+   "mat_Table37": 0.216
+  },
+  "assets/models/furniture_mega/glb/Table40.glb": {
+   "mat_Table40": 0.384
+  }
+ },
+ "generated": "2026-09-22",
+ "models": {
+  "assets/models/furniture_mega/glb/BathTub01.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub02.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub03.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub04.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub05.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub06.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathTub07.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity01.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity02.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity03.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity04.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity05.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity06.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/BathroomVanity07.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed01.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed02.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed03.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed04.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed05.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed06.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed07.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed08.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed09.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed10.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed11.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed12.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed13.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed14.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed15.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed16.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed17.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed18.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed19.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed20.glb": {
+   "mat_BedFrame": "wood",
+   "mat_Mattress": "fabric",
+   "mat_Blanket": "fabric"
+  },
+  "assets/models/furniture_mega/glb/Bed21.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed22.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed23.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed24.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed25.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed26.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed27.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed28.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed29.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed30.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed31.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed32.glb": {
+   "mat_Blanket": "fabric",
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed33.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed34.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed35.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed36.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed37.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed38.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed39.glb": {
+   "mat_BedFrame": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed40.glb": {
+   "mat_BedFrame": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed41.glb": {
+   "mat_BedFrame": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed42.glb": {
+   "mat_BedFrame": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed43.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed44.glb": {
+   "mat_Mattress": "fabric",
+   "mat_BedFrame": "wood"
+  },
+  "assets/models/furniture_mega/glb/Bed45.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed46.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed47.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed48.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed49.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/Bed50.glb": {
+   "mat_Mattress": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetACorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetACorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetA_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetBCorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetBCorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetB_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetCCorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetCCorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetC_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetDCorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetDCorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetD_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetECorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetECorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetE_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetFCorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetFCorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetF_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetGCorner01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetGCorner02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/CabinetG_Sink.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair01.glb": {
+   "mat_Chair01": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair02.glb": {
+   "mat_Chair02": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair03.glb": {
+   "mat_Chair03": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair04.glb": {
+   "mat_Chair04": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair05.glb": {
+   "mat_Chair05": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair06.glb": {
+   "mat_Chair06": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair07.glb": {
+   "mat_Chair07": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair08.glb": {
+   "mat_Chair08": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair09.glb": {
+   "mat_Chair09": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair10.glb": {
+   "mat_Chair10": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair11.glb": {
+   "mat_Chair11": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair12.glb": {
+   "mat_Chair12": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair13.glb": {
+   "mat_Chair13": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair14.glb": {
+   "mat_Chair14": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair15.glb": {
+   "mat_Chair15": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair16.glb": {
+   "mat_Chair16": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair17.glb": {
+   "mat_Chair17": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair18.glb": {
+   "mat_Chair18": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair19.glb": {
+   "mat_Chair19": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair20.glb": {
+   "mat_Chair20": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair21.glb": {
+   "mat_Chair21": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair22.glb": {
+   "mat_Chair22": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair23.glb": {
+   "mat_Chair23": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair24.glb": {
+   "mat_Chair24": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair25.glb": {
+   "mat_Chair25": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair26.glb": {
+   "mat_Chair26": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair27.glb": {
+   "mat_Chair27": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair28.glb": {
+   "mat_Chair28": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair29.glb": {
+   "mat_Chair29": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair30.glb": {
+   "mat_Chair30": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair31.glb": {
+   "mat_Chair31": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair32.glb": {
+   "mat_Chair32": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair33.glb": {
+   "mat_Chair33": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair34.glb": {
+   "mat_Chair34": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair35.glb": {
+   "mat_Chair35": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair36.glb": {
+   "mat_Chair36": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair37.glb": {
+   "mat_Chair37": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair38.glb": {
+   "mat_Chair38": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair39.glb": {
+   "mat_Chair39": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair40.glb": {
+   "mat_Chair40": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair41.glb": {
+   "mat_Chair41": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair42.glb": {
+   "mat_Chair42": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair43.glb": {
+   "mat_Chair43": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair44.glb": {
+   "mat_Chair44": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair45.glb": {
+   "mat_Chair45": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair46.glb": {
+   "mat_Chair46": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair47.glb": {
+   "mat_Chair47": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair48.glb": {
+   "mat_Chair48": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair49.glb": {
+   "mat_Chair49": "body"
+  },
+  "assets/models/furniture_mega/glb/Chair50.glb": {
+   "mat_Chair50": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet01.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet02.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet03.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet04.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet05.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet06.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet07.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet08.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet09.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet10.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet11.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet12.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet13.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet14.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet15.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet16.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet17.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet18.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet19.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet20.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet21.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet22.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet23.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet24.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet25.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet26.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet27.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet28.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet29.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet30.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet31.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet32.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet33.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet34.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet35.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet36.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet37.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet38.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet39.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet40.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet41.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet42.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet43.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet44.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet45.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet46.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet47.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet48.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet49.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Closet50.glb": {
+   "mat_Closet": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer01.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer02.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer03.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer04.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer05.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer06.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer07.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer08.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer09.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer10.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer11.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer12.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer13.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer14.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer15.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer16.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer17.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer18.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer19.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer20.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer21.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer22.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer23.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer24.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer25.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer26.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer27.glb": {
+   "mat_Drawer": "wood"
+  },
+  "assets/models/furniture_mega/glb/Drawer28.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer29.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer30.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer31.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer32.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer33.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer34.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer35.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer36.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer37.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer38.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer39.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer40.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer41.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer42.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer43.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer44.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer45.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer46.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer47.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer48.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer49.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/Drawer50.glb": {
+   "mat_Drawer": "body"
+  },
+  "assets/models/furniture_mega/glb/GasStove01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/GasStove02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/GasStove03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/GasStove04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/GasStove07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenExhaust07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven01.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven02.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven03.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven04.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven05.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven06.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/KitchenOven07.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven01.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven02.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven03.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven04.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven05.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven06.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/MicrowaveOven07.glb": {
+   "mat_Glass": "glass",
+   "mat_Kitchen": "metal"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Refrigerator07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem01.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem02.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem03.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem04.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem05.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem06.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/ShowerSystem07.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink01.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink02.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink03.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink04.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink05.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink06.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sink07.glb": {
+   "mat_Kitchen": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa01.glb": {
+   "mat_Sofa01": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa02.glb": {
+   "mat_Sofa02": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa03.glb": {
+   "mat_Sofa03": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa04.glb": {
+   "mat_Sofa04": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa05.glb": {
+   "mat_Sofa04": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa06.glb": {
+   "mat_Sofa06": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa07.glb": {
+   "mat_Sofa07": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa08.glb": {
+   "mat_Sofa08": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa09.glb": {
+   "mat_Sofa09": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa10.glb": {
+   "mat_Sofa10": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa11.glb": {
+   "mat_Sofa11": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa12.glb": {
+   "mat_Sofa12": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa13.glb": {
+   "mat_Sofa13": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa14.glb": {
+   "mat_Sofa14": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa15.glb": {
+   "mat_Sofa15": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa16.glb": {
+   "mat_Sofa16": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa17.glb": {
+   "mat_Sofa17": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa18.glb": {
+   "mat_Sofa18": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa19.glb": {
+   "mat_Sofa19": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa20.glb": {
+   "mat_Sofa20": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa21.glb": {
+   "mat_Sofa21": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa22.glb": {
+   "mat_Sofa22": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa23.glb": {
+   "mat_Sofa23": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa24.glb": {
+   "mat_Sofa24": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa25.glb": {
+   "mat_Sofa25": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa26.glb": {
+   "mat_Sofa26": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa27.glb": {
+   "mat_Sofa27": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa28.glb": {
+   "mat_Sofa28": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa29.glb": {
+   "mat_Sofa29": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa30.glb": {
+   "mat_Sofa30": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa31.glb": {
+   "mat_Sofa31": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa32.glb": {
+   "mat_Sofa32": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa33.glb": {
+   "mat_Sofa33": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa34.glb": {
+   "mat_Sofa34": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa35.glb": {
+   "mat_Sofa35": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa36.glb": {
+   "mat_Sofa36": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa37.glb": {
+   "mat_Sofa37": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa38.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa39.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa40.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa41.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa42.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa43.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa44.glb": {
+   "mat_SectionalSofaFabric": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa45.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa46.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa47.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa48.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa49.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Sofa50.glb": {
+   "mat_SectionalSofaLeather": "body"
+  },
+  "assets/models/furniture_mega/glb/Table01.glb": {
+   "mat_Table01": "body"
+  },
+  "assets/models/furniture_mega/glb/Table02.glb": {
+   "mat_Table02": "body"
+  },
+  "assets/models/furniture_mega/glb/Table03.glb": {
+   "mat_Table03": "body"
+  },
+  "assets/models/furniture_mega/glb/Table04.glb": {
+   "mat_Table04": "body"
+  },
+  "assets/models/furniture_mega/glb/Table05.glb": {
+   "mat_Table05": "body"
+  },
+  "assets/models/furniture_mega/glb/Table06.glb": {
+   "mat_Table06": "body"
+  },
+  "assets/models/furniture_mega/glb/Table07.glb": {
+   "mat_Table07": "body"
+  },
+  "assets/models/furniture_mega/glb/Table08.glb": {
+   "mat_Table08": "body"
+  },
+  "assets/models/furniture_mega/glb/Table09.glb": {
+   "mat_Table09": "body"
+  },
+  "assets/models/furniture_mega/glb/Table10.glb": {
+   "mat_Table10": "body"
+  },
+  "assets/models/furniture_mega/glb/Table11.glb": {
+   "mat_Table11": "body"
+  },
+  "assets/models/furniture_mega/glb/Table12.glb": {
+   "mat_Table12": "body"
+  },
+  "assets/models/furniture_mega/glb/Table13.glb": {
+   "mat_Table13": "body"
+  },
+  "assets/models/furniture_mega/glb/Table14.glb": {
+   "mat_Table14": "body"
+  },
+  "assets/models/furniture_mega/glb/Table15.glb": {
+   "mat_Table15": "body"
+  },
+  "assets/models/furniture_mega/glb/Table16.glb": {
+   "mat_Table16": "body"
+  },
+  "assets/models/furniture_mega/glb/Table17.glb": {
+   "mat_Table17": "body"
+  },
+  "assets/models/furniture_mega/glb/Table18.glb": {
+   "mat_Table18": "body"
+  },
+  "assets/models/furniture_mega/glb/Table19.glb": {
+   "mat_Table19": "body"
+  },
+  "assets/models/furniture_mega/glb/Table20.glb": {
+   "mat_Table20": "body"
+  },
+  "assets/models/furniture_mega/glb/Table21.glb": {
+   "mat_Table21": "body"
+  },
+  "assets/models/furniture_mega/glb/Table22.glb": {
+   "mat_Table22": "body"
+  },
+  "assets/models/furniture_mega/glb/Table23.glb": {
+   "mat_Table23": "body"
+  },
+  "assets/models/furniture_mega/glb/Table24.glb": {
+   "mat_Table24": "body"
+  },
+  "assets/models/furniture_mega/glb/Table25.glb": {
+   "mat_Table25": "body"
+  },
+  "assets/models/furniture_mega/glb/Table26.glb": {
+   "mat_Table26": "body"
+  },
+  "assets/models/furniture_mega/glb/Table27.glb": {
+   "mat_Table27": "body"
+  },
+  "assets/models/furniture_mega/glb/Table28.glb": {
+   "mat_Table28": "body"
+  },
+  "assets/models/furniture_mega/glb/Table29.glb": {
+   "mat_Table29": "body"
+  },
+  "assets/models/furniture_mega/glb/Table30.glb": {
+   "mat_Table30": "body"
+  },
+  "assets/models/furniture_mega/glb/Table31.glb": {
+   "mat_Table31": "body"
+  },
+  "assets/models/furniture_mega/glb/Table32.glb": {
+   "mat_Table32": "body"
+  },
+  "assets/models/furniture_mega/glb/Table33.glb": {
+   "mat_Table33": "body"
+  },
+  "assets/models/furniture_mega/glb/Table34.glb": {
+   "mat_Table34": "body"
+  },
+  "assets/models/furniture_mega/glb/Table35.glb": {
+   "mat_Table35": "body"
+  },
+  "assets/models/furniture_mega/glb/Table36.glb": {
+   "mat_Table36": "body"
+  },
+  "assets/models/furniture_mega/glb/Table37.glb": {
+   "mat_Table37": "body"
+  },
+  "assets/models/furniture_mega/glb/Table38.glb": {
+   "mat_Table38": "body"
+  },
+  "assets/models/furniture_mega/glb/Table39.glb": {
+   "mat_Table39": "body"
+  },
+  "assets/models/furniture_mega/glb/Table40.glb": {
+   "mat_Table40": "body"
+  },
+  "assets/models/furniture_mega/glb/Table41.glb": {
+   "mat_Table41": "body"
+  },
+  "assets/models/furniture_mega/glb/Table42.glb": {
+   "mat_Table42": "body"
+  },
+  "assets/models/furniture_mega/glb/Table43.glb": {
+   "mat_Table43": "body"
+  },
+  "assets/models/furniture_mega/glb/Table44.glb": {
+   "mat_Table44": "body"
+  },
+  "assets/models/furniture_mega/glb/Table45.glb": {
+   "mat_Table45": "body"
+  },
+  "assets/models/furniture_mega/glb/Table46.glb": {
+   "mat_Table46": "body"
+  },
+  "assets/models/furniture_mega/glb/Table47.glb": {
+   "mat_Table47": "body"
+  },
+  "assets/models/furniture_mega/glb/Table48.glb": {
+   "mat_Table48": "body"
+  },
+  "assets/models/furniture_mega/glb/Table49.glb": {
+   "mat_Table49": "body"
+  },
+  "assets/models/furniture_mega/glb/Table50.glb": {
+   "mat_Table50": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet01.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet02.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet03.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet04.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet05.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet06.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/Toilet07.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin01.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin02.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin03.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin04.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin05.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin06.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/furniture_mega/glb/WashBasin07.glb": {
+   "mat_Bathroom": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__basket-304967-Gray.glb": {
+   "basket-304967-Gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-349685_Frame_Gray.glb": {
+   "bath-349685_Frame_Gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-382696_1_blue_frame.glb": {
+   "bath-382696_1_blue_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-453432.glb": {
+   "bath-453432": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-4645451.glb": {
+   "bath-4645451": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-853444.glb": {
+   "bath-853444": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-l933_all_in_one_washbasin_frame.glb": {
+   "bath-l933_all_in_one_washbasin_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-lower_cabinet-732.glb": {
+   "bath-lower_cabinet-732": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-lower_cabinet.glb": {
+   "bath-lower_cabinet": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bath/MEGA_PACK_BATH__bath-minimal_point_open_upper_cabinet_frame.glb": {
+   "bath-minimal_point_open_upper_cabinet_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-102432_Frame_Q_Brown.glb": {
+   "512.006": "metal",
+   "236236.004": "fabric",
+   "23623.001": "accent",
+   "236236.005": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-107329_Frame_CK.glb": {
+   "234": "fabric",
+   "234234": "fabric",
+   "326234": "metal",
+   "235.011": "fabric",
+   "234.008": "fabric",
+   "235.009": "fabric",
+   "234.007": "fabric",
+   "235.010": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-117851-3color.glb": {
+   "123": "fabric",
+   "2131": "fabric",
+   "123.002": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-117944_Frame_Q_Maple.glb": {
+   "243": "metal",
+   "346": "wood",
+   "364": "accent",
+   "364.005": "wood",
+   "346.008": "wood",
+   "346.006": "accent",
+   "346.007": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-117944_Frame_Q_Teak.glb": {
+   "12": "fabric",
+   "132": "metal",
+   "12.005": "accent",
+   "12.004": "accent",
+   "12.002": "fabric",
+   "12.003": "fabric",
+   "12.001": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-25333.glb": {
+   "52314": "metal",
+   "512.004": "metal",
+   "512.001": "fabric",
+   "152.001": "fabric",
+   "512.002": "fabric",
+   "512.003": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-43693.glb": {
+   "236": "fabric",
+   "623": "accent",
+   "43693": "wood",
+   "236.006": "fabric",
+   "263.006": "fabric",
+   "236.005": "fabric",
+   "236.007": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-43694-43685.glb": {
+   "43694": "metal",
+   "356256": "fabric",
+   "523523": "fabric",
+   "235235.002": "fabric",
+   "235235.003": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-45539.glb": {
+   "235": "fabric",
+   "523": "fabric",
+   "2365": "fabric",
+   "236.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Bed/MEGA_PACK_BED__bed-99483.glb": {
+   "bed-99483.001": "fabric",
+   "bed-99483.003": "fabric",
+   "bed-99483": "accent",
+   "bed-99483.005": "fabric",
+   "bed-99483.006": "fabric",
+   "bed-99483.002": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-133299_frame_countyoffice.glb": {
+   "cabinet-133299_frame_countyoffice": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-143628_frame_1_naturalwood.glb": {
+   "cabinet-143628_frame_1_naturalwood": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-149435_frame_brown.glb": {
+   "cabinet-149435_frame_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-154332_frame.glb": {
+   "cabinet-154332_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-19565_Frame.glb": {
+   "cabinet-19565_Frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-306913_frame_brown.glb": {
+   "cabinet-306913_frame_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-336846_frame.glb": {
+   "cabinet-336846_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-354290_frame_walnut_brown.glb": {
+   "cabinet-354290_frame_walnut_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-65549.glb": {
+   "cabinet-65549": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Cabinet/MEGA_PACK_CABINET__cabinet-69585.glb": {
+   "cabinet-69585": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet--in-65uf.001.glb": {
+   "in-65uf.025": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-122712_Dark_Navy.glb": {
+   "carpet-122712_Dark Navy": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-221115_frame_granada.glb": {
+   "carpet-221115_frame_granada": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-224774_frame_gray.glb": {
+   "carpet-224774_frame_gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-27355_frame_botanical.glb": {
+   "carpet-27355_frame_botanical": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-29915_frame.glb": {
+   "carpet-29915_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-345vxc34sdfv.glb": {
+   "carpet-345vxc34sdfv": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-49517_frame_mordencheck.glb": {
+   "carpet-49517_frame_mordencheck": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-77619_Frame_08.glb": {
+   "carpet-77619_Frame_08": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Carpet/MEGA_PACK_Carpet__carpet-horang_frame_orange_0000.glb": {
+   "carpet-horang_frame_orange_0000": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-185637.glb": {
+   "chair-185637": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-230409_frame_walnut.glb": {
+   "chair-230409_frame_walnut": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-408727_black_frame.glb": {
+   "chair-408727_black__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-459698_Frame_Walnut.glb": {
+   "chair-459698_Frame_Walnut": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-490755_frame_black.glb": {
+   "chair-490755_frame_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-54418_Brown.glb": {
+   "chair-54418_Brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-545882_frame_walnut.glb": {
+   "chair-545882_frame_walnut": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-84415_Frame_Black.glb": {
+   "chair-84415_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair-marketb_frame_900_black.glb": {
+   "chair-marketb_frame_900_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Chair/MEGA_PACK_Chair__chair_142082_Frame_Orange.glb": {
+   "chair_142082_Frame_Orange": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-154085_Frame_Gray.glb": {
+   "curtain-154085_Frame_Gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-177647.glb": {
+   "curtain-177647": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-179264.glb": {
+   "curtain-179264": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-203701_yellow.glb": {
+   "curtain-203701_yellow": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-207554.glb": {
+   "curtain-207554": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-228569_check.glb": {
+   "curtain-228569_check": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-230615.glb": {
+   "curtain-230615": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-32084_Frame_Black.glb": {
+   "curtain-32084_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-45658.glb": {
+   "curtain-45658": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Curtain/MEGA_PACK_Curtain__curtain-47103_Frame_BlueNavy.glb": {
+   "curtain-47103_Frame_BlueNavy": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__calder_incense_holder.glb": {
+   "calder_incense_holder": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__clock-116007_Frame_RoseGoldBlack.glb": {
+   "clock-116007_Frame_RoseGoldBlack": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__clock-131686.glb": {
+   "clock-131686": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__clock-68955_Frame_Black.glb": {
+   "clock-68955_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__decor-63422_frame.glb": {
+   "decor-63422_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__decor-71718_Frame_NaturalWood.glb": {
+   "decor-71718_Frame_NaturalWood": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__decor-roland_pom_pom_chrysanthemum_flower_frame_li.glb": {
+   "decor-roland_pom_pom_chrysanthemum_flower_frame_li": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__decor-shop_the_look.glb": {
+   "decor-shop_the_look": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__decor_698778_frame.glb": {
+   "decor_698778_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Decor/MEGA_PACK_decor__defuser_Green.glb": {
+   "defuser_Green.001": "metal",
+   "defuser_Green": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__Classroom-door-black.glb": {
+   "Classroom-door-black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__Classroom-door-blue.glb": {
+   "Classroom-door-blue": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__Classroom-door-grey.glb": {
+   "Classroom-door-grey": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__Classroom-door-red.glb": {
+   "Classroom-door-red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__Classroom-door-white.glb": {
+   "Classroom-door-white": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__ROUND-WHITE-DOOR-White.glb": {
+   "ROUND-WHITE-DOOR-White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__door-305142_Black.glb": {
+   "door-305142_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__door-305142_White.glb": {
+   "door-305142_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__door-586242_White.glb": {
+   "door-586242_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Door/MEGA_PACK_door__door-837968_Gray.glb": {
+   "door-837968_Gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-19522_Frame_Orange.glb": {
+   "electronic-19522_Frame_Orange": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-228738.glb": {
+   "electronic-228738": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-267923.glb": {
+   "electronic-267923": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-372697.glb": {
+   "electronic-372697": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-382616.glb": {
+   "electronic-382616": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-477638_black_frame.glb": {
+   "electronic-477638_black__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-566595.glb": {
+   "electronic-566595": "metal",
+   "electronic-566595.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-79841_Frame_Black.glb": {
+   "electronic-79841_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic-80816_frame_white.glb": {
+   "electronic-80816_frame_white": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Electronic/MEGA_PACK_Electronic__electronic_230181.glb": {
+   "electronic_230181": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__MULA.glb": {
+   "MULA": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid-288079_frame_48inch.glb": {
+   "kid-288079_frame_48inch": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid-677431_Brown.glb": {
+   "kid-677431_Brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid-919125.glb": {
+   "kid-919125": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid-klappa_frame.glb": {
+   "kid-klappa_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid-lillabo_frame_wood.glb": {
+   "kid-lillabo_frame_wood": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid_691953_Frame_Guliguli_Tiger.glb": {
+   "kid_691953_Frame_Guliguli Tiger": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid_ADADA-ROCKING-HORSE_1.glb": {
+   "kid_ADADA-ROCKING-HORSE_1": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__kid_Verve-Malibu-Ross.glb": {
+   "kid_Verve-Malibu-Ross": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kid/MEGA_PACK_kid__picnic_childrens_hut_aubergine.glb": {
+   "picnic_childrens_hut_aubergine": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic-298603_Frame_Black.glb": {
+   "electronic-298603_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic-383746.glb": {
+   "electronic-383746": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic-423938_Frame_Metal.glb": {
+   "electronic-423938_Frame_Metal": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic-553172_frame_black.glb": {
+   "electronic-553172_frame_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic-drip-coffee-machine_red.glb": {
+   "electronic-drip-coffee-machine_red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__electronic_1206268270_Frame.glb": {
+   "electronic_1206268270_Frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__kitchen-171401_frame.glb": {
+   "kitchen-171401_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__kitchen_344313.glb": {
+   "kitchen_344313": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__kitchen_coffeebeangrinder.glb": {
+   "kitchen_coffeebeangrinder": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Kitchen/MEGA_PACK_kitchen__kitchen_kneader_Frame_red.glb": {
+   "kitchen_kneader_Frame_red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__FLOWER-POT-VP3-1.glb": {
+   "FLOWER-POT-VP3-1": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-126685_frame.glb": {
+   "lamp-126685_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-13127_Frame_Black.glb": {
+   "lamp-13127_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-13171_Frame_GunMetal.glb": {
+   "lamp-13171_Frame_GunMetal": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-244934_Frame_Black.glb": {
+   "lamp-244934_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-25416.glb": {
+   "lamp-25416": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-31085_2.glb": {
+   "lamp-31085_2": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-507702_frame_brown.glb": {
+   "lamp-507702_frame_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-573754_frame.glb": {
+   "lamp-573754_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Lamp/MEGA_PACK_lamp__lamp-58151_Orange.glb": {
+   "lamp-58151_Orange": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__bed-120970_frame_ss_dark_gray.glb": {
+   "bed-120970_frame_ss_dark_gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__easter_9_zone_independent_spring_mattress_Q.glb": {
+   "easter_9_zone_independent_spring_mattress_Q": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress-162155.glb": {
+   "mattress-162155": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress-162182_LQ_Ivory.glb": {
+   "mattress-162182_LQ_Ivory": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress-324031_K.glb": {
+   "mattress-324031_K": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress-40418_Q.glb": {
+   "mattress-40418_Q": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress-40418_SS.glb": {
+   "mattress-40418_SS": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress_278434_K.glb": {
+   "mattress_278434_K": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress_29361_D.glb": {
+   "mattress_29361_D": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mattress/MEGA_PACK_Mattress__mattress_bonnell_220t_mattress_SS.glb": {
+   "mattress_bonnell_220t_mattress_SS": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__J-38-Dressing-Mirror.glb": {
+   "J-38-Dressing-Mirror": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__cabinet-79736_frame_oak.glb": {
+   "cabinet-79736_frame_oak": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-220010_frame_gold.glb": {
+   "mirror-220010_frame_gold": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-325613_frame_natural.glb": {
+   "mirror-325613_frame_natural": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-337570_600_frame_red.001.glb": {
+   "mirror-337570_600_frame_red.001": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-35799_410_frame_black.glb": {
+   "mirror-35799_410_frame_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-459754_frame_natural.glb": {
+   "mirror-459754_frame_natural": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-498995_frame_light_brown.glb": {
+   "mirror-498995_frame_light_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-69653_frame_silver.glb": {
+   "mirror-69653_frame_silver": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Mirror/MEGA_PACK_Mirror__mirror-70923_frame.glb": {
+   "mirror-70923_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__decor-355748_frame_500.glb": {
+   "decor-355748_frame_500": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__decor-366937_frame_a3_champagne.glb": {
+   "decor-366937_frame_a3_champagne": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__decor-449871_frame_red.glb": {
+   "decor-449871_frame_red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__decor-476641_frame.glb": {
+   "decor-476641_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__decor-680411_frame_364.glb": {
+   "decor-680411_frame_364": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__painting-152307_afishbowl_frame.glb": {
+   "painting-152307_afishbowl__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__painting-503147_50_70_cm.glb": {
+   "painting-503147_50_70_cm.001": "accent"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__painting_366907_Frame_29X42cm_WalnutWood.glb": {
+   "painting_366907_Frame_29X42cm_WalnutWood": "wood",
+   "painting_366907_Frame_29X42cm_WalnutWood.001": "wood"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__painting_366907_Frame_50X70cm_White.glb": {
+   "painting_366907_Frame_50X70cm_White": "wood",
+   "painting_366907_Frame_50X70cm_White.001": "wood"
+  },
+  "assets/models/interior_model_0_26_1/glb/Painting/MEGA_PACK_Painting__shelf-163148_frame_a2_black.glb": {
+   "shelf-163148_frame_a2_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-046_365.glb": {
+   "pet-046_365": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-16575673.glb": {
+   "pet-16575673": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-279131_white_frame.glb": {
+   "pet-279131_white__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-283245_1_frame.glb": {
+   "pet-283245_1_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-386854_1_frame.glb": {
+   "pet-386854_1_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-43005_Frame_Green.glb": {
+   "pet-43005_Frame_Green": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-46694_frame.glb": {
+   "pet-46694_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-566756_frame.glb": {
+   "pet-566756_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-61727_brown_frame.glb": {
+   "pet-61727_brown__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Pet/MEGA_PACK_Pet__pet-81869_frame_brown.glb": {
+   "pet-81869_frame_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__Plant_447168_Frame_Brown.glb": {
+   "Plant_447168_Frame_Brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-143525_frame.glb": {
+   "plant-143525_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-144523_frame.glb": {
+   "plant-144523_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-151348_chocolate_frame.glb": {
+   "plant-151348_chocolate__frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-169614.glb": {
+   "plant-169614.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-230510.glb": {
+   "plant-230510.001": "accent"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-317746.glb": {
+   "plant-317746": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant-352597.glb": {},
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant_133259.glb": {
+   "plant_133259": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Plant/MEGA_PACK_Plant__plant_303563.glb": {
+   "plant_303563": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-134459_frame_red.glb": {
+   "shelf-134459_frame_red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-157369.glb": {
+   "shelf-157369": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-161715.glb": {
+   "shelf-161715": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-172151_frame_brown.glb": {
+   "shelf-172151_frame__brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-282506_frame_red.glb": {
+   "shelf-282506_frame_red": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-310090_frame_natural.glb": {
+   "shelf-310090_frame_natural": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-344463_ModernAcacia-Black.glb": {
+   "shelf-344463_ModernAcacia-Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-395523_frame_black.glb": {
+   "shelf-395523_frame_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-422943_frame_walnut_dark_gray.glb": {
+   "shelf-422943_frame_walnut_dark_gray": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Shelf/MEGA_PACK_Shelf__shelf-609241_frame_merbau.glb": {
+   "shelf-609241_frame_merbau": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__2-seater_fabric_sofa.glb": {
+   "interior.001": "fabric",
+   "sofa_365562_1": "metal",
+   "interior.002": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__2-seater_modular_sofa.glb": {
+   "interior.173": "fabric",
+   "interior.093": "fabric",
+   "interior.090": "fabric",
+   "interior.091": "fabric",
+   "interior.092": "fabric",
+   "sofa-25476": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__4-seater_lounge_sofa.glb": {
+   "sofa_460998_Frame_Denim": "wood",
+   "sofa-35368cb4r.001": "fabric",
+   "sofa-j567k767.002": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__Alto_3.5_seater_Louvoir_Fabric_Sofa_blue.glb": {
+   "sofa-264969_frame_sky_blue": "wood",
+   "interior.079": "fabric",
+   "interior.041": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__Artificial_leather_sofa.glb": {
+   "sofa_128316_Frame_Black": "wood",
+   "interior.003": "fabric",
+   "interior.004": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__BOLIA_sofa_Ivory.glb": {
+   "sofa-e5ybetgdh45y.002": "fabric",
+   "sofa-e5ybetgdh45y.003": "accent",
+   "BOLIA-Ivory": "wood"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__Cotton_4-seater_sofa.glb": {
+   "sofa_345791_Frame_Begie": "wood",
+   "sofa-h5476edgvsx2.001": "fabric",
+   "sofa-h5476edgvsx2": "fabric",
+   "sofa-h5476edgvsx2.002": "fabric",
+   "sofa-h5476edgvsx2.003": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__Covering_fabric_sofa.glb": {
+   "sofa_267116_Frame_Begie": "wood",
+   "sofa-e5ybetgdh45y.005": "fabric",
+   "sofa-e5ybetgdh45y.006": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__EasyClean_Fabric_Sofa.glb": {
+   "sofa_191950_frame_grey": "wood",
+   "sofa-e6b3tgfdhbdx346.001": "fabric",
+   "sofa-e6b3tgfdhbdx346.008": "fabric",
+   "sofa-e6b3tgfdhbdx346.009": "fabric",
+   "sofa-e6b3tgfdhbdx346.010": "fabric",
+   "sofa-e6b3tgfdhbdx346.011": "fabric",
+   "sofa-e6b3tgfdhbdx346.012": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Sofa/MEGA_PACK_Sofa__Fabric_sofa_with_stool.glb": {
+   "sofa_309927_Frame_Brown": "wood",
+   "sofa-e5ybetgdh45y.004": "fabric",
+   "sofa-e6b3tgfdhbdx346.006": "fabric",
+   "sofa-e6b3tgfdhbdx346.002": "fabric",
+   "sofa-e6b3tgfdhbdx346.003": "fabric",
+   "sofa-e6b3tgfdhbdx346.004": "fabric",
+   "sofa-e6b3tgfdhbdx346.007": "fabric",
+   "sofa-e6b3tgfdhbdx346.005": "fabric"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__Classic-Line-TB_229-5.glb": {
+   "Classic-Line-TB 229-5": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__ENDLESS-TABLE_193.glb": {
+   "ENDLESS-TABLE_193": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__pond_table-WOOD.glb": {
+   "pond_table-WOOD": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-157282.glb": {
+   "table-157282": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-167288_frame_1190b_urbanacacia.glb": {
+   "table-167288_frame_1190b_urbanacacia": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-171562_frame_brown_800.glb": {
+   "table-171562_frame_brown_800": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-175980_frame_brown.glb": {
+   "table-175980_frame_brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-309959.glb": {
+   "table-309959": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-78393_frame_natural.glb": {
+   "table-78393_frame_natural": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Table/MEGA_PACK_Table__table-86358_frame_travertino_a600.glb": {
+   "table-86358_frame_travertino_a600": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset-527276_frame_combination_chair_a_black.glb": {
+   "tableset-527276_frame_combination_chair_a_black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_402658_Frame_2BlueBenchGray.glb": {
+   "tableset_402658_Frame_2BlueBenchGray": "wood",
+   "tableset_402658_Frame_2BlueBenchGray.001": "wood"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_442574_Frame_WhiteMarble.glb": {
+   "tableset_442574_Frame_WhiteMarble": "stone",
+   "tableset_442574_Frame_WhiteMarble.001": "stone"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_456939_Frame_Walnutbrown.glb": {
+   "tableset_456939_Frame_Walnutbrown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_462997.glb": {
+   "tableset_462997": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_488514.glb": {
+   "tableset_488514": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_489772_Frame_Brownivory.glb": {
+   "tableset_489772_Frame_Brownivory": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_494396.glb": {
+   "tableset_494396": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_539495.glb": {
+   "tableset_539495": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tableset/MEGA_PACK_Tableset__tableset_614454_Frame_Walnut.glb": {
+   "tableset_614454_Frame_Walnut": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-101085_frame.glb": {
+   "electronic-101085_frame": "wood",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-123142.glb": {
+   "electronic-123142": "metal",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-126724_frame.glb": {
+   "electronic-126724_frame": "wood",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-168789_frame.glb": {
+   "electronic-168789_frame": "wood",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-246603.glb": {
+   "electronic-246603": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-263340.glb": {
+   "electronic-263340": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-280915.glb": {
+   "electronic-280915": "metal",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-280931.glb": {
+   "electronic-280931": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-431112.glb": {
+   "electronic-431112": "metal",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Tv/MEGA_PACK_tv__electronic-46720.glb": {
+   "electronic-46720": "metal",
+   "electronic-431112.001": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_305163_Frame_Black.glb": {
+   "wall_305163_Frame_ Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_307079_Frame_White.glb": {
+   "wall_307079_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_453365_Frame_Brown.glb": {
+   "wall_453365_Frame_Brown": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_453365_Frame_White.glb": {
+   "wall_453365_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_454283_Frame_White.glb": {
+   "wall_454283_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_454305_Frame_White.glb": {
+   "wall_454305_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_490267_Frame_Maple.glb": {
+   "wall_490267_Frame_Maple": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_490267_Frame_White.glb": {
+   "wall_490267_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_551669_Frame_Black.glb": {
+   "wall_551669_Frame_Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Wall/MEGA_PACK_wall__wall_551669_Frame_White.glb": {
+   "wall_551669_Frame_White": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__2W-Long-Spear_BlueGray.glb": {
+   "2W-Long-Spear_BlueGray.001": "metal",
+   "2W-Long-Spear_BlueGray": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__2W-Long-Spear_Brown.glb": {
+   "2W-Long-Spear_Brown.001": "metal",
+   "2W-Long-Spear_Brown": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__2W-Long-Spear_CharcoalGray.001.glb": {
+   "2W-Long-Spear_CharcoalGray.002": "metal",
+   "2W-Long-Spear_CharcoalGray.003": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__2W-Long-Spear_CharcoalGray.glb": {
+   "2W-Long-Spear_CharcoalGray.001": "metal",
+   "2W-Long-Spear_CharcoalGray": "metal"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__HOTEL-ROUND-WINDOW-Black.glb": {
+   "HOTEL-ROUND-WINDOW-Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__PLAID-ROUND-WINDOW-Black.glb": {
+   "PLAID-ROUND-WINDOW-Black": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__shelf-33580-14.glb": {
+   "shelf-33580-14": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__window-33050_wood_frame.glb": {
+   "window-33050_wood_frame": "body"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__window-3bf7.004.glb": {
+   "int-vw.1906": "metal",
+   "int-vw.1875": "wood"
+  },
+  "assets/models/interior_model_0_26_1/glb/Window/MEGA_PACK_Window__wood_circle_window.glb": {
+   "wood_circle_window": "body"
+  }
+ },
+ "defaults": {
+  "wood": 0.242,
+  "body": 0.358,
+  "fabric": 0.38,
+  "leather": 0.242,
+  "accent": 0.38,
+  "metal": 0.358,
+  "ceramic": 0.55,
+  "stone": 0.55
+ }
+}

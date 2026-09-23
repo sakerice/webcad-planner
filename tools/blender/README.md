@@ -169,6 +169,71 @@ QuadriFlow によるリトポロジーも試した。2万クアッド(描画コ�
 - 車の前は glTF の -Z。既存 `car_sedan.glb` と揃っていないと、アプリ上で
   車だけ真横を向く。`stage_join_and_place()` に assert を入れてある。
 
+## カタログのモデルを作るときの約束（外すとアプリで壊れる）
+
+`assets/models/original/*.glb` に入る家具・住設を作るときの決まり。
+**決まりは `model_kit.py` の `run()` が機械で守らせる。** 文章で置くだけでは
+守られなかった(寸法・正面・UVのどれも取りこぼした)ので、`run()` を通していない
+モデルは「検査されていないモデル」として扱う。
+`build_sanitary.py` / `build_hvac.py` / `build_desks.py` / `build_doors.py` /
+`build_garden.py` はすべてこれを通している。
+**外部のエージェントに作らせるときは、まずここを渡す。**
+
+    from model_kit import *
+    run([('original-desk', (1000, 600, 720), build_desk, 'wood', 3000)])
+      #   ID            寸法mm(w,d,h)     組み立て関数  部位  面数上限
+
+| 項目 | 決まり |
+|---|---|
+| 単位・座標 | メートル。Blender は Z-up で組み、`export_yup=True` で glTF(+Y up)へ |
+| 原点 | 接地面の中心。Z=0 から上へ立てる |
+| 正面 | **Blender の -Y**。glTF では +Z になり、アプリの約束(前面+Z / 上+Y)と合う |
+| 寸法 | バウンディングボックスを manifest の w/d/h にぴたりと合わせる(`normalize_to()`) |
+| 形 | 単一のメッシュオブジェクトへ join してから書き出す |
+| 質感 | 画像テクスチャを使わない。色・粗さ・金属度だけ。マテリアル名は英語 |
+| 色変更 | 変えられる部位はマテリアルの `finishChannel`(ID プロパティ)で示し、`export_extras=True` で書き出す。**陶器・白物家電のように現実に色の選べないものには付けない** |
+| UV | **`unwrap()` で展開してから書き出す。** 無いとアプリで素材を選んでも柄が出ない(単色になる) |
+| 面数 | モバイルで動く範囲。既存は 150〜600 三角形、上限の目安 3,000 |
+| 編集可能な原本 | `tools/blender/work/original/<id>.blend` を必ず残す(検査が見ている) |
+
+向きの確かめ方: `render_thumb()` は **-Y 側**から撮る。ここに正面が写っていなければ逆。
+
+天井付け・下向きの品は `run()` の第7要素に `True` を渡す。**見える面が下を向いているので、
+そのまま撮るとカタログの絵も平面の記号も真っ白な板になる。**形は変えず、絵のためだけに裏返す。
+
+### 落とし穴（4つとも実際に踏んだ）
+
+1. **`normalize_to()` は XY の縦横比を保つ。** 組んだ形が狙いの箱をぴたりと
+   張っていないと、片方の軸しか目標に届かない。**どこかの部品で X・Y・Z の
+   両端が箱に届くように組むこと。** 便器(奥行き664→780へ引き伸ばし)、
+   エアコン(幅798→791.3)、机(1000→977.4)、建具(755→687.2)で4回踏んだ。
+2. **`obj.dimensions` は `normalize_to()` の後も古い値を返す。** 頂点を直接
+   動かすので依存グラフが更新されるまで反映されない。**寸法の確認は頂点から測る。**
+3. **`add_tube()` の管は12角形。** 外側の面が公称半径より約3.4%内側に来る
+   (r=10mm で実測9.66mm = cos15度)。**管で寸法の端を決めない。**
+4. **角のRをケチると箱にしかならない。** 浴槽を R=70mm で作ったらサムネが
+   ただの白い箱だった。R=170mm で初めて浴槽に見えた。**面数を足しても
+   直らない種類の問題。**
+5. **glTF の `TEXCOORD_0` は「先頭のUV層」で、`active_render` の層ではない。**
+   UVを持つ部品(`primitive_cube_add` は UVMap を作る)と持たない部品
+   (`from_pydata` は作らない)を join すると層が2枚になり、**先頭の空の層が
+   書き出される**。Blender 側の検査は通るのに、アプリでは単色になる。
+   デッキ・便器・エアコン・建具の4系統で踏んだ。`unwrap()` が余分な層を
+   落とし、`tools/tests/model-uv.test.cjs` が GLB を直接見て捕まえる。
+
+### 登録（モデルを作ったあと）
+
+1. `tools/blender/<family>-collection.json` に項目を書く(w/d/h・category・
+   `builder`・必要なら `finishChannels` / `defaultElevation`)
+2. `python3 tools/assets/register_original_collection.py`
+   — glTF に extras を刻み、`custom/manifest.json` と `manifest.js` へ合流させる
+3. `node tools/tag_catalogue.mjs --via ~/.claude/jev/jev.mjs --resume`
+   — 分類(kind/mount/room)を貼る
+4. `index.html` の `MODEL_ASSET_VER` を +1
+5. `tools/tests/model-uv.test.cjs` の `UNWRAPPED` に ID を足す
+   — **足さないと、UVの無いまま出荷できてしまう**
+6. `sh tools/run_tests.sh` と `node tools/catalogue_gap.mjs`
+
 ## 注意点(ハマりどころ)
 
 - **GLB更新後は `index.html` の `MODEL_ASSET_VER` を必ず+1する。**

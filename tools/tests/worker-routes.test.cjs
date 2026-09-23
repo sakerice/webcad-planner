@@ -704,3 +704,53 @@ test('Vertex は受付番号を使わず、そのまま間取りを返す', asyn
   assert.ok(body.plan, 'Vertex で間取りが返っていない');
   assert.ok(!body.jobs, 'Vertex なのに受付番号を返している');
 });
+
+// ── 見直しを払うかどうか ──────────────────────────────────────────────
+//
+// 判断そのものの当たり方は tools/tests/plan-revise-gate.test.cjs が見る。
+// ここで見るのは配線: 読み取りの返事に要否が載ること、載らない環境でも
+// これまでどおり動くこと。
+test('読み取りの返事に、見直しの要否が載る', async () => {
+  let asked = null;
+  const env = {
+    ...VERTEX_ENV,
+    AI: { run: async (model, input) => { asked = { model, input }; return { answers: { consistent: { noul: 0.9 }, completeness: { score: 3.4 } } }; } },
+  };
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, env, vertexFetch(() => vertexReply(GOOD_PLAN)));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(asked.model, 'typesafe/jev', 'Jev を呼んでいない');
+  assert.ok(!JSON.stringify(asked.input.state).includes('base64'), '判断に画像を渡している（Jev は画像を受け取れない）');
+  assert.equal(body.revise.skipAll, true, '素直な読み取りでも見直しを払っている');
+});
+
+test('判断の仕組みが無い環境では、これまでどおり見直す', async () => {
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, VERTEX_ENV, vertexFetch(() => vertexReply(GOOD_PLAN)));
+  const body = await res.json();
+  assert.equal(body.revise.skipAll, false, 'Jev が無いのに見直しを省いている');
+});
+
+test('失敗の返事に、次の一手が載る（用意した選択肢のときだけ）', async () => {
+  const notJson = () => new Response(JSON.stringify({
+    candidates: [{ content: { parts: [{ text: 'この画像に間取り図はありません' }] }, finishReason: 'STOP' }],
+  }), { status: 200 });
+
+  const env = {
+    ...VERTEX_ENV,
+    AI: { run: async () => ({ answers: { next_step: { choice: 'not_a_floorplan', confidence: 0.8 } } }) },
+  };
+  const res = await callAi('/api/ai/import-plan', { image: PNG }, env, vertexFetch(notJson));
+  assert.equal(res.status, 502);
+  const body = await res.json();
+  assert.equal(body.error, 'ai_bad_response');
+  assert.equal(body.next, 'not_a_floorplan');
+
+  // 選べなかったときは何も足さない（これまでの文面に戻る）
+  const vague = {
+    ...VERTEX_ENV,
+    AI: { run: async () => ({ answers: { next_step: { choice: 'unknown', confidence: 0.9 } } }) },
+  };
+  const res2 = await callAi('/api/ai/import-plan', { image: PNG }, vague, vertexFetch(notJson));
+  const body2 = await res2.json();
+  assert.equal(body2.next, undefined, '分からないものを助言として出している');
+});

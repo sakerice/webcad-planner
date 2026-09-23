@@ -197,838 +197,6 @@
       "previewVersion": 2
     },
     {
-      "id": "original-sofa",
-      "name": "オークフレーム ソファ",
-      "sourceFolder": "Sofas",
-      "group": "家具",
-      "category": "ソファ",
-      "w": 2100,
-      "d": 900,
-      "h": 820,
-      "model": "assets/models/original/original-sofa.glb",
-      "thumb": "assets/models/previews-v2/original-sofa-thumb.png",
-      "top": "assets/models/previews-v2/original-sofa-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "張地",
-          "default": "#aab5af"
-        },
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#9e7e5d"
-        }
-      ]
-    },
-    {
-      "id": "original-chair",
-      "name": "ラウンジチェア",
-      "sourceFolder": "Chairs",
-      "group": "家具",
-      "category": "チェア",
-      "w": 720,
-      "d": 760,
-      "h": 790,
-      "model": "assets/models/original/original-chair.glb",
-      "thumb": "assets/models/previews-v2/original-chair-thumb.png",
-      "top": "assets/models/previews-v2/original-chair-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "張地",
-          "default": "#bdaf9e"
-        },
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#73553c"
-        }
-      ]
-    },
-    {
-      "id": "original-bed",
-      "name": "ファブリックヘッド ベッド",
-      "sourceFolder": "Beds",
-      "group": "家具",
-      "category": "ベッド",
-      "w": 1600,
-      "d": 2150,
-      "h": 980,
-      "model": "assets/models/original/original-bed.glb",
-      "thumb": "assets/models/previews-v2/original-bed-thumb.png",
-      "top": "assets/models/previews-v2/original-bed-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "張地",
-          "default": "#aab5af"
-        },
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#9e7e5d"
-        }
-      ]
-    },
-    {
-      "id": "original-table",
-      "name": "オーク ダイニングテーブル",
-      "sourceFolder": "Tables",
-      "group": "家具",
-      "category": "テーブル",
-      "w": 1600,
-      "d": 850,
-      "h": 720,
-      "model": "assets/models/original/original-table.glb",
-      "thumb": "assets/models/previews-v2/original-table-thumb.png",
-      "top": "assets/models/previews-v2/original-table-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#b89e7c"
-        }
-      ]
-    },
-    {
-      "id": "original-sideboard",
-      "name": "オーク サイドボード",
-      "sourceFolder": "Drawers",
-      "group": "家具",
-      "category": "収納",
-      "w": 1400,
-      "d": 420,
-      "h": 760,
-      "model": "assets/models/original/original-sideboard.glb",
-      "thumb": "assets/models/previews-v2/original-sideboard-thumb.png",
-      "top": "assets/models/previews-v2/original-sideboard-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#9e7e5d"
-        }
-      ]
-    },
-    {
-      "id": "original-wardrobe",
-      "name": "オーク ワードローブ",
-      "sourceFolder": "Closets",
-      "group": "家具",
-      "category": "収納",
-      "w": 1000,
-      "d": 580,
-      "h": 1900,
-      "model": "assets/models/original/original-wardrobe.glb",
-      "thumb": "assets/models/previews-v2/original-wardrobe-thumb.png",
-      "top": "assets/models/previews-v2/original-wardrobe-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#9e7e5d"
-        }
-      ]
-    },
-    {
-      "id": "original-ac-unit",
-      "name": "室外機・ディテールモデル",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-ac-unit.glb",
-      "thumb": "assets/models/previews-v2/original-ac-unit-thumb.png",
-      "top": "assets/models/previews-v2/original-ac-unit-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 800,
-      "d": 300,
-      "h": 630,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-heat-pump",
-      "name": "ヒートポンプ（貯湯タンク用）",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-heat-pump.glb",
-      "thumb": "assets/models/previews-v2/original-heat-pump-thumb.png",
-      "top": "assets/models/previews-v2/original-heat-pump-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 850,
-      "d": 320,
-      "h": 640,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-mailbox",
-      "name": "独立ポスト",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-mailbox.glb",
-      "thumb": "assets/models/previews-v2/original-mailbox-thumb.png",
-      "top": "assets/models/previews-v2/original-mailbox-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 420,
-      "d": 250,
-      "h": 1250,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#424b4d"
-        }
-      ]
-    },
-    {
-      "id": "original-parcel-box",
-      "name": "宅配ボックス",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-parcel-box.glb",
-      "thumb": "assets/models/previews-v2/original-parcel-box-thumb.png",
-      "top": "assets/models/previews-v2/original-parcel-box-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 450,
-      "d": 450,
-      "h": 820,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#424b4d"
-        }
-      ]
-    },
-    {
-      "id": "original-entry-column",
-      "name": "インターホン門柱",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-entry-column.glb",
-      "thumb": "assets/models/previews-v2/original-entry-column-thumb.png",
-      "top": "assets/models/previews-v2/original-entry-column-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 180,
-      "d": 160,
-      "h": 1500,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#424b4d"
-        }
-      ]
-    },
-    {
-      "id": "original-garden-tap",
-      "name": "立水栓・水受け",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-garden-tap.glb",
-      "thumb": "assets/models/previews-v2/original-garden-tap-thumb.png",
-      "top": "assets/models/previews-v2/original-garden-tap-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 500,
-      "d": 500,
-      "h": 850,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-tank",
-      "name": "エコキュート 貯湯タンク",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-tank.glb",
-      "thumb": "assets/models/previews-v2/original-tank-thumb.png",
-      "top": "assets/models/previews-v2/original-tank-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 630,
-      "d": 760,
-      "h": 1850,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-meter",
-      "name": "電力メーター",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-meter.glb",
-      "thumb": "assets/models/previews-v2/original-meter-thumb.png",
-      "top": "assets/models/previews-v2/original-meter-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 1600,
-      "w": 180,
-      "d": 120,
-      "h": 250,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-gas-unit",
-      "name": "壁掛け給湯器",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-gas-unit.glb",
-      "thumb": "assets/models/previews-v2/original-gas-unit-thumb.png",
-      "top": "assets/models/previews-v2/original-gas-unit-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 1300,
-      "w": 470,
-      "d": 240,
-      "h": 700,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-drain-cover",
-      "name": "点検蓋",
-      "group": "外構",
-      "category": "設備",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-drain-cover.glb",
-      "thumb": "assets/models/previews-v2/original-drain-cover-thumb.png",
-      "top": "assets/models/previews-v2/original-drain-cover-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 300,
-      "d": 300,
-      "h": 20,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#cbd1d1"
-        }
-      ]
-    },
-    {
-      "id": "original-parcel-slim-column",
-      "name": "宅配ポスト・薄型機能門柱",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-parcel-slim-column.glb",
-      "thumb": "assets/models/previews-v2/original-parcel-slim-column-thumb.png",
-      "top": "assets/models/previews-v2/original-parcel-slim-column-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 340,
-      "d": 220,
-      "h": 1500,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#3c4246"
-        },
-        {
-          "key": "panel",
-          "label": "扉・アクセント",
-          "default": "#868a89"
-        }
-      ]
-    },
-    {
-      "id": "original-parcel-integrated-column",
-      "name": "宅配ポスト・一体型機能門柱",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-parcel-integrated-column.glb",
-      "thumb": "assets/models/previews-v2/original-parcel-integrated-column-thumb.png",
-      "top": "assets/models/previews-v2/original-parcel-integrated-column-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 470,
-      "d": 440,
-      "h": 1500,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#3c4246"
-        },
-        {
-          "key": "panel",
-          "label": "扉・アクセント",
-          "default": "#868a89"
-        }
-      ]
-    },
-    {
-      "id": "original-parcel-pole-mounted",
-      "name": "宅配ボックス・二本脚型",
-      "group": "外構",
-      "category": "玄関・庭",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-parcel-pole-mounted.glb",
-      "thumb": "assets/models/previews-v2/original-parcel-pole-mounted-thumb.png",
-      "top": "assets/models/previews-v2/original-parcel-pole-mounted-top.png",
-      "previewVersion": 2,
-      "groundLevel": true,
-      "defaultElevation": 0,
-      "w": 460,
-      "d": 450,
-      "h": 1150,
-      "front": "+Z",
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "本体塗装",
-          "default": "#3c4246"
-        },
-        {
-          "key": "panel",
-          "label": "扉・アクセント",
-          "default": "#868a89"
-        }
-      ]
-    },
-    {
-      "id": "original-shoe-tall",
-      "name": "下駄箱・トール",
-      "group": "住設",
-      "category": "下駄箱",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-shoe-tall.glb",
-      "thumb": "assets/models/previews-v2/original-shoe-tall-thumb.png",
-      "top": "assets/models/previews-v2/original-shoe-tall-top.png",
-      "previewVersion": 2,
-      "w": 800,
-      "d": 410,
-      "h": 2000,
-      "front": "+Z",
-      "mirrorOption": {
-        "x": -0.21500000000000002,
-        "y": 1.06,
-        "w": 0.29000000000000004,
-        "h": 1.7
-      },
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "収納扉・本体",
-          "default": "#a68967"
-        }
-      ]
-    },
-    {
-      "id": "original-shoe-counter",
-      "name": "下駄箱・カウンター付き",
-      "group": "住設",
-      "category": "下駄箱",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-shoe-counter.glb",
-      "thumb": "assets/models/previews-v2/original-shoe-counter-thumb.png",
-      "top": "assets/models/previews-v2/original-shoe-counter-top.png",
-      "previewVersion": 2,
-      "w": 1600,
-      "d": 410,
-      "h": 2000,
-      "front": "+Z",
-      "mirrorOption": {
-        "x": -0.515,
-        "y": 1.06,
-        "w": 0.47,
-        "h": 1.7
-      },
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "収納扉・本体",
-          "default": "#a68967"
-        }
-      ]
-    },
-    {
-      "id": "original-shoe-bridge",
-      "name": "下駄箱・コの字",
-      "group": "住設",
-      "category": "下駄箱",
-      "sourceFolder": "BlenderOriginal",
-      "provenance": "original",
-      "model": "assets/models/original/original-shoe-bridge.glb",
-      "thumb": "assets/models/previews-v2/original-shoe-bridge-thumb.png",
-      "top": "assets/models/previews-v2/original-shoe-bridge-top.png",
-      "previewVersion": 2,
-      "w": 1800,
-      "d": 410,
-      "h": 2000,
-      "front": "+Z",
-      "mirrorOption": {
-        "x": -0.6150000000000001,
-        "y": 1.06,
-        "w": 0.47,
-        "h": 1.7
-      },
-      "finishChannels": [
-        {
-          "key": "body",
-          "label": "収納扉・本体",
-          "default": "#a68967"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-900-short",
-      "name": "リネンカーテン 開き 900",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 900,
-      "d": 150,
-      "h": 1350,
-      "model": "assets/models/original/original-curtain-open-900-short.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-900-short-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-900-short-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-short.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-900-long",
-      "name": "リネンカーテン 開き 900",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 900,
-      "d": 150,
-      "h": 2040,
-      "model": "assets/models/original/original-curtain-open-900-long.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-900-long-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-900-long-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-long.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-1300-short",
-      "name": "リネンカーテン 開き 1300",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1300,
-      "d": 150,
-      "h": 1350,
-      "model": "assets/models/original/original-curtain-open-1300-short.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-1300-short-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-1300-short-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-short.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-1300-long",
-      "name": "リネンカーテン 開き 1300",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1300,
-      "d": 150,
-      "h": 2040,
-      "model": "assets/models/original/original-curtain-open-1300-long.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-1300-long-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-1300-long-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-long.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-780",
-      "name": "ロールスクリーン 巻上げ 780",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 780,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-780.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-780-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-780-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-780.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-1235",
-      "name": "ロールスクリーン 巻上げ 1235",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1235,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-1235.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-1235-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-1235-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-1235.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-1690",
-      "name": "ロールスクリーン 巻上げ 1690",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1690,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-1690.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-1690-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-1690-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-1690.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-laundry-rail",
-      "name": "天井吊り物干し 1100",
-      "group": "家具",
-      "category": "収納",
-      "w": 1100,
-      "d": 80,
-      "h": 500,
-      "model": "assets/models/original/original-laundry-rail.glb",
-      "thumb": "assets/models/previews-v2/original-laundry-rail-thumb.png",
-      "top": "assets/models/previews-v2/original-laundry-rail-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-laundry-rail.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "accent",
-          "label": "金物",
-          "default": "#b0b5b5"
-        }
-      ]
-    },
-    {
-      "id": "original-laundry-cabinet",
-      "name": "ランドリー作業収納 900",
-      "group": "家具",
-      "category": "収納",
-      "w": 900,
-      "d": 500,
-      "h": 900,
-      "model": "assets/models/original/original-laundry-cabinet.glb",
-      "thumb": "assets/models/previews-v2/original-laundry-cabinet-thumb.png",
-      "top": "assets/models/previews-v2/original-laundry-cabinet-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-laundry-cabinet.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#a08568"
-        },
-        {
-          "key": "body",
-          "label": "天板",
-          "default": "#d8d2c6"
-        },
-        {
-          "key": "accent",
-          "label": "金物",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
       "id": "original-kitchen-island",
       "name": "シンクアイランド 2100",
       "group": "住設",
@@ -2122,6 +1290,1592 @@
       ],
       "kitchenDishwasherVariant": "original-kitchen-p2550-970",
       "kitchenDishwasher": false
+    },
+    {
+      "id": "original-curtain-open-900-short",
+      "name": "リネンカーテン 開き 900",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 900,
+      "d": 150,
+      "h": 1350,
+      "model": "assets/models/original/original-curtain-open-900-short.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-900-short-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-900-short-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-short.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-900-long",
+      "name": "リネンカーテン 開き 900",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 900,
+      "d": 150,
+      "h": 2040,
+      "model": "assets/models/original/original-curtain-open-900-long.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-900-long-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-900-long-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-long.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-1300-short",
+      "name": "リネンカーテン 開き 1300",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1300,
+      "d": 150,
+      "h": 1350,
+      "model": "assets/models/original/original-curtain-open-1300-short.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-1300-short-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-1300-short-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-short.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-1300-long",
+      "name": "リネンカーテン 開き 1300",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1300,
+      "d": 150,
+      "h": 2040,
+      "model": "assets/models/original/original-curtain-open-1300-long.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-1300-long-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-1300-long-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-long.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-780",
+      "name": "ロールスクリーン 巻上げ 780",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 780,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-780.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-780-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-780-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-780.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-1235",
+      "name": "ロールスクリーン 巻上げ 1235",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1235,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-1235.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-1235-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-1235-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-1235.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-1690",
+      "name": "ロールスクリーン 巻上げ 1690",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1690,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-1690.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-1690-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-1690-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-1690.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-laundry-rail",
+      "name": "天井吊り物干し 1100",
+      "group": "家具",
+      "category": "収納",
+      "w": 1100,
+      "d": 80,
+      "h": 500,
+      "model": "assets/models/original/original-laundry-rail.glb",
+      "thumb": "assets/models/previews-v2/original-laundry-rail-thumb.png",
+      "top": "assets/models/previews-v2/original-laundry-rail-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-laundry-rail.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "accent",
+          "label": "金物",
+          "default": "#b0b5b5"
+        }
+      ]
+    },
+    {
+      "id": "original-laundry-cabinet",
+      "name": "ランドリー作業収納 900",
+      "group": "家具",
+      "category": "収納",
+      "w": 900,
+      "d": 500,
+      "h": 900,
+      "model": "assets/models/original/original-laundry-cabinet.glb",
+      "thumb": "assets/models/previews-v2/original-laundry-cabinet-thumb.png",
+      "top": "assets/models/previews-v2/original-laundry-cabinet-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-laundry-cabinet.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#a08568"
+        },
+        {
+          "key": "body",
+          "label": "天板",
+          "default": "#d8d2c6"
+        },
+        {
+          "key": "accent",
+          "label": "金物",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-sofa",
+      "name": "オークフレーム ソファ",
+      "sourceFolder": "Sofas",
+      "group": "家具",
+      "category": "ソファ",
+      "w": 2100,
+      "d": 900,
+      "h": 820,
+      "model": "assets/models/original/original-sofa.glb",
+      "thumb": "assets/models/previews-v2/original-sofa-thumb.png",
+      "top": "assets/models/previews-v2/original-sofa-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "張地",
+          "default": "#aab5af"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#9e7e5d"
+        }
+      ]
+    },
+    {
+      "id": "original-chair",
+      "name": "ラウンジチェア",
+      "sourceFolder": "Chairs",
+      "group": "家具",
+      "category": "チェア",
+      "w": 720,
+      "d": 760,
+      "h": 790,
+      "model": "assets/models/original/original-chair.glb",
+      "thumb": "assets/models/previews-v2/original-chair-thumb.png",
+      "top": "assets/models/previews-v2/original-chair-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "張地",
+          "default": "#bdaf9e"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#73553c"
+        }
+      ]
+    },
+    {
+      "id": "original-bed",
+      "name": "ファブリックヘッド ベッド",
+      "sourceFolder": "Beds",
+      "group": "家具",
+      "category": "ベッド",
+      "w": 1600,
+      "d": 2150,
+      "h": 980,
+      "model": "assets/models/original/original-bed.glb",
+      "thumb": "assets/models/previews-v2/original-bed-thumb.png",
+      "top": "assets/models/previews-v2/original-bed-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "張地",
+          "default": "#aab5af"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#9e7e5d"
+        }
+      ]
+    },
+    {
+      "id": "original-table",
+      "name": "オーク ダイニングテーブル",
+      "sourceFolder": "Tables",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1600,
+      "d": 850,
+      "h": 720,
+      "model": "assets/models/original/original-table.glb",
+      "thumb": "assets/models/previews-v2/original-table-thumb.png",
+      "top": "assets/models/previews-v2/original-table-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#b89e7c"
+        }
+      ]
+    },
+    {
+      "id": "original-sideboard",
+      "name": "オーク サイドボード",
+      "sourceFolder": "Drawers",
+      "group": "家具",
+      "category": "収納",
+      "w": 1400,
+      "d": 420,
+      "h": 760,
+      "model": "assets/models/original/original-sideboard.glb",
+      "thumb": "assets/models/previews-v2/original-sideboard-thumb.png",
+      "top": "assets/models/previews-v2/original-sideboard-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#9e7e5d"
+        }
+      ]
+    },
+    {
+      "id": "original-wardrobe",
+      "name": "オーク ワードローブ",
+      "sourceFolder": "Closets",
+      "group": "家具",
+      "category": "収納",
+      "w": 1000,
+      "d": 580,
+      "h": 1900,
+      "model": "assets/models/original/original-wardrobe.glb",
+      "thumb": "assets/models/previews-v2/original-wardrobe-thumb.png",
+      "top": "assets/models/previews-v2/original-wardrobe-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#9e7e5d"
+        }
+      ]
+    },
+    {
+      "id": "original-ac-unit",
+      "name": "室外機・ディテールモデル",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-ac-unit.glb",
+      "thumb": "assets/models/previews-v2/original-ac-unit-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-unit-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 800,
+      "d": 300,
+      "h": 630,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-heat-pump",
+      "name": "ヒートポンプ（貯湯タンク用）",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-heat-pump.glb",
+      "thumb": "assets/models/previews-v2/original-heat-pump-thumb.png",
+      "top": "assets/models/previews-v2/original-heat-pump-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 850,
+      "d": 320,
+      "h": 640,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-mailbox",
+      "name": "独立ポスト",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-mailbox.glb",
+      "thumb": "assets/models/previews-v2/original-mailbox-thumb.png",
+      "top": "assets/models/previews-v2/original-mailbox-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 420,
+      "d": 250,
+      "h": 1250,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#424b4d"
+        }
+      ]
+    },
+    {
+      "id": "original-parcel-box",
+      "name": "宅配ボックス",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-parcel-box.glb",
+      "thumb": "assets/models/previews-v2/original-parcel-box-thumb.png",
+      "top": "assets/models/previews-v2/original-parcel-box-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 450,
+      "d": 450,
+      "h": 820,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#424b4d"
+        }
+      ]
+    },
+    {
+      "id": "original-entry-column",
+      "name": "インターホン門柱",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-entry-column.glb",
+      "thumb": "assets/models/previews-v2/original-entry-column-thumb.png",
+      "top": "assets/models/previews-v2/original-entry-column-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 180,
+      "d": 160,
+      "h": 1500,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#424b4d"
+        }
+      ]
+    },
+    {
+      "id": "original-garden-tap",
+      "name": "立水栓・水受け",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-garden-tap.glb",
+      "thumb": "assets/models/previews-v2/original-garden-tap-thumb.png",
+      "top": "assets/models/previews-v2/original-garden-tap-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 500,
+      "d": 500,
+      "h": 850,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-tank",
+      "name": "エコキュート 貯湯タンク",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-tank.glb",
+      "thumb": "assets/models/previews-v2/original-tank-thumb.png",
+      "top": "assets/models/previews-v2/original-tank-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 630,
+      "d": 760,
+      "h": 1850,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-meter",
+      "name": "電力メーター",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-meter.glb",
+      "thumb": "assets/models/previews-v2/original-meter-thumb.png",
+      "top": "assets/models/previews-v2/original-meter-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 1600,
+      "w": 180,
+      "d": 120,
+      "h": 250,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-gas-unit",
+      "name": "壁掛け給湯器",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-gas-unit.glb",
+      "thumb": "assets/models/previews-v2/original-gas-unit-thumb.png",
+      "top": "assets/models/previews-v2/original-gas-unit-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 1300,
+      "w": 470,
+      "d": 240,
+      "h": 700,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-drain-cover",
+      "name": "点検蓋",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-drain-cover.glb",
+      "thumb": "assets/models/previews-v2/original-drain-cover-thumb.png",
+      "top": "assets/models/previews-v2/original-drain-cover-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 300,
+      "d": 300,
+      "h": 20,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#cbd1d1"
+        }
+      ]
+    },
+    {
+      "id": "original-parcel-slim-column",
+      "name": "宅配ポスト・薄型機能門柱",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-parcel-slim-column.glb",
+      "thumb": "assets/models/previews-v2/original-parcel-slim-column-thumb.png",
+      "top": "assets/models/previews-v2/original-parcel-slim-column-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 340,
+      "d": 220,
+      "h": 1500,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#3c4246"
+        },
+        {
+          "key": "panel",
+          "label": "扉・アクセント",
+          "default": "#868a89"
+        }
+      ]
+    },
+    {
+      "id": "original-parcel-integrated-column",
+      "name": "宅配ポスト・一体型機能門柱",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-parcel-integrated-column.glb",
+      "thumb": "assets/models/previews-v2/original-parcel-integrated-column-thumb.png",
+      "top": "assets/models/previews-v2/original-parcel-integrated-column-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 470,
+      "d": 440,
+      "h": 1500,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#3c4246"
+        },
+        {
+          "key": "panel",
+          "label": "扉・アクセント",
+          "default": "#868a89"
+        }
+      ]
+    },
+    {
+      "id": "original-parcel-pole-mounted",
+      "name": "宅配ボックス・二本脚型",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-parcel-pole-mounted.glb",
+      "thumb": "assets/models/previews-v2/original-parcel-pole-mounted-thumb.png",
+      "top": "assets/models/previews-v2/original-parcel-pole-mounted-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 460,
+      "d": 450,
+      "h": 1150,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "本体塗装",
+          "default": "#3c4246"
+        },
+        {
+          "key": "panel",
+          "label": "扉・アクセント",
+          "default": "#868a89"
+        }
+      ]
+    },
+    {
+      "id": "original-shoe-tall",
+      "name": "下駄箱・トール",
+      "group": "住設",
+      "category": "下駄箱",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-shoe-tall.glb",
+      "thumb": "assets/models/previews-v2/original-shoe-tall-thumb.png",
+      "top": "assets/models/previews-v2/original-shoe-tall-top.png",
+      "previewVersion": 2,
+      "w": 800,
+      "d": 410,
+      "h": 2000,
+      "front": "+Z",
+      "mirrorOption": {
+        "x": -0.21500000000000002,
+        "y": 1.06,
+        "w": 0.29000000000000004,
+        "h": 1.7
+      },
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "収納扉・本体",
+          "default": "#a68967"
+        }
+      ]
+    },
+    {
+      "id": "original-shoe-counter",
+      "name": "下駄箱・カウンター付き",
+      "group": "住設",
+      "category": "下駄箱",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-shoe-counter.glb",
+      "thumb": "assets/models/previews-v2/original-shoe-counter-thumb.png",
+      "top": "assets/models/previews-v2/original-shoe-counter-top.png",
+      "previewVersion": 2,
+      "w": 1600,
+      "d": 410,
+      "h": 2000,
+      "front": "+Z",
+      "mirrorOption": {
+        "x": -0.515,
+        "y": 1.06,
+        "w": 0.47,
+        "h": 1.7
+      },
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "収納扉・本体",
+          "default": "#a68967"
+        }
+      ]
+    },
+    {
+      "id": "original-shoe-bridge",
+      "name": "下駄箱・コの字",
+      "group": "住設",
+      "category": "下駄箱",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "model": "assets/models/original/original-shoe-bridge.glb",
+      "thumb": "assets/models/previews-v2/original-shoe-bridge-thumb.png",
+      "top": "assets/models/previews-v2/original-shoe-bridge-top.png",
+      "previewVersion": 2,
+      "w": 1800,
+      "d": 410,
+      "h": 2000,
+      "front": "+Z",
+      "mirrorOption": {
+        "x": -0.6150000000000001,
+        "y": 1.06,
+        "w": 0.47,
+        "h": 1.7
+      },
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "収納扉・本体",
+          "default": "#a68967"
+        }
+      ]
+    },
+    {
+      "id": "original-bathtub",
+      "name": "浴槽（1坪ユニットバス用）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "バスルーム",
+      "w": 1600,
+      "d": 750,
+      "h": 600,
+      "model": "assets/models/original/original-bathtub.glb",
+      "thumb": "assets/models/previews-v2/original-bathtub-thumb.png",
+      "top": "assets/models/previews-v2/original-bathtub-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py"
+    },
+    {
+      "id": "original-toilet",
+      "name": "便器（タンク付き）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "トイレ",
+      "w": 390,
+      "d": 700,
+      "h": 800,
+      "model": "assets/models/original/original-toilet.glb",
+      "thumb": "assets/models/previews-v2/original-toilet-thumb.png",
+      "top": "assets/models/previews-v2/original-toilet-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py"
+    },
+    {
+      "id": "original-vanity",
+      "name": "洗面化粧台（間口750・三面鏡）",
+      "sourceFolder": "Sanitary",
+      "group": "住設",
+      "category": "洗面台",
+      "w": 750,
+      "d": 505,
+      "h": 1850,
+      "model": "assets/models/original/original-vanity.glb",
+      "thumb": "assets/models/previews-v2/original-vanity-thumb.png",
+      "top": "assets/models/previews-v2/original-vanity-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_sanitary.py",
+      "finishChannels": [
+        {
+          "key": "door",
+          "label": "扉",
+          "default": "#e7e2d9"
+        }
+      ]
+    },
+    {
+      "id": "original-ac-wall",
+      "name": "壁掛けエアコン（6〜10畳）",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 798,
+      "d": 235,
+      "h": 295,
+      "model": "assets/models/original/original-ac-wall.glb",
+      "thumb": "assets/models/previews-v2/original-ac-wall-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-wall-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2000
+    },
+    {
+      "id": "original-ac-wall-wide",
+      "name": "壁掛けエアコン（14〜20畳）",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 890,
+      "d": 330,
+      "h": 295,
+      "model": "assets/models/original/original-ac-wall-wide.glb",
+      "thumb": "assets/models/previews-v2/original-ac-wall-wide-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-wall-wide-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2000
+    },
+    {
+      "id": "original-desk",
+      "name": "学習机（片袖3段）",
+      "sourceFolder": "Desks",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1000,
+      "d": 600,
+      "h": 720,
+      "model": "assets/models/original/original-desk.glb",
+      "thumb": "assets/models/previews-v2/original-desk-thumb.png",
+      "top": "assets/models/previews-v2/original-desk-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_desks.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#c9a97e"
+        }
+      ]
+    },
+    {
+      "id": "original-desk-work",
+      "name": "ワークデスク（書斎・幅1400）",
+      "sourceFolder": "Desks",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1400,
+      "d": 700,
+      "h": 730,
+      "model": "assets/models/original/original-desk-work.glb",
+      "thumb": "assets/models/previews-v2/original-desk-work-thumb.png",
+      "top": "assets/models/previews-v2/original-desk-work-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_desks.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#c9a97e"
+        }
+      ]
+    },
+    {
+      "id": "original-vent-register",
+      "name": "24時間換気の給排気口",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 150,
+      "d": 150,
+      "h": 30,
+      "model": "assets/models/original/original-vent-register.glb",
+      "thumb": "assets/models/previews-v2/original-vent-register-thumb.png",
+      "top": "assets/models/previews-v2/original-vent-register-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2370
+    },
+    {
+      "id": "original-bath-dryer",
+      "name": "浴室換気乾燥機",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 650,
+      "d": 450,
+      "h": 130,
+      "model": "assets/models/original/original-bath-dryer.glb",
+      "thumb": "assets/models/previews-v2/original-bath-dryer-thumb.png",
+      "top": "assets/models/previews-v2/original-bath-dryer-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 2270
+    },
+    {
+      "id": "original-ac-floor",
+      "name": "床置きエアコン",
+      "sourceFolder": "Hvac",
+      "group": "住設",
+      "category": "空調",
+      "w": 600,
+      "d": 250,
+      "h": 700,
+      "model": "assets/models/original/original-ac-floor.glb",
+      "thumb": "assets/models/previews-v2/original-ac-floor-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-floor-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_hvac.py",
+      "defaultElevation": 0
+    },
+    {
+      "id": "original-desk-counter",
+      "name": "スタディカウンター（2人並び・幅1800）",
+      "sourceFolder": "Desks",
+      "group": "家具",
+      "category": "テーブル",
+      "w": 1800,
+      "d": 450,
+      "h": 730,
+      "model": "assets/models/original/original-desk-counter.glb",
+      "thumb": "assets/models/previews-v2/original-desk-counter-thumb.png",
+      "top": "assets/models/previews-v2/original-desk-counter-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_desks.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#c9ad85"
+        }
+      ]
+    },
+    {
+      "id": "original-door-flush",
+      "name": "室内ドア（フラッシュ戸）",
+      "sourceFolder": "Doors",
+      "group": "家具",
+      "category": "ドア",
+      "w": 755,
+      "d": 70,
+      "h": 1990,
+      "model": "assets/models/original/original-door-flush.glb",
+      "thumb": "assets/models/previews-v2/original-door-flush-thumb.png",
+      "top": "assets/models/previews-v2/original-door-flush-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_doors.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "面材",
+          "default": "#c7a883"
+        }
+      ]
+    },
+    {
+      "id": "original-door-slit",
+      "name": "室内ドア（採光スリット）",
+      "sourceFolder": "Doors",
+      "group": "家具",
+      "category": "ドア",
+      "w": 755,
+      "d": 70,
+      "h": 1990,
+      "model": "assets/models/original/original-door-slit.glb",
+      "thumb": "assets/models/previews-v2/original-door-slit-thumb.png",
+      "top": "assets/models/previews-v2/original-door-slit-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "front": "+Z",
+      "builder": "tools/blender/build_doors.py",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "面材",
+          "default": "#c7a883"
+        }
+      ]
+    },
+    {
+      "id": "original-tree-symbol",
+      "name": "シンボルツリー（高木・落葉）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-symbol.glb",
+      "thumb": "assets/models/previews-v2/original-tree-symbol-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-symbol-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 2000,
+      "d": 2000,
+      "h": 4000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-evergreen",
+      "name": "中木（常緑・目隠し・株立ち）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-evergreen.glb",
+      "thumb": "assets/models/previews-v2/original-tree-evergreen-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-evergreen-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1200,
+      "d": 1200,
+      "h": 2200,
+      "front": "+Z"
+    },
+    {
+      "id": "original-shrub",
+      "name": "低木・下草（まとまり）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-shrub.glb",
+      "thumb": "assets/models/previews-v2/original-shrub-thumb.png",
+      "top": "assets/models/previews-v2/original-shrub-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 500,
+      "front": "+Z"
+    },
+    {
+      "id": "original-deck-1820",
+      "name": "ウッドデッキ（1間×半間）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-deck-1820.glb",
+      "thumb": "assets/models/previews-v2/original-deck-1820-thumb.png",
+      "top": "assets/models/previews-v2/original-deck-1820-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 910,
+      "h": 450,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "デッキ材",
+          "default": "#886044"
+        }
+      ]
+    },
+    {
+      "id": "original-terrace-tile",
+      "name": "タイルテラス（600角×9枚）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-terrace-tile.glb",
+      "thumb": "assets/models/previews-v2/original-terrace-tile-thumb.png",
+      "top": "assets/models/previews-v2/original-terrace-tile-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 1820,
+      "h": 150,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "タイル",
+          "default": "#b7b4a9"
+        }
+      ]
+    },
+    {
+      "id": "original-fence-lattice",
+      "name": "縦格子フェンス（1スパン）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-lattice.glb",
+      "thumb": "assets/models/previews-v2/original-fence-lattice-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-lattice-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 60,
+      "h": 1800,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "格子",
+          "default": "#252a2c"
+        }
+      ]
+    },
+    {
+      "id": "original-car-stop",
+      "name": "駐車場の車止め",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-car-stop.glb",
+      "thumb": "assets/models/previews-v2/original-car-stop-thumb.png",
+      "top": "assets/models/previews-v2/original-car-stop-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 600,
+      "d": 100,
+      "h": 100,
+      "front": "+Z"
+    },
+    {
+      "id": "original-standpipe",
+      "name": "屋外水栓（立水栓・パン付き）",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-standpipe.glb",
+      "thumb": "assets/models/previews-v2/original-standpipe-thumb.png",
+      "top": "assets/models/previews-v2/original-standpipe-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 300,
+      "d": 300,
+      "h": 900,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "柱・水栓金具",
+          "default": "#a6afb2"
+        }
+      ]
+    },
+    {
+      "id": "original-tree-deciduous",
+      "name": "株立ちの落葉樹（ヤマボウシ）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-deciduous.glb",
+      "thumb": "assets/models/previews-v2/original-tree-deciduous-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-deciduous-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1600,
+      "d": 1600,
+      "h": 3000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-conifer",
+      "name": "針葉樹（コニファー）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-conifer.glb",
+      "thumb": "assets/models/previews-v2/original-tree-conifer-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-conifer-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 1800,
+      "front": "+Z"
+    },
+    {
+      "id": "original-fence-board",
+      "name": "横板の板塀（高さ1200）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-board.glb",
+      "thumb": "assets/models/previews-v2/original-fence-board-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-board-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 40,
+      "h": 1200,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "板",
+          "default": "#8b6a4c"
+        }
+      ]
+    },
+    {
+      "id": "original-books-stack",
+      "name": "本の平積みと立て掛け",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-books-stack.glb",
+      "thumb": "assets/models/previews-v2/original-books-stack-thumb.png",
+      "top": "assets/models/previews-v2/original-books-stack-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 250,
+      "d": 180,
+      "h": 220,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "accent",
+          "label": "表紙",
+          "default": "#526963"
+        }
+      ]
+    },
+    {
+      "id": "original-mug-tray",
+      "name": "マグとトレー",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-mug-tray.glb",
+      "thumb": "assets/models/previews-v2/original-mug-tray-thumb.png",
+      "top": "assets/models/previews-v2/original-mug-tray-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 300,
+      "d": 200,
+      "h": 110,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "トレー",
+          "default": "#bd9467"
+        }
+      ]
+    },
+    {
+      "id": "original-vase-tall",
+      "name": "花器（枝もの）",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-vase-tall.glb",
+      "thumb": "assets/models/previews-v2/original-vase-tall-thumb.png",
+      "top": "assets/models/previews-v2/original-vase-tall-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 200,
+      "d": 200,
+      "h": 600,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "花器",
+          "default": "#c1ad91"
+        }
+      ]
+    },
+    {
+      "id": "original-basket-blanket",
+      "name": "かごとブランケット",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-basket-blanket.glb",
+      "thumb": "assets/models/previews-v2/original-basket-blanket-thumb.png",
+      "top": "assets/models/previews-v2/original-basket-blanket-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 450,
+      "d": 350,
+      "h": 380,
+      "front": "+Z",
+      "defaultElevation": 0,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "かご",
+          "default": "#b28a5c"
+        },
+        {
+          "key": "fabric",
+          "label": "ブランケット",
+          "default": "#bdae94"
+        }
+      ]
+    },
+    {
+      "id": "original-plant-desk",
+      "name": "卓上の観葉（小鉢）",
+      "group": "家具",
+      "category": "植物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-plant-desk.glb",
+      "thumb": "assets/models/previews-v2/original-plant-desk-thumb.png",
+      "top": "assets/models/previews-v2/original-plant-desk-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 180,
+      "d": 180,
+      "h": 300,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "鉢",
+          "default": "#c3ab92"
+        }
+      ]
+    },
+    {
+      "id": "original-entry-tray",
+      "name": "玄関の小物（トレーと鍵）",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-entry-tray.glb",
+      "thumb": "assets/models/previews-v2/original-entry-tray-thumb.png",
+      "top": "assets/models/previews-v2/original-entry-tray-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 250,
+      "d": 180,
+      "h": 120,
+      "front": "+Z",
+      "defaultElevation": 900,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "トレー",
+          "default": "#8d6447"
+        }
+      ]
+    },
+    {
+      "id": "original-washer-drum",
+      "name": "ドラム式洗濯乾燥機",
+      "group": "住設",
+      "category": "洗濯",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_laundry.py",
+      "model": "assets/models/original/original-washer-drum.glb",
+      "thumb": "assets/models/previews-v2/original-washer-drum-thumb.png",
+      "top": "assets/models/previews-v2/original-washer-drum-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 640,
+      "d": 720,
+      "h": 1050,
+      "front": "+Z"
+    },
+    {
+      "id": "original-washer-pan",
+      "name": "洗濯パン",
+      "group": "住設",
+      "category": "洗濯",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_laundry.py",
+      "model": "assets/models/original/original-washer-pan.glb",
+      "thumb": "assets/models/previews-v2/original-washer-pan-thumb.png",
+      "top": "assets/models/previews-v2/original-washer-pan-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 640,
+      "d": 640,
+      "h": 120,
+      "front": "+Z"
+    },
+    {
+      "id": "original-laundry-pole",
+      "name": "室内物干し（天井付け・2本）",
+      "group": "住設",
+      "category": "洗濯",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_laundry.py",
+      "model": "assets/models/original/original-laundry-pole.glb",
+      "thumb": "assets/models/previews-v2/original-laundry-pole-thumb.png",
+      "top": "assets/models/previews-v2/original-laundry-pole-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 1200,
+      "d": 60,
+      "h": 250,
+      "front": "+Z",
+      "defaultElevation": 2150,
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金物",
+          "default": "#bec4c7"
+        }
+      ]
+    },
+    {
+      "id": "original-ac-wall-slim",
+      "name": "壁掛けエアコン（コンパクト）",
+      "group": "住設",
+      "category": "空調",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_laundry.py",
+      "model": "assets/models/original/original-ac-wall-slim.glb",
+      "thumb": "assets/models/previews-v2/original-ac-wall-slim-thumb.png",
+      "top": "assets/models/previews-v2/original-ac-wall-slim-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 728,
+      "d": 220,
+      "h": 280,
+      "front": "+Z",
+      "defaultElevation": 2000
     }
   ]
 }

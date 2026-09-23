@@ -1134,6 +1134,29 @@ function groundYForItem(it){
   });
   return on?SITE_SURFACE_Y:0;
 }
+// 壁に開く建具・窓か。開口は壁の中に中心があるので、床の決め方が家具と違う。
+function isWallOpeningItem(it){
+  if(!it) return false;
+  if(it.type==='window'||it.type==='window-door') return true;
+  return typeof isDoorLikeOpeningType==='function' && isDoorLikeOpeningType(it.type);
+}
+// 開口が面している部屋の床(m)。両側を見て高いほうを採る。
+// **高いほうを採るのは、敷居は室内側の床に合わせるから。** 片側が屋外なら
+// 室内側だけが見つかる。どちらにも部屋が無ければ null。
+function openingAdjacentFloorTopY(it){
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  var along=Math.round(Number(it.rot)||0)%180;   // 0=X方向に開く / 90=Y方向
+  var step=Math.max(((it.d||0)/2)+200,260);      // 壁の外まで確実に出る距離
+  var pts=(along===0)?[[cx,cy-step],[cx,cy+step]]:[[cx-step,cy],[cx+step,cy]];
+  var best=null,i,room,y;
+  for(i=0;i<pts.length;i++){
+    room=roomAtPointOnFloor(it.floor,pts[i][0],pts[i][1]);
+    if(!room) continue;
+    y=roomFloorTopY(room);
+    if(best===null||y>best) best=y;
+  }
+  return best;
+}
 function item3DBaseY(it){
   if(!it) return 0;
   if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
@@ -1147,6 +1170,24 @@ function item3DBaseY(it){
     return groundYForItem(it);
   }
   if(it.type==='roof') return localSupportTopY(it.floor,it.x,it.y,it.x+(it.w||0),it.y+(it.d||0));
+  // **壁の開口は、地面に置く物ではない。** 中心が壁の中に来るので、基礎の
+  // 外周をわずかに越えることがあり、下の「基礎の外なら地面」に捕まると
+  // 基礎の高さぶん落ちる。部屋の矩形も壁の芯で終わるので、越えた瞬間に
+  // 床上げもスラブも失う。
+  //
+  // **3階建ての既定プランの掃き出し窓が、これで792mm沈んで基礎の中にいた。**
+  // ずれは10mm(部屋の南端8190に対し、窓の中心が8200)。10mmで780mm落ちる。
+  // 目で見ないと分からない壊れ方で、寸法の検査には出ない。
+  // **面している部屋が見つかったときだけ介入する。** 全ての開口を横取りすると、
+  // 建物の外に置いた物置のドアのような「部屋に面していない開口」まで
+  // 床の高さへ持ち上げてしまい、地面から630mm浮く(実測で確認した)。
+  if(isWallOpeningItem(it)
+     && !roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2)){
+    var sideY=openingAdjacentFloorTopY(it);
+    if(sideY!==null) return sideY;
+  }
+  // ここから下は従来どおり。中心が部屋の中にある開口も、どこにも面していない
+  // 開口も、これまでと同じ経路を通る。
   // 1階に置いた一般アイテムでも、基礎の外(=屋外)にあるものは地面に置く。
   // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
   // 「地面から浮いた謎の矩形」になる
@@ -2107,7 +2148,7 @@ function buildDetailedExterior(grp,it,w,d,h){
   var url=EXTERIOR_MODEL_URLS[it.type];
   if(!url || !ensureGltfModel(url)) return false;
   var clone=makeGltfBoxFitClone(url,w,h,d,it.colorCustom?it.color:null);
-  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness);grp.add(clone);return true;
+  ModelQuality.applyFinishes(clone,it.finishColors,it.finishRoughness,it.finishTextures,typeof FINISH_TEXTURE_DEPS==='object'?FINISH_TEXTURE_DEPS:null);grp.add(clone);return true;
 }
 var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
 var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';
@@ -2117,6 +2158,28 @@ var FMP_MANIFEST_SOURCES = [
   {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'},
   {url:CUSTOM_MODEL_MANIFEST_URL, globalName:'CUSTOM_MODEL_MANIFEST'}
 ];
+// カタログ753点の分類。tools/tag_catalogue.mjs が作る。
+//
+// なぜ別のファイルなのか
+// ----------------------
+// manifest の category は、取り込み元3つのフォルダ構造をそのまま引きずって
+// いる。同じものが別の名前に散り(キッチンが4か所、収納が4か所)、中身の
+// 取り違えもある(「窓」にシェルフ、「絵画」にシェルフ、「家電」に冷蔵庫)。
+//
+// **category は消さない。** 保存済みのプランはモデルを名前で持っているので、
+// 分類を差し替えるのではなく、その上に新しい軸(kind)を足す。
+//
+// 読めなければ、これまでどおり category で並べる。
+var CATALOGUE_TAGS_URL = 'assets/models/tags.json';
+var CATALOGUE_TAGS = null;
+// 外部アセットの「色を変えられる部位」。tools/assign_finish_channels.mjs が作る。
+//
+// **仕組みは前からあり、手書きの2点にしか繋がっていなかった。** 685点中684点が
+// テクスチャ付きで、applySelectableColor はテクスチャ付きを避けるため、外部
+// アセットはほぼ色を変えられなかった。ここを全点に配線する。
+// 読めなければ、これまでどおり色を変えられないだけ(見た目は変わらない)。
+var CATALOGUE_FINISHES_URL = 'assets/models/finishes.json';
+var CATALOGUE_FINISHES = null;
 var FMP_ITEMS = {};
 var FMP_TOP_IMAGES = {};
 var FMP_TOP_CROPS = {};
@@ -2204,7 +2267,65 @@ function initNativeColorInputs(){
 function mergeFurnitureMegaManifest(manifest){
   (manifest.items||[]).forEach(function(item){
     FMP_ITEMS[item.id]=item;
+    applyCatalogueTag(item);
+    applyFinishChannels(item);
   });
+}
+// 分類を1点に貼る。タグが無ければ何もしない(これまでどおり category で並ぶ)。
+//
+// **検索語は tags.json が持っている。** Jev は文章を書けないので、「浴槽」を
+// 「バスタブ」「風呂」でも引けるようにする語は人が書いたものである。
+// ここでモデル名に混ぜておけば、検索の仕組み(assets/js/asset-catalogue.js)は
+// 何も変えずにその語で引けるようになる。
+function applyCatalogueTag(item){
+  if(!item || !CATALOGUE_TAGS || !CATALOGUE_TAGS.items) return;
+  var tag=CATALOGUE_TAGS.items[item.id]; if(!tag) return;
+  var kind=(CATALOGUE_TAGS.kinds||{})[tag.kind];
+  item.kind=tag.kind;
+  item.mount=tag.mount||null;
+  item.room=tag.room||null;
+  if(kind){
+    item.kindJa=kind.ja;
+    item.kindGroup=kind.group;
+    item.searchWords=[kind.ja].concat(kind.search||[]).join(' ');
+  }
+}
+// 色を変えられる部位を、モデル1点ぶん組み立てる。
+//
+// 画面(assets/js/app-state.js の selectedModelFinishesHtml)は
+// `finishChannels` を回すだけなので、ここに入れれば全点で操作が出る。
+// **マニフェストが自前で持っているものは触らない**(自作モデルは登録時に
+// GLB から既定色を拾っていて、そちらのほうが正確)。
+function applyFinishChannels(item){
+  if(!item || (item.finishChannels&&item.finishChannels.length)) return;
+  if(!CATALOGUE_FINISHES || !CATALOGUE_FINISHES.models) return;
+  var map=CATALOGUE_FINISHES.models[item.model]; if(!map) return;
+  var fixed=CATALOGUE_FINISHES.fixed||[];
+  var meta=CATALOGUE_FINISHES.channels||{};
+  var seen={},out=[];
+  Object.keys(map).forEach(function(material){
+    var key=map[material];
+    // ガラスは色を変えない。操作を出すと、押しても何も起きない欄になる。
+    if(!key||seen[key]||fixed.indexOf(key)>=0) return;
+    seen[key]=1;
+    var m=meta[key]||{};
+    out.push({key:key,label:m.ja||key,default:m.color||'#cccccc'});
+  });
+  if(out.length) item.finishChannels=out;
+}
+
+// 並べる見出し。タグがあれば kind、無ければこれまでの category。
+function catalogueHeading(item){
+  return (item&&item.kindJa)||(item&&item.category)||'その他';
+}
+// どの大分類の引き出しに入れるか。
+//
+// **メニューの並びだけを直す。** item.group はこのあとも元のままにしておく。
+// あれは assets/js/lock-tiers.js の段位（住設=LOCKED / 家具=SOFT）を決めて
+// いて、分類を貼り直したせいで凍結されていたものが黙って自由になる、という
+// 倒れ方をさせたくない。見た目の置き場所と、守りの強さは別の話である。
+function catalogueGroup(item){
+  return (item&&item.kindGroup)||(item&&item.group)||'家具';
 }
 function applyFurnitureMegaManifest(manifests){
   FMP_ITEMS={};
@@ -2228,8 +2349,17 @@ function loadFurnitureManifestSource(src){
   });
 }
 function loadFurnitureMegaLibrary(){
-  Promise.all(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource)).then(function(manifests){
-    manifests=manifests.filter(Boolean);
+  // 分類は**マニフェストと一緒に取りに行く**。あとから足すと、一度
+  // 古い並びで描いてから描き直すことになり、開いた小見出しが畳まれる。
+  var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
+    return r.ok?r.json():null;
+  }).catch(function(){ return null; });};
+  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+    .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
+    CATALOGUE_TAGS=all[0]||null;
+    CATALOGUE_FINISHES=all[1]||null;
+    if(CATALOGUE_FINISHES && typeof ModelQuality==='object') ModelQuality.setFinishes(CATALOGUE_FINISHES);
+    var manifests=all.slice(2).filter(Boolean);
     if(manifests.length) applyFurnitureMegaManifest(manifests);
   });
 }
@@ -2239,9 +2369,20 @@ function isBuildingComponentFmpItem(item){
 function isInteriorSwingDoorType(type){
   return type==='door-swing' || type==='door-swing-s';
 }
-function isClassroomDoorModel(item){
-  return !!(item && item.category==='ドア' && /^Classroom-door-/i.test(item.name||''));
+// 開口(開き戸)へ割り当てられる扉のモデル。
+//
+// **もとは教室のドア5点しか出せなかった。** `Classroom-door-*` という名前で
+// 絞っていたためで、住宅用の建具を足しても、カタログに在るのにメニューへ
+// 出てこない状態だった。ID で自作のものを拾い足す。
+//
+// `家具>ドア` の残り5点(丸窓付き・600幅の物置戸など)は住宅の室内建具では
+// ないので、これまでどおり出さない。
+function isOpeningDoorModel(item){
+  if(!item || item.category!=='ドア') return false;
+  return /^Classroom-door-/i.test(item.name||'') || /^original-door-/.test(item.id||'');
 }
+// 旧名。呼んでいるところが残っていても動くように。
+function isClassroomDoorModel(item){ return isOpeningDoorModel(item); }
 function getOpeningModelItem(it){
   var model=getFmpItem(it&&it.openingModel);
   if(!model) return null;
@@ -2269,7 +2410,7 @@ function getOpeningModelToolPreset(tool){
     };
     if(doorModelId==='bath-clear-swing'||doorModelId==='bath-clear-fold') return {kind:'door',baseType:doorModelId==='bath-clear-fold'?'door-fold':'door-swing',openingModel:'',model:null,doorFinish:'bath-clear',label:doorModelId==='bath-clear-fold'?'浴室・透明折り戸':'浴室・透明開き戸'};
     var doorModel=getFmpItem(doorModelId);
-    if(!doorModel || !isClassroomDoorModel(doorModel)) return null;
+    if(!doorModel || !isOpeningDoorModel(doorModel)) return null;
     return {
       kind:'door', baseType:'door-swing', openingModel:doorModelId, model:doorModel, label:'開き戸: '+doorModel.name
     };
@@ -2314,7 +2455,7 @@ function renderOpeningModelToolMenus(){
 function renderOpeningDoorModelToolMenu(){
   var mount=document.getElementById('opening-door-model-tools');
   if(!mount) return;
-  var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isClassroomDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
+  var doors=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(isOpeningDoorModel).sort(function(a,b){return a.name.localeCompare(b.name);});
   var html='<div class="asset-subcat opening-tool-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="開き戸"><span class="sicon"><svg class="menu-category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M8 21V6l8-2v17ZM13 13h.01"/></svg></span><span>開き戸・浴室ドア</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
   html+=openingToolTileHtml(openingDoorModelToolId(''),'デフォルト','',{thumb:'assets/models/previews-v2/standard-door-default-thumb.png'},'opening-model-default-tile');
   html+=openingToolTileHtml(openingDoorModelToolId('small'),'小','',{thumb:'assets/models/previews-v2/standard-door-small-thumb.png'},'opening-model-default-tile');
@@ -2344,15 +2485,16 @@ function renderFurnitureMegaLibrary(){
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var cats={};
-    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return item.group===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
-      (cats[item.category]||(cats[item.category]=[])).push(item);
+    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return catalogueGroup(item)===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
+      var head=catalogueHeading(item);
+      (cats[head]||(cats[head]=[])).push(item);
     });
     var html='';
     Object.keys(cats).sort().forEach(function(cat){
       cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
       html+='<div class="asset-subcat"><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
         html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
         html+=(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
         html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';

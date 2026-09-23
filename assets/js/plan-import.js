@@ -373,12 +373,19 @@
         ST.busy = false;
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
       }
-      return revisePlanImport(images, hint, r.body).then(function (body) {
-        ST.busy = false;
-        ST.result = body;
-        renderPlanImportResult(body);
-        syncPlanImportButtons();
-        showQuota();
+      return maybeRevisePlanImport(images, hint, r.body).then(function (body) {
+        // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
+        // 判断が得られなければ、これまでどおり下書きだけを渡す。
+        var finish = (typeof PlanFinish === 'undefined' || !body.plan)
+          ? Promise.resolve(null) : PlanFinish.analyze(body.plan);
+        return finish.then(function (out) {
+          body.finish = out;
+          ST.busy = false;
+          ST.result = body;
+          renderPlanImportResult(body);
+          syncPlanImportButtons();
+          showQuota();
+        });
       });
     }).catch(function () {
       ST.busy = false;
@@ -450,6 +457,22 @@
   // **上積みであって、必須の工程ではない。** 描けなかったとき、通信に失敗した
   // とき、上限に達したときは、見直す前の結果をそのまま使う。ここで落ちて
   // 読み取り自体を失うほうが損である。
+  // 見直しを払うかどうかは、サーバ側の門(worker/plan-gate.mjs)が決めている。
+  //
+  // **見直しは、読み取りと同じだけ費用がかかる。** 直すところが無ければ同じ
+  // JSONがそのまま返るので、辻褄の合っているページでは ¥40 を確実に捨てて
+  // いた。1日の取り込み回数が5回に絞られているのは、この倍額がそのまま
+  // 効いている。
+  //
+  // 門が答えを出せなかったとき・古いサーバに当たったときは revise が
+  // 付いてこない。そのときは**これまでどおり見直す**。
+  function maybeRevisePlanImport(images, hint, body) {
+    var advice = body && body.revise;
+    if (!advice || !advice.skipAll) return revisePlanImport(images, hint, body);
+    body.reviewSkipped = true;
+    return Promise.resolve(body);
+  }
+
   function revisePlanImport(images, hint, body) {
     var pages = (body && body.pages) || [];
     if (!pages.length || typeof PlanReviewDraw === 'undefined') return Promise.resolve(body);
@@ -547,13 +570,25 @@
   }
 
   // 失敗の理由を、利用者が次に何をすればよいか分かる言葉で出す。
+  // 次の一手の文面。**キーはサーバと共有するが、日本語はこちらにしかない。**
+  // worker/plan-gate.mjs の NEXT_STEP_QUESTION の選択肢と1対1で対応する。
+  var NEXT_STEP = {
+    recrop_tighter: '平面図だけを大きく囲み直してください。立面図や外観パース、表題欄が一緒に入っていると読み取れません。',
+    recrop_wider: '寸法線まで入るように、少し広めに囲み直してください。',
+    single_page: 'ページを1枚ずつに分けて取り込むと通ることがあります。',
+    better_scan: 'もっと大きく、はっきり写った画像でお試しください。寸法の数字が読める大きさが必要です。',
+    not_a_floorplan: 'この画像には平面図が写っていないようです。間取りの描かれたページを選んでください。',
+    too_complex: 'この間取りは自動では読み取れない形のようです（曲線や斜めの壁、スキップフロアなど）。お手数ですが、手で引いてください。',
+    retry: 'もう一度お試しください。',
+  };
+
   function showPlanImportError(status, body) {
     var code = (body && body.error) || '';
     var map = {
       ai_not_configured: 'この環境ではまだAIの読み取りを使えません（管理者の設定待ちです）。',
       ai_model_not_japan_resident: 'AIの設定が正しくないため実行しませんでした。管理者にお伝えください。',
-      ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。図面の部分だけを大きく囲み直すと通ることがあります。',
-      ai_bad_response: 'AIが間取りとして答えられませんでした。図面がはっきり写るように囲み直してください。',
+      ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。',
+      ai_bad_response: 'AIが間取りとして答えられませんでした。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
       ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
       invalid_request: '送った画像に問題がありました。',
@@ -568,6 +603,20 @@
     var text = map[code] || byStatus[status]
       || ('読み取れませんでした（' + status + (code ? ' ' + code : '') + '）。');
     if (code === 'ai_quota_exceeded' && body && body.message) text = body.message;
+    // **次に何をすればよいか。**
+    //
+    // 起きたことと、次の一手は別である。これまでは1つの文面に混ぜていたので、
+    // 原因が何であれ「図面がはっきり写るように囲み直してください」と言うほか
+    // なかった。実際の原因は、囲みが広すぎる・狭すぎる・そもそも平面図が写って
+    // いない・画像が小さすぎる、と別物である。
+    //
+    // サーバが next を付けてくるのは、送った画像の枚数・大きさ・返ってきた
+    // 不整合から一手を選べたときだけ。**文面はここにしかない**ので、選択肢に
+    // 無い答えが返っても画面には出ない。
+    if ((code === 'ai_invalid_plan' || code === 'ai_bad_response') && !NEXT_STEP[(body && body.next) || '']) {
+      text += '図面の部分だけを大きく囲み直すと通ることがあります。';
+    }
+    if (body && NEXT_STEP[body.next]) text += NEXT_STEP[body.next];
     if (body && body.problems && body.problems.length) {
       text += '\n' + body.problems.slice(0, 5).join('\n');
     }
@@ -616,6 +665,19 @@
         lines.push('・AIが自分の読み取りを平面図として見直しました'
           + (ch.length ? '（' + ch.length + '件を直しました）。' : '（直すところはありませんでした）。'));
         ch.forEach(function (c) { lines.push('　・' + c); });
+      }
+      // **省いたことも書く。** 費用を見せている以上、払わなかった理由も
+      // 見えているべきである。黙って省くと、見直しが動かなくなったのか
+      // 省いたのかが、使う側から区別できない。
+      if (body.reviewSkipped) {
+        lines.push('・読み取りの辻褄が合っていたので、見直しは省きました（その分の費用と時間はかかっていません）。');
+      }
+      // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
+      if (body.finish) {
+        var swaps = (body.finish.picks || []).length;
+        var lacks = PlanFinish.missingLines(body.finish).length;
+        if (swaps) lines.push('・水まわり ' + swaps + ' 点を、部屋の広さに合うモデルに差し替えます。');
+        if (lacks) lines.push('・取り込んだあと、足りないもの ' + lacks + ' 件を道具の一覧に出します。');
       }
       if (body.reviewNote) lines.push('・' + body.reviewNote);
       (body.notes || []).forEach(function (n) { lines.push('・' + n); });
@@ -691,6 +753,11 @@
     if (typeof DATA !== 'undefined' && DATA && ((DATA.walls || []).length || (DATA.rooms || []).length)) {
       if (!confirm('いまの間取りを、読み取った下書きで置き換えます。よろしいですか？')) return;
     }
+    // 水まわりの既定モデルを、部屋に合うものへ差し替えてから組み立てる。
+    // **中心は動かさない。** 寸法だけが入れ替わるので、図面どおりの位置に残る。
+    if (ST.result.finish && typeof PlanFinish !== 'undefined') {
+      PlanFinish.applyPicks(ST.result.plan, ST.result.finish.picks);
+    }
     var plan = toAppObjects(ST.result.plan);
     // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
     root._defaultPlanPending = false;
@@ -709,6 +776,9 @@
     if (typeof resetView === 'function') resetView();
     if (typeof draw2d === 'function') draw2d();
     if (typeof rebuild3D === 'function') rebuild3D();
+    // 足りないものを道具の一覧に出す。**ここは閉じたあとも残る。**
+    // 1つ置いてから次を置く、という使い方になるため。
+    if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
     closePlanImport();
   }
 
