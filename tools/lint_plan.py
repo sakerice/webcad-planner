@@ -965,7 +965,14 @@ def check16_ac_pairing(data):
 
 
 def check17_window_head_alignment(data):
-    """同一階・同一外壁面で窓の上端(sill+height)の種類が2を超えていないか。"""
+    """同一階・同一の面で窓の上端(sill+height)の種類が2を超えていないか。
+
+    **「面」は向きではなく、窓が乗っている壁の位置で決める。** 向きだけで
+    まとめると、北面と南面が同じ「NS面」に入る。既定プランでこれが起き、
+    南の掃き出し窓(上端2030)と北の高窓(2350)が「揃っていない」と出ていた。
+    別の外壁面なので、揃える理由が無い。**設計を歪めないと通せない指摘は、
+    見落としと同じくらい害がある。**
+    """
     out = []
     groups = {}
     for it in data['items']:
@@ -973,13 +980,18 @@ def check17_window_head_alignment(data):
             continue
         top = (it.get('windowSill') or 0) + (it.get('windowHeight') or 0)
         rot = int(round((it.get('rot', 0) or 0))) % 180
-        key = (it.get('floor', 1), 'NS' if rot == 0 else 'EW')
+        cx, cy = center(it)
+        # 面を代表する座標。南北向きの窓なら y、東西向きなら x。
+        # 壁の厚みと納まりで数十mmばらつくので 500mm の枠にまとめる。
+        face_pos = int(round((cy if rot == 0 else cx) / 500.0)) * 500
+        key = (it.get('floor', 1), 'NS' if rot == 0 else 'EW', face_pos)
         groups.setdefault(key, {}).setdefault(top, []).append(it)
-    for (floor, face), tops in sorted(groups.items()):
+    for (floor, face, pos), tops in sorted(groups.items()):
         if len(tops) > 2:
             desc = ', '.join('%dmm×%d枚' % (t, len(v)) for t, v in sorted(tops.items()))
-            out.append('[%dF] %s面: 窓上端が%d種類ある(%s)'
-                       % (floor, face, len(tops), desc))
+            out.append('[%dF] %s面(%s=%dmm付近): 窓上端が%d種類ある(%s)'
+                       % (floor, face, 'y' if face == 'NS' else 'x', pos,
+                          len(tops), desc))
     return out
 
 

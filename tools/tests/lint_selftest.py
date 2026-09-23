@@ -209,6 +209,29 @@ def break_43(d):
     return d
 
 
+def break_17(d):
+    """同じ外壁面の窓を、3種類の上端に散らす。
+
+    **面は向きではなく壁の位置で分ける。** 向きだけでまとめていたとき、
+    北面と南面が同じ「NS面」に入り、揃える理由の無い窓どうしを揃っていないと
+    言っていた。ここでは1つの面だけを崩す。
+    """
+    face = {}
+    for it in d['items']:
+        if it['type'] not in ('window', 'window-door'):
+            continue
+        if int(round(it.get('rot', 0) or 0)) % 180 != 0:
+            continue
+        face.setdefault(int(round((it['y'] + it['d'] / 2) / 500.0)) * 500, []).append(it)
+    group = max(face.values(), key=len)
+    if len(group) < 3:
+        raise SystemExit('同じ面に窓が3枚無いフィクスチャでは17を試せない')
+    for n, it in enumerate(group[:3]):
+        it['windowSill'] = 1000 + n * 200
+        it['windowHeight'] = 800
+    return d
+
+
 CASES = [
     ('34', break_34, '玄関から居室が見通せる'),
     ('35', break_35, 'トイレの直下が居室'),
@@ -219,6 +242,7 @@ CASES = [
     ('39', break_30, '家具が相手に背を向けている'),
     ('33', break_33, '照明が天井から浮いている'),
     ('40', break_40, '窓の見付けを家具が塞ぐ'),
+    ('17', break_17, '同じ面の窓の上端が3種類'),
     ('41', break_41, '窓を壁が横切る'),
     ('42', break_42, '玄関ドアの正面が塞がれる'),
     ('43', break_43, '広い開口の正面が塞がれる'),
