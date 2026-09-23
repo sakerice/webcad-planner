@@ -76,6 +76,15 @@ check_cloudflare_asset_sizes
 #   ビルド段階(CI)   WORKERS_CI=1, SKIP_DEPLOY=1 → 作るだけ
 #   配信段階(CI)     WORKERS_CI=1               → 配信する
 #   手元・エージェント  WORKERS_CI 無し            → 作るだけ
+# Cloudflare がこの変数の名前を変えたら、ここは**黙って配信しなくなる**。
+# 本番が更新されないのに誰も気づかないのがいちばん困るので、CI なのに配信
+# しない状況はビルドログへ必ず出す。CI=true も Workers Builds が既定で
+# 入れる(公式ドキュメント「Default variables」)。
+if [ "${CI:-}" = "true" ] && [ -z "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
+  echo "!!! CI で動いているのに Workers Builds の印がありません。配信しません。"
+  echo "!!! ビルド環境の変数が変わった可能性があります。build.sh を確認してください。"
+fi
+
 if [ -n "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
   echo "Workers Builds からの実行です。配信します。"
   npx wrangler deploy
