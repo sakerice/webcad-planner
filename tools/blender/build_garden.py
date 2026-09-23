@@ -276,6 +276,98 @@ def standpipe():
     return combine(parts)
 
 
+def tree_deciduous():
+    """Four spreading dogwood stems with open, layered broadleaf sprays."""
+    rng = random.Random(15030)
+    mats = [material('Dogwood smooth bark', '#82715e', .95)]
+    mats += [material('Dogwood leaf '+str(i), c, .8)
+             for i,c in enumerate(('#456d36','#608647','#789853'))]
+    bm = bmesh.new()
+    for s in range(4):
+        az = s*math.pi/2
+        radial = Vector((math.cos(az),math.sin(az),0))
+        root = radial*.055
+        top = radial*.180 + Vector((0,0,2.88-.09*s))
+        pts = [root, root+Vector((0,0,.24)),
+               radial*.110+Vector((0,0,1.38)), top]
+        add_tube(bm, 0, pts, [.030,.027,.018,.003], 6)
+        for b in range(4):
+            angle = az+b*.22
+            direction = Vector((math.cos(angle),math.sin(angle),0))
+            start = pts[2].lerp(top, .12+b*.19)
+            tip = direction*(.720-.115*b)+Vector((0,0,1.80+.30*b+.04*(s%2)))
+            middle = start.lerp(tip,.52)+Vector((0,0,.055))
+            add_tube(bm, 0, [start,middle,tip], [.012,.007,.0015], 4)
+            for j in range(48):
+                u = rng.uniform(.32,.90)
+                center = start.lerp(tip,u)+Vector((rng.uniform(-.045,.045),
+                         rng.uniform(-.045,.045),rng.uniform(-.045,.055)))
+                angle_leaf = angle+rng.uniform(-1.2,1.2)
+                along = Vector((math.cos(angle_leaf),math.sin(angle_leaf),
+                                rng.uniform(-.25,.45)))
+                length = rng.uniform(.10,.15)
+                leaf(bm,center,along,length,length*.58,1+j%3,rng.uniform(-.7,.7))
+            if b == 0:
+                # Real terminal leaves set +/-800 mm on X and Y, not tubes.
+                leaf(bm,tip,direction,.160,.075,2,0)
+    # The leader's terminal leaf sets the crown top at exactly 3 m.
+    leaf(bm,Vector((.180,0,2.940)),Vector((0,0,1)),.120,.060,3,.25)
+    obj = new_object('Four stem layered dogwood', bm, mats)
+    obj['leaf_plates'] = 773
+    return combine([obj])
+
+
+def tree_conifer():
+    """Single leader and dense short sprays tapering to a conical tip."""
+    rng = random.Random(90180)
+    mats = [material('Conifer bark', '#74634e', .95)]
+    mats += [material('Conifer scale foliage '+str(i), c, .85)
+             for i,c in enumerate(('#304e38','#416246','#537652'))]
+    bm = bmesh.new()
+    add_tube(bm,0,[(0,0,0),(0,0,.20),(0,0,1.750)],[.027,.023,.002],6)
+    for tier in range(12):
+        z = .250+tier*.120
+        reach = .390*(1-(z-.250)/1.5)
+        for branch in range(6):
+            angle = branch*math.tau/6+tier*.43
+            radial = Vector((math.cos(angle),math.sin(angle),0))
+            start = Vector((0,0,z+.055))
+            tip = radial*reach+Vector((0,0,z))
+            add_tube(bm,0,[start,tip],[.007*(1-tier/15),.001],4)
+            for j in range(10):
+                center = start.lerp(tip,.40+.06*j)
+                center += Vector((rng.uniform(-.010,.010),rng.uniform(-.010,.010),
+                                  rng.uniform(-.025,.025)))
+                a = angle+(-1 if j%2 else 1)*.65
+                along = Vector((math.cos(a),math.sin(a),.35))
+                length = .090-.004*tier
+                leaf(bm,center,along,length,length*.62,1+(j+tier)%3,
+                     rng.uniform(-.6,.6))
+    for i in range(4):
+        radial = Vector((math.cos(i*math.pi/2),math.sin(i*math.pi/2),0))
+        # Lower terminal foliage fixes both diameters at 900 mm.
+        leaf(bm,radial*.410+Vector((0,0,.250)),radial,.080,.048,2,0)
+    leaf(bm,Vector((0,0,1.760)),Vector((0,0,1)),.080,.036,3,0)
+    obj = new_object('Tapered conifer foliage sprays', bm, mats)
+    obj['leaf_plates'] = 725
+    return combine([obj])
+
+
+def fence_board():
+    wood = [material('Horizontal fence timber '+str(i), c, .8, channel='wood')
+            for i,c in enumerate(('#967454','#a2805e','#8b6a4c'))]
+    parts = []
+    for x in (-.880,.880):
+        parts.append(box('Board fence end post', (x-.030,-.020,0),
+                         (x+.030,.020,1.200), wood[2], .002, 1))
+    # Nine horizontal 100 mm boards with 27 mm clear gaps; front is -Y.
+    for i in range(9):
+        z = .084+i*.127
+        parts.append(box('Board fence horizontal plank', (-.880,-.020,z),
+                         (.880,-.002,z+.100), wood[i%3], .002, 1))
+    return combine(parts)
+
+
 if __name__ == '__main__':
     run([('original-tree-symbol', (2000, 2000, 4000), lambda: plant('symbol'), None, 3000, True),
          ('original-tree-evergreen', (1200, 1200, 2200), lambda: plant('evergreen'), None, 3000, True),
@@ -284,4 +376,7 @@ if __name__ == '__main__':
          ('original-terrace-tile', (1820, 1820, 150), terrace, 'stone', 1500),
          ('original-fence-lattice', (1820, 60, 1800), fence, 'metal', 1500),
          ('original-car-stop', (600, 100, 100), car_stop, None, 1500),
-         ('original-standpipe', (300, 300, 900), standpipe, 'metal', 1500)])
+         ('original-standpipe', (300, 300, 900), standpipe, 'metal', 1500),
+         ('original-tree-deciduous', (1600, 1600, 3000), tree_deciduous, None, 3000, True),
+         ('original-tree-conifer', (900, 900, 1800), tree_conifer, None, 2500, True),
+         ('original-fence-board', (1820, 40, 1200), fence_board, 'wood', 800)])

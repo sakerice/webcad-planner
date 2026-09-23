@@ -41,6 +41,23 @@ def build_desk(w,d,h,drawers):
     return combine(parts)
 
 
+def desk_counter():
+    wood = matp('Study counter oak', '#c9ad85', rough=.58)
+    wood['finishChannel'] = 'wood'
+    parts = [box('Study counter single top', (-.900,-.225,.700),
+                 (.900,.225,.730), wood, .006, 3)]
+    # Three 24 mm panels leave two equal seating bays. Their recessed backs
+    # leave a continuous 45 mm cable route beneath the wall edge of the top.
+    for x in (-.864,0,.864):
+        parts.append(box('Study counter thin support panel', (x-.012,-.205,0),
+                         (x+.012,.180,.704), wood, .002, 2))
+    for lo, hi in ((-.852,-.012),(.012,.852)):
+        parts.append(box('Study counter rear stiffener', (lo,.150,.615),
+                         (hi,.174,.704), wood, .002, 1))
+    return combine(parts)
+
+
 if __name__ == '__main__':
     run([('original-desk', (1000, 600, 720), lambda: build_desk(1, .6, .72, 3), 'wood'),
-         ('original-desk-work', (1400, 700, 730), lambda: build_desk(1.4, .7, .73, 2), 'wood')])
+         ('original-desk-work', (1400, 700, 730), lambda: build_desk(1.4, .7, .73, 2), 'wood'),
+         ('original-desk-counter', (1800, 450, 730), desk_counter, 'wood', 1000)])

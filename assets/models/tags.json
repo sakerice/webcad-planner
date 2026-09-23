@@ -7647,6 +7647,16 @@
     "room": 0.31
    }
   },
+  "original-ac-floor": {
+   "kind": "hvac",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.35
+   }
+  },
   "original-ac-unit": {
    "kind": "utility-equipment",
    "mount": "outdoor",
@@ -7695,6 +7705,16 @@
     "kind": 0.68,
     "mount": 0.54,
     "room": 0.33
+   }
+  },
+  "original-bath-dryer": {
+   "kind": "hvac",
+   "mount": "ceiling",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.97
    }
   },
   "original-bathtub": {
@@ -7813,6 +7833,16 @@
     "room": 0.67
    }
   },
+  "original-desk-counter": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "study",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.68,
+    "room": 0.87
+   }
+  },
   "original-desk-work": {
    "kind": "desk",
    "mount": "floor",
@@ -7875,6 +7905,19 @@
     "mount": 0.63,
     "room": 1
    }
+  },
+  "original-fence-board": {
+   "kind": "fence",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.96
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → フェンス・目隠し"
+   ]
   },
   "original-fence-lattice": {
    "kind": "fence",
@@ -8408,6 +8451,32 @@
     "room": 1
    }
   },
+  "original-tree-conifer": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.95,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-tree-deciduous": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
   "original-tree-evergreen": {
    "kind": "garden-plant",
    "mount": "outdoor",
@@ -8452,6 +8521,16 @@
     "kind": 1,
     "mount": 0.84,
     "room": 0.88
+   }
+  },
+  "original-vent-register": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.71,
+    "room": 0.34
    }
   },
   "original-wardrobe": {

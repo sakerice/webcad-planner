@@ -175,6 +175,69 @@
           "label": "柱・水栓金具"
         }
       ]
+    },
+    {
+      "id": "original-tree-deciduous",
+      "name": "株立ちの落葉樹（ヤマボウシ）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-deciduous.glb",
+      "thumb": "assets/models/previews-v2/original-tree-deciduous-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-deciduous-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1600,
+      "d": 1600,
+      "h": 3000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-conifer",
+      "name": "針葉樹（コニファー）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-conifer.glb",
+      "thumb": "assets/models/previews-v2/original-tree-conifer-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-conifer-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 1800,
+      "front": "+Z"
+    },
+    {
+      "id": "original-fence-board",
+      "name": "横板の板塀（高さ1200）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-board.glb",
+      "thumb": "assets/models/previews-v2/original-fence-board-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-board-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 40,
+      "h": 1200,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "板"
+        }
+      ]
     }
   ]
 }

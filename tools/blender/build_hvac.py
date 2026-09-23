@@ -52,6 +52,75 @@ def build_ac(w, d, h):
     return combine(parts)
 
 
+def vent_register():
+    """150 mm circular register; the exposed grille faces down for ceiling use."""
+    skin = matp('Register ivory resin', '#f3f2ec', rough=.42)
+    shade = matp('Register recessed interior', '#68716e', rough=.8)
+    # Inner ceiling -> inner wall -> rounded outer lip -> closed rear.
+    # XY diameter fixes w/d; the central pull fixes z=0. No resizing.
+    rows = [(.063,.022), (.063,.003), (.073,.003),
+            (.075,.005), (.075,.028), (.073,.030)]
+    rings = [[(r*math.cos(i*math.tau/16), r*math.sin(i*math.tau/16), z)
+              for i in range(16)] for r,z in rows]
+    parts = [shell('Register circular recessed rim', rings, [skin, shade], [1,0,0,0,0])]
+    for y, half_width in ((-.038,.047), (0,.059), (.038,.047)):
+        parts.append(box('Register louver', (-half_width,y-.008,.003),
+                         (half_width,y+.008,.009), skin, .001, 1))
+    rings = [[(r*math.cos(i*math.tau/8), r*math.sin(i*math.tau/8), z)
+              for i in range(8)] for r,z in ((.007,0),(.009,.002),(.009,.014))]
+    parts.append(shell('Register central pull', rings, [skin], [0,0]))
+    return combine(parts)
+
+
+def bath_dryer():
+    skin = matp('Bath dryer white resin', '#f4f4ef', rough=.4)
+    dark = matp('Bath dryer intake shadow', '#485151', rough=.85)
+    window = matp('Bath dryer control window', '#52686b', rough=.28)
+    parts = [box('Bath dryer shallow housing', (-.325,-.225,.020),
+                 (.325,.225,.130), skin, .009, 2),
+             box('Bath dryer recessed intake', (-.270,-.177,.010),
+                 (.170,.177,.023), dark, .003, 1)]
+    # Downward-facing grille: real 6 mm gaps, recessed dark backing.
+    for i in range(10):
+        y = -.180+i*.038
+        parts.append(box('Bath dryer grille bar', (-.278,y,0),
+                         (.178,y+.032,.014), skin, .0015, 1))
+    parts.append(box('Bath dryer side control panel', (.200,-.180,.003),
+                     (.288,.180,.022), skin, .003, 1))
+    parts.append(box('Bath dryer small control window', (.218,-.115,.001),
+                     (.270,-.045,.006), window, .001, 1))
+    return combine(parts)
+
+
+def ac_floor():
+    skin = matp('Floor AC warm white shell', '#f5f4ef', rough=.38)
+    dark = matp('Floor AC recessed vents', '#465052', rough=.8)
+    blade = matp('Floor AC ivory louvers', '#dedfd8', rough=.48)
+    # Rear lower corners stand proud of the main back, leaving a real pipe chase.
+    parts = [box('Floor AC main housing', (-.300,-.100,.025),
+                 (.300,.095,.700), skin, .012, 2),
+             box('Floor AC upper rear cover', (-.285,.085,.220),
+                 (.285,.125,.685), skin, .004, 1)]
+    for x in (-.270,.270):
+        parts.append(box('Floor AC rear foot', (x-.025,-.085,0),
+                         (x+.025,.125,.220), skin, .004, 1))
+    parts.append(box('Floor AC upper outlet recess', (-.260,-.106,.545),
+                     (.260,-.098,.664), dark, .002, 1))
+    for z in (.550,.584,.618):
+        parts.append(box('Floor AC outlet louver', (-.250,-.125,z),
+                         (.250,-.103,z+.019), blade, .003, 1))
+    parts.append(box('Floor AC lower intake recess', (-.255,-.106,.070),
+                     (.255,-.098,.310), dark, .002, 1))
+    for i in range(7):
+        z = .074+i*.034
+        parts.append(box('Floor AC intake slat', (-.263,-.115,z),
+                         (.263,-.104,z+.023), skin, .002, 1))
+    return combine(parts)
+
+
 if __name__ == '__main__':
     run([('original-ac-wall', (798, 235, 295), lambda: build_ac(.798, .235, .295)),
-         ('original-ac-wall-wide', (890, 330, 295), lambda: build_ac(.890, .330, .295))])
+         ('original-ac-wall-wide', (890, 330, 295), lambda: build_ac(.890, .330, .295)),
+         ('original-vent-register', (150, 150, 30), vent_register, None, 400, False, True),
+         ('original-bath-dryer', (650, 450, 130), bath_dryer, None, 700, False, True),
+         ('original-ac-floor', (600, 250, 700), ac_floor, None, 900)])

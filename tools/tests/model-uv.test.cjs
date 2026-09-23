@@ -71,7 +71,9 @@ const UNWRAPPED = [
   'original-books-stack', 'original-mug-tray', 'original-vase-tall',
   'original-basket-blanket', 'original-plant-desk', 'original-entry-tray',
   'original-washer-drum', 'original-washer-pan', 'original-laundry-pole',
-  'original-ac-wall-slim',
+  'original-ac-wall-slim', 'original-vent-register', 'original-bath-dryer',
+  'original-ac-floor', 'original-desk-counter',
+  'original-tree-deciduous', 'original-tree-conifer', 'original-fence-board',
 ];
 
 test('UV展開を通した品は、UVが1つも潰れていない', () => {

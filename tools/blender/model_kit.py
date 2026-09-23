@@ -192,7 +192,7 @@ def uv_report(obj):
 
 
 def run(entries, do_export=None, do_icons=None):
-    """(stem, 寸法mm, 組み立て関数[, 狙う部位, 面数の上限, 薄板を許すか]) を順に通す。
+    """(stem, 寸法mm, 組み立て関数[, 部位, 面数上限, 薄板可, 下から見せるか]) を順に通す。
 
     狙う部位は文字列・集合・None。None は「部位を分けない」の意味で、
     finishChannel が1つでも付いていれば止める(付け忘れと、付けすぎの両方を見る)。
@@ -205,6 +205,10 @@ def run(entries, do_export=None, do_icons=None):
         want_channels = entry[3] if len(entry) > 3 else None
         budget = entry[4] if len(entry) > 4 else 3000
         open_faces_ok = entry[5] if len(entry) > 5 else False
+        # 天井付けの品は、見える面が下を向いている。**そのまま撮ると
+        # カタログの絵も平面の記号も真っ白な板になる**(換気口と浴室乾燥機で
+        # 実際にそうなった)。絵のためだけに裏返す。形は変えない。
+        from_below = entry[6] if len(entry) > 6 else False
 
         clear_scene()
         bpy.context.scene.unit_settings.system = 'METRIC'
@@ -267,8 +271,14 @@ def run(entries, do_export=None, do_icons=None):
         print(line, flush=True)
         if do_icons:
             PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
+            if from_below:
+                # X で裏返し、Z でも回して正面(-Y)を手前に保つ
+                obj.rotation_euler = (math.pi, 0, math.pi)
+                bpy.context.view_layer.update()
             render_top(obj, str(PREVIEW_DIR / (stem + '-top.png')))
             render_thumb(obj, str(PREVIEW_DIR / (stem + '-thumb.png')))
+            obj.rotation_euler = (0, 0, 0)
+            bpy.context.view_layer.update()
             # 背面は出荷しない。**作り手が裏を確かめるため**に work へ残す。
             obj.rotation_euler.z = math.pi
             bpy.context.view_layer.update()
