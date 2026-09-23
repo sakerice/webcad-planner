@@ -1178,16 +1178,16 @@ function item3DBaseY(it){
   // **3階建ての既定プランの掃き出し窓が、これで792mm沈んで基礎の中にいた。**
   // ずれは10mm(部屋の南端8190に対し、窓の中心が8200)。10mmで780mm落ちる。
   // 目で見ないと分からない壊れ方で、寸法の検査には出ない。
-  if(isWallOpeningItem(it)){
-    var ox=(it.x||0)+(it.w||0)/2, oy=(it.y||0)+(it.d||0)/2;
-    if(!roomAtPointOnFloor(it.floor,ox,oy)){
-      // 中心で部屋が見つからないときだけ、開口の両側を見る。
-      // 見つかる場合の値は一切変えない。
-      var sideY=openingAdjacentFloorTopY(it);
-      if(sideY!==null) return sideY;
-    }
-    return roomFloorAt(it.floor,ox,oy);
+  // **面している部屋が見つかったときだけ介入する。** 全ての開口を横取りすると、
+  // 建物の外に置いた物置のドアのような「部屋に面していない開口」まで
+  // 床の高さへ持ち上げてしまい、地面から630mm浮く(実測で確認した)。
+  if(isWallOpeningItem(it)
+     && !roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2)){
+    var sideY=openingAdjacentFloorTopY(it);
+    if(sideY!==null) return sideY;
   }
+  // ここから下は従来どおり。中心が部屋の中にある開口も、どこにも面していない
+  // 開口も、これまでと同じ経路を通る。
   // 1階に置いた一般アイテムでも、基礎の外(=屋外)にあるものは地面に置く。
   // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
   // 「地面から浮いた謎の矩形」になる

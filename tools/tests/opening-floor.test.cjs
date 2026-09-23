@@ -40,7 +40,12 @@ function world() {
     isContextExteriorItemType: () => false,
     isFloorAwareGroundItemType: () => false,
     groundYForItem: () => -0.012,          // 地面(=沈んだときの値)
-    itemOnFoundation: () => false,         // **開口の中心は基礎の外に出る**
+    // 基礎は建物の外周＝部屋と同じ範囲。**開口の中心は壁の中なので、
+    // わずかに基礎の外へ出る。** そこが今回の不具合の入口だった。
+    itemOnFoundation: (o) => {
+      const x = o.x + o.w / 2, y = o.y + o.d / 2;
+      return x >= 0 && x <= 3000 && y >= 0 && y <= 8190;
+    },
     roomFloorTopY: () => 0.78,             // 基礎450+スラブ180+床上げ150
     roomAtPointOnFloor: (floor, x, y) =>
       (floor === room.floor && x >= room.x && x <= room.x + room.w
@@ -73,13 +78,13 @@ test('開口でない物は、基礎の外なら地面のまま(ポーチ・デ�
   assert.equal(base({ type: 'custom-block', floor: 1, x: 0, y: 8300, w: 1800, d: 900 }), -0.012);
 });
 
-test('両側とも部屋が無くても、開口は地面へ落とさない', () => {
-  // **開口は「基礎の外だから地面」の対象にしない。** 壁に開くものなので、
-  // 部屋が見つからないときも床の決め方(roomFloorAt)へ渡す。
-  const { scope, base } = world();
-  scope.roomAtPointOnFloor = () => null;
-  scope.roomFloorAt = () => 0.63;
-  assert.equal(base({ type: 'window', floor: 1, x: 9000, y: 9000, w: 690, d: 150, rot: 0 }), 0.63);
+test('どの部屋にも面していない開口は、従来どおり地面に置く', () => {
+  // **面している部屋があるときだけ介入する。** 全部を横取りすると、建物の
+  // 外に置いた物置のドアが床の高さまで持ち上がり、地面から630mm浮く。
+  // ポーチやデッキが浮かないための既存の規則を壊さないこと。
+  const { base } = world();
+  assert.equal(base({ type: 'door-swing', floor: 1, x: 20000, y: 20000, w: 780, d: 160, rot: 0 }),
+    -0.012, '建物の外の建具が宙に浮いている');
 });
 
 test('建具も窓も、開口として扱われる', () => {
