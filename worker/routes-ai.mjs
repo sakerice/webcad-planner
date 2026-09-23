@@ -28,6 +28,7 @@ import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./pla
 import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, missingByRoom, MAX_ROOMS, MAX_SLOTS } from "./plan-finish.mjs";
+import { knowledgeWarnings } from "./plan-check.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -646,10 +647,14 @@ export function finishImportedPlan(parsed, usage, extra) {
     }, 422);
   }
   const normalized = PlanSchema.normalizePlan(plan);
+  // 物の置かれ方の知識に照らす。浴槽が洋室にある、便器の寸法が住宅のものでない、
+  // といった**読み取りの取り違え**を、この時点で利用者へ返す。
+  // 既存の warnings と同じ経路で画面に出る（判定できないものは黙る）。
+  const warnings = checked.warnings.concat(knowledgeWarnings(normalized));
   return json({
     plan: normalized,
     summary: PlanSchema.summarize(normalized),
-    warnings: checked.warnings,
+    warnings: warnings,
     // モデルが「読めなかった」と言っていることは、そのまま利用者に見せる。
     notes: plan.notes.slice(0, 20),
     usage: usage || null,
