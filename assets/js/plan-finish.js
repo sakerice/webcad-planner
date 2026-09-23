@@ -144,7 +144,17 @@
       return res.ok ? res.json() : null;
     }).then(function (out) {
       if (!out || !out.rooms) return null;
-      ST.result = { plan: plan, rooms: out.rooms, picks: out.picks || [], missing: out.missing || [] };
+      // **用途が決まってから、もう一度知識に照らす。**「洋室」のように名前だけ
+      // では用途が決まらない部屋は、取り込み直後には判定できず黙っていた。
+      // jev が決めたあとなら「浴槽が寝室にある」と言える。
+      var types = {};
+      out.rooms.forEach(function (r) { if (r && r.id && r.type) types[r.id] = r.type; });
+      var warnings = (typeof PlanCheck === 'object' && PlanCheck)
+        ? PlanCheck.knowledgeWarnings(plan, types) : [];
+      ST.result = {
+        plan: plan, rooms: out.rooms, picks: out.picks || [],
+        missing: out.missing || [], warnings: warnings,
+      };
       return ST.result;
     }).catch(function () { return null; });
   }
@@ -208,11 +218,28 @@
     var old = document.getElementById('plan-finish');
     if (old) old.remove();
     var lines = missingLines(result);
-    if (!lines.length) return;
+    var warn = (result && result.warnings) || [];
+    if (!lines.length && !warn.length) return;
 
     var box = document.createElement('div');
     box.className = 'catalogue-search';
     box.id = 'plan-finish';
+
+    // **読み取りの取り違えを、足りないものより先に出す。** 浴槽が寝室にある
+    // ような間違いは、家具を足す前に直すべきものだから。
+    if (warn.length) {
+      var wHead = document.createElement('label');
+      wHead.textContent = '読み取りで気になるところ（' + warn.length + '件）';
+      var wList = document.createElement('div');
+      wList.className = 'catalogue-count';
+      wList.style.whiteSpace = 'pre-line';
+      wList.textContent = warn.map(function (t) { return '・' + t; }).join('\n');
+      box.append(wHead, wList);
+    }
+    if (!lines.length) {
+      sidebar.prepend(box);
+      return;
+    }
     var head = document.createElement('label');
     head.textContent = 'この間取りに足りないもの（' + lines.length + '件）';
     var note = document.createElement('div');

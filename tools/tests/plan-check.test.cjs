@@ -14,8 +14,8 @@ const { join } = require('node:path');
 const ROOT = join(__dirname, '..', '..');
 let check = null;
 
-test.before(async () => {
-  check = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
+test.before(() => {
+  check = require(join(ROOT, 'assets/js/plan-check.js'));
 });
 
 /** 部屋1つと、その中の設備1つだけの間取り。 */
@@ -93,4 +93,21 @@ test('読み取りの種類と知識表の分類の対応が、実在するも�
       `${importType} は読み取りが返さない種類`);
     assert.ok(OK.KNOWLEDGE[kind], `${kind} が知識表に無い`);
   }
+});
+
+test('用途を渡せば、名前で決まらない部屋でも判定できる', () => {
+  // **ここが jev をつなぐ口。** 「洋室」は名前だけでは寝室・子供部屋・書斎の
+  // どれか決まらないので取り込み直後は黙るが、jev が決めたあとなら言える。
+  const plan = planWith('洋室(1)', { type: 'bath', w: 1600, d: 750 });
+  plan.rooms[0].id = 'r1';
+  assert.deepEqual(check.knowledgeWarnings(plan), [], '用途が無いのに判定している');
+  const w = check.knowledgeWarnings(plan, { r1: 'bedroom' });
+  assert.equal(w.length, 1);
+  assert.match(w[0], /浴槽/);
+});
+
+test('Worker からも同じ実装が呼べる', async () => {
+  // 実装が二か所にあると必ず食い違う。入口だけ別で、中身は同じ。
+  const worker = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
+  assert.equal(worker.knowledgeWarnings, check.knowledgeWarnings);
 });
