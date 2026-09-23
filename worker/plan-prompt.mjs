@@ -147,6 +147,8 @@ w は、図に描かれている開口の幅とする。
 
 w は、図に描かれている窓の幅とする。
 
+**手順19b.** 図面の家具などの印を marks に入れる（種類は当てない）。
+
 **手順20.** 部屋の面積を検算する。
 
 入れたすべての部屋の parts の面積を足し、**width × depth と一致するか**確かめる。
@@ -183,7 +185,7 @@ w は、図に描かれている窓の幅とする。
 // 古い形(walls が最上位にある、ページごとの配列)も受ける。読み取りを
 // やり直させるより、受けられる形は受けるほうが安い。
 export function decodeCompactPlan(parsed) {
-  const out = { floors: [], walls: [], rooms: [], items: [], labels: [], notes: [], dims: [] };
+  const out = { floors: [], walls: [], rooms: [], items: [], marks: [], labels: [], notes: [], dims: [] };
   if (!parsed || typeof parsed !== "object") return out;
 
   const merge = (one) => {
@@ -191,6 +193,7 @@ export function decodeCompactPlan(parsed) {
     out.walls.push(...one.walls);
     out.rooms.push(...one.rooms);
     out.items.push(...one.items);
+    out.marks.push(...(one.marks || []));
     out.labels.push(...one.labels);
     out.notes.push(...one.notes);
     out.dims.push(...one.dims);
@@ -215,8 +218,26 @@ export function decodeCompactPlan(parsed) {
       const items = (Array.isArray(f.items) ? f.items : [])
         .filter((it) => it && typeof it === "object")
         .map((it) => ({ ...it, floor: it.floor == null ? floor : Number(it.floor) }));
+      // 図面に描かれていた印。**種類は当てさせていない**ので、
+      // ここでは位置と大きさと添え字をそのまま持ち上げるだけ。
+      // 何であるかの解釈は assets/js/object-knowledge.js が受け持つ。
+      const marks = (Array.isArray(f.marks) ? f.marks : [])
+        .filter((m) => m && typeof m === "object")
+        .map((m) => ({
+          x: num(m.x), y: num(m.y), w: num(m.w), d: num(m.d),
+          label: m.label == null ? "" : String(m.label).slice(0, 40),
+          looks: m.looks == null ? "" : String(m.looks).slice(0, 60),
+          floor: m.floor == null ? floor : Number(m.floor),
+        }))
+        // null や空文字は 0 になってしまうので、元の値で見る。
+        .filter((m, i) => {
+          const src = f.marks[i] || {};
+          const given = (v) => v !== null && v !== undefined && v !== "";
+          return given(src.x) && given(src.y) && Number.isFinite(m.x) && Number.isFinite(m.y);
+        });
       out.floors.push({ floor, width, depth, rooms, dims: f.dims || null });
       out.items.push(...items);
+      out.marks.push(...marks);
       if (f.dims && typeof f.dims === "object") out.dims.push({ ...f.dims, floor });
       // 古い形で walls / labels も混ざってきたら拾っておく
       for (const w of Array.isArray(f.walls) ? f.walls : []) {

@@ -323,8 +323,103 @@
     return lines.join('\n');
   }
 
+  // ── 図面の印が何であるかを当てる ──────────────────────────────
+  //
+  // **これが知識を書いた目的。** 図面に「外壁沿いの薄い箱」があったとき、
+  // 形だけではテレビともカーテンとも取れる。知識で絞る。
+  //
+  //   mark  { w, d, floor, label }      図面から拾った印の大きさと添え字
+  //   ctx   { roomType, near, onExteriorWall }
+  //         near は近くにあるものの配列 [{kind, x, y, w, d, dist}]
+  //
+  // 返すのは候補の配列。**確信ではなく候補**であることを名前で示す。
+  // 1つに絞れないことのほうが多く、絞れないまま返すのが正しい。
+  function candidatesFor(mark, ctx) {
+    var context = ctx || {};
+    var near = context.near || [];
+    var out = [];
+    for (var kind in K) {
+      if (!Object.prototype.hasOwnProperty.call(K, kind)) continue;
+      var k = K[kind];
+      var why = [];
+      var score = 0;
+
+      // 図面の添え字は、**いちばん強い手がかり**。「TV」「クローゼット」など。
+      // 分類の呼び名はカタログの語彙(tags.json の kinds)が持っているので、
+      // ここには書き写さない。呼び名が渡されなければ、この手がかりは使わない。
+      var hit = labelHit(mark.label, context.names && context.names[kind]);
+      if (hit) { score += 5; why.push('図面に「' + hit + '」と書かれている'); }
+
+      // **添え字が当たっているものは、以下で振り落とさない。**
+      // 「テレビ」と書いてあるのに寸法が合わないとき、欲しいのは
+      // 「冷蔵庫では」ではなく「テレビだが寸法が違う」という答えである。
+      var keep = !!hit;
+
+      // 部屋で弾く
+      var allowed = roomAllows(kind, context.roomType);
+      if (allowed === false && !keep) continue;
+      if (allowed === false) why.push('ただし、この部屋には在らないもの');
+      else if (allowed === true && k.rooms !== 'any') { score += 1; why.push('この部屋に在るもの'); }
+
+      // 実寸
+      var size = sizeOk(kind, mark.w, mark.d);
+      if (size === false && !keep) continue;
+      if (size === false) why.push('ただし、実寸が ' + k.size.what + ' から外れる');
+      else if (size === true) { score += 2; why.push('実寸が合う'); }
+
+      // 付随先が近くにあるか。**ここがいちばん効く。**
+      if (k.attach) {
+        var host = nearest(near, k.attach.to);
+        if ((!host || host.dist > k.attach.within) && !keep) continue;
+        if (!host || host.dist > k.attach.within) {
+          why.push('ただし、そばに ' + k.attach.to + ' が無い');
+        } else {
+          score += 3;
+          why.push(k.attach.to + ' のそばにある');
+          var span = spanOk(kind, mark.w, Math.max(host.w || 0, host.d || 0));
+          if (span === false && !keep) continue;
+          if (span === false) why.push('ただし、幅が ' + k.attach.to + ' と釣り合わない');
+          else if (span === true) { score += 3; why.push('幅が ' + k.attach.to + ' と釣り合う'); }
+        }
+      }
+
+      // 外壁沿いかどうか
+      if (k.place === 'exterior-wall' && context.onExteriorWall) { score += 1; why.push('外壁沿い'); }
+
+      if (score > 0) out.push({ kind: kind, score: score, why: why });
+    }
+    out.sort(function (a, b) { return b.score - a.score; });
+    return out;
+  }
+
+  /** 添え字が、その分類の呼び名や検索語を含んでいるか。含んでいればその語。 */
+  function labelHit(label, names) {
+    if (!label || !names) return null;
+    var text = String(label).toLowerCase();
+    var words = [names.ja].concat(names.search || []).filter(Boolean);
+    for (var i = 0; i < words.length; i++) {
+      if (text.indexOf(String(words[i]).toLowerCase()) >= 0) return words[i];
+    }
+    return null;
+  }
+
+  /** near の中から、その分類のもので最も近いものを返す。 */
+  function nearest(near, kind) {
+    var best = null;
+    for (var i = 0; i < near.length; i++) {
+      var n = near[i];
+      var is = n.kind === kind
+        || (kind === 'window' && (n.kind === 'window' || n.kind === 'window-door'))
+        || (kind === 'window-door' && n.kind === 'window-door');
+      if (!is) continue;
+      if (!best || (n.dist || 0) < (best.dist || 0)) best = n;
+    }
+    return best;
+  }
+
   return {
     KNOWLEDGE: K,
+    candidatesFor: candidatesFor,
     knowledgeFor: knowledgeFor,
     sizeTable: sizeTable,
     roomAllows: roomAllows,

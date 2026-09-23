@@ -37,6 +37,13 @@
   // 画面に出す名前。読み取りの種類名のままでは利用者に伝わらない。
   var JA = { bath: "浴槽", toilet: "便器", sink: "洗面台", kitchen: "流し台" };
 
+  /** 数として読めれば数、読めなければ null。null・空文字は 0 にしない。 */
+  function numOrNull(v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+
   function centreOf(item) {
     return {
       x: Number(item.x || 0) + Number(item.w || 0) / 2,
@@ -100,5 +107,84 @@
 
   var _internals = { IMPORT_TO_KIND, roomAt };
 
-  return { knowledgeWarnings: knowledgeWarnings, _internals: _internals };
+  // ── 図面の印を解釈する ──────────────────────────────────────
+  //
+  // 読み取りは印の位置・大きさ・添え字だけを返す（種類は当てさせていない）。
+  // ここで、その印が**どの部屋にあり、そばに何があり、外壁沿いか**を集めて、
+  // 置かれ方の知識に渡す。
+  //
+  // **返すのは候補であって、決定ではない。** 1つに絞れないことのほうが多く、
+  // 絞れないまま返すのが正しい。置くかどうかは人が決める。
+  function interpretMarks(plan, marks, options) {
+    var opts = options || {};
+    var list = Array.isArray(marks) ? marks : [];
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var mark = list[i];
+      // **null や空文字を 0 として通さない。** Number(null) は 0 なので、
+      // 位置が読めなかった印が原点に置かれた印として通ってしまう。
+      var cx = numOrNull(mark.x), cy = numOrNull(mark.y);
+      if (cx === null || cy === null) continue;
+      var room = roomAt(plan, mark.floor, cx, cy);
+      var type = room
+        ? ((opts.roomTypes && (opts.roomTypes[room.id] || opts.roomTypes[room.n]))
+           || RoomProgram.typeFromName(room.n || ""))
+        : null;
+      var ctx = {
+        roomType: type,
+        near: nearbyOf(plan, mark),
+        onExteriorWall: onExteriorWall(plan, mark, room),
+        names: opts.names,
+      };
+      out.push({
+        mark: mark,
+        room: room ? (room.n || "") : "",
+        roomType: type || null,
+        candidates: ObjectKnowledge.candidatesFor(mark, ctx).slice(0, 4),
+      });
+    }
+    return out;
+  }
+
+  /** 印のそばにある建具・設備。距離は中心どうし。 */
+  function nearbyOf(plan, mark) {
+    var cx = Number(mark.x), cy = Number(mark.y);
+    var near = [];
+    var items = plan.items || [];
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if ((it.floor || 1) !== (mark.floor || 1)) continue;
+      var c = centreOf(it);
+      var dist = Math.sqrt((c.x - cx) * (c.x - cx) + (c.y - cy) * (c.y - cy));
+      if (dist > 3000) continue;
+      near.push({
+        kind: IMPORT_TO_KIND[it.type] || it.type,
+        x: c.x, y: c.y, w: it.w, d: it.d, dist: dist,
+      });
+    }
+    near.sort(function (a, b) { return a.dist - b.dist; });
+    return near.slice(0, 12);
+  }
+
+  /**
+   * 外壁沿いか。**部屋の外へ出てみて確かめる。**
+   * 印の中心から四方へ少し出た点を見て、どれかが「どの部屋でもない」なら外壁側。
+   * 部屋が分からないときは判定しない（false を返して手がかりに使わない）。
+   */
+  function onExteriorWall(plan, mark, room) {
+    if (!room) return false;
+    var cx = Number(mark.x), cy = Number(mark.y);
+    var step = 700;
+    var probes = [[cx - step, cy], [cx + step, cy], [cx, cy - step], [cx, cy + step]];
+    for (var i = 0; i < probes.length; i++) {
+      if (!roomAt(plan, mark.floor, probes[i][0], probes[i][1])) return true;
+    }
+    return false;
+  }
+
+  return {
+    knowledgeWarnings: knowledgeWarnings,
+    interpretMarks: interpretMarks,
+    _internals: _internals,
+  };
 }));

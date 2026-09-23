@@ -133,8 +133,13 @@
    * 仕上げの判断をもらう。**失敗しても取り込みは止めない。**
    * 判断が得られなければ null を返し、画面は仕上げの欄を出さない。
    */
-  function analyze(plan) {
+  /**
+   * 取り込んだ間取りを仕上げる。
+   * marks は図面に描かれていた印（読み取りが返す。無くてもよい）。
+   */
+  function analyze(plan, marksIn) {
     if (!plan || !(plan.rooms || []).length) return Promise.resolve(null);
+    var marks = Array.isArray(marksIn) ? marksIn : [];
     var body = { rooms: roomsOf(plan).slice(0, 40), slots: slotsOf(plan).slice(0, 24) };
     return fetch('/api/ai/finish-plan', {
       method: 'POST',
@@ -151,9 +156,14 @@
       out.rooms.forEach(function (r) { if (r && r.id && r.type) types[r.id] = r.type; });
       var warnings = (typeof PlanCheck === 'object' && PlanCheck)
         ? PlanCheck.knowledgeWarnings(plan, types) : [];
+      // 図面に描かれていた印を解釈する。**分類の呼び名を持っているのは
+      // 画面側**(CATALOGUE_TAGS.kinds)なので、ここで当てる。
+      var reads = (typeof PlanCheck === 'object' && PlanCheck && marks.length)
+        ? PlanCheck.interpretMarks(plan, marks, { roomTypes: types, names: kindNames() })
+        : [];
       ST.result = {
         plan: plan, rooms: out.rooms, picks: out.picks || [],
-        missing: out.missing || [], warnings: warnings,
+        missing: out.missing || [], warnings: warnings, reads: reads,
       };
       return ST.result;
     }).catch(function () { return null; });
@@ -212,6 +222,23 @@
   //
   // サイドバーの検索の下に差し込む。**取り込んだあとも残る**ので、
   // 1つ置いてから次を置く、という使い方ができる。
+  /** 分類の日本語名。無ければ分類の key をそのまま返す。 */
+  function kindLabel(kind) {
+    var names = kindNames();
+    return (names && names[kind] && names[kind].ja) || kind;
+  }
+
+  /** 分類の呼び名。カタログの分類表(tags.json)が持っている。 */
+  function kindNames() {
+    var tags = (typeof CATALOGUE_TAGS === 'object' && CATALOGUE_TAGS) || null;
+    if (!tags || !tags.kinds) return null;
+    var out = {};
+    Object.keys(tags.kinds).forEach(function (k) {
+      out[k] = { ja: tags.kinds[k].ja, search: tags.kinds[k].search };
+    });
+    return out;
+  }
+
   function mount(result) {
     var sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
@@ -219,7 +246,12 @@
     if (old) old.remove();
     var lines = missingLines(result);
     var warn = (result && result.warnings) || [];
-    if (!lines.length && !warn.length) return;
+    // 図面に描かれていた印のうち、**何であるか見当が付いたものだけ**出す。
+    // 絞れなかったものを並べても選べない。
+    var reads = ((result && result.reads) || []).filter(function (r) {
+      return r.candidates.length && r.candidates[0].score >= 3;
+    });
+    if (!lines.length && !warn.length && !reads.length) return;
 
     var box = document.createElement('div');
     box.className = 'catalogue-search';
@@ -236,6 +268,25 @@
       wList.textContent = warn.map(function (t) { return '・' + t; }).join('\n');
       box.append(wHead, wList);
     }
+    // **図面にこう描かれていた、という読み取り。**置くかどうかは人が決める。
+    // 読み取りは「見たまま」だけを返し、何であるかはこちらが当てている
+    // ので、外していることがある。断定して並べない。
+    if (reads.length) {
+      var rHead = document.createElement('label');
+      rHead.textContent = '図面に描かれていたもの（' + reads.length + '件・推定）';
+      var rNote = document.createElement('div');
+      rNote.className = 'catalogue-count';
+      rNote.style.whiteSpace = 'pre-line';
+      rNote.textContent = reads.map(function (r) {
+        var top = r.candidates[0];
+        var name = kindLabel(top.kind);
+        var where = r.room ? '「' + r.room + '」の' : '';
+        return '・' + where + Math.round(r.mark.w) + '×' + Math.round(r.mark.d)
+             + 'mm は ' + name + 'かもしれません（' + top.why[0] + '）';
+      }).join('\n');
+      box.append(rHead, rNote);
+    }
+
     if (!lines.length) {
       sidebar.prepend(box);
       return;

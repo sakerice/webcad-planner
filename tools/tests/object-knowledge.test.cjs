@@ -109,3 +109,63 @@ test('jev へ渡す説明文に、判断の手がかりが入っている', () =
   assert.match(text, /理由:/, 'なぜそうなのかが入っていない');
   assert.equal(OK.describe('存在しない分類'), '');
 });
+
+// ── 図面の印が何であるかを当てる ──────────────────────────────────
+//
+// **これが知識を書いた目的そのもの。** 形だけでは「薄い箱」としか言えない
+// ものを、置かれ方の知識で絞る。
+let NAMES = null;
+test.before(async () => {
+  const v = await import('file://' + join(ROOT, 'tools/catalogue-vocab.mjs'));
+  NAMES = {};
+  for (const [k, d] of Object.entries(v.KINDS)) NAMES[k] = { ja: d.ja, search: d.search };
+});
+
+const WINDOW = { kind: 'window', w: 1690, d: 150, dist: 120 };
+const top = (mark, ctx) => (OK.candidatesFor(mark, ctx)[0] || {}).kind;
+
+test('窓のそばにある幅の合う薄い箱は、カーテンになる', () => {
+  assert.equal(top({ w: 1990, d: 150 },
+    { roomType: 'ldk', near: [WINDOW], onExteriorWall: true }), 'curtain');
+});
+
+test('窓から離れた薄い箱は、カーテンにならない', () => {
+  const list = OK.candidatesFor({ w: 1240, d: 300 }, { roomType: 'ldk', near: [] });
+  assert.equal(list[0].kind, 'tv');
+  assert.ok(!list.some((c) => c.kind === 'curtain'), 'そばに窓が無いのにカーテンが出ている');
+});
+
+test('幅が窓と釣り合わなければ、カーテンにならない', () => {
+  // 窓1690 に対して幅800。カーテンの決まり（窓幅+100〜400）から外れる。
+  const list = OK.candidatesFor({ w: 800, d: 150 },
+    { roomType: 'ldk', near: [WINDOW], onExteriorWall: true });
+  assert.ok(!list.some((c) => c.kind === 'curtain'));
+});
+
+test('図面の添え字が、いちばん強い手がかりになる', () => {
+  assert.equal(top({ w: 1240, d: 300, label: 'TV' },
+    { roomType: 'ldk', near: [], names: NAMES }), 'tv');
+});
+
+test('添え字があれば、寸法が合わなくても候補から外さない', () => {
+  // **「テレビ」と書いてあるのに寸法が違うとき、欲しいのは「冷蔵庫では」
+  // ではなく「テレビだが寸法が違う」という答え。**
+  const list = OK.candidatesFor({ w: 600, d: 600, label: 'テレビ' },
+    { roomType: 'ldk', near: [], names: NAMES });
+  assert.equal(list[0].kind, 'tv');
+  assert.ok(list[0].why.some((w) => /実寸が/.test(w)), '寸法が外れている旨が添えられていない');
+});
+
+test('添え字があれば、その部屋に在らなくても候補から外さない', () => {
+  const list = OK.candidatesFor({ w: 640, d: 720, label: '洗濯機' },
+    { roomType: 'ldk', near: [], names: NAMES });
+  assert.equal(list[0].kind, 'laundry');
+  assert.ok(list[0].why.some((w) => /この部屋には在らない/.test(w)));
+});
+
+test('呼び名を渡さなければ、添え字は使わない', () => {
+  // 呼び名はカタログの語彙が持つ。**ここに書き写さない**ので、
+  // 渡されなければその手がかりは使えない（黙って誤判定しない）。
+  const list = OK.candidatesFor({ w: 600, d: 600, label: 'テレビ' }, { roomType: 'ldk', near: [] });
+  assert.ok(!list.some((c) => c.kind === 'tv'), '呼び名なしで添え字を当てている');
+});

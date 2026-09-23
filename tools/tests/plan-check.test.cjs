@@ -111,3 +111,69 @@ test('Worker からも同じ実装が呼べる', async () => {
   const worker = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
   assert.equal(worker.knowledgeWarnings, check.knowledgeWarnings);
 });
+
+// ── 図面の印を解釈する ──────────────────────────────────────────
+//
+// 読み取りは印の位置・大きさ・添え字だけを返し、**種類は当てさせない**。
+// 何であるかはここで、置かれ方の知識を使って当てる。
+let NAMES = null;
+test.before(async () => {
+  const v = await import('file://' + join(ROOT, 'tools/catalogue-vocab.mjs'));
+  NAMES = {};
+  for (const [k, d] of Object.entries(v.KINDS)) NAMES[k] = { ja: d.ja, search: d.search };
+});
+
+/** LDK ひと部屋と、北面の窓ひとつ。 */
+function ldkWithWindow() {
+  return {
+    rooms: [{ id: 'r1', floor: 1, n: 'LDK', x: 0, y: 0, w: 5000, d: 4000 }],
+    items: [{ floor: 1, type: 'window', x: 1000, y: -75, w: 1690, d: 150 }],
+  };
+}
+
+test('窓のそばの薄い箱は、カーテンと読む', () => {
+  const r = check.interpretMarks(ldkWithWindow(),
+    [{ floor: 1, x: 1845, y: 200, w: 1990, d: 150, looks: '細長い薄い矩形' }],
+    { names: NAMES });
+  assert.equal(r.length, 1);
+  assert.equal(r[0].candidates[0].kind, 'curtain');
+  assert.equal(r[0].room, 'LDK');
+});
+
+test('窓から離れた同じような箱は、カーテンと読まない', () => {
+  const r = check.interpretMarks(ldkWithWindow(),
+    [{ floor: 1, x: 4000, y: 3500, w: 1240, d: 300 }], { names: NAMES });
+  assert.equal(r[0].candidates[0].kind, 'tv');
+});
+
+test('添え字があれば、それに従う', () => {
+  const r = check.interpretMarks(ldkWithWindow(),
+    [{ floor: 1, x: 4000, y: 3500, w: 1240, d: 300, label: 'TV' }], { names: NAMES });
+  assert.equal(r[0].candidates[0].kind, 'tv');
+  assert.ok(r[0].candidates[0].why.some((w) => /書かれている/.test(w)));
+});
+
+test('位置が読めない印は捨てる', () => {
+  const r = check.interpretMarks(ldkWithWindow(),
+    [{ floor: 1, x: null, y: 1, w: 1, d: 1 }], { names: NAMES });
+  assert.deepEqual(r, []);
+});
+
+test('印が無ければ何も返さない', () => {
+  assert.deepEqual(check.interpretMarks(ldkWithWindow(), [], { names: NAMES }), []);
+  assert.deepEqual(check.interpretMarks(ldkWithWindow(), null, {}), []);
+});
+
+test('読み取りが返す印の形が、解釈できる形になっている', async () => {
+  // **スキーマと解釈側がずれると、印が黙って捨てられる。**
+  const prompt = await import('file://' + join(ROOT, 'worker/plan-prompt.mjs'));
+  const decoded = prompt.decodeCompactPlan({
+    floors: [{
+      floor: 1, width: 5000, depth: 4000, rooms: [], items: [],
+      marks: [{ x: 1845, y: 200, w: 1990, d: 150, label: '', looks: '細長い薄い矩形' }],
+    }],
+  });
+  assert.equal(decoded.marks.length, 1);
+  const r = check.interpretMarks(ldkWithWindow(), decoded.marks, { names: NAMES });
+  assert.equal(r.length, 1, '読み取りの形をそのまま解釈できていない');
+});

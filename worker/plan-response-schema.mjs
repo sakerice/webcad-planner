@@ -75,6 +75,33 @@ const ITEM = {
   propertyOrdering: ["type", "x", "y", "w", "d", "rot"],
 };
 
+// 図面に描かれていた「印」。**items とは別にする。**
+//
+// items は「実際に置く物」。図面の家具はメーカーの標準仕様の絵であって、
+// 置く物ではない(worker/plan-item-spec.mjs の判断)。その判断は変えない。
+//
+// 一方で、図面に描かれた家具は**その部屋がどう使われるかの手がかり**である。
+// 「外壁沿いの薄い箱」がカーテンなのかテレビなのかで、間取りの読み方が変わる。
+// そこで、**種類を当てさせずに見たままを返させ**、置かれ方の知識
+// (assets/js/object-knowledge.js)でこちら側が解釈する。
+//
+// 種類を当てさせないのは、モデルが持っているのは絵の情報、こちらが持っている
+// のは日本の住宅の作法で、**別のものだから**。両方を足して初めて決まる。
+const MARK = {
+  type: "OBJECT",
+  description: "図面の家具などの印",
+  properties: {
+    x: mm("中心のx"),
+    y: mm("中心のy"),
+    w: mm("幅"),
+    d: mm("奥行き"),
+    label: { type: "STRING", description: "添えられた文字" },
+    looks: { type: "STRING", description: "見たままの形" },
+  },
+  required: ["x", "y", "w", "d"],
+  propertyOrdering: ["x", "y", "w", "d", "label", "looks"],
+};
+
 const FLOOR = {
   type: "OBJECT",
   description: "1つの階",
@@ -103,9 +130,14 @@ const FLOOR = {
       items: ROOM,
     },
     items: { type: "ARRAY", description: "この階の建具・階段・設備", items: ITEM },
+    marks: {
+      type: "ARRAY",
+      description: "この階の家具などの印",
+      items: MARK,
+    },
   },
   required: ["floor", "width", "depth", "rooms"],
-  propertyOrdering: ["floor", "dims", "width", "depth", "rooms", "items"],
+  propertyOrdering: ["floor", "dims", "width", "depth", "rooms", "items", "marks"],
 };
 
 export const PLAN_RESPONSE_SCHEMA = {

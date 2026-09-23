@@ -654,6 +654,9 @@ export function finishImportedPlan(parsed, usage, extra) {
   return json({
     plan: normalized,
     summary: PlanSchema.summarize(normalized),
+    // 図面に描かれていた印。**間取りの一部ではない**ので plan の外に置く。
+    // 何であるかの解釈は画面側で行う（分類の呼び名を持っているのがあちらのため）。
+    marks: (plan.marks || []).slice(0, 80),
     warnings: warnings,
     // モデルが「読めなかった」と言っていることは、そのまま利用者に見せる。
     notes: plan.notes.slice(0, 20),

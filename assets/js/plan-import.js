@@ -36,7 +36,7 @@
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
-    result: null,       // 読み取り結果 {plan, summary, notes, warnings, usage}
+    result: null,       // 読み取り結果 {plan, summary, notes, warnings, marks, usage}
     busy: false,
   };
 
@@ -377,7 +377,7 @@
         // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
         // 判断が得られなければ、これまでどおり下書きだけを渡す。
         var finish = (typeof PlanFinish === 'undefined' || !body.plan)
-          ? Promise.resolve(null) : PlanFinish.analyze(body.plan);
+          ? Promise.resolve(null) : PlanFinish.analyze(body.plan, body.marks);
         return finish.then(function (out) {
           body.finish = out;
           ST.busy = false;
