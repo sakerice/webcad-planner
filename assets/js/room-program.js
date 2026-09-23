@@ -44,7 +44,9 @@
     wic: { ja: 'ウォークインクローゼット', what: '人が入れる衣類の収納' },
     storage: { ja: '納戸・パントリー', what: '物をしまうための部屋' },
     balcony: { ja: 'バルコニー', what: '屋外に張り出した床' },
-    exterior: { ja: '外構', what: '建物の外。門柱・庭・駐車スペース' },
+    // key は tags.json の room と揃える。以前 exterior と書いていたが、
+    // タグ787点側は outdoor で、**同じものに二つの名前があった**。
+    outdoor: { ja: '外構', what: '建物の外。門柱・庭・駐車スペース' },
     other: { ja: 'その他', what: '上のどれでもない' },
   };
 
@@ -214,7 +216,7 @@
     ],
     // 敷地。部屋ではないが、**外構が無い家は3Dで見ると家に見えない**ので、
     // 仕上げの一覧では1つの区画として扱う。
-    exterior: [
+    outdoor: [
       { kind: 'gate-post', n: 1, why: '門柱とポスト' },
       { kind: 'garden-plant', n: 3, why: 'シンボルツリー・中木・下草' },
       { kind: 'fence', n: 1, why: '隣地との目隠し' },
