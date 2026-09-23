@@ -94,6 +94,17 @@
   // kind は assets/models/tags.json の分類。出どころは docs/quality-bar.md。
   // why は画面にそのまま出す文なので、**理由を書く**。「ソファが無い」では
   // なく「くつろぐ場所が無い」と書けるように。
+  // **どの部屋からも要求されない分類は、仕上げの「足りないもの」に一生出て
+  // こない。** 在庫83点がその状態だったので、居場所のあるものを足した
+  // (寝具・ロールスクリーン・生活家電・カウンターテーブル)。
+  //
+  // 残り57点は、足さないと決めたもの:
+  //   建具（モデル）22  ドアは壁に開口を切る仕組みで置く。家具として置くと
+  //                     壁と無関係な位置に浮く
+  //   シンク15          システムキッチンに含まれている。単体で置く場面が無い
+  //   テーブルセット10  ダイニングテーブル+椅子と二重になる
+  //   ペット10          飼うかどうかは家族次第。「足りない」とは言えない
+  // 検索からは引けるので、置きたい人は置ける。
   var PROGRAM = {
     ldk: [
       { kind: 'sofa', n: 1, why: 'くつろぐ場所' },
@@ -109,6 +120,7 @@
       { kind: 'plant', n: 1, why: 'グリーン' },
       { kind: 'decor', n: 2, why: '生活の気配' },
       { kind: 'cabinet', n: 1, why: 'リビングの収納' },
+      { kind: 'counter-table', n: 1, why: '対面キッチンのカウンター' },
       { kind: 'wall-decor', n: 1, why: '壁の見せ場' },
       { kind: 'hvac', n: 1, why: 'エアコン' },
       { kind: 'cooktop', n: 1, why: 'コンロ' },
@@ -138,6 +150,7 @@
     ],
     bedroom: [
       { kind: 'bed', n: 1, why: '寝る場所' },
+      { kind: 'bedding', n: 1, why: '布団と枕' },
       { kind: 'light', n: 1, why: '枕元の明かり' },
       { kind: 'chest', n: 1, why: '衣類の収納' },
       { kind: 'curtain', n: 1, why: '窓まわり' },
@@ -146,6 +159,7 @@
     ],
     kids: [
       { kind: 'bed', n: 1, why: '寝る場所' },
+      { kind: 'bedding', n: 1, why: '布団と枕' },
       { kind: 'desk', n: 1, why: '勉強する場所' },
       { kind: 'chair', n: 1, why: '机の椅子' },
       { kind: 'shelf', n: 1, why: '本と持ち物の収納' },
@@ -179,9 +193,12 @@
       { kind: 'vanity', n: 1, why: '洗面台' },
       { kind: 'laundry', n: 1, why: '洗濯機' },
       { kind: 'mirror', n: 1, why: '鏡' },
+      { kind: 'roller-screen', n: 1, why: '窓まわり（カーテンは掛けない）' },
+      { kind: 'appliance', n: 1, why: '生活家電の置き場' },
     ],
     toilet: [
       { kind: 'toilet', n: 1, why: '便器' },
+      { kind: 'roller-screen', n: 1, why: '窓まわり（カーテンは掛けない）' },
     ],
     wic: [
       { kind: 'closet', n: 1, why: '衣類を掛ける' },
