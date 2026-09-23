@@ -121,12 +121,23 @@ async function aiQuota(env, request) {
   const limits = quotaLimits(env);
   const seen = await takeQuota(request, env, 0, true);
   const left = Number(seen.remaining);
+  // **数えられなかったことを「残り0回」と言わない。**
+  //
+  // 数の仕組み(Durable Object)が詰まったときは、takeQuota が「通す」を返して
+  // 機能を止めない。ところがその返事の remaining は 0 で、ここがそれを
+  // 「本日あと0回」として返していた。画面はその0を見て読み取りボタンを
+  // 使えなくする。**Worker は通しているのに、画面だけが閉じる。**
+  // 実測で、数えられない環境で機能そのものが押せなくなった。
+  //
+  // 数が分からないときは counted: false を返す。画面は残り回数の欄を
+  // 隠すだけで、ボタンには触らない。
+  const counted = Boolean(env && env.AI_QUOTA) && seen.scope !== "error" && seen.scope !== "none";
   return json({
     // 残りを回数にする。1回ぶんに満たない端数は切り捨てる。
-    left: Number.isFinite(left) ? Math.floor(left / POINTS_PER_IMPORT) : null,
+    left: counted && Number.isFinite(left) ? Math.floor(left / POINTS_PER_IMPORT) : null,
     perUser: limits.imports.perUser,
     total: limits.imports.total,
-    counted: Boolean(env && env.AI_QUOTA),
+    counted: counted,
   });
 }
 
