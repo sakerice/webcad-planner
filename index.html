@@ -4283,6 +4283,8 @@ function init3D(){
     }
   }
   ren.domElement.addEventListener('pointerdown',function(e){
+    // 2Dと同じ理由で、3Dを触ったときも入力欄から焦点を外す
+    if(typeof blurActiveControl==='function') blurActiveControl();
     if(isWalkView()){
       _walkDrag.pointers[e.pointerId]={x:e.clientX,y:e.clientY};
       if(walkPointerCount()===1){
@@ -16300,7 +16302,25 @@ function onFloorChange(v){
 }
 
 // ───── CANVAS EVENTS ─────
+// 図面を触ったら、入力欄から焦点を外す。
+//
+// **焦点が残ると、矢印キーがそちらへ行く。** canvas は tabindex を持たないので
+// クリックしても焦点を受け取らない。日の光の時刻スライダーを一度つまむと焦点は
+// スライダーに残り、そのあと物を選んで矢印キーで動かそうとすると、
+// **物は動かず日の時刻だけが動く**。keydown の側は「入力欄にいるなら何もしない」
+// と決めているので、物が動かないのは筋が通っている。動いてはいけないのは太陽の
+// ほうである。押しっぱなしにすれば数時間ぶん進み、昼のはずが夕暮れになる。
+//
+// 実測: スライダーをつまむ → 図面をクリックして物を選ぶ → ← を10回 で、
+// 物は1mmも動かず 13:36 → 13:06 になった。
+function blurActiveControl(){
+  var a=document.activeElement;
+  if(!a || a===document.body) return;
+  var t=a.tagName;
+  if(t==='INPUT' || t==='SELECT' || t==='TEXTAREA') a.blur();
+}
 canvas.onmousedown=function(e){
+  blurActiveControl();
   ST.selectAll = false;
   var r=canvas.getBoundingClientRect(); var cx=e.clientX-r.left, cy=e.clientY-r.top;
   if(e.button===1 || (e.button===0 && e.altKey)){
@@ -20576,6 +20596,7 @@ function getTouchDist(e){
 }
 
 canvas.addEventListener('touchstart',function(e){
+  blurActiveControl();
   if(ST.view!=='2d') return;
   e.preventDefault();
   if(e.touches.length===1){
