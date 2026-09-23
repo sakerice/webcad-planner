@@ -523,6 +523,9 @@ plan.update(review26["metadata"])
 for collection, order in review26["order"].items():
     by_id = {obj["id"]: obj for obj in plan[collection]}
     plan[collection] = [by_id[object_id] for object_id in order]
+# 受領版26に残った通り芯からのずれ2か所を戻す(間取りは変えない)。
+from default_plan_2f_review import apply_review_26_joints
+apply_review_26_joints(plan)
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
 # 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
