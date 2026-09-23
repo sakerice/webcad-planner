@@ -528,6 +528,15 @@ for collection, order in review26["order"].items():
 # 受領版26に残った通り芯からのずれ2か所を戻す(間取りは変えない)。
 from default_plan_2f_review import apply_review_26_joints
 apply_review_26_joints(plan)
+# 最新の受領版(review 27)。門柱・車・道路の位置。ここまでの生成結果を土台に
+# 載せるので、上の通り芯の戻しより後に置く(土台が変わると apply_patch_file が
+# 止まる)。差分は tools/make_review_patch.py で作る。
+apply_patch_file(plan, "default_plan_2f_review_27.json")
+review27 = json.loads(Path(__file__).with_name("default_plan_2f_review_27.json").read_text())
+plan.update(review27["metadata"])
+for collection, order in review27["order"].items():
+    by_id = {obj["id"]: obj for obj in plan[collection]}
+    plan[collection] = [by_id[object_id] for object_id in order]
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
 # 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。
