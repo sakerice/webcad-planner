@@ -199,7 +199,8 @@
     // 仕上げの一覧では1つの区画として扱う。
     exterior: [
       { kind: 'gate-post', n: 1, why: '門柱とポスト' },
-      { kind: 'garden-plant', n: 1, why: 'シンボルツリー' },
+      { kind: 'garden-plant', n: 3, why: 'シンボルツリー・中木・下草' },
+      { kind: 'fence', n: 1, why: '隣地との目隠し' },
       { kind: 'deck', n: 1, why: '庭とつながる床' },
       { kind: 'garden-equipment', n: 1, why: '立水栓' },
       { kind: 'utility-equipment', n: 2, why: '室外機・給湯器' },

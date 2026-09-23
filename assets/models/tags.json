@@ -1,7 +1,7 @@
 {
  "version": 1,
  "model": "typesafe/jev",
- "generated": "2026-09-22",
+ "generated": "2026-09-23",
  "kinds": {
   "kitchen-unit": {
    "group": "住設",
@@ -509,6 +509,18 @@
     "水道",
     "点検蓋",
     "屋外設備"
+   ]
+  },
+  "fence": {
+   "group": "外構",
+   "ja": "フェンス・目隠し",
+   "search": [
+    "フェンス",
+    "目隠し",
+    "縦格子",
+    "格子",
+    "柵",
+    "境界"
    ]
   },
   "other": {
@@ -7685,6 +7697,19 @@
     "room": 1
    }
   },
+  "original-car-stop": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.99,
+    "room": 1
+   },
+   "review": [
+    "いまの分類「設備」から外れた → 屋外設備"
+   ]
+  },
   "original-chair": {
    "kind": "chair",
    "mount": "floor",
@@ -7734,6 +7759,19 @@
     "mount": 0.7,
     "room": 0.28
    }
+  },
+  "original-deck-1820": {
+   "kind": "deck",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.96
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → デッキ・テラス"
+   ]
   },
   "original-desk": {
    "kind": "desk",
@@ -7797,6 +7835,19 @@
     "mount": 0.96,
     "room": 0.92
    }
+  },
+  "original-fence-lattice": {
+   "kind": "fence",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → フェンス・目隠し"
+   ]
   },
   "original-garden-tap": {
    "kind": "garden-equipment",
@@ -8198,6 +8249,19 @@
     "room": 1
    }
   },
+  "original-shrub": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.99,
+    "room": 0.93
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
   "original-sideboard": {
    "kind": "cabinet",
    "mount": "floor",
@@ -8217,6 +8281,19 @@
     "mount": 1,
     "room": 1
    }
+  },
+  "original-standpipe": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.92,
+    "room": 1
+   },
+   "review": [
+    "いまの分類「設備」から外れた → 屋外設備"
+   ]
   },
   "original-table": {
    "kind": "dining-table",
@@ -8238,6 +8315,19 @@
     "room": 0.94
    }
   },
+  "original-terrace-tile": {
+   "kind": "deck",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.95,
+    "room": 0.94
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → デッキ・テラス"
+   ]
+  },
   "original-toilet": {
    "kind": "toilet",
    "mount": "floor",
@@ -8247,6 +8337,32 @@
     "mount": 0.37,
     "room": 1
    }
+  },
+  "original-tree-evergreen": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.95,
+    "room": 0.92
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-tree-symbol": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.93
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
   },
   "original-vanity": {
    "kind": "vanity",

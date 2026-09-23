@@ -197,258 +197,6 @@ window.CUSTOM_MODEL_MANIFEST = {
       "previewVersion": 2
     },
     {
-      "id": "original-curtain-open-900-short",
-      "name": "リネンカーテン 開き 900",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 900,
-      "d": 150,
-      "h": 1350,
-      "model": "assets/models/original/original-curtain-open-900-short.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-900-short-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-900-short-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-short.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-900-long",
-      "name": "リネンカーテン 開き 900",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 900,
-      "d": 150,
-      "h": 2040,
-      "model": "assets/models/original/original-curtain-open-900-long.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-900-long-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-900-long-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-long.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-1300-short",
-      "name": "リネンカーテン 開き 1300",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1300,
-      "d": 150,
-      "h": 1350,
-      "model": "assets/models/original/original-curtain-open-1300-short.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-1300-short-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-1300-short-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-short.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-curtain-open-1300-long",
-      "name": "リネンカーテン 開き 1300",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1300,
-      "d": 150,
-      "h": 2040,
-      "model": "assets/models/original/original-curtain-open-1300-long.glb",
-      "thumb": "assets/models/previews-v2/original-curtain-open-1300-long-thumb.png",
-      "top": "assets/models/previews-v2/original-curtain-open-1300-long-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-long.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-780",
-      "name": "ロールスクリーン 巻上げ 780",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 780,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-780.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-780-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-780-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-780.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-1235",
-      "name": "ロールスクリーン 巻上げ 1235",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1235,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-1235.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-1235-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-1235-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-1235.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-roller-open-1690",
-      "name": "ロールスクリーン 巻上げ 1690",
-      "group": "家具",
-      "category": "カーテン",
-      "w": 1690,
-      "d": 50,
-      "h": 250,
-      "model": "assets/models/original/original-roller-open-1690.glb",
-      "thumb": "assets/models/previews-v2/original-roller-open-1690-thumb.png",
-      "top": "assets/models/previews-v2/original-roller-open-1690-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-roller-open-1690.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "fabric",
-          "label": "生地",
-          "default": "#c6bead"
-        },
-        {
-          "key": "accent",
-          "label": "レール",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
-      "id": "original-laundry-rail",
-      "name": "天井吊り物干し 1100",
-      "group": "家具",
-      "category": "収納",
-      "w": 1100,
-      "d": 80,
-      "h": 500,
-      "model": "assets/models/original/original-laundry-rail.glb",
-      "thumb": "assets/models/previews-v2/original-laundry-rail-thumb.png",
-      "top": "assets/models/previews-v2/original-laundry-rail-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-laundry-rail.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "accent",
-          "label": "金物",
-          "default": "#b0b5b5"
-        }
-      ]
-    },
-    {
-      "id": "original-laundry-cabinet",
-      "name": "ランドリー作業収納 900",
-      "group": "家具",
-      "category": "収納",
-      "w": 900,
-      "d": 500,
-      "h": 900,
-      "model": "assets/models/original/original-laundry-cabinet.glb",
-      "thumb": "assets/models/previews-v2/original-laundry-cabinet-thumb.png",
-      "top": "assets/models/previews-v2/original-laundry-cabinet-top.png",
-      "previewVersion": 2,
-      "provenance": "original",
-      "sourceBlend": "tools/blender/work/original/original-laundry-cabinet.blend",
-      "frontAxis": "+Z",
-      "finishChannels": [
-        {
-          "key": "wood",
-          "label": "木部",
-          "default": "#a08568"
-        },
-        {
-          "key": "body",
-          "label": "天板",
-          "default": "#d8d2c6"
-        },
-        {
-          "key": "accent",
-          "label": "金物",
-          "default": "#50473e"
-        }
-      ]
-    },
-    {
       "id": "original-kitchen-island",
       "name": "シンクアイランド 2100",
       "group": "住設",
@@ -1544,6 +1292,258 @@ window.CUSTOM_MODEL_MANIFEST = {
       "kitchenDishwasher": false
     },
     {
+      "id": "original-curtain-open-900-short",
+      "name": "リネンカーテン 開き 900",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 900,
+      "d": 150,
+      "h": 1350,
+      "model": "assets/models/original/original-curtain-open-900-short.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-900-short-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-900-short-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-short.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-900-long",
+      "name": "リネンカーテン 開き 900",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 900,
+      "d": 150,
+      "h": 2040,
+      "model": "assets/models/original/original-curtain-open-900-long.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-900-long-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-900-long-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-900-long.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-1300-short",
+      "name": "リネンカーテン 開き 1300",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1300,
+      "d": 150,
+      "h": 1350,
+      "model": "assets/models/original/original-curtain-open-1300-short.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-1300-short-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-1300-short-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-short.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-curtain-open-1300-long",
+      "name": "リネンカーテン 開き 1300",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1300,
+      "d": 150,
+      "h": 2040,
+      "model": "assets/models/original/original-curtain-open-1300-long.glb",
+      "thumb": "assets/models/previews-v2/original-curtain-open-1300-long-thumb.png",
+      "top": "assets/models/previews-v2/original-curtain-open-1300-long-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-curtain-open-1300-long.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-780",
+      "name": "ロールスクリーン 巻上げ 780",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 780,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-780.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-780-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-780-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-780.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-1235",
+      "name": "ロールスクリーン 巻上げ 1235",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1235,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-1235.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-1235-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-1235-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-1235.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-roller-open-1690",
+      "name": "ロールスクリーン 巻上げ 1690",
+      "group": "家具",
+      "category": "カーテン",
+      "w": 1690,
+      "d": 50,
+      "h": 250,
+      "model": "assets/models/original/original-roller-open-1690.glb",
+      "thumb": "assets/models/previews-v2/original-roller-open-1690-thumb.png",
+      "top": "assets/models/previews-v2/original-roller-open-1690-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-roller-open-1690.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "label": "生地",
+          "default": "#c6bead"
+        },
+        {
+          "key": "accent",
+          "label": "レール",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
+      "id": "original-laundry-rail",
+      "name": "天井吊り物干し 1100",
+      "group": "家具",
+      "category": "収納",
+      "w": 1100,
+      "d": 80,
+      "h": 500,
+      "model": "assets/models/original/original-laundry-rail.glb",
+      "thumb": "assets/models/previews-v2/original-laundry-rail-thumb.png",
+      "top": "assets/models/previews-v2/original-laundry-rail-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-laundry-rail.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "accent",
+          "label": "金物",
+          "default": "#b0b5b5"
+        }
+      ]
+    },
+    {
+      "id": "original-laundry-cabinet",
+      "name": "ランドリー作業収納 900",
+      "group": "家具",
+      "category": "収納",
+      "w": 900,
+      "d": 500,
+      "h": 900,
+      "model": "assets/models/original/original-laundry-cabinet.glb",
+      "thumb": "assets/models/previews-v2/original-laundry-cabinet-thumb.png",
+      "top": "assets/models/previews-v2/original-laundry-cabinet-top.png",
+      "previewVersion": 2,
+      "provenance": "original",
+      "sourceBlend": "tools/blender/work/original/original-laundry-cabinet.blend",
+      "frontAxis": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#a08568"
+        },
+        {
+          "key": "body",
+          "label": "天板",
+          "default": "#d8d2c6"
+        },
+        {
+          "key": "accent",
+          "label": "金物",
+          "default": "#50473e"
+        }
+      ]
+    },
+    {
       "id": "original-sofa",
       "name": "オークフレーム ソファ",
       "sourceFolder": "Sofas",
@@ -2310,6 +2310,186 @@ window.CUSTOM_MODEL_MANIFEST = {
           "key": "wood",
           "label": "面材",
           "default": "#c7a883"
+        }
+      ]
+    },
+    {
+      "id": "original-tree-symbol",
+      "name": "シンボルツリー（高木・落葉）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-symbol.glb",
+      "thumb": "assets/models/previews-v2/original-tree-symbol-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-symbol-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 2000,
+      "d": 2000,
+      "h": 4000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-evergreen",
+      "name": "中木（常緑・目隠し・株立ち）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-evergreen.glb",
+      "thumb": "assets/models/previews-v2/original-tree-evergreen-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-evergreen-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1200,
+      "d": 1200,
+      "h": 2200,
+      "front": "+Z"
+    },
+    {
+      "id": "original-shrub",
+      "name": "低木・下草（まとまり）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-shrub.glb",
+      "thumb": "assets/models/previews-v2/original-shrub-thumb.png",
+      "top": "assets/models/previews-v2/original-shrub-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 500,
+      "front": "+Z"
+    },
+    {
+      "id": "original-deck-1820",
+      "name": "ウッドデッキ（1間×半間）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-deck-1820.glb",
+      "thumb": "assets/models/previews-v2/original-deck-1820-thumb.png",
+      "top": "assets/models/previews-v2/original-deck-1820-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 910,
+      "h": 450,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "デッキ材",
+          "default": "#886044"
+        }
+      ]
+    },
+    {
+      "id": "original-terrace-tile",
+      "name": "タイルテラス（600角×9枚）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-terrace-tile.glb",
+      "thumb": "assets/models/previews-v2/original-terrace-tile-thumb.png",
+      "top": "assets/models/previews-v2/original-terrace-tile-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 1820,
+      "h": 150,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "タイル",
+          "default": "#b7b4a9"
+        }
+      ]
+    },
+    {
+      "id": "original-fence-lattice",
+      "name": "縦格子フェンス（1スパン）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-lattice.glb",
+      "thumb": "assets/models/previews-v2/original-fence-lattice-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-lattice-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 60,
+      "h": 1800,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "格子",
+          "default": "#252a2c"
+        }
+      ]
+    },
+    {
+      "id": "original-car-stop",
+      "name": "駐車場の車止め",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-car-stop.glb",
+      "thumb": "assets/models/previews-v2/original-car-stop-thumb.png",
+      "top": "assets/models/previews-v2/original-car-stop-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 600,
+      "d": 100,
+      "h": 100,
+      "front": "+Z"
+    },
+    {
+      "id": "original-standpipe",
+      "name": "屋外水栓（立水栓・パン付き）",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-standpipe.glb",
+      "thumb": "assets/models/previews-v2/original-standpipe-thumb.png",
+      "top": "assets/models/previews-v2/original-standpipe-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 300,
+      "d": 300,
+      "h": 900,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "柱・水栓金具",
+          "default": "#a6afb2"
         }
       ]
     }

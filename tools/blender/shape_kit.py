@@ -54,6 +54,67 @@ def cap(bm, mat_index, ring, flip=False):
 
 
 
+def unwrap(obj):
+    """Smart UV atlas at final world size; call after join/modifier application.
+
+    Existing exporters/builders remain opt-in. Work in a temporary world-space
+    mesh so unapplied object scale cannot bias texel density. Average island
+    scale precedes packing; packing uses one uniform scale, never axis stretch.
+    All components/materials share one non-overlapping atlas. Smart cuts follow
+    changes in surface direction (box faces / rounded side bands).
+    Requires Object mode; restores the caller's selection and active object.
+    """
+    if obj.type != 'MESH' or bpy.context.mode != 'OBJECT':
+        raise ValueError('unwrap requires a mesh and Object mode')
+    selected = list(bpy.context.selected_objects)
+    active = bpy.context.view_layer.objects.active
+    uv_sync = bpy.context.scene.tool_settings.use_uv_select_sync
+    mesh = obj.data.copy()
+    temp = bpy.data.objects.new('_uv_world_space', mesh)
+    bpy.context.collection.objects.link(temp)
+    mesh.transform(obj.matrix_world)
+    try:
+        bpy.context.scene.tool_settings.use_uv_select_sync = False
+        bpy.ops.object.select_all(action='DESELECT')
+        temp.select_set(True)
+        bpy.context.view_layer.objects.active = temp
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66),
+                                 island_margin=0.015, area_weight=0.0,
+                                 correct_aspect=True, scale_to_bounds=False)
+        bpy.ops.uv.select_all(action='SELECT')
+        bpy.ops.uv.average_islands_scale()
+        bpy.ops.uv.pack_islands(rotate=True, margin=0.015)
+        bpy.ops.object.mode_set(mode='OBJECT')
+        if obj.data.users > 1:
+            obj.data = obj.data.copy()
+        target = obj.data.uv_layers.active
+        if target is None:
+            target = obj.data.uv_layers.new(name='UVMap')
+        for dst, src in zip(target.data, mesh.uv_layers.active.data):
+            dst.uv = src.uv
+        target.active_render = True
+        # **UV層は1枚だけにする。** glTF の TEXCOORD_0 は「先頭の層」であって
+        # active_render の層ではない。UV を持つ部品と持たない部品を join すると
+        # 層が2枚になり、先頭の空の層が書き出される。デッキがこれで、
+        # 16枚の床板だけテクスチャが単色になった(Blender側の検査は通る)。
+        for layer in [l for l in obj.data.uv_layers if l.name != target.name]:
+            obj.data.uv_layers.remove(layer)
+        obj.data.update()
+    finally:
+        if temp.mode != 'OBJECT':
+            bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.data.objects.remove(temp, do_unlink=True)
+        bpy.data.meshes.remove(mesh)
+        bpy.ops.object.select_all(action='DESELECT')
+        for item in selected:
+            item.select_set(True)
+        bpy.context.view_layer.objects.active = active
+        bpy.context.scene.tool_settings.use_uv_select_sync = uv_sync
+    return obj
+
+
 def export(obj, path):
     """GLBへ書き出す。**extras を載せる**ところだけ exterior_build と違う。
 

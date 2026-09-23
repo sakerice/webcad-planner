@@ -172,8 +172,16 @@ QuadriFlow によるリトポロジーも試した。2万クアッド(描画コ�
 ## カタログのモデルを作るときの約束（外すとアプリで壊れる）
 
 `assets/models/original/*.glb` に入る家具・住設を作るときの決まり。
-`build_sanitary.py` / `build_hvac.py` / `build_desks.py` / `build_doors.py` は
-すべてこれに従っている。**外部のエージェントに作らせるときは、まずここを渡す。**
+**決まりは `model_kit.py` の `run()` が機械で守らせる。** 文章で置くだけでは
+守られなかった(寸法・正面・UVのどれも取りこぼした)ので、`run()` を通していない
+モデルは「検査されていないモデル」として扱う。
+`build_sanitary.py` / `build_hvac.py` / `build_desks.py` / `build_doors.py` /
+`build_garden.py` はすべてこれを通している。
+**外部のエージェントに作らせるときは、まずここを渡す。**
+
+    from model_kit import *
+    run([('original-desk', (1000, 600, 720), build_desk, 'wood', 3000)])
+      #   ID            寸法mm(w,d,h)     組み立て関数  部位  面数上限
 
 | 項目 | 決まり |
 |---|---|
@@ -184,6 +192,7 @@ QuadriFlow によるリトポロジーも試した。2万クアッド(描画コ�
 | 形 | 単一のメッシュオブジェクトへ join してから書き出す |
 | 質感 | 画像テクスチャを使わない。色・粗さ・金属度だけ。マテリアル名は英語 |
 | 色変更 | 変えられる部位はマテリアルの `finishChannel`(ID プロパティ)で示し、`export_extras=True` で書き出す。**陶器・白物家電のように現実に色の選べないものには付けない** |
+| UV | **`unwrap()` で展開してから書き出す。** 無いとアプリで素材を選んでも柄が出ない(単色になる) |
 | 面数 | モバイルで動く範囲。既存は 150〜600 三角形、上限の目安 3,000 |
 | 編集可能な原本 | `tools/blender/work/original/<id>.blend` を必ず残す(検査が見ている) |
 
@@ -202,6 +211,12 @@ QuadriFlow によるリトポロジーも試した。2万クアッド(描画コ�
 4. **角のRをケチると箱にしかならない。** 浴槽を R=70mm で作ったらサムネが
    ただの白い箱だった。R=170mm で初めて浴槽に見えた。**面数を足しても
    直らない種類の問題。**
+5. **glTF の `TEXCOORD_0` は「先頭のUV層」で、`active_render` の層ではない。**
+   UVを持つ部品(`primitive_cube_add` は UVMap を作る)と持たない部品
+   (`from_pydata` は作らない)を join すると層が2枚になり、**先頭の空の層が
+   書き出される**。Blender 側の検査は通るのに、アプリでは単色になる。
+   デッキ・便器・エアコン・建具の4系統で踏んだ。`unwrap()` が余分な層を
+   落とし、`tools/tests/model-uv.test.cjs` が GLB を直接見て捕まえる。
 
 ### 登録（モデルを作ったあと）
 
@@ -212,7 +227,9 @@ QuadriFlow によるリトポロジーも試した。2万クアッド(描画コ�
 3. `node tools/tag_catalogue.mjs --via ~/.claude/jev/jev.mjs --resume`
    — 分類(kind/mount/room)を貼る
 4. `index.html` の `MODEL_ASSET_VER` を +1
-5. `sh tools/run_tests.sh` と `node tools/catalogue_gap.mjs`
+5. `tools/tests/model-uv.test.cjs` の `UNWRAPPED` に ID を足す
+   — **足さないと、UVの無いまま出荷できてしまう**
+6. `sh tools/run_tests.sh` と `node tools/catalogue_gap.mjs`
 
 ## 注意点(ハマりどころ)
 

@@ -11,6 +11,7 @@ import bmesh
 from mathutils import Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import window_treatment_build as wt
+from shape_kit import unwrap
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT/'assets/models/original'
@@ -90,6 +91,13 @@ for ident,w,d,h,kind in specs:
         if kind == 'roller':
             channel = 'fabric' if material.name.startswith('ScreenCloth') else 'accent'
         material['finishChannel'] = channel
+    # **UVを展開してから書き出す。** 無いと、画面に素材の欄が出るのに
+    # 柄が出ない(UVの無い面は同じ1点を参照するので単色になる)。
+    # この9点は UV の決まりが入る前に作ったので、あとから足している。
+    unwrap(ob)
+    bpy.ops.object.select_all(action='DESELECT')
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/f'{ident}.blend'))
     bpy.ops.export_scene.gltf(filepath=str(OUT/f'{ident}.glb'),export_format='GLB',use_selection=True,export_yup=True,export_apply=True,export_extras=True)
     path=OUT/f'{ident}.glb'

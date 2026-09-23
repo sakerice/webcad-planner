@@ -222,15 +222,22 @@ async function main() {
     ? (state, questions) => askViaCli(via.replace(/^~/, process.env.HOME), state, questions)
     : askViaRest;
 
-  let items = loadItems();
+  const all = loadItems();
+  let items = all;
   if (only) {
     const want = new Set(only.split(","));
     items = items.filter((i) => want.has(i.id));
   }
   if (limit > 0) items = items.slice(0, limit);
 
-  const previous = resume && existsSync(out) ? JSON.parse(readFileSync(out, "utf8")).items || {} : {};
-  const todo = items.filter((i) => !previous[i.id]);
+  // **今ある結果は必ず土台にする。** `--only` で8点だけ貼り直したとき、
+  // 残り762点のタグが消えた。`--resume` は「貼り直さない」の指定であって、
+  // 「残すかどうか」の指定ではない。
+  const onDisk = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")).items || {} : {};
+  // マニフェストから消えたモデルのタグは残さない(全点走らせたときの掃除)。
+  const live = new Set(all.map((i) => i.id));
+  const previous = Object.fromEntries(Object.entries(onDisk).filter(([id]) => live.has(id)));
+  const todo = items.filter((i) => !(resume && previous[i.id]));
   process.stderr.write(`${items.length} 点中 ${todo.length} 点を貼る（並列 ${concurrency}）\n`);
 
   let done = 0, failed = 0;
