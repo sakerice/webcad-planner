@@ -1,11 +1,12 @@
-// 読み取った階だけを差し替える。図面に写っていない階には触らない。
+// 取り込みは、利用者が作ったものを消さない。
 //
-// 2階の平面図を1枚だけ読み取ると、1階の間取りが丸ごと消えていた。
-// 取り込みが DATA をまるごと差し替えていたためで、図面に写っていない階
-// (1階)も、図面とは関係のない設定(階ごとの階高・方位・外壁の仕様)も、
-// まとめて失われていた。
+// 2階の平面図を1枚読み取ると、1階の間取りが丸ごと消えていた。取り込みが
+// 間取りをまるごと差し替えていたためで、図面に写っていない階も、図面とは
+// 関係のない設定(方位・外壁の仕様・階ごとの階高)も、敷地も失われていた。
 //
-// 取り込みが置き換えてよいのは、**その図面に写っている階だけ**である。
+// 読み取りが言えるのは「この図面にはこう描いてある」ことだけである。
+// 空いている階にはそのまま入れ、**既に間取りがある階なら、消さずに隣へ
+// 建てる**。どちらを残すかは利用者が決める。
 const assert = require('assert');
 const path = require('path');
 
@@ -45,14 +46,16 @@ function wallsOf(floor, x0, y0, x1, y1) {
     { x1: x0, y1: y1, x2: x0, y2: y0, floor: floor, thick: 120 },
   ];
 }
+function tagged(floor, tag, x0, y0, x1, y1) {
+  return wallsOf(floor, x0, y0, x1, y1).map(function (w, i) { return Object.assign({ id: tag + i }, w); });
+}
+function has(list, id) { return list.some(function (o) { return o.id === id; }); }
+function byType(items, type) { return items.filter(function (i) { return i.type === type; }); }
 
-// いま開いている間取り: 1階と2階、基礎と屋根つき。階ごとの設定も持っている。
+// いま開いている間取り: 1階と2階、基礎と屋根つき。敷地と階ごとの設定も持つ。
 function currentPlan() {
   return {
-    walls: [].concat(
-      wallsOf(1, 0, 0, 7280, 4095).map(function (w, i) { return Object.assign({ id: 'a' + i }, w); }),
-      wallsOf(2, 0, 0, 7280, 4095).map(function (w, i) { return Object.assign({ id: 'b' + i }, w); })
-    ),
+    walls: [].concat(tagged(1, 'a', 0, 0, 7280, 4095), tagged(2, 'b', 0, 0, 7280, 4095)),
     rooms: [
       { id: 'r1', floor: 1, x: 0, y: 0, w: 7280, d: 4095, n: 'LDK' },
       { id: 'r2', floor: 2, x: 0, y: 0, w: 7280, d: 4095, n: '寝室' },
@@ -63,7 +66,7 @@ function currentPlan() {
       { id: 'i3', type: 'foundation', floor: 1, x: 0, y: 0, w: 7280, d: 4095, foundationHeight: 450 },
       { id: 'i4', type: 'roof', floor: 3, x: -450, y: -450, w: 8180, d: 4995, roofType: 'gable', pitch: 45 },
       { id: 'i5', type: 'site-rect', floor: 1, x: -2000, y: -2000, w: 12000, d: 9000 },
-      { id: 'i6', type: 'road', floor: 1, x: -2000, y: 8000, w: 12000, d: 4000 },
+      { id: 'i6', type: 'tree', floor: 1, x: 9000, y: 2000, w: 900, d: 900 },
     ],
     floors: { 1: { wallHeight: 2600 }, 2: { wallHeight: 2400 } },
     floorMetadata: { 1: { use: 'residential' } },
@@ -82,22 +85,56 @@ function readSecondFloor() {
   };
 }
 
-// ── 2階を読み取っても、1階はそのまま ──────────────────────────────
-global.DATA = currentPlan();
-global.PlanImport.state.result = { plan: readSecondFloor() };
-global.applyPlanImport();
+function importInto(plan, read) {
+  global.DATA = plan;
+  global.PlanImport.state.result = { plan: read };
+  global.applyPlanImport();
+  return global.DATA;
+}
 
-const f1walls = DATA.walls.filter(function (w) { return w.floor === 1; });
-assert.equal(f1walls.length, 4, '2階を取り込んだのに、1階の壁が消えた');
-assert.deepEqual(DATA.rooms.filter(function (r) { return r.floor === 1; }).map(function (r) { return r.n; }),
-  ['LDK'], '2階を取り込んだのに、1階の部屋が消えた');
-assert.ok(DATA.items.some(function (i) { return i.id === 'i1'; }), '2階を取り込んだのに、1階の建具が消えた');
+// ── 既に間取りがある階を読んだら、消さずに隣へ建てる ──────────────
+global.HISTORY = ['{}'];              // 既定プランのままではない
+global._defaultPlanPending = false;
+importInto(currentPlan(), readSecondFloor());
 
-// 2階のほうは、読み取った下書きに入れ替わっている
-const f2rooms = DATA.rooms.filter(function (r) { return r.floor === 2; });
-assert.deepEqual(f2rooms.map(function (r) { return r.n; }), ['子供室'], '2階が読み取った下書きに入れ替わっていない');
-assert.equal(DATA.walls.filter(function (w) { return w.floor === 2; }).length, 4, '2階の壁が入れ替わっていない');
-assert.ok(!DATA.items.some(function (i) { return i.id === 'i2'; }), '2階の古い建具が残っている');
+// 元の間取りは、1つも欠けていない
+['a0', 'a1', 'a2', 'a3', 'b0', 'b1', 'b2', 'b3'].forEach(function (id) {
+  assert.ok(has(DATA.walls, id), '元の壁 ' + id + ' が消えた');
+});
+assert.deepEqual(DATA.rooms.filter(function (r) { return r.id === 'r1' || r.id === 'r2'; })
+  .map(function (r) { return r.n; }), ['LDK', '寝室'], '元の部屋が消えた');
+['i1', 'i2', 'i3', 'i4', 'i5', 'i6'].forEach(function (id) {
+  assert.ok(has(DATA.items, id), '元の ' + id + ' が消えた');
+});
+
+// 読み取った下書きは、元の間取りの右隣に建っている。
+// いまの間取りが載っている右端は 10000（敷地の右辺）。そこから 3000mm 空ける。
+// 敷地まで数えるのは、庭木や塀の上に下書きが重ならないようにするため。
+const DRAFT_X = 10000 + 3000;
+const drafted = DATA.rooms.filter(function (r) { return r.n === '子供室'; });
+assert.equal(drafted.length, 1, '読み取った部屋が入っていない');
+assert.equal(drafted[0].x, DRAFT_X, '下書きが隣に建っていない: x=' + drafted[0].x);
+assert.equal(drafted[0].floor, 2, '下書きの階が変わっている');
+// 元の壁は 'a0'…'b3'、下書きの壁は mkWall が振る番号で見分ける
+const draftWalls = DATA.walls.filter(function (w) { return typeof w.id === 'number'; });
+assert.equal(draftWalls.length, 4, '下書きの壁が4本入っていない');
+assert.ok(draftWalls.every(function (w) { return w.x1 >= DRAFT_X && w.x2 >= DRAFT_X; }),
+  '下書きの壁が隣へずれていない');
+const draftWindow = DATA.items.filter(function (i) { return i.type === 'window' && i.id !== 'i2'; });
+assert.equal(draftWindow.length, 1, '下書きの窓が入っていない');
+assert.ok(draftWindow[0].x >= DRAFT_X, '下書きの窓だけ元の位置に残っている');
+
+// 下書きの基礎と屋根は、**下書きの壁だけ**から作る。元の間取りの壁とまとめて
+// 外形を取ると、2棟をまたぐ1枚の基礎と1枚の屋根になる。
+const foundations = byType(DATA.items, 'foundation');
+assert.equal(foundations.length, 2, '基礎の数が合わない: ' + foundations.length);
+const newFoundation = foundations.filter(function (i) { return i.id !== 'i3'; })[0];
+assert.equal(newFoundation.w, 5460, '下書きの基礎が2棟をまたいでいる: w=' + newFoundation.w);
+assert.equal(newFoundation.x, DRAFT_X, '下書きの基礎が下書きの位置にない');
+const roofs = byType(DATA.items, 'roof');
+assert.equal(roofs.length, 2, '屋根の数が合わない: ' + roofs.length);
+const newRoof = roofs.filter(function (i) { return i.id !== 'i4'; })[0];
+assert.equal(newRoof.w, 5460 + 900, '下書きの屋根が2棟をまたいでいる: w=' + newRoof.w);
 
 // ── 図面と関係のない設定は残る ────────────────────────────────────
 assert.deepEqual(DATA.floors, { 1: { wallHeight: 2600 }, 2: { wallHeight: 2400 } }, '階ごとの高さ設定が消えた');
@@ -106,65 +143,60 @@ assert.deepEqual(DATA.heightDefaults, { modelVersion: 2, floorThickness: 180 }, 
 assert.deepEqual(DATA.exteriorWallSettings, { texture: 'siding' }, '外壁の設定が消えた');
 assert.equal(DATA.northDeg, 30, '方位が消えた');
 
-// ── 基礎は1階のもの。2階を読み取ったときに作り直さない ────────────
-const foundations = DATA.items.filter(function (i) { return i.type === 'foundation'; });
-assert.equal(foundations.length, 1, '基礎が増えた・消えた: ' + foundations.length);
-assert.equal(foundations[0].id, 'i3', '1階を読み取っていないのに、基礎を置き直した');
-
-// ── 屋根は最上階から決まるので、その階を読んだら作り直す ──────────
-const roofs = DATA.items.filter(function (i) { return i.type === 'roof'; });
-assert.equal(roofs.length, 1, '屋根が増えた・消えた: ' + roofs.length);
-assert.equal(roofs[0].w, 5460 + 900, '屋根が読み取った2階の外形に合っていない');
-assert.ok(roofs[0].id !== 'i4', '最上階を読み取ったのに、古い屋根が残っている');
-
-// ── 何も無いところへの取り込みは、これまでどおり基礎も屋根も付く ──
-global.DATA = { walls: [], rooms: [], items: [] };
-global.PlanImport.state.result = { plan: { walls: wallsOf(1, 0, 0, 7280, 4095), rooms: [], items: [] } };
-global.applyPlanImport();
-assert.equal(DATA.items.filter(function (i) { return i.type === 'foundation'; }).length, 1,
-  '空の間取りへの取り込みで、基礎が付かなくなった');
-assert.equal(DATA.items.filter(function (i) { return i.type === 'roof'; }).length, 1,
-  '空の間取りへの取り込みで、屋根が付かなくなった');
-
-// ── 1階だけを読み直したときは、基礎が作り直され、屋根は触らない ──
-global.DATA = currentPlan();
-global.PlanImport.state.result = { plan: { walls: wallsOf(1, 0, 0, 5460, 3640), rooms: [], items: [] } };
-global.applyPlanImport();
-const again = DATA.items.filter(function (i) { return i.type === 'foundation'; });
-assert.equal(again.length, 1, '1階を読み直したら基礎が増えた・消えた');
-assert.equal(again[0].w, 5460, '1階を読み直したのに、基礎が古い外形のまま');
-const keptRoof = DATA.items.filter(function (i) { return i.type === 'roof'; });
-assert.equal(keptRoof.length, 1, '1階を読み直したら屋根が増えた・消えた');
-assert.equal(keptRoof[0].id, 'i4', '最上階(2階)を読んでいないのに、屋根を置き直した');
-
-// ── 敷地と周辺は、平面図に描かれていないので消さない ──────────────
+// ── 空いている階は、隣ではなく上に載せる ──────────────────────────
 //
-// 読み取りは敷地も道路も作らない（図面に無いものを推測で置かないため）。
-// 作らないものを消すと、二度と戻せない。1階は読み直した直後である。
-assert.ok(DATA.items.some(function (i) { return i.id === 'i5'; }), '1階を読み直したら敷地が消えた');
-assert.ok(DATA.items.some(function (i) { return i.id === 'i6'; }), '1階を読み直したら道路が消えた');
+// 1階を読んだあとに2階を読む、という一番ふつうの流れ。ここで隣に建てて
+// しまっては使えない。屋根は最上階から決まるので、2階が載ったら作り直す。
+const oneFloor = {
+  walls: tagged(1, 'a', 0, 0, 7280, 4095),
+  rooms: [{ id: 'r1', floor: 1, x: 0, y: 0, w: 7280, d: 4095, n: 'LDK' }],
+  items: [
+    { id: 'i1', type: 'door', floor: 1, x: 100, y: 0, w: 800, d: 120 },
+    { id: 'i3', type: 'foundation', floor: 1, x: 0, y: 0, w: 7280, d: 4095 },
+    { id: 'i4', type: 'roof', floor: 2, x: -450, y: -450, w: 8180, d: 4995 },
+  ],
+};
+importInto(oneFloor, readSecondFloor());
+const stacked = DATA.rooms.filter(function (r) { return r.n === '子供室'; })[0];
+assert.equal(stacked.x, 0, '空いている2階なのに、隣へずらした');
+assert.equal(DATA.walls.filter(function (w) { return w.floor === 1; }).length, 4, '1階の壁が変わった');
+assert.ok(has(DATA.items, 'i1'), '1階の建具が消えた');
+// 基礎は最下階(1階)から決まる。2階を読んだだけでは作り直さない。
+const keptFoundation = byType(DATA.items, 'foundation');
+assert.equal(keptFoundation.length, 1, '基礎の数が合わない');
+assert.equal(keptFoundation[0].id, 'i3', '1階を読んでいないのに、基礎を置き直した');
+// 屋根は最上階から決まる。1階建てのときの屋根は、2階が載ったら要らない。
+const stackedRoofs = byType(DATA.items, 'roof');
+assert.equal(stackedRoofs.length, 1, '屋根が2枚になった（1階建てのときの屋根が残っている）');
+assert.equal(stackedRoofs[0].floor, 3, '屋根が2階の上に載っていない');
+assert.equal(stackedRoofs[0].w, 5460 + 900, '屋根が読み取った2階の外形に合っていない');
+
+// ── 何も無いところへの取り込みは、基礎も屋根も付く ────────────────
+importInto({ walls: [], rooms: [], items: [] },
+  { walls: wallsOf(1, 0, 0, 7280, 4095), rooms: [], items: [] });
+assert.equal(byType(DATA.items, 'foundation').length, 1, '空の間取りへの取り込みで、基礎が付かなくなった');
+assert.equal(byType(DATA.items, 'roof').length, 1, '空の間取りへの取り込みで、屋根が付かなくなった');
+assert.equal(DATA.walls[0].x1, 0, '空の間取りなのに、隣へずらした');
 
 // ── 起動直後の既定プランは、下敷きにしない ────────────────────────
 //
 // 起動ダイアログの「間取り図の画像から下書きを作る」で入っても、裏では
-// 既定プランが読み込まれている。図面から作りはじめるつもりの人に、
-// 既定プランの別の階が残ってはいけない。
-global.DATA = currentPlan();
+// 既定プランが読み込まれている。図面から作りはじめるつもりの人の隣に、
+// 見たこともない既定プランが建っていてはいけない。既定プランは利用者が
+// 作ったものではないので、これだけは外す。
 global.HISTORY = [];                 // まだ一度も触っていない
-global._defaultPlanPending = true;   // 既定プランのまま
-global.PlanImport.state.result = { plan: readSecondFloor() };
-global.applyPlanImport();
+global._defaultPlanPending = true;
+importInto(currentPlan(), readSecondFloor());
 assert.equal(DATA.walls.filter(function (w) { return w.floor === 1; }).length, 0,
   '図面から作りはじめたのに、既定プランの1階が残っている');
 assert.deepEqual(DATA.rooms.map(function (r) { return r.n; }), ['子供室'],
   '図面から作りはじめたのに、既定プランの部屋が残っている');
+assert.equal(DATA.rooms[0].x, 0, '下敷きが無いのに、隣へずらした');
 
-// 既定プランを手で直してきた人にとっては、それは自分の間取りである
-global.DATA = currentPlan();
+// 既定プランを手で直してきた人にとっては、それはもう自分の間取りである
 global.HISTORY = ['{}'];             // 触った跡がある
 global._defaultPlanPending = true;
-global.PlanImport.state.result = { plan: readSecondFloor() };
-global.applyPlanImport();
+importInto(currentPlan(), readSecondFloor());
 assert.equal(DATA.walls.filter(function (w) { return w.floor === 1; }).length, 4,
   '手で直してきた1階が、既定プラン扱いで消された');
 

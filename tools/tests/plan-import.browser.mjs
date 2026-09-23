@@ -213,6 +213,10 @@ try {
       }), { status: 200, headers: { 'content-type': 'application/json' } });
     };
   });
+  // ここで見たいのは「各ページが各階になる」ことなので、間取りを空にして
+  // から読む。空でないと、取り込みは**消さずに隣へ**建てる（その振る舞いは
+  // このすぐ下で見る）。
+  await page.evaluate(() => { DATA.walls = []; DATA.rooms = []; DATA.items = []; });
   await page.locator('#plan-import-run').click();
   await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });
   // PDFはページごとの画像にして送る。**そのまま送ると1ページ260トークンしか
@@ -233,15 +237,19 @@ try {
   assert.equal(floors.walls, 8, '2階ぶんの壁が入っていない');
   assert.deepEqual(floors.byFloor, [['洋室'], ['LDK']], '階ごとの部屋が入っていない');
 
-  // ── 2階だけを読み直しても、1階は消えない ──────────────────────────
+  // ── 取り込みは、利用者が作ったものを消さない ──────────────────────
   //
-  // 取り込みは DATA をまるごと差し替えていた。2階の平面図を1枚読み取った
-  // だけで1階が丸ごと消え、方位も外壁の設定も失われていた。
-  // 置き換えてよいのは、**その図面に写っていた階だけ**である。
+  // 取り込みは間取りをまるごと差し替えていた。2階の平面図を1枚読み取った
+  // だけで1階が丸ごと消え、方位も敷地も失われていた。
+  // いま2階には間取りがある。**消さずに、右隣に建てる**。
   await page.evaluate(() => {
     DATA.northDeg = 30;
     DATA.items.push({ id: 'site1', type: 'site-rect', floor: 1, x: -2000, y: -2000, w: 14000, d: 10000 });
   });
+  const before = await page.evaluate(() => ({
+    floor1: DATA.rooms.filter((r) => (r.floor || 1) === 1).map((r) => r.n),
+    floor2: DATA.rooms.filter((r) => (r.floor || 1) === 2).map((r) => r.n),
+  }));
   await page.evaluate(() => {
     const w = (x1, y1, x2, y2) => ({ x1, y1, x2, y2, floor: 2, thick: 120 });
     PlanImport.state.result = { plan: {
@@ -254,19 +262,24 @@ try {
   const kept = await page.evaluate(() => ({
     floor1: DATA.rooms.filter((r) => (r.floor || 1) === 1).map((r) => r.n),
     floor2: DATA.rooms.filter((r) => (r.floor || 1) === 2).map((r) => r.n),
+    draftX: (DATA.rooms.find((r) => r.n === '子供室') || {}).x,
+    oldX: (DATA.rooms.find((r) => r.n === 'LDK') || {}).x,
     northDeg: DATA.northDeg,
     site: DATA.items.filter((i) => i.type === 'site-rect').length,
     canUndo: HISTORY.length > 0,
   }));
-  assert.deepEqual(kept.floor1, ['洋室'], '2階を読み取ったのに1階が消えた: ' + JSON.stringify(kept));
-  assert.deepEqual(kept.floor2, ['子供室'], '2階が読み取った下書きに入れ替わっていない');
+  assert.deepEqual(kept.floor1, before.floor1, '2階を読み取ったのに1階が変わった: ' + JSON.stringify(kept));
+  assert.deepEqual(kept.floor2, before.floor2.concat(['子供室']),
+    '元の2階が消えた、または下書きが入っていない: ' + JSON.stringify(kept));
+  assert.ok(kept.draftX > kept.oldX + 5000,
+    '下書きが元の間取りの隣に建っていない: ' + JSON.stringify(kept));
   assert.equal(kept.northDeg, 30, '図面と関係のない設定(方位)が消えた');
   assert.equal(kept.site, 1, '平面図に描かれていない敷地を、取り込みが消した');
   assert.equal(kept.canUndo, true, '取り込みを取り消せない');
 
   await page.evaluate(() => undoAction());
   const undone = await page.evaluate(() => DATA.rooms.filter((r) => (r.floor || 1) === 2).map((r) => r.n));
-  assert.deepEqual(undone, ['LDK'], '取り込みを取り消しても元に戻らない');
+  assert.deepEqual(undone, before.floor2, '取り込みを取り消しても元に戻らない');
 
   assert.deepEqual(errors, [], 'ページで例外が出ている');
   console.log('間取り図の読み取り: 画像もPDFも、選ぶ→読み取る→取り込む が通った');
