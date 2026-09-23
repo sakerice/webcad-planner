@@ -1134,6 +1134,29 @@ function groundYForItem(it){
   });
   return on?SITE_SURFACE_Y:0;
 }
+// 壁に開く建具・窓か。開口は壁の中に中心があるので、床の決め方が家具と違う。
+function isWallOpeningItem(it){
+  if(!it) return false;
+  if(it.type==='window'||it.type==='window-door') return true;
+  return typeof isDoorLikeOpeningType==='function' && isDoorLikeOpeningType(it.type);
+}
+// 開口が面している部屋の床(m)。両側を見て高いほうを採る。
+// **高いほうを採るのは、敷居は室内側の床に合わせるから。** 片側が屋外なら
+// 室内側だけが見つかる。どちらにも部屋が無ければ null。
+function openingAdjacentFloorTopY(it){
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  var along=Math.round(Number(it.rot)||0)%180;   // 0=X方向に開く / 90=Y方向
+  var step=Math.max(((it.d||0)/2)+200,260);      // 壁の外まで確実に出る距離
+  var pts=(along===0)?[[cx,cy-step],[cx,cy+step]]:[[cx-step,cy],[cx+step,cy]];
+  var best=null,i,room,y;
+  for(i=0;i<pts.length;i++){
+    room=roomAtPointOnFloor(it.floor,pts[i][0],pts[i][1]);
+    if(!room) continue;
+    y=roomFloorTopY(room);
+    if(best===null||y>best) best=y;
+  }
+  return best;
+}
 function item3DBaseY(it){
   if(!it) return 0;
   if(isGroundLevelItemType(it.type) || isContextExteriorItemType(it.type)){
@@ -1147,6 +1170,24 @@ function item3DBaseY(it){
     return groundYForItem(it);
   }
   if(it.type==='roof') return localSupportTopY(it.floor,it.x,it.y,it.x+(it.w||0),it.y+(it.d||0));
+  // **壁の開口は、地面に置く物ではない。** 中心が壁の中に来るので、基礎の
+  // 外周をわずかに越えることがあり、下の「基礎の外なら地面」に捕まると
+  // 基礎の高さぶん落ちる。部屋の矩形も壁の芯で終わるので、越えた瞬間に
+  // 床上げもスラブも失う。
+  //
+  // **3階建ての既定プランの掃き出し窓が、これで792mm沈んで基礎の中にいた。**
+  // ずれは10mm(部屋の南端8190に対し、窓の中心が8200)。10mmで780mm落ちる。
+  // 目で見ないと分からない壊れ方で、寸法の検査には出ない。
+  if(isWallOpeningItem(it)){
+    var ox=(it.x||0)+(it.w||0)/2, oy=(it.y||0)+(it.d||0)/2;
+    if(!roomAtPointOnFloor(it.floor,ox,oy)){
+      // 中心で部屋が見つからないときだけ、開口の両側を見る。
+      // 見つかる場合の値は一切変えない。
+      var sideY=openingAdjacentFloorTopY(it);
+      if(sideY!==null) return sideY;
+    }
+    return roomFloorAt(it.floor,ox,oy);
+  }
   // 1階に置いた一般アイテムでも、基礎の外(=屋外)にあるものは地面に置く。
   // 床レベルに置くと基礎高さぶん宙に浮き、ポーチ・デッキ・アプローチ・門柱が
   // 「地面から浮いた謎の矩形」になる

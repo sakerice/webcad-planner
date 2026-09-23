@@ -528,6 +528,16 @@ plan.update(_review24["metadata"])
 for _collection, _order in _review24["order"].items():
     _by_id = {obj["id"]: obj for obj in plan[_collection]}
     plan[_collection] = [_by_id[_object_id] for _object_id in _order]
+# 受領版25。玄関ポーチを650へ上げ、段板と土間を合わせ、アプローチを延長。
+apply_patch_file(plan, "default_plan_3f_review_25.json")
+_review25 = _json.loads(_Path(__file__).with_name("default_plan_3f_review_25.json").read_text())
+plan.update(_review25["metadata"])
+for _collection, _order in _review25["order"].items():
+    _by_id = {obj["id"]: obj for obj in plan[_collection]}
+    plan[_collection] = [_by_id[_object_id] for _object_id in _order]
+# 掃き出し窓を南の外壁へ戻す(高さの不具合はアプリ側で直した)。
+from default_plan_review import apply_review_25_joints
+apply_review_25_joints(plan)
 # 高さの設定。**壁の高さは「仕上げ床 → 仕上げ天井」**(高さモデルv2)。
 # 印(modelVersion)が無いと、アプリは保存済みの古いプランとして扱い、
 # 1階の天井が300mm下がって物干し・レンジフードが天井に埋まる。

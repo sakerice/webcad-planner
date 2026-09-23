@@ -58,6 +58,8 @@ const FNS = [
   'rectMinusRect', 'subtractRectsFromRect', 'polyAsAxisRectMm',
   'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'roomFloorAt', 'roomStoreyFloorAt',
   'itemIsUnderPlatform', 'item3DBaseY',
+  // 壁の開口の床決め。item3DBaseY から呼ぶので、外すと ReferenceError になる。
+  'isWallOpeningItem', 'openingAdjacentFloorTopY',
   'roomAtPointOnFloor', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove', 'roomDeclaresSlopedCeiling',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',

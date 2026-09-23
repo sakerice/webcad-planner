@@ -63,6 +63,37 @@ def is_neighbor(t):
     return t.startswith('neighbor-')
 
 
+# いま検査しているプラン。is_furniture() が基礎の高さを見るために要る。
+# 検査関数はプランを引数で受け取るが、is_furniture は各所から1要素だけで
+# 呼ばれるので、ここで持つ。set_current_plan() は main と自己検査が呼ぶ。
+_CURRENT_PLAN = None
+
+
+def set_current_plan(data):
+    global _CURRENT_PLAN
+    _CURRENT_PLAN = data
+
+
+def _floor_like_max_mm(it):
+    """「その上に立つ物」とみなせる高さの上限(mm)。
+
+    1階の床の高さ(基礎+スラブ)まで。基礎を持たない階や基礎が読めないときは
+    従来どおり500mm。**数字を固定で持たない**のは、基礎高さがプランごとに
+    違うため(この値を固定にしていて玄関ドアが開かなくなった)。
+    """
+    data = _CURRENT_PLAN
+    if not data:
+        return 500.0
+    base = None
+    for other in data.get('items', []):
+        if other.get('type') == 'foundation':
+            base = float(other.get('foundationHeight') or 0)
+            break
+    if base is None:
+        return 500.0
+    return max(500.0, base + FLOOR_SLAB_MM)
+
+
 def is_furniture(it):
     """建具・照明・注記・敷地/構造/外構系 以外を「家具」とみなす。"""
     t = it.get('type', '')
@@ -70,10 +101,16 @@ def is_furniture(it):
         return False
     if is_light(t) or is_neighbor(t):
         return False
-    # 高さ500mm以下の custom-block は床仕上げ・段(デッキ/ポーチ/目地)扱い。
-    # 家具ではないので、ドアの開閉域や家具重なりの対象から外す
-    if t == 'custom-block' and (it.get('customHeight') or 900) <= 500:
-        return False
+    # 床仕上げ・段(デッキ/ポーチ/土間)の custom-block は家具ではない。
+    # ドアの開閉域や家具重なりの対象から外す。
+    #
+    # **高さの上限を500mm固定にしていたのが誤りだった。** 基礎450mm+スラブ
+    # 180mmの家では、玄関の床が地面から630mm。そこへ着けるポーチは600mm台に
+    # なる。500mmで切ると、**すべての玄関ドアが「ポーチが当たって5度しか
+    # 開かない」**になる。実際に3階建ての既定プランで出た。
+    # 建物の1階床(基礎+スラブ)までの高さは「立つ物」として扱う。
+    if t == 'custom-block':
+        return (it.get('customHeight') or 900) > _floor_like_max_mm(it)
     # カーテン・ロールスクリーンは窓に付く物、カーペットは床仕上げ。
     # 重なり・窓前チェックの対象外
     if is_window_dressing(t) or '-Carpet-' in t:
@@ -2671,6 +2708,7 @@ def main(argv):
     data.setdefault('walls', [])
     data.setdefault('rooms', [])
     data.setdefault('items', [])
+    set_current_plan(data)
 
     print('lint_plan: %s' % path)
     print('walls=%d rooms=%d items=%d' % (
