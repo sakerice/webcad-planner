@@ -70,6 +70,8 @@ const UNWRAPPED = [
   'original-car-stop', 'original-standpipe',
   'original-books-stack', 'original-mug-tray', 'original-vase-tall',
   'original-basket-blanket', 'original-plant-desk', 'original-entry-tray',
+  'original-washer-drum', 'original-washer-pan', 'original-laundry-pole',
+  'original-ac-wall-slim',
 ];
 
 test('UV展開を通した品は、UVが1つも潰れていない', () => {

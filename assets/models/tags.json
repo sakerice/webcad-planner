@@ -7667,6 +7667,16 @@
     "room": 0.33
    }
   },
+  "original-ac-wall-slim": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.63
+   }
+  },
   "original-ac-wall-wide": {
    "kind": "hvac",
    "mount": "wall",
@@ -8149,6 +8159,16 @@
     "room": 0.79
    }
   },
+  "original-laundry-pole": {
+   "kind": "laundry",
+   "mount": "ceiling",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.36
+   }
+  },
   "original-laundry-rail": {
    "kind": "laundry",
    "mount": "ceiling",
@@ -8442,6 +8462,26 @@
     "kind": 1,
     "mount": 0.99,
     "room": 0.92
+   }
+  },
+  "original-washer-drum": {
+   "kind": "laundry",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.85,
+    "room": 0.89
+   }
+  },
+  "original-washer-pan": {
+   "kind": "laundry",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.81
    }
   }
  }
