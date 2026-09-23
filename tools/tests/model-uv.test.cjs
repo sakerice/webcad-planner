@@ -68,6 +68,8 @@ const UNWRAPPED = [
   'original-tree-symbol', 'original-tree-evergreen', 'original-shrub',
   'original-deck-1820', 'original-terrace-tile', 'original-fence-lattice',
   'original-car-stop', 'original-standpipe',
+  'original-books-stack', 'original-mug-tray', 'original-vase-tall',
+  'original-basket-blanket', 'original-plant-desk', 'original-entry-tray',
 ];
 
 test('UV展開を通した品は、UVが1つも潰れていない', () => {

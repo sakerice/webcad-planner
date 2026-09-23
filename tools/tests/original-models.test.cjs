@@ -10,7 +10,7 @@ test('invalid finish values leave source materials intact',()=>{
  const m=material('wood'),mesh={isMesh:true,material:m};applyFinishes({traverse:f=>f(mesh)},{wood:'url(bad)'});assert.equal(mesh.material,m);
 });
 test('original collection has independent IDs, editable sources and canonical front metadata',()=>{
- const items=JSON.parse(fs.readFileSync('assets/models/custom/manifest.json')).items.filter(i=>i.provenance==='original');assert.equal(items.length,71);
+ const items=JSON.parse(fs.readFileSync('assets/models/custom/manifest.json')).items.filter(i=>i.provenance==='original');assert.equal(items.length,77);
  for(const i of items){
   assert.ok(i.id.startsWith('original-'));assert.ok(fs.existsSync('tools/blender/work/original/'+i.id+'.blend'));
   const b=fs.readFileSync(i.model),j=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)));

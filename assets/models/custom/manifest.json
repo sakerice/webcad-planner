@@ -2492,6 +2492,167 @@
           "default": "#a6afb2"
         }
       ]
+    },
+    {
+      "id": "original-books-stack",
+      "name": "本の平積みと立て掛け",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-books-stack.glb",
+      "thumb": "assets/models/previews-v2/original-books-stack-thumb.png",
+      "top": "assets/models/previews-v2/original-books-stack-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 250,
+      "d": 180,
+      "h": 220,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "accent",
+          "label": "表紙",
+          "default": "#526963"
+        }
+      ]
+    },
+    {
+      "id": "original-mug-tray",
+      "name": "マグとトレー",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-mug-tray.glb",
+      "thumb": "assets/models/previews-v2/original-mug-tray-thumb.png",
+      "top": "assets/models/previews-v2/original-mug-tray-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 300,
+      "d": 200,
+      "h": 110,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "トレー",
+          "default": "#bd9467"
+        }
+      ]
+    },
+    {
+      "id": "original-vase-tall",
+      "name": "花器（枝もの）",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-vase-tall.glb",
+      "thumb": "assets/models/previews-v2/original-vase-tall-thumb.png",
+      "top": "assets/models/previews-v2/original-vase-tall-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 200,
+      "d": 200,
+      "h": 600,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "花器",
+          "default": "#c1ad91"
+        }
+      ]
+    },
+    {
+      "id": "original-basket-blanket",
+      "name": "かごとブランケット",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-basket-blanket.glb",
+      "thumb": "assets/models/previews-v2/original-basket-blanket-thumb.png",
+      "top": "assets/models/previews-v2/original-basket-blanket-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 450,
+      "d": 350,
+      "h": 380,
+      "front": "+Z",
+      "defaultElevation": 0,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "かご",
+          "default": "#b28a5c"
+        },
+        {
+          "key": "fabric",
+          "label": "ブランケット",
+          "default": "#bdae94"
+        }
+      ]
+    },
+    {
+      "id": "original-plant-desk",
+      "name": "卓上の観葉（小鉢）",
+      "group": "家具",
+      "category": "植物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-plant-desk.glb",
+      "thumb": "assets/models/previews-v2/original-plant-desk-thumb.png",
+      "top": "assets/models/previews-v2/original-plant-desk-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 180,
+      "d": 180,
+      "h": 300,
+      "front": "+Z",
+      "defaultElevation": 720,
+      "finishChannels": [
+        {
+          "key": "body",
+          "label": "鉢",
+          "default": "#c3ab92"
+        }
+      ]
+    },
+    {
+      "id": "original-entry-tray",
+      "name": "玄関の小物（トレーと鍵）",
+      "group": "家具",
+      "category": "小物",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_decor.py",
+      "model": "assets/models/original/original-entry-tray.glb",
+      "thumb": "assets/models/previews-v2/original-entry-tray-thumb.png",
+      "top": "assets/models/previews-v2/original-entry-tray-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "w": 250,
+      "d": 180,
+      "h": 120,
+      "front": "+Z",
+      "defaultElevation": 900,
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "トレー",
+          "default": "#8d6447"
+        }
+      ]
     }
   ]
 }

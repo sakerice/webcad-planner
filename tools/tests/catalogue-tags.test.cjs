@@ -1,4 +1,4 @@
-// カタログ770点の分類(assets/models/tags.json)。
+// カタログ776点の分類(assets/models/tags.json)。
 //
 // 見ているのは4つ:
 //   1. **1点も漏れていない**こと。漏れた品はサイドバーで「その他」に落ちる。
@@ -33,9 +33,9 @@ function searchText(item) {
   return [item.name, item.category, words, item.id].join(' ');
 }
 
-test('770点すべてに分類が付いている', () => {
+test('776点すべてに分類が付いている', () => {
   const items = catalogueItems();
-  assert.equal(items.length, 770, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
+  assert.equal(items.length, 776, 'カタログの点数が変わった。変わったならタグを貼り直すこと');
   const missing = items.filter((i) => !TAGS.items[i.id]);
   assert.deepEqual(missing.map((i) => i.id), [], '分類の無い品がある（node tools/tag_catalogue.mjs --resume で貼れる）');
 });
