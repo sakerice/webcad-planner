@@ -99,8 +99,9 @@ test('UVの無い品は1点も無い', () => {
 });
 
 test('古いビルダーの品も、UVの潰れがこれ以上増えていない', () => {
-  // 古い品には、元の形に面積ゼロの面が残っている。**直すのは別の仕事**だが、
-  // 増やさないことだけは見る。減らしたらこの数を下げること。
+  // 古い品には、元の形に面積ゼロの面が残っている(ロールスクリーンの巻き芯が
+  // 最悪で14%)。**形の側の問題なので直すのは別の仕事**だが、増やさないことは
+  // 見る。立水栓は33%だったが、水受けボウルを展開して0%になった。
   const worst = MANIFEST.items
     .filter((i) => i.provenance === 'original' && !UNWRAPPED.includes(i.id))
     .map((i) => ({ id: i.id, ...scanGlb(i.model) }))
@@ -108,6 +109,5 @@ test('古いビルダーの品も、UVの潰れがこれ以上増えていない
     .filter((r) => r.ratio > 0.15)
     .map((r) => `${r.id} (${Math.round(r.ratio * 100)}%)`)
     .sort();
-  assert.deepEqual(worst, ['original-garden-tap (33%)'],
-    'UVの潰れが15%を超える品が増えた');
+  assert.deepEqual(worst, [], 'UVの潰れが15%を超える品がある');
 });
