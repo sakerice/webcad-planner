@@ -22,7 +22,7 @@ try {
   await page.waitForSelector('#app-loading', { state: 'hidden', timeout: 60000 });
 
   // ── 起動ダイアログから入れること ────────────────────────────────────
-  const entry = page.locator('#preset-choice-modal .preset-blank-btn', { hasText: '間取り図の画像から作る' });
+  const entry = page.locator('#preset-choice-modal .preset-blank-btn', { hasText: '間取り図の画像から下書きを作る' });
   assert.equal(await entry.count(), 1, '起動ダイアログに入口が無い');
   await entry.click();
   await page.waitForSelector('#plan-import-modal.show', { timeout: 5000 });
@@ -51,8 +51,19 @@ try {
   assert.equal(first.canvasW, 400, 'プレビューが描かれていない');
 
   // ── 囲む（本物のマウスで） ────────────────────────────────────────
+  //
+  // canvas は object-fit:contain で置いてあるので、箱の中に**余白**ができる。
+  // 箱の幅で割ると、余白のぶんだけ始点がずれる（実測で x=30 が 0 に張り付いた）。
+  // 画面 → 画像の換算は、アプリが使うのと同じ入れ方で出す。
   const box = await page.locator('#plan-import-canvas').boundingBox();
-  const at = (px, py) => ({ x: box.x + box.width * px / 400, y: box.y + box.height * py / 300 });
+  const shown = await page.evaluate(() => {
+    const c = document.getElementById('plan-import-canvas');
+    return { cw: c.width, ch: c.height, iw: PlanImport.state.image.naturalWidth };
+  });
+  const fit = Math.min(box.width / shown.cw, box.height / shown.ch);
+  const pad = { x: box.x + (box.width - shown.cw * fit) / 2, y: box.y + (box.height - shown.ch * fit) / 2 };
+  const preview = shown.cw / shown.iw;   // 画像の画素 → canvas の画素
+  const at = (px, py) => ({ x: pad.x + px * preview * fit, y: pad.y + py * preview * fit });
   const from = at(30, 30), to = at(260, 220);
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
@@ -104,7 +115,7 @@ try {
 
   const req = await page.evaluate(() => ({
     hint: window.__sentBody.hint,
-    imageHead: String(window.__sentBody.image).slice(0, 22),
+    imageHead: String(window.__sentBody.images[0]).slice(0, 22),
   }));
   assert.equal(req.hint, '1階の平面図です', '補足が送られていない');
   assert.equal(req.imageHead, 'data:image/png;base64,', '画像の形が違う');
@@ -163,14 +174,17 @@ try {
   // PDFはベクターなので、ブラウザで画像に変換するよりAI側で開いたほうが
   // 寸法の文字がはっきり読める。実測でもPDF直送が最良だった。
   await page.evaluate(() => { resetPlanImport(); });
-  const pdfBytes = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
+  // 本物の(最小の)PDF。pdf.js が実際に開けるものでないと、ページを画像に
+  // する経路をまったく通らない。
+  const pdfBytes = Buffer.from('JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCA1OTUgODQyXSAvQ29udGVudHMgNCAwIFIgL1Jlc291cmNlcyA8PCA+PiA+PgplbmRvYmoKNCAwIG9iago8PCAvTGVuZ3RoIDU1ID4+CnN0cmVhbQoyIHcgMCAwIDAgUkcgMTAwIDMwMCA0MDAgNDAwIHJlIFMgMTUwIDM1MCBtIDQ1MCAzNTAgbCBTCmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDUKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNTggMDAwMDAgbiAKMDAwMDAwMDExNSAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCnRyYWlsZXIKPDwgL1NpemUgNSAvUm9vdCAxIDAgUiA+PgpzdGFydHhyZWYKMzI0CiUlRU9GCg==', 'base64');
   await page.locator('#plan-import-file').setInputFiles({
     name: 'madori.pdf', mimeType: 'application/pdf', buffer: pdfBytes,
   });
-  await page.waitForFunction(() => PlanImport.state.pdf !== null, null, { timeout: 5000 });
+  await page.waitForFunction(() => PlanImport.state.pages && PlanImport.state.pages.length > 0,
+    null, { timeout: 30000 });
   assert.equal(await page.locator('#plan-import-crop').isVisible(), false,
     'PDFなのに囲む操作を出している（利用者に不要な手間をかけている）');
-  assert.match(await page.locator('#plan-import-status').textContent(), /そのまま読み取ります/);
+  assert.match(await page.locator('#plan-import-status').textContent(), /ページを読み取ります/);
   assert.equal(await page.locator('#plan-import-run').isDisabled(), false, 'PDFで読み取りボタンが押せない');
 
   // ── 複数階の取り込み ────────────────────────────────────────────────
@@ -201,8 +215,14 @@ try {
   });
   await page.locator('#plan-import-run').click();
   await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });
-  const pdfSent = await page.evaluate(() => String(window.__sentBody.image).slice(0, 28));
-  assert.equal(pdfSent, 'data:application/pdf;base64,', 'PDFをそのまま送っていない: ' + pdfSent);
+  // PDFはページごとの画像にして送る。**そのまま送ると1ページ260トークンしか
+  // 使われず、寸法の文字が読めない**(assets/js/pdf-pages.js の実測)。
+  const pdfSent = await page.evaluate(() => ({
+    head: String(window.__sentBody.images[0]).slice(0, 22),
+    pages: window.__sentBody.images.length,
+  }));
+  assert.equal(pdfSent.head, 'data:image/png;base64,', 'PDFを画像にして送っていない: ' + pdfSent.head);
+  assert.equal(pdfSent.pages, 1, '送ったページ数が合わない');
   assert.match(await page.locator('#plan-import-summary').textContent(), /階 1・2/, '階の表示が出ていない');
 
   await page.locator('#plan-import-apply').click();
@@ -212,6 +232,41 @@ try {
   }));
   assert.equal(floors.walls, 8, '2階ぶんの壁が入っていない');
   assert.deepEqual(floors.byFloor, [['洋室'], ['LDK']], '階ごとの部屋が入っていない');
+
+  // ── 2階だけを読み直しても、1階は消えない ──────────────────────────
+  //
+  // 取り込みは DATA をまるごと差し替えていた。2階の平面図を1枚読み取った
+  // だけで1階が丸ごと消え、方位も外壁の設定も失われていた。
+  // 置き換えてよいのは、**その図面に写っていた階だけ**である。
+  await page.evaluate(() => {
+    DATA.northDeg = 30;
+    DATA.items.push({ id: 'site1', type: 'site-rect', floor: 1, x: -2000, y: -2000, w: 14000, d: 10000 });
+  });
+  await page.evaluate(() => {
+    const w = (x1, y1, x2, y2) => ({ x1, y1, x2, y2, floor: 2, thick: 120 });
+    PlanImport.state.result = { plan: {
+      walls: [w(0, 0, 5460, 0), w(5460, 0, 5460, 3640), w(5460, 3640, 0, 3640), w(0, 3640, 0, 0)],
+      rooms: [{ floor: 2, x: 0, y: 0, w: 5460, d: 3640, n: '子供室' }],
+      items: [],
+    } };
+    applyPlanImport();
+  });
+  const kept = await page.evaluate(() => ({
+    floor1: DATA.rooms.filter((r) => (r.floor || 1) === 1).map((r) => r.n),
+    floor2: DATA.rooms.filter((r) => (r.floor || 1) === 2).map((r) => r.n),
+    northDeg: DATA.northDeg,
+    site: DATA.items.filter((i) => i.type === 'site-rect').length,
+    canUndo: HISTORY.length > 0,
+  }));
+  assert.deepEqual(kept.floor1, ['洋室'], '2階を読み取ったのに1階が消えた: ' + JSON.stringify(kept));
+  assert.deepEqual(kept.floor2, ['子供室'], '2階が読み取った下書きに入れ替わっていない');
+  assert.equal(kept.northDeg, 30, '図面と関係のない設定(方位)が消えた');
+  assert.equal(kept.site, 1, '平面図に描かれていない敷地を、取り込みが消した');
+  assert.equal(kept.canUndo, true, '取り込みを取り消せない');
+
+  await page.evaluate(() => undoAction());
+  const undone = await page.evaluate(() => DATA.rooms.filter((r) => (r.floor || 1) === 2).map((r) => r.n));
+  assert.deepEqual(undone, ['LDK'], '取り込みを取り消しても元に戻らない');
 
   assert.deepEqual(errors, [], 'ページで例外が出ている');
   console.log('間取り図の読み取り: 画像もPDFも、選ぶ→読み取る→取り込む が通った');

@@ -627,9 +627,15 @@
 
   // ── 4. 取り込む ────────────────────────────────────────────────────
   //
-  // 読み取れるのは壁・部屋・開口・階段だけなので、いまの間取りへ混ぜず
-  // **置き換える**。混ぜると、どれが読み取った分でどれが元からの分か
-  // 分からなくなり、取り消しもできない。
+  // 読み取れるのは壁・部屋・開口・階段だけなので、**読み取れた階の中では**
+  // いまの間取りへ混ぜず置き換える。混ぜると、どれが読み取った分でどれが
+  // 元からの分か分からなくなり、取り消しもできない。
+  //
+  // **置き換えるのは、その図面に写っていた階だけ。** 2階の平面図を1枚
+  // 読み取っただけで1階が消えるのは、図面が言っていないことまで反映して
+  // いることになる。写っていない階と、階とは関係のない設定(方位・外壁の
+  // 仕様・階ごとの階高)には触らない。
+  //
   // 読み取った素の JSON を、**アプリ自身の生成関数を通して**作り直す。
   //
   // AIが返すのは座標と種類だけで、色・テクスチャ・壁の見え方・建具の高さと
@@ -650,23 +656,8 @@
         textureFlipX: false, textureFlipY: false,
       });
     });
-    // 壁から決まる構造部材（基礎・屋根）をここで足す。
-    //
-    // AIには出させない。基礎は1階の壁の外形そのもの、屋根は最上階の外形＋軒で
-    // 一意に決まるので、読み取りの精度に左右されず必ず正しく置ける。
-    // これが無いと、出来上がるのは「家」ではなく「壁の集まり」になる。
-    var structure = (typeof PlanStructure !== 'undefined' && PlanStructure)
-      ? PlanStructure.structureFor(plan.walls) : [];
-    structure.forEach(function (st) {
-      var made = mkItem(st.type, st.x, st.y, st.rot || 0, st.floor, st.w, st.d);
-      // 種類ごとの欄（基礎の高さ・屋根の形）は mkItem の既定値より、
-      // 壁から決めたこちらの値を優先する。
-      Object.keys(st).forEach(function (k) {
-        if (['type', 'x', 'y', 'w', 'd', 'rot', 'floor'].indexOf(k) < 0) made[k] = st[k];
-      });
-      out.items.push(made);
-    });
-
+    // 構造部材（基礎・屋根）はここでは作らない。**いまの間取りと合わせた
+    // 壁から決まる**ので、階を差し替えたあと withStructure で作る。
     (plan.items || []).forEach(function (it) {
       // **アプリのアイテムは x,y が左上の角。** AIには「開口の中心」で
       // 答えさせているので、ここで角へ直す。直さないと開口が幅の半分ぶん
@@ -686,15 +677,114 @@
     return out;
   }
 
+  // その間取りに出てくる階。
+  function floorsOfObjects() {
+    var seen = [];
+    for (var i = 0; i < arguments.length; i++) {
+      (arguments[i] || []).forEach(function (o) {
+        var f = Number(o && o.floor) || 1;
+        if (seen.indexOf(f) < 0) seen.push(f);
+      });
+    }
+    return seen.sort(function (a, b) { return a - b; });
+  }
+
+  // 壁から決まる構造部材（基礎・屋根）を置く。
+  //
+  // AIには出させない。基礎は最下階の壁の外形そのもの、屋根は最上階の外形＋軒で
+  // 一意に決まるので、読み取りの精度に左右されず必ず正しく置ける。
+  // これが無いと、出来上がるのは「家」ではなく「壁の集まり」になる。
+  //
+  // **作り直すのは、読み取った階から決まるものだけ。** 2階を読み取ったなら
+  // 屋根（最上階から決まる）は作り直すが、基礎（最下階から決まる）は
+  // 触らない。読み取っていない階の部材には、利用者が手で入れた判断
+  // （屋根の形・勾配）が入っている。
+  function withStructure(items, walls, floors) {
+    if (typeof PlanStructure === 'undefined' || !PlanStructure) return items;
+    var all = PlanStructure.floorsOf(walls);
+    if (!all.length) return items;
+    var bottom = all[0], top = all[all.length - 1];
+    var want = PlanStructure.structureFor(walls).filter(function (st) {
+      return floors.indexOf(st.type === 'roof' ? top : bottom) >= 0;
+    });
+    // 作り直すものと同じ種類・同じ階の古い部材は、ここで外す（二重に載る）。
+    var out = items.filter(function (it) {
+      return !want.some(function (st) {
+        return it && it.type === st.type && (Number(it.floor) || 1) === st.floor;
+      });
+    });
+    want.forEach(function (st) {
+      var made = mkItem(st.type, st.x, st.y, st.rot || 0, st.floor, st.w, st.d);
+      // 種類ごとの欄（基礎の高さ・屋根の形）は mkItem の既定値より、
+      // 壁から決めたこちらの値を優先する。
+      Object.keys(st).forEach(function (k) {
+        if (['type', 'x', 'y', 'w', 'd', 'rot', 'floor'].indexOf(k) < 0) made[k] = st[k];
+      });
+      out.push(made);
+    });
+    return out;
+  }
+
+  function floorLabel(floors) {
+    return floors.map(function (f) { return f + '階'; }).join('・');
+  }
+
+  // いまの間取りが「起動時の既定プランのまま」か。
+  //
+  // 起動ダイアログの「間取り図の画像から下書きを作る」で入ってきたときも、
+  // 裏では既定プランが読み込まれている。**利用者は図面から作りはじめる
+  // つもりでいる**ので、そこへ読み取った階を混ぜると、身に覚えのない部屋が
+  // 別の階に残る。この場合だけは、下敷きを外して図面だけから作る。
+  //
+  // 既定プランを手で直してきた人にとっては、それはもう自分の間取りである。
+  // 触った跡(編集履歴)が無いことまで見て分ける。
+  function isUntouchedDefault() {
+    return root._defaultPlanPending === true &&
+      (typeof HISTORY === 'undefined' || !HISTORY || !HISTORY.length);
+  }
+
   function applyPlanImport() {
     if (!ST.result || !ST.result.plan) return;
-    if (typeof DATA !== 'undefined' && DATA && ((DATA.walls || []).length || (DATA.rooms || []).length)) {
-      if (!confirm('いまの間取りを、読み取った下書きで置き換えます。よろしいですか？')) return;
+    if (typeof DATA === 'undefined' || !DATA) return;
+    var read = toAppObjects(ST.result.plan);
+    var readFloors = floorsOfObjects(read.walls, read.rooms, read.items);
+    if (!readFloors.length) return;
+
+    var fresh = isUntouchedDefault();
+    var base = fresh ? { walls: [], rooms: [], items: [] } : DATA;
+    var onOtherFloor = function (o) { return o && readFloors.indexOf(Number(o.floor) || 1) < 0; };
+    // 敷地と周辺（道路・隣家・電柱）は、平面図には描かれていない。
+    // **読み取りが作らないものは、読み取りが消してもいけない。** 1階を
+    // 読み直しただけで敷地が消えると、斜線制限も外構もまとめて失われる。
+    var isSite = function (o) {
+      return o && (o.type === 'site-rect' ||
+        (typeof isContextExteriorItemType === 'function' && isContextExteriorItemType(o.type)));
+    };
+    var kept = {
+      walls: (base.walls || []).filter(onOtherFloor),
+      rooms: (base.rooms || []).filter(onOtherFloor),
+      items: (base.items || []).filter(function (o) { return onOtherFloor(o) || isSite(o); }),
+    };
+    // 何が消えて何が残るのかを、押す前に言う。
+    if ((DATA.walls || []).length || (DATA.rooms || []).length) {
+      var staying = floorsOfObjects(kept.walls, kept.rooms);
+      var ask = fresh
+        ? 'いまの間取りを外して、読み取った下書き（' + floorLabel(readFloors) + '）から作りはじめます。よろしいですか？'
+        : floorLabel(readFloors) + 'を、読み取った下書きで置き換えます。'
+          + (staying.length ? '（' + floorLabel(staying) + 'はそのまま残ります）' : '')
+          + 'よろしいですか？';
+      if (!confirm(ask)) return;
     }
-    var plan = toAppObjects(ST.result.plan);
-    // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
+
+    // 取り消せるようにしてから触る。**丸ごと差し替えていた頃は、取り込みが
+    // 最後の操作になるので履歴を捨てていた。** いまは他の階が残る以上、
+    // 押し間違いを1手で戻せるべきである。
+    if (typeof saveState === 'function') saveState();
     root._defaultPlanPending = false;
-    DATA = plan;
+    DATA.walls = kept.walls.concat(read.walls);
+    DATA.rooms = kept.rooms.concat(read.rooms);
+    DATA.items = withStructure(kept.items.concat(read.items), DATA.walls, readFloors);
+    // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
     if (typeof syncNorthFromPlan === 'function') syncNorthFromPlan();
     if (typeof ensureObjectIds === 'function') ensureObjectIds();
     if (typeof ensureExteriorWallSettings === 'function') ensureExteriorWallSettings();
@@ -703,7 +793,6 @@
     if (typeof ensureFloorMetadata === 'function') ensureFloorMetadata();
     if (typeof syncExteriorWallSettings === 'function') syncExteriorWallSettings();
     if (typeof normalizeLegacyFurnitureItems === 'function') normalizeLegacyFurnitureItems();
-    if (typeof clearEditHistory === 'function') clearEditHistory();
     if (typeof sharedForceFullSync === 'function') sharedForceFullSync();
     if (typeof markDirty === 'function') markDirty();
     if (typeof resetView === 'function') resetView();
