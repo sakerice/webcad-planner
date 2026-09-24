@@ -242,90 +242,22 @@
     return out;
   }
 
-  function mount(result) {
-    var sidebar = document.getElementById('sidebar');
-    if (!sidebar) return;
-    var old = document.getElementById('plan-finish');
-    if (old) old.remove();
-    var lines = missingLines(result);
-    var warn = (result && result.warnings) || [];
-    // 図面に描かれていた印のうち、**何であるか見当が付いたものだけ**出す。
-    // 絞れなかったものを並べても選べない。
-    var reads = ((result && result.reads) || []).filter(function (r) {
-      return r.candidates.length && r.candidates[0].score >= 3;
-    });
-    if (!lines.length && !warn.length && !reads.length) return;
-
-    var box = document.createElement('div');
-    box.className = 'catalogue-search';
-    box.id = 'plan-finish';
-
-    // **読み取りの取り違えを、足りないものより先に出す。** 浴槽が寝室にある
-    // ような間違いは、家具を足す前に直すべきものだから。
-    if (warn.length) {
-      var wHead = document.createElement('label');
-      wHead.textContent = '読み取りで気になるところ（' + warn.length + '件）';
-      var wList = document.createElement('div');
-      wList.className = 'catalogue-count';
-      wList.style.whiteSpace = 'pre-line';
-      wList.textContent = warn.map(function (t) { return '・' + t; }).join('\n');
-      box.append(wHead, wList);
-    }
-    // **図面にこう描かれていた、という読み取り。**置くかどうかは人が決める。
-    // 読み取りは「見たまま」だけを返し、何であるかはこちらが当てている
-    // ので、外していることがある。断定して並べない。
-    if (reads.length) {
-      var rHead = document.createElement('label');
-      rHead.textContent = '図面に描かれていたもの（' + reads.length + '件・推定）';
-      var rNote = document.createElement('div');
-      rNote.className = 'catalogue-count';
-      rNote.style.whiteSpace = 'pre-line';
-      rNote.textContent = reads.map(function (r) {
-        var top = r.candidates[0];
-        var name = kindLabel(top.kind);
-        var where = r.room ? '「' + r.room + '」の' : '';
-        return '・' + where + Math.round(r.mark.w) + '×' + Math.round(r.mark.d)
-             + 'mm は ' + name + 'かもしれません（' + top.why[0] + '）';
-      }).join('\n');
-      box.append(rHead, rNote);
-    }
-
-    if (!lines.length) {
-      sidebar.prepend(box);
-      return;
-    }
-    var head = document.createElement('label');
-    head.textContent = 'この間取りに足りないもの（' + lines.length + '件）';
-    var note = document.createElement('div');
-    note.className = 'catalogue-count';
-    note.textContent = '押すとその品が道具になります。置く場所は図の上でタップしてください。';
-    var grid = document.createElement('div');
-    grid.className = 'catalogue-result-grid';
-
-    var byRoom = {};
-    lines.forEach(function (line) { (byRoom[line.room] || (byRoom[line.room] = [])).push(line); });
-    box.append(head, note);
-    Object.keys(byRoom).forEach(function (room) {
-      var heading = document.createElement('div');
-      heading.className = 'catalogue-result-heading';
-      heading.textContent = room;
-      var row = document.createElement('div');
-      row.className = 'catalogue-result-grid';
-      byRoom[room].forEach(function (line) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'catalogue-result asset-tile';
-        b.title = line.why;
-        b.textContent = line.ja;
-        b.addEventListener('click', function () { pickTool(line, b); });
-        row.append(b);
-      });
-      box.append(heading, row);
-    });
-
-    var anchor = document.getElementById('object-search');
-    if (anchor) anchor.after(box); else sidebar.append(box);
-  }
+  // 画面へ出す口は、いま**外してある**。
+  //
+  // 取り込みの直後にサイドバーへ地の文を生やしていた（「この間取りに足りない
+  // もの（93件）」と赤い札の並び）。実機で見て、次の理由で取り下げた:
+  //
+  //   1. **板が無い。** 浮いたカードに載せるのが DESIGN.md の決まりで、
+  //      地の文を figure の上へ直接置くと図に重なって読めない
+  //   2. **車輪の再生産。** 札を押すとその場で道具になる作りで、カタログの
+  //      パネルが既に持っている導線を別の場所に作り直していた
+  //   3. **93件は多すぎる。** 部屋ごとに要るものを全部挙げると、選べない
+  //
+  // 作り直しの形は決まっている（AGENTS.md「UI を新しく作るとき」）:
+  // レコメンドの欄をカードで作り、項目を押したら**カタログのパネルを開いて
+  // その品まで送る**。×で個別に消せる。判断は PlanFinish.result に残って
+  // いるので、画面の作り直しはここを読むだけでよい。
+  function mount() {}
 
   // 足りないものを押したとき。**置かない。道具にするだけ。**
   function pickTool(line, button) {

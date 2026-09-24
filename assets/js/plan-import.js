@@ -706,11 +706,15 @@
     });
     (plan.rooms || []).forEach(function (r) {
       var floor = r.floor || 1;
-      out.rooms.push({
+      var made = {
         id: 'rm_' + (nextId++), type: 'room', x: r.x, y: r.y, w: r.w, d: r.d, floor: floor,
         n: r.n || '', floorRaiseMm: newRoomFloorRaiseMm(floor),
         textureFlipX: false, textureFlipY: false,
-      });
+      };
+      // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
+      // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
+      if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
+      out.rooms.push(made);
     });
     // 壁から決まる構造部材（基礎・屋根）をここで足す。
     //
@@ -776,9 +780,10 @@
     if (typeof resetView === 'function') resetView();
     if (typeof draw2d === 'function') draw2d();
     if (typeof rebuild3D === 'function') rebuild3D();
-    // 足りないものを道具の一覧に出す。**ここは閉じたあとも残る。**
-    // 1つ置いてから次を置く、という使い方になるため。
-    if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
+    // 足りないもの・読み取りの指摘・図面の印は、いま**画面に出していない**。
+    // 出していた版が DESIGN.md に従っておらず、カタログのパネルが持つ導線を
+    // 作り直していたため取り下げた（assets/js/plan-finish.js の mount を見ること）。
+    // 判断そのものは PlanFinish.result に残っている。
     closePlanImport();
   }
 

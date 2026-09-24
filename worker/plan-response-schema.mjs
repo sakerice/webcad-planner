@@ -55,9 +55,12 @@ const ROOM = {
       description: "その部屋が占める長方形",
       items: PART,
     },
+    // スキップフロア・小上がり。アプリ側は room.skipLevelMm を持っている
+    // (床も天井も持ち上がる段差、上限2400mm)ので、読み取れれば再現できる。
+    level: { type: "NUMBER", description: "その階の床からの段差" },
   },
   required: ["name", "parts"],
-  propertyOrdering: ["name", "parts"],
+  propertyOrdering: ["name", "parts", "level"],
 };
 
 const ITEM = {
