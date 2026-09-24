@@ -90,7 +90,9 @@ try {
   await page.evaluate(() => {
     window.__sentBody = null;
     window.fetch = async (url, opts) => {
-      window.__sentBody = JSON.parse(opts.body);
+      // **読み取りの本文だけを覚える。** 取り込みの前後には位置探しや
+      // 仕上げの問い合わせも飛ぶので、最後の1件を覚えると別の本文になる。
+      if (String(url).includes('/api/ai/import-plan')) window.__sentBody = JSON.parse(opts.body);
       return new Response(JSON.stringify({
         plan: {
           walls: [
@@ -192,7 +194,9 @@ try {
   // PDFが複数ページなら各ページが各階になる。壁が階ごとに入ることを見る。
   await page.evaluate(() => {
     window.fetch = async (url, opts) => {
-      window.__sentBody = JSON.parse(opts.body);
+      // **読み取りの本文だけを覚える。** 取り込みの前後には位置探しや
+      // 仕上げの問い合わせも飛ぶので、最後の1件を覚えると別の本文になる。
+      if (String(url).includes('/api/ai/import-plan')) window.__sentBody = JSON.parse(opts.body);
       const wallsFor = (f) => ([
         { id: 'w' + f + 'a', floor: f, x1: 0, y1: 0, x2: 7280, y2: 0, thick: 120 },
         { id: 'w' + f + 'b', floor: f, x1: 7280, y1: 0, x2: 7280, y2: 4095, thick: 120 },
