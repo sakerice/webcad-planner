@@ -17580,6 +17580,47 @@ function applyStashedCamera(s){
   return true;
 }
 
+// JSONをファイルとして保存する。
+//
+// **data: の URL では、iPad で保存できない。**
+//
+// 以前はこうしていた:
+//   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json)
+//   a.download='plan.json'; a.click();
+//
+// iOS Safari は data: の URL に対して download 属性を尊重しない。保存の代わりに
+// その URL を開こうとするだけで、**ファイルは1つもできない**。利用者から見ると
+// 「書き出しを押したのに、読み込むと古い間取りが出てくる」という形で現れる
+// (「ファイル」アプリに前のファイルが残っているため)。実測で、同じ8月14日の
+// ファイルが5回続けて渡されていた。
+//
+// 大きさの問題もある。実測したプランは JSON で 3.6MB、encodeURIComponent を
+// 通すと data: の URL が **4.5MB の文字列**になる。URL の長さには上限があり、
+// 大きな間取りほど黙って失敗する側に倒れる。
+//
+// Blob と createObjectURL なら、iOS Safari でも「ファイル」へ保存される。
+// 文字列を1つも作らないので、大きさの上限にも当たらない。
+// アンカーは文書に入れてから押す（入れずに押すと無視するブラウザがある）。
+function downloadJsonFile(json, filename){
+  var url=null;
+  try{
+    var blob=new Blob([json],{type:'application/json;charset=utf-8'});
+    url=URL.createObjectURL(blob);
+  }catch(e){
+    // Blob を作れない環境では、従来どおり data: へ落とす
+    url='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  }
+  var a=document.createElement('a');
+  a.href=url; a.download=filename; a.rel='noopener';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  // 押した直後に消すと保存が始まらない端末がある
+  setTimeout(function(){
+    if(a.parentNode) a.parentNode.removeChild(a);
+    if(url.slice(0,5)==='blob:') URL.revokeObjectURL(url);
+  },4000);
+}
 function exportPlan(){
   normalizeLegacyFurnitureItems();
   ensureObjectIds();
@@ -17596,10 +17637,7 @@ function exportPlan(){
   ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
-  var json=JSON.stringify(DATA,null,2);
-  var a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
-  a.download='plan.json';a.click();
+  downloadJsonFile(JSON.stringify(DATA,null,2),'plan.json');
 }
 async function savePlanToStorage(){
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
@@ -18111,11 +18149,7 @@ function buildUnityRenderPlan(){
 }
 function exportUnityRenderRequest(){
   var req=buildUnityRenderRequest();
-  var json=JSON.stringify(req,null,2);
-  var a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
-  a.download='webcad-render-request.json';
-  a.click();
+  downloadJsonFile(JSON.stringify(req,null,2),'webcad-render-request.json');
 }
 var AI_RENDER_PACKAGE=null;
 var AI_RENDER_DOWNLOAD_URLS=[];
