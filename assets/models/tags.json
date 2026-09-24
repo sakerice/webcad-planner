@@ -1,0 +1,8567 @@
+{
+ "version": 1,
+ "model": "typesafe/jev",
+ "generated": "2026-09-23",
+ "kinds": {
+  "kitchen-unit": {
+   "group": "住設",
+   "ja": "システムキッチン",
+   "search": [
+    "キッチン",
+    "システムキッチン",
+    "流し台",
+    "台所",
+    "対面キッチン",
+    "アイランドキッチン",
+    "I型"
+   ]
+  },
+  "kitchen-storage": {
+   "group": "住設",
+   "ja": "キッチン収納",
+   "search": [
+    "キッチン収納",
+    "吊戸棚",
+    "カップボード",
+    "食器棚",
+    "カウンター収納",
+    "背面収納"
+   ]
+  },
+  "cooktop": {
+   "group": "住設",
+   "ja": "コンロ",
+   "search": [
+    "コンロ",
+    "ガスコンロ",
+    "IH",
+    "IHクッキングヒーター",
+    "ガス台",
+    "五徳"
+   ]
+  },
+  "range-hood": {
+   "group": "住設",
+   "ja": "レンジフード",
+   "search": [
+    "レンジフード",
+    "換気扇",
+    "フード",
+    "排気"
+   ]
+  },
+  "cooking-appliance": {
+   "group": "住設",
+   "ja": "調理家電",
+   "search": [
+    "調理家電",
+    "オーブン",
+    "電子レンジ",
+    "レンジ",
+    "食洗機",
+    "食器洗い機",
+    "炊飯器",
+    "コーヒーメーカー"
+   ]
+  },
+  "kitchen-sink": {
+   "group": "住設",
+   "ja": "シンク",
+   "search": [
+    "シンク",
+    "流し",
+    "キッチンシンク"
+   ]
+  },
+  "refrigerator": {
+   "group": "住設",
+   "ja": "冷蔵庫",
+   "search": [
+    "冷蔵庫",
+    "冷凍庫",
+    "レイゾウコ"
+   ]
+  },
+  "bathtub": {
+   "group": "住設",
+   "ja": "浴槽",
+   "search": [
+    "浴槽",
+    "バスタブ",
+    "風呂",
+    "お風呂",
+    "湯船",
+    "ユニットバス"
+   ]
+  },
+  "shower": {
+   "group": "住設",
+   "ja": "シャワー・水栓",
+   "search": [
+    "シャワー",
+    "水栓",
+    "蛇口",
+    "混合栓",
+    "カラン"
+   ]
+  },
+  "vanity": {
+   "group": "住設",
+   "ja": "洗面化粧台",
+   "search": [
+    "洗面台",
+    "洗面化粧台",
+    "洗面",
+    "洗面ボウル",
+    "化粧台",
+    "手洗い"
+   ]
+  },
+  "toilet": {
+   "group": "住設",
+   "ja": "便器",
+   "search": [
+    "便器",
+    "トイレ",
+    "便所",
+    "ウォシュレット"
+   ]
+  },
+  "laundry": {
+   "group": "住設",
+   "ja": "洗濯・物干し",
+   "search": [
+    "洗濯機",
+    "洗濯",
+    "ランドリー",
+    "物干し",
+    "部屋干し",
+    "ランドリールーム"
+   ]
+  },
+  "shoe-storage": {
+   "group": "住設",
+   "ja": "玄関収納",
+   "search": [
+    "下駄箱",
+    "玄関収納",
+    "シューズボックス",
+    "靴箱",
+    "シューズクローク"
+   ]
+  },
+  "hvac": {
+   "group": "住設",
+   "ja": "空調",
+   "search": [
+    "エアコン",
+    "空調",
+    "冷暖房",
+    "シーリングファン",
+    "換気"
+   ]
+  },
+  "utility-equipment": {
+   "group": "住設",
+   "ja": "住宅設備機器",
+   "search": [
+    "室外機",
+    "エコキュート",
+    "給湯器",
+    "ヒートポンプ",
+    "貯湯タンク",
+    "メーター",
+    "点検蓋"
+   ]
+  },
+  "joinery-prop": {
+   "group": "住設",
+   "ja": "建具（モデル）",
+   "search": [
+    "ドア",
+    "扉",
+    "建具",
+    "窓",
+    "サッシ",
+    "室内ドア"
+   ]
+  },
+  "sofa": {
+   "group": "家具",
+   "ja": "ソファ",
+   "search": [
+    "ソファ",
+    "ソファー",
+    "カウチ",
+    "長椅子",
+    "くつろぐ",
+    "リビング"
+   ]
+  },
+  "chair": {
+   "group": "家具",
+   "ja": "チェア",
+   "search": [
+    "椅子",
+    "チェア",
+    "いす",
+    "ダイニングチェア",
+    "ラウンジチェア",
+    "スツール"
+   ]
+  },
+  "dining-table": {
+   "group": "家具",
+   "ja": "ダイニングテーブル",
+   "search": [
+    "ダイニングテーブル",
+    "食卓",
+    "テーブル",
+    "食事"
+   ]
+  },
+  "low-table": {
+   "group": "家具",
+   "ja": "ローテーブル",
+   "search": [
+    "ローテーブル",
+    "リビングテーブル",
+    "センターテーブル",
+    "座卓",
+    "サイドテーブル",
+    "ちゃぶ台"
+   ]
+  },
+  "desk": {
+   "group": "家具",
+   "ja": "デスク",
+   "search": [
+    "机",
+    "デスク",
+    "学習机",
+    "勉強机",
+    "書斎机",
+    "ワークデスク",
+    "ドレッサー",
+    "化粧台"
+   ]
+  },
+  "counter-table": {
+   "group": "家具",
+   "ja": "カウンターテーブル",
+   "search": [
+    "カウンターテーブル",
+    "カウンター",
+    "ハイテーブル",
+    "バーテーブル",
+    "立ち飲み"
+   ]
+  },
+  "table-set": {
+   "group": "家具",
+   "ja": "テーブルセット",
+   "search": [
+    "テーブルセット",
+    "ダイニングセット",
+    "食卓セット"
+   ]
+  },
+  "bed": {
+   "group": "家具",
+   "ja": "ベッド",
+   "search": [
+    "ベッド",
+    "寝台",
+    "寝る",
+    "寝室",
+    "ダブルベッド",
+    "シングルベッド"
+   ]
+  },
+  "bedding": {
+   "group": "家具",
+   "ja": "寝具",
+   "search": [
+    "マットレス",
+    "布団",
+    "ふとん",
+    "寝具",
+    "枕"
+   ]
+  },
+  "closet": {
+   "group": "家具",
+   "ja": "クローゼット",
+   "search": [
+    "クローゼット",
+    "ワードローブ",
+    "洋服だんす",
+    "収納",
+    "衣装"
+   ]
+  },
+  "cabinet": {
+   "group": "家具",
+   "ja": "キャビネット",
+   "search": [
+    "キャビネット",
+    "サイドボード",
+    "飾り棚",
+    "収納",
+    "リビング収納"
+   ]
+  },
+  "chest": {
+   "group": "家具",
+   "ja": "チェスト",
+   "search": [
+    "チェスト",
+    "タンス",
+    "たんす",
+    "引き出し",
+    "衣類収納"
+   ]
+  },
+  "shelf": {
+   "group": "家具",
+   "ja": "シェルフ",
+   "search": [
+    "棚",
+    "シェルフ",
+    "本棚",
+    "ラック",
+    "オープンシェルフ",
+    "書棚"
+   ]
+  },
+  "tv": {
+   "group": "家具",
+   "ja": "テレビ・AV",
+   "search": [
+    "テレビ",
+    "TV",
+    "モニター",
+    "テレビボード",
+    "AVボード"
+   ]
+  },
+  "appliance": {
+   "group": "家具",
+   "ja": "生活家電",
+   "search": [
+    "家電",
+    "掃除機",
+    "空気清浄機",
+    "扇風機",
+    "加湿器"
+   ]
+  },
+  "light": {
+   "group": "家具",
+   "ja": "照明",
+   "search": [
+    "照明",
+    "ランプ",
+    "ライト",
+    "間接照明",
+    "ペンダントライト",
+    "フロアランプ",
+    "スタンド"
+   ]
+  },
+  "curtain": {
+   "group": "家具",
+   "ja": "カーテン",
+   "search": [
+    "カーテン",
+    "ドレープ",
+    "レースカーテン",
+    "窓まわり"
+   ]
+  },
+  "roller-screen": {
+   "group": "家具",
+   "ja": "ロールスクリーン",
+   "search": [
+    "ロールスクリーン",
+    "ブラインド",
+    "シェード",
+    "目隠し",
+    "ロールカーテン"
+   ]
+  },
+  "rug": {
+   "group": "家具",
+   "ja": "ラグ・カーペット",
+   "search": [
+    "ラグ",
+    "カーペット",
+    "絨毯",
+    "じゅうたん",
+    "マット"
+   ]
+  },
+  "mirror": {
+   "group": "家具",
+   "ja": "ミラー",
+   "search": [
+    "鏡",
+    "ミラー",
+    "姿見"
+   ]
+  },
+  "wall-decor": {
+   "group": "家具",
+   "ja": "壁装飾",
+   "search": [
+    "絵画",
+    "アート",
+    "ポスター",
+    "壁掛け",
+    "時計",
+    "壁装飾"
+   ]
+  },
+  "decor": {
+   "group": "家具",
+   "ja": "小物・装飾",
+   "search": [
+    "小物",
+    "雑貨",
+    "置物",
+    "花瓶",
+    "装飾",
+    "生活感"
+   ]
+  },
+  "plant": {
+   "group": "家具",
+   "ja": "観葉植物",
+   "search": [
+    "植物",
+    "観葉植物",
+    "グリーン",
+    "鉢植え",
+    "プランツ"
+   ]
+  },
+  "kids": {
+   "group": "家具",
+   "ja": "キッズ",
+   "search": [
+    "キッズ",
+    "子供",
+    "こども",
+    "おもちゃ",
+    "子供部屋"
+   ]
+  },
+  "pet": {
+   "group": "家具",
+   "ja": "ペット",
+   "search": [
+    "ペット",
+    "犬",
+    "猫",
+    "ケージ"
+   ]
+  },
+  "gate-post": {
+   "group": "外構",
+   "ja": "門柱・ポスト",
+   "search": [
+    "門柱",
+    "ポスト",
+    "郵便受け",
+    "宅配ボックス",
+    "インターホン",
+    "表札",
+    "機能門柱"
+   ]
+  },
+  "deck": {
+   "group": "外構",
+   "ja": "デッキ・テラス",
+   "search": [
+    "ウッドデッキ",
+    "デッキ",
+    "テラス",
+    "縁側"
+   ]
+  },
+  "garden-plant": {
+   "group": "外構",
+   "ja": "庭木",
+   "search": [
+    "庭木",
+    "シンボルツリー",
+    "植栽",
+    "木",
+    "庭"
+   ]
+  },
+  "garden-equipment": {
+   "group": "外構",
+   "ja": "屋外設備",
+   "search": [
+    "立水栓",
+    "散水栓",
+    "水道",
+    "点検蓋",
+    "屋外設備"
+   ]
+  },
+  "fence": {
+   "group": "外構",
+   "ja": "フェンス・目隠し",
+   "search": [
+    "フェンス",
+    "目隠し",
+    "縦格子",
+    "格子",
+    "柵",
+    "境界"
+   ]
+  },
+  "other": {
+   "group": "家具",
+   "ja": "その他",
+   "search": []
+  }
+ },
+ "items": {
+  "custom-sofa-tailored": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-AirConditionerWall01": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "fmp-BathTub01": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.47,
+    "room": 1
+   }
+  },
+  "fmp-BathTub02": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 1
+   }
+  },
+  "fmp-BathTub03": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 1
+   }
+  },
+  "fmp-BathTub04": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 1
+   }
+  },
+  "fmp-BathTub05": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 1
+   }
+  },
+  "fmp-BathTub06": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 1
+   }
+  },
+  "fmp-BathTub07": {
+   "kind": "bathtub",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 1
+   }
+  },
+  "fmp-BathroomVanity01": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.4,
+    "room": 0.98
+   }
+  },
+  "fmp-BathroomVanity02": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.34,
+    "room": 0.96
+   }
+  },
+  "fmp-BathroomVanity03": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.97
+   }
+  },
+  "fmp-BathroomVanity04": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 0.98
+   }
+  },
+  "fmp-BathroomVanity05": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.36,
+    "room": 0.98
+   }
+  },
+  "fmp-BathroomVanity06": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 0.98
+   }
+  },
+  "fmp-BathroomVanity07": {
+   "kind": "vanity",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.42,
+    "room": 0.97
+   }
+  },
+  "fmp-Bed01": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed02": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed03": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed04": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed05": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed06": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed07": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed08": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed09": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed10": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed11": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed12": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed13": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed14": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed15": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed16": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed17": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed18": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed19": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed20": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed21": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed22": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed23": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed24": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed25": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed26": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed27": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed28": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed29": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Bed30": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed31": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed32": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed33": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed34": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Bed35": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed36": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed37": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed38": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed39": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed40": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed41": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed42": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed43": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed44": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed45": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed46": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed47": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed48": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Bed49": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Bed50": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetA01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.78,
+    "room": 1
+   }
+  },
+  "fmp-CabinetA02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.78,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetA03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.78,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetA04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.8,
+    "room": 1
+   }
+  },
+  "fmp-CabinetA05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 1
+   }
+  },
+  "fmp-CabinetA06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 1
+   }
+  },
+  "fmp-CabinetA07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.83,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetACorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.86,
+    "room": 1
+   }
+  },
+  "fmp-CabinetACorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.84,
+    "room": 1
+   }
+  },
+  "fmp-CabinetA_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.79,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-CabinetB01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.78,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetB02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetB03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.75,
+    "room": 1
+   }
+  },
+  "fmp-CabinetB04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetB05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 1
+   }
+  },
+  "fmp-CabinetB06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetB07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.79,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetBCorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-CabinetBCorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.82,
+    "room": 1
+   }
+  },
+  "fmp-CabinetB_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.81,
+    "mount": 0.95,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.82,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetC05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetC06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.78,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.8,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetCCorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-CabinetCCorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.88,
+    "room": 1
+   }
+  },
+  "fmp-CabinetC_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.96,
+    "room": 1
+   }
+  },
+  "fmp-CabinetD01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetD02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.83,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetD03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 1
+   }
+  },
+  "fmp-CabinetD04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.79,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetD05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.8,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetD06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.8,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetD07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.82,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetDCorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-CabinetDCorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-CabinetD_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.8,
+    "mount": 0.95,
+    "room": 1
+   }
+  },
+  "fmp-CabinetE01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 1
+   }
+  },
+  "fmp-CabinetE02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetE03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetE04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.75,
+    "room": 1
+   }
+  },
+  "fmp-CabinetE05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetE06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetE07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.75,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetECorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.82,
+    "room": 1
+   }
+  },
+  "fmp-CabinetECorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.9,
+    "room": 1
+   }
+  },
+  "fmp-CabinetE_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.96,
+    "room": 1
+   }
+  },
+  "fmp-CabinetF01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetF02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.78,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetF03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.78,
+    "room": 1
+   }
+  },
+  "fmp-CabinetF04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.73,
+    "room": 1
+   }
+  },
+  "fmp-CabinetF05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetF06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetF07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.71,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetFCorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.84,
+    "room": 1
+   }
+  },
+  "fmp-CabinetFCorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.87,
+    "room": 1
+   }
+  },
+  "fmp-CabinetF_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.74,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-CabinetG01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-CabinetG02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetG03": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.8,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetG04": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetG05": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetG06": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetG07": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.85,
+    "room": 0.99
+   }
+  },
+  "fmp-CabinetGCorner01": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.78,
+    "room": 1
+   }
+  },
+  "fmp-CabinetGCorner02": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.8,
+    "room": 1
+   }
+  },
+  "fmp-CabinetG_Sink": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.96,
+    "room": 1
+   }
+  },
+  "fmp-CeilingFan01": {
+   "kind": "hvac",
+   "mount": "ceiling",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.69
+   }
+  },
+  "fmp-Chair01": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.43
+   }
+  },
+  "fmp-Chair02": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.51
+   }
+  },
+  "fmp-Chair03": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.47
+   }
+  },
+  "fmp-Chair04": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.49
+   }
+  },
+  "fmp-Chair05": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.48
+   }
+  },
+  "fmp-Chair06": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.47
+   }
+  },
+  "fmp-Chair07": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.56
+   }
+  },
+  "fmp-Chair08": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.53
+   }
+  },
+  "fmp-Chair09": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair10": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.59
+   }
+  },
+  "fmp-Chair11": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "fmp-Chair12": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.59
+   }
+  },
+  "fmp-Chair13": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.5
+   }
+  },
+  "fmp-Chair14": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.61
+   }
+  },
+  "fmp-Chair15": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.52
+   }
+  },
+  "fmp-Chair16": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair17": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.51
+   }
+  },
+  "fmp-Chair18": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.53
+   }
+  },
+  "fmp-Chair19": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.55
+   }
+  },
+  "fmp-Chair20": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.59
+   }
+  },
+  "fmp-Chair21": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.57
+   }
+  },
+  "fmp-Chair22": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.6
+   }
+  },
+  "fmp-Chair23": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "fmp-Chair24": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.52
+   }
+  },
+  "fmp-Chair25": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.51
+   }
+  },
+  "fmp-Chair26": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.55
+   }
+  },
+  "fmp-Chair27": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair28": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair29": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.52
+   }
+  },
+  "fmp-Chair30": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.57
+   }
+  },
+  "fmp-Chair31": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair32": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair33": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.63
+   }
+  },
+  "fmp-Chair34": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "fmp-Chair35": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.62
+   }
+  },
+  "fmp-Chair36": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.55
+   }
+  },
+  "fmp-Chair37": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.5
+   }
+  },
+  "fmp-Chair38": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.56
+   }
+  },
+  "fmp-Chair39": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 1,
+    "room": 0.71
+   }
+  },
+  "fmp-Chair40": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 1,
+    "room": 0.68
+   }
+  },
+  "fmp-Chair41": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "fmp-Chair42": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.58
+   }
+  },
+  "fmp-Chair43": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.56
+   }
+  },
+  "fmp-Chair44": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.55
+   }
+  },
+  "fmp-Chair45": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.5
+   }
+  },
+  "fmp-Chair46": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.59
+   }
+  },
+  "fmp-Chair47": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.47
+   }
+  },
+  "fmp-Chair48": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "fmp-Chair49": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.59
+   }
+  },
+  "fmp-Chair50": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.64
+   }
+  },
+  "fmp-Closet01": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.44,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet02": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.48
+   }
+  },
+  "fmp-Closet03": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 0.51
+   }
+  },
+  "fmp-Closet04": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.4,
+    "room": 0.52
+   }
+  },
+  "fmp-Closet05": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet06": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 0.54
+   }
+  },
+  "fmp-Closet07": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.47
+   }
+  },
+  "fmp-Closet08": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.53
+   }
+  },
+  "fmp-Closet09": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.39,
+    "room": 0.5
+   }
+  },
+  "fmp-Closet10": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.55
+   }
+  },
+  "fmp-Closet11": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.47,
+    "room": 0.51
+   }
+  },
+  "fmp-Closet12": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.55
+   }
+  },
+  "fmp-Closet13": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.57
+   }
+  },
+  "fmp-Closet14": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.42,
+    "room": 0.52
+   }
+  },
+  "fmp-Closet15": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.49,
+    "room": 0.5
+   }
+  },
+  "fmp-Closet16": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.57
+   }
+  },
+  "fmp-Closet17": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 0.54
+   }
+  },
+  "fmp-Closet18": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet19": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.57
+   }
+  },
+  "fmp-Closet20": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.44,
+    "room": 0.6
+   }
+  },
+  "fmp-Closet21": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet22": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.53,
+    "room": 0.58
+   }
+  },
+  "fmp-Closet23": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.65
+   }
+  },
+  "fmp-Closet24": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 0.62
+   }
+  },
+  "fmp-Closet25": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.52
+   }
+  },
+  "fmp-Closet26": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 0.61
+   }
+  },
+  "fmp-Closet27": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.49,
+    "room": 0.63
+   }
+  },
+  "fmp-Closet28": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.61
+   }
+  },
+  "fmp-Closet29": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.39,
+    "room": 0.62
+   }
+  },
+  "fmp-Closet30": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.54
+   }
+  },
+  "fmp-Closet31": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.62,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet32": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.7,
+    "room": 0.62
+   }
+  },
+  "fmp-Closet33": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.55,
+    "room": 0.67
+   }
+  },
+  "fmp-Closet34": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.39,
+    "room": 0.56
+   }
+  },
+  "fmp-Closet35": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.63,
+    "room": 0.52
+   }
+  },
+  "fmp-Closet36": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.63
+   }
+  },
+  "fmp-Closet37": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 0.67
+   }
+  },
+  "fmp-Closet38": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 0.62
+   }
+  },
+  "fmp-Closet39": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.65,
+    "room": 0.6
+   }
+  },
+  "fmp-Closet40": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.5,
+    "room": 0.66
+   }
+  },
+  "fmp-Closet41": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.57,
+    "room": 0.64
+   }
+  },
+  "fmp-Closet42": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.61
+   }
+  },
+  "fmp-Closet43": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.55,
+    "room": 0.67
+   }
+  },
+  "fmp-Closet44": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 0.66
+   }
+  },
+  "fmp-Closet45": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.52,
+    "room": 0.61
+   }
+  },
+  "fmp-Closet46": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 0.6
+   }
+  },
+  "fmp-Closet47": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.64
+   }
+  },
+  "fmp-Closet48": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.47,
+    "room": 0.65
+   }
+  },
+  "fmp-Closet49": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.57,
+    "room": 0.63
+   }
+  },
+  "fmp-Closet50": {
+   "kind": "closet",
+   "mount": "builtin",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.61
+   }
+  },
+  "fmp-Curtain01": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.86,
+    "room": 0.25
+   }
+  },
+  "fmp-Curtain02": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.61,
+    "room": 0.56
+   }
+  },
+  "fmp-Drawer01": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.79,
+    "room": 0.39
+   }
+  },
+  "fmp-Drawer02": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.74,
+    "room": 0.58
+   }
+  },
+  "fmp-Drawer03": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.79,
+    "room": 0.48
+   }
+  },
+  "fmp-Drawer04": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.57,
+    "room": 0.38
+   }
+  },
+  "fmp-Drawer05": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.56,
+    "room": 0.44
+   }
+  },
+  "fmp-Drawer06": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.58,
+    "room": 0.48
+   }
+  },
+  "fmp-Drawer07": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.59,
+    "room": 0.47
+   }
+  },
+  "fmp-Drawer08": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.57,
+    "room": 0.44
+   }
+  },
+  "fmp-Drawer09": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.6,
+    "room": 0.5
+   }
+  },
+  "fmp-Drawer10": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.54,
+    "room": 0.54
+   }
+  },
+  "fmp-Drawer11": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.7,
+    "room": 0.53
+   }
+  },
+  "fmp-Drawer12": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.61,
+    "room": 0.53
+   }
+  },
+  "fmp-Drawer13": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.65,
+    "room": 0.51
+   }
+  },
+  "fmp-Drawer14": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.71,
+    "room": 0.57
+   }
+  },
+  "fmp-Drawer15": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.65,
+    "room": 0.55
+   }
+  },
+  "fmp-Drawer16": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.71,
+    "room": 0.61
+   }
+  },
+  "fmp-Drawer17": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.66,
+    "room": 0.57
+   }
+  },
+  "fmp-Drawer18": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.62,
+    "room": 0.54
+   }
+  },
+  "fmp-Drawer19": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.7,
+    "room": 0.59
+   }
+  },
+  "fmp-Drawer20": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.74,
+    "room": 0.59
+   }
+  },
+  "fmp-Drawer21": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.76,
+    "room": 0.6
+   }
+  },
+  "fmp-Drawer22": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.77,
+    "room": 0.56
+   }
+  },
+  "fmp-Drawer23": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.63,
+    "room": 0.59
+   }
+  },
+  "fmp-Drawer24": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.54,
+    "room": 0.57
+   }
+  },
+  "fmp-Drawer25": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.71,
+    "room": 0.54
+   }
+  },
+  "fmp-Drawer26": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.56,
+    "room": 0.45
+   }
+  },
+  "fmp-Drawer27": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.69,
+    "room": 0.54
+   }
+  },
+  "fmp-Drawer28": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.75,
+    "room": 0.58
+   }
+  },
+  "fmp-Drawer29": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.83,
+    "room": 0.53
+   }
+  },
+  "fmp-Drawer30": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.56,
+    "room": 0.44
+   }
+  },
+  "fmp-Drawer31": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.79,
+    "room": 0.4
+   }
+  },
+  "fmp-Drawer32": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.78,
+    "room": 0.33
+   }
+  },
+  "fmp-Drawer33": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.86,
+    "room": 0.55
+   }
+  },
+  "fmp-Drawer34": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.84,
+    "room": 0.61
+   }
+  },
+  "fmp-Drawer35": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.83,
+    "room": 0.33
+   }
+  },
+  "fmp-Drawer36": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.79,
+    "room": 0.32
+   }
+  },
+  "fmp-Drawer37": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.88,
+    "room": 0.55
+   }
+  },
+  "fmp-Drawer38": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.83,
+    "room": 0.51
+   }
+  },
+  "fmp-Drawer39": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.88,
+    "room": 0.51
+   }
+  },
+  "fmp-Drawer40": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.92,
+    "room": 0.5
+   }
+  },
+  "fmp-Drawer41": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.84,
+    "room": 0.55
+   }
+  },
+  "fmp-Drawer42": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.83,
+    "room": 0.58
+   }
+  },
+  "fmp-Drawer43": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.75,
+    "room": 0.43
+   }
+  },
+  "fmp-Drawer44": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.84,
+    "room": 0.58
+   }
+  },
+  "fmp-Drawer45": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.87,
+    "room": 0.49
+   }
+  },
+  "fmp-Drawer46": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.81,
+    "room": 0.5
+   }
+  },
+  "fmp-Drawer47": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.87,
+    "room": 0.35
+   }
+  },
+  "fmp-Drawer48": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.88,
+    "room": 0.54
+   }
+  },
+  "fmp-Drawer49": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.89,
+    "room": 0.57
+   }
+  },
+  "fmp-Drawer50": {
+   "kind": "chest",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.9,
+    "room": 0.62
+   }
+  },
+  "fmp-GardenTree01": {
+   "kind": "garden-plant",
+   "mount": "floor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.63,
+    "room": 0.8
+   }
+  },
+  "fmp-GasStove01": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.85,
+    "room": 1
+   }
+  },
+  "fmp-GasStove02": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-GasStove03": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.89,
+    "room": 1
+   }
+  },
+  "fmp-GasStove04": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.83,
+    "room": 1
+   }
+  },
+  "fmp-GasStove07": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.9,
+    "room": 1
+   }
+  },
+  "fmp-GatePost01": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.97
+   }
+  },
+  "fmp-KitchenExhaust01": {
+   "kind": "range-hood",
+   "mount": "wall",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.33,
+    "room": 0.99
+   }
+  },
+  "fmp-KitchenExhaust02": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.32,
+    "room": 0.98
+   }
+  },
+  "fmp-KitchenExhaust03": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.38,
+    "room": 0.98
+   }
+  },
+  "fmp-KitchenExhaust04": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.38,
+    "room": 0.99
+   }
+  },
+  "fmp-KitchenExhaust05": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.35,
+    "room": 0.98
+   }
+  },
+  "fmp-KitchenExhaust06": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.33,
+    "room": 0.98
+   }
+  },
+  "fmp-KitchenExhaust07": {
+   "kind": "range-hood",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.37,
+    "room": 0.98
+   }
+  },
+  "fmp-KitchenOven01": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven02": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven03": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.92,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven04": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.92,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven05": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.93,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven06": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.93,
+    "room": 1
+   }
+  },
+  "fmp-KitchenOven07": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-MicrowaveOven01": {
+   "kind": "cooking-appliance",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.4,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven02": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.37,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven03": {
+   "kind": "cooking-appliance",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.35,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven04": {
+   "kind": "cooking-appliance",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.37,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven05": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.41,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven06": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.68,
+    "room": 0.99
+   }
+  },
+  "fmp-MicrowaveOven07": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.41,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator01": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.53,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator02": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.65,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator03": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.64,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator04": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.61,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator05": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.59,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator06": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.57,
+    "room": 0.99
+   }
+  },
+  "fmp-Refrigerator07": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.46,
+    "room": 0.99
+   }
+  },
+  "fmp-RollerScreen01": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.76,
+    "room": 0.46
+   }
+  },
+  "fmp-RollerScreen02": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.82,
+    "room": 0.39
+   }
+  },
+  "fmp-RollerScreen03": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.78,
+    "room": 0.37
+   }
+  },
+  "fmp-RollerScreen04": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.75,
+    "room": 0.32
+   }
+  },
+  "fmp-RollerScreen05": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.8,
+    "room": 0.37
+   }
+  },
+  "fmp-RollerScreen06": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.73,
+    "room": 0.25
+   }
+  },
+  "fmp-ShowerSystem01": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.93
+   }
+  },
+  "fmp-ShowerSystem02": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 0.96
+   }
+  },
+  "fmp-ShowerSystem03": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.96
+   }
+  },
+  "fmp-ShowerSystem04": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.96
+   }
+  },
+  "fmp-ShowerSystem05": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.97
+   }
+  },
+  "fmp-ShowerSystem06": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.47,
+    "room": 0.97
+   }
+  },
+  "fmp-ShowerSystem07": {
+   "kind": "shower",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.43,
+    "room": 0.94
+   }
+  },
+  "fmp-Sink01": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.96,
+    "room": 0.99
+   }
+  },
+  "fmp-Sink02": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.95,
+    "room": 0.99
+   }
+  },
+  "fmp-Sink03": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.96,
+    "room": 0.99
+   }
+  },
+  "fmp-Sink04": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.94,
+    "room": 1
+   }
+  },
+  "fmp-Sink05": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.94,
+    "room": 0.99
+   }
+  },
+  "fmp-Sink06": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.95,
+    "room": 1
+   }
+  },
+  "fmp-Sink07": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.95,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa01": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa02": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa03": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa04": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa05": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Sofa06": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa07": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa08": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa09": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa10": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa11": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa12": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa13": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa14": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa15": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa16": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa17": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa18": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa19": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa20": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa21": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa22": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa23": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa24": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa25": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa26": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa27": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa28": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa29": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa30": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Sofa31": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa32": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa33": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa34": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa35": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa36": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa37": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Sofa38": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa39": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.97
+   }
+  },
+  "fmp-Sofa40": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa41": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.97
+   }
+  },
+  "fmp-Sofa42": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa43": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa44": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Sofa45": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa46": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.98
+   }
+  },
+  "fmp-Sofa47": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa48": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.95
+   }
+  },
+  "fmp-Sofa49": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "fmp-Sofa50": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "fmp-Table01": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.68,
+    "mount": 0.99,
+    "room": 0.74
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table02": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.7,
+    "mount": 0.99,
+    "room": 0.67
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table03": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.7,
+    "mount": 0.99,
+    "room": 0.74
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table04": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.99,
+    "room": 0.73
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table05": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.7,
+    "mount": 0.99,
+    "room": 0.72
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table06": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.56,
+    "mount": 0.99,
+    "room": 0.8
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table07": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.59,
+    "mount": 0.99,
+    "room": 0.76
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table08": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.61,
+    "mount": 0.99,
+    "room": 0.74
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table09": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.59,
+    "mount": 0.99,
+    "room": 0.77
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table10": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.67,
+    "mount": 0.99,
+    "room": 0.79
+   },
+   "review": [
+    "ローテーブル としては高さ 630mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table11": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.99,
+    "room": 0.73
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table12": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.99,
+    "room": 0.75
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table13": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.99,
+    "room": 0.75
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table14": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.99,
+    "room": 0.73
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table15": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.98,
+    "room": 0.72
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table16": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.99,
+    "room": 0.72
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table17": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.99,
+    "room": 0.75
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table18": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.84,
+    "mount": 0.98,
+    "room": 0.76
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table19": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.99,
+    "room": 0.75
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table20": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.99,
+    "room": 0.69
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table21": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.7,
+    "mount": 0.99,
+    "room": 0.72
+   },
+   "review": [
+    "ローテーブル としては高さ 631mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table22": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.99,
+    "room": 0.65
+   },
+   "review": [
+    "ローテーブル としては高さ 626mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table23": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.99,
+    "room": 0.66
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table24": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.98,
+    "room": 0.64
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table25": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.99,
+    "room": 0.64
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table26": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.85,
+    "mount": 0.99,
+    "room": 0.64
+   },
+   "review": [
+    "ローテーブル としては高さ 628mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table27": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.99,
+    "room": 0.69
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table28": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.99,
+    "room": 0.62
+   },
+   "review": [
+    "ローテーブル としては高さ 629mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table29": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.99,
+    "room": 0.58
+   },
+   "review": [
+    "ローテーブル としては高さ 616mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table30": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.76,
+    "mount": 0.99,
+    "room": 0.66
+   },
+   "review": [
+    "ローテーブル としては高さ 624mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table31": {
+   "kind": "counter-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.77
+   }
+  },
+  "fmp-Table32": {
+   "kind": "counter-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.99,
+    "room": 0.66
+   }
+  },
+  "fmp-Table33": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.98,
+    "room": 0.54
+   }
+  },
+  "fmp-Table34": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.98,
+    "room": 0.42
+   }
+  },
+  "fmp-Table35": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.98,
+    "room": 0.28
+   }
+  },
+  "fmp-Table36": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.42
+   }
+  },
+  "fmp-Table37": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.98,
+    "room": 0.29
+   }
+  },
+  "fmp-Table38": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.99,
+    "room": 0.45
+   }
+  },
+  "fmp-Table39": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.33
+   }
+  },
+  "fmp-Table40": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.32
+   }
+  },
+  "fmp-Table41": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.78,
+    "mount": 0.99,
+    "room": 0.64
+   },
+   "review": [
+    "ローテーブル としては高さ 617mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table42": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.8,
+    "mount": 0.99,
+    "room": 0.75
+   },
+   "review": [
+    "ローテーブル としては高さ 620mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table43": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.99,
+    "room": 0.65
+   },
+   "review": [
+    "ローテーブル としては高さ 625mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table44": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.99,
+    "room": 0.65
+   },
+   "review": [
+    "ローテーブル としては高さ 626mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table45": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.98,
+    "room": 0.35
+   }
+  },
+  "fmp-Table46": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.98,
+    "room": 0.39
+   }
+  },
+  "fmp-Table47": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.99,
+    "room": 0.59
+   }
+  },
+  "fmp-Table48": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.79,
+    "mount": 0.99,
+    "room": 0.7
+   },
+   "review": [
+    "ローテーブル としては高さ 623mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table49": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.81,
+    "mount": 0.99,
+    "room": 0.67
+   },
+   "review": [
+    "ローテーブル としては高さ 623mm が範囲外（0〜560mm）"
+   ]
+  },
+  "fmp-Table50": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.98,
+    "room": 0.57
+   }
+  },
+  "fmp-Toilet01": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 0.99
+   }
+  },
+  "fmp-Toilet02": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.62,
+    "room": 0.99
+   }
+  },
+  "fmp-Toilet03": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.58,
+    "room": 0.99
+   }
+  },
+  "fmp-Toilet04": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.58,
+    "room": 0.99
+   }
+  },
+  "fmp-Toilet05": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.6,
+    "room": 1
+   }
+  },
+  "fmp-Toilet06": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.53,
+    "room": 0.99
+   }
+  },
+  "fmp-Toilet07": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.59,
+    "room": 0.99
+   }
+  },
+  "fmp-WashBasin01": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.98
+   }
+  },
+  "fmp-WashBasin02": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 0.98
+   }
+  },
+  "fmp-WashBasin03": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 0.97
+   }
+  },
+  "fmp-WashBasin04": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.98
+   }
+  },
+  "fmp-WashBasin05": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.53,
+    "room": 0.98
+   }
+  },
+  "fmp-WashBasin06": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.4,
+    "room": 0.98
+   }
+  },
+  "fmp-WashBasin07": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.98
+   }
+  },
+  "fmp-WoodDeck01": {
+   "kind": "deck",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.97,
+    "room": 1
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.19,
+    "mount": 0.66,
+    "room": 0.87
+   },
+   "review": [
+    "確信が薄い (0.19)"
+   ]
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-349685_Frame_Gray": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.33,
+    "room": 0.96
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-382696_1_blue_frame": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.5,
+    "room": 0.97
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-453432": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.58,
+    "room": 0.98
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-4645451": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.54,
+    "room": 0.98
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-853444": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.51,
+    "room": 0.98
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-l933_all_in_one_washbasin_frame": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.42,
+    "room": 0.71
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-lower_cabinet": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.81,
+    "mount": 0.4,
+    "room": 0.93
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-lower_cabinet-732": {
+   "kind": "cabinet",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.42,
+    "room": 0.94
+   }
+  },
+  "im0261-Bath-MEGA_PACK_BATH-bath-minimal_point_open_upper_cabinet_frame": {
+   "kind": "cabinet",
+   "mount": "wall",
+   "room": "bath",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.87,
+    "room": 0.91
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-102432_Frame_Q_Brown": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-107329_Frame_CK": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-117851-3color": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-117944_Frame_Q_Maple": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-117944_Frame_Q_Teak": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-25333": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-43693": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-43694-43685": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-45539": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Bed-MEGA_PACK_BED-bed-99483": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-133299_frame_countyoffice": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.94,
+    "room": 0.31
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-143628_frame_1_naturalwood": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.97,
+    "room": 0.17
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.94,
+    "room": 0.17
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-154332_frame": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.97,
+    "room": 0.53
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.94,
+    "room": 0.26
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.8,
+    "mount": 0.97,
+    "room": 0.43
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-336846_frame": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.96,
+    "room": 0.3
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-354290_frame_walnut_brown": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.86,
+    "room": 0.2
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-65549": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.95,
+    "room": 0.37
+   }
+  },
+  "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.95,
+    "room": 0.31
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet--in-65uf.001": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.29
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-122712_Dark_Navy": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.41
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.32
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.36
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-27355_frame_botanical": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.51
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.36
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-345vxc34sdfv": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.31
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-49517_frame_mordencheck": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.32
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-77619_Frame_08": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.43
+   }
+  },
+  "im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000": {
+   "kind": "rug",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.4
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-185637": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.46
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-230409_frame_walnut": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.66
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.53
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.72
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-490755_frame_black": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.51
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-54418_Brown": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.6
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-545882_frame_walnut": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.71
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-84415_Frame_Black": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.48
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair-marketb_frame_900_black": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.99,
+    "room": 0.61
+   }
+  },
+  "im0261-Chair-MEGA_PACK_Chair-chair_142082_Frame_Orange": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.54
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-154085_Frame_Gray": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.63,
+    "room": 0.42
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 0.41
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-179264": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.56,
+    "room": 0.41
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-203701_yellow": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.49,
+    "room": 0.4
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-207554": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.55,
+    "room": 0.43
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-228569_check": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.59,
+    "room": 0.49
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-230615": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.63,
+    "room": 0.42
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-32084_Frame_Black": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.6,
+    "room": 0.47
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-45658": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.5,
+    "room": 0.41
+   }
+  },
+  "im0261-Curtain-MEGA_PACK_Curtain-curtain-47103_Frame_BlueNavy": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.59,
+    "room": 0.4
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-calder_incense_holder": {
+   "kind": "decor",
+   "mount": "tabletop",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.84
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-clock-116007_Frame_RoseGoldBlack": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.86,
+    "mount": 0.47,
+    "room": 0.51
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-clock-131686": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.37,
+    "room": 0.36
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-clock-68955_Frame_Black": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.55,
+    "room": 0.43
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-decor-63422_frame": {
+   "kind": "decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.34,
+    "mount": 0.48,
+    "room": 0.35
+   },
+   "review": [
+    "確信が薄い (0.34)"
+   ]
+  },
+  "im0261-Decor-MEGA_PACK_decor-decor-71718_Frame_NaturalWood": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.56,
+    "mount": 0.65,
+    "room": 0.49
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li": {
+   "kind": "decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.47,
+    "mount": 0.58,
+    "room": 0.26
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-decor-shop_the_look": {
+   "kind": "decor",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.71,
+    "mount": 0.6,
+    "room": 0.43
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-decor_698778_frame": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.46,
+    "mount": 0.69,
+    "room": 0.46
+   }
+  },
+  "im0261-Decor-MEGA_PACK_decor-defuser_Green": {
+   "kind": "decor",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.43,
+    "mount": 0.68,
+    "room": 0.51
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-Classroom-door-black": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.83,
+    "room": 0.69
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-Classroom-door-blue": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.8,
+    "room": 0.68
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-Classroom-door-grey": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.77,
+    "room": 0.79
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-Classroom-door-red": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.8,
+    "room": 0.57
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-Classroom-door-white": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.84,
+    "room": 0.71
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-ROUND-WHITE-DOOR-White": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.91,
+    "room": 0.62
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-door-305142_Black": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.86,
+    "room": 0.59
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-door-305142_White": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.85,
+    "room": 0.63
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-door-586242_White": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.81,
+    "room": 0.58
+   }
+  },
+  "im0261-Door-MEGA_PACK_door-door-837968_Gray": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.87,
+    "room": 0.53
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-19522_Frame_Orange": {
+   "kind": "appliance",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.45,
+    "mount": 0.47,
+    "room": 0.46
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-228738": {
+   "kind": "appliance",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.47,
+    "mount": 0.52,
+    "room": 0.44
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-267923": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.43,
+    "mount": 0.85,
+    "room": 0.27
+   },
+   "review": [
+    "いまの分類「家電」から外れた → 冷蔵庫"
+   ]
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-372697": {
+   "kind": "refrigerator",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.34,
+    "mount": 0.76,
+    "room": 0.41
+   },
+   "review": [
+    "いまの分類「家電」から外れた → 冷蔵庫",
+    "確信が薄い (0.34)"
+   ]
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-382616": {
+   "kind": "appliance",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.39,
+    "mount": 0.55,
+    "room": 0.39
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-477638_black_frame": {
+   "kind": "tv",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.3,
+    "mount": 0.36,
+    "room": 0.47
+   },
+   "review": [
+    "確信が薄い (0.3)"
+   ]
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-566595": {
+   "kind": "appliance",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.35,
+    "mount": 0.5,
+    "room": 0.39
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-79841_Frame_Black": {
+   "kind": "tv",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.38,
+    "mount": 0.6,
+    "room": 0.52
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic-80816_frame_white": {
+   "kind": "appliance",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.37,
+    "mount": 0.72,
+    "room": 0.32
+   }
+  },
+  "im0261-Electronic-MEGA_PACK_Electronic-electronic_230181": {
+   "kind": "appliance",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.64,
+    "mount": 0.68,
+    "room": 0.41
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-MULA": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.82,
+    "room": 0.99
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid-288079_frame_48inch": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.87,
+    "room": 0.97
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid-677431_Brown": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.91,
+    "room": 0.98
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid-919125": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.83,
+    "room": 0.95
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid-klappa_frame": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.83,
+    "room": 0.98
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid-lillabo_frame_wood": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.42,
+    "room": 0.98
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid_691953_Frame_Guliguli_Tiger": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.76,
+    "room": 0.99
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid_ADADA-ROCKING-HORSE_1": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.99
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-kid_Verve-Malibu-Ross": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.7,
+    "room": 0.98
+   }
+  },
+  "im0261-Kid-MEGA_PACK_kid-picnic_childrens_hut_aubergine": {
+   "kind": "kids",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.59,
+    "room": 0.92
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.45,
+    "mount": 0.76,
+    "room": 0.98
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic-383746": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.61,
+    "mount": 0.65,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic-423938_Frame_Metal": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.53,
+    "mount": 0.93,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic-553172_frame_black": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.52,
+    "mount": 0.57,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red": {
+   "kind": "cooking-appliance",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.89,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-electronic_1206268270_Frame": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.87,
+    "mount": 0.94,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-kitchen-171401_frame": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.94,
+    "room": 0.99
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_344313": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.86,
+    "room": 0.98
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_coffeebeangrinder": {
+   "kind": "cooking-appliance",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.92,
+    "room": 1
+   }
+  },
+  "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_kneader_Frame_red": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.46,
+    "mount": 0.59,
+    "room": 1
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-FLOWER-POT-VP3-1": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.39,
+    "room": 0.31
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.62,
+    "room": 0.62
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-13127_Frame_Black": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.38,
+    "room": 0.36
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-13171_Frame_GunMetal": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.29
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-244934_Frame_Black": {
+   "kind": "light",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.4,
+    "room": 0.56
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-25416": {
+   "kind": "light",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.4,
+    "room": 0.35
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-31085_2": {
+   "kind": "light",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 0.4
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-507702_frame_brown": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.6,
+    "room": 0.5
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame": {
+   "kind": "light",
+   "mount": "tabletop",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.52,
+    "room": 0.53
+   }
+  },
+  "im0261-Lamp-MEGA_PACK_lamp-lamp-58151_Orange": {
+   "kind": "light",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.48,
+    "room": 0.41
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-bed-120970_frame_ss_dark_gray": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.99,
+    "room": 0.97
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-easter_9_zone_independent_spring_mattress_Q": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 1,
+    "room": 0.95
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress-162155": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 1,
+    "room": 0.96
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress-162182_LQ_Ivory": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 1,
+    "room": 0.97
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress-324031_K": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 1,
+    "room": 0.95
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress-40418_Q": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 1,
+    "room": 0.96
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress-40418_SS": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 1,
+    "room": 0.97
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress_278434_K": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 1,
+    "room": 0.96
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress_29361_D": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 1,
+    "room": 0.96
+   }
+  },
+  "im0261-Mattress-MEGA_PACK_Mattress-mattress_bonnell_220t_mattress_SS": {
+   "kind": "bedding",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 1,
+    "room": 0.96
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-J-38-Dressing-Mirror": {
+   "kind": "mirror",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.79,
+    "room": 0.72
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-cabinet-79736_frame_oak": {
+   "kind": "mirror",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 0.65,
+    "mount": 0.56,
+    "room": 0.42
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.55,
+    "room": 0.76
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-325613_frame_natural": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.41,
+    "room": 0.7
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-337570_600_frame_red.001": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.54,
+    "room": 0.71
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-35799_410_frame_black": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.84,
+    "room": 0.43
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-459754_frame_natural": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.59,
+    "room": 0.61
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-498995_frame_light_brown": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.5,
+    "room": 0.79
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-69653_frame_silver": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.59,
+    "room": 0.49
+   }
+  },
+  "im0261-Mirror-MEGA_PACK_Mirror-mirror-70923_frame": {
+   "kind": "mirror",
+   "mount": "wall",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.73,
+    "room": 0.52
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.93,
+    "room": 0.44
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-decor-366937_frame_a3_champagne": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.91,
+    "room": 0.39
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-decor-449871_frame_red": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.92,
+    "room": 0.36
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-decor-476641_frame": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.92,
+    "room": 0.41
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-decor-680411_frame_364": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.95,
+    "room": 0.48
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-painting-152307_afishbowl_frame": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.89,
+    "room": 0.41
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.89,
+    "room": 0.32
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_29X42cm_WalnutWood": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.9,
+    "room": 0.35
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.93,
+    "room": 0.44
+   }
+  },
+  "im0261-Painting-MEGA_PACK_Painting-shelf-163148_frame_a2_black": {
+   "kind": "shelf",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.65,
+    "mount": 0.65,
+    "room": 0.24
+   },
+   "review": [
+    "いまの分類「絵画」から外れた → シェルフ"
+   ]
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-046_365": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.7,
+    "room": 0.47
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-16575673": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.79,
+    "room": 0.45
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-279131_white_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.65,
+    "room": 0.38
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-283245_1_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.84,
+    "room": 0.34
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-386854_1_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.81,
+    "room": 0.43
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-43005_Frame_Green": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.7,
+    "room": 0.33
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-46694_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.68,
+    "room": 0.35
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-566756_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.79,
+    "room": 0.35
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-61727_brown_frame": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.79,
+    "room": 0.27
+   }
+  },
+  "im0261-Pet-MEGA_PACK_Pet-pet-81869_frame_brown": {
+   "kind": "pet",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.91,
+    "mount": 0.84,
+    "room": 0.2
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.92,
+    "room": 0.29
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-143525_frame": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.76,
+    "room": 0.36
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-144523_frame": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.63,
+    "room": 0.35
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-151348_chocolate_frame": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 0.69,
+    "room": 0.29
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-169614": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.77,
+    "room": 0.4
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-230510": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.87,
+    "room": 0.37
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-317746": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.51,
+    "room": 0.33
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant-352597": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.6,
+    "room": 0.44
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant_133259": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.56,
+    "room": 0.36
+   }
+  },
+  "im0261-Plant-MEGA_PACK_Plant-plant_303563": {
+   "kind": "plant",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.5,
+    "room": 0.45
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-134459_frame_red": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.8,
+    "room": 0.32
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-157369": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.87,
+    "room": 0.33
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-161715": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.84,
+    "room": 0.55
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "storage",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.89,
+    "room": 0.3
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-282506_frame_red": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.86,
+    "room": 0.41
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-310090_frame_natural": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.89,
+    "room": 0.44
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.87,
+    "room": 0.31
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.86,
+    "room": 0.28
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-422943_frame_walnut_dark_gray": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.75,
+    "room": 0.34
+   }
+  },
+  "im0261-Shelf-MEGA_PACK_Shelf-shelf-609241_frame_merbau": {
+   "kind": "shelf",
+   "mount": "floor",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.7,
+    "room": 0.37
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-2-seater_fabric_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-2-seater_modular_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-4-seater_lounge_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-Alto_3.5_seater_Louvoir_Fabric_Sofa_blue": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-Artificial_leather_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-BOLIA_sofa_Ivory": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-Cotton_4-seater_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-EasyClean_Fabric_Sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "im0261-Sofa-MEGA_PACK_Sofa-Fabric_sofa_with_stool": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.99
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-Classic-Line-TB_229-5": {
+   "kind": "dining-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.51,
+    "mount": 0.98,
+    "room": 0.9
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-ENDLESS-TABLE_193": {
+   "kind": "dining-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.98,
+    "room": 0.86
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-pond_table-WOOD": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.8,
+    "room": 0.36
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-157282": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.82,
+    "mount": 0.94,
+    "room": 0.52
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-167288_frame_1190b_urbanacacia": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.93,
+    "room": 0.68
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-171562_frame_brown_800": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.97,
+    "room": 0.58
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-175980_frame_brown": {
+   "kind": "dining-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.92,
+    "mount": 0.98,
+    "room": 0.86
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-309959": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.95,
+    "room": 0.4
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-78393_frame_natural": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.78,
+    "mount": 0.98,
+    "room": 0.8
+   }
+  },
+  "im0261-Table-MEGA_PACK_Table-table-86358_frame_travertino_a600": {
+   "kind": "low-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.96,
+    "room": 0.6
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset-527276_frame_combination_chair_a_black": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.8,
+    "mount": 0.97,
+    "room": 0.97
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_402658_Frame_2BlueBenchGray": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.95,
+    "room": 0.95
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_442574_Frame_WhiteMarble": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.98,
+    "room": 0.98
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_456939_Frame_Walnutbrown": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.97,
+    "room": 0.98
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_462997": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.96,
+    "room": 0.95
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_488514": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.94,
+    "room": 0.96
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_489772_Frame_Brownivory": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.98,
+    "room": 0.95
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_494396": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.94,
+    "room": 0.93
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_539495": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.94,
+    "room": 0.94
+   }
+  },
+  "im0261-Tableset-MEGA_PACK_Tableset-tableset_614454_Frame_Walnut": {
+   "kind": "table-set",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.98,
+    "room": 0.96
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-101085_frame": {
+   "kind": "tv",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.35,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-123142": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.64,
+    "room": 0.96
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-126724_frame": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.3,
+    "room": 0.96
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-168789_frame": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.25,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-246603": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.28,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-263340": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.33,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-280915": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.37,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-280931": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.54,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-431112": {
+   "kind": "tv",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.47,
+    "room": 0.97
+   }
+  },
+  "im0261-Tv-MEGA_PACK_tv-electronic-46720": {
+   "kind": "tv",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.5,
+    "room": 0.96
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_305163_Frame_Black": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.99,
+    "room": 0.43
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_307079_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.98,
+    "room": 0.36
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_453365_Frame_Brown": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.97,
+    "room": 0.35
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_453365_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.96,
+    "room": 0.46
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_454283_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 1,
+    "room": 0.61
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_454305_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.99,
+    "room": 0.63
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_490267_Frame_Maple": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.99,
+    "room": 0.27
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_490267_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.99,
+    "room": 0.47
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_551669_Frame_Black": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.99,
+    "room": 0.38
+   }
+  },
+  "im0261-Wall-MEGA_PACK_wall-wall_551669_Frame_White": {
+   "kind": "wall-decor",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.99,
+    "room": 0.55
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_BlueGray": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.9,
+    "mount": 0.75,
+    "room": 0.46
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_Brown": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.69,
+    "room": 0.42
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_CharcoalGray": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.93,
+    "mount": 0.75,
+    "room": 0.53
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_CharcoalGray.001": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.74,
+    "room": 0.46
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-HOTEL-ROUND-WINDOW-Black": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.92,
+    "room": 0.32
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-PLAID-ROUND-WINDOW-Black": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.94,
+    "mount": 0.9,
+    "room": 0.39
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-shelf-33580-14": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.79,
+    "mount": 0.58,
+    "room": 0.43
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-window-33050_wood_frame": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.92,
+    "room": 0.37
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-window-3bf7.004": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.91,
+    "room": 0.48
+   }
+  },
+  "im0261-Window-MEGA_PACK_Window-wood_circle_window": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.95,
+    "mount": 0.95,
+    "room": 0.31
+   }
+  },
+  "original-ac-floor": {
+   "kind": "hvac",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.35
+   }
+  },
+  "original-ac-unit": {
+   "kind": "utility-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.96,
+    "room": 1
+   }
+  },
+  "original-ac-wall": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.33
+   }
+  },
+  "original-ac-wall-slim": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.63
+   }
+  },
+  "original-ac-wall-wide": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.92
+   }
+  },
+  "original-basket-blanket": {
+   "kind": "decor",
+   "mount": "floor",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 0.68,
+    "mount": 0.54,
+    "room": 0.33
+   }
+  },
+  "original-bath-dryer": {
+   "kind": "hvac",
+   "mount": "ceiling",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.97
+   }
+  },
+  "original-bathtub": {
+   "kind": "bathtub",
+   "mount": "builtin",
+   "room": "bath",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.72,
+    "room": 1
+   }
+  },
+  "original-bed": {
+   "kind": "bed",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "original-books-stack": {
+   "kind": "decor",
+   "mount": "tabletop",
+   "room": "study",
+   "confidence": {
+    "kind": 0.81,
+    "mount": 0.86,
+    "room": 0.65
+   }
+  },
+  "original-car-stop": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.89,
+    "mount": 0.99,
+    "room": 1
+   },
+   "review": [
+    "いまの分類「設備」から外れた → 屋外設備"
+   ]
+  },
+  "original-chair": {
+   "kind": "chair",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.97
+   }
+  },
+  "original-curtain-open-1300-long": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.67,
+    "room": 0.45
+   }
+  },
+  "original-curtain-open-1300-short": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.73,
+    "room": 0.49
+   }
+  },
+  "original-curtain-open-900-long": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.73,
+    "room": 0.4
+   }
+  },
+  "original-curtain-open-900-short": {
+   "kind": "curtain",
+   "mount": "wall",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.7,
+    "room": 0.28
+   }
+  },
+  "original-deck-1820": {
+   "kind": "deck",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.96
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → デッキ・テラス"
+   ]
+  },
+  "original-desk": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "kids",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.67
+   }
+  },
+  "original-desk-counter": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "study",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.68,
+    "room": 0.87
+   }
+  },
+  "original-desk-work": {
+   "kind": "desk",
+   "mount": "floor",
+   "room": "study",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 1
+   }
+  },
+  "original-door-flush": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.88,
+    "room": 0.75
+   }
+  },
+  "original-door-slit": {
+   "kind": "joinery-prop",
+   "mount": "wall",
+   "room": "toilet",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.87,
+    "room": 0.15
+   }
+  },
+  "original-drain-cover": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.75,
+    "mount": 0.9,
+    "room": 1
+   },
+   "review": [
+    "いまの分類「設備」から外れた → 屋外設備"
+   ]
+  },
+  "original-entry-column": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.92
+   }
+  },
+  "original-entry-tray": {
+   "kind": "decor",
+   "mount": "tabletop",
+   "room": "entry",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.63,
+    "room": 1
+   }
+  },
+  "original-fence-board": {
+   "kind": "fence",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.96
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → フェンス・目隠し"
+   ]
+  },
+  "original-fence-lattice": {
+   "kind": "fence",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → フェンス・目隠し"
+   ]
+  },
+  "original-garden-tap": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.88,
+    "room": 0.98
+   }
+  },
+  "original-gas-unit": {
+   "kind": "utility-equipment",
+   "mount": "wall",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.91
+   }
+  },
+  "original-heat-pump": {
+   "kind": "utility-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.85,
+    "room": 0.97
+   }
+  },
+  "original-kitchen-box-dishwasher450": {
+   "kind": "cooking-appliance",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.97,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-drawer450": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.97,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-drawer600": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.96,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-drawer750": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.98,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-drawer900": {
+   "kind": "kitchen-storage",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.96,
+    "mount": 0.97,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-hob750": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.83,
+    "mount": 0.98,
+    "room": 1
+   }
+  },
+  "original-kitchen-box-sink900": {
+   "kind": "kitchen-sink",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.59,
+    "mount": 0.95,
+    "room": 1
+   }
+  },
+  "original-kitchen-cooking": {
+   "kind": "cooktop",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.44,
+    "mount": 0.4,
+    "room": 0.99
+   }
+  },
+  "original-kitchen-gas2550": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.98
+   }
+  },
+  "original-kitchen-gas2550-no-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.92
+   }
+  },
+  "original-kitchen-i2100": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.95,
+    "room": 0.92
+   }
+  },
+  "original-kitchen-i2100-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.94,
+    "room": 0.98
+   }
+  },
+  "original-kitchen-i2400": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.94,
+    "room": 0.94
+   }
+  },
+  "original-kitchen-i2400-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.97,
+    "room": 0.97
+   }
+  },
+  "original-kitchen-i2550": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.97,
+    "room": 0.99
+   }
+  },
+  "original-kitchen-i2550-no-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.94
+   }
+  },
+  "original-kitchen-i2700": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.97
+   }
+  },
+  "original-kitchen-i2700-no-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.94,
+    "room": 0.93
+   }
+  },
+  "original-kitchen-island": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.59,
+    "room": 0.91
+   }
+  },
+  "original-kitchen-p2550-750": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.82
+   }
+  },
+  "original-kitchen-p2550-750-no-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.97,
+    "room": 0.88
+   }
+  },
+  "original-kitchen-p2550-970": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.83
+   }
+  },
+  "original-kitchen-p2550-970-no-dw": {
+   "kind": "kitchen-unit",
+   "mount": "builtin",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.97,
+    "room": 0.86
+   }
+  },
+  "original-laundry-cabinet": {
+   "kind": "laundry",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.79
+   }
+  },
+  "original-laundry-pole": {
+   "kind": "laundry",
+   "mount": "ceiling",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.36
+   }
+  },
+  "original-laundry-rail": {
+   "kind": "laundry",
+   "mount": "ceiling",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.39
+   }
+  },
+  "original-mailbox": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.96
+   }
+  },
+  "original-meter": {
+   "kind": "utility-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 1
+   }
+  },
+  "original-mug-tray": {
+   "kind": "decor",
+   "mount": "tabletop",
+   "room": "kitchen",
+   "confidence": {
+    "kind": 0.98,
+    "mount": 0.99,
+    "room": 0.56
+   }
+  },
+  "original-parcel-box": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.87,
+    "room": 0.84
+   }
+  },
+  "original-parcel-integrated-column": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.94
+   }
+  },
+  "original-parcel-pole-mounted": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.84,
+    "room": 0.85
+   }
+  },
+  "original-parcel-slim-column": {
+   "kind": "gate-post",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.95
+   }
+  },
+  "original-plant-desk": {
+   "kind": "plant",
+   "mount": "tabletop",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 0.52
+   }
+  },
+  "original-roller-open-1235": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.63,
+    "room": 0.33
+   }
+  },
+  "original-roller-open-1690": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.65,
+    "room": 0.3
+   }
+  },
+  "original-roller-open-780": {
+   "kind": "roller-screen",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 0.97,
+    "mount": 0.74,
+    "room": 0.25
+   }
+  },
+  "original-shoe-bridge": {
+   "kind": "shoe-storage",
+   "mount": "floor",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.72,
+    "room": 0.99
+   }
+  },
+  "original-shoe-counter": {
+   "kind": "shoe-storage",
+   "mount": "floor",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.53,
+    "room": 1
+   }
+  },
+  "original-shoe-tall": {
+   "kind": "shoe-storage",
+   "mount": "floor",
+   "room": "entry",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.92,
+    "room": 1
+   }
+  },
+  "original-shrub": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.99,
+    "room": 0.93
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-sideboard": {
+   "kind": "cabinet",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 0.88,
+    "mount": 1,
+    "room": 0.88
+   }
+  },
+  "original-sofa": {
+   "kind": "sofa",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "original-standpipe": {
+   "kind": "garden-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.92,
+    "room": 1
+   },
+   "review": [
+    "いまの分類「設備」から外れた → 屋外設備"
+   ]
+  },
+  "original-table": {
+   "kind": "dining-table",
+   "mount": "floor",
+   "room": "ldk",
+   "confidence": {
+    "kind": 1,
+    "mount": 1,
+    "room": 1
+   }
+  },
+  "original-tank": {
+   "kind": "utility-equipment",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.66,
+    "room": 0.94
+   }
+  },
+  "original-terrace-tile": {
+   "kind": "deck",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.95,
+    "room": 0.94
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → デッキ・テラス"
+   ]
+  },
+  "original-toilet": {
+   "kind": "toilet",
+   "mount": "floor",
+   "room": "toilet",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.37,
+    "room": 1
+   }
+  },
+  "original-tree-conifer": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.95,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-tree-deciduous": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.96,
+    "room": 0.91
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-tree-evergreen": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 0.99,
+    "mount": 0.95,
+    "room": 0.92
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-tree-symbol": {
+   "kind": "garden-plant",
+   "mount": "outdoor",
+   "room": "outdoor",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.98,
+    "room": 0.93
+   },
+   "review": [
+    "いまの分類「玄関・庭」から外れた → 庭木"
+   ]
+  },
+  "original-vanity": {
+   "kind": "vanity",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.45,
+    "room": 1
+   }
+  },
+  "original-vase-tall": {
+   "kind": "decor",
+   "mount": "tabletop",
+   "room": "washitsu",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.84,
+    "room": 0.88
+   }
+  },
+  "original-vent-register": {
+   "kind": "hvac",
+   "mount": "wall",
+   "room": "any",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.71,
+    "room": 0.34
+   }
+  },
+  "original-wardrobe": {
+   "kind": "closet",
+   "mount": "floor",
+   "room": "bedroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.99,
+    "room": 0.92
+   }
+  },
+  "original-washer-drum": {
+   "kind": "laundry",
+   "mount": "floor",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.85,
+    "room": 0.89
+   }
+  },
+  "original-washer-pan": {
+   "kind": "laundry",
+   "mount": "builtin",
+   "room": "washroom",
+   "confidence": {
+    "kind": 1,
+    "mount": 0.51,
+    "room": 0.81
+   }
+  }
+ }
+}

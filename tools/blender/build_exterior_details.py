@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from original_geometry import *
+from shape_kit import unwrap
 import json
 R=Path(__file__).resolve().parents[2]
 OUT=R/'assets/models/original';WORK=R/'tools/blender/work/original'
@@ -200,6 +201,19 @@ for key,name,wm,dm,hm in SPECS:
    bpy.ops.object.select_all(action='DESELECT')
    for o in group:o.select_set(True)
    bpy.context.view_layer.objects.active=group[0];bpy.ops.object.join()
+ # **UV層の無い部品を展開する。** 無いと、画面に素材の欄が出るのに柄が出ない
+ # (UVの無い面は同じ1点を参照するので単色になる)。立水栓の水受けボウルが
+ # これで、4,860三角形のうち3,324が1点に潰れていた。
+ # プリミティブや曲線から起こした部品は既にUVを持つので触らない。
+ # **層が「有る」だけでは足りない。** 立水栓の水受けボウルは UV層を持って
+ # いたが、全ての角が同じ1点を指していた(面積ゼロ)。層の有無ではなく
+ # 実際に面積があるかで見る。
+ for o in [o for o in bpy.context.scene.objects if o.type=='MESH']:
+  layer=o.data.uv_layers.active
+  if layer and len(layer.data):
+   us=[d.uv.x for d in layer.data];vs=[d.uv.y for d in layer.data]
+   if (max(us)-min(us))*(max(vs)-min(vs))>1e-9:continue
+  unwrap(o)
  bpy.ops.export_scene.gltf(filepath=str(OUT/(ident+'.glb')),export_format='GLB',export_apply=True,export_extras=True)
  print('EXTERIOR',ident,flush=True)
 items=[]

@@ -1,0 +1,243 @@
+{
+  "items": [
+    {
+      "id": "original-tree-symbol",
+      "name": "シンボルツリー（高木・落葉）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-symbol.glb",
+      "thumb": "assets/models/previews-v2/original-tree-symbol-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-symbol-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 2000,
+      "d": 2000,
+      "h": 4000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-evergreen",
+      "name": "中木（常緑・目隠し・株立ち）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-evergreen.glb",
+      "thumb": "assets/models/previews-v2/original-tree-evergreen-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-evergreen-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1200,
+      "d": 1200,
+      "h": 2200,
+      "front": "+Z"
+    },
+    {
+      "id": "original-shrub",
+      "name": "低木・下草（まとまり）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-shrub.glb",
+      "thumb": "assets/models/previews-v2/original-shrub-thumb.png",
+      "top": "assets/models/previews-v2/original-shrub-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 500,
+      "front": "+Z"
+    },
+    {
+      "id": "original-deck-1820",
+      "name": "ウッドデッキ（1間×半間）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-deck-1820.glb",
+      "thumb": "assets/models/previews-v2/original-deck-1820-thumb.png",
+      "top": "assets/models/previews-v2/original-deck-1820-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 910,
+      "h": 450,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "デッキ材"
+        }
+      ]
+    },
+    {
+      "id": "original-terrace-tile",
+      "name": "タイルテラス（600角×9枚）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-terrace-tile.glb",
+      "thumb": "assets/models/previews-v2/original-terrace-tile-thumb.png",
+      "top": "assets/models/previews-v2/original-terrace-tile-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 1820,
+      "h": 150,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "stone",
+          "label": "タイル"
+        }
+      ]
+    },
+    {
+      "id": "original-fence-lattice",
+      "name": "縦格子フェンス（1スパン）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-lattice.glb",
+      "thumb": "assets/models/previews-v2/original-fence-lattice-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-lattice-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 60,
+      "h": 1800,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "格子"
+        }
+      ]
+    },
+    {
+      "id": "original-car-stop",
+      "name": "駐車場の車止め",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-car-stop.glb",
+      "thumb": "assets/models/previews-v2/original-car-stop-thumb.png",
+      "top": "assets/models/previews-v2/original-car-stop-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 600,
+      "d": 100,
+      "h": 100,
+      "front": "+Z"
+    },
+    {
+      "id": "original-standpipe",
+      "name": "屋外水栓（立水栓・パン付き）",
+      "group": "外構",
+      "category": "設備",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-standpipe.glb",
+      "thumb": "assets/models/previews-v2/original-standpipe-thumb.png",
+      "top": "assets/models/previews-v2/original-standpipe-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 300,
+      "d": 300,
+      "h": 900,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "柱・水栓金具"
+        }
+      ]
+    },
+    {
+      "id": "original-tree-deciduous",
+      "name": "株立ちの落葉樹（ヤマボウシ）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-deciduous.glb",
+      "thumb": "assets/models/previews-v2/original-tree-deciduous-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-deciduous-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1600,
+      "d": 1600,
+      "h": 3000,
+      "front": "+Z"
+    },
+    {
+      "id": "original-tree-conifer",
+      "name": "針葉樹（コニファー）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-tree-conifer.glb",
+      "thumb": "assets/models/previews-v2/original-tree-conifer-thumb.png",
+      "top": "assets/models/previews-v2/original-tree-conifer-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 900,
+      "d": 900,
+      "h": 1800,
+      "front": "+Z"
+    },
+    {
+      "id": "original-fence-board",
+      "name": "横板の板塀（高さ1200）",
+      "group": "外構",
+      "category": "玄関・庭",
+      "sourceFolder": "BlenderOriginal",
+      "provenance": "original",
+      "builder": "tools/blender/build_garden.py",
+      "model": "assets/models/original/original-fence-board.glb",
+      "thumb": "assets/models/previews-v2/original-fence-board-thumb.png",
+      "top": "assets/models/previews-v2/original-fence-board-top.png",
+      "previewVersion": 2,
+      "groundLevel": true,
+      "defaultElevation": 0,
+      "w": 1820,
+      "d": 40,
+      "h": 1200,
+      "front": "+Z",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "label": "板"
+        }
+      ]
+    }
+  ]
+}

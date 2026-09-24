@@ -50,8 +50,47 @@ echo "Build complete: dist/"
 ls -lh dist/index.html
 du -sh dist/
 check_cloudflare_asset_sizes
-if [ "${SKIP_DEPLOY:-0}" = "1" ]; then
-  echo "Skipping deploy because SKIP_DEPLOY=1"
+
+# **ここでは配信しない。ビルドするだけ。**
+#
+# 以前は末尾で `npx wrangler deploy` を実行し、SKIP_DEPLOY=1 を付けたときだけ
+# 止まる形だった。つまり「ビルドを確かめよう」と思って `bash build.sh` と
+# 打つと、そのまま本番が入れ替わった。実際、検証のつもりで実行して本番を
+# 差し替える事故が起きている。
+#
+# **既定を逆にする。** 名前が build なら build しかしない。配信は
+# tools/deploy.sh という別の名前の、別の操作にする。
+#
+# ただし **Workers Builds(Gitからの自動デプロイ)だけは例外**にする。
+#
+# main の deploy command は Cloudflare のダッシュボードにあり、リポジトリから
+# 読めない。記録では `bash build.sh` が設定されている（docs のメモ）。もし
+# そうなら、ここから配信を抜くと **main にマージしても本番が更新されなく
+# なる**。黙って止まるのがいちばん困るので、CI からの実行だけは通す。
+#
+# 見分け方は WORKERS_CI。Cloudflare Workers Builds が自分で入れる環境変数で、
+# 手元にもエージェントにも無い。加えて、ビルド段階
+# (`[build] command = "SKIP_DEPLOY=1 bash build.sh"`)では配信しない——
+# あそこは dist/ を作らせるためだけの呼び出しである。
+#
+#   ビルド段階(CI)   WORKERS_CI=1, SKIP_DEPLOY=1 → 作るだけ
+#   配信段階(CI)     WORKERS_CI=1               → 配信する
+#   手元・エージェント  WORKERS_CI 無し            → 作るだけ
+# Cloudflare がこの変数の名前を変えたら、ここは**黙って配信しなくなる**。
+# 本番が更新されないのに誰も気づかないのがいちばん困るので、CI なのに配信
+# しない状況はビルドログへ必ず出す。CI=true も Workers Builds が既定で
+# 入れる(公式ドキュメント「Default variables」)。
+if [ "${CI:-}" = "true" ] && [ -z "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
+  echo "!!! CI で動いているのに Workers Builds の印がありません。配信しません。"
+  echo "!!! ビルド環境の変数が変わった可能性があります。build.sh を確認してください。"
+fi
+
+if [ -n "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
+  echo "Workers Builds からの実行です。配信します。"
+  npx wrangler deploy
   exit 0
 fi
-npx wrangler deploy
+
+echo
+echo "dist/ を作りました。**本番には出していません。**"
+echo "本番へ出すときは: bash tools/deploy.sh"

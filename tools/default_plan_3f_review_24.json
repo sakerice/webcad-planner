@@ -1,0 +1,1824 @@
+{
+ "collections": {
+  "walls": [],
+  "rooms": [],
+  "items": [
+   {
+    "before": {
+     "id": 1132,
+     "type": "custom-block",
+     "x": 2400,
+     "y": 9100,
+     "w": 1200,
+     "d": 900,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#b9b8b4",
+     "colorCustom": true,
+     "customHeight": 20,
+     "name": "アプローチ",
+     "texture": "porch_tile"
+    },
+    "after": {
+     "id": 1132,
+     "type": "custom-block",
+     "x": -60,
+     "y": 8250,
+     "w": 3680,
+     "d": 1480,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#b9b8b4",
+     "colorCustom": true,
+     "customHeight": 20,
+     "name": "アプローチ",
+     "texture": "porch_tile",
+     "elev": 0,
+     "stack": -1
+    }
+   },
+   {
+    "before": {
+     "id": 1047,
+     "type": "window-door",
+     "x": 505,
+     "y": 8110,
+     "w": 1690,
+     "d": 180,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#000000",
+     "colorCustom": true,
+     "windowStd": "16520",
+     "windowKind": "sliding",
+     "windowSill": 0,
+     "windowHeight": 2030,
+     "sashColor": "#1c1c1c",
+     "doorOpenState": "closed"
+    },
+    "after": {
+     "id": 1047,
+     "type": "window-door",
+     "x": 559.9999999999999,
+     "y": 7775,
+     "w": 1690,
+     "d": 180,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#000000",
+     "colorCustom": true,
+     "windowStd": "16520",
+     "windowKind": "sliding",
+     "windowSill": 0,
+     "windowHeight": 2030,
+     "sashColor": "#1c1c1c",
+     "doorOpenState": "closed"
+    }
+   },
+   {
+    "before": {
+     "id": 1129,
+     "type": "lattice-screen",
+     "x": 200,
+     "y": 9770,
+     "w": 2400,
+     "d": 60,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#8B5E3C",
+     "colorCustom": true,
+     "latticeHeight": 1500,
+     "fencePattern": "vertical",
+     "fenceTopStyle": "even"
+    },
+    "after": {
+     "id": 1129,
+     "type": "lattice-screen",
+     "x": -10,
+     "y": 9010.25,
+     "w": 3590,
+     "d": 89.75,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#8B5E3C",
+     "colorCustom": true,
+     "latticeHeight": 2500,
+     "fencePattern": "vertical",
+     "fenceTopStyle": "even",
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1133,
+     "type": "fmp-GatePost01",
+     "x": 4800,
+     "y": 10250,
+     "w": 400,
+     "d": 200,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1133,
+     "type": "fmp-GatePost01",
+     "x": 5460,
+     "y": 9800,
+     "w": 400,
+     "d": 200,
+     "rot": 180,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1134,
+     "type": "bicycle",
+     "x": 410,
+     "y": 9225,
+     "w": 580,
+     "d": 1850,
+     "rot": 90,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#a8b4c4",
+     "colorCustom": true
+    },
+    "after": {
+     "id": 1134,
+     "type": "bicycle",
+     "x": 605,
+     "y": 8515,
+     "w": 580,
+     "d": 1850,
+     "rot": 90,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#a8b4c4",
+     "colorCustom": true,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1135,
+     "type": "bicycle-fold",
+     "x": 2325,
+     "y": 9425,
+     "w": 550,
+     "d": 1450,
+     "rot": 90,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#d8a878",
+     "colorCustom": true
+    },
+    "after": {
+     "id": 1135,
+     "type": "bicycle-fold",
+     "x": 2400,
+     "y": 8700,
+     "w": 550,
+     "d": 1450,
+     "rot": 90,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": "#d8a878",
+     "colorCustom": true,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1144,
+     "type": "fmp-AirConditionerWall01",
+     "x": -209.99999999999991,
+     "y": 5070,
+     "w": 800,
+     "d": 260,
+     "rot": 270,
+     "floor": 2,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 2050,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1144,
+     "type": "fmp-AirConditionerWall01",
+     "x": -209.99999999999991,
+     "y": 5274.410467942846,
+     "w": 800,
+     "d": 260,
+     "rot": 270,
+     "floor": 2,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 2050,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    }
+   },
+   {
+    "before": {
+     "id": 1154,
+     "type": "fmp-BathTub03",
+     "x": -189.5,
+     "y": 532.5,
+     "w": 1179,
+     "d": 535,
+     "rot": 270,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1154,
+     "type": "fmp-BathTub03",
+     "x": -241.99999999999997,
+     "y": 397.00000000000006,
+     "w": 1179,
+     "d": 535,
+     "rot": 270,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1157,
+     "type": "fmp-BathroomVanity07",
+     "x": 2259,
+     "y": 87,
+     "w": 682,
+     "d": 426,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1157,
+     "type": "fmp-BathroomVanity07",
+     "x": 2340,
+     "y": 70,
+     "w": 682,
+     "d": 426,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFacingVersion": 1,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1158,
+     "type": "fmp-WashBasin01",
+     "x": 2278,
+     "y": 82.5,
+     "w": 644,
+     "d": 435,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 695,
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1158,
+     "type": "fmp-WashBasin01",
+     "x": 2365,
+     "y": 50.5,
+     "w": 644,
+     "d": 435,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 695,
+     "modelFacingVersion": 1
+    }
+   },
+   {
+    "before": {
+     "id": 1162,
+     "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     "x": 125,
+     "y": 1880,
+     "w": 750,
+     "d": 300,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 1600,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1162,
+     "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     "x": 170.99999999999994,
+     "y": 1880,
+     "w": 750,
+     "d": 300,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 1600,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1,
+     "finishTextures": {
+      "body": "wood_cedar"
+     }
+    }
+   },
+   {
+    "before": {
+     "id": 1163,
+     "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     "x": 915,
+     "y": 1880,
+     "w": 750,
+     "d": 300,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 1600,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1163,
+     "type": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+     "x": 920.9999999999999,
+     "y": 1880,
+     "w": 750,
+     "d": 300,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "elev": 1600,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1,
+     "finishTextures": {
+      "body": "wood_cedar"
+     }
+    }
+   },
+   {
+    "before": {
+     "id": 1164,
+     "type": "original-laundry-cabinet",
+     "x": 460,
+     "y": 1880,
+     "w": 900,
+     "d": 500,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1164,
+     "type": "original-laundry-cabinet",
+     "x": 460,
+     "y": 1880,
+     "w": 900,
+     "d": 500,
+     "rot": 0,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1,
+     "elev": 0,
+     "finishTextures": {
+      "wood": "wood_oak"
+     }
+    }
+   },
+   {
+    "before": {
+     "id": 1165,
+     "type": "im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray",
+     "x": 479,
+     "y": 3229,
+     "w": 442,
+     "d": 342,
+     "rot": 180,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1
+    },
+    "after": {
+     "id": 1165,
+     "type": "im0261-Bath-MEGA_PACK_BATH-basket-304967-Gray",
+     "x": 1875,
+     "y": 60.00000000000006,
+     "w": 442,
+     "d": 342,
+     "rot": 360,
+     "floor": 1,
+     "flipX": false,
+     "flipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "color": null,
+     "colorCustom": false,
+     "modelFrontAxis": "+Z",
+     "modelFacingVersion": 1,
+     "elev": 0
+    }
+   },
+   {
+    "before": {
+     "id": 1269,
+     "type": "original-shoe-bridge",
+     "x": 3005,
+     "y": 6140,
+     "rot": -90,
+     "floor": 1,
+     "modelFacingVersion": 1,
+     "w": 1800,
+     "d": 410,
+     "color": null,
+     "flipX": false,
+     "flipY": false,
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "elev": 0,
+     "fmpId": "original-shoe-bridge",
+     "colorCustom": false,
+     "showMirror": true,
+     "modelFrontAxis": "+Z"
+    },
+    "after": {
+     "id": 1269,
+     "type": "original-shoe-bridge",
+     "x": 3005,
+     "y": 6140,
+     "rot": -90,
+     "floor": 1,
+     "modelFacingVersion": 1,
+     "w": 1800,
+     "d": 410,
+     "color": null,
+     "flipX": false,
+     "flipY": false,
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "sScale": 1,
+     "sX": 0,
+     "sY": 0,
+     "elev": 0,
+     "fmpId": "original-shoe-bridge",
+     "colorCustom": false,
+     "showMirror": true,
+     "modelFrontAxis": "+Z",
+     "finishTextures": {
+      "body": "wood_oak"
+     }
+    }
+   }
+  ]
+ },
+ "metadata": {
+  "exteriorDetail": {
+   "gutters": true,
+   "gutterColor": "#2B2B2B"
+  },
+  "exteriorWallSettings": {
+   "whole": {
+    "color": "#F2F0EB",
+    "texture": "plaster_white",
+    "textureFlipX": false,
+    "textureFlipY": false,
+    "linked": false
+   },
+   "floors": {
+    "1": {
+     "color": "#3A3D40",
+     "texture": "galvalume_dark",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "2": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "3": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "4": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    }
+   },
+   "walls": {
+    "1002": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1003": {
+     "color": "#3A3D40",
+     "texture": "galvalume_dark",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1004": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1005": {
+     "color": "#8B5E3C",
+     "texture": "wood_cedar",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1006": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1053": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1054": {
+     "color": "#3A3D40",
+     "texture": "galvalume_dark",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1055": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1056": {
+     "color": "#8B5E3C",
+     "texture": "wood_cedar",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1057": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1090": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1091": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1092": {
+     "color": "#F2F0EB",
+     "texture": "plaster_white",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1093": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1094": {
+     "color": "#3A3D40",
+     "texture": "galvalume_dark",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1095": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1096": {
+     "color": "#8B5E3C",
+     "texture": "wood_cedar",
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1097": {
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    }
+   },
+   "faces": {}
+  },
+  "floorMetadata": {
+   "1": {
+    "role": "residential",
+    "occupiable": true
+   },
+   "2": {
+    "role": "residential",
+    "occupiable": true
+   },
+   "3": {
+    "role": "residential",
+    "occupiable": true
+   },
+   "4": {
+    "role": "roof",
+    "occupiable": false
+   }
+  },
+  "interiorWallSettings": {
+   "whole": {
+    "color": "#EFEDE7",
+    "texture": "wall_int",
+    "textureFlipX": false,
+    "textureFlipY": false,
+    "linked": false
+   },
+   "floors": {
+    "1": {
+     "color": "#EFEDE7",
+     "texture": "wall_int",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "2": {
+     "color": "#EFEDE7",
+     "texture": "wall_int",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "3": {
+     "color": "#EFEDE7",
+     "texture": "wall_int",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    },
+    "4": {
+     "color": "#EFEDE7",
+     "texture": "wall_int",
+     "textureFlipX": false,
+     "textureFlipY": false,
+     "linked": false
+    }
+   },
+   "faces": {
+    "1002_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1002_1_1820_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1002_1_3640_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1002_1_4550_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1003_1_0_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1004_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1004_-1_2730_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1005_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1006_1_0_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1006_1_4550_6370": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1006_1_6370_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1007_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1007_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1008_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1008_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1009_-1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1009_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1009_1_1820_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_-1_1820_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_1_1820_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_-1_3640_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1010_1_2730_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1011_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1011_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1012_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1012_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1013_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1013_-1_1820_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1013_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1013_-1_2730_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1013_1_2730_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1014_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1014_1_0_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1014_-1_1820_4550": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1015_-1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1015_1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1016_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1016_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1053_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1053_1_2730_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1053_1_3640_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1054_1_0_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1055_-1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1056_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1057_1_0_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1057_1_5460_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1058_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1058_-1_1820_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1058_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1059_-1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1059_1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1060_-1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1060_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1060_1_1820_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1060_1_2730_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1061_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1061_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1062_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1062_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1063_-1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1063_1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1093_1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1093_1_3640_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1094_1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1094_1_3640_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1094_1_5460_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1095_-1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1096_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1097_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1097_1_2730_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1097_1_5460_8190": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1098_-1_0_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1098_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1098_1_2730_5460": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1099_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1099_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1100_-1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1100_1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1101_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1101_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1102_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1102_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1103_-1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1103_1_0_2730": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1104_-1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1104_1_0_910": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1105_-1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1105_1_0_1820": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1090_-1_0_3640": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1090_-1_0_60": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1090_-1_60_3700": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "1090_-1_3700_3760": {
+     "mode": "inherit",
+     "color": null,
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    }
+   }
+  },
+  "planFixes": {
+   "outdoorCeilingFixtureElev": 1,
+   "ceilingFixtureElev": 1
+  },
+  "roofAppearance": {
+   "whole": {
+    "linked": true,
+    "color": "#2B2B2B",
+    "texture": null,
+    "textureFlipX": false,
+    "textureFlipY": false
+   },
+   "floors": {
+    "1": {
+     "linked": false,
+     "color": "#2a2a30",
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "2": {
+     "linked": false,
+     "color": "#2a2a30",
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "3": {
+     "linked": false,
+     "color": "#2a2a30",
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    },
+    "4": {
+     "linked": false,
+     "color": "#2a2a30",
+     "texture": null,
+     "textureFlipX": false,
+     "textureFlipY": false
+    }
+   }
+  },
+  "viewState": {
+   "twoD": {
+    "zoom": 2.3590486896045495,
+    "panX": 221.3095723088618,
+    "panY": -167.53926251363805
+   },
+   "ext": null,
+   "int": {
+    "pos": [
+     9.579384094762197,
+     25.221215163331163,
+     14.012291785343006
+    ],
+    "target": [
+     2.7299999999999995,
+     0.6299999999999999,
+     4.095
+    ]
+   }
+  }
+ },
+ "order": {
+  "walls": [
+   1002,
+   1003,
+   1004,
+   1005,
+   1006,
+   1007,
+   1008,
+   1009,
+   1010,
+   1011,
+   1012,
+   1013,
+   1014,
+   1015,
+   1016,
+   1053,
+   1054,
+   1055,
+   1056,
+   1057,
+   1058,
+   1059,
+   1060,
+   1061,
+   1062,
+   1063,
+   1090,
+   1091,
+   1092,
+   1093,
+   1094,
+   1095,
+   1096,
+   1097,
+   1098,
+   1099,
+   1100,
+   1101,
+   1102,
+   1103,
+   1104,
+   1105
+  ],
+  "rooms": [
+   "r1017",
+   "r1018",
+   "r1019",
+   "r1020",
+   "r1021",
+   "r1022",
+   "r1023",
+   "r1024",
+   "r1025",
+   "r1026",
+   "r1027",
+   "r1064",
+   "r1065",
+   "r1066",
+   "r1067",
+   "r1068",
+   "r1069",
+   "r1070",
+   "r1071",
+   "r1106",
+   "r1107",
+   "r1108",
+   "r1109"
+  ],
+  "items": [
+   1001,
+   1132,
+   1028,
+   1029,
+   1030,
+   1031,
+   1032,
+   1033,
+   1034,
+   1035,
+   1037,
+   1038,
+   1039,
+   1040,
+   1041,
+   1042,
+   1043,
+   1044,
+   1045,
+   1046,
+   1047,
+   1048,
+   1049,
+   1050,
+   1051,
+   1052,
+   1072,
+   1073,
+   1074,
+   1075,
+   1076,
+   1077,
+   1078,
+   1079,
+   1080,
+   1081,
+   1082,
+   1083,
+   1084,
+   1085,
+   1086,
+   1087,
+   1088,
+   1089,
+   1110,
+   1111,
+   1112,
+   1113,
+   1114,
+   1115,
+   1116,
+   1117,
+   1118,
+   1119,
+   1120,
+   1121,
+   1122,
+   1123,
+   1124,
+   1126,
+   1127,
+   1128,
+   1129,
+   1130,
+   1131,
+   1133,
+   1134,
+   1135,
+   1136,
+   1137,
+   1138,
+   1139,
+   1140,
+   1141,
+   1142,
+   1143,
+   1144,
+   1145,
+   1146,
+   1147,
+   1148,
+   1149,
+   1150,
+   1151,
+   1152,
+   1153,
+   1154,
+   1155,
+   1157,
+   1158,
+   1160,
+   1161,
+   1162,
+   1163,
+   1164,
+   1165,
+   1169,
+   1171,
+   1172,
+   1173,
+   1176,
+   1181,
+   1182,
+   1183,
+   1184,
+   1185,
+   1186,
+   1187,
+   1188,
+   1189,
+   1190,
+   1191,
+   1195,
+   1197,
+   1198,
+   1199,
+   1200,
+   1201,
+   1202,
+   1203,
+   1204,
+   1205,
+   1209,
+   1210,
+   1211,
+   1212,
+   1213,
+   1215,
+   1217,
+   1218,
+   1219,
+   1220,
+   1222,
+   1227,
+   1228,
+   1229,
+   1230,
+   1231,
+   1232,
+   1233,
+   1234,
+   1235,
+   1236,
+   1237,
+   1238,
+   1239,
+   1240,
+   1241,
+   1242,
+   1243,
+   1244,
+   1245,
+   1246,
+   1247,
+   1248,
+   1249,
+   1251,
+   1252,
+   1253,
+   1254,
+   1255,
+   1256,
+   1257,
+   1258,
+   1259,
+   1260,
+   1261,
+   1262,
+   1263,
+   1269,
+   1270
+  ]
+ }
+}
