@@ -169,3 +169,23 @@ test('呼び名を渡さなければ、添え字は使わない', () => {
   const list = OK.candidatesFor({ w: 600, d: 600, label: 'テレビ' }, { roomType: 'ldk', near: [] });
   assert.ok(!list.some((c) => c.kind === 'tv'), '呼び名なしで添え字を当てている');
 });
+
+test('根拠は、効いた順に並ぶ', () => {
+  // **画面はいちばん強い根拠(why[0])だけを出す。** 拾った順のままだと
+  // 「LDKの900×1400は食卓かもしれません（この部屋に在るもの）」という、
+  // 何も説明していない一行になる。実物の図面で実測してそうなっていた。
+  const list = OK.candidatesFor({ w: 900, d: 1400 }, { roomType: 'ldk', near: [] });
+  const top = list.find((c) => c.kind === 'dining-table');
+  assert.ok(top, '食卓が候補に出ていない');
+  assert.match(top.why[0], /実寸/, '効いた根拠より先に「この部屋に在るもの」が来ている');
+
+  // 添え字はいちばん強いので、寸法より先に来る。
+  const labelled = OK.candidatesFor({ w: 1240, d: 300, label: 'TV' },
+    { roomType: 'ldk', near: [], names: NAMES });
+  assert.match(labelled[0].why[0], /書かれている/);
+
+  // 「ただし…」の但し書きは最後に回る。
+  const odd = OK.candidatesFor({ w: 600, d: 600, label: 'テレビ' },
+    { roomType: 'ldk', near: [], names: NAMES });
+  assert.match(odd[0].why[odd[0].why.length - 1], /^ただし/);
+});

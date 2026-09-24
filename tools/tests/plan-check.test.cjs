@@ -108,8 +108,53 @@ test('用途を渡せば、名前で決まらない部屋でも判定できる',
 
 test('Worker からも同じ実装が呼べる', async () => {
   // 実装が二か所にあると必ず食い違う。入口だけ別で、中身は同じ。
+  // Worker 側は既定寸法を添えて渡すだけで、判定そのものは持たない。
   const worker = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
-  assert.equal(worker.knowledgeWarnings, check.knowledgeWarnings);
+  assert.equal(worker._internals, check._internals, '別の実装を持っている');
+  const plan = planWith('主寝室', { type: 'bath', w: 1600, d: 750 });
+  assert.deepEqual(worker.knowledgeWarnings(plan), check.knowledgeWarnings(plan),
+    '同じ間取りで答えが違う');
+});
+
+test('既定寸法のままの設備を、寸法の読み違いと言わない', async () => {
+  // **手順17は設備の寸法を「既定値のまま変えない」と命じている。**
+  // 命じたとおりの値を叱ると、正しく読めた図面ほど必ず警告が出る。
+  // 実測で、浴槽の既定 1600×1600 は知識表の湯船(1100〜1700 × 650〜900)から
+  // 外れており、浴槽のある図面すべてでこの指摘が出ていた。
+  const spec = await import('file://' + join(ROOT, 'worker/plan-item-spec.mjs'));
+  const worker = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
+  for (const s of spec.ITEM_SPEC) {
+    if (!check._internals.IMPORT_TO_KIND[s.type]) continue;
+    const room = { bath: '浴室', toilet: 'トイレ', sink: '洗面所', kitchen: 'キッチン' }[s.type];
+    const w = worker.knowledgeWarnings(planWith(room, { type: s.type, w: s.w, d: s.d }));
+    assert.deepEqual(w, [], `${s.type} の既定 ${s.w}×${s.d} に指摘が出ている`);
+  }
+});
+
+test('既定から外れた寸法は、Worker から呼んでも指摘する', async () => {
+  // 既定を見逃す代わりに、既定から外れたものを見落としてはいけない。
+  const worker = await import('file://' + join(ROOT, 'worker/plan-check.mjs'));
+  const w = worker.knowledgeWarnings(planWith('トイレ', { type: 'toilet', w: 3000, d: 3000 }));
+  assert.equal(w.length, 1);
+  assert.match(w[0], /3000×3000/);
+});
+
+test('実物の図面の室名から、用途が決まる', () => {
+  // **提供された3つの実物の図面(平屋・2階建て・3階建て)で確かめたもの。**
+  // 室名46件のうち16件が決まらず、そのうち名前だけで決まるものを足した。
+  const RP = require(join(ROOT, 'assets/js/room-program.js'));
+  const cases = [
+    ['収納', 'storage'], ['床上げ収納', 'storage'], ['ハーフ収納', 'storage'],
+    ['FCL', 'wic'], ['ファミリークローゼット', 'wic'], ['SCL', 'storage'],
+    ['Living Dinning Kitchen', 'ldk'], ['Living Dining Kitchen', 'ldk'],
+  ];
+  for (const [name, want] of cases) {
+    assert.equal(RP.typeFromName(name), want, `${name} が ${want} にならない`);
+  }
+  // **決まらないものは足さない。** 「趣味部屋」が書斎か工房かは名前で決まらない。
+  for (const name of ['趣味部屋', 'スキップ', 'ニッチ', 'KB置き場', '洋室']) {
+    assert.equal(RP.typeFromName(name), null, `${name} を決め打ちしている`);
+  }
 });
 
 // ── 図面の印を解釈する ──────────────────────────────────────────

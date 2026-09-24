@@ -341,14 +341,22 @@
     for (var kind in K) {
       if (!Object.prototype.hasOwnProperty.call(K, kind)) continue;
       var k = K[kind];
-      var why = [];
       var score = 0;
+
+      // 根拠は**効いた順に並べる**。拾った順ではない。
+      // 画面はいちばん強い根拠(why[0])だけを出すので、拾った順のままだと
+      // 「LDKの900×1400は食卓かもしれません（この部屋に在るもの）」という、
+      // 何も説明していない一行になる。実測でそうなっていた。
+      var reasons = [];
+      var why = [];
+      // ブロックの中の関数宣言は古い実行環境で挙動が揺れる。式で持つ。
+      var add = function (weight, text) { reasons.push({ w: weight, t: text }); };
 
       // 図面の添え字は、**いちばん強い手がかり**。「TV」「クローゼット」など。
       // 分類の呼び名はカタログの語彙(tags.json の kinds)が持っているので、
       // ここには書き写さない。呼び名が渡されなければ、この手がかりは使わない。
       var hit = labelHit(mark.label, context.names && context.names[kind]);
-      if (hit) { score += 5; why.push('図面に「' + hit + '」と書かれている'); }
+      if (hit) { score += 5; add(5, '図面に「' + hit + '」と書かれている'); }
 
       // **添え字が当たっているものは、以下で振り落とさない。**
       // 「テレビ」と書いてあるのに寸法が合わないとき、欲しいのは
@@ -358,34 +366,36 @@
       // 部屋で弾く
       var allowed = roomAllows(kind, context.roomType);
       if (allowed === false && !keep) continue;
-      if (allowed === false) why.push('ただし、この部屋には在らないもの');
-      else if (allowed === true && k.rooms !== 'any') { score += 1; why.push('この部屋に在るもの'); }
+      if (allowed === false) add(-1, 'ただし、この部屋には在らないもの');
+      else if (allowed === true && k.rooms !== 'any') { score += 1; add(1, 'この部屋に在るもの'); }
 
       // 実寸
       var size = sizeOk(kind, mark.w, mark.d);
       if (size === false && !keep) continue;
-      if (size === false) why.push('ただし、実寸が ' + k.size.what + ' から外れる');
-      else if (size === true) { score += 2; why.push('実寸が合う'); }
+      if (size === false) add(-1, 'ただし、実寸が ' + k.size.what + ' から外れる');
+      else if (size === true) { score += 2; add(2, '実寸が合う'); }
 
       // 付随先が近くにあるか。**ここがいちばん効く。**
       if (k.attach) {
         var host = nearest(near, k.attach.to);
         if ((!host || host.dist > k.attach.within) && !keep) continue;
         if (!host || host.dist > k.attach.within) {
-          why.push('ただし、そばに ' + k.attach.to + ' が無い');
+          add(-1, 'ただし、そばに ' + k.attach.to + ' が無い');
         } else {
           score += 3;
-          why.push(k.attach.to + ' のそばにある');
+          add(3, k.attach.to + ' のそばにある');
           var span = spanOk(kind, mark.w, Math.max(host.w || 0, host.d || 0));
           if (span === false && !keep) continue;
-          if (span === false) why.push('ただし、幅が ' + k.attach.to + ' と釣り合わない');
-          else if (span === true) { score += 3; why.push('幅が ' + k.attach.to + ' と釣り合う'); }
+          if (span === false) add(-1, 'ただし、幅が ' + k.attach.to + ' と釣り合わない');
+          else if (span === true) { score += 3; add(4, '幅が ' + k.attach.to + ' と釣り合う'); }
         }
       }
 
       // 外壁沿いかどうか
-      if (k.place === 'exterior-wall' && context.onExteriorWall) { score += 1; why.push('外壁沿い'); }
+      if (k.place === 'exterior-wall' && context.onExteriorWall) { score += 1; add(1, '外壁沿い'); }
 
+      // 強い根拠から並べ、「ただし…」の但し書きは最後に回す。
+      why = reasons.slice().sort(function (a, b) { return b.w - a.w; }).map(function (r) { return r.t; });
       if (score > 0) out.push({ kind: kind, score: score, why: why });
     }
     out.sort(function (a, b) { return b.score - a.score; });

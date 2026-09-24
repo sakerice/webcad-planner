@@ -67,8 +67,9 @@
    * では用途が決まらない部屋を、jev が決めたあとに渡すためにある。** 無ければ
    * 名前の規則だけで判定し、決まらない部屋については黙る。
    */
-  function knowledgeWarnings(plan, roomTypes) {
+  function knowledgeWarnings(plan, roomTypes, options) {
     var out = [];
+    var defaults = (options && options.defaults) || null;
     if (!plan || !Array.isArray(plan.items)) return out;
     for (var item of plan.items) {
       var kind = IMPORT_TO_KIND[item.type];
@@ -96,7 +97,21 @@
       }
 
       // 2. 実寸の範囲に収まるか
-      if (ObjectKnowledge.sizeOk(kind, item.w, item.d) === false) {
+      //
+      // **既定寸法のままのものは、寸法を読んだ答えではない。**
+      // 読み取りの手順17は設備について「w と d は仕様の既定値のまま変えない」と
+      // 命じている(図に合わせて変えると、アプリのカタログの品物と食い違うため)。
+      // 命じたとおりの値を「日本の住宅の寸法から外れる」と叱ると、**正しく読めた
+      // 図面ほど必ず警告が出る**。実測で、浴槽の既定 1600×1600 は知識表の
+      // 湯船(1100〜1700 × 650〜900)から外れており、浴槽のある図面すべてで
+      // この指摘が出ていた。
+      //
+      // 既定から外れている値だけを見る。そこは読み取りが手順に反して図から
+      // 拾った値であり、3000×3000 の便器のような読み違いはここに出る。
+      var byDefault = defaults && defaults[item.type]
+        && Number(item.w) === Number(defaults[item.type].w)
+        && Number(item.d) === Number(defaults[item.type].d);
+      if (!byDefault && ObjectKnowledge.sizeOk(kind, item.w, item.d) === false) {
         var k = ObjectKnowledge.knowledgeFor(kind);
         out.push(`${name}が ${Math.round(item.w)}×${Math.round(item.d)}mm です。`
           + `日本の住宅では ${k.size.what}。寸法の読み違いかもしれません`);

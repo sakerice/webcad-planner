@@ -154,8 +154,11 @@
       // jev が決めたあとなら「浴槽が寝室にある」と言える。
       var types = {};
       out.rooms.forEach(function (r) { if (r && r.id && r.type) types[r.id] = r.type; });
+      // 既定寸法を渡す。**渡さないと、手順どおりに読めた設備が叱られる**
+      // (読み取りは設備の寸法を既定のままにするよう命じられている)。
       var warnings = (typeof PlanCheck === 'object' && PlanCheck)
-        ? PlanCheck.knowledgeWarnings(plan, types) : [];
+        ? PlanCheck.knowledgeWarnings(plan, types,
+            { defaults: (typeof ISIZES === 'object' && ISIZES) || null }) : [];
       // 図面に描かれていた印を解釈する。**分類の呼び名を持っているのは
       // 画面側**(CATALOGUE_TAGS.kinds)なので、ここで当てる。
       var reads = (typeof PlanCheck === 'object' && PlanCheck && marks.length)
