@@ -162,7 +162,8 @@
         });
       } else if (type) {
         ask.push({
-          id: 'm' + i, index: i, looks: mark.looks || '', label: mark.label || '',
+          id: 'm' + i, index: i, room: room ? room.n : null,
+          looks: mark.looks || '', label: mark.label || '',
           w: mark.w, d: mark.d,
           roomJa: (RoomProgram.ROOM_TYPES[type] || {}).ja || '',
           candidates: ObjectKnowledge.shortlistFor(mark, type),

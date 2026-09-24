@@ -126,8 +126,10 @@ test('窓口は、1回に投げられる判断の数を抑える', async () => {
 
 test('画面側は、置く場所を決めていない', () => {
   const src = readFileSync(join(ROOT, 'assets', 'js', 'plan-finish.js'), 'utf8');
-  // 足りないものは「道具にする」だけ。座標を作って置く処理を持たない。
-  assert.match(src, /setTool\(model\)/, '道具として渡していない');
+  // おすすめは**カタログの欄を開くだけ**。道具にもしない(置く導線は
+  // カタログが持っていて、ここで作り直さない)。座標を作って置く処理も持たない。
+  assert.match(src, /toggleAssetCat\(head\)/, 'カタログの欄を開いていない');
+  assert.ok(!/setTool\(/.test(src), 'おすすめから道具を選んでいる(カタログの導線の作り直し)');
   assert.ok(!/mkItem\(/.test(src), '足りないものを自分で置いている（納まりを決められない）');
   assert.ok(!/DATA\.items\.push/.test(src), '間取りに直接足している');
   // 差し替えは寸法だけ。中心を動かさない。
@@ -149,4 +151,38 @@ test('差し替えは、寸法だけを入れ替える', () => {
   assert.equal(plan.items[0].y, 2000, '位置が動いた');
   // 知らないモデルは無視する
   assert.deepEqual(global.PlanFinish.applyPicks(plan, [{ slot: 'i0', model: 'fmp-Nope' }]), []);
+});
+
+test('おすすめは、図面に描かれていた家具を分類ごとにまとめる', () => {
+  global.window = global;
+  delete require.cache[require.resolve(join(ROOT, 'assets', 'js', 'plan-finish.js'))];
+  require(join(ROOT, 'assets', 'js', 'plan-finish.js'));
+  const reads = [
+    { kind: 'bed', room: '子ども室①' }, { kind: 'bed', room: '子ども室②' }, { kind: 'bed', room: '主寝室' },
+    { kind: 'chair', room: 'LDK' }, { kind: 'chair', room: 'LDK' },
+    { kind: 'sofa', room: 'LDK' },
+    { kind: 'bathtub', room: '浴室' },      // 取り込みが自分で置く
+    { kind: 'kitchen-unit', room: 'LDK' },  // 同上
+    { kind: 'other', room: 'LDK' },         // 何か分からないもの
+  ];
+  // 並びの手がかりが無ければ多い順
+  const list = global.PlanFinish.recommendations({ reads });
+  assert.deepEqual(list.map((r) => r.kind), ['bed', 'chair', 'sofa'], '多い順に、まとめて並んでいない');
+  assert.equal(list[0].count, 3);
+  assert.deepEqual(list[0].rooms, ['子ども室①', '子ども室②', '主寝室']);
+  assert.deepEqual(list[1].rooms, ['LDK'], '同じ部屋を重ねて挙げている');
+
+  // 画面では、部屋を形づくる家具を先に並べる。**多い順だとハンガーパイプが
+  // 先頭に来る**(実物の平屋で8本あり、ベッドやソファより前に並んだ)。
+  const tags = require(join(ROOT, 'assets', 'models', 'tags.json'));
+  const OK = require(join(ROOT, 'assets', 'js', 'object-knowledge.js'));
+  const hints = { kinds: tags.kinds, order: Object.keys(OK.KNOWLEDGE) };
+  const many = reads.concat(Array(8).fill({ kind: 'closet', room: 'WIC' }), [{ kind: 'cooktop', room: 'LDK' }]);
+  const ordered = global.PlanFinish.recommendations({ reads: many }, hints).map((r) => r.kind);
+  assert.deepEqual(ordered, ['sofa', 'chair', 'bed', 'closet', 'cooktop'],
+    '家具が先・知識の表の並び・住設は後、になっていない');
+  // 以前は部屋ごとに要るものを全部挙げて93件になった。図面にあったものだけ。
+  assert.deepEqual(global.PlanFinish.recommendations({ reads: [], missing: [{ id: 'r0', missing: [{ kind: 'sofa' }] }] }), [],
+    '図面に無いものを「足りない」として挙げている');
+  assert.deepEqual(global.PlanFinish.recommendations(null), []);
 });

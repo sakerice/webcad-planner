@@ -675,13 +675,21 @@
       // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
       if (body.finish) {
         var swaps = (body.finish.picks || []).length;
-        var lacks = PlanFinish.missingLines(body.finish).length;
+        var recs = PlanFinish.shownRecommendations(body.finish).length;
         if (swaps) lines.push('・水まわり ' + swaps + ' 点を、部屋の広さに合うモデルに差し替えます。');
-        if (lacks) lines.push('・取り込んだあと、足りないもの ' + lacks + ' 件を道具の一覧に出します。');
+        if (recs) lines.push('・図面に描かれていた家具 ' + recs + ' 種類を、カタログの先頭に「おすすめの家具」として出します。');
       }
       if (body.reviewNote) lines.push('・' + body.reviewNote);
       (body.notes || []).forEach(function (n) { lines.push('・' + n); });
-      (body.warnings || []).forEach(function (w) { lines.push('・' + w); });
+      // 読み取りの指摘。**仕上げのあとのものも足す。**仕上げで部屋の用途が
+      // 決まると、名前だけでは照らせなかった部屋(洋室など)も照らせる。
+      // 同じ文は2度出さない。
+      var said = {};
+      (body.warnings || []).concat((body.finish && body.finish.warnings) || []).forEach(function (w) {
+        if (said[w]) return;
+        said[w] = true;
+        lines.push('・' + w);
+      });
       notes.textContent = lines.length ? lines.join('\n') : '特にありません。';
     }
     show('plan-import-step3', true);
@@ -780,10 +788,9 @@
     if (typeof resetView === 'function') resetView();
     if (typeof draw2d === 'function') draw2d();
     if (typeof rebuild3D === 'function') rebuild3D();
-    // 足りないもの・読み取りの指摘・図面の印は、いま**画面に出していない**。
-    // 出していた版が DESIGN.md に従っておらず、カタログのパネルが持つ導線を
-    // 作り直していたため取り下げた（assets/js/plan-finish.js の mount を見ること）。
-    // 判断そのものは PlanFinish.result に残っている。
+    // 図面に描かれていた家具を「おすすめの家具」としてカタログの先頭に出す。
+    // **ここからは置かない。**押すとカタログのその欄を開く(plan-finish.js の mount)。
+    if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
     closePlanImport();
   }
 
