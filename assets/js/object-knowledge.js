@@ -103,7 +103,9 @@
          + 'ここでは共通の分しか書けない。洗濯機はパンの上、物干しは天井付け',
     },
     'shoe-storage': {
-      rooms: ['entry'], mount: 'floor', place: 'against-wall', face: 'into-room',
+      // storage: シューズクローク(SCL/SIC)は室名の表で storage になる。実物の
+      // 2階建ての図面で、SCL の中の下駄箱が「部屋に合わない」と言われていた。
+      rooms: ['entry', 'storage'], mount: 'floor', place: 'against-wall', face: 'into-room',
       size: { w: [700, 1800], d: [330, 450], what: '下駄箱 奥行350〜400' },
       why: '玄関土間に面する壁。奥行が深いと土間が狭くなる',
     },
@@ -188,14 +190,22 @@
       why: '敷き布団・掛け布団・枕。ベッドの上に載る',
     },
     closet: {
-      rooms: ['wic', 'bedroom', 'kids'], mount: 'floor', place: 'against-wall',
+      // storage: 室名の無い小部屋(洋室脇の物入れ)が storage になる。実物の
+      // 2階建ての図面で、その中のハンガーパイプが「部屋に合わない」と言われていた。
+      rooms: ['wic', 'bedroom', 'kids', 'storage'], mount: 'floor', place: 'against-wall',
       face: 'into-room',
       why: '扉か引き出しが前に開く。600mm以上の空きが要る',
     },
-    cabinet: { rooms: ['ldk'], mount: 'floor', place: 'against-wall', face: 'into-room' },
+    // テレビ台・収納棚。LDK だけにしていたが、実物の図面3枚で寝室のテレビ台
+    // (2件)・ランドリーの収納・玄関脇の収納が「部屋に合わない」と言われた。
+    cabinet: {
+      rooms: ['ldk', 'bedroom', 'kids', 'study', 'washroom', 'entry'],
+      mount: 'floor', place: 'against-wall', face: 'into-room',
+    },
     chest: { rooms: ['bedroom', 'kids'], mount: 'floor', place: 'against-wall', face: 'into-room' },
     shelf: {
-      rooms: ['study', 'kids', 'storage', 'wic'], mount: 'floor',
+      // washroom: 洗面所の壁のニッチに棚がある(実物の2階建ての図面)。
+      rooms: ['study', 'kids', 'storage', 'wic', 'washroom'], mount: 'floor',
       place: 'against-wall', face: 'into-room',
     },
 
@@ -230,7 +240,9 @@
       rooms: ['ldk', 'entry', 'washitsu'], mount: 'tabletop',
       why: '棚や卓の上に載る小物。床に直置きはしない',
     },
-    plant: { rooms: ['ldk'], mount: 'floor', place: 'free', why: '床置きの鉢と卓上の小鉢がある' },
+    // どこにでも置かれる。LDK だけにしていたが、実物の平屋の図面で主寝室と
+    // 玄関脇の鉢が「部屋に合わない」と言われた。
+    plant: { rooms: 'any', mount: 'floor', place: 'free', why: '床置きの鉢と卓上の小鉢がある' },
     kids: { rooms: ['kids'], mount: 'floor', place: 'free' },
     pet: { rooms: ['ldk'], mount: 'floor', place: 'free' },
 
@@ -402,6 +414,37 @@
     return out;
   }
 
+  // ── jev に選ばせる候補 ────────────────────────────────────────
+  //
+  // candidatesFor は点数を付けて**当てよう**としていた。実物の図面で試すと、
+  // 家具に文字が書かれていない図面では 21件中1件しか当たらなかった。
+  // 寸法の範囲は広く、壁沿いの薄い箱をまとめてテレビと呼んでしまう。
+  //
+  // ここは当てない。**在り得ないものを外すだけ**にする。何であるかは、
+  // 図面の見た目(looks)と知識の説明(describe)を読んで jev が決める。
+  //
+  //   外す: その部屋に在らないもの
+  //   外さない: 実寸から外れるもの … 図面の印は**まとまりで描かれる**。
+  //            ベッドとナイトテーブル2つで 1760×1460、食卓と椅子4脚で
+  //            1675×1610、洗面台はボウルだけ 560×560。寸法で外すと、
+  //            実測でまさにこれらの正解が落ちた。寸法は describe に入れて
+  //            jev に量らせる
+  //   外さない: 付随先(窓など)が遠いもの … 読み取りは窓の中心を壁芯に置き、
+  //            印の中心は室内側にあるので、この2つは構造的に離れる。
+  //            実測で、カーテンがこの条件で全部落ちていた
+  //
+  // 部屋の用途が決まっていなければ何も返さない(決まらないものは黙る)。
+  function shortlistFor(mark, roomType) {
+    if (!roomType) return [];
+    var out = [];
+    for (var kind in K) {
+      if (!Object.prototype.hasOwnProperty.call(K, kind) || kind === 'other') continue;
+      if (roomAllows(kind, roomType) === false) continue;
+      out.push(kind);
+    }
+    return out;
+  }
+
   /** 添え字が、その分類の呼び名や検索語を含んでいるか。含んでいればその語。 */
   function labelHit(label, names) {
     if (!label || !names) return null;
@@ -430,6 +473,7 @@
   return {
     KNOWLEDGE: K,
     candidatesFor: candidatesFor,
+    shortlistFor: shortlistFor,
     knowledgeFor: knowledgeFor,
     sizeTable: sizeTable,
     roomAllows: roomAllows,

@@ -122,6 +122,76 @@
 
   var _internals = { IMPORT_TO_KIND, roomAt };
 
+  // ── 図面の印を読む（いまの本筋） ─────────────────────────────
+  //
+  // **何であるかは、図面を見ている読み取りが答える(guess)。**知識はそれを
+  // 照らすだけ。実物の図面3枚・印114件で比べた:
+  //
+  //   A. jev に選ばせる(見た目の描写と知識の説明を渡す)
+  //   B. 読み取りが答え、知識で照らす
+  //
+  // 2つの答えが食い違った49件のうち、**A だけが正しかったものは0件**。
+  // jev が受け取るのは読み取りの一行の描写で、「小さな矩形の中に複数の円」を
+  // 食卓セットと読んだ。読み取りは調理台の上にあるのを見ていてコンロと答えた。
+  //
+  // 読み取りが答えなかった印(guess が無い・other)は、部屋の用途が決まって
+  // いれば jev に回す(ask)。
+  //
+  //   roomTypes は {部屋のid: 用途}。部屋の id は取り込んだ間取りのもの。
+  function readMarks(plan, marks, roomTypes) {
+    var reads = [], ask = [];
+    var list = Array.isArray(marks) ? marks : [];
+    for (var i = 0; i < list.length; i++) {
+      var mark = list[i];
+      var cx = numOrNull(mark.x), cy = numOrNull(mark.y);
+      if (cx === null || cy === null) continue;
+      var room = roomAt(plan, mark.floor, cx, cy);
+      var type = room
+        ? ((roomTypes && roomTypes[room.id]) || RoomProgram.typeFromName(room.n || '') || room.use || null)
+        : null;
+      var guess = typeof mark.guess === 'string' ? mark.guess : '';
+      if (guess && guess !== 'other' && ObjectKnowledge.KNOWLEDGE[guess]) {
+        var fits = ObjectKnowledge.roomAllows(guess, type);
+        reads.push({
+          index: i, mark: mark, room: room ? room.n : null, roomType: type,
+          kind: guess, from: 'reader',
+          // 知識と食い違ったものは消さずに印を付ける。**実物の図面で調べると
+          // 13件すべてが知識の側の穴だった**(部屋の範囲が狭すぎた11件、
+          // ナイトテーブルという分類そのものが無かった2件)。
+          fits: fits,
+        });
+      } else if (type) {
+        ask.push({
+          id: 'm' + i, index: i, looks: mark.looks || '', label: mark.label || '',
+          w: mark.w, d: mark.d,
+          roomJa: (RoomProgram.ROOM_TYPES[type] || {}).ja || '',
+          candidates: ObjectKnowledge.shortlistFor(mark, type),
+        });
+      }
+    }
+    return { reads: reads, ask: ask.filter(function (a) { return a.candidates.length; }) };
+  }
+
+  /**
+   * 仕上げ(jev)が返した部屋の用途を、取り込んだ間取りの部屋の id に付け直す。
+   *
+   * **仕上げへは部屋を並び順の番号(r0, r1, …)で送っている。** 取り込んだ部屋の
+   * id は p38 のような別の番号なので、そのまま引くと1件も当たらない。実物の
+   * 2階建てで 29部屋中0部屋だった。jev が決めた用途が、知識の照合にも印の
+   * 解釈にも一度も届いていなかった。
+   */
+  function typesByRoomId(plan, named) {
+    var out = {};
+    var rooms = (plan && plan.rooms) || [];
+    (named || []).forEach(function (r) {
+      if (!r || !r.type) return;
+      var m = /^r(\d+)$/.exec(String(r.id));
+      var room = m ? rooms[Number(m[1])] : null;
+      if (room && room.id !== undefined) out[room.id] = r.type;
+    });
+    return out;
+  }
+
   // ── 図面の印を解釈する ──────────────────────────────────────
   //
   // 読み取りは印の位置・大きさ・添え字だけを返す（種類は当てさせていない）。
@@ -199,6 +269,8 @@
 
   return {
     knowledgeWarnings: knowledgeWarnings,
+    readMarks: readMarks,
+    typesByRoomId: typesByRoomId,
     interpretMarks: interpretMarks,
     _internals: _internals,
   };

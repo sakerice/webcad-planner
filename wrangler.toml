@@ -33,6 +33,10 @@ run_worker_first = [ "/api/*" ]
 # 無くても動く。無ければ門が開きっぱなしになり、門が無かった頃と同じ動きになる。
 [ai]
 binding = "AI"
+# 手元の `wrangler dev` から本物の Workers AI へ繋ぐ印。**デプロイ時には
+# 無視される**(Cloudflare 公式ドキュメント)ので、本番の挙動は変わらない。
+# これが無いと手元では `AI ... not supported` になり、jev を一度も試せない。
+remote = true
 
 [[r2_buckets]]
 binding = "PLANS"

@@ -95,7 +95,7 @@
     var cols = gx.length - 1, rows = gy.length - 1;
     var grid = [], j, i;
     for (j = 0; j < rows; j++) { grid.push(new Array(cols).fill(null)); }
-    var problems = [], names = Object.create(null), levels = Object.create(null);
+    var problems = [], names = Object.create(null), levels = Object.create(null), uses = Object.create(null);
     // 升目の中心がその長方形に入っていれば塗る。境界のわずかなずれに強い。
     var cx = [], cy = [];
     for (i = 0; i < cols; i++) cx.push((gx[i] + gx[i + 1]) / 2);
@@ -111,6 +111,8 @@
       // 持っていない部屋は 0 として扱えばよい。
       var lv = Number(r.level);
       levels[key] = (isFinite(lv) && lv > 0) ? Math.min(Math.round(lv), SKIP_LEVEL_MAX_MM) : 0;
+      // 図面を見ている側が判断した用途。名前だけで決まらない語のために持つ。
+      if (typeof r.use === 'string' && r.use) uses[key] = r.use;
       var parts = Array.isArray(r.parts) ? r.parts : [r];
       var painted = 0, clash = 0;
       parts.forEach(function (q) {
@@ -130,7 +132,7 @@
       if (!painted) problems.push('「' + (names[key] || '名前なし') + '」の範囲が升目に載らない');
       if (clash) problems.push('「' + (names[key] || '名前なし') + '」が他の部屋と ' + clash + ' マス重なっている');
     });
-    return { grid: grid, names: names, levels: levels, problems: problems };
+    return { grid: grid, names: names, levels: levels, uses: uses, problems: problems };
   }
 
   // 隣り合う升目の持ち主が違えば、そこが壁。外側との境も壁。
@@ -221,16 +223,18 @@
       return { walls: [], rooms: [], problems: ['通り芯が足りない（縦' + gx.length + '本 横' + gy.length + '本）'] };
     }
     var cols = gx.length - 1, rows = gy.length - 1;
-    var read, names, levels;
+    var read, names, levels, uses;
     if (Array.isArray(spec.rooms) && spec.rooms.length) {
       var painted = paintRects(gx, gy, spec.rooms);
       read = { grid: painted.grid, problems: painted.problems };
       names = painted.names;
       levels = painted.levels;
+      uses = painted.uses;
     } else {
       read = readCells(spec.cells, cols, rows);
       names = legendMap(spec.legend);
       levels = Object.create(null);
+      uses = Object.create(null);
     }
     var walls = wallsFrom(gx, gy, read.grid, floor, thick);
 
@@ -246,6 +250,7 @@
         // **段のある部屋だけが持つ。** 0 を全部屋に書くと、この欄を持たない
         // 既存プランとの差が生まれる。
         if (levels[k]) made.skipLevelMm = levels[k];
+        if (uses[k]) made.use = uses[k];
         rooms.push(made);
       });
     });

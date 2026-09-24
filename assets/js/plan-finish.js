@@ -95,6 +95,9 @@
         area_m2: Number(area.toFixed(1)),
         tatami: Number((area / 1.6562).toFixed(1)),
         kinds: kindsInRoom(plan, r),
+        // 読み取り(図面を見ている側)が判断した用途。サーバは名前の表の次に
+        // これを採り、無いときだけ jev に聞く。
+        use: r.use || '',
       };
     });
   }
@@ -140,36 +143,46 @@
   function analyze(plan, marksIn) {
     if (!plan || !(plan.rooms || []).length) return Promise.resolve(null);
     var marks = Array.isArray(marksIn) ? marksIn : [];
+    var PC = (typeof PlanCheck === 'object' && PlanCheck) || null;
     var body = { rooms: roomsOf(plan).slice(0, 40), slots: slotsOf(plan).slice(0, 24) };
+    return post(body).then(function (out) {
+      if (!out || !out.rooms) return null;
+      // **用途が決まってから、もう一度知識に照らす。**仕上げへは部屋を並び順の
+      // 番号で送っているので、取り込んだ部屋の id に付け直してから使う。
+      var types = PC ? PC.typesByRoomId(plan, out.rooms) : {};
+      // 既定寸法を渡す。**渡さないと、手順どおりに読めた設備が叱られる**
+      // (読み取りは設備の寸法を既定のままにするよう命じられている)。
+      var warnings = PC
+        ? PC.knowledgeWarnings(plan, types, { defaults: (typeof ISIZES === 'object' && ISIZES) || null })
+        : [];
+      // 図面の印。**読み取りが答えたものはそれを採り**、答えなかったものだけ
+      // jev に回す(assets/js/plan-check.js の readMarks を見ること)。
+      var got = PC && marks.length ? PC.readMarks(plan, marks, types) : { reads: [], ask: [] };
+      var asked = got.ask.length ? post({ marks: got.ask }) : Promise.resolve(null);
+      return asked.then(function (judged) {
+        var reads = got.reads.slice();
+        ((judged && judged.reads) || []).forEach(function (j) {
+          var a = got.ask.filter(function (x) { return x.id === j.id; })[0];
+          if (!a) return;
+          reads.push({ index: a.index, mark: marks[a.index], kind: j.kind, from: 'jev',
+            confidence: j.confidence, fits: true });
+        });
+        reads.sort(function (x, y) { return x.index - y.index; });
+        ST.result = {
+          plan: plan, rooms: out.rooms, picks: out.picks || [],
+          missing: out.missing || [], warnings: warnings, reads: reads,
+        };
+        return ST.result;
+      });
+    }).catch(function () { return null; });
+  }
+
+  function post(body) {
     return fetch('/api/ai/finish-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
-    }).then(function (res) {
-      return res.ok ? res.json() : null;
-    }).then(function (out) {
-      if (!out || !out.rooms) return null;
-      // **用途が決まってから、もう一度知識に照らす。**「洋室」のように名前だけ
-      // では用途が決まらない部屋は、取り込み直後には判定できず黙っていた。
-      // jev が決めたあとなら「浴槽が寝室にある」と言える。
-      var types = {};
-      out.rooms.forEach(function (r) { if (r && r.id && r.type) types[r.id] = r.type; });
-      // 既定寸法を渡す。**渡さないと、手順どおりに読めた設備が叱られる**
-      // (読み取りは設備の寸法を既定のままにするよう命じられている)。
-      var warnings = (typeof PlanCheck === 'object' && PlanCheck)
-        ? PlanCheck.knowledgeWarnings(plan, types,
-            { defaults: (typeof ISIZES === 'object' && ISIZES) || null }) : [];
-      // 図面に描かれていた印を解釈する。**分類の呼び名を持っているのは
-      // 画面側**(CATALOGUE_TAGS.kinds)なので、ここで当てる。
-      var reads = (typeof PlanCheck === 'object' && PlanCheck && marks.length)
-        ? PlanCheck.interpretMarks(plan, marks, { roomTypes: types, names: kindNames() })
-        : [];
-      ST.result = {
-        plan: plan, rooms: out.rooms, picks: out.picks || [],
-        missing: out.missing || [], warnings: warnings, reads: reads,
-      };
-      return ST.result;
-    }).catch(function () { return null; });
+    }).then(function (res) { return res.ok ? res.json() : null; });
   }
 
   /**
@@ -223,8 +236,7 @@
 
   // ── 画面 ──────────────────────────────────────────────────────────
   //
-  // サイドバーの検索の下に差し込む。**取り込んだあとも残る**ので、
-  // 1つ置いてから次を置く、という使い方ができる。
+  // 呼び名の引き方だけを残してある。画面そのものは作り直し待ち(下の mount)。
   /** 分類の日本語名。無ければ分類の key をそのまま返す。 */
   function kindLabel(kind) {
     var names = kindNames();

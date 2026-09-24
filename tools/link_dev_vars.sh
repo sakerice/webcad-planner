@@ -53,10 +53,10 @@ fi
 cat <<EOF
 
 手元で読み取りを動かす:
-  npx wrangler dev --local --port 8899
+  npx wrangler dev --port 8899
 
 **--remote は付けなくてよい。** 付けると本番の利用回数と費用を実際に使う。
 ローカルなら R2 は preview バケット、Durable Object もローカルになる。
-ただし jev(env.AI = Workers AI)はローカルでは繋がらないので、jev を試すときは
-wrangler.toml の [ai] に remote = true を足す(この値はデプロイ時には無視される)。
+jev(env.AI = Workers AI)は wrangler.toml の remote = true で本物に繋がる。
+**--local は付けない**(付けると remote の印ごと切られて jev が動かない)。
 EOF

@@ -34,7 +34,7 @@
 
 ## 読み取り(AI)を手元で試す
 
-`bash tools/link_dev_vars.sh` を叩いてから `npx wrangler dev --local --port 8899`。
+`bash tools/link_dev_vars.sh` を叩いてから `npx wrangler dev --port 8899`。
 
 鍵は **`webcad-planner/.dev.vars` に1つだけ**ある。作業場(worktree)は使い捨てなので、
 そこに置くと作業場ごと消える。スクリプトは本体への symlink を張るだけで、鍵を
@@ -44,9 +44,12 @@
 R2 は preview バケット、Durable Object もローカルで、外に出るのは読み取りの API
 呼び出しだけになる。
 
-jev(`env.AI` = Workers AI)は**鍵が要らない**が、ローカルでは繋がらない
-(`AI ... not supported` と出る)。jev を試すときだけ `wrangler.toml` の `[ai]` に
-`remote = true` を足す。この値は**デプロイ時には無視される**ので本番の挙動は変わらない。
+jev(`env.AI` = Workers AI)は**鍵が要らない**。`wrangler.toml` の `[ai]` に
+`remote = true` が入っているので、手元の `wrangler dev` からも本物に繋がる
+(起動時に `env.AI ... remote` と出る)。この値は**デプロイ時には無視される**。
+
+**`--local` を付けない。** 付けると remote の印ごと切られ、`AI ... not supported`
+になって jev が動かない。付けなくても R2 と Durable Object はローカルのまま。
 
 ## UI を新しく作るとき
 

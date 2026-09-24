@@ -11,6 +11,13 @@
 // 読み取りの段取りは worker/plan-prompt.mjs の手順にある。description は
 // どの項目かが分かる最小限にとどめ、説明を二重に持たない。
 import { ALLOWED_ITEM_TYPES } from "./plan-item-spec.mjs";
+import RoomProgram from "../assets/js/room-program.js";
+import ObjectKnowledge from "../assets/js/object-knowledge.js";
+
+// 部屋の用途と、印が何であるか。**選べる語はこちらの表から作る。**
+// 書き写すと、表に足したときに読み取りだけ古いまま残る。
+export const ROOM_USES = Object.keys(RoomProgram.ROOM_TYPES);
+export const MARK_KINDS = Object.keys(ObjectKnowledge.KNOWLEDGE);
 
 const mm = (description) => ({ type: "NUMBER", description });
 
@@ -58,9 +65,12 @@ const ROOM = {
     // スキップフロア・小上がり。アプリ側は room.skipLevelMm を持っている
     // (床も天井も持ち上がる段差、上限2400mm)ので、読み取れれば再現できる。
     level: { type: "NUMBER", description: "その階の床からの段差" },
+    // 図面を見ている側の判断。室名の表で決まらない語(趣味部屋・KB置き場)を
+    // 名前と広さだけで当てさせると、実測で9件中4件しか当たらなかった。
+    use: { type: "STRING", enum: ROOM_USES, description: "その部屋の用途" },
   },
   required: ["name", "parts"],
-  propertyOrdering: ["name", "parts", "level"],
+  propertyOrdering: ["name", "parts", "level", "use"],
 };
 
 const ITEM = {
@@ -100,9 +110,10 @@ const MARK = {
     d: mm("奥行き"),
     label: { type: "STRING", description: "添えられた文字" },
     looks: { type: "STRING", description: "見たままの形" },
+    guess: { type: "STRING", enum: MARK_KINDS, description: "何だと思うか" },
   },
   required: ["x", "y", "w", "d"],
-  propertyOrdering: ["x", "y", "w", "d", "label", "looks"],
+  propertyOrdering: ["x", "y", "w", "d", "label", "looks", "guess"],
 };
 
 const FLOOR = {
