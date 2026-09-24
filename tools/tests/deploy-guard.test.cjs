@@ -8,6 +8,10 @@
 //
 // **この検査が落ちたら、同じ事故がまた起きる。** 直し方は「検査を緩める」
 // ではなく「既定でデプロイしない形に戻す」。
+//
+// 門は「拒否」ではなく「毎回たずねる」。本番は許可制で、利用者が確認の窓で
+// 押したときだけ通る。**見ているのは「黙って通らないこと」**であって、
+// 「絶対に通らないこと」ではない。
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
@@ -78,7 +82,7 @@ test('tools/deploy.sh は、端末からでなければ動かない', () => {
   assert.match(run.stderr, /端末から人が実行/, '止めた理由を伝えていない');
 });
 
-test('フックが、本番を触るコマンドを実際に止める', () => {
+test('フックが、本番を触るコマンドで実際に確認を出す', () => {
   const hook = join(ROOT, 'tools', 'deny-deploy.sh');
   assert.ok(existsSync(hook), 'フックが無い');
   const ask = (command) => execFileSync('bash', [hook], {
@@ -86,7 +90,7 @@ test('フックが、本番を触るコマンドを実際に止める', () => {
   });
   const blocked = (command) => {
     const out = ask(command);
-    assert.ok(out.includes('"permissionDecision":"deny"'), `止めていない: ${command}`);
+    assert.ok(out.includes('"permissionDecision":"ask"'), `確認なしで通した: ${command}`);
   };
   const allowed = (command) => {
     assert.equal(ask(command).trim(), '', `止めてはいけないものを止めた: ${command}`);
@@ -119,14 +123,14 @@ test('フックが、本番を触るコマンドを実際に止める', () => {
 //
 // どちらも「デプロイ」という語が出てこない。`git push origin main` と
 // `gh pr merge` が、そのまま本番の差し替えである。
-test('main へ載せる操作を止め、枝の作業は止めない', () => {
+test('main へ載せる操作で確認を出し、枝の作業は止めない', () => {
   const hook = join(ROOT, 'tools', 'deny-deploy.sh');
   const ask = (command) => execFileSync('bash', [hook], {
     input: JSON.stringify({ tool_input: { command } }), encoding: 'utf8',
     env: { ...process.env, CLAUDE_PROJECT_DIR: ROOT },
   });
-  const blocked = (command) => assert.ok(ask(command).includes('"permissionDecision":"deny"'),
-    `本番に出る操作を通した: ${command}`);
+  const blocked = (command) => assert.ok(ask(command).includes('"permissionDecision":"ask"'),
+    `本番に出る操作を確認なしで通した: ${command}`);
   const allowed = (command) => assert.equal(ask(command).trim(), '',
     `枝の作業を止めた: ${command}`);
 
@@ -149,7 +153,7 @@ test('main へ載せる操作を止め、枝の作業は止めない', () => {
   allowed('git merge origin/main');   // main を**取り込む**のは安全
 });
 
-test('main に居るときは、宛先を書かない push も止める', () => {
+test('main に居るときは、宛先を書かない push でも確認を出す', () => {
   // 宛先を書かない push は、いまの枝に出る。main に居れば本番に出る。
   const repo = mkdtempSync(join(tmpdir(), 'pushguard-'));
   execFileSync('git', ['init', '-q', '-b', 'main', repo]);
@@ -157,7 +161,7 @@ test('main に居るときは、宛先を書かない push も止める', () => 
     input: JSON.stringify({ tool_input: { command: 'git push' } }), encoding: 'utf8',
     env: { ...process.env, CLAUDE_PROJECT_DIR: repo },
   });
-  assert.ok(out.includes('"permissionDecision":"deny"'), 'main に居るのに push を通した');
+  assert.ok(out.includes('"permissionDecision":"ask"'), 'main に居るのに push を確認なしで通した');
   rmSync(repo, { recursive: true, force: true });
 });
 
@@ -171,7 +175,7 @@ test('自動デプロイの引き金が、検査の知っているものと一�
   assert.match(read('wrangler.toml'), /\[build\]/, 'Workers Builds の設定が無い');
 });
 
-test('プロジェクトの設定が、フックと拒否の両方を持っている', () => {
+test('プロジェクトの設定が、フックと確認の両方を持っている', () => {
   const settings = JSON.parse(read('.claude/settings.json'));
   const hooks = (settings.hooks && settings.hooks.PreToolUse) || [];
   const bash = hooks.find((h) => h.matcher === 'Bash');
@@ -179,9 +183,17 @@ test('プロジェクトの設定が、フックと拒否の両方を持って�
   assert.ok(bash.hooks.some((h) => h.command && h.command.includes('deny-deploy.sh')),
     'フックがこのリポジトリの門を呼んでいない');
 
-  const deny = (settings.permissions && settings.permissions.deny) || [];
-  for (const want of ['deploy', 'rollback', 'secret']) {
-    assert.ok(deny.some((rule) => rule.includes(want)), `拒否に ${want} が無い`);
+  // 本番は許可制。**確認の一覧に載っていること**を見る。
+  // ここから外れると、確認なしで通る道ができる。
+  const asked = (settings.permissions && settings.permissions.ask) || [];
+  for (const want of ['deploy', 'rollback', 'secret', 'gh pr merge', 'push origin main']) {
+    assert.ok(asked.some((rule) => rule.includes(want)), `確認の一覧に ${want} が無い`);
+  }
+  // 許可(allow)へ入れてしまうと、たずねずに通る。そこは塞ぐ。
+  const allow = (settings.permissions && settings.permissions.allow) || [];
+  for (const rule of allow) {
+    assert.ok(!/deploy|rollback|secret|pr merge|push origin main/.test(rule),
+      `本番を触る規則が許可に入っている: ${rule}`);
   }
 });
 

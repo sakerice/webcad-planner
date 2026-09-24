@@ -4183,6 +4183,9 @@ function init3D(){
   // モバイルでのメモリ圧等によるWebGLコンテキスト喪失から自動復帰する
   ren.domElement.addEventListener('webglcontextlost',function(e){ e.preventDefault(); },false);
   ren.domElement.addEventListener('webglcontextrestored',function(){
+    // 戻ったと言われても、合成器も環境マップも古いコンテキストのまま。
+    // 作り直しに通す（作り直せないときだけ、従来どおり組み直す）。
+    if(recover3DIfContextLost()) return;
     if(sc3){ rebuild3D(); }
     if(typeof invalidate3D==='function') invalidate3D();
   },false);
@@ -4301,6 +4304,8 @@ function init3D(){
     }
   }
   ren.domElement.addEventListener('pointerdown',function(e){
+    // 2Dと同じ理由で、3Dを触ったときも入力欄から焦点を外す
+    if(typeof blurActiveControl==='function') blurActiveControl();
     if(isWalkView()){
       _walkDrag.pointers[e.pointerId]={x:e.clientX,y:e.clientY};
       if(walkPointerCount()===1){
@@ -4386,6 +4391,11 @@ function init3D(){
   ren.domElement.addEventListener('mouseup',function(){_intML.down=false;});
   ren.domElement.addEventListener('contextmenu',function(e){e.preventDefault();});
   // WASD / arrow keys for interior
+  // **文書レベルの購読と描画ループは1度だけ。** コンテキストを失って作り直す
+  // とき init3D をもう一度通るので、ここを素通しにすると購読もループも二重に
+  // なる（押していないキーが効き続ける、描画が倍走る）。
+  if(!_3dGlobalsWired){
+  _3dGlobalsWired=true;
   document.addEventListener('keydown',function(e){
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     var k=e.key.toLowerCase();
@@ -4394,8 +4404,54 @@ function init3D(){
     if(e.key==='Escape'&&isInt) setView('2d');
   });
   document.addEventListener('keyup',function(e){iMov[e.key.toLowerCase()]=false;});
+  loop3D();
+  }
 
-  build3D(); loop3D();
+  build3D();
+}
+var _3dGlobalsWired=false;
+
+// タブを行き来すると、端末が裏のタブのWebGLコンテキストを捨てることがある。
+// 捨てられたまま戻ると3Dは**真っ黒**になる（実測: 画面の明るさ 178 → 0）。
+// iPad Safari で2つのタブに house-planner を開いていると、ふつうに起きる。
+//
+// 失われたコンテキストの上に作った物（レンダラ・合成器・環境マップ・
+// GPUへ上げたテクスチャ）は、もう1つも使えない。**作り直すしかない。**
+// webglcontextrestored が来ないまま戻ってくる端末があるので、タブが見えた
+// ときにも自分で確かめる。
+function recover3DIfContextLost(){
+  if(!ren) return false;
+  var gl=null;
+  try{ gl=ren.getContext(); }catch(e){ gl=null; }
+  if(gl && !gl.isContextLost()) return false;
+  // 見ていた向きは引き継ぐ。作り直しで視点が飛ぶと、何が起きたのか分からない。
+  var pos=null,target=null;
+  try{ if(camExt) pos=camExt.position.toArray(); if(orbit) target=orbit.target.toArray(); }catch(e){}
+  try{ if(composer) composer.dispose(); }catch(e){}
+  try{ if(_pmremGen) _pmremGen.dispose(); }catch(e){}
+  try{ if(_envRT) _envRT.dispose(); }catch(e){}
+  try{ ren.dispose(); }catch(e){}
+  var dead=ren.domElement;
+  if(dead && dead.parentNode) dead.parentNode.removeChild(dead);
+  composer=null; _pmremGen=null; _envRT=null; _skyMesh=null; _gndMesh=null;
+  _texCache={};
+  ren=null; sc3=null; camExt=null; camInt=null; orbit=null;
+  init3D();
+  if(!ren) return false;
+  try{
+    if(pos && camExt) camExt.position.fromArray(pos);
+    if(target && orbit){ orbit.target.fromArray(target); orbit.update(); }
+  }catch(e){}
+  rebuild3D();
+  if(typeof invalidate3D==='function') invalidate3D();
+  console.info('[WebCAD] WebGLコンテキストを失っていたので3Dを作り直しました');
+  return true;
+}
+if(typeof document!=='undefined'){
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden) recover3DIfContextLost();
+  });
+  window.addEventListener('focus',function(){ recover3DIfContextLost(); });
 }
 
 function fitCameraToScene(){
@@ -16322,7 +16378,25 @@ function onFloorChange(v){
 }
 
 // ───── CANVAS EVENTS ─────
+// 図面を触ったら、入力欄から焦点を外す。
+//
+// **焦点が残ると、矢印キーがそちらへ行く。** canvas は tabindex を持たないので
+// クリックしても焦点を受け取らない。日の光の時刻スライダーを一度つまむと焦点は
+// スライダーに残り、そのあと物を選んで矢印キーで動かそうとすると、
+// **物は動かず日の時刻だけが動く**。keydown の側は「入力欄にいるなら何もしない」
+// と決めているので、物が動かないのは筋が通っている。動いてはいけないのは太陽の
+// ほうである。押しっぱなしにすれば数時間ぶん進み、昼のはずが夕暮れになる。
+//
+// 実測: スライダーをつまむ → 図面をクリックして物を選ぶ → ← を10回 で、
+// 物は1mmも動かず 13:36 → 13:06 になった。
+function blurActiveControl(){
+  var a=document.activeElement;
+  if(!a || a===document.body) return;
+  var t=a.tagName;
+  if(t==='INPUT' || t==='SELECT' || t==='TEXTAREA') a.blur();
+}
 canvas.onmousedown=function(e){
+  blurActiveControl();
   ST.selectAll = false;
   var r=canvas.getBoundingClientRect(); var cx=e.clientX-r.left, cy=e.clientY-r.top;
   if(e.button===1 || (e.button===0 && e.altKey)){
@@ -17528,6 +17602,47 @@ function applyStashedCamera(s){
   return true;
 }
 
+// JSONをファイルとして保存する。
+//
+// **data: の URL では、iPad で保存できない。**
+//
+// 以前はこうしていた:
+//   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json)
+//   a.download='plan.json'; a.click();
+//
+// iOS Safari は data: の URL に対して download 属性を尊重しない。保存の代わりに
+// その URL を開こうとするだけで、**ファイルは1つもできない**。利用者から見ると
+// 「書き出しを押したのに、読み込むと古い間取りが出てくる」という形で現れる
+// (「ファイル」アプリに前のファイルが残っているため)。実測で、同じ8月14日の
+// ファイルが5回続けて渡されていた。
+//
+// 大きさの問題もある。実測したプランは JSON で 3.6MB、encodeURIComponent を
+// 通すと data: の URL が **4.5MB の文字列**になる。URL の長さには上限があり、
+// 大きな間取りほど黙って失敗する側に倒れる。
+//
+// Blob と createObjectURL なら、iOS Safari でも「ファイル」へ保存される。
+// 文字列を1つも作らないので、大きさの上限にも当たらない。
+// アンカーは文書に入れてから押す（入れずに押すと無視するブラウザがある）。
+function downloadJsonFile(json, filename){
+  var url=null;
+  try{
+    var blob=new Blob([json],{type:'application/json;charset=utf-8'});
+    url=URL.createObjectURL(blob);
+  }catch(e){
+    // Blob を作れない環境では、従来どおり data: へ落とす
+    url='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  }
+  var a=document.createElement('a');
+  a.href=url; a.download=filename; a.rel='noopener';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  // 押した直後に消すと保存が始まらない端末がある
+  setTimeout(function(){
+    if(a.parentNode) a.parentNode.removeChild(a);
+    if(url.slice(0,5)==='blob:') URL.revokeObjectURL(url);
+  },4000);
+}
 function exportPlan(){
   normalizeLegacyFurnitureItems();
   ensureObjectIds();
@@ -17535,12 +17650,16 @@ function exportPlan(){
   ensureInteriorWallSettings();
   ensureRoofAppearance();
   ensureFloorMetadata();
+  // 壁・床の既定値も書き出す。**ここだけ ensure が抜けていた。**
+  // 既定値を持たないプランでは、利用者が設定した値はグローバル(WALL_H)に
+  // しか無く、ensureHeightDefaults を通して初めてプランへ写る。抜けていると
+  // 書き出したJSONに既定値が1つも入らず、読み直したときに「壁・床の規定値が
+  // 反映されない」という形で出る（実測: plan 39.json に heightDefaults も
+  // floors も無かった）。
+  ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
-  var json=JSON.stringify(DATA,null,2);
-  var a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
-  a.download='plan.json';a.click();
+  downloadJsonFile(JSON.stringify(DATA,null,2),'plan.json');
 }
 async function savePlanToStorage(){
   // 空プランの保存は事故のもと(次回起動時に空画面が復元される)なので保存しない
@@ -17554,6 +17673,13 @@ async function savePlanToStorage(){
   ensureInteriorWallSettings();
   ensureRoofAppearance();
   ensureFloorMetadata();
+  // 壁・床の既定値も書き出す。**ここだけ ensure が抜けていた。**
+  // 既定値を持たないプランでは、利用者が設定した値はグローバル(WALL_H)に
+  // しか無く、ensureHeightDefaults を通して初めてプランへ写る。抜けていると
+  // 書き出したJSONに既定値が1つも入らず、読み直したときに「壁・床の規定値が
+  // 反映されない」という形で出る（実測: plan 39.json に heightDefaults も
+  // floors も無かった）。
+  ensureHeightDefaults();
   syncExteriorWallSettings();
   captureViewState();
   setSaveButtonBusy(true);
@@ -18045,11 +18171,7 @@ function buildUnityRenderPlan(){
 }
 function exportUnityRenderRequest(){
   var req=buildUnityRenderRequest();
-  var json=JSON.stringify(req,null,2);
-  var a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
-  a.download='webcad-render-request.json';
-  a.click();
+  downloadJsonFile(JSON.stringify(req,null,2),'webcad-render-request.json');
 }
 var AI_RENDER_PACKAGE=null;
 var AI_RENDER_DOWNLOAD_URLS=[];
@@ -20598,6 +20720,7 @@ function getTouchDist(e){
 }
 
 canvas.addEventListener('touchstart',function(e){
+  blurActiveControl();
   if(ST.view!=='2d') return;
   e.preventDefault();
   if(e.touches.length===1){
