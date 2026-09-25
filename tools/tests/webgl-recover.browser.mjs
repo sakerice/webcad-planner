@@ -66,8 +66,24 @@ try {
   assert.equal(await page.evaluate(() => document.querySelectorAll('#c3d-wrap canvas').length), canvasesBefore,
     '作り直しで canvas が増えた（古いものが残っている）');
 
+  // ── 見ている最中に失ったときも、自分で戻る ──────────────────────
+  //
+  // 報告: 色を続けて変えているさなかに一度だけ真っ黒になった。タブを離れて
+  // いないので、タブが見えたときの確認も、戻った通知も走らない。
+  // **こちらから手を出さずに**戻ることを見る。
+  await page.evaluate(() => {
+    const ext = ren.getContext().getExtension('WEBGL_lose_context');
+    ext.loseContext();
+  });
+  await page.waitForTimeout(9000);   // 待ち時間(1.5秒)＋組み直し
+  assert.equal(await page.evaluate(() => ren.getContext().isContextLost()), false,
+    '前面のまま失ったときに、自分で戻っていない');
+  const alone = await brightness();
+  assert.ok(alone > before * 0.7,
+    '自分で戻したのに暗いまま（' + before.toFixed(1) + ' → ' + alone.toFixed(1) + '）');
+
   assert.deepEqual(errors, [], 'ページで例外が出ている: ' + errors.join(' / '));
-  console.log('WebGL: コンテキストを失っても、タブへ戻れば3Dが戻る');
+  console.log('WebGL: タブへ戻っても、見ている最中でも、3Dが戻る');
 } finally {
   await browser.close();
 }
