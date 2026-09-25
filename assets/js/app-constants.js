@@ -2109,12 +2109,14 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs){
   }
   if(best===null) best=fallbackH;
   if(minH!==undefined&&best<minH) best=minH;
+  // 外壁は、屋根の板の下面まで立ち上げる(wallRaiseRoofs)。上げるだけで、下げない。
+  // **切る前に**上げる。後で上げると、斜線の制限面などで切った分を元へ戻してしまう
+  // (陸屋根も立ち上げの対象にしたとき、斜線で削った壁が陸屋根まで戻った)。
+  var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*t,w.y1+dy*t);
+  if(up!==null&&best<up-fy) best=up-fy;
   // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
   var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
   if(lim!==null&&best>lim-fy) best=lim-fy;
-  // 外壁は、勾配屋根の下面まで立ち上げる(wallRaiseRoofs)。上げるだけで、下げない。
-  var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*t,w.y1+dy*t);
-  if(up!==null&&best<up-fy) best=up-fy;
   // 同じ階の勾配屋根(下屋)の下では、屋根の板の下面で切る(下げるだけ)。
   var down=wallRaiseTopWorldY(w,underRoofs,w.x1+dx*t,w.y1+dy*t);
   if(down!==null&&best>down-fy) best=Math.max(0.001,down-fy);
@@ -2132,11 +2134,29 @@ function wallTopCutEnv(w,isOuter){
   var sameFloor=wallSameFloorRoofs(w);
   if(isOuter===undefined)
     isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
+  // 外皮かどうかは「片側でも部屋に面していない」でも見る。外観の塗り分け
+  // (getWallExteriorSpans)は軒の出の下を外と数えないことがあり、それで外壁を
+  // 間仕切り扱いすると、勾配天井の部屋の天井高まで下げられて屋根とのあいだに
+  // 隙間が開いた(報告された: 陸屋根の下の LDK の南の外壁)。
+  if(!isOuter&&!wallAdjacentRoomsCeiling(w).enclosed) isOuter=true;
   // 立ち上げるのは「片側でも部屋に面していない壁」(外皮)。外観の塗り分け
   // (getWallExteriorSpans)は屋根の軒下などを外と数えないことがあり、それで
   // 判定すると軒の出の下の外壁が立ち上がらなかった(利用者のプランで確認)。
   // 壁の高さの規則(wallCeilingHeightM)が使うのと同じ判定にそろえる。
-  var raise=(isOuter||!wallAdjacentRoomsCeiling(w).enclosed)?wallRaiseRoofs(w):[];
+  var raise=isOuter?wallRaiseRoofs(w):[];
+  // 実際にどこかで壁を持ち上げる屋根だけを残す。壁に直に載る陸屋根(ほとんどの家)
+  // まで数えると、何も変わらない壁まで折れ線の作り方に回ってしまう。
+  if(raise.length){
+    var topY=floorBaseY(w.floor||1)+wallDisplayHeightM(w);
+    var dxr=w.x2-w.x1, dyr=w.y2-w.y1;
+    raise=raise.filter(function(rf){
+      for(var i=0;i<=16;i++){
+        var y=wallRaiseTopWorldY(w,[rf],w.x1+dxr*i/16,w.y1+dyr*i/16);
+        if(y!==null&&y>topY+0.001) return true;
+      }
+      return false;
+    });
+  }
   if(!touches&&!raise.length&&!sameFloor.length) return null;
   return {
     minH:isOuter?wallFullHeightM(w&&w.floor):undefined,
@@ -2178,8 +2198,8 @@ function wallSameFloorRoofs(w){
 // 実物どおり、外壁の方を屋根の下面まで立ち上げる(妻壁)。
 //
 // 対象は外皮に面した壁だけ。間仕切りは天井までで止まり、天井裏は見えない。
-// 屋根は、壁の階の真上の階に載る勾配屋根(陸屋根は隙間を作らないので除く)で、
-// 壁の芯線のどこかを覆っているもの。
+// 屋根は、壁の階の真上の階に載る屋根で、壁の芯線のどこかを覆っているもの
+// (陸屋根も、高さ Z で持ち上げていれば隙間を作るので含める)。
 function wallRaiseRoofs(w){
   var out=[];
   if(!w||typeof DATA==='undefined'||!DATA||!DATA.items) return out;
@@ -2188,7 +2208,9 @@ function wallRaiseRoofs(w){
   var fl=(w.floor||1)+1;
   DATA.items.forEach(function(it){
     if(!it||it.type!=='roof'||it.hidden3D||(it.floor||1)!==fl) return;
-    if((it.roofType||'gable')==='flat') return;
+    // 陸屋根も数える。高さ Z で持ち上げた陸屋根(片流れから切り替えると Z が残る)は、
+    // 壁の天端とのあいだに隙間を作る(報告された: 陸屋根の下に謎の空間)。
+    // 立ち上げは上げるだけなので、壁に直に載っている陸屋根では何も起きない。
     for(var i=0;i<=8;i++){
       var t=i/8;
       if(roofCoversPlanPoint(it,w.x1+dx*t,w.y1+dy*t)){ out.push(it); return; }
@@ -2208,7 +2230,9 @@ function wallRaiseTopWorldY(w,roofs,xMm,yMm){
   [[0,0],[nx*halfMm,ny*halfMm],[-nx*halfMm,-ny*halfMm]].forEach(function(o){
     roofs.forEach(function(rf){
       if(!roofCoversPlanPoint(rf,xMm+o[0],yMm+o[1])) return;
-      var thick=Math.max(30,Math.min(600,Number(rf.roofThickness)||180))*U;
+      // 勾配屋根の板は面から下へ屋根厚ぶん伸びる。陸屋根の板は面(据え付け高さ)の
+      // **上に**載る(build3DRoofItem の flat)ので、板の下面は面そのもの。
+      var thick=((rf.roofType||'gable')==='flat')?0:Math.max(30,Math.min(600,Number(rf.roofThickness)||180))*U;
       var y=roofUndersideWorldYAt(rf,xMm+o[0],yMm+o[1])-thick;
       if(best===null||y<best) best=y;
     });

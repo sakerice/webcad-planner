@@ -6567,7 +6567,8 @@ function getSelectionBox3D(ref){
   if(!ref) return box;
   if(ref.type && !shouldRenderItemInCurrent3DView(ref)) return box;
   if(ref.x1!==undefined && ref.x2!==undefined){
-    var fy=floorBaseY(ref.floor), band=getWallBandRange(ref);
+    // 壁の足元は足元の上下ぶん動く(buildWall3D と同じ)。
+    var fy=floorBaseY(ref.floor)+wallFootOffsetMm(ref)*U, band=getWallBandRange(ref);
     var len=Math.hypot(ref.x2-ref.x1,ref.y2-ref.y1)*U;
     var thick=Math.max((ref.thick||120)*U,0.08);
     var h=Math.max(band.height||wallFullHeightM(ref.floor),0.05);
@@ -9181,17 +9182,32 @@ function wallExteriorFaceOffsetM(w){
 function wallInteriorFaceOffsetM(w){
   return w.thick*U/2+WALL_INT_FACE_GAP_M+wallFaceJitterM(w);
 }
+// 壁が立つ高さの範囲(m)。**壁の足元(fy)から**測る。fy は足元の上下
+// (wallFootOffsetMm)ぶん動いているので、ここでも同じだけ補って、世界での位置を
+// 変えない: 下へ伸ばした壁は下端だけが下がり、天端はそのまま。
+// 以前は足元の上下を見ておらず、壁全体(天端ごと)が下がっていた。まわりの
+// 選択枠・隣の壁との突き合わせ・巾木は元の位置のままだったので、すべてずれた
+// (報告された)。
 function getWallBandRange(w){
   var band=w.wallBand||'full';
   var fullH=wallDisplayHeightM(w);
+  var foot=wallFootOffsetMm(w)*U;           // マイナス = 下へ伸ばす
   if(band==='low'){
-    return {base:0,height:Math.min(fullH,1.1)};
+    return {base:0,height:Math.max(0.05,Math.min(fullH,1.1)-foot)};
   }
   if(band==='high'){
+    // 垂れ壁は天端から下がる帯。足元を動かしても帯の世界での位置は変えない。
     var h=Math.min(fullH,0.9);
-    return {base:Math.max(0,fullH-h),height:h};
+    return {base:Math.max(0,fullH-h)-foot,height:h};
   }
-  return {base:0,height:fullH};
+  return {base:0,height:Math.max(0.05,fullH-foot)};
+}
+// 壁の高さの範囲を、世界での高さ(m)で。壁どうしを比べるときはこちら
+// (足元の上下は壁ごとに違うので、足元基準のままでは比べられない)。
+function wallBandWorldRange(w){
+  var b=getWallBandRange(w);
+  var foot=floorBaseY(w.floor||1)+wallFootOffsetMm(w)*U;
+  return {bottom:foot+b.base, top:foot+b.base+b.height};
 }
 
 // Limit render-only wall endpoints at a neighbouring facade. Plan coordinates stay intact.
@@ -9202,8 +9218,8 @@ function wallFacadeEndLimitM(w,atEnd){
   var ex=dx/len*(atEnd?1:-1),ey=dy/len*(atEnd?1:-1),limit=Infinity;
   DATA.walls.forEach(function(o){
     if(o===w||o.floor!==w.floor||o.vis3D==='hide'||(o.thick||0)<120) return;
-    var wb=getWallBandRange(w),ob=getWallBandRange(o);
-    if(ob.base>wb.base+0.001||ob.base+ob.height<wb.base+wb.height-0.001) return;
+    var wb=wallBandWorldRange(w),ob=wallBandWorldRange(o);
+    if(ob.bottom>wb.bottom+0.001||ob.top<wb.top-0.001) return;
     var ox=o.x2-o.x1,oy=o.y2-o.y1,ol=Math.hypot(ox,oy);
     if(ol<1) return;
     var along=((px-o.x1)*ox+(py-o.y1)*oy)/ol;
@@ -9412,7 +9428,7 @@ function buildWall3D(w){
     mesh.castShadow=false; mesh.receiveShadow=true;
     mesh.position.set(
       x1+dirX*mid+normalX*(intOff+SK_T/2),
-      fy+SK_H/2,
+      fy-wallFootOffsetMm(w)*U+SK_H/2,   // 巾木は床の位置のまま(足元を下げても動かさない)
       z1+dirZ*mid+normalZ*(intOff+SK_T/2)
     );
     mesh.rotation.y=rotY;
