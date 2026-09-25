@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/deny-deploy.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/confirm-deploy.sh\"",
             "timeout": 10,
             "statusMessage": "本番を触るコマンドでないか見ています"
           }
