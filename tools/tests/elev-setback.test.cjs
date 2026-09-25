@@ -122,7 +122,7 @@ const TOP_FNS = [
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({
@@ -173,7 +173,11 @@ function box(floor, x0, y0, x1, y1) {
 }
 // 2階建て＋切妻屋根。棟は東西(x方向)に走り、y=3000 で折り返す。
 // ceiling を渡すと2階の部屋が勾配天井を宣言する。
-function gableHouse(ceiling) {
+// roofType を省けば切妻。'flat' を渡すと同じ家の陸屋根版になる。
+// 2026-09-26 から、勾配屋根の下の外壁は屋根の下面まで立ち上がる(wallRaiseRoofs)。
+// 「何も設定していなければ1バイトも変わらない」の検査は、その変更の影響を受けない
+// 陸屋根版で見る(検査の目的は斜線・勾配天井の仕組みが黙っていることの確認)。
+function gableHouse(ceiling, roofType) {
   const walls = [], rooms = [];
   [1, 2].forEach((f) => {
     box(f, 0, 1000, 6000, 5000).forEach((w) => walls.push(w));
@@ -182,7 +186,7 @@ function gableHouse(ceiling) {
   if (ceiling) rooms[1].ceiling = ceiling;
   return {
     walls, rooms, floors: {},
-    items: [{ id: 'roof1', type: 'roof', roofType: 'gable', x: -500, y: 500, w: 7000, d: 5000,
+    items: [{ id: 'roof1', type: 'roof', roofType: roofType || 'gable', x: -500, y: 500, w: 7000, d: 5000,
       rot: 0, floor: 3, elev: 0, pitch: 35, roofThickness: 180 }]
   };
 }
@@ -256,8 +260,8 @@ const DIRS = ['e', 'w', 's', 'n'];
 test('24-0(最重要): 斜線も勾配天井も無いプランの立面図は1バイトも変わらない', () => {
   // 変更前のコード = 「壁の折れ線」も「斜線制限」も存在しない世界。新しい呼び出しは
   // そこで必ず従来の枝/空文字列へ倒れるので、両者が一致すれば1バイトも増えていない。
-  const old = before(gableHouse(null));
-  const after = full(gableHouse(null));
+  const old = before(gableHouse(null, 'flat'));
+  const after = full(gableHouse(null, 'flat'));
   DIRS.forEach((d) => {
     ['"50"', '"100"', '"200"', '"auto"'].forEach((s) => {
       ['"a3"', '"a4"'].forEach((p) => {
@@ -283,10 +287,17 @@ test('24-0: 敷地はあるが用途地域の設定が無いプランでも、�
 // ══ 24-1 壁の上端は 3D と同じ折れ線 ═══════════════════════════════════
 
 test('24-1(最重要): 削られていない壁は null、勾配天井に接する壁は折れ線を返す', () => {
-  const flat = full(gableHouse(null));
+  const flat = full(gableHouse(null, 'flat'));
   const wFlat = 'DATA.walls.filter(function(w){return w.floor===2&&w.x1===0&&w.x2===0;})[0]';
   assert.equal(run(flat, 'wallTopProfileM(' + wFlat + ')'), null,
-    '勾配を宣言していない家の壁は従来のまっすぐな上辺のまま');
+    '陸屋根の家の壁は従来のまっすぐな上辺のまま');
+  // 切妻の家では、勾配天井を宣言していなくても妻側の外壁が屋根まで立ち上がる
+  // (以前は屋根の板を三角形に伸ばして塞いでいた。利用者の指示で壁の側へ)。
+  const gable = full(gableHouse(null));
+  const gp = plain(run(gable, 'wallTopProfileM(' + wFlat + ')'));
+  assert.ok(gp && gp.length >= 3, '妻壁が折れ線になっていない');
+  const gh = gp.map((p) => p[1]);
+  assert.ok(Math.max.apply(null, gh) - Math.min.apply(null, gh) > 1.0, '妻壁が棟に向かって上がっていない: ' + JSON.stringify(gh));
   const sloped = full(gableHouse(SLOPED));
   const prof = plain(run(sloped, 'wallTopProfileM(' + wFlat + ')'));
   assert.ok(prof && prof.length >= 3, '折れ線が返る: ' + JSON.stringify(prof));
@@ -327,8 +338,10 @@ test('24-1(最重要): 立面図の壁の上端が、3D と同じ高さ(wallTopH
     const t = (yMm - y1) / (y2 - y1);
     if (t < 0.02 || t > 0.98) return;        // 端は折れ線の丸めが乗るので中だけ見る
     const env = 'wallTopCutEnv(' + w + ')';
-    const h = run(ctx, 'wallTopHeightAtM(' + w + ',' + t + ',' + fullH + ',' + env + '.minH,' + env + '.roofs)');
-    const expected = (baseM + Math.min(h, fullH)) / run(ctx, 'U');
+    const h = run(ctx, 'wallTopHeightAtM(' + w + ',' + t + ',' + fullH + ',' + env + '.minH,' + env + '.roofs,' + env + '.raise)');
+    // 屋根の下面まで立ち上げる外壁は、壁自身の高さを超えてよい(wallTopProfileM と同じ)。
+    const raised = run(ctx, env + '.raise.length') > 0;
+    const expected = (baseM + (raised ? h : Math.min(h, fullH))) / run(ctx, 'U');
     assert.ok(Math.abs(expected - p[1]) < 2,
       't=' + t + ' で図面 ' + p[1] + ' / 3D ' + expected);
     checked++;
@@ -932,8 +945,8 @@ test('26-5(最重要): 斜めに走る壁の上端が、その壁の上での制
 });
 
 test('26-5(最重要): 斜線を設定していないプランの立面図は、どの方位でも1バイトも変わらない', () => {
-  const old = before(gableHouse(null));
-  const now = full(gableHouse(null));
+  const old = before(gableHouse(null, 'flat'));
+  const now = full(gableHouse(null, 'flat'));
   [0, 17, 90, 200, 318].forEach((deg) => {
     run(old, 'setPlanNorthDeg(' + deg + ');');
     run(now, 'setPlanNorthDeg(' + deg + ');');

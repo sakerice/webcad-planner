@@ -93,7 +93,7 @@ const FNS = [
   'roomCeilingTypeValue', 'roomFlatCeilingInputMm', 'roofTypeLabel',
   // Task 14 で足したもの
   'roomDisplayLabel', 'roomSlopedCeilingBlockReason',
-  'selectedRoomCeilingHtml',
+  'selectedRoomCeilingHtml', 'roomHasNoFloorAbove', 'slopedCeilingSpanMm', 'slopedCeilingAngleDeg',
   'updateSelectedCeilingType', 'updateSelectedFlatCeilingMm', 'updateSelectedSlopedCeiling',
   'updateSelectedProp',
   // 天井を書き換えると、その部屋の天井付け器具も追従する

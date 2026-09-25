@@ -115,7 +115,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
   'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'wallRoofTopLimitWorldY',
-  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
+  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'getWallBandRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
