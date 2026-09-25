@@ -9316,7 +9316,7 @@ function buildWall3D(w){
     // 返ってきた値を fy 基準へ下ろす。
     var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder)-wallLiftM+WALL_TOP_OVERSHOOT_M;
     // 同じ階の勾配屋根の下では、上乗せ分でも屋根の板の下面を超えない。
-    var underLim=wallRaiseTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+    var underLim=wallUnderRoofTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
     if(underLim!==null&&top>underLim-fy) top=underLim-fy;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,

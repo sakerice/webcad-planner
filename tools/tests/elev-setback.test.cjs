@@ -122,7 +122,7 @@ const TOP_FNS = ['roofBaseWorldY',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({

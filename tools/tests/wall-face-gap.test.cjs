@@ -119,7 +119,7 @@ function ctxFor(walls) {
   'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
-    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM',
+    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM', 'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
     'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
     'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'

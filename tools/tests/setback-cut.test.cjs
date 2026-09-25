@@ -140,7 +140,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
-  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopHeightAtM',
+  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopHeightAtM',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   // 斜線（Task 16）
   'getObjBounds', 'isFiniteCanvasValue',

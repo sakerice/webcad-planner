@@ -2132,7 +2132,7 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs){
   var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
   if(lim!==null&&best>lim-fy) best=lim-fy;
   // 同じ階の勾配屋根(下屋)の下では、屋根の板の下面で切る(下げるだけ)。
-  var down=wallRaiseTopWorldY(w,underRoofs,w.x1+dx*t,w.y1+dy*t);
+  var down=wallUnderRoofTopWorldY(w,underRoofs,w.x1+dx*t,w.y1+dy*t);
   if(down!==null&&best>down-fy) best=Math.max(0.001,down-fy);
   return best;
 }
@@ -2242,6 +2242,20 @@ function wallRaiseRoofs(w){
     }
   });
   return out;
+}
+// 同じ階の勾配屋根の下をくぐる壁の天端(ワールドm)。屋根ごとには板の下面の
+// いちばん低い点(壁の厚みぶんで突き抜けない)を採り、**屋根どうしでは高い方**を採る。
+// 2枚の片流れの境に立つ妻壁は、高い方の屋根まで立ち上がって隙間を塞ぎ、低い方の
+// 屋根はその壁の横腹に突き当たる(実際の納まり)。低い方で切ると、高い方の屋根の
+// 下に細いすき間が開き、室内から屋根の裏が見えた(報告された)。
+function wallUnderRoofTopWorldY(w,roofs,xMm,yMm){
+  if(!roofs||!roofs.length) return null;
+  var best=null;
+  roofs.forEach(function(rf){
+    var y=wallRaiseTopWorldY(w,[rf],xMm,yMm);
+    if(y!==null&&(best===null||y>best)) best=y;
+  });
+  return best;
 }
 // 立ち上げる先の高さ(ワールドm)。屋根の板の**下面**(上面から屋根厚を引く)まで。
 // 上面まで上げると、壁の天端が屋根の面と重なってちらつく。壁の芯と両面の3点で
