@@ -83,7 +83,7 @@ test('tools/deploy.sh は、端末からでなければ動かない', () => {
 });
 
 test('フックが、本番を触るコマンドで実際に確認を出す', () => {
-  const hook = join(ROOT, 'tools', 'deny-deploy.sh');
+  const hook = join(ROOT, 'tools', 'confirm-deploy.sh');
   assert.ok(existsSync(hook), 'フックが無い');
   const ask = (command) => execFileSync('bash', [hook], {
     input: JSON.stringify({ tool_input: { command } }), encoding: 'utf8',
@@ -124,7 +124,7 @@ test('フックが、本番を触るコマンドで実際に確認を出す', ()
 // どちらも「デプロイ」という語が出てこない。`git push origin main` と
 // `gh pr merge` が、そのまま本番の差し替えである。
 test('main へ載せる操作で確認を出し、枝の作業は止めない', () => {
-  const hook = join(ROOT, 'tools', 'deny-deploy.sh');
+  const hook = join(ROOT, 'tools', 'confirm-deploy.sh');
   const ask = (command) => execFileSync('bash', [hook], {
     input: JSON.stringify({ tool_input: { command } }), encoding: 'utf8',
     env: { ...process.env, CLAUDE_PROJECT_DIR: ROOT },
@@ -157,7 +157,7 @@ test('main に居るときは、宛先を書かない push でも確認を出す
   // 宛先を書かない push は、いまの枝に出る。main に居れば本番に出る。
   const repo = mkdtempSync(join(tmpdir(), 'pushguard-'));
   execFileSync('git', ['init', '-q', '-b', 'main', repo]);
-  const out = execFileSync('bash', [join(ROOT, 'tools', 'deny-deploy.sh')], {
+  const out = execFileSync('bash', [join(ROOT, 'tools', 'confirm-deploy.sh')], {
     input: JSON.stringify({ tool_input: { command: 'git push' } }), encoding: 'utf8',
     env: { ...process.env, CLAUDE_PROJECT_DIR: repo },
   });
@@ -180,7 +180,7 @@ test('プロジェクトの設定が、フックと確認の両方を持って�
   const hooks = (settings.hooks && settings.hooks.PreToolUse) || [];
   const bash = hooks.find((h) => h.matcher === 'Bash');
   assert.ok(bash, 'Bash のフックが無い');
-  assert.ok(bash.hooks.some((h) => h.command && h.command.includes('deny-deploy.sh')),
+  assert.ok(bash.hooks.some((h) => h.command && h.command.includes('confirm-deploy.sh')),
     'フックがこのリポジトリの門を呼んでいない');
 
   // 本番は許可制。**確認の一覧に載っていること**を見る。
