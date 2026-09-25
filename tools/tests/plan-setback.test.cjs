@@ -91,7 +91,7 @@ const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
 const SETBACK_FNS = [
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
-  'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
+  'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofCeilingWorldYAt',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',

@@ -97,7 +97,7 @@ const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
 const SETBACK_FNS = [
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
-  'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
+  'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofCeilingWorldYAt',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
@@ -111,7 +111,7 @@ const SETBACK_FNS = [
 const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
   '_ceilingClampWarned', 'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M',
   'WALL_TOP_SAMPLE_STEP_M'];
-const TOP_FNS = [
+const TOP_FNS = ['roofBaseWorldY',
   'roomDeclaresSlopedCeiling', 'roofItemOverRoom', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',

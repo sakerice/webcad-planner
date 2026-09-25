@@ -879,7 +879,7 @@ function roofLowHighMm(it){
   if(run<=0) return null;
   var fl=it.floor||1;
   var ref=(fl>1)?floorTopY(fl-1):floorBaseY(fl);
-  var low=Math.round((floorBaseY(fl)+(Number(it.elev)||0)*U-ref)/U);
+  var low=Math.round((roofBaseWorldY(it)+(Number(it.elev)||0)*U-ref)/U);
   var pitch=Math.max(5,Math.min(60,Number(it.pitch)||30));
   var high=Math.round(low+Math.tan(pitch*Math.PI/180)*run/U);
   return {lowMm:low, highMm:high, runMm:Math.round(run/U)};

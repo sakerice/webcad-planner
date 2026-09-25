@@ -1611,6 +1611,11 @@ function roofsOverRoom(room){
     pts.push([room.x+room.w*(i+0.5)/5, room.y+room.d*(j+0.5)/5]);
   DATA.items.forEach(function(it){
     if(!it||it===primary||it.type!=='roof'||it.hidden3D) return;
+    // 同じ高さの段に載る屋根だけ(下屋どうし)。上の階の軒の出(2階の屋根が1階の
+    // 部屋の上へ張り出した分)は、その部屋の屋根ではない。数えると、軒の出が
+    // かかる細い帯だけ天井が上の階の屋根まで上がり、下屋の陸屋根の上へ天井の
+    // 切れ端が突き出した(利用者のプラン)。
+    if((it.floor||1)!==(primary.floor||1)) return;
     var hit=pts.some(function(p){
       return roofCoversPlanPoint(it,p[0],p[1])&&roofCeilingWorldYAt(it,p[0],p[1])>floorY;
     });
@@ -1624,9 +1629,18 @@ function roofsOverRoom(room){
 // 世界での据え付け方 (floorBaseY(floor)+elev) も既存の竪樋判定と同じ式である。
 // この面が「家の中のものが超えられない天井(=屋根裏の底)」であり、天井面も壁の
 // 上端もここで頭を押さえられる。
+// 屋根が据わる高さ(ワールドm、高さ Z を足す前)。**3D で屋根を置く位置
+// (item3DBaseY の roof の枝)と同じ式にする。** 下の階の壁を既定より高くすると、
+// 屋根はその壁の天端まで持ち上がって描かれる(localSupportTopY)。高さの計算が
+// 階の基準面(floorBaseY)のままだと、壁は元の高さで切られ、持ち上がった屋根との
+// あいだが空いた(利用者のプランで 812mm)。下の階に高い壁が無ければ floorBaseY と同じ。
+function roofBaseWorldY(roofItem){
+  var it=roofItem||{};
+  return localSupportTopY(it.floor,it.x||0,it.y||0,(it.x||0)+(it.w||0),(it.y||0)+(it.d||0));
+}
 function roofUndersideWorldYAt(roofItem,xMm,yMm){
   var lp=roofLocalPoint(roofItem,xMm,yMm);
-  return floorBaseY(roofItem.floor)+((roofItem.elev||0)*U)
+  return roofBaseWorldY(roofItem)+((roofItem.elev||0)*U)
     +roofSurfaceHeightAt(roofItem,lp.x,lp.z);
 }
 // 屋根の面から天井までの下がり(mm)。既定は CEILING_UNDER_ROOF_OFFSET_MM(250)だが、
@@ -1750,7 +1764,7 @@ function roomRoofCeilingExtent(room){
   var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
     over.map(function(rf){
       return [rf.id,rf.x,rf.y,rf.w,rf.d,rf.floor,rf.rot,rf.elev,rf.roofType,rf.pitch,
-        rf.flipX?1:0,rf.flipY?1:0,floorBaseY(rf.floor)].join(',');
+        rf.flipX?1:0,rf.flipY?1:0,roofBaseWorldY(rf)].join(',');
     }).join('|'),
     floorBaseY(room.floor),
     sbRoofs.map(function(r){return r.key;}).join('|')].join(':');
@@ -2158,8 +2172,19 @@ function wallTopCutEnv(w,isOuter){
     });
   }
   if(!touches&&!raise.length&&!sameFloor.length) return null;
+  // 外壁の下限は階高。ただし**高さを個別に指定した外壁は、その高さを下限にする。**
+  // 勾配天井の部屋に面した壁は天井の高さから上端を組むので、階高より高く指定した
+  // 外壁(3500mm など)でも天井(3400mm)で止まり、持ち上がった陸屋根とのあいだが
+  // 空いた(利用者のプラン)。屋根が覆う位置では、このあと屋根で切られる。
+  var minH;
+  if(isOuter){
+    minH=wallFullHeightM(w&&w.floor);
+    var explicitH=w&&w.wallHeight!==undefined&&isFinite(Number(w.wallHeight))&&
+      Number(w.wallHeight)!==defaultWallHeightMmForFloor(w.floor);
+    if(explicitH) minH=Math.max(minH,wallDisplayHeightM(w));
+  }
   return {
-    minH:isOuter?wallFullHeightM(w&&w.floor):undefined,
+    minH:minH,
     roofs:touches?wallLimitingRoofs(w):[],
     raise:raise,
     // 同じ階の勾配屋根の下を通る壁は、屋根の板の**下面**で止める(上面で止めると、

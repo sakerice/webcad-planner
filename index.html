@@ -11284,7 +11284,7 @@ function downspoutObstacleInfo(it,xl,zl,topWorldY){
     var oTop, oStop;
     if(o.type==='roof'){
       // 勾配屋根はその地点の屋根面高さで判定(基準面だと斜面に刺さる)
-      oTop=floorBaseY(o.floor)+((o.elev||0)*U)+roofSurfaceHeightAt(o,lp.x,lp.z);
+      oTop=roofBaseWorldY(o)+((o.elev||0)*U)+roofSurfaceHeightAt(o,lp.x,lp.z);
       oStop=oTop; // 屋根面で受ける
     } else {
       oTop=floorTopY(o.floor)+((o.elev||0)*U)+getItemHeightValue(o)*U; // 柵天端(経路判定用)
@@ -15271,13 +15271,18 @@ function buildRooms3D(flFilt){
 	    if(!roomHasUserLight){
 	      var autoDim=isIndoorView?1/(1+0.35*(userLightsByFloor[r.floor]||0)):1;
 	      var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
+	      // 勾配天井の部屋では、ライトごとに**その位置の**天井の高さに付ける。
+	      // ceilY は部屋でいちばん高い天井なので、そこに全部付けると、天井が低い
+	      // ところのライトが天井(ときには屋根)を突き抜けて宙に浮いた(報告された)。
+	      var lightProfile=roomCeilingProfile(r);
 	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
 	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+	        var lceil=lightProfile?Math.min(ceilY,roomCeilingWorldYAtMm(r,lightProfile,lx/U,lz/U)):ceilY;
 	        if(showAutoLightFixtures){
-	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,ceilY-0.013,lz));
+	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,lceil-0.013,lz));
 	        }
 	        var pl=new THREE.PointLight(0xffffff,roomInt*autoDim*Math.PI,6.0,1.8);
-	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true,autoRoomScale:(isIndoorView?0.35:1.8)*autoDim*Math.PI}; sc3.add(pl);
+	        pl.position.set(lx,lceil-0.22,lz); pl.userData={b:true,autoRoomScale:(isIndoorView?0.35:1.8)*autoDim*Math.PI}; sc3.add(pl);
 	      }
 	    }
   });
@@ -21665,7 +21670,7 @@ var JISDRAW=(function(){
     var ax=ELEV_AXES[dir];
     var verts=roofLocalVertices(it);
     if(!verts.length) return null;
-    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
     var pts=[], apex=-Infinity;
     verts.forEach(function(v){
       var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})。flipX/flipY→回転→平行移動を内包
@@ -21767,7 +21772,7 @@ var JISDRAW=(function(){
     var ax=ELEV_AXES[dir];
     var verts=roofLocalVertices(it);
     if(!verts.length) return null;
-    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
     var world=verts.map(function(v){
       var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})
       return {x:w.x, y:w.y, h:baseHeightMm+v.h/U};
@@ -21858,7 +21863,7 @@ var JISDRAW=(function(){
       return isFinite(max)?max:null;
     }
     DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
-      var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+      var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
       roofLocalVertices(it).forEach(function(v){
         var h=baseHeightMm+v.h/U;
         if(h>max) max=h;

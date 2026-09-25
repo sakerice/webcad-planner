@@ -109,7 +109,7 @@ const FNS = [
   'wallFullHeightM', 'isPositiveNumber',
   'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
   'roomDeclaresSlopedCeiling', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal',
-  'roofItemOverRoom', 'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
+  'roofItemOverRoom', 'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofCeilingWorldYAt',
   'roofLocalPoint', 'roofSurfaceHeightAt', 'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
   'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
