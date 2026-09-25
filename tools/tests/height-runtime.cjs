@@ -68,7 +68,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingSlopeM',
-  'roomAtPointOnFloor', 'ceilingFinishThicknessM', 'roomCeilingElevationMm',
+  'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'ceilingFinishThicknessM', 'roomCeilingElevationMm',
   'roomSkipLevelMm', 'roomSkipCavityMm', 'roomStoreyFloorTopY', 'roomCeilingCapM',
   'itemIsUnderPlatform', 'ceilingFinishElevationMm', 'defaultLightElevationMm',
   'snapCeilingFixturesToCeiling'

@@ -1048,6 +1048,11 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.wallStyle||'solid')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
+    // 載せる床(足元と高さの基準)。段差のある階でだけ出す。家具・階段と同じ欄。
+    // (以前の「壁の基準」の欄は、壁がここで return するため一度も表示されていなかった。)
+    html += baseFloorSelectHtml(it);
+    if(floorHasSkipLevel(it.floor||1))
+      html += '<div class="lock-status-note">いまの足元は ＋'+wallSkipFootMm(it)+'mm、高さの基準は ＋'+wallSkipBaseMm(it)+'mm です。</div>';
     // 巾木の有無と色は壁単位ではなく**内観面ごと**(下の「壁紙カラー(内観面)」)。
     // 壁は両面が別の部屋に面するので、壁単位だと部屋ごとの統一が取れない。
     if((it.thick||0)<120){
@@ -1363,18 +1368,8 @@ function updateProps(){
         box:'階段下を塞ぎます。下を収納にしたいなら、ひな壇のまま造作棚を置いてください。',
         skeleton:'蹴込み板なし。光と視線が抜けます。'
       }[sstyle])+'</div>';
-    // 足元。段差のある階でだけ出す。
-    if(floorMaxSkipLevelMm(it.floor) > 0){
-      var sbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
-      html += '<div class="pr"><div class="pl">階段の足元</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
-        '<option value="auto"'+(sbase==='auto'?' selected':'')+'>自動（下端の先の床から）</option>'+
-        '<option value="floor"'+(sbase==='floor'?' selected':'')+'>階の床から</option>'+
-        '<option value="skip"'+(sbase==='skip'?' selected':'')+'>段差の上から</option>'+
-        '</select></div>';
-      html += '<div class="lock-status-note">いまの足元は ＋'+
-        Math.round((stairUpperSpanM(it).baseY - floorTopY(it.floor))/U)+'mm です。'+
-        '自動は階段の下端の先にある床を見ます（部材の中心ではないので、段差からはみ出す大きさの階段でも段差の上から始まります）。</div>';
-    }
+    // 載せる床(足元)。段差のある階でだけ出す。家具・壁と同じ欄。
+    html += baseFloorSelectHtml(it);
     html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
       (sri.steps||getStairStepCount(it))+'段。'+
       (target==='level'
@@ -1442,16 +1437,9 @@ function updateProps(){
         ? '（自動は、背面が壁に接していれば縦板なしにします。回転や反転を掛けた棚では当たらないことがあるので、その場合は明示してください。）'
         : '')+'</div>';
   }
-  // 段差のある部屋の中に居るものだけ、置く高さの基準を選ばせる。
-  // 段差の無い家では欄そのものが出ないので、既存の操作は1つも増えない。
-  if(it.type !== 'room' && it.type !== 'wall' && !isOpeningItemType(it.type) &&
-     roomSkipCavityMm(roomAtPointOnFloor(it.floor,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2)) > 0) {
-    var under = it.baseLevel === 'under';
-    html += '<div class="pr"><div class="pl">置く高さ</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'under\'?\'under\':undefined)">'+
-      '<option value="floor"'+(under?'':' selected')+'>段差の上（この部屋の床）</option>'+
-      '<option value="under"'+(under?' selected':'')+'>段差の下（床下の空間）</option>'+
-      '</select></div>';
-  }
+  // 載せる床。段差のある階でだけ出す(段差の無い家では欄そのものが出ないので、
+  // 既存の操作は1つも増えない)。壁と階段は、それぞれの欄の中で同じものを出す。
+  if(baseFloorKindOf(it)==='item') html += baseFloorSelectHtml(it);
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
@@ -1464,20 +1452,6 @@ function updateProps(){
   }
   if(it.thick !== undefined) {
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
-    // 段差のある階でだけ、足元と高さの基準を選ばせる。
-    // 自動は「接する部屋の段差」から判断するが、部屋の外を通る壁や、
-    // 部屋の縁からわずかに外れた壁では当たらない。そのための明示。
-    if(floorMaxSkipLevelMm(it.floor) > 0) {
-      var wbase = (it.baseLevel==='floor'||it.baseLevel==='skip') ? it.baseLevel : 'auto';
-      html += '<div class="ph" style="margin-top:12px">スキップフロア</div>';
-      html += '<div class="pr"><div class="pl">壁の基準</div><select class="pi" onchange="updateSelectedProp(\'baseLevel\',this.value===\'auto\'?undefined:this.value)">'+
-        '<option value="auto"'+(wbase==='auto'?' selected':'')+'>自動（接する部屋から判断）</option>'+
-        '<option value="floor"'+(wbase==='floor'?' selected':'')+'>階の床から</option>'+
-        '<option value="skip"'+(wbase==='skip'?' selected':'')+'>段差の上から</option>'+
-        '</select></div>';
-      html += '<div class="lock-status-note">いまの足元は ＋'+wallSkipFootMm(it)+'mm、高さの基準は ＋'+wallSkipBaseMm(it)+'mm です。'+
-        '両側とも段差の上にある壁だけ足元が上がります（段差の境界の壁は蹴上げ面を兼ねるので下ろしたまま）。</div>';
-    }
     html += '<div class="pr"><div class="pl">カラー</div><input class="pi" type="color" value="'+(it.color||'#888')+'" onchange="updateSelectedProp(\'color\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
     if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';

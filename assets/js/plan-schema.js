@@ -83,6 +83,16 @@
     if (w.baseLevel !== undefined && w.baseLevel !== 'floor' && w.baseLevel !== 'skip') {
       warnings.push(where + ': 壁の基準 "' + w.baseLevel + '" は floor / skip のどちらでもないので自動判定で読む');
     }
+    checkBaseRoom(w, where, warnings);
+  }
+
+  // 載せる床(部屋のid)。見つからない部屋を指していても読めるので warnings。
+  // アプリ側は、指した部屋が無ければ自動に戻す(baseRoomOf)。
+  function checkBaseRoom(o, where, warnings) {
+    if (o.baseRoom === undefined || o.baseRoom === null) return;
+    if (typeof o.baseRoom !== 'string' && typeof o.baseRoom !== 'number') {
+      warnings.push(where + ': 載せる床(baseRoom) が部屋のidでないので自動判定で読む');
+    }
   }
 
   function checkRoom(r, where, errors, warnings) {
@@ -134,6 +144,7 @@
         ['floor', 'under', 'skip'].indexOf(it.baseLevel) < 0) {
       warnings.push(where + ': 置く高さの基準 "' + it.baseLevel + '" は floor / under / skip のどれでもないので自動判定で読む');
     }
+    checkBaseRoom(it, where, warnings);
     if (it.stairRail !== undefined &&
         ['none', 'left', 'right', 'both'].indexOf(it.stairRail) < 0) {
       warnings.push(where + ': 階段の手すり "' + it.stairRail + '" は none / left / right / both のどれでもないので手すり無しとして読む');

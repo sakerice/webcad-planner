@@ -10,7 +10,9 @@ function context(){const c={DATA:{rooms:[],walls:[]},U:.001,Number,Math,isFinite
  vm.createContext(c);
  vm.runInContext(html.slice(html.indexOf('function defaultFloorRaiseMmForFloor('),html.indexOf('// 階高(mm)。plan.floors')),c);
  vm.runInContext(html.slice(html.indexOf('function segmentInsideRectLengthMm('),html.indexOf('function roomFloorTopY(')),c);
- vm.runInContext(html.slice(html.indexOf('function roomFloorOffsetMm('),html.indexOf('function updateSelectedRoomFloor(')),c);return c;}
+ vm.runInContext(html.slice(html.indexOf('function roomFloorOffsetMm('),html.indexOf('function updateSelectedRoomFloor(')),c);
+ // 重なった部屋の選び方(roomFloorAt が使う)。
+ vm.runInContext(html.slice(html.indexOf('function roomsAtPointOnFloor('),html.indexOf('// 壁の両側を数点サンプリングし')),c);return c;}
 test('legacy room height is unchanged; chosen floor buildup is clamped in mm',()=>{const c=context();assert.equal(c.roomFloorOffsetMm({}),0);assert.equal(c.roomFloorOffsetMm({floorRaiseMm:150}),150);assert.equal(c.roomFloorOffsetMm({floorRaiseMm:-100}),0);assert.equal(c.roomFloorOffsetMm({floorRaiseMm:Infinity}),0);assert.equal(c.roomFloorOffsetMm({floorRaiseMm:999}),600);});
 test('entry, living and flush bathroom use their own floors without lifting the storey',()=>{const c=context();c.DATA.rooms=[{floor:1,x:0,y:0,w:1000,d:1000},{floor:1,x:1000,y:0,w:2000,d:2000,floorRaiseMm:150},{floor:1,x:3000,y:0,w:1000,d:1000,floorRaiseMm:150}];assert.equal(c.roomFloorAt(1,500,500),0);assert.equal(c.roomFloorAt(1,1500,500),.15);assert.equal(c.roomFloorAt(1,3500,500),.15);assert.equal(c.floorTopY(2),2.7);});
 test('smaller inset room wins and rooms on another floor cannot lift objects',()=>{const c=context();c.DATA.rooms=[{floor:1,x:0,y:0,w:5000,d:5000,floorRaiseMm:150},{floor:1,x:0,y:0,w:1000,d:1000,floorRaiseMm:0}];assert.equal(c.roomFloorAt(1,500,500),0);assert.equal(c.roomFloorAt(2,500,500),2.7);assert.equal(c.roomFloorAt(1,6000,6000),0);});
