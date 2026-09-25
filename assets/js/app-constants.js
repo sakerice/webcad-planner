@@ -1223,19 +1223,23 @@ function updateSelectedBaseFloor(value){
   var kind=baseFloorKindOf(it);
   if(!kind) return;
   if(typeof saveState==='function') saveState();
+  // 変える前に、何かの天板に載っていたか(高さ Z がその天板の高さと一致するか)。
+  var canElev=kind==='item'&&typeof canSetItemElevation==='function'&&canSetItemElevation(it)&&!isLightItemType(it.type);
+  var wasOn=canElev?findDefaultPlacementSurface(it):null;
+  var sat=!!(wasOn&&Math.abs((Number(it.elev)||0)-wasOn.top)<=1);
   var targets=[it];
   if(kind==='stair') targets=getConnectedStairParts(it);
   targets.forEach(function(o){ delete o.baseRoom; delete o.baseLevel; });
   var v=String(value||'auto');
   if(v.indexOf('room:')===0) it.baseRoom=v.slice(5);
   else if(v==='floor'||v==='skip'||(v==='under'&&kind==='item')) it.baseLevel=v;
-  // 床を選び直したら、床からの高さ(elev)は新しい床で測り直す。棚や机の上に
-  // 置いた物はその天板へ載せ直し、そうでなければ床に置く。以前の床を基準にした
-  // 値が残ると、床を変えた瞬間に物が床へ埋まったり宙に浮いたりする。
-  if(kind==='item'&&typeof canSetItemElevation==='function'&&canSetItemElevation(it)&&!isLightItemType(it.type)){
+  // 棚や机の天板に載っていた物は、床を選び直したら新しい床で載せ直す(天板が
+  // 無くなれば床に置く)。天板の高さのまま残すと、床を変えた瞬間に宙に浮く。
+  // 天板に載っていなかった物の高さ Z は、利用者が決めた値なので触らない
+  // (マイナスで床より下げて置くこともできる)。
+  if(canElev&&sat){
     var surface=findDefaultPlacementSurface(it);
-    if(surface) it.elev=Math.max(-5000,Math.min(10000,Math.round(surface.top)));
-    else if((Number(it.elev)||0)<0) it.elev=0;
+    it.elev=surface?Math.max(-5000,Math.min(10000,Math.round(surface.top))):0;
   }
   markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
@@ -1492,15 +1496,36 @@ function roomDeclaresSlopedCeiling(room){
 // 少しでも重なっていれば「上に部屋がある」とみなす。一部だけ覆われた部屋に勾配を
 // 許すと、覆われた側で天井が上階の床を突き抜ける。
 //
-// ただし**壁の厚みの半分(60mm)までの重なりは数えない。** 部屋の矩形は壁の芯で
-// 描くが、手で描くと芯から数十mmずれる。そのずれは壁の中に隠れるので、上の床が
-// 天井を突き抜けて見えることはない。1mm で数えていたときは、上階の部屋が 45〜49mm
-// かかっているだけで階段室を吹き抜けにできず、設定しても黙って平天井のまま、
-// 上に床の無い天井が階段の上に板のように浮いていた(利用者のプランで発生)。
-var ROOM_OVERLAP_EPS_MM=60;
+// ただし**壁の中に隠れる細い重なりは数えない。** 部屋の矩形は壁の芯で描くが、
+// 手で描くと芯から数十mmずれる。重なりが細い帯(幅 60mm まで)で、その帯に沿って
+// 壁が立っていれば、帯は壁の中に隠れ、上の床が天井を突き抜けて見えることはない。
+// 1mm で数えていたときは、上階の部屋が 45〜49mm かかっているだけで階段室を
+// 吹き抜けにできず、設定しても黙って平天井のままだった(利用者のプランで発生)。
+// 壁の無いところの細い重なりは、従来どおり重なりとして数える(隠すものが無い)。
+var ROOM_OVERLAP_EPS_MM=1;
+var ROOM_OVERLAP_WALL_TOL_MM=60;
 function roomsOverlapInPlan(a,b){
-  return a.x+a.w>b.x+ROOM_OVERLAP_EPS_MM && b.x+b.w>a.x+ROOM_OVERLAP_EPS_MM &&
-         a.y+a.d>b.y+ROOM_OVERLAP_EPS_MM && b.y+b.d>a.y+ROOM_OVERLAP_EPS_MM;
+  var x0=Math.max(a.x,b.x), x1=Math.min(a.x+a.w,b.x+b.w);
+  var y0=Math.max(a.y,b.y), y1=Math.min(a.y+a.d,b.y+b.d);
+  if(x1-x0<=ROOM_OVERLAP_EPS_MM||y1-y0<=ROOM_OVERLAP_EPS_MM) return false;
+  if(Math.min(x1-x0,y1-y0)<=ROOM_OVERLAP_WALL_TOL_MM&&overlapStripHiddenByWall(a,b,x0,y0,x1,y1)) return false;
+  return true;
+}
+// 重なりの帯(x0..x1, y0..y1)に沿って、どちらかの部屋の階の壁が帯の長さの8割以上
+// 立っているか。壁の厚みの半分だけ帯を太らせて、壁の芯が通る長さで測る。
+function overlapStripHiddenByWall(a,b,x0,y0,x1,y1){
+  if(typeof DATA==='undefined'||!DATA||!DATA.walls) return false;
+  var vertical=(x1-x0)<(y1-y0);
+  var stripLen=vertical?(y1-y0):(x1-x0);
+  var floors=[a.floor||1,b.floor||1];
+  return DATA.walls.some(function(w){
+    if(!w||floors.indexOf(w.floor||1)<0) return false;
+    var half=(Number(w.thick)||120)/2;
+    var len=vertical
+      ? segmentInsideRectLengthMm(w.x1,w.y1,w.x2,w.y2,x0-half,y0,x1+half,y1)
+      : segmentInsideRectLengthMm(w.x1,w.y1,w.x2,w.y2,x0,y0-half,x1,y1+half);
+    return len>=stripLen*0.8;
+  });
 }
 // この部屋を覆っている上階の部屋。無ければ null(=その部屋の上は屋根裏)。
 // 複数該当するときは一番下の階のものを返す -- 画面で理由を言うときに、
@@ -1604,24 +1629,31 @@ function roofItemOverRoom(room){
 function roofsOverRoom(room){
   var primary=roofItemOverRoom(room);
   if(!primary) return [];
-  var out=[primary];
   var floorY=floorTopY(room.floor);
   var pts=[], i, j;
   for(i=0;i<5;i++) for(j=0;j<5;j++)
     pts.push([room.x+room.w*(i+0.5)/5, room.y+room.d*(j+0.5)/5]);
+  // 部屋に一部でもかかる屋根を集め、**いちばん低い段(floor)**の屋根だけを使う。
+  // 上の段の屋根(2階の屋根の軒の出など)は、同じ部屋に下の段の屋根(下屋)が
+  // かかっていればその部屋の屋根ではない -- 数えると、軒の出のかかる細い帯だけ
+  // 天井が上の段の屋根まで上がり、下屋の上へ天井の切れ端が突き出した。
+  // 以前は「主の屋根(中心の屋根)と同じ段」で絞っていたが、中心に上の段の屋根が
+  // かかる部屋では、端にかかる下屋を落としてしまっていた。
+  var found=[];
   DATA.items.forEach(function(it){
-    if(!it||it===primary||it.type!=='roof'||it.hidden3D) return;
-    // 同じ高さの段に載る屋根だけ(下屋どうし)。上の階の軒の出(2階の屋根が1階の
-    // 部屋の上へ張り出した分)は、その部屋の屋根ではない。数えると、軒の出が
-    // かかる細い帯だけ天井が上の階の屋根まで上がり、下屋の陸屋根の上へ天井の
-    // 切れ端が突き出した(利用者のプラン)。
-    if((it.floor||1)!==(primary.floor||1)) return;
-    var hit=pts.some(function(p){
+    if(!it||it.type!=='roof'||it.hidden3D) return;
+    var hit=(it===primary)||pts.some(function(p){
       return roofCoversPlanPoint(it,p[0],p[1])&&roofCeilingWorldYAt(it,p[0],p[1])>floorY;
     });
-    if(hit) out.push(it);
+    if(hit) found.push(it);
   });
-  return out;
+  var level=Infinity;
+  found.forEach(function(it){ level=Math.min(level,it.floor||1); });
+  var out=found.filter(function(it){ return (it.floor||1)===level; });
+  // 主の屋根を先頭に。どの屋根も覆っていない点は、部屋の内側で屋根のある点の
+  // 高さを使う(roomCeilingWorldYAtMm)。
+  out.sort(function(a,b){ return (a===primary?-1:0)-(b===primary?-1:0); });
+  return out.length?out:[primary];
 }
 // 屋根の下面(=垂木の載る基準面)の、ワールド Y(m)。
 // **屋根の形の計算はここに書かない**。3D 側が既に使っている roofSurfaceHeightAt
@@ -1634,9 +1666,15 @@ function roofsOverRoom(room){
 // 屋根はその壁の天端まで持ち上がって描かれる(localSupportTopY)。高さの計算が
 // 階の基準面(floorBaseY)のままだと、壁は元の高さで切られ、持ち上がった屋根との
 // あいだが空いた(利用者のプランで 812mm)。下の階に高い壁が無ければ floorBaseY と同じ。
+var _roofBaseCache=null;   // 3D の組み立て1回のあいだだけ有効(build3D が作って捨てる)
 function roofBaseWorldY(roofItem){
   var it=roofItem||{};
-  return localSupportTopY(it.floor,it.x||0,it.y||0,(it.x||0)+(it.w||0),(it.y||0)+(it.d||0));
+  var cache=(typeof _roofBaseCache!=='undefined')?_roofBaseCache:null;
+  var key=cache&&[it.id,it.floor,it.x,it.y,it.w,it.d].join(',');
+  if(key&&cache[key]!==undefined) return cache[key];
+  var v=localSupportTopY(it.floor,it.x||0,it.y||0,(it.x||0)+(it.w||0),(it.y||0)+(it.d||0));
+  if(key) cache[key]=v;
+  return v;
 }
 function roofUndersideWorldYAt(roofItem,xMm,yMm){
   var lp=roofLocalPoint(roofItem,xMm,yMm);
@@ -1728,7 +1766,7 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
       // ずれる)と、その細い帯だけ主の屋根の面を延長した高さになり、吹き抜け側では
       // 天井が棚のように落ちて、壁の上に謎の板が出た(報告された)。
       var near=null;
-      if(roofs.length>1&&room){
+      if((roofs.length>1||roofs.indexOf(profile.roof)<0)&&room){
         var cx=room.x+room.w/2, cy=room.y+room.d/2;
         var vx=cx-xMm, vy=cy-yMm, vl=Math.hypot(vx,vy)||1;
         [40,80,160,320,640].some(function(dMm){
@@ -2113,7 +2151,11 @@ function wallLimitingRoofs(w){
 // -- 屋根が無いところで外壁を天井まで切ると、下げた部屋の上でファサードに
 // 水平のスリットが貫通する(Task 2b の実測)。
 // roofs はその壁の頭を押さえる屋根(wallLimitingRoofs)。渡さなければ切らない。
-function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs){
+// raiseT は立ち上げの屋根を見る位置(t と同じ尺度)。省略すれば t。3D の壁は
+// 隅を閉じるために端の先(t<0 / t>1)まで伸ばすので、その位置の屋根で決めないと、
+// 屋根の縁の外へ出た部分まで立ち上がって屋根の上に突き出す。立面図は 0..1 だけを
+// 描くので省略でよい。**3D も立面図もこの1つの関数で上端を決める。**
+function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs,raiseT){
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
   var lenMm=Math.sqrt(dx*dx+dy*dy);
   if(lenMm<1) return fallbackH;
@@ -2148,7 +2190,8 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs){
   // 外壁は、屋根の板の下面まで立ち上げる(wallRaiseRoofs)。上げるだけで、下げない。
   // **切る前に**上げる。後で上げると、斜線の制限面などで切った分を元へ戻してしまう
   // (陸屋根も立ち上げの対象にしたとき、斜線で削った壁が陸屋根まで戻った)。
-  var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*t,w.y1+dy*t);
+  var rt=(raiseT===undefined)?t:raiseT;
+  var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*rt,w.y1+dy*rt);
   if(up!==null&&best<up-fy) best=up-fy;
   // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
   var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
@@ -2170,11 +2213,10 @@ function wallTopCutEnv(w,isOuter){
   var sameFloor=wallSameFloorRoofs(w);
   if(isOuter===undefined)
     isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
-  // 外皮かどうかは「片側でも部屋に面していない」でも見る。外観の塗り分け
-  // (getWallExteriorSpans)は軒の出の下を外と数えないことがあり、それで外壁を
-  // 間仕切り扱いすると、勾配天井の部屋の天井高まで下げられて屋根とのあいだに
-  // 隙間が開いた(報告された: 陸屋根の下の LDK の南の外壁)。
-  if(!isOuter&&!wallAdjacentRoomsCeiling(w).enclosed) isOuter=true;
+  // 外皮かどうかは外観の塗り分けと同じ判定(getWallExteriorSpans)1つで決める。
+  // 以前はここだけ「片側でも部屋に面していない」で上書きしていたが、原因は外の
+  // 判定が壁の厚みを無視して家の中へ流れ込んでいたことだった(getWallOutsideGrid で
+  // 直した)。判定を1つにしておけば、外装の色・壁紙の欄・壁の高さが食い違わない。
   // 立ち上げるのは「片側でも部屋に面していない壁」(外皮)。外観の塗り分け
   // (getWallExteriorSpans)は屋根の軒下などを外と数えないことがあり、それで
   // 判定すると軒の出の下の外壁が立ち上がらなかった(利用者のプランで確認)。

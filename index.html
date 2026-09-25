@@ -6055,6 +6055,13 @@ function build3D(){
   syncExteriorWallSettings();
   ensureInteriorWallSettings();
   ensureRoofAppearance();
+  // 屋根の据わる高さ(roofBaseWorldY)は、組み立てのあいだ変わらない。天井の格子の
+  // 頂点ごと・壁の上端の点ごとに下の階の全部の壁を調べ直さないよう、この1回の
+  // 組み立てのあいだだけ屋根ごとに覚えておく(組み立ての外では毎回求める)。
+  _roofBaseCache={};
+  try{ build3DScene(); } finally { _roofBaseCache=null; }
+}
+function build3DScene(){
   var toRemove=[];
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
   toRemove.forEach(function(c){
@@ -8544,10 +8551,23 @@ function getWallOutsideGrid(fl){
   var outside=new Array(cols*rows).fill(false);
   function id(i,j){return j*cols+i;}
   function center(i,j){return {x:minX+(i+0.5)*cell,y:minY+(j+0.5)*cell};}
+  // 隣のセルへ進めるか。壁の**芯線**と交わるかだけを見ていた頃は、壁どうしが芯線で
+  // 接していない角(片方の壁の端が、もう片方の芯から数十mm手前で止まっている)を
+  // すり抜けて、家の中まで「外」が流れ込んだ。見た目は壁の厚みで閉じているので
+  // 気づけず、外壁が内壁として扱われていた(利用者のプランで、LDK とスキップの
+  // 外壁がすべて内壁になり、勾配天井で天井高まで切られて屋根との間が空いた)。
+  // 壁を厚みのある帯として見る: 芯線から厚みの半分以内を通れば塞がれている。
+  function pointSegDist(px,py,x1,y1,x2,y2){
+    var dx=x2-x1, dy=y2-y1, l2=dx*dx+dy*dy;
+    var t=l2>0?Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/l2)):0;
+    return Math.hypot(px-(x1+dx*t),py-(y1+dy*t));
+  }
   function blocked(a,b){
     for(var wi=0;wi<walls.length;wi++){
       var w=walls[wi];
       if(segmentsIntersect(a.x,a.y,b.x,b.y,w.x1,w.y1,w.x2,w.y2)) return true;
+      var half=(w.thick||120)/2;
+      if(pointSegDist(w.x1,w.y1,a.x,a.y,b.x,b.y)<=half||pointSegDist(w.x2,w.y2,a.x,a.y,b.x,b.y)<=half) return true;
     }
     return false;
   }
@@ -8915,8 +8935,7 @@ function getWallInteriorFaces(w){
       // atStart/atEnd: この区間が壁自身のセンターライン始点/終点(内隅になりやすい)に
       // 接しているかどうか。addInteriorFaces 側でこのフラグを見て、実際の描画時に
       // 面を内隅方向へ、相手の壁の内装面とちょうど突き合う分だけ延長し隙間を塞ぐ
-      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM,
-        covered:wallFaceCoveredByOtherWalls(w,ta*len,tb*len,sign)});
+      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM});
     }
   });
   return faces;
@@ -8926,7 +8945,7 @@ function getWallInteriorFaces(w){
 //
 // **3Dの描画では使わない。** 埋まった区間を描かないようにしたら、壁の重なり方
 // によっては室内から外壁の芯が素通しに見えた(getWallInteriorFaces の注記)。
-// 使うのは設定欄だけ -- 見えない面に「内面 n」の設定が並ぶと、どれが
+// 使うのは設定欄だけ(3D の組み立てでは計算しない) -- 見えない面に「内面 n」の設定が並ぶと、どれが
 // どの面か分からなくなる(報告された)。
 // 面の上の3点(両端の少し内側と中央)が、同じ階の高さの足りる実壁の芯に
 // すべて入っていれば埋まっているとみなす。
@@ -9314,7 +9333,8 @@ function buildWall3D(w){
     if(t<0) t=0; else if(t>1) t=1;
     // wallTopHeightAtM は floorBaseY 基準。fallback も同じ基準へ上げてから渡し、
     // 返ってきた値を fy 基準へ下ろす。
-    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    var rawT=len>0?alongM/len:0;   // 端の先(隅を閉じる延長)も含む実際の位置
+    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder,rawT)-wallLiftM+WALL_TOP_OVERSHOOT_M;
     // 同じ階の勾配屋根の下では、上乗せ分でも屋根の板の下面を超えない。
     var underLim=wallUnderRoofTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
     if(underLim!==null&&top>underLim-fy) top=underLim-fy;
@@ -9329,13 +9349,9 @@ function buildWall3D(w){
     var reachesTop=slopedTopRaise&&slopedTopRaise.length&&(yBase+h>=wallH-0.001);
     if(top>yBase+h&&!reachesTop) top=yBase+h;
     if(reachesTop){
-      // 立ち上げの高さは**その位置の**屋根で決める。壁の端から隅へ伸ばした部分
-      // (alongM が 0..len の外)を端の高さのまま上げると、屋根の縁の外へ出た
-      // 部分が屋根より上に突き出した(報告された)。屋根の無いところは上げない。
-      var ux=(w.x2-w.x1)/Math.max(1e-9,len/U), uy=(w.y2-w.y1)/Math.max(1e-9,len/U);
-      var ax=w.x1+ux*(alongM/U), ay=w.y1+uy*(alongM/U);
-      var up=wallRaiseTopWorldY(w,slopedTopRaise,ax,ay);
-      if(up===null){ if(top>yBase+h) top=yBase+h; }
+      // 立ち上げの高さはその位置の屋根で決まる(wallTopHeightAtM の raiseT)。
+      // ここでは上乗せ分(WALL_TOP_OVERSHOOT_M)を屋根の板の下面で止めるだけ。
+      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*rawT,w.y1+(w.y2-w.y1)*rawT);
       // top は fy(持ち上がりを含む壁の足元)基準。立ち上げた分だけを屋根の板の下面で
       // 止める。ピース自身の天端より下へは下げない -- 軒では屋根の板の方が厚く、
       // そこで下げると外皮の高さを割ってスリットが開く(Task 2b)。屋根が軒で階高より
@@ -16105,7 +16121,8 @@ function walkWallVerticalRangeM(w){
   return {bottom:bottom, top:top};
 }
 function buildWalkCollisionCache(floor){
-  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor&&w.vis3D!=='hide';}).map(function(w){
+  // 3D で一時的に非表示にした壁も、以前どおりぶつかる(見えなくしても壁はある)。
+  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
     var vr=walkWallVerticalRangeM(w);
     return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
       bottomY:vr.bottom, topY:vr.top};

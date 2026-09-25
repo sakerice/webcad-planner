@@ -384,7 +384,7 @@ function drawLabelsOn(data, floor) {
   const c = sandbox([
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('FLOOR_H'),
     topLevelVar('FLOOR_SLAB_H'), topLevelVar('_ceilingClampWarned'),
-    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
+    topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('_roofCeilingExtentCache'), topLevelVar('ROOM_OVERLAP_EPS_MM'), topLevelVar('ROOM_OVERLAP_WALL_TOL_MM'),
     topLevelVar('PLAN_CAPTURE'), topLevelVar('PLAN_CAPTURE_SCALE'),
     topLevelFunction('w2c'),
     topLevelFunction('isFiniteCanvasValue'),
@@ -405,7 +405,7 @@ function drawLabelsOn(data, floor) {
     topLevelFunction('roomVoidCeilingMm'), topLevelFunction('roomVoidFloorsAreOpen'),
     topLevelFunction('roomExplicitCeilingMm'), topLevelFunction('roomCeilingHeightM'),
     topLevelFunction('roomCeilingCapM'), topLevelFunction('segmentInsideRectLengthMm'),
-    topLevelFunction('roomsOverlapInPlan'), topLevelFunction('roomAboveRoom'),
+    topLevelFunction('roomsOverlapInPlan', 'overlapStripHiddenByWall', 'segmentInsideRectLengthMm'), topLevelFunction('roomAboveRoom'),
     topLevelFunction('roomHasRoomAbove'),
     topLevelFunction('roomDeclaresSlopedCeiling'), topLevelFunction('roofCoversPlanPoint'), topLevelFunction('setbackOutlineCoversLocal'),
     topLevelFunction('roofItemOverRoom'), topLevelFunction('roofUndersideWorldYAt', 'roofBaseWorldY'), topLevelFunction('roofCeilingWorldYAt'),

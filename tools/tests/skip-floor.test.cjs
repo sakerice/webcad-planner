@@ -61,7 +61,7 @@ const FNS = [
   // 壁の開口の床決め。item3DBaseY から呼ぶので、外すと ReferenceError になる。
   'isWallOpeningItem', 'openingAdjacentFloorTopY',
   'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'isPositiveNumber',
-  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove', 'roomDeclaresSlopedCeiling',
+  'roomsOverlapInPlan', 'overlapStripHiddenByWall', 'segmentInsideRectLengthMm', 'roomAboveRoom', 'roomHasRoomAbove', 'roomDeclaresSlopedCeiling',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingCapM', 'roomCeilingHeightM', 'roomRenderedCeilingMm',
   'roomLevelLabel', 'usesFinishedHeightModel', 'ceilingFinishThicknessM',
@@ -114,7 +114,7 @@ function heights(data) {
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
     topLevelVar('STAIR_RAIL_BRACKET_PITCH_M'), topLevelVar('RAIL_INFILL_VALUES'),
     topLevelVar('STAIR_RAIL_HEIGHT_MM'),
-    topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'),
+    topLevelVar('_ceilingClampWarned'), topLevelVar('ROOM_OVERLAP_EPS_MM'), topLevelVar('ROOM_OVERLAP_WALL_TOL_MM'),
     topLevelVar('CEILING_FINISH_M'), topLevelVar('CEILING_FIXTURE_TOP_MM')
   ].concat(FNS.map(sliceFunction)).join('\n'), ctx);
   return ctx;
