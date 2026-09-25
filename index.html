@@ -9329,7 +9329,13 @@ function buildWall3D(w){
     var reachesTop=slopedTopRaise&&slopedTopRaise.length&&(yBase+h>=wallH-0.001);
     if(top>yBase+h&&!reachesTop) top=yBase+h;
     if(reachesTop){
-      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+      // 立ち上げの高さは**その位置の**屋根で決める。壁の端から隅へ伸ばした部分
+      // (alongM が 0..len の外)を端の高さのまま上げると、屋根の縁の外へ出た
+      // 部分が屋根より上に突き出した(報告された)。屋根の無いところは上げない。
+      var ux=(w.x2-w.x1)/Math.max(1e-9,len/U), uy=(w.y2-w.y1)/Math.max(1e-9,len/U);
+      var ax=w.x1+ux*(alongM/U), ay=w.y1+uy*(alongM/U);
+      var up=wallRaiseTopWorldY(w,slopedTopRaise,ax,ay);
+      if(up===null){ if(top>yBase+h) top=yBase+h; }
       // top は fy(持ち上がりを含む壁の足元)基準。立ち上げた分だけを屋根の板の下面で
       // 止める。ピース自身の天端より下へは下げない -- 軒では屋根の板の方が厚く、
       // そこで下げると外皮の高さを割ってスリットが開く(Task 2b)。屋根が軒で階高より

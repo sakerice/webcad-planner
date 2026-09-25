@@ -1721,10 +1721,32 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
     });
     if(roofLim===null){
       // どの屋根も覆っていない位置。斜線由来の勾配は「削られていない位置」なので
-      // 元の平天井のまま。宣言由来は従来どおりその屋根の面を延長する。
+      // 元の平天井のまま。
       if(profile.reason==='setback'&&profile.maxY!==undefined) return profile.maxY;
-      roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
-      y=roofLim-roofCeilingOffsetMm(profile.roof)*U;
+      // 屋根が2枚以上かかる部屋では、**部屋の内側へ少し寄った、屋根のある点**の
+      // 値を使う。部屋の縁が屋根の端より外に出ている(壁の芯と屋根の端が数十mm
+      // ずれる)と、その細い帯だけ主の屋根の面を延長した高さになり、吹き抜け側では
+      // 天井が棚のように落ちて、壁の上に謎の板が出た(報告された)。
+      var near=null;
+      if(roofs.length>1&&room){
+        var cx=room.x+room.w/2, cy=room.y+room.d/2;
+        var vx=cx-xMm, vy=cy-yMm, vl=Math.hypot(vx,vy)||1;
+        [40,80,160,320,640].some(function(dMm){
+          var qx=xMm+vx/vl*dMm, qy=yMm+vy/vl*dMm;
+          roofs.forEach(function(rf){
+            if(!rf||!roofCoversPlanPoint(rf,qx,qy)) return;
+            var v=roofUndersideWorldYAt(rf,qx,qy)-roofCeilingOffsetMm(rf)*U;
+            if(near===null||v<near.y) near={y:v,lim:roofTopLimitAtPlanPoint(roofs,qx,qy)};
+          });
+          return near!==null;
+        });
+      }
+      if(near){ y=near.y; roofLim=near.lim; }
+      else {
+        // 宣言由来は従来どおりその屋根の面を延長する。
+        roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
+        y=roofLim-roofCeilingOffsetMm(profile.roof)*U;
+      }
     }
     if(y===null) y=roofLim-CEILING_UNDER_ROOF_OFFSET_MM*U;
     var lowWorld=baseY+profile.lowY;
