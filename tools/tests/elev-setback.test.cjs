@@ -116,13 +116,13 @@ const TOP_FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
-  'roomCeilingProfile', 'roomCeilingWorldYAtMm',
+  'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm',
   'wallTouchesSlopedCeiling',
   'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({
@@ -338,7 +338,7 @@ test('24-1(最重要): 立面図の壁の上端が、3D と同じ高さ(wallTopH
     const t = (yMm - y1) / (y2 - y1);
     if (t < 0.02 || t > 0.98) return;        // 端は折れ線の丸めが乗るので中だけ見る
     const env = 'wallTopCutEnv(' + w + ')';
-    const h = run(ctx, 'wallTopHeightAtM(' + w + ',' + t + ',' + fullH + ',' + env + '.minH,' + env + '.roofs,' + env + '.raise)');
+    const h = run(ctx, 'wallTopHeightAtM(' + w + ',' + t + ',' + fullH + ',' + env + '.minH,' + env + '.roofs,' + env + '.raise,' + env + '.under)');
     // 屋根の下面まで立ち上げる外壁は、壁自身の高さを超えてよい(wallTopProfileM と同じ)。
     const raised = run(ctx, env + '.raise.length') > 0;
     const expected = (baseM + (raised ? h : Math.min(h, fullH))) / run(ctx, 'U');

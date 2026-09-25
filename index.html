@@ -9289,6 +9289,7 @@ function buildWall3D(w){
   var slopedTopMinH=topEnv?topEnv.minH:undefined;
   var slopedTopRoofs=topEnv?topEnv.roofs:null;
   var slopedTopRaise=topEnv?topEnv.raise:null;
+  var slopedTopUnder=topEnv?topEnv.under:null;
   // さらに上へ少しだけ伸ばして、刻みの食い違いで壁と天井のあいだにスリットが
   // 開く可能性を消す。上へ出た分は天井面に隠れる(下から見えるのは天井の側)。
   var WALL_TOP_OVERSHOOT_M=0.015;
@@ -9297,7 +9298,10 @@ function buildWall3D(w){
     if(t<0) t=0; else if(t>1) t=1;
     // wallTopHeightAtM は floorBaseY 基準。fallback も同じ基準へ上げてから渡し、
     // 返ってきた値を fy 基準へ下ろす。
-    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    // 同じ階の勾配屋根の下では、上乗せ分でも屋根の板の下面を超えない。
+    var underLim=wallRaiseTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+    if(underLim!==null&&top>underLim-fy) top=underLim-fy;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
       w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t);

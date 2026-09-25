@@ -1594,6 +1594,30 @@ function roofItemOverRoom(room){
   });
   return best;
 }
+// この部屋に**一部でも**かかっている屋根をすべて(roofItemOverRoom の屋根を先頭に)。
+// 部屋の上が2枚の屋根に分かれている家がある -- 1階の LDK の西半分に陸屋根、
+// 東半分に片流れ、のように。中心の屋根1枚だけを見ると、部屋全体がその屋根に
+// 沿ってしまい、もう片方の勾配が天井に出ない(利用者のプランで確認)。
+// 天井の高さは点ごとに「その点を覆う屋根のうち低い方」で決まる
+// (roomCeilingWorldYAtMm)ので、ここで全部を渡せば、西は平ら・東は勾配になる。
+// 屋根が1枚しか掛かっていない部屋では [roofItemOverRoom] と同じ = 従来どおり。
+function roofsOverRoom(room){
+  var primary=roofItemOverRoom(room);
+  if(!primary) return [];
+  var out=[primary];
+  var floorY=floorTopY(room.floor);
+  var pts=[], i, j;
+  for(i=0;i<5;i++) for(j=0;j<5;j++)
+    pts.push([room.x+room.w*(i+0.5)/5, room.y+room.d*(j+0.5)/5]);
+  DATA.items.forEach(function(it){
+    if(!it||it===primary||it.type!=='roof'||it.hidden3D) return;
+    var hit=pts.some(function(p){
+      return roofCoversPlanPoint(it,p[0],p[1])&&roofCeilingWorldYAt(it,p[0],p[1])>floorY;
+    });
+    if(hit) out.push(it);
+  });
+  return out;
+}
 // 屋根の下面(=垂木の載る基準面)の、ワールド Y(m)。
 // **屋根の形の計算はここに書かない**。3D 側が既に使っている roofSurfaceHeightAt
 // (屋根ローカル座標での屋根面高さ) と roofLocalPoint をそのまま呼ぶ。屋根アイテムの
@@ -1641,8 +1665,11 @@ function roomCeilingProfile(room){
   var baseY=floorBaseY(room.floor);
   var lowY=shape.lowMm*U+floorSlabHeightMForFloor(room.floor);
   var roof=roofItemOverRoom(room);
-  if(roof) return {source:'roof',reason:'declared',roof:roof,
-    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],lowY:lowY,baseY:baseY};
+  if(roof){
+    var over=roofsOverRoom(room);
+    return {source:'roof',reason:'declared',roof:roof,
+      roofs:sbRoofs.length?over.concat(sbRoofs):over,lowY:lowY,baseY:baseY};
+  }
   if(sbRoofs.length) return {source:'roof',reason:'setback',roof:sbRoofs[0],
     roofs:sbRoofs,lowY:lowY,baseY:baseY};
   var highY=roomCeilingHeightM(room);
@@ -1699,15 +1726,19 @@ function roomRoofCeilingExtent(room){
   var shape=HeightModel.ceilingShape(DATA,room);
   if(!shape||shape.type!=='sloped') return null;
   var sbRoofs=setbackRoofsForRoom(room);
+  // 部屋にかかる屋根すべて(roofsOverRoom)。天井の描画(roomCeilingProfile)と同じ組。
+  var over=roofsOverRoom(room);
   // 鍵は結果を決めるものを全部含める。含め忘れると古い天井高が残る。
   var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
-    roof.id,roof.x,roof.y,roof.w,roof.d,roof.floor,roof.rot,roof.elev,
-    roof.roofType,roof.pitch,roof.flipX?1:0,roof.flipY?1:0,
-    floorBaseY(room.floor),floorBaseY(roof.floor),
+    over.map(function(rf){
+      return [rf.id,rf.x,rf.y,rf.w,rf.d,rf.floor,rf.rot,rf.elev,rf.roofType,rf.pitch,
+        rf.flipX?1:0,rf.flipY?1:0,floorBaseY(rf.floor)].join(',');
+    }).join('|'),
+    floorBaseY(room.floor),
     sbRoofs.map(function(r){return r.key;}).join('|')].join(':');
   if(_roofCeilingExtentCache[key]) return _roofCeilingExtentCache[key];
   var profile={source:'roof',reason:'declared',roof:roof,
-    roofs:sbRoofs.length?[roof].concat(sbRoofs):[roof],
+    roofs:sbRoofs.length?over.concat(sbRoofs):over,
     lowY:shape.lowMm*U+floorSlabHeightMForFloor(room.floor),
     baseY:floorBaseY(room.floor)};
   var baseY=floorBaseY(room.floor);
@@ -2028,7 +2059,7 @@ function wallLimitingRoofs(w){
 // -- 屋根が無いところで外壁を天井まで切ると、下げた部屋の上でファサードに
 // 水平のスリットが貫通する(Task 2b の実測)。
 // roofs はその壁の頭を押さえる屋根(wallLimitingRoofs)。渡さなければ切らない。
-function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs){
+function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs){
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
   var lenMm=Math.sqrt(dx*dx+dy*dy);
   if(lenMm<1) return fallbackH;
@@ -2066,6 +2097,9 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs){
   // 外壁は、勾配屋根の下面まで立ち上げる(wallRaiseRoofs)。上げるだけで、下げない。
   var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*t,w.y1+dy*t);
   if(up!==null&&best<up-fy) best=up-fy;
+  // 同じ階の勾配屋根(下屋)の下では、屋根の板の下面で切る(下げるだけ)。
+  var down=wallRaiseTopWorldY(w,underRoofs,w.x1+dx*t,w.y1+dy*t);
+  if(down!==null&&best>down-fy) best=Math.max(0.001,down-fy);
   return best;
 }
 // ── 壁の上端の折れ線を1か所で決める (Task 24-1) ────────────────────────
@@ -2077,6 +2111,7 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs){
 // isOuter は既に求めてあれば渡す(buildWall3D は extSpans から持っている)。
 function wallTopCutEnv(w,isOuter){
   var touches=wallTouchesSlopedCeiling(w);
+  var sameFloor=wallSameFloorRoofs(w);
   if(isOuter===undefined)
     isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
   // 立ち上げるのは「片側でも部屋に面していない壁」(外皮)。外観の塗り分け
@@ -2084,12 +2119,39 @@ function wallTopCutEnv(w,isOuter){
   // 判定すると軒の出の下の外壁が立ち上がらなかった(利用者のプランで確認)。
   // 壁の高さの規則(wallCeilingHeightM)が使うのと同じ判定にそろえる。
   var raise=(isOuter||!wallAdjacentRoomsCeiling(w).enclosed)?wallRaiseRoofs(w):[];
-  if(!touches&&!raise.length) return null;
+  if(!touches&&!raise.length&&!sameFloor.length) return null;
   return {
     minH:isOuter?wallFullHeightM(w&&w.floor):undefined,
     roofs:touches?wallLimitingRoofs(w):[],
-    raise:raise
+    raise:raise,
+    // 同じ階の勾配屋根の下を通る壁は、屋根の板の**下面**で止める(上面で止めると、
+    // 屋根の縁に立つ妻壁の天端が屋根の面と重なり、縁に沿って白くちらついた)。
+    under:sameFloor
   };
+}
+// この壁と**同じ階に載っている**屋根のうち、壁の芯線にかかっているもの。
+// 下屋(1階の上に載る片流れ)は2階の床の高さに据わるので、2階に立てた壁は
+// その屋根の下を通る。壁は屋根を突き抜けないので、ここで屋根の下面で切る。
+// 下屋と別の屋根のあいだにできる三角形の隙間は、この壁(妻壁)で塞ぐ
+// (利用者の選択。屋根の板を下へ伸ばして塞ぐのはやめた)。
+function wallSameFloorRoofs(w){
+  var out=[];
+  if(!w||typeof DATA==='undefined'||!DATA||!DATA.items) return out;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  if(Math.hypot(dx,dy)<1) return out;
+  var fl=w.floor||1;
+  DATA.items.forEach(function(it){
+    if(!it||it.type!=='roof'||it.hidden3D||(it.floor||1)!==fl) return;
+    // 同じ階の**陸屋根**は壁の足元の高さにある(下屋の平らな屋根)。壁はその上に
+    // 立つのであって、下をくぐるのではない。数えると、陸屋根の縁に立てた妻壁が
+    // 高さ0まで切られた(利用者のプランで確認)。
+    if((it.roofType||'gable')==='flat') return;
+    for(var i=0;i<=8;i++){
+      var t=i/8;
+      if(roofCoversPlanPoint(it,w.x1+dx*t,w.y1+dy*t)){ out.push(it); return; }
+    }
+  });
+  return out;
 }
 // ── 外壁を屋根の下面まで立ち上げる ──────────────────────────────────────
 // 勾配のある屋根(片流れ・切妻・寄棟…)の下では、外壁の天端と屋根のあいだに
@@ -2167,7 +2229,7 @@ function wallTopProfileM(w){
   var pts=[], flat=true, i, t, h;
   for(i=0;i<=n;i++){
     t=i/n;
-    h=wallTopHeightAtM(w,t,fullH,env.minH,env.roofs,env.raise);
+    h=wallTopHeightAtM(w,t,fullH,env.minH,env.roofs,env.raise,env.under);
     // 壁自身の高さは超えない。ただし屋根の下面まで立ち上げる外壁は、そこまで上がる。
     if(h>fullH&&!(env.raise&&env.raise.length)) h=fullH;
     if(h<0.001) h=0.001;
