@@ -27,7 +27,8 @@ import { planKnowledge } from "./plan-knowledge.mjs";
 import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
 import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
-import { nameRooms, pickModels, missingByRoom, MAX_ROOMS, MAX_SLOTS } from "./plan-finish.mjs";
+import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
+import { knowledgeWarnings } from "./plan-check.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -242,16 +243,18 @@ async function aiFindPlan(payload, env, deps, request) {
 async function aiFinishPlan(payload, env, deps) {
   const rooms = Array.isArray(payload && payload.rooms) ? payload.rooms : [];
   const slots = Array.isArray(payload && payload.slots) ? payload.slots : [];
-  if (!rooms.length && !slots.length) {
-    return json({ error: "invalid_request", message: "rooms か slots が要る" }, 400);
+  const marks = Array.isArray(payload && payload.marks) ? payload.marks : [];
+  if (!rooms.length && !slots.length && !marks.length) {
+    return json({ error: "invalid_request", message: "rooms か slots か marks が要る" }, 400);
   }
-  if (rooms.length > MAX_ROOMS || slots.length > MAX_SLOTS) {
+  if (rooms.length > MAX_ROOMS || slots.length > MAX_SLOTS || marks.length > MAX_MARKS) {
     return json({ error: "invalid_request", message: "1回に送れる数を超えている" }, 400);
   }
 
-  const [named, picks] = await Promise.all([
+  const [named, picks, reads] = await Promise.all([
     nameRooms(rooms, env, deps),
     pickModels(slots, env, deps),
+    judgeMarks(marks, env, deps),
   ]);
 
   // 足りないものは、種別が決まったあとで数える。
@@ -260,7 +263,7 @@ async function aiFinishPlan(payload, env, deps) {
     id: r.id, type: r.type, kinds: (byId.get(r.id) || {}).kinds || [],
   })));
 
-  return json({ rooms: named, picks, missing });
+  return json({ rooms: named, picks, missing, reads });
 }
 
 // ── 間取り図 → プランJSON ────────────────────────────────────────────
@@ -657,10 +660,17 @@ export function finishImportedPlan(parsed, usage, extra) {
     }, 422);
   }
   const normalized = PlanSchema.normalizePlan(plan);
+  // 物の置かれ方の知識に照らす。浴槽が洋室にある、便器の寸法が住宅のものでない、
+  // といった**読み取りの取り違え**を、この時点で利用者へ返す。
+  // 既存の warnings と同じ経路で画面に出る（判定できないものは黙る）。
+  const warnings = checked.warnings.concat(knowledgeWarnings(normalized));
   return json({
     plan: normalized,
     summary: PlanSchema.summarize(normalized),
-    warnings: checked.warnings,
+    // 図面に描かれていた印。**間取りの一部ではない**ので plan の外に置く。
+    // 何であるかの解釈は画面側で行う（分類の呼び名を持っているのがあちらのため）。
+    marks: (plan.marks || []).slice(0, MAX_MARKS),
+    warnings: warnings,
     // モデルが「読めなかった」と言っていることは、そのまま利用者に見せる。
     notes: plan.notes.slice(0, 20),
     usage: usage || null,

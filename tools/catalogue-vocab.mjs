@@ -27,6 +27,9 @@
 // モデルが決めるのは「この品はどの kind か」だけ。
 
 // ── 置き方 ──────────────────────────────────────────────────────────
+import { createRequire } from "node:module";
+const ObjectKnowledge = createRequire(import.meta.url)("../assets/js/object-knowledge.js");
+
 export const MOUNTS = {
   floor: "床に置く",
   wall: "壁に取り付ける",
@@ -223,18 +226,9 @@ export function heightProblem(kind, h) {
 //
 // 出どころ: 住宅設備メーカーの標準寸法（1坪UB・間口2550のシステムキッチン・
 // シングル/ダブルベッド・4人掛けダイニング等）。
-export const REAL_SIZE = {
-  bathtub: { w: [1100, 1700], d: [650, 900], what: "1坪ユニットバスの湯船 1600×750。0.75坪でも 1100×700" },
-  vanity: { w: [600, 1200], d: [450, 620], what: "洗面化粧台 750×500 / 900×500" },
-  toilet: { w: [350, 520], d: [620, 820], what: "便器 380×680" },
-  "kitchen-unit": { w: [1800, 2700], d: [600, 1000], what: "システムキッチン 間口2550・奥行650（対面は970）" },
-  refrigerator: { w: [550, 800], d: [600, 780], what: "400〜500L の冷蔵庫 685×700" },
-  bed: { w: [950, 1600], d: [1900, 2150], what: "シングル 970×1950 / ダブル 1400×1950" },
-  "dining-table": { w: [1200, 1900], d: [700, 950], what: "4人掛け 1500×800" },
-  desk: { w: [900, 1500], d: [550, 750], what: "学習机 1000×600" },
-  "shoe-storage": { w: [700, 1800], d: [330, 450], what: "下駄箱 奥行350〜400" },
-  sofa: { w: [1500, 2500], d: [750, 1050], what: "2.5〜3人掛け 1900×900" },
-};
+// 実寸の範囲。**数字の出どころは assets/js/object-knowledge.js ひとつ。**
+// ここに書き写すと、片方だけ直したときに検査と実物が食い違う。
+export const REAL_SIZE = ObjectKnowledge.sizeTable();
 
 /** その品が、日本の住宅の寸法に収まっているか。 */
 export function realSizeOk(kind, w, d) {

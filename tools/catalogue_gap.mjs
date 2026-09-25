@@ -33,7 +33,7 @@ const TAGS = JSON.parse(readFileSync(join(ROOT, "assets", "models", "tags.json")
 // **この構成を1軒ぶん仕上げられるか**を物差しにする。
 export const HOUSE_3LDK = [
   "ldk", "kitchen", "entry", "hall", "stairs", "bath", "washroom", "toilet",
-  "washitsu", "bedroom", "wic", "kids", "kids", "toilet", "hall", "balcony", "exterior",
+  "washitsu", "bedroom", "wic", "kids", "kids", "toilet", "hall", "balcony", "outdoor",
 ];
 
 export function gapReport(house = HOUSE_3LDK) {

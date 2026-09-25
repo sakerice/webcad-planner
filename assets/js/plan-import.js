@@ -36,7 +36,7 @@
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
-    result: null,       // 読み取り結果 {plan, summary, notes, warnings, usage}
+    result: null,       // 読み取り結果 {plan, summary, notes, warnings, marks, usage}
     busy: false,
   };
 
@@ -377,7 +377,7 @@
         // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
         // 判断が得られなければ、これまでどおり下書きだけを渡す。
         var finish = (typeof PlanFinish === 'undefined' || !body.plan)
-          ? Promise.resolve(null) : PlanFinish.analyze(body.plan);
+          ? Promise.resolve(null) : PlanFinish.analyze(body.plan, body.marks);
         return finish.then(function (out) {
           body.finish = out;
           ST.busy = false;
@@ -675,13 +675,21 @@
       // 仕上げの見通し。**取り込む前に、このあと何が起きるかを出す。**
       if (body.finish) {
         var swaps = (body.finish.picks || []).length;
-        var lacks = PlanFinish.missingLines(body.finish).length;
+        var recs = PlanFinish.shownRecommendations(body.finish).length;
         if (swaps) lines.push('・水まわり ' + swaps + ' 点を、部屋の広さに合うモデルに差し替えます。');
-        if (lacks) lines.push('・取り込んだあと、足りないもの ' + lacks + ' 件を道具の一覧に出します。');
+        if (recs) lines.push('・図面に描かれていた家具 ' + recs + ' 種類を、カタログの先頭に「おすすめの家具」として出します。');
       }
       if (body.reviewNote) lines.push('・' + body.reviewNote);
       (body.notes || []).forEach(function (n) { lines.push('・' + n); });
-      (body.warnings || []).forEach(function (w) { lines.push('・' + w); });
+      // 読み取りの指摘。**仕上げのあとのものも足す。**仕上げで部屋の用途が
+      // 決まると、名前だけでは照らせなかった部屋(洋室など)も照らせる。
+      // 同じ文は2度出さない。
+      var said = {};
+      (body.warnings || []).concat((body.finish && body.finish.warnings) || []).forEach(function (w) {
+        if (said[w]) return;
+        said[w] = true;
+        lines.push('・' + w);
+      });
       notes.textContent = lines.length ? lines.join('\n') : '特にありません。';
     }
     show('plan-import-step3', true);
@@ -719,11 +727,15 @@
     });
     (plan.rooms || []).forEach(function (r) {
       var floor = r.floor || 1;
-      out.rooms.push({
+      var made = {
         id: 'rm_' + (nextId++), type: 'room', x: r.x, y: r.y, w: r.w, d: r.d, floor: floor,
         n: r.n || '', floorRaiseMm: newRoomFloorRaiseMm(floor),
         textureFlipX: false, textureFlipY: false,
-      });
+      };
+      // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
+      // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
+      if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
+      out.rooms.push(made);
     });
     // 構造部材（基礎・屋根）はここでは作らない。**いまの間取りと合わせた
     // 壁から決まる**ので、階を差し替えたあと withStructure で作る。
@@ -942,8 +954,8 @@
     if (typeof rebuild3D === 'function') rebuild3D();
     // 隣に建てたぶん、3Dも入りきらなくなる。両方が見える位置へ引く。
     if (typeof fitCameraToScene === 'function') fitCameraToScene();
-    // 足りないものを道具の一覧に出す。**ここは閉じたあとも残る。**
-    // 1つ置いてから次を置く、という使い方になるため。
+    // 図面に描かれていた家具を「おすすめの家具」としてカタログの先頭に出す。
+    // **ここからは置かない。**押すとカタログのその欄を開く(plan-finish.js の mount)。
     if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
     closePlanImport();
   }

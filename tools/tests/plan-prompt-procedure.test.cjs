@@ -185,7 +185,12 @@ test('補足(hint)は末尾に足される', async () => {
 test('手順は短いままにする', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   // 目安。超えたら、仕様か注意書きが混ざり始めている。
-  assert.ok(buildPlanPrompt().length < 2600,
+  //
+  // 2600 → 2700（2026-09-24）。図面の印(marks)を拾う手順19bを足したぶん。
+  // **説明は仕様書(plan-spec.mjs の「図面に描かれていた印」)へ置き、
+  // 手順には1行しか足していない。** 上げたのは工程が1つ増えたからであって、
+  // 注意書きが混ざったからではない。混ざり始めたら、また上げずに減らすこと。
+  assert.ok(buildPlanPrompt().length < 2700,
     '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });
 

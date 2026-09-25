@@ -87,11 +87,15 @@
   //
   // 代わりに「この部屋は x 2275 から 3185 まで」と、読み取った寸法の数値を
   // そのまま言ってもらう。数える作業が無くなる。升目への変換はここでやる。
+  // スキップフロアの段差の上限。assets/js/app-constants.js の SKIP_LEVEL_MAX_MM と
+  // 同じ値。ずれると、読み取りが通した段をアプリが黙って切り詰める。
+  var SKIP_LEVEL_MAX_MM = 2400;
+
   function paintRects(gx, gy, rooms) {
     var cols = gx.length - 1, rows = gy.length - 1;
     var grid = [], j, i;
     for (j = 0; j < rows; j++) { grid.push(new Array(cols).fill(null)); }
-    var problems = [], names = Object.create(null);
+    var problems = [], names = Object.create(null), levels = Object.create(null), uses = Object.create(null);
     // 升目の中心がその長方形に入っていれば塗る。境界のわずかなずれに強い。
     var cx = [], cy = [];
     for (i = 0; i < cols; i++) cx.push((gx[i] + gx[i + 1]) / 2);
@@ -101,6 +105,14 @@
       if (!r || typeof r !== 'object') return;
       var key = String.fromCharCode(65 + (idx % 26)) + (idx >= 26 ? String(Math.floor(idx / 26)) : '');
       names[key] = r.name == null ? '' : String(r.name);
+      // スキップフロア(その区画ごと床も天井も上がる段差)。アプリ側の
+      // room.skipLevelMm と同じもので、上限も揃えてある。
+      // **省略と 0 は区別しない。** 段が無い部屋がほとんどなので、
+      // 持っていない部屋は 0 として扱えばよい。
+      var lv = Number(r.level);
+      levels[key] = (isFinite(lv) && lv > 0) ? Math.min(Math.round(lv), SKIP_LEVEL_MAX_MM) : 0;
+      // 図面を見ている側が判断した用途。名前だけで決まらない語のために持つ。
+      if (typeof r.use === 'string' && r.use) uses[key] = r.use;
       var parts = Array.isArray(r.parts) ? r.parts : [r];
       var painted = 0, clash = 0;
       parts.forEach(function (q) {
@@ -120,7 +132,7 @@
       if (!painted) problems.push('「' + (names[key] || '名前なし') + '」の範囲が升目に載らない');
       if (clash) problems.push('「' + (names[key] || '名前なし') + '」が他の部屋と ' + clash + ' マス重なっている');
     });
-    return { grid: grid, names: names, problems: problems };
+    return { grid: grid, names: names, levels: levels, uses: uses, problems: problems };
   }
 
   // 隣り合う升目の持ち主が違えば、そこが壁。外側との境も壁。
@@ -211,14 +223,18 @@
       return { walls: [], rooms: [], problems: ['通り芯が足りない（縦' + gx.length + '本 横' + gy.length + '本）'] };
     }
     var cols = gx.length - 1, rows = gy.length - 1;
-    var read, names;
+    var read, names, levels, uses;
     if (Array.isArray(spec.rooms) && spec.rooms.length) {
       var painted = paintRects(gx, gy, spec.rooms);
       read = { grid: painted.grid, problems: painted.problems };
       names = painted.names;
+      levels = painted.levels;
+      uses = painted.uses;
     } else {
       read = readCells(spec.cells, cols, rows);
       names = legendMap(spec.legend);
+      levels = Object.create(null);
+      uses = Object.create(null);
     }
     var walls = wallsFrom(gx, gy, read.grid, floor, thick);
 
@@ -227,10 +243,15 @@
     var rooms = [];
     Object.keys(keys).forEach(function (k) {
       rectsOf(read.grid, cols, rows, k).forEach(function (r) {
-        rooms.push({
+        var made = {
           n: names[k] === undefined ? '' : names[k], floor: floor,
           x: gx[r.x0], y: gy[r.y0], w: gx[r.x1] - gx[r.x0], d: gy[r.y1] - gy[r.y0],
-        });
+        };
+        // **段のある部屋だけが持つ。** 0 を全部屋に書くと、この欄を持たない
+        // 既存プランとの差が生まれる。
+        if (levels[k]) made.skipLevelMm = levels[k];
+        if (uses[k]) made.use = uses[k];
+        rooms.push(made);
       });
     });
     var problems = read.problems.slice();

@@ -10,6 +10,21 @@
 // 物の種類と既定寸法は worker/plan-item-spec.mjs から作る。アプリの
 // 定数(assets/js/app-constants.js の ISIZES)が正で、書き写すと黙って古くなる。
 import { itemTypeTable } from "./plan-item-spec.mjs";
+import RoomProgram from "../assets/js/room-program.js";
+// 分類の呼び名はカタログの語彙(tags.json の kinds)が持っている。書き写さない。
+import tags from "../assets/models/tags.json" with { type: "json" };
+
+// use に選べる語と、その意味。**室名の表(room-program.js)から作る。**
+function roomUseTable() {
+  return Object.entries(RoomProgram.ROOM_TYPES)
+    .map(([k, v]) => `| ${k} | ${v.ja} | ${v.what} |`).join("\n");
+}
+
+// guess に選べる語と、その呼び名。**カタログの語彙から作る。**
+function markKindTable() {
+  return Object.entries(tags.kinds)
+    .map(([k, v]) => `${k}=${v.ja}`).join(" / ");
+}
 
 export function planSpec() {
   return `# house-planner mobile 取り込みデータ仕様
@@ -76,13 +91,38 @@ notes は、図から読み取れなかった箇所、および他の記載か�
 
     {
       "name":  文字列,
-      "parts": [ { "x0": 数値, "y0": 数値, "x1": 数値, "y1": 数値 }, ... ]
+      "parts": [ { "x0": 数値, "y0": 数値, "x1": 数値, "y1": 数値 }, ... ],
+      "level": 数値
     }
 
 | 項目 | 内容 |
 |---|---|
 | name | 室名 |
 | parts | その部屋が占める長方形。x0 < x1、y0 < y1 |
+| level | その階の床から何mm高いか。段差が無ければ 0 |
+| use | その部屋が何に使われる部屋か。下の表から1つ |
+
+### level（スキップフロア・小上がり）
+
+同じ階の中で床が持ち上がっている区画がある。スキップフロア、和室の小上がり、玄関の上がり框の段など。**床だけでなく天井も一緒に上がる。** 上限は 2400mm。
+
+段差の下は空間になり、そこが収納になっていることがある（「ハーフ収納」
+「床上げ収納」「階段下収納」）。**その収納は段差の下にある別の部屋**として
+parts に入れ、level は 0 とする。持ち上がっているのは上の区画のほうである。
+
+level に値を入れるのは、段差の高さが図に記載されている区画だけとする。
+記載が無ければ 0 とする。
+
+### use（部屋の用途）
+
+name は図に書かれた文字そのまま、use はその部屋が何であるか。**別のもの。**
+「趣味部屋」「KB置き場」「スキップ」のように、書かれた名前だけでは用途が
+決まらない部屋がある。use は、名前に加えて図に描かれているもの(床の仕上げ、
+置かれている物、どこに面しているか)から決める。
+
+| use | 名前 | 中身 |
+|---|---|---|
+${roomUseTable()}
 
 1つの部屋は複数の長方形で表せる。同じ部屋に属する長方形の間に壁は生成されない。
 部屋どうしは重ならない。
@@ -116,6 +156,27 @@ ${itemTypeTable()}
 | 階段（stair / stair-corner） | w は既定の値。d は段数に応じて図から読み取った長さ |
 | balcony | 図から読み取った寸法を用いる |
 | 建具（window / window-door / door-swing / door-slide-s / door-fold / door-opening / door-front） | 図から読み取った寸法を用いる |
+
+## 図面に描かれていた印 (marks)
+
+家具などの印。**items とは別のもの。**
+
+items は「実際に置く物」で、動かせる家具は入れない（図面の家具はメーカーの
+標準仕様の絵であって、置く物ではない）。marks はその判断を変えずに、
+**図面に何が描かれていたか**だけを残すためにある。
+
+| 項目 | 中身 |
+|---|---|
+| x, y, w, d | 位置と大きさ |
+| label | その印に添えられた文字。「TV」「クローゼット」「WIC」など。無ければ空 |
+| looks | 見たままの形。「細長い薄い矩形」「円と矩形」「弧のある矩形」など |
+| guess | それが何だと思うか。下の語から1つ。見当が付かなければ other |
+
+looks と guess は**両方**返す。guess はあなたの判断、looks はその根拠になる。
+こちらは日本の住宅の作法（カーテンは窓に付き、幅は窓より左右100〜200mm大きい、
+など）を持っていて、guess をそれに照らして確かめる。
+
+guess に使える語: ${markKindTable()}
 
 ## アプリが生成する要素
 

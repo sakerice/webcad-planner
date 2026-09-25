@@ -25,6 +25,9 @@
 // 決まった表(room-program.js)で当たる。聞くのは「洋室(1)」のように、
 // 広さと階と他の部屋との関係でしか決まらないものだけ。
 import RoomProgram from "../assets/js/room-program.js";
+import ObjectKnowledge from "../assets/js/object-knowledge.js";
+// 分類の呼び名はカタログの語彙が持っている。印ごとに画面から送らせない。
+import tags from "../assets/models/tags.json" with { type: "json" };
 import { jevAsk, choice } from "./jev.mjs";
 
 // 1回で扱う上限。**この窓口には認証が無い**ので、1回の呼び出しで投げられる
@@ -32,6 +35,10 @@ import { jevAsk, choice } from "./jev.mjs";
 export const MAX_ROOMS = 40;
 export const MAX_SLOTS = 24;
 export const MAX_CANDIDATES = 8;
+// 読み取りが返す印の上限(worker/routes-ai.mjs の marks.slice)と揃える。
+// 40 にしていたら、実物の平屋1枚で45件あり、1回で送れなかった。
+export const MAX_MARKS = 80;
+export const MAX_MARK_CHOICES = 30;
 
 const ROOM_KEYS = Object.keys(RoomProgram.ROOM_TYPES);
 
@@ -80,6 +87,11 @@ export async function nameRooms(rooms, env, deps = {}) {
   return Promise.all(list.map(async (room) => {
     const byName = RoomProgram.typeFromName(room.name);
     if (byName) return { id: room.id, type: byName, from: "name" };
+    // **図面を見ている側の判断を先に採る。** jev が受け取るのは名前と広さだけで、
+    // 実物の図面3枚の「趣味部屋」「KB置き場」「スキップ」などを名前と広さで
+    // 当てさせると 9件中4件しか当たらず、外したものは全部「和室」だった。
+    // 図面を見れば床がフローリングか畳かは一目で分かる。
+    if (room.use && RoomProgram.ROOM_TYPES[room.use]) return { id: room.id, type: room.use, from: "reader" };
     const answers = await jevAsk(env, { state: roomState(room, context), questions: roomQuestion(room) }, deps);
     const picked = choice(answers, "room_type");
     if (!picked || !RoomProgram.ROOM_TYPES[picked]) return { id: room.id, type: "other", from: "unknown" };
@@ -143,6 +155,57 @@ export async function pickModels(slots, env, deps = {}) {
     return { slot: slot.id, model: answer, confidence: confidence === null ? null : Number(confidence.toFixed(2)) };
   }));
   return picked.filter(Boolean);
+}
+
+// 図面の印が何であるかを選ばせる質問。
+//
+// **候補は画面側が知識で絞ってから送ってくる**(その部屋に在らないものを外すだけ)。
+// 何であるかの判断材料は2つで、どちらも jev が読む:
+//   - 図面の見た目(looks) … 読み取りが描写した形。「二重線の縦長矩形。上端に
+//     小さな横長矩形」なら枕の付いたベッド
+//   - 置かれ方の知識(describe) … 「カーテンは窓の室内側、幅は窓より左右
+//     100〜200mm大きい」。見た目だけでは薄い箱がテレビかカーテンか決まらない
+function markQuestion(mark) {
+  const criteria = {};
+  for (const kind of mark.candidates) {
+    const text = ObjectKnowledge.describe(kind).replace(/\n/g, " / ");
+    const ja = (tags.kinds[kind] && tags.kinds[kind].ja) || kind;
+    criteria[kind] = `${ja}: ${text}`;
+  }
+  criteria.none = "None of these: the symbol is something else, or cannot be told";
+  const size = `${Math.round(Number(mark.w) || 0)} x ${Math.round(Number(mark.d) || 0)} mm`;
+  return {
+    kind: {
+      type: "choice",
+      instructions: `A Japanese floor plan shows a symbol in a ${mark.roomJa || "room"}. `
+        + `The symbol is drawn like this: "${mark.looks || "(not described)"}". `
+        + (mark.label ? `It is labelled "${mark.label}". ` : "It has no label. ")
+        + `The drawn outline measures ${size}; a symbol often draws a group `
+        + "(a bed with bedside tables, a table with its chairs), so the outline can be larger than the item itself. "
+        + "Which of these is it?",
+      criteria,
+    },
+  };
+}
+
+/**
+ * 図面の印を1つずつ jev に選ばせる。迷ったもの(confidence 0.3 未満)は返さない。
+ * @param {Array} marks [{id, looks, label, w, d, roomJa, candidates:[分類...], names}]
+ */
+export async function judgeMarks(marks, env, deps = {}) {
+  const list = (Array.isArray(marks) ? marks : []).slice(0, MAX_MARKS)
+    .map((m) => ({ ...m, candidates: (m.candidates || []).slice(0, MAX_MARK_CHOICES) }))
+    .filter((m) => m.candidates.length >= 1);
+  const judged = await Promise.all(list.map(async (mark) => {
+    const answers = await jevAsk(env, { state: { room: mark.roomJa || "" }, questions: markQuestion(mark) }, deps);
+    const answer = choice(answers, "kind");
+    if (!answer || answer === "none" || !mark.candidates.includes(answer)) return null;
+    const a = answers.kind;
+    const confidence = typeof a.confidence === "number" ? a.confidence : null;
+    if (confidence !== null && confidence < 0.3) return null;
+    return { id: mark.id, kind: answer, confidence: confidence === null ? null : Number(confidence.toFixed(2)) };
+  }));
+  return judged.filter(Boolean);
 }
 
 /**

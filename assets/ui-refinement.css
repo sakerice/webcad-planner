@@ -199,3 +199,35 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #sidebar .catalogue-result{border-radius:12px!important;box-shadow:none!important;border:1px solid #e1e7e3!important;background:#fff}
 #sidebar .catalogue-result:hover{border-color:#ef5037!important}
 #sidebar .catalogue-result.active{background:#ef5037!important;color:white!important}
+
+/* 取り込み後の「おすすめの家具」(assets/js/plan-finish.js の mount)。
+   検索の欄(#object-search)と同じ板に載せる。行は横長のボタンなので capsule。
+   ここからは置かない。押すとカタログのその分類の欄を開いて送る。 */
+#plan-recommend{background:#fff;border-radius:20px;padding:14px 12px;margin:0 0 12px}
+#plan-recommend h2{margin:0;color:var(--hp-text);font-size:11px;font-weight:700;line-height:1.5}
+/* 見出しと、欄ごと閉じる×。×は押せる大きさ(40px)を保ったまま、見出しの行を
+   押し広げないよう上と右へはみ出させる */
+.plan-recommend-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
+.plan-recommend-close{flex:0 0 40px;width:40px;height:40px;margin:-10px -6px -10px 0;padding:0;border:0;border-radius:50%;background:transparent;color:#64746e;font-size:20px;line-height:1;cursor:pointer;touch-action:manipulation}
+.plan-recommend-close:hover{background:#e9ece7}
+.plan-recommend-close:focus-visible{outline:2px solid var(--hp-primary);outline-offset:2px}
+#plan-recommend .catalogue-count{margin:2px 0 10px;line-break:strict;word-break:auto-phrase}
+/* 列は minmax(0,1fr)。既定の min-width:auto だと、1行に収めた長い室名が列ごと
+   広げて × をカードの外へ押し出した(実物の平屋で起きた)。 */
+.plan-recommend-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.plan-recommend-item{display:flex;align-items:center;min-width:0;min-height:48px;border-radius:var(--hp-control-radius);background:#f5f6f3}
+.plan-recommend-open{flex:1 1 auto;min-width:0;min-height:48px;display:flex;align-items:center;gap:8px;margin:0;padding:4px 2px 4px 10px;border:0;border-radius:var(--hp-control-radius);background:transparent;color:var(--hp-text);font:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+#sidebar .plan-recommend-open .menu-category-icon{width:22px;height:22px;min-width:22px;flex:0 0 22px;margin:0}
+.plan-recommend-text{display:flex;flex-direction:column;min-width:0;gap:1px}
+/* 名前も1行。「ダイニングテー/ブル」と語の途中で折れた。いちばん長い呼び名
+   (ダイニングテーブル)が 218px のサイドバーで収まる大きさにしてある */
+.plan-recommend-name{font-size:12px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-recommend-where{font-size:10px;line-height:1.45;color:var(--hp-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-recommend-dismiss{flex:0 0 40px;width:40px;height:40px;margin:0 2px 0 0;padding:0;border:0;border-radius:50%;background:transparent;color:#64746e;font-size:20px;line-height:1;cursor:pointer;touch-action:manipulation}
+.plan-recommend-open:hover,.plan-recommend-dismiss:hover{background:#e9ece7}
+.plan-recommend-open:focus-visible,.plan-recommend-dismiss:focus-visible{outline:2px solid var(--hp-primary);outline-offset:2px}
+/* 検索中は検索結果を検索の欄の真下に保つ */
+#sidebar.catalogue-searching>#plan-recommend{display:none!important}
+/* 開いた欄を一瞬示す(強調はオレンジの1色だけ)。見出しの浮きの影は別の規則が
+   !important で持っているので、box-shadow には触らず outline で描く。 */
+#sidebar .asset-subcat.plan-recommend-target>.asset-subhdr{outline:2px solid var(--hp-primary);outline-offset:-2px}
