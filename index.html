@@ -4180,9 +4180,23 @@ function init3D(){
   ['pointerdown','pointermove','wheel','touchstart','touchmove'].forEach(function(ev){
     ren.domElement.addEventListener(ev,noteCam3DInput,{passive:true});
   });
-  // モバイルでのメモリ圧等によるWebGLコンテキスト喪失から自動復帰する
-  ren.domElement.addEventListener('webglcontextlost',function(e){ e.preventDefault(); },false);
+  // モバイルでのメモリ圧等によるWebGLコンテキスト喪失から自動復帰する。
+  //
+  // **見ている最中に失うこともある。** 実測の報告: 色を続けて変えている
+  // さなかに一度だけ真っ黒になった。タブを離れていないので、タブが見えた
+  // ときの確認(visibilitychange/focus)も、戻った通知も走らない。画面は
+  // 黒いまま、利用者は何が起きたのか分からない。
+  //
+  // 失ったと分かった時点で数えはじめ、しばらく経っても戻らなければ自分で
+  // 作り直す。端末が自分で戻してくれるなら、そちらに譲る(restored が来たら
+  // 数えるのをやめる)。
+  ren.domElement.addEventListener('webglcontextlost',function(e){
+    e.preventDefault();
+    clearTimeout(_ctxLostTimer);
+    _ctxLostTimer=setTimeout(function(){ _ctxLostTimer=0; recover3DIfContextLost(); },1500);
+  },false);
   ren.domElement.addEventListener('webglcontextrestored',function(){
+    clearTimeout(_ctxLostTimer); _ctxLostTimer=0;
     // 戻ったと言われても、合成器も環境マップも古いコンテキストのまま。
     // 作り直しに通す（作り直せないときだけ、従来どおり組み直す）。
     if(recover3DIfContextLost()) return;
@@ -4410,6 +4424,8 @@ function init3D(){
   build3D();
 }
 var _3dGlobalsWired=false;
+// コンテキストを失ってから、自分で作り直すまでの待ち時間の札。
+var _ctxLostTimer=0;
 
 // タブを行き来すると、端末が裏のタブのWebGLコンテキストを捨てることがある。
 // 捨てられたまま戻ると3Dは**真っ黒**になる（実測: 画面の明るさ 178 → 0）。
