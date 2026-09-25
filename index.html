@@ -15693,7 +15693,7 @@ function walkUpdateGround(snap){
 var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
 var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
 function walkSpawnObstructed(xMm,zMm,fl){
-  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  if(walkBlockedAt(xMm,zMm,fl,roomFloorAt(fl,xMm,zMm))) return true;
   // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
   // 点そのものは家具の外なので素通りしてしまう。
   var r=WALK_PLAYER_RADIUS_MM;
@@ -15737,7 +15737,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
     var yaw=i*Math.PI/6;
     var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
     for(var d=200; d<=8000; d+=200){
-      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl, roomFloorAt(fl,xMm,zMm))) break;
       reach=d;
     }
     var bonus=0;
@@ -15766,7 +15766,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
 var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
 var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
 function walkSpawnObstructed(xMm,zMm,fl){
-  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  if(walkBlockedAt(xMm,zMm,fl,roomFloorAt(fl,xMm,zMm))) return true;
   // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
   // 点そのものは家具の外なので素通りしてしまう。
   var r=WALK_PLAYER_RADIUS_MM;
@@ -15810,7 +15810,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
     var yaw=i*Math.PI/6;
     var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
     for(var d=200; d<=8000; d+=200){
-      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl, roomFloorAt(fl,xMm,zMm))) break;
       reach=d;
     }
     var bonus=0;
@@ -16082,18 +16082,46 @@ function getWallDoorGapsMm(w){
 // スキップフロア(通常 800 以上)は階段からしか上がれない。
 var WALK_MAX_STEP_UP_M=0.4;
 var _walkCollWalls=null, _walkCollFloor=null;
+// 壁の当たり判定に使う、壁が立っている高さの範囲(ワールドm)。3D の壁
+// (buildWall3D)と同じ足元・高さの取り方: 足元は wallBaseSupportY に足元の上下を
+// 足した位置、上端は帯の高さ。上端が折れ線の壁(屋根・勾配天井で切った壁)は、
+// その折れ線のいちばん高い所まで。
+function walkWallVerticalRangeM(w){
+  var fy=wallBaseSupportY(w)+wallFootOffsetMm(w)*U;
+  var band=getWallBandRange(w);
+  var bottom=fy+band.base, top=bottom+band.height;
+  var prof=(typeof wallTopProfileM==='function')?wallTopProfileM(w):null;
+  if(prof&&(w.wallBand||'full')!=='high'){
+    var maxH=-Infinity;
+    prof.forEach(function(p){ if(p[1]>maxH) maxH=p[1]; });
+    if(isFinite(maxH)) top=Math.min(top,floorBaseY(w.floor||1)+maxH);
+  }
+  return {bottom:bottom, top:top};
+}
 function buildWalkCollisionCache(floor){
-  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
-    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w)};
+  _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor&&w.vis3D!=='hide';}).map(function(w){
+    var vr=walkWallVerticalRangeM(w);
+    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
+      bottomY:vr.bottom, topY:vr.top};
   });
   _walkCollFloor=floor;
 }
+// 歩いている人の体が占める高さ(ワールドm)。足元から頭まで。
+var WALK_BODY_HEIGHT_M=1.7;
 // (xMm,zMm) がいずれかの壁の実体(ドア開口を除く)に衝突するか
-function walkBlockedAt(xMm,zMm,floor){
+// 壁は、**体の高さの範囲にかかっているときだけ**ぶつかる。以前は高さを見ておらず、
+// 段差の縁の低い壁(スキップフロアの下の立ち上がり)の上を、段差の床の上から
+// 通り抜けられなかった(報告された)。足元+一段(WALK_MAX_STEP_UP_M)より低い壁は
+// 跨げ、頭より上にある垂れ壁はくぐれる。
+// feetY を渡さなければ、いまの足元(WALK)で判定する。
+function walkBlockedAt(xMm,zMm,floor,feetY){
   if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
   var walls=_walkCollWalls;
+  var feet=(feetY!==undefined)?feetY:floorTopY(floor)+((WALK&&WALK.groundOff)||0);
+  var head=feet+WALK_BODY_HEIGHT_M;
   for(var i=0;i<walls.length;i++){
     var w=walls[i];
+    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
     var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
     if(len2<1) continue;
     var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2;
