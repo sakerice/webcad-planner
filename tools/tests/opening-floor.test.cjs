@@ -35,6 +35,7 @@ function world() {
   const room = { floor: 1, x: 0, y: 0, w: 3000, d: 8190 };
   const scope = {
     itemIsUnderPlatform: () => false,
+    baseRoomOf: () => null,           // 載せる床の指定なし(自動)
     stairGroupIsLevel: () => false,
     isGroundLevelItemType: () => false,
     isContextExteriorItemType: () => false,

@@ -116,7 +116,7 @@ const HEIGHT_FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
-  'roomAtPointOnFloor', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
+  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM',
   'wallStackedAboveCapM',
   'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY'
 ];

@@ -844,18 +844,28 @@ function wallSkipLevelsMm(w){
   return out;
 }
 // 壁の高さを測る基準(mm)。壁は2つの部屋の境界にあるので、
-// 「どちらのレベルから測るか」を決める必要がある。**高い側**を採るのは、
-// 段差の縁に立てる腰壁・手すり壁がそこを守るためのものだからである
-// (低い側から測ると、持ち上がった床の上では手すりが埋まる)。
+// 「どちらのレベルから測るか」を決める必要がある。
+//
+// 自動は**低い側**、つまり足元(wallSkipFootMm)と同じ。段差の上から測るのは、
+// 壁の両側とも段差の上にあるときだけ。
+//
+// 以前は高い側を採っていた(段差の縁の手すり壁を段差の上から測るため)。
+// しかし保存済みの壁はほぼ全部が高さを個別に持っていて、スキップフロアに
+// 面した**ふつうの間仕切り壁**まで段差ぶん伸び、その上の2階の床を最大 1.8m
+// 持ち上げていた(利用者のプランで実際に起きた)。自動が外れたときの壊れ方は、
+// 低い側なら「手すりが低い」、高い側なら「上の階が浮く」。軽い方を既定にし、
+// 手すり壁は 'skip' を選んで段差の上から測る。
 //
 // wall.baseLevel で明示できる: 'floor' は段差を無視して階の床から、
 // 'skip' はその階の段差から。省略時は上の自動判定。
 function wallSkipBaseMm(w){
   if(!w) return 0;
+  var br=baseRoomOf(w);
+  if(br) return roomSkipLevelMm(br);
   if(w.baseLevel==='floor') return 0;
   var lv=wallSkipLevelsMm(w);
   if(w.baseLevel==='skip') return Math.max(lv.max,floorMaxSkipLevelMm(w.floor));
-  return lv.max;
+  return lv.min;
 }
 // 壁の足元を持ち上げる量(mm)。
 //
@@ -865,6 +875,9 @@ function wallSkipBaseMm(w){
 // 低い側の足元に穴が開く。
 function wallSkipFootMm(w){
   if(!w) return 0;
+  // 部屋を指したときは、足元もその床。段差の縁の手すり壁は段差の上に載る。
+  var br=baseRoomOf(w);
+  if(br) return roomSkipLevelMm(br);
   if(w.baseLevel==='floor') return 0;
   var lv=wallSkipLevelsMm(w);
   if(w.baseLevel==='skip') return Math.max(lv.max,floorMaxSkipLevelMm(w.floor));
@@ -992,23 +1005,61 @@ function roomStoreyFloorTopY(room){
     +floorSlabHeightMForFloor(room.floor);
 }
 function roomFloorAt(floor,x,y){
-  var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
-  // A smaller explicit room wins over an enclosing whole-floor outline.
-  candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
-  if(candidates.length) return roomFloorTopY(candidates[0]);
+  // 重なった部屋の選び方は roomsAtPointOnFloor の1か所で決める。
+  var room=roomAtPointOnFloor(floor,x,y);
+  if(room) return roomFloorTopY(room);
   return localSupportTopY(floor,x,y,x,y)+floorSlabHeightMForFloor(floor);
 }
 // 段差の**下**の床(m)。roomFloorAt と同じ部屋の選び方で、段差と床上げだけを足さない。
 // 段差を持たない場所では roomFloorAt と (床上げを除いて) 同じ値になる。
 function roomStoreyFloorAt(floor,x,y){
-  var candidates=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===floor&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d;});
-  candidates.sort(function(a,b){return a.w*a.d-b.w*b.d;});
-  if(candidates.length) return roomStoreyFloorTopY(candidates[0]);
+  var room=roomAtPointOnFloor(floor,x,y);
+  if(room) return roomStoreyFloorTopY(room);
   return localSupportTopY(floor,x,y,x,y)+floorSlabHeightMForFloor(floor);
 }
 // このアイテムが「段差の下」に置かれているか。
 function itemIsUnderPlatform(it){
   return !!(it&&it.baseLevel==='under');
+}
+// ── 載せる床 (家具・壁・階段で共通) ─────────────────────────────────────
+// 段差のある階で、物がどの床に載るかを明示する受け口。
+//   obj.baseRoom = 部屋のid  … その部屋の床に載る。**部屋で覚える**ので、
+//                              あとで段差の高さを変えても物がついてくる。
+//   obj.baseLevel = 'floor'  … 段差を無視して階の床に載る。
+//   obj.baseLevel = 'under'  … 段差の下(床下の空間)。家具だけ。
+//   obj.baseLevel = 'skip'   … 以前の指定(その階でいちばん高い段差)。読むだけ。
+//   どれも無ければ自動。
+// 指した部屋が消えた・別の階に移った・隠したときは、自動に戻る。
+function baseRoomOf(obj){
+  if(!obj||obj.baseRoom===undefined||obj.baseRoom===null) return null;
+  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
+  var fl=obj.floor||1;
+  for(var i=0;i<DATA.rooms.length;i++){
+    var r=DATA.rooms[i];
+    if(r&&String(r.id)===String(obj.baseRoom)&&(r.floor||1)===fl&&!r.hidden3D) return r;
+  }
+  return null;
+}
+// その点の、段差を持たない部屋(= 階の床)。段差の部屋しか無ければ null。
+function floorRoomIgnoringSkip(floor,x,y){
+  var list=roomsAtPointOnFloor(floor,x,y);
+  for(var i=0;i<list.length;i++) if(roomSkipLevelMm(list[i])<=0) return list[i];
+  return null;
+}
+// 「載せる床」の選択肢になる、その階の段差の部屋(低い順)。
+function skipRoomsOnFloor(floor){
+  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return [];
+  var f=floor||1;
+  return DATA.rooms.filter(function(r){
+    return r&&!r.hidden3D&&(r.floor||1)===f&&roomSkipLevelMm(r)>0;
+  }).sort(function(a,b){return roomSkipLevelMm(a)-roomSkipLevelMm(b);});
+}
+// 選択肢と読み上げに使う部屋の呼び名。同じ名前の段差が並ぶことがある
+// (利用者のプランでは「スキップ」が3つ)ので、段差と大きさを添える。
+function baseRoomLabel(r){
+  if(!r) return '';
+  var name=(r.n&&String(r.n).trim())||'部屋';
+  return name+' ＋'+roomSkipLevelMm(r)+'（'+Math.round(r.w)+'×'+Math.round(r.d)+'）';
 }
 function updateSelectedRoomFloor(value){
   var r=ST.selected;if(!r||r.type!=='room')return;
@@ -1073,6 +1124,105 @@ function selectedRoomSkipHtml(r){
       '段差の上り下りには、階段の「行き先」を「同じ階の段差」にした階段を置いてください。</div>';
   }
   return html;
+}
+// ── 「載せる床」の欄 (家具・建具・壁・階段で共通) ─────────────────────────
+// 段差のある階でだけ出す。選択肢も説明も種類をまたいで同じにする:
+// 自動(いま何を選んでいるかを添える) / 階の床 / その階の段差の部屋 / 段差の下。
+function baseFloorKindOf(it){
+  if(!it) return null;
+  if(it.x1!==undefined&&it.x2!==undefined) return 'wall';
+  if(typeof isStairPartType==='function'&&isStairPartType(it.type)) return 'stair';
+  if(it.type==='room') return null;
+  return 'item';
+}
+function baseFloorChoiceOf(it){
+  if(baseRoomOf(it)) return 'room:'+baseRoomOf(it).id;
+  if(it.baseLevel==='floor'||it.baseLevel==='under'||it.baseLevel==='skip') return it.baseLevel;
+  return 'auto';
+}
+// 自動がいま選んでいる床の呼び名。
+function baseFloorAutoLabel(it,kind){
+  var fl=it.floor||1;
+  function named(r){
+    if(!r) return '階の床';
+    return roomSkipLevelMm(r)>0 ? baseRoomLabel(r)+' の床' : '階の床（'+((r.n&&String(r.n).trim())||'部屋')+'）';
+  }
+  if(kind==='wall'){
+    var lv=wallSkipLevelsMm(it);
+    return lv.min>0 ? '段差の上（＋'+lv.min+'）' : '階の床';
+  }
+  if(kind==='stair'){
+    var ends=stairRunEndsMm(it);
+    if(stairGroupIsLevel(it)){
+      var sp=stairLevelSpanM(it);
+      var lowAt=sp.reversed?ends.up:ends.down;
+      return named(roomAtPointOnFloor(fl,lowAt.x,lowAt.y));
+    }
+    return named(roomAtPointOnFloor(fl,ends.down.x,ends.down.y));
+  }
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  return named(roomAtPointOnFloor(fl,cx,cy));
+}
+function baseFloorSelectHtml(it){
+  var kind=baseFloorKindOf(it);
+  if(!kind||!floorHasSkipLevel(it.floor||1)) return '';
+  var cur=baseFloorChoiceOf(it);
+  var rooms=skipRoomsOnFloor(it.floor||1);
+  var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  var canUnder=(kind==='item') && (it.baseLevel==='under' || roomSkipCavityMm(roomAtPointOnFloor(it.floor,cx,cy))>0);
+  function opt(v,label){ return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>'; }
+  var html='<div class="ph" style="margin-top:12px">スキップフロア</div>'+
+    '<div class="pr"><div class="pl">載せる床</div><select class="pi" onchange="updateSelectedBaseFloor(this.value)">'+
+    opt('auto','自動')+
+    opt('floor','階の床');
+  rooms.forEach(function(r){ html+=opt('room:'+r.id,baseRoomLabel(r)); });
+  if(canUnder) html+=opt('under','段差の下（床下の空間）');
+  if(cur==='skip') html+=opt('skip','いちばん高い段差（以前の指定）');
+  html+='</select></div>';
+  var note;
+  if(cur==='auto'){
+    note=({
+      item:'自動は、物の中心がある部屋の床に載せます。部屋が重なっているところでは、小さい部屋を優先します。',
+      wall:'自動では、両側とも段差の上にある壁だけが段差の上から立ちます。段差の境の壁は階の床から測ります（上の階が持ち上がらないように）。段差の縁の手すり壁・腰壁は、段差の部屋を選んでください。',
+      stair:stairGroupIsLevel(it)
+        ? '自動は、階段の両端の先にある床を見て、低い方から高い方へ上ります。'
+        : '自動は、階段の下端の先にある床から始めます。'
+    })[kind];
+  }else if(cur.indexOf('room:')===0){
+    note='この部屋の床に載せています。段差の高さを変えると一緒に動きます。部屋を消すと自動に戻ります。';
+    if(kind==='stair') note+='1本の階段（つながった部材）全体に効きます。';
+  }else if(cur==='under'){
+    note='段差の下の空間（その階の構造床）に置いています。';
+  }else if(cur==='floor'){
+    note='段差を無視して、階の床に載せています。';
+  }else{
+    note='以前の指定です。段差が複数ある階では、いちばん高い段差になります。部屋を選び直すことを勧めます。';
+  }
+  // いま載っている床を、選んだ方法によらず必ず先頭に書く。
+  var now;
+  if(cur==='auto') now='いまは '+baseFloorAutoLabel(it,kind)+' に載っています（自動）。';
+  else if(cur.indexOf('room:')===0) now='いまは '+baseRoomLabel(baseRoomOf(it))+' の床に載っています（指定）。';
+  else if(cur==='under') now='いまは 段差の下 に置いています（指定）。';
+  else if(cur==='floor') now='いまは 階の床 に載っています（指定）。';
+  else now='いまは いちばん高い段差 に載っています（以前の指定）。';
+  return html+'<div class="lock-status-note"><b>'+now+'</b>'+note+'</div>';
+}
+// 「載せる床」を変える。階段は1本の階段全体で1つの指定なので、
+// つながった部材の指定をまとめて置き換える。
+function updateSelectedBaseFloor(value){
+  var it=ST.selected;
+  if(!it) return;
+  if(isObjectLocked(it)){ updateProps(); return; }
+  var kind=baseFloorKindOf(it);
+  if(!kind) return;
+  if(typeof saveState==='function') saveState();
+  var targets=[it];
+  if(kind==='stair') targets=getConnectedStairParts(it);
+  targets.forEach(function(o){ delete o.baseRoom; delete o.baseLevel; });
+  var v=String(value||'auto');
+  if(v.indexOf('room:')===0) it.baseRoom=v.slice(5);
+  else if(v==='floor'||v==='skip'||(v==='under'&&kind==='item')) it.baseLevel=v;
+  markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
 function selectedRoomFloorHtml(r){
   var v=roomFloorOffsetMm(r);
@@ -1170,6 +1320,19 @@ function item3DBaseY(it){
     return groundYForItem(it);
   }
   if(it.type==='roof') return localSupportTopY(it.floor,it.x,it.y,it.x+(it.w||0),it.y+(it.d||0));
+  // 載せる床を明示したもの(部屋 / 階の床)。建具もここを通る -- 段差の境の
+  // ドアの敷居をどちらの床に合わせるかは、自動では決めきれない。
+  // 階段は階段グループとして決めるので、下の階段の経路に任せる。
+  var isStair=(typeof isStairPartType==='function'&&isStairPartType(it.type));
+  if(!isStair){
+    var br=baseRoomOf(it);
+    if(br) return roomFloorTopY(br);
+    if(it.baseLevel==='floor'){
+      var fcx=(it.x||0)+(it.w||0)/2, fcy=(it.y||0)+(it.d||0)/2;
+      var fr0=floorRoomIgnoringSkip(it.floor,fcx,fcy);
+      return fr0 ? roomFloorTopY(fr0) : roomStoreyFloorAt(it.floor,fcx,fcy);
+    }
+  }
   // **壁の開口は、地面に置く物ではない。** 中心が壁の中に来るので、基礎の
   // 外周をわずかに越えることがあり、下の「基礎の外なら地面」に捕まると
   // 基礎の高さぶん落ちる。部屋の矩形も壁の芯で終わるので、越えた瞬間に
@@ -1689,15 +1852,31 @@ function roomHeightLabel(room){
   var ch=roomRenderedCeilingLabel(room);
   return lvl ? (lvl+' / '+ch) : ch;
 }
+// その点にある部屋を、優先する順に並べて返す。
+//
+// **部屋が重なっているとき、どれの床に載るかを決める規則はここ1か所。**
+// 小さい部屋が先(大きな部屋の中に切り出した区画 = スキップフロアや小上がりを
+// 描くための書き方)。同じ大きさなら重ね順(stack)の手前、それも同じなら
+// 後から描いた方(平面図で上に見えている方)。
+//
+// 以前は roomAtPointOnFloor が「配列の先頭」、roomFloorAt が「小さい方」で
+// 別々に決めていた。階段室の中にスキップフロアを重ねると、家具は段差の上に
+// 載るのに、壁・階段・建具は段差が無いものとして扱われていた。
+function roomsAtPointOnFloor(floor,x,y){
+  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return [];
+  var out=[];
+  DATA.rooms.forEach(function(r,i){
+    if(!r||r.floor!==floor||r.hidden3D) return;
+    if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d) out.push({r:r,i:i});
+  });
+  function stackOf(r){ var v=Number(r.stack); return isFinite(v)?v:0; }
+  out.sort(function(a,b){
+    return (a.r.w*a.r.d-b.r.w*b.r.d) || (stackOf(b.r)-stackOf(a.r)) || (b.i-a.i);
+  });
+  return out.map(function(o){return o.r;});
+}
 function roomAtPointOnFloor(floor,x,y){
-  if(typeof DATA==='undefined'||!DATA||!DATA.rooms) return null;
-  var rooms=DATA.rooms, i, r;
-  for(i=0;i<rooms.length;i++){
-    r=rooms[i];
-    if(!r||r.floor!==floor||r.hidden3D) continue;
-    if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d) return r;
-  }
-  return null;
+  return roomsAtPointOnFloor(floor,x,y)[0]||null;
 }
 // 壁の両側を数点サンプリングし、接する部屋の天井高の最大値と、
 // 「両側とも部屋に囲まれているか(=内部間仕切りか)」を返す。

@@ -77,6 +77,7 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/photographic-sky.js"></script>
 <script src="assets/js/asset-catalogue.js"></script>
 <script src="assets/js/menu-icons.js"></script>
+<script src="assets/js/number-expr.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--safe-l:env(safe-area-inset-left,0px);--safe-r:env(safe-area-inset-right,0px)}
@@ -151,6 +152,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 .pr{margin-bottom:9px}
 .pl{font-size:10px;color:#7a8fb0;margin-bottom:3px}
 .pi{width:100%;background:#0f3460;border:1px solid #2a4080;color:#eee;padding:4px 7px;border-radius:3px;font-size:11px;font-family:inherit}
+.num-expr-error{outline:2px solid #e5484d !important;outline-offset:1px}
 .note-textarea{min-height:156px;resize:vertical;line-height:1.45;box-sizing:border-box;overflow:auto}
 .pi[type=color]{height:28px;padding:2px}.pi[type=range]{padding:0}.pi[type=file]{font-size:10px}
 .pbtn{width:100%;padding:7px;background:#e94560;border:none;border-radius:3px;color:#fff;cursor:pointer;font-size:11px;margin-top:3px;font-family:inherit;touch-action:manipulation}
@@ -201,7 +203,7 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 #int-ctrl.show{display:block}
 .ic-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:10px;color:#7a8fb0}
 .ic-row input,.ic-row select{background:#0f3460;border:1px solid #2a4080;color:#eee;padding:3px 5px;border-radius:3px;font-size:10px;font-family:inherit}
-.ic-row input[type=number]{width:75px}.ic-row input[type=range]{width:85px}.ic-row select{flex:1}
+.ic-row input[type=number],.ic-row input[data-num-expr]{width:75px}.ic-row input[type=range]{width:85px}.ic-row select{flex:1}
 #wasd{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(22,33,62,0.9);padding:5px 12px;border-radius:6px;font-size:10px;color:#aab;display:none;z-index:200;pointer-events:none;white-space:nowrap}
 #coords{position:absolute;bottom:3px;right:6px;font-size:10px;color:#888;pointer-events:none}
 /* 操作ガイドは読むだけの札で、押すところが1つも無い。それが平面図の左上に
@@ -10268,9 +10270,27 @@ function stairPartsTouch(a,b){
   return (gapX<=220&&overlapY>60) || (gapY<=220&&overlapX>60);
 }
 function getConnectedStairParts(seed){
-  var all=DATA.items.filter(function(o){
+  // 行き先の違う階段は、接していても1本の階段にしない。
+  // 「段差へ上る階段」の隣に「上の階へ行く階段」を折り返しで置くと、
+  // 以前は1つのグループになり、上の階へ行くはずの階段が段差用の階段として
+  // (段差の上に張り付いて、150mm だけ上る形で)描かれていた。
+  // 踊り場は行き先を持たないので、どちらとも繋がる。
+  // 踊り場を種にしたときは、接している最初の段の行き先に従う
+  // (どの部材を種にしても同じグループになるように)。
+  var parts=DATA.items.filter(function(o){
     // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
     return o.floor===seed.floor && isStairPartType(o.type);
+  });
+  var seedLevel=isLevelStairPart(seed);
+  if(isStairLandingType(seed.type)){
+    var firstRun=parts.filter(function(o){
+      return o!==seed && !isStairLandingType(o.type) && stairPartsTouch(seed,o);
+    })[0];
+    seedLevel=!!firstRun && isLevelStairPart(firstRun);
+  }
+  var all=parts.filter(function(o){
+    if(o===seed || isStairLandingType(o.type)) return true;
+    return isLevelStairPart(o)===seedLevel;
   });
   var group=[], queue=[seed], seen={};
   seen[seed.id]=true;
@@ -10377,10 +10397,41 @@ function stairRunEndsMm(seed,outMm){
 // 始まってしまう(2730mm の直階段は小さな段差に収まらないので、普通に起きる)。
 // 下端の先にも部屋が無いときだけ、従来どおり各パーツの中心から採る。
 // item.baseLevel==='skip' なら、判定に頼らずその階の段差から始める。
+// 階段グループの「載せる床」の指定。部材ごとに持てるが、1本の階段の足元は
+// 1つなので、並びの下から見て最初に指定を持つ部材のものを採る。
+// **どの部材を選んでも同じ答えになる**ことが要る(以前は選んだ部材の値を見ていた)。
+function stairGroupBase(seedOrGroup){
+  var group=Array.isArray(seedOrGroup)?seedOrGroup:stairGroupOrdered(seedOrGroup);
+  for(var i=0;i<group.length;i++){
+    var o=group[i];
+    var r=baseRoomOf(o);
+    if(r) return {room:r};
+    if(o&&(o.baseLevel==='floor'||o.baseLevel==='skip')) return {level:o.baseLevel};
+  }
+  return null;
+}
+// 指定から決まる足元(ワールドm)。指定が無ければ null。
+function stairExplicitFootY(fl,base,at,group){
+  if(!base) return null;
+  if(base.room) return roomFloorTopY(base.room);
+  if(base.level==='skip') return floorTopY(fl)+floorMaxSkipLevelMm(fl)*U;
+  if(base.level==='floor'){
+    // 階の床 = 段差を持たない部屋の床(床上げを含む)。下端の先で探し、無ければ
+    // 階段自身の下で探す(下端の先が段差の部屋だけのこともある)。
+    var pts=at?[at]:[];
+    (group||[]).forEach(function(o){ pts.push({x:(o.x||0)+(o.w||0)/2, y:(o.y||0)+(o.d||0)/2}); });
+    for(var i=0;i<pts.length;i++){
+      var fr=floorRoomIgnoringSkip(fl,pts[i].x,pts[i].y);
+      if(fr) return roomFloorTopY(fr);
+    }
+    return floorTopY(fl);
+  }
+  return null;
+}
 function stairFootY(seed,ends){
   var fl=(seed&&seed.floor)||1;
-  if(seed&&seed.baseLevel==='skip') return floorTopY(fl)+floorMaxSkipLevelMm(fl)*U;
-  if(seed&&seed.baseLevel==='floor') return floorTopY(fl);
+  var explicitY=stairExplicitFootY(fl,stairGroupBase(ends.group),ends.down,ends.group);
+  if(explicitY!==null) return explicitY;
   var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
   if(r) return roomFloorTopY(r);
   return Math.min.apply(null,ends.group.map(function(o){
@@ -10410,13 +10461,38 @@ function stairLevelSpanM(seed){
   var sd=stairPartEndMm(seed,-1), su=stairPartEndMm(seed,1);
   var reversed=(roomFloorAt(fl,sd.x,sd.y)>roomFloorAt(fl,su.x,su.y)+0.005);
   if(hi-lo<0.05){
-    var base=floorTopY(fl), maxLvl=0;
+    // 段差が2つ以上ある階では「いちばん高い段差」ではなく、**足元のすぐ上の段差**へ
+    // 上がるものとみなす。+800 の床に置いた階段が、隣の +1600 ではなく +2400 へ
+    // 上る高さで描かれていた。足元より上に段差が無ければ従来どおり、階の床から
+    // いちばん高い段差まで。
+    var base=floorTopY(fl), maxLvl=0, nextY=Infinity;
     DATA.rooms.forEach(function(r){
       if(!r||r.hidden3D||(r.floor||1)!==fl) return;
       var v=roomSkipLevelMm(r)+roomFloorOffsetMm(r);
       if(v>maxLvl) maxLvl=v;
+      if(roomSkipLevelMm(r)<=0) return;
+      var y=base+v*U;
+      if(y>lo+0.05 && y<nextY) nextY=y;
     });
-    lo=base; hi=base+maxLvl*U; reversed=false;
+    if(isFinite(nextY)){ hi=nextY; }
+    else { lo=base; hi=base+maxLvl*U; }
+    reversed=false;
+  }
+  // 足元を明示したとき(載せる床)。上る先は、両端のうち足元より高い方。
+  // 両端とも足元より高くなければ、足元のすぐ上の段差。
+  var explicitY=stairExplicitFootY(fl,stairGroupBase(group),down,group);
+  if(explicitY!==null){
+    var top=-Infinity;
+    [yDown,yUp].forEach(function(y){ if(y>explicitY+0.05&&y>top) top=y; });
+    if(!isFinite(top)){
+      var fb=floorTopY(fl);
+      DATA.rooms.forEach(function(r){
+        if(!r||r.hidden3D||(r.floor||1)!==fl||roomSkipLevelMm(r)<=0) return;
+        var y=roomFloorTopY(r);
+        if(y>explicitY+0.05&&(!isFinite(top)||y<top)) top=y;
+      });
+    }
+    if(isFinite(top)){ lo=explicitY; hi=top; }
   }
   return {baseY:lo, topY:hi, riseM:Math.max(0.05,hi-lo), reversed:reversed};
 }
@@ -14514,10 +14590,30 @@ function stairQuadOf(it){
 }
 // 同じ階の段差を上る階段が、持ち上がった床と平面で重なっている範囲。
 // 重なったまま床を張ると階段が床に飲まれるので、床の側に穴を開ける。
+// 上り下りの高さ(ワールドm)も持たせる -- 穴を開けてよい床は、階段がその高さを
+// **通り抜ける**床だけだからである(levelStairHolesForRoom)。
 function levelStairQuadsForFloor(floor){
   return DATA.items.filter(function(it){
     return it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
-  }).map(stairQuadOf);
+  }).map(function(it){
+    var span=stairLevelSpanM(it);
+    return {quad:stairQuadOf(it), baseY:span.baseY, topY:span.topY};
+  });
+}
+// その部屋の段差の天板に開ける、レベル階段の穴。
+//
+// 階段の足元がこの床より低いときだけ開ける。段差が2つ以上あると、+800 の床の上に
+// 立って +1600 へ上る階段が +800 の床と平面で重なる。そこに穴を開けると、
+// 階段が自分の立っている床を抜いてしまい、宙に浮いて描かれる。
+// 階段の天端が天板の下端に届かない(段差の下に収まる)ときも開けない。
+function levelStairHolesForRoom(r,entries,deckBottomY){
+  var floorY=roomFloorTopY(r);
+  var quads=(entries||[]).filter(function(e){
+    return e.baseY<floorY-0.005 && e.topY>deckBottomY+0.005;
+  }).map(function(e){return e.quad;});
+  if(!quads.length) return [];
+  var cache={}; cache[r.floor]=quads;
+  return stairwellHolesForRoom(r,cache);
 }
 function stairwellQuadsForFloor(floor){
   var belowFloor=floor-1;
@@ -14957,14 +15053,18 @@ function buildRooms3D(flFilt){
     // 段差を持たない部屋では levelStairQuadsForFloor が空なので何も起きない。
     if(levelStairQuadsByFloor[r.floor]===undefined)
       levelStairQuadsByFloor[r.floor]=levelStairQuadsForFloor(r.floor);
-    var platformHoles=(roomSkipLevelMm(r)>0)
-      ? stairHoles.concat(stairwellHolesForRoom(r,levelStairQuadsByFloor))
-      : stairHoles;
     // 床の立ち上がり全体(構造スラブ + スキップフロアの段差 + 床上げ)。
     // 支持が持ち上がっていない家では slabBaseY===ry で、従来と1ビットも変わらない。
     var buildupM=slabH+(roomSkipLevelMm(r)+roomFloorOffsetMm(r))*U;
     var slabBaseY=floorY-buildupM;
     var cavityMm=roomSkipCavityMm(r);
+    // 段差の天板の下端。床下が空間なら天板の厚みぶん、詰まった段差なら構造床の天端まで。
+    var deckBottomY=(cavityMm>0)
+      ? floorY-Math.max(slabH,Math.max(80,FLOOR_SLAB_H||180)*U)
+      : slabBaseY+slabH;
+    var platformHoles=(roomSkipLevelMm(r)>0)
+      ? stairHoles.concat(levelStairHolesForRoom(r,levelStairQuadsByFloor[r.floor],deckBottomY))
+      : stairHoles;
     if(cavityMm>0){
       // 段差が 400mm 以上ある部屋は、床下を**空間**として作る。
       // 下: その階の構造床(= 段差の下に物を置くときの基準)
