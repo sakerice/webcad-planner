@@ -327,10 +327,12 @@ function selectedLockControlHtml(it){
 function selectedVisibilityControlHtml(it){
   if(!it) return '';
   if(it.x1!==undefined && it.x2!==undefined){
-    var v=it.vis3D||'auto';
-    var html='<div class="pr"><div class="pl">3D表示</div><select data-lock-control class="pi" onchange="updateSelectedProp(\'vis3D\',this.value===\'auto\'?\'\':this.value)">';
-    html+='<option value="auto"'+(v==='auto'||v===''?' selected':'')+'>自動(内観で自動透過)</option>';
+    // 既定は「常に表示」(利用者の指示)。何も書いていない壁は常に表示なので、
+    // 「常に表示」を選んだら受け口ごと消し、「自動」は 'auto' と書いて残す。
+    var v=(it.vis3D==='auto'||it.vis3D==='hide')?it.vis3D:'show';
+    var html='<div class="pr"><div class="pl">3D表示</div><select data-lock-control class="pi" onchange="updateSelectedProp(\'vis3D\',this.value===\'show\'?\'\':this.value)">';
     html+='<option value="show"'+(v==='show'?' selected':'')+'>常に表示(透過しない)</option>';
+    html+='<option value="auto"'+(v==='auto'?' selected':'')+'>自動(内観で自動透過)</option>';
     html+='<option value="hide"'+(v==='hide'?' selected':'')+'>一時的に非表示</option>';
     html+='</select></div>';
     if(v==='hide') html+='<div class="lock-status-note">この壁は3Dに表示されません(2Dでは編集できます)。</div>';
@@ -413,6 +415,16 @@ function selectedRoomCeilingHtml(it){
     (voidBlocked?'（この部屋では作れません）':'')+'</option>';
   html+='</select></div>';
   if(blocked&&type!=='void') html+='<div class="lock-status-note">'+blocked+'</div>';
+  // 上の階に床が無いのに、自分の高さで天井を張っている部屋への案内(利用者の選択:
+  // 自動で吹き抜けにはせず、気づけるようにする)。上の階のどこかに部屋はあるが
+  // この部屋の真上には無く、さらに上の屋根だけが覆っている -- この形では、
+  // 上に床の無い天井が宙に浮いた板のように見える(階段室で報告された)。
+  if(type==='flat'&&!voidBlocked&&roomHasNoFloorAbove(it)){
+    html+='<div class="lock-status-note">この部屋の真上（'+((it.floor||1)+1)+'階）には床がありません。いまは'+
+      (it.floor||1)+'階の高さで天井を張っているので、上の階から見ると天井が板のように浮いて見えます。'+
+      '上まで開いた空間なら、吹き抜けにしてください。</div>';
+    html+='<button class="pbtn sec" onclick="updateSelectedCeilingType(\'void\')">吹き抜けにする</button>';
+  }
   if(type==='void'){
     // 高さは入力させない。階高から決まる値なので、手で書かせると階高を変えた
     // 瞬間に上階の天井と食い違い、スラブの小口が室内に見える。
@@ -473,8 +485,10 @@ function selectedRoomCeilingHtml(it){
     var dir=(typeof c2.direction==='number'&&isFinite(c2.direction))?Math.round(c2.direction):0;
     html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+lowMm+'" onchange="updateSelectedSlopedCeiling(\'lowMm\',this.value)"></div>';
     html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" min="0" step="50" value="'+highMm+'" onchange="updateSelectedSlopedCeiling(\'highMm\',this.value)"></div>';
+    // 勾配(°)。低い側・高い側と連動する(どれを変えても残りが決まる)。
+    html+='<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="0" max="75" step="0.5" value="'+(Math.round(slopedCeilingAngleDeg(it,lowMm,highMm,dir)*10)/10)+'" onchange="updateSelectedSlopedCeiling(\'angle\',this.value)"></div>';
     html+='<div class="pr"><div class="pl">向き (°)</div><input class="pi" type="number" step="15" value="'+dir+'" onchange="updateSelectedSlopedCeiling(\'direction\',this.value)"></div>';
-    html+='<div class="lock-status-note">向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
+    html+='<div class="lock-status-note">低い側・高い側・勾配は連動します。勾配を入れると、低い側はそのままで高い側が決まります（上る距離は勾配の向きの部屋の奥行き '+Math.round(slopedCeilingSpanMm(it,dir))+'mm）。向きは 0 が北、時計回り。低い側から高い側へ向かう向きです。この部屋の上に屋根はありません。屋根を載せると、これらの値ではなく屋根が天井を決めます。</div>';
     if(shape&&shape.type==='sloped'&&shape.highMm<highMm){
       // 丸めが起きるのは上に部屋がある階だけになった (Task 14-2)。なぜ丸まったのかを
       // 「階高を超えたから」で止めず、上に何が載っているかまで言う。
@@ -486,6 +500,108 @@ function selectedRoomCeilingHtml(it){
   }
   html+='<div class="lock-status-note">勾配天井の天井面は内観3Dの天井ビュー・外観3D・ウォークスルーで確認できます。壁の上辺は内観3Dでも勾配に沿って切れます。</div>';
   return html;
+}
+// この部屋の真上の階に床(部屋)が無く、それより上の屋根だけが覆っているか。
+function roomHasNoFloorAbove(room){
+  if(!room||roomHasRoomAbove(room)) return false;
+  var up=(room.floor||1)+1;
+  var upperExists=DATA.rooms.some(function(r){ return r&&!r.hidden3D&&(r.floor||1)===up; });
+  if(!upperExists) return false;
+  var cx=room.x+room.w/2, cy=room.y+room.d/2;
+  return DATA.items.some(function(it){
+    return it&&it.type==='roof'&&!it.hidden3D&&(it.floor||1)>up&&roofCoversPlanPoint(it,cx,cy);
+  });
+}
+// 片引き戸・引込み戸の「引き込む側」の欄。戸は開口の横へ開口幅ぶん滑るので、
+// そこが壁に納まっているかを示し、向きを変える・壁を延ばすで直せるようにする。
+function slideDoorPocketHtml(it){
+  if(!it||typeof isSlideInDoorType!=='function'||!isSlideInDoorType(it.type)) return '';
+  var dir=slideDoorDir(it);
+  var cur=slideDoorPocketInfo(it,dir), other=slideDoorPocketInfo(it,-dir);
+  var html='<div class="ph" style="margin-top:12px">引き込む側</div>';
+  if(!cur){
+    return html+'<div class="lock-status-note">取り付く壁が見つかりません。壁の上に置くと、引き込む側を確かめられます。</div>';
+  }
+  html+='<div class="pr"><div class="pl">引く向き</div><select class="pi" onchange="updateSelectedProp(\'flipX\',this.value===\'back\')">'+
+    '<option value="fwd"'+(dir>0?' selected':'')+'>平面図で'+slideDoorDirLabel(it,1)+'へ引く</option>'+
+    '<option value="back"'+(dir<0?' selected':'')+'>平面図で'+slideDoorDirLabel(it,-1)+'へ引く</option>'+
+    '</select></div>';
+  var note;
+  if(cur.missingMm<=0){
+    note='引き込む部分（'+cur.needMm+'mm）は壁の中に納まっています。';
+  }else{
+    note='引き込む部分に壁が '+cur.missingMm+'mm 足りません（必要 '+cur.needMm+'mm／壁 '+cur.haveMm+'mm）。開けた戸が壁の外に出ます。';
+    if(other&&other.missingMm<=0) note+='反対側なら壁に納まります。';
+  }
+  html+='<div class="lock-status-note">'+note+'</div>';
+  if(cur.missingMm>0&&other&&other.missingMm<=0){
+    html+='<button class="pbtn sec" onclick="updateSelectedProp(\'flipX\','+(dir>0)+')">反対側（'+slideDoorDirLabel(it,-dir)+'）へ引くようにする</button>';
+  }
+  if(cur.missingMm>0&&cur.extendable){
+    html+='<button class="pbtn sec" onclick="extendWallForSlideDoor()">壁を延ばして引き込み部分を作る</button>';
+  }
+  return html;
+}
+// 取り付いた壁の端を、引き込み部分の先まで延ばす。
+function extendWallForSlideDoor(){
+  var it=ST.selected;
+  if(!it||!isSlideInDoorType(it.type)) return;
+  var info=slideDoorPocketInfo(it,slideDoorDir(it));
+  if(!info||!info.extendable) return;
+  var w=info.wall;
+  if(isObjectLocked(w)){ alert('取り付いている壁がロックされているので延ばせません。'); return; }
+  saveState();
+  var reach=info.reachMm;
+  if(info.dir>0){ w.x2=Math.round(w.x1+info.ux*reach); w.y2=Math.round(w.y1+info.uy*reach); }
+  else{
+    var nx1=w.x1+info.ux*reach, ny1=w.y1+info.uy*reach;
+    w.x1=Math.round(nx1); w.y1=Math.round(ny1);
+  }
+  markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
+}
+// 床の仕上げの欄。床材・カラー・テクスチャの3つ組で、天井の仕上げ・家具の
+// 素材と同じ並びにする(利用者の指示: 3つはいつもセットで設定できること)。
+// 描くときの読み方は makeRoomFloorMaterial / roomFloorMaterialKey。
+var ROOM_FLOOR_MATERIAL_OPTIONS=[
+  ['wood_floor','フローリング（標準）'],
+  ['wood_oak','フローリング（オーク）'],
+  ['tile_floor','タイル']
+];
+function selectedRoomFloorFinishHtml(it){
+  if(!it||it.type!=='room') return '';
+  var key=(typeof roomFloorMaterialKey==='function')?roomFloorMaterialKey(it):null;
+  var uploaded=!!(it.texture&&!key);
+  var hasColor=!!it.floorColor;
+  var html='<div class="ph" style="margin-top:12px">床の仕上げ</div>';
+  html+='<div class="pr"><div class="pl">床材</div><select class="pi" onchange="updateSelectedRoomFloorMaterial(this.value)">'+
+    '<option value=""'+(key?'':' selected')+'>自動（部屋名から：水まわりはタイル）</option>';
+  ROOM_FLOOR_MATERIAL_OPTIONS.forEach(function(o){
+    html+='<option value="'+o[0]+'"'+(key===o[0]?' selected':'')+'>'+o[1]+'</option>';
+  });
+  html+='</select></div>';
+  html+='<div class="pr"><div class="pl">床カラー</div><input class="pi" type="color" value="'+(it.floorColor||'#ffffff')+'" onchange="updateSelectedProp(\'floorColor\',this.value)"></div>';
+  if(hasColor) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'floorColor\',null)">床カラー解除</button>';
+  html+='<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
+  if(uploaded) html+='<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">床テクスチャ解除</button>';
+  html+=selectedTextureFlipControlsHtml(it);
+  var note=uploaded
+    ? 'テクスチャ（画像）を設定しているあいだ、床材は使われません。'
+    : '床材の柄で描いています。画像を読み込むと、画像が床材より優先されます。';
+  note+=hasColor
+    ? '床カラーは床材・画像に重ねて掛けます（白で元の色のまま）。'
+    : '床カラーは未設定です（床材・画像の色のまま）。';
+  return html+'<div class="lock-status-note">'+note+'</div>';
+}
+// 床材を選ぶ。古いプランは床材のキーを texture に書いていたので、床材を選び直すときは
+// そちらを消して floorMaterial へ移す(画像のアップロードは消さない)。
+function updateSelectedRoomFloorMaterial(value){
+  var r=ST.selected;
+  if(!r||r.type!=='room') return;
+  if(isObjectLocked(r)){ updateProps(); return; }
+  saveState();
+  if(typeof FLOOR_PBR_STEM!=='undefined'&&FLOOR_PBR_STEM[r.texture]) delete r.texture;
+  if(value) r.floorMaterial=value; else delete r.floorMaterial;
+  markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
 // 天井の仕上げ（色・テクスチャ）の欄 (Task 22)。
 // 床テクスチャの欄と同じ書き方・同じ入れ物で、置き場所だけ天井の欄の下。
@@ -720,8 +836,68 @@ function updateSelectedSlopedCeiling(field,v){
     direction:(typeof cur.direction==='number'&&isFinite(cur.direction))?cur.direction:0};
   var n=Number(v);
   if(field==='direction'){ if(isFinite(n)) c.direction=n; }
+  else if(field==='angle'){
+    // 勾配(°)を入れたら、低い側はそのままで高い側を決める(勾配の向きの部屋の奥行きで)。
+    if(!isFinite(n)) return;
+    var ang=Math.max(0,Math.min(75,n));
+    var span=slopedCeilingSpanMm(room,c.direction);
+    if(span<=0) return;
+    c.highMm=Math.max(c.lowMm,Math.round(c.lowMm+span*Math.tan(ang*Math.PI/180)));
+  }
   else if(isPositiveNumber(n)) c[field]=Math.round(n);
   updateSelectedProp('ceiling',c);
+}
+// 勾配天井が低い側から高い側まで上る水平の距離(mm)。部屋の外周を勾配の向きへ
+// 射影した長さで、描画(ceilingSlopeSpan)と同じ測り方をする。
+function slopedCeilingSpanMm(room,direction){
+  if(!room||typeof ceilingSlopeSpan!=='function') return 0;
+  var sp=ceilingSlopeSpan(room,ceilingSlopeUnit(direction));
+  return Math.max(0,(sp.max-sp.min)/U);
+}
+function slopedCeilingAngleDeg(room,lowMm,highMm,direction){
+  var span=slopedCeilingSpanMm(room,direction);
+  if(span<=0) return 0;
+  return Math.atan(Math.max(0,highMm-lowMm)/span)*180/Math.PI;
+}
+// ── 屋根の勾配と、低い側・高い側の高さ ─────────────────────────────────
+// 屋根も勾配天井と同じく、勾配(°)・低い側・高い側の3つで見せ、どれを書いても
+// 残りが決まるようにする(利用者の指示)。高さは**屋根の下の階の床から**測る
+// (低い側 = 軒の高さ、高い側 = 棟・上端の高さ。屋根の上面で測る)。
+// 低い側を変えると屋根ごと上下し(elev)、高い側を変えると勾配が変わる。
+// 結合した屋根(L字・コの字)は上る距離が面ごとに違うので、勾配だけを出す。
+function roofRiseRunM(it){
+  if(!it||(it.roofType||'gable')==='flat') return 0;
+  if(typeof hasRoofParts==='function'&&hasRoofParts(it)) return 0;
+  var W=(it.w||0)*U, D=(it.d||0)*U, t=it.roofType||'gable';
+  if(t==='mono') return D;
+  if(t==='gable') return D/2;
+  if(t==='gable-y') return W/2;
+  return Math.min(W,D)/2;
+}
+function roofLowHighMm(it){
+  var run=roofRiseRunM(it);
+  if(run<=0) return null;
+  var fl=it.floor||1;
+  var ref=(fl>1)?floorTopY(fl-1):floorBaseY(fl);
+  var low=Math.round((floorBaseY(fl)+(Number(it.elev)||0)*U-ref)/U);
+  var pitch=Math.max(5,Math.min(60,Number(it.pitch)||30));
+  var high=Math.round(low+Math.tan(pitch*Math.PI/180)*run/U);
+  return {lowMm:low, highMm:high, runMm:Math.round(run/U)};
+}
+function updateSelectedRoofHeight(field,v){
+  var it=ST.selected;
+  if(!it||it.type!=='roof') return;
+  var cur=roofLowHighMm(it), n=Number(v);
+  if(!cur||!isFinite(n)) return;
+  if(field==='low'){
+    updateSelectedProp('elev',Math.round((Number(it.elev)||0)+(n-cur.lowMm)));
+    return;
+  }
+  // 高い側 → 勾配。勾配は 5〜60° の範囲なので、はみ出す値はそこへ丸める。
+  var rise=Math.max(0,n-cur.lowMm);
+  var deg=Math.atan(rise/Math.max(1,cur.runMm))*180/Math.PI;
+  deg=Math.max(5,Math.min(60,Math.round(deg*10)/10));
+  updateSelectedProp('pitch',deg);
 }
 function clearAll3DHidden(){
   var n=0;
@@ -1028,6 +1204,9 @@ function updateProps(){
     html += '<div class="pr"><div class="pl">終点 Y (mm)</div><input class="pi" type="number" value="'+Math.round(it.y2)+'" onchange="updateSelectedProp(\'y2\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁厚 (mm)</div><input class="pi" type="number" value="'+it.thick+'" onchange="updateSelectedProp(\'thick\',+this.value)"></div>';
     html += '<div class="pr"><div class="pl">壁高さ (mm)</div><input class="pi" type="number" min="300" max="6000" step="10" value="'+Math.round(wallHeightMm(it))+'" onchange="updateSelectedProp(\'wallHeight\',+this.value)"></div>';
+    // 足元の上下。天端はそのまま、下端だけを伸ばし縮みさせる。
+    html += '<div class="pr"><div class="pl">足元の上下 (mm)</div><input class="pi" type="number" min="-3000" max="2000" step="10" value="'+wallFootOffsetMm(it)+'" onchange="updateSelectedProp(\'footOffsetMm\',+this.value||0)"></div>';
+    if(wallFootOffsetMm(it)!==0) html += '<div class="lock-status-note">足元を '+(wallFootOffsetMm(it)<0?'床より '+(-wallFootOffsetMm(it))+'mm 下へ伸ばしています':'床から '+wallFootOffsetMm(it)+'mm 持ち上げています')+'。天端は動きません。</div>';
     html += '<div class="pr"><div class="pl">設置高さ</div><select class="pi" onchange="updateSelectedProp(\'wallBand\',this.value)">';
     [['full','通常'],['low','低位のみ'],['high','高位のみ']].forEach(function(opt){
       html += '<option value="'+opt[0]+'" '+((it.wallBand||'full')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
@@ -1062,7 +1241,8 @@ function updateProps(){
       html += selectedTextureFlipControlsHtml(it);
     }
     if((it.thick||0)>=120){
-      var faces=getWallInteriorFaces(it);
+      // ほかの壁に丸ごと埋まって見えない面は、設定欄に出さない(3Dでは描いている)。
+      var faces=getWallInteriorFaces(it).filter(function(f){ return !f.covered; });
       html += '<div class="ph" style="margin-top:12px">壁紙カラー（内観面）</div>';
       if(!faces.length){
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">この壁は両面が外観カラー対象です。</div>';
@@ -1183,6 +1363,7 @@ function updateProps(){
         html += '<div class="pr"><div class="pl">採光スリット (小窓)</div><label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" '+(it.showDoorSlit!==false?'checked':'')+' onchange="updateSelectedProp(\'showDoorSlit\',this.checked)">3Dで表示する</label></div>';
       }
     }
+    html += slideDoorPocketHtml(it);
   }
   if(it.type==='wood-fence'){
     if(!it.fenceHeight) it.fenceHeight=1600;
@@ -1301,7 +1482,13 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+(it.roofType===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
-    html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" value="'+Math.round(it.pitch||30)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
+    html += '<div class="pr"><div class="pl">勾配 (°)</div><input class="pi" type="number" min="5" max="60" step="0.5" value="'+(Math.round((Number(it.pitch)||30)*10)/10)+'" onchange="updateSelectedProp(\'pitch\',+this.value)"></div>';
+    var rlh=roofLowHighMm(it);
+    if(rlh){
+      html += '<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="number" step="10" value="'+rlh.lowMm+'" onchange="updateSelectedRoofHeight(\'low\',this.value)"></div>';
+      html += '<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="number" step="10" value="'+rlh.highMm+'" onchange="updateSelectedRoofHeight(\'high\',this.value)"></div>';
+      html += '<div class="lock-status-note">勾配・低い側・高い側は連動します。高さは屋根の下の階の床から、屋根の上面で測ります。低い側を変えると屋根ごと上下し、高い側を変えると勾配が変わります（勾配は 5〜60°）。上る距離は '+rlh.runMm+'mm です。</div>';
+    }
     html += roofMergeSectionHtml(it);
     var gm=it.gutterMode||'auto';
     html += '<div class="pr"><div class="pl">雨樋</div><select class="pi" onchange="updateSelectedProp(\'gutterMode\',this.value)">';
@@ -1358,6 +1545,18 @@ function updateProps(){
     // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
     // 組み合わせで決まるので、ここで選ぶのは1枚ごとの作りだけ。
     var sstyle = stairStyleOf(it);
+    // 踏板・踊り場の床材。床の仕上げ(床材・カラー・テクスチャ)と同じ選択肢に、
+    // 「床と同じ」を足す。蹴込み板は下の3Dカラー・テクスチャのまま。
+    var sfm=it.stairFloorMaterial||'';
+    var sfRoom=roomAtPointOnFloor(it.floor||1,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
+    html += '<div class="pr"><div class="pl">踏板の床材</div><select class="pi" onchange="updateSelectedProp(\'stairFloorMaterial\',this.value)">'+
+      '<option value=""'+(sfm===''?' selected':'')+'>なし（3Dカラー・テクスチャで塗る）</option>'+
+      '<option value="match"'+(sfm==='match'?' selected':'')+'>床と同じ'+(sfRoom?'（'+((sfRoom.n&&String(sfRoom.n).trim())||'部屋')+'の床）':'')+'</option>';
+    ROOM_FLOOR_MATERIAL_OPTIONS.forEach(function(o){
+      html += '<option value="'+o[0]+'"'+(sfm===o[0]?' selected':'')+'>'+o[1]+'</option>';
+    });
+    html += '</select></div>';
+    if(sfm) html += '<div class="lock-status-note">踏板と踊り場を'+(sfm==='match'?'足元の部屋の床（床材・床カラー・床テクスチャ）':'この床材')+'で仕上げています。部屋の床を変えると'+(sfm==='match'?'一緒に変わります':'変わりません')+'。蹴込み板は3Dカラー・テクスチャのままです。'+(sfm==='match'&&!sfRoom?'いまは足元に部屋が無いので、3Dカラーで塗っています。':'')+'</div>';
     html += '<div class="pr"><div class="pl">階段の形状</div><select class="pi" onchange="updateSelectedProp(\'stairStyle\',this.value===\'open\'?undefined:this.value)">'+
       '<option value="open"'+(sstyle==='open'?' selected':'')+'>ひな壇（側面が見える・階段下は素通し）</option>'+
       '<option value="box"'+(sstyle==='box'?' selected':'')+'>箱型（階段下を塞ぐ）</option>'+
@@ -1442,9 +1641,7 @@ function updateProps(){
   if(baseFloorKindOf(it)==='item') html += baseFloorSelectHtml(it);
   if(it.type === 'room') {
     html += '<div class="pr"><div class="pl">部屋名</div><input class="pi" type="text" value="'+(it.n||'')+'" onchange="updateSelectedProp(\'n\',this.value)"></div>';
-    html += '<div class="pr"><div class="pl">床テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadTex(this)"></div>';
-    if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>';
-    html += selectedTextureFlipControlsHtml(it);
+    html += selectedRoomFloorFinishHtml(it);
     html += selectedRoomFloorHtml(it);
     html += selectedRoomSkipHtml(it);
     html += selectedRoomCeilingHtml(it);
@@ -1644,10 +1841,12 @@ function updateSelectedProp(p,v,noSave){
   if(p==='setback' && !v) delete ST.selected.setback;
   // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
   // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
-  if((p==='stairTarget'||p==='baseLevel') && !v) delete ST.selected[p];
+  if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm') && !v) delete ST.selected[p];
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
+  if(p==='floorColor' && !v) delete ST.selected.floorColor;
+  if(p==='stairFloorMaterial' && !v) delete ST.selected.stairFloorMaterial;
   if(p==='ceilingTexture' && !v){
     delete ST.selected.ceilingTexture;
     delete ST.selected.ceilingTextureFlipX;

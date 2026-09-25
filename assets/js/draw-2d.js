@@ -679,6 +679,84 @@ function getOpeningWallInfo(it){
     rot:Math.atan2(wdy,wdx)*180/Math.PI
   };
 }
+// ── 片引き戸の引き込み側 ──────────────────────────────────────────────
+// 片引き戸(door-slide-s)と引込み戸(door-pocket)は、開けると戸が開口の横へ
+// 1枚ぶん(= 開口幅)滑る。その引き込み側は**壁の中(または壁に沿って)**に
+// 納まっていないと成り立たない。w は開口の幅だけで、引き代は含まない。
+// 滑る向きは flipX(false = 取り付いた壁の始点→終点の向き)。
+function isSlideInDoorType(type){ return type==='door-slide-s'||type==='door-pocket'; }
+// 引き込み側 dir(+1 = 壁の終点側 / -1 = 始点側)に、壁がどれだけあるか。
+// 取り付いた壁と、同じ直線上に続く壁(同じ階・平行・芯のずれ 30mm 以内)を
+// 合わせて数え、その区間にほかの開口(ドア・窓)があれば壁が無いものとして引く。
+function slideDoorPocketInfo(it,dir){
+  if(!it||!isSlideInDoorType(it.type)) return null;
+  var info=getOpeningWallInfo(it);
+  if(!info||!info.wall) return null;
+  var w=info.wall, wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
+  if(wlen<1) return null;
+  var ux=wdx/wlen, uy=wdy/wlen;
+  var s=info.t*wlen, half=(it.w||0)/2, need=(it.w||0);
+  var a=Math.min(s+dir*half,s+dir*(half+need)), b=Math.max(s+dir*half,s+dir*(half+need));
+  function proj(x,y){ return (x-w.x1)*ux+(y-w.y1)*uy; }
+  function off(x,y){ return Math.abs(-(x-w.x1)*uy+(y-w.y1)*ux); }
+  var cover=[];
+  DATA.walls.forEach(function(o){
+    if((o.floor||1)!==(w.floor||1)) return;
+    var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
+    if(olen<1) return;
+    if(Math.abs((odx*ux+ody*uy)/olen)<0.999) return;          // 平行でない
+    if(off(o.x1,o.y1)>30||off(o.x2,o.y2)>30) return;          // 同じ直線上でない
+    var p1=proj(o.x1,o.y1), p2=proj(o.x2,o.y2);
+    cover.push([Math.min(p1,p2),Math.max(p1,p2)]);
+  });
+  // ほかの開口が引き込み区間にあれば、そこは壁ではない。
+  var holes=[];
+  DATA.items.forEach(function(o){
+    if(o===it||(o.floor||1)!==(it.floor||1)||!isOpeningItemType(o.type)) return;
+    var oi=getOpeningWallInfo(o);
+    if(!oi||!oi.wall) return;
+    if(off(oi.x,oi.y)>30) return;
+    var c=proj(oi.x,oi.y), h=(o.w||0)/2;
+    holes.push([c-h,c+h]);
+  });
+  function covered(x){
+    if(holes.some(function(h){ return x>h[0]&&x<h[1]; })) return false;
+    return cover.some(function(c){ return x>=c[0]-1&&x<=c[1]+1; });
+  }
+  var steps=40, have=0;
+  for(var i=0;i<steps;i++){ if(covered(a+(b-a)*(i+0.5)/steps)) have+=(b-a)/steps; }
+  have=Math.round(have);
+  // 取り付いた壁の端を延ばせば足りるか(足りない部分が壁の端の先だけで、そこに開口が無い)。
+  var hostEnd=dir>0?wlen:0;
+  var beyond=dir>0?(b>wlen+1):(a<-1);
+  var extendable=beyond && !holes.some(function(h){ return h[1]>Math.min(a,b)&&h[0]<Math.max(a,b)&&(dir>0?h[1]>wlen:h[0]<0); });
+  return {dir:dir, needMm:need, haveMm:have, missingMm:Math.max(0,need-have), wall:w,
+          reachMm:dir>0?b:a, hostEnd:hostEnd, extendable:extendable, ux:ux, uy:uy};
+}
+function slideDoorDir(it){ return it&&it.flipX?-1:1; }
+// 平面図の上で、引き込む向きを言葉にする(画面は右が +x、下が +y)。
+function slideDoorDirLabel(it,dir){
+  var info=getOpeningWallInfo(it);
+  if(!info||!info.wall) return dir>0?'終点側':'始点側';
+  var w=info.wall, dx=(w.x2-w.x1)*dir, dy=(w.y2-w.y1)*dir;
+  if(Math.abs(dx)>=Math.abs(dy)) return dx>0?'右':'左';
+  return dy>0?'下':'上';
+}
+// 取り込んだ間取りの片引き戸を、壁のある側へ引くように向ける。
+// 読み取りは引く向きを持たないので、何もしないと全部が壁の終点側へ引く
+// (壁の途切れた廊下側へ引いて、戸が宙に浮くことがあった)。
+// 両側とも同じだけ壁があれば、そのまま(終点側)にする。
+function orientSlideInDoorsToWalls(items){
+  var changed=0;
+  (items||[]).forEach(function(it){
+    if(!it||!isSlideInDoorType(it.type)) return;
+    var fwd=slideDoorPocketInfo(it,1), back=slideDoorPocketInfo(it,-1);
+    if(!fwd||!back) return;
+    var want=(back.haveMm>fwd.haveMm+1);
+    if(!!it.flipX!==want){ it.flipX=want; changed++; }
+  });
+  return changed;
+}
 function getOpeningCenterCandidates(it){
   var a={x:it.x+it.w/2,y:it.y+it.d/2};
   var b={x:it.x+it.d/2,y:it.y+it.w/2};

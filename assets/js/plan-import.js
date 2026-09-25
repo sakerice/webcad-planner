@@ -929,6 +929,8 @@
         });
       }).concat(read.items, made);
     }
+    // 片引き戸は、壁のある側へ引くように向ける(読み取りは引く向きを持たない)。
+    if (typeof orientSlideInDoorsToWalls === 'function') orientSlideInDoorsToWalls(read.items);
     // 読み込み経路(doImport)と同じ手順で、アプリが期待する既定値をそろえる。
     if (typeof syncNorthFromPlan === 'function') syncNorthFromPlan();
     if (typeof ensureObjectIds === 'function') ensureObjectIds();

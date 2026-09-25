@@ -8201,9 +8201,14 @@ function isCustomWallColor(w){
   return !!(w.color && w.color !== '#888' && w.color !== '#888888');
 }
 
+// 高さ Z (elev) を設定できるか。3D では開口以外のすべての物に効く(buildItem3D が
+// 群ごと持ち上げる)ので、ここは「設定欄に出すか」の判定である。
+// 外階段・スロープ・周辺の建物は以前は出していなかったが、地盤より下げて置く、
+// 下げた土間に合わせる、といった使い方ができないので出す(利用者の指摘)。
+// 基礎は家全体の床の高さを決める元なので、ここでは動かさない(基礎高さの欄で決める)。
 function canSetItemElevation(it){
   if(!it || !it.type) return false;
-  if(it.type==='room' || it.type==='wall' || isPlanAnnotationType(it.type) || it.type==='site-rect' || it.type==='foundation' || it.type==='exterior-stair' || it.type==='ramp' || isContextExteriorItemType(it.type)) return false;
+  if(it.type==='room' || it.type==='wall' || isPlanAnnotationType(it.type) || it.type==='site-rect' || it.type==='foundation') return false;
   return !isOpeningItemType(it.type);
 }
 var ITEM_SURFACE_CATEGORIES = {
@@ -8239,6 +8244,10 @@ function findDefaultPlacementSurface(item){
     if(!isPlacementSurfaceItem(surface)) return;
     if(!isInsideItem(surface,cx,cy)) return;
     var top=item3DBaseY(surface)/U + getItemTopElevation(surface);
+    // 自分の足元より低い面には載せない。基礎は建物の床の下にあるので、室内に
+    // 置いた家具が基礎を「載る面」と取り違え、床の厚み(スラブ+床上げ)ぶん
+    // 沈んでいた(報告: 家具が床に埋まる。スキップフロアの上では段差ぶん沈む)。
+    if(top<=itemBaseMm+1) return;
     if(top>bestTop){ best=surface; bestTop=top; }
   });
   return best ? {item:best, top:bestTop-itemBaseMm} : null;
@@ -8905,10 +8914,37 @@ function getWallInteriorFaces(w){
       // atStart/atEnd: この区間が壁自身のセンターライン始点/終点(内隅になりやすい)に
       // 接しているかどうか。addInteriorFaces 側でこのフラグを見て、実際の描画時に
       // 面を内隅方向へ、相手の壁の内装面とちょうど突き合う分だけ延長し隙間を塞ぐ
-      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM});
+      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM,
+        covered:wallFaceCoveredByOtherWalls(w,ta*len,tb*len,sign)});
     }
   });
   return faces;
+}
+// この面の区間(芯線上 aMm..bMm、sign 側)が、ほかの壁の中に**丸ごと**埋まっているか。
+// 壁の端が隣の壁の中に入った短い区間や、T字に突き当たる壁の真下の区間がそうなる。
+//
+// **3Dの描画では使わない。** 埋まった区間を描かないようにしたら、壁の重なり方
+// によっては室内から外壁の芯が素通しに見えた(getWallInteriorFaces の注記)。
+// 使うのは設定欄だけ -- 見えない面に「内面 n」の設定が並ぶと、どれが
+// どの面か分からなくなる(報告された)。
+// 面の上の3点(両端の少し内側と中央)が、同じ階の高さの足りる実壁の芯に
+// すべて入っていれば埋まっているとみなす。
+function wallFaceCoveredByOtherWalls(w,aMm,bMm,sign){
+  if(bMm-aMm<1) return true;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy);
+  if(len<1) return false;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+  var off=(w.thick||120)/2+10;
+  var inset=Math.min(20,(bMm-aMm)/4);
+  var needH=wallSolidCoverHeightMm(w)-1;
+  var others=DATA.walls.filter(function(o){
+    return o!==w && (o.floor||1)===(w.floor||1) && o.vis3D!=='hide' && wallSolidCoverHeightMm(o)>=needH;
+  });
+  if(!others.length) return false;
+  return [aMm+inset,(aMm+bMm)/2,bMm-inset].every(function(t){
+    var px=w.x1+ux*t+nx*off*sign, py=w.y1+uy*t+ny*off*sign;
+    return others.some(function(o){ return wallCoreBoxHitMm(o,px,py); });
+  });
 }
 
 function makeExteriorWallMaterial(w,fl,len,face){
@@ -9025,7 +9061,9 @@ function makeInteriorCutawayWallMaterial(source,opacity){
 }
 function markInteriorCutawayCandidate(mesh,w,sign,opacity){
   if(!mesh || !w) return;
-  if(w.vis3D==='show') return; // 常に表示: 自動カットアウェイ対象にしない
+  // 自動で透過させるのは「自動」を選んだ壁だけ。既定は常に表示(利用者の指示で
+  // 既定を反転した。以前は何も書いていない壁が自動で、'show' だけが透過しなかった)。
+  if(w.vis3D!=='auto') return;
   mesh.userData.cutawayWall={
     wall:w,
     sign:sign||0,
@@ -9188,7 +9226,10 @@ function buildWall3D(w){
   if(w.vis3D==='hide') return;
   // 足元は原則 floorBaseY。芯線の全体が下階の高い壁(スキップフロアの上に立つ壁を
   // 含む)に載っている壁だけ、その天端から立つ。下階に高い壁が無ければ同値。
-  var fl=w.floor, fy=wallBaseSupportY(w);
+  // 足元の上下(wallFootOffsetMm)は fy だけを動かす。壁の天端は wallDisplayHeightM が
+  // floorBaseY から決めているので、fy を下げれば壁は下へ伸び、上げれば縮む。
+  // 開口の高さは item3DBaseY から fy を引いて出すので、世界での位置は変わらない。
+  var fl=w.floor, fy=wallBaseSupportY(w)+wallFootOffsetMm(w)*U;
   // 壁の高さ・勾配の頭打ち・開口の位置は、すべて **fy を 0 とする座標**で組み立てる。
   // 高さモデル側 (wallDisplayHeightM / wallTopHeightAtM / wallFullHeightM) は
   // floorBaseY を 0 とするので、その差だけ引いて frame をそろえる。
@@ -9247,6 +9288,8 @@ function buildWall3D(w){
   var slopedTop=!!topEnv;
   var slopedTopMinH=topEnv?topEnv.minH:undefined;
   var slopedTopRoofs=topEnv?topEnv.roofs:null;
+  var slopedTopRaise=topEnv?topEnv.raise:null;
+  var slopedTopUnder=topEnv?topEnv.under:null;
   // さらに上へ少しだけ伸ばして、刻みの食い違いで壁と天井のあいだにスリットが
   // 開く可能性を消す。上へ出た分は天井面に隠れる(下から見えるのは天井の側)。
   var WALL_TOP_OVERSHOOT_M=0.015;
@@ -9255,14 +9298,29 @@ function buildWall3D(w){
     if(t<0) t=0; else if(t>1) t=1;
     // wallTopHeightAtM は floorBaseY 基準。fallback も同じ基準へ上げてから渡し、
     // 返ってきた値を fy 基準へ下ろす。
-    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    // 同じ階の勾配屋根の下では、上乗せ分でも屋根の板の下面を超えない。
+    var underLim=wallRaiseTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+    if(underLim!==null&&top>underLim-fy) top=underLim-fy;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
       w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t);
     if(roofLim!==null&&top>roofLim-fy) top=roofLim-fy;
     // ピース自身の天端は超えない。まぐさ上の小壁など、天井より下で完結する
     // ピースはこれで一切影響を受けない。
-    if(top>yBase+h) top=yBase+h;
+    // 屋根の下面まで立ち上げる外壁では、壁の天端まで届くピースだけは上へ出てよい
+    // (窓の下の腰壁のように途中で終わるピースは、従来どおり自分の天端で止める)。
+    var reachesTop=slopedTopRaise&&slopedTopRaise.length&&(yBase+h>=wallH-0.001);
+    if(top>yBase+h&&!reachesTop) top=yBase+h;
+    if(reachesTop){
+      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+      // top は fy(持ち上がりを含む壁の足元)基準。立ち上げた分だけを屋根の板の下面で
+      // 止める。ピース自身の天端より下へは下げない -- 軒では屋根の板の方が厚く、
+      // そこで下げると外皮の高さを割ってスリットが開く(Task 2b)。屋根が軒で階高より
+      // 下りてきているところは、上の roofLim が既に切っている。
+      var capTop=Math.max(yBase+h,up!==null?up-fy:yBase+h);
+      if(top>capTop) top=capTop;
+    }
     if(top<yBase+0.001) top=yBase+0.001;
     return top;
   }
@@ -10880,8 +10938,12 @@ function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
     subdivide(mx,x1,mz,z1,depth+1); subdivide(x0,mx,mz,z1,depth+1);
   }
   m.cells.forEach(function(cl){ subdivide(cl.x0,cl.x1,cl.z0,cl.z1,0); });
-  // 外周の立ち上がり。軒では鼻隠し(高さ0→-厚み)、妻では妻壁+鼻隠しになる。
-  var bottomY=-thick, skirtBottomY=-Math.max(thick,skirt);
+  // 外周の小口。屋根の面に沿って**屋根厚ぶんだけ**下がる(軒では鼻隠し、妻では破風)。
+  // 以前は軒の高さまで一律に下ろしていたので、妻側や片流れの側面では小口が
+  // 屋根なりの台形・三角形に伸び、屋根の板で壁との隙間を塞ぐ形になっていた。
+  // そういう形の屋根はまず無いので、隙間は外壁の方を屋根まで立ち上げて塞ぐ
+  // (wallRaiseRoofs)。屋根の小口は板の厚みだけにする。
+  var skirtExtra=Math.max(0,skirt-thick);
   m.edges.forEach(function(e){
     var n=Math.max(1,Math.min(64,Math.ceil(e.len/0.25)));
     for(var i=0;i<n;i++){
@@ -10889,9 +10951,9 @@ function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
       var ax=e.ax+e.ux*t0, az=e.az+e.uz*t0;
       var bx=e.ax+e.ux*t1, bz=e.az+e.uz*t1;
       var ha=H(ax,az), hb=H(bx,bz);
-      pushQuad(side,[ax,ha,az],[bx,hb,bz],[bx,bottomY,bz],[ax,bottomY,az]);
-      if(skirtBottomY<bottomY-0.001)
-        pushQuad(skirtTris,[ax,bottomY,az],[bx,bottomY,bz],[bx,skirtBottomY,bz],[ax,skirtBottomY,az]);
+      pushQuad(side,[ax,ha,az],[bx,hb,bz],[bx,hb-thick,bz],[ax,ha-thick,az]);
+      if(skirtExtra>0.001)
+        pushQuad(skirtTris,[ax,ha-thick,az],[bx,hb-thick,bz],[bx,hb-thick-skirtExtra,bz],[ax,ha-thick-skirtExtra,az]);
     }
   });
   function addMesh(points,material){
@@ -10969,12 +11031,16 @@ function build3DRoofItem(grp,it,w3,d3){
     tri(a,b,c,material);
     tri(a,c,d,material);
   }
+  // 小口は屋根の面に沿って屋根厚ぶんだけ下がる(build3DRoofPolygon と同じ)。
+  // 水平な軒では従来と同じ形。斜めの辺(片流れの側面・切妻の破風)では、
+  // 以前のように軒の高さまで台形に伸ばさない -- 隙間は外壁が塞ぐ(wallRaiseRoofs)。
   function edge(a,b){
-    quad(a,b,[b[0],bottomY,b[2]],[a[0],bottomY,a[2]],edgeMat);
+    quad(a,b,[b[0],b[1]-thick,b[2]],[a[0],a[1]-thick,a[2]],edgeMat);
   }
   function skirtEdge(a,b){
-    if(skirtBottomY>=bottomY-0.001) return;
-    quad([a[0],bottomY,a[2]],[b[0],bottomY,b[2]],[b[0],skirtBottomY,b[2]],[a[0],skirtBottomY,a[2]],skirtMat);
+    var extra=Math.max(0,skirt-thick);
+    if(extra<=0.001) return;
+    quad([a[0],a[1]-thick,a[2]],[b[0],b[1]-thick,b[2]],[b[0],b[1]-thick-extra,b[2]],[a[0],a[1]-thick-extra,a[2]],skirtMat);
   }
   function edgeLoop(points){
     for(var i=0;i<points.length;i++){
@@ -10983,12 +11049,22 @@ function build3DRoofItem(grp,it,w3,d3){
       skirtEdge(a,b);
     }
   }
+  // 妻側は破風(屋根の縁に沿った板)だけを付ける。以前は妻の三角形を屋根の板で
+  // 塞いでいたが、そこは外壁(妻壁)が屋根まで立ち上がって塞ぐ。
   function gableEnd(x,axis){
+    var p1,ridge,p2;
     if(axis==='x'){
-      tri([x,baseY,-D/2],[x,baseY,D/2],[x,Math.tan(pitch)*D/2,0],edgeMat);
+      p1=[x,baseY,-D/2]; ridge=[x,baseY+Math.tan(pitch)*D/2,0]; p2=[x,baseY,D/2];
     } else {
-      tri([-W/2,baseY,x],[W/2,baseY,x],[0,Math.tan(pitch)*W/2,x],edgeMat);
+      p1=[-W/2,baseY,x]; ridge=[0,baseY+Math.tan(pitch)*W/2,x]; p2=[W/2,baseY,x];
     }
+    edge(p1,ridge); edge(ridge,p2);
+    skirtEdge(p1,ridge); skirtEdge(ridge,p2);
+  }
+  // 軒の辺だけの小口(切妻の妻側の水平な辺は付けない -- 妻壁の手前に板が1枚
+  // 浮いてしまう)。
+  function eaveEdges(pairs){
+    pairs.forEach(function(pr){ edge(pr[0],pr[1]); skirtEdge(pr[0],pr[1]); });
   }
   function hipRidgePoints(longRidge){
     var alongX=W>=D;
@@ -11068,7 +11144,7 @@ function build3DRoofItem(grp,it,w3,d3){
     var gr1=[0,baseY+riseY,-D/2], gr2=[0,baseY+riseY,D/2];
     quad(gy1,gy4,gr2,gr1,mat);
     quad(gy3,gy2,gr1,gr2,mat);
-    edgeLoop([gy1,gy2,gy3,gy4]);
+    eaveEdges([[gy4,gy1],[gy2,gy3]]);
     gableEnd(-D/2,'z'); gableEnd(D/2,'z');
     return;
   }
@@ -11077,7 +11153,7 @@ function build3DRoofItem(grp,it,w3,d3){
   var r1=[-W/2,baseY+riseG,0], r2=[W/2,baseY+riseG,0];
   quad(g1,g2,r2,r1,mat);
   quad(g3,g4,r1,r2,mat);
-  edgeLoop([g1,g2,g3,g4]);
+  eaveEdges([[g1,g2],[g3,g4]]);
   gableEnd(-W/2,'x'); gableEnd(W/2,'x');
 }
 
@@ -11805,7 +11881,8 @@ function buildItem3D(it){
     var sSteps=riseInfo.steps||getStairStepCount(it),sH=partRise/sSteps,sD=d3/sSteps;
     // 踏板・蹴込み板。テクスチャを貼っていればそれを使う(画像トリミングの欄と対)。
     // 色は it.color(アイテム色)で塗られるので、ここでは既定の木色を置くだけ。
-    var sMat=makeItemTextureMaterial(it,w3,Math.max(0.2,d3),'repeat',0xffffff,{lighting:true,roughness:0.6,envMapIntensity:0.18}) ||
+    var sMat=stairTreadFloorMaterial(it,w3,isStairLandingType(it.type)?d3:(sD||d3)) ||
+      makeItemTextureMaterial(it,w3,Math.max(0.2,d3),'repeat',0xffffff,{lighting:true,roughness:0.6,envMapIntensity:0.18}) ||
       new THREE.MeshStandardMaterial({color:0xd0c8a8,roughness:0.6});
     var rMat=makeItemTextureMaterial(it,w3,Math.max(0.1,sH||0.2),'repeat',0xffffff,{lighting:true,roughness:0.7,envMapIntensity:0.16}) ||
       new THREE.MeshStandardMaterial({color:0xe8e2d8,roughness:0.7});
@@ -14664,12 +14741,45 @@ var FLOOR_PBR_STEM = {
   wood_oak:   'floor_oak',
   tile_floor: 'floor_tile'
 };
+// 床の仕上げは3つ組(床材・カラー・テクスチャ)。天井・家具と同じ並び。
+//   r.floorMaterial … 床材のキー(FLOOR_PBR_STEM)。無ければ部屋名から自動
+//   r.floorColor    … 床材・テクスチャに掛ける色(乗算)。無ければ白 = 従来どおり
+//   r.texture       … アップロードした画像。床材より優先する
+// 古いプランは床材のキーを r.texture に書いていたので、そちらも床材として読む。
+function roomFloorMaterialKey(r){
+  if(r&&FLOOR_PBR_STEM[r.texture]) return r.texture;
+  if(r&&FLOOR_PBR_STEM[r.floorMaterial]) return r.floorMaterial;
+  return null;
+}
+// 階段の踏板・踊り場の床材(利用者の指示: 階段は床と同じ仕上げにそろえることが多い)。
+//   it.stairFloorMaterial = 'match'      … 階段が立つ部屋の床と同じ(床材・カラー・画像)
+//                         = 床材のキー   … その床材(FLOOR_PBR_STEM)
+//                         = 省略          … 従来どおり、色と画像だけ
+// 柄の縮尺は踏板1枚の大きさで合わせる(階段全体で割ると、奥行きの浅い踏板に
+// 木目が縮んで詰まる)。蹴込み板は従来どおり色だけ。
+function stairTreadFloorMaterial(it,wM,dM){
+  var mode=it&&it.stairFloorMaterial;
+  if(!mode) return null;
+  var src;
+  if(mode==='match'){
+    var fl=it.floor||1, cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+    var room=roomAtPointOnFloor(fl,cx,cy);
+    if(!room) return null;
+    src={n:room.n,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
+      floorMaterial:room.floorMaterial,floorColor:room.floorColor};
+  } else if(FLOOR_PBR_STEM[mode]){
+    src={floorMaterial:mode};
+  } else return null;
+  src.w=Math.max(1,wM/U); src.d=Math.max(1,dM/U);
+  return makeRoomFloorMaterial(src);
+}
 function makeRoomFloorMaterial(r){
   var rw=r.w*U, rd=r.d*U;
   var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
+  var tint=(r&&r.floorColor)||0xffffff;
   // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
   // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
-  var floorKey=FLOOR_PBR_STEM[r.texture]?r.texture:(isWet?'tile_floor':'wood_floor');
+  var floorKey=roomFloorMaterialKey(r)||(isWet?'tile_floor':'wood_floor');
   var stem=FLOOR_PBR_STEM[floorKey];
   var diffName=stem+'_diffuse.jpg';
   var normName=stem+'_normal.jpg';
@@ -14680,7 +14790,7 @@ function makeRoomFloorMaterial(r){
   var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
   var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
   // マット塗装でも空は映る。0.06 では床が紙に見える
-  var matParams={color:0xffffff,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.85,0.85),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.20};
+  var matParams={color:tint,map:fd,normalMap:fn,normalScale:new THREE.Vector2(0.85,0.85),roughnessMap:fr2,roughness:1.0,metalness:0.0,envMapIntensity:0.20};
   if(r.texture&&!FLOOR_PBR_STEM[r.texture]){
     var tex=cloneRepeatReadyTexture(getTexture3D(r.texture));
     if(tex){
@@ -14689,7 +14799,7 @@ function makeRoomFloorMaterial(r){
       if(rn) setTextureRepeatNoDistort(rn,rw,rd,texTileM(r.texture,0.9));
       return makeInteriorLightingMaterial({map:tex,normalMap:rn||undefined,
         normalScale:rn?new THREE.Vector2(0.85,0.85):undefined,
-        color:0xffffff,roughness:1.0,metalness:0.0,envMapIntensity:0.20});
+        color:tint,roughness:1.0,metalness:0.0,envMapIntensity:0.20});
     }
   }
   return new THREE.MeshStandardMaterial(matParams);
@@ -14738,7 +14848,30 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
     outline.holes.push(path);
   });
   var out={};
-  if(slabH>0){
+  // 床スラブの本体は、穴が軸に沿った矩形なら**矩形の差に割って**箱で作る。
+  // 穴として開ける(ExtrudeGeometry)と外形の側面は穴をまたいで残るので、
+  // 階段が部屋の縁にかかると、壁の無いところで縦板が1枚、吹き抜けの縁に
+  // 宙に浮いて見える(報告された)。階段は2つの部屋にまたがることが多く、
+  // どちらの部屋の床にもこの板が残っていた。仕上げ面(下の slab)は
+  // 縦の面を持たないので従来どおり穴の形で作る(テクスチャの縮尺も保つ)。
+  // 回した階段など矩形にならない穴だけ、従来の経路に残る。
+  var holeRects=[];
+  for(var hi=0;hi<holes.length&&holeRects;hi++){
+    var hr=polyAsAxisRectMm(holes[hi]);
+    if(hr) holeRects.push(hr); else holeRects=null;
+  }
+  if(slabH>0&&holeRects){
+    var bodyGroup=new THREE.Group(), bodyMat=makeFloorSlabMaterial(matFloor);
+    subtractRectsFromRect({x0:r.x,y0:r.y,x1:r.x+r.w,y1:r.y+r.d},holeRects).forEach(function(p){
+      var bw=(p.x1-p.x0)*U, bd=(p.y1-p.y0)*U;
+      if(bw<=0.002||bd<=0.002) return;
+      var box=new THREE.Mesh(new THREE.BoxGeometry(bw,slabH,bd),bodyMat);
+      box.position.set((p.x0+p.x1)/2*U,ry+slabH/2,(p.y0+p.y1)/2*U);
+      box.castShadow=true; box.receiveShadow=true;
+      bodyGroup.add(box);
+    });
+    out.slabBody=bodyGroup;
+  } else if(slabH>0){
     var extGeo=new THREE.ExtrudeGeometry(outline,{depth:Math.max(slabH,0.001),bevelEnabled:false});
     extGeo.rotateX(-Math.PI/2);
     var slabBody=new THREE.Mesh(extGeo,makeFloorSlabMaterial(matFloor));
@@ -21146,7 +21279,9 @@ var JISDRAW=(function(){
       var f=w.floor||1;
       var base=floorBaseY(f)/U;
       var top=base+wallDisplayHeightM(w)/U;
-      var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:base,top:top,rawTop:top,
+      // 足元の上下は下端だけを動かす(3D の buildWall3D と同じ)。天端は base から測る。
+      var foot=base+(typeof wallFootOffsetMm==='function'?wallFootOffsetMm(w):0);
+      var r={uMin:Math.min(u1,u2),uMax:Math.max(u1,u2),base:foot,top:top,rawTop:top,
         depth:Math.max(d1,d2),floor:f,wall:w};
       var pts=elevWallTopPoints(w,u1,u2,base);
       if(pts){
