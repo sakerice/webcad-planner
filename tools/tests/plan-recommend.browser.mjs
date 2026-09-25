@@ -179,6 +179,27 @@ try {
     await page.evaluate((r) => PlanFinish.mount(r), RESULT);
     assert.equal(await page.locator('#plan-recommend .plan-recommend-item').count(), n);
 
+    // ── 右上の×で、欄ごと一度に閉じる ──
+    const corner = await page.evaluate(() => {
+      const card = document.getElementById('plan-recommend').getBoundingClientRect();
+      const x = document.querySelector('#plan-recommend .plan-recommend-close');
+      const r = x.getBoundingClientRect();
+      const firstRow = document.querySelector('#plan-recommend .plan-recommend-item').getBoundingClientRect();
+      return { w: r.width, h: r.height, label: x.getAttribute('aria-label'),
+               inside: r.left >= card.left && r.right <= card.right + 0.5 && r.top >= card.top,
+               topRight: r.right > card.right - 60 && r.bottom < firstRow.top };
+    });
+    assert.ok(corner.w >= 40 && corner.h >= 40, '欄ごと閉じる×が小さすぎる');
+    assert.ok(corner.inside, '欄ごと閉じる×がカードの外にはみ出している');
+    assert.ok(corner.topRight, '欄ごと閉じる×が右上に無い');
+    assert.match(corner.label, /閉じる/);
+    await page.locator('#plan-recommend .plan-recommend-close').click();
+    assert.equal(await page.locator('#plan-recommend').count(), 0, '右上の×で欄が閉じない');
+    assert.equal(await page.evaluate(() => DATA.items.length), itemsBefore, '閉じただけで間取りが変わった');
+    // 閉じても、取り込み直せば出し直す
+    await page.evaluate((r) => PlanFinish.mount(r), RESULT);
+    assert.equal(await page.locator('#plan-recommend .plan-recommend-item').count(), n);
+
     // 何も無ければカードを出さない
     await page.evaluate(() => PlanFinish.mount({ reads: [{ kind: 'bathtub', room: '浴室' }] }));
     assert.equal(await page.locator('#plan-recommend').count(), 0, '出すものが無いのに空のカードを出す');
@@ -209,6 +230,9 @@ try {
         .filter((x) => x.getBoundingClientRect().right > card.right + 0.5).length;
     });
     assert.equal(clippedMobile, 0, 'スマホ幅で×がカードの外に出る');
+    await page.locator('#plan-recommend .plan-recommend-close').click();
+    assert.equal(await page.locator('#plan-recommend').count(), 0, 'スマホ幅で右上の×が効かない');
+    await page.evaluate((r) => PlanFinish.mount(r), RESULT);
     await page.locator('#plan-recommend [data-kind="chair"] .plan-recommend-open').click();
     await page.waitForTimeout(700);
     const ok = await page.evaluate(() => {

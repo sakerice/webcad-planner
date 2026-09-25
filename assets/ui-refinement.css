@@ -205,6 +205,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
    ここからは置かない。押すとカタログのその分類の欄を開いて送る。 */
 #plan-recommend{background:#fff;border-radius:20px;padding:14px 12px;margin:0 0 12px}
 #plan-recommend h2{margin:0;color:var(--hp-text);font-size:11px;font-weight:700;line-height:1.5}
+/* 見出しと、欄ごと閉じる×。×は押せる大きさ(40px)を保ったまま、見出しの行を
+   押し広げないよう上と右へはみ出させる */
+.plan-recommend-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}
+.plan-recommend-close{flex:0 0 40px;width:40px;height:40px;margin:-10px -6px -10px 0;padding:0;border:0;border-radius:50%;background:transparent;color:#64746e;font-size:20px;line-height:1;cursor:pointer;touch-action:manipulation}
+.plan-recommend-close:hover{background:#e9ece7}
+.plan-recommend-close:focus-visible{outline:2px solid var(--hp-primary);outline-offset:2px}
 #plan-recommend .catalogue-count{margin:2px 0 10px;line-break:strict;word-break:auto-phrase}
 /* 列は minmax(0,1fr)。既定の min-width:auto だと、1行に収めた長い室名が列ごと
    広げて × をカードの外へ押し出した(実物の平屋で起きた)。 */

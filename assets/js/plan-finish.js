@@ -207,6 +207,7 @@
   //   - **ここからは置かない。**押したら、カタログのその分類の欄を開いて
   //     そこまで送る。置くのはカタログから、いつもどおりに
   //   - ×で1つずつ消せる。全部消えたらカードごと消える
+  //   - 右上の×で、欄ごと一度に閉じられる
   //
   // 並べるのは**図面に描かれていたもの**だけ(assets/js/plan-check.js の
   // readMarks が決めたもの)。目標は「間取りをそのまま再現する」ことなので、
@@ -291,16 +292,27 @@
     var card = document.createElement('section');
     card.id = 'plan-recommend';
     card.setAttribute('aria-labelledby', 'plan-recommend-title');
+    // 見出しの行。右上の×で、この欄ごと一度に閉じる(1つずつ消す×とは別)。
+    var head = document.createElement('div');
+    head.className = 'plan-recommend-head';
     var title = document.createElement('h2');
     title.id = 'plan-recommend-title';
     title.textContent = 'おすすめの家具';
+    var closeAll = document.createElement('button');
+    closeAll.type = 'button';
+    closeAll.className = 'plan-recommend-close';
+    closeAll.setAttribute('aria-label', 'おすすめの家具を閉じる');
+    closeAll.title = 'おすすめの家具を閉じる';
+    closeAll.textContent = '×';
+    closeAll.addEventListener('click', function () { card.remove(); });
+    head.append(title, closeAll);
     var note = document.createElement('p');
     note.className = 'catalogue-count';
     note.textContent = '図面に描かれていたものです。押すと、カタログのその欄を開きます。';
     var ul = document.createElement('ul');
     ul.className = 'plan-recommend-list';
     list.forEach(function (r) { ul.append(row(r)); });
-    card.append(title, note, ul);
+    card.append(head, note, ul);
 
     // 検索の欄のすぐ下(検索結果より後ろ)。カタログの先頭に置く。
     var anchor = document.getElementById('object-search-results') || document.getElementById('object-search');
