@@ -64,7 +64,7 @@ const FNS = [
   'setbackOutlineCoversLocal', 'roofItemOverRoom',
   'roofUndersideWorldYAt', 'roofCeilingWorldYAt', 'roofLocalPoint', 'roofSurfaceHeightAt',
   'setbackRoofsForRoom', 'roofTopLimitAtPlanPoint',
-  'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roomRoofCeilingExtent',
+  'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',

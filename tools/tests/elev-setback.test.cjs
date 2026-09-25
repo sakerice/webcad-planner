@@ -116,7 +116,7 @@ const TOP_FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
-  'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm',
+  'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm',
   'wallTouchesSlopedCeiling',
   'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'

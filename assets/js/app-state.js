@@ -1545,6 +1545,18 @@ function updateProps(){
     // 外観の形状。昇降の形(直・かね折れ・折り返し・回り)は置く部材の
     // 組み合わせで決まるので、ここで選ぶのは1枚ごとの作りだけ。
     var sstyle = stairStyleOf(it);
+    // 踏板・踊り場の床材。床の仕上げ(床材・カラー・テクスチャ)と同じ選択肢に、
+    // 「床と同じ」を足す。蹴込み板は下の3Dカラー・テクスチャのまま。
+    var sfm=it.stairFloorMaterial||'';
+    var sfRoom=roomAtPointOnFloor(it.floor||1,(it.x||0)+(it.w||0)/2,(it.y||0)+(it.d||0)/2);
+    html += '<div class="pr"><div class="pl">踏板の床材</div><select class="pi" onchange="updateSelectedProp(\'stairFloorMaterial\',this.value)">'+
+      '<option value=""'+(sfm===''?' selected':'')+'>なし（3Dカラー・テクスチャで塗る）</option>'+
+      '<option value="match"'+(sfm==='match'?' selected':'')+'>床と同じ'+(sfRoom?'（'+((sfRoom.n&&String(sfRoom.n).trim())||'部屋')+'の床）':'')+'</option>';
+    ROOM_FLOOR_MATERIAL_OPTIONS.forEach(function(o){
+      html += '<option value="'+o[0]+'"'+(sfm===o[0]?' selected':'')+'>'+o[1]+'</option>';
+    });
+    html += '</select></div>';
+    if(sfm) html += '<div class="lock-status-note">踏板と踊り場を'+(sfm==='match'?'足元の部屋の床（床材・床カラー・床テクスチャ）':'この床材')+'で仕上げています。部屋の床を変えると'+(sfm==='match'?'一緒に変わります':'変わりません')+'。蹴込み板は3Dカラー・テクスチャのままです。'+(sfm==='match'&&!sfRoom?'いまは足元に部屋が無いので、3Dカラーで塗っています。':'')+'</div>';
     html += '<div class="pr"><div class="pl">階段の形状</div><select class="pi" onchange="updateSelectedProp(\'stairStyle\',this.value===\'open\'?undefined:this.value)">'+
       '<option value="open"'+(sstyle==='open'?' selected':'')+'>ひな壇（側面が見える・階段下は素通し）</option>'+
       '<option value="box"'+(sstyle==='box'?' selected':'')+'>箱型（階段下を塞ぐ）</option>'+
@@ -1834,6 +1846,7 @@ function updateSelectedProp(p,v,noSave){
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;
   if(p==='floorColor' && !v) delete ST.selected.floorColor;
+  if(p==='stairFloorMaterial' && !v) delete ST.selected.stairFloorMaterial;
   if(p==='ceilingTexture' && !v){
     delete ST.selected.ceilingTexture;
     delete ST.selected.ceilingTextureFlipX;

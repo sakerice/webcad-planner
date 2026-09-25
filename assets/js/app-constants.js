@@ -1629,9 +1629,18 @@ function roofUndersideWorldYAt(roofItem,xMm,yMm){
   return floorBaseY(roofItem.floor)+((roofItem.elev||0)*U)
     +roofSurfaceHeightAt(roofItem,lp.x,lp.z);
 }
+// 屋根の面から天井までの下がり(mm)。既定は CEILING_UNDER_ROOF_OFFSET_MM(250)だが、
+// **屋根の板の厚みより小さくしてはいけない。** 屋根の面(roofUndersideWorldYAt)は
+// 板の上面で、板は面から屋根厚ぶん下へ伸びている。厚み 260mm の屋根で 250mm しか
+// 下げないと、天井が屋根の板の中に入り、室内から屋根の裏(濃い色)が見えた
+// (利用者のプランの片流れで確認)。厚みの既定 180mm では従来どおり 250mm。
+function roofCeilingOffsetMm(rf){
+  var thick=Math.max(30,Math.min(600,Number(rf&&rf.roofThickness)||180));
+  return Math.max(CEILING_UNDER_ROOF_OFFSET_MM,thick+20);
+}
 // 屋根下面から CEILING_UNDER_ROOF_OFFSET_MM だけ下げた面の、ワールド Y(m)。
 function roofCeilingWorldYAt(roofItem,xMm,yMm){
-  return roofUndersideWorldYAt(roofItem,xMm,yMm)-CEILING_UNDER_ROOF_OFFSET_MM*U;
+  return roofUndersideWorldYAt(roofItem,xMm,yMm)-roofCeilingOffsetMm(roofItem)*U;
 }
 // 部屋の天井の形。**宣言しておらず斜線にも当たっていない部屋では必ず null**を返し、
 // 呼び出し側は従来の平天井の枝を通る。宣言した部屋は屋根があれば屋根から、無ければ
@@ -1688,13 +1697,22 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
     // ときだけ、点ごとに低い方が勝つ。
     var roofs=profile.roofs||[profile.roof];
     var roofLim=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
+    // 天井は、この点を覆う屋根それぞれの「面−下がり」のうち低い方。下がりは屋根ごとに
+    // 厚みで変わる(roofCeilingOffsetM)。屋根1枚・厚み既定なら従来の式と同じ値になる。
+    var y=null;
+    roofs.forEach(function(rf){
+      if(!rf||!roofCoversPlanPoint(rf,xMm,yMm)) return;
+      var v=roofUndersideWorldYAt(rf,xMm,yMm)-roofCeilingOffsetMm(rf)*U;
+      if(y===null||v<y) y=v;
+    });
     if(roofLim===null){
       // どの屋根も覆っていない位置。斜線由来の勾配は「削られていない位置」なので
       // 元の平天井のまま。宣言由来は従来どおりその屋根の面を延長する。
       if(profile.reason==='setback'&&profile.maxY!==undefined) return profile.maxY;
       roofLim=roofUndersideWorldYAt(profile.roof,xMm,yMm);
+      y=roofLim-roofCeilingOffsetMm(profile.roof)*U;
     }
-    var y=roofLim-CEILING_UNDER_ROOF_OFFSET_MM*U;
+    if(y===null) y=roofLim-CEILING_UNDER_ROOF_OFFSET_MM*U;
     var lowWorld=baseY+profile.lowY;
     // 軒先側では屋根下面が低い側の天井高より下へ来る。そこは天井を吊ったまま
     // (平らな部分)にする -- だから勾配は壁の途中から始まり、上辺は折れ線になる。
