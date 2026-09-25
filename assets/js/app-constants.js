@@ -2134,11 +2134,16 @@ function wallTopCutEnv(w,isOuter){
   var sameFloor=wallSameFloorRoofs(w);
   if(isOuter===undefined)
     isOuter=(typeof getWallExteriorSpans==='function')&&getWallExteriorSpans(w).length>0;
+  // 外皮かどうかは「片側でも部屋に面していない」でも見る。外観の塗り分け
+  // (getWallExteriorSpans)は軒の出の下を外と数えないことがあり、それで外壁を
+  // 間仕切り扱いすると、勾配天井の部屋の天井高まで下げられて屋根とのあいだに
+  // 隙間が開いた(報告された: 陸屋根の下の LDK の南の外壁)。
+  if(!isOuter&&!wallAdjacentRoomsCeiling(w).enclosed) isOuter=true;
   // 立ち上げるのは「片側でも部屋に面していない壁」(外皮)。外観の塗り分け
   // (getWallExteriorSpans)は屋根の軒下などを外と数えないことがあり、それで
   // 判定すると軒の出の下の外壁が立ち上がらなかった(利用者のプランで確認)。
   // 壁の高さの規則(wallCeilingHeightM)が使うのと同じ判定にそろえる。
-  var raise=(isOuter||!wallAdjacentRoomsCeiling(w).enclosed)?wallRaiseRoofs(w):[];
+  var raise=isOuter?wallRaiseRoofs(w):[];
   // 実際にどこかで壁を持ち上げる屋根だけを残す。壁に直に載る陸屋根(ほとんどの家)
   // まで数えると、何も変わらない壁まで折れ線の作り方に回ってしまう。
   if(raise.length){
