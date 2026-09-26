@@ -225,7 +225,7 @@ function bodyOf(svg) {
 // 太線の閉じた輪郭(壁のスカイライン・屋根)。
 function thickPolys(svg, lw) {
   const out = [];
-  const re = new RegExp('<polygon points="([^"]+)" fill="none" stroke="#000" stroke-width="' + lw + '"\\/>', 'g');
+  const re = new RegExp('<polygon points="([^"]+)" fill="(?:none|#fff)" stroke="#000" stroke-width="' + lw + '"\\/>', 'g');
   let m;
   while ((m = re.exec(bodyOf(svg)))) {
     out.push(m[1].trim().split(' ').map((p) => p.split(',').map(Number)));

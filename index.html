@@ -21649,7 +21649,11 @@ var JISDRAW=(function(){
 
   // 開口(窓・ドア)をこの方位に投影して描く。手前の壁面(=最前面深度)より
   // 壁厚+150mm以上奥にある開口は「その面に面していない」とみなして描かない。
-  function elevOpenings(dir,LW){
+  // layers を渡すと、開口ごとに {d:奥行き, svg} を積む(elevSceneToSvg の奥から描く順に
+  // 混ぜるため)。その場合、手前の壁に隠れるかどうかは描く順で決まるので、下の
+  // 「手前の壁より奥なら描かない」という大まかな判定は使わない -- 玄関前の凹みの奥の
+  // ドアのように、一部だけ見えている開口まで丸ごと消していた。
+  function elevOpenings(dir,LW,layers){
     var ax=ELEV_AXES[dir];
     var rects=elevWallRects(dir);
     var out='';
@@ -21664,7 +21668,8 @@ var JISDRAW=(function(){
       var wallFloor=w.floor||1;
       var front=elevFrontDepthAt(rects,uCenter,wallFloor); // 同じ階のrectsのみと比較(セットバックした上階が誤って隠れないように)
       var wallThick=w.thick||120;
-      if(wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
+      if(!layers && wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
+      var mark=out.length;
       // 開口幅(it.w、壁方向)をu軸へ投影。壁がこの面と直交する(=妻壁)ほどcosUが0に近づき幅も0に潰れる
       var halfU=Math.abs(cosU)*(it.w||0)/2;
       if(halfU<1) return; // 直交壁の開口はこの面ではほぼ幅0=表示不要
@@ -21691,6 +21696,7 @@ var JISDRAW=(function(){
         var knobX=uCenter+knobSide*(uR-uL)*0.41;
         out+='<circle cx="'+knobX+'" cy="'+knobY+'" r="'+(LW.mid*1.2)+'" fill="#000"/>';
       }
+      if(layers){ layers.push({d:wallDepth+ELEV_LAYER_EPS_MM,svg:out.slice(mark)}); out=out.slice(0,mark); }
     });
     return out;
   }
@@ -21699,7 +21705,7 @@ var JISDRAW=(function(){
   // 高さ・基準面は3D実装(getItemHeightValue:12829, item3DBaseY:3535)の実値をそのまま使い、
   // ここで別の数値を持たない(3D側と食い違わないため)。
   // it.rot(度)の向き(width軸方向)をワールド(cos,sin)へ変換する式はstairBounds2D(:11185)と同じ規約。
-  function elevBalconyFenceToSvg(dir,LW){
+  function elevBalconyFenceToSvg(dir,LW,layers){
     var ax=ELEV_AXES[dir];
     var rects=elevWallRects(dir);
     var out='';
@@ -21719,12 +21725,13 @@ var JISDRAW=(function(){
       // 建物本体に隠れてこの面からは見えないとみなし描かない
       var front=elevFrontDepthAt(rects,uCenter,floor);
       var itemDepth=cx*ax.dp[0]+cy*ax.dp[1];
-      if(isFinite(front) && itemDepth<front-300) return;
+      if(!layers && isFinite(front) && itemDepth<front-300) return;
       var base=item3DBaseY(it)/U; // バルコニー=その階の床天端、フェンス=GL(1F)/階天端(2F以上)
       var h=getItemHeightValue(it); // バルコニー=スラブ厚、フェンス=800mm既定、木製フェンス=it.fenceHeight(既定1600)mm
       var uL=uCenter-halfU, uR=uCenter+halfU;
-      out+='<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
-        +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      var svg='<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
+        +'" fill="'+(layers?'#fff':'none')+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
+      if(layers) layers.push({d:itemDepth+ELEV_LAYER_EPS_MM,svg:svg}); else out+=svg;
     });
     return out;
   }
@@ -21998,31 +22005,57 @@ var JISDRAW=(function(){
     elevRoofItems().forEach(function(it){
       var prof=pls.length ? roofItemProfileCut(it,dir,pls) : roofItemProfile(it,dir);
       if(!prof || prof.points.length<3) return;
+      prof.item=it;   // 奥行き(elevRoofFrontDepth)で並べるため
       out.push(prof);
     });
     return out;
   }
-  // 壁のシルエット。母屋+離れのように壁群がu方向に分離している場合、elevSkylineは
-  // グループごとに独立した点列を返すので、棟ごとに別の<polygon>として描く
-  // (離れた棟の間を直線で橋渡ししないため)。
-  // 制限面があるときの切り取りは **壁1本ごと**(elevWallLimitLines)で、ここには
-  // 出てこない -- 壁は直線なので、その壁の上での制限高さは u の一次式に書ける。
-  function elevSkylineToSvg(dir,rects,LW){
-    var out='';
-    elevSkyline(rects).forEach(function(pts){
-      if(pts.length<3) return;
-      var s=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
-      if(s) out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+  // ── 立面図の隠れ線 ──────────────────────────────────────────────────
+  // 以前は壁の外形(全部の壁を重ねたシルエット)・屋根・開口を、奥行きを見ずに線で
+  // 重ねていた。そのため手前の壁の奥にある陸屋根の縁や2階の箱の輪郭が、壁を
+  // 透かして描かれ、逆に玄関前の凹みのような奥行きの段は1本も出なかった
+  // (利用者のプラン32を3Dの正射影と並べて確認)。
+  // 奥から手前へ、白で塗った面を重ねる(画家のアルゴリズム)。手前の面が奥の線を
+  // 隠すので、見える線だけが残る。
+  //   ・壁は **同じ奥行きの線に乗るものを1枚の面にまとめる**。1階と2階が同じ面なら
+  //     段の線は出ない。面の輪郭は elevSkyline(外形と同じ作り方)で作る。
+  //   ・屋根はいちばん手前の点の奥行きで並べる(軒の出は壁より手前にある)。
+  //   ・開口とバルコニーは、載っている壁の面の直後に描く。
+  var ELEV_LAYER_EPS_MM=0.01;
+  function elevRoofFrontDepth(it,ax){
+    var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+    var rad=(it.rot||0)*Math.PI/180, c=Math.cos(rad), s=Math.sin(rad);
+    var hw=(it.w||0)/2, hd=(it.d||0)/2, best=-Infinity;
+    [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].forEach(function(p){
+      var x=cx+p[0]*c-p[1]*s, y=cy+p[0]*s+p[1]*c;
+      var d=x*ax.dp[0]+y*ax.dp[1];
+      if(d>best) best=d;
     });
-    return out;
+    return best;
   }
-  function roofProfileToSvg(dir,LW){
-    var out='';
-    elevRoofProfiles(dir).forEach(function(prof){
-      var s=prof.points.map(function(p){return p[0]+','+p[1];}).join(' ');
-      out+='<polygon points="'+s+'" fill="none" stroke="#000" stroke-width="'+LW.thick+'"/>';
+  function elevSceneToSvg(dir,rects,LW){
+    var ax=ELEV_AXES[dir], layers=[], planes={};
+    rects.forEach(function(r){
+      var k=Math.round(r.depth);
+      (planes[k]=planes[k]||[]).push(r);
     });
-    return out;
+    Object.keys(planes).forEach(function(k){
+      elevSkyline(planes[k]).forEach(function(pts){
+        if(pts.length<3) return;
+        layers.push({d:Number(k),svg:'<polygon points="'+pts.map(function(p){return p[0]+','+p[1];}).join(' ')
+          +'" fill="#fff" stroke="#000" stroke-width="'+LW.thick+'"/>'});
+      });
+    });
+    elevRoofProfiles(dir).forEach(function(prof){
+      layers.push({d:elevRoofFrontDepth(prof.item,ax),svg:'<polygon points="'+prof.points.map(function(p){return p[0]+','+p[1];}).join(' ')
+        +'" fill="#fff" stroke="#000" stroke-width="'+LW.thick+'"/>'});
+    });
+    elevOpenings(dir,LW,layers);
+    elevBalconyFenceToSvg(dir,LW,layers);
+    // 同じ奥行きでは積んだ順(面 → 屋根 → 開口)を保つ。
+    layers.forEach(function(l,i){ l.i=i; });
+    layers.sort(function(a,b){ return (a.d-b.d)||(a.i-b.i); });
+    return layers.map(function(l){ return l.svg; }).join('');
   }
   // 全roofアイテムの頂点のうち最高高さ(mm、絶対値)。屋根が無ければnull。
   // 斜線制限が無いプランでは頂点の実高さはどの方位から見ても同じなので、
@@ -22204,12 +22237,10 @@ var JISDRAW=(function(){
     // <g transform="scale(1,-1)">で一括反転することで各座標計算での符号ミスを避ける。
     var view={minX:cx-vw/2, minY:-(ch+vh/2), maxX:cx+vw/2, maxY:-(ch-vh/2)};
     var body='';
-    body+=elevSkylineToSvg(dir,rects,LW);
-    body+=roofProfileToSvg(dir,LW); // 屋根が無いプランでは中身が空文字列になり壁上端までの立面のまま
+    // 壁・屋根・開口・バルコニーを奥から手前へ重ねる(隠れ線を消す)。
+    body+=elevSceneToSvg(dir,rects,LW);
     body+=foundationToSvg(dir,LW);
     body+=elevGlSvg(bounds,LW);
-    body+=elevBalconyFenceToSvg(dir,LW);
-    body+=elevOpenings(dir,LW);
     body+=heightDimsToSvg(dir,LW);
     // 斜線制限。設定が無ければ空文字列なので、ここに足しても出力は1バイトも変わらない。
     body+=elevSetbackLimitToSvg(dir,view,LW);
