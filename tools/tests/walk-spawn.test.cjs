@@ -42,6 +42,7 @@ function obstructedCtx(items) {
     DATA: { items: items, rooms: [] },
     WALK_PLAYER_RADIUS_MM: 280,
     walkBlockedAt: () => false,
+    roomFloorAt: () => 0,           // 探る点の床の高さ(当たり判定は上で無効にしてある)
     isPlanAnnotationType: (t) => t === 'memo' || t === 'ruler',
     isLightItemType: (t) => /^light-/.test(t),
     isPlacementSurfaceItem: () => false,
@@ -91,7 +92,8 @@ test('肩幅ぶん離れていない家具も障害に数える', () => {
 test('狙いから90度を超える向きは選ばない（玄関から屋外を向かない）', () => {
   const ctx = vm.createContext({
     // 「後ろ」だけが延々と開けている＝玄関から屋外、という状況
-    walkBlockedAt: (x, z) => !(z > 0)
+    walkBlockedAt: (x, z) => !(z > 0),
+    roomFloorAt: () => 0
   });
   vm.runInContext(topLevelFunction('walkBestFacing'), ctx);
   const prefer = 0;                       // 家の中は yaw 0 の側

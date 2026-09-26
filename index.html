@@ -6055,6 +6055,13 @@ function build3D(){
   syncExteriorWallSettings();
   ensureInteriorWallSettings();
   ensureRoofAppearance();
+  // 屋根の据わる高さ(roofBaseWorldY)は、組み立てのあいだ変わらない。天井の格子の
+  // 頂点ごと・壁の上端の点ごとに下の階の全部の壁を調べ直さないよう、この1回の
+  // 組み立てのあいだだけ屋根ごとに覚えておく(組み立ての外では毎回求める)。
+  _roofBaseCache={};
+  try{ build3DScene(); } finally { _roofBaseCache=null; }
+}
+function build3DScene(){
   var toRemove=[];
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
   toRemove.forEach(function(c){
@@ -8544,10 +8551,23 @@ function getWallOutsideGrid(fl){
   var outside=new Array(cols*rows).fill(false);
   function id(i,j){return j*cols+i;}
   function center(i,j){return {x:minX+(i+0.5)*cell,y:minY+(j+0.5)*cell};}
+  // 隣のセルへ進めるか。壁の**芯線**と交わるかだけを見ていた頃は、壁どうしが芯線で
+  // 接していない角(片方の壁の端が、もう片方の芯から数十mm手前で止まっている)を
+  // すり抜けて、家の中まで「外」が流れ込んだ。見た目は壁の厚みで閉じているので
+  // 気づけず、外壁が内壁として扱われていた(利用者のプランで、LDK とスキップの
+  // 外壁がすべて内壁になり、勾配天井で天井高まで切られて屋根との間が空いた)。
+  // 壁を厚みのある帯として見る: 芯線から厚みの半分以内を通れば塞がれている。
+  function pointSegDist(px,py,x1,y1,x2,y2){
+    var dx=x2-x1, dy=y2-y1, l2=dx*dx+dy*dy;
+    var t=l2>0?Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/l2)):0;
+    return Math.hypot(px-(x1+dx*t),py-(y1+dy*t));
+  }
   function blocked(a,b){
     for(var wi=0;wi<walls.length;wi++){
       var w=walls[wi];
       if(segmentsIntersect(a.x,a.y,b.x,b.y,w.x1,w.y1,w.x2,w.y2)) return true;
+      var half=(w.thick||120)/2;
+      if(pointSegDist(w.x1,w.y1,a.x,a.y,b.x,b.y)<=half||pointSegDist(w.x2,w.y2,a.x,a.y,b.x,b.y)<=half) return true;
     }
     return false;
   }
@@ -8915,8 +8935,7 @@ function getWallInteriorFaces(w){
       // atStart/atEnd: この区間が壁自身のセンターライン始点/終点(内隅になりやすい)に
       // 接しているかどうか。addInteriorFaces 側でこのフラグを見て、実際の描画時に
       // 面を内隅方向へ、相手の壁の内装面とちょうど突き合う分だけ延長し隙間を塞ぐ
-      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM,
-        covered:wallFaceCoveredByOtherWalls(w,ta*len,tb*len,sign)});
+      faces.push({a:ta*len*U,b:tb*len*U,sign:sign,atStart:i===0,atEnd:i===uniq.length-2,fillStartM:fillStartM,fillEndM:fillEndM});
     }
   });
   return faces;
@@ -8926,7 +8945,7 @@ function getWallInteriorFaces(w){
 //
 // **3Dの描画では使わない。** 埋まった区間を描かないようにしたら、壁の重なり方
 // によっては室内から外壁の芯が素通しに見えた(getWallInteriorFaces の注記)。
-// 使うのは設定欄だけ -- 見えない面に「内面 n」の設定が並ぶと、どれが
+// 使うのは設定欄だけ(3D の組み立てでは計算しない) -- 見えない面に「内面 n」の設定が並ぶと、どれが
 // どの面か分からなくなる(報告された)。
 // 面の上の3点(両端の少し内側と中央)が、同じ階の高さの足りる実壁の芯に
 // すべて入っていれば埋まっているとみなす。
@@ -9314,9 +9333,10 @@ function buildWall3D(w){
     if(t<0) t=0; else if(t>1) t=1;
     // wallTopHeightAtM は floorBaseY 基準。fallback も同じ基準へ上げてから渡し、
     // 返ってきた値を fy 基準へ下ろす。
-    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder)-wallLiftM+WALL_TOP_OVERSHOOT_M;
+    var rawT=len>0?alongM/len:0;   // 端の先(隅を閉じる延長)も含む実際の位置
+    var top=wallTopHeightAtM(w,t,yBase+h+wallLiftM,slopedTopMinH,slopedTopRoofs,slopedTopRaise,slopedTopUnder,rawT)-wallLiftM+WALL_TOP_OVERSHOOT_M;
     // 同じ階の勾配屋根の下では、上乗せ分でも屋根の板の下面を超えない。
-    var underLim=wallRaiseTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+    var underLim=wallUnderRoofTopWorldY(w,slopedTopUnder,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
     if(underLim!==null&&top>underLim-fy) top=underLim-fy;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
@@ -9329,7 +9349,9 @@ function buildWall3D(w){
     var reachesTop=slopedTopRaise&&slopedTopRaise.length&&(yBase+h>=wallH-0.001);
     if(top>yBase+h&&!reachesTop) top=yBase+h;
     if(reachesTop){
-      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t);
+      // 立ち上げの高さはその位置の屋根で決まる(wallTopHeightAtM の raiseT)。
+      // ここでは上乗せ分(WALL_TOP_OVERSHOOT_M)を屋根の板の下面で止めるだけ。
+      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*rawT,w.y1+(w.y2-w.y1)*rawT);
       // top は fy(持ち上がりを含む壁の足元)基準。立ち上げた分だけを屋根の板の下面で
       // 止める。ピース自身の天端より下へは下げない -- 軒では屋根の板の方が厚く、
       // そこで下げると外皮の高さを割ってスリットが開く(Task 2b)。屋根が軒で階高より
@@ -11284,7 +11306,7 @@ function downspoutObstacleInfo(it,xl,zl,topWorldY){
     var oTop, oStop;
     if(o.type==='roof'){
       // 勾配屋根はその地点の屋根面高さで判定(基準面だと斜面に刺さる)
-      oTop=floorBaseY(o.floor)+((o.elev||0)*U)+roofSurfaceHeightAt(o,lp.x,lp.z);
+      oTop=roofBaseWorldY(o)+((o.elev||0)*U)+roofSurfaceHeightAt(o,lp.x,lp.z);
       oStop=oTop; // 屋根面で受ける
     } else {
       oTop=floorTopY(o.floor)+((o.elev||0)*U)+getItemHeightValue(o)*U; // 柵天端(経路判定用)
@@ -15271,13 +15293,18 @@ function buildRooms3D(flFilt){
 	    if(!roomHasUserLight){
 	      var autoDim=isIndoorView?1/(1+0.35*(userLightsByFloor[r.floor]||0)):1;
 	      var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
+	      // 勾配天井の部屋では、ライトごとに**その位置の**天井の高さに付ける。
+	      // ceilY は部屋でいちばん高い天井なので、そこに全部付けると、天井が低い
+	      // ところのライトが天井(ときには屋根)を突き抜けて宙に浮いた(報告された)。
+	      var lightProfile=roomCeilingProfile(r);
 	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
 	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+	        var lceil=lightProfile?Math.min(ceilY,roomCeilingWorldYAtMm(r,lightProfile,lx/U,lz/U)):ceilY;
 	        if(showAutoLightFixtures){
-	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,ceilY-0.013,lz));
+	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,lceil-0.013,lz));
 	        }
 	        var pl=new THREE.PointLight(0xffffff,roomInt*autoDim*Math.PI,6.0,1.8);
-	        pl.position.set(lx,ceilY-0.22,lz); pl.userData={b:true,autoRoomScale:(isIndoorView?0.35:1.8)*autoDim*Math.PI}; sc3.add(pl);
+	        pl.position.set(lx,lceil-0.22,lz); pl.userData={b:true,autoRoomScale:(isIndoorView?0.35:1.8)*autoDim*Math.PI}; sc3.add(pl);
 	      }
 	    }
   });
@@ -15688,7 +15715,7 @@ function walkUpdateGround(snap){
 var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
 var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
 function walkSpawnObstructed(xMm,zMm,fl){
-  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  if(walkBlockedAt(xMm,zMm,fl,roomFloorAt(fl,xMm,zMm))) return true;
   // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
   // 点そのものは家具の外なので素通りしてしまう。
   var r=WALK_PLAYER_RADIUS_MM;
@@ -15732,7 +15759,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
     var yaw=i*Math.PI/6;
     var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
     for(var d=200; d<=8000; d+=200){
-      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl, roomFloorAt(fl,xMm,zMm))) break;
       reach=d;
     }
     var bonus=0;
@@ -15761,7 +15788,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
 var WALK_SPAWN_MIN_OBSTACLE_MM=300;   // ラグ・段差は跨げる。腰高以上を障害とする
 var WALK_SPAWN_FLOORLIKE_TYPES={'site-rect':1,foundation:1,roof:1,balcony:1,road:1,ramp:1,'exterior-stair':1};
 function walkSpawnObstructed(xMm,zMm,fl){
-  if(walkBlockedAt(xMm,zMm,fl)) return true;
+  if(walkBlockedAt(xMm,zMm,fl,roomFloorAt(fl,xMm,zMm))) return true;
   // 肩幅ぶん離れているかで見る。中心1点だけだと、下駄箱の手前9cmに立っていても
   // 点そのものは家具の外なので素通りしてしまう。
   var r=WALK_PLAYER_RADIUS_MM;
@@ -15805,7 +15832,7 @@ function walkBestFacing(xMm,zMm,fl,preferYaw){
     var yaw=i*Math.PI/6;
     var dx=-Math.sin(yaw), dz=-Math.cos(yaw), reach=0;
     for(var d=200; d<=8000; d+=200){
-      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl)) break;
+      if(walkBlockedAt(xMm+dx*d, zMm+dz*d, fl, roomFloorAt(fl,xMm,zMm))) break;
       reach=d;
     }
     var bonus=0;
@@ -16077,18 +16104,47 @@ function getWallDoorGapsMm(w){
 // スキップフロア(通常 800 以上)は階段からしか上がれない。
 var WALK_MAX_STEP_UP_M=0.4;
 var _walkCollWalls=null, _walkCollFloor=null;
+// 壁の当たり判定に使う、壁が立っている高さの範囲(ワールドm)。3D の壁
+// (buildWall3D)と同じ足元・高さの取り方: 足元は wallBaseSupportY に足元の上下を
+// 足した位置、上端は帯の高さ。上端が折れ線の壁(屋根・勾配天井で切った壁)は、
+// その折れ線のいちばん高い所まで。
+function walkWallVerticalRangeM(w){
+  var fy=wallBaseSupportY(w)+wallFootOffsetMm(w)*U;
+  var band=getWallBandRange(w);
+  var bottom=fy+band.base, top=bottom+band.height;
+  var prof=(typeof wallTopProfileM==='function')?wallTopProfileM(w):null;
+  if(prof&&(w.wallBand||'full')!=='high'){
+    var maxH=-Infinity;
+    prof.forEach(function(p){ if(p[1]>maxH) maxH=p[1]; });
+    if(isFinite(maxH)) top=Math.min(top,floorBaseY(w.floor||1)+maxH);
+  }
+  return {bottom:bottom, top:top};
+}
 function buildWalkCollisionCache(floor){
+  // 3D で一時的に非表示にした壁も、以前どおりぶつかる(見えなくしても壁はある)。
   _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
-    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w)};
+    var vr=walkWallVerticalRangeM(w);
+    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
+      bottomY:vr.bottom, topY:vr.top};
   });
   _walkCollFloor=floor;
 }
+// 歩いている人の体が占める高さ(ワールドm)。足元から頭まで。
+var WALK_BODY_HEIGHT_M=1.7;
 // (xMm,zMm) がいずれかの壁の実体(ドア開口を除く)に衝突するか
-function walkBlockedAt(xMm,zMm,floor){
+// 壁は、**体の高さの範囲にかかっているときだけ**ぶつかる。以前は高さを見ておらず、
+// 段差の縁の低い壁(スキップフロアの下の立ち上がり)の上を、段差の床の上から
+// 通り抜けられなかった(報告された)。足元+一段(WALK_MAX_STEP_UP_M)より低い壁は
+// 跨げ、頭より上にある垂れ壁はくぐれる。
+// feetY を渡さなければ、いまの足元(WALK)で判定する。
+function walkBlockedAt(xMm,zMm,floor,feetY){
   if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
   var walls=_walkCollWalls;
+  var feet=(feetY!==undefined)?feetY:floorTopY(floor)+((WALK&&WALK.groundOff)||0);
+  var head=feet+WALK_BODY_HEIGHT_M;
   for(var i=0;i<walls.length;i++){
     var w=walls[i];
+    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
     var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
     if(len2<1) continue;
     var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2;
@@ -21665,7 +21721,7 @@ var JISDRAW=(function(){
     var ax=ELEV_AXES[dir];
     var verts=roofLocalVertices(it);
     if(!verts.length) return null;
-    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
     var pts=[], apex=-Infinity;
     verts.forEach(function(v){
       var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})。flipX/flipY→回転→平行移動を内包
@@ -21767,7 +21823,7 @@ var JISDRAW=(function(){
     var ax=ELEV_AXES[dir];
     var verts=roofLocalVertices(it);
     if(!verts.length) return null;
-    var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+    var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
     var world=verts.map(function(v){
       var w=roofLocalToWorldMm(it,v.x,v.z); // ローカルm→ワールドmm({x,y})
       return {x:w.x, y:w.y, h:baseHeightMm+v.h/U};
@@ -21858,7 +21914,7 @@ var JISDRAW=(function(){
       return isFinite(max)?max:null;
     }
     DATA.items.filter(function(it){return it.type==='roof';}).forEach(function(it){
-      var baseHeightMm=floorBaseY(it.floor)/U+(it.elev||0);
+      var baseHeightMm=((it.type==='roof'&&typeof roofBaseWorldY==='function')?roofBaseWorldY(it):floorBaseY(it.floor))/U+(it.elev||0);
       roofLocalVertices(it).forEach(function(v){
         var h=baseHeightMm+v.h/U;
         if(h>max) max=h;

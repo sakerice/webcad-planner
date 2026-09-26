@@ -95,9 +95,9 @@ const SETBACK_VARS = ['SETBACK_PLANE_MARGIN_MM', 'SETBACK_CUT_EPS_M',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_setbackRoofCache', '_setbackRoofCacheKey',
   '_setbackRoomRoofsCache', '_setbackRoomRoofsCacheKey'];
 const SETBACK_FNS = [
-  'roomsOverlapInPlan', 'roomAboveRoom', 'roomHasRoomAbove',
+  'roomsOverlapInPlan', 'overlapStripHiddenByWall', 'segmentInsideRectLengthMm', 'roomAboveRoom', 'roomHasRoomAbove',
   'setbackClipsCoverPlan', 'roofCoversPlanPoint', 'setbackOutlineCoversLocal', 'roofLocalPoint', 'roofSurfaceHeightAt',
-  'roofUndersideWorldYAt', 'roofCeilingWorldYAt',
+  'roofUndersideWorldYAt', 'roofBaseWorldY', 'roofCeilingWorldYAt',
   'setbackLawApi', 'setbackOverrideNum', 'siteSetbackConfig', 'activeSetbackSite', 'activeSetbackSites',
   'setbackBoundsMm', 'setbackNorthDeg', 'setbackNorthVecPlan',
   'setbackRoadWidthDir', 'setbackRoadItems', 'setbackRoadItem', 'setbackRoadWidthMm',
@@ -108,10 +108,10 @@ const SETBACK_FNS = [
   'clipPlanPolyByRoofLocal', 'roofRoomOverlapPointsMm', 'setbackRoofsOverRoom', 'setbackRoofsForRoom'
 ];
 // 壁の上端の折れ線(3D と共通の経路)。
-const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM',
+const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM', 'ROOM_OVERLAP_WALL_TOL_MM',
   '_ceilingClampWarned', 'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M',
   'WALL_TOP_SAMPLE_STEP_M'];
-const TOP_FNS = [
+const TOP_FNS = ['roofBaseWorldY',
   'roomDeclaresSlopedCeiling', 'roofItemOverRoom', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
@@ -122,7 +122,7 @@ const TOP_FNS = [
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({

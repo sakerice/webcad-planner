@@ -477,7 +477,7 @@ function selectedRoomCeilingHtml(it){
       html+='<div class="pr"><div class="pl">低い側 (mm)</div><input class="pi" type="text" value="'+shape.lowMm+'" readonly></div>';
       html+='<div class="pr"><div class="pl">高い側 (mm)</div><input class="pi" type="text" value="'+shape.highMm+'" readonly></div>';
     }
-    html+='<div class="lock-status-note">高さは屋根が決めます（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下がった面）。屋根の勾配や形を変えると天井もついてきます。</div>';
+    html+='<div class="lock-status-note">高さは屋根が決めます（屋根下面から '+roofCeilingOffsetMm(roof)+'mm 下がった面）。屋根の勾配や形を変えると天井もついてきます。</div>';
   } else {
     var c2=it.ceiling||{};
     var lowMm=isPositiveNumber(c2.lowMm)?Math.round(c2.lowMm):HeightModel.DEFAULTS.slopedLowMm;
@@ -733,7 +733,7 @@ function siteSetbackPanelHtml(it){
   // 「だいたい合っている」と読まれる。既定で閉じているだけで中身は同じ。
   h+='<details class="prop-details"><summary>詳しく（効き方と、見ていないもの）</summary>';
   h+='<div class="lock-status-note">制限面より上に出た部分を実際に削ります。切り口には斜線に沿った片流れ屋根が架かり、'+
-    'その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下）。壁の上端も同じ屋根で切られます。'+
+    'その下の部屋は自動で勾配天井になります（屋根下面から '+CEILING_UNDER_ROOF_OFFSET_MM+'mm 下。屋根の板が厚いときは厚み＋20mm 下）。壁の上端も同じ屋根で切られます。'+
     '家具は削りません。制限面と寸法の表示は「寸法」ボタンで出し入れします（消しても削りは効いたままです）。</div>';
   if(roads.length>1){
     h+='<div class="lock-status-note">角地です。道路ごとに制限面を引き、どの点でもいちばん低い制限が効きます。</div>';
@@ -879,7 +879,7 @@ function roofLowHighMm(it){
   if(run<=0) return null;
   var fl=it.floor||1;
   var ref=(fl>1)?floorTopY(fl-1):floorBaseY(fl);
-  var low=Math.round((floorBaseY(fl)+(Number(it.elev)||0)*U-ref)/U);
+  var low=Math.round((roofBaseWorldY(it)+(Number(it.elev)||0)*U-ref)/U);
   var pitch=Math.max(5,Math.min(60,Number(it.pitch)||30));
   var high=Math.round(low+Math.tan(pitch*Math.PI/180)*run/U);
   return {lowMm:low, highMm:high, runMm:Math.round(run/U)};
@@ -1242,7 +1242,7 @@ function updateProps(){
     }
     if((it.thick||0)>=120){
       // ほかの壁に丸ごと埋まって見えない面は、設定欄に出さない(3Dでは描いている)。
-      var faces=getWallInteriorFaces(it).filter(function(f){ return !f.covered; });
+      var faces=getWallInteriorFaces(it).filter(function(f){ return !wallFaceCoveredByOtherWalls(it,f.a/U,f.b/U,f.sign); });
       html += '<div class="ph" style="margin-top:12px">壁紙カラー（内観面）</div>';
       if(!faces.length){
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">この壁は両面が外観カラー対象です。</div>';
