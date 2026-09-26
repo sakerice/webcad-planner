@@ -11107,14 +11107,15 @@ function build3DRoofPolygon(grp,it,mat,edgeMat,skirtMat,W,D){
 }
 // 2枚の屋根の段差を塞ぐ外壁の面(roofGapInfillRuns)。屋根の縁に沿って、低い方の
 // 屋根の上面から高い方の屋根の下面まで、壁の厚み(120mm)の塊を建てる。
-// 外側の面は縁より 3mm 外(低い方の屋根の上)に置く -- 縁ちょうどだと、その内側
-// 1〜2mm に立つ天井の段(buildSteppedCeilingGrid)の方が手前になり、外から天井の
-// 色が見える。クリックすると屋根が選ばれる(仕上げは屋根の設定欄で変える)。
-var ROOF_GAP_WALL_THICK_M=0.12, ROOF_GAP_OUTSET_M=0.003;
-// 奥行きの判定を天井の側より強く手前へ寄せる。天井の面は「下から見たら天井が
-// 勝つ」ために深度を手前へ寄せてあり(withCeilingDepthBias)、斜めから見ると
-// その寄せ幅が数mmを超える。寄せないと、この壁の 5mm 奥にある天井の段が勝ち、
-// 外から天井の白が見えた(確認済み)。
+// **厚みは縁の外側(低い方の屋根の上 = 屋外)へ取る。** 内側(高い方の屋根の下)へ
+// 取ると、そこは勾配天井の部屋の中なので、壁の下端が天井より下に出て、室内に
+// 棚のように張り出した(利用者の報告)。
+// 内側の面は縁より 10mm 外に置く。縁の内側 1〜2mm には天井の段
+// (buildSteppedCeilingGrid)が立っていて、天井は深度を手前へ寄せてある
+// (withCeilingDepthBias)。10mm 離せば、室内からは必ず天井が勝ち、外からはこの壁の
+// 外側の面(縁から120mm外)が天井の段よりずっと手前にある。
+// クリックすると屋根が選ばれる(仕上げは屋根の設定欄で変える)。
+var ROOF_GAP_WALL_THICK_M=0.12, ROOF_GAP_INNER_GAP_M=0.01;
 function makeRoofGapInfillMaterial(ap){
   var src=ap.texture?getTexture3D(ap.texture):null;
   var tex=src?cloneRepeatReadyTexture(src):null;
@@ -11127,7 +11128,6 @@ function makeRoofGapInfillMaterial(ap){
   } else {
     m=makeExteriorLightingMaterial({color:ap.color||'#e8e0cc',roughness:0.9,envMapIntensity:0.14,side:THREE.DoubleSide});
   }
-  m.polygonOffset=true; m.polygonOffsetFactor=-2; m.polygonOffsetUnits=-2;
   return m;
 }
 function build3DRoofGapInfills(){
@@ -11139,7 +11139,8 @@ function build3DRoofGapInfills(){
     var tile=ap.texture?texTileM(ap.texture,wallTextureTileHeight()):1;
     runs.forEach(function(run){
       var verts=[], uvs=[], idx=[], along=0, k, p, q;
-      var o=-ROOF_GAP_OUTSET_M, t=ROOF_GAP_WALL_THICK_M-ROOF_GAP_OUTSET_M;
+      // run.(nx,ny) は屋根の内側向き。外側の面は縁から厚みぶん外、内側の面は縁の 10mm 外。
+      var o=-ROOF_GAP_WALL_THICK_M, t=-ROOF_GAP_INNER_GAP_M;
       for(k=0;k<run.pts.length;k++){
         p=run.pts[k];
         if(k>0){ q=run.pts[k-1]; along+=Math.hypot(p.x-q.x,p.y-q.y)*U; }

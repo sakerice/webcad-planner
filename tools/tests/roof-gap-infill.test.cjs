@@ -88,3 +88,41 @@ test('仕上げの既定は下の階の外壁と同じ。屋根に指定すれ�
   const c2 = ctx({ ext: { whole: { linked: true, color: '#333333', texture: null }, floors: {} } });
   assert.equal(c2.roofGapInfillAppearance(mono).color, '#333333');
 });
+
+// 壁の厚みは縁の外側(低い方の屋根の上 = 屋外)へ取る。内側(高い方の屋根の下)へ
+// 取ると勾配天井の部屋の中に入り、室内に棚のように張り出した(利用者の報告)。
+test('塞ぐ壁の厚みは縁の外(低い方の屋根の上)にあり、高い方の屋根の下(室内側)へ出ない', () => {
+  const html = require('./app-source.cjs').appSource();
+  const src = (n) => {
+    const at = html.indexOf('\nfunction ' + n + '(');
+    assert.notEqual(at, -1, n);
+    let i = html.indexOf('{', at), depth = 0;
+    for (; i < html.length; i++) { if (html[i] === '{') depth++; else if (html[i] === '}') { depth--; if (depth === 0) break; } }
+    return html.slice(at + 1, i + 1);
+  };
+  const constLine = html.match(/\nvar ROOF_GAP_WALL_THICK_M=[^;]*;/)[0];
+  const built = [];
+  function Geo() { this.attributes = {}; }
+  Geo.prototype.setAttribute = function (k, a) { this.attributes[k] = a; };
+  Geo.prototype.setIndex = function () {}; Geo.prototype.computeVertexNormals = function () {};
+  const c = vm.createContext({
+    Math, U: 0.001,
+    DATA: { items: [mono] },
+    THREE: { BufferGeometry: Geo, Float32BufferAttribute: function (a) { this.array = a; },
+      Mesh: function (g) { this.geometry = g; this.userData = {}; } },
+    shouldRenderItemInCurrent3DView: () => true,
+    roofGapInfillRuns: () => [{ nx: 1, ny: 0, pts: [{ x: 5430, y: 5000, bottom: 4.39, top: 5.8 }, { x: 5430, y: 7000, bottom: 4.39, top: 4.8 }] }],
+    roofGapInfillAppearance: () => ({ color: '#fff' }),
+    texTileM: () => 1, wallTextureTileHeight: () => 1,
+    makeRoofGapInfillMaterial: () => ({}), mark3DSelectable: () => {},
+    sc3: { add: (m) => built.push(m) },
+  });
+  vm.runInContext(constLine + '\n' + src('build3DRoofGapInfills'), c);
+  c.build3DRoofGapInfills();
+  assert.equal(built.length, 1);
+  const pos = built[0].geometry.attributes.position.array;
+  const xs = []; for (let i = 0; i < pos.length; i += 3) xs.push(pos[i] * 1000);
+  // 屋根の内側向きは +x(縁 x=5430 の東が高い方の屋根)。壁はすべて縁より西にある。
+  assert.ok(Math.max(...xs) <= 5430 - 5, '壁が高い方の屋根の下(室内側)へ出ている: ' + Math.max(...xs));
+  assert.ok(Math.min(...xs) <= 5430 - 100, '厚みが取れていない: ' + Math.min(...xs));
+});
