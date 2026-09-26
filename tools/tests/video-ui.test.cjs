@@ -498,14 +498,13 @@ test('既存の静止画AIレンダーは動画側の関数を1つも呼ばな�
 // videoRenderSourceFromView はウォークスルーも '3d' に倒す。プリセットの候補は
 // それでよいが、説明文まで「いま見ている3Dの画角をそのまま参照にします」のまま
 // だと、押した瞬間に拒否されるまで嘘を読ませることになる。
-test('ウォークスルーでは「撮れない」と、押す前に書いてある', () => {
+test('ウォークスルーでは、いまの目線を参照にすると押す前に書いてある', () => {
   const c = ui({ view: '3d-walk' });
   c.openVideoRenderDialog();
   const note = c.$dom.byId['video-render-source'].textContent;
   assert.match(note, /ウォークスルー/, note);
-  assert.match(note, /外観3D/, note);
-  assert.doesNotMatch(note, /いま見ている3Dの画角をそのまま参照にします/,
-    'ウォークスルーで守れない約束を書いている');
+  assert.match(note, /目線/, note);
+  assert.doesNotMatch(note, /撮れません/, note);
   // プリセットは 3D 側のまま（切り替えれば同じ設定でそのまま撮れる）
   assert.deepEqual(idsOf(c.$dom.byId['video-render-preset']), D3_IDS);
 });
@@ -523,11 +522,11 @@ test('外観3D↔ウォークスルーの往復で説明文が追随する（sou
   assert.match(note.textContent, /いま見ている3Dの画角/, '戻らない: ' + note.textContent);
 });
 
-test('ウォークスルーで押すと、拒否の文面がそのままダイアログに出る', async () => {
+test('撮れないビューで押すと、拒否の文面がそのままダイアログに出る', async () => {
   // 実際の文面は index.html の videoRenderViewRefusalText が作る（同じ関数を走らせる）。
   const refusal = vm.runInContext('(' + topLevelFunction('videoRenderViewRefusalText') + ')',
-    vm.createContext({ ST: { view: '3d-walk' } }))();
-  const c = ui({ view: '3d-walk', generate: () => { throw new Error(refusal); } });
+    vm.createContext({ ST: { view: '2d' } }))();
+  const c = ui({ view: '3d-ext', generate: () => { throw new Error(refusal); } });
   c.openVideoRenderDialog();
   await c.runVideoRenderPackage();
   const status = c.$dom.byId['video-render-status'].textContent;

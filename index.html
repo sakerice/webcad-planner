@@ -3567,7 +3567,7 @@ input[type="reset"]:focus-visible{
          この機能について → 設定 → データ作成 → データ出力。見出しは既存の .ph、
          中身も既存の unity-render-* クラスをそのまま使う。 -->
     <div class="ph">この機能について</div>
-    <div class="unity-render-status">いま見ている外観3Dまたは内観3Dを、画像生成AIで高品質化するためのデータを作ります。基準・エッジ・深度・法線・セグメント・部材IDのガイド画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
+    <div class="unity-render-status">いま見ている外観3D・内観3D・ウォークスルーの画面を、画像生成AIで高品質化するためのデータを作ります。基準・エッジ・深度・法線・セグメント・部材IDのガイド画像で設計と画角を固定し、AIへの指示文で「形を変えずに質感だけ上げる」ことを伝えます。</div>
     <div class="ph">設定</div>
     <div class="unity-render-config">
       <div class="ai-style-field">
@@ -18624,6 +18624,40 @@ function leaveSharedRoom(){
 function isUnityRenderableView(){
   return ST.view==='3d-ext'||ST.view==='3d-int';
 }
+// 画像AI・動画AIの参照を撮れるビュー。ウォークスルーも撮る(利用者の要望)。
+// 撮影は画面に出ているカメラ(getActive3DCamera = camExt)でそのまま行うので、
+// ウォークスルーの目線がそのまま参照になる。Unity の高画質レンダーは外観・内観の
+// まま(isUnityRenderableView)。
+function isAiCaptureView(){
+  return isUnityRenderableView()||ST.view==='3d-walk';
+}
+// 参照の「見ている先」。外観・内観はオービットの注視点。ウォークスルーはオービットを
+// 使わないので、目線の正面で最初に当たる物を注視点とする(当たらなければ5m先)。
+// 深度ガイドはこの距離から明暗の幅を決めるので、室内で5m先に固定すると、1〜3mに
+// ある物がすべて暗い側に潰れた(確認済み)。オービットの注視点は前のビューのままで、
+// ウォークスルーの向きとは関係が無い。
+function aiCaptureTarget(){
+  if(ST.view==='3d-walk'&&camExt){
+    var dir=new THREE.Vector3(); camExt.getWorldDirection(dir);
+    var dist=5;
+    if(sc3){
+      var ms=[]; sc3.traverse(function(o){ if(o.isMesh&&o.visible&&!(o.userData&&o.userData._sky)) ms.push(o); });
+      var hit=new THREE.Raycaster(camExt.position.clone(),dir.clone(),0.1,60).intersectObjects(ms,false)[0];
+      if(hit) dist=Math.max(0.5,Math.min(30,hit.distance));
+    }
+    return camExt.position.clone().add(dir.multiplyScalar(dist));
+  }
+  return (orbit&&orbit.target)?orbit.target:new THREE.Vector3(4,1,2);
+}
+// 内観か外観か。ウォークスルーは、目の位置が部屋の中なら内観、外なら外観。
+function aiCaptureViewMode(){
+  if(ST.view==='3d-int') return 'interior';
+  if(ST.view==='3d-walk'&&camExt){
+    var fl=(typeof WALK!=='undefined'&&WALK.floor)||ST.floor;
+    return roomAtPointOnFloor(fl,camExt.position.x/U,camExt.position.z/U)?'interior':'exterior';
+  }
+  return 'exterior';
+}
 function isUnityRenderFeatureEnabled(){
   var params=new URLSearchParams((location&&location.search)||'');
   var explicit=params.get('unityRender');
@@ -18641,7 +18675,7 @@ function updateUnityRenderControls(){
   });
 }
 function currentUnityCameraSettings(){
-  var mode=ST.view==='3d-int'?'interior':'exterior';
+  var mode=aiCaptureViewMode();
   if(orbit && isUnityRenderableView()) orbit.update();
   if(camExt) camExt.updateMatrixWorld(true);
   var settings={
@@ -18656,7 +18690,7 @@ function currentUnityCameraSettings(){
     settings.camX=camExt.position.x;
     settings.camY=camExt.position.y;
     settings.camZ=camExt.position.z;
-    var target=(orbit&&orbit.target)?orbit.target:new THREE.Vector3(4,1,2);
+    var target=aiCaptureTarget();
     settings.targetX=target.x;
     settings.targetY=target.y;
     settings.targetZ=target.z;
@@ -18784,7 +18818,7 @@ function getActive3DCamera(){
   return camExt;
 }
 function ensureAiRenderable3D(){
-  if(!isUnityRenderableView()) return false;
+  if(!isAiCaptureView()) return false;
   if(!ren || !sc3) init3D();
   if(!ren || !sc3) return false;
   var wrap=document.getElementById('c3d-wrap');
@@ -18967,7 +19001,7 @@ function captureAiOverrideGuideDataUrl(kind){
     mat=new THREE.MeshNormalMaterial({side:THREE.DoubleSide});
     sc3.background=new THREE.Color(0x8080ff);
   }else{
-    var target=orbit&&orbit.target?orbit.target:new THREE.Vector3();
+    var target=aiCaptureTarget();
     var focusDistance=Math.max(1,cam.position.distanceTo(target));
     var depthNear=Math.max(cam.near,focusDistance*0.2);
     var depthFar=Math.min(cam.far,Math.max(depthNear+1,focusDistance*2.2));
@@ -19281,7 +19315,7 @@ function buildAiRenderMetadata(instanceLegend){
     version:2,
     createdAt:new Date().toISOString(),
     app:'house-planner mobile',
-    view:ST.view==='3d-int'?'interior':'exterior',
+    view:aiCaptureViewMode(),
     floor:ST.floor,
     camera:currentUnityCameraSettings(),
     counts:{
@@ -19387,7 +19421,7 @@ function onAiRenderPresetChange(){}
 function aiRenderSourceNoteText(){
   if(ST.view==='3d-int') return '参照にする画面: 内観3D（いま見ている画角をそのまま撮ります）';
   if(ST.view==='3d-ext') return '参照にする画面: 外観3D（いま見ている画角をそのまま撮ります）';
-  if(ST.view==='3d-walk') return '参照にする画面: なし（ウォークスルーの目線からは撮れません。外観3D か 内観3D へ切り替えてください）';
+  if(ST.view==='3d-walk') return '参照にする画面: ウォークスルー（いまの目線をそのまま撮ります）';
   return '参照にする画面: なし（外観3D か 内観3D を表示してください。押すと外観3Dへ切り替えます）';
 }
 function syncAiRenderSource(){
@@ -19404,7 +19438,7 @@ function buildAiRenderPrompt(metadata){
   // カメラ・照明の実測値を渡すと、生成側の視点・光の再現性が上がる
   var camInfo='';
   try{
-    var camPos=camExt.position, tgt=orbit&&orbit.target?orbit.target:camPos;
+    var camPos=camExt.position, tgt=aiCaptureTarget();
     var az=Math.round(Math.atan2(tgt.x-camPos.x,tgt.z-camPos.z)*180/Math.PI);
     camInfo='Camera: fov '+Math.round(camExt.fov)+' deg, eye height about '+camPos.y.toFixed(1)+' m above ground, looking azimuth '+az+' deg, perspective matches base_render.png exactly.';
   }catch(e){}
@@ -19498,7 +19532,7 @@ function buildAiRenderPrompt(metadata){
   ].filter(function(line){return line!==null;}).join('\n');
 }
 async function ensureAiRenderableView(){
-  if(isUnityRenderableView()) return true;
+  if(isAiCaptureView()) return true;
   setUnityRenderStatus('画像AI用データを作るため、外観3D表示へ切り替えています...');
   setView('3d-ext');
   await waitFrame(260);
@@ -19724,8 +19758,8 @@ async function generateAiRenderPackage(){
   clearAiRenderDownloadLinks();
   setUnityRenderImage('');
   await ensureAiRenderableView();
-  if(!isUnityRenderableView()){
-    setUnityRenderStatus('外観3Dまたは内観3Dを表示してから画像AI用データを作ってください。');
+  if(!isAiCaptureView()){
+    setUnityRenderStatus('外観3D・内観3D・ウォークスルーのどれかを表示してから画像AI用データを作ってください。');
     return null;
   }
   setUnityRenderBusy(true);
@@ -20098,7 +20132,7 @@ function videoPlanWithheldRecord(guidesRequested){
 }
 function videoCameraDescriptor(floor){
   var cam=getActive3DCamera();
-  var target=(orbit&&orbit.target)?orbit.target:new THREE.Vector3();
+  var target=aiCaptureTarget();
   var base=floorBaseY(floor);
   var vFov=(cam&&cam.fov)||45;
   var aspect=(cam&&cam.aspect)||1;
@@ -20267,19 +20301,12 @@ function planEmptyFloorRefusal(bounds,floor,label){
     'には壁・部屋・建具・家具が1つもないため、家の形を持つ絵を作れません。'+
     '設計要素のある階に切り替えてから、もう一度押してください。');
 }
-// 撮れないビュー（ウォークスルー）から押されたときの文面。
-// 黙って外観3Dへ寄せない理由まで書く: 寄せた結果を見たユーザーは、
-// 何が起きたのか分からないまま別の画角の絵を受け取ることになる。
+// 撮れないビューから押されたときの文面。黙って外観3Dへ寄せない: 寄せた結果を
+// 見たユーザーは、何が起きたのか分からないまま別の画角の絵を受け取ることになる。
+// (ウォークスルーは以前ここで拒否していたが、今は目線のまま撮る。)
 function videoRenderViewRefusalText(){
-  if(ST.view==='3d-walk'){
-    return 'ウォークスルーの目線からは参照を撮れません。'+
-      'ここで自動的に外観3Dへ切り替えると、ダイアログの説明（いま見ている3Dの画角を'+
-      'そのまま参照にします）とは違う、外観を回り込む画角の絵が渡ります。'+
-      '外観3D か 内観3D へ切り替え、撮りたい画角にしてから'+
-      'もう一度「動画AI用データを作る」を押してください。';
-  }
-  return '3Dの参照は外観3Dまたは内観3Dからしか撮れません。'+
-    'どちらかを表示し、撮りたい画角にしてから'+
+  return '3Dの参照は外観3D・内観3D・ウォークスルーから撮ります。'+
+    'どれかを表示し、撮りたい画角にしてから'+
     'もう一度「動画AI用データを作る」を押してください。';
 }
 // 名指しできないエラーは直せない。「4件」とだけ言われたユーザーは、平面図の
@@ -20380,16 +20407,13 @@ async function generateVideoRenderPackage(options){
   }
 
   // ── 3Dソース (Task 7)。平面図ソースはここへ来ない（上で return 済み）。──
-  // 撮れないビューからは黙って撮り直さない。ensureAiRenderableView は
-  // setView('3d-ext') を行うので、ウォークスルーの目線で押したユーザーには
-  // 外観軌道の絵が返る（実測: カメラ [3.67,4.98,1.16] → [20.43,11.95,21.82]）。
-  // ダイアログは「いま見ている3Dの画角をそのまま参照にします」と言っており、
-  // それはその約束を破る。しかも ensureAiRenderableView の説明文は静止画側の
-  // ステータス要素へ書かれるため、動画ダイアログには何も出ない。
-  // 投げれば runVideoRenderPackage が動画ダイアログのステータスへそのまま出す。
-  if(!isUnityRenderableView()) throw new Error(videoRenderViewRefusalText());
+  // 撮れないビューからは黙って撮り直さない(外観3Dへ寄せると、ダイアログの
+  // 「いま見ている画角をそのまま参照にします」を破る)。ウォークスルーは撮れる
+  // ビューに含む(目線そのままが参照)。投げれば runVideoRenderPackage が動画
+  // ダイアログのステータスへそのまま出す。
+  if(!isAiCaptureView()) throw new Error(videoRenderViewRefusalText());
   var floor=ST.floor;
-  var view=ST.view==='3d-int'?'interior':'exterior';
+  var view=aiCaptureViewMode();
 
   await waitFrame(50);
   // 1) 参照の本体と、部材ごとのマスク。既存の静止画版とまったく同じ関数を呼ぶ。
@@ -20524,8 +20548,7 @@ async function generateVideoRenderPackage(options){
 var VIDEO_RENDER_UI={source:null,view:null,busy:false};
 var VIDEO_RENDER_MIN_DURATION_SEC=4;
 // 参照は「いま画面に出ているもの」。3Dを見ていれば3D、平面図を見ていれば平面図。
-// ウォークスルーもプリセットの候補としては 3D 側だが、そこからは撮れない
-// （generateVideoRenderPackage が理由を出して拒否する）。説明文は下の
+// ウォークスルーも 3D 側(目線をそのまま撮る)。説明文は下の
 // videoRenderSourceNoteText がビューごとに書き分ける。
 function videoRenderSourceFromView(){ return ST.view==='2d'?'plan':'3d'; }
 function videoRenderSourceLabel(source){ return source==='plan'?'平面図':'3Dビュー'; }
@@ -20561,15 +20584,13 @@ function onVideoRenderPresetChange(){}
 // setView の末尾から呼ばれる。画面が変われば選べるものも変わる。
 // 参照が変わったのに本文が前のままだと、3D用の文で平面図を撮ることになるので
 // 本文も入れ替える（画面を切り替えたのはユーザーの操作である）。
-// ダイアログの「参照にする画面」の一文。ウォークスルーはここで撮れないと言い切る:
-// 押してから拒否されるのは正しいが、押す前に分かる方がもっと正しい。
+// ダイアログの「参照にする画面」の一文。押す前に、何が撮られるかが分かるように。
 function videoRenderSourceNoteText(source){
   if(source==='plan'){
     return '参照にする画面: '+videoRenderSourceLabel(source)+'（この階の平面図をそのまま参照にします）';
   }
   if(ST.view==='3d-walk'){
-    return '参照にする画面: なし（ウォークスルーの目線からは撮れません。'+
-      '外観3D か 内観3D へ切り替えてください）';
+    return '参照にする画面: ウォークスルー（いまの目線をそのまま参照にします）';
   }
   return '参照にする画面: '+videoRenderSourceLabel(source)+'（いま見ている3Dの画角をそのまま参照にします）';
 }

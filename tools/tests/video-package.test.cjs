@@ -591,6 +591,9 @@ function harness(opts) {
     LockTiers: LockTiers, ShadowLift: ShadowLift, VideoPrompt: VideoPrompt, HeightModel: HeightModel,
     waitFrame: function () { return Promise.resolve(); },
     isUnityRenderableView: function () { return ctx.ST.view === '3d-ext' || ctx.ST.view === '3d-int'; },
+    isAiCaptureView: function () { return ['3d-ext', '3d-int', '3d-walk'].indexOf(ctx.ST.view) >= 0; },
+    aiCaptureViewMode: function () { return ctx.ST.view === '3d-int' ? 'interior' : 'exterior'; },
+    aiCaptureTarget: function () { return (ctx.orbit && ctx.orbit.target) || { x: 0, y: 0, z: 0 }; },
     videoDaylightDescriptor: function () { return o.daylight || { timeOfDay: 'day' }; },
     waitForPlanFloorTopImages: function () {
       return Promise.resolve({ images: 12, pending: 0, waitedMs: 0 });
@@ -874,17 +877,15 @@ test('光の文が書けたときは、その文がプロンプトに実際に�
   assert.ok(pkg.prompt.length > withoutLight.length);
 });
 
-// ── 6. ウォークスルーからは撮らない（Task 10-4）──────────────────────────
-test('ウォークスルーから押すと、理由を言って拒否する（黙って外観へ寄せない）', async () => {
+// ── 6. ウォークスルーの目線をそのまま撮る ─────────────────────────────────
+// 以前は拒否していた(Task 10-4)。利用者の要望で撮るようにした。撮るのは画面に
+// 出ている目線そのもので、外観3Dへ勝手に切り替えない(それは今も守る)。
+test('ウォークスルーから押すと、ビューを切り替えずにいまの目線を撮る', async () => {
   const c = harness({ view: '3d-walk', floor: 2 });
-  await assert.rejects(() => build(c), (e) => {
-    assert.match(e.message, /ウォークスルー/);
-    assert.match(e.message, /外観3D/);
-    return true;
-  });
+  await build(c);
   assert.equal(c.ST.view, '3d-walk', 'ユーザーのビューを勝手に切り替えている');
-  assert.equal(c.$log.captures.length, 0, '拒否したのに撮っている');
-  assert.equal(c.$log.zips.length, 0);
+  assert.ok(c.$log.captures.length > 0, '撮っていない');
+  assert.equal(c.$log.zips.length, 1);
 });
 
 // ── 7. 高さの記録（Task 10-1 の package.json 側）──────────────────────────

@@ -203,6 +203,7 @@ function harness(opts) {
     topLevelVar('unityRenderBusy'),
     topLevelFunction('waitFrame'),
     topLevelFunction('isUnityRenderableView'),
+    topLevelFunction('isAiCaptureView'),
     topLevelFunction('openUnityRenderModal'),
     topLevelFunction('closeUnityRenderModal'),
     topLevelFunction('setUnityRenderStatus'),
@@ -393,11 +394,13 @@ test('ビュー切替から画像AI側の説明文の更新が呼ばれている
   assert.match(setView, /syncAiRenderSource\(\)/);
 });
 
-test('ウォークスルーでは画像AIも「撮れない」と押す前に書く', () => {
+// ウォークスルーの目線も参照として撮る(利用者の要望)。押す前に、何が撮られるかを書く。
+test('ウォークスルーでは、いまの目線を撮ると押す前に書く', () => {
   const ctx = vm.createContext({ ST: { view: '3d-walk' } });
   const note = vm.runInContext('(' + topLevelFunction('aiRenderSourceNoteText') + ')', ctx)();
   assert.match(note, /ウォークスルー/, note);
-  assert.match(note, /外観3D/, note);
+  assert.match(note, /目線/, note);
+  assert.doesNotMatch(note, /撮れません/, note);
 });
 
 // ── 表現プリセット ────────────────────────────────────────────────────────
