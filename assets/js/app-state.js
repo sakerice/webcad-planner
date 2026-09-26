@@ -1508,6 +1508,7 @@ function updateProps(){
       if(it.texture) html += '<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">屋根テクスチャ解除</button>';
       html += selectedTextureFlipControlsHtml(it);
     }
+    html += roofGapInfillSettingsHtml(it);
   }
   if(isStairPartType(it.type)) {
     var sri = stairRiseInfo(it);
@@ -1961,6 +1962,53 @@ function applyOpeningModelToItem(it,modelId){
       it.y=oldCy-it.d/2;
     }
   }
+}
+// 2枚の屋根の段差を塞ぐ壁の仕上げ(屋根の設定欄)。塞ぐ所がある屋根にだけ出す。
+// 既定は下の階の外壁と同じ。個別に指定すると、その屋根の塞ぐ壁だけが変わる。
+function roofGapInfillSettingsHtml(it){
+  if(typeof roofGapInfillRuns!=='function'||!roofGapInfillRuns(it).length) return '';
+  var own=!!(it.gapInfillColor||it.gapInfillTexture);
+  var ap=roofGapInfillAppearance(it);
+  var html='<div class="ph" style="margin-top:12px">段差を塞ぐ壁</div>';
+  html+='<div class="lock-status-note">隣の低い屋根とのあいだの隙間を、外壁で塞いでいます。3Dでその壁を押すと、この屋根が選ばれます。</div>';
+  html+='<div class="pr"><div class="pl">仕上げ</div><select class="pi" onchange="updateRoofGapInfillMode(this.value)">'+
+    '<option value="wall"'+(own?'':' selected')+'>下の階の外壁と同じ</option>'+
+    '<option value="own"'+(own?' selected':'')+'>個別に指定</option></select></div>';
+  if(own){
+    html+='<div class="pr"><div class="pl">色</div><input class="pi" type="color" value="'+(it.gapInfillColor||ap.color||'#e8e0cc')+'" onchange="updateSelectedProp(\'gapInfillColor\',this.value)"></div>';
+    html+='<div class="pr"><div class="pl">テクスチャ</div><input class="pi" type="file" accept="image/*" onchange="uploadRoofGapInfillTex(this)"></div>';
+    if(it.gapInfillTexture){
+      html+='<button class="pbtn sec" onclick="updateSelectedProp(\'gapInfillTexture\',null)">テクスチャ解除</button>';
+      html+='<div class="lock-status-note">テクスチャを貼っているあいだは、色は使われません(外壁と同じ)。</div>';
+    }
+  }
+  return html;
+}
+function updateRoofGapInfillMode(mode){
+  var it=ST.selected;
+  if(!it||it.type!=='roof') return;
+  if(mode==='own'){
+    // 個別にした瞬間の見た目は変えない(今の外壁の色と柄から始める)。
+    if(!it.gapInfillColor&&!it.gapInfillTexture){
+      var cur=roofGapInfillAppearance(it);
+      if(cur.texture) updateSelectedProp('gapInfillTexture',cur.texture);
+      updateSelectedProp('gapInfillColor',cur.color||'#e8e0cc');
+    }
+  } else {
+    updateSelectedProp('gapInfillColor',null);
+    updateSelectedProp('gapInfillTexture',null);
+  }
+}
+function uploadRoofGapInfillTex(inp){
+  if(ST.selected && isObjectLocked(ST.selected)){ updateProps(); return; }
+  var file=inp.files[0]; if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    prepareUploadedTexture(e.target.result,function(dataUrl){
+      updateSelectedProp('gapInfillTexture', dataUrl);
+    });
+  };
+  r.readAsDataURL(file);
 }
 function uploadTex(inp){
   if(ST.selected && isObjectLocked(ST.selected)){ updateProps(); return; }
