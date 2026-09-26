@@ -16267,7 +16267,13 @@ function doorOpenWant(it){
 // ウォークスルーを離れるときに呼ぶ。以降はプランの開閉状態が効く
 function resetWalkDoorWants(){ _doorWantByItem=new WeakMap(); }
 function walkEyeHeightMm(){ return WALK_EYE_PRESETS_MM[WALK.eyePreset]||WALK_EYE_PRESETS_MM.stand; }
-function walkEyeY(){ return floorTopY(WALK.floor)+(WALK.groundOff||0)+walkEyeHeightMm()*U; }
+function walkEyeY(){
+  var ground=WALK.groundOff||0, eye=ground+walkEyeHeightMm()*U;
+  // 段差の下の空間(ハーフ収納など)では、天板の下端より 10cm 下で抑える(かがんだ目線)。
+  var under=(typeof walkUnderDeckAt==='function')?walkUnderDeckAt(WALK.x/U,WALK.z/U,WALK.floor):null;
+  if(under&&ground<under.deckBottomOff-0.3) eye=Math.max(ground+0.3,Math.min(eye,under.deckBottomOff-0.1));
+  return floorTopY(WALK.floor)+eye;
+}
 function updateWalkEyePresetButton(){
   var b=document.getElementById('walk-height-toggle');
   if(!b) return;
@@ -16372,10 +16378,37 @@ function walkFloorLandingGroundAt(xMm,zMm,floor){
   return best;
 }
 // その点の床(その階の床天端からのm)。部屋の床と、床として使う踊り場の高い方。
-function walkFlatGroundAt(xMm,zMm,floor){
+// 段差の部屋の下の空間(床下が SKIP_CAVITY_MIN_MM 以上あるもの)に居るときの、
+// 下の床と天板の下端(その階の床天端からのm)。空間が無ければ null。
+// 下の床は、段差を持たない部屋(ハーフ収納など)の床。
+// 天板の厚みは 3D の段差の作り(buildRooms3D の deckM)と同じ。
+function walkUnderDeckAt(xMm,zMm,floor){
+  var top=roomAtPointOnFloor(floor,xMm,zMm);
+  if(!top||roomSkipLevelMm(top)<=0||roomSkipCavityMm(top)<=0) return null;
+  var base=floorTopY(floor);
+  // 下に部屋(ハーフ収納など)を描いた所だけ。部屋の無い段差の下は、3D で立ち上がりの
+  // 板が塞いでいる側もあり(当たり判定を持たない)、入れると板をすり抜ける。
+  var low=floorRoomIgnoringSkip(floor,xMm,zMm);
+  if(!low) return null;
+  var floorY=roomFloorTopY(low);
+  var deckM=Math.max(floorSlabHeightMForFloor(floor),Math.max(80,FLOOR_SLAB_H||180)*U);
+  var deckBottomY=roomFloorTopY(top)-deckM;
+  if(deckBottomY-floorY<0.3) return null;
+  return {floorOff:floorY-base, deckBottomOff:deckBottomY-base};
+}
+// その点の床(その階の床天端からのm)。部屋の床と、床として使う踊り場の高い方。
+// 段差の下に空間があり、いま天板より下に居る(curOff)なら、下の床を返す --
+// 段差の天端を足元にすると、ハーフ収納のような段差の下の空間へ歩いて入れない
+// (1.8m を一度に上る段差として止められていた。利用者の報告)。
+function walkFlatGroundAt(xMm,zMm,floor,curOff){
   var y=roomFloorAt(floor,xMm,zMm)-floorTopY(floor);
   var l=walkFloorLandingGroundAt(xMm,zMm,floor);
-  return (l!==null&&l>y)?l:y;
+  var up=(l!==null&&l>y)?l:y;
+  if(curOff!==undefined&&curOff!==null){
+    var under=walkUnderDeckAt(xMm,zMm,floor);
+    if(under&&curOff<under.deckBottomOff-0.3) return under.floorOff;
+  }
+  return up;
 }
 function walkFloorHasData(f){
   if(f<1) return false;
@@ -16451,7 +16484,7 @@ function walkUpdateGround(snap){
   // 段差そのものは登れない。階段を使わずに 400mm を超える段差へ乗り移ることは
   // 現実に無いし、乗れてしまうとスキップフロアの縁を歩いただけで壁を抜けたように
   // 上へ出る。テレポート(snap)は免除する -- スポーン地点は段差の上のこともある。
-  var target=walkFlatGroundAt(xMm,zMm,fl);
+  var target=walkFlatGroundAt(xMm,zMm,fl,prevOff);
   if(!snap && target-prevOff>WALK_MAX_STEP_UP_M) return;
   WALK.groundOff=target;
 }
@@ -16940,7 +16973,7 @@ function updateWalkMode(now){
       if(walkLevelStairGroundAt(WALK.x/U,WALK.z/U,WALK.floor,0)===null &&
          walkLevelStairGroundAt(txM,tzM,WALK.floor,120)===null){
         var here=floorTopY(WALK.floor)+(WALK.groundOff||0);
-        if(floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor)-here>WALK_MAX_STEP_UP_M) return true;
+        if(floorTopY(WALK.floor)+walkFlatGroundAt(txM,tzM,WALK.floor,WALK.groundOff||0)-here>WALK_MAX_STEP_UP_M) return true;
       }
       return false;
     }

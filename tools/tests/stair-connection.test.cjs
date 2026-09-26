@@ -72,7 +72,7 @@ const FNS = [
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
-  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairPartShapeKey', 'stairPartEdgesRaw', 'stairPartsLinkRaw', 'hasStairOrder', 'stairTouchingUnlinked', 'walkFloorLandingGroundAt', 'walkFlatGroundAt', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
+  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairPartShapeKey', 'stairPartEdgesRaw', 'stairPartsLinkRaw', 'hasStairOrder', 'stairTouchingUnlinked', 'walkFloorLandingGroundAt', 'walkFlatGroundAt', 'walkUnderDeckAt', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
   'isLevelStairPart', 'isFloorLanding', 'landingFloorLevelMm', 'landingFloorTopY', 'floorLandingBaseY', 'floorLandingAtMm', 'stairFloorAtMm', 'stairGroupTargetFloor', 'stairChainParts', 'stairTargetCandidates', 'skipRoomsOnFloor', 'baseRoomLabel', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
   'stairPartEndMm', 'stairLocalProgress', 'walkLevelStairGroundAt', 'walkStairSampleAt', 'stairPartPortsMm', 'stairPointOnPart', 'stairGroupChainOrder', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairGroupBase', 'stairExplicitFootY', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
@@ -357,4 +357,28 @@ test('部材を動かす・高さ順を変える・使い方を切り替える�
   assert.equal(g.getConnectedStairParts(r1).length, 1, '床にした踊り場を越えてつながっている');
   delete L.landingMode; delete L.landingLevelMm;
   assert.equal(g.getConnectedStairParts(r1).length, 3);
+});
+
+// ── 段差の下の部屋(ハーフ収納)へ歩いて入る ──────────────────────────────
+// 利用者の報告: 1F のウォークスルーでハーフ収納に入れない。足元の床を、上に
+// 重なった段差の部屋の天端(+1800)で見ていたので、1.8m の段差として止められていた。
+function underDeckHouse(withStorage) {
+  const rooms = [{ id: 'ldk', n: 'LDK', floor: 1, x: 0, y: 3000, w: 6000, d: 3000 },
+    { id: 'deck', n: 'スキップ', floor: 1, x: 0, y: 0, w: 3000, d: 3000, skipLevelMm: 1800 }];
+  if (withStorage) rooms.push({ id: 'st', n: 'ハーフ収納', floor: 1, x: 0, y: 0, w: 3050, d: 3000 });
+  return house([], rooms);
+}
+test('段差の下に部屋があれば、下に居る間はその床に立ち、上に居れば段差の天端に立つ', () => {
+  const g = heights(underDeckHouse(true));
+  const mmOff = (v) => Math.round(v / g.U);
+  assert.equal(mmOff(g.walkFlatGroundAt(1500, 1500, 1, 0)), 0, '下から入ると収納の床');
+  assert.equal(mmOff(g.walkFlatGroundAt(1500, 1500, 1, 1.8)), 1800, '段差の上では天端');
+  assert.equal(mmOff(g.walkFlatGroundAt(1500, 1500, 1)), 1800, '高さを渡さなければ従来どおり天端');
+  const u = g.walkUnderDeckAt(1500, 1500, 1);
+  assert.ok(u && u.deckBottomOff > 1.5 && u.deckBottomOff < 1.8, JSON.stringify(u));
+});
+test('段差の下に部屋が無ければ、これまでどおり入れない(段差の天端として扱う)', () => {
+  const g = heights(underDeckHouse(false));
+  assert.equal(g.walkUnderDeckAt(1500, 1500, 1), null);
+  assert.equal(Math.round(g.walkFlatGroundAt(1500, 1500, 1, 0) / g.U), 1800);
 });

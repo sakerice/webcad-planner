@@ -72,7 +72,7 @@ const FNS = [
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
-  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairPartShapeKey', 'stairPartEdgesRaw', 'stairPartsLinkRaw', 'hasStairOrder', 'stairTouchingUnlinked', 'walkFloorLandingGroundAt', 'walkFlatGroundAt', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
+  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairPartShapeKey', 'stairPartEdgesRaw', 'stairPartsLinkRaw', 'hasStairOrder', 'stairTouchingUnlinked', 'walkFloorLandingGroundAt', 'walkFlatGroundAt', 'walkUnderDeckAt', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
   'isLevelStairPart', 'isFloorLanding', 'landingFloorLevelMm', 'landingFloorTopY', 'floorLandingBaseY', 'floorLandingAtMm', 'stairFloorAtMm', 'stairGroupTargetFloor', 'stairChainParts', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
   'stairPartEndMm', 'stairPartPortsMm', 'stairPointOnPart', 'stairGroupChainOrder', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairGroupBase', 'stairExplicitFootY', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
