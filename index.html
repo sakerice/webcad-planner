@@ -10589,11 +10589,17 @@ function hasStairOrder(o){ return !!o&&o.stairOrder!==undefined&&o.stairOrder!==
 function stairPartsLinked(a,b){ return !!stairPartsLink(a,b); }
 // 接しているのにつながっていない部材(横腹で当てた・向きが合わない・深く重なった)。
 // 利用者が「つないだつもり」になっている部材を知らせるために使う。
+// 床として使う踊り場は相手にしない(床であって部材ではない)。また、同じ床の踊り場に
+// どちらもつながっている部材どうし(床の踊り場で折り返す2本)は、横腹が接して
+// いても正しい形なので知らせない。
 function stairTouchingUnlinked(seed){
-  if(!seed||!isStairPartType(seed.type)) return [];
+  if(!seed||!isStairPartType(seed.type)||isFloorLanding(seed)) return [];
   var chain=stairChainParts(seed), fl=seed.floor||1;
+  var floors=DATA.items.filter(function(l){ return (l.floor||1)===fl&&isFloorLanding(l); });
+  var myFloors=floors.filter(function(l){ return chain.some(function(p){ return stairPartsLinked(p,l); }); });
   return DATA.items.filter(function(o){
-    if((o.floor||1)!==fl||!isStairPartType(o.type)||chain.indexOf(o)>=0) return false;
+    if((o.floor||1)!==fl||!isStairPartType(o.type)||isFloorLanding(o)||chain.indexOf(o)>=0) return false;
+    if(myFloors.some(function(l){ return stairChainParts(o).some(function(q){ return stairPartsLinked(q,l); }); })) return false;
     return chain.some(function(p){ return stairPartsTouch(p,o)&&!stairPartsLinked(p,o); });
   });
 }
@@ -11165,7 +11171,6 @@ function stairRiseInfo(it){
 }
 
 // 直階段の段数。2Dの踏み板線と3Dの段数はともにこの関数を参照し、常に一致する。
-var _stairStepDepth=0;   // 段数 → 足元 → 別の階段の踊り場 → 段数… の入れ子の歯止め
 function getStairStepCount(it){
   if(!it) return 3;
   // 踊り場は段を持たない。上り高さを分け合わないので 0 を返す。
@@ -11177,19 +11182,17 @@ function getStairStepCount(it){
   if(stairGroupIsLevel(it))
     return stairStepCount(Math.round(stairGroupRiseM(it)/U), it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
   // 段数の元になるのは階高。天井高ではないので置き換えない。
-  // ただし足元が階の床より上(段差の部屋・床の踊り場の上)から上る階段は、実際に
-  // 上る高さから出す。階高から出すと、残り 800mm を 13 段で上る蹴上げ 60mm の
-  // 階段になり、手前の段差用の階段(実際の高さから出す)と蹴上げがそろわない。
-  // 普通の床から上る階段は、保存済みプランの段数を変えないよう従来どおり。
-  if(typeof stairUpperSpanM==='function'&&_stairStepDepth<4){
-    _stairStepDepth++;
-    try{
-      var ends=stairRunEndsMm(it), sp=stairUpperSpanM(it);
-      // 「階の床」= その点の、段差を持たない部屋の床(床上げを含む)。
-      var floorY=stairExplicitFootY(it.floor||1,{level:'floor'},ends.down,ends.group);
-      if(sp.baseY-floorY>0.05)
-        return stairStepCount(Math.round(sp.riseM/U), it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
-    } finally { _stairStepDepth--; }
+  // ただし **床として使う踊り場の上から** 上る階段は、実際に上る高さから出す。
+  // 階高から出すと、残り 800mm を 13 段で上る蹴上げ 60mm の階段になり、手前の
+  // 段差用の階段(実際の高さから出す)と蹴上げがそろわない。
+  // 段差の部屋から上る階段は、保存済みプランの段数を変えないよう従来どおり
+  // (変えるなら仕様の変更として別に決める)。床の踊り場は今回からの形なので、
+  // 保存済みのプランには無い。
+  if(typeof stairRunEndsMm==='function'&&!it.baseRoom&&!it.baseLevel){
+    var ends=stairRunEndsMm(it), fl=it.floor||1;
+    if(ends.down&&floorLandingAtMm(fl,ends.down,0)&&
+       !ends.group.some(function(o){ return o.baseRoom||o.baseLevel; }))
+      return stairStepCount(Math.round(stairUpperSpanM(it).riseM/U), it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
   }
   return stairStepCount(FLOOR_H, it.d||(ISIZES.stair&&ISIZES.stair.d)||2730);
 }

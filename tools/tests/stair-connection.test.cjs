@@ -108,7 +108,7 @@ function heights(data) {
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
-    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('_stairEdgeCache'), topLevelVar('_stairLinkCache'), topLevelVar('_stairLinkCacheSize'), topLevelVar('_stairStepDepth'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
+    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('_stairEdgeCache'), topLevelVar('_stairLinkCache'), topLevelVar('_stairLinkCacheSize'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
     topLevelVar('SHELF_BOARD_T_MM'),
     topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
@@ -323,4 +323,38 @@ test('普通の床から上る階段の段数は、従来どおり階高から�
   const g = heights(house(lShape()));
   const r1 = g.DATA.items[0];
   assert.equal(g.getStairStepCount(r1), g.stairStepCount(g.FLOOR_H, r1.d));
+});
+test('段差の部屋から上の階へ上がる既存の階段の段数は変わらない(階高から出す)', () => {
+  const g = heights(house([P('up', 'stair', 0, 1000, 910, 2000, 180)],
+    [{ id: 'hall', n: 'ホール', floor: 1, x: -5000, y: -5000, w: 20000, d: 20000 },
+     { id: 'deck', n: 'スキップ', floor: 1, x: -2000, y: 2000, w: 4000, d: 3000, skipLevelMm: 700 }]));
+  const up = g.DATA.items[0];
+  assert.equal(mmOf(g, up)[0], 700, '前提: 段差の上から上る');
+  assert.equal(g.getStairStepCount(up), g.stairStepCount(g.FLOOR_H, up.d));
+});
+test('床の踊り場で折り返す2本には、つながっていない警告を出さない', () => {
+  // 北へ上る段差用の階段 lv → 床の踊り場 F(1820 幅) → lv の真横を南へ上る up
+  const g = heights(house([
+    P('lv', 'stair', 0, 0, 910, 2000, 180, { stairTarget: 'level', stairTo: 'F' }),       // 上端 y=-1000
+    P('F', 'stair-landing', 455, -1455, 1820, 910, 0, { landingMode: 'floor', landingLevelMm: 1200 }),
+    P('up', 'stair', 910, 0, 910, 2000, 0)                                               // 下端 y=-1000
+  ]));
+  const [lv, F, up] = g.DATA.items;
+  assert.deepEqual(mmOf(g, lv), [0, 1200]);
+  assert.equal(mmOf(g, up)[0], 1200);
+  assert.equal(g.stairTouchingUnlinked(lv).length, 0);
+  assert.equal(g.stairTouchingUnlinked(up).length, 0);
+});
+test('部材を動かす・高さ順を変える・使い方を切り替えると、つながりの結果も変わる(古い結果を返さない)', () => {
+  const g = heights(house(lShape()));
+  const [r1, L, r2] = g.DATA.items;
+  assert.equal(g.stairPartsLinked(L, r2), true);
+  r2.x += 600;                                         // 踊り場から離す
+  assert.equal(g.stairPartsLinked(L, r2), false);
+  r2.x -= 600;
+  assert.equal(g.stairPartsLinked(L, r2), true);
+  L.landingMode = 'floor'; L.landingLevelMm = 1000;
+  assert.equal(g.getConnectedStairParts(r1).length, 1, '床にした踊り場を越えてつながっている');
+  delete L.landingMode; delete L.landingLevelMm;
+  assert.equal(g.getConnectedStairParts(r1).length, 3);
 });

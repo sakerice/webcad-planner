@@ -459,13 +459,20 @@ function drawStairLinkOverlay(){
     ctx.fillStyle=color; ctx.fillText(text,c.cx,c.cy);
   }
   ctx.save(); ctx.lineCap='round';
-  var used={};
+  var used={}, legacyParts={};
   chain.forEach(function(p,i){
     chain.concat(others).forEach(function(q,j){
       if(q===p) return;
       if(chain.indexOf(q)>=0&&chain.indexOf(q)<i) return;
       var l=stairPartsLink(p,q);
-      if(!l||l.legacy) return;
+      if(!l) return;
+      if(l.legacy){
+        // 旧来のつながり(高さ順で横に並べた部材)は辺を持たないので、中心どうしを
+        // 緑の線で結び、その2枚の出入り口は空いていると描かない。
+        legacyParts[p.id]=1; legacyParts[q.id]=1;
+        seg({x:p.x+p.w/2,y:p.y+p.d/2},{x:q.x+q.w/2,y:q.y+q.d/2},'rgba(46,160,67,0.95)',4,[2,5]);
+        return;
+      }
       used[p.id+l.ea.k]=1; used[q.id+l.eb.k]=1;
       var isBad=bad.some(function(b){ return (b.a===p&&b.b===q)||(b.a===q&&b.b===p); });
       var sp=span(l.ea,l.eb);
@@ -474,7 +481,7 @@ function drawStairLinkOverlay(){
   });
   chain.forEach(function(p){
     stairPartEdgesMm(p).forEach(function(e){
-      if(e.role==='side'||used[p.id+e.k]) return;
+      if(e.role==='side'||used[p.id+e.k]||legacyParts[p.id]) return;
       if(e.role==='any'){ seg(e.a,e.b,'rgba(230,140,20,0.55)',2,[5,4]); return; }
       seg(e.a,e.b,'rgba(230,140,20,0.95)',3,[7,4]);
       var mid={x:(e.a.x+e.b.x)/2+e.n.x*220,y:(e.a.y+e.b.y)/2+e.n.y*220};

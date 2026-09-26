@@ -119,7 +119,7 @@ function heights(data) {
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
-    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('_stairEdgeCache'), topLevelVar('_stairLinkCache'), topLevelVar('_stairLinkCacheSize'), topLevelVar('_stairStepDepth'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
+    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('_stairEdgeCache'), topLevelVar('_stairLinkCache'), topLevelVar('_stairLinkCacheSize'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
     topLevelVar('SHELF_BOARD_T_MM'),
     topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
