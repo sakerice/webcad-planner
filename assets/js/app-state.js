@@ -1430,6 +1430,15 @@ function updateProps(){
       html += '<option value="'+opt[0]+'" '+((it.lightShape||'point')===opt[0]?'selected':'')+'>'+opt[1]+'</option>';
     });
     html += '</select></div>';
+    if((it.lightShape||'point')==='line'){
+      var aim=(it.lightAim==='up'||it.lightAim==='side')?it.lightAim:'down';
+      html += '<div class="pr"><div class="pl">光の向き</div><select class="pi" onchange="updateSelectedProp(\'lightAim\',this.value===\'down\'?undefined:this.value)">'+
+        '<option value="down"'+(aim==='down'?' selected':'')+'>下へ</option>'+
+        '<option value="up"'+(aim==='up'?' selected':'')+'>天井へ（間接照明）</option>'+
+        '<option value="side"'+(aim==='side'?' selected':'')+'>横へ（壁を照らす）</option>'+
+        '</select></div>';
+      html += '<div class="lock-status-note">線の長さ全体から、この向きへ照らします。横へは器具の前（平面図で奥行きの向き）の壁を照らします。線照明は影を落としません。</div>';
+    }
     html += '<div class="pr"><div class="pl">ライトカラー</div><input class="pi" type="color" value="'+(it.lightColor||'#fff6dd')+'" onchange="updateSelectedProp(\'lightColor\',this.value)"></div>';
     html += '<div class="pr"><div class="pl">色温度プリセット</div><div style="display:flex;gap:4px;flex-wrap:wrap">';
     LIGHT_KELVIN_PRESETS.forEach(function(k){
@@ -1965,7 +1974,7 @@ function updateSelectedProp(p,v,noSave){
   if(p==='setback' && !v) delete ST.selected.setback;
   // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
   // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
-  if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm') && !v) delete ST.selected[p];
+  if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm'||p==='lightAim') && !v) delete ST.selected[p];
   if(p==='stairTarget' && v!=='level') delete ST.selected.stairTo;
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
