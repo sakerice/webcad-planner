@@ -1271,6 +1271,9 @@ function updateSelectedBaseFloor(value){
   var targets=[it];
   if(kind==='stair') targets=getConnectedStairParts(it);
   targets.forEach(function(o){ delete o.baseRoom; delete o.baseLevel; });
+  // つながった部材まで書き換えるので、共同編集の相手へ全部を送る。
+  if(targets.length>1&&typeof SHARED!=='undefined'&&SHARED&&SHARED.roomId&&!SHARED.applying&&typeof sharedMarkObjectsDirty==='function')
+    sharedMarkObjectsDirty(targets);
   var v=String(value||'auto');
   if(v.indexOf('room:')===0) it.baseRoom=v.slice(5);
   else if(v==='floor'||v==='skip'||(v==='under'&&kind==='item')) it.baseLevel=v;

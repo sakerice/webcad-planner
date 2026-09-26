@@ -1824,33 +1824,59 @@ function setSelectedStairTarget(value){
   var it=ST.selected;
   if(!it||!isStairPartType(it.type)||isFloorLanding(it)) return;
   var parts=stairChainParts(it);
-  if(parts.some(isObjectLocked)){ updateProps(); return; }
+  if(parts.some(isObjectLocked)){
+    alert('つながっている部材にロックされたものがあるため、行き先を変えられません。ロックを外してから選んでください。');
+    updateProps(); return;
+  }
   saveState();
   var to=(typeof value==='string'&&value.indexOf('to:')===0)?value.slice(3):null;
   parts.forEach(function(o){
     if(value==='upper'){ delete o.stairTarget; delete o.stairTo; }
     else { o.stairTarget='level'; if(to!==null) o.stairTo=to; else delete o.stairTo; }
   });
+  markStairPartsEdited(parts);
   draw2d();
   if(ren) rebuild3D();
   updateProps();
 }
 // 踊り場の使い方を切り替える。床にするときは、いまの高さをそのまま床の高さにする
 // (切り替えただけで踊り場が動かないように)。
+// つながった部材まで書き換えたとき。共同編集の相手へ、選んでいる部材だけでなく
+// 書き換えた部材すべてを送る(送らないと、相手の画面では下の階段が床になった
+// 踊り場を突き抜けて上の階まで上る)。
+function markStairPartsEdited(parts){
+  if(typeof SHARED!=='undefined'&&SHARED&&SHARED.roomId&&!SHARED.applying&&typeof sharedMarkObjectsDirty==='function')
+    sharedMarkObjectsDirty(parts);
+  markDirty();
+}
 function setSelectedLandingMode(mode){
   var it=ST.selected;
   if(!it||!isStairLandingType(it.type)) return;
-  if(isObjectLocked(it)){ updateProps(); return; }
   var wasFloor=isFloorLanding(it);
   if((mode==='floor')===wasFloor) return;
+  // 書き換える部材を先に決め、どれかがロックされていれば何もしない。
+  var order=wasFloor?[]:stairGroupOrdered(it), idx=order.indexOf(it);
+  var below=order.slice(0,Math.max(0,idx)).filter(function(o){ return !isFloorLanding(o); });
+  var fl=it.floor||1, id=String(it.id);
+  var touched=[it].concat(below);
+  if(wasFloor){
+    // 階段の一部に戻したときにつながる部材(一時的に戻して数える)と、この踊り場を
+    // 行き先にしていた部材。
+    var keepMode=it.landingMode; delete it.landingMode;
+    touched=stairChainParts(it);
+    it.landingMode=keepMode;
+    DATA.items.forEach(function(o){ if((o.floor||1)===fl&&String(o.stairTo)===id&&touched.indexOf(o)<0) touched.push(o); });
+  }
+  if(touched.some(isObjectLocked)){
+    alert('つながっている部材にロックされたものがあるため、踊り場の使い方を変えられません。ロックを外してから切り替えてください。');
+    updateProps(); return;
+  }
   saveState();
   if(mode==='floor'){
     var y=stairLandingTopY(it);
     // 踊り場より下にあった部材は、この踊り場を行き先にする。そうしないと
     // 「上の階」のままの下の階段が、床になった踊り場を突き抜けて上の階まで上る。
-    var order=stairGroupOrdered(it), idx=order.indexOf(it);
-    order.slice(0,Math.max(0,idx)).forEach(function(o){
-      if(isFloorLanding(o)) return;
+    below.forEach(function(o){
       o.stairTarget='level'; o.stairTo=String(it.id);
     });
     it.landingMode='floor';
@@ -1858,7 +1884,6 @@ function setSelectedLandingMode(mode){
     // 床は階段の部材ではないので、階段としての指定は持たない。
     delete it.stairTarget; delete it.stairTo; delete it.stairOrder;
   } else {
-    var fl=it.floor||1, id=String(it.id);
     delete it.landingMode; delete it.landingLevelMm;
     // この踊り場を行き先にしていた階段の指定を外し、つながった1本の行き先を
     // 上側の部材(この踊り場を行き先にしていなかった部材)にそろえる。
@@ -1874,6 +1899,7 @@ function setSelectedLandingMode(mode){
       else { delete o.stairTarget; delete o.stairTo; }
     });
   }
+  markStairPartsEdited(touched);
   draw2d();
   if(ren) rebuild3D();
   updateProps();

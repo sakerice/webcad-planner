@@ -72,7 +72,7 @@ const FNS = [
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallFullHeightM', 'wallHeightMm', 'wallDisplayHeightM',
   'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm',
-  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
+  'isStairPartType', 'stairBounds2D', 'stairPartsTouch', 'stairPartEdgesMm', 'stairPartShapeKey', 'stairPartEdgesRaw', 'stairPartsLinkRaw', 'hasStairOrder', 'stairTouchingUnlinked', 'walkFloorLandingGroundAt', 'walkFlatGroundAt', 'stairEdgesFace', 'stairPartsLink', 'stairPartsLinked', 'stairGroupChainInfo', 'stairChainFreeEnds', 'getConnectedStairParts', 'stairLandingIsLevel', 'stairLandingTopY',
   'isLevelStairPart', 'isFloorLanding', 'landingFloorLevelMm', 'landingFloorTopY', 'floorLandingBaseY', 'floorLandingAtMm', 'stairFloorAtMm', 'stairGroupTargetFloor', 'stairChainParts', 'stairTargetCandidates', 'skipRoomsOnFloor', 'baseRoomLabel', 'stairGroupIsLevel', 'stairLevelSpanM', 'stairGroupRiseM',
   'stairPartEndMm', 'stairLocalProgress', 'walkLevelStairGroundAt', 'walkStairSampleAt', 'stairPartPortsMm', 'stairPointOnPart', 'stairGroupChainOrder', 'stairGroupOrdered', 'stairRunEndsMm', 'stairFootY', 'stairGroupBase', 'stairExplicitFootY', 'stairUpperSpanM', 'stairRiseInfo',
   'stairStyleOf', 'stairHasRisers', 'latticePitchMm', 'latticeSlatMm', 'latticeClearMm', 'latticeHasCap',
@@ -108,7 +108,7 @@ function heights(data) {
   });
   vm.runInContext([
     topLevelVar('WALL_H'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'), topLevelVar('U'),
-    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
+    topLevelVar('SKIP_LEVEL_MAX_MM'), topLevelVar('LANDING_LEVEL_MAX_MM'), topLevelVar('STAIR_LINK_GAP_MM'), topLevelVar('_stairEdgeCache'), topLevelVar('_stairLinkCache'), topLevelVar('_stairLinkCacheSize'), topLevelVar('_stairStepDepth'), topLevelVar('STAIR_LINK_OVERLAP_MM'), topLevelVar('STAIR_LINK_MIN_SPAN_MM'), topLevelVar('SKIP_CAVITY_MIN_MM'),
     topLevelVar('SHELF_BOARD_T_MM'),
     topLevelVar('STAIR_BALUSTER_GAP_MAX_M'), topLevelVar('STAIR_BALUSTER_MM'),
     topLevelVar('STAIR_NEWEL_MM'), topLevelVar('STAIR_RAIL_END_EXT_M'),
@@ -238,7 +238,10 @@ test('床として使う踊り場は、上の階の床に穴を開けず、ウ�
   const g = heights(floorLandingHouse());
   const [, F] = g.DATA.items;
   assert.equal(g.stairwellQuadsForFloor(2).length, 1, '穴は上の階への階段の1つだけ');
-  assert.equal(Math.round(g.walkLevelStairGroundAt(1455, 0, 1, 0) / g.U), 1200);
+  assert.equal(Math.round(g.walkFloorLandingGroundAt(1455, 0, 1) / g.U), 1200);
+  assert.equal(g.walkLevelStairGroundAt(1455, 0, 1, 120), null, '床の踊り場が段差用の階段として数えられている(横から乗り上がれてしまう)');
+  assert.equal(Math.round(g.walkFlatGroundAt(1455, 0, 1) / g.U), 1200);
+  assert.equal(Math.round(g.walkFlatGroundAt(1455, 600, 1) / g.U), 0, '踊り場の外 145mm でも持ち上がっている');
   assert.equal(g.walkStairSampleAt(1455, 0, 1, 0), null, '床の踊り場が上の階への経路になっている');
   F.landingLevelMm = 900;
   assert.deepEqual(mmOf(g, g.DATA.items[0]), [0, 900], '高さを変えると、行き先にしている階段がついてこない');
@@ -260,4 +263,64 @@ test('階段の一部の踊り場で始まる階段は、隣の床の踊り場�
   assert.equal(ids(g.stairGroupOrdered(up)), 'L>up');
   assert.deepEqual(mmOf(g, L), [1500, 1500]);
   assert.equal(mmOf(g, up)[0], 1500);
+});
+
+// ── レビューで挙がった形 ──────────────────────────────────────────────────
+test('旧来の組み方: 高さ順を指定して横腹で並べた2本は、これまでどおり1本として割る', () => {
+  const g = heights(house([
+    P('a', 'stair', 455, 0, 910, 2000, 180, { stairOrder: 1 }),
+    P('b', 'stair', 1365, 0, 910, 2000, 0, { stairOrder: 2 })
+  ]));
+  const [a, b] = g.DATA.items;
+  assert.equal(ids(g.stairGroupOrdered(a)), 'a>b');
+  const ha = mmOf(g, a), hb = mmOf(g, b);
+  assert.equal(ha[1], hb[0], JSON.stringify([ha, hb]));
+  assert.ok(ha[1] > 0 && hb[1] > ha[1]);
+});
+test('踊り場が階段の上端に 400mm 食い込んでいても、1本につながる', () => {
+  const g = heights(house([
+    P('s', 'stair', 0, 0, 910, 2000, -90),                        // 上端 x=1000
+    P('L', 'stair-landing', 1000 - 400 + 455, 0, 910, 910, 0),
+    P('t', 'stair', 1000 - 400 + 455, -455 - 1000, 910, 2000, 180)
+  ]));
+  assert.equal(ids(g.stairGroupOrdered(g.DATA.items[0])), 's>L>t');
+});
+test('横腹に当てた部材は、つながっていない部材として知らせる', () => {
+  const g = heights(house([P('a', 'stair', 0, 0, 910, 2000, -90), P('L', 'stair-landing', 0, 910, 910, 910, 0)]));
+  assert.equal(ids(g.stairTouchingUnlinked(g.DATA.items[0])), 'L');
+  // つながっている L字では何も出ない
+  const h = heights(house(lShape()));
+  assert.equal(h.stairTouchingUnlinked(h.DATA.items[0]).length, 0);
+});
+test('反転(flipY)した直階段は、上端と下端が入れ替わる', () => {
+  const a = P('a', 'stair', 0, 0, 910, 2000, -90, { flipY: true });   // 西へ上る(x=-1000 が上端)
+  const L = P('L', 'stair-landing', -1455, 0, 910, 910, 0);
+  const b = P('b', 'stair', -1455, -1455, 910, 2000, 180);
+  const g = heights(house([b, L, a]));
+  assert.equal(ids(g.stairGroupOrdered(g.DATA.items[0])), 'a>L>b');
+});
+test('踊り場どうしだけのグループでは並びを決めず、位置の順に戻る(止まる)', () => {
+  const g = heights(house([P('L1', 'stair-landing', 0, 0, 910, 910, 0), P('L2', 'stair-landing', 910, 0, 910, 910, 0)]));
+  const info = g.stairGroupChainInfo(g.getConnectedStairParts(g.DATA.items[0]));
+  assert.equal(info.order, null);
+  assert.equal(info.undirected.length, 1);
+  assert.equal(g.stairGroupOrdered(g.DATA.items[0]).length, 2);
+});
+test('行き先に指した床の踊り場から階段を離すと、指定は効かなくなる(欄の表示と一致)', () => {
+  const d = floorLandingHouse();
+  d.items[0].x -= 1000;                                                    // 踊り場から 1000mm 離す
+  const g = heights(d);
+  assert.equal(g.stairGroupTargetFloor(g.getConnectedStairParts(g.DATA.items[0])), null);
+  assert.equal(g.stairTargetCandidates(g.DATA.items[0]).length, 0);
+});
+test('床の踊り場の上から上の階へ上がる階段は、実際の上り高さから段数を出す(蹴上げがそろう)', () => {
+  const g = heights(floorLandingHouse());
+  const up = g.DATA.items[2], rise = mmOf(g, up)[1] - mmOf(g, up)[0];
+  const steps = g.getStairStepCount(up);
+  assert.ok(rise / steps >= 150 && rise / steps <= 230, '蹴上げ ' + (rise / steps) + 'mm(' + steps + '段)');
+});
+test('普通の床から上る階段の段数は、従来どおり階高から出す', () => {
+  const g = heights(house(lShape()));
+  const r1 = g.DATA.items[0];
+  assert.equal(g.getStairStepCount(r1), g.stairStepCount(g.FLOOR_H, r1.d));
 });

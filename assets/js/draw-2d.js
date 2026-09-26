@@ -465,7 +465,7 @@ function drawStairLinkOverlay(){
       if(q===p) return;
       if(chain.indexOf(q)>=0&&chain.indexOf(q)<i) return;
       var l=stairPartsLink(p,q);
-      if(!l) return;
+      if(!l||l.legacy) return;
       used[p.id+l.ea.k]=1; used[q.id+l.eb.k]=1;
       var isBad=bad.some(function(b){ return (b.a===p&&b.b===q)||(b.a===q&&b.b===p); });
       var sp=span(l.ea,l.eb);
@@ -480,6 +480,11 @@ function drawStairLinkOverlay(){
       var mid={x:(e.a.x+e.b.x)/2+e.n.x*220,y:(e.a.y+e.b.y)/2+e.n.y*220};
       label(mid,e.role==='down'?'上り口':'上がり','rgba(170,90,0,1)');
     });
+  });
+  // 接しているのにつながっていない部材は、外形を赤い破線で囲む。
+  if(!isFloorLanding(it)) stairTouchingUnlinked(it).forEach(function(o){
+    var E=stairPartEdgesMm(o);
+    E.forEach(function(e){ seg(e.a,e.b,'rgba(211,47,47,0.9)',2.5,[6,4]); });
   });
   ctx.setLineDash([]); ctx.restore();
 }
