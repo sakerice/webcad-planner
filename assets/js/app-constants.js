@@ -1286,9 +1286,16 @@ function updateSelectedBaseFloor(value){
 }
 function selectedRoomFloorHtml(r){
   var v=roomFloorOffsetMm(r);
+  // 玄関土間は、床の厚みの中まで下げて**基礎の天端＋20mm**に置く(床を下げられる
+  // いちばん下)。実物の土間は基礎の天端にタイルを張った高さで、玄関ドアの外と
+  // ほぼ同じ高さになる。以前の「玄関土間 ＋0mm」は床の構造面のままで、玄関ドアが
+  // 外の基礎の天端から床の厚み(180mm)ぶん浮いて見えた(利用者の報告)。
+  // 床を下げられない高さモデルでは 0。
+  var dirtMm=(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel())?-Math.max(0,floorSlabMmForFloor(r.floor)-20):0;
+  var dirtLabel=dirtMm<0?'−'+(-dirtMm):'＋0';
   return '<div class="ph" style="margin-top:12px">床の高さ</div>'+
     '<div class="pr"><div class="pl">仕上げ床</div><select class="pi" onchange="if(this.value)updateSelectedRoomFloor(this.value)">'+
-    '<option value="">プリセットを選択</option><option value="0">玄関土間・既存基準 ＋0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
+    '<option value="">プリセットを選択</option><option value="'+dirtMm+'">玄関土間（基礎の天端＋20mm）'+dirtLabel+'mm</option><option value="0">床の構造面 ±0mm</option><option value="150">室内床 ＋150mm</option><option value="150">浴室（室内と段差なし）＋150mm</option></select></div>'+
     '<div class="pr"><label class="pl" for="room-floor-raise">床の上下 (mm)</label><input id="room-floor-raise" class="pi" type="number" min="'+(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?-(floorSlabMmForFloor(r.floor)-20):0)+'" max="600" step="5" value="'+v+'" onchange="updateSelectedRoomFloor(this.value)"></div>'+
     '<div class="lock-status-note">この階の標準床面を0mmとして指定。正は床上げ、負は床下げ（床厚内・残り20mmまで）。家具・建具・歩行高さが追従します。浴室の段差は製品仕様に合わせて調整してください。天井の位置は固定です。</div>';
 }
