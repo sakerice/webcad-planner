@@ -3792,6 +3792,18 @@ var ASSET_TEX_MAP = {
   gravel_normal:'assets/textures/ground/gravel-normal.jpg',
   sand_normal:'assets/textures/ground/sand-normal.jpg',
   concrete_normal:'assets/textures/ground/concrete-normal.jpg',
+  concrete_new:'assets/textures/ground/concrete-new-color.jpg',
+  concrete_new_normal:'assets/textures/ground/concrete-new-normal.jpg',
+  concrete_brush:'assets/textures/ground/concrete-brush-color.jpg',
+  concrete_brush_normal:'assets/textures/ground/concrete-brush-normal.jpg',
+  lawn:'assets/textures/ground/lawn-color.jpg',
+  lawn_normal:'assets/textures/ground/lawn-normal.jpg',
+  interlocking:'assets/textures/ground/interlocking-color.jpg',
+  interlocking_normal:'assets/textures/ground/interlocking-normal.jpg',
+  tile_gray:'assets/textures/ground/tile-gray-color.jpg',
+  tile_gray_normal:'assets/textures/ground/tile-gray-normal.jpg',
+  gravel_white:'assets/textures/ground/gravel-white-color.jpg',
+  gravel_white_normal:'assets/textures/ground/gravel-white-normal.jpg',
   'wood_oak':'assets/textures/floor_oak_diffuse.jpg',
   'wood_floor':  'assets/textures/floor_wood_diffuse.jpg',
   'grass':       'assets/textures/ground/grass-color.jpg',
@@ -14785,7 +14797,7 @@ function makeGroundSurfaceMaterial(key,w,d,it){
   var material=new THREE.MeshStandardMaterial({
     color:0xffffff,map:map(key),normalMap:map(key+'_normal'),
     normalScale:new THREE.Vector2(cfg.normal,cfg.normal),
-    roughness:key==='concrete'?0.92:1,metalness:0,
+    roughness:cfg.rough==null?1:cfg.rough,metalness:0,
     envMapIntensity:Math.min(cfg.env,LIGHT_SETTINGS.env),side:THREE.DoubleSide
   });
   material.userData=material.userData||{};
