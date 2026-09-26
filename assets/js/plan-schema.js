@@ -139,6 +139,9 @@
     if (it.stairTarget !== undefined && it.stairTarget !== 'upper' && it.stairTarget !== 'level') {
       warnings.push(where + ': 階段の行き先 "' + it.stairTarget + '" は upper / level のどちらでもないので上の階として読む');
     }
+    if (it.landingMode !== undefined && it.landingMode !== 'floor') {
+      warnings.push(where + ': 踊り場の使い方 "' + it.landingMode + '" は floor ではないので階段の一部として読む');
+    }
     // 置く高さの基準。物は floor / under、階段は floor / skip を使う。
     if (it.baseLevel !== undefined &&
         ['floor', 'under', 'skip'].indexOf(it.baseLevel) < 0) {

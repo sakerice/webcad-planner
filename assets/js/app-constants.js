@@ -1467,6 +1467,7 @@ function item3DBaseY(it){
   // stairUpperSpanM)。パーツの中心から採ると、段差の上から始まる階段が
   // footprint の中心のはみ出しだけで低い側から始まってしまう。
   if(typeof isStairPartType==='function'&&isStairPartType(it.type)){
+    if(typeof isFloorLanding==='function'&&isFloorLanding(it)) return floorLandingBaseY(it);
     if(stairGroupIsLevel(it)) return stairLevelSpanM(it).baseY;
     return stairUpperSpanM(it).baseY;
   }
