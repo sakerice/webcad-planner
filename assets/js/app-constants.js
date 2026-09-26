@@ -2395,6 +2395,124 @@ function wallRaiseBridgeReachMm(w,xMm,yMm){
   }
   return 0;
 }
+// ── 2枚の屋根の段差を塞ぐ壁 ─────────────────────────────────────────
+// 同じ部屋の上で屋根が2枚に分かれ、片方がもう片方より高く架かると、境の上に
+// 屋根と屋根のあいだの隙間ができる(利用者のプラン32: LDK の西に陸屋根、東に
+// 片流れ。境の上に高さ約1.8mの三角形が開き、室内の天井の段が外から見えた)。
+// 実物はそこに外壁が立つ。平面図には壁が無いので、3D で外壁の面を建てて塞ぐ
+// (利用者の選択: 自動で塞ぐ。仕上げは屋根の設定欄で変えられる)。
+//
+// 塞ぐのは、屋根 H の縁のうち
+//   ・外側を別の屋根 L が覆い、L の上面が H の下面より低い
+//   ・下に部屋がある(家の中の隙間である。軒先の外は塞がない)
+//   ・そこに壁がまだ立っていない(下の階の外壁を屋根まで立ち上げた所など)
+// 区間。高さは L の上面から H の下面まで。
+var ROOF_GAP_SAMPLE_MM=60;
+var ROOF_GAP_MIN_M=0.03;
+function roofSlabThickM(rf){
+  return Math.max(30,Math.min(600,Number(rf&&rf.roofThickness)||180))*U;
+}
+// 屋根の板の上面・下面(ワールドm)。陸屋根の板は据え付け面の上に載り、勾配屋根の
+// 板は面から下へ伸びる(wallRaiseTopWorldY と同じ規則)。
+function roofSlabTopWorldYAt(rf,xMm,yMm){
+  var s=roofUndersideWorldYAt(rf,xMm,yMm);
+  return ((rf.roofType||'gable')==='flat')?s+roofSlabThickM(rf):s;
+}
+function roofSlabBottomWorldYAt(rf,xMm,yMm){
+  var s=roofUndersideWorldYAt(rf,xMm,yMm);
+  return ((rf.roofType||'gable')==='flat')?s:s-roofSlabThickM(rf);
+}
+function roofFootprintCornersMm(rf){
+  var cx=(rf.x||0)+(rf.w||0)/2, cy=(rf.y||0)+(rf.d||0)/2;
+  var rad=(rf.rot||0)*Math.PI/180, c=Math.cos(rad), sn=Math.sin(rad);
+  var hw=(rf.w||0)/2, hd=(rf.d||0)/2;
+  return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(function(p){
+    return [cx+p[0]*c-p[1]*sn, cy+p[0]*sn+p[1]*c];
+  });
+}
+// 屋根 H の縁で塞ぐ区間。[{pts:[{x,y,bottom,top}], nx, ny}] -- (nx,ny) は屋根の内側向き。
+function roofGapInfillRuns(H){
+  var out=[];
+  if(!H||H.type!=='roof'||H.hidden3D||typeof DATA==='undefined'||!DATA) return out;
+  var others=(DATA.items||[]).filter(function(it){ return it&&it!==H&&it.type==='roof'&&!it.hidden3D; });
+  if(!others.length) return out;
+  var cs=roofFootprintCornersMm(H);
+  var cx=(cs[0][0]+cs[2][0])/2, cy=(cs[0][1]+cs[2][1])/2;
+  var lowerFloors=[];
+  for(var f=1;f<(H.floor||1);f++) lowerFloors.push(f);
+  if(!lowerFloors.length) return out;
+  function roomBelow(x,y){
+    return lowerFloors.some(function(f){ return !!roomAtPointOnFloor(f,x,y); });
+  }
+  function wallStandsAt(x,y,bottom){
+    return (DATA.walls||[]).some(function(w){
+      if(w.vis3D==='hide'||!wallCoreBoxHitMm(w,x,y)) return false;
+      return wallTopWorldYAtPointM(w,x,y)>bottom+0.05;
+    });
+  }
+  for(var e=0;e<4;e++){
+    var a=cs[e], b=cs[(e+1)%4];
+    var ex=b[0]-a[0], ey=b[1]-a[1], len=Math.hypot(ex,ey);
+    if(len<ROOF_GAP_SAMPLE_MM) continue;
+    var ux=ex/len, uy=ey/len, nx=-uy, ny=ux;
+    if((cx-a[0])*nx+(cy-a[1])*ny<0){ nx=-nx; ny=-ny; }
+    // 縁に沿って d(mm)の位置で塞ぐ点を求める。塞がない位置なら null。
+    var at=function(d){
+      var px=a[0]+ux*d, py=a[1]+uy*d;
+      var ix=px+nx*5, iy=py+ny*5, ox=px-nx*5, oy=py-ny*5;
+      if(!roofCoversPlanPoint(H,ix,iy)||roofCoversPlanPoint(H,ox,oy)||!roomBelow(ix,iy)) return null;
+      var top=roofSlabBottomWorldYAt(H,ix,iy), bottom=null, blocked=false;
+      others.forEach(function(L){
+        if(blocked||!roofCoversPlanPoint(L,ox,oy)) return;
+        var lt=roofSlabTopWorldYAt(L,ox,oy);
+        if(lt>=top-ROOF_GAP_MIN_M) blocked=true;          // 隣の屋根の方が高い(隙間は無い)
+        else if(bottom===null||lt>bottom) bottom=lt;
+      });
+      if(blocked||bottom===null||top-bottom<ROOF_GAP_MIN_M) return null;
+      if(wallStandsAt(px+nx*60,py+ny*60,bottom)) return null;
+      return {x:px,y:py,bottom:bottom,top:top};
+    };
+    // 刻みの点だけで区間を作ると、端が最大で1刻み(60mm)手前で止まり、細い隙間が
+    // 残った(確認済み)。塞ぐ/塞がないが入れ替わる刻みでは、境を二分法で詰める。
+    var edgeOf=function(dIn,dOut){
+      for(var k=0;k<12;k++){ var m=(dIn+dOut)/2; if(at(m)) dIn=m; else dOut=m; }
+      return at(dIn);
+    };
+    var n=Math.max(1,Math.ceil((len-2)/ROOF_GAP_SAMPLE_MM)), run=null, prevD=null;
+    for(var i=0;i<=n;i++){
+      var d=1+(len-2)*i/n, pt=at(d);
+      if(pt){
+        if(!run){
+          run={pts:[],nx:nx,ny:ny}; out.push(run);
+          if(prevD!==null){ var s0=edgeOf(d,prevD); if(s0&&Math.abs(s0.x-pt.x)+Math.abs(s0.y-pt.y)>0.5) run.pts.push(s0); }
+        }
+        run.pts.push(pt);
+      } else {
+        if(run&&prevD!==null){ var s1=edgeOf(prevD,d); if(s1) run.pts.push(s1); }
+        run=null;
+      }
+      prevD=d;
+    }
+  }
+  return out.filter(function(r){ return r.pts.length>=2; });
+}
+// 塞ぐ壁の仕上げ。屋根に個別の指定(gapInfillColor / gapInfillTexture)があれば
+// それ、無ければ**下の階の外壁と同じ**(家全体・階の外壁の設定を読むだけで、
+// 壁ごとの設定欄は作らない -- 平面図に無い壁の欄がデータに増えないように)。
+function roofGapInfillAppearance(H){
+  if(H&&(H.gapInfillColor||H.gapInfillTexture)){
+    return {color:H.gapInfillColor||'#e8e0cc',texture:H.gapInfillTexture||null,
+      textureFlipX:!!H.gapInfillTextureFlipX,textureFlipY:!!H.gapInfillTextureFlipY,source:'roof'};
+  }
+  var fl=Math.max(1,((H&&H.floor)||1)-1);
+  var s=(typeof ensureExteriorWallSettings==='function')?ensureExteriorWallSettings():null;
+  if(s&&s.whole&&s.whole.linked)
+    return {color:s.whole.color||'#e8e0cc',texture:s.whole.texture||null,
+      textureFlipX:!!s.whole.textureFlipX,textureFlipY:!!s.whole.textureFlipY,source:'wall'};
+  var fs=(s&&s.floors&&s.floors[fl])||(typeof defaultExteriorFloorSetting==='function'?defaultExteriorFloorSetting(fl):{});
+  return {color:fs.color||(typeof WALL_COLORS!=='undefined'&&WALL_COLORS[fl])||'#e8e0cc',texture:fs.texture||null,
+    textureFlipX:!!fs.textureFlipX,textureFlipY:!!fs.textureFlipY,source:'wall'};
+}
 // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
 // 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より
 // 下に落ちるので、粗い側(天井)より細かい側(壁)を高く保たないと隙間が開く。
