@@ -2303,7 +2303,14 @@ var SITE_SURFACE_OPTIONS = {
   sand:{label:'砂地（締め固め）',texture:'sand',tileM:1.5,normal:0.35,color:0xffffff,edge:0xaca080,segment:0xd8bb80,env:0.03},
   grass:{label:'芝生（自然草地）',texture:'grass',tileM:2,normal:0.55,color:0xffffff,edge:0x3f6f35,segment:0x43b047,env:0.04},
   gravel:{label:'砂利',texture:'gravel',tileM:2.25,normal:0.65,color:0xffffff,edge:0x8c8372,segment:0x9c8f78,env:0.05},
-  concrete:{label:'コンクリート（経年）',texture:'concrete',tileM:2.08,normal:0.25,color:0xffffff,edge:0x8f9396,segment:0xbfc3c7,env:0.06}
+  concrete:{label:'コンクリート（経年）',texture:'concrete',tileM:2.08,normal:0.25,color:0xffffff,edge:0x8f9396,segment:0xbfc3c7,env:0.06,rough:0.92},
+  // 家が建った後の外構。土間コン・芝・舗装は新しい状態のものを別に持つ。
+  concrete_new:{label:'コンクリート（金ゴテ・新しい）',texture:'concrete_new',tileM:2.2,normal:0.2,color:0xffffff,edge:0x9aa1a8,segment:0xa9b8c6,env:0.06,rough:0.85},
+  concrete_brush:{label:'コンクリート（刷毛引き・新しい）',texture:'concrete_brush',tileM:2,normal:0.35,color:0xffffff,edge:0x969a9c,segment:0x8fa3b5,env:0.05,rough:0.95},
+  lawn:{label:'芝生（手入れされた）',texture:'lawn',tileM:2,normal:0.45,color:0xffffff,edge:0x3d7a32,segment:0x2fd05a,env:0.04},
+  interlocking:{label:'インターロッキング',texture:'interlocking',tileM:2,normal:0.6,color:0xffffff,edge:0x7e7f7a,segment:0xb59a8a,env:0.05,rough:0.95},
+  tile_gray:{label:'タイル（300角・グレー）',texture:'tile_gray',tileM:1.8,normal:0.5,color:0xffffff,edge:0x8e8c88,segment:0xc8b8d8,env:0.07,rough:0.8},
+  gravel_white:{label:'化粧砂利（白）',texture:'gravel_white',tileM:1.5,normal:0.6,color:0xffffff,edge:0xa8a498,segment:0xe8d8a8,env:0.05}
 };
 function siteSurfaceType(it){
   return (it&&SITE_SURFACE_OPTIONS[it.siteSurface]) ? it.siteSurface : 'grass';

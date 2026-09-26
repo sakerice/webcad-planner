@@ -51,5 +51,83 @@
     ],
     "license": "CC0",
     "processing": "Diffuse and OpenGL normal maps resized to 512px JPEG; no displacement geometry."
+  },
+  {
+    "key": "concrete_new",
+    "source": "https://ambientcg.com/view?id=Concrete034",
+    "authors": {
+      "ambientCG (Lennart Demes)": "All"
+    },
+    "dimensionsMm": [
+      2200,
+      2200
+    ],
+    "license": "CC0",
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; 2:1 source stacked to a square; tile scale set to 2.2m (source states 1.1m) to reduce visible repetition; no displacement geometry. Color regraded to a warm neutral grey (trowel marks at 75% contrast) so it does not read lavender under the sky light."
+  },
+  {
+    "key": "concrete_brush",
+    "source": "https://polyhaven.com/a/brushed_concrete_03",
+    "authors": {
+      "Amal Kumar": "All"
+    },
+    "dimensionsMm": [
+      2000,
+      2000
+    ],
+    "license": "CC0",
+    "processing": "Diffuse converted to neutral light grey keeping luminance detail; OpenGL normal map; 512px JPEG."
+  },
+  {
+    "key": "lawn",
+    "source": "https://ambientcg.com/view?id=Grass005",
+    "authors": {
+      "ambientCG (Lennart Demes)": "All"
+    },
+    "dimensionsMm": [
+      2000,
+      2000
+    ],
+    "license": "CC0",
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; source gives no physical size, 2m assumed; no displacement geometry. Color desaturated to 72%, warmed slightly, with a seamless low-frequency brightness variation (±7%) so large lawns do not read as a flat carpet."
+  },
+  {
+    "key": "interlocking",
+    "source": "https://ambientcg.com/view?id=PavingStones099",
+    "authors": {
+      "ambientCG (Lennart Demes)": "All"
+    },
+    "dimensionsMm": [
+      2000,
+      2000
+    ],
+    "license": "CC0",
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 1024px JPEG; no displacement geometry."
+  },
+  {
+    "key": "tile_gray",
+    "source": "https://ambientcg.com/view?id=Tiles038",
+    "authors": {
+      "ambientCG (Lennart Demes)": "All"
+    },
+    "dimensionsMm": [
+      1800,
+      1800
+    ],
+    "license": "CC0",
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 1024px JPEG; 2:1 source stacked to a square; scaled so one tile is 300mm (source states 1.1m width = 6 tiles); no displacement geometry. Color regraded to a warm neutral grey keeping joint contrast."
+  },
+  {
+    "key": "gravel_white",
+    "source": "https://ambientcg.com/view?id=Gravel023",
+    "authors": {
+      "ambientCG (Lennart Demes)": "All"
+    },
+    "dimensionsMm": [
+      1500,
+      1500
+    ],
+    "license": "CC0",
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; no displacement geometry."
   }
 ]
