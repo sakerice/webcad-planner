@@ -1172,6 +1172,10 @@ function baseFloorAutoLabel(it,kind){
 }
 function baseFloorSelectHtml(it){
   var kind=baseFloorKindOf(it);
+  // ドア・窓は段差の無い階でも出す。玄関の床を下げた家で、ドアをどちらの部屋の
+  // 床に載せるかを、ドアの欄から選べるようにする(利用者の要望)。
+  var opening=kind==='item'&&isWallOpeningItem(it);
+  if(opening) return openingBaseFloorSelectHtml(it);
   if(!kind||!floorHasSkipLevel(it.floor||1)) return '';
   var cur=baseFloorChoiceOf(it);
   var rooms=skipRoomsOnFloor(it.floor||1);
@@ -1212,6 +1216,43 @@ function baseFloorSelectHtml(it){
   else if(cur==='under') now='いまは 段差の下 に置いています（指定）。';
   else if(cur==='floor') now='いまは 階の床 に載っています（指定）。';
   else now='いまは いちばん高い段差 に載っています（以前の指定）。';
+  return html+'<div class="lock-status-note"><b>'+now+'</b>'+note+'</div>';
+}
+// ドア・窓の「載せる床」。自動と、両側の部屋(床の高さを添えて)を並べる。
+// 段差のある階では、従来の「階の床」と段差の部屋も残す。
+function openingBaseFloorSelectHtml(it){
+  var fl=it.floor||1, cur=baseFloorChoiceOf(it);
+  var adj=openingAdjacentRooms(it);
+  var chosen=baseRoomOf(it);
+  if(chosen&&adj.indexOf(chosen)<0) adj.push(chosen);   // 面していない部屋を選んだまま動かした
+  var skip=floorHasSkipLevel(fl);
+  function opt(v,label){ return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+label+'</option>'; }
+  var html='<div class="ph" style="margin-top:12px">載せる床</div>'+
+    '<div class="pr"><div class="pl">載せる床</div><select class="pi" onchange="updateSelectedBaseFloor(this.value)">'+opt('auto','自動');
+  adj.forEach(function(r){ html+=opt('room:'+r.id,openingFloorLabel(r,fl)); });
+  if(skip){
+    html+=opt('floor','階の床');
+    skipRoomsOnFloor(fl).forEach(function(r){ if(adj.indexOf(r)<0) html+=opt('room:'+r.id,baseRoomLabel(r)); });
+  }
+  if(cur==='skip') html+=opt('skip','いちばん高い段差（以前の指定）');
+  html+='</select></div>';
+  var y=item3DBaseY(it), on=null;
+  adj.forEach(function(r){ if(!on&&Math.abs(roomFloorTopY(r)-y)<0.0005) on=r; });
+  var where=on?openingFloorLabel(on,fl):'階の床';
+  var now, note;
+  if(cur==='auto'){
+    now='いまは '+where+' に載っています（自動）。';
+    note='自動は、両側の部屋のうち床の高い方に載せます（敷居は室内側の床に合わせる）。外に面したドア・窓は、室内側の部屋の床です。';
+  } else if(cur.indexOf('room:')===0){
+    now='いまは '+(chosen?openingFloorLabel(chosen,fl):where)+' に載っています（指定）。';
+    note='この部屋の床に載せています。部屋の床の高さを変えると一緒に動きます。部屋を消すと自動に戻ります。';
+  } else if(cur==='floor'){
+    now='いまは '+where+' に載っています（指定）。';
+    note='段差（スキップフロア）を無視して、面している部屋の床に載せています。';
+  } else {
+    now='いまは いちばん高い段差 に載っています（以前の指定）。';
+    note='以前の指定です。部屋を選び直すことを勧めます。';
+  }
   return html+'<div class="lock-status-note"><b>'+now+'</b>'+note+'</div>';
 }
 // 「載せる床」を変える。階段は1本の階段全体で1つの指定なので、
@@ -1312,14 +1353,48 @@ function isWallOpeningItem(it){
 // 開口が面している部屋の床(m)。両側を見て高いほうを採る。
 // **高いほうを採るのは、敷居は室内側の床に合わせるから。** 片側が屋外なら
 // 室内側だけが見つかる。どちらにも部屋が無ければ null。
-function openingAdjacentFloorTopY(it){
+// 両側は**載っている壁の向き**で決める(getOpeningWallInfo)。建具の回転の値で決めて
+// いたときは、回転 0 のまま南北の壁に付けた玄関ドアで、壁に沿った方向(=両側では
+// ない)を探してどの部屋にも当たらず、階の床へ戻った。玄関の床を下げてもドアが
+// 下がらず、土間から150mm浮いた(利用者の報告)。壁が見つからない開口だけ、
+// 従来どおり回転の値で探す。
+// ignoreSkip: 載せる床を「階の床」にした開口。段差(スキップフロア)は見ない。
+// 開口の両側の点(壁の外まで確実に出る距離)。
+function openingSidePoints(it){
   var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
+  var step=Math.max(((it.d||0)/2)+200,260);
+  var info=(typeof getOpeningWallInfo==='function')?getOpeningWallInfo(it):null;
+  if(info&&info.wall){
+    var w=info.wall, wdx=w.x2-w.x1, wdy=w.y2-w.y1, wl=Math.hypot(wdx,wdy)||1;
+    var nx=-wdy/wl, ny=wdx/wl;
+    step=Math.max(((w.thick||120)/2)+200,260);
+    return [[info.x+nx*step,info.y+ny*step],[info.x-nx*step,info.y-ny*step]];
+  }
   var along=Math.round(Number(it.rot)||0)%180;   // 0=X方向に開く / 90=Y方向
-  var step=Math.max(((it.d||0)/2)+200,260);      // 壁の外まで確実に出る距離
-  var pts=(along===0)?[[cx,cy-step],[cx,cy+step]]:[[cx-step,cy],[cx+step,cy]];
+  return (along===0)?[[cx,cy-step],[cx,cy+step]]:[[cx-step,cy],[cx+step,cy]];
+}
+// 開口(ドア・窓)が面している部屋(両側。重なっている部屋も含める)。
+// 「載せる床」の選択肢に並べる。
+function openingAdjacentRooms(it){
+  var out=[];
+  openingSidePoints(it).forEach(function(p){
+    roomsAtPointOnFloor(it.floor,p[0],p[1]).forEach(function(r){
+      if(r&&!r.hidden3D&&out.indexOf(r)<0) out.push(r);
+    });
+  });
+  return out;
+}
+// 選択肢の呼び名。その階の床からの上下を添える(「玄関（床 −150）」)。
+function openingFloorLabel(r,floor){
+  var name=(r.n&&String(r.n).trim())||'部屋';
+  var mm=Math.round((roomFloorTopY(r)-floorTopY(floor||r.floor||1))/U);
+  return name+'（床 '+(mm>0?'＋'+mm:(mm<0?'−'+(-mm):'±0'))+'）';
+}
+function openingAdjacentFloorTopY(it,ignoreSkip){
+  var pts=openingSidePoints(it);
   var best=null,i,room,y;
   for(i=0;i<pts.length;i++){
-    room=roomAtPointOnFloor(it.floor,pts[i][0],pts[i][1]);
+    room=ignoreSkip?floorRoomIgnoringSkip(it.floor,pts[i][0],pts[i][1]):roomAtPointOnFloor(it.floor,pts[i][0],pts[i][1]);
     if(!room) continue;
     y=roomFloorTopY(room);
     if(best===null||y>best) best=y;
@@ -1349,7 +1424,14 @@ function item3DBaseY(it){
     if(it.baseLevel==='floor'){
       var fcx=(it.x||0)+(it.w||0)/2, fcy=(it.y||0)+(it.d||0)/2;
       var fr0=floorRoomIgnoringSkip(it.floor,fcx,fcy);
-      return fr0 ? roomFloorTopY(fr0) : roomStoreyFloorAt(it.floor,fcx,fcy);
+      if(fr0) return roomFloorTopY(fr0);
+      // 壁の開口は中心が壁の中にあって部屋に入らないことが多い。そのときは階の
+      // 基準の床へ戻さず、壁の両側の部屋の床を見る(下げた玄関の床のドアが浮いた)。
+      if(isWallOpeningItem(it)){
+        var fside=openingAdjacentFloorTopY(it,true);
+        if(fside!==null) return fside;
+      }
+      return roomStoreyFloorAt(it.floor,fcx,fcy);
     }
   }
   // **壁の開口は、地面に置く物ではない。** 中心が壁の中に来るので、基礎の

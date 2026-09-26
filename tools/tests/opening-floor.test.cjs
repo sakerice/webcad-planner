@@ -55,6 +55,7 @@ function world() {
     isDoorLikeOpeningType: (t) => t === 'door-swing',
   };
   scope.isWallOpeningItem = fn('isWallOpeningItem', scope);
+  scope.openingSidePoints = fn('openingSidePoints', scope);
   scope.openingAdjacentFloorTopY = fn('openingAdjacentFloorTopY', scope);
   return { scope, base: fn('item3DBaseY', scope) };
 }
@@ -126,4 +127,32 @@ test('凍結した間取りの1階の開口は、すべて面している部屋�
     }
     assert.deepEqual(orphans, [], `${name}: どの部屋にも面していない開口がある`);
   }
+});
+
+// 玄関の床を下げた家で、玄関ドアが土間から150mm浮いた(利用者の報告)。
+// ドアは南北に走る壁に付いているのに回転は 0 のままで、両側の部屋を建具の回転の
+// 向き(=壁に沿った向き)に探してどこにも当たらず、階の床へ戻っていた。
+// 両側は、ドアが載っている壁の向きで探す。
+test('回転0のまま南北の壁に付けた玄関ドアは、下げた玄関の床に載る', () => {
+  const genkan = { id: 'g', floor: 1, x: 5005, y: 1365, w: 1365, d: 1430, n: '玄関' };   // 東の縁 x=6370
+  const wall = { floor: 1, x1: 6370, y1: 0, x2: 6370, y2: 2730, thick: 120 };
+  const scope = {
+    itemIsUnderPlatform: () => false, baseRoomOf: () => null, stairGroupIsLevel: () => false,
+    isGroundLevelItemType: () => false, isContextExteriorItemType: () => false, isFloorAwareGroundItemType: () => false,
+    groundYForItem: () => 0, itemOnFoundation: () => true,
+    roomFloorTopY: (r) => (r === genkan ? 0.48 : 0.78),                 // 玄関 −150
+    roomAtPointOnFloor: (f, x, y) => (x >= genkan.x && x <= genkan.x + genkan.w && y >= genkan.y && y <= genkan.y + genkan.d) ? genkan : null,
+    floorRoomIgnoringSkip: (f, x, y) => scope.roomAtPointOnFloor(f, x, y),
+    roomStoreyFloorAt: () => 0.63, roomFloorAt: () => 0.63,            // 階の床(ここへ戻ると浮く)
+    isDoorLikeOpeningType: (t) => t === 'door-front',
+    getOpeningWallInfo: (it) => ({ wall, x: 6370, y: it.y + it.d / 2 }),
+  };
+  scope.isWallOpeningItem = fn('isWallOpeningItem', scope);
+  scope.openingSidePoints = fn('openingSidePoints', scope);
+  scope.openingAdjacentFloorTopY = fn('openingAdjacentFloorTopY', scope);
+  const base = fn('item3DBaseY', scope);
+  // 中心が玄関の縁から壁の中へ 20mm 入ったドア(回転 0、幅は x 方向に 910)
+  const door = { type: 'door-front', floor: 1, x: 5935, y: 1947.5, w: 910, d: 200, rot: 0 };
+  assert.equal(base(door), 0.48, '自動: 階の床へ戻って浮いている');
+  assert.equal(base(Object.assign({ baseLevel: 'floor' }, door)), 0.48, '載せる床=階の床: 階の床へ戻って浮いている');
 });
