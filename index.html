@@ -10470,15 +10470,16 @@ function getConnectedStairParts(seed){
     // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
     return o.floor===seed.floor && isStairPartType(o.type);
   });
-  var seedLevel=isLevelStairPart(seed);
-  if(isStairLandingType(seed.type)){
-    var firstRun=parts.filter(function(o){
-      return o!==seed && !isStairLandingType(o.type) && stairPartsTouch(seed,o);
-    })[0];
-    seedLevel=!!firstRun && isLevelStairPart(firstRun);
-  }
+  // 踊り場は1つのグループにだけ属する。段差へ上る階段(レベル)に(踊り場を介して
+  // でも)接していればそちら、そうでなければ上の階へ上がる階段の側。
+  // 以前は踊り場を両方のグループに入れ、高さは「最初に見つかった段」の側で
+  // 決めていた。段差へ上って踊り場に着き、そこから上の階へ上がる階段を出すと、
+  // 踊り場の高さがデータの並び順で変わり、スキップフロアとの接続が壊れた
+  // (利用者の報告)。上の階へ上がる階段は、踊り場を足元として始まる(stairFootY)。
+  var seedLevel=isStairLandingType(seed.type)?stairLandingIsLevel(seed,parts):isLevelStairPart(seed);
   var all=parts.filter(function(o){
-    if(o===seed || isStairLandingType(o.type)) return true;
+    if(o===seed) return true;
+    if(isStairLandingType(o.type)) return stairLandingIsLevel(o,parts)===seedLevel;
     return isLevelStairPart(o)===seedLevel;
   });
   var group=[], queue=[seed], seen={};
@@ -10494,6 +10495,22 @@ function getConnectedStairParts(seed){
     });
   }
   return group;
+}
+// 踊り場(と、それに接する踊り場のつながり)が、段差へ上る階段に接しているか。
+function stairLandingIsLevel(landing,parts){
+  var list=parts||DATA.items.filter(function(o){ return o.floor===landing.floor&&isStairPartType(o.type); });
+  var seen={}, queue=[landing];
+  seen[landing.id]=true;
+  while(queue.length){
+    var cur=queue.shift();
+    for(var i=0;i<list.length;i++){
+      var o=list[i];
+      if(o===cur||!stairPartsTouch(cur,o)) continue;
+      if(!isStairLandingType(o.type)){ if(isLevelStairPart(o)) return true; continue; }
+      if(!seen[o.id]){ seen[o.id]=true; queue.push(o); }
+    }
+  }
+  return false;
 }
 // ── 同じ階の中の段差を上る階段 (スキップフロア) ──────────────────────────
 // 階段は既定では「上の階へ上がるもの」である。スキップフロアでは、同じ階の中の
@@ -10532,9 +10549,77 @@ function stairPartEndMm(it,dir,outMm){
 // 階段グループを、下から上への順に並べる。並び順は stairOrder、無ければ
 // 走行軸方向の位置。**どのパーツを種にしても同じ並びになる**ことが要る --
 // 上り高さはグループの性質で、種にしたパーツで変わってはいけない。
+// 部材の入口(下)と出口(上)の少し先の点(平面mm)。踊り場は向きを持たないので null。
+// 直階段は奥行きの -端 → +端(stairPartEndMm と同じ規約)。コーナー階段(廻り段)は、
+// ローカル +奥行きの辺から入って +幅の辺へ抜ける(stairLocalProgress・build3DWinderCorner
+// と同じ規約)。
+function stairPartPortsMm(it,outMm){
+  if(!it||isStairLandingType(it.type)) return null;
+  var out=(outMm===undefined)?60:outMm;
+  if(it.type!=='stair-corner') return {down:stairPartEndMm(it,-1,out), up:stairPartEndMm(it,1,out)};
+  var r=(Number(it.rot)||0)*Math.PI/180, cos=Math.cos(r), sin=Math.sin(r);
+  var cx=(Number(it.x)||0)+(Number(it.w)||0)/2, cy=(Number(it.y)||0)+(Number(it.d)||0)/2;
+  function w(lx,ly){
+    if(it.flipX) lx=-lx;
+    if(it.flipY) ly=-ly;
+    return {x:cx+lx*cos-ly*sin, y:cy+lx*sin+ly*cos};
+  }
+  return {down:w(0,(Number(it.d)||0)/2+out), up:w((Number(it.w)||0)/2+out,0)};
+}
+function stairPointOnPart(o,pt,marginMm){
+  var b=stairBounds2D(o), m=(marginMm===undefined)?20:marginMm;
+  return pt.x>=b.l-m&&pt.x<=b.r+m&&pt.y>=b.t-m&&pt.y<=b.b+m;
+}
+// 部材のつながりをたどって、下から上へ並べる。直階段は下端で前の部材に、上端で
+// 次の部材に接する。コーナー階段は入口・出口の辺で接する。踊り場はその間に入る。
+// 1本の道にならない(枝分かれ・向きの食い違い)ときは null を返し、呼び出し側は
+// 従来の位置の並びへ戻る。
+function stairGroupChainOrder(group){
+  var n=group.length, pred={}, succ={}, i, j, p, ports, q;
+  function link(a,b){
+    if(!a||!b||a===b) return true;
+    if((succ[a.id]&&succ[a.id]!==b)||(pred[b.id]&&pred[b.id]!==a)) return false;
+    succ[a.id]=b; pred[b.id]=a; return true;
+  }
+  function partAt(pt,self){
+    var hit=null;
+    for(var k=0;k<n;k++){ if(group[k]!==self&&stairPointOnPart(group[k],pt)){ if(hit) return null; hit=group[k]; } }
+    return hit;
+  }
+  for(i=0;i<n;i++){
+    p=group[i]; ports=stairPartPortsMm(p);
+    if(!ports) continue;
+    q=partAt(ports.down,p); if(q&&!link(q,p)) return null;
+    q=partAt(ports.up,p); if(q&&!link(p,q)) return null;
+  }
+  // 踊り場どうしが直接つながるところ(段を挟まない L 字の広い踊り場など)。
+  for(i=0;i<n;i++){
+    p=group[i];
+    if(!isStairLandingType(p.type)) continue;
+    for(j=0;j<n;j++){
+      q=group[j];
+      if(q===p||!isStairLandingType(q.type)||!stairPartsTouch(p,q)) continue;
+      if(pred[p.id]&&!succ[p.id]&&!pred[q.id]&&!link(p,q)) return null;
+    }
+  }
+  var starts=group.filter(function(o){ return !pred[o.id]; });
+  if(starts.length!==1) return null;
+  var order=[], seen={}, cur=starts[0];
+  while(cur&&!seen[cur.id]){ seen[cur.id]=true; order.push(cur); cur=succ[cur.id]; }
+  return order.length===n?order:null;
+}
 function stairGroupOrdered(seed){
   var group=getConnectedStairParts(seed);
   if(group.length<=1) return group;
+  // 高さ順を利用者が指定していなければ、部材のつながりで並べる。位置の並び
+  // (外接矩形の長い方の軸)は、L字・U字に曲がる階段では歩く順と合わず、踊り場や
+  // コーナー階段の高さが入れ替わった(利用者の報告: 踊り場を使うとスキップフロアとの
+  // 接続が壊れる)。しかも種にした部材によって並びが変わっていた。
+  var hasOrder=group.some(function(o){ return o.stairOrder!==undefined&&isFinite(o.stairOrder); });
+  if(!hasOrder){
+    var chain=stairGroupChainOrder(group);
+    if(chain) return chain;
+  }
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   group.forEach(function(o){
     minX=Math.min(minX,o.x); maxX=Math.max(maxX,o.x+o.w);
@@ -10561,14 +10646,30 @@ function stairGroupOrdered(seed){
 // 端は **いちばん下のパーツの下端** と **いちばん上のパーツの上端** から採る。
 // グループの外接矩形と種の向きで出していた頃は、折り返し階段のように
 // 途中で向きが変わる形で、種にしたパーツによって上り高さが変わっていた。
+// 入口・出口は部材の向きから採る(コーナー階段は入口の辺・出口の辺)。踊り場で
+// 始まる・終わるときは、ほかの部材に接していない辺のうち、下端は床の低い側、
+// 上端は床の高い側(スキップフロアへ着く辺)を採る。
 function stairRunEndsMm(seed,outMm){
   var group=stairGroupOrdered(seed);
   var first=group[0]||seed, last=group[group.length-1]||seed;
-  return {
-    group:group,
-    down:stairPartEndMm(first,-1,outMm),
-    up:stairPartEndMm(last,1,outMm)
-  };
+  var out=(outMm===undefined)?300:outMm;
+  function endOf(part,dir){
+    var ports=stairPartPortsMm(part,out);
+    if(ports) return dir<0?ports.down:ports.up;
+    var r=(Number(part.rot)||0)*Math.PI/180, cos=Math.cos(r), sin=Math.sin(r);
+    var cx=(Number(part.x)||0)+(Number(part.w)||0)/2, cy=(Number(part.y)||0)+(Number(part.d)||0)/2;
+    var hw=(Number(part.w)||0)/2+out, hd=(Number(part.d)||0)/2+out;
+    var sides=[[0,hd],[0,-hd],[hw,0],[-hw,0]].map(function(l){ return {x:cx+l[0]*cos-l[1]*sin, y:cy+l[0]*sin+l[1]*cos}; });
+    var free=sides.filter(function(pt){ return !group.some(function(o){ return o!==part&&stairPointOnPart(o,pt,0); }); });
+    if(!free.length) return stairPartEndMm(part,dir,out);
+    var fl=part.floor||1, best=null, bestY=null;
+    free.forEach(function(pt){
+      var y=roomFloorAt(fl,pt.x,pt.y);
+      if(bestY===null||(dir<0?y<bestY:y>bestY)){ bestY=y; best=pt; }
+    });
+    return best;
+  }
+  return {group:group, down:endOf(first,-1), up:endOf(last,1)};
 }
 // 上の階へ上がる階段の足元と天端(ワールドm)。
 //
@@ -10621,11 +10722,22 @@ function stairFootY(seed,ends){
   var fl=(seed&&seed.floor)||1;
   var explicitY=stairExplicitFootY(fl,stairGroupBase(ends.group),ends.down,ends.group);
   if(explicitY!==null) return explicitY;
+  // 下端の先が、別のグループ(段差へ上る階段)の踊り場の上なら、その踊り場から始まる。
+  var land=DATA.items.filter(function(o){
+    return o.floor===fl&&isStairLandingType(o.type)&&ends.group.indexOf(o)<0&&stairPointOnPart(o,ends.down,0);
+  })[0];
+  if(land) return stairLandingTopY(land);
   var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
   if(r) return roomFloorTopY(r);
   return Math.min.apply(null,ends.group.map(function(o){
     return roomFloorAt(fl,(o.x||0)+(o.w||0)/2,(o.y||0)+(o.d||0)/2);
   }));
+}
+// 踊り場の天端(ワールドm)。踊り場は段を持たないので、グループの足元に、
+// 手前の段が上りきった分を足した高さ。
+function stairLandingTopY(landing){
+  var span=stairGroupIsLevel(landing)?stairLevelSpanM(landing):stairUpperSpanM(landing);
+  return span.baseY+stairRiseInfo(landing).base;
 }
 function stairUpperSpanM(seed){
   var fl=(seed&&seed.floor)||1, nf=fl+1;
@@ -15836,7 +15948,10 @@ function walkStairSampleAt(xMm,zMm,floor,marginMm){
     var it=DATA.items[i];
     if(it.floor!==floor || !isStairPartType(it.type)) continue;
     // レベル階段は階をまたがない。上下階の遷移を扱うこの経路には入れない。
-    if(isLevelStairPart(it)) continue;
+    // 段差へ上る階段(踊り場を含むグループ全体)は、上の階への経路に入れない。
+    // 部材の宣言(isLevelStairPart)だけで見ると、宣言を持たない踊り場が上の階への
+    // 階段として数えられ、段差の上の踊り場に乗った瞬間に上の階へ移ってしまった。
+    if(stairGroupIsLevel(it)) continue;
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
     if(t===null) continue;
     var sri=stairRiseInfo(it);
@@ -15857,7 +15972,8 @@ function walkLevelStairGroundAt(xMm,zMm,floor,marginMm){
   var best=null, top=floorTopY(floor);
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor || !isLevelStairPart(it)) continue;
+    // 踊り場も、段差へ上る階段のグループに属していればここで足元を持つ。
+    if(it.floor!==floor || !isStairPartType(it.type) || !stairGroupIsLevel(it)) continue;
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
     if(t===null) continue;
     var span=stairLevelSpanM(it);
