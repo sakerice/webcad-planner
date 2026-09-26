@@ -57,7 +57,7 @@ function ctxFor(walls) {
   function Plane(w, h) { Geo.call(this); this.kind = 'plane'; this.w = w; this.h = h;
     this.setAttribute('uv', new Attr([0, 0, 1, 0, 0, 1, 1, 1], 2)); }
   Plane.prototype = Object.create(Geo.prototype);
-  function Box(w, h, d) { Geo.call(this); this.kind = 'box'; this.depth = d; }
+  function Box(w, h, d) { Geo.call(this); this.kind = 'box'; this.w = w; this.h = h; this.depth = d; }
   Box.prototype = Object.create(Geo.prototype);
   function Mesh(g, m) {
     this.isMesh = true; this.geometry = g; this.material = m; this.userData = {};
@@ -105,7 +105,7 @@ function ctxFor(walls) {
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('WALL_CORE_END_PAD_MM'), topLevelVar('INTERIOR_WALL_DEFAULT'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'), topLevelVar('ROOM_OVERLAP_WALL_TOL_MM'),
     topLevelVar('_roofCeilingExtentCache'),
-    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'),
+    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'), topLevelVar('STEP_JUMP_MIN_M'), topLevelVar('STEP_JUMP_RATIO', 'STEP_GRID_MAX_LINES'),
     topLevelVar('WALL_FACE_JITTER_M')
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
@@ -119,10 +119,10 @@ function ctxFor(walls) {
   'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
-    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM',
+    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM', 'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
     'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
-    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'
+    'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'
 
   ].map(topLevelFunction)).join('\n'), ctx);
   return ctx;
@@ -186,4 +186,40 @@ test('12-3: 壁ごとのジッタは残っている（重なった壁同士のZ�
     seen.add(Math.round(gapsOf(ctxFor([w]), w).ext * 1e6));
   }
   assert.equal(seen.size, 7, '壁ごとに面の位置がずれていない(白い破線が戻る): ' + seen.size);
+});
+
+// 戸口の下に残す壁は、ドアの敷居の高さまで。以前は床の厚み(180mm)で固定していて、
+// 玄関の床を150mm下げてドアも下がっても、戸口に元の床の高さの壁が段として残り、
+// 下げた土間から見てドアが浮いた(利用者の指摘)。
+function doorStubHeightM(sillAboveFootM) {
+  const w = wallAt(0);
+  const ctx = ctxFor([w]);
+  const door = { id: 'd1', type: 'door-front', floor: 1, x: -60, y: 1545, w: 910, d: 120 };
+  ctx.DATA.items = [door];
+  vm.runInContext('var __foot = wallBaseSupportY(DATA.walls[0]) + wallFootOffsetMm(DATA.walls[0]) * U;', ctx);
+  ctx.isOpeningItemType = () => true;
+  ctx.getOpeningWallInfo = () => ({ wall: w, t: 0.5 });
+  ctx.item3DBaseY = () => ctx.__foot + sillAboveFootM;
+  ctx.__built.length = 0;
+  vm.runInContext('buildWall3D(DATA.walls[0]);', ctx);
+  let stub = null;
+  (function walk(o) {
+    if (o.children) { o.children.forEach(walk); return; }
+    if (!o.isMesh || o.geometry.kind !== 'box' || (o.userData && o.userData.skirting)) return;
+    const bottom = o.position.y - o.geometry.h / 2;
+    // 戸口の区間(壁の中ほど)にあって、壁の足元から立つ低い箱
+    if (Math.abs(bottom - ctx.__foot) < 1e-6 && o.geometry.h < 1 && Math.abs(o.position.z - 2.0) < 0.1) stub = o.geometry.h;
+  })({ children: ctx.__built });
+  return stub;
+}
+
+test('戸口の下の壁は、ドアの敷居の高さまで(玄関の床を下げたドアでも段が残らない)', () => {
+  // 標準の床(床の厚み180mm)では従来どおり
+  assert.ok(Math.abs(doorStubHeightM(0.18) - 0.18) < 1e-6);
+  // 玄関の床を150mm下げた: 敷居は足元から30mm
+  assert.ok(Math.abs(doorStubHeightM(0.03) - 0.03) < 1e-6, '下げた玄関のドアの下に床の厚みぶんの壁が残る');
+  // 下限(残り20mm)まで下げても、敷居の下に隙間を抜かない
+  assert.ok(Math.abs(doorStubHeightM(0.02) - 0.02) < 1e-6, '20mm の壁が捨てられて敷居の下が抜ける');
+  // 床を上げた部屋のドアは、その敷居まで埋める
+  assert.ok(Math.abs(doorStubHeightM(0.33) - 0.33) < 1e-6);
 });

@@ -468,7 +468,7 @@ function ceilingBuilder(data) {
   ].concat(HEIGHT_FNS.map(topLevelFunction)).concat([
     topLevelFunction('ceilingSlopeUnit'),
     topLevelFunction('ceilingSlopeSpan'),
-    topLevelFunction('buildSlopedCeilingGeometry'),
+    topLevelFunction('buildSlopedCeilingGeometry'), topLevelFunction('buildSteppedCeilingGrid'), topLevelFunction('stepAwareSamples'), topLevelVar('STEP_JUMP_MIN_M'), topLevelVar('STEP_JUMP_RATIO', 'STEP_GRID_MAX_LINES'),
     topLevelFunction('buildRoomCeilingShapeGeometry'),
     topLevelFunction('makeAutoLightFixtureMesh'),
     topLevelFunction('buildRoomCeilingMesh')

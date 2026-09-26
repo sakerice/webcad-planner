@@ -53,7 +53,7 @@ function ctxWith(walls) {
      topLevelFunction('isPositiveNumber'),
      topLevelFunction('wallSolidCoverHeightMm'),
      topLevelFunction('wallCoreBoxHitMm'),
-     topLevelFunction('wallEndCornerExtensionMm')].join('\n'), ctx);
+     topLevelFunction('wallEndCornerExtensionMm'), topLevelFunction('wallJoinsAtCorner')].join('\n'), ctx);
   return ctx;
 }
 function ext(ctx, w, atEnd) {

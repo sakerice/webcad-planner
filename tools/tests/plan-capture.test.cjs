@@ -538,7 +538,8 @@ function runDraw2d(capture) {
     topLevelVar('PLAN_CAPTURE'),
     topLevelFunction('planCaptureShows'),
     topLevelFunction('planCaptureDefaults'),
-    topLevelFunction('draw2d')
+    topLevelFunction('draw2d'),
+    topLevelFunction('draw2dScene')
   ], {
     DATA: data,
     ST: { floor: 2, zoom: 20, panX: 0, panY: 0, showGrid: true, showDim: true,
