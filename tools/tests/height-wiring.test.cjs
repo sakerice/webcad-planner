@@ -356,7 +356,7 @@ function ceilingYsFor(data, floor) {
     topLevelVar('CEILING_TEXTURE_TILE_M')
   ].concat(HEIGHT_FNS.map(topLevelFunction))
    .concat(['appearanceWithTextureOrientation', 'resolveRoomCeilingAppearance',
-            'makeRoomCeilingMaterial', 'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
+            'makeRoomCeilingMaterial', 'roomFloorOffsetMm', 'roomFloorTopY', 'roomStoreyFloorTopY', 'autoRoomLightsEnabled', 'buildRooms3D'].map(topLevelFunction)).join('\n'), ctx);
   ctx.buildRooms3D(floor);
   return { got: got, U: ctx.U, floorBaseY: ctx.floorBaseY };
 }

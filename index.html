@@ -3442,8 +3442,12 @@ input[type="reset"]:focus-visible{
         <label for="sky-cloud">雲の量 <output id="sky-cloud-val">45%</output></label>
         <input id="sky-cloud" type="range" min="0" max="1" step="0.01" value="0.45" oninput="updateAtmosphere('cloud',this.value)" onchange="flushSunHour()">
       </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:10px;color:#cce;font-weight:bold;margin-top:6px"><input id="auto-room-lights" type="checkbox" checked onchange="setAutoRoomLights(this.checked)"> 照明を置いていない部屋を自動で照らす</label>
+      <div id="auto-room-lights-note" style="font-size:9px;color:#7a8fb0;margin:2px 0 4px">照明を置いた部屋は、置いた照明だけで照らします。切ると、照明を置いていない部屋は暗くなります（プランに保存）。</div>
+      <div id="light-room-row">
       <div style="font-size:10px;color:#7a8fb0">部屋ライト <span id="light-room-val">0.25</span></div>
       <input id="light-room" type="range" min="0" max="1.2" step="0.05" value="0.25" style="width:100%" oninput="updateLightSetting('room',+this.value)">
+      </div>
       <div style="font-size:10px;color:#7a8fb0">環境光 <span id="light-ambient-val">0.16</span></div>
       <input id="light-ambient" type="range" min="0" max="1.2" step="0.05" value="0.16" style="width:100%" oninput="updateLightSetting('ambient',+this.value)">
       <div style="font-size:10px;color:#7a8fb0">太陽光 <span id="light-sun-val">0.78</span></div>
@@ -7208,7 +7212,26 @@ function hideWallPanel(){
 function getLightPreset(key){
   return LIGHT_PRESETS[key]||LIGHT_PRESETS.day;
 }
+// 照明を置いていない部屋の自動照明(buildRooms3D の自動ルームライト)。既定は点ける。
+// 切った指定だけをプランに書く(DATA.autoRoomLights=false)。書かれていないプランは
+// 従来どおり点く。部屋ライトの強さ(LIGHT_SETTINGS.room)は0にしても器具の円盤と
+// 光源の物体が残るので、それとは別に「作らない」スイッチを持つ(利用者の要望)。
+function autoRoomLightsEnabled(){
+  return !(typeof DATA!=='undefined'&&DATA&&DATA.autoRoomLights===false);
+}
+function setAutoRoomLights(on){
+  if(typeof DATA==='undefined'||!DATA) return;
+  if(on) delete DATA.autoRoomLights; else DATA.autoRoomLights=false;
+  if(typeof markDirty==='function') markDirty();
+  syncLightPanelUi();
+  if(ren) rebuild3D();
+}
 function syncLightPanelUi(){
+  var autoOn=autoRoomLightsEnabled();
+  var autoBox=document.getElementById('auto-room-lights');
+  if(autoBox) autoBox.checked=autoOn;
+  var roomRow=document.getElementById('light-room-row');
+  if(roomRow){ roomRow.style.opacity=autoOn?'1':'0.45'; roomRow.style.pointerEvents=autoOn?'':'none'; }
   var key=LIGHT_SETTINGS.timeOfDay||'day';
   var preset=getLightPreset(key);
   var modeLabel=document.getElementById('light-mode-label');
@@ -15644,7 +15667,7 @@ function buildRooms3D(flFilt){
 	      var lcx=li.x+li.w/2, lcy=li.y+li.d/2;
 	      return lcx>=r.x-200 && lcx<=r.x+r.w+200 && lcy>=r.y-200 && lcy<=r.y+r.d+200;
 	    });
-	    if(!roomHasUserLight){
+	    if(!roomHasUserLight && autoRoomLightsEnabled()){
 	      var autoDim=isIndoorView?1/(1+0.35*(userLightsByFloor[r.floor]||0)):1;
 	      var nx2=Math.max(1,Math.round(rw/lightPitch)), nz2=Math.max(1,Math.round(rd/lightPitch));
 	      // 勾配天井の部屋では、ライトごとに**その位置の**天井の高さに付ける。
