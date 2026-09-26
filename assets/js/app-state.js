@@ -79,7 +79,12 @@ function ceilingFinishElevationMm(floor,cx,cy){
   var r=(isFinite(cx)&&isFinite(cy))?roomAtPointOnFloor(fl,cx,cy):null;
   // 天井範囲(下げ天井・折り上げ天井)の段差は、**その場所に付く器具だけ**が追う。
   // 部屋そのものの天井高(roomCeilingElevationMm)には入れない。
-  if(r) return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+  if(r){
+    // 勾配天井の部屋の天井範囲は、範囲の中の実際の天井面から測る(部屋の天井高とは違う)。
+    var ae=(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.areaFinishElevationMm)?CeilingDesigner.areaFinishElevationMm(r,cx,cy):null;
+    if(ae!==null&&ae!==undefined) return ae;
+    return roomCeilingElevationMm(r)+(typeof CeilingDesigner!=='undefined'?CeilingDesigner.offsetAt(r,cx,cy):0);
+  }
   return Math.round((wallFullHeightM(fl)-floorSlabHeightMForFloor(fl)-ceilingFinishThicknessM())/U);
 }
 // 天井付けの器具(照明・物干し)を、天井の動きに追従させる。

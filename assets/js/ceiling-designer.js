@@ -3,9 +3,36 @@
 'use strict';
 function areas(r){return ((r.ceilingAreas||[]).concat(DATA.items.filter(it=>it.type==='ceiling-area'&&roomFor(it)===r).map(it=>({...it,x:it.x-r.x,y:it.y-r.y})))).map(a=>{const x=Math.max(0,Number(a.x)||0),y=Math.max(0,Number(a.y)||0);return {...a,x,y,w:Math.min(Number(a.w)||0,r.w-x),d:Math.min(Number(a.d)||0,r.d-y),offset:Math.max(-800,Math.min(800,Number(a.offset)||0))};}).filter(a=>a.w>0&&a.d>0&&a.offset);}
 function offsetAt(r,x,y){const a=areas(r).find(a=>x>=r.x+a.x&&x<=r.x+a.x+a.w&&y>=r.y+a.y&&y<=r.y+a.y+a.d);return a?a.offset:0;}
+// 天井範囲の段差の基準になる天井面(ワールドm)。平天井の部屋は部屋の天井高。
+// 勾配天井の部屋では、範囲の中の実際の天井面(範囲は天井が平らな所にしか置けない)。
+// 勾配天井の部屋でも、陸屋根の下などで天井が平らな所には置けるようにした
+// (利用者の選択)。そこは部屋の天井高(いちばん高い所)とは違う高さにある。
+function areaBaseY(r,a){
+ const p=roomCeilingProfile(r);
+ if(!p)return floorBaseY(r.floor)+roomCeilingHeightM(r);
+ return roomCeilingWorldYAtMm(r,p,r.x+a.x+a.w/2,r.y+a.y+a.d/2);
+}
+// 範囲(平面の絶対座標の矩形)の中で、天井が平らか(高低差2mm以内)。
+function ceilingFlatOver(r,rect){
+ const p=roomCeilingProfile(r);if(!p)return true;
+ let lo=Infinity,hi=-Infinity;
+ for(let i=0;i<=6;i++)for(let j=0;j<=6;j++){
+  const x=rect.x+1+(rect.w-2)*i/6,y=rect.y+1+(rect.d-2)*j/6,v=roomCeilingWorldYAtMm(r,p,x,y);
+  if(v<lo)lo=v;if(v>hi)hi=v;
+ }
+ return hi-lo<=0.002;
+}
+// その点が天井範囲の中なら、器具の取付面の高さ(mm、仕上げ床から)。勾配天井の部屋
+// だけ(平天井の部屋は従来の式が同じ値を出す)。範囲の外なら null。
+function areaFinishElevationMm(r,x,y){
+ if(!r||!roomCeilingProfile(r))return null;
+ const a=areas(r).find(a=>x>=r.x+a.x&&x<=r.x+a.x+a.w&&y>=r.y+a.y&&y<=r.y+a.y+a.d);
+ if(!a)return null;
+ return Math.round((areaBaseY(r,a)-roomFloorTopY(r)-ceilingFinishThicknessM())/U)+a.offset;
+}
 function fixtures(){return DATA.items.filter(it=>it.floor===ST.floor&&(isLightItemType(it.type)||(typeof CEILING_FIXTURE_TOP_MM!=='undefined'&&CEILING_FIXTURE_TOP_MM[it.type]!==undefined)));}
 function ceilingGroup(r,ceilY,mat,holes,profile){
- if(profile||!areas(r).length)return buildRoomCeilingMesh(r,ceilY,mat,holes,profile);
+ if(!areas(r).length)return buildRoomCeilingMesh(r,ceilY,mat,holes,profile);
  const inset=typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:.012;
  // 天井範囲の見えがかり。テクスチャを設定したらそれを貼り、無ければ色で塗る
  // (部屋の天井仕上げと同じ決まり: 画像が優先)。タイルの大きさも部屋の天井と
@@ -24,15 +51,23 @@ function ceilingGroup(r,ceilY,mat,holes,profile){
  };
  const group=new THREE.Group();group.userData={b:true,ceiling:true,roomId:r.id};const aa=areas(r);const all=(holes||[]).slice();
  aa.forEach(a=>all.push([{x:(r.x+a.x)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y+a.d)*U},{x:(r.x+a.x)*U,z:(r.y+a.y+a.d)*U}]));
- const base=buildRoomCeilingMesh(r,ceilY,mat,all,null);if(active())mark3DSelectable(base,r,'room');group.add(base);
+ let base;
+ if(profile){
+  // 勾配天井は格子の面なので、穴の輪郭で作り直さず(形が崩れる)、そのまま建てて
+  // 範囲の矩形だけを切り抜く。
+  base=buildRoomCeilingMesh(r,ceilY,mat,holes,profile);base.updateMatrixWorld(true);
+  aa.forEach(a=>cutMesh(base,new THREE.Box3(new THREE.Vector3((r.x+a.x)*U,-1e3,(r.y+a.y)*U),new THREE.Vector3((r.x+a.x+a.w)*U,1e3,(r.y+a.y+a.d)*U))));
+ } else base=buildRoomCeilingMesh(r,ceilY,mat,all,null);
+ if(active())mark3DSelectable(base,r,'room');group.add(base);
  aa.forEach(a=>{
   const m=faceMaterial(mat,a,a.w*U,a.d*U);
   // 段差の立ち上がり(見付け)は色のまま。面に貼った画像を細い帯へ引き伸ばすと
   // 柄が溶けて、かえって納まりが読めなくなる。
   const fascia=m.map?faceMaterial(mat,{color:a.color},0,0):m;
-  const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=ceilY+a.offset*U-inset;
+  const cy0=profile?areaBaseY(r,a):ceilY;
+  const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=cy0+a.offset*U-inset;
   const face=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);face.rotation.x=Math.PI/2;face.position.set(x,y,z);face.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};const ref=DATA.items.find(it=>it.type==='ceiling-area'&&it.id===a.id);if(ref)mark3DSelectable(face,ref,'item');group.add(face);
-  const h=Math.abs(a.offset)*U,mid=(ceilY-inset+y)/2;
+  const h=Math.abs(a.offset)*U,mid=(cy0-inset+y)/2;
   [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),fascia);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};if(ref)mark3DSelectable(side,ref,'item');group.add(side);});
  });return group;
 }
@@ -45,7 +80,8 @@ function migrate(){
  DATA.rooms.forEach(r=>{if(!r.ceilingAreas?.length)return;r.ceilingAreas.forEach(a=>{if(!DATA.items.some(it=>it.id===a.id&&zone(it)))DATA.items.push({...a,type:'ceiling-area',floor:r.floor,x:r.x+a.x,y:r.y+a.y,rot:0});});delete r.ceilingAreas;});
 }
 function validItem(it){
- const r=roomFor(it);if(!r||roomCeilingProfile(r)||!roomHasCoverAbove(r))return '平天井の部屋内に配置してください。';
+ const r=roomFor(it);if(!r||!roomHasCoverAbove(r))return '天井のある部屋の中に配置してください。';
+ if(roomCeilingProfile(r)&&['x','y','w','d'].every(k=>Number.isFinite(it[k]))&&!ceilingFlatOver(r,it))return '勾配の範囲には置けません。天井が平らな範囲に置いてください。';
  if(isObjectLocked(r))return '部屋がロックされています。';
  if(!['x','y','w','d','offset'].every(k=>Number.isFinite(it[k])))return '寸法を数値で指定してください。';
  if(it.rot)return '天井範囲は部屋に沿った矩形で配置してください。';
@@ -143,7 +179,7 @@ function pickPlacement(e){
 }
 // Determine the remaining material from the very same floor/roof surfaces used to render.
 function raisingLimit(r,it){
- const base=floorBaseY(r.floor)+roomCeilingHeightM(r),rect=it||r;
+ const rect=it||r,base=it?areaBaseY(r,{x:it.x-r.x,y:it.y-r.y,w:it.w,d:it.d}):floorBaseY(r.floor)+roomCeilingHeightM(r);
  let max=Infinity,reason='上階の床厚';
  DATA.rooms.filter(u=>u.floor===r.floor+1&&roomsOverlapInPlan(rect,u)).forEach(u=>{
   const y=roomFloorTopY(u)-.02;if(y<max){max=y;reason='上階の床厚・床下げ';}
@@ -164,7 +200,7 @@ function floorLoweringLimit(r){
  let min=-Math.max(0,floorSlabMmForFloor(r.floor)-20);
  DATA.rooms.filter(b=>b.floor===r.floor-1).forEach(b=>areas(b).filter(a=>a.offset>0).forEach(a=>{
   const rect={x:b.x+a.x,y:b.y+a.y,w:a.w,d:a.d};if(!roomsOverlapInPlan(r,rect))return;
-  const top=floorBaseY(b.floor)+roomCeilingHeightM(b)+a.offset*U;
+  const top=areaBaseY(b,a)+a.offset*U;
   const floor=localSupportTopY(r.floor,r.x,r.y,r.x+r.w,r.y+r.d)+floorSlabHeightMForFloor(r.floor);
   min=Math.max(min,Math.ceil((top+.02-floor)/U-1e-6));
  }));return min;
@@ -187,7 +223,7 @@ function cutMesh(mesh,box){
 }
 function carveRecesses(scene){
  const cuts=[];DATA.rooms.forEach(r=>areas(r).filter(a=>a.offset>0).forEach(a=>{
-  const base=floorBaseY(r.floor)+roomCeilingHeightM(r);
+  const base=areaBaseY(r,a);
   cuts.push({floor:r.floor,box:new THREE.Box3(new THREE.Vector3((r.x+a.x)*U,base-.02,(r.y+a.y)*U),new THREE.Vector3((r.x+a.x+a.w)*U,base+a.offset*U+.001,(r.y+a.y+a.d)*U))});
  }));if(!cuts.length)return;
  scene.updateMatrixWorld(true);
@@ -197,7 +233,7 @@ function carveRecesses(scene){
  });
 }
 // The model and view adapter intentionally have no canvas, renderer or dialog of their own.
-window.CeilingDesigner={active,zone,fixture,visible,areas,offsetAt,ceilingGroup,migrate,isTool,drawClick,drawArea,props,setSurface,validItem,ceilingCamera,pickPlacement,raisingLimit,floorLoweringLimit,carveRecesses};
+window.CeilingDesigner={active,zone,fixture,visible,areas,offsetAt,areaFinishElevationMm,ceilingGroup,migrate,isTool,drawClick,drawArea,props,setSurface,validItem,ceilingCamera,pickPlacement,raisingLimit,floorLoweringLimit,carveRecesses};
 ILABELS['ceiling-area']='天井範囲';
 syncUI();
 })();
