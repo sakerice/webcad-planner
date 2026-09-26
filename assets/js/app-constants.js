@@ -2501,6 +2501,10 @@ function wallRaiseBridgeReachMm(w,xMm,yMm){
 //   ・そこに壁がまだ立っていない(下の階の外壁を屋根まで立ち上げた所など)
 // 区間。高さは L の上面から H の下面まで。
 var ROOF_GAP_SAMPLE_MM=60;
+// 塞ぐ壁の上に、高い方の屋根を縁から外へ伸ばす長さ(mm)。壁の厚み(120)より 20mm
+// 長くし、壁の外面の上に屋根の小口が少し出るようにする。以前は屋根が縁で止まり、
+// 壁の天端と外面が屋根の外にむき出しになっていた(利用者の報告: 屋根の外に壁がある)。
+var ROOF_GAP_CAP_MM=140;
 var ROOF_GAP_MIN_M=0.03;
 function roofSlabThickM(rf){
   return Math.max(30,Math.min(600,Number(rf&&rf.roofThickness)||180))*U;
@@ -2563,7 +2567,15 @@ function roofGapInfillRuns(H){
       });
       if(blocked||bottom===null||top-bottom<ROOF_GAP_MIN_M) return null;
       if(wallStandsAt(px+nx*60,py+ny*60,bottom)) return null;
-      return {x:px,y:py,bottom:bottom,top:top};
+      // 高い方の屋根を、塞ぐ壁の上まで外へ伸ばすための高さ。屋根の面を縁の内側の
+      // 2点から外へまっすぐ延ばす(勾配屋根は勾配のまま、陸屋根は水平)。
+      // 伸ばした先の下面が低い方の屋根の上面を割らないようにする。
+      var jx=px+nx*125, jy=py+ny*125;
+      var topIn=roofSlabTopWorldYAt(H,ix,iy);
+      var slope=roofCoversPlanPoint(H,jx,jy)?(top-roofSlabBottomWorldYAt(H,jx,jy))/120:0;
+      var capBottom=Math.max(bottom+0.005,top+slope*(ROOF_GAP_CAP_MM+5));
+      return {x:px,y:py,bottom:bottom,top:top,capTopIn:topIn,
+        capBottomOut:capBottom,capTopOut:capBottom+(topIn-top)};
     };
     // 刻みの点だけで区間を作ると、端が最大で1刻み(60mm)手前で止まり、細い隙間が
     // 残った(確認済み)。塞ぐ/塞がないが入れ替わる刻みでは、境を二分法で詰める。
