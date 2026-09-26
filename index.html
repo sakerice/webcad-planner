@@ -7355,6 +7355,24 @@ function refreshSkyTexture(skipEnvironment){
   if(typeof invalidate3D==='function') invalidate3D(false);
 }
 
+// 半球光の「下からの色」。外では地面(土・芝)の照り返しなので、プリセットの
+// 土の色(昼は #9c8a6f)を使う。**室内(内観3D・ウォークスルー)では床と壁からの
+// 照り返しになる。** 同じ土の色を当てると、下を向いた天井がいつも黄土色になり、
+// 天井を白に設定しても色がほぼ変わらなかった(利用者の報告。天井の1点を測ると
+// (136,131,122)、下からの色を白にすると (166,164,160))。
+// 昼の室内は、明るい床・白い壁からの照り返しに見合う、ほぼ中立の明るい色。
+// 夕方・夜の室内は、明るさはプリセットのまま色みだけを抜く(夜の室内を明るく
+// しない)。
+var INTERIOR_BOUNCE_DAY_COLOR='#e6e4e0';
+function hemiGroundColorFor(preset,daytimeInterior){
+  var ground=(preset&&preset.hemiGround)||'#777777';
+  var interior=(ST.view==='3d-int'||ST.view==='3d-walk'||isInt);
+  if(!interior) return ground;
+  if(daytimeInterior) return INTERIOR_BOUNCE_DAY_COLOR;
+  var c=new THREE.Color(ground);
+  var l=0.2126*c.r+0.7152*c.g+0.0722*c.b;   // 線形の輝度
+  return c.setRGB(l,l,l);
+}
 function applyLightingToScene(refreshSky){
   var preset=getLightPreset(LIGHT_SETTINGS.timeOfDay);
   var nightMix=LIGHT_SETTINGS.sunSim?solarNightBlend(computeSunPosition(LIGHT_SETTINGS.hour,LIGHT_SETTINGS.season,LIGHT_SETTINGS.northDeg).altitude):0;
@@ -7398,7 +7416,7 @@ function applyLightingToScene(refreshSky){
       } else if(o.name==='HemiLight'){
         o.intensity=LIGHT_SETTINGS.hemi*indirectScale*((ST.view==='3d-int'||isInt)?(daytimeInterior?1.25:0.4):(ST.view==='3d-walk'?(daytimeInterior?1.25:0.5):1));
         if(o.color) o.color.set(preset.hemiSky||'#ffffff');
-        if(o.groundColor) o.groundColor.set(preset.hemiGround||'#777777');
+        if(o.groundColor) o.groundColor.set(hemiGroundColorFor(preset,daytimeInterior));
       } else if(o.userData && o.userData.siteRect && o.material && o.material.envMapIntensity!==undefined){
         var cfg=SITE_SURFACE_OPTIONS[o.userData.siteZoneSurface||siteSurfaceType(o.userData.siteRectRef)]||SITE_SURFACE_OPTIONS.grass;
         o.material.envMapIntensity=Math.min(cfg.env==null?0.05:cfg.env,LIGHT_SETTINGS.env);
