@@ -105,7 +105,7 @@ function ctxFor(walls) {
     topLevelVar('U'), topLevelVar('WALL_H'), topLevelVar('WALL_CORE_END_PAD_MM'), topLevelVar('INTERIOR_WALL_DEFAULT'), topLevelVar('FLOOR_H'), topLevelVar('FLOOR_SLAB_H'),
     topLevelVar('_ceilingClampWarned'), topLevelVar('CEILING_UNDER_ROOF_OFFSET_MM'), topLevelVar('ROOM_OVERLAP_EPS_MM'), topLevelVar('ROOM_OVERLAP_WALL_TOL_MM'),
     topLevelVar('_roofCeilingExtentCache'),
-    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'), topLevelVar('STEP_JUMP_MIN_M'), topLevelVar('STEP_JUMP_RATIO'),
+    topLevelVar('WALL_EXT_FACE_GAP_M'), topLevelVar('WALL_INT_FACE_GAP_M'), topLevelVar('WALL_TOP_SAMPLE_STEP_M'), topLevelVar('STEP_JUMP_MIN_M'), topLevelVar('STEP_JUMP_RATIO', 'STEP_GRID_MAX_LINES'),
     topLevelVar('WALL_FACE_JITTER_M')
   ].concat([
     'foundationHeightMm', 'foundationHeightM', 'storyHeightMmForFloor', 'storyHeightM',
@@ -119,7 +119,7 @@ function ctxFor(walls) {
   'roomCeilingProfile', 'roofsOverRoom', 'roomCeilingWorldYAtMm', 'roofCeilingOffsetMm', 'roomRoofCeilingExtent',
     'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
-    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM',
+    'roomCeilingSlopeM', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM',
     'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM', 'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
     'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
     'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM', 'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'

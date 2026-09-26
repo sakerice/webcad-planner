@@ -8815,21 +8815,40 @@ function wallCoreBoxHitMm(o,px,py){
 // この階まで届いている壁**(勾配屋根の下で屋根まで立ち上げた外壁)も相手にする。
 // 同じ階だけを見ていた頃は、2階の壁の端がその立ち上げた外壁の面で止まり、
 // 端の断面が吹き抜けの中に縦の線として見えた(報告された)。
-function wallJoinsAtCorner(o,w){
+function wallJoinsAtCorner(o,w,px,py){
   if(!o||!w||o===w) return false;
   var fo=o.floor||1, fw=w.floor||1;
   if(fo===fw) return true;
-  if(fo!==fw-1) return false;
+  if(fo!==fw-1||px===undefined) return false;
   // 高さの計算を持たない場面(平面だけを扱う処理や検査)では、同じ階の壁だけを見る。
-  if(typeof wallDisplayHeightM!=='function'||typeof floorBaseY!=='function') return false;
+  if(typeof wallTopWorldYAtPointM!=='function'||typeof floorBaseY!=='function') return false;
+  // 下の階の壁が、その角で**上の階の壁の頭まで**届いているときだけ角をつなぐ。
+  // 届いていない(壁の高さを少し上げただけの1階の壁など)なら、上の階の壁は従来
+  // どおり自分で角を閉じる。途中までしか届かない相手に端を合わせると、その上で
+  // 角が欠けた(レビューで確認: 2階の出隅に 60mm 角の欠け)。
+  // 高さは角の1点だけで見る。壁全体の最高点で見ると、端の一部だけ立ち上がる壁が
+  // どこでもつながってしまい、しかも2Dの描画のたびに全部の壁の上端を作って
+  // 再描画が秒単位で遅くなった。
+  // 壁の高さは接する部屋から決まり、求めるのが軽くない。描画1回ぶんの覚えが
+  // あれば壁ごとに1度だけ求める(2階の壁の端ごとに1階の壁を見直すため)。
   var cache=(typeof _roofBaseCache!=='undefined'&&_roofBaseCache)?_roofBaseCache:null;
-  var key='rise:'+o.id;
-  if(cache&&cache[key]!==undefined) return cache[key];
-  var prof=(typeof wallTopProfileM==='function')?wallTopProfileM(o):null;
-  var maxH=prof?prof.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity):wallDisplayHeightM(o);
-  var rises=floorBaseY(fo)+maxH>floorBaseY(fw)+0.05;
-  if(cache) cache[key]=rises;
-  return rises;
+  var hs=cache?(cache.__wallDispH=cache.__wallDispH||new Map()):null;
+  function dispH(x){
+    if(hs&&hs.has(x)) return hs.get(x);
+    var v=wallDisplayHeightM(x); if(hs) hs.set(x,v); return v;
+  }
+  var wTop=floorBaseY(fw)+dispH(w);
+  // 壁の上端が自分の高さを超えるのは、屋根の下面まで立ち上げるときだけ
+  // (wallTopProfileM の規則)。立ち上げる屋根が無く、自分の高さでも届かない壁は
+  // 上端を求めるまでもなく届かない。ほとんどの壁はここで落ちる。
+  if(floorBaseY(fo)+dispH(o)<wTop-0.05&&
+     !(typeof wallRaiseRoofs==='function'&&wallRaiseRoofs(o).length)) return false;
+  // 図面の書き出しなど、描画1回ぶんの覚え(_roofBaseCache)が無い所から呼ばれた
+  // ときは、この判定のあいだだけ覚える。
+  var own=(typeof _roofBaseCache!=='undefined')&&!_roofBaseCache;
+  if(own) _roofBaseCache={};
+  try{ return wallTopWorldYAtPointM(o,px,py)>=wTop-0.05; }
+  finally{ if(own) _roofBaseCache=null; }
 }
 // info を渡すと、端が相手の壁の面にぴったり止まっている(面合わせの突き当たり)か
 // を info.flush に書く。そのときは突き付けの余り(WALL_CORE_END_PAD_MM)を足さない --
@@ -8849,7 +8868,7 @@ function wallEndCornerExtensionMm(w,atEnd,info){
   // 通常の出隅は相手が1枚なので min でも max でも同じ値になる。
   var need=Infinity;
   DATA.walls.forEach(function(o){
-    if(!wallJoinsAtCorner(o,w) || (o.thick||0)<120) return;
+    if(o===w || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
     if(olen<1) return;
     var sinA=Math.abs(wdx*ody-wdy*odx)/(wlen*olen);
@@ -8868,6 +8887,8 @@ function wallEndCornerExtensionMm(w,atEnd,info){
     var qx=px+ux*sAlong, qy=py+uy*sAlong;
     var tt=((qx-o.x1)*odx+(qy-o.y1)*ody)/(olen*olen);
     if(tt<-0.02||tt>1.02) return;     // 交点が相手の線分の範囲外
+    // 高さを見る判定(階をまたぐ角)は重いので、角を成すと分かった相手にだけ行う。
+    if(!wallJoinsAtCorner(o,w,qx,qy)) return;
     var v=sAlong+toFace;              // 端から相手の外面まで。負や0なら既に閉じている
     if(info&&v<=0.5&&v>=-WALL_CORE_END_PAD_MM) info.flush=true;
     if(v<need) need=v;
@@ -8880,9 +8901,12 @@ function wallEndCornerExtensionMm(w,atEnd,info){
     var sx=px+ux*reach+nx*half*sg, sy=py+uy*reach+ny*half*sg;
     var covered=false;
     DATA.walls.forEach(function(o){
-      if(covered||!wallJoinsAtCorner(o,w)||(o.thick||0)<120) return;
-      if(wallSolidCoverHeightMm(o)<myH-50) return;  // 腰高の手すり壁では塞げない
-      if(wallCoreBoxHitMm(o,sx,sy)) covered=true;
+      if(covered||o===w||(o.thick||0)<120||!wallCoreBoxHitMm(o,sx,sy)) return;
+      if(!wallJoinsAtCorner(o,w,sx,sy)) return;
+      // 同じ階では高さを比べる(腰高の手すり壁では塞げない)。下の階の壁は、
+      // つながると判定された時点で上の階の壁の頭まで届いている。
+      if((o.floor||1)===(w.floor||1)&&wallSolidCoverHeightMm(o)<myH-50) return;
+      covered=true;
     });
     if(!covered) open=true;
   });
@@ -8894,7 +8918,7 @@ function wallCornerExtensionMm(w,atEnd){
   if(wlen<1) return 0;
   var best=0;
   DATA.walls.forEach(function(o){
-    if(!wallJoinsAtCorner(o,w) || (o.thick||0)<120) return;
+    if(o===w || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen2=odx*odx+ody*ody;
     if(olen2<1) return;
     // 延長が必要なのはL字・T字など、壁面同士が角度を持って交差する接合だけ。
@@ -8907,6 +8931,7 @@ function wallCornerExtensionMm(w,atEnd){
     var qx=o.x1+odx*t, qy=o.y1+ody*t;
     var dist=Math.hypot(px-qx,py-qy);
     if(dist>(o.thick||120)/2+40) return; // 交差とみなせる距離を超えたら対象外
+    if(!wallJoinsAtCorner(o,w,qx,qy)) return;
     var neededFromCenterline=(o.thick||120)/2+INTERIOR_FINISH_MM;
     // 相手の壁の外装面(芯+厚/2+6mm)を貫通すると、ファサードに内装(白)面の
     // エッジが縦線として露出する。芯+4mmまでにキャップして必ず内側に留める
@@ -9863,7 +9888,7 @@ function buildWall3D(w){
       // 戸口の下の壁は**ドアの敷居まで**。以前は床の厚み(slabH)で固定していたため、
       // 玄関の床を下げてドアも下がっても、戸口に元の床の高さの壁(150mm)が残り、
       // 下げた土間から見てドアが段の上に浮いた(利用者の指摘)。
-      var doorSill=isFinite(Number(o.sill))?Math.max(0,Number(o.sill)):slabH;
+      var doorSill=Math.max(0,Number(o.sill)||0);
       if(doorSill>0.001) addWallPiece(o.a,o.b,0,doorSill,true);
       if(o.arch){
         var r=Math.min((o.b-o.a)/2,Math.max(0.18,(o.h-doorSill)*0.35));
@@ -15156,6 +15181,8 @@ var CEILING_SAMPLE_STEP_M=0.12;
 // step は段のために足した点の印。
 var STEP_JUMP_MIN_M=0.02;
 var STEP_JUMP_RATIO=4;
+// 段のために足す線の上限(片方向の、2本1組の数)。屋根の境の辺の数より十分大きい。
+var STEP_GRID_MAX_LINES=24;
 function stepAwareSamples(f,ps){
   var ys=ps.map(function(p){ return f(p); }), out=[], i, a, b, fa, fb, k, m, fm, d, L, add;
   for(i=0;i<ps.length;i++){
@@ -15194,6 +15221,9 @@ function buildSteppedCeilingGrid(r,ceilY,segX,segZ){
   }
   var ex=linesM(xs,zs,true), ez=linesM(zs,xs,false);
   if(!ex.length&&!ez.length) return null;
+  // 屋根の境が格子に対して斜め(回した屋根)だと、行ごとに別の位置で段が見つかり、
+  // 線が際限なく増える(しかも段は垂直にならない)。そういう部屋は従来の格子に戻す。
+  if(ex.length>STEP_GRID_MAX_LINES||ez.length>STEP_GRID_MAX_LINES) return null;
   function merge(base,extra){
     return base.map(function(p){ return {pos:p,at:p}; }).concat(extra)
       .sort(function(a,b){ return a.pos-b.pos; });
@@ -15219,7 +15249,8 @@ function buildSlopedCeilingGeometry(r,holes,profile){
   var drop=(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012);
   function ceilY(xMm,yMm){ return roomCeilingWorldYAtMm(r,profile,xMm,yMm)-drop; }
   var geo;
-  if((!holes||!holes.length)&&profile.source==='roof'){
+  // 段差が生まれるのは、2枚以上の屋根がかかる部屋だけ(1枚なら天井は連続している)。
+  if((!holes||!holes.length)&&profile.source==='roof'&&(profile.roofs||[]).length>1){
     var sx=Math.max(1,Math.min(96,Math.ceil(rw/CEILING_SAMPLE_STEP_M)));
     var sz=Math.max(1,Math.min(96,Math.ceil(rd/CEILING_SAMPLE_STEP_M)));
     var stepped=buildSteppedCeilingGrid(r,ceilY,sx,sz);
@@ -21624,7 +21655,7 @@ var JISDRAW=(function(){
 
   // 壁シルエットの外形(スカイライン)。各連続グループごとに独立したポリライン点列を返す(配列の配列)。
   // グループ内は上辺(top)を左→右、下辺(base)を右→左でつなぎ、<polygon>の自動閉路に任せて
-  // そのグループ両端でbaseまで降ろした1本の外形ポリラインにする(塗りなし・LW.thickで描画)。
+  // そのグループ両端でbaseまで降ろした1本の外形ポリラインにする。elevSceneToSvg が同じ奥行きの壁ごとに呼び、白で塗って LW.thick で描く。
   function elevSkyline(rects){
     var segs=elevSegments(rects);
     if(!segs.length) return [];
@@ -21635,28 +21666,15 @@ var JISDRAW=(function(){
     });
   }
 
-  // 指定u位置を覆う壁群のうち最も手前(depthが最大)の値。開口の被り判定に使う。
-  // floorを渡した場合は同じ階のrectsのみを比較対象にする(セットバックした上階の窓が、
-  // 下階の前面壁の深度と混同されて誤って「隠れている」と判定されるのを防ぐ)。
-  function elevFrontDepthAt(rects,uVal,floor){
-    var d=-Infinity;
-    rects.forEach(function(r){
-      if(floor!=null && r.floor!==floor) return;
-      if(r.uMin-0.5<=uVal && uVal<=r.uMax+0.5) d=Math.max(d,r.depth);
-    });
-    return d;
-  }
-
-  // 開口(窓・ドア)をこの方位に投影して描く。手前の壁面(=最前面深度)より
-  // 壁厚+150mm以上奥にある開口は「その面に面していない」とみなして描かない。
-  // layers を渡すと、開口ごとに {d:奥行き, svg} を積む(elevSceneToSvg の奥から描く順に
-  // 混ぜるため)。その場合、手前の壁に隠れるかどうかは描く順で決まるので、下の
-  // 「手前の壁より奥なら描かない」という大まかな判定は使わない -- 玄関前の凹みの奥の
-  // ドアのように、一部だけ見えている開口まで丸ごと消していた。
+  // 開口(窓・ドア)をこの方位に投影し、開口ごとに {d:奥行き, svg} を layers へ積む
+  // (elevSceneToSvg が奥から順に描く)。手前の壁に隠れるかどうかは描く順で決まる。
+  // 以前は「手前の壁より壁厚+150mm以上奥なら描かない」と丸ごと消していて、玄関前の
+  // 凹みの奥のドアのように一部だけ見えている開口まで消えていた。
+  // 奥行きは載っている壁の面と**同じ丸め**にする。面は Math.round(depth) で並ぶので、
+  // 丸めない値を使うと、座標に .5 以上の端数がある壁では面が開口より手前に来て、
+  // 開口を白で塗りつぶした(レビューで確認)。
   function elevOpenings(dir,LW,layers){
     var ax=ELEV_AXES[dir];
-    var rects=elevWallRects(dir);
-    var out='';
     DATA.items.filter(function(it){return isOpeningItemType(it.type);}).forEach(function(it){
       var info=getOpeningWallInfo(it);
       if(!info || !info.wall) return; // 対応する壁が見つからない孤立開口は描画対象外
@@ -21665,11 +21683,7 @@ var JISDRAW=(function(){
       var cosU=(dx/len)*ax.u[0]+(dy/len)*ax.u[1];
       var wallDepth=Math.max(w.x1*ax.dp[0]+w.y1*ax.dp[1], w.x2*ax.dp[0]+w.y2*ax.dp[1]);
       var uCenter=info.x*ax.u[0]+info.y*ax.u[1];
-      var wallFloor=w.floor||1;
-      var front=elevFrontDepthAt(rects,uCenter,wallFloor); // 同じ階のrectsのみと比較(セットバックした上階が誤って隠れないように)
-      var wallThick=w.thick||120;
-      if(!layers && wallDepth<front-(wallThick+150)) return; // 手前の壁に隠れる(この面に面していない)開口
-      var mark=out.length;
+      var out='';
       // 開口幅(it.w、壁方向)をu軸へ投影。壁がこの面と直交する(=妻壁)ほどcosUが0に近づき幅も0に潰れる
       var halfU=Math.abs(cosU)*(it.w||0)/2;
       if(halfU<1) return; // 直交壁の開口はこの面ではほぼ幅0=表示不要
@@ -21696,19 +21710,19 @@ var JISDRAW=(function(){
         var knobX=uCenter+knobSide*(uR-uL)*0.41;
         out+='<circle cx="'+knobX+'" cy="'+knobY+'" r="'+(LW.mid*1.2)+'" fill="#000"/>';
       }
-      if(layers){ layers.push({d:wallDepth+ELEV_LAYER_EPS_MM,svg:out.slice(mark)}); out=out.slice(0,mark); }
+      layers.push({d:Math.round(wallDepth)+ELEV_LAYER_EPS_MM,svg:out});
     });
-    return out;
   }
 
   // バルコニー・フェンス簡略輪郭(Spec §立面図仕様「バルコニー・フェンスは簡略輪郭のみ」)。
   // 高さ・基準面は3D実装(getItemHeightValue:12829, item3DBaseY:3535)の実値をそのまま使い、
   // ここで別の数値を持たない(3D側と食い違わないため)。
   // it.rot(度)の向き(width軸方向)をワールド(cos,sin)へ変換する式はstairBounds2D(:11185)と同じ規約。
+  // 塗らずに線だけで描く(以前と同じ見え方)。外構の塀まで白で塗ると、家の前の
+  // 木塀が1階の外壁と窓をまるごと隠し、図面の変化が大きすぎる。奥から順に描く中に
+  // 混ぜるのは、手前の壁の後ろにあるものを隠すため。
   function elevBalconyFenceToSvg(dir,LW,layers){
     var ax=ELEV_AXES[dir];
-    var rects=elevWallRects(dir);
-    var out='';
     DATA.items.filter(function(it){
       return it.type==='balcony' || it.type==='fence' || it.type==='wood-fence';
     }).forEach(function(it){
@@ -21720,20 +21734,13 @@ var JISDRAW=(function(){
       if(halfU<1) return;
       var cx=it.x+(it.w||0)/2, cy=it.y+(it.d||0)/2;
       var uCenter=cx*ax.u[0]+cy*ax.u[1];
-      var floor=it.floor||1;
-      // 同じ階の前面壁(elevFrontDepthAt:17970と同じ考え方)より奥にあるアイテムは
-      // 建物本体に隠れてこの面からは見えないとみなし描かない
-      var front=elevFrontDepthAt(rects,uCenter,floor);
       var itemDepth=cx*ax.dp[0]+cy*ax.dp[1];
-      if(!layers && isFinite(front) && itemDepth<front-300) return;
       var base=item3DBaseY(it)/U; // バルコニー=その階の床天端、フェンス=GL(1F)/階天端(2F以上)
       var h=getItemHeightValue(it); // バルコニー=スラブ厚、フェンス=800mm既定、木製フェンス=it.fenceHeight(既定1600)mm
       var uL=uCenter-halfU, uR=uCenter+halfU;
-      var svg='<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
-        +'" fill="'+(layers?'#fff':'none')+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
-      if(layers) layers.push({d:itemDepth+ELEV_LAYER_EPS_MM,svg:svg}); else out+=svg;
+      layers.push({d:itemDepth+ELEV_LAYER_EPS_MM,svg:'<rect x="'+uL+'" y="'+base+'" width="'+(uR-uL)+'" height="'+h
+        +'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>'});
     });
-    return out;
   }
 
   // 立面全体のu範囲・高さ範囲(GL=0を必ず含む)。壁が無ければ既定の矩形を返す。
@@ -22005,7 +22012,7 @@ var JISDRAW=(function(){
     elevRoofItems().forEach(function(it){
       var prof=pls.length ? roofItemProfileCut(it,dir,pls) : roofItemProfile(it,dir);
       if(!prof || prof.points.length<3) return;
-      prof.item=it;   // 奥行き(elevRoofFrontDepth)で並べるため
+      prof.item=it;   // 奥行き(elevRoofDepth)で並べるため
       out.push(prof);
     });
     return out;
@@ -22019,19 +22026,18 @@ var JISDRAW=(function(){
   // 隠すので、見える線だけが残る。
   //   ・壁は **同じ奥行きの線に乗るものを1枚の面にまとめる**。1階と2階が同じ面なら
   //     段の線は出ない。面の輪郭は elevSkyline(外形と同じ作り方)で作る。
-  //   ・屋根はいちばん手前の点の奥行きで並べる(軒の出は壁より手前にある)。
-  //   ・開口とバルコニーは、載っている壁の面の直後に描く。
+  //   ・屋根は屋根の平面の中心の奥行きで並べる(elevRoofDepth)。
+  //   ・開口は、載っている壁の面の直後に描く。バルコニーと塀は線だけ。
   var ELEV_LAYER_EPS_MM=0.01;
-  function elevRoofFrontDepth(it,ax){
+  // 屋根を並べる奥行きは**屋根の平面の中心**。いちばん手前の角(軒先)で並べると、
+  // 妻側や片流れの高い側から見たとき、屋根の輪郭(軒から上を閉じた多角形)が、
+  // 屋根の下まで立ち上がる壁より手前に来て、その壁の高窓を白で塗りつぶした
+  // (レビューで確認)。中心で並べれば、その壁の方が手前になって窓が残り、
+  // 壁の上に出ている屋根の帯だけが見える。屋根の載っている壁より奥にある壁
+  // (屋根を向こうへ上っていく面の奥の2階の壁など)は、従来どおり屋根に隠れる。
+  function elevRoofDepth(it,ax){
     var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
-    var rad=(it.rot||0)*Math.PI/180, c=Math.cos(rad), s=Math.sin(rad);
-    var hw=(it.w||0)/2, hd=(it.d||0)/2, best=-Infinity;
-    [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].forEach(function(p){
-      var x=cx+p[0]*c-p[1]*s, y=cy+p[0]*s+p[1]*c;
-      var d=x*ax.dp[0]+y*ax.dp[1];
-      if(d>best) best=d;
-    });
-    return best;
+    return cx*ax.dp[0]+cy*ax.dp[1];
   }
   function elevSceneToSvg(dir,rects,LW){
     var ax=ELEV_AXES[dir], layers=[], planes={};
@@ -22047,7 +22053,7 @@ var JISDRAW=(function(){
       });
     });
     elevRoofProfiles(dir).forEach(function(prof){
-      layers.push({d:elevRoofFrontDepth(prof.item,ax),svg:'<polygon points="'+prof.points.map(function(p){return p[0]+','+p[1];}).join(' ')
+      layers.push({d:elevRoofDepth(prof.item,ax),svg:'<polygon points="'+prof.points.map(function(p){return p[0]+','+p[1];}).join(' ')
         +'" fill="#fff" stroke="#000" stroke-width="'+LW.thick+'"/>'});
     });
     elevOpenings(dir,LW,layers);

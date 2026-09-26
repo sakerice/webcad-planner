@@ -110,7 +110,7 @@ const SETBACK_FNS = [
 // 壁の上端の折れ線(3D と共通の経路)。
 const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM', 'ROOM_OVERLAP_WALL_TOL_MM',
   '_ceilingClampWarned', 'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M',
-  'WALL_TOP_SAMPLE_STEP_M', 'STEP_JUMP_MIN_M', 'STEP_JUMP_RATIO'];
+  'WALL_TOP_SAMPLE_STEP_M', 'STEP_JUMP_MIN_M', 'STEP_JUMP_RATIO', 'STEP_GRID_MAX_LINES'];
 const TOP_FNS = ['roofBaseWorldY',
   'roomDeclaresSlopedCeiling', 'roofItemOverRoom', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
@@ -122,7 +122,7 @@ const TOP_FNS = ['roofBaseWorldY',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({
@@ -1122,4 +1122,51 @@ test('立面図の窓とドアは、3D で建具を置く高さから描く', ()
   const bottoms = rects.map((r) => Math.round(r.y)).sort((a, b) => a - b);
   // 窓: 780 + 900 = 1680(以前は基礎の天端 + 900 = 1350)。ドア: 480(以前は 450)
   assert.deepEqual(bottoms, [480, 1680], '開口の下端 ' + JSON.stringify(rects));
+});
+
+// ── 立面図の隠れ線(奥から順に白で塗って重ねる) ─────────────────────────
+function openingRects(svg) {
+  const out = [];
+  const re = /<rect x="([-\d.e]+)" y="([-\d.e]+)" width="([-\d.e]+)" height="([-\d.e]+)" fill="none" stroke="#000"/g;
+  const body = bodyOf(svg);
+  let m;
+  while ((m = re.exec(body))) out.push({ at: m.index, y: Number(m[2]) });
+  return { body, rects: out };
+}
+// 窓の枠のあとに、白で塗った多角形が1つも来ていない(= 窓の上を塗りつぶしていない)か。
+function windowNotPaintedOver(svg) {
+  const { body, rects } = openingRects(svg);
+  assert.ok(rects.length > 0, '窓が描かれていない');
+  const lastRect = rects[rects.length - 1].at;
+  return body.indexOf('fill="#fff"', lastRect) < 0;
+}
+function withWindow(data, wall, win) {
+  data.items.push(win);
+  const ctx = full(data);
+  ctx.getOpeningWallInfo = () => ({ wall, x: win.x + win.w / 2, y: win._y, rot: 0 });
+  ctx.item3DBaseY = () => 0.78;
+  ctx.openingSillMm = (it) => it.windowSill;
+  ctx.openingHeightMm = (it) => it.windowHeight;
+  ctx.effectiveWindowKind = () => 'sliding';
+  ctx.isNoDoorOpeningType = () => false;
+  return ctx;
+}
+
+test('座標に .5 以上の端数がある壁でも、その壁の窓は立面図に残る', () => {
+  const data = gableHouse(null, 'flat');
+  const south = data.walls.find((w) => w.id === 'w1s');
+  south.y1 = 5000.6; south.y2 = 5000.6;                      // 面の奥行きは丸めて 5001
+  const ctx = withWindow(data, south,
+    { id: 'win', type: 'window', floor: 1, x: 1000, y: 4940, w: 1600, d: 120, rot: 0, windowSill: 900, windowHeight: 1100, _y: 5000.6 });
+  assert.ok(windowNotPaintedOver(elev(ctx, 's')), '壁の面が窓の上に塗られている');
+});
+
+test('妻側から見た、屋根の下まで立ち上がる壁の高窓は、屋根に塗りつぶされない', () => {
+  // 切妻(棟は東西)を東から見る。2階の東の壁の三角部分(軒より上)に窓。
+  const data = gableHouse();
+  const east = data.walls.find((w) => w.id === 'w2e');
+  const ctx = withWindow(data, east,
+    { id: 'hi', type: 'window', floor: 2, x: 6000, y: 2600, w: 800, d: 120, rot: 90, windowSill: 2600, windowHeight: 600, _y: 3000 });
+  ctx.getOpeningWallInfo = () => ({ wall: east, x: 6000, y: 3000, rot: 90 });
+  assert.ok(windowNotPaintedOver(elev(ctx, 'e')), '屋根の白塗りが高窓の上に来ている');
 });

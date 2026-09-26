@@ -281,7 +281,15 @@ function capturePlan2dDataUrl(options){
   }
 }
 
+// 屋根の据わる高さ(roofBaseWorldY)を、この1回の描画のあいだだけ覚えておく
+// (build3D と同じ仕組み)。2階の壁の隅の取り合いは下の階の壁の高さを見るので、
+// 覚えておかないと描画1回で同じ屋根の高さを千回以上求め直し、ドラッグが重くなる。
 function draw2d(){
+  if(typeof _roofBaseCache==='undefined'||_roofBaseCache) return draw2dScene();
+  _roofBaseCache={};
+  try{ return draw2dScene(); } finally { _roofBaseCache=null; }
+}
+function draw2dScene(){
   ensureObjectIds();
   var W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);

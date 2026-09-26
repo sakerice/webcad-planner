@@ -91,7 +91,7 @@ function ceilingCtx(extra) {
     topLevelFunction('makeAutoLightFixtureMesh'),
     topLevelFunction('ceilingSlopeUnit'),
     topLevelFunction('ceilingSlopeSpan'),
-    topLevelFunction('buildSlopedCeilingGeometry'), topLevelFunction('buildSteppedCeilingGrid'), topLevelFunction('stepAwareSamples'), 'var STEP_JUMP_MIN_M=0.02, STEP_JUMP_RATIO=4;',
+    topLevelFunction('buildSlopedCeilingGeometry'), topLevelFunction('buildSteppedCeilingGrid'), topLevelFunction('stepAwareSamples'), 'var STEP_JUMP_MIN_M=0.02, STEP_JUMP_RATIO=4, STEP_GRID_MAX_LINES=24;',
     topLevelFunction('buildRoomCeilingShapeGeometry'),
     topLevelFunction('buildRoomCeilingMesh')
   ].join('\n'), ctx);

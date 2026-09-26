@@ -1666,7 +1666,7 @@ function roofsOverRoom(room){
 // 屋根はその壁の天端まで持ち上がって描かれる(localSupportTopY)。高さの計算が
 // 階の基準面(floorBaseY)のままだと、壁は元の高さで切られ、持ち上がった屋根との
 // あいだが空いた(利用者のプランで 812mm)。下の階に高い壁が無ければ floorBaseY と同じ。
-var _roofBaseCache=null;   // 3D の組み立て1回のあいだだけ有効(build3D が作って捨てる)
+var _roofBaseCache=null;   // 3D の組み立て1回・平面図の描画1回のあいだだけ有効(build3D / draw2d が作って捨てる)
 function roofBaseWorldY(roofItem){
   var it=roofItem||{};
   var cache=(typeof _roofBaseCache!=='undefined')?_roofBaseCache:null;
@@ -2372,20 +2372,26 @@ function wallRaiseTopNearWorldY(w,roofs,xMm,yMm){
   }
   return null;
 }
-// その点が上階の壁の足元(下階の壁の厚みぶん端の先まで含む)にあれば、屋根を
-// 探しに行ってよい距離(mm)。無ければ 0 -- 屋根の縁の外で壁が勝手に立ち上がり、
-// 屋根の上へ突き出すことはしない。
+// その点が、この壁と直交して**そこで終わる**上階の壁の足元(端の先は下階の壁の
+// 厚みぶんまで)にあれば、屋根を探しに行ってよい距離(mm)。無ければ 0 -- 屋根の
+// 縁の外で壁が勝手に立ち上がり、屋根の上へ突き出すことはしない。
+// 下階の壁の真上を同じ向きに走る普通の上階の壁は対象外(そこで立ち上げると、
+// 上階の壁の中に下階の壁が重なる)。
 function wallRaiseBridgeReachMm(w,xMm,yMm){
   if(typeof DATA==='undefined'||!DATA||!DATA.walls) return 0;
+  var wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
+  if(wlen<1) return 0;
   var up=(w.floor||1)+1, ext=(w.thick||120)/2+20, i, u, udx, udy, ulen, t, p;
   for(i=0;i<DATA.walls.length;i++){
     u=DATA.walls[i];
     if(!u||u===w||(u.floor||1)!==up||u.vis3D==='hide') continue;
     udx=u.x2-u.x1; udy=u.y2-u.y1; ulen=Math.hypot(udx,udy);
     if(ulen<1) continue;
+    if(Math.abs(wdx*udx+wdy*udy)/(wlen*ulen)>0.2) continue;       // 直交していない
     t=((xMm-u.x1)*udx+(yMm-u.y1)*udy)/ulen;
+    if(!(Math.abs(t)<=ext||Math.abs(t-ulen)<=ext)) continue;       // 端がここで終わっていない
     p=Math.abs((xMm-u.x1)*udy-(yMm-u.y1)*udx)/ulen;
-    if(t>=-ext&&t<=ulen+ext&&p<=(u.thick||120)/2+20) return (u.thick||120)+40;
+    if(p<=(u.thick||120)/2+20) return (u.thick||120)+40;
   }
   return 0;
 }
@@ -2430,6 +2436,26 @@ function wallTopProfileM(w){
   }
   if(flat) return null;   // 頭を押さえる物が無かった = 従来のまっすぐな上辺
   return wallTopProfileSimplify(pts);
+}
+// 壁の上端の、平面上の1点(壁の芯線へ下ろした位置)での高さ(ワールドm)。
+// wallTopProfileM と同じ規則を1点だけで評価する。全長の折れ線を作るより軽いので、
+// 壁の隅の取り合い(wallJoinsAtCorner)のように何度も呼ぶ所ではこちらを使う。
+function wallTopWorldYAtPointM(w,px,py){
+  var fb=floorBaseY(w.floor||1), fullH=wallDisplayHeightM(w);
+  // 上端の決め方(外壁か・どの屋根か)は壁ごとに決まる。描画1回ぶんの覚え
+  // (_roofBaseCache)があれば、そこに壁ごとに1度だけ求めて置く。
+  var cache=(typeof _roofBaseCache!=='undefined'&&_roofBaseCache)?_roofBaseCache:null;
+  var envs=cache?(cache.__wallTopEnv=cache.__wallTopEnv||new Map()):null;
+  var env;
+  if(envs&&envs.has(w)) env=envs.get(w);
+  else { env=wallTopCutEnv(w); if(envs) envs.set(w,env); }
+  if(!env) return fb+fullH;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
+  if(len2<1) return fb+fullH;
+  var t=Math.max(0,Math.min(1,((px-w.x1)*dx+(py-w.y1)*dy)/len2));
+  var h=wallTopHeightAtM(w,t,fullH,env.minH,env.roofs,env.raise,env.under);
+  if(h>fullH&&!(env.raise&&env.raise.length)) h=fullH;
+  return fb+h;
 }
 // 壁1枚が届くべき高さ(m)。壁は2つの部屋の境界にあるので、接する部屋の天井高の
 // 最大値を採る。低い方に合わせて切ると高い側の部屋に穴が開くので、最大値以外は
