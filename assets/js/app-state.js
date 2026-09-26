@@ -1518,13 +1518,41 @@ function updateProps(){
   if(isStairPartType(it.type)) {
     var sri = stairRiseInfo(it);
     var orderVal = it.stairOrder !== undefined ? it.stairOrder : (sri.index + 1);
+    var floorLanding = isFloorLanding(it);
+    // 踊り場の使い方。階段の一部なら段の途中の高さに付き、床なら高さを指定する。
+    if(isStairLandingType(it.type)){
+      html += '<div class="pr"><div class="pl">踊り場の使い方</div><select class="pi" onchange="setSelectedLandingMode(this.value)">'+
+        '<option value="part"'+(floorLanding?'':' selected')+'>階段の一部（段の途中の高さ）</option>'+
+        '<option value="floor"'+(floorLanding?' selected':'')+'>床（高さを指定）</option>'+
+        '</select></div>';
+      if(floorLanding){
+        html += '<div class="pr"><div class="pl">床の高さ（階の床から mm）</div><input class="pi" type="number" min="0" max="'+LANDING_LEVEL_MAX_MM+'" step="10" value="'+landingFloorLevelMm(it)+'" onchange="updateSelectedProp(\'landingLevelMm\',Math.max(0,Math.min('+LANDING_LEVEL_MAX_MM+',Math.round(+this.value||0))))"></div>';
+        var near=skipRoomsOnFloor(it.floor||1).map(function(r){
+          return baseRoomLabel(r)+' は +'+Math.round((roomFloorTopY(r)-floorTopY(it.floor||1))/U);
+        });
+        var fconn=stairConnectionSummary(it);
+        if(fconn) html += '<div class="lock-status-note">つながり: '+escHtml(fconn.text)+'</div>';
+        html += '<div class="lock-status-note">床として置いた踊り場です。ここで階段が切れます。接している階段は、ここから上り始めるか、「行き先」でこの踊り場を選べます。'+
+          (near.length?'同じ物差しで '+near.join('、')+' です。':'')+'</div>';
+      } else {
+        html += '<div class="lock-status-note">接している段と1本の階段になり、手前の段が上りきった高さに付きます。行き先は、この階段のどの部材から変えても全体に入ります。</div>';
+      }
+    }
     // 行き先。平面だけからは「上の階へ上がる階段」と「同じ階の段差を上る階段」を
-    // 区別できないので宣言させる。省略は従来どおり上の階。
-    var target = (it.stairTarget === 'level') ? 'level' : 'upper';
-    html += '<div class="pr"><div class="pl">行き先</div><select class="pi" onchange="updateSelectedProp(\'stairTarget\',this.value===\'level\'?\'level\':undefined)">'+
+    // 区別できないので宣言させる。省略は従来どおり上の階。接している床(床として
+    // 使う踊り場・段差の部屋)は、名前で選べるように並べる。
+    var target = (it.stairTarget === 'level') ? (it.stairTo!==undefined&&it.stairTo!==null ? 'to:'+it.stairTo : 'level') : 'upper';
+    var targetCands = floorLanding ? [] : stairTargetCandidates(it);
+    if(target.indexOf('to:')===0 && !targetCands.some(function(c){ return 'to:'+c.id===target; })) target='level';
+    if(!floorLanding){
+    html += '<div class="pr"><div class="pl">行き先</div><select class="pi" onchange="setSelectedStairTarget(this.value)">'+
       '<option value="upper"'+(target==='upper'?' selected':'')+'>上の階</option>'+
-      '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（スキップフロア）</option>'+
+      '<option value="level"'+(target==='level'?' selected':'')+'>同じ階の段差（自動）</option>'+
+      targetCands.map(function(c){
+        return '<option value="to:'+escHtml(c.id)+'"'+(target==='to:'+c.id?' selected':'')+'>'+escHtml(c.label)+'</option>';
+      }).join('')+
       '</select></div>';
+    }
     // 手すり。付ける側は選ばせ、壁付けか柱建てかは置いた場所から決める。
     var rail = ({left:'left',right:'right',both:'both'})[it.stairRail] || 'none';
     html += '<div class="pr"><div class="pl">手すり</div><select class="pi" onchange="updateSelectedProp(\'stairRail\',this.value===\'none\'?undefined:this.value)">'+
@@ -1573,6 +1601,7 @@ function updateProps(){
         box:'階段下を塞ぎます。下を収納にしたいなら、ひな壇のまま造作棚を置いてください。',
         skeleton:'蹴込み板なし。光と視線が抜けます。'
       }[sstyle])+'</div>';
+    if(!floorLanding){
     // 載せる床(足元)。段差のある階でだけ出す。家具・壁と同じ欄。
     html += baseFloorSelectHtml(it);
     html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
@@ -1581,7 +1610,10 @@ function updateProps(){
         ? '同じ階の段差を上ります。上階の床には穴を開けません。'
         : '上の階の床まで上がります。')+'</div>';
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
+    var conn=stairConnectionSummary(it);
+    if(conn) html += '<div class="lock-status-note"'+(conn.warn?' style="color:#b3261e"':'')+'>つながり: '+escHtml(conn.text)+'</div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
+    }
   }
   if(it.sScale !== undefined && it.type!=='room' && it.type!=='wall' && it.type!=='site-rect' && it.type!=='roof' && !isFmpItemType(it.type) && !isCustomBlockType(it.type) && !isLightItemType(it.type)) {
     if(it.type==='downspout'){
@@ -1786,6 +1818,92 @@ function updateSelectedModelRoughness(channel,value){
   if(value==='')delete settings[channel];else settings[channel]=Number(value);
   updateSelectedProp('finishRoughness',Object.keys(settings).length?settings:null);
 }
+// 階段の行き先を、接している1本の部材すべてに入れる。
+// 'upper' = 上の階 / 'level' = 同じ階の段差(自動) / 'to:<id>' = その床(踊り場・部屋)。
+function setSelectedStairTarget(value){
+  var it=ST.selected;
+  if(!it||!isStairPartType(it.type)||isFloorLanding(it)) return;
+  var parts=stairChainParts(it);
+  if(parts.some(isObjectLocked)){
+    alert('つながっている部材にロックされたものがあるため、行き先を変えられません。ロックを外してから選んでください。');
+    updateProps(); return;
+  }
+  saveState();
+  var to=(typeof value==='string'&&value.indexOf('to:')===0)?value.slice(3):null;
+  parts.forEach(function(o){
+    if(value==='upper'){ delete o.stairTarget; delete o.stairTo; }
+    else { o.stairTarget='level'; if(to!==null) o.stairTo=to; else delete o.stairTo; }
+  });
+  markStairPartsEdited(parts);
+  draw2d();
+  if(ren) rebuild3D();
+  updateProps();
+}
+// 踊り場の使い方を切り替える。床にするときは、いまの高さをそのまま床の高さにする
+// (切り替えただけで踊り場が動かないように)。
+// つながった部材まで書き換えたとき。共同編集の相手へ、選んでいる部材だけでなく
+// 書き換えた部材すべてを送る(送らないと、相手の画面では下の階段が床になった
+// 踊り場を突き抜けて上の階まで上る)。
+function markStairPartsEdited(parts){
+  if(typeof SHARED!=='undefined'&&SHARED&&SHARED.roomId&&!SHARED.applying&&typeof sharedMarkObjectsDirty==='function')
+    sharedMarkObjectsDirty(parts);
+  markDirty();
+}
+function setSelectedLandingMode(mode){
+  var it=ST.selected;
+  if(!it||!isStairLandingType(it.type)) return;
+  var wasFloor=isFloorLanding(it);
+  if((mode==='floor')===wasFloor) return;
+  // 書き換える部材を先に決め、どれかがロックされていれば何もしない。
+  var order=wasFloor?[]:stairGroupOrdered(it), idx=order.indexOf(it);
+  var below=order.slice(0,Math.max(0,idx)).filter(function(o){ return !isFloorLanding(o); });
+  var fl=it.floor||1, id=String(it.id);
+  var touched=[it].concat(below);
+  if(wasFloor){
+    // 階段の一部に戻したときにつながる部材(一時的に戻して数える)と、この踊り場を
+    // 行き先にしていた部材。
+    var keepMode=it.landingMode; delete it.landingMode;
+    touched=stairChainParts(it);
+    it.landingMode=keepMode;
+    DATA.items.forEach(function(o){ if((o.floor||1)===fl&&String(o.stairTo)===id&&touched.indexOf(o)<0) touched.push(o); });
+  }
+  if(touched.some(isObjectLocked)){
+    alert('つながっている部材にロックされたものがあるため、踊り場の使い方を変えられません。ロックを外してから切り替えてください。');
+    updateProps(); return;
+  }
+  saveState();
+  if(mode==='floor'){
+    var y=stairLandingTopY(it);
+    // 踊り場より下にあった部材は、この踊り場を行き先にする。そうしないと
+    // 「上の階」のままの下の階段が、床になった踊り場を突き抜けて上の階まで上る。
+    below.forEach(function(o){
+      o.stairTarget='level'; o.stairTo=String(it.id);
+    });
+    it.landingMode='floor';
+    it.landingLevelMm=Math.max(0,Math.min(LANDING_LEVEL_MAX_MM,Math.round((y-floorTopY(it.floor||1))/U/10)*10));
+    // 床は階段の部材ではないので、階段としての指定は持たない。
+    delete it.stairTarget; delete it.stairTo; delete it.stairOrder;
+  } else {
+    delete it.landingMode; delete it.landingLevelMm;
+    // この踊り場を行き先にしていた階段の指定を外し、つながった1本の行き先を
+    // 上側の部材(この踊り場を行き先にしていなかった部材)にそろえる。
+    var pointed={};
+    DATA.items.forEach(function(o){ if((o.floor||1)===fl&&String(o.stairTo)===id){ pointed[o.id]=1; delete o.stairTo; } });
+    var chain=stairChainParts(it), rest=chain.filter(function(o){ return !pointed[o.id]&&o!==it; });
+    var src=rest.length?rest:chain;
+    var level=src.some(function(o){ return o.stairTarget==='level'; });
+    var to=null;
+    src.forEach(function(o){ if(to===null&&o.stairTo!==undefined&&o.stairTo!==null) to=o.stairTo; });
+    chain.forEach(function(o){
+      if(level){ o.stairTarget='level'; if(to!==null) o.stairTo=to; else delete o.stairTo; }
+      else { delete o.stairTarget; delete o.stairTo; }
+    });
+  }
+  markStairPartsEdited(touched);
+  draw2d();
+  if(ren) rebuild3D();
+  updateProps();
+}
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
   // ロックが止めるのは削除・移動・寸法/座標変更。3D表示の一時切り替えは
@@ -1848,6 +1966,7 @@ function updateSelectedProp(p,v,noSave){
   // 階段の行き先・置く高さの基準も同じ扱い。既定へ戻したら受け口ごと消す。
   // undefined を残すと保存 JSON には出ないのにメモリ上は「設定あり」に見える。
   if((p==='stairTarget'||p==='baseLevel'||p==='vis3D'||p==='footOffsetMm') && !v) delete ST.selected[p];
+  if(p==='stairTarget' && v!=='level') delete ST.selected.stairTo;
   // 天井の仕上げ (Task 22) も同じ扱い。解除したら受け口ごと消す。null を残すと
   // 保存 JSON に "ceilingColor":null が出て、一度も触っていないプランと別物になる。
   if(p==='ceilingColor' && !v) delete ST.selected.ceilingColor;

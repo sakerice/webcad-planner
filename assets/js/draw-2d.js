@@ -382,6 +382,10 @@ function draw2dScene(){
       ghost.x=ghostObjectSnap.x; ghost.y=ghostObjectSnap.y;
       ST._snapState=ghostObjectSnap;
     }else ST._snapState=null;
+    if(isStairPartType(ghost.type)&&typeof stairSnapPosition==='function'){
+      var ghostStair=stairSnapPosition(ghost,ghost.x,ghost.y);
+      ghost.x=ghostStair.x; ghost.y=ghostStair.y;
+    }
     mx=ghost.x+ghost.w/2; my=ghost.y+ghost.d/2;
     ctx.save(); ctx.globalAlpha=0.5; drawItem2d(ghost); ctx.restore();
     // Dimension label near ghost
@@ -402,6 +406,7 @@ function draw2dScene(){
   if(DRAG.marquee){var m=DRAG.marquee,a=w2c(m.start.x,m.start.y),b=w2c(m.end.x,m.end.y);ctx.save();ctx.fillStyle='rgba(233,69,96,.08)';ctx.strokeStyle='#e94560';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.fillRect(a.cx,a.cy,b.cx-a.cx,b.cy-a.cy);ctx.strokeRect(a.cx,a.cy,b.cx-a.cx,b.cy-a.cy);ctx.restore();}
   drawLockOverlays(fw,fi);
   drawBaseSelectionOverlay();
+  drawStairLinkOverlay();
   document.getElementById('st-walls').textContent='壁:'+fw.length;
   syncLockBatchUi();
   // ── Snap guide lines ──
@@ -422,6 +427,74 @@ function draw2dScene(){
   }
 }
 
+// 階段の部材を選んでいるとき、その階段のつながりを図に重ねる。
+//   緑の太線 … つながっている辺(部材どうし・床として使う踊り場)
+//   赤の太線 … 向きが食い違っている辺(上端どうしなど)
+//   橙の破線 … どこにもつながっていない出入り口。「上り口」「上がり」を添える
+function drawStairLinkOverlay(){
+  var it=ST.selected;
+  if(!it||!isStairPartType(it.type)||(it.floor||1)!==ST.floor||ST.tool!=='select') return;
+  if(!planCaptureShows('selection')||typeof stairChainParts!=='function') return;
+  var chain=stairChainParts(it), fl=it.floor||1;
+  if(isFloorLanding(it)) chain=[it];
+  var others=DATA.items.filter(function(o){ return (o.floor||1)===fl&&isFloorLanding(o)&&chain.indexOf(o)<0; });
+  var info=isFloorLanding(it)?{conflicts:[]}:stairGroupChainInfo(getConnectedStairParts(it));
+  var bad=info.conflicts.concat(info.branches||[]);
+  function span(ea,eb){
+    var ux=(ea.b.x-ea.a.x)/ea.len, uy=(ea.b.y-ea.a.y)/ea.len;
+    var t1=(eb.a.x-ea.a.x)*ux+(eb.a.y-ea.a.y)*uy, t2=(eb.b.x-ea.a.x)*ux+(eb.b.y-ea.a.y)*uy;
+    var lo=Math.max(0,Math.min(t1,t2)), hi=Math.min(ea.len,Math.max(t1,t2));
+    return [{x:ea.a.x+ux*lo,y:ea.a.y+uy*lo},{x:ea.a.x+ux*hi,y:ea.a.y+uy*hi}];
+  }
+  function seg(p,q,color,width,dash){
+    var a=w2c(p.x,p.y), b=w2c(q.x,q.y);
+    ctx.strokeStyle=color; ctx.lineWidth=width; ctx.setLineDash(dash||[]);
+    ctx.beginPath(); ctx.moveTo(a.cx,a.cy); ctx.lineTo(b.cx,b.cy); ctx.stroke();
+  }
+  function label(pt,text,color){
+    var c=w2c(pt.x,pt.y);
+    ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    var tw=ctx.measureText(text).width+10;
+    ctx.fillStyle='rgba(255,255,255,0.94)'; ctx.fillRect(c.cx-tw/2,c.cy-9,tw,18);
+    ctx.fillStyle=color; ctx.fillText(text,c.cx,c.cy);
+  }
+  ctx.save(); ctx.lineCap='round';
+  var used={}, legacyParts={};
+  chain.forEach(function(p,i){
+    chain.concat(others).forEach(function(q,j){
+      if(q===p) return;
+      if(chain.indexOf(q)>=0&&chain.indexOf(q)<i) return;
+      var l=stairPartsLink(p,q);
+      if(!l) return;
+      if(l.legacy){
+        // 旧来のつながり(高さ順で横に並べた部材)は辺を持たないので、中心どうしを
+        // 緑の線で結び、その2枚の出入り口は空いていると描かない。
+        legacyParts[p.id]=1; legacyParts[q.id]=1;
+        seg({x:p.x+p.w/2,y:p.y+p.d/2},{x:q.x+q.w/2,y:q.y+q.d/2},'rgba(46,160,67,0.95)',4,[2,5]);
+        return;
+      }
+      used[p.id+l.ea.k]=1; used[q.id+l.eb.k]=1;
+      var isBad=bad.some(function(b){ return (b.a===p&&b.b===q)||(b.a===q&&b.b===p); });
+      var sp=span(l.ea,l.eb);
+      seg(sp[0],sp[1],isBad?'rgba(211,47,47,0.95)':'rgba(46,160,67,0.95)',5);
+    });
+  });
+  chain.forEach(function(p){
+    stairPartEdgesMm(p).forEach(function(e){
+      if(e.role==='side'||used[p.id+e.k]||legacyParts[p.id]) return;
+      if(e.role==='any'){ seg(e.a,e.b,'rgba(230,140,20,0.55)',2,[5,4]); return; }
+      seg(e.a,e.b,'rgba(230,140,20,0.95)',3,[7,4]);
+      var mid={x:(e.a.x+e.b.x)/2+e.n.x*220,y:(e.a.y+e.b.y)/2+e.n.y*220};
+      label(mid,e.role==='down'?'上り口':'上がり','rgba(170,90,0,1)');
+    });
+  });
+  // 接しているのにつながっていない部材は、外形を赤い破線で囲む。
+  if(!isFloorLanding(it)) stairTouchingUnlinked(it).forEach(function(o){
+    var E=stairPartEdgesMm(o);
+    E.forEach(function(e){ seg(e.a,e.b,'rgba(211,47,47,0.9)',2.5,[6,4]); });
+  });
+  ctx.setLineDash([]); ctx.restore();
+}
 function drawMultiSelectionOverlays(){
   if(!planCaptureShows('selection')) return;
   var selected=(ST.multiSelected||[]).filter(function(obj){return obj && (obj.floor||1)===ST.floor;});
@@ -1544,6 +1617,13 @@ function drawItem2d(it){
       ctx.restore();
       ctx.strokeStyle='rgba(35,35,35,0.82)'; ctx.lineWidth=1.2;
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
+      if(typeof isFloorLanding==='function'&&isFloorLanding(it)){
+        // 床として使う踊り場は昇り方向を持たない。床の高さを書く。
+        ctx.fillStyle='rgba(20,20,20,0.90)';
+        ctx.font='bold '+Math.max(9,Math.min(14,Math.min(hw,hd)*0.35))+'px sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('床 +'+landingFloorLevelMm(it),0,0);
+      } else {
       ctx.strokeStyle='rgba(20,20,20,0.90)'; ctx.fillStyle='rgba(20,20,20,0.90)'; ctx.lineWidth=1.6;
       ctx.beginPath();
       ctx.moveTo(0,-hd*0.72); ctx.lineTo(0,hd*0.72);
@@ -1551,6 +1631,7 @@ function drawItem2d(it){
       var lAw=Math.max(5*sc,4), lAl=Math.min(hd*0.17,Math.max(10*sc,9));
       ctx.beginPath();
       ctx.moveTo(0,hd*0.72); ctx.lineTo(-lAw,hd*0.72-lAl); ctx.lineTo(lAw,hd*0.72-lAl); ctx.closePath(); ctx.fill();
+      }
     } else if(it.type === 'stair-corner') {
       // 廻り3段コーナーのJIS流平面記号: 外形+内側隅から放射する段鼻線+昇り歩行線(1/4弧の矢印)。
       // 3Dモデル(build3DWinderCorner)と同じ割付で、下辺から入り右下の内側隅を廻って右辺へ抜ける。
@@ -2328,6 +2409,11 @@ function applyHandleDrag(cx,cy,e){
       var snapped=applyEdgeSnap(nx,ny,it.w||0,it.d||0,it.id,it.rot||0);
       nx=snapped.x; ny=snapped.y; ST._snapState=snapped;
     } else { ST._snapState=null; }
+    // 階段の部材は、ほかの部材の出入り口へ吸い付く(つながりの判定と同じ辺で見る)。
+    if(isStairPartType(it.type)&&typeof stairSnapPosition==='function'){
+      var ss=stairSnapPosition(it,nx,ny);
+      nx=ss.x; ny=ss.y;
+    }
     it.x=nx; it.y=ny;
 
   }else if(h==='rot'){

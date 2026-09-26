@@ -1271,6 +1271,9 @@ function updateSelectedBaseFloor(value){
   var targets=[it];
   if(kind==='stair') targets=getConnectedStairParts(it);
   targets.forEach(function(o){ delete o.baseRoom; delete o.baseLevel; });
+  // つながった部材まで書き換えるので、共同編集の相手へ全部を送る。
+  if(targets.length>1&&typeof SHARED!=='undefined'&&SHARED&&SHARED.roomId&&!SHARED.applying&&typeof sharedMarkObjectsDirty==='function')
+    sharedMarkObjectsDirty(targets);
   var v=String(value||'auto');
   if(v.indexOf('room:')===0) it.baseRoom=v.slice(5);
   else if(v==='floor'||v==='skip'||(v==='under'&&kind==='item')) it.baseLevel=v;
@@ -1467,6 +1470,7 @@ function item3DBaseY(it){
   // stairUpperSpanM)。パーツの中心から採ると、段差の上から始まる階段が
   // footprint の中心のはみ出しだけで低い側から始まってしまう。
   if(typeof isStairPartType==='function'&&isStairPartType(it.type)){
+    if(typeof isFloorLanding==='function'&&isFloorLanding(it)) return floorLandingBaseY(it);
     if(stairGroupIsLevel(it)) return stairLevelSpanM(it).baseY;
     return stairUpperSpanM(it).baseY;
   }
