@@ -1096,3 +1096,30 @@ test('27-2(最重要): 立面図の輪郭は、建物の平面の広がりの外
   });
   assert.ok(checked > 100, '見た点が少なすぎる: ' + checked);
 });
+
+// ── 立面図の窓とドアの高さ ─────────────────────────────────────────────
+// 立面図は窓とドアの下端を階の基準面(床の構造の下面 = 基礎の天端)から測っていて、
+// 床の厚みと部屋の床上げのぶん、3D より 180〜330mm 低く描いていた。3D で建具を
+// 置く高さ(item3DBaseY)から測る。玄関の床を下げたドアも一緒に下がる。
+test('立面図の窓とドアは、3D で建具を置く高さから描く', () => {
+  const data = gableHouse(null, 'flat');
+  const south = data.walls.find((w) => w.id === 'w1s');       // y=5000 の外壁(南立面に正対)
+  data.items.push(
+    { id: 'win', type: 'window', floor: 1, x: 1000, y: 4940, w: 1600, d: 120, rot: 0, windowSill: 900, windowHeight: 1100, _base: 0.78 },
+    { id: 'door', type: 'door-front', floor: 1, x: 4000, y: 4900, w: 900, d: 200, rot: 0, doorHeight: 2000, _base: 0.48 });
+  const ctx = full(data);
+  ctx.getOpeningWallInfo = (it) => ({ wall: south, x: it.x + it.w / 2, y: 5000, rot: 0 });
+  ctx.item3DBaseY = (it) => it._base;                          // 3D の置き高さ(ここでは与える)
+  ctx.openingSillMm = (it) => (it.type === 'window' ? it.windowSill : 0);
+  ctx.openingHeightMm = (it) => (it.type === 'window' ? it.windowHeight : it.doorHeight);
+  ctx.effectiveWindowKind = () => 'sliding';
+  ctx.isNoDoorOpeningType = () => false;
+  const body = bodyOf(elev(ctx, 's'));
+  const rects = [];
+  const re = /<rect x="([-\d.e]+)" y="([-\d.e]+)" width="([-\d.e]+)" height="([-\d.e]+)" fill="none" stroke="#000"/g;
+  let m;
+  while ((m = re.exec(body))) rects.push({ y: Number(m[2]), h: Number(m[4]) });
+  const bottoms = rects.map((r) => Math.round(r.y)).sort((a, b) => a - b);
+  // 窓: 780 + 900 = 1680(以前は基礎の天端 + 900 = 1350)。ドア: 480(以前は 450)
+  assert.deepEqual(bottoms, [480, 1680], '開口の下端 ' + JSON.stringify(rects));
+});
