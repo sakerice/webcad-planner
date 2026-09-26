@@ -63,7 +63,7 @@
       2200
     ],
     "license": "CC0",
-    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; 2:1 source stacked to a square; tile scale set to 2.2m (source states 1.1m) to reduce visible repetition; no displacement geometry."
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; 2:1 source stacked to a square; tile scale set to 2.2m (source states 1.1m) to reduce visible repetition; no displacement geometry. Color regraded to a warm neutral grey (trowel marks at 75% contrast) so it does not read lavender under the sky light."
   },
   {
     "key": "concrete_brush",
@@ -89,7 +89,7 @@
       2000
     ],
     "license": "CC0",
-    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; source gives no physical size, 2m assumed; no displacement geometry."
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 512px JPEG; source gives no physical size, 2m assumed; no displacement geometry. Color desaturated to 72%, warmed slightly, with a seamless low-frequency brightness variation (±7%) so large lawns do not read as a flat carpet."
   },
   {
     "key": "interlocking",
@@ -115,7 +115,7 @@
       1800
     ],
     "license": "CC0",
-    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 1024px JPEG; 2:1 source stacked to a square; scaled so one tile is 300mm (source states 1.1m width = 6 tiles); no displacement geometry."
+    "processing": "Color and OpenGL normal maps from the 1K-JPG pack, resized to 1024px JPEG; 2:1 source stacked to a square; scaled so one tile is 300mm (source states 1.1m width = 6 tiles); no displacement geometry. Color regraded to a warm neutral grey keeping joint contrast."
   },
   {
     "key": "gravel_white",
