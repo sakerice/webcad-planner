@@ -11623,13 +11623,17 @@ function build3DRoofGapInfills(){
       var verts=[], uvs=[], idx=[], along=0, k, p, q;
       // run.(nx,ny) は屋根の内側向き。外側の面は縁から厚みぶん外、内側の面は縁の 10mm 外。
       var o=-ROOF_GAP_WALL_THICK_M, t=-ROOF_GAP_INNER_GAP_M;
+      var capM=ROOF_GAP_CAP_MM*U;
+      // 壁の天端は、外へ伸ばした屋根の下面(縁からの距離で直線に補間)。
+      function capBottomAt(p,dist){ return p.top+(p.capBottomOut-p.top)*Math.min(1,dist/capM); }
       for(k=0;k<run.pts.length;k++){
         p=run.pts[k];
         if(k>0){ q=run.pts[k-1]; along+=Math.hypot(p.x-q.x,p.y-q.y)*U; }
         var ox=p.x*U+run.nx*o, oz=p.y*U+run.ny*o, ix=p.x*U+run.nx*t, iz=p.y*U+run.ny*t;
+        var otop=capBottomAt(p,-o), itop=capBottomAt(p,-t);
         // 0:外下 1:外上 2:内下 3:内上
-        verts.push(ox,p.bottom,oz, ox,p.top,oz, ix,p.bottom,iz, ix,p.top,iz);
-        uvs.push(along/tile,p.bottom/tile, along/tile,p.top/tile, along/tile,p.bottom/tile, along/tile,p.top/tile);
+        verts.push(ox,p.bottom,oz, ox,otop,oz, ix,p.bottom,iz, ix,itop,iz);
+        uvs.push(along/tile,p.bottom/tile, along/tile,otop/tile, along/tile,p.bottom/tile, along/tile,itop/tile);
       }
       for(k=0;k<run.pts.length-1;k++){
         var a=k*4, b=(k+1)*4;
@@ -11651,8 +11655,56 @@ function build3DRoofGapInfills(){
       mesh.userData.roofGapInfill=true;
       mark3DSelectable(mesh,H,'item');
       sc3.add(mesh);
+      build3DRoofGapCap(H,run);
     });
   });
+}
+// 塞ぐ壁の上に伸ばした、高い方の屋根の続き。上面は屋根の仕上げ、下面・小口・両端は
+// 屋根の「厚み部分の色」。縁の 3mm 内側から始めて、屋根の板と継ぎ目を開けない。
+function build3DRoofGapCap(H,run){
+  var ap=resolveRoofAppearance(H);
+  var roofTex=ap.texture?getTexture3D(ap.texture):null, rtc=roofTex?cloneRepeatReadyTexture(roofTex):null;
+  if(rtc){ rtc.wrapS=rtc.wrapT=THREE.RepeatWrapping; rtc.repeat.set(1,1); applyTextureFlip(rtc,ap); }
+  var topMat=makeExteriorLightingMaterial({map:rtc||null,color:rtc?0xffffff:(ap.color||'#2a2a30'),side:THREE.DoubleSide,roughness:0.92,metalness:0,envMapIntensity:0.06});
+  var edgeMat=makeExteriorLightingMaterial({color:H.roofEdgeColor||'#3a2f2a',side:THREE.DoubleSide,roughness:0.82,envMapIntensity:0.14});
+  var capM=ROOF_GAP_CAP_MM*U, inM=-0.003, TILE=0.8;
+  var topV=[], topUV=[], topI=[], edV=[], edI=[], k;
+  for(k=0;k<run.pts.length;k++){
+    var p=run.pts[k];
+    var ix=p.x*U+run.nx*(-inM), iz=p.y*U+run.ny*(-inM), ox=p.x*U-run.nx*capM, oz=p.y*U-run.ny*capM;
+    // 上面 0:内 1:外
+    topV.push(ix,p.capTopIn,iz, ox,p.capTopOut,oz);
+    topUV.push(ix/TILE,iz/TILE, ox/TILE,oz/TILE);
+    // 下面・小口 0:内下 1:外下 2:外上
+    edV.push(ix,p.top,iz, ox,p.capBottomOut,oz, ox,p.capTopOut,oz);
+  }
+  for(k=0;k<run.pts.length-1;k++){
+    var a=k*2, b=(k+1)*2;
+    topI.push(a,b,b+1, a,b+1,a+1);
+    var c=k*3, d=(k+1)*3;
+    edI.push(c,d,d+1, c,d+1,c+1);          // 下面
+    edI.push(c+1,d+1,d+2, c+1,d+2,c+2);    // 外の小口
+  }
+  // 両端の小口(内下・外下・外上・内上の四角)
+  function endCap(i){
+    var p=run.pts[i], base=edV.length/3;
+    var ix=p.x*U+run.nx*(-inM), iz=p.y*U+run.ny*(-inM), ox=p.x*U-run.nx*capM, oz=p.y*U-run.ny*capM;
+    edV.push(ix,p.top,iz, ox,p.capBottomOut,oz, ox,p.capTopOut,oz, ix,p.capTopIn,iz);
+    edI.push(base,base+1,base+2, base,base+2,base+3);
+  }
+  endCap(0); endCap(run.pts.length-1);
+  function add(v,uv,idx,mat){
+    var g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+    if(uv) g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    g.setIndex(idx); g.computeVertexNormals();
+    var m=new THREE.Mesh(g,mat);
+    m.castShadow=true; m.receiveShadow=true; m.userData.b=true; m.userData.roofGapCap=true;
+    mark3DSelectable(m,H,'item');
+    sc3.add(m);
+  }
+  add(topV,topUV,topI,topMat);
+  add(edV,null,edI,edgeMat);
 }
 function build3DRoofItem(grp,it,w3,d3){
   var type=it.roofType||'gable';

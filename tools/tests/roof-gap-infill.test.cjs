@@ -42,7 +42,7 @@ function ctx(opts) {
     defaultExteriorFloorSetting: () => ({}),
     WALL_COLORS: { 1: '#5c3820' },
   });
-  vm.runInContext(['var ROOF_GAP_SAMPLE_MM=60;', 'var ROOF_GAP_MIN_M=0.03;'].concat(
+  vm.runInContext(['var ROOF_GAP_SAMPLE_MM=60;', 'var ROOF_GAP_MIN_M=0.03;', 'var ROOF_GAP_CAP_MM=140;'].concat(
     ['roofSlabThickM', 'roofSlabTopWorldYAt', 'roofSlabBottomWorldYAt', 'roofFootprintCornersMm', 'roofGapInfillRuns', 'roofGapInfillAppearance']
       .map(sliceFunction)).join('\n'), c);
   return c;
@@ -111,18 +111,49 @@ test('塞ぐ壁の厚みは縁の外(低い方の屋根の上)にあり、高い
     THREE: { BufferGeometry: Geo, Float32BufferAttribute: function (a) { this.array = a; },
       Mesh: function (g) { this.geometry = g; this.userData = {}; } },
     shouldRenderItemInCurrent3DView: () => true,
-    roofGapInfillRuns: () => [{ nx: 1, ny: 0, pts: [{ x: 5430, y: 5000, bottom: 4.39, top: 5.8 }, { x: 5430, y: 7000, bottom: 4.39, top: 4.8 }] }],
+    roofGapInfillRuns: () => [{ nx: 1, ny: 0, pts: [
+      { x: 5430, y: 5000, bottom: 4.39, top: 5.8, capTopIn: 6.06, capBottomOut: 5.8, capTopOut: 6.06 },
+      { x: 5430, y: 7000, bottom: 4.39, top: 4.8, capTopIn: 5.06, capBottomOut: 4.8, capTopOut: 5.06 }] }],
+    resolveRoofAppearance: () => ({ color: '#222' }), getTexture3D: () => null, cloneRepeatReadyTexture: () => null,
+    applyTextureFlip: () => {}, makeExteriorLightingMaterial: () => ({}),
     roofGapInfillAppearance: () => ({ color: '#fff' }),
     texTileM: () => 1, wallTextureTileHeight: () => 1,
     makeRoofGapInfillMaterial: () => ({}), mark3DSelectable: () => {},
     sc3: { add: (m) => built.push(m) },
   });
-  vm.runInContext(constLine + '\n' + src('build3DRoofGapInfills'), c);
+  vm.runInContext(constLine + '\nvar ROOF_GAP_CAP_MM=140;\n' + src('build3DRoofGapInfills') + '\n' + src('build3DRoofGapCap'), c);
   c.build3DRoofGapInfills();
-  assert.equal(built.length, 1);
-  const pos = built[0].geometry.attributes.position.array;
+  const wallMesh = built.find((m) => m.userData.roofGapInfill);
+  assert.ok(wallMesh, '壁が建っていない');
+  const pos = wallMesh.geometry.attributes.position.array;
+  // 伸ばした屋根(上面と、下面・小口の2つ)が、壁の外面より外まで覆う
+  const caps = built.filter((m) => m.userData.roofGapCap);
+  assert.equal(caps.length, 2);
+  const cxs = []; caps.forEach((m) => { const a = m.geometry.attributes.position.array; for (let i = 0; i < a.length; i += 3) cxs.push(a[i] * 1000); });
+  assert.ok(Math.min(...cxs) <= 5430 - 130, '屋根が壁の外面まで伸びていない: ' + Math.min(...cxs));
+  assert.ok(Math.max(...cxs) >= 5430, '屋根の板と継ぎ目が開いている: ' + Math.max(...cxs));
+  // 壁の天端は伸ばした屋根の下面を越えない
+  for (let i = 0; i < pos.length; i += 3) assert.ok(pos[i + 1] <= 5.8 + 1e-9);
   const xs = []; for (let i = 0; i < pos.length; i += 3) xs.push(pos[i] * 1000);
   // 屋根の内側向きは +x(縁 x=5430 の東が高い方の屋根)。壁はすべて縁より西にある。
   assert.ok(Math.max(...xs) <= 5430 - 5, '壁が高い方の屋根の下(室内側)へ出ている: ' + Math.max(...xs));
   assert.ok(Math.min(...xs) <= 5430 - 100, '厚みが取れていない: ' + Math.min(...xs));
+});
+
+// 利用者の報告: 屋根の外に壁がある(壁の天端と外面が高い方の屋根の外にむき出し)。
+// 高い方の屋根を、塞ぐ壁の上まで外へ伸ばす。
+test('高い方の屋根は、塞ぐ壁の上まで外へ伸びる(面をそのまま延長する)', () => {
+  const pts = ctx().roofGapInfillRuns(mono)[0].pts;
+  pts.forEach((p) => {
+    // 西の縁は勾配と平行(南北に下がる)なので、外へ延ばしても高さは変わらない
+    assert.ok(Math.abs(p.capBottomOut - p.top) < 1e-6, '縁と平行な方向で高さが変わっている');
+    assert.ok(Math.abs(p.capTopIn - p.top - 0.26) < 1e-6, '上面は板の厚みぶん上');
+    assert.ok(Math.abs(p.capTopOut - p.capBottomOut - 0.26) < 1e-6);
+  });
+  // 勾配と直交する縁: 東へ上る片流れの西の縁では、外へ延ばすと勾配どおり下がる
+  const east = (rf, x, y) => (rf === mono ? 5.0 + (x - 5430) / 3730 * 1.5 : 4.13);
+  const q = ctx({ surface: east }).roofGapInfillRuns(mono)[0].pts[0];
+  const perMm = 1.5 / 3730;
+  assert.ok(Math.abs((q.top - q.capBottomOut) - perMm * 145) < 1e-6, '勾配どおりに延びていない ' + (q.top - q.capBottomOut));
+  assert.ok(q.capBottomOut > q.bottom, '延ばした屋根の下面が低い方の屋根を割っている');
 });
