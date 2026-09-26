@@ -8811,7 +8811,30 @@ function wallCoreBoxHitMm(o,px,py){
   return t>=-WALL_CORE_END_PAD_MM && t<=olen+WALL_CORE_END_PAD_MM
       && sdist<=(o.thick||120)/2;
 }
-function wallEndCornerExtensionMm(w,atEnd){
+// 角の取り合いで相手にしてよい壁か。同じ階の壁に加えて、**下の階から立ち上がって
+// この階まで届いている壁**(勾配屋根の下で屋根まで立ち上げた外壁)も相手にする。
+// 同じ階だけを見ていた頃は、2階の壁の端がその立ち上げた外壁の面で止まり、
+// 端の断面が吹き抜けの中に縦の線として見えた(報告された)。
+function wallJoinsAtCorner(o,w){
+  if(!o||!w||o===w) return false;
+  var fo=o.floor||1, fw=w.floor||1;
+  if(fo===fw) return true;
+  if(fo!==fw-1) return false;
+  // 高さの計算を持たない場面(平面だけを扱う処理や検査)では、同じ階の壁だけを見る。
+  if(typeof wallDisplayHeightM!=='function'||typeof floorBaseY!=='function') return false;
+  var cache=(typeof _roofBaseCache!=='undefined'&&_roofBaseCache)?_roofBaseCache:null;
+  var key='rise:'+o.id;
+  if(cache&&cache[key]!==undefined) return cache[key];
+  var prof=(typeof wallTopProfileM==='function')?wallTopProfileM(o):null;
+  var maxH=prof?prof.reduce(function(m,p){ return p[1]>m?p[1]:m; },-Infinity):wallDisplayHeightM(o);
+  var rises=floorBaseY(fo)+maxH>floorBaseY(fw)+0.05;
+  if(cache) cache[key]=rises;
+  return rises;
+}
+// info を渡すと、端が相手の壁の面にぴったり止まっている(面合わせの突き当たり)か
+// を info.flush に書く。そのときは突き付けの余り(WALL_CORE_END_PAD_MM)を足さない --
+// 足すと端の断面が相手の仕上げ面より手前へ出て、縦の線として見える(報告された)。
+function wallEndCornerExtensionMm(w,atEnd,info){
   if((w.thick||0)<120) return 0;
   var px=atEnd?w.x2:w.x1, py=atEnd?w.y2:w.y1;
   var wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
@@ -8826,7 +8849,7 @@ function wallEndCornerExtensionMm(w,atEnd){
   // 通常の出隅は相手が1枚なので min でも max でも同じ値になる。
   var need=Infinity;
   DATA.walls.forEach(function(o){
-    if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
+    if(!wallJoinsAtCorner(o,w) || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen=Math.hypot(odx,ody);
     if(olen<1) return;
     var sinA=Math.abs(wdx*ody-wdy*odx)/(wlen*olen);
@@ -8846,6 +8869,7 @@ function wallEndCornerExtensionMm(w,atEnd){
     var tt=((qx-o.x1)*odx+(qy-o.y1)*ody)/(olen*olen);
     if(tt<-0.02||tt>1.02) return;     // 交点が相手の線分の範囲外
     var v=sAlong+toFace;              // 端から相手の外面まで。負や0なら既に閉じている
+    if(info&&v<=0.5&&v>=-WALL_CORE_END_PAD_MM) info.flush=true;
     if(v<need) need=v;
   });
   if(!isFinite(need)||need<=0) return 0;
@@ -8856,7 +8880,7 @@ function wallEndCornerExtensionMm(w,atEnd){
     var sx=px+ux*reach+nx*half*sg, sy=py+uy*reach+ny*half*sg;
     var covered=false;
     DATA.walls.forEach(function(o){
-      if(covered||o===w||o.floor!==w.floor||(o.thick||0)<120) return;
+      if(covered||!wallJoinsAtCorner(o,w)||(o.thick||0)<120) return;
       if(wallSolidCoverHeightMm(o)<myH-50) return;  // 腰高の手すり壁では塞げない
       if(wallCoreBoxHitMm(o,sx,sy)) covered=true;
     });
@@ -8870,7 +8894,7 @@ function wallCornerExtensionMm(w,atEnd){
   if(wlen<1) return 0;
   var best=0;
   DATA.walls.forEach(function(o){
-    if(o===w || o.floor!==w.floor || (o.thick||0)<120) return;
+    if(!wallJoinsAtCorner(o,w) || (o.thick||0)<120) return;
     var odx=o.x2-o.x1, ody=o.y2-o.y1, olen2=odx*odx+ody*ody;
     if(olen2<1) return;
     // 延長が必要なのはL字・T字など、壁面同士が角度を持って交差する接合だけ。
@@ -9287,8 +9311,12 @@ function buildWall3D(w){
   var extSpans=getWallExteriorSpans(w);
   // 出隅の欠けを埋める延長(mm→m)。従来は一律6mmで、直交する2枚の芯線の端が
   // 同じ点に来る出隅に「厚/2 × 厚/2」の四角い欠けが残っていた
-  var endExtA=Math.max(0.006,wallEndCornerExtensionMm(w,false)*U);
-  var endExtB=Math.max(0.006,wallEndCornerExtensionMm(w,true)*U);
+  var endInfoA={}, endInfoB={};
+  var endExtA=wallEndCornerExtensionMm(w,false,endInfoA)*U;
+  var endExtB=wallEndCornerExtensionMm(w,true,endInfoB)*U;
+  // 相手の面にぴったり止まる端には余りを足さない(断面が面から出ないように)。
+  endExtA=endInfoA.flush&&endExtA<=0?0:Math.max(0.006,endExtA);
+  endExtB=endInfoB.flush&&endExtB<=0?0:Math.max(0.006,endExtB);
   // 外装面も同じだけ伸ばさないと、伸ばしたコアの断面が角に帯として露出する
   if(extSpans.length){
     var spanFirst=extSpans[0], spanLast=extSpans[0];
@@ -9351,7 +9379,7 @@ function buildWall3D(w){
     if(reachesTop){
       // 立ち上げの高さはその位置の屋根で決まる(wallTopHeightAtM の raiseT)。
       // ここでは上乗せ分(WALL_TOP_OVERSHOOT_M)を屋根の板の下面で止めるだけ。
-      var up=wallRaiseTopWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*rawT,w.y1+(w.y2-w.y1)*rawT);
+      var up=wallRaiseTopNearWorldY(w,slopedTopRaise,w.x1+(w.x2-w.x1)*rawT,w.y1+(w.y2-w.y1)*rawT);
       // top は fy(持ち上がりを含む壁の足元)基準。立ち上げた分だけを屋根の板の下面で
       // 止める。ピース自身の天端より下へは下げない -- 軒では屋根の板の方が厚く、
       // そこで下げると外皮の高さを割ってスリットが開く(Task 2b)。屋根が軒で階高より
@@ -9361,6 +9389,13 @@ function buildWall3D(w){
     }
     if(top<yBase+0.001) top=yBase+0.001;
     return top;
+  }
+  // 上辺の点列。刻みは WALL_TOP_SAMPLE_STEP_M、屋根の境の段差だけ垂直に立てる
+  // (stepAwareSamples)。外装・内装の面とコアが同じ点列を通るので、段の位置がそろう。
+  function wallTopSamples(aa,bb,yBase,h){
+    var segs=Math.max(2,Math.min(160,Math.ceil((bb-aa)/WALL_TOP_SAMPLE_STEP_M))), ps=[], i;
+    for(i=0;i<=segs;i++) ps.push(aa+(bb-aa)*i/segs);
+    return stepAwareSamples(function(al){ return slopedTopAt(al,yBase,h); },ps);
   }
   function addExteriorFace(a,b,yBase,h){
     if(!extMat || !extSpans.length) return;
@@ -9515,13 +9550,13 @@ function buildWall3D(w){
   // そこまで下りてきているところだけを切る。開口が天井からはみ出しても検出も
   // 警告もしない(見れば分かる異常なので、検出の実装ごと省く)。
   function slopedFaceMesh(aa,bb,yBase,h,offsetM,sign,faceMat){
-    var segs=Math.max(2,Math.min(160,Math.ceil((bb-aa)/WALL_TOP_SAMPLE_STEP_M)));
+    var smp=wallTopSamples(aa,bb,yBase,h), segs=smp.length-1;
     var verts=[], uvs=[], idx=[], i, lx, along, top, p, n;
     var lz=sign*offsetM;
     for(i=0;i<=segs;i++){
-      lx=(bb-aa)*i/segs;
-      along=aa+lx;
-      top=slopedTopAt(along,yBase,h);
+      along=smp[i].pos;
+      lx=along-aa;
+      top=smp[i].y;
       verts.push(lx,yBase,lz, lx,top,lz);
       // UV は applyWallFaceUv と同じ規約: u=壁の全長に対する位置、v=壁の全高に対する高さ
       uvs.push(along/len,yBase/wallH, along/len,top/wallH);
@@ -9549,11 +9584,11 @@ function buildWall3D(w){
     if(a<=0.002) coreA-=endExtA;
     if(b>=len-0.002) coreB+=endExtB;
 
-    var segs=Math.max(2,Math.min(160,Math.ceil((coreB-coreA)/WALL_TOP_SAMPLE_STEP_M)));
+    var smp=wallTopSamples(coreA,coreB,yBase,h), segs=smp.length-1;
     var verts=[], idxBody=[], idxTop=[], si, lx, top, p, n;
     for(si=0;si<=segs;si++){
-      lx=(coreB-coreA)*si/segs;
-      top=slopedTopAt(coreA+lx,yBase,h);
+      lx=smp[si].pos-coreA;
+      top=smp[si].y;
       verts.push(lx,yBase,-thick/2, lx,yBase,thick/2, lx,top,-thick/2, lx,top,thick/2);
     }
     for(si=0;si<segs;si++){
@@ -15111,9 +15146,85 @@ function ceilingSlopeSpan(r,u){
 // -- 分割すると既に勾配天井を宣言しているプランのジオメトリまで変わる。
 // 天井面のサンプリング間隔(m)。屋根の折れ(棟・隅棟)をこの刻みで近似する。
 var CEILING_SAMPLE_STEP_M=0.12;
+// 刻みで採った高さの列(位置 ps、高さ f)を、段差のところだけ垂直の段にする。
+// 2枚の屋根の境(陸屋根と片流れが並ぶ LDK)では天井も壁の頭も境で一気に跳ぶ。
+// 刻みの点を結ぶだけだと、跳びが1刻みぶんの斜面になり、低い側の屋根の小口が
+// その斜面を突き抜けて、段々の黒い帯に見えた(利用者のプラン)。
+// 跳びの位置を二分法で詰め、**高い側へ1〜2mm寄せた所**に2点を足して段を立てる
+// (低い側の屋根の小口を、天井・壁の面の奥に隠すため)。
+// 返すのは [{pos, y, at, step}]。at は高さを採った位置で、段の低い点だけ pos と違う。
+// step は段のために足した点の印。
+var STEP_JUMP_MIN_M=0.02;
+var STEP_JUMP_RATIO=4;
+function stepAwareSamples(f,ps){
+  var ys=ps.map(function(p){ return f(p); }), out=[], i, a, b, fa, fb, k, m, fm, d, L, add;
+  for(i=0;i<ps.length;i++){
+    out.push({pos:ps[i],y:ys[i],at:ps[i]});
+    if(i===ps.length-1) break;
+    d=ys[i+1]-ys[i]; L=ps[i+1]-ps[i];
+    if(!(L>0.005&&Math.abs(d)>STEP_JUMP_MIN_M&&Math.abs(d)>STEP_JUMP_RATIO*L)) continue;
+    a=ps[i]; b=ps[i+1]; fa=ys[i]; fb=ys[i+1];
+    for(k=0;k<16;k++){
+      m=(a+b)/2; fm=f(m);
+      if(Math.abs(fm-fa)>Math.abs(fb-fm)){ b=m; fb=fm; } else { a=m; fa=fm; }
+    }
+    if(fb>fa) add=[{pos:b+0.001,y:fa,at:a,step:true},{pos:b+0.002,y:f(b+0.002),at:b+0.002,step:true}];
+    else add=[{pos:a-0.002,y:f(a-0.002),at:a-0.002,step:true},{pos:a-0.001,y:fb,at:b,step:true}];
+    if(add[0].pos>ps[i]+0.0005&&add[1].pos<ps[i+1]-0.0005) out.push(add[0],add[1]);
+  }
+  return out;
+}
+// 格子の天井。x・z の刻みに、段差の位置(stepAwareSamples)を足した線で割る。
+// 段差が無ければ null(呼び出し側は従来の PlaneGeometry のまま)。
+function buildSteppedCeilingGrid(r,ceilY,segX,segZ){
+  function axis(n,a0,len){ var ps=[], i; for(i=0;i<=n;i++) ps.push(a0+len*i/n); return ps; }
+  var xs=axis(segX,r.x,r.w), zs=axis(segZ,r.y,r.d);
+  // 位置は mm。stepAwareSamples の 1〜2mm 寄せは m 単位の前提なので、m の列で回す。
+  function linesM(baseMm,otherMm,along){
+    var extra=[];
+    otherMm.forEach(function(o){
+      stepAwareSamples(function(pm){ return along?ceilY(pm/U,o):ceilY(o,pm/U); },
+        baseMm.map(function(p){ return p*U; })).forEach(function(s){
+        if(!s.step) return;
+        var pos=s.pos/U, at=s.at/U;
+        if(!extra.some(function(e){ return Math.abs(e.pos-pos)<0.5; })) extra.push({pos:pos,at:at});
+      });
+    });
+    return extra;
+  }
+  var ex=linesM(xs,zs,true), ez=linesM(zs,xs,false);
+  if(!ex.length&&!ez.length) return null;
+  function merge(base,extra){
+    return base.map(function(p){ return {pos:p,at:p}; }).concat(extra)
+      .sort(function(a,b){ return a.pos-b.pos; });
+  }
+  var gx=merge(xs,ex), gz=merge(zs,ez);
+  var verts=[], uvs=[], idx=[], i, j, nx=gx.length;
+  for(j=0;j<gz.length;j++) for(i=0;i<nx;i++){
+    verts.push(gx[i].pos*U, ceilY(gx[i].at,gz[j].at), gz[j].pos*U);
+    uvs.push((gx[i].pos-r.x)/r.w, 1-(gz[j].pos-r.y)/r.d);
+  }
+  for(j=0;j<gz.length-1;j++) for(i=0;i<nx-1;i++){
+    var a=j*nx+i, b=(j+1)*nx+i, c=(j+1)*nx+i+1, d=j*nx+i+1;
+    idx.push(a,b,d, b,c,d);
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  geo.setIndex(idx);
+  return geo;
+}
 function buildSlopedCeilingGeometry(r,holes,profile){
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
+  var drop=(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012);
+  function ceilY(xMm,yMm){ return roomCeilingWorldYAtMm(r,profile,xMm,yMm)-drop; }
   var geo;
+  if((!holes||!holes.length)&&profile.source==='roof'){
+    var sx=Math.max(1,Math.min(96,Math.ceil(rw/CEILING_SAMPLE_STEP_M)));
+    var sz=Math.max(1,Math.min(96,Math.ceil(rd/CEILING_SAMPLE_STEP_M)));
+    var stepped=buildSteppedCeilingGrid(r,ceilY,sx,sz);
+    if(stepped){ stepped.computeVertexNormals(); return stepped; }
+  }
   if(!holes||!holes.length){
     var segX=1, segZ=1;
     if(profile.source==='roof'){

@@ -110,7 +110,7 @@ const SETBACK_FNS = [
 // 壁の上端の折れ線(3D と共通の経路)。
 const TOP_VARS = ['CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM', 'ROOM_OVERLAP_WALL_TOL_MM',
   '_ceilingClampWarned', 'WALL_EXT_FACE_GAP_M', 'WALL_INT_FACE_GAP_M', 'WALL_FACE_JITTER_M',
-  'WALL_TOP_SAMPLE_STEP_M'];
+  'WALL_TOP_SAMPLE_STEP_M', 'STEP_JUMP_MIN_M', 'STEP_JUMP_RATIO'];
 const TOP_FNS = ['roofBaseWorldY',
   'roomDeclaresSlopedCeiling', 'roofItemOverRoom', 'roomRoofCeilingExtent',
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
@@ -122,7 +122,7 @@ const TOP_FNS = ['roofBaseWorldY',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM'
 ];
 // Task 24 で足した関数。**これだけが無い世界** = 変更前のコードである。
-const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
+const NEW_FNS = ['wallTopCutEnv', 'wallSameFloorRoofs', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM'];
 
 function makeCtx(data) {
   const ctx = vm.createContext({

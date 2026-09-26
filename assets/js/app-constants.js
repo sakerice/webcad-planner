@@ -1767,8 +1767,15 @@ function roomCeilingWorldYAtMm(room,profile,xMm,yMm){
       // 天井が棚のように落ちて、壁の上に謎の板が出た(報告された)。
       var near=null;
       if((roofs.length>1||roofs.indexOf(profile.roof)<0)&&room){
-        var cx=room.x+room.w/2, cy=room.y+room.d/2;
-        var vx=cx-xMm, vy=cy-yMm, vl=Math.hypot(vx,vy)||1;
+        // 寄せる向きは**いちばん近い辺から真っすぐ内側**。部屋の中心へ斜めに寄せると、
+        // 2枚の屋根の境の近くでは寄せた先が隣の屋根に入り、縁の帯だけ段差の位置が
+        // ずれて天井の段がねじれた(利用者のプラン: 陸屋根と片流れの境)。
+        var eL=xMm-room.x, eR=room.x+room.w-xMm, eT=yMm-room.y, eB=room.y+room.d-yMm;
+        var em=Math.min(eL,eR,eT,eB), vx=0, vy=0;
+        if(eL===em) vx+=1; if(eR===em) vx-=1;
+        if(eT===em) vy+=1; if(eB===em) vy-=1;
+        if(!vx&&!vy){ vx=room.x+room.w/2-xMm; vy=room.y+room.d/2-yMm; }
+        var vl=Math.hypot(vx,vy)||1;
         [40,80,160,320,640].some(function(dMm){
           var qx=xMm+vx/vl*dMm, qy=yMm+vy/vl*dMm;
           roofs.forEach(function(rf){
@@ -2191,7 +2198,7 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs,raiseT)
   // **切る前に**上げる。後で上げると、斜線の制限面などで切った分を元へ戻してしまう
   // (陸屋根も立ち上げの対象にしたとき、斜線で削った壁が陸屋根まで戻った)。
   var rt=(raiseT===undefined)?t:raiseT;
-  var up=wallRaiseTopWorldY(w,raiseRoofs,w.x1+dx*rt,w.y1+dy*rt);
+  var up=wallRaiseTopNearWorldY(w,raiseRoofs,w.x1+dx*rt,w.y1+dy*rt);
   if(up!==null&&best<up-fy) best=up-fy;
   // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
   var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
@@ -2341,6 +2348,46 @@ function wallRaiseTopWorldY(w,roofs,xMm,yMm){
     });
   });
   return best;
+}
+// 立ち上げの高さ(wallRaiseTopWorldY)を、屋根の縁の**少し外**でも返す版。
+// 屋根の縁に上階の壁が立ち、その端が下階の壁の上に載る隅(利用者のプラン:
+// 片流れの縁に立つ2階の壁と、屋根の下を立ち上がる1階の外壁)では、屋根が
+// 上階の壁の内面から始まるので、下階の壁は上階の壁の下の区間で立ち上がらない。
+// 上階の壁は下階の壁の内面で止まるため、隅の上半分が欠け、しかも立ち上がりの
+// 境が上辺の刻み(60mm)で斜めの辺になって隙間とめり込みに見えた。
+// 上階の壁の足元にあたる区間だけ、壁に沿っていちばん近い屋根の位置の高さを使う。
+function wallRaiseTopNearWorldY(w,roofs,xMm,yMm){
+  var y=wallRaiseTopWorldY(w,roofs,xMm,yMm);
+  if(y!==null||!roofs||!roofs.length) return y;
+  var reach=wallRaiseBridgeReachMm(w,xMm,yMm);
+  if(!(reach>0)) return null;
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy);
+  if(len<1) return null;
+  var ux=dx/len, uy=dy/len, d, s;
+  for(d=5;d<=reach;d+=5){
+    for(s=-1;s<=1;s+=2){
+      y=wallRaiseTopWorldY(w,roofs,xMm+ux*d*s,yMm+uy*d*s);
+      if(y!==null) return y;
+    }
+  }
+  return null;
+}
+// その点が上階の壁の足元(下階の壁の厚みぶん端の先まで含む)にあれば、屋根を
+// 探しに行ってよい距離(mm)。無ければ 0 -- 屋根の縁の外で壁が勝手に立ち上がり、
+// 屋根の上へ突き出すことはしない。
+function wallRaiseBridgeReachMm(w,xMm,yMm){
+  if(typeof DATA==='undefined'||!DATA||!DATA.walls) return 0;
+  var up=(w.floor||1)+1, ext=(w.thick||120)/2+20, i, u, udx, udy, ulen, t, p;
+  for(i=0;i<DATA.walls.length;i++){
+    u=DATA.walls[i];
+    if(!u||u===w||(u.floor||1)!==up||u.vis3D==='hide') continue;
+    udx=u.x2-u.x1; udy=u.y2-u.y1; ulen=Math.hypot(udx,udy);
+    if(ulen<1) continue;
+    t=((xMm-u.x1)*udx+(yMm-u.y1)*udy)/ulen;
+    p=Math.abs((xMm-u.x1)*udy-(yMm-u.y1)*udx)/ulen;
+    if(t>=-ext&&t<=ulen+ext&&p<=(u.thick||120)/2+20) return (u.thick||120)+40;
+  }
+  return 0;
 }
 // 上辺のサンプリング間隔(m)。棟や隅棟の折れをこの刻みで折れ線に落とす。
 // 天井面(CEILING_SAMPLE_STEP_M)より細かく採る。折れをまたぐ区間では弦が真の面より

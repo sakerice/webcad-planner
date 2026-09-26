@@ -89,7 +89,7 @@ const DRAW_FNS = [
   'floorSlabMmForFloor', 'localSupportTopY', 'floorHasSkipLevel', 'wallSkipBaseMm', 'wallSkipLevelsMm', 'wallSkipFootMm', 'floorMaxSkipLevelMm', 'roomSkipLevelMm', 'segmentInsideRectLengthMm',
   'floorBaseY', 'floorSlabHeightM', 'floorSlabHeightMForFloor', 'floorTopY',
   'wallFullHeightM', 'isPositiveNumber', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'getObjBounds', 'isFiniteCanvasValue'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallJoinsAtCorner', 'getObjBounds', 'isFiniteCanvasValue'
 ];
 const DRAW_VARS = ['FMP_ITEMS', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'FLOOR_H', 'FLOOR_SLAB_H'];
 // 複数行のオブジェクトリテラル（1行の var 抽出では取れない）。
