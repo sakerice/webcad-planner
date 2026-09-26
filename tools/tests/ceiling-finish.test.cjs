@@ -328,15 +328,16 @@ const WIRE_FNS = [
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
   'textureImageAspect', 'setTextureRepeatNoDistort', 'applyTextureFlip',
   'appearanceWithTextureOrientation', 'withCeilingDepthBias', 'makeCeilingMaterial',
-  'resolveRoomCeilingAppearance', 'makeRoomCeilingMaterial', 'buildRooms3D'
+  'resolveRoomCeilingAppearance', 'makeRoomCeilingMaterial', 'autoRoomLightsEnabled', 'buildRooms3D'
 ];
 const WIRE_VARS = ['U', 'WALL_H', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', '_roofCeilingExtentCache', 'ROOM_OVERLAP_EPS_MM', 'ROOM_OVERLAP_WALL_TOL_MM',
   'CEILING_TEXTURE_TILE_M', 'CEILING_DEFAULT_COLOR'];
 
-function builtCeilings(data, floor) {
+function builtCeilings(data, floor, counts) {
   const got = [];
   const noop = function () { return { position: { set: function () {} }, userData: {} }; };
+  const light = function () { if (counts) counts.lights = (counts.lights || 0) + 1; return noop(); };
   const ctx = vm.createContext({
     console: console, HeightModel: HeightModel, DATA: data,
     Math: Math, Number: Number, Object: Object, Array: Array, JSON: JSON,
@@ -344,7 +345,7 @@ function builtCeilings(data, floor) {
     ST: { view: '3d-ext', floor: floor },
     isInt: false, PV_INTERIOR_DAYLIGHT: null,
     LIGHT_SETTINGS: { room: 1, env: 0 },
-    THREE: Object.assign(makeThree(), { Mesh: noop, PointLight: noop, CylinderGeometry: noop, Color: function () { return {}; } }),
+    THREE: Object.assign(makeThree(), { Mesh: noop, PointLight: light, CylinderGeometry: noop, Color: function () { return {}; } }),
     isWalkView: function () { return false; },
     isLightItemType: function () { return false; },
     makeRoomFloorMaterial: function () { return {}; },
@@ -586,4 +587,15 @@ test('部屋のプロパティ欄から天井の仕上げの欄が呼ばれて�
 test('天井メッシュの材質は部屋ごとの関数を通っている（1つの材質を配り回していない）', () => {
   assert.ok(html.indexOf('buildRoomCeilingMesh(r,ceilY,makeRoomCeilingMaterial(r,matCeiling)') !== -1,
     'buildRooms3D が部屋ごとの天井材質を作っていない');
+});
+
+// 照明を置いていない部屋の自動照明を切れる(利用者の要望)。切った指定はプランに
+// DATA.autoRoomLights=false として残り、書かれていないプランは従来どおり点く。
+test('自動照明を切ると、照明を置いていない部屋にも自動の光源を作らない', () => {
+  const on = {}, off = {};
+  builtCeilings(twoRoomHouse(), 1, on);
+  const house = twoRoomHouse(); house.autoRoomLights = false;
+  builtCeilings(house, 1, off);
+  assert.ok(on.lights > 0, '既定(指定なし)で自動照明が点いていない');
+  assert.equal(off.lights || 0, 0, '切ったのに自動の光源を作っている');
 });
