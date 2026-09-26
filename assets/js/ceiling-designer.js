@@ -50,13 +50,15 @@ function ceilingGroup(r,ceilY,mat,holes,profile){
   m.map=null;m.color.set(a.color||'#eee8dd');return m;
  };
  const group=new THREE.Group();group.userData={b:true,ceiling:true,roomId:r.id};const aa=areas(r);const all=(holes||[]).slice();
- aa.forEach(a=>all.push([{x:(r.x+a.x)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y+a.d)*U},{x:(r.x+a.x)*U,z:(r.y+a.y+a.d)*U}]));
+ // 間接照明を仕込んだ下げ天井は、元の天井から離れて浮く箱になる。箱の上にも元の天井が
+ // 続いていないと、光を受ける面が無い。だから元の天井に穴を開けない。
+ aa.filter(a=>!coveOf(a)).forEach(a=>all.push([{x:(r.x+a.x)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y)*U},{x:(r.x+a.x+a.w)*U,z:(r.y+a.y+a.d)*U},{x:(r.x+a.x)*U,z:(r.y+a.y+a.d)*U}]));
  let base;
  if(profile){
   // 勾配天井は格子の面なので、穴の輪郭で作り直さず(形が崩れる)、そのまま建てて
   // 範囲の矩形だけを切り抜く。
   base=buildRoomCeilingMesh(r,ceilY,mat,holes,profile);base.updateMatrixWorld(true);
-  aa.forEach(a=>cutMesh(base,new THREE.Box3(new THREE.Vector3((r.x+a.x)*U,-1e3,(r.y+a.y)*U),new THREE.Vector3((r.x+a.x+a.w)*U,1e3,(r.y+a.y+a.d)*U))));
+  aa.filter(a=>!coveOf(a)).forEach(a=>cutMesh(base,new THREE.Box3(new THREE.Vector3((r.x+a.x)*U,-1e3,(r.y+a.y)*U),new THREE.Vector3((r.x+a.x+a.w)*U,1e3,(r.y+a.y+a.d)*U))));
  } else base=buildRoomCeilingMesh(r,ceilY,mat,all,null);
  if(active())mark3DSelectable(base,r,'room');group.add(base);
  aa.forEach(a=>{
@@ -67,9 +69,45 @@ function ceilingGroup(r,ceilY,mat,holes,profile){
   const cy0=profile?areaBaseY(r,a):ceilY;
   const x=(r.x+a.x+a.w/2)*U,z=(r.y+a.y+a.d/2)*U,w=a.w*U,d=a.d*U,y=cy0+a.offset*U-inset;
   const face=new THREE.Mesh(new THREE.PlaneGeometry(w,d),m);face.rotation.x=Math.PI/2;face.position.set(x,y,z);face.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};const ref=DATA.items.find(it=>it.type==='ceiling-area'&&it.id===a.id);if(ref)mark3DSelectable(face,ref,'item');group.add(face);
-  const h=Math.abs(a.offset)*U,mid=(cy0-inset+y)/2;
+  const cove=coveOf(a);
+  // 立ち上がりの上端。間接照明を仕込むときは、元の天井より光の出口ぶん下で止める。
+  const topY=cove?cy0-inset-cove.gapM:cy0-inset;
+  const h=Math.max(.001,topY-y),mid=(topY+y)/2;
   [[x-w/2,z,.006,d],[x+w/2,z,.006,d],[x,z-d/2,w,.006],[x,z+d/2,w,.006]].forEach(p=>{const side=new THREE.Mesh(new THREE.BoxGeometry(p[2],h,p[3]),fascia);side.position.set(p[0],mid,p[1]);side.userData={b:true,ceiling:true,roomId:r.id,ceilingAreaId:a.id};if(ref)mark3DSelectable(side,ref,'item');group.add(side);});
+  if(cove)buildCove(group,a,ref,x,z,w,d,topY,fascia);
  });return group;
+}
+// 下げ天井に仕込む間接照明(コーブ照明)。
+// 下げ天井は多くの場合、縁に間接照明を仕込む(利用者)。箱の立ち上がりを元の天井の
+// 光の出口(既定 100mm)ぶん手前で止め、箱の上の縁に線照明を置いて、元の天井を
+// 斜め上・外へ照らす。器具は立ち上がりの陰になり、下からは見えない。
+// 仕込めるのは下げ天井だけ(折り上げは光の当たる面の側が違う)。段差が光の出口より
+// 40mm 以上深くないと箱にならないので、そのときは仕込まない。
+const COVE_GAP_DEFAULT_MM=100, COVE_SETBACK_M=.06;
+function coveOf(a){
+ if(!a||!a.cove||!(a.offset<0))return null;
+ const gap=Math.max(40,Math.min(300,Number(a.coveGap)||COVE_GAP_DEFAULT_MM));
+ if(-a.offset<gap+40)return null;
+ const intensity=Math.max(0,Math.min(3,isFinite(Number(a.coveIntensity))?Number(a.coveIntensity):.8));
+ return {gapM:gap*U,color:a.coveColor||'#ffd9a8',intensity};
+}
+function buildCove(group,a,ref,x,z,w,d,topY,fascia){
+ const cove=coveOf(a);
+ // 箱の上板(光の出口から覗くと見える)。
+ const lid=new THREE.Mesh(new THREE.PlaneGeometry(w,d),fascia);lid.rotation.x=-Math.PI/2;lid.position.set(x,topY,z);
+ lid.userData={b:true,ceiling:true,ceilingAreaId:a.id};group.add(lid);
+ const color=new THREE.Color(cove.color);
+ const ledMat=new THREE.MeshStandardMaterial({color:color,emissive:color,emissiveIntensity:1.2,roughness:.5});
+ const it={lightIntensity:cove.intensity,lightRange:4000};
+ // 4辺それぞれ、縁から少し内側に、外向き・斜め上へ照らす線照明。
+ [[0,-1,w],[0,1,w],[-1,0,d],[1,0,d]].forEach(([ox,oz,len])=>{
+  const L=Math.max(.1,len-COVE_SETBACK_M*2);
+  const cx=x+ox*(w/2-COVE_SETBACK_M),cz=z+oz*(d/2-COVE_SETBACK_M);
+  const along=ox?new THREE.Vector3(0,0,1):new THREE.Vector3(1,0,0);
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(ox?.02:L,.012,ox?L:.02),ledMat);strip.position.set(cx,topY+.006,cz);
+  strip.userData={b:true,coveLed:true};group.add(strip);
+  if(typeof addLineLight==='function')addLineLight(group,it,color,L,'up',{at:new THREE.Vector3(cx,topY+.014,cz),along,dir:new THREE.Vector3(ox*.55,.83,oz*.55).normalize()});
+ });
 }
 function active(){return !!ST.ceilingView&&(ST.view==='2d'||ST.view==='3d-int');}
 function zone(it){return it&&it.type==='ceiling-area';}
@@ -112,7 +150,7 @@ function drawClick(x,y){
 }
 function drawArea(it){
  if(!active())return;const sc=ST.zoom*.05,x=ST.panX+it.x*sc,y=ST.panY+it.y*sc;
- ctx.save();ctx.fillStyle=it.color||'#e4ddd1';ctx.globalAlpha=.8;ctx.fillRect(x,y,it.w*sc,it.d*sc);ctx.globalAlpha=1;ctx.strokeStyle=ST.selected===it?'#e94560':'#8e8375';ctx.lineWidth=1.5;ctx.setLineDash(it.offset>0?[5,3]:[]);ctx.strokeRect(x,y,it.w*sc,it.d*sc);ctx.setLineDash([]);ctx.fillStyle='#56534b';ctx.font='12px sans-serif';ctx.fillText((it.offset<0?'下げ ':'折り上げ +')+it.offset+'mm',x+5,y+17,Math.max(10,it.w*sc-10));ctx.restore();if(ST.selected===it&&ST.tool==='select')drawHandles(it,x+it.w*sc/2,y+it.d*sc/2,it.w*sc/2,it.d*sc/2,sc);
+ ctx.save();ctx.fillStyle=it.color||'#e4ddd1';ctx.globalAlpha=.8;ctx.fillRect(x,y,it.w*sc,it.d*sc);ctx.globalAlpha=1;ctx.strokeStyle=ST.selected===it?'#e94560':'#8e8375';ctx.lineWidth=1.5;ctx.setLineDash(it.offset>0?[5,3]:[]);ctx.strokeRect(x,y,it.w*sc,it.d*sc);ctx.setLineDash([]);ctx.fillStyle='#56534b';ctx.font='12px sans-serif';ctx.fillText((it.offset<0?'下げ ':'折り上げ +')+it.offset+'mm'+(coveOf(it)?'・間接照明':''),x+5,y+17,Math.max(10,it.w*sc-10));ctx.restore();if(ST.selected===it&&ST.tool==='select')drawHandles(it,x+it.w*sc/2,y+it.d*sc/2,it.w*sc/2,it.d*sc/2,sc);
 }
 function props(it){
  document.getElementById('props-title').textContent='天井範囲 の設定';
@@ -123,10 +161,25 @@ function props(it){
   +(it.texture?'<button class="pbtn sec" onclick="updateSelectedProp(\'texture\',null)">テクスチャ解除</button>':'')
   +selectedTextureFlipControlsHtml(it)
   +(it.texture?'<div class="lock-status-note">テクスチャを設定しているあいだ、仕上げ色は段差の立ち上がりにだけ効きます（部屋の天井仕上げと同じ決まりです）。</div>':'')
+  +coveProps(it)
   +'<p class="model-finish-note">通常のハンドルで移動・サイズ変更できます。照明の取付高さは天井の変更に追従します。</p>'+selectedDeleteButtonHtml();
  setPropsBodyHtml(document.getElementById('props-body'),html,it);
  const name=document.getElementById('mob-prop-name');if(name)name.textContent='天井範囲';
  const size=document.getElementById('mob-prop-size');if(size)size.textContent=it.w+' × '+it.d+' mm';
+}
+// 間接照明の欄。下げ天井のときだけ出す。
+function coveProps(it){
+ if(!(it.offset<0))return '';
+ let html='<div class="ph" style="margin-top:12px">間接照明</div>'
+  +'<label class="lock-control-label"><input type="checkbox" '+(it.cove?'checked':'')+' onchange="updateSelectedProp(\'cove\',this.checked||undefined)">間接照明を仕込む</label>';
+ if(!it.cove)return html+'<div class="lock-status-note">入れると、下げ天井の縁の上に線照明を仕込み、周りの天井を照らします。器具は段差の陰に隠れます。</div>';
+ const gap=Math.max(40,Math.min(300,Number(it.coveGap)||COVE_GAP_DEFAULT_MM));
+ html+='<div class="pr"><label class="pl">光の出口の高さ mm</label><input class="pi" type="number" min="40" max="300" step="10" value="'+gap+'" onchange="updateSelectedProp(\'coveGap\',Number(this.value))"></div>'
+  +'<div class="pr"><label class="pl">光の色</label><input class="pi" type="color" value="'+(it.coveColor||'#ffd9a8')+'" onchange="updateSelectedProp(\'coveColor\',this.value)"></div>'
+  +'<div class="pr"><label class="pl">明るさ</label><input class="pi" type="number" min="0" max="3" step="0.05" value="'+(isFinite(Number(it.coveIntensity))?Number(it.coveIntensity):.8)+'" onchange="updateSelectedProp(\'coveIntensity\',Number(this.value))"></div>';
+ if(!coveOf(it))html+='<div class="lock-status-note" style="color:#b3261e">段差が浅くて仕込めません。段差を光の出口の高さ＋40mm以上（いまは '+(gap+40)+'mm 以上）にしてください。</div>';
+ else html+='<div class="lock-status-note">下げ天井の立ち上がりを、元の天井より光の出口の高さぶん下で止め、その上の縁に線照明を仕込みます。照らすのは内観3D・ウォークスルーのときです。</div>';
+ return html;
 }
 let floorCamera=null;
 function ceilingCamera(){

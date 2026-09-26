@@ -54,6 +54,13 @@ window.THREE = Object.assign({}, THREE_NS, {
   UnrealBloomPass: UnrealBloomPass, ShaderPass: ShaderPass,
   BufferGeometryUtils: {mergeGeometries: mergeGeometries}
 });
+// 面光源(RectAreaLight)の係数表。線照明を線の長さ全体から照らすのに使う。
+// 約300KBあるので任意ロード: 失敗したら線照明は点光源を並べる代わりの照らし方になる。
+try {
+  const ral = await import('three/addons/lights/RectAreaLightUniformsLib.js');
+  ral.RectAreaLightUniformsLib.init();
+  window.THREE.rectAreaReady = true;
+} catch(e) { console.warn('RectAreaLight load failed; line lights fall back to point lights', e); }
 // N8AO(高品質AO)は任意ロード: 失敗してもアプリは素のレンダラーで動作する
 try {
   const mod = await import('./assets/vendor/n8ao.js');
@@ -12346,12 +12353,62 @@ function build3DLightItem(grp,it,w3,d3){
   var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
   var angleRad=THREE.MathUtils.degToRad(Math.max(10,Math.min(110,Number(it.lightAngle)||45))/2);
   addLightBeamHint(grp,kind,color,rangeM,angleRad);
-  var offsets=lineMode?[-0.32,0.32]:[0];
-  offsets.forEach(function(frac,idx){
-    var localX=lineMode?frac*Math.max(w3,0.28):0;
-    addConfiguredLight(grp,it,kind,color,localX,0,idx===0&&claimInteriorShadowLightSlot(it));
-  });
+  if(lineMode){
+    addLineLight(grp,it,color,Math.max(w3,0.28),lineLightAim(it));
+    return;
+  }
+  addConfiguredLight(grp,it,kind,color,0,0,claimInteriorShadowLightSlot(it));
 }
+// 線照明の向き。'down' 下へ / 'up' 天井へ(間接照明) / 'side' 横へ(器具の前 = ローカル +奥行き)。
+function lineLightAim(it){
+  var a=it&&it.lightAim;
+  return (a==='up'||a==='side')?a:'down';
+}
+// 線照明の光源。**線の長さ全体から、決めた向きへ**照らす。
+// 以前は器具の両端寄りに点光源を2つ置き、全方向へ照らしていたので、光が丸い
+// にじみ2つになり、天井や壁を線に沿って照らせなかった(利用者の報告: 線照明が
+// きちんと照らない)。面光源(RectAreaLight)が使えれば 1 つの細長い面で照らし、
+// 使えなければ点光源を線に沿って並べる。
+// 面光源は影を落とさない(three.js の制約)。間接照明は壁や天井を柔らかく照らす
+// ものなので、影よりも光の広がりを優先する。
+var LINE_LIGHT_WIDTH_M=0.04;
+function addLineLight(grp,it,color,lengthM,aim,opts){
+  if(!isInt && !isWalkView()) return;
+  opts=opts||{};
+  var base=Math.max(0,Math.min(3,Number(opts.intensity!==undefined?opts.intensity:it.lightIntensity)||0));
+  // 向きの単位ベクトル(grp のローカル)。横へは少し下へ振って壁を上から撫でる。
+  var dir=opts.dir||(aim==='up'?new THREE.Vector3(0,1,0):aim==='side'?new THREE.Vector3(0,-0.35,1).normalize():new THREE.Vector3(0,-1,0));
+  var at=opts.at||new THREE.Vector3(0,aim==='up'?0.012:-0.02,0);
+  if(THREE.rectAreaReady&&THREE.RectAreaLight){
+    // 面光源の強さは輝度(面の明るさ)。細い面は面積が小さいので、長さ1mあたりの
+    // 光の量が点光源2灯のときと同じくらいになるよう幅で割り戻す。
+    var lum=base*LINE_LIGHT_LUMINANCE/LINE_LIGHT_WIDTH_M;
+    var rl=new THREE.RectAreaLight(color,lum,lengthM,LINE_LIGHT_WIDTH_M);
+    rl.position.copy(at);
+    // 面の長手を grp のローカル X にそろえたまま、光を dir へ向ける。
+    var m=new THREE.Matrix4(), xAxis=new THREE.Vector3(1,0,0);
+    if(opts.along) xAxis.copy(opts.along);
+    var zAxis=dir.clone().negate();            // 面光源は自分の -Z の向きへ照らす
+    var yAxis=new THREE.Vector3().crossVectors(zAxis,xAxis).normalize();
+    xAxis=new THREE.Vector3().crossVectors(yAxis,zAxis).normalize();
+    m.makeBasis(xAxis,yAxis,zAxis);
+    rl.quaternion.setFromRotationMatrix(m);
+    rl.userData={lineLight:true};
+    grp.add(rl);
+    return;
+  }
+  // 代わりの照らし方: 60cm おきの点光源(2〜6灯)を、向きの側へ少し出して置く。
+  var n=Math.max(2,Math.min(6,Math.round(lengthM/0.6)));
+  var rangeM=Math.max(0.5,Math.min(12,(Number(it.lightRange)||4500)*U));
+  var along=opts.along||new THREE.Vector3(1,0,0);
+  for(var i=0;i<n;i++){
+    var t=(i+0.5)/n-0.5;
+    var p=new THREE.PointLight(color,base*Math.PI*2/n,rangeM,1.65);
+    p.position.copy(at).addScaledVector(along,t*lengthM).addScaledVector(dir,0.06);
+    grp.add(p);
+  }
+}
+var LINE_LIGHT_LUMINANCE=1.6;
 
 function buildItem3D(it){
   if(it.type==='ceiling-area')return;
