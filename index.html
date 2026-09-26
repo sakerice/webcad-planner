@@ -6619,8 +6619,12 @@ function getSelectionBox3D(ref){
       var oy=item3DBaseY(ref)+(ref.elev||0)*U;
       var oh=Math.max(0.2,openingHeightMm(ref)*U);
       if(isWindowLikeType(ref.type)){
+        // 窓の枠は窓の高さいっぱいに建つ(buildWinFrames)ので、選択枠も同じ高さで包む。
+        // 以前は「壁の高さ − 窓の下端」で打ち切っていたが、その壁の高さを壁を渡さずに
+        // 求めていて(wallHeightMm(null) は下限の 300mm を返す)、どの窓でも枠が0.2〜0.25m
+        // に潰れ、窓の下端に薄い帯として出ていた(利用者の報告)。
         oy+=openingSillMm(ref)*U;
-        oh=Math.max(0.2,Math.min(windowHeightMm(ref)*U,wallHeightMm(null)*U-openingSillMm(ref)*U-0.05));
+        oh=Math.max(0.2,windowHeightMm(ref)*U);
       }
       var ow=Math.max(ref.w*U,0.08), od=Math.max(ref.d*U,0.08);
       var og=new THREE.BoxGeometry(ow,oh,od);
