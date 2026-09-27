@@ -2375,10 +2375,43 @@ function wallSameFloorRoofs(w){
     if((it.roofType||'gable')==='flat') return;
     for(var i=0;i<=8;i++){
       var t=i/8;
-      if(roofCoversPlanPoint(it,w.x1+dx*t,w.y1+dy*t)){ out.push(it); return; }
+      var px=w.x1+dx*t, py=w.y1+dy*t;
+      if(roofCoversPlanPoint(it,px,py)&&!sameFloorRoofEndsAtWallAt(w,it,px,py)){ out.push(it); return; }
     }
   });
   return out;
+}
+// 同じ階の屋根が、壁の芯のこの点で**壁に取り付いて終わっている**か(壁の頭を切らないか)。
+// 屋根の輪郭がこの点を覆っていても、壁の片側に**この屋根の掛かっていない同じ階の
+// 部屋**があるなら、屋根は壁の外面に取り付いて終わっている(下屋が上階の外壁に
+// 突き当たる納まり)。その壁は部屋を囲う外壁なので、屋根で切ると部屋の壁が消える。
+// 利用者のプラン41: 3階に置いた下屋の縁が3階の外壁の芯と一致し、外壁が軒の高さ
+// (≒床)まで切られて消えた。2枚の屋根の境に立つ妻壁(両側とも屋根で部屋が無い)は
+// 従来どおり切る。
+// 壁の端の数十mmはどの部屋にも入らないので、端の区間では少し内側の点でも部屋を
+// 探す(隅の最後の数cmだけ切られて角が欠けないように)。
+function sameFloorRoofEndsAtWallAt(w,rf,xMm,yMm){
+  var dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy);
+  if(len<1) return false;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+  var off=Math.max((w.thick||120)/2+40,100);
+  var t0=((xMm-w.x1)*ux+(yMm-w.y1)*uy)/len;
+  // 内側へ寄せるのは端の区間だけ(壁厚か150mmの大きい方)。壁の中ほどまで歩くと、
+  // 屋根の上に立つ妻壁が、離れた所の部屋を拾って途中だけ立ち上がる(既定プラン3階建て)。
+  var e=Math.min(0.5,Math.max(w.thick||120,150)/len);
+  // 端の点そのものは見ない。交わる壁の芯の上にあり、隣の部屋の縁に乗って拾ってしまう。
+  var tIn=Math.max(e,Math.min(1-e,t0));
+  // 屋根の輪郭が芯を越えて部屋側へ少し入り込んでいる(描き込みの誤差)こともあるので、
+  // 部屋側は壁の面のすぐ先と、さらに 400mm 奥の2点で見る。
+  var px=w.x1+dx*tIn, py=w.y1+dy*tIn, s, d, qx, qy;
+  for(s=-1;s<=1;s+=2){
+    for(d=0;d<2;d++){
+      var o=off+d*400;
+      qx=px+nx*o*s; qy=py+ny*o*s;
+      if(roomAtPointOnFloor(w.floor,qx,qy)&&!roofCoversPlanPoint(rf,qx,qy)) return true;
+    }
+  }
+  return false;
 }
 // ── 外壁を屋根の下面まで立ち上げる ──────────────────────────────────────
 // 勾配のある屋根(片流れ・切妻・寄棟…)の下では、外壁の天端と屋根のあいだに
@@ -2416,6 +2449,8 @@ function wallUnderRoofTopWorldY(w,roofs,xMm,yMm){
   if(!roofs||!roofs.length) return null;
   var best=null;
   roofs.forEach(function(rf){
+    // 壁に取り付いて終わっている屋根では切らない(sameFloorRoofEndsAtWallAt)。
+    if(sameFloorRoofEndsAtWallAt(w,rf,xMm,yMm)) return;
     var y=wallRaiseTopWorldY(w,[rf],xMm,yMm);
     if(y!==null&&(best===null||y>best)) best=y;
   });

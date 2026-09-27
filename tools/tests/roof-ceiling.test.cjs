@@ -148,13 +148,13 @@ const HEIGHT_FNS = [
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm', 'roomCeilingSlopeM',
   'roomRenderedCeilingMm', 'roomRenderedCeilingShape', 'roomRenderedCeilingLabel', 'roomLevelLabel', 'roomHeightLabel',
-  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM',
+  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'roofTopLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'sameFloorRoofEndsAtWallAt', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM',
   'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'buildRoomCeilingShapeGeometry', 'buildSlopedCeilingGeometry', 'buildSteppedCeilingGrid', 'stepAwareSamples', 'buildRoomCeilingMesh',
   'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallCrossingFacePositionsM', 'snapExteriorSpanDrawEnds', 'interiorFaceDrawRange', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D'
 ];
 const HEIGHT_VARS = ['INTERIOR_FINISH_MM', 'U', 'WALL_H', 'WALL_CORE_END_PAD_MM', 'INTERIOR_WALL_DEFAULT', 'FLOOR_H', 'FLOOR_SLAB_H', '_ceilingClampWarned',
   'CEILING_UNDER_ROOF_OFFSET_MM', 'CEILING_SAMPLE_STEP_M', '_roofCeilingExtentCache',

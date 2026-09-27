@@ -115,11 +115,11 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan', 'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
   'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallTouchesSlopedCeiling', 'wallRoofTopLimitWorldY',
-  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
+  'wallLimitingRoofs', 'wallTopHeightAtM', 'wallTopCutEnv', 'wallSameFloorRoofs', 'sameFloorRoofEndsAtWallAt', 'wallFootOffsetMm', 'wallRaiseRoofs', 'wallRaiseTopWorldY', 'wallRaiseBridgeReachMm', 'wallRaiseTopNearWorldY', 'wallUnderRoofTopWorldY', 'wallTopProfileSimplify', 'wallTopProfileM', 'wallTopWorldYAtPointM', 'wallAdjacentRoomsCeiling', 'wallCeilingHeightM', 'wallStackedAboveCapM',
   'wallHeightMm', 'wallDisplayHeightM', 'wallLiftMm', 'wallBaseSupportY',
   'getWallBandRange', 'wallBandWorldRange', 'hasWallTopShape', 'wallTopSide', 'applyWallFaceUv',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
-  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'
+  'wallSolidCoverHeightMm', 'wallCoreBoxHitMm', 'wallEndCornerExtensionMm', 'wallCrossingFacePositionsM', 'snapExteriorSpanDrawEnds', 'interiorFaceDrawRange', 'wallJoinsAtCorner', 'normalizeTextureOrientationTarget', 'defaultInteriorFloorSetting', 'ensureInteriorWallSettings', 'wallSettingKey', 'interiorFaceKey', 'getInteriorFaceSetting', 'resolveSkirtingForFace', 'wallFacadeEndLimitM', 'buildWall3D', 'stepAwareSamples'
 
 ];
 

@@ -53,10 +53,50 @@ test('屋根が1枚の部屋では、その1枚だけ(従来どおり)', () => {
 test('2階の壁は、同じ階の片流れで切られ、陸屋根では切られない', () => {
   const c = vm.createContext({ DATA: { items: [westFlat, eastMono] }, roofCoversPlanPoint: covers });
   vm.runInContext(sliceFunction('wallSameFloorRoofs'), c);
+  vm.runInContext(sliceFunction('sameFloorRoofEndsAtWallAt'), c);
+  c.roomAtPointOnFloor = () => null;
   const gable = { floor: 2, x1: 5470, y1: 4550, x2: 5470, y2: 8190 };
   assert.equal(c.wallSameFloorRoofs(gable).map((r) => r.id).join(','), 'em');
   const onFlat = { floor: 2, x1: 1000, y1: 5000, x2: 3000, y2: 5000 };
   assert.equal(c.wallSameFloorRoofs(onFlat).length, 0);
+});
+
+// 利用者のプラン41: 3階に置いた下屋の縁が、3階の部屋を囲う外壁の芯と一致していた。
+// 屋根は外壁に取り付いて終わっているだけで、壁の上は通っていない。切ると外壁が
+// 軒の高さまで落ちて消えた(3階の北の外壁 W106、隅の W108/W105)。
+test('部屋を囲う外壁は、縁が芯に乗る同じ階の下屋では切られない', () => {
+  // 下屋は y<=940、3階の部屋は y>=940 の側(壁 y=940 の南)
+  const lean = { id: 'ln', type: 'roof', roofType: 'hip', floor: 3, x: 0, y: 0, w: 3220, d: 940 };
+  const room = { floor: 3, x: 0, y: 950, w: 3220, d: 3185 };
+  const inRoom = (fl, x, y) => (fl === room.floor && x >= room.x && x <= room.x + room.w && y >= room.y && y <= room.y + room.d) ? room : null;
+  const c = vm.createContext({ DATA: { items: [lean] }, roofCoversPlanPoint: covers, roomAtPointOnFloor: inRoom });
+  vm.runInContext(sliceFunction('wallSameFloorRoofs'), c);
+  vm.runInContext(sliceFunction('sameFloorRoofEndsAtWallAt'), c);
+  const wall = { floor: 3, thick: 120, x1: 3220, y1: 940, x2: -40, y2: 940 };
+  assert.equal(c.wallSameFloorRoofs(wall).length, 0, '部屋を囲う外壁は下屋の下を通る壁ではない');
+  assert.equal(c.sameFloorRoofEndsAtWallAt(wall, lean, 1600, 940), true);
+  // 壁の端(どの部屋にも入らない数十mm)でも、内側の部屋で判定して切らない
+  const past = { floor: 3, thick: 120, x1: 3300, y1: 940, x2: -40, y2: 940 };   // 部屋の縁より80mm先で終わる
+  assert.equal(c.sameFloorRoofEndsAtWallAt(past, lean, 3290, 940), true);
+  // 屋根の輪郭が芯を越えて部屋側へ 150mm 入り込んでいても、部屋を囲う外壁は切らない
+  const over = Object.assign({}, lean, { d: 1090 });
+  assert.equal(c.sameFloorRoofEndsAtWallAt(wall, over, 1600, 940), true);
+  // 部屋の側まで屋根が覆っているなら(壁の両側が屋根の下)、従来どおり切る
+  const wide = Object.assign({}, lean, { d: 5000 });
+  assert.equal(c.sameFloorRoofEndsAtWallAt(wall, wide, 1600, 940), false);
+  // 両側とも部屋が無い(屋根の上に立つ妻壁)なら、従来どおり切る
+  const c2 = vm.createContext({ DATA: { items: [lean] }, roofCoversPlanPoint: covers, roomAtPointOnFloor: () => null });
+  vm.runInContext(sliceFunction('wallSameFloorRoofs'), c2);
+  vm.runInContext(sliceFunction('sameFloorRoofEndsAtWallAt'), c2);
+  assert.equal(c2.wallSameFloorRoofs(wall).map((r) => r.id).join(','), 'ln');
+  // 屋根の上に立つ妻壁の中ほどでは、離れた所(端の区間の外)の部屋を拾わない
+  // (既定プラン3階建ての W1092 が途中だけ立ち上がった)
+  const gableWall = { floor: 3, thick: 120, x1: 1600, y1: 0, x2: 1600, y2: 940 };
+  const nearEnd = { floor: 3, x: 1400, y: 900, w: 400, d: 40 };
+  const c3 = vm.createContext({ DATA: { items: [lean] }, roofCoversPlanPoint: covers,
+    roomAtPointOnFloor: (fl, x, y) => (x >= nearEnd.x && x <= nearEnd.x + nearEnd.w && y >= nearEnd.y && y <= nearEnd.y + nearEnd.d) ? nearEnd : null });
+  vm.runInContext(sliceFunction('sameFloorRoofEndsAtWallAt'), c3);
+  assert.equal(c3.sameFloorRoofEndsAtWallAt(gableWall, lean, 1600, 470), false);
 });
 
 // ── 2枚の屋根の境の段差(利用者のプラン32) ─────────────────────────────
