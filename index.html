@@ -16428,7 +16428,13 @@ function applyInteriorLightBudget(cam){
   // 変わった)、カメラが動いていなくても選び直す。
   var cand=L.list.filter(lightAncestorsVisible);
   var sig=cand.length+':'+(cand.length?cand[0].id+'/'+cand[cand.length-1].id:'');
-  var p=cam.position, now=(typeof performance!=='undefined')?performance.now():Date.now();
+  // 近さの基準。ウォークスルーは目の位置。内観3D・外観3Dは部屋を見下ろすので、
+  // カメラ(上空)ではなく**見ている中心**(回転の中心)の、目の高さの点。カメラの位置で
+  // 選ぶと、上空のカメラの真下に近い画面手前側の照明だけが光った。
+  var p=cam.position;
+  if(!(typeof isWalkView==='function'&&isWalkView())&&typeof orbit!=='undefined'&&orbit&&orbit.target)
+    p={x:orbit.target.x,y:orbit.target.y+1.5,z:orbit.target.z};
+  var now=(typeof performance!=='undefined')?performance.now():Date.now();
   if(sig===L.sig&&isFinite(L.x)&&Math.hypot(p.x-L.x,p.y-L.y,p.z-L.z)<0.25&&now-L.at<600) return;
   L.sig=sig; L.x=p.x; L.y=p.y; L.z=p.z; L.at=now; L.culled=true;
   var wp=new THREE.Vector3(), groups={spot:[],point:[],rect:[]}, has={spot:false,point:false,rect:false};
@@ -17366,8 +17372,13 @@ function noteCam3DInput(){ _lastCam3DInputAt=performance.now(); }
 function setDynamicResolution(low){
   if(_dynResLow===low || !ren) return;
   // 恩恵が大きいタッチ端末・モバイルレイアウト、および
-  // PCでもウォークスルー移動中(N8AO+Bloomが解像度そのままだと重い)に適用
-  var eligible=((navigator.maxTouchPoints||0)>0)||isMobileLayout()||(isWalkView()&&WALK.active);
+  // PCでもウォークスルー移動中(N8AO+Bloomが解像度そのままだと重い)に適用。
+  // 内観3D・外観3Dを回している間も対象にする。内観3Dは部屋全体を見下ろすので画面の
+  // ほぼ全部で照明を計算し、Retina では画素が4倍になる。回している間も最高画質で
+  // 描いていたので、1フレーム 140ms 程度かかった(利用者の報告: 内観3Dでも重い)。
+  // 止めれば 600ms で元の画質に戻る。
+  var eligible=((navigator.maxTouchPoints||0)>0)||isMobileLayout()||(isWalkView()&&WALK.active)||
+    ST.view==='3d-int'||ST.view==='3d-ext';
   if(low && !eligible) return;
   _dynResLow=low;
   var base=Math.min(window.devicePixelRatio,2);
