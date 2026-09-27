@@ -14,7 +14,7 @@ test('authored metalness and metallic maps survive brightness adjustment',()=>{
  assert.equal(mat.metalness,1);assert.equal(mat.metalnessMap,map);assert.equal(mat.envMapIntensity,.6);
 });
 test('AO owns the beauty pass only when enabled; raw-render fallback stays available',()=>{
- let renders=0;const s=env(['render3DNow'],{ren:{},sc3:{},camExt:{},composer:{passes:[{},{}],render(){renders++;}},_n8aoPass:{enabled:true,configuration:{autoRenderBeauty:true}}});
+ let renders=0;const s=env(['render3DNow'],{ren:{},sc3:{},camExt:{},composer:{passes:[{},{}],render(){renders++;}},_n8aoPass:{enabled:true,configuration:{autoRenderBeauty:true}},applyInteriorLightBudget(){}});
  s.render3DNow();assert.equal(s.composer.passes[0].enabled,false);
  s._n8aoPass.enabled=false;s.render3DNow();assert.equal(s.composer.passes[0].enabled,true);
  s._n8aoPass=null;s.render3DNow();assert.equal(s.composer.passes[0].enabled,true);assert.equal(renders,3);

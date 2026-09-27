@@ -6198,6 +6198,7 @@ function perform3DRebuild(){
   if(!sc3) return;
   var t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   build3D();
+  invalidateLightBudget();
   if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
   var t1=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   _last3DRebuildMs=t1-t0;
@@ -12278,7 +12279,7 @@ function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
   if(kind==='ceiling'){
     var p=new THREE.PointLight(color,intensity,rangeM,1.65);
     p.position.set(localX,-0.08,localZ);
-    if(castsShadow) configureInteriorLightShadow(p,rangeM);
+    if(castsShadow) markShadowableLight(p,rangeM);
     grp.add(p);
     return;
   }
@@ -12291,8 +12292,16 @@ function addConfiguredLight(grp,it,kind,color,localX,localZ,castsShadow){
   target.position.set(localX,-Math.max(1.0,Math.min(rangeM,3.2)),localZ+forward);
   grp.add(target);
   s.target=target;
-  if(castsShadow) configureInteriorLightShadow(s,rangeM);
+  if(it.lightCastShadow!==false) markShadowableLight(s,rangeM);
   grp.add(s);
+}
+// 影を落としてよい光。影の設定だけ済ませ、実際に落とすかは光の予算
+// (applyInteriorLightBudget)が、カメラに近いものから決める。
+function markShadowableLight(light,rangeM){
+  configureInteriorLightShadow(light,rangeM);
+  light.castShadow=false;
+  light.userData=light.userData||{};
+  light.userData.shadowable=true;
 }
 function build3DLightItem(grp,it,w3,d3){
   ensureLightDefaults(it);
@@ -16332,8 +16341,68 @@ function anyWasdActive(){
   for(var k in iMov){ if(iMov[k]) return true; }
   return false;
 }
+// ── 光の予算 ─────────────────────────────────────────────────────────────
+// three.js は画面のすべての画素で、置いたすべての光を毎回計算する。ダウンライトを
+// 32灯並べた LDK では、ウォークスルー1フレームが約0.5秒かかった(利用者の報告:
+// 動作がかなり重くなった。スポットを消すと 34ms)。部屋の反対側や別の階の光も
+// 全部計算していた。
+// 内観・ウォークスルーでは、光を計算する数に上限を置き、**カメラに近いものから**
+// 光らせる。器具の見た目(発光する器具)はすべて残る。
+// 種類ごとの数は常に一定にする。数が変わると three.js がシェーダーを作り直し、
+// 歩くたびに引っかかるからである。影を落とす数も同じ理由で一定にする。
+var LIGHT_BUDGET={spot:10,point:8,rect:4,spotShadow:4,pointShadow:1};
+var _lightBudget={list:null,at:0,x:NaN,y:NaN,z:NaN,culled:false};
+function invalidateLightBudget(){ _lightBudget.list=null; _lightBudget.x=NaN; }
+function applyInteriorLightBudget(cam){
+  if(!sc3||!cam) return;
+  var L=_lightBudget;
+  if(!L.list||L.list.some(function(o){ return !o.parent; })){
+    L.list=[];
+    sc3.traverse(function(o){ if(o.isSpotLight||o.isRectAreaLight||o.isPointLight) L.list.push(o); });
+    L.x=NaN;
+  }
+  var interior=isInt||(typeof isWalkView==='function'&&isWalkView());
+  if(!interior){
+    // 外観では予算をかけない(窓明かりは自動の部屋の光が担う)。隠した光を戻す。
+    if(L.culled){
+      L.list.forEach(function(o){ if(o.userData&&o.userData._budgetHidden){ o.visible=true; o.userData._budgetHidden=false; } });
+      L.culled=false;
+    }
+    return;
+  }
+  var p=cam.position, now=(typeof performance!=='undefined')?performance.now():Date.now();
+  if(isFinite(L.x)&&Math.hypot(p.x-L.x,p.y-L.y,p.z-L.z)<0.25&&now-L.at<600) return;
+  L.x=p.x; L.y=p.y; L.z=p.z; L.at=now; L.culled=true;
+  var wp=new THREE.Vector3(), groups={spot:[],point:[],rect:[]};
+  L.list.forEach(function(o){
+    o.getWorldPosition(wp);
+    // 別の階(高さが大きく違う)の光は後回し。天井や床に遮られて届かないから。
+    var dy=Math.abs(wp.y-p.y);
+    var d=Math.hypot(wp.x-p.x,wp.z-p.z)+dy*0.5+(dy>2.4?30:0);
+    groups[o.isSpotLight?'spot':o.isRectAreaLight?'rect':'point'].push({o:o,d:d});
+  });
+  function pick(list,max,shadowMax){
+    list.sort(function(a,b){ return a.d-b.d; });
+    var shadows=0;
+    list.forEach(function(e,i){
+      var on=i<max;
+      e.o.visible=on;
+      e.o.userData=e.o.userData||{};
+      e.o.userData._budgetHidden=!on;
+      var sh=on&&e.o.userData.shadowable&&shadows<shadowMax;
+      if(sh) shadows++;
+      if(e.o.userData.shadowable) e.o.castShadow=!!sh;
+    });
+  }
+  pick(groups.spot,LIGHT_BUDGET.spot,LIGHT_BUDGET.spotShadow);
+  pick(groups.point,LIGHT_BUDGET.point,LIGHT_BUDGET.pointShadow);
+  pick(groups.rect,LIGHT_BUDGET.rect,0);
+  // 影を落とす光が入れ替わったら、影を描き直す(自動更新を止めている場合に備える)。
+  if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+}
 function render3DNow(){
   if(!ren||!sc3||!camExt) return;
+  applyInteriorLightBudget(camExt);
   // 斜線の寸法の文字を、この視点で建物に被らない位置へ逃がしてから描く。
   if(typeof layoutSetbackDimLabels==='function') layoutSetbackDimLabels(camExt);
   if(composer){
