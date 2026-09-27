@@ -16350,55 +16350,141 @@ function anyWasdActive(){
 // 光らせる。器具の見た目(発光する器具)はすべて残る。
 // 種類ごとの数は常に一定にする。数が変わると three.js がシェーダーを作り直し、
 // 歩くたびに引っかかるからである。影を落とす数も同じ理由で一定にする。
-var LIGHT_BUDGET={spot:10,point:8,rect:4,spotShadow:4,pointShadow:1};
-var _lightBudget={list:null,at:0,x:NaN,y:NaN,z:NaN,culled:false};
-function invalidateLightBudget(){ _lightBudget.list=null; _lightBudget.x=NaN; }
+// 点光源の影は使わない(1灯で6方向を描くので重く、階によって影を落とせる点光源の有無が
+// 変わると、影の数が変わってシェーダーを作り直す)。影はスポット(ダウンライト)が担う。
+// 影を落とすスポットは近い2灯。影は1灯ごとに全画素で影の地図を引くので重い
+// (plan 34 の2階ホールで、影4灯と影なしの差が約25ms)。
+var LIGHT_BUDGET={spot:10,point:8,rect:4,spotShadow:2,pointShadow:0};
+var _lightBudget={list:null,x:NaN,y:NaN,z:NaN,at:0,culled:false,dummies:null,sig:'',precompiled:false};
+function invalidateLightBudget(){ _lightBudget.list=null; _lightBudget.x=NaN; _lightBudget.sig=''; _lightBudget.precompiled=false; }
+// 光がいま描画に使われるか(自分より上の親がすべて見えているか)。ウォークスルーは
+// いる階以外の家具を**グループごと**隠す(applyWalkCulling)。隠れたグループの中の光は
+// three.js が数えないので、予算で「光らせる」と選んでも光らない。
+function lightAncestorsVisible(o){
+  for(var p=o.parent;p;p=p.parent){ if(!p.visible) return false; }
+  return true;
+}
+// 数を一定に保つための、明るさ 0 の光。候補が上限より少ないとき(2階はダウンライトが
+// 5灯しかない等)の不足を埋める。これが無いと、実際に効く光の数が階の移動や歩く位置で
+// 変わり、そのたびに three.js が画面のすべての材質のシェーダーを作り直して引っかかった
+// (利用者の報告: 階を跨ぐと重い / 2階のホールで重い)。
+function lightBudgetDummy(kind){
+  var L=_lightBudget;
+  if(!L.dummies) L.dummies={spot:[],point:[],rect:[],shadow:[]};
+  var pool=L.dummies[kind];
+  for(var i=0;i<pool.length;i++){ if(!pool[i].parent||pool[i].parent!==sc3){ pool.splice(i,1); i--; } }
+  return pool;
+}
+// 影を落とす数も一定に保つための、影だけの空のスポット。何も照らさない向き・距離に置く
+// (影の描画は視野に何も入らないので軽い)。
+function padShadowBudget(need){
+  var pool=lightBudgetDummy('shadow');
+  while(pool.length<need){
+    var d=new THREE.SpotLight(0x000000,0,0.2,0.1);
+    d.position.set(0,-500,0);
+    d.target.position.set(0,-501,0);
+    d.castShadow=true;
+    if(d.shadow&&d.shadow.mapSize) d.shadow.mapSize.set(16,16);
+    if(d.shadow&&d.shadow.camera){ d.shadow.camera.near=0.01; d.shadow.camera.far=0.2; }
+    d.userData={budgetDummy:true};
+    sc3.add(d); sc3.add(d.target);
+    pool.push(d);
+  }
+  pool.forEach(function(d,i){ d.visible=i<need; });
+}
+function padLightBudget(kind,need){
+  var pool=lightBudgetDummy(kind);
+  while(pool.length<need){
+    var d=kind==='spot'?new THREE.SpotLight(0x000000,0,1):kind==='rect'?new THREE.RectAreaLight(0x000000,0,0.01,0.01):new THREE.PointLight(0x000000,0,1);
+    d.position.set(0,-500,0);
+    d.userData={budgetDummy:true};
+    sc3.add(d);
+    pool.push(d);
+  }
+  pool.forEach(function(d,i){ d.visible=i<need; });
+}
 function applyInteriorLightBudget(cam){
   if(!sc3||!cam) return;
   var L=_lightBudget;
   if(!L.list||L.list.some(function(o){ return !o.parent; })){
     L.list=[];
-    sc3.traverse(function(o){ if(o.isSpotLight||o.isRectAreaLight||o.isPointLight) L.list.push(o); });
-    L.x=NaN;
+    sc3.traverse(function(o){
+      if((o.isSpotLight||o.isRectAreaLight||o.isPointLight)&&!(o.userData&&o.userData.budgetDummy)) L.list.push(o);
+    });
+    L.sig='';
   }
   var interior=isInt||(typeof isWalkView==='function'&&isWalkView());
   if(!interior){
-    // 外観では予算をかけない(窓明かりは自動の部屋の光が担う)。隠した光を戻す。
+    // 外観では予算をかけない(窓明かりは自動の部屋の光が担う)。隠した光を戻し、空の光を消す。
     if(L.culled){
       L.list.forEach(function(o){ if(o.userData&&o.userData._budgetHidden){ o.visible=true; o.userData._budgetHidden=false; } });
+      ['spot','point','rect','shadow'].forEach(function(k){ lightBudgetDummy(k).forEach(function(d){ d.visible=false; }); });
       L.culled=false;
+      L.precompiled=false;
     }
     return;
   }
+  // 候補は「親まで見えている光」だけ。どれが候補かが変わったら(階を移った・カリングが
+  // 変わった)、カメラが動いていなくても選び直す。
+  var cand=L.list.filter(lightAncestorsVisible);
+  var sig=cand.length+':'+(cand.length?cand[0].id+'/'+cand[cand.length-1].id:'');
   var p=cam.position, now=(typeof performance!=='undefined')?performance.now():Date.now();
-  if(isFinite(L.x)&&Math.hypot(p.x-L.x,p.y-L.y,p.z-L.z)<0.25&&now-L.at<600) return;
-  L.x=p.x; L.y=p.y; L.z=p.z; L.at=now; L.culled=true;
-  var wp=new THREE.Vector3(), groups={spot:[],point:[],rect:[]};
-  L.list.forEach(function(o){
+  if(sig===L.sig&&isFinite(L.x)&&Math.hypot(p.x-L.x,p.y-L.y,p.z-L.z)<0.25&&now-L.at<600) return;
+  L.sig=sig; L.x=p.x; L.y=p.y; L.z=p.z; L.at=now; L.culled=true;
+  var wp=new THREE.Vector3(), groups={spot:[],point:[],rect:[]}, has={spot:false,point:false,rect:false};
+  L.list.forEach(function(o){ has[o.isSpotLight?'spot':o.isRectAreaLight?'rect':'point']=true; });
+  cand.forEach(function(o){
     o.getWorldPosition(wp);
     // 別の階(高さが大きく違う)の光は後回し。天井や床に遮られて届かないから。
     var dy=Math.abs(wp.y-p.y);
     var d=Math.hypot(wp.x-p.x,wp.z-p.z)+dy*0.5+(dy>2.4?30:0);
     groups[o.isSpotLight?'spot':o.isRectAreaLight?'rect':'point'].push({o:o,d:d});
   });
-  function pick(list,max,shadowMax){
+  var shadowChanged=false;
+  function pick(kind,max,shadowMax){
+    var list=groups[kind];
     list.sort(function(a,b){ return a.d-b.d; });
-    var shadows=0;
-    list.forEach(function(e,i){
-      var on=i<max;
-      e.o.visible=on;
-      e.o.userData=e.o.userData||{};
-      e.o.userData._budgetHidden=!on;
-      var sh=on&&e.o.userData.shadowable&&shadows<shadowMax;
-      if(sh) shadows++;
-      if(e.o.userData.shadowable) e.o.castShadow=!!sh;
+    var chosen={}, shadows=0;
+    list.forEach(function(e,i){ if(i<max) chosen[e.o.id]=1; });
+    L.list.forEach(function(o){
+      var k=o.isSpotLight?'spot':o.isRectAreaLight?'rect':'point';
+      if(k!==kind) return;
+      var on=!!chosen[o.id];
+      o.visible=on;
+      o.userData=o.userData||{};
+      o.userData._budgetHidden=!on;
+      if(o.userData.shadowable){
+        var sh=on&&shadows<shadowMax&&lightAncestorsVisible(o);
+        if(sh) shadows++;
+        if(o.castShadow!==!!sh){ o.castShadow=!!sh; shadowChanged=true; }
+      }
     });
+    // その種類の光が家にあるなら、数を常に上限にそろえる(無い種類は 0 のまま)。
+    // スポットは影だけの空の光も数に入るので、下でまとめてそろえる。
+    if(kind!=='spot') padLightBudget(kind,has[kind]?Math.max(0,max-Math.min(max,list.length)):0);
+    return {shadows:shadows,on:Math.min(max,list.length)};
   }
-  pick(groups.spot,LIGHT_BUDGET.spot,LIGHT_BUDGET.spotShadow);
-  pick(groups.point,LIGHT_BUDGET.point,LIGHT_BUDGET.pointShadow);
-  pick(groups.rect,LIGHT_BUDGET.rect,0);
-  // 影を落とす光が入れ替わったら、影を描き直す(自動更新を止めている場合に備える)。
-  if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+  var sp=pick('spot',LIGHT_BUDGET.spot,LIGHT_BUDGET.spotShadow);
+  pick('point',LIGHT_BUDGET.point,LIGHT_BUDGET.pointShadow);
+  // 影を落とすスポットが上限に満たない階では、影だけの空の光で埋めて、影の数をそろえる。
+  // スポットの総数(光らせる上限＋影の上限)も一定にする -- 影だけの光もスポットに数えられるから。
+  // 家にスポットが無ければどちらも 0 のまま。
+  var anyShadowable=L.list.some(function(o){ return o.isSpotLight&&o.userData&&o.userData.shadowable; });
+  var shadowPad=anyShadowable?Math.max(0,LIGHT_BUDGET.spotShadow-sp.shadows):0;
+  padShadowBudget(shadowPad);
+  var spotTotal=has.spot?LIGHT_BUDGET.spot+(anyShadowable?LIGHT_BUDGET.spotShadow:0):0;
+  padLightBudget('spot',Math.max(0,spotTotal-sp.on-shadowPad));
+  pick('rect',THREE.rectAreaReady?LIGHT_BUDGET.rect:0,0);
+  // 影を落とす光が入れ替わったときだけ、影を描き直す(自動更新は止めてある)。
+  if(shadowChanged&&ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+  // ほかの階の家具など、まだ一度も描いていない材質のシェーダーを、裏で先に作っておく。
+  // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
+  // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
+  // compileAsync は隠れている物の材質も作る(three.js r169)。
+  if(!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+    L.precompiled=true;
+    try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
+  }
 }
 function render3DNow(){
   if(!ren||!sc3||!camExt) return;
