@@ -4882,6 +4882,9 @@ function isSetbackSubjectMesh(o){
   var ud=o.userData||{};
   if(!ud.b) return false;
   if(ud.setbackHelper || ud.selectionHelper || ud.hitProxy || ud.shadowHelper) return false;
+  // 軒樋は削らないし、斜線の板の広さにも数えない(数えると板が樋の分だけ軒の外へ
+  // 張り出し、樋を呑み込む)。板とぶつかる区間は trimRoofGuttersForSetback で除く。
+  if(ud.roofGutter||ud.roofDownspout) return false;
   if(o.name==='_sky') return false;
   var ref=ud.selectRef;
   if(ref && ref.type){
@@ -5901,6 +5904,146 @@ function build3DSetbackRoofSlab(pl,fp,planes){
   });
   grp.userData={b:true,setbackRoof:true};
   sc3.add(grp);
+  // 軒樋は板とは別の組に置く(板の頂点は「面の上か板厚ぶん下」だけ、という約束を崩さない)。
+  var gg=new THREE.Group();
+  gg.userData={b:true,setbackGutter:true};
+  addSetbackSlabGutters(gg,pl,fp,thick,clips,function(t,s){ return vtx(t,s,false); });
+  if(gg.children.length) sc3.add(gg);
+}
+// 斜線の板の見付(軒)に吊る軒樋。板の低い側の縁(境界に近い側 = 水の流れる先)だけに付ける。
+// 形は屋根の軒樋(build3DRoofGutters)と同じ半丸φ105で、鼻隠しの外に少し出して吊る。
+// 吊る高さは勾配からも決める。樋は縁より外(境界側)へ 1.8r 出るので、そこで下がる
+// 制限面(勾配×1.8r)より下に縁を収める(収めないと樋が制限面を超える)。
+// 建物が境界と平行でないと、軒は格子の刻みで階段状になる。同じ向きで段ごとに
+// つながる軒をまとめ、端から端まで1本の樋にする(刻みごとの細切れを並べない)。
+function addSetbackSlabGutters(grp,pl,fp,thick,clips,vtxTop){
+  var rG=0.055;
+  var gutterY=-Math.max(0.10,Math.min(thick,0.30)*0.66,(pl.slope||0)*rG*1.8+0.005);
+  var col=(DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73';
+  var mat=new THREE.MeshStandardMaterial({color:col,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
+  function covAt(t,s){
+    var i=Math.floor((t-fp.t0)/fp.cell), j=Math.floor((s-fp.s0)/fp.cell);
+    return i>=0&&i<fp.nt&&j>=0&&j<fp.ns&&fp.cov[i*fp.ns+j];
+  }
+  var eaves=[];
+  setbackFootprintEdges(fp).forEach(function(e){
+    if(e.tLo!==e.tHi) return;                       // 勾配なりの縁(けらば)には付けない
+    var sm=(e.sLo+e.sHi)/2, h=fp.cell/2;
+    if(!(covAt(e.tLo+h,sm)&&!covAt(e.tLo-h,sm))) return;   // 板が高い側にある縁 = 軒
+    eaves.push({t:e.tLo,sLo:e.sLo,sHi:e.sHi});
+  });
+  eaves.sort(function(a,b){ return a.sLo-b.sLo; });
+  var chains=[], tol=fp.cell*0.01;
+  eaves.forEach(function(e){
+    var c=chains.length?chains[chains.length-1]:null;
+    if(c&&Math.abs(e.sLo-c.sHi)<=tol&&Math.abs(e.t-c.tEnd)<=fp.cell*1.01&&(c.dir===0||Math.sign(e.t-c.tEnd)===0||Math.sign(e.t-c.tEnd)===c.dir)){
+      if(c.dir===0&&e.t!==c.tEnd) c.dir=Math.sign(e.t-c.tEnd);
+      c.sHi=e.sHi; c.tEnd=e.t;
+    } else chains.push({tStart:e.t,tEnd:e.t,sLo:e.sLo,sHi:e.sHi,dir:0});
+  });
+  chains.forEach(function(c){
+    // 階段の軒は、低い段(t の小さい側)の縁を結んだ線に吊る(板の外へ出さない)
+    var seg=setbackClipSegment([c.tStart,c.sLo],[c.tEnd,c.sHi],clips);
+    if(!seg) return;
+    var a=vtxTop(seg[0][0],seg[0][1]), b=vtxTop(seg[1][0],seg[1][1]);
+    var len=Math.hypot(b[0]-a[0],b[2]-a[2]);
+    if(len<0.3) return;
+    // 外向き(境界へ向かう = t が減る向き)の水平方向。軒の線に直交させる。
+    var dx=(b[0]-a[0])/len, dz=(b[2]-a[2])/len;
+    var p0=setbackPointAt(pl,c.tStart,c.sLo), p1=setbackPointAt(pl,c.tStart-100,c.sLo);
+    var ox=-dz, oz=dx;
+    if(ox*(p1.x-p0.x)+oz*(p1.y-p0.y)<0){ ox=-ox; oz=-oz; }
+    // 階段の軒では両端の高さが違う。筒を軒の線なりに傾ける(半丸の口は上向きのまま)。
+    // 回転は屋根の軒樋と同じ z→y の順。z を π/2 から傾き分だけ回すと、筒の +Y 端
+    // (= a の側)が rise ぶん下がる。
+    var rise=b[1]-a[1], H=Math.hypot(len,rise);
+    var m=new THREE.Mesh(new THREE.CylinderGeometry(rG,rG,H,12,1,true,Math.PI,Math.PI),mat);
+    m.position.set((a[0]+b[0])/2+ox*rG*0.8,(a[1]+b[1])/2+gutterY,(a[2]+b[2])/2+oz*rG*0.8);
+    m.rotation.z=Math.PI/2+Math.asin(rise/H);
+    m.rotation.y=-Math.atan2(b[2]-a[2],b[0]-a[0]);
+    m.castShadow=false; m.receiveShadow=false;
+    m.userData={b:true,setbackGutter:true};
+    grp.add(m);
+  });
+}
+// 屋根の軒樋のうち、斜線の板にぶつかる区間と制限面を超える区間を除く(斜めには
+// 削らず、まっすぐ短くする)。ぶつかる = その平面位置に板があり、樋の上端が板の
+// 下面より上にある。
+// 板の無い所・板より下を通る所の樋は、そのまま残す。
+function trimRoofGuttersForSetback(sections){
+  if(!sc3||!sections||!sections.length) return;
+  var planes=sections[0].planes||sections.map(function(s){ return s.plane; });
+  var thick=Math.max(0.03,Math.min(0.6,(setbackSlabAppearanceItem().roofThickness||180)*U));
+  function slabBottomAt(xm,zm){
+    var best=null;
+    sections.forEach(function(sec){
+      var pl=sec.plane, fp=sec.fp, ts=setbackWorldToTS(pl,xm,zm);
+      var i=Math.floor((ts.t-fp.t0)/fp.cell), j=Math.floor((ts.s-fp.s0)/fp.cell);
+      if(!(i>=0&&i<fp.nt&&j>=0&&j<fp.ns&&fp.cov[i*fp.ns+j])) return;
+      var drop=thick*Math.sqrt(1+pl.slope*pl.slope);
+      var y=setbackLowestLimitMmAt(planes,xm/U,zm/U)*U-drop;
+      if(best===null||y<best) best=y;
+    });
+    return best;
+  }
+  var gutters=[];
+  sc3.updateMatrixWorld(true);
+  sc3.traverse(function(o){ if(o.isMesh&&o.userData&&(o.userData.roofGutter||o.userData.roofDownspout)) gutters.push(o); });
+  var v=new THREE.Vector3();
+  gutters.forEach(function(o){
+    var gp=o.geometry&&o.geometry.parameters;
+    if(!gp||!(gp.height>0)) return;
+    var ds=o.userData.roofDownspout;
+    var L=gp.height, r=(o.userData.roofGutter||ds).radius||0.055;
+    var n=Math.max(2,Math.ceil(L/0.02)), keep=[], i, y, hit=false;
+    // 筒の中心だけでなく両側の縁(水平に ±r)でも見る。制限面は境界側へ下がるので、
+    // 中心で収まっていても境界側の縁が面を超えることがある(壁の天端と同じ扱い)。
+    var ax=new THREE.Vector3(0,1,0).transformDirection(o.matrixWorld);
+    var sx=-ax.z, sz=ax.x, sl=Math.hypot(sx,sz);
+    if(sl>1e-6){ sx/=sl; sz/=sl; } else { sx=1; sz=0; }
+    for(i=0;i<=n;i++){
+      y=-L/2+L*i/n;
+      v.set(0,y,0).applyMatrix4(o.matrixWorld);
+      var ok=true;
+      for(var k=-1;k<=1&&ok;k++){
+        var px=v.x+sx*r*k, pz=v.z+sz*r*k;
+        // 制限面より上に出る区間(板の外でも)は、建物の一部として残せない。
+        var lim=setbackLowestLimitMmAt(planes,px/U,pz/U)*U;
+        var bot=slabBottomAt(px,pz);
+        if(v.y+r>lim||(bot!==null&&v.y+r>=bot-0.005)) ok=false;
+      }
+      if(!ok) hit=true;
+      keep.push(ok);
+    }
+    if(!hit) return;
+    var runs=[], a=null;
+    if(ds&&ds.part!=='wall'){
+      // 集水器の短い管・呼び樋は、ぶつかるなら丸ごと外す(途中で切った筒は残さない)
+    } else if(ds){
+      // 壁沿いの縦の管は、下から続いている区間だけ残す(上を短くする)
+      var lowEnd=(new THREE.Vector3(0,-L/2,0).applyMatrix4(o.matrixWorld).y<new THREE.Vector3(0,L/2,0).applyMatrix4(o.matrixWorld).y);
+      if(lowEnd){ for(i=0;i<=n&&keep[i];i++); if(i>0) runs.push([0,i-1]); }
+      else { for(i=n;i>=0&&keep[i];i--); if(i<n) runs.push([i+1,n]); }
+    } else {
+      for(i=0;i<=n;i++){
+        if(keep[i]&&a===null) a=i;
+        if((!keep[i]||i===n)&&a!==null){ runs.push([a,keep[i]?i:i-1]); a=null; }
+      }
+    }
+    var parent=o.parent, axis=new THREE.Vector3(0,1,0).applyQuaternion(o.quaternion);
+    runs.forEach(function(rn){
+      var y0=-L/2+L*rn[0]/n, y1=-L/2+L*rn[1]/n, len=y1-y0;
+      if(len<0.05) return;
+      var m=new THREE.Mesh(new THREE.CylinderGeometry(gp.radiusTop,gp.radiusBottom,len,gp.radialSegments,1,gp.openEnded,gp.thetaStart,gp.thetaLength),o.material);
+      m.position.copy(o.position).addScaledVector(axis,(y0+y1)/2*o.scale.y);
+      m.quaternion.copy(o.quaternion); m.scale.copy(o.scale);
+      m.castShadow=o.castShadow; m.receiveShadow=o.receiveShadow;
+      m.userData=Object.assign({},o.userData);
+      parent.add(m);
+    });
+    parent.remove(o);
+    o.geometry.dispose();
+  });
 }
 // 削る**前**に断面を測っておく。削ったあとでは、開いた所が消えてしまって測れない。
 function setbackSectionsForBuild(){
@@ -6121,6 +6264,7 @@ function build3DScene(){
   if(typeof CeilingDesigner!=='undefined')CeilingDesigner.carveRecesses(sc3);
   // 板は断面そのものなので、削り直す必要が無い(面の上に載っているだけである)。
   build3DSetbackRoofs(_sbSections);
+  trimRoofGuttersForSetback(_sbSections);
   sc3.updateMatrixWorld(true);
   // 制限面・寸法・(削り残しがあれば)はみ出しの表示。削ったあとなので赤は出ない。
   build3DSetback();
@@ -8742,6 +8886,68 @@ function addExteriorRoomBreakpoints(w,breaks){
   });
 }
 
+// 交わる壁の**両面**が、この壁の芯を横切る位置(壁の始点からの m)。外と内の境はそこにある。
+function wallCrossingFacePositionsM(w){
+  var out=[];
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var len2=dx*dx+dy*dy;
+  if(len2<1) return out;
+  var len=Math.sqrt(len2);
+  DATA.walls.forEach(function(o){
+    if(o===w || o.floor!==w.floor) return;
+    var odx=o.x2-o.x1, ody=o.y2-o.y1;
+    var olen=Math.sqrt(odx*odx+ody*ody);
+    if(olen<1) return;
+    var denom=dx*ody-dy*odx;
+    if(Math.abs(denom)<1e-6*len*olen) return;   // 平行な壁は横切らない
+    var half=(o.thick||120)/2, onx=-ody/olen, ony=odx/olen;
+    [-1,1].forEach(function(s){
+      var ox=o.x1+onx*half*s, oy=o.y1+ony*half*s;
+      var rx=ox-w.x1, ry=oy-w.y1;
+      var t=(rx*ody-ry*odx)/denom;
+      var u=(rx*dy-ry*dx)/denom;
+      // 相手の壁の端は厚みの半分だけ伸ばして見る(出隅・入隅の角も境になる)
+      var m=half/olen;
+      if(t>0 && t<1 && u>=-m && u<=1+m) out.push(t*len*U);
+    });
+  });
+  return out;
+}
+// 外装面を**描く**範囲(sp.da / sp.db)。外と内の判定は 80mm 刻みなので、境が
+// 刻みの途中にあると外装面が手前の刻みで止まり、交わる壁の外面までの数mmに
+// 内装(白)の面が出た(利用者のプラン41: 3階の入隅に白い縦線)。途中で終わる端を、
+// 1刻み以内にある交わる壁の面へ寄せる。
+// **sp.a / sp.b は変えない。** 面ごとの色設定はその値をキーに保存されている
+// (exteriorFaceKey / interiorFaceKey)ので、判定側で端を動かすと保存済みの設定が
+// 外れ、読み込み時に消える。寄せるのは描画だけ。
+function snapExteriorSpanDrawEnds(w,spans){
+  var dx=w.x2-w.x1, dy=w.y2-w.y1;
+  var lenMm=Math.sqrt(dx*dx+dy*dy), len=lenMm*U;
+  var step=len/Math.max(4,Math.min(180,Math.ceil(lenMm/80)));   // getWallExteriorSpans の刻み
+  var faces=spans.length?wallCrossingFacePositionsM(w):[];
+  function snap(v){
+    var best=v, bestD=step;
+    faces.forEach(function(f){ var d=Math.abs(f-v); if(d<bestD){ bestD=d; best=f; } });
+    return best;
+  }
+  spans.forEach(function(sp){
+    sp.da=(sp.a<=0.002)?sp.a:snap(sp.a);
+    sp.db=(sp.b>=len-0.002)?sp.b:snap(sp.b);
+  });
+  return spans;
+}
+// 内装面の描く範囲。外装面を寄せた端に接している内装面は、同じだけ縮める/伸ばす
+// (面の重なりやすき間を作らない)。キー(face.a / face.b)は変えない。
+function interiorFaceDrawRange(face,spans){
+  var a=face.a, b=face.b;
+  spans.forEach(function(sp){
+    if(sp.sign!==face.sign||sp.da===undefined) return;
+    if(Math.abs(face.a-sp.b)<0.001) a=sp.db;
+    if(Math.abs(face.b-sp.a)<0.001) b=sp.da;
+  });
+  return {a:a,b:b};
+}
+
 function getWallExteriorSpans(w){
   if((w.thick||0)<120) return [];
   var dx=w.x2-w.x1, dy=w.y2-w.y1;
@@ -9420,6 +9626,7 @@ function buildWall3D(w){
     if(spanFirst.a<=0.002) spanFirst.a-=endExtA;
     if(spanLast.b>=len-0.002) spanLast.b+=endExtB;
   }
+  snapExteriorSpanDrawEnds(w,extSpans);
   var isOuter=extSpans.length>0;
   var facadeStartLimit=wallFacadeEndLimitM(w,false),facadeEndLimit=wallFacadeEndLimitM(w,true);
   var mat=isOuter?makeExteriorWallMaterial(w,fl,len):makeWallCoreMaterial();
@@ -9461,7 +9668,7 @@ function buildWall3D(w){
     if(underLim!==null&&top>underLim-fy) top=underLim-fy;
     // 天井との刻みの食い違いを埋めるための上乗せ分でも、屋根は突き抜けない。
     var roofLim=wallRoofTopLimitWorldY(w,slopedTopRoofs,
-      w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t);
+      w.x1+(w.x2-w.x1)*t, w.y1+(w.y2-w.y1)*t, top+fy);
     if(roofLim!==null&&top>roofLim-fy) top=roofLim-fy;
     // ピース自身の天端は超えない。まぐさ上の小壁など、天井より下で完結する
     // ピースはこれで一切影響を受けない。
@@ -9493,7 +9700,7 @@ function buildWall3D(w){
   function addExteriorFace(a,b,yBase,h){
     if(!extMat || !extSpans.length) return;
     extSpans.forEach(function(sp){
-      var aa=Math.max(a,sp.a), bb=Math.min(b,sp.b);
+      var aa=Math.max(a,sp.da), bb=Math.min(b,sp.db);
       if(bb-aa<0.004) return;
       var mid=(aa+bb)/2, segLen=bb-aa;
       var normalX=baseNormalX*sp.sign, normalZ=baseNormalZ*sp.sign;
@@ -9522,15 +9729,16 @@ function buildWall3D(w){
     // スキップされ、その部分だけ面が抜けて奥の壁コア(外壁マテリアル)が
     // 室内側にそのまま露出してしまう不具合があった
     getWallInteriorFaces(w).forEach(function(faceInfo){
-      var aa=Math.max(a,faceInfo.a), bb=Math.min(b,faceInfo.b);
+      var fr=interiorFaceDrawRange(faceInfo,extSpans);
+      var aa=Math.max(a,fr.a), bb=Math.min(b,fr.b);
       if(bb-aa<0.004) return;
       // 壁自身のセンターライン始点/終点にちょうど接している区間は、交差する隣の壁と
       // 作る内隅であることが多い。お互いの内装オフセット面が正確に一致せず、隅に
       // 細い隙間(奥の外壁コアが露出)ができる不具合があったため、内隅方向へ少し
       // 延長してこの面で隙間を覆う(隣の壁の面とも重なるが、双方とも同じ内装仕上げ材なので
       // 見た目には影響しない)
-      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
-      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
+      if(faceInfo.atStart && Math.abs(aa-fr.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
+      if(faceInfo.atEnd && Math.abs(bb-fr.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
       var mid=(aa+bb)/2, segLen=bb-aa;
       var normalX=baseNormalX*faceInfo.sign, normalZ=baseNormalZ*faceInfo.sign;
       var faceMat=makeInteriorWallMaterial(w,len,faceInfo);
@@ -9709,7 +9917,7 @@ function buildWall3D(w){
     if(extMat&&extSpans.length){
       extSpans.forEach(function(sp){
         // コアと同じ範囲(coreA..coreB)で切る。a,b で切ると角で外装が足りない
-        var aa=Math.max(coreA,sp.a), bb=Math.min(coreB,sp.b);
+        var aa=Math.max(coreA,sp.da), bb=Math.min(coreB,sp.db);
         if(bb-aa<0.004) return;
         var face=slopedFaceMesh(aa,bb,yBase,h,wallExteriorFaceOffsetM(w),sp.sign,
           makeExteriorWallMaterial(w,fl,len,sp));
@@ -9720,10 +9928,11 @@ function buildWall3D(w){
       });
     }
     getWallInteriorFaces(w).forEach(function(faceInfo){
-      var aa=Math.max(a,faceInfo.a), bb=Math.min(b,faceInfo.b);
+      var fr=interiorFaceDrawRange(faceInfo,extSpans);
+      var aa=Math.max(a,fr.a), bb=Math.min(b,fr.b);
       if(bb-aa<0.004) return;
-      if(faceInfo.atStart && Math.abs(aa-faceInfo.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
-      if(faceInfo.atEnd && Math.abs(bb-faceInfo.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
+      if(faceInfo.atStart && Math.abs(aa-fr.a)<0.001) aa-=Math.min(faceInfo.fillStartM,facadeStartLimit);
+      if(faceInfo.atEnd && Math.abs(bb-fr.b)<0.001) bb+=Math.min(faceInfo.fillEndM,facadeEndLimit);
       var face=slopedFaceMesh(aa,bb,yBase,h,wallInteriorFaceOffsetM(w),faceInfo.sign,
         makeInteriorWallMaterial(w,len,faceInfo));
       face.userData.interiorFace=true;
@@ -12054,9 +12263,19 @@ function addPipeBetween(grp,a,b,r,mat){
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(vx/len,vy/len,vz/len));
   m.castShadow=false; m.receiveShadow=false;
   grp.add(m);
+  return m;
+}
+// 竪樋の管に印を付ける(斜線で斜めに削らず、trimRoofGuttersForSetback で扱う)。
+// wall = 壁沿いの縦の管(上を短くする)、それ以外(集水器の短い管・呼び樋)は取り除く。
+function tagRoofDownspout(m,part,noMerge){
+  if(!m) return;
+  m.userData.roofDownspout={part:part,radius:(m.geometry.parameters&&m.geometry.parameters.radiusTop)||0.03};
+  if(noMerge) m.userData.noMerge=true;
 }
 function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
   var eavesOnly=!!(opts&&opts.eavesOnly);
+  var trimForSetback=(typeof setbackPlanes==='function')&&setbackPlanes().length>0;
+  function tagDs(m,part){ tagRoofDownspout(m,part,trimForSetback); }
   // マテリアルは build3D 毎に dispose されるため都度生成(共有キャッシュ禁止)
   var gutterColor=(DATA.exteriorDetail&&DATA.exteriorDetail.gutterColor)||'#6b6e73';
   var gutterMat=new THREE.MeshStandardMaterial({color:gutterColor,roughness:0.55,metalness:0.35,side:THREE.DoubleSide});
@@ -12095,6 +12314,11 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
     m.rotation.z=Math.PI/2;
     m.rotation.y=-Math.atan2(ez,ex);
     m.castShadow=false; m.receiveShadow=false;
+    // 軒樋は斜線で**斜めに削らない**(切り口が半端な筒になって板の縁から覗く)。
+    // 斜線の板にぶつかる区間は trimRoofGuttersForSetback がまっすぐ短くする。
+    // そのときだけ1本ずつ扱うので統合しない(斜線の無い家は従来どおり統合して描く)。
+    m.userData.roofGutter={radius:rG};
+    if(trimForSetback) m.userData.noMerge=true;
     grp.add(m);
     if(eavesOnly) return; // このエッジは軒樋のみ(竪樋は手動配置)
     // 竪樋の取付先候補: 直下階の壁コーナー(軒の出の内側・エッジ近傍)を全て集める
@@ -12204,11 +12428,11 @@ function build3DRoofGutters(grp,it,W,D,groundLocalY,opts){
     _downspoutRegistry.push({x:wp.x,y:wp.y,top:wTop,bottom:wBottom});
     if(p.kind==='elbow'){
       // 集水器の垂直スタブ → 45度の呼び樋 → 壁面へ
-      addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.ax,y:topY-stub,z:p.az},rP,gutterMat);
-      addPipeBetween(grp,{x:p.ax,y:topY-stub,z:p.az},{x:p.x,y:elbowDropY,z:p.z},rP,gutterMat);
+      tagDs(addPipeBetween(grp,{x:p.ax,y:topY,z:p.az},{x:p.ax,y:topY-stub,z:p.az},rP,gutterMat),'stub');
+      tagDs(addPipeBetween(grp,{x:p.ax,y:topY-stub,z:p.az},{x:p.x,y:elbowDropY,z:p.z},rP,gutterMat),'offset');
     }
     // 壁沿いの垂直竪樋(障害物があれば下屋上面で止まる)
-    addPipeBetween(grp,{x:p.x,y:elbowDropY,z:p.z},{x:p.x,y:bottomY,z:p.z},rP,gutterMat);
+    tagDs(addPipeBetween(grp,{x:p.x,y:elbowDropY,z:p.z},{x:p.x,y:bottomY,z:p.z},rP,gutterMat),'wall');
     // 雨水枡は地面到達時のみ
     if(bottomY<=groundLocalY+0.03){
       var pit=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.04,0.15),pitMat);
