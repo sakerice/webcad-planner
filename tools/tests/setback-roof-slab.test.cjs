@@ -101,6 +101,8 @@ Mesh.prototype = Object.create(Obj3D.prototype);
 
 const THREE = {
   Group: Group, Mesh: Mesh,
+  // 斜線の板の軒樋(addSetbackSlabGutters)。形は検査しないので頂点は持たせない。
+  CylinderGeometry: function (r1, r2, h) { const g = new Geo(); g.setAttribute('position', new Attr([], 3)); g.parameters = { radiusTop: r1, radiusBottom: r2, height: h }; return g; },
   BufferGeometry: Geo,
   Float32BufferAttribute: function (a, s) { return new Attr(a, s); },
   BufferAttribute: function (a, s) { return new Attr(a, s); },
@@ -138,7 +140,7 @@ const FNS = [
   'setbackClipPolygon', 'setbackClipSegment',
   'setbackFootprintRects', 'setbackFootprintEdges',
   'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',
-  'build3DSetbackRoofSlab', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
+  'build3DSetbackRoofSlab', 'addSetbackSlabGutters', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
   // 既存の屋根アイテム描画（斜線の板がここを通っていないことの確認に使う）
   'build3DRoofItem', 'roofEaveEdges',
 ];

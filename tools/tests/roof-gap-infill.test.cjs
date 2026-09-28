@@ -71,6 +71,13 @@ test('下に部屋が無い所(軒先の外など)は塞がない', () => {
   assert.equal(ctx({ noRoom: true }).roofGapInfillRuns(mono).length, 0);
 });
 
+test('すぐ下の階に部屋が無い所(上の階の軒の張り出しの下)は、さらに下の階に部屋があっても塞がない', () => {
+  // 3階の屋根。すぐ下(2階)には部屋が無く、1階にだけ部屋がある = 軒の外(プラン41 の北東の角)
+  const upper = Object.assign({}, mono, { floor: 3 });
+  const c = ctx({ items: [upper, Object.assign({}, flat, { floor: 3 })] });
+  assert.equal(c.roofGapInfillRuns(upper).length, 0);
+});
+
 test('すでに壁が立っている所は塞がない(二重にしない)', () => {
   const wall = { x: 5460, y1: 4000, y2: 9000, top: 6.3 };
   assert.equal(ctx({ walls: [wall] }).roofGapInfillRuns(mono).length, 0);

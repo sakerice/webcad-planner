@@ -2197,23 +2197,47 @@ function roofTopLimitAtPlanPoint(roofs,xMm,yMm){
   }
   return best;
 }
-// 壁は厚みを持つ。上端を芯の位置だけで切ると、勾配を横切る向きの壁では外面/内面の
-// 上端が屋根面より上に出る(120mm厚・30度勾配で 36.6mm 実測した)。芯と両面の3点で
-// 見て、いちばん低い屋根面に合わせる。屋根が覆っていない点は数に入れない。
-function wallRoofTopLimitWorldY(w,roofs,xMm,yMm){
-  if(!roofs||!roofs.length) return null;
-  var best=roofTopLimitAtPlanPoint(roofs,xMm,yMm);
-  var dx=w.x2-w.x1, dy=w.y2-w.y1;
-  var len=Math.sqrt(dx*dx+dy*dy);
-  if(len<1) return best;
-  var nx=-dy/len, ny=dx/len;
-  var halfMm=Math.max(wallExteriorFaceOffsetM(w),wallInteriorFaceOffsetM(w))/U;
-  var s,v;
-  for(s=-1;s<=1;s+=2){
-    v=roofTopLimitAtPlanPoint(roofs,xMm+nx*halfMm*s,yMm+ny*halfMm*s);
-    if(v!==null&&(best===null||v<best)) best=v;
+// 壁の頭を押さえる高さ(ワールドm)。その点を覆う屋根のうち低い方。覆っていなければ null。
+// 斜線の板(setbackRoof)だけは**板の下面**で止める。面(板の上面)まで立てると、壁の
+// 天端が板の上面と同じ高さに並び、黒い板の上に壁の色がちらついた(利用者のプラン41:
+// 北側斜線の板の上に W105・W108)。ふつうの屋根は従来どおり面まで(納まりの検査が
+// その高さを前提にしている)。
+function roofSlabBottomLimitAtPlanPoint(roofs,xMm,yMm){
+  var best=null, i, it, y;
+  for(i=0;i<roofs.length;i++){
+    it=roofs[i];
+    if(!it||!roofCoversPlanPoint(it,xMm,yMm)) continue;
+    y=it.setbackRoof?roofSlabBottomWorldYAt(it,xMm,yMm):roofUndersideWorldYAt(it,xMm,yMm);
+    if(best===null||y<best) best=y;
   }
   return best;
+}
+// 壁は厚みを持つ。上端を芯の位置だけで切ると、勾配を横切る向きの壁では外面/内面の
+// 上端が屋根面より上に出る(120mm厚・30度勾配で 36.6mm 実測した)。芯と両面の3点で
+// 見て、いちばん低い屋根の板の下面に合わせる。屋根が覆っていない点は数に入れない。
+function wallRoofTopLimitWorldY(w,roofs,xMm,yMm,candY){
+  if(!roofs||!roofs.length) return null;
+  // 3点(芯と両面)で、屋根の面(surf)と、斜線の板なら板の下面(slab)の低い方を採る。
+  function low(fn){
+    var best=fn(roofs,xMm,yMm);
+    var dx=w.x2-w.x1, dy=w.y2-w.y1;
+    var len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) return best;
+    var nx=-dy/len, ny=dx/len;
+    var halfMm=Math.max(wallExteriorFaceOffsetM(w),wallInteriorFaceOffsetM(w))/U;
+    var s,v;
+    for(s=-1;s<=1;s+=2){
+      v=fn(roofs,xMm+nx*halfMm*s,yMm+ny*halfMm*s);
+      if(v!==null&&(best===null||v<best)) best=v;
+    }
+    return best;
+  }
+  var surf=low(roofTopLimitAtPlanPoint);
+  // 板の下面で止めるのは、壁が面そのものに届く(=板と重なる)点だけ。斜線の屋根
+  // アイテムの範囲は外接矩形で、実際に板が建つ範囲より広い。面に届かない壁まで
+  // 下げると、板の無い所で壁の天端が下がる。候補の高さ candY を渡さなければ下面。
+  if(candY!==undefined&&surf!==null&&candY<surf-0.0005) return surf;
+  return low(roofSlabBottomLimitAtPlanPoint);
 }
 // この壁の頭を押さえる屋根。壁の両側をサンプリングし、天井を屋根から導いている
 // 部屋(roomCeilingProfile の source==='roof')の屋根だけを集める。
@@ -2294,7 +2318,7 @@ function wallTopHeightAtM(w,t,fallbackH,minH,roofs,raiseRoofs,underRoofs,raiseT)
   var up=wallRaiseTopNearWorldY(w,raiseRoofs,w.x1+dx*rt,w.y1+dy*rt);
   if(up!==null&&best<up-fy) best=up-fy;
   // 下限を効かせた**あと**に屋根で切る。屋根がある位置では上限が下限に勝つ。
-  var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t);
+  var lim=wallRoofTopLimitWorldY(w,roofs,w.x1+dx*t,w.y1+dy*t,best+fy);
   if(lim!==null&&best>lim-fy) best=lim-fy;
   // 同じ階の勾配屋根(下屋)の下では、屋根の板の下面で切る(下げるだけ)。
   var down=wallUnderRoofTopWorldY(w,underRoofs,w.x1+dx*t,w.y1+dy*t);
@@ -2570,11 +2594,14 @@ function roofGapInfillRuns(H){
   if(!others.length) return out;
   var cs=roofFootprintCornersMm(H);
   var cx=(cs[0][0]+cs[2][0])/2, cy=(cs[0][1]+cs[2][1])/2;
-  var lowerFloors=[];
-  for(var f=1;f<(H.floor||1);f++) lowerFloors.push(f);
-  if(!lowerFloors.length) return out;
+  // 塞ぐのは、屋根の**すぐ下の階**の部屋の上だけ。それより下の階の部屋まで数えると、
+  // 上の階の外壁より外へ張り出した軒の下(下の階は広いので部屋がある)にまで、
+  // 下の屋根から上の屋根まで板が立ち、建物の角から柱のように飛び出した
+  // (利用者のプラン41: 3階の北東の角)。
+  var belowFloor=(H.floor||1)-1;
+  if(belowFloor<1) return out;
   function roomBelow(x,y){
-    return lowerFloors.some(function(f){ return !!roomAtPointOnFloor(f,x,y); });
+    return !!roomAtPointOnFloor(belowFloor,x,y);
   }
   function wallStandsAt(x,y,bottom){
     return (DATA.walls||[]).some(function(w){

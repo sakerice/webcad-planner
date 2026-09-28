@@ -107,6 +107,8 @@ Sprite.prototype = Object.create(Obj3D.prototype);
 
 const THREE = {
   Group: Group, Mesh: Mesh, LineSegments: LineSegments, Sprite: Sprite,
+  // 斜線の板の軒樋(addSetbackSlabGutters)。形は検査しないので頂点は持たせない。
+  CylinderGeometry: function (r1, r2, h) { const g = new Geo(); g.setAttribute('position', new Attr([], 3)); g.parameters = { radiusTop: r1, radiusBottom: r2, height: h }; return g; },
   BufferGeometry: Geo,
   Float32BufferAttribute: function (a, s) { return new Attr(Array.from(a), s); },
   BufferAttribute: function (a, s) { return new Attr(Array.from(a), s); },
@@ -143,7 +145,7 @@ const FNS = [
   'ceilingSlopeUnit', 'ceilingSlopeSpan',
   'roomVoidTargetFloor', 'roomIsVoidCeiling', 'roomVoidCeilingMm', 'roomVoidFloorsAreOpen',
   'roomExplicitCeilingMm', 'roomCeilingHeightM', 'roomCeilingCapM', 'roomSkipLevelMm',
-  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
+  'baseRoomOf', 'floorRoomIgnoringSkip', 'roomsAtPointOnFloor', 'roomAtPointOnFloor', 'roofSlabThickM', 'roofSlabBottomWorldYAt', 'roofSlabBottomLimitAtPlanPoint', 'wallRoofTopLimitWorldY', 'wallLimitingRoofs', 'wallTopHeightAtM',
   'wallFaceJitterStep', 'wallFaceJitterM', 'wallExteriorFaceOffsetM', 'wallInteriorFaceOffsetM',
   'getObjBounds', 'isFiniteCanvasValue',
   'isContextExteriorItemType', 'isGroundLevelItemType',
@@ -166,7 +168,7 @@ const FNS = [
   'setbackClipPolygon', 'setbackClipSegment',
   'setbackFootprintRects', 'setbackFootprintEdges',
   'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',
-  'build3DSetbackRoofSlab', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
+  'build3DSetbackRoofSlab', 'addSetbackSlabGutters', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
   'setbackCutGeometry', 'applySetbackCut',
   'build3DRoofItem'
 ];
