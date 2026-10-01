@@ -65,3 +65,11 @@ Transport-only tests previously used empty-room successful model responses; they
 The first draft rejected bad geometry before the browser could invoke revision. HTTP 422 now retains raw `pages`, usage, and an explicit `revisionCandidate` marker, but never a `plan`. The browser permits one existing revision pass for this candidate and only enables Apply after the Worker validates its repaired output. Quota errors, network errors, no render, and still-invalid repairs leave the result unset and Apply disabled. A five-case browser-orchestration/real-Worker-route regression uses a mocked OpenAI transport; no hosted model is contacted.
 
 Distinct coordinate lines separated by 1 mm or less now produce diagnostics and no walls, rather than silently generating near-coincident full-thickness walls. This is a review requirement, not snapping: input values remain unchanged. Tests cover 0.001, 0.5 and 1 mm gaps; the exact 100 mm stress case remains valid. This conservative rule may flag small offsets even when they occur in different parts of a floor; such readings require review rather than guessed correction.
+
+## Review visuals and wider deterministic coverage
+
+[Three-panel source/before/after PNG](source-before-after.png) shows the 90 mm partition drift explicitly. It visualizes specified coordinates and reconstruction, not image recognition.
+
+`plan-opening-objects.test.cjs` additionally exercises actual Worker assembly, `toAppObjects`, real `mkItem`, wall attachment, adjacent-room lookup and walk-gap semantics for five supplied opening types. It checks center/width/depth/rotation preservation, same-floor matching, door vs window properties, catalog fallback and windows remaining excluded from door-only walk gaps. These are object-generation regressions, not detected-opening accuracy or a 3D/browser rendering test.
+
+The [blinded native input package](native-sources/README.md) keeps source PNGs and exact prompt/schema separate from expected JSON. It is prepared for approximate assistant-model evaluation only; no predictions have been scored yet. [Unknown-dimension audit](unknown-dimensions-audit.md) documents the contract changes still needed without changing that schema in this PR.
