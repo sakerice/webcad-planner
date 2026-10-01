@@ -13,6 +13,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script>
+// A child-only, read-only runtime for sequential comparison captures.
+var COMPARISON_PREVIEW = window.parent !== window && new URLSearchParams(location.search).get('comparisonPreview') === '1';
+if(COMPARISON_PREVIEW){
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=function(input,options){
+    const url=new URL(typeof input==='string'?input:input.url,location.href);
+    if(url.pathname.startsWith('/api/') || (options&&options.method&&options.method.toUpperCase()!=='GET')) return Promise.reject(new Error('Comparison preview cannot access application APIs'));
+    return originalFetch(input,options);
+  };
+  window.WebSocket=function(){throw new Error('Comparison preview cannot join collaboration');};
+}
 // importmap 非対応の古いSafari(iPadOS 16.3以前)等では es-module-shims でポリフィルする。
 // 対応ブラウザでは何もロードしない
 (function(){
@@ -16711,7 +16722,7 @@ function applyInteriorLightBudget(cam){
   // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
   // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
   // compileAsync は隠れている物の材質も作る(three.js r169)。
-  if(!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+  if(!(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)&&!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
     L.precompiled=true;
     try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
   }
@@ -17619,6 +17630,7 @@ function setDynamicResolution(low){
   if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return; // Captures render explicitly, with no camera animation.
   requestAnimationFrame(loop3D);
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
@@ -19638,6 +19650,7 @@ async function refreshSharedPlan(){
   return SHARED.refreshPromise;
 }
 async function initSharedRoomFromUrl(){
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return false;
   var roomId=sharedRoomFromLocation();if(!roomId)return false;
   try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
   catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
@@ -22246,8 +22259,9 @@ function applyIntCamera(){
 
 try {
   ensureHeightDefaults(); syncHeightDefaultsUI();
-  loadPreset(); normalizeLegacyFurnitureItems(); renderOpeningModelToolMenus(); resize2d(); resetView();
-  loadFurnitureMegaLibrary();
+  if(!COMPARISON_PREVIEW) loadPreset();
+  normalizeLegacyFurnitureItems(); renderOpeningModelToolMenus(); resize2d(); resetView();
+  window.comparisonCatalogueReady=loadFurnitureMegaLibrary();
 } catch(e) {
   console.error("Initialization error:", e);
 }
@@ -24295,7 +24309,7 @@ function jisPrint(){
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
-initSharedRoomFromUrl().then(async function(joined){
+if(!COMPARISON_PREVIEW) initSharedRoomFromUrl().then(async function(joined){
   if(!joined) await checkStorageOnInit();
   // 既定間取りで始まる起動なら、どの間取りで始めるかを選んでもらう
   maybeOfferPresetChoice();
@@ -24556,5 +24570,31 @@ updateMobileShiftButton();
 })();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
+<link rel="stylesheet" href="assets/plan-comparison.css">
+<button id="compare-launch" onclick="PlanComparison.open()">▧ 案を比較 <small>試作</small></button>
+<dialog id="compare-dialog" aria-labelledby="compare-heading">
+  <div class="compare-row"><span class="compare-muted">LOCAL COMPARISON · 比較の試作</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
+  <h2 id="compare-heading">同じ視点で、住まいの案を比べる</h2>
+  <p class="compare-muted">名前を付けて案を残し、左右で切り替え。編集中のプランとは別に、このブラウザだけに保存します。</p>
+  <div class="compare-row"><label for="compare-name">案の名前</label><input id="compare-name" maxlength="80" placeholder="例：A案 / リビングの壁紙"><button id="compare-save" class="compare-primary" data-compare-write>現在のプランを保存</button><button id="compare-import-open" data-compare-write>JSONから追加</button><input id="compare-import" type="file" accept=".json,application/json" hidden><span id="compare-count" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-mode">比較表示</label><select id="compare-mode"><option value="2d">平面概略</option><option value="3d">内観3D（アプリの描画）</option></select><span class="compare-muted">3Dは同じカメラ・画角・照明で順番に撮影します。</span></div>
+  <div id="compare-3d-controls" hidden>
+    <div class="compare-row"><label for="compare-room">部屋の視点</label><select id="compare-room"></select><button id="compare-room-camera">この部屋から見る</button><button id="compare-live-camera">現在の内観3D視点を使う</button></div>
+    <div class="compare-row"><label for="compare-camera-name">3D視点名</label><input id="compare-camera-name" maxlength="80" placeholder="例：リビング / ソファ側"><button id="compare-save-camera" data-compare-write>3D視点を保存</button><label for="compare-cameras">保存した3D視点</label><select id="compare-cameras"></select><button id="compare-recapture">同じ条件で撮り直す</button><button id="compare-cancel-capture">撮影を中止</button></div>
+  </div>
+  <div id="compare-2d-controls">
+  <div class="compare-row"><label for="compare-floor">階</label><select id="compare-floor"><option value="1">1F</option><option value="2">2F</option><option value="3">3F</option></select><button id="compare-fit">両案が入る共通範囲</button><button data-compare-camera="in" aria-label="共通視点を拡大">＋</button><button data-compare-camera="out" aria-label="共通視点を縮小">−</button><button data-compare-camera="left" aria-label="共通視点を左へ">←</button><button data-compare-camera="right" aria-label="共通視点を右へ">→</button><button data-compare-camera="up" aria-label="共通視点を上へ">↑</button><button data-compare-camera="down" aria-label="共通視点を下へ">↓</button><span id="compare-view-label" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-view-name">共通視点</label><input id="compare-view-name" maxlength="80" placeholder="例：1F 全体"><button id="compare-save-view" data-compare-write>視点を保存</button><label for="compare-views">保存した視点</label><select id="compare-views"></select></div>
+  </div>
+  <div class="compare-grid">
+    <article class="compare-tile"><div class="compare-row"><label for="compare-a">A</label><select id="compare-a"></select><button id="compare-a-export">JSON保存</button></div><h3 id="compare-a-title"></h3><img id="compare-a-image" hidden alt="左の案"><p id="compare-a-finishes" class="compare-muted"></p></article>
+    <article class="compare-tile"><div class="compare-row"><label for="compare-b">B</label><select id="compare-b"></select><button id="compare-b-export">JSON保存</button></div><h3 id="compare-b-title"></h3><img id="compare-b-image" hidden alt="右の案"><p id="compare-b-finishes" class="compare-muted"></p></article>
+  </div>
+  <div class="compare-row"><button id="compare-images" class="compare-primary">比較画像を保存</button><span class="compare-muted">同一範囲・画角 / 各960 × 720</span></div>
+  <p id="compare-status" role="status" aria-live="polite"></p>
+  <details open><summary>この試作で確認できること</summary><p class="compare-muted">内観3Dは既存アプリの壁・素材・家具を同じ視点で描画します。製品の実物色や照明の物理的な再現を保証するものではありません。部屋から見る視点は自動配置なので、見づらい場合は編集中の内観3Dで視点を調整してから使ってください。平面は家具や開口を省略した概略です。案の切替は比較画面だけに反映します。各案の画像AI用パッケージとAI完成画像は未実装です。</p></details>
+</dialog>
+<script src="assets/js/comparison-renderer.js"></script>
+<script src="assets/js/plan-comparison.js"></script>
 </body>
 </html>

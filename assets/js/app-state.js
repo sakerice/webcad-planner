@@ -2321,6 +2321,11 @@ var DIRTY = false;
 // ~5MB quota on mobile Safari (counted as UTF-16). IndexedDB has a far larger
 // quota and is built for blob-sized data. All methods are async (Promise-based).
 var StorageAdapter = (function(){
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return {
+    save:function(){return Promise.reject(new Error('Read-only comparison preview'));},
+    load:function(){return Promise.resolve(null);},
+    hasData:function(){return Promise.resolve(false);}
+  };
   var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
   var LEGACY_LS_KEY='webcad-plan-v1';
   function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }
