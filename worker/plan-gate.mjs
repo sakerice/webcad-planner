@@ -92,12 +92,20 @@ function dimensionCheck(dims) {
   for (const edge of ["top", "bottom", "left", "right"]) {
     const e = dims[edge];
     if (!e || typeof e !== "object") continue;
-    const total = Number(e.total);
-    const parts = (Array.isArray(e.parts) ? e.parts : []).map(Number).filter(Number.isFinite);
-    if (!Number.isFinite(total) && !parts.length) continue;
+    // Null, blanks and booleans are not measured lengths. Keep unreadable
+    // entries in the chain: summing only the known subset would imply a
+    // complete chain and can produce a false match with the total.
+    const length = (v) => {
+      if (typeof v !== "number" && !(typeof v === "string" && v.trim())) return null;
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
+    const total = length(e.total);
+    const parts = (Array.isArray(e.parts) ? e.parts : []).map(length);
+    const complete = parts.length > 0 && parts.every((n) => n !== null);
     out[edge] = {
       total: round(total),
-      sum_of_parts: parts.length ? round(parts.reduce((a, b) => a + b, 0)) : null,
+      sum_of_parts: complete ? round(parts.reduce((a, b) => a + b, 0)) : null,
     };
   }
   return Object.keys(out).length ? out : null;
