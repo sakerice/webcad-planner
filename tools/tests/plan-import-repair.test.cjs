@@ -9,7 +9,7 @@ const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==';
 for (const outcome of ['repaired','still-invalid','quota','network','no-render']) {
   test(`invalid extraction gets at most one repair and never becomes applicable: ${outcome}`,async()=>{
     const {handleAi} = await import('../../worker/routes-ai.mjs');
-    const valid={floors:[structuredClone(fixtures[0])]};
+    const valid={floors:[{...structuredClone(fixtures[0]),floor:1}]};
     const invalid=structuredClone(valid); invalid.floors[0].rooms[1].parts[0].x0=999;
     const env={OPENAI_API_KEY:'synthetic-test-key-not-a-credential'};
     let providerPosts=0, revisions=0;
