@@ -3174,7 +3174,7 @@ function loadFurnitureMegaLibrary(){
   var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
   }).catch(function(){ return null; });};
-  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+  return Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
     .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
     CATALOGUE_TAGS=all[0]||null;
     CATALOGUE_FINISHES=all[1]||null;

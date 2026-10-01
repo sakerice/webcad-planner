@@ -17,3 +17,18 @@ test('storage acknowledges only transaction completion; abort is a failure',asyn
     await assert.rejects(aborted,/transaction aborted/);assert.equal(closed,2);
   }finally{delete global.indexedDB;}
 });
+test('saved 3D cameras require a finite pose and fixed comparison viewport',()=>{
+  const {validateCamera}=require('../../assets/js/plan-comparison.js');
+  const spec={floor:1,pos:[1,1.6,3],target:[4,1.5,1],up:[0,1,0],fov:65,width:960,height:720,lighting:{timeOfDay:'day'}};
+  assert.deepEqual(validateCamera(spec),spec);
+  for(const invalid of [{...spec,fov:Infinity},{...spec,pos:[NaN,1,2]},{...spec,width:1920},{...spec,target:null}])assert.throws(()=>validateCamera(invalid));
+});
+test('preview storage adapter cannot read or overwrite the editor database',async()=>{
+  const fs=require('node:fs'),vm=require('node:vm');
+  const source=fs.readFileSync(require.resolve('../../assets/js/app-state.js'),'utf8');
+  const block=source.slice(source.indexOf('var StorageAdapter ='),source.indexOf('function markDirty(){'));
+  let opens=0;const context=vm.createContext({COMPARISON_PREVIEW:true,indexedDB:{open(){opens++;throw Error('must not open');}}});
+  vm.runInContext(block,context);
+  assert.equal(await context.StorageAdapter.load(),null);assert.equal(await context.StorageAdapter.hasData(),false);
+  await assert.rejects(context.StorageAdapter.save({walls:[]}),/Read-only/);assert.equal(opens,0);
+});
