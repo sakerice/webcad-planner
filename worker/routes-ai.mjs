@@ -637,6 +637,26 @@ function sumUsage(results) {
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage, extra) {
   const plan = decodeCompactPlan(parsed);
+  // An empty extraction is the model's refusal when no physical scale can
+  // be established. Do not turn that (or a missing footprint) into an
+  // applicable empty/partial plan, including mixed multi-page results.
+  const sourcePages = Array.isArray(extra && extra.pages) ? extra.pages
+    : Array.isArray(parsed) ? parsed : [parsed];
+  const positive = (v) => (typeof v === "number" || (typeof v === "string" && v.trim() !== ""))
+    && Number.isFinite(Number(v)) && Number(v) > 0;
+  const readings = [...sourcePages, ...(Array.isArray(parsed) ? parsed : [parsed])];
+  if (readings.some((p) => Array.isArray(p && p.floors)
+    && (!p.floors.length || p.floors.some((f) => !f || !positive(f.width) || !positive(f.depth))))) {
+    return json({
+      error: "ai_invalid_plan",
+      message: "実寸の幅・奥行きを確認できません。寸法線を含む図面と実寸の手がかりを確認してください。",
+      problems: ["読み取りに有効な実寸の階がありません。"],
+      notes: sourcePages.flatMap((p) => Array.isArray(p && p.notes) ? p.notes.map(String) : []).slice(0, 20),
+      pages: sourcePages,
+      usage: usage || null,
+      revisionCandidate: false,
+    }, 422);
+  }
   // 壁はAIに出させず、**部屋と部屋の境目から作る**。
   // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
   // という失敗が残った(実測で13本中12本は通り芯にぴったり載っていた)。
