@@ -165,7 +165,7 @@
   $('fit').onclick=()=>{view=fit(['a','b'].map(selected).filter(Boolean).map(p=>p.plan),Number($('floor').value));render();};
   $('floor').onchange=()=>{$('fit').click();};
   document.querySelectorAll('[data-compare-camera]').forEach(button=>button.onclick=()=>{if(!view)return;const action=button.dataset.compareCamera;if(action==='in')view.span=Math.max(500,view.span/1.25);if(action==='out')view.span=Math.min(1e8,view.span*1.25);if(action==='left')view.x-=view.span*.15;if(action==='right')view.x+=view.span*.15;if(action==='up')view.y-=view.span*.15;if(action==='down')view.y+=view.span*.15;$('views').value='';render();});
-  $('save-view').onclick=()=>run(async()=>{if(!view)throw Error('先に案を保存してください。');const n=$('view-name').value.trim();if(!n)throw Error('視点の名前を入力してください。');const next=clone(state);const id=crypto.randomUUID();next.views.push({id,name:n.slice(0,80),...view});await commit(next);$('views').value=id;message('共通の平面視点を保存しました。');});
+  $('save-view').onclick=()=>run(async()=>{if(!view)throw Error('先に案を保存してください。');const n=$('view-name').value.trim();if(!n)throw Error('視点の名前を入力してください。');const next=clone(state);const id=crypto.randomUUID();next.views.push({x:view.x,y:view.y,span:view.span,floor:view.floor,id,name:n.slice(0,80)});await commit(next);$('views').value=id;message('共通の平面視点を保存しました。');});
   $('views').onchange=()=>{const v=state.views.find(v=>v.id===$('views').value);if(v){view=clone(v);$('floor').value=v.floor;render();}};
   $('mode').onchange=render;
   $('room-camera').onclick=()=>{try{sceneSpec=cameraForRoom();render();}catch(e){message(e.message);}};

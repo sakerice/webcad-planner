@@ -61,7 +61,21 @@ const fixture=require('./fixtures/house-2f.json');
     assert.equal(await b.locator('#compare-a option').count(),6);
     assert.equal(await b.locator('#compare-views option').count(),2);
     assert.equal(await b.locator('#compare-cameras option').count(),2);
+    // Selecting a saved view must not reuse its identity when saving a new name.
+    await b.locator('#compare-views').selectOption({label:'view A'});
+    await b.locator('#compare-view-name').fill('view A copy');await b.locator('#compare-save-view').click();
+    await b.waitForFunction(()=>document.getElementById('compare-views').options.length===3);
+    await b.locator('#compare-views').selectOption({label:'view A'});
+    await b.locator('[data-compare-camera="right"]').click();
+    await b.locator('#compare-view-name').fill('view A moved');await b.locator('#compare-save-view').click();
+    await b.waitForFunction(()=>document.getElementById('compare-views').options.length===4);
+    const finalViews=(await b.evaluate(()=>PlanComparison.storage())).views;
+    const original=finalViews.find(v=>v.name==='view A'),copy=finalViews.find(v=>v.name==='view A copy'),moved=finalViews.find(v=>v.name==='view A moved');
+    assert.equal(new Set(finalViews.map(v=>v.id)).size,4);
+    for(const key of ['x','y','span','floor'])assert.equal(original[key],copy[key]);
+    assert.notEqual(original.x,moved.x);
+    assert.deepEqual(original,persisted.views.find(v=>v.name==='view A'));
     assert.deepEqual(errors,[]);
-    console.log('PASS: two stale tabs retain snapshots/views; delayed save close/reopen and next save; linked whole/floor images differ; live edits preserved; reload; no page errors');
+    console.log('PASS: two stale tabs retain snapshots/views; delayed save close/reopen and next save; linked whole/floor images differ; live edits preserved; reload; saved-view copy and moved copy keep fresh identity; no page errors');
   }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
