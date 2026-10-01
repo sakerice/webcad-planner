@@ -338,8 +338,8 @@ test('ページごとの補足に、何ページ目かを入れる', async () =>
   assert.match(seen[0], /東西に長い家です/, '利用者の補足が消えている');
 });
 
-test('同じ階が2回来たら、ページの並び順を正とする', async () => {
-  // 見出しの無い図面では階を取り違える。全ページが1階と答えると家にならない。
+test('同じ階が複数ページにあるときは架空の階を作らない', async () => {
+  // 重複図面か階数の読み違いかはページ順だけでは判断できない。
   let n = 0;
   const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG, PNG] }, VERTEX_ENV,
     vertexFetch(async () => {
@@ -348,7 +348,11 @@ test('同じ階が2回来たら、ページの並び順を正とする', async (
         rooms: [{ name: '洋室' + n, parts: [{ x0: 0, y0: 0, x1: 3640, y1: 4095 }] }] }] });
     }));
   const body = await res.json();
-  assert.deepEqual(body.summary.floors, [1, 2, 3], '全ページが同じ階になっている');
+  assert.equal(res.status, 422);
+  assert.equal(body.error, 'ai_ambiguous_floors');
+  assert.equal(body.plan, undefined);
+  assert.equal(body.pages.length, 3);
+  assert.equal(body.revisionCandidate, false);
 });
 
 test('使用量は全ページの合計になる', async () => {
@@ -547,8 +551,9 @@ test('上限は「回数」で設定する（点は内部の数え方）', async
 const ONE_FLOOR = { floors: [{ floor: 1, width: 3640, depth: 4095, rooms: [] }] };
 
 test('読み取りは、見直しのために素のJSONをページごとに返す', async () => {
+  let floor = 0;
   const res = await callAi('/api/ai/import-plan', { images: [PNG, PNG] }, VERTEX_ENV,
-    vertexFetch(async () => vertexReply(ONE_FLOOR)));
+    vertexFetch(async () => vertexReply({floors:[{...ONE_FLOOR.floors[0],floor:++floor}]})));
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.pages.length, 2, 'ページごとの素のJSONが返っていない');
@@ -687,10 +692,11 @@ test('取りに行くのは、受付番号の数だけ。まだなら pending �
   assert.equal(body.done, 0);
   assert.equal(body.total, 2);
 
-  // 出来た
+  // 出来た（成功経路は異なる階のページで検査する）
+  let floor = 0;
   res = await callAi('/api/ai/plan-result', { jobs: started }, OPENAI_ENV,
     openaiFetch(async () => new Response('{}', { status: 200 }),
-                async () => new Response(openaiBody(ONE_FLOOR), { status: 200 })));
+                async () => new Response(openaiBody({floors:[{...ONE_FLOOR.floors[0],floor:++floor}]}), { status: 200 })));
   body = await res.json();
   assert.ok(body.plan, '全部そろったのに間取りを返していない');
   assert.equal(body.pages.length, 2);
@@ -754,3 +760,28 @@ test('失敗の返事に、次の一手が載る（用意した選択肢のと�
   const body2 = await res2.json();
   assert.equal(body2.next, undefined, '分からないものを助言として出している');
 });
+
+for (const mode of ['import', 'revise', 'poll']) {
+  test(`ページの不確実性メモを残す (${mode})`, async () => {
+    let n=0;
+    const next=()=>({floors:[{floor:++n,width:1820,depth:1820,rooms:[{name:'洋室',parts:[{x0:0,y0:0,x1:1820,y1:1820}]}]}],notes:[`寸法${n}は要確認`]});
+    let res;
+    if(mode==='poll') {
+      let job=0;
+      const start=await callAi('/api/ai/import-plan',{images:[PNG,PNG]},OPENAI_ENV,
+        openaiFetch(async()=>Response.json({id:'resp_notes'+(++job),status:'queued'}),async()=>Response.json({})));
+      const {jobs}=await start.json();
+      res=await callAi('/api/ai/plan-result',{jobs},OPENAI_ENV,
+        openaiFetch(async()=>Response.json({}),async()=>new Response(openaiBody(next()),{status:200})));
+    } else {
+      res=await callAi('/api/ai/'+(mode==='revise'?'revise-plan':'import-plan'),
+        mode==='revise'?{images:[PNG,PNG],renders:[PNG,PNG],pages:[ONE_FLOOR,ONE_FLOOR]}:{images:[PNG,PNG]},
+        VERTEX_ENV,vertexFetch(async()=>vertexReply(next())));
+    }
+    assert.equal(res.status,200);
+    const body=await res.json();
+    assert.deepEqual(body.notes,['1ページ: 寸法1は要確認','2ページ: 寸法2は要確認']);
+    assert.deepEqual(body.summary.floors,[1,2]);
+    assert.deepEqual(body.pages.map(p=>p.notes[0]),['寸法1は要確認','寸法2は要確認']);
+  });
+}

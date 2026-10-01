@@ -588,6 +588,7 @@
       ai_not_configured: 'この環境ではまだAIの読み取りを使えません（管理者の設定待ちです）。',
       ai_model_not_japan_resident: 'AIの設定が正しくないため実行しませんでした。管理者にお伝えください。',
       ai_invalid_plan: 'AIは読み取りましたが、そのままでは使えない形でした。',
+      ai_ambiguous_floors: 'ページと階の対応を確定できません。対象の階の図面だけを選び、階数を補足して読み直してください。',
       ai_bad_response: 'AIが間取りとして答えられませんでした。',
       ai_upstream_error: 'AI側でエラーが起きました。少し待ってからもう一度お試しください。',
       ai_quota_exceeded: '',   // message をそのまま出す（残り回数を含むため）
@@ -735,6 +736,8 @@
       // スキップフロア。**段のある部屋だけが持つ欄**なので、無い部屋には
       // 書かない(書くと、この欄を持たない既存プランと形が変わる)。
       if (r.skipLevelMm) made.skipLevelMm = r.skipLevelMm;
+      // Keep the image reader's room-use evidence when making editable objects.
+      if (typeof r.use === 'string' && r.use) made.use = r.use;
       out.rooms.push(made);
     });
     // 構造部材（基礎・屋根）はここでは作らない。**いまの間取りと合わせた
