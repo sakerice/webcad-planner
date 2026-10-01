@@ -1,7 +1,7 @@
 # 案の比較：ローカル試作と次の提案
 
 2026-10-01。`feat/local-plan-comparison`。main の `d41e98d` から開始。
-公開・push・main 更新は行っていない。PR64 の変更は含まない。
+レビュー用のドラフト PR #65 にのみ push。main 更新・マージ・手動デプロイは行っていない。PR64 の変更は含まない。
 
 ## 今回のレビュー対象
 
@@ -24,6 +24,22 @@
 レビュー画像は `tools/tests/fixtures/house-2f.json` の凍結サンプルと、
 組み込み素材 `plaster_white` / 色 `#9CAD9F` を適用した説明用の派生案。
 ユーザーの家や採用する製品を示すものではない。
+
+## 実際の試作画面
+
+以下はコミット `0b20a8699dca590dfba75f99cc99ad54c6f6c2cf` のブラウザ検証画像。
+凍結サンプル `tools/tests/fixtures/house-2f.json` と上記の色替え案のみを使い、
+新しいブラウザコンテキストで撮影した。個人のプラン・接続先・秘密情報は含まない。
+1440 × 1200 / 390 × 844 の元PNGを維持（合計約542 KiB）。
+AI生成の完成予想図ではなく、既存アプリの内観3Dの比較画面。
+
+[デスクトップ画像を開く](plan-comparison/sample-desktop.png)
+
+![同じカメラの既存仕上げとセージの塗り壁を左右比較](plan-comparison/sample-desktop.png)
+
+[スマホ画像を開く](plan-comparison/sample-mobile.png) — 縦に並ぶ画像のうちA案が見えているスクロール位置。
+
+![スマホでの比較パネル](plan-comparison/sample-mobile.png)
 
 ## 保全の境界
 
@@ -74,5 +90,5 @@
 本体の動作を停止するコードは製品には加えていない。
 フル既存テスト一式やSafari・実端末の検証は未実施。
 
-レビュー画像・撮影設定・テスト結果・ビルドログは `output/plan-comparison/`（git対象外）。
+上記のレビュー用画像は `docs/plan-comparison/` に同梱。撮影設定・テスト結果・ビルドログなどは `output/plan-comparison/`（git対象外）。
 開発プレビューはこの環境の `http://localhost:8931`。外部公開URLは作っていない。
