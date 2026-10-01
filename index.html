@@ -22026,14 +22026,97 @@ async function renderUnityImage(){
     setUnityRenderBusy(false);
   }
 }
+// JSON import is synchronous once the file has been read: no save/sync can see
+// the candidate until its migrations and first render have succeeded.
+function stageJsonImport(text){
+  var candidate=JSON.parse(text);
+  var checked=PlanSchema.validatePlan(candidate);
+  if(!checked.ok) throw new Error(checked.errors.slice(0,3).join(' / '));
+  var previous={data:DATA,state:ST,wallHeight:WALL_H,nextId:nextId};
+  try{
+    DATA=candidate;
+    // Legacy helpers use globals. Give them a private state and restore every
+    // global they write in finally, including when a migration throws.
+    ST=Object.assign({},ST,{selected:null,multiSelected:[]});
+    resetHeightGlobalsForPlanLoad();
+    // Allocate missing IDs with the existing allocator before normalizePlan,
+    // whose p1/p2 defaults could collide with IDs already in a saved file.
+    ensureObjectIds();
+    DATA=PlanSchema.normalizePlan(DATA);
+    ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();
+    ensureFloorMetadata();ensureHeightDefaults();
+    syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    return {data:DATA,wallHeight:WALL_H,nextId:nextId};
+  }finally{
+    DATA=previous.data;ST=previous.state;WALL_H=previous.wallHeight;nextId=previous.nextId;
+  }
+}
+function applyJsonImport(staged){
+  var previous={data:DATA,state:ST,drag:DRAG,wallHeight:WALL_H,nextId:nextId,
+    north:LIGHT_SETTINGS.northDeg,dirty:DIRTY,pending:_defaultPlanPending};
+  var camera=camExt?{position:camExt.position.clone(),quaternion:camExt.quaternion.clone(),
+    target:orbit?orbit.target.clone():null}:null;
+  try{
+    DATA=staged.data;WALL_H=staged.wallHeight;nextId=staged.nextId;
+    ST=Object.assign({},ST,{selected:null,multiSelected:[],selectAll:false,
+      drawing:false,drawPts:[],_snapState:null});
+    DRAG=Object.assign({},DRAG,{active:false,shiftClick:null,group:null,marquee:null});
+    restoreViewState();syncNorthFromPlan();syncHeightDefaultsUI();updateProps();
+    draw2d();
+    // Do not defer the first build to another frame: its exception must still
+    // belong to this transaction, before history or shared storage is touched.
+    rebuild3D(true);
+    DIRTY=true;
+    var saveButton=document.getElementById('save-btn');
+    if(saveButton) saveButton.classList.add('dirty');
+    renderSaveButtonState();
+  }catch(error){
+    DATA=previous.data;ST=previous.state;DRAG=previous.drag;
+    WALL_H=previous.wallHeight;nextId=previous.nextId;
+    LIGHT_SETTINGS.northDeg=previous.north;DIRTY=previous.dirty;
+    _defaultPlanPending=previous.pending;
+    // A failed renderer may already have cleared its canvas/scene. Recover the
+    // old presentation too; a second render failure must not prevent restoration
+    // of the plan, history, selection, or camera.
+    [syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,function(){rebuild3D(true);},
+      function(){
+        var btn=document.getElementById('save-btn');
+        if(btn) btn.classList.toggle('dirty',DIRTY);
+        renderSaveButtonState();
+      }].forEach(function(recover){try{recover();}catch(e){console.warn('[WebCAD] import recovery',e);}});
+    if(camera){
+      camExt.position.copy(camera.position);camExt.quaternion.copy(camera.quaternion);
+      if(orbit&&camera.target) orbit.target.copy(camera.target);
+      invalidate3D();
+    }
+    throw error;
+  }
+  _defaultPlanPending=false;
+  clearEditHistory();
+  sharedForceFullSync();queueSharedSync(700);queueSharedLocalAutoSave();
+}
+var _jsonImportRequest=0;
 function doImport(inp){
-  var file=inp.files[0];if(!file)return;
-  var r=new FileReader();
-  r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
-    catch(ex){alert('読み込みエラー:'+ex.message);}
-  };
-  r.readAsText(file);
+  var file=inp.files&&inp.files[0];if(!file)return;
+  var request=++_jsonImportRequest;
+  // Let the same file trigger change again after an error or a successful load.
+  inp.value='';
+  function failed(){
+    if(request!==_jsonImportRequest)return;
+    alert('読み込めませんでした。編集中の間取りと操作履歴はそのままです。\nこのアプリから書き出したJSONファイルを選んで、もう一度お試しください。');
+  }
+  try{
+    var r=new FileReader();
+    r.onload=function(e){
+      if(request!==_jsonImportRequest)return;
+      try{applyJsonImport(stageJsonImport(e.target.result));}
+      catch(ex){console.warn('[WebCAD] JSON import failed',ex);failed();}
+    };
+    r.onerror=failed;
+    // Aborted reads and cancelling the picker leave the current plan untouched.
+    r.onabort=function(){};
+    r.readAsText(file);
+  }catch(ex){failed();}
 }
 
 // 天井に固定する器具。値は「取付面(elev)から器具の上端までの高さ(mm)」。
