@@ -184,24 +184,11 @@ function keyFile() {
   }
   // 手順1〜2で読んだ寸法線。内訳の合計が総寸法と合っているかを、こちらでも検算する。
   // **AIの自己申告を信じない。** 合っていると言いながら合っていないことがある。
-  const edgeJa = { top: '上辺', bottom: '下辺', left: '左辺', right: '右辺' };
+  const { formatDimensionLines } = await import(pathToFileURL(join(ROOT, 'tools', 'probe-dimensions.mjs')).href);
   for (const dims of plan.dims) {
     if (!dims || typeof dims !== 'object') continue;
     const floor = dims.floor == null ? '' : `（${dims.floor}階）`;
-    const lines = [];
-    for (const side of ['top', 'bottom', 'left', 'right']) {
-      const d = dims[side];
-      if (!d) continue;
-      // 本筋は {total, parts}。古い保存は [total, [parts]] の形。
-      const total = Number(Array.isArray(d) ? d[0] : d.total);
-      const raw = Array.isArray(d) ? d[1] : d.parts;
-      const parts = Array.isArray(raw) ? raw.map(Number) : [];
-      if (!isFinite(total)) continue;
-      const sum = parts.reduce((a, b) => a + b, 0);
-      const ok = !parts.length ? '（内訳なし）'
-        : Math.abs(sum - total) < 1 ? '✓' : `✗ 内訳の合計が ${sum} で合わない`;
-      lines.push(`  ${edgeJa[side]}  総 ${total}  = ${parts.join(' + ')}  ${ok}`);
-    }
+    const lines = formatDimensionLines(dims);
     if (lines.length) {
       console.log(`\n読んだ寸法線${floor}:`);
       console.log(lines.join('\n'));

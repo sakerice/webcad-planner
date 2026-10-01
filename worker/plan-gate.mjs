@@ -45,6 +45,7 @@
 // **迷ったら払う。** 境目(0.55 / 1.9)は素直な側の実測から離し、壊した側からも
 // 離した位置に置いてある。少しでも怪しければ従来どおり見直す。間違った間取りを
 // 渡すより、¥40 を余分に払うほうが安い。
+import { readDimensionEdge } from "./plan-dimensions.mjs";
 import { jevAsk, noul, score, choice } from "./jev.mjs";
 
 // ── 見直しの門 ──────────────────────────────────────────────────────
@@ -92,20 +93,10 @@ function dimensionCheck(dims) {
   for (const edge of ["top", "bottom", "left", "right"]) {
     const e = dims[edge];
     if (!e || typeof e !== "object") continue;
-    // Null, blanks and booleans are not measured lengths. Keep unreadable
-    // entries in the chain: summing only the known subset would imply a
-    // complete chain and can produce a false match with the total.
-    const length = (v) => {
-      if (typeof v !== "number" && !(typeof v === "string" && v.trim())) return null;
-      const n = Number(v);
-      return Number.isFinite(n) && n > 0 ? n : null;
-    };
-    const total = length(e.total);
-    const parts = (Array.isArray(e.parts) ? e.parts : []).map(length);
-    const complete = parts.length > 0 && parts.every((n) => n !== null);
+    const { total, sum } = readDimensionEdge(e);
     out[edge] = {
       total: round(total),
-      sum_of_parts: complete ? round(parts.reduce((a, b) => a + b, 0)) : null,
+      sum_of_parts: round(sum),
     };
   }
   return Object.keys(out).length ? out : null;
