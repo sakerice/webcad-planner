@@ -24556,5 +24556,23 @@ updateMobileShiftButton();
 })();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
+<link rel="stylesheet" href="assets/plan-comparison.css">
+<button id="compare-launch" onclick="PlanComparison.open()">▧ 案を比較 <small>試作</small></button>
+<dialog id="compare-dialog" aria-labelledby="compare-heading">
+  <div class="compare-row"><span class="compare-muted">LOCAL COMPARISON · 平面比較の試作</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
+  <h2 id="compare-heading">同じ視点で、住まいの案を比べる</h2>
+  <p class="compare-muted">名前を付けて案を残し、左右で切り替え。編集中のプランとは別に、このブラウザだけに保存します。</p>
+  <div class="compare-row"><label for="compare-name">案の名前</label><input id="compare-name" maxlength="80" placeholder="例：A案 / リビングの壁紙"><button id="compare-save" class="compare-primary" data-compare-write>現在のプランを保存</button><button id="compare-import-open" data-compare-write>JSONから追加</button><input id="compare-import" type="file" accept=".json,application/json" hidden><span id="compare-count" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-floor">階</label><select id="compare-floor"><option value="1">1F</option><option value="2">2F</option><option value="3">3F</option></select><button id="compare-fit">両案が入る共通範囲</button><button data-compare-camera="in" aria-label="共通視点を拡大">＋</button><button data-compare-camera="out" aria-label="共通視点を縮小">−</button><button data-compare-camera="left" aria-label="共通視点を左へ">←</button><button data-compare-camera="right" aria-label="共通視点を右へ">→</button><button data-compare-camera="up" aria-label="共通視点を上へ">↑</button><button data-compare-camera="down" aria-label="共通視点を下へ">↓</button><span id="compare-view-label" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-view-name">共通視点</label><input id="compare-view-name" maxlength="80" placeholder="例：1F 全体"><button id="compare-save-view" data-compare-write>視点を保存</button><label for="compare-views">保存した視点</label><select id="compare-views"></select></div>
+  <div class="compare-grid">
+    <article class="compare-tile"><div class="compare-row"><label for="compare-a">A</label><select id="compare-a"></select><button id="compare-a-export">JSON保存</button></div><h3 id="compare-a-title"></h3><img id="compare-a-image" hidden alt="左の案"><p id="compare-a-finishes" class="compare-muted"></p></article>
+    <article class="compare-tile"><div class="compare-row"><label for="compare-b">B</label><select id="compare-b"></select><button id="compare-b-export">JSON保存</button></div><h3 id="compare-b-title"></h3><img id="compare-b-image" hidden alt="右の案"><p id="compare-b-finishes" class="compare-muted"></p></article>
+  </div>
+  <div class="compare-row"><button id="compare-images" class="compare-primary">比較画像を保存</button><span class="compare-muted">平面概略・同一範囲 / 各960 × 720</span></div>
+  <p id="compare-status" role="status" aria-live="polite"></p>
+  <details open><summary>この試作で確認できること</summary><p class="compare-muted">平面の範囲・階・仕上げ色をそろえた比較です。壁紙の質感、家具、開口、3Dの光は再現していません。壁の色と素材IDは画像下に表示します。案の切替は比較画面だけに反映します。3Dの共通カメラ・各案の画像AI用パッケージは次の段階です（AI完成画像ではありません）。</p></details>
+</dialog>
+<script src="assets/js/plan-comparison.js"></script>
 </body>
 </html>
