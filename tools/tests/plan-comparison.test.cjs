@@ -8,12 +8,12 @@ test('one shared view frames both plans deterministically',()=>{const b=validate
 test('storage acknowledges only transaction completion; abort is a failure',async()=>{
   const {storage}=require('../../assets/js/plan-comparison.js');
   let tx,closed=0;
-  global.indexedDB={open(){const req={result:{close(){closed++;},transaction(){tx={objectStore(){return {put(){return {result:'state'};}};}};return tx;}}};queueMicrotask(()=>req.onsuccess());return req;}};
+  global.indexedDB={open(){const req={result:{close(){closed++;},transaction(){tx={objectStore(){return {get(){const req={result:undefined};queueMicrotask(()=>req.onsuccess());return req;},put(){return {result:'state'};}};}};return tx;}}};queueMicrotask(()=>req.onsuccess());return req;}};
   try{
-    let settled=false;const save=storage({version:1}).then(()=>settled=true);
+    let settled=false;const save=storage({version:1,plans:[],views:[]}).then(()=>settled=true);
     await new Promise(setImmediate);assert.equal(settled,false,'request success must not imply committed');
     tx.oncomplete();await save;assert.equal(settled,true);assert.equal(closed,1);
-    const aborted=storage({version:1});await new Promise(setImmediate);tx.error=Error('transaction aborted');tx.onabort();
+    const aborted=storage({version:1,plans:[],views:[]});await new Promise(setImmediate);tx.error=Error('transaction aborted');tx.onabort();
     await assert.rejects(aborted,/transaction aborted/);assert.equal(closed,2);
   }finally{delete global.indexedDB;}
 });
@@ -31,4 +31,26 @@ test('preview storage adapter cannot read or overwrite the editor database',asyn
   vm.runInContext(block,context);
   assert.equal(await context.StorageAdapter.load(),null);assert.equal(await context.StorageAdapter.hasData(),false);
   await assert.rejects(context.StorageAdapter.save({walls:[]}),/Read-only/);assert.equal(opens,0);
+});
+
+test('immutable workspace merge preserves additions from stale tabs in every collection',()=>{
+  const {mergeWorkspace}=require('../../assets/js/plan-comparison.js');
+  const a={version:1,plans:[{id:'a'}],views:[{id:'va'}],cameras:[{id:'ca'}]};
+  const b={version:1,plans:[{id:'b'}],views:[{id:'vb'}],cameras:[{id:'cb'}]};
+  const merged=mergeWorkspace(a,b);
+  for(const key of ['plans','views','cameras'])assert.equal(merged[key].length,2);
+  assert.deepEqual(mergeWorkspace(merged,a),merged);
+  assert.throws(()=>mergeWorkspace(a,{...a,plans:[{id:'a',name:'conflict'}]}),/別のタブ/);
+  assert.throws(()=>mergeWorkspace({...a,version:2},b),/保存形式/);
+  assert.equal(a.plans.length,1);
+});
+test('2D wall colors use renderer whole, floor, wall, default precedence',()=>{
+  const {interiorColor}=require('../../assets/js/plan-comparison.js');
+  const wall={floor:2,interiorColor:'#112233',color:'#999999'};
+  const plan={interiorWallSettings:{whole:{linked:true,color:'#abcdef'},floors:{2:{linked:true,color:'#123456'}}}};
+  assert.equal(interiorColor(plan,wall),'#abcdef');
+  plan.interiorWallSettings.whole.linked=false;assert.equal(interiorColor(plan,wall),'#123456');
+  plan.interiorWallSettings.floors[2].linked=false;assert.equal(interiorColor(plan,wall),'#112233');
+  assert.equal(interiorColor({}, {color:'#999999'}),'#f4f0e8');
+  plan.interiorWallSettings.whole={linked:true};assert.equal(interiorColor(plan,wall),'#f4f0e8');
 });

@@ -23,14 +23,39 @@
       request.onsuccess=()=>resolve(request.result);
     });
   }
+  // Records are immutable additions. Merge inside the same write transaction so
+  // a stale tab cannot replace another tab's snapshots or shared viewpoints.
+  function mergeWorkspace(current,incoming){
+    const result={version:1,plans:[],views:[],cameras:[]};
+    for(const source of [current,incoming]){
+      if(!source)continue;
+      if(source.version!==1||!Array.isArray(source.plans)||!Array.isArray(source.views)||source.cameras&&!Array.isArray(source.cameras))throw Error('保存形式が違います。');
+      for(const key of ['plans','views','cameras'])for(const record of source[key]||[]){
+        if(!record||typeof record.id!=='string')throw Error('比較レコードの形式が不正です。');
+        const previous=result[key].find(item=>item.id===record.id);
+        if(previous&&JSON.stringify(previous)!==JSON.stringify(record))throw Error('別のタブで変更されました。比較保存を開き直してください。');
+        if(!previous)result[key].push(clone(record));
+      }
+    }
+    return result;
+  }
   async function storage(value){
     const db=await openStore();
     try{return await new Promise((resolve,reject)=>{
       const tx=db.transaction('workspace',value?'readwrite':'readonly');
-      const req=value?tx.objectStore('workspace').put(value,'state'):tx.objectStore('workspace').get('state');
-      tx.oncomplete=()=>resolve(req.result);
-      tx.onerror=tx.onabort=()=>reject(tx.error||Error('保存できませんでした。'));
+      let result,failure;
+      tx.oncomplete=()=>resolve(result);
+      tx.onerror=tx.onabort=()=>reject(failure||tx.error||Error('保存できませんでした。'));
+      const store=tx.objectStore('workspace'),req=store.get('state');
+      req.onsuccess=()=>{
+        try{result=value?mergeWorkspace(req.result,value):req.result;if(value)store.put(result,'state');}
+        catch(error){failure=error;tx.abort();}
+      };
     });}finally{db.close();}
+  }
+  function interiorColor(plan,wall){
+    const settings=plan.interiorWallSettings||{},floor=settings.floors?.[wall.floor||1];
+    return (settings.whole?.linked?settings.whole.color:floor?.linked?floor.color:wall.interiorColor)||'#f4f0e8';
   }
   function fit(plans,floor){
     const points=[];
@@ -45,7 +70,7 @@
     for(const key of ['pos','target','up'])if(!Array.isArray(spec[key])||spec[key].length!==3||!spec[key].every(n=>Number.isFinite(n)&&Math.abs(n)<1e6))throw Error('3Dカメラの座標が不正です。');
     return clone(spec);
   }
-  const api={validatePlan,validateCamera,fit,storage};
+  const api={validatePlan,validateCamera,fit,storage,mergeWorkspace,interiorColor};
   if(typeof module!=='undefined') module.exports=api;
   if(!root.document || (typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)) return;
   let state={version:1,plans:[],views:[]},view=null,busy=false,ready=false,opener=null,captureGeneration=0,sceneSpec=null,renderController=null,renderVersion=0,pairReady=false;
@@ -55,7 +80,7 @@
   const name=()=>{const n=$('name').value.trim();if(!n)throw Error('案の名前を入力してください。');return n.slice(0,80);};
   function fillSelect(el,records){const old=el.value;el.replaceChildren();records.forEach(r=>{const o=document.createElement('option');o.value=r.id;o.textContent=r.name;el.append(o);});if(records.some(r=>r.id===old))el.value=old;}
   function refresh(repaint=true){const floors=[...new Set(state.plans.flatMap(p=>p.plan.walls.concat(p.plan.rooms).map(o=>o.floor||1)))].filter(Number.isFinite).sort((a,b)=>a-b);if(floors.length)fillSelect($('floor'),floors.map(f=>({id:String(f),name:f+'F'})));fillSelect($('a'),state.plans);fillSelect($('b'),state.plans);fillSelect($('views'),state.views);fillSelect($('cameras'),state.cameras||[]);$('count').textContent=state.plans.length+'案 · このブラウザに保存';if(repaint)render();}
-  async function commit(next,repaint=true){if(!ready)throw Error('比較保存を開き直してください。');await storage(next);state=next;refresh(repaint);}
+  async function commit(next,repaint=true){if(!ready)throw Error('比較保存を開き直してください。');state=await storage(next);refresh(repaint);}
   async function run(action){if(busy)return;busy=true;document.querySelectorAll('[data-compare-write]').forEach(b=>b.disabled=true);try{await action();}catch(e){message('保存・読込に失敗: '+e.message+' 編集中のプランは変更していません。');}finally{busy=false;document.querySelectorAll('[data-compare-write]').forEach(b=>b.disabled=false);}}
   function color(c,fallback){return typeof c==='string'&&/^#[0-9a-f]{6}$/i.test(c)?c:fallback;}
   function imageFor(plan,v){
@@ -67,7 +92,7 @@
       c.strokeStyle='#c1b9ad';c.lineWidth=1/s;c.strokeRect(r.x,r.y,r.w,r.d);
     }
     for(const w of plan.walls.filter(w=>(w.floor||1)===v.floor)){
-      c.strokeStyle=color(w.interiorColor||w.color,'#655f58');c.lineWidth=Math.max(60,w.thick||120);c.beginPath();c.moveTo(w.x1,w.y1);c.lineTo(w.x2,w.y2);c.stroke();
+      c.strokeStyle=color(interiorColor(plan,w),'#f4f0e8');c.lineWidth=Math.max(60,w.thick||120);c.beginPath();c.moveTo(w.x1,w.y1);c.lineTo(w.x2,w.y2);c.stroke();
       c.strokeStyle='#665e54';c.lineWidth=1/s;c.stroke();
     }
     for(const r of plan.rooms.filter(r=>(r.floor||1)===v.floor)){
@@ -105,6 +130,7 @@
     return [...new Set(entries.map(w=>[w.interiorColor,typeof w.interiorTexture==='string'&&w.interiorTexture.startsWith('data:')?'アップロード画像':w.interiorTexture].filter(Boolean).join(' / ')).filter(Boolean))].slice(0,8).join(' · ');
   }
   function render(){
+    if(!$('dialog').open)return;
     const a=selected('a'),b=selected('b');
     const is3D=$('mode').value==='3d';
     $('3d-controls').hidden=!is3D;$('2d-controls').hidden=is3D;
@@ -122,7 +148,9 @@
   }
   function download(text,filename,type){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),4000);}
   api.open=async function(){
-    if($('dialog').open)return;opener=document.activeElement;ready=false;$('dialog').showModal();
+    if($('dialog').open)return;opener=document.activeElement;$('dialog').showModal();
+    // A pending operation still owns readiness and will refresh the reopened panel.
+    if(busy)return;ready=false;
     await run(async()=>{const loaded=await storage();if(loaded){if(loaded.version!==1||!Array.isArray(loaded.plans)||!Array.isArray(loaded.views))throw Error('保存形式が違います。');loaded.plans.forEach(p=>{if(typeof p.id!=='string'||typeof p.name!=='string')throw Error('案の保存形式が不正です。');validatePlan(p.plan);});loaded.views.forEach(v=>{if(typeof v.id!=='string'||typeof v.name!=='string'||!['x','y','span','floor'].every(k=>Number.isFinite(v[k]))||v.span<=0)throw Error('視点の保存形式が不正です。');});if(loaded.cameras&&!Array.isArray(loaded.cameras))throw Error('3D視点の保存形式が不正です。');(loaded.cameras||[]).forEach(c=>{if(typeof c.id!=='string'||typeof c.name!=='string')throw Error('3D視点名が不正です。');validateCamera(c.spec);});state=loaded;}ready=true;refresh();message('案を切り替えても、編集中のプランはそのままです。');});
   };
   function add(plan,n){const next=clone(state);const id=crypto.randomUUID();next.plans.push({id,name:n,createdAt:new Date().toISOString(),plan:validatePlan(plan)});return commit(next).then(()=>{$('b').value=id;render();message('「'+n+'」を保存しました。');});}

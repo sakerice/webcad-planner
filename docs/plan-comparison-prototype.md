@@ -44,6 +44,12 @@
 - 閉じる・中止・案の連打は古い処理を無効化してiframeを破棄。古い結果を再表示しない。
 - 編集用プランへの復元は未実装。必要な案はJSON書き出しで保持できる。
 
+## 保存・平面色のレビュー修正
+
+比較レコードは追加時に同一の readwrite transaction 内で最新データを読み、IDで合流する。古いタブの保存でも他タブの案・平面視点・3D視点を失わない。同じIDの内容が異なる場合は保存を中止する（名前変更・削除は未実装）。保存中に閉じて開き直しても、その処理が完了するまで操作を無効化し、完了後に続けて保存できる。閉じたパネルから新しい撮影は始めない。
+
+平面概略の内壁色は、既存3Dと同じ全体連動 → 階連動 → 個別内壁色 → 既定色の優先順で解決する。平面は色の概略であり、テクスチャや面ごとの見え方は内観3Dで確認する。
+
 ## 次に作る範囲
 
 1. 写真に近い採光が必要なら、天井・太陽・照明条件を含む専用の撮影モードを別途評価。
@@ -57,6 +63,7 @@
 
 - `node --test tools/tests/plan-comparison.test.cjs tools/tests/light-budget.test.cjs tools/tests/material-lifecycle.test.cjs tools/tests/fixture-only.test.cjs tools/tests/js-modules.test.cjs tools/tests/asset-version.test.cjs`
 - `node tools/check-html-js.cjs`
+- `PLAYWRIGHT_MODULE=/opt/codex/cua_node/lib/node_modules/playwright node tools/tests/plan-comparison-persistence.browser.cjs`（複数タブ・遅延保存・連動色）
 - `python3 tools/dev_server.py 8931`
 - `PLAYWRIGHT_MODULE=/opt/codex/cua_node/lib/node_modules/playwright node tools/tests/plan-comparison.browser.cjs`
 - `PLAYWRIGHT_MODULE=/opt/codex/cua_node/lib/node_modules/playwright node tools/tests/plan-comparison-3d.browser.cjs`
