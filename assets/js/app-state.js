@@ -2415,9 +2415,9 @@ function ensureObjectIds(){
   DATA.items.forEach(function(i){ scanId(i.id); });
   DATA.rooms.forEach(function(r){ scanId(r.id); });
   if(nextId<=maxId) nextId=maxId+1;
-  DATA.walls.forEach(function(w){ if(w.id===undefined||w.id===null) w.id=nextId++; });
-  DATA.items.forEach(function(i){ if(i.id===undefined||i.id===null) i.id=nextId++; });
-  DATA.rooms.forEach(function(r){ if(!r.id) r.id='rm'+(nextId++); });
+  DATA.walls.forEach(function(w){ if(w.id===undefined||w.id===null||w.id==='') w.id=nextId++; });
+  DATA.items.forEach(function(i){ if(i.id===undefined||i.id===null||i.id==='') i.id=nextId++; });
+  DATA.rooms.forEach(function(r){ if(r.id===undefined||r.id===null||r.id==='') r.id='rm'+(nextId++); });
 }
 
 function objectIdLabel(o){
