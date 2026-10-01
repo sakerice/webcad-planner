@@ -110,6 +110,24 @@ try {
     const current=await page.evaluate(()=>serializeDataSnapshot());
     await file(current);await page.waitForTimeout(150);
     assert.equal(await page.evaluate(()=>serializeDataSnapshot()),current);
+    // Regression: an empty wall ID used to normalize to an existing p1.
+    const collisions=JSON.parse(JSON.stringify(simple));
+    collisions.walls.push({...collisions.walls[0],id:''});
+    collisions.rooms[0].id='p2';
+    collisions.items=[{...collisions.items[0],id:'p3',baseRoom:'p2'},
+      {...collisions.items[0],id:'',baseRoom:'p2'}, {...collisions.items[0],id:''}];
+    collisions.exteriorWallSettings={walls:{p1:{color:'#123456'}}};
+    const alertsBeforeCollision=await page.evaluate(()=>__importAlerts.length);
+    await file(JSON.stringify(collisions));
+    await page.waitForFunction(()=>DATA.items.length===3&&DATA.walls.length===2);
+    assert.deepEqual(await page.evaluate(()=>{
+      const all=[...DATA.walls,...DATA.rooms,...DATA.items];
+      return {valid:PlanSchema.validatePlan(DATA).ok,unique:new Set(all.map(o=>String(o.id))).size===all.length,
+        wall:DATA.walls[0].id,room:DATA.rooms[0].id,item:DATA.items[0].id,
+        references:DATA.items.map(o=>o.baseRoom),color:DATA.exteriorWallSettings.walls.p1.color,
+        alerts:__importAlerts.length};
+    }),{valid:true,unique:true,wall:'p1',room:'p2',item:'p3',references:['p2','p2',undefined],
+      color:'#123456',alerts:alertsBeforeCollision});
     // Normal multi-floor plan, genuine edits after import, then invalid import again.
     await file(fixture);
     await page.waitForFunction(()=>DATA.walls.length===41);

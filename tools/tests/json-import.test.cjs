@@ -95,3 +95,36 @@ test('cancel, read error, abort, repeat and out-of-order readers preserve curren
   c.doImport(input);readers[4].onload({target:{result:'{}'}});
   assert.equal(snapshot(c),after);assert.equal(alerts.length,2);
 });
+
+test('empty/missing wall and item IDs cannot collide with p1; existing IDs and references survive staging',()=>{
+  const {c}=setup(),before=snapshot(c);
+  const input=plan();
+  input.walls.push({...input.walls[0],id:''},{...input.walls[0],id:null},{...input.walls[0],id:undefined});
+  input.rooms=[{id:0,x:0,y:0,w:4000,d:3000,n:'numeric zero room'},
+    {id:'p2',x:4000,y:0,w:4000,d:3000,n:'referenced room'}];
+  input.items=[{...input.items[0],id:'p3',baseRoom:0},
+    {...input.items[0],id:'',baseRoom:'p2'},
+    {...input.items[0],id:'',baseRoom:'p2'},
+    {...input.items[0],id:null}, {...input.items[0]}];
+  input.walls[0].baseRoom='p2';
+  input.exteriorWallSettings={walls:{p1:{color:'#123456'}}};
+  assert.equal(PlanSchema.validatePlan(input).ok,true);
+  const out=c.stageJsonImport(JSON.stringify(input)).data;
+  assert.equal(snapshot(c),before);
+  assert.equal(PlanSchema.validatePlan(out).ok,true);
+  const all=[...out.walls,...out.rooms,...out.items];
+  assert.equal(new Set(all.map(o=>String(o.id))).size,all.length);
+  assert.equal(out.walls[0].id,'p1');assert.equal(out.rooms[0].id,0);
+  assert.equal(out.rooms[1].id,'p2');assert.equal(out.items[0].id,'p3');
+  assert.equal(out.items[0].baseRoom,0);assert.equal(out.items[1].baseRoom,'p2');
+  assert.equal(out.walls[0].baseRoom,'p2');
+  assert.equal(out.exteriorWallSettings.walls.p1.color,'#123456');
+  assert.equal(JSON.stringify(c.stageJsonImport(JSON.stringify(out)).data),JSON.stringify(out));
+});
+test('final validation rejects an ID collision introduced during staging without touching live work',()=>{
+  const {c,calls}=setup(),before=snapshot(c);
+  c.normalizeLegacyFurnitureItems=()=>{c.DATA.walls.push({...c.DATA.walls[0]});};
+  assert.throws(()=>c.stageJsonImport(JSON.stringify(plan())),/重複/);
+  assert.equal(snapshot(c),before);
+  assert.ok(!calls.some(x=>/shared|queue|draw2d/.test(x)));
+});

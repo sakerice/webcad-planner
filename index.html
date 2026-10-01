@@ -22039,13 +22039,15 @@ function stageJsonImport(text){
     // global they write in finally, including when a migration throws.
     ST=Object.assign({},ST,{selected:null,multiSelected:[]});
     resetHeightGlobalsForPlanLoad();
-    // Allocate missing IDs with the existing allocator before normalizePlan,
-    // whose p1/p2 defaults could collide with IDs already in a saved file.
-    ensureObjectIds();
+    // Normalize missing/empty IDs against all reserved IDs first, then advance
+    // the editor's allocator. Existing IDs and their references stay unchanged.
     DATA=PlanSchema.normalizePlan(DATA);
+    ensureObjectIds();
     ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();
     ensureFloorMetadata();ensureHeightDefaults();
     syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    checked=PlanSchema.validatePlan(DATA);
+    if(!checked.ok) throw new Error(checked.errors.slice(0,3).join(' / '));
     return {data:DATA,wallHeight:WALL_H,nextId:nextId};
   }finally{
     DATA=previous.data;ST=previous.state;WALL_H=previous.wallHeight;nextId=previous.nextId;
