@@ -92,3 +92,10 @@ test('worker rejects conflicting extraction before returning any candidate plan'
   assert.equal(response.status,422);
   const body=await response.json(); assert.equal(body.error,'ai_invalid_plan'); assert.ok(body.problems.length); assert.equal(body.plan,undefined);
 });
+for (const gap of [0.001, 0.5, 1]) test(`near-coincident boundaries require review (${gap} mm gap)`,()=>{
+  const f=structuredClone(fixtures[0]); f.rooms[1].parts[0].x0+=gap;
+  const b=Grid.build(f);
+  assert.ok(b.problems.some(p=>p.includes('近接')));
+  assert.equal(b.walls.length,0); assert.equal(b.rooms.length,0);
+  assert.equal(f.rooms[1].parts[0].x0,1000+gap,'must not silently snap model coordinates');
+});

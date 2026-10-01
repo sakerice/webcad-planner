@@ -648,6 +648,14 @@ export function finishImportedPlan(parsed, usage, extra) {
         error: "ai_invalid_plan",
         message: "読み取った部屋の境界が矛盾しています。図面の範囲を確認して読み直してください。",
         problems: built.problems.slice(0, 20),
+        // Raw readings are repair input, never an applicable plan. Keep them for
+        // the existing single revision pass; an unsuccessful revision stays 422.
+        ...(extra && Array.isArray(extra.pages) ? {
+          pages: extra.pages,
+          revisionCandidate: !extra.revised,
+          revise: { ...(extra.revise || {}), skipAll: false },
+          usage: usage || null,
+        } : {}),
       }, 422);
     }
     plan.walls = built.walls;

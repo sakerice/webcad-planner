@@ -45,7 +45,7 @@ node --test tools/tests/*.test.cjs
 SKIP_DEPLOY=1 bash build.sh
 ```
 
-Run the build **after** tests, not concurrently: the deploy-guard tests themselves run `build.sh` and share `dist/`. The first broad run collided with a simultaneous build; the isolated deploy-guard rerun passed all 10 tests and the separate no-deploy build passed. Targeted suite after all changes: 280 passed. Full final results are recorded in `validation.txt`.
+Run the build **after** tests, not concurrently: the deploy-guard tests themselves run `build.sh` and share `dist/`. The first broad run collided with a simultaneous build; the isolated deploy-guard rerun passed all 10 tests and the separate no-deploy build passed. Targeted suite after review fixes: 288 passed. Full suite: 1318 passed, 2 skipped, 0 failed. Full final results are recorded in `validation.txt`.
 
 Transport-only tests previously used empty-room successful model responses; they now use a valid synthetic rectangular room. Their assertions still exercise transport, usage, quota and review behavior. No recognition result is inferred from these mocked responses.
 
@@ -59,3 +59,9 @@ Transport-only tests previously used empty-room successful model responses; they
 - Room adjacency is tested locally; opening type, width, rotation, target wall/room connectivity, OCR, scale, image crop quality and cross-floor registration still need real image ground truth and authorized model runs.
 - Audit follow-ups outside this change: duplicate floor renumbering, dropped page notes in multi-page merge, page-local cross-floor stair assumptions, and dropped `room.use` during application. These were not silently bundled into this PR.
 - No main push, merge, deployment, external document upload or paid API request occurred. For a real end-to-end comparison, obtain explicit authorization for synthetic image data sent to the endpoint/model above and a bounded payment budget. A proposed first batch is five images, one request each, with a US$5 total cap and no automatic locate/revise calls; verify actual model availability/pricing before executing. This is a proposed budget, not measured cost or spending permission.
+
+## Independent review follow-up
+
+The first draft rejected bad geometry before the browser could invoke revision. HTTP 422 now retains raw `pages`, usage, and an explicit `revisionCandidate` marker, but never a `plan`. The browser permits one existing revision pass for this candidate and only enables Apply after the Worker validates its repaired output. Quota errors, network errors, no render, and still-invalid repairs leave the result unset and Apply disabled. A five-case browser-orchestration/real-Worker-route regression uses a mocked OpenAI transport; no hosted model is contacted.
+
+Distinct coordinate lines separated by 1 mm or less now produce diagnostics and no walls, rather than silently generating near-coincident full-thickness walls. This is a review requirement, not snapping: input values remain unchanged. Tests cover 0.001, 0.5 and 1 mm gaps; the exact 100 mm stress case remains valid. This conservative rule may flag small offsets even when they occur in different parts of a floor; such readings require review rather than guessed correction.

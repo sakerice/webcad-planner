@@ -114,6 +114,15 @@
     });
     function unique(values) { return Array.from(new Set(values)).sort(function (a, b) { return a - b; }); }
     xs = unique(xs); ys = unique(ys);
+    // Do not turn floating-point noise into two full-thickness walls. Keep the
+    // measured values unchanged and request review instead of guessing a snap.
+    [xs, ys].forEach(function (axis) {
+      for (var i = 1; i < axis.length; i++) {
+        if (axis[i] - axis[i - 1] <= 1) {
+          problems.push('1mm以下の近接した境界がある（寸法を確認して見直す）'); break;
+        }
+      }
+    });
     // Bound the Cartesian product before allocating cells, including bad model output.
     if (xs.length > 256 || ys.length > 256) problems.push('部屋の境界が多すぎる');
     return { x: xs, y: ys, problems: problems };

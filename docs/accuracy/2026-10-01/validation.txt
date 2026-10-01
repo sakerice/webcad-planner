@@ -1,11 +1,11 @@
 Validation performed 2026-10-01, local environment, no hosted model evaluation.
 
 node --test tools/tests/plan-*.test.cjs tools/tests/worker-routes.test.cjs
-  tests 280; pass 280; fail 0; skipped 0
+  tests 288; pass 288; fail 0; skipped 0
 
 node --test tools/tests/*.test.cjs
-  tests 1312; pass 1310; fail 0; skipped 2
-  duration_ms 76309.529817
+  tests 1320; pass 1318; fail 0; skipped 2
+  duration_ms 75604.5076
 
 node --test tools/tests/deploy-guard.test.cjs
   tests 10; pass 10; fail 0
@@ -25,3 +25,5 @@ Before/after metrics are in before.json and after.json. Generated SVGs are
 synthetic coordinate-reference comparisons, not observed model predictions.
 Full local logs: /tmp/accuracy-tests.log, /tmp/floorplan-full-tests.log,
 /tmp/floorplan-deploy-guard.log, /tmp/floorplan-build.log.
+
+Review fixes: 29 geometry/repair tests passed (24 geometry, 5 browser/Worker flow).
