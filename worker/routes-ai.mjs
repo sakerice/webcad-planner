@@ -18,6 +18,7 @@
 import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs";
 import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
+import { mergeReadPages } from "./plan-pages.mjs";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
@@ -311,11 +312,11 @@ async function aiImportPlan(payload, env, deps, request) {
   const pages = collectPages(results);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
     // 見直しのために、**モデルが答えたそのままの形**をページごとに返す。
     // アプリが組み立てたあとの形では、本人に自分の答えとして見せられない。
-    { pages: pages.list, revise: await reviseAdvice(pages.list, env, deps) },
+    { pages: pages.list, revise: pages.merged?.pageProblems?.length ? null : await reviseAdvice(pages.list, env, deps) },
   ), env, deps, { images, pages: pages.list });
 }
 
@@ -383,7 +384,7 @@ async function aiRevisePlan(payload, env, deps, request) {
   const pages = collectPages(results);
   if (pages.error) return pages.error;
   return finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
     { pages: pages.list, revised: true },
   );
@@ -512,12 +513,12 @@ async function aiPlanResult(payload, env, deps) {
   // 門は「読み取りの次に見直しを払うか」だけを決める。
   const revised = Boolean(payload && payload.revised);
   return withNextStep(finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
     {
       pages: pages.list,
       revised,
-      ...(revised ? {} : { revise: await reviseAdvice(pages.list, env, deps) }),
+      ...(revised ? {} : { revise: pages.merged?.pageProblems?.length ? null : await reviseAdvice(pages.list, env, deps) }),
     },
   ), env, deps, { pages: pages.list });
 }
@@ -537,6 +538,7 @@ async function withNextStep(res, env, deps, context) {
   let body;
   try { body = await res.clone().json(); } catch (e) { return res; }
   if (!body || typeof body !== "object" || !body.error) return res;
+  if (body.error === "ai_ambiguous_floors") return res;
   const images = Array.isArray(context && context.images) ? context.images : [];
   const picked = await nextStep(failureFacts({
     error: body.error,
@@ -564,7 +566,7 @@ function collectPages(results) {
     }
     list.push(parsed);
   }
-  return { list };
+  return { list, merged: mergeReadPages(list) };
 }
 
 // 使った枚数を数える。Durable Object が数の持ち主。
@@ -603,26 +605,6 @@ function pageHint(hint, index, total) {
   return hint ? `${page}\n${hint}` : page;
 }
 
-// ページごとの読み取りを、1つの家にまとめる。
-//
-// 見出し(「2階平面図」など)から階を判断させているが、書かれていない図面も
-// ある。同じ階が2つ来たら、ページの並び順を正とする。
-function mergeFloors(pages) {
-  const out = [];
-  const used = new Set();
-  pages.forEach((page, i) => {
-    const floors = Array.isArray(page && page.floors) ? page.floors : [];
-    for (const f of floors) {
-      if (!f || typeof f !== "object") continue;
-      let floor = Number(f.floor);
-      if (!Number.isFinite(floor) || floor < 1 || used.has(floor)) floor = i + 1;
-      used.add(floor);
-      out.push({ ...f, floor });
-    }
-  });
-  return out;
-}
-
 function sumUsage(results) {
   const keys = ["inputTokens", "answerTokens", "thoughtTokens", "outputTokens", "totalTokens"];
   const out = { calls: results.length };
@@ -636,6 +618,17 @@ function sumUsage(results) {
 //
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage, extra) {
+  if (Array.isArray(parsed?.pageProblems) && parsed.pageProblems.length) {
+    return json({
+      error: "ai_ambiguous_floors",
+      message: "ページと階の対応を確定できません。対象の階の図面だけを選び、階数を補足して読み直してください。",
+      problems: parsed.pageProblems.slice(0, 20),
+      notes: parsed.notes || [],
+      pages: extra?.pages || [],
+      usage: usage || null,
+      revisionCandidate: false,
+    }, 422);
+  }
   const plan = decodeCompactPlan(parsed);
   // 壁はAIに出させず、**部屋と部屋の境目から作る**。
   // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
