@@ -1,0 +1,27 @@
+Validation performed 2026-10-01, local environment, no hosted model evaluation.
+
+node --test tools/tests/plan-*.test.cjs tools/tests/worker-routes.test.cjs
+  tests 280; pass 280; fail 0; skipped 0
+
+node --test tools/tests/*.test.cjs
+  tests 1312; pass 1310; fail 0; skipped 2
+  duration_ms 76309.529817
+
+node --test tools/tests/deploy-guard.test.cjs
+  tests 10; pass 10; fail 0
+
+SKIP_DEPLOY=1 bash build.sh
+  assets/default_plan.json: OK (walls 36, rooms 23, items 176)
+  assets/default_plan_3f.json: OK (walls 42, rooms 23, items 173)
+  Build complete: dist/
+  473M dist/
+  Explicit output: build only, not deployed.
+
+The initial full-suite run had one deploy-guard failure from a concurrent build
+both modifying dist/. The standalone guard rerun passed, the build passed,
+and the final complete suite above passed with no concurrent build.
+
+Before/after metrics are in before.json and after.json. Generated SVGs are
+synthetic coordinate-reference comparisons, not observed model predictions.
+Full local logs: /tmp/accuracy-tests.log, /tmp/floorplan-full-tests.log,
+/tmp/floorplan-deploy-guard.log, /tmp/floorplan-build.log.
