@@ -636,6 +636,7 @@ function sumUsage(results) {
 //
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage, extra) {
+  const plan = decodeCompactPlan(parsed);
   // An empty extraction is the model's refusal when no physical scale can
   // be established. Do not turn that (or a missing footprint) into an
   // applicable empty/partial plan, including mixed multi-page results.
@@ -656,7 +657,6 @@ export function finishImportedPlan(parsed, usage, extra) {
       revisionCandidate: false,
     }, 422);
   }
-  const plan = decodeCompactPlan(parsed);
   // 壁はAIに出させず、**部屋と部屋の境目から作る**。
   // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
   // という失敗が残った(実測で13本中12本は通り芯にぴったり載っていた)。
