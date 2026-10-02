@@ -3529,11 +3529,22 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div id="plan-import-step2" style="display:none">
-      <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
-           図面が写っていない画像のときだけ、囲むと精度が上がる。
-           PDF はそのまま送るので、この枠ごと出さない。 -->
+      <!-- PDFはページ別に送信予定画像を確認。自動切り出し失敗を黙って送らない。 -->
+      <div id="plan-import-pdf-review" style="display:none">
+        <div class="unity-render-config">
+          <div><label for="plan-import-page">確認するページ</label>
+            <select id="plan-import-page" onchange="selectPlanImportPage(this.value)"></select></div>
+        </div>
+        <div id="plan-import-page-status" class="unity-render-status" role="status"></div>
+        <div class="airx-source-note">送信予定の画像（全ページを読み取ります）</div>
+        <img id="plan-import-output" alt="送信予定画像" style="display:block;max-width:100%;max-height:28dvh;margin:auto;object-fit:contain">
+        <div class="unity-render-actions">
+          <button id="plan-import-confirm-page" class="pbtn sec" style="width:auto;padding:7px 14px" onclick="confirmPlanImportPage()">このページ全体を確認して使う</button>
+        </div>
+        <div class="airx-source-note">平面図・寸法線以外の外観パースや表題欄、氏名・住所が入っていないか確認してください。下の元ページをドラッグして囲み直せます。</div>
+      </div>
       <div id="plan-import-crop">
-        <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <div class="ph">2. 元画像で図面の範囲を確認・調整</div>
         <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
         <div class="unity-render-actions">
           <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
@@ -4436,6 +4447,7 @@ function init3D(){
   if(!_3dGlobalsWired){
   _3dGlobalsWired=true;
   document.addEventListener('keydown',function(e){
+    if(isPlanImportDialogOpen()) return;
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     var k=e.key.toLowerCase();
     if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0){ iMov[k]=true; invalidate3D(); }
@@ -18231,7 +18243,7 @@ canvas.addEventListener('mouseup',function(){
 });
 // Complete a gesture even when the pointer leaves the canvas.
 window.addEventListener('mousemove',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee))canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:e.clientX,clientY:e.clientY,buttons:e.buttons,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey}));});
-window.addEventListener('keydown',function(e){if(e.key==='Escape'&&DRAG.marquee){DRAG.marquee=null;draw2d();}});
+window.addEventListener('keydown',function(e){if(isPlanImportDialogOpen()) return;if(e.key==='Escape'&&DRAG.marquee){DRAG.marquee=null;draw2d();}});
 window.addEventListener('mouseup',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee||DRAG.shiftClick))canvas.dispatchEvent(new MouseEvent('mouseup'));});
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -19092,7 +19104,14 @@ function restoreHistorySnapshot(snapshot){
   draw2d();if(ren)rebuild3D();
 }
 
+// 読み取り画面のページ選択・ボタン操作を、背後の間取りへ伝えない。
+// preventDefault はしないので、select の矢印・入力欄の Undo などはそのまま。
+function isPlanImportDialogOpen(){
+  var dialog=document.getElementById('plan-import-modal');
+  return !!(dialog && dialog.classList.contains('show'));
+}
 window.addEventListener('keydown', function(e){
+  if(isPlanImportDialogOpen()) return;
   if(e.key==='Shift'){ST.shiftKey=true; draw2d();}
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
   if((e.key==='Enter' || e.key==='Escape') && ST.tool==='walk-route' && ST.drawing){
