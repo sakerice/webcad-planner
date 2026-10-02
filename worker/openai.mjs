@@ -93,9 +93,10 @@ export function toJsonSchema(node) {
   if (!node || typeof node !== "object") return node;
   const type = String(node.type || "").toLowerCase();
   const out = {};
-  if (type) out.type = type === "integer" ? "integer" : type;
+  if (type) out.type = node.nullable === true ? [type, "null"] : type;
   if (node.description) out.description = node.description;
-  if (node.enum) out.enum = node.enum;
+  if (node.enum) out.enum = node.nullable === true
+    ? [...new Set([...node.enum, null])] : node.enum;
   if (type === "object") {
     out.properties = {};
     for (const key of Object.keys(node.properties || {})) {

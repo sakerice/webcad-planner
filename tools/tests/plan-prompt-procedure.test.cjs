@@ -86,16 +86,14 @@ test('カタログの品物は大きさを変えさせない', async () => {
   assert.match(p, /図に描かれている窓の幅/, '窓の幅を図から取る指示が無い');
 });
 
-test('部屋の面積を検算させる（L字の取りこぼしに気づく唯一の手）', async () => {
+test('部屋面積は画像の室内輪郭と検算し、外形の凹みを埋めない', async () => {
   const { buildPlanPrompt } = await mod('worker/plan-prompt.mjs');
   const p = buildPlanPrompt();
-  // L字を長方形1つで済ませる誤りは、手順に書いても直らなかった。寸法線で
-  // 効いたのは検算だったので、同じ手を面積に当てる。合計が width×depth に
-  // 足りなければ、どこかの部屋が凹みを埋めている。
-  assert.match(p, /部屋の面積を検算する/, '面積の検算が無い');
-  assert.match(p, /width × depth と一致するか/, '何と比べるのかが無い');
-  assert.match(p, /手順6の見落とし/, '足りないときの原因が示されていない');
-  assert.match(p, /輪郭に凹みがあるのに parts が1つの部屋がある/, 'L字の取りこぼしに気づかせる指示が無い');
+  assert.match(p, /部屋の面積を検算する/);
+  assert.match(p, /画像で確認した建物の室内輪郭と照合する/);
+  assert.match(p, /width × depth は外接長方形/);
+  assert.match(p, /部屋ではない場所を面積合わせのために埋めない/);
+  assert.match(p, /部屋どうしが重なっている場合は境界を読み直す/);
 });
 
 test('階段の折り返しを見直させる', async () => {
@@ -190,7 +188,11 @@ test('手順は短いままにする', async () => {
   // **説明は仕様書(plan-spec.mjs の「図面に描かれていた印」)へ置き、
   // 手順には1行しか足していない。** 上げたのは工程が1つ増えたからであって、
   // 注意書きが混ざったからではない。混ざり始めたら、また上げずに減らすこと。
-  assert.ok(buildPlanPrompt().length < 2700,
+  // 2700 → 2800: unknown evidence and scale refusal are explicit steps;
+  // observed values remain separate from inferred coordinates.
+  // 2800 → 2900: retain explicit page-label identification and defer cross-floor
+  // registration without moving the source-local stair geometry.
+  assert.ok(buildPlanPrompt().length < 2900,
     '手順が ' + buildPlanPrompt().length + ' 文字ある。仕様か注意書きが混ざっていないか');
 });
 
@@ -224,9 +226,9 @@ test('階段の上下を意識させる', async () => {
   const { itemTypeTable } = await mod('worker/plan-item-spec.mjs');
   // 上る向きは図に描かれている。どこを見れば分かるかを言う。
   assert.match(buildPlanPrompt(), /UP/, '上る向きの読み取り方が無い');
-  // 階の間の決まりは仕様の側（データの意味そのものなので）。
-  assert.match(itemTypeTable(), /上下階で同じ位置に置き、いちばん上の階には置かない/,
-    '階段が階をまたぐ物であることが仕様に無い');
-  // 手順の側は、読み直して揃える作業だけを持つ。
-  assert.match(buildPlanPrompt(), /下の階と位置が揃っているか/, '階段の見直しに位置の確認が無い');
+  // Read source-local geometry first. Joint registration owns cross-floor placement.
+  assert.match(itemTypeTable(), /その階から上の階へ上る/);
+  assert.match(itemTypeTable(), /その階の図の位置を保持し、いちばん上の階には置かない/);
+  assert.match(buildPlanPrompt(), /下の階と座標を揃えるために移動しない/);
+  assert.match(buildPlanPrompt(), /その階の図の位置と一致するか/);
 });

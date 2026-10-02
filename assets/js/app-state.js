@@ -512,7 +512,7 @@ function roomHasNoFloorAbove(room){
   var up=(room.floor||1)+1;
   var upperExists=DATA.rooms.some(function(r){ return r&&!r.hidden3D&&(r.floor||1)===up; });
   if(!upperExists) return false;
-  var cx=room.x+room.w/2, cy=room.y+room.d/2;
+  var anchor=room.shape?RoomGeometry.labelAnchor(room):{x:room.x+room.w/2,y:room.y+room.d/2}, cx=anchor.x, cy=anchor.y;
   return DATA.items.some(function(it){
     return it&&it.type==='roof'&&!it.hidden3D&&(it.floor||1)>up&&roofCoversPlanPoint(it,cx,cy);
   });
@@ -521,6 +521,10 @@ function roomHasNoFloorAbove(room){
 // そこが壁に納まっているかを示し、向きを変える・壁を延ばすで直せるようにする。
 function slideDoorPocketHtml(it){
   if(!it||typeof isSlideInDoorType!=='function'||!isSlideInDoorType(it.type)) return '';
+  if(it.openingSourceGeometry){
+    var measured=it.openingSourceGeometry;
+    return '<div class="ph" style="margin-top:12px">読み取り元の引き込み</div><div class="pr"><div class="pl">引く向き</div><select class="pi" disabled title="'+SceneOpeningGeometry.sourceEditMessage+'"><option>'+slideDoorDirLabel(it,measured.direction)+'へ引く</option></select></div><div class="lock-status-note">パネル '+measured.leafWidthMm+'mm・移動距離 '+Math.abs(measured.openXmm-measured.closedXmm)+'mm。読み取り元の戸袋形状を保持するため、反転・壁の自動延長はできません。</div>';
+  }
   var dir=slideDoorDir(it);
   var cur=slideDoorPocketInfo(it,dir), other=slideDoorPocketInfo(it,-dir);
   var html='<div class="ph" style="margin-top:12px">引き込む側</div>';
@@ -550,6 +554,7 @@ function slideDoorPocketHtml(it){
 // 取り付いた壁の端を、引き込み部分の先まで延ばす。
 function extendWallForSlideDoor(){
   var it=ST.selected;
+  if(it&&it.openingSourceGeometry){if(typeof alert==='function')alert(SceneOpeningGeometry.sourceEditMessage);updateProps();return;}
   if(!it||!isSlideInDoorType(it.type)) return;
   var info=slideDoorPocketInfo(it,slideDoorDir(it));
   if(!info||!info.extendable) return;
@@ -605,6 +610,7 @@ function updateSelectedRoomFloorMaterial(value){
   if(isObjectLocked(r)){ updateProps(); return; }
   saveState();
   if(typeof FLOOR_PBR_STEM!=='undefined'&&FLOOR_PBR_STEM[r.texture]) delete r.texture;
+  delete r.floorDiagramPattern;
   if(value) r.floorMaterial=value; else delete r.floorMaterial;
   markDirty(); updateProps(); draw2d(); if(ren) rebuild3D();
 }
@@ -916,7 +922,16 @@ function clearAll3DHidden(){
   if(ST.selected) updateProps();
 }
 function setPropsBodyHtml(body,html,it){
+  if(it&&it.openingSourceGeometry)html+='<div class="lock-status-note" data-source-opening-note>'+SceneOpeningGeometry.sourceEditMessage+'</div>';
+  if(it&&it.openingSourceGeometry){
+    var sourceStatus=SceneOpeningGeometry.sourcePlacementStatus(it,DATA.walls);
+    html+='<div class="lock-status-note" data-source-placement-status="'+(sourceStatus.detached?'unresolved-host':sourceStatus.edited?'edited-unvalidated':'import-snapshot')+'">'+sourceStatus.message+'</div>';
+  }
   body.innerHTML=html;
+  if(it&&it.openingSourceGeometry)body.querySelectorAll('input,select,textarea,button').forEach(function(el){
+    var handler=(el.getAttribute('onchange')||'')+' '+(el.getAttribute('onclick')||'')+' '+(el.getAttribute('oninput')||'');
+    if(SceneOpeningGeometry.sourceControlBlocked(it,handler)){el.disabled=true;el.title=SceneOpeningGeometry.sourceEditMessage;el.setAttribute('aria-disabled','true');}
+  });
   body.classList.toggle('is-locked',isObjectLocked(it));
   if(!isObjectLocked(it)) return;
   body.querySelectorAll('input,select,textarea,button').forEach(function(el){
@@ -1915,6 +1930,7 @@ function setSelectedLandingMode(mode){
 }
 function updateSelectedProp(p,v,noSave){
   if(!ST.selected)return;
+  if(typeof SceneOpeningGeometry!=='undefined'&&SceneOpeningGeometry.sourceEditBlocked(ST.selected,p)){if(typeof alert==='function')alert(SceneOpeningGeometry.sourceEditMessage);updateProps();return;}
   // ロックが止めるのは削除・移動・寸法/座標変更。3D表示の一時切り替えは
   // 間取りの形を変えないので、ロック中でも通す(UI 側も data-lock-control)。
   // 増やすときは「間取りの形を変えないか」で判断する(ロック中の注記が
@@ -1922,6 +1938,8 @@ function updateSelectedProp(p,v,noSave){
   // node:vm で切り出して走らせている検査があるため。
   var lockAllowed=['locked','hidden3D','vis3D'];
   if(isObjectLocked(ST.selected) && lockAllowed.indexOf(p)<0){ updateProps(); return; }
+  var openingBefore=(typeof SceneOpeningGeometry!=='undefined' && ST.selected.openingHostWallId!==undefined)
+    ? Object.assign({},ST.selected) : null;
   var keepColorPickerOpen=isAppearanceColorInputActive() && /color/i.test(p);
   if(keepColorPickerOpen) markAppearanceColorDirty();
   else if(!noSave) saveState();
@@ -1953,9 +1971,13 @@ function updateSelectedProp(p,v,noSave){
     normalizeWindowVerticalProps(ST.selected,'windowTop');
     delete ST.selected.windowTop;
   } else {
-    ST.selected[p]=v;
+    if(ST.selected.shape && ['x','y','w','d'].indexOf(p)>=0){
+      var roomBounds={}; roomBounds[p]=Number(v); RoomGeometry.setBounds(ST.selected,roomBounds);
+    } else ST.selected[p]=v;
     if(isWindowLikeType(ST.selected.type) && (p==='windowSill'||p==='windowHeight')) normalizeWindowVerticalProps(ST.selected,p);
   }
+  if(openingBefore && ['x','y','w','d','rot','floor'].indexOf(p)>=0)
+    SceneOpeningGeometry.rebindAfterEdit(ST.selected,DATA.walls,{before:openingBefore});
   // 天井を「指定なし」へ戻したときは受け口ごと消す。undefined を残すと保存 JSON
   // には出ないのにメモリ上のプランは「指定あり」に見え、判定が食い違う。
   // 天井を書いたときは旧フィールド(ceilingHeight)も消す: HeightModel が
@@ -2072,6 +2094,7 @@ function updateSelectedLightKind(kind){
   updateProps();
 }
 function applyOpeningModelToItem(it,modelId){
+  if(it&&it.openingSourceGeometry)return false;
   if(!it || !isOpeningItemType(it.type)) return;
   delete it.windowStd; // 開口モデル適用で規格プリセット表示が実寸と乖離しないようクリア
   if(!modelId){
@@ -2321,6 +2344,11 @@ var DIRTY = false;
 // ~5MB quota on mobile Safari (counted as UTF-16). IndexedDB has a far larger
 // quota and is built for blob-sized data. All methods are async (Promise-based).
 var StorageAdapter = (function(){
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return {
+    save:function(){return Promise.reject(new Error('Read-only comparison preview'));},
+    load:function(){return Promise.resolve(null);},
+    hasData:function(){return Promise.resolve(false);}
+  };
   var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
   var LEGACY_LS_KEY='webcad-plan-v1';
   function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }
@@ -2415,9 +2443,9 @@ function ensureObjectIds(){
   DATA.items.forEach(function(i){ scanId(i.id); });
   DATA.rooms.forEach(function(r){ scanId(r.id); });
   if(nextId<=maxId) nextId=maxId+1;
-  DATA.walls.forEach(function(w){ if(w.id===undefined||w.id===null) w.id=nextId++; });
-  DATA.items.forEach(function(i){ if(i.id===undefined||i.id===null) i.id=nextId++; });
-  DATA.rooms.forEach(function(r){ if(!r.id) r.id='rm'+(nextId++); });
+  DATA.walls.forEach(function(w){ if(w.id===undefined||w.id===null||w.id==='') w.id=nextId++; });
+  DATA.items.forEach(function(i){ if(i.id===undefined||i.id===null||i.id==='') i.id=nextId++; });
+  DATA.rooms.forEach(function(r){ if(r.id===undefined||r.id===null||r.id==='') r.id='rm'+(nextId++); });
 }
 
 function objectIdLabel(o){

@@ -1,0 +1,358 @@
+{
+  "sceneVersion": 2,
+  "units": "mm",
+  "coordinateSystem": "x-east-y-south-clockwise",
+  "walls": [
+    {
+      "id": "north",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "start": {
+        "value": {
+          "x": 0,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "end": {
+        "value": {
+          "x": 6000,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "thicknessMm": {
+        "value": 120,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    },
+    {
+      "id": "divider",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "start": {
+        "value": {
+          "x": 0,
+          "y": 3000
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "end": {
+        "value": {
+          "x": 6000,
+          "y": 3000
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "thicknessMm": {
+        "value": 120,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    }
+  ],
+  "rooms": [
+    {
+      "id": "entry",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "bounds": {
+        "value": {
+          "x": 0,
+          "y": 0,
+          "w": 6000,
+          "d": 3000
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "name": {
+        "value": "玄関",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "use": {
+        "value": "entrance",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorRaiseMm": {
+        "value": -160,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorDatum": {
+        "value": "target-model-finish",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorMaterial": {
+        "value": "tile_floor",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorColor": {
+        "value": "#bbccdd",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    },
+    {
+      "id": "study",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "bounds": {
+        "value": {
+          "x": 0,
+          "y": 3000,
+          "w": 6000,
+          "d": 3000
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "name": {
+        "value": "書斎",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorRaiseMm": {
+        "value": 0,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorDatum": {
+        "value": "target-model-finish",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "floorMaterial": {
+        "value": "wood_oak",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    }
+  ],
+  "openings": [
+    {
+      "id": "passage",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "hostWallId": {
+        "value": "divider",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "entry",
+          "study"
+        ],
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "center": {
+        "value": {
+          "x": 3000,
+          "y": 3000
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "widthMm": {
+        "value": 1000,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "kind": {
+        "value": "door-opening",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "heightMm": {
+        "value": 2100,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    }
+  ],
+  "furniture": [
+    {
+      "id": "desk1",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "catalogId": {
+        "value": "original-desk-work",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "center": {
+        "value": {
+          "x": 2500,
+          "y": 4500
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "sizeMm": {
+        "value": {
+          "w": 1400,
+          "d": 700
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "rotationDeg": {
+        "value": 90,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "flipX": {
+        "value": true,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "flipY": {
+        "value": false,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "hostRoomId": {
+        "value": "study",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "semanticExtent": {
+        "value": "asset",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "elev": {
+        "value": 0,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "baseRoom": {
+        "value": "study",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "finishColors": {
+        "value": {
+          "wood": "#123456"
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "finishTextures": {
+        "value": {
+          "wood": "wood_oak"
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "finishRoughness": {
+        "value": {
+          "wood": 0.48
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    },
+    {
+      "id": "car1",
+      "floor": {
+        "value": 1,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "catalogId": {
+        "value": "car",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "center": {
+        "value": {
+          "x": 9000,
+          "y": 2500
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "sizeMm": {
+        "value": {
+          "w": 2083,
+          "d": 4790
+        },
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "rotationDeg": {
+        "value": 270,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "hostRoomId": {
+        "value": null,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "semanticExtent": {
+        "value": "asset",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "color": {
+        "value": "#225588",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "circulation",
+      "rooms": {
+        "value": [
+          "entry",
+          "study"
+        ],
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "openingId": {
+        "value": "passage",
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      },
+      "requiredTraversable": {
+        "value": true,
+        "status": "observed",
+        "source": "synthetic-fixture:explicit-measurement"
+      }
+    }
+  ]
+}

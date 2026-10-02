@@ -45,7 +45,9 @@
 // **迷ったら払う。** 境目(0.55 / 1.9)は素直な側の実測から離し、壊した側からも
 // 離した位置に置いてある。少しでも怪しければ従来どおり見直す。間違った間取りを
 // 渡すより、¥40 を余分に払うほうが安い。
+import { readDimensionEdge } from "./plan-dimensions.mjs";
 import { jevAsk, noul, score, choice } from "./jev.mjs";
+import PlanGrid from "../assets/js/plan-grid.js";
 
 // ── 見直しの門 ──────────────────────────────────────────────────────
 
@@ -92,12 +94,10 @@ function dimensionCheck(dims) {
   for (const edge of ["top", "bottom", "left", "right"]) {
     const e = dims[edge];
     if (!e || typeof e !== "object") continue;
-    const total = Number(e.total);
-    const parts = (Array.isArray(e.parts) ? e.parts : []).map(Number).filter(Number.isFinite);
-    if (!Number.isFinite(total) && !parts.length) continue;
+    const { total, sum } = readDimensionEdge(e);
     out[edge] = {
       total: round(total),
-      sum_of_parts: parts.length ? round(parts.reduce((a, b) => a + b, 0)) : null,
+      sum_of_parts: round(sum),
     };
   }
   return Object.keys(out).length ? out : null;
@@ -144,6 +144,9 @@ export function pageFacts(page, index = 0) {
         width: round(width),
         depth: round(depth),
         dimension_check: dimensionCheck(f && f.dims),
+        // Area sums alone cannot detect an overlap cancelled by an equal-sized
+        // gap. Use the same bounded geometry checks as the actual assembler.
+        geometry_problems: PlanGrid.build(f).problems.slice(0, 20),
         rooms,
         room_area_sum_ratio_to_footprint: footprint > 0 ? Number((roomArea / footprint).toFixed(2)) : null,
         items,
@@ -192,7 +195,11 @@ export async function reviseAdvice(pages, env, deps = {}) {
   if (!list.length || mode === "off") return { mode: "off", pages: always, skipAll: false };
 
   const judged = await Promise.all(list.map(async (page, i) => {
-    const answers = await jevAsk(env, { state: pageFacts(page, i), questions: REVISE_QUESTIONS }, deps);
+    const facts = pageFacts(page, i);
+    if (facts.floors.some((f) => f.geometry_problems.length)) {
+      return { page: i + 1, revise: true, reason: "invalid_geometry", consistent: null, completeness: null };
+    }
+    const answers = await jevAsk(env, { state: facts, questions: REVISE_QUESTIONS }, deps);
     return { page: i + 1, ...reviseDecision(answers) };
   }));
 

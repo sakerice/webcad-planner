@@ -1,0 +1,28 @@
+{
+  "contract": "scene-ir-v3-source-preview.1",
+  "schemaVersion": 3,
+  "imageRouteDefault": "v1",
+  "runtimeMode": "source-preview-only",
+  "canApply": false,
+  "retainedGeometry": {
+    "walls": "nonzero axis-aligned segments",
+    "logicalRooms": ["connected rectUnion (max 32 rectangles)", "simple orthogonalPolygon (max 64 vertices)"],
+    "roomHoles": false,
+    "objects": "catalog-independent oriented rectangular source envelopes and source fronts",
+    "exterior": "orthogonal regions and building footprints; subtraction references retained",
+    "openings": "physical gaps with independent leaf geometry/pivot/travel observations",
+    "stairs": "diagram polylines only, not certified 3D flight geometry"
+  },
+  "evidence": ["source facts", "dimension chain order and basis", "relative elevations", "diagram appearance distinct from specified physical material"],
+  "rendererCertification": {
+    "polygonRooms": false,
+    "siteSurfaces": false,
+    "offsetDoorPivots": false,
+    "arbitraryPocketGeometry": false,
+    "foldKinematics": false,
+    "sharedV3Persistence": false
+  },
+  "mapping": "Separate optional bindings. Native asset dimensions/fronts never replace source facts.",
+  "exclusions": ["arbitrary meshes", "curved walls", "general BIM", "inferred roof", "inferred stair rise", "silent v3-to-v1 fallback"],
+  "limits": {"coordinateAbsoluteMm":1000000,"annotations":256,"entitiesPerCollection":2000,"leafCountPerOpening":8}
+}

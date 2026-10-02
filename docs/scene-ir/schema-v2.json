@@ -1,0 +1,2830 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:webcad:scene-ir:2",
+  "title": "WebCAD Scene IR v2 (bounded experimental compiler)",
+  "$defs": {
+    "fact1": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact2": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact3": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact4": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                },
+                "d": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "w",
+                "d"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                },
+                "d": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "w",
+                "d"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact5": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact6": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -1000000,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -1000000,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact7": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "const": "target-model-finish"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "relativeToRoomId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                    }
+                  },
+                  "required": [
+                    "relativeToRoomId"
+                  ]
+                }
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "const": "target-model-finish"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "relativeToRoomId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                    }
+                  },
+                  "required": [
+                    "relativeToRoomId"
+                  ]
+                }
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact8": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2400
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2400
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact9": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "tile_floor",
+                "wood_floor",
+                "wood_oak"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "tile_floor",
+                "wood_floor",
+                "wood_oak"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact10": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact11": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact12": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact13": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "door-swing",
+                "door-swing-s",
+                "door-front",
+                "door-slide-s",
+                "door-pocket",
+                "door-slide",
+                "door-opening",
+                "door-opening-arch",
+                "door-fold",
+                "door-fold-w",
+                "window",
+                "window-door"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "door-swing",
+                "door-swing-s",
+                "door-front",
+                "door-slide-s",
+                "door-pocket",
+                "door-slide",
+                "door-opening",
+                "door-opening-arch",
+                "door-fold",
+                "door-fold-w",
+                "window",
+                "window-door"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact14": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ]
+                },
+                {
+                  "const": "center"
+                }
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ]
+                },
+                {
+                  "const": "center"
+                }
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact15": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4000
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4000
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact16": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "open",
+                "closed"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact17": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "fix",
+                "sliding",
+                "casement"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "fix",
+                "sliding",
+                "casement"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact18": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "",
+                "bath-clear"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "",
+                "bath-clear"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact19": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                },
+                "d": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "w",
+                "d"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                },
+                "d": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "required": [
+                "w",
+                "d"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact20": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "native",
+                "fit-observed"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "native",
+                "fit-observed"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact21": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "boolean"
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "boolean"
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact22": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact23": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "asset",
+                "individual-fixture",
+                "room-assembly",
+                "symbol-only"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "asset",
+                "individual-fixture",
+                "room-assembly",
+                "symbol-only"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact24": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "floor",
+                "under",
+                "skip"
+              ]
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "enum": [
+                "floor",
+                "under",
+                "skip"
+              ]
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact25": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              }
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              }
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact26": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              }
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              }
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact27": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  0.85,
+                  0.48,
+                  0.22
+                ]
+              }
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  0.85,
+                  0.48,
+                  0.22
+                ]
+              }
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "fact28": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "sceneVersion": {
+      "const": 2
+    },
+    "units": {
+      "const": "mm"
+    },
+    "coordinateSystem": {
+      "const": "x-east-y-south-clockwise"
+    },
+    "walls": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "floor": {
+            "$ref": "#/$defs/fact1"
+          },
+          "start": {
+            "$ref": "#/$defs/fact2"
+          },
+          "end": {
+            "$ref": "#/$defs/fact2"
+          },
+          "thicknessMm": {
+            "$ref": "#/$defs/fact3"
+          }
+        },
+        "required": [
+          "id",
+          "floor",
+          "start",
+          "end",
+          "thicknessMm"
+        ]
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "floor": {
+            "$ref": "#/$defs/fact1"
+          },
+          "bounds": {
+            "$ref": "#/$defs/fact4"
+          },
+          "name": {
+            "$ref": "#/$defs/fact5"
+          },
+          "use": {
+            "$ref": "#/$defs/fact5"
+          },
+          "floorRaiseMm": {
+            "$ref": "#/$defs/fact6"
+          },
+          "floorDatum": {
+            "$ref": "#/$defs/fact7"
+          },
+          "skipLevelMm": {
+            "$ref": "#/$defs/fact8"
+          },
+          "floorMaterial": {
+            "$ref": "#/$defs/fact9"
+          },
+          "floorColor": {
+            "$ref": "#/$defs/fact10"
+          }
+        },
+        "required": [
+          "id",
+          "floor",
+          "bounds"
+        ]
+      }
+    },
+    "openings": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "floor": {
+            "$ref": "#/$defs/fact1"
+          },
+          "hostWallId": {
+            "$ref": "#/$defs/fact11"
+          },
+          "adjacentRoomIds": {
+            "$ref": "#/$defs/fact12"
+          },
+          "center": {
+            "$ref": "#/$defs/fact2"
+          },
+          "widthMm": {
+            "$ref": "#/$defs/fact3"
+          },
+          "depthMm": {
+            "$ref": "#/$defs/fact3"
+          },
+          "kind": {
+            "$ref": "#/$defs/fact13"
+          },
+          "axis": {
+            "$ref": "#/$defs/fact2"
+          },
+          "rotationDeg": {
+            "$ref": "#/$defs/fact6"
+          },
+          "hinge": {
+            "$ref": "#/$defs/fact2"
+          },
+          "latch": {
+            "$ref": "#/$defs/fact2"
+          },
+          "swingSide": {
+            "$ref": "#/$defs/fact2"
+          },
+          "travelDirection": {
+            "$ref": "#/$defs/fact2"
+          },
+          "travel": {
+            "$ref": "#/$defs/fact2"
+          },
+          "wallFace": {
+            "$ref": "#/$defs/fact14"
+          },
+          "heightMm": {
+            "$ref": "#/$defs/fact3"
+          },
+          "sillMm": {
+            "$ref": "#/$defs/fact15"
+          },
+          "openState": {
+            "$ref": "#/$defs/fact16"
+          },
+          "windowKind": {
+            "$ref": "#/$defs/fact17"
+          },
+          "openingModel": {
+            "$ref": "#/$defs/fact11"
+          },
+          "doorFinish": {
+            "$ref": "#/$defs/fact18"
+          },
+          "color": {
+            "$ref": "#/$defs/fact10"
+          }
+        },
+        "required": [
+          "id",
+          "floor",
+          "hostWallId",
+          "adjacentRoomIds",
+          "center",
+          "widthMm",
+          "kind"
+        ]
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "floor": {
+            "$ref": "#/$defs/fact1"
+          },
+          "catalogId": {
+            "$ref": "#/$defs/fact11"
+          },
+          "center": {
+            "$ref": "#/$defs/fact2"
+          },
+          "sizeMm": {
+            "$ref": "#/$defs/fact19"
+          },
+          "sizePolicy": {
+            "$ref": "#/$defs/fact20"
+          },
+          "rotationDeg": {
+            "$ref": "#/$defs/fact6"
+          },
+          "flipX": {
+            "$ref": "#/$defs/fact21"
+          },
+          "flipY": {
+            "$ref": "#/$defs/fact21"
+          },
+          "hostRoomId": {
+            "$ref": "#/$defs/fact22"
+          },
+          "semanticExtent": {
+            "$ref": "#/$defs/fact23"
+          },
+          "elev": {
+            "$ref": "#/$defs/fact6"
+          },
+          "baseRoom": {
+            "$ref": "#/$defs/fact11"
+          },
+          "baseLevel": {
+            "$ref": "#/$defs/fact24"
+          },
+          "finishColors": {
+            "$ref": "#/$defs/fact25"
+          },
+          "finishTextures": {
+            "$ref": "#/$defs/fact26"
+          },
+          "finishRoughness": {
+            "$ref": "#/$defs/fact27"
+          },
+          "color": {
+            "$ref": "#/$defs/fact10"
+          },
+          "heightMm": {
+            "$ref": "#/$defs/fact3"
+          },
+          "facingDirection": {
+            "$ref": "#/$defs/fact2"
+          }
+        },
+        "required": [
+          "id",
+          "floor",
+          "catalogId",
+          "center",
+          "sizeMm",
+          "rotationDeg",
+          "hostRoomId",
+          "semanticExtent"
+        ]
+      }
+    },
+    "connections": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "rooms": {
+            "$ref": "#/$defs/fact28"
+          },
+          "openingId": {
+            "$ref": "#/$defs/fact11"
+          },
+          "requiredTraversable": {
+            "$ref": "#/$defs/fact21"
+          }
+        },
+        "required": [
+          "id",
+          "rooms",
+          "openingId",
+          "requiredTraversable"
+        ]
+      }
+    }
+  },
+  "required": [
+    "sceneVersion",
+    "units",
+    "coordinateSystem",
+    "walls",
+    "rooms",
+    "openings",
+    "furniture",
+    "connections"
+  ]
+}

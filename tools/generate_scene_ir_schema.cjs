@@ -1,0 +1,23 @@
+const fs=require('node:fs');
+const id={type:'string',pattern:'^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$'};
+const number={type:'number',minimum:-1000000,maximum:1000000},positive={type:'number',exclusiveMinimum:0,maximum:1000000};
+const object=(properties,required=Object.keys(properties))=>({type:'object',additionalProperties:false,properties,required});
+const point=object({x:number,y:number}),size=object({w:positive,d:positive}),rect=object({x:number,y:number,w:positive,d:positive});
+const defs={},factNames=new Map();
+const fact=value=>{
+ const key=JSON.stringify(value);if(factNames.has(key))return {$ref:'#/$defs/'+factNames.get(key)};
+ const name='fact'+(factNames.size+1);factNames.set(key,name);
+ defs[name]={oneOf:[object({value,status:{const:'observed'},source:{type:'string',minLength:1},reason:{type:'string'}},['value','status','source']),object({value,status:{const:'inferred'},source:{type:'string',minLength:1},reason:{type:'string',minLength:1}},['value','status','source','reason']),object({value:{type:'null'},status:{const:'unknown'},source:{type:'string'},reason:{type:'string'}},['value','status'])]};
+ return {$ref:'#/$defs/'+name};
+};
+const text={type:'string'},boolean={type:'boolean'},color={type:'string',pattern:'^#[0-9a-fA-F]{6}$'},floor=fact({type:'integer',minimum:1,maximum:5});
+const entity=(props,required)=>object({id,...props},['id',...required]);
+const walls=entity({floor,start:fact(point),end:fact(point),thicknessMm:fact(positive)},['floor','start','end','thicknessMm']);
+const rooms=entity({floor,bounds:fact(rect),name:fact(text),use:fact(text),floorRaiseMm:fact(number),floorDatum:fact({oneOf:[{const:'target-model-finish'},object({relativeToRoomId:id})]}),skipLevelMm:fact({type:'integer',minimum:0,maximum:2400}),floorMaterial:fact({enum:['tile_floor','wood_floor','wood_oak']}),floorColor:fact(color)},['floor','bounds']);
+const openingProps={floor,hostWallId:fact(id),adjacentRoomIds:fact({type:'array',minItems:2,maxItems:2,items:{oneOf:[id,{type:'null'}]}}),center:fact(point),widthMm:fact(positive),depthMm:fact(positive),kind:fact({enum:['door-swing','door-swing-s','door-front','door-slide-s','door-pocket','door-slide','door-opening','door-opening-arch','door-fold','door-fold-w','window','window-door']}),axis:fact(point),rotationDeg:fact(number),hinge:fact(point),latch:fact(point),swingSide:fact(point),travelDirection:fact(point),travel:fact(point),wallFace:fact({oneOf:[point,{const:'center'}]}),heightMm:fact(positive),sillMm:fact({type:'number',minimum:0,maximum:4000}),openState:fact({enum:['open','closed']}),windowKind:fact({enum:['fix','sliding','casement']}),openingModel:fact(id),doorFinish:fact({enum:['','bath-clear']}),color:fact(color)};
+const openings=entity(openingProps,['floor','hostWallId','adjacentRoomIds','center','widthMm','kind']);
+const dictionary=value=>({type:'object',additionalProperties:value});
+const furniture=entity({floor,catalogId:fact(id),center:fact(point),sizeMm:fact(size),sizePolicy:fact({enum:['native','fit-observed']}),rotationDeg:fact(number),flipX:fact(boolean),flipY:fact(boolean),hostRoomId:fact({oneOf:[id,{type:'null'}]}),semanticExtent:fact({enum:['asset','individual-fixture','room-assembly','symbol-only']}),elev:fact(number),baseRoom:fact(id),baseLevel:fact({enum:['floor','under','skip']}),finishColors:fact(dictionary(color)),finishTextures:fact(dictionary(id)),finishRoughness:fact(dictionary({enum:[.85,.48,.22]})),color:fact(color),heightMm:fact(positive),facingDirection:fact(point)},['floor','catalogId','center','sizeMm','rotationDeg','hostRoomId','semanticExtent']);
+const connections=entity({rooms:fact({type:'array',items:id,minItems:2,maxItems:2}),openingId:fact(id),requiredTraversable:fact(boolean)},['rooms','openingId','requiredTraversable']);
+const schema={$schema:'https://json-schema.org/draft/2020-12/schema',$id:'urn:webcad:scene-ir:2',title:'WebCAD Scene IR v2 (bounded experimental compiler)',$defs:defs,...object({sceneVersion:{const:2},units:{const:'mm'},coordinateSystem:{const:'x-east-y-south-clockwise'},...Object.fromEntries(Object.entries({walls,rooms,openings,furniture,connections}).map(([k,v])=>[k,{type:'array',maxItems:2000,items:v}]))})};
+fs.writeFileSync('docs/scene-ir/schema-v2.json',JSON.stringify(schema,null,2)+'\n');

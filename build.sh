@@ -19,6 +19,7 @@ check_cloudflare_asset_sizes() {
 # 出荷する間取りが「読み込める形」であること。テストからは既定間取りを
 # 読めない決まりなので(tools/tests/fixture-only.test.cjs)、ここで見る。
 node tools/check_plan_schema.cjs assets/default_plan.json assets/default_plan_3f.json
+node tools/check_scene_asset_certificates.cjs
 
 rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models

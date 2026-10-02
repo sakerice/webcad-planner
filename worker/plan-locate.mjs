@@ -15,6 +15,8 @@
 //
 // 縮めた画像で足りる。位置が分かればよく、寸法の文字は読まない。
 // そのぶん安い（実測 ¥0.5 前後）。
+import PlanSourceIdentity from '../assets/js/plan-source-identity.js';
+
 export const LOCATE_SYSTEM = [
   "あなたは図面の紙面を見て、平面図が描かれている範囲を答える専門家です。",
   "出力はJSONだけで、説明文や前置きは書きません。",
@@ -34,7 +36,17 @@ export const LOCATE_PROMPT = `この画像は住宅のプレゼン資料の1ペ�
 
 座標は、画像の左上を (0,0)、右下を (1000,1000) とする値で答えます。
 
-平面図が見当たらない場合は found を false にしてください。`;
+平面図が見当たらない場合は found を false にしてください。
+
+切り出し範囲とは別に sourceHeader を答えてください。ページ全体の見出しから、
+この平面図の階を明示する「1F」「2階」などをそのまま labels の text に転記し、
+各文字の範囲も同じ0〜1000座標で返します。見出しが切り出しの外でも保持します。
+氏名・住所・日付・物件名など階に無関係な文字は転記しません。
+階ラベルが無い/読めないとき labels は空配列。ページ順、図形、階段から階を推測しません。
+pageKind は floor-plan / roof-plan / perspective / multiple-floor-plans / unknown のいずれか。
+平面図とその3Dイラストの組は floor-plan で、3Dの各層を別の階にしません。
+屋根だけの図は roof-plan、3Dしかない図は perspective。複数の平面図は multiple-floor-plans。
+複数の異なる階見出しがあるときは全部残し、1つへ決めません。`;
 
 export const LOCATE_SCHEMA = {
   type: "OBJECT",
@@ -44,10 +56,23 @@ export const LOCATE_SCHEMA = {
     y0: { type: "NUMBER", description: "上端" },
     x1: { type: "NUMBER", description: "右端" },
     y1: { type: "NUMBER", description: "下端" },
+    sourceHeader: {
+      type: "OBJECT",
+      properties: {
+        pageKind: { type: "STRING", enum: ["floor-plan", "roof-plan", "perspective", "multiple-floor-plans", "unknown"] },
+        labels: { type: "ARRAY", items: { type: "OBJECT", properties: {
+          text: { type: "STRING", description: "階見出しの文字だけを原文のまま" },
+          x0: { type: "NUMBER" }, y0: { type: "NUMBER" }, x1: { type: "NUMBER" }, y1: { type: "NUMBER" },
+        }, required: ["text", "x0", "y0", "x1", "y1"] } },
+      }, required: ["pageKind", "labels"],
+    },
   },
-  required: ["found", "x0", "y0", "x1", "y1"],
-  propertyOrdering: ["found", "x0", "y0", "x1", "y1"],
+  required: ["found", "x0", "y0", "x1", "y1", "sourceHeader"],
+  propertyOrdering: ["found", "x0", "y0", "x1", "y1", "sourceHeader"],
 };
+
+// Older locator replies still crop normally; missing metadata stays unknown.
+export function normalizeSourceHeader(raw) { return PlanSourceIdentity.header(raw && raw.sourceHeader, 1000); }
 
 // 返ってきた範囲を、使える形に整える。
 //

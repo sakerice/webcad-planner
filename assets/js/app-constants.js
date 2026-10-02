@@ -958,7 +958,7 @@ function wallBaseSupportY(w){
   // **低い方**を採る。高い方に合わせると低い側に穴が開く。
   function supportAt(px,py){
     var r=roomAtPointOnFloor(fl,px,py);
-    return r ? localSupportTopY(fl,r.x,r.y,r.x+r.w,r.y+r.d)
+    return r ? (r.shape?Math.max.apply(null,RoomGeometry.cells(r).map(function(c){return localSupportTopY(fl,c.x,c.y,c.x+c.w,c.y+c.d);})):localSupportTopY(fl,r.x,r.y,r.x+r.w,r.y+r.d))
              : localSupportTopY(fl,px,py,px,py);
   }
   var minTop=Infinity, i, s, t, px, py, v;
@@ -1001,14 +1001,14 @@ function segmentInsideRectLengthMm(x1,y1,x2,y2,rx0,ry0,rx1,ry1){
 }
 function roomFloorTopY(room){
   if(!room) return 0;
-  return localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d)
+  return (room.shape?Math.max.apply(null,RoomGeometry.cells(room).map(function(c){return localSupportTopY(room.floor,c.x,c.y,c.x+c.w,c.y+c.d);})):localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d))
     +floorSlabHeightMForFloor(room.floor)+(roomSkipLevelMm(room)+roomFloorOffsetMm(room))*U;
 }
 // 段差の**下**(= その階の構造床の天端)。段差の下の空間に物を置くときの基準で、
 // 段差を持たない部屋では roomFloorTopY と同値 (床上げは仕上げなので含めない)。
 function roomStoreyFloorTopY(room){
   if(!room) return 0;
-  return localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d)
+  return (room.shape?Math.max.apply(null,RoomGeometry.cells(room).map(function(c){return localSupportTopY(room.floor,c.x,c.y,c.x+c.w,c.y+c.d);})):localSupportTopY(room.floor,room.x,room.y,room.x+room.w,room.y+room.d))
     +floorSlabHeightMForFloor(room.floor);
 }
 function roomFloorAt(floor,x,y){
@@ -1598,6 +1598,9 @@ function roomDeclaresSlopedCeiling(room){
 var ROOM_OVERLAP_EPS_MM=1;
 var ROOM_OVERLAP_WALL_TOL_MM=60;
 function roomsOverlapInPlan(a,b){
+  if(a.shape||b.shape) return RoomGeometry.cells(a).some(function(ac){return RoomGeometry.cells(b).some(function(bc){
+    return roomsOverlapInPlan(Object.assign({},a,ac,{shape:null}),Object.assign({},b,bc,{shape:null}));
+  });});
   var x0=Math.max(a.x,b.x), x1=Math.min(a.x+a.w,b.x+b.w);
   var y0=Math.max(a.y,b.y), y1=Math.min(a.y+a.d,b.y+b.d);
   if(x1-x0<=ROOM_OVERLAP_EPS_MM||y1-y0<=ROOM_OVERLAP_EPS_MM) return false;
@@ -1694,16 +1697,18 @@ function roofItemOverRoom(room){
   // これが無いと、屋根の階だけを見ていないせいで、既定プラン(部屋1〜3階・屋根3階と
   // 4階)の1階の部屋が2階分上の屋根から天井をもらう。
   if(roomHasRoomAbove(room)) return null;
-  var cx=room.x+room.w/2, cy=room.y+room.d/2;
+  var anchor=room.shape?RoomGeometry.labelAnchor(room):{x:room.x+room.w/2,y:room.y+room.d/2}, cx=anchor.x, cy=anchor.y;
   var floorY=floorTopY(room.floor);
   var best=null, bestApex=Infinity;
   DATA.items.forEach(function(it){
     if(!it||it.type!=='roof'||it.hidden3D) return;
-    if(!roofCoversPlanPoint(it,cx,cy)) return;
-    var apex=roofCeilingWorldYAt(it,cx,cy);
+    var coveredPoints=room.shape?RoomGeometry.samplePoints(room,[.1,.3,.5,.7,.9]).filter(function(p){return roofCoversPlanPoint(it,p.x,p.y);}):[{x:cx,y:cy}];
+    if(room.shape?!coveredPoints.length:!roofCoversPlanPoint(it,cx,cy)) return;
+    var apex=Math.max.apply(null,coveredPoints.map(function(p){return roofCeilingWorldYAt(it,p.x,p.y);}));
     // 中心だけでは軒先を掴んでしまうので、部屋の四隅も見て一番高いところで判定する。
-    [[room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]]
+    (room.shape?RoomGeometry.polygon(room).map(function(p){return [p.x,p.y];}):[[room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]])
       .forEach(function(p){
+        if(room.shape&&!roofCoversPlanPoint(it,p[0],p[1]))return;
         var v=roofCeilingWorldYAt(it,p[0],p[1]);
         if(v>apex) apex=v;
       });
@@ -1726,6 +1731,7 @@ function roofsOverRoom(room){
   var pts=[], i, j;
   for(i=0;i<5;i++) for(j=0;j<5;j++)
     pts.push([room.x+room.w*(i+0.5)/5, room.y+room.d*(j+0.5)/5]);
+  if(room.shape) pts=RoomGeometry.samplePoints(room,[.1,.3,.5,.7,.9]).map(function(p){return [p.x,p.y];});
   // 部屋に一部でもかかる屋根を集め、**いちばん低い段(floor)**の屋根だけを使う。
   // 上の段の屋根(2階の屋根の軒の出など)は、同じ部屋に下の段の屋根(下屋)が
   // かかっていればその部屋の屋根ではない -- 数えると、軒の出のかかる細い帯だけ
@@ -1921,7 +1927,7 @@ function roomRoofCeilingExtent(room){
   // 部屋にかかる屋根すべて(roofsOverRoom)。天井の描画(roomCeilingProfile)と同じ組。
   var over=roofsOverRoom(room);
   // 鍵は結果を決めるものを全部含める。含め忘れると古い天井高が残る。
-  var key=[room.id,room.floor,room.x,room.y,room.w,room.d,shape.lowMm,
+  var key=[room.id,room.floor,room.x,room.y,room.w,room.d,JSON.stringify(room.shape||null),shape.lowMm,
     over.map(function(rf){
       return [rf.id,rf.x,rf.y,rf.w,rf.d,rf.floor,rf.rot,rf.elev,rf.roofType,rf.pitch,
         rf.flipX?1:0,rf.flipY?1:0,roofBaseWorldY(rf)].join(',');
@@ -1936,12 +1942,15 @@ function roomRoofCeilingExtent(room){
   var baseY=floorBaseY(room.floor);
   var N=12, i, j, px, py, y;
   var lowY=Infinity, highY=-Infinity, loPt=null, hiPt=null;
-  for(i=0;i<=N;i++) for(j=0;j<=N;j++){
-    px=room.x+room.w*i/N; py=room.y+room.d*j/N;
+  var samples=[];
+  if(room.shape) samples=RoomGeometry.samplePoints(room,[0,.25,.5,.75,1]);
+  else for(i=0;i<=N;i++) for(j=0;j<=N;j++)samples.push({x:room.x+room.w*i/N,y:room.y+room.d*j/N});
+  samples.forEach(function(p){
+    px=p.x;py=p.y;
     y=roomCeilingWorldYAtMm(room,profile,px,py)-baseY;
     if(y<lowY){ lowY=y; loPt=[px,py]; }
     if(y>highY){ highY=y; hiPt=[px,py]; }
-  }
+  });
   // 矢印は高い側を指す。0=北。平面の +Y は南なので北は -y。
   var dir=0;
   if(loPt&&hiPt&&(hiPt[0]!==loPt[0]||hiPt[1]!==loPt[1])){
@@ -1968,7 +1977,8 @@ function roomCeilingCapM(room){
   var storyM=storyHeightM(floor);
   if(!room||!isFinite(room.x)||!isFinite(room.y)) return storyM;
   if(roomSkipLevelMm(room)<=0) return storyM;
-  var localM=localSupportTopY(floor+1,room.x,room.y,room.x+room.w,room.y+room.d)-floorBaseY(floor);
+  var support=room.shape?Math.max.apply(null,RoomGeometry.cells(room).map(function(c){return localSupportTopY(floor+1,c.x,c.y,c.x+c.w,c.y+c.d);})):localSupportTopY(floor+1,room.x,room.y,room.x+room.w,room.y+room.d);
+  var localM=support-floorBaseY(floor);
   return localM>storyM?localM:storyM;
 }
 // 部屋の天井面の高さ(floorBaseY からの高さ、m)。部屋ごとの天井高の唯一の入口。
@@ -2111,11 +2121,11 @@ function roomsAtPointOnFloor(floor,x,y){
   var out=[];
   DATA.rooms.forEach(function(r,i){
     if(!r||r.floor!==floor||r.hidden3D) return;
-    if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d) out.push({r:r,i:i});
+    if(typeof RoomGeometry!=='undefined'?RoomGeometry.contains(r,x,y):(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.d)) out.push({r:r,i:i});
   });
   function stackOf(r){ var v=Number(r.stack); return isFinite(v)?v:0; }
   out.sort(function(a,b){
-    return (a.r.w*a.r.d-b.r.w*b.r.d) || (stackOf(b.r)-stackOf(a.r)) || (b.i-a.i);
+    return (typeof RoomGeometry!=='undefined'?RoomGeometry.area(a.r)-RoomGeometry.area(b.r):(a.r.w*a.r.d-b.r.w*b.r.d)) || (stackOf(b.r)-stackOf(a.r)) || (b.i-a.i);
   });
   return out.map(function(o){return o.r;});
 }
@@ -2872,6 +2882,7 @@ var DOOR_STD_WIDTHS=[
 ];
 function applyDoorWidthPreset(w){
   var it=ST.selected;
+  if(it&&it.openingSourceGeometry){if(typeof alert==='function')alert(SceneOpeningGeometry.sourceEditMessage);updateProps();return;}
   if(!it || !isInteriorSwingDoorType(it.type)) return;
   if(isObjectLocked(it)){ updateProps(); return; }
   w=Number(w);
@@ -2886,6 +2897,7 @@ function applyDoorWidthPreset(w){
 }
 function applyWindowStdPreset(id){
   var it=ST.selected;
+  if(it&&it.openingSourceGeometry){if(typeof alert==='function')alert(SceneOpeningGeometry.sourceEditMessage);updateProps();return;}
   if(!it || !isWindowLikeType(it.type)) return;
   if(isObjectLocked(it)){ updateProps(); return; }
   var p=null;
@@ -3174,7 +3186,7 @@ function loadFurnitureMegaLibrary(){
   var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
   }).catch(function(){ return null; });};
-  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+  return Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
     .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
     CATALOGUE_TAGS=all[0]||null;
     CATALOGUE_FINISHES=all[1]||null;
