@@ -32,7 +32,12 @@
 
   var ST = {
     image: null,        // 読み込んだ画像 (Image)
-    pages: null,        // PDFを選んだとき、ページごとの画像 (data URL の配列)
+    pages: null,        // PDFを選んだとき、送るページ画像 (data URL の配列)
+    pageReview: null,   // 元ページ・切り出し範囲・確認状態
+    pdfData: null,
+    selectedPage: 0,
+    version: 0,        // ファイル変更・取消し後の古い非同期結果を捨てる
+    previewVersion: 0,
     fileName: '',
     crop: null,         // 切り出し範囲 {x,y,w,h} 画像の画素で
     drag: null,         // 囲んでいる最中の状態
@@ -78,12 +83,17 @@
   function closePlanImport() {
     var m = $('plan-import-modal');
     if (m) m.classList.remove('show');
+    if (ST.busy) resetPlanImport();
+    cancelPlanImportDrag();
   }
 
   function resetPlanImport() {
+    ST.version++; ST.previewVersion++;
     ST.image = null; ST.pages = null; ST.fileName = '';
+    ST.pageReview = null; ST.pdfData = null; ST.selectedPage = 0;
     ST.crop = null; ST.drag = null; ST.result = null; ST.busy = false;
     var f = $('plan-import-file'); if (f) f.value = '';
+    show('plan-import-pdf-review', false);
     show('plan-import-step2', false);
     show('plan-import-step3', false);
     setStatus('間取り図のPDFか画像を選んでください。');
@@ -99,121 +109,254 @@
   // 位置は安いモデルに1回聞く（1ページ ¥0.5 前後）。紙面の構成はメーカーごとに
   // 違い、写真ではなおさら決まった形が無いので、画素の解析では当てにならない。
   //
-  // 切り出せなかったページは、ページ全体のまま送る。切り出しは上乗せであって、
-  // 失敗したら読めなくなる、という作りにはしない。
+  // 切り出せなかったページは、全体のプレビューを見て明示的に確認するか、
+  // 手で囲み直してから送る。黙って全体を読み取りに回さない。
   // 位置探しに待てる時間。**上限が要る。** 実測で、AI 側が混んでいるときに
   // 1回200秒かかったことがある。切り出しは上乗せであって、これを待つために
-  // 読み取りが始まらないのでは本末転倒。時間切れならページ全体のまま送る。
+  // 読み取りが始まらないのでは本末転倒。時間切れなら手元での確認へ進める。
   var LOCATE_TIMEOUT_MS = 25000;
 
   function locate(smallDataUrl) {
-    var asked = fetch('/api/ai/find-plan', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ image: smallDataUrl }),
-    }).then(function (res) { return res.json(); })
-      .then(function (body) { return (body && body.box) || null; })
-      .catch(function () { return null; });
-    var giveUp = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, LOCATE_TIMEOUT_MS); });
-    return Promise.race([asked, giveUp]);
+    return new Promise(function (resolve) {
+      var timer = setTimeout(function () { resolve(null); }, LOCATE_TIMEOUT_MS);
+      fetch('/api/ai/find-plan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ image: smallDataUrl }),
+      }).then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (body) { clearTimeout(timer); resolve((body && body.box) || null); })
+        .catch(function () { clearTimeout(timer); resolve(null); });
+    });
+  }
+
+  function validPlanBox(box) {
+    return box && ['x0', 'y0', 'x1', 'y1'].every(function (key) {
+      return typeof box[key] === 'number' && isFinite(box[key]) && box[key] >= 0 && box[key] <= 1;
+    }) && box.x1 > box.x0 && box.y1 > box.y0;
+  }
+
+  function pendingPdfPages() {
+    return ST.pageReview ? ST.pageReview.filter(function (p) { return !p.confirmed; }).length : 0;
+  }
+
+  function setPdfReviewStatus() {
+    if (ST.pageReview && !ST.busy && !ST.result) {
+      var pending = pendingPdfPages();
+      setStatus(pending ? '未確認のページが ' + pending + ' 枚あります。各ページを囲み直すか、全体を確認してください。'
+        : ST.pages.length + 'ページを読み取ります。送信予定の画像を確認してください。');
+    }
+  }
+
+  function syncPdfReview() {
+    if (!ST.pageReview) return;
+    var select = $('plan-import-page');
+    if (select) {
+      select.textContent = '';
+      ST.pageReview.forEach(function (page, i) {
+        var option = document.createElement('option');
+        option.value = String(i);
+        option.textContent = (i + 1) + 'ページ — ' + page.status;
+        select.appendChild(option);
+      });
+      select.value = String(ST.selectedPage);
+      select.disabled = ST.busy;
+    }
+    var page = ST.pageReview[ST.selectedPage];
+    var status = $('plan-import-page-status');
+    if (status) status.textContent = (ST.selectedPage + 1) + 'ページ: ' + page.status + '。' + page.message;
+    var preview = $('plan-import-output');
+    if (preview) {
+      preview.src = ST.pages[ST.selectedPage];
+      preview.alt = (ST.selectedPage + 1) + 'ページの送信予定画像';
+    }
+    var confirm = $('plan-import-confirm-page');
+    if (confirm) confirm.disabled = ST.busy || !ST.image || page.confirmed || !!page.box;
+  }
+
+  function selectPlanImportPage(index) {
+    index = Number(index);
+    if (ST.busy || !ST.pageReview || !Number.isInteger(index) || !ST.pageReview[index]) return;
+    ST.selectedPage = index;
+    setPdfReviewStatus();
+    ST.image = null; ST.crop = null; ST.drag = null;
+    var c = $('plan-import-canvas');
+    if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    var version = ST.version, previewVersion = ++ST.previewVersion;
+    var page = ST.pageReview[index], img = new Image();
+    syncPlanImportButtons();
+    img.onload = function () {
+      if (version !== ST.version || previewVersion !== ST.previewVersion) return;
+      ST.image = img;
+      var b = page.box || { x0: 0, y0: 0, x1: 1, y1: 1 };
+      ST.crop = { x: b.x0 * img.naturalWidth, y: b.y0 * img.naturalHeight,
+        w: (b.x1 - b.x0) * img.naturalWidth, h: (b.y1 - b.y0) * img.naturalHeight };
+      drawPlanImportPreview();
+      syncPlanImportButtons();
+    };
+    img.onerror = function () {
+      if (version !== ST.version || previewVersion !== ST.previewVersion) return;
+      page.confirmed = false;
+      page.status = '要確認'; page.message = 'プレビューを開けません。ファイルを選び直してください。';
+      setPdfReviewStatus();
+      syncPlanImportButtons();
+    };
+    img.src = page.source;
+  }
+
+  function confirmPlanImportPage() {
+    if (ST.busy || !ST.pageReview || !ST.image) return;
+    var page = ST.pageReview[ST.selectedPage];
+    if (page.box) return;
+    page.confirmed = true; page.status = '全体を確認済み';
+    page.message = 'このページ全体を読み取ります。';
+    setPdfReviewStatus();
+    syncPlanImportButtons();
+  }
+
+  // 手で囲んだ範囲もPDFから3072pxで描き直す（縮小済みの画像を拡大しない）。
+  function cropPlanImportPage() {
+    if (!ST.pageReview || !ST.image || !ST.crop || ST.busy) return;
+    var index = ST.selectedPage, page = ST.pageReview[index], version = ST.version;
+    var box = { x0: ST.crop.x / ST.image.naturalWidth, y0: ST.crop.y / ST.image.naturalHeight,
+      x1: (ST.crop.x + ST.crop.w) / ST.image.naturalWidth,
+      y1: (ST.crop.y + ST.crop.h) / ST.image.naturalHeight };
+    if (box.x0 === 0 && box.y0 === 0 && box.x1 === 1 && box.y1 === 1) {
+      planImportSelectAll(); return;
+    }
+    page.confirmed = false;
+    ST.result = null; ST.busy = true;
+    show('plan-import-step3', false);
+    page.status = '切り出し中'; page.message = '選んだ範囲をPDFから描き直しています。';
+    syncPlanImportButtons();
+    return Promise.resolve().then(function () {
+      if (version !== ST.version) return null;
+      return PdfPages.renderRegion(ST.pdfData, index + 1, box, { maxPx: MAX_SEND_PX });
+    }).then(function (cropped) {
+      if (version !== ST.version) return;
+      if (!cropped) throw new Error('empty crop');
+      ST.pages[index] = cropped; page.box = box; page.confirmed = true;
+      page.status = '手動で切り出し済み'; page.message = '選んだ範囲を読み取ります。';
+    }).catch(function () {
+      if (version !== ST.version) return;
+      ST.pages[index] = page.source; page.box = null; page.confirmed = false;
+      page.status = '要確認'; page.message = '切り出しに失敗しました。囲み直すか、ページ全体を確認してください。';
+    }).then(function () {
+      if (version !== ST.version) return;
+      ST.busy = false;
+      selectPlanImportPage(index);
+    });
   }
 
   // ── 1. 画像を選ぶ ──────────────────────────────────────────────────
   function onPlanImportFile(input) {
     var file = input && input.files && input.files[0];
     if (!file) return;
+    resetPlanImport();
     ST.fileName = file.name || '';
+    var version = ST.version;
+    function current() { return version === ST.version; }
+    function fail(message) {
+      if (!current()) return;
+      ST.busy = false; setStatus(message); syncPlanImportButtons();
+    }
+    ST.busy = true;
+    syncPlanImportButtons();
 
-    // PDF は、こちらでページごとの画像にしてから送る。
-    //
-    // 以前はそのまま送っていたが、**1ページあたり約260トークンしか使われて
-    // いなかった**(768画素角のタイル1枚ぶん)。画像にすれば1ページ3,369
-    // トークンまで使われる。詳しくは assets/js/pdf-pages.js の実測値。
+    // PDFはページ全体と切り出し結果を別々に持ち、失敗したページを確認できる。
     if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
       var pdfReader = new FileReader();
       pdfReader.onload = function (e) {
-        ST.image = null; ST.crop = null; ST.result = null; ST.pages = null;
+        if (!current()) return;
         setStatus('PDFを開いています…');
         if (typeof PdfPages === 'undefined' || !PdfPages) {
-          setStatus('PDFを開く部品がありません。画像にしてからお試しください。');
+          fail('PDFを開く部品がありません。画像にしてからお試しください。');
           return;
         }
-        var pdfData = e.target.result;
-        var smalls = null;
+        var pdfData = e.target.result, smalls = null, review = null;
+        ST.pdfData = pdfData;
         PdfPages.renderPages(pdfData, {
           maxPx: MAX_SEND_PX,
-          onProgress: function (n, total) { setStatus('PDFを開いています… ' + n + ' / ' + total + 'ページ'); },
+          onProgress: function (n, total) {
+            if (current()) setStatus('PDFを開いています… ' + n + ' / ' + total + 'ページ');
+          },
         }).then(function (pages) {
-          if (!pages.length) { setStatus('このPDFにページがありません。'); return []; }
-          // 位置を聞くための小さい版も、PDFから描く。大きい絵を画像として
-          // 読み直すと、画面が隠れているあいだ復号が返ってこない。
+          if (!current()) return [];
+          if (!pages.length) { fail('このPDFにページがありません。'); return []; }
+          // 小さい版を作れなくても、元ページのプレビューから手で確認できる。
           return PdfPages.renderPages(pdfData, { maxPx: 1024 }).then(function (small) {
-            smalls = small;
-            return pages;
-          });
+            smalls = small; return pages;
+          }).catch(function () { return pages; });
         }).then(function (pages) {
-          if (!pages || !pages.length) return [];
-          // ページごとに、図面の部分だけを高い解像度で描き直す。
-          //
-          // 位置はまとめて聞く。順番に聞くと、1ページぶんの待ちがページ数だけ
-          // 積み上がる。描き直しはこちらの処理なので、聞き終えてから順に行う。
+          if (!current() || !pages || !pages.length) return [];
           setStatus('図面の位置を探しています…');
           var out = pages.slice();
+          review = pages.map(function (page) {
+            return { source: page, box: null, confirmed: false, status: '要確認',
+              message: '図面の位置を確認できませんでした。囲み直すか、ページ全体を確認してください。' };
+          });
           return Promise.all(pages.map(function (page, i) {
             return locate((smalls && smalls[i]) || page);
           })).then(function (boxes) {
             var next = function (i) {
+              if (!current()) return [];
               if (i >= pages.length) return out;
-              if (!boxes[i]) return next(i + 1);
+              if (!validPlanBox(boxes[i])) return next(i + 1);
               setStatus('図面を切り出しています… ' + (i + 1) + ' / ' + pages.length + 'ページ');
-              return PdfPages.renderRegion(pdfData, i + 1, boxes[i], { maxPx: MAX_SEND_PX })
-                .then(function (cropped) { if (cropped) out[i] = cropped; return next(i + 1); })
-                .catch(function () { return next(i + 1); });
+              return Promise.resolve().then(function () {
+                if (!current()) return null;
+                return PdfPages.renderRegion(pdfData, i + 1, boxes[i], { maxPx: MAX_SEND_PX });
+              }).then(function (cropped) {
+                if (!cropped) throw new Error('empty crop');
+                out[i] = cropped;
+                review[i].box = boxes[i]; review[i].confirmed = true;
+                review[i].status = '自動切り出し済み';
+                review[i].message = '送信予定の範囲を確認できます。必要なら囲み直してください。';
+              }).catch(function () {
+                review[i].message = '切り出しに失敗しました。囲み直すか、ページ全体を確認してください。';
+              }).then(function () { return next(i + 1); });
             };
-            return Promise.resolve(next(0));
+            return next(0);
           });
         }).then(function (pages) {
-          if (!pages || !pages.length) return;
-          ST.pages = pages;
+          if (!current() || !pages || !pages.length) return;
+          ST.pages = pages; ST.pageReview = review; ST.busy = false;
           show('plan-import-step2', true);
-          show('plan-import-crop', false);
+          show('plan-import-crop', true);
+          show('plan-import-pdf-review', true);
           show('plan-import-step3', false);
-          setStatus(pages.length + 'ページを読み取ります。');
-          syncPlanImportButtons();
+          selectPlanImportPage(0);
         }).catch(function (err) {
-          setStatus('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
-          syncPlanImportButtons();
+          fail('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
         });
       };
-      pdfReader.onerror = function () { setStatus('ファイルを読めませんでした。'); };
+      pdfReader.onerror = function () { fail('ファイルを読めませんでした。'); };
       pdfReader.readAsDataURL(file);
       return;
     }
 
     if (!/^image\//.test(file.type)) {
-      setStatus('PDF か画像（PNG / JPEG / WebP）を選んでください。');
+      fail('PDF か画像（PNG / JPEG / WebP）を選んでください。');
       return;
     }
     var reader = new FileReader();
     reader.onload = function (e) {
+      if (!current()) return;
       var img = new Image();
       img.onload = function () {
-        ST.image = img; ST.pages = null;
-        // 最初は全体を選んでおく。狭めるのは利用者の任意。
+        if (!current()) return;
+        ST.image = img; ST.busy = false;
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
-        ST.result = null;
         show('plan-import-step2', true);
         show('plan-import-crop', true);
-        show('plan-import-step3', false);
         drawPlanImportPreview();
         setStatus('このまま読み取れます。図面が紙面の一部にしか写っていない場合は、'
           + '図面の部分だけをドラッグで囲むと、より正確に読めます（任意）。');
         syncPlanImportButtons();
       };
-      img.onerror = function () { setStatus('この画像を開けませんでした。別の形式で試してください。'); };
+      img.onerror = function () { fail('この画像を開けませんでした。別の形式で試してください。'); };
       img.src = e.target.result;
     };
-    reader.onerror = function () { setStatus('ファイルを読めませんでした。'); };
+    reader.onerror = function () { fail('ファイルを読めませんでした。'); };
     reader.readAsDataURL(file);
   }
 
@@ -281,10 +424,11 @@
   }
 
   function planImportDown(e) {
-    if (!ST.image) return;
+    if (!ST.image || ST.busy) return;
     e.preventDefault();
     var p = canvasPointToImage(e);
     ST.drag = { x0: p.x, y0: p.y, x: p.x, y: p.y, w: 0, h: 0 };
+    syncPlanImportButtons();
     drawPlanImportPreview();
   }
 
@@ -304,14 +448,29 @@
     // 指が滑っただけの極小の矩形は、選び直しとみなして捨てる。
     if (ST.drag.w > 20 && ST.drag.h > 20) {
       ST.crop = { x: ST.drag.x, y: ST.drag.y, w: ST.drag.w, h: ST.drag.h };
+      if (ST.pageReview) cropPlanImportPage();
     }
     ST.drag = null;
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
 
+  function cancelPlanImportDrag() {
+    ST.drag = null;
+    drawPlanImportPreview();
+    syncPlanImportButtons();
+  }
+
   function planImportSelectAll() {
-    if (!ST.image) return;
+    if (!ST.image || ST.busy) return;
+    if (ST.pageReview) {
+      var page = ST.pageReview[ST.selectedPage];
+      page.box = null; page.confirmed = false; page.status = '要確認';
+      page.message = 'ページ全体に戻しました。囲み直すか、全体を確認してください。';
+      ST.pages[ST.selectedPage] = page.source;
+      ST.result = null; show('plan-import-step3', false);
+      setPdfReviewStatus();
+    }
     ST.crop = { x: 0, y: 0, w: ST.image.naturalWidth, h: ST.image.naturalHeight };
     drawPlanImportPreview();
     syncPlanImportButtons();
@@ -337,20 +496,26 @@
 
   function syncPlanImportButtons() {
     var run = $('plan-import-run');
-    if (run) run.disabled = (!ST.image && !ST.pages) || ST.busy;
+    if (run) run.disabled = (!ST.image && !ST.pages) || ST.busy || !!ST.drag || pendingPdfPages() > 0;
+    syncPdfReview();
+
     var apply = $('plan-import-apply');
     if (apply) apply.disabled = !ST.result || ST.busy;
     var size = $('plan-import-crop-size');
     if (size && ST.crop) {
-      var scale = Math.min(1, MAX_SEND_PX / Math.max(ST.crop.w, ST.crop.h));
+      var pdfCrop = ST.pageReview && ST.pageReview[ST.selectedPage].box;
+      var scale = pdfCrop ? MAX_SEND_PX / Math.max(ST.crop.w, ST.crop.h)
+        : Math.min(1, MAX_SEND_PX / Math.max(ST.crop.w, ST.crop.h));
       size.textContent = '送る範囲: ' + Math.round(ST.crop.w) + '×' + Math.round(ST.crop.h) +
-        ' 画素 → ' + Math.round(ST.crop.w * scale) + '×' + Math.round(ST.crop.h * scale) + ' に縮めて送信';
+        ' 画素 → ' + Math.round(ST.crop.w * scale) + '×' + Math.round(ST.crop.h * scale) +
+        (pdfCrop ? ' にPDFから描き直して送信' : ' に縮めて送信');
     }
   }
 
   // ── 3. 読み取る ────────────────────────────────────────────────────
   function runPlanImport() {
-    if (ST.busy) return;
+    if (ST.busy || ST.drag || pendingPdfPages() > 0) return;
+    var version = ST.version;
     // PDFはページごとの画像、画像は切り出して(囲んでいなければ全体を)送る。
     var images = ST.pages || (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
     if (!images.length) return;
@@ -365,20 +530,25 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, hint: hint }),
     }).then(readReply).then(function (r) {
-      return waitForJobs(r, { onProgress: function (done, total) {
+      if (version !== ST.version) return null;
+      return waitForJobs(r, { isCurrent: function () { return version === ST.version; }, onProgress: function (done, total) {
+        if (version !== ST.version) return;
         setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
+      if (version !== ST.version || !r) return;
       if (r.status !== 200) {
         ST.busy = false;
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
       }
-      return maybeRevisePlanImport(images, hint, r.body).then(function (body) {
+      return maybeRevisePlanImport(images, hint, r.body, version).then(function (body) {
+        if (version !== ST.version) return;
         // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
         // 判断が得られなければ、これまでどおり下書きだけを渡す。
         var finish = (typeof PlanFinish === 'undefined' || !body.plan)
           ? Promise.resolve(null) : PlanFinish.analyze(body.plan, body.marks);
         return finish.then(function (out) {
+          if (version !== ST.version) return;
           body.finish = out;
           ST.busy = false;
           ST.result = body;
@@ -388,6 +558,7 @@
         });
       });
     }).catch(function () {
+      if (version !== ST.version) return;
       ST.busy = false;
       setStatus('サーバに接続できませんでした。通信の状態を確かめて、もう一度お試しください。');
       syncPlanImportButtons();
@@ -416,6 +587,7 @@
     var jobs = first.body.jobs;
     var until = Date.now() + JOB_TIMEOUT_MS;
     function once() {
+      if (opts.isCurrent && !opts.isCurrent()) return null;
       if (Date.now() > until) return { status: 504, body: null };
       return fetch('/api/ai/plan-result', {
         method: 'POST',
@@ -466,14 +638,14 @@
   //
   // 門が答えを出せなかったとき・古いサーバに当たったときは revise が
   // 付いてこない。そのときは**これまでどおり見直す**。
-  function maybeRevisePlanImport(images, hint, body) {
+  function maybeRevisePlanImport(images, hint, body, version) {
     var advice = body && body.revise;
-    if (!advice || !advice.skipAll) return revisePlanImport(images, hint, body);
+    if (!advice || !advice.skipAll) return revisePlanImport(images, hint, body, version);
     body.reviewSkipped = true;
     return Promise.resolve(body);
   }
 
-  function revisePlanImport(images, hint, body) {
+  function revisePlanImport(images, hint, body, version) {
     var pages = (body && body.pages) || [];
     if (!pages.length || typeof PlanReviewDraw === 'undefined') return Promise.resolve(body);
 
@@ -493,10 +665,13 @@
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, renders: renders, pages: pages, hint: hint }),
     }).then(readReply).then(function (r) {
-      return waitForJobs(r, { revised: true, onProgress: function (done, total) {
+      if (version !== ST.version) return null;
+      return waitForJobs(r, { revised: true, isCurrent: function () { return version === ST.version; }, onProgress: function (done, total) {
+        if (version !== ST.version) return;
         setStatus('AIに見直させています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
+      if (version !== ST.version || !r) return body;
       if (r.status !== 200 || !r.body || !r.body.plan) {
         body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
         return body;
@@ -975,7 +1150,7 @@
     root.addEventListener('touchmove', planImportMove, { passive: false });
     root.addEventListener('mouseup', planImportUp);
     root.addEventListener('touchend', planImportUp);
-    root.addEventListener('touchcancel', planImportUp);
+    root.addEventListener('touchcancel', cancelPlanImportDrag);
   }
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wirePlanImportCanvas);
@@ -989,7 +1164,10 @@
   root.planImportDown = planImportDown;
   root.planImportMove = planImportMove;
   root.planImportUp = planImportUp;
+  root.cancelPlanImportDrag = cancelPlanImportDrag;
   root.planImportSelectAll = planImportSelectAll;
+  root.selectPlanImportPage = selectPlanImportPage;
+  root.confirmPlanImportPage = confirmPlanImportPage;
   root.runPlanImport = runPlanImport;
   root.applyPlanImport = applyPlanImport;
   // 検査から中身を覗くため
@@ -1002,6 +1180,7 @@
     renderPlanImportResult: renderPlanImportResult,
     reviewChanges: reviewChanges,
     fitContain: fitContain,
+    validPlanBox: validPlanBox,
     MAX_SEND_PX: MAX_SEND_PX,
   };
 }(typeof self !== 'undefined' ? self : this));
