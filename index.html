@@ -2983,6 +2983,13 @@ input[type="reset"]:focus-visible{
   color:#fff;
   box-shadow:0 4px 10px rgba(255,63,39,.34);
 }
+.wk-height:disabled{opacity:.65;cursor:default}
+#walk-tps-controls{position:absolute;pointer-events:auto;width:178px;padding:10px;border-radius:24px;background:var(--hp-panel);box-shadow:0 4px 12px rgba(24,20,18,.13);color:var(--hp-text)}
+#walk-tps-controls button{border:0;border-radius:999px;padding:8px 12px;min-height:40px;background:var(--hp-panel-strong);color:var(--hp-text);box-shadow:inset 0 0 0 1px rgba(31,27,24,.1)}
+#walk-tps-controls button[aria-pressed="true"]{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-tps-controls button:disabled{opacity:.45}
+#walk-tps-status{display:block;font-size:11px;margin-top:6px}
+#walk-tps-status[hidden],#walk-tps-action[hidden]{display:none}
 #walk-dpad{
   right:14px;
   bottom:14px;
@@ -3400,6 +3407,11 @@ input[type="reset"]:focus-visible{
       <div id="walk-hud" style="display:none">
         <canvas id="walk-minimap" width="220" height="176"></canvas>
         <button id="walk-exit" type="button" onclick="exitWalkMode()">✕ ウォークスルー終了</button>
+        <div id="walk-tps-controls" role="group" aria-label="人物視点の試作">
+          <button id="walk-tps-mode" type="button" aria-pressed="false" onclick="WalkTps.toggle()">TPS試作</button>
+          <button id="walk-tps-action" type="button" hidden disabled onclick="WalkTps.action()">座る</button>
+          <span id="walk-tps-status" role="status" hidden>仮モデル・仮歩行</span>
+        </div>
         <div id="walk-dpad">
           <button type="button" class="wk-btn wk-fwd"  data-wdir="fwd">▲</button>
           <button type="button" class="wk-btn wk-left" data-wdir="left">◀</button>
@@ -4536,6 +4548,7 @@ function recover3DIfContextLost(){
   var gl=null;
   try{ gl=ren.getContext(); }catch(e){ gl=null; }
   if(gl && !gl.isContextLost()) return false;
+  if(window.WalkTps)WalkTps.reset(false);
   // 見ていた向きは引き継ぐ。作り直しで視点が飛ぶと、何が起きたのか分からない。
   var pos=null,target=null;
   try{ if(camExt) pos=camExt.position.toArray(); if(orbit) target=orbit.target.toArray(); }catch(e){}
@@ -6304,6 +6317,7 @@ function build3D(){
   try{ build3DScene(); } finally { _roofBaseCache=null; }
 }
 function build3DScene(){
+  if(typeof WalkTps!=='undefined')WalkTps.invalidate();
   var toRemove=[];
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
   toRemove.forEach(function(c){
@@ -6453,6 +6467,7 @@ function isLikelyHeavy3DRebuild(){
 // 「重くなった」と受け取られる。待ちを見せる価値があるのは、結果が変わる操作だけ。
 function rebuild3D(quiet){
   if(!sc3) return;
+  if(window.WalkTps)WalkTps.invalidate();
   var loadingEl=document.getElementById('app-loading');
   var loadingAlreadyVisible=!!(loadingEl&&loadingEl.classList.contains('show'));
   if(quiet || !isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
@@ -6468,6 +6483,7 @@ function rebuild3D(quiet){
     try{perform3DRebuild();}
     finally{
       _tablet3DRebuildQueued=false;
+      if(window.WalkTps)WalkTps.invalidate();
       hideAppLoading();
     }
   });
@@ -12844,7 +12860,7 @@ function buildItem3D(it){
   if(isFmpItemType(it.type)){
     var fmp=getFmpItem(it.type);
     if(fmp && ensureGltfModel(fmp.model)){
-      if(queueFmpInstance(fmp.model,it,grp)) return;
+      if(!(window.WalkTpsSeatAssets&&WalkTpsSeatAssets.supports(fmp.model))&&!(window.WalkTpsInteractions&&WalkTpsInteractions.requiresInstance(fmp.model))&&queueFmpInstance(fmp.model,it,grp)) return;
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
       ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness,it.finishTextures,FINISH_TEXTURE_DEPS);
@@ -12853,7 +12869,10 @@ function buildItem3D(it){
         var spec=fmp.mirrorOption,sx=it.w/fmp.w,sy=getItemHeightValue(it)/fmp.h;
         var mirror=new THREE.Mesh(new THREE.BoxGeometry(spec.w*sx,spec.h*sy,.004),new THREE.MeshStandardMaterial({color:0xe1e7e8,metalness:1,roughness:.035}));
         mirror.name='Optional full length mirror';mirror.position.set(spec.x*sx,spec.y*sy,it.d*U*.455+.004);grp.add(mirror);
+        if(window.WalkTpsInteractions)WalkTpsInteractions.attachMirror(grp,it,fmp,mirror);
       }
+      if(window.WalkTpsSeatAssets)WalkTpsSeatAssets.attach(fmpClone,fmp.model);
+      if(window.WalkTpsInteractions)WalkTpsInteractions.attachBath(fmpClone,fmp.model);
       grp.add(fmpClone);
       mark3DSelectable(grp,it,'item'); sc3.add(grp);
       return;
@@ -12937,6 +12956,7 @@ function buildItem3D(it){
             : makeGltfClone(modelUrl,targetSize.w,targetSize.d,it.colorCustom?it.color:null);
           if(!cfg.uniformFit) applyGltfModelConfig(clone,it.type);
         }
+        if(window.WalkTpsSeatAssets)WalkTpsSeatAssets.attach(clone,modelUrl);
         grp.add(clone);
         mark3DSelectable(grp,it,'item'); sc3.add(grp);
         return;
@@ -15750,6 +15770,10 @@ function build3DSofa(grp,w,d){
   var darker=new THREE.MeshStandardMaterial({color:0x9a7d58,roughness:0.9,metalness:0.0});
   var legMat=new THREE.MeshStandardMaterial({color:0x4a3826,roughness:0.6,metalness:0.1});
   var seatH=0.36, backH=0.75, armW=Math.min(0.16,w*0.1);
+  // Explicit affordance from this procedural recipe only. Loaded GLBs never
+  // inherit it by type/name; their own reviewed geometry must supply a socket.
+  if(w-armW*2>=0.6&&d>=0.6&&d<=1.4)grp.userData.walkSeatSocket={version:1,kind:'sit',revision:'procedural-sofa-seat-v1',
+    seat:[0,seatH+0.08,d*0.03],approach:[0,0,d/2+0.65],front:[0,0,1]};
   function box(bw,bh,bd,x,y,z,m){
     var mm=new THREE.Mesh(new THREE.BoxGeometry(bw,bh,bd),m||mat);
     mm.position.set(x,y,z); mm.castShadow=true; mm.receiveShadow=true; grp.add(mm);
@@ -17052,12 +17076,17 @@ function walkEyeY(){
 function updateWalkEyePresetButton(){
   var b=document.getElementById('walk-height-toggle');
   if(!b) return;
+  var tps=typeof WalkTps!=='undefined'&&WalkTps.cameraVerified&&WalkTps.cameraVerified();
+  b.disabled=!!tps;
+  b.setAttribute('aria-label',tps?'TPS人物追従中。視点高切替はFPS表示で使用できます':'視点の高さを切り替え');
+  if(tps){b.innerHTML='TPS<br>追従';b.setAttribute('aria-pressed','false');b.title='TPS人物追従中。視点高切替はFPS表示で使用できます';return;}
   var sitting=WALK.eyePreset==='sit';
   b.innerHTML=sitting?'座り<br>視点':'立ち<br>視点';
   b.setAttribute('aria-pressed',sitting?'true':'false');
   b.title=sitting?'立ち視点に切り替え':'座り視点に切り替え';
 }
 function toggleWalkEyePreset(){
+  if(typeof WalkTps!=='undefined'&&WalkTps.cameraVerified&&WalkTps.cameraVerified())return;
   WALK.eyePreset=WALK.eyePreset==='sit'?'stand':'sit';
   updateWalkEyePresetButton();
   walkApplyCamera();
@@ -17454,6 +17483,10 @@ function walkSpawn(){
   walkUpdateGround(true);
 }
 function walkApplyCamera(){
+  if(typeof WalkTps!=='undefined'&&WalkTps.enabled()){WalkTps.update(0);return;}
+  walkApplyFpsCamera();
+}
+function walkApplyFpsCamera(){
   if(!camExt) return;
   camExt.position.set(WALK.x,walkEyeY(),WALK.z);
   camExt.rotation.order='YXZ';
@@ -17516,6 +17549,7 @@ function drawWalkMinimap(){
   ctx.fillText(fl+'F タップで移動',24,WALK_MAP_LABEL_BAND-9);
 }
 function walkMinimapTap(ev){
+  if(typeof WalkTps!=='undefined'&&!WalkTps.cancel())return;
   var cv=document.getElementById('walk-minimap');
   var r=cv.getBoundingClientRect();
   var cx=(ev.clientX-r.left)*(cv.width/r.width);
@@ -17570,6 +17604,8 @@ function positionWalkHud(){
   var dp=document.getElementById('walk-dpad');
   if(mm) mm.style.top=topSafe+'px';
   if(ex){ ex.style.top=topSafe+'px'; ex.style.left=leftSafe+'px'; }
+  var tps=document.getElementById('walk-tps-controls');
+  if(tps){tps.style.top=(topSafe+54)+'px';tps.style.left=leftSafe+'px';}
   if(dp) dp.style.bottom=botSafe+'px';
 }
 // 立面方向スナップボタン: モバイルではフロート表示の#bottom-navが、デスクトップ
@@ -17593,6 +17629,7 @@ function positionElevSnapFab(){
 }
 window.addEventListener('resize',positionElevSnapFab);
 function initWalkHud(){
+  if(typeof WalkTps!=='undefined'){WalkTps.beforeMove();WalkTps.update(0);}
   var mm=document.getElementById('walk-minimap');
   if(mm&&!mm._wired){
     mm._wired=true;
@@ -17726,6 +17763,7 @@ function updateWalkMode(now){
   var dt=Math.min(0.1,Math.max(0.001,(now-(_lastWalkTick||now))/1000));
   _lastWalkTick=now;
   if(WALK.floor!==ST.floor){ WALK.floor=ST.floor||1; WALK.groundOff=0; _walkCollFloor=null; drawWalkMinimap(); }
+  if(typeof WalkTps!=='undefined')WalkTps.beforeMove();
   var rot=(WALK.keys.left?1:0)-(WALK.keys.right?1:0)
         +((iMov['arrowleft']||iMov['a'])?1:0)-((iMov['arrowright']||iMov['d'])?1:0);
   var fwd=(WALK.keys.fwd?1:0)-(WALK.keys.back?1:0)
@@ -17774,13 +17812,14 @@ function updateWalkMode(now){
   }
   if(moved){
     walkUpdateGround();
-    walkApplyCamera();
+    if(typeof WalkTps==='undefined'||!WalkTps.enabled())walkApplyCamera();
     if(now-WALK._mapT>120){ WALK._mapT=now; drawWalkMinimap(); }
   }
   var doors=updateWalkDoors(dt);
   WALK._doorsAnim=doors;
   WALK.moving=moved;
-  return moved||doors;
+  var tpsChanged=typeof WalkTps!=='undefined'&&WalkTps.update(dt);
+  return moved||doors||tpsChanged;
 }
 // ── ウォークスルー中のフロアカリング ─────────────────────────
 // スラブに遮られて見えない他フロアのアイテム(家具・住設等)を非表示にして
@@ -18012,6 +18051,7 @@ function refresh3DPreviewWithLoading(){
 }
 
 function setView(v){
+  if(typeof WalkTps!=='undefined'&&v!==ST.view)WalkTps.reset(false);
   // ビュー切替時は必ずモバイルサイドメニュー・光/時間帯設定パネル・外観色パネルを閉じる。
   // これらは position:absolute; z-index:200 で、ウォークスルーHUD(z-index:30)より
   // 手前に表示され続けるため、開いたままウォークスルーへ入るとD-pad・ミニマップ・
@@ -18266,7 +18306,9 @@ function resetView(){
   draw2d();
 }
 function onFloorChange(v){
+  if(typeof WalkTps!=='undefined')WalkTps.reset(false);
   ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false; resetPickCycle();
+  if(typeof WALK!=='undefined'&&WALK.active){_walkCollFloor=null;walkSpawn();walkApplyCamera();drawWalkMinimap();}
   document.getElementById('props').classList.remove('show');
   // The previous selection is gone; its hidden controls are rebuilt on the next selection.
   var oldProps=document.getElementById('props-body');if(oldProps)oldProps.textContent='';
@@ -22355,6 +22397,7 @@ function stageJsonImport(text){
   var checked=PlanSchema.validatePlan(candidate);
   if(!checked.ok) throw new Error(checked.errors.slice(0,3).join(' / '));
   var previous={data:DATA,state:ST,wallHeight:WALL_H,nextId:nextId};
+  var endWalkStage=typeof WalkTps!=='undefined'&&WalkTps.preservePlanStage?WalkTps.preservePlanStage():null;
   try{
     DATA=candidate;
     // Legacy helpers use globals. Give them a private state and restore every
@@ -22373,6 +22416,7 @@ function stageJsonImport(text){
     return {data:DATA,wallHeight:WALL_H,nextId:nextId};
   }finally{
     DATA=previous.data;ST=previous.state;WALL_H=previous.wallHeight;nextId=previous.nextId;
+    if(endWalkStage)endWalkStage();
   }
 }
 function applyJsonImport(staged){
@@ -24961,6 +25005,14 @@ updateMobileShiftButton();
 </dialog>
 <script src="assets/js/comparison-renderer.js"></script>
 <script src="assets/js/plan-comparison.js"></script>
+<script src="assets/js/walk-tps-foundation.js"></script>
+<script src="assets/js/walk-tps-boundary.js"></script>
+<script src="assets/js/walk-tps-mesh-volumes.js"></script>
+<script src="assets/js/walk-tps-avatar.js"></script>
+<script src="assets/js/walk-tps-seat-assets.js"></script>
+<script src="assets/js/walk-tps-interactions.js"></script>
+<script src="assets/js/walk-tps-bath-safety.js"></script>
+<script src="assets/js/walk-tps.js"></script>
 <script src="assets/js/parallel-editors.js"></script>
 </body>
 </html>
