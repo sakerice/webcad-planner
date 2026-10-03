@@ -10,13 +10,16 @@ Blenderの既存model kitを使う。追加36点を再生成する場合：
 
 ```sh
 blender -b -t 4 --factory-startup --python tools/blender/rpg_mansion/expansion/build.py -- --no-icons
-blender -b -t 4 --factory-startup --python tools/blender/rpg_mansion/previews.py
+blender -b -t 4 --factory-startup --python tools/blender/rpg_mansion/previews.py -- --only wing-chair,sofa,chaise,bench,stool,dining-table,round-table,coffee-table,console,secretary,worktable,single-bed,canopy-bed,nightstand,wardrobe,dresser,linen-cabinet,kitchen-hutch,butler-sink,range,icebox,bathtub,toilet,washstand,floor-lamp,table-lamp,sconce,chandelier,mirror,curtain,coat-stand,umbrella-stand,planter,fireplace,radiator,armour
+python3 tools/assets/rpg-pack-contract/probe_expansion_surfaces.py
 python3 tools/blender/rpg_mansion/test_pack.py
 python3 tools/blender/rpg_mansion/test_surfaces.py
 node --test tools/tests/asset-pack-registry.test.cjs tools/tests/asset-pack-conversion.test.cjs tools/tests/rpg-pack-contract.test.cjs
 bash tools/run_tests.sh
 SKIP_DEPLOY=1 bash build.sh
 ```
+
+プレビューは上記36点に限定する。`--only` を省く全50点の生成には、旧14点を含むBlender原本の復元が必要。再生成でsource SHAが変わる場合があるため、代表6点のsidecarは上記probeで出力に合わせて再測定する。元レビュー原本とのSHA照合は、復元したアーカイブで別途行う。
 
 `test_pack.py` は配布GLB、寸法、UV、材質、重複面、法線、配置用画像を検証する。編集用sourceのアーカイブを復元した場合は、リポジトリと同じ相対パス構成を持つrootを `RPG_SOURCE_ARCHIVE` に指定すると、元のBlender・背面画像・sidecarのsource SHAも追加検証する。通常テストはアーカイブなしで実行できる。GLB検証を省略しない。
 
