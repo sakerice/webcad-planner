@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "read_catalog.request.schema.json",
+  "title": "read_catalog request",
+  "description": "Current internal API contract. Catalogue IDs follow SceneCatalogue.cleanId; runtime membership, non-opening binding policy and physical compiler gates remain authoritative. Frozen 5fa5282 packets are unchanged.",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$",
+        "not": {
+          "enum": [
+            "__proto__",
+            "constructor",
+            "prototype"
+          ]
+        }
+      },
+      "maxItems": 64
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

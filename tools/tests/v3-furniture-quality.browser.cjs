@@ -1,0 +1,40 @@
+// Independent disposable Chrome profile. Synthetic structured source only: no image AI/gate/API.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/tmp/webcad-browser-check/node_modules/playwright');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const output=path.resolve(process.env.OUTPUT_DIR||'docs/quality-review/v3-furniture-browser');
+(async()=>{fs.mkdirSync(output,{recursive:true});const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});try{
+ const page=await browser.newPage({viewport:{width:1500,height:1100}}),errors=[],blocked=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+ await page.route('**/*',route=>{let u=new URL(route.request().url());if(u.hostname==='127.0.0.1'&&!u.pathname.startsWith('/api/'))return route.continue();blocked.push(u.origin+u.pathname);return route.abort();});
+ await page.goto(process.env.APP_URL||'http://127.0.0.1:65235/');await page.waitForFunction(()=>window.PlanImport&&window.StorageAdapter);
+ const preparation=await page.evaluate(()=>{
+  closePresetChoice();_defaultPlanPending=false;DATA={walls:[],rooms:[],items:[],heightDefaults:{modelVersion:2,floorThickness:180}};clearEditHistory();draw2d();
+  let label=document.createElement('div');label.id='synthetic-browser-test-label';label.style.cssText='position:fixed;bottom:8px;left:10px;background:#18334c;color:white;padding:8px;z-index:999999;pointer-events:none';label.textContent='構造化テスト用IR・2F家具確認／画像読み取り・AI未実行';document.body.appendChild(label);
+  const f=value=>({value,status:'observed',source:'synthetic structured 2F furniture survey'}),u=()=>({value:null,status:'unknown',unknownReason:'not-shown'}),models={'sofa':'fmp-Sofa01','dining-table':'original-table','kitchen-sink':'fmp-CabinetA_Sink','refrigerator':'fmp-Refrigerator01'},registry=PlanImport.sceneCatalogue();
+  let source={sceneVersion:3,units:'mm',coordinateSystem:'x-east-y-south-clockwise',annotations:[],walls:[],rooms:[{id:'synthetic-second-floor',floor:f(2),shape:f({kind:'rectUnion',rectangles:[{x:0,y:0,w:6500,d:4500}]}),boundaryBasis:f('clear-face'),name:f('構造化テスト用2F')}],openings:[],objects:Object.entries(models).map(([type,id],i)=>{let m=registry.get(id);return {id:'synthetic-object-'+i,objectType:f(type),semanticExtent:f(m.semanticExtent),placement:f({domain:'room',roomId:'synthetic-second-floor'}),sourceFootprint:f({center:{x:i%2?4700:1700,y:i<2?1200:3300},sizeMm:{w:m.w,d:m.d},axisX:{x:1,y:0}}),frontDirection:u(),heightMm:u()};}),siteRegions:[],buildingFootprints:[],bindings:[],connections:[]};
+  window.__v3FurnitureSource=source;window.__v3FurnitureRaw=JSON.stringify(source);openPlanImport();PlanImport.stageSceneIR(source,{materialization:'bounded-v3',pageScope:['synthetic-structured-ir-no-image']});return {source,models,before:serializeDataSnapshot(),v3ImageGate:window.SCENE_IR_V3_IMAGE_IMPORT===true};
+ });assert.equal(preparation.v3ImageGate,false);fs.writeFileSync(path.join(output,'synthetic-source.json'),JSON.stringify(preparation.source,null,2)+'\n');
+ const candidateEvidence=[];
+ for(const [i,[semantic,model]]of Object.entries(Object.entries(preparation.models))){
+  const group=()=>page.locator('details[data-scene-group="objects:synthetic-object-'+i+'"]');await group().evaluate(e=>e.open=true);
+  await group().locator('[data-scene-mapping]').click();const select=group().locator('[data-scene-catalogue]');candidateEvidence.push({semantic,model,options:await select.locator('option').evaluateAll(es=>es.map(e=>({value:e.value,text:e.textContent})))});
+  await select.selectOption(model);await group().locator('[data-scene-sizing]').selectOption('native');await group().locator('[data-scene-appearance]').selectOption('unspecified');await group().locator('[data-scene-mapping-confirm]').click();let state=await page.evaluate(()=>({count:PlanImport.state.result.sceneOptions.bindingDecisions.length,text:document.querySelector('.scene-mapping-editor')?.textContent}));if(state.count!==Number(i)+1){await page.screenshot({path:path.join(output,'failed-mapping.png')});fs.writeFileSync(path.join(output,'mapping-failure.json'),JSON.stringify(state,null,2));throw Error('Mapping confirmation failed '+JSON.stringify(state));}
+ }
+ await page.screenshot({path:path.join(output,'01-mapping-review.png')});
+ for(let attempts=0;attempts<100;attempts++){let checkbox=page.locator('input[data-scene-accept]:not(:checked):not(:disabled)').first();if(!await checkbox.count())break;const id=await checkbox.getAttribute('data-scene-accept');await checkbox.evaluate(e=>{e.closest('details').open=true;});await page.locator('input[data-scene-accept="'+id+'"]').check();if(attempts===99)throw Error('Review did not settle');}
+ await page.locator('#plan-import-apply').click();await page.waitForFunction(()=>DATA.items.length===4);
+ await page.locator('#save-btn').click();await page.waitForFunction(()=>!document.querySelector('#save-btn').classList.contains('saving'));
+ const downloadPromise=page.waitForEvent('download');await page.locator('button[onclick="exportPlan()"]').first().evaluate(e=>e.click());const download=await downloadPromise;await download.saveAs(path.join(output,'exported-plan.json'));
+ const applied=await page.evaluate(async()=>{
+  const snapshot=serializeDataSnapshot(),sourceUnchanged=JSON.stringify(window.__v3FurnitureSource)===window.__v3FurnitureRaw;
+  const stored=await StorageAdapter.load(),saved=JSON.stringify(stored)===snapshot;
+  undoAction();const undo=DATA.rooms.length===0&&DATA.items.length===0;redoAction();const redo=serializeDataSnapshot()===snapshot;
+  return {snapshot,sourceUnchanged,saved,undo,redo,items:DATA.items.map(i=>({id:i.id,type:i.type,floor:i.floor,w:i.w,d:i.d,x:i.x,y:i.y,rot:i.rot,baseRoom:i.baseRoom})),bindingCount:DATA.sceneReconstructionReports[0].reviewDecisions.bindingDecisions.length,reportSourceIdentical:JSON.stringify(DATA.sceneReconstructionReports[0].originalIR)===window.__v3FurnitureRaw};
+ });assert.equal(applied.sourceUnchanged,true);assert.equal(applied.reportSourceIdentical,true);assert.equal(applied.saved,true);assert.equal(applied.undo,true);assert.equal(applied.redo,true);assert.equal(applied.bindingCount,4);assert.ok(applied.items.every(i=>i.floor===2));
+ fs.writeFileSync(path.join(output,'applied-plan.json'),applied.snapshot+'\n');delete applied.snapshot;const exported=JSON.parse(fs.readFileSync(path.join(output,'exported-plan.json'),'utf8'));assert.deepEqual(exported.items.map(i=>i.type).sort(),applied.items.map(i=>i.type).sort());assert.equal(exported.sceneReconstructionReports[0].reviewDecisions.bindingDecisions.length,4);
+ await page.locator('#floor-sel').selectOption('2');await page.screenshot({path:path.join(output,'02-applied-2d.png')});await page.evaluate(()=>setView('3d-int'));
+ await page.waitForFunction(()=>!!ren&&!!sc3);await page.waitForTimeout(9000);await page.screenshot({path:path.join(output,'03-applied-3d.png')});
+ const render=await page.evaluate(()=>({renderer:!!ren,sceneChildren:sc3.children.length,modelLoading:Object.keys(_modelLoading).filter(k=>_modelLoading[k]),modelFailed:Object.keys(_modelFailed).filter(k=>_modelFailed[k]),renderCalls:ren.info.render.calls,triangles:ren.info.render.triangles}));
+ assert.equal(render.renderer,true);assert.deepEqual(render.modelFailed,[]);assert.deepEqual(errors,[]);
+ const result={syntheticStructuredSource:true,aiCalls:0,paidCalls:0,v3ImageGateEnabled:false,isolatedProfile:true,userTabsTouched:false,url:page.url(),candidateEvidence,jsonExportVerified:true,...applied,render,errors,blocked};fs.writeFileSync(path.join(output,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({saved:result.saved,jsonExportVerified:true,undo:result.undo,redo:result.redo,sourceUnchanged:result.sourceUnchanged,models:result.items.map(i=>i.type),render:result.render,errors:result.errors}));
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

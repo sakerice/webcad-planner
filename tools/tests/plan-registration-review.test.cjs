@@ -19,7 +19,7 @@ function field(h,selector){const e=selector.split(' ').reduce((scope,s)=>scope&&
 function confirmFloors(h){for(const f of [1,2,3])field(h,'details[data-building-floor="'+f+'"] button[data-building-confirm]').click();}
 function approve(h){confirmFloors(h);field(h,'input[data-building-partial]').click();}
 test('production controls require each floor review and explicit partial choice; Apply retains source/assumptions without guessed stairs or roofs',()=>{
- const h=setup(),before=JSON.stringify(h.body.sourceLocal);assert.equal(h.apply.disabled,true);assert.match(h.document.body.textContent,/階段・開口・屋根は未完成/);
+ const h=setup(),before=JSON.stringify(h.body.sourceLocal);assert.equal(h.apply.disabled,true);assert.match(h.document.body.textContent,/階接続・開口・屋根は未完成/);
  confirmFloors(h);assert.equal(h.apply.disabled,true);field(h,'input[data-building-partial]').click();assert.equal(h.apply.disabled,false);
  const heights=JSON.stringify(h.c.DATA.heightDefaults);h.apply.click();assert.equal(h.c.DATA.rooms.length>0,true);
  assert.equal(h.c.DATA.items.some(i=>/^stair/.test(i.type)||i.type==='roof'||i.type==='foundation'),false);

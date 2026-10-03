@@ -128,3 +128,38 @@ test('final validation rejects an ID collision introduced during staging without
   assert.equal(snapshot(c),before);
   assert.ok(!calls.some(x=>/shared|queue|draw2d/.test(x)));
 });
+
+// The native JSON button protects dirty work; comparison adds no separate import UI.
+test('declining valid JSON replacement keeps unsaved data, IDs and Undo/Redo',()=>{
+ const {c,readers,alerts,calls}=setup();c.DIRTY=true;c.confirm=()=>false;const before=snapshot(c);
+ c.doImport({files:['replacement'],value:'replacement.json'});
+ readers[0].onload({target:{result:JSON.stringify(plan())}});
+ assert.equal(snapshot(c),before);assert.equal(alerts.length,0);
+ assert.ok(!calls.some(x=>/shared|queue|draw2d/.test(x)));
+});
+
+test('native JSON replacement preserves supplied height defaults and cancellation preserves live heights',()=>{
+ const {c,readers}=setup();
+ const expanded=require('./app-source.cjs').appSource();
+ function actual(name){const start=expanded.indexOf('\nfunction '+name+'(')+1;const end=expanded.indexOf('\nfunction ',start+1);return expanded.slice(start,end);}
+ c.DEFAULT_WALL_H_MM=2400;c.WALL_H_MIN=1800;c.WALL_H_MAX=4000;c.DEFAULT_FLOOR_RAISE_MM=120;
+ vm.runInContext(actual('clampWallHeightMm')+'\n'+actual('resetHeightGlobalsForPlanLoad')+'\n'+actual('ensureHeightDefaults'),c);
+ c.DATA.heightDefaults={wallHeight:2688};c.ensureHeightDefaults();c.DIRTY=true;c.confirm=()=>false;
+ const replacement={...plan(),heightDefaults:{wallHeight:3120}};const before=snapshot(c);
+ c.doImport({files:['height'],value:'height.json'});readers[0].onload({target:{result:JSON.stringify(replacement)}});
+ assert.equal(snapshot(c),before);assert.equal(c.WALL_H,2688);
+ c.confirm=()=>true;c.doImport({files:['height'],value:'height.json'});readers[1].onload({target:{result:JSON.stringify(replacement)}});
+ assert.equal(c.WALL_H,3120);assert.equal(c.DATA.heightDefaults.wallHeight,3120);
+});
+
+test('pending JSON reads cannot cross installation, close, cancellation or a newer import',()=>{
+ for(const reason of ['install','close','cancel','newer','during-confirm']){
+  const {c,readers}=setup();c.DIRTY=true;const before=snapshot(c);c.confirm=()=>{if(reason==='during-confirm')vm.runInContext('++_jsonImportRequest',c);return true;};
+  c.doImport({files:['old'],value:'old.json'});
+  if(reason==='cancel')c.doImport({files:[]});
+  else if(reason==='newer')c.doImport({files:['new'],value:'new.json'});
+  else if(reason!=='during-confirm')vm.runInContext('++_jsonImportRequest',c);
+  readers[0].onload({target:{result:JSON.stringify(plan())}});assert.equal(snapshot(c),before,reason);
+  if(reason==='newer'){readers[1].onload({target:{result:JSON.stringify({...plan(),items:[]})}});assert.equal(c.DATA.items.length,0);}
+ }
+});

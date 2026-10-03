@@ -257,3 +257,33 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #building-registration-notice[hidden] { display:none; }
 #building-registration-notice summary { cursor:pointer; font-weight:600; }
 #building-registration-notice-detail { margin-top:8px; white-space:pre-wrap; line-height:1.6; }
+
+/* Comparison uses the existing toolbar controls/tokens; child editors own all plan actions. */
+.editor-pane #compare-launch,.editor-pane #toolbar>.brand-mark,.editor-pane #toolbar>.tsep:first-of-type{display:none!important}
+.editor-pane #toolbar .tbtn.mob-hide{display:inline-flex!important}
+.parallel-open body>#toolbar>.brand-mark,.parallel-open .offline-preview-banner{display:none}
+.parallel-editors{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#f2f4f7;color:var(--hp-text)}
+.parallel-editors[hidden]{display:none}
+.parallel-heading,.parallel-controls{display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 12px;background:#fff;box-shadow:var(--hp-shadow-soft);border-radius:24px}
+.parallel-heading [data-parallel-close]{margin-left:auto}
+.parallel-heading .brand-mark{flex-shrink:0}
+.parallel-local-notice,[data-parallel-status]{font-size:11px;color:var(--hp-muted)}
+.parallel-controls{flex-wrap:wrap}
+.parallel-controls select,.parallel-pane header select{min-height:40px;min-width:0;padding:6px 12px;border:0;border-radius:var(--hp-control-radius);background:#f5f6f3;color:var(--hp-text);font:inherit;font-size:12px}
+.parallel-editors .tbtn{min-height:40px;border:0;border-radius:var(--hp-control-radius);box-shadow:none!important}
+.parallel-recovery summary{margin:0;font-size:12px}
+[data-parallel-status]{margin:6px 18px}
+.parallel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex:1;min-height:0;gap:8px;padding:8px 12px}
+.parallel-pane{display:flex;min-width:0;min-height:0;flex-direction:column;background:#fff;border-radius:24px;overflow:hidden;box-shadow:var(--hp-shadow)}
+.parallel-pane header{padding:6px;display:flex}
+.parallel-pane header select{flex:1;width:auto;background:#fff}
+.parallel-pane-remove{flex:0 0 40px;min-height:40px;font-size:22px;padding:0;border-radius:var(--hp-control-radius)}
+.parallel-pane iframe{width:100%;flex:1;border:0;min-height:0}
+.parallel-editors button:disabled{opacity:.5;cursor:default}
+@media(max-width:768px){.parallel-heading{flex-wrap:wrap}.parallel-local-notice{display:none}.parallel-controls{max-height:30dvh;overflow:auto}.parallel-grid{gap:6px;padding:6px}.parallel-heading,.parallel-controls{margin-left:6px;margin-right:6px}}
+
+/* Preserve the native disconnected state against general button display rules. */
+#toolbar #collab-indicator:not(.show){display:none!important}
+
+/* Keep the comparison entry above the native 3D elevation controls. */
+body:has(#elev-snap-fab.show) #compare-launch{bottom:126px}

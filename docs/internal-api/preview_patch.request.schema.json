@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "preview_patch.request.schema.json",
+  "title": "preview_patch request",
+  "description": "Current internal API contract. Catalogue IDs follow SceneCatalogue.cleanId; runtime membership, non-opening binding policy and physical compiler gates remain authoritative. Frozen 5fa5282 packets are unchanged.",
+  "type": "object",
+  "properties": {
+    "planId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+    },
+    "baseRevision": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "displayBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sourceEntityId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+          },
+          "catalogId": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$",
+                "not": {
+                  "enum": [
+                    "__proto__",
+                    "constructor",
+                    "prototype"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sizingPolicy": {
+            "enum": [
+              "native",
+              "fit-source"
+            ]
+          },
+          "appearanceMode": {
+            "enum": [
+              "unspecified",
+              "match-diagram-appearance"
+            ]
+          }
+        },
+        "required": [
+          "sourceEntityId",
+          "catalogId",
+          "sizingPolicy",
+          "appearanceMode"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 32
+    },
+    "selectedObjectIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+      },
+      "maxItems": 32,
+      "uniqueItems": true
+    },
+    "selectedEntityIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+      },
+      "maxItems": 32,
+      "uniqueItems": true,
+      "description": "Optional explicit raw walls/rooms/openings. Existing createPartialSelection derives dependency closure. Omit for the legacy object-only scope. No duplicates and combined selection must be nonempty."
+    },
+    "incompleteConfirmed": {
+      "const": true
+    },
+    "displayOverrides": {
+      "type": "array",
+      "maxItems": 1,
+      "description": "Complete replacement for this preview; omit or [] to use editor defaults. Display-only, never measured or approved. Target exactly one explicitly selected existing non-opening-host wall.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sourceEntityId": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+          },
+          "field": {
+            "const": "wallHeight"
+          },
+          "valueMm": {
+            "type": "number",
+            "minimum": 300,
+            "maximum": 6000
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "origin": {
+            "const": "explicit-display-assumption"
+          },
+          "sourceHash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "baseRevision": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "heightContractVersion": {
+            "const": 1
+          }
+        },
+        "required": [
+          "sourceEntityId",
+          "field",
+          "valueMm",
+          "source",
+          "reason",
+          "origin",
+          "sourceHash",
+          "baseRevision",
+          "heightContractVersion"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "planId",
+    "baseRevision",
+    "displayBindings",
+    "selectedObjectIds",
+    "incompleteConfirmed"
+  ],
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "properties": {
+        "selectedObjectIds": {
+          "minItems": 1
+        }
+      }
+    },
+    {
+      "required": [
+        "selectedEntityIds"
+      ],
+      "properties": {
+        "selectedEntityIds": {
+          "minItems": 1
+        }
+      }
+    }
+  ]
+}
