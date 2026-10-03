@@ -280,3 +280,44 @@ test('a new legacy read retires an open mapping editor and its stale controls be
  assert.equal(result(h),current);assert.equal(h.c.PlanImport.state.mappingEditor,null);
  h.apply.click();assert.equal(h.c.HISTORY.length,1);assert.equal(h.c.DATA.rooms.length,1);assert.equal(h.c.DATA.rooms[0].n,'New legacy room');assert.equal(h.c.DATA.items.length,0);assert.equal(h.c.DATA.sceneReconstructionReports,undefined);
 });
+
+test('frozen source full blockers and evidence remain reachable in partial review without changing approvals',()=>{
+ const source=JSON.parse(fs.readFileSync(path.join(__dirname,'../../local-preview/frozen-page-2.json'),'utf8'));
+ const h=setup(source),opts=clone(result(h).sceneOptions);
+ opts.partialSelection=SceneV3.createPartialSelection(source,[],true,['wall-west']);
+ h.c.PlanImport.stageSceneIR(source,opts);
+ const body=result(h),before=JSON.stringify(body.sceneOptions),data=JSON.stringify(h.c.DATA);
+ assert.equal(body.sceneCompilation.diagnostics.some(d=>d.code==='unsupported_opening_mechanism'),false);
+ assert.ok(body.sceneFullCompilation.diagnostics.some(d=>d.code==='unsupported_opening_mechanism'));
+ assert.match(control(h,'[data-scene-full-errors]').textContent,/unsupported_stair_reconstruction/);
+ assert.match(control(h,'[data-scene-full-status]').textContent,/全体適用: 不可/);
+ const fullStair=body.sceneFullCompilation.reviewGroups.find(g=>g.diagnostics.some(d=>d.code==='unsupported_stair_reconstruction'));
+ const stairGroup=group(h,fullStair.collection,fullStair.entityId);
+ assert.ok(stairGroup.textContent.includes(fullStair.evidence[0].path),'Deferred groups keep actual source evidence');
+ assert.equal(stairGroup.querySelector('[data-scene-omit]'),null,'Stairs cannot be waived');
+ const search=control(h,'[data-scene-review-search]');search.value='unsupported_stair_reconstruction';search.dispatchEvent(new ReviewEvent('input'));
+ assert.equal(stairGroup.hidden,false);assert.equal(group(h,'walls','wall-west').hidden,true);
+ assert.equal(JSON.stringify(body.sceneOptions),before);assert.equal(JSON.stringify(h.c.DATA),data);
+ assert.equal(JSON.stringify(body.sceneIR),h.raw);assert.deepEqual(clone(body.extraction),h.extraction);
+ const stale=search;
+ h.c.PlanImport.stageSceneIR(source,opts);
+ assert.equal(control(h,'[data-scene-review-search]').value,'unsupported_stair_reconstruction');
+ const text=control(h,'[data-scene-filter-count]').textContent;stale.value='never-match';stale.dispatchEvent(new ReviewEvent('input'));
+ assert.equal(control(h,'[data-scene-filter-count]').textContent,text);
+ const freshSearch=control(h,'[data-scene-review-search]');freshSearch.value='';freshSearch.dispatchEvent(new ReviewEvent('input'));
+ const filter=control(h,'[data-scene-review-filter]');filter.value='unresolved';filter.dispatchEvent(new ReviewEvent('change'));
+ assert.equal(group(h,'walls','wall-west').hidden,true);assert.equal(group(h,fullStair.collection,fullStair.entityId).hidden,false);
+ assert.equal(result(h).sceneFullCompilation.canApply,false);assertUnchanged(h);
+});
+
+test('full diagnostic refresh follows explicit room mapping while frozen raw and stair blockers remain intact',()=>{
+ const source=JSON.parse(fs.readFileSync(path.join(__dirname,'../../local-preview/frozen-page-2.json'),'utf8'));
+ const h=setup(source),opts=clone(result(h).sceneOptions);opts.partialSelection=SceneV3.createPartialSelection(source,[],true,['wall-west']);
+ h.c.PlanImport.stageSceneIR(source,opts);
+ assert.ok(result(h).sceneFullCompilation.diagnostics.some(d=>d.path==='rooms[0].appearance'&&d.code==='appearance_mapping_required'));
+ mapSurface(h,'rooms','room-ldk');
+ assert.equal(result(h).sceneFullCompilation.diagnostics.some(d=>d.path==='rooms[0].appearance'&&d.code==='appearance_mapping_required'),false);
+ assert.ok(result(h).sceneFullCompilation.diagnostics.some(d=>d.code==='unsupported_opening_mechanism'));
+ assert.ok(result(h).sceneFullCompilation.diagnostics.some(d=>d.code==='unsupported_stair_reconstruction'));
+ assert.equal(JSON.stringify(result(h).sceneIR),h.raw);assert.deepEqual(clone(result(h).extraction),h.extraction);assertUnchanged(h);
+});

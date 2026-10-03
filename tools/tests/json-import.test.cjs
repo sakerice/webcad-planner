@@ -163,3 +163,6 @@ test('pending JSON reads cannot cross installation, close, cancellation or a new
   if(reason==='newer'){readers[1].onload({target:{result:JSON.stringify({...plan(),items:[]})}});assert.equal(c.DATA.items.length,0);}
  }
 });
+test('standard JSON reader routes source review separately and discards reads across newer review decisions',()=>{
+ for(const stale of [false,true]){const {c,readers}=setup();let imported=0;c.PlanImport={state:{version:1,requestVersion:1,result:{original:true}}};c.SceneReviewFlow={isReviewData:()=>true,mount(){},importText(){imported++;}};const before=snapshot(c);c.doImport({files:[{name:'scene.json'}],value:'scene.json'});if(stale)c.PlanImport.state.requestVersion++;readers[0].onload({target:{result:'{"sceneVersion":3}'}});assert.equal(imported,stale?0:1);assert.equal(snapshot(c),before);}
+});

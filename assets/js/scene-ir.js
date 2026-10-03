@@ -211,7 +211,7 @@
       if(id!==undefined&&!m)issue('unknown_catalogue_id',p+'.catalogId',registry.resolveAlias(id)?'Legacy alias would silently substitute '+registry.resolveAlias(id)+'; select an exact catalogue ID':'Exact catalogue ID is not registered');
       if(m&&m.openingOnly)issue('opening_as_furniture',p+'.catalogId','Use the hosted opening compiler');
       var host=fact(e,'hostRoomId',p,function(v){return v===null||Catalogue.cleanId(v);},true),extent=fact(e,'semanticExtent',p,function(v){return ['asset','individual-fixture','room-assembly','symbol-only'].indexOf(v)>=0;},true);
-      if(m&&extent&&extent!==m.semanticExtent)issue('asset_semantic_extent',p+'.semanticExtent','Source symbol extent does not match the selected asset ('+m.semanticExtent+')');
+      if(m&&extent&&!Catalogue.supportsSemanticExtent(m,extent))issue('asset_semantic_extent',p+'.semanticExtent','Source symbol extent does not match the selected asset ('+m.semanticExtent+')');
       var it=Object.assign({id:e.id,type:id,floor:f,rot:rot,modelFacingVersion:1,sceneImportVersion:2},sz?{w:sz.w,d:sz.d}:{});
       if(c&&sz){it.x=c.x-sz.w/2;it.y=c.y-sz.d/2;}
       ['flipX','flipY'].forEach(function(k){optional(e,k,p,function(v){return typeof v==='boolean';},it);});

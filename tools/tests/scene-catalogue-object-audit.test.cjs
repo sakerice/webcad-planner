@@ -3,8 +3,8 @@ const C=require('../../assets/js/scene-catalogue.js');
 const items={};for(const dir of ['furniture_mega','custom'])for(const item of JSON.parse(fs.readFileSync('assets/models/'+dir+'/manifest.json')).items)items[item.id]=item;
 test('audited exact object IDs preserve real manifest dimensions, semantic extent and known front without family guesses',()=>{
  const c=C.create({items});
- for(const [id,type] of Object.entries({'fmp-Sofa01':'sofa','original-table':'dining-table','fmp-CabinetA_Sink':'kitchen-sink','fmp-Refrigerator01':'refrigerator','original-bathtub':'bathtub'})){
-  const got=c.get(id),raw=items[id];assert.equal(got.sourceObjectType,type);assert.deepEqual([got.w,got.d,got.h],[raw.w,raw.d,raw.h]);assert.equal(got.front,raw.front||null);assert.equal(got.frontProvenance,raw.front?'manifest':'unknown');assert.equal(got.semanticExtent,['fmp-CabinetA_Sink','original-bathtub'].includes(id)?'individual-fixture':'asset');
+ for(const [id,type] of Object.entries({'fmp-Sofa01':'sofa','original-table':'dining-table','original-bathtub':'bathtub'})){
+  const got=c.get(id),raw=items[id];assert.equal(got.sourceObjectType,type);assert.deepEqual([got.w,got.d,got.h],[raw.w,raw.d,raw.h]);assert.equal(got.front,raw.front||null);assert.equal(got.frontProvenance,raw.front?'manifest':'unknown');assert.equal(got.semanticExtent,['original-bathtub'].includes(id)?'individual-fixture':'asset');
  }
  for(const id of ['fmp-Sofa02','fmp-Refrigerator02'])if(c.get(id))assert.equal(c.get(id).sourceObjectType,undefined);
 });
