@@ -1,0 +1,664 @@
+{
+  "runtime": "Chromium software WebGL; standalone review, not editor integration",
+  "loadAndRenderMs": 1819,
+  "results": [
+    {
+      "id": "rpg-mansion-chair-01",
+      "dimensionsXYZmm": [
+        519.9999809265137,
+        1049.9999523162842,
+        550.000011920929
+      ],
+      "triangles": 1668,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-desk-01",
+      "dimensionsXYZmm": [
+        1399.999976158142,
+        786.0000133514404,
+        740.0000095367432
+      ],
+      "triangles": 1596,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-bookcase-01",
+      "dimensionsXYZmm": [
+        1100.000023841858,
+        2000,
+        379.9999952316284
+      ],
+      "triangles": 3576,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-candlestick-01",
+      "dimensionsXYZmm": [
+        180.00000715255737,
+        412.00000047683716,
+        180.00000715255737
+      ],
+      "triangles": 532,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-frame-01",
+      "dimensionsXYZmm": [
+        660.0000262260437,
+        899.9999761581421,
+        75.00000298023224
+      ],
+      "triangles": 584,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-chest-01",
+      "dimensionsXYZmm": [
+        819.9999928474426,
+        535.0000262260437,
+        490.00000953674316
+      ],
+      "triangles": 752,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-rug-01",
+      "dimensionsXYZmm": [
+        1399.999976158142,
+        9.999999776482582,
+        2000
+      ],
+      "triangles": 128,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-side-table-01",
+      "dimensionsXYZmm": [
+        639.9999856948853,
+        637.0000243186951,
+        639.9999856948853
+      ],
+      "triangles": 784,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-mantel-clock-01",
+      "dimensionsXYZmm": [
+        360.00001430511475,
+        430.0000071525574,
+        204.99999821186066
+      ],
+      "triangles": 1284,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-letter-01",
+      "dimensionsXYZmm": [
+        219.9999988079071,
+        12.000000104308128,
+        144.99999582767487
+      ],
+      "triangles": 300,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-key-01",
+      "dimensionsXYZmm": [
+        56.0000017285347,
+        8.00000037997961,
+        129.99999523162842
+      ],
+      "triangles": 292,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-fallen-chair-01",
+      "dimensionsXYZmm": [
+        519.9999809265137,
+        550.000011920929,
+        1049.9999523162842
+      ],
+      "triangles": 1668,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-glass-shards-01",
+      "dimensionsXYZmm": [
+        569.9999928474426,
+        4.000000189989805,
+        500
+      ],
+      "triangles": 40,
+      "uv": true,
+      "boundsCorrect": true
+    },
+    {
+      "id": "rpg-mansion-clue-stain-01",
+      "dimensionsXYZmm": [
+        589.9999737739563,
+        1.0000000474974513,
+        330.00001311302185
+      ],
+      "triangles": 276,
+      "uv": true,
+      "boundsCorrect": true
+    }
+  ],
+  "manifest": {
+    "schemaVersion": 1,
+    "id": "rpg-mansion",
+    "name": "RPGアセット",
+    "version": "0.1.0",
+    "status": "standalone-review-not-integrated",
+    "namespace": "rpg-mansion-",
+    "units": {
+      "manifest": "millimetres",
+      "model": "metres"
+    },
+    "axes": {
+      "front": "+Z",
+      "up": "+Y",
+      "origin": "bottom-centre"
+    },
+    "baseCommit": "6c5fe1819ba388bcfac8055cc94744bd7831d734",
+    "recoveryC072": "not-restored",
+    "provenance": {
+      "method": "Original procedural Blender modelling",
+      "externalAssets": [],
+      "sharedHelpers": [
+        "tools/blender/model_kit.py",
+        "tools/blender/build_decor.py",
+        "tools/blender/shape_kit.py",
+        "tools/blender/exterior_build.py"
+      ]
+    },
+    "items": [
+      {
+        "id": "rpg-mansion-chair-01",
+        "name": "洋館の椅子",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "椅子",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chair-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-chair-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-chair-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-chair-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-chair-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-chair-01-validation.json",
+        "w": 520,
+        "d": 550,
+        "h": 1050,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#672e37"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-desk-01",
+        "name": "革張りの書斎机",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "机",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-desk-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-desk-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-desk-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-desk-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-desk-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-desk-01-validation.json",
+        "w": 1400,
+        "d": 740,
+        "h": 786,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#25494b"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-bookcase-01",
+        "name": "書物入りの本棚",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "収納",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bookcase-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bookcase-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bookcase-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-bookcase-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-bookcase-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-bookcase-01-validation.json",
+        "w": 1100,
+        "d": 380,
+        "h": 2000,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#672e37"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#704b32"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-candlestick-01",
+        "name": "真鍮の燭台",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "小物",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-candlestick-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-candlestick-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-candlestick-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01-validation.json",
+        "w": 180,
+        "d": 180,
+        "h": 412,
+        "defaultElevation": 750,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          }
+        ],
+        "placementHint": "surface",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-frame-01",
+        "name": "月景の額",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "壁装飾",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-frame-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-frame-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-frame-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-frame-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-frame-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-frame-01-validation.json",
+        "w": 660,
+        "d": 75,
+        "h": 900,
+        "defaultElevation": 900,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#25494b"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "wall",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-chest-01",
+        "name": "鍵付き木箱",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "収納",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-chest-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-chest-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-chest-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-chest-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-chest-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-chest-01-validation.json",
+        "w": 820,
+        "d": 490,
+        "h": 535,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-rug-01",
+        "name": "深紅の敷物",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "敷物",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rug-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rug-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rug-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01-validation.json",
+        "w": 1400,
+        "d": 2000,
+        "h": 10,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#672e37"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-side-table-01",
+        "name": "丸い飾り台",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "机",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-side-table-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-side-table-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-side-table-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-side-table-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-side-table-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-side-table-01-validation.json",
+        "w": 640,
+        "d": 640,
+        "h": 637,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-mantel-clock-01",
+        "name": "置き時計",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "小物",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mantel-clock-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mantel-clock-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mantel-clock-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01-validation.json",
+        "w": 360,
+        "d": 205,
+        "h": 430,
+        "defaultElevation": 750,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#704b32"
+          }
+        ],
+        "placementHint": "surface",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-letter-01",
+        "name": "封蝋付きの手紙",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "探索小物",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-letter-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01-validation.json",
+        "w": 220,
+        "d": 145,
+        "h": 12,
+        "defaultElevation": 750,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          }
+        ],
+        "placementHint": "surface",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-key-01",
+        "name": "古い真鍮の鍵",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "探索小物",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-key-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-key-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-key-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-key-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-key-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-key-01-validation.json",
+        "w": 56,
+        "d": 130,
+        "h": 8,
+        "defaultElevation": 750,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          }
+        ],
+        "placementHint": "surface",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-fallen-chair-01",
+        "name": "倒れた洋館の椅子",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "事件跡",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-fallen-chair-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-fallen-chair-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-fallen-chair-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-fallen-chair-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-fallen-chair-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-fallen-chair-01-validation.json",
+        "w": 520,
+        "d": 1050,
+        "h": 550,
+        "defaultElevation": 0,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [
+          {
+            "key": "fabric",
+            "label": "布・革",
+            "default": "#672e37"
+          },
+          {
+            "key": "metal",
+            "label": "金属",
+            "default": "#b29455"
+          },
+          {
+            "key": "wood",
+            "label": "木部",
+            "default": "#493025"
+          }
+        ],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-glass-shards-01",
+        "name": "割れたガラスの跡",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "事件跡",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-glass-shards-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glass-shards-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glass-shards-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-glass-shards-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-glass-shards-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-glass-shards-01-validation.json",
+        "w": 570,
+        "d": 500,
+        "h": 4,
+        "defaultElevation": 1,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [],
+        "placementHint": "floor",
+        "previewVersion": 1
+      },
+      {
+        "id": "rpg-mansion-clue-stain-01",
+        "name": "非写実的な血痕・手掛かり",
+        "packId": "rpg-mansion",
+        "group": "家具",
+        "category": "事件跡",
+        "sourceFolder": "BlenderRpgMansion",
+        "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-clue-stain-01.glb",
+        "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-clue-stain-01-thumb.png",
+        "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-clue-stain-01-top.png",
+        "rear": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01-rear.png",
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01.blend",
+        "validation": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01-validation.json",
+        "w": 590,
+        "d": 330,
+        "h": 1,
+        "defaultElevation": 1,
+        "provenance": "original",
+        "builder": "tools/blender/rpg_mansion/build.py",
+        "finishChannels": [],
+        "placementHint": "floor",
+        "previewVersion": 1
+      }
+    ]
+  },
+  "renderer": {
+    "frame": 1,
+    "calls": 48,
+    "triangles": 13480,
+    "points": 0,
+    "lines": 0
+  },
+  "ready": true,
+  "errors": []
+}
