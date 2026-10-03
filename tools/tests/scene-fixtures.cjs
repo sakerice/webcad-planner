@@ -9,7 +9,7 @@ function observed(value){return {value,status:'observed',source:'synthetic-fixtu
 function inferred(value,reason='Reviewable catalogue choice'){return {value,status:'inferred',source:'synthetic-fixture:symbol',reason};}
 function unknown(){return {value:null,status:'unknown'};}
 function runtime(){
- const c=vm.createContext({console,Math,Number,Object,Array,String,Boolean,JSON,isFinite,SceneCatalogue,SceneIR,SceneOpeningGeometry,
+ const c=vm.createContext({console,Math,Number,Object,Array,String,Boolean,JSON,isFinite,SceneCatalogue,SceneIR,SceneOpeningGeometry,HeightModel:require('../../assets/js/height-model.js'),
    FMP_ITEMS:{},CATALOGUE_TAGS:JSON.parse(read('assets/models/tags.json')),CATALOGUE_FINISHES:JSON.parse(read('assets/models/finishes.json')),
    nextId:1000,DATA:{walls:[],rooms:[],items:[],heightDefaults:{modelVersion:2,floorThickness:180}},HISTORY:[],
    WALL_H:2400,U:.001,ST:{floor:1},ICOLORS:{car:'#d0d0dc'},

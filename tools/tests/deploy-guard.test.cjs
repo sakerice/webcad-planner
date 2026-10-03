@@ -28,39 +28,45 @@ test('build.sh は、ビルドするだけで本番に出さない', () => {
   const lines = src.split('\n').filter((l) => !l.trim().startsWith('#'));
   const deploys = lines.filter((l) => /wrangler\s+(deploy|versions)/.test(l));
   assert.equal(deploys.length, 1, `配信の行が ${deploys.length} 本ある（1本だけのはず）`);
-  assert.match(src, /if \[ -n "\$\{WORKERS_CI:-\}" \] && \[ "\$\{SKIP_DEPLOY:-0\}" != "1" \]/,
-    '配信が WORKERS_CI の中に閉じていない');
+  assert.match(src, /\[ "\$\{WORKERS_CI:-\}" = "1" \]/, 'CI の値が厳密でない');
+  assert.match(src, /\[ "\$\{WORKERS_CI_BRANCH:-\}" = "main" \]/, 'source main の一致が無い');
+  assert.match(src, /if workers_ci_production_deploy_allowed; then/, '配信がfail-closedの門を通っていない');
   // 出さないことを、実行した人に伝えていること
   assert.match(src, /本番には出していません/, 'ビルドだけだと伝えていない');
   assert.match(src, /tools\/deploy\.sh/, '本番へ出す手順を案内していない');
 });
 
-test('build.sh は、CI を名乗らないかぎり配信しない（実際に走らせる）', () => {
-  // 3通りを走らせて、配信の行に達するかどうかだけを見る。
-  // wrangler は実際には呼ばせない——PATH の先頭に偽物を置く。
-  const bin = mkdtempSync(join(tmpdir(), 'fakebin-'));
-  const flag = join(bin, 'called');
-  writeFileSync(join(bin, 'npx'), `#!/bin/bash\necho "$@" >> "${flag}"\n`, { mode: 0o755 });
-
-  const run = (env) => {
-    rmSync(flag, { force: true });
-    const out = spawnSync('bash', ['build.sh'], {
-      cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, ...env, PATH: `${bin}:${process.env.PATH}` },
-    });
-    assert.equal(out.status, 0, `build.sh が落ちた: ${out.stderr}`);
-    return existsSync(flag) ? readFileSync(flag, 'utf8') : '';
-  };
-
-  // 手元・エージェント: 配信しない
-  assert.equal(run({}), '', '手元の実行で配信しようとした');
-  // CI のビルド段階: 配信しない（dist/ を作らせるだけの呼び出し）
-  assert.equal(run({ WORKERS_CI: '1', SKIP_DEPLOY: '1' }), '', 'ビルド段階で配信しようとした');
-  // CI の配信段階: 配信する（ここを塞ぐと main にマージしても本番が更新されない）
-  assert.match(run({ WORKERS_CI: '1' }), /wrangler deploy/, 'CI からの配信が止まっている');
-
-  rmSync(bin, { recursive: true, force: true });
-});
+// Actual build.sh control flow in an empty sandbox. Fixed PATH never reaches real npx.
+function stubbedBuild(run) {
+  const dir=mkdtempSync(join(tmpdir(),'build-guard-stub-')),bin=join(dir,'bin'),flag=join(dir,'deploy-calls');
+  require('node:fs').mkdirSync(bin);writeFileSync(join(dir,'build.sh'),read('build.sh'));
+  for(const name of ['node','python3','cp','mkdir','rm','ls','du','find'])writeFileSync(join(bin,name),'#!/bin/sh\nexit 0\n',{mode:0o755});
+  writeFileSync(join(bin,'npx'),'#!/bin/sh\nprintf "%s\\n" "$*" >> "$TASK_BUILD_DEPLOY_CALLS"\nexit "${TASK_BUILD_NPX_EXIT:-0}"\n',{mode:0o755});
+  function invoke(values={}) {
+    rmSync(flag,{force:true});
+    const result=spawnSync('/bin/bash',['build.sh'],{cwd:dir,encoding:'utf8',stdio:['ignore','pipe','pipe'],env:{PATH:bin+':/usr/bin:/bin',LANG:'C',TASK_BUILD_DEPLOY_CALLS:flag,...values}});
+    return {...result,calls:existsSync(flag)?readFileSync(flag,'utf8').trim().split('\n'):[]};
+  }
+  try{run(invoke);}finally{rmSync(dir,{recursive:true,force:true});}
+}
+test('actual build flow refuses missing/feature/typo CI and unknown skip values without real deployment',()=>stubbedBuild(run=>{
+  const main={WORKERS_CI:'1',WORKERS_CI_BRANCH:'main'};
+  const denied=[{}, {WORKERS_CI:'1'}, {WORKERS_CI:'1',WORKERS_CI_BRANCH:'feature'}, {WORKERS_CI:'1',WORKERS_CI_BRANCH:'Main'}, {WORKERS_CI:'1',WORKERS_CI_BRANCH:'refs/heads/main'}, {WORKERS_CI:'0',WORKERS_CI_BRANCH:'main'}, {WORKERS_CI:'true',WORKERS_CI_BRANCH:'main'}, {WORKERS_CI:'1',GITHUB_BASE_REF:'main'}, ...['1','','true','2','false','unknown'].map(SKIP_DEPLOY=>({...main,SKIP_DEPLOY}))];
+  for(const values of denied){const r=run(values);assert.equal(r.status,0,JSON.stringify(values));assert.deepEqual(r.calls,[],JSON.stringify(values));}
+}));
+test('provider branch contradictions and tag refs cannot override the exact Workers source branch',()=>stubbedBuild(run=>{
+  const main={WORKERS_CI:'1',WORKERS_CI_BRANCH:'main'};
+  for(const key of ['CF_PAGES_BRANCH','GITHUB_REF_NAME','GITHUB_HEAD_REF','GITHUB_BASE_REF','CI_COMMIT_BRANCH','CI_COMMIT_REF_NAME','BITBUCKET_BRANCH','VERCEL_GIT_COMMIT_REF']){const r=run({...main,[key]:'feature'});assert.equal(r.status,0);assert.deepEqual(r.calls,[],key);}
+  for(const GITHUB_REF of ['refs/heads/feature','refs/tags/main'])assert.deepEqual(run({...main,GITHUB_REF}).calls,[]);
+  assert.deepEqual(run({...main,CI_COMMIT_TAG:'main'}).calls,[]);
+}));
+test('only exact Workers main and unset/zero skip reach one fixed-stub wrangler deploy',()=>stubbedBuild(run=>{
+  const main={WORKERS_CI:'1',WORKERS_CI_BRANCH:'main'};
+  for(const values of [main,{...main,SKIP_DEPLOY:'0'},{...main,SKIP_DEPLOY:'0',CF_PAGES_BRANCH:'main',GITHUB_REF_NAME:'main',GITHUB_REF:'refs/heads/main'}]){const r=run(values);assert.equal(r.status,0);assert.deepEqual(r.calls,['wrangler deploy']);}
+}));
+test('actual main deployment stub failure propagates its exit status without retry',()=>stubbedBuild(run=>{
+  const r=run({WORKERS_CI:'1',WORKERS_CI_BRANCH:'main',TASK_BUILD_NPX_EXIT:'23'});assert.equal(r.status,23);assert.deepEqual(r.calls,['wrangler deploy']);
+}));
 
 test('Workers Builds のビルドコマンドは、これまでどおり通る', () => {
   // wrangler.toml の [build] command が build.sh を呼んでいること。

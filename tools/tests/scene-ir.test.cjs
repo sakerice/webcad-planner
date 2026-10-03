@@ -92,7 +92,7 @@ test('actual mkItem staging/apply/undo preserves existing work, host/baseRoom ID
 
 test('Apply revalidates stale preview, refuses incompatible height changes and cannot auto-flip strict sliders',()=>{
  const c=runtime();c.PlanImport.stageSceneIR(fixture());const before=JSON.stringify(c.DATA);c.DATA.heightDefaults.modelVersion=1;c.applyPlanImport();assert.equal(c.DATA.items.length,0);assert.equal(c.HISTORY.length,0);
- assert.match(read('assets/js/plan-import.js'),/if \(!sceneCompilation && typeof orientSlideInDoorsToWalls/);
+ assert.doesNotMatch(read('assets/js/plan-import.js'),/orientSlideInDoorsToWalls\(read\.items\)/);
 });
 
 test('raw PlanFinish room analysis uses source centers without adding half dimensions',()=>{

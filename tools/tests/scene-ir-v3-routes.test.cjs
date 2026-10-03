@@ -272,3 +272,7 @@ test('v3 uses actual IP quota admission: one page is charged once and exhausted 
   assert.equal(result.status, 200); assert.equal(f.calls.length, 2);
   assert.equal([...values.values()].reduce((a, b) => a + b, 0), 20);
 });
+
+test('expired completed packet preserves persisted raw bytes and does not poll provider or consume quota',async()=>{
+ const f=fixture(),begun=await start(f);const done=await call('plan-result',{jobs:begun.jobs,extractionContract:V3},f);assert.equal(done.status,200);const key=[...f.records.keys()][0],record=f.record();assert.ok(record.rawResponse);record.contract.freezeSha256='prior-frozen-packet';const stored=JSON.stringify(record);f.records.set(key,stored);const calls=f.calls.length,quota=f.quotaCalls.length;const r=await call('plan-result',{jobs:begun.jobs,extractionContract:V3},f);assert.equal(r.status,409);assert.equal(r.body.error,'scene_ir_v3_job_mismatch');assert.equal(f.records.get(key),stored);assert.equal(f.record().rawResponse,record.rawResponse);assert.equal(f.calls.length,calls);assert.equal(f.quotaCalls.length,quota);assert.equal(r.body.rawResponse,undefined);
+});

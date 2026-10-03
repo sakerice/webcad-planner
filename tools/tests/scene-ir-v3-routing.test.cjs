@@ -68,7 +68,7 @@ test('CommonJS and browser SceneIR dispatch only numeric v3 to the source compil
       assert.equal(result.canApply, false);
     }
     assert.equal(calls.length, 2);
-    if (commonJS) assert.deepEqual(imports, ['./scene-catalogue.js', './scene-opening-geometry.js', './scene-ir-v3.js']);
+    if (commonJS) assert.deepEqual(imports, ['./scene-catalogue.js', './scene-opening-geometry.js', './scene-ir-v3.js', './height-model.js']);
   }
 });
 

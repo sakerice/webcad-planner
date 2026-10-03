@@ -186,6 +186,9 @@
     if(s.mechanism==='swing' && ['door-swing','door-swing-s','door-front'].indexOf(spec.kind)>=0){
       var sign=parallelSign(s.closedAxis,frame.u), side=parallelSign(spec.swingSide,frame.n);
       if(!point(s.pivot)||!sign||!side||!finite(s.angleDeg)||s.angleDeg<=0||s.angleDeg>180){fail('invalid-source-swing','Source swing needs exact pivot, host-parallel closed axis, perpendicular swing side and angle in (0,180]');return null;}
+      var sourceTip={x:s.pivot.x+frame.u.x*sign*s.leafWidthMm,y:s.pivot.y+frame.u.y*sign*s.leafWidthMm};
+      if(spec.hinge!==undefined&&!samePoint(spec.hinge,s.pivot))fail('source-hinge-conflict','Explicit hinge contradicts the independent source leaf pivot');
+      if(spec.latch!==undefined&&!samePoint(spec.latch,sourceTip))fail('source-latch-conflict','Explicit latch contradicts the independent source leaf tip; gap jambs are not leaf endpoints');
       var pivot=local(s.pivot), end=pivot.x+sign*s.leafWidthMm;
       if(Math.min(pivot.x,end)<-spec.widthMm/2-EPS||Math.max(pivot.x,end)>spec.widthMm/2+EPS||Math.abs(pivot.y)>frame.wall.thick/2+EPS){fail('source-swing-outside-gap','Source closed panel and pivot must fit the declared opening span and wall thickness');return null;}
       return {mode:'hinge',hingeXmm:pivot.x,hingeZmm:pivot.y,leafCenterXmm:sign*s.leafWidthMm/2,leafWidthMm:s.leafWidthMm,leafThicknessMm:s.thicknessMm,openAngleY:-side*sign*s.angleDeg*Math.PI/180};
@@ -226,15 +229,19 @@
     return {detached:detached,edited:edited,message:message};
   }
 
-  function sourcePlanGeometry(item, open) {
-    var p=item&&item.openingSourceGeometry;
+  function planGeometry(item, wallThicknessMm, open) {
+    var p=rendererParameters(item,wallThicknessMm);
     if(!p||p.mode==='opening')return null;
+    var fraction=typeof open==='boolean'?(open?1:0):open;
+    if(!finite(fraction)||fraction<0||fraction>1)throw new RangeError('Opening fraction must be between 0 and 1');
     var f={u:{x:1,y:0},n:{x:0,y:1}},c={x:0,y:0};
     var out={parameters:p,closedLeaf:p.mode==='hinge'?hingeLeaf(f,c,p,0):leafRectangle(f,c,p.closedXmm,p.leafZmm,p.leafWidthMm,p.leafThicknessMm)};
-    out.leaf=p.mode==='hinge'?hingeLeaf(f,c,p,open?p.openAngleY:0):leafRectangle(f,c,open?p.openXmm:p.closedXmm,p.leafZmm,p.leafWidthMm,p.leafThicknessMm);
+    out.leaf=p.mode==='hinge'?hingeLeaf(f,c,p,p.openAngleY*fraction):leafRectangle(f,c,p.closedXmm+(p.openXmm-p.closedXmm)*fraction,p.leafZmm,p.leafWidthMm,p.leafThicknessMm);
+    if(p.mode==='bypass')out.fixedLeaf=leafRectangle(f,c,p.fixedXmm,p.fixedZmm,p.leafWidthMm,p.leafThicknessMm);
     if(p.pocketBoundsMm){var b=p.pocketBoundsMm;out.pocket=leafRectangle(f,c,(b[0]+b[1])/2,(b[2]+b[3])/2,b[1]-b[0],b[3]-b[2]);}
     return out;
   }
+  function sourcePlanGeometry(item, open){return item&&item.openingSourceGeometry?planGeometry(item,120,open):null;}
 
   // The renderer subtracts these same exact cavity bounds from wall solids.
   function pocketCutsForWall(item, walls, wall) {
@@ -365,6 +372,7 @@
     }
     var hinge=spec.kind==='door-swing'||spec.kind==='door-swing-s'||spec.kind==='door-front';
     var staticOpening=spec.kind==='door-opening'||spec.kind==='window'||spec.kind==='window-door';
+    if(spec.sourceExactGap===true&&!staticOpening&&spec.sourceLeaf===undefined){fail('missing-independent-source-leaf','An exact source gap cannot establish leaf width, hinge or travel; independent sourceLeaf geometry is required');return result(null);}
     var unused=hinge?['travelDirection','travel','wallFace']:staticOpening?['hinge','latch','swingSide','travelDirection','travel','wallFace']:['hinge','latch','swingSide'];
     unused.forEach(function(key){if(spec[key]!==undefined)fail('inapplicable-opening-kinematics',key+' does not apply to '+spec.kind);});
     if(spec.sourceLeaf!==undefined){
@@ -510,5 +518,5 @@
     }
     return result(item);
   }
-  return {supportedKinds:TYPES.slice(),rendererParameters:rendererParameters,sourceEditMessage:sourceEditMessage,sourceEditBlocked:sourceEditBlocked,sourceControlBlocked:sourceControlBlocked,sourcePlacementStatus:sourcePlacementStatus,sourcePlanGeometry:sourcePlanGeometry,pocketCutsForWall:pocketCutsForWall,subtractBoxes:subtractBoxes,wallCutWidthMm:wallCutWidthMm,explicitHostWallInfo:explicitHostWallInfo,rebindAfterEdit:rebindAfterEdit,compileOpening:compileOpening};
+  return {supportedKinds:TYPES.slice(),rendererParameters:rendererParameters,planGeometry:planGeometry,sourceEditMessage:sourceEditMessage,sourceEditBlocked:sourceEditBlocked,sourceControlBlocked:sourceControlBlocked,sourcePlacementStatus:sourcePlacementStatus,sourcePlanGeometry:sourcePlanGeometry,pocketCutsForWall:pocketCutsForWall,subtractBoxes:subtractBoxes,wallCutWidthMm:wallCutWidthMm,explicitHostWallInfo:explicitHostWallInfo,rebindAfterEdit:rebindAfterEdit,compileOpening:compileOpening};
 }));

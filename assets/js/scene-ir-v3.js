@@ -1,10 +1,19 @@
 /* Source-first Scene IR v3. Typed retention only; no renderer approximation or DATA mutation. */
 (function(root,factory){
-  if(typeof module==='object'&&module.exports)module.exports=factory(require('./scene-ir-v3-materialize.js'));
-  else root.SceneIRV3=factory(root.SceneIRV3Materialize);
-}(typeof self!=='undefined'?self:this,function(Materialize){
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./scene-ir-v3-materialize.js'),require('./scene-appearance-profiles.js'));
+  else root.SceneIRV3=factory(root.SceneIRV3Materialize,root.SceneAppearanceProfiles);
+}(typeof self!=='undefined'?self:this,function(Materialize,Profiles){
   'use strict';
   var LIMIT=1000000;
+  // Triangle-inequality bound for rounding both unit-vector components to 4dp.
+  var DIRECTION_ROUNDING_LIMIT=Math.SQRT2*0.00005;
+  function deriveDirection(v){
+    if(!v||!Number.isFinite(v.x)||!Number.isFinite(v.y))return null;
+    var length=Math.hypot(v.x,v.y);
+    if(!Number.isFinite(length)||length===0||Math.abs(length-1)>DIRECTION_ROUNDING_LIMIT)return null;
+    return {x:v.x/length,y:v.y/length};
+  }
+
   var object=function(properties,required){return {type:'object',additionalProperties:false,properties:properties,required:required||Object.keys(properties)};};
   var array=function(items,max,min){return {type:'array',items:items,maxItems:max||2000,minItems:min||0};};
   var enumeration=function(values){return {enum:values};};
@@ -23,11 +32,11 @@
   var openings=entity({floor:floor,hostWallId:fact(id),adjacentRoomIds:fact(array({oneOf:[id,{type:'null'}]},2,2)),start:fact(point),end:fact(point),mechanism:fact(enumeration(['swing','pocket','slide','bypass-slide','fold','opening','window'])),leaves:array(leaves,8),leafRelation:fact(enumeration(['single','paired','bypass','independent'])),appearance:appearance,heightMm:fact(positive),sillMm:fact(number),windowKind:fact(enumeration(['fix','sliding','casement']))},['floor','hostWallId','adjacentRoomIds','start','end','mechanism']);
   var placement={oneOf:[object({domain:{const:'room'},roomId:id}),object({domain:{const:'exterior'},regionId:id},['domain'])]};
   var footprint=object({center:point,sizeMm:size,axisX:point});
-  var objects=entity({objectType:fact(enumeration(['bed','desk','chair','car','washbasin','toilet','bathtub','laundry-appliance','hanging-storage','cabinet-like','shower-fixture','stair','unidentified-symbol'])),semanticExtent:fact(enumeration(['asset','individual-fixture','room-assembly','symbol-only'])),placement:fact(placement),sourceFootprint:fact(footprint),frontDirection:fact(point),headDirection:fact(point),heightMm:fact(positive),relativeElevation:elevation,appearance:appearance,diagramSegments:fact(array(object({points:array(point,64,2),visibility:enumeration(['solid','dashed']),treadLabels:array(text,64),ascentDirection:point},['points','visibility']),32,1))},['objectType','semanticExtent','placement','sourceFootprint']);
+  var objects=entity({objectType:fact(enumeration(['bed','desk','chair','sofa','dining-table','kitchen-sink','refrigerator','car','washbasin','toilet','bathtub','laundry-appliance','hanging-storage','cabinet-like','shower-fixture','stair','unidentified-symbol'])),semanticExtent:fact(enumeration(['asset','individual-fixture','room-assembly','symbol-only'])),placement:fact(placement),sourceFootprint:fact(footprint),frontDirection:fact(point),headDirection:fact(point),heightMm:fact(positive),relativeElevation:elevation,appearance:appearance,diagramSegments:fact(array(object({points:array(point,64,2),visibility:enumeration(['solid','dashed']),treadLabels:array(text,64),ascentDirection:point},['points','visibility']),32,1))},['objectType','semanticExtent','placement','sourceFootprint']);
   var siteRegions=entity({role:fact(enumeration(['parcel-boundary','ground','parking','approach','ramp'])),shape:fact(shape),subtractRegionIds:array(id,64),appearance:appearance,relativeElevation:elevation,direction:fact(point)},['role','shape']);
   var buildingFootprints=entity({shape:fact(shape),boundaryBasis:fact(enumeration(['outer-face','wall-centerline','clear-face']))},['shape','boundaryBasis']);
   var annotations=entity({kind:enumeration(['dimension','level-note','label','direction-note','legend']),literalText:fact(text),pixelBox:fact(rect),valuesMm:fact(array(number,64,1)),basis:fact(enumeration(['outer-face','wall-centerline','clear-face','opening-jamb','object-envelope','site-boundary','nominal-module','unknown'])),axis:fact(point),references:fact(array(object({entityId:id,edge:enumeration(['start','end','north','south','east','west','envelope'])},['entityId']),64)),spanMm:fact(positive)},['kind','literalText']);
-  var bindings=entity({sourceEntityId:id,catalogId:fact(id),sizingPolicy:enumeration(['native','fit-source','proxy']),rotationDeg:fact(number),appearanceMode:enumeration(['unspecified','match-diagram-appearance']),channels:array(object({sourceRegion:enumeration(['body','top','seat','frame']),channel:id,color:color}),16)},['sourceEntityId','catalogId','sizingPolicy']);
+  var bindings=entity({sourceEntityId:id,catalogId:fact(id),sizingPolicy:enumeration(['native','fit-source','proxy']),rotationDeg:fact(number),appearanceMode:enumeration(['unspecified','match-diagram-appearance']),appearanceProfile:object({id:id,version:{const:1},assetSha256:{type:'string',pattern:'^[0-9a-f]{64}$'},colors:object({body:color,seat:color})}),channels:array(object({sourceRegion:enumeration(['body','top','seat','frame']),channel:id,color:color}),16)},['sourceEntityId','catalogId','sizingPolicy']);
   var connections=entity({rooms:fact(array(id,2,2)),openingId:fact(id),requiredTraversable:fact({type:'boolean'})},['rooms','openingId','requiredTraversable']);
   var collections={annotations:annotations,walls:walls,rooms:rooms,openings:openings,objects:objects,siteRegions:siteRegions,buildingFootprints:buildingFootprints,bindings:bindings,connections:connections};
   var props={sceneVersion:{const:3},units:{const:'mm'},coordinateSystem:{const:'x-east-y-south-clockwise'}};
@@ -79,10 +88,17 @@
     return polygonCheck(p);
   }
   function inside(p,q){var hit=false;for(var i=0,j=p.length-1;i<p.length;j=i++){var a=p[i],b=p[j];if((a.x===b.x&&q.x===a.x&&q.y>=Math.min(a.y,b.y)&&q.y<=Math.max(a.y,b.y))||(a.y===b.y&&q.y===a.y&&q.x>=Math.min(a.x,b.x)&&q.x<=Math.max(a.x,b.x)))return true;if((a.y>q.y)!==(b.y>q.y)&&q.x<(b.x-a.x)*(q.y-a.y)/(b.y-a.y)+a.x)hit=!hit;}return hit;}
+  function profilePreflight(scene,options){
+    if(Profiles)return Profiles.preflight(scene,options);
+    var bindings=(scene&&scene.bindings||[]).concat((options&&options.bindingDecisions||[]).map(function(d){return d&&d.binding;}));
+    return bindings.filter(function(b){return b&&Object.getOwnPropertyDescriptor(b,'appearanceProfile');}).map(function(){return {code:'invalid_appearance_profile',path:'bindings.appearanceProfile',severity:'error',message:'Native appearance profile module is unavailable'};});
+  }
+  var extractionSchema=clone(schema);delete extractionSchema.properties.bindings.items.properties.appearanceProfile;
   function compile(scene,options){
     options=options||{};
     var out={version:3,valid:false,plan:{walls:[],rooms:[],items:[]},diagnostics:[],evidence:[],defaults:[],suggestions:[],unresolved:[],reviewGroups:[],unresolvedEntities:[],acknowledgedOmissions:[],reconstructionStatus:'invalid',canApply:false,sourceScene:null,sourcePreview:{polygons:[],objects:[],openings:[]}};
     function issue(code,path,message,severity){out.diagnostics.push({code:code,path:path,message:message,severity:severity||'error'});}
+    out.diagnostics=profilePreflight(scene,options);if(out.diagnostics.length)return out;
     check(schema,scene,'scene',out.diagnostics);if(out.diagnostics.length)return out;
     out.sourceScene=clone(scene);
     var ids=new Map(),kinds=new Map(),polygons=new Map();
@@ -91,10 +107,18 @@
     function walk(v,p){if(!v||typeof v!=='object')return;if(v.status){out.evidence.push(Object.assign({path:p},clone(v)));if(v.source!==undefined&&!v.source.trim())issue('missing_source',p,'Source must not be whitespace');if(v.status==='inferred'&&!v.reason.trim())issue('missing_inference_reason',p,'Inference reason must not be whitespace');(v.evidenceRefs||[]).forEach(function(id){ref(id,p+'.evidenceRefs',['annotations']);});}Object.keys(v).forEach(function(k){walk(v[k],Array.isArray(v)?p+'['+k+']':p+'.'+k);});}
     walk(scene,'scene');
     ['rooms','siteRegions','buildingFootprints'].forEach(function(k){scene[k].forEach(function(e,i){if(e.shape.value===null)return;try{var p=canonicalShape(e.shape.value);polygons.set(e.id,p);out.sourcePreview.polygons.push({id:e.id,collection:k,outer:p});}catch(err){issue('invalid_shape',k+'['+i+'].shape',err.message);}});});
-    function unit(f,p){if(f&&f.value!==null&&Math.abs(Math.hypot(f.value.x,f.value.y)-1)>1e-6)issue('invalid_direction',p,'Direction must be a unit vector');}
+    out.directionDerivations=[];
+    out.sourcePreview.directionDerivations=out.directionDerivations;
+    function unit(f,p){
+      if(!f||f.value===null)return;
+      var v=f.value,d=deriveDirection(v),length=Math.hypot(v.x,v.y);
+      if(!d){issue('invalid_direction',p,'Direction must be unit length within the bounded component-rounding allowance');return;}
+      if(length!==1){var diagnostic={code:'rounded_direction_derived',path:p,severity:'warning',message:'Derived unit direction uses bounded component-rounding allowance; original source fact is unchanged',original:clone(v),derived:d,sourceNorm:length,maxNormError:DIRECTION_ROUNDING_LIMIT,basis:'four-decimal-component-rounding-bound'};out.diagnostics.push(diagnostic);out.directionDerivations.push(diagnostic);}
+      return d;
+    }
     scene.walls.forEach(function(e,i){var a=e.start.value,b=e.end.value;if(a&&b&&(a.x===b.x)===(a.y===b.y))issue('unsupported_wall','walls['+i+']','Wall must be nonzero and axis aligned');});
     scene.annotations.forEach(function(e,i){var p='annotations['+i+']';if(e.kind==='dimension'&&(!e.valuesMm||!e.basis))issue('missing_dimension_basis',p,'Dimension annotations require valuesMm and basis facts');unit(e.axis,p+'.axis');if(e.references&&e.references.value)e.references.value.forEach(function(r){ref(r.entityId,p+'.references');});if(e.valuesMm&&e.valuesMm.value&&e.spanMm&&e.spanMm.value!==null&&Math.abs(e.valuesMm.value.reduce(function(a,b){return a+b;},0)-e.spanMm.value)>0.001)issue('dimension_conflict',p,'Dimension chain sum differs from independently recorded span');});
-    scene.openings.forEach(function(e,i){var p='openings['+i+']';if(e.hostWallId.value)ref(e.hostWallId.value,p+'.hostWallId',['walls']);if(e.adjacentRoomIds.value)e.adjacentRoomIds.value.filter(Boolean).forEach(function(id){ref(id,p+'.adjacentRoomIds',['rooms']);});(e.leaves||[]).forEach(function(l){['closedAxis','swingSide','travelDirection'].forEach(function(k){unit(l[k],p+'.leaves.'+l.id+'.'+k);});var axis=l.closedAxis&&l.closedAxis.value,side=l.swingSide&&l.swingSide.value,angle=l.angleDeg&&l.angleDeg.value;if(axis&&side&&angle){var turn=axis.x*side.y-axis.y*side.x;if(Math.abs(axis.x*side.x+axis.y*side.y)>1e-6||Math.sign(angle)!==Math.sign(turn))issue('source_angle_direction_conflict',p+'.leaves.'+l.id+'.angleDeg','Signed clockwise angle contradicts closed axis and declared swing side; source facts are retained unchanged');}});out.sourcePreview.openings.push(clone(e));});
+    scene.openings.forEach(function(e,i){var p='openings['+i+']';if(e.hostWallId.value)ref(e.hostWallId.value,p+'.hostWallId',['walls']);if(e.adjacentRoomIds.value)e.adjacentRoomIds.value.filter(Boolean).forEach(function(id){ref(id,p+'.adjacentRoomIds',['rooms']);});(e.leaves||[]).forEach(function(l){var axis=unit(l.closedAxis,p+'.leaves.'+l.id+'.closedAxis'),side=unit(l.swingSide,p+'.leaves.'+l.id+'.swingSide');unit(l.travelDirection,p+'.leaves.'+l.id+'.travelDirection');var angle=l.angleDeg&&l.angleDeg.value;if(axis&&side&&angle){var turn=axis.x*side.y-axis.y*side.x;if(Math.abs(axis.x*side.x+axis.y*side.y)>1e-6||Math.sign(angle)!==Math.sign(turn))issue('source_angle_direction_conflict',p+'.leaves.'+l.id+'.angleDeg','Signed clockwise angle contradicts closed axis and declared swing side; source facts are retained unchanged');}});out.sourcePreview.openings.push(clone(e));});
     scene.objects.forEach(function(e,i){var p='objects['+i+']',place=e.placement.value,fp=e.sourceFootprint.value;unit(e.frontDirection,p+'.frontDirection');unit(e.headDirection,p+'.headDirection');if(fp)unit({value:fp.axisX},p+'.sourceFootprint.axisX');if(place){if(place.domain==='room')ref(place.roomId,p+'.placement',['rooms']);else if(place.regionId)ref(place.regionId,p+'.placement',['siteRegions']);}out.sourcePreview.objects.push(clone(e));});
     ['rooms','objects','siteRegions'].forEach(function(k){scene[k].forEach(function(e,i){if(e.relativeElevation&&e.relativeElevation.relativeToId.value)ref(e.relativeElevation.relativeToId.value,k+'['+i+'].relativeElevation',['rooms','siteRegions','buildingFootprints']);});});
     scene.siteRegions.forEach(function(e,i){(e.subtractRegionIds||[]).forEach(function(id){ref(id,'siteRegions['+i+'].subtractRegionIds',['siteRegions','buildingFootprints']);if(id===e.id)issue('cyclic_subtraction','siteRegions['+i+']','A region cannot subtract itself');});unit(e.direction,'siteRegions['+i+'].direction');});
@@ -102,7 +126,7 @@
     function visitRegion(id){if(active.has(id)){issue('cyclic_subtraction','siteRegions','Subtraction graph must be acyclic');return;}if(done.has(id))return;active.add(id);var e=ids.get(id);if(e)(e.subtractRegionIds||[]).forEach(visitRegion);active.delete(id);done.add(id);}
     scene.siteRegions.forEach(function(e){visitRegion(e.id);});
     scene.connections.forEach(function(e,i){if(e.rooms.value)e.rooms.value.forEach(function(id){ref(id,'connections['+i+'].rooms',['rooms']);});if(e.openingId.value)ref(e.openingId.value,'connections['+i+'].openingId',['openings']);});
-    scene.bindings.forEach(function(e,i){var p='bindings['+i+']';ref(e.sourceEntityId,p+'.sourceEntityId',['objects','rooms','openings','siteRegions']);var source=ids.get(e.sourceEntityId),catalog=options.registry&&e.catalogId.value&&options.registry.get(e.catalogId.value);if(!source)return;if(!catalog){issue('mapping_unresolved',p,'Catalog mapping is unresolved; source facts remain intact','warning');return;}if(source.frontDirection&&source.frontDirection.value&&!catalog.front)issue('mapping_unresolved',p,'Source front is known but canonical asset front is unverified','warning');var f=source.sourceFootprint&&source.sourceFootprint.value;if(f&&(f.sizeMm.w!==catalog.w||f.sizeMm.d!==catalog.d))out.diagnostics.push({code:'native_size_mismatch',path:p,severity:'warning',message:'Native dimensions differ from source; no resizing applied',deltaMm:{w:catalog.w-f.sizeMm.w,d:catalog.d-f.sizeMm.d}});});
+    scene.bindings.forEach(function(e,i){var p='bindings['+i+']';ref(e.sourceEntityId,p+'.sourceEntityId',['objects','rooms','openings','siteRegions']);var source=ids.get(e.sourceEntityId),catalog=options.registry&&e.catalogId.value&&options.registry.get(e.catalogId.value);if(!source)return;if(e.appearanceProfile!==undefined){try{Profiles.validate(e.appearanceProfile,e,source,catalog);}catch(error){issue('invalid_appearance_profile',p+'.appearanceProfile',error.message);}}if(!catalog){issue('mapping_unresolved',p,'Catalog mapping is unresolved; source facts remain intact','warning');return;}if(source.frontDirection&&source.frontDirection.value&&!catalog.front)issue('mapping_unresolved',p,'Source front is known but canonical asset front is unverified','warning');var f=source.sourceFootprint&&source.sourceFootprint.value;if(f&&(f.sizeMm.w!==catalog.w||f.sizeMm.d!==catalog.d))out.diagnostics.push({code:'native_size_mismatch',path:p,severity:'warning',message:'Native dimensions differ from source; no resizing applied',deltaMm:{w:catalog.w-f.sizeMm.w,d:catalog.d-f.sizeMm.d}});});
     out.valid=!out.diagnostics.some(function(d){return d.severity==='error';});
     issue('retained_preview_only','scene','v3 source retained; runtime polygon/site/opening consumers and persistence are not certified. Apply is disabled.','error');
     out.reconstructionStatus=out.valid?'retained-preview-only':'invalid';
@@ -121,11 +145,11 @@
           boundScene.bindings=boundScene.bindings.filter(function(b){return b.sourceEntityId!==binding.sourceEntityId;});
           boundScene.bindings.push(clone(binding));
         });
-        return Materialize.compile(boundScene,out,options);
+        return Materialize.compile(boundScene,out,Object.assign({},options,{deriveDirection:deriveDirection}));
       }
       issue('missing_materializer','scene','Bounded v3 runtime is not loaded');
     }
     return out;
   }
-  return {createPlacementContext:Materialize&&Materialize.createPlacementContext,sourceHash:Materialize&&Materialize.sourceHash,schema:schema,compile:compile,canonicalShape:canonicalShape,contains:inside};
+  return {preflightAppearanceProfiles:profilePreflight,validateDisplayOverrides:Materialize&&Materialize.validateDisplayOverrides,deriveDirection:deriveDirection,directionRoundingLimit:DIRECTION_ROUNDING_LIMIT,createPartialSelection:Materialize&&Materialize.createPartialSelection,createPlacementContext:Materialize&&Materialize.createPlacementContext,sourceHash:Materialize&&Materialize.sourceHash,schema:extractionSchema,displaySchema:schema,compile:compile,canonicalShape:canonicalShape,contains:inside};
 }));

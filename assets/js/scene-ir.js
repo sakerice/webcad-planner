@@ -3,9 +3,9 @@
  * Inferences/defaults remain reviewable. Editor/saved-file and legacy import schemas are unchanged.
  */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./scene-catalogue.js'), require('./scene-opening-geometry.js'), require('./scene-ir-v3.js'));
-  else root.SceneIR = factory(root.SceneCatalogue, root.SceneOpeningGeometry, root.SceneIRV3);
-}(typeof self !== 'undefined' ? self : this, function (Catalogue, Openings, V3) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./scene-catalogue.js'), require('./scene-opening-geometry.js'), require('./scene-ir-v3.js'), require('./height-model.js'));
+  else root.SceneIR = factory(root.SceneCatalogue, root.SceneOpeningGeometry, root.SceneIRV3, root.HeightModel);
+}(typeof self !== 'undefined' ? self : this, function (Catalogue, Openings, V3, HeightModel) {
   'use strict';
   var EPS = 0.001, LIMIT = 1000000;
   var FACT_KEYS = ['value', 'status', 'source', 'reason'];
@@ -188,10 +188,11 @@
       if(result.ok&&result.item&&s.kind.indexOf('window')===0){
         if(typeof options.normalizeWindow!=='function'||typeof options.windowVerticalLimitMm!=='function')issue('missing_window_runtime',s._path,'Window parameters require the actual runtime vertical normalizer');
         else {
+          var host=out.plan.walls.find(function(w){return w.id===s.hostWallId;});
           var raw=Object.assign({type:s.kind,floor:s.floor,windowSill:s.kind==='window-door'?0:900,windowHeight:s.kind==='window-door'?2100:1200},s._properties);
-          var available=options.windowVerticalLimitMm(s.floor,s.adjacentRoomIds.filter(function(id){return id!==null;}).map(function(id){return rooms[id];}));
+          var available=options.windowVerticalLimitMm(s.floor,s.adjacentRoomIds.filter(function(id){return id!==null;}).map(function(id){return rooms[id];}),host);
           if(raw.windowSill+raw.windowHeight>available+EPS)issue('window_context_height_conflict',s._path,'Window frame would exceed the conservative host aperture clearance after room finish/structural offsets');
-          var normalized=options.normalizeWindow(clone(raw));
+          var normalized=options.normalizeWindow(clone(raw),host);
           ['windowSill','windowHeight'].forEach(function(k){if(!normalized||Math.abs(normalized[k]-raw[k])>EPS)issue('window_vertical_clamp',s._path+'.'+k,'Window values/defaults would be silently clamped by the actual renderer');});
         }
         issue('window_sash_not_validated',s._path,'Window host/span and vertical parameters validated; moving sash trajectory is not modeled','warning');
@@ -298,5 +299,6 @@
 
     return out;
   }
-  return {createPlacementContext:V3&&V3.createPlacementContext,sourceHash:V3&&V3.sourceHash,compile:compile,footprint:footprint,normalizeRoomUse:roomUse};
+  function previewSnapshot(source,snapshot,options){if(source&&source.sceneVersion===3&&V3.preflightAppearanceProfiles(source,options).length)return V3.compile(source,options);return compile(clone(source),Object.assign({},options,HeightModel.sceneRuntime(snapshot)));}
+  return {wallHeightContract:HeightModel&&HeightModel.WALL_HEIGHT_CONTRACT,validateDisplayOverrides:V3&&V3.validateDisplayOverrides,previewSnapshot:previewSnapshot,createPartialSelection:V3&&V3.createPartialSelection,createPlacementContext:V3&&V3.createPlacementContext,sourceHash:V3&&V3.sourceHash,compile:compile,footprint:footprint,normalizeRoomUse:roomUse};
 }));

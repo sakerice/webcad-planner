@@ -62,7 +62,7 @@ test('source renderer consumers use shared actual dimensions and disable uncerti
 const index=fs.readFileSync(require('node:path').join(__dirname,'../../index.html'),'utf8'),draw=fs.readFileSync(require('node:path').join(__dirname,'../../assets/js/draw-2d.js'),'utf8');
 assert.match(index,/pivot.position.set\(hingeX,0,\(hingeGeometry.hingeZmm\|\|0\)\*U\)/);
 assert.match(index,/sourceLeafW=hingeGeometry.leafWidthMm\*U/);assert.match(index,/openingModelReady=!it.openingSourceGeometry/);
-assert.match(index,/SceneOpeningGeometry.subtractBoxes/);assert.match(index,/SceneOpeningGeometry.pocketCutsForWall/);assert.match(draw,/SceneOpeningGeometry.sourcePlanGeometry/);
+assert.match(index,/SceneOpeningGeometry.subtractBoxes/);assert.match(index,/SceneOpeningGeometry.pocketCutsForWall/);assert.match(draw,/SceneOpeningGeometry.planGeometry/);
 });
 test('source parameters are allowlisted and cannot silently mix mechanisms',()=>{
 const s=swing();s.sourceLeaf.travelDistanceMm=42;assert.ok(codes(G.compileOpening(s,walls,[])).includes('inapplicable-source-leaf-field'));

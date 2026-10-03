@@ -44,14 +44,14 @@ test('door/window presets and model replacement cannot bypass source shape guard
 const c=sourceRuntime();for(const name of ['applyDoorWidthPreset','applyWindowStdPreset','applyOpeningModelToItem','canApplyOpeningPresetToItem'])H.load(name,c);
 const before=JSON.stringify(c.DATA);c.applyDoorWidthPreset(900);c.applyWindowStdPreset('anything');assert.equal(c.applyOpeningModelToItem(c.ST.selected,'model'),false);assert.equal(c.canApplyOpeningPresetToItem(c.ST.selected,{kind:'door'}),false);assert.equal(JSON.stringify(c.DATA),before);assert.equal(c.HISTORY.length,0);
 });
-test('source SVG exports exact shared leaf polygons under translation and host rotation; legacy symbols unchanged',()=>{
+test('source SVG exports exact shared leaf polygons under translation and host rotation; ordinary symbols use the same native geometry',()=>{
 const c=sourceRuntime();for(const name of ['openingFrame','frameStr','lineTag','rectCutSvg','sourceDoorSymbolSvg','swingDoorSymbolSvg','slideDoorSymbolSvg'])H.load(name,c);
 const it=c.ST.selected,lw={thin:1,mid:2},norm=points=>points.map(p=>p.map(n=>+n.toFixed(6))).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
 for(const state of ['open','closed'])for(const rot of [0,90,180]){
 it.doorOpenState=state;const info={x:1200,y:300,rot,wall:{thick:120}},svg=c.swingDoorSymbolSvg(it,info,lw),polys=[...svg.matchAll(/<polygon points="([^"]+)"/g)],points=polys[polys.length-1][1].split(' ').map(s=>s.split(',').map(Number));
 const a=rot*Math.PI/180,leaf=G.sourcePlanGeometry(it,state==='open').leaf.map(p=>[1200+p.x*Math.cos(a)-p.y*Math.sin(a),300+p.x*Math.sin(a)+p.y*Math.cos(a)]);assert.deepEqual(norm(points),norm(leaf));if(state==='open')assert.match(svg,/A780,780/);else assert.doesNotMatch(svg,/<path/);
 }
-const legacy={type:'door-swing',w:780,flipX:false,flipY:false},svg=c.swingDoorSymbolSvg(legacy,{x:0,y:0,rot:0,wall:{thick:120}},lw);assert.match(svg,/M390,0 A780,780 0 0,1/);assert.equal([...svg.matchAll(/<polygon /g)].length,1);
+const legacy={type:'door-swing',w:780,flipX:false,flipY:false},svg=c.swingDoorSymbolSvg(legacy,{x:0,y:0,rot:0,wall:{thick:120}},lw);assert.match(svg,/M390,0 A780,780 0 0,1/);assert.equal([...svg.matchAll(/<polygon /g)].length,3);const ordinary=[...svg.matchAll(/<polygon points="([^"]+)"/g)].at(-1)[1].split(' ').map(p=>p.split(',').map(Number));assert.deepEqual(norm(ordinary),norm(G.planGeometry(legacy,120,true).leaf.map(p=>[p.x,p.y])));
 const pocket={type:'door-pocket',w:900,doorOpenState:'open',openingSourceGeometry:{mode:'single',direction:1,leafWidthMm:940,leafThicknessMm:32,closedXmm:0,openXmm:940,leafZmm:0,pocketBoundsMm:[450,1430,-30,30]}};
 const ps=c.slideDoorSymbolSvg(pocket,{x:0,y:0,rot:0,wall:{thick:120}},lw);assert.match(ps,/470,-16 1410,-16 1410,16 470,16/);assert.match(ps,/450,-30 1430,-30 1430,30 450,30/);
 });

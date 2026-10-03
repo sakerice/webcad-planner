@@ -18,6 +18,9 @@
     skipLevelMaxMm: 2400
   };
 
+  var WALL_HEIGHT_CONTRACT=Object.freeze({version:1,field:'wallHeight',unit:'mm',minMm:300,maxMm:6000,origin:'explicit-display-assumption'});
+  function isExplicitWallHeightMm(v){return typeof v==='number'&&Number.isFinite(v)&&v>=WALL_HEIGHT_CONTRACT.minMm&&v<=WALL_HEIGHT_CONTRACT.maxMm;}
+
   var ARROWS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
   // ↑ ↗ → ↘ ↓ ↙ ← ↖
 
@@ -97,7 +100,64 @@
     return 'CH ' + shape.heightMm;
   }
 
+  // Existing editor window normalization, shared by native properties and
+  // snapshot Scene IR compilation. It mutates only the supplied item copy.
+  function normalizeWindowVerticalProps(it,maxTop) {
+    var sill=Number(it.windowSill),height=Number(it.windowHeight);
+    if(!isFinite(sill))sill=it.type==='window-door'?0:900;
+    if(!isFinite(height))height=it.type==='window-door'?2100:1200;
+    sill=Math.max(0,Math.min(maxTop-200,sill));
+    height=Math.max(200,Math.min(maxTop,height));
+    if(sill+height>maxTop)height=Math.max(200,maxTop-sill);
+    it.windowSill=Math.round(sill);it.windowHeight=Math.round(height);
+    if(it.windowTop!==undefined)delete it.windowTop;
+    return it;
+  }
+  function editorWallHeightMm(plan,floor,fallback) {
+    var hd=plan&&plan.heightDefaults||{},entry=plan&&plan.floors&&plan.floors[String(floor)],v=Number(entry&&entry.wallHeight);
+    if(hd.perFloor&&isFinite(v)&&v>0)return Math.max(300,Math.min(6000,Math.round(v)));
+    if(fallback!==undefined){v=Number(fallback);return isFinite(v)&&v>0?v:2400;}
+    // The native plan loader rounds/clamps the stored global height. Do the
+    // same read here without calling ensureHeightDefaults or touching globals.
+    v=Number(hd.wallHeight);return isFinite(v)&&v>0?Math.max(1800,Math.min(4000,Math.round(v))):2400;
+  }
+  function newRoomFloorRaiseMm(plan,floor) {
+    var f=floor||1,hd=plan&&plan.heightDefaults||{},entry=plan&&plan.floors&&plan.floors[String(f)],v;
+    if(hd.perFloor&&entry&&isFinite(Number(entry.floorRaise)))v=Number(entry.floorRaise);
+    else if(!hd.perFloor&&hd.floorRaiseSet){v=Number(hd.floorRaise);if(!isFinite(v))v=0;}
+    return v===undefined?(f===1?150:0):Math.max(0,Math.min(600,Math.round(v)));
+  }
+  function wallHeightMm(plan,wall,fallback) {
+    var v=Number(wall&&wall.wallHeight);
+    return isFinite(v)?Math.max(WALL_HEIGHT_CONTRACT.minMm,Math.min(WALL_HEIGHT_CONTRACT.maxMm,v)):editorWallHeightMm(plan,wall&&wall.floor,fallback);
+  }
+  function windowMaxTopMm(plan,item) {
+    var wall=item&&item._wallRef;
+    if(item&&(item.sceneImportVersion===2||item.sceneImportVersion===3||item.openingHostWallId!==undefined)){
+      if(!wall){var matches=(plan.walls||[]).filter(function(w){return w&&w.id===item.openingHostWallId;});if(matches.length===1)wall=matches[0];}
+      if(!wall)wall={floor:item.floor};
+    }
+    return Math.max(200,wallHeightMm(plan,wall)-50);
+  }
+  function sceneRuntime(snapshot) {
+    var target=JSON.parse(JSON.stringify(snapshot||{}));
+    return {targetPlan:target,defaultWallHeightMmForFloor:function(floor){return editorWallHeightMm(target,floor);},defaultFloorOffset:function(floor){return newRoomFloorRaiseMm(target,floor);},
+      windowVerticalLimitMm:function(floor,adjacentRooms,host){
+        var raise=Math.max.apply(null,[0].concat(adjacentRooms.map(function(room){var finish=typeof room.floorRaiseMm==='number'?room.floorRaiseMm:newRoomFloorRaiseMm(target,floor);return Math.max(0,finish)+Math.max(0,room.skipLevelMm||0);})));
+        return wallHeightMm(target,host||{floor:floor})-50-raise;
+      },normalizeWindow:function(item,host){
+        if(host)item._wallRef=host;
+        normalizeWindowVerticalProps(item,windowMaxTopMm(target,item));delete item._wallRef;return item;
+      }};
+  }
+
   return {
+    WALL_HEIGHT_CONTRACT: WALL_HEIGHT_CONTRACT,
+    isExplicitWallHeightMm: isExplicitWallHeightMm,
+    wallHeightMm: wallHeightMm,
+    sceneRuntime: sceneRuntime,
+    editorWallHeightMm: editorWallHeightMm,
+    normalizeWindowVerticalProps: normalizeWindowVerticalProps,
     DEFAULTS: DEFAULTS,
     MIN_STORY_HEIGHT_MM: MIN_STORY_HEIGHT_MM,
     storyHeightMm: storyHeightMm,

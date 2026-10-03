@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "read_catalog.response.schema.json",
+  "title": "read_catalog response",
+  "description": "Current internal API contract. Catalogue IDs follow SceneCatalogue.cleanId; runtime membership, non-opening binding policy and physical compiler gates remain authoritative. Frozen 5fa5282 packets are unchanged.",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "const": 1
+    },
+    "version": {
+      "const": "scene-catalogue-v1"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "w",
+          "d",
+          "h",
+          "front",
+          "parameters",
+          "materialCapability",
+          "defaultHeight"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "w": {
+            "type": "number"
+          },
+          "d": {
+            "type": "number"
+          },
+          "h": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "front": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "head": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "frontProvenance": {
+            "type": "string"
+          },
+          "headProvenance": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "finishChannels": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "materialCapability": {
+            "type": "object",
+            "required": [
+              "status",
+              "declaredChannels",
+              "verifiedChannels",
+              "fixedMaterials",
+              "sourceRegionSemanticsAudited",
+              "uniformPixelRGBGuaranteed"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "unreviewed",
+                  "asset-and-code-audited",
+                  "audit-mismatch"
+                ]
+              },
+              "declaredChannels": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "verifiedChannels": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "fixedMaterials": {
+                "type": "array"
+              },
+              "sourceRegionSemanticsAudited": {
+                "const": false
+              },
+              "uniformPixelRGBGuaranteed": {
+                "const": false
+              },
+              "asset": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          },
+          "defaultHeight": {
+            "type": "object",
+            "properties": {
+              "valueMm": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "origin": {
+                "enum": [
+                  "catalogue-manifest",
+                  "builtin-default",
+                  "unknown"
+                ]
+              },
+              "sourceMeasured": {
+                "const": false
+              },
+              "rendererRuleAudited": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "valueMm",
+              "origin",
+              "sourceMeasured",
+              "rendererRuleAudited"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "apiVersion",
+    "version",
+    "hash",
+    "entries"
+  ],
+  "additionalProperties": false
+}

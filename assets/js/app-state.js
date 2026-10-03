@@ -537,9 +537,9 @@ function slideDoorPocketHtml(it){
     '</select></div>';
   var note;
   if(cur.missingMm<=0){
-    note='引き込む部分（'+cur.needMm+'mm）は壁の中に納まっています。';
+    note='開閉時のパネル外形に必要な支持壁（'+Math.round(cur.needMm)+'mm）は連続しています。'+(it.type==='door-pocket'?'戸袋の内部空洞・施工納まりは未確認です。':'壁面を滑る表示の評価です。');
   }else{
-    note='引き込む部分に壁が '+cur.missingMm+'mm 足りません（必要 '+cur.needMm+'mm／壁 '+cur.haveMm+'mm）。開けた戸が壁の外に出ます。';
+    note='開閉時のパネル外形に壁が '+Math.round(cur.missingMm)+'mm 足りません（必要 '+Math.round(cur.needMm)+'mm／壁 '+Math.round(cur.haveMm)+'mm）。開けた戸が壁の外に出ます。';
     if(other&&other.missingMm<=0) note+='反対側なら壁に納まります。';
   }
   html+='<div class="lock-status-note">'+note+'</div>';
@@ -927,6 +927,8 @@ function setPropsBodyHtml(body,html,it){
     var sourceStatus=SceneOpeningGeometry.sourcePlacementStatus(it,DATA.walls);
     html+='<div class="lock-status-note" data-source-placement-status="'+(sourceStatus.detached?'unresolved-host':sourceStatus.edited?'edited-unvalidated':'import-snapshot')+'">'+sourceStatus.message+'</div>';
   }
+  if(it&&it.sourceOpeningMapping&&typeof SourceOpeningReview!=='undefined'){var openingReview=SourceOpeningReview.currentStatus(it,DATA.walls,DATA.items,getOpeningWallInfo(it));html='<div class="lock-status-note" data-reader-opening-status="'+openingReview.status+'">'+escHtml(openingReview.message)+'</div>'+html;}
+  if(it&&it.sourceObjectMapping?.catalogueDisplay&&typeof SourceObjectMapping!=='undefined'){var objectReview=SourceObjectMapping.currentStatus(it,typeof item3DBaseY==='function'?item3DBaseY(it)/U:undefined);html='<div class="lock-status-note" data-source-object-status="'+objectReview.status+'">'+escHtml(objectReview.message)+'</div>'+html;}
   body.innerHTML=html;
   if(it&&it.openingSourceGeometry)body.querySelectorAll('input,select,textarea,button').forEach(function(el){
     var handler=(el.getAttribute('onchange')||'')+' '+(el.getAttribute('onclick')||'')+' '+(el.getAttribute('oninput')||'');
@@ -1397,6 +1399,7 @@ function updateProps(){
     html += '</select></div>';
   }
   if(it.type==='lattice-screen'){
+    if(typeof SourceImageRails!=='undefined'){var imageReview=SourceImageRails.currentReview(it);if(imageReview){var imported=imageReview.baseline;html+='<div class="lock-status-note" data-image-rail-provenance>図面画像の手動取り込み。取り込み時の仮定：'+(imported?'長さ '+imported.w+'mm / 高さ '+imported.latticeHeight+'mm':'当初の寸法比較記録なし')+'。現在：長さ '+it.w+'mm / 高さ '+it.latticeHeight+'mm。'+(imageReview.status==='edited'?'取り込み後のユーザー編集あり（'+escHtml(imageReview.changes.map(function(c){return c.field;}).join(', '))+'）。当初の来歴は現在の形状を保証しません。':imageReview.status==='unknown'?'現在の形状と取り込み時の一致は確認できません。':'取り込み時の表示値と一致しています。')+'高さ・仕上げ・構造は未測定／未確認です。</div>';}}
     if(!it.latticeHeight) it.latticeHeight=1600;
     if(!it.fencePattern) it.fencePattern='vertical';
     if(!it.fenceTopStyle) it.fenceTopStyle='even';
@@ -1628,12 +1631,19 @@ function updateProps(){
     if(!floorLanding){
     // 載せる床(足元)。段差のある階でだけ出す。家具・壁と同じ欄。
     html += baseFloorSelectHtml(it);
-    html += '<div class="lock-status-note">上り高さ '+Math.round(stairGroupRiseM(it)/U)+'mm / '+
-      (sri.steps||getStairStepCount(it))+'段。'+
-      (target==='level'
-        ? '同じ階の段差を上ります。上階の床には穴を開けません。'
-        : '上の階の床まで上がります。')+'</div>';
+    var riseLabel=it.sourceStairConnection?'選択部材の表示仮定 '+Math.round(sri.rise/U*10)/10+'mm / '+sri.steps+'段（未測定）。接続全体 '+Math.round(stairGroupRiseM(it)/U)+'mm / '+stairGroupOrdered(it).reduce(function(n,o){return n+getStairStepCount(o);},0)+'表示段（未測定）。':
+      '選択部材の上り高さ '+Math.round(sri.rise/U)+'mm / '+(sri.steps||getStairStepCount(it))+'段。';
+    html += '<div class="lock-status-note">'+riseLabel+
+      (target==='level'?'同じ階の段差を上ります。上階の床には穴を開けません。':it.sourceStairConnection?'接続下書き。床開口・階移動は無効です。':'上の階の床まで上がります。')+'</div>';
     html += '<div class="pr"><div class="pl">階段 高さ順 (1=下)</div><input class="pi" type="number" min="1" max="12" value="'+orderVal+'" onchange="updateSelectedProp(\'stairOrder\',+this.value)"></div>';
+    var sourceDraft=sourceStairConnectionCandidate(it);
+    if(sourceDraft){
+      html += '<div class="lock-status-note">元図の投影線からの接続下書き。高さ・段数は仮定として確認します。床穴と階移動は作りません。</div>';
+      html += '<div class="pr"><div class="pl">'+sourceDraft.sourceFloor+'F基準床からの足元仮定(mm)</div><input id="source-stair-base-offset" class="pi" type="number" min="0" max="6000" value="'+sourceDraft.baseOffsetMm+'"></div>';
+      html += '<div class="pr"><div class="pl">'+sourceDraft.targetFloor+'F基準床からの上端仮定(mm)</div><input id="source-stair-target-offset" class="pi" type="number" min="-1000" max="6000" value="'+sourceDraft.targetOffsetMm+'"></div>';
+      html += '<div class="pr"><div class="pl">直線の仮定段数（回りは3段）</div><input id="source-stair-straight-steps" class="pi" type="number" min="3" max="30" value="'+sourceDraft.straightSteps+'"></div>';
+      html += '<button class="pbtn sec" id="source-stair-connect" data-source-review="'+escHtml(sourceDraft.reviewSnapshot)+'" onclick="connectSelectedSourceStairDraft()">この'+sourceDraft.sourceFloor+'F→'+sourceDraft.targetFloor+'Fを接続下書きにする</button>';
+    }
     var conn=stairConnectionSummary(it);
     if(conn) html += '<div class="lock-status-note"'+(conn.warn?' style="color:#b3261e"':'')+'>つながり: '+escHtml(conn.text)+'</div>';
     html += '<div class="pr"><div class="pl">接続パーツ: '+sri.count+' / 現在 '+(sri.index+1)+' 番目</div><button class="pbtn sec" onclick="updateSelectedProp(\'stairOrder\',undefined)">自動判定に戻す</button></div>';
@@ -1769,12 +1779,22 @@ function updateSelectedKitchenVariant(id){
 }
 function selectedModelFinishesHtml(it){
   var model=getItemFinishModel(it.type);
+  var tailored=typeof TailoredSofaFinish!=='undefined'&&it.type===TailoredSofaFinish.type;
+  if(tailored){
+    var audit=getTailoredSofaFinishRuntime().status(_modelCache[TailoredSofaFinish.url]);
+    if(!audit.ok)return '<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">'+(audit.reason==='not-loaded'?'3D表示でモデルを確認すると、部位の色を指定できます。':escHtml(audit.message))+'</div>';
+    if(!TailoredSofaFinish.colors(it))return '<div class="ph" style="margin-top:12px">素材・カラー</div><button class="pbtn sec" type="button" onclick="enableSelectedTailoredSofaColors()">部位の色を指定する</button>';
+    // Private color-only UI descriptor; never mutate the catalogue's capabilities.
+    model={finishChannels:[{key:'seat',label:'座面',default:'#adb5af'},{key:'body',label:'背・肘・本体',default:'#adb5af'}]};
+  }
   if(!model || !model.finishChannels) return '';
-  var html=selectedKitchenConfigurationHtml(it,model)+'<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">素材の表情を保って色を変更</div>';
+  var html=selectedKitchenConfigurationHtml(it,model)+'<div class="ph" style="margin-top:12px">素材・カラー</div><div class="model-finish-note">'+(tailored?'元の素材のまま色を指定（未指定の部位は元の色）':'素材の表情を保って色を変更')+'</div>';
   if(model.mirrorOption) html+='<div class="pr"><label class="pl" for="shoe-mirror">姿見</label><input id="shoe-mirror" type="checkbox" '+(it.showMirror?'checked':'')+' onchange="updateSelectedProp(\'showMirror\',this.checked)"></div>';
   model.finishChannels.forEach(function(channel){
-    var value=(it.finishColors&&it.finishColors[channel.key])||channel.default;
+    var settings=tailored?TailoredSofaFinish.colors(it):it.finishColors;
+    var value=(settings&&settings[channel.key])||channel.default;
     html+='<div class="pr"><label class="pl" for="finish-'+channel.key+'">'+escHtml(channel.label)+'</label><input id="finish-'+channel.key+'" class="pi" type="color" value="'+escHtml(value)+'" oninput="updateSelectedModelFinish(\''+channel.key+'\',this.value)"></div>';
+    if(tailored)return; // This opt-in has colors only, with authored maps and roughness.
     // **壁と同じ資産から選ばせる。** 壁は色のほかにテクスチャを貼れるのに
     // カタログのモデルは色だけ、という分かれ方をしていた。仕様を分ける理由が
     // 無いので揃える。「元の柄のまま」を既定にし、選んだときだけ差し替える。
@@ -1818,8 +1838,18 @@ function updateSelectedModelTexture(channel,value){
   if(value==='')delete textures[channel];else textures[channel]=value;
   updateSelectedProp('finishTextures',Object.keys(textures).length?textures:null);
 }
+function enableSelectedTailoredSofaColors(){
+  var it=ST.selected;
+  if(!it||typeof TailoredSofaFinish==='undefined'||it.type!==TailoredSofaFinish.type||!getTailoredSofaFinishRuntime().status(_modelCache[TailoredSofaFinish.url]).ok)return;
+  updateSelectedProp('tailoredSofaColors',{version:1,colors:{}});
+}
 function updateSelectedModelFinish(channel,value){
   if(!ST.selected || !/^#[0-9a-f]{6}$/i.test(value||'')) return;
+  if(typeof TailoredSofaFinish!=='undefined'&&ST.selected.type===TailoredSofaFinish.type){
+    var own=TailoredSofaFinish.colors(ST.selected);
+    if(!own||(channel!=='seat'&&channel!=='body')||!getTailoredSofaFinishRuntime().status(_modelCache[TailoredSofaFinish.url]).ok)return;
+    own[channel]=value;updateSelectedProp('tailoredSofaColors',{version:1,colors:own});return;
+  }
   var model=getItemFinishModel(ST.selected.type);
   if(!model || !(model.finishChannels||[]).some(function(c){return c.key===channel;})) return;
   var colors=Object.assign({},ST.selected.finishColors||{});colors[channel]=value;
@@ -1829,6 +1859,10 @@ function updateSelectedModelFinish(channel,value){
 // 元に戻らない、という見え方になる。
 function updateSelectedModelFinishReset(){
   if(!ST.selected)return;
+  if(typeof TailoredSofaFinish!=='undefined'&&ST.selected.type===TailoredSofaFinish.type){
+    if(TailoredSofaFinish.colors(ST.selected))updateSelectedProp('tailoredSofaColors',{version:1,colors:{}});
+    return;
+  }
   updateSelectedProp('finishColors',null);
   updateSelectedProp('finishTextures',null);
   updateSelectedProp('finishRoughness',null);
@@ -1978,6 +2012,7 @@ function updateSelectedProp(p,v,noSave){
   }
   if(openingBefore && ['x','y','w','d','rot','floor'].indexOf(p)>=0)
     SceneOpeningGeometry.rebindAfterEdit(ST.selected,DATA.walls,{before:openingBefore});
+  if(typeof SourceOpeningReview!=='undefined')SourceOpeningReview.recordEditorSetting(ST.selected,p,v,DATA.walls);
   // 天井を「指定なし」へ戻したときは受け口ごと消す。undefined を残すと保存 JSON
   // には出ないのにメモリ上のプランは「指定あり」に見え、判定が食い違う。
   // 天井を書いたときは旧フィールド(ceilingHeight)も消す: HeightModel が
@@ -2349,6 +2384,14 @@ var StorageAdapter = (function(){
     load:function(){return Promise.resolve(null);},
     hasData:function(){return Promise.resolve(false);}
   };
+  if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE){
+    return {
+      save:function(data){return window.parent.ParallelEditors.persistPane(EDITOR_PANE,window.__editorPlanId,JSON.parse(JSON.stringify(data,function(k,v){return k==='_texObj'?undefined:v;})));},
+      load:function(){return window.parent.ParallelEditors.readSavedPane(window.__editorPlanId);},
+      hasData:async function(){return !!(await window.parent.ParallelEditors.readSavedPane(window.__editorPlanId));}
+    };
+  }
+
   var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
   var LEGACY_LS_KEY='webcad-plan-v1';
   function serialize(data){ return JSON.stringify(data, function(k,v){return k==='_texObj'?undefined:v;}); }

@@ -14,8 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script>
 // A child-only, read-only runtime for sequential comparison captures.
+var EDITOR_PANE = window.parent !== window && /^[a-z0-9-]{1,80}$/.test(new URLSearchParams(location.search).get('editorPane')||'') ? new URLSearchParams(location.search).get('editorPane') : null;
 var COMPARISON_PREVIEW = window.parent !== window && new URLSearchParams(location.search).get('comparisonPreview') === '1';
-if(COMPARISON_PREVIEW){
+if(COMPARISON_PREVIEW || EDITOR_PANE){
   const originalFetch=window.fetch.bind(window);
   window.fetch=function(input,options){
     const url=new URL(typeof input==='string'?input:input.url,location.href);
@@ -77,6 +78,8 @@ try {
   const mod = await import('./assets/vendor/n8ao.js');
   window.THREE.N8AOPass = mod.N8AOPass;
 } catch(e) { console.warn('N8AO load failed; AO disabled', e); }
+// Publish readiness only after optional rendering modules have settled.
+window.threeModulesReady = true;
 window.dispatchEvent(new Event('three-ready'));
 </script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
@@ -87,12 +90,15 @@ window.dispatchEvent(new Event('three-ready'));
 <!-- 間取りJSONの「読み込める形」。worker 側の取り込みと同じものを読む -->
 <script src="assets/js/plan-schema.js"></script>
 <script src="assets/js/scene-opening-geometry.js"></script>
+<script src="assets/js/source-opening-review.js"></script>
 <script src="assets/js/setback-law.js"></script>
 <!-- video-prompt.js は LockTiers を読むので、lock-tiers.js より後に置くこと -->
 <script src="assets/js/lock-tiers.js"></script>
 <script src="assets/js/video-prompt.js"></script>
 <script src="assets/js/shadow-lift.js"></script>
 <script src="assets/js/model-quality.js"></script>
+<script src="assets/js/tailored-sofa-finish.js"></script>
+<script src="assets/js/scene-appearance-profiles.js"></script>
 <script src="assets/js/utility-wires.js"></script>
 <script src="assets/js/photographic-sky.js"></script>
 <script src="assets/js/asset-catalogue.js"></script>
@@ -3571,6 +3577,17 @@ input[type="reset"]:focus-visible{
           <span id="plan-import-crop-size" class="airx-source-note"></span>
         </div>
       </div>
+      <div id="plan-import-mode-wrap" style="display:none">
+        <div class="unity-render-config">
+          <div><label for="plan-import-mode">読み取り方</label>
+            <select id="plan-import-mode" style="min-height:40px" onchange="setPlanImportExtractionMode(this.value)">
+              <option value="v1">従来の下書き</option>
+              <option id="plan-import-source-mode" value="scene-ir-v3">元図の情報を確認（実験）</option>
+            </select>
+          </div>
+        </div>
+        <div id="plan-import-mode-note" class="airx-source-note" role="status"></div>
+      </div>
       <div class="unity-render-config">
         <div>
           <label for="plan-import-hint">補足（任意）</label>
@@ -3813,11 +3830,15 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/room-program.js"></script>
 <script src="assets/js/plan-check.js"></script>
 <script src="assets/js/plan-finish.js"></script>
+<script src="assets/js/scene-material-audit.js"></script>
 <script src="assets/js/scene-catalogue.js"></script>
 <script src="assets/js/scene-source-overlay.js"></script>
 <script src="assets/js/scene-ir-v3-materialize.js"></script>
 <script src="assets/js/scene-ir-v3.js"></script>
 <script src="assets/js/scene-ir.js"></script>
+<script src="assets/js/source-object-mapping.js"></script>
+<script src="assets/js/source-image-rails.js"></script>
+<script src="assets/js/source-stair-display.js"></script>
 <script src="assets/js/plan-import.js"></script>
 <script>
 // ───── 3D ENGINE ─────
@@ -3974,7 +3995,7 @@ function disposeObj(obj,seenGeo,seenMat) {
   seenMat=seenMat||new Set();
   if (obj.geometry && !seenGeo.has(obj.geometry)) {
     seenGeo.add(obj.geometry);
-    obj.geometry.dispose();
+    if(!(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(obj.geometry)))obj.geometry.dispose();
   }
   if (obj.material) {
     if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m,seenMat); });
@@ -3986,7 +4007,7 @@ function disposeMat(m,seenMat) {
   if(!m || (seenMat&&seenMat.has(m))) return;
   if(seenMat) seenMat.add(m);
   m.dispose();
-  if (m.map) m.map.dispose();
+  if (m.map && !(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(m.map))) m.map.dispose();
   // Only release explicitly owned auxiliary maps. GLB normal/roughness maps may
   // be shared with cached models and must remain alive across scene rebuilds.
   var owned=m.userData&&m.userData.ownedAuxiliaryTextures;
@@ -4212,16 +4233,26 @@ function applyGradeSettings(){
   _gradePass.uniforms.gLift.value=GRADE_LIFT;
   _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
 }
+var _threeReadyWaiting=false,_threeReadyListener=null,_threeReadyTimer=0;
+function cancel3DEngineWait(){
+  if(_threeReadyListener)window.removeEventListener('three-ready',_threeReadyListener);
+  if(_threeReadyTimer)clearTimeout(_threeReadyTimer);
+  _threeReadyWaiting=false;_threeReadyListener=null;_threeReadyTimer=0;
+}
 function init3D(){
-  if(ren) return;
-  if(typeof window.THREE==='undefined'){
+  if(window._editorPaneDisposed||ren) return;
+  if(!window.threeModulesReady){
     // ESモジュール(three.js)ロード前に呼ばれた場合はロード完了後に再実行。
     // ロード中/失敗を画面に表示し、無言の空画面にしない
     show3DEngineNotice('loading');
-    window.addEventListener('three-ready',function(){ hide3DEngineNotice(); init3D(); if(sc3&&ST.view!=='2d') rebuild3D(); },{once:true});
-    setTimeout(function(){ if(typeof window.THREE==='undefined') show3DEngineNotice('failed'); },8000);
+    if(_threeReadyWaiting)return;
+    _threeReadyWaiting=true;
+    _threeReadyListener=function(){cancel3DEngineWait();if(window._editorPaneDisposed)return;hide3DEngineNotice();if(ST.view!=='2d')setView(ST.view);};
+    window.addEventListener('three-ready',_threeReadyListener,{once:true});
+    _threeReadyTimer=setTimeout(function(){_threeReadyTimer=0;if(!window._editorPaneDisposed&&!window.threeModulesReady)show3DEngineNotice('failed');},8000);
     return;
   }
+  cancel3DEngineWait();
   hide3DEngineNotice();
   var wrap=document.getElementById('c3d-wrap');
   ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -4535,6 +4566,9 @@ if(typeof document!=='undefined'){
   window.addEventListener('focus',function(){ recover3DIfContextLost(); });
 }
 
+var _sceneCameraFitTimer=null;
+function cancelScheduledCameraFit(){if(_sceneCameraFitTimer!==null)clearTimeout(_sceneCameraFitTimer);_sceneCameraFitTimer=null;}
+function scheduleSceneCameraFit(delay){cancelScheduledCameraFit();_sceneCameraFitTimer=setTimeout(function(){_sceneCameraFitTimer=null;fitCameraToScene();},delay);}
 function fitCameraToScene(){
   if(!sc3||!camExt||!orbit) return;
   if(WALKTHROUGH) return;
@@ -8624,19 +8658,7 @@ function windowTopMm(it){
 }
 function normalizeWindowVerticalProps(it,prefer){
   if(!it || !isWindowLikeType(it.type)) return;
-  var maxTop=windowMaxTopMm(it);
-  var sill=Number(it.windowSill);
-  var height=Number(it.windowHeight);
-  if(!isFinite(sill)) sill=it.type==='window-door'?0:900;
-  if(!isFinite(height)) height=it.type==='window-door'?2100:1200;
-  sill=Math.max(0,Math.min(maxTop-200,sill));
-  height=Math.max(200,Math.min(maxTop,height));
-  if(sill+height>maxTop){
-    height=Math.max(200,maxTop-sill);
-  }
-  it.windowSill=Math.round(sill);
-  it.windowHeight=Math.round(height);
-  if(it.windowTop!==undefined) delete it.windowTop;
+  HeightModel.normalizeWindowVerticalProps(it,windowMaxTopMm(it));
 }
 function ensureWindowProps(it){
   if(!it || !isWindowLikeType(it.type)) return;
@@ -10869,7 +10891,13 @@ function stairEdgesFace(ea,eb){
 // {a,b,ea,eb,gap,span} / null。
 var _stairLinkCache={};
 var _stairLinkCacheSize=0;
+function stairSourceGroupMatches(a,b){
+  var ca=a&&a.sourceStairConnection,cb=b&&b.sourceStairConnection;
+  return !ca&&!cb||!!(ca&&cb&&typeof ca.groupId==='string'&&ca.groupId&&ca.groupId===cb.groupId);
+}
 function stairPartsLink(a,b){
+  if(!stairSourceGroupMatches(a,b))return null;
+  if((a&&a.stairDisplayOnly)||(b&&b.stairDisplayOnly)) return null;
   if(!a||!b||a===b||(a.floor||1)!==(b.floor||1)) return null;
   var ck=stairPartShapeKey(a)+'|'+stairPartShapeKey(b);
   if(Object.prototype.hasOwnProperty.call(_stairLinkCache,ck)){
@@ -10882,6 +10910,8 @@ function stairPartsLink(a,b){
   return r;
 }
 function stairPartsLinkRaw(a,b){
+  if(!stairSourceGroupMatches(a,b))return null;
+  if((a&&a.stairDisplayOnly)||(b&&b.stairDisplayOnly)) return null;
   var best=null, EA=stairPartEdgesMm(a), EB=stairPartEdgesMm(b);
   EA.forEach(function(ea){
     if(ea.role==='side') return;
@@ -10909,12 +10939,13 @@ function stairPartsLinked(a,b){ return !!stairPartsLink(a,b); }
 // どちらもつながっている部材どうし(床の踊り場で折り返す2本)は、横腹が接して
 // いても正しい形なので知らせない。
 function stairTouchingUnlinked(seed){
+  if(seed&&seed.stairDisplayOnly) return [];
   if(!seed||!isStairPartType(seed.type)||isFloorLanding(seed)) return [];
   var chain=stairChainParts(seed), fl=seed.floor||1;
   var floors=DATA.items.filter(function(l){ return (l.floor||1)===fl&&isFloorLanding(l); });
   var myFloors=floors.filter(function(l){ return chain.some(function(p){ return stairPartsLinked(p,l); }); });
   return DATA.items.filter(function(o){
-    if((o.floor||1)!==fl||!isStairPartType(o.type)||isFloorLanding(o)||chain.indexOf(o)>=0) return false;
+    if(!stairSourceGroupMatches(seed,o)||(o.floor||1)!==fl||!isStairPartType(o.type)||isFloorLanding(o)||chain.indexOf(o)>=0) return false;
     if(myFloors.some(function(l){ return stairChainParts(o).some(function(q){ return stairPartsLinked(q,l); }); })) return false;
     return chain.some(function(p){ return stairPartsTouch(p,o)&&!stairPartsLinked(p,o); });
   });
@@ -10925,12 +10956,12 @@ function stairTouchingUnlinked(seed){
 // 吸い付かなければ {x,y} をそのまま返す。
 var STAIR_SNAP_MM=250;
 function stairSnapPosition(it,x,y){
-  if(!it||!isStairPartType(it.type)) return {x:x,y:y};
+  if(!it||it.stairDisplayOnly||!isStairPartType(it.type)) return {x:x,y:y};
   var probe=Object.assign({},it,{x:x,y:y});
   var mine=stairPartEdgesMm(probe).filter(function(e){ return e.role!=='side'; });
   var best=null, fl=it.floor||1;
   DATA.items.forEach(function(o){
-    if(o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
+    if(!stairSourceGroupMatches(it,o)||o.stairDisplayOnly||o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
     stairPartEdgesMm(o).forEach(function(eo){
       if(eo.role==='side') return;
       mine.forEach(function(e){
@@ -10951,8 +10982,62 @@ function stairSnapPosition(it,x,y){
   });
   return best||{x:x,y:y};
 }
+// Source geometry connections are reviewed drafts, never implicit floor openings or walk routes.
+function sourceStairConnectionCandidate(it){
+  if(!it||(it.floor!==1&&it.floor!==2)||!it.stairDisplayOnly||!it.sourceStairDisplay)return null;
+  var sourceFloor=it.floor,targetFloor=sourceFloor+1;
+  var pair=DATA.items.filter(function(o){return o.floor===sourceFloor&&o.stairDisplayOnly&&o.sourceStairDisplay&&o.sourceStairDisplay.targetFloor===targetFloor;});
+  if(pair.length!==2||!pair.some(function(o){return o.type==='stair';})||!pair.some(function(o){return o.type==='stair-corner';}))return null;
+  var clones=pair.map(function(o){return Object.assign({},o,{stairDisplayOnly:false});}),info=stairGroupChainInfo(clones);
+  if(!info.order||info.conflicts.length||info.branches.length||info.order[0].type!=='stair-corner')return null;
+  var link=stairPartsLink(info.order[0],info.order[1]);if(!link||link.legacy||link.ea.role!=='up'||link.eb.role!=='down')return null;
+  var ordered=info.order.map(function(o){return pair.find(function(p){return p.id===o.id;});}),down=stairPartPortsMm(ordered[0],0).down,up=stairPartPortsMm(ordered[1],0).up;
+  if(!roomAtPointOnFloor(targetFloor,up.x,up.y))return null;
+  var report=(DATA.sceneReconstructionReports||[]).slice().reverse().find(function(r){return r.sourceLocal&&Array.isArray(r.stairDisplayDecisions)&&pair.every(function(o){return r.sourceLocal.items&&JSON.stringify(r.sourceLocal.items[o.sourceStairDisplay.sourceItemIndex])===o.sourceStairDisplay.sourceSnapshot;});});
+  if(!report||!report.poses||!report.poses[sourceFloor]||!report.translation)return null;
+  var decisions=report.stairDisplayDecisions.filter(function(d){return pair.some(function(o){return o.sourceStairDisplay.sourceItemIndex===d.sourceItemIndex;});}),expected;
+  try{var sourceKey=PlanRegistration.snapshot(report.sourceLocal),proposalKey=PlanRegistration.snapshot(report.proposals);if(decisions.some(function(d){return d.sourceSnapshot!==sourceKey||d.proposalSnapshot!==proposalKey;}))return null;expected=SourceStairDisplay.materialize(report.sourceLocal,decisions.map(function(d){return Object.assign({},d,{sourceSnapshot:d.entitySnapshot});}));}catch(error){return null;}
+  if(expected.length!==2)return null;
+  for(var i=0;i<pair.length;i++){
+    var actual=pair[i],original=expected.find(function(o){return o.sourceStairDisplay.sourceItemIndex===actual.sourceStairDisplay.sourceItemIndex;});if(!original)return null;
+    var centre=PlanRegistration.transform({x:original.x+original.w/2,y:original.y+original.d/2},report.poses[sourceFloor]),tx=report.translation.x,ty=report.translation.y;
+    if(!Number.isFinite(tx)||!Number.isFinite(ty)||Math.abs(actual.x-(centre.x+tx-original.w/2))>0.001||Math.abs(actual.y-(centre.y+ty-original.d/2))>0.001||actual.w!==original.w||actual.d!==original.d||actual.rot!==((original.rot||0)+report.poses[sourceFloor].quarterTurns*90)%360||!!actual.flipX!==!!original.flipX||!!actual.flipY!==!!original.flipY||(actual.elev||0)!==0)return null;
+  }
+  var baseRoom=roomAtPointOnFloor(sourceFloor,down.x,down.y),targetRoom=roomAtPointOnFloor(targetFloor,up.x,up.y),reviewSnapshot=JSON.stringify({parts:ordered,sourceItems:pair.map(function(o){return report.sourceLocal.items[o.sourceStairDisplay.sourceItemIndex];}),decisions:decisions.map(function(d){return {sourceItemIndex:d.sourceItemIndex,entitySnapshot:d.entitySnapshot,reviewed:d.reviewed,displayRiseMm:d.displayRiseMm,displayBaseOffsetMm:d.displayBaseOffsetMm,partOrder:d.partOrder,targetFloor:d.targetFloor,directionDecision:d.directionDecision};}),poses:report.poses,translation:report.translation,datum:{sourceFloor:sourceFloor,targetFloor:targetFloor,sourceFloorY:floorTopY(sourceFloor),targetFloorY:floorTopY(targetFloor),baseRoom:baseRoom,targetRoom:targetRoom,baseY:roomFloorAt(sourceFloor,down.x,down.y),targetY:roomFloorAt(targetFloor,up.x,up.y)}});
+  return {sourceFloor:sourceFloor,targetFloor:targetFloor,parts:ordered,reviewSnapshot:reviewSnapshot,baseRoomId:baseRoom&&baseRoom.id,targetRoomId:targetRoom.id,baseOffsetMm:Math.round((roomFloorAt(sourceFloor,down.x,down.y)-floorTopY(sourceFloor))/U),targetOffsetMm:Math.round((roomFloorAt(targetFloor,up.x,up.y)-floorTopY(targetFloor))/U),straightSteps:getStairStepCount(ordered[1])};
+}
+function connectSelectedSourceStairDraft(){
+  var draft=sourceStairConnectionCandidate(ST.selected);if(!draft){alert('元図の階段2部材と上り方向・行先を再確認してください。');return;}
+  var review=document.getElementById('source-stair-connect');if(!review||review.getAttribute('data-source-review')!==draft.reviewSnapshot){alert('元データまたは高さ基準が変わりました。設定欄を開き直して再確認してください。');return;}
+  var sourceFloor=draft.sourceFloor,targetFloor=draft.targetFloor;
+  var base=Number(document.getElementById('source-stair-base-offset').value),top=Number(document.getElementById('source-stair-target-offset').value),steps=Number(document.getElementById('source-stair-straight-steps').value);
+  var baseMm=Math.round(floorTopY(sourceFloor)/U)+base,topMm=Math.round(floorTopY(targetFloor)/U)+top;
+  if(!Number.isFinite(base)||base<0||base>6000||!Number.isFinite(top)||top< -1000||top>6000||!Number.isInteger(steps)||steps<3||steps>30||topMm-baseMm<500||topMm-baseMm>6000){alert('高さ仮定と直線段数を確認してください。');return;}
+  var snapshot=draft.reviewSnapshot;
+  if(!confirm(sourceFloor+'F→'+targetFloor+'Fの接続下書き: 足元 '+baseMm+'mm、上端 '+topMm+'mm、回り3段＋直線'+steps+'段。高さ・段数は未測定の仮定です。床穴と階移動は作りません。この条件で接続しますか？'))return;
+  var current=sourceStairConnectionCandidate(ST.selected);if(!current||current.reviewSnapshot!==snapshot){alert('確認中に元データまたは高さ基準が変わりました。再確認してください。');return;}
+  saveState();var ids=current.parts.map(function(o){return o.id;});
+  current.parts.forEach(function(o,n){o.stairDisplayOnly=false;o.stairOrder=n+1;o.stairTarget='upper';o.sourceStairConnection={version:1,groupId:ids.join(':'),memberIds:ids.slice(),targetFloor:targetFloor,baseMm:baseMm,topMm:topMm,steps:n?steps:3,heightProvenance:'user-reviewed-unmeasured-assumption',measured:false,floorOpeningsReviewed:false,walkRouteReviewed:false,baseRoomId:current.baseRoomId,targetRoomId:current.targetRoomId,reviewSnapshot:snapshot};});
+  updateProps();draw2d();if(ren)rebuild3D();
+}
+function sourceStairConnectionSpan(it){
+  var c=it&&it.sourceStairConnection;if(!c||c.version!==1||(it.floor!==1&&it.floor!==2)||c.targetFloor!==it.floor+1||!Number.isFinite(c.baseMm)||!Number.isFinite(c.topMm)||c.topMm-c.baseMm<500||c.topMm-c.baseMm>6000||!Number.isInteger(c.steps)||c.steps<3||c.steps>30)return null;
+  return {baseY:c.baseMm*U,topY:c.topMm*U,riseM:(c.topMm-c.baseMm)*U};
+}
 // 選んだ階段の、上る順番とつながりの説明(設定欄に出す)。
 function stairConnectionSummary(it){
+  if(it&&it.sourceStairConnection){
+    var c=it.sourceStairConnection,span=sourceStairConnectionSpan(it),group=getConnectedStairParts(it),info=stairGroupChainInfo(group),ends=stairRunEndsMm(it,0),gap=span?Math.round((roomFloorAt(c.targetFloor,ends.up.x,ends.up.y)-span.topY)/U):null,baseGap=span?Math.round((roomFloorAt(it.floor,ends.down.x,ends.down.y)-span.baseY)/U):null;
+    return {text:'元図の投影線とは別の'+it.floor+'F→'+c.targetFloor+'F接続下書き。高さ・段数は未測定の仮定。回り3段固定。床開口・階移動は未確認のため無効。'+(span?'足元 '+c.baseMm+'mm、上端 '+c.topMm+'mm。足元床との高さ差 '+baseGap+'mm、行先床との高さ差 '+gap+'mm。':'高さ仮定の記録が不正です。')+(group.length!==2||info.conflicts.length||!info.order?'部材の接続方向・欠落を再確認してください。':''),warn:true};
+  }
+  if(it&&it.stairDisplayOnly){
+    var text="図面からの表示用階段。高さは確認した表示上の仮定です。階接続・床開口・歩行経路は作りません。コーナーは既存モデルの3段固定です。";
+    var target=it.sourceStairDisplay&&it.sourceStairDisplay.targetFloor;
+    if(Number.isInteger(target)&&target===(it.floor||1)+1&&typeof stairPartPortsMm==='function'&&typeof roomFloorAt==='function'){
+      try{var ports=stairPartPortsMm(it,0),gap=(roomFloorAt(target,ports.up.x,ports.up.y)-stairUpperSpanM(it).topY)/U;if(isFinite(gap))text+=' '+target+'階の床とこの部材の表示上端との差 '+Math.round(gap)+'mm（現在の床高さも表示仮定。接続完了ではありません）。';}catch(error){text+=' 行先床の位置・高さを確認できません。';}
+    }else text+=' 行先階の確認がありません。';
+    return {text:text,warn:true};
+  }
   if(!it||!isStairPartType(it.type)) return null;
   var names={'stair':'直階段','stair-corner':'コーナー階段','stair-landing':'踊り場'};
   if(isFloorLanding(it)){
@@ -10982,6 +11067,7 @@ function stairConnectionSummary(it){
   return {text:text+'。'+notes.join(''),warn:warn};
 }
 function getConnectedStairParts(seed){
+  if(seed&&seed.stairDisplayOnly) return [seed];
   // 行き先の違う階段は、接していても1本の階段にしない。
   // 「段差へ上る階段」の隣に「上の階へ行く階段」を折り返しで置くと、
   // 以前は1つのグループになり、上の階へ行くはずの階段が段差用の階段として
@@ -10993,7 +11079,7 @@ function getConnectedStairParts(seed){
   if(isFloorLanding(seed)) return [seed];
   var parts=DATA.items.filter(function(o){
     // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
-    return o.floor===seed.floor && isStairPartType(o.type) && !isFloorLanding(o);
+    return !o.stairDisplayOnly && o.floor===seed.floor && isStairPartType(o.type) && !isFloorLanding(o) && stairSourceGroupMatches(seed,o);
   });
   // 踊り場は1つのグループにだけ属する。段差へ上る階段(レベル)に(踊り場を介して
   // でも)接していればそちら、そうでなければ上の階へ上がる階段の側。
@@ -11043,7 +11129,7 @@ function stairLandingIsLevel(landing,parts){
 // 上がる階段なのか段差を上る階段なのかを区別できないからである。
 // 省略時は 'upper' なので、保存済みプランの階段は1段も変わらない。
 function isLevelStairPart(it){
-  return !!(it && isStairPartType(it.type) && !isFloorLanding(it) && it.stairTarget==='level');
+  return !!(it && !it.stairDisplayOnly && isStairPartType(it.type) && !isFloorLanding(it) && it.stairTarget==='level');
 }
 // ── 踊り場の使い方 ─────────────────────────────────────────────────────
 // 踊り場には2通りの使い方がある。
@@ -11073,7 +11159,7 @@ function floorLandingAtMm(fl,pt,marginMm){
   var list=DATA.items;
   for(var i=0;i<list.length;i++){
     var o=list[i];
-    if((o.floor||1)===fl&&isFloorLanding(o)&&!o.hidden3D&&stairPointOnPart(o,pt,marginMm===undefined?0:marginMm)) return o;
+    if(!o.stairDisplayOnly&&(o.floor||1)===fl&&isFloorLanding(o)&&!o.hidden3D&&stairPointOnPart(o,pt,marginMm===undefined?0:marginMm)) return o;
   }
   return null;
 }
@@ -11084,6 +11170,7 @@ function stairFloorAtMm(fl,pt){
 }
 // 行き先に選べる床: この階段に接している、床として使う踊り場と段差の部屋。
 function stairTargetCandidates(seed){
+  if(seed&&seed.stairDisplayOnly) return [];
   if(!seed||!isStairPartType(seed.type)||isFloorLanding(seed)) return [];
   var fl=seed.floor||1, chain=stairChainParts(seed), out=[];
   // 段差の部屋は、この階段の空いている出入り口の先にあるときだけ並べる。
@@ -11148,9 +11235,10 @@ function stairChainFreeEnds(chain,outMm){
 // 行き先を変えるときは、この1本すべてに同じ値を入れる -- 部材ごとに違う行き先が
 // 残ると、踊り場がどちらの階段に付くかが利用者から見えなくなる。
 function stairChainParts(seed){
+  if(seed&&seed.stairDisplayOnly) return [seed];
   if(!seed||!isStairPartType(seed.type)) return [];
   if(isFloorLanding(seed)) return [seed];
-  var parts=DATA.items.filter(function(o){ return o.floor===seed.floor&&isStairPartType(o.type)&&!isFloorLanding(o); });
+  var parts=DATA.items.filter(function(o){ return !o.stairDisplayOnly&&o.floor===seed.floor&&isStairPartType(o.type)&&!isFloorLanding(o)&&stairSourceGroupMatches(seed,o); });
   var out=[], queue=[seed], seen={};
   seen[seed.id]=true;
   while(queue.length){
@@ -11372,7 +11460,7 @@ function stairFootY(seed,ends){
   if(explicitY!==null) return explicitY;
   // 下端の先が、別のグループ(段差へ上る階段)の踊り場の上なら、その踊り場から始まる。
   var land=DATA.items.filter(function(o){
-    return o.floor===fl&&isStairLandingType(o.type)&&ends.group.indexOf(o)<0&&stairPointOnPart(o,ends.down,0);
+    return !o.stairDisplayOnly&&o.floor===fl&&isStairLandingType(o.type)&&ends.group.indexOf(o)<0&&stairPointOnPart(o,ends.down,0);
   })[0];
   if(land) return stairLandingTopY(land);
   var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
@@ -11389,6 +11477,14 @@ function stairLandingTopY(landing){
   return span.baseY+stairRiseInfo(landing).base;
 }
 function stairUpperSpanM(seed){
+  if(seed&&seed.sourceStairConnection){var reviewed=sourceStairConnectionSpan(seed);if(reviewed)return reviewed;return {baseY:floorTopY(seed.floor||1),topY:floorTopY(seed.floor||1),riseM:0};}
+  if(seed&&seed.stairDisplayOnly){
+    var rise=Number(seed.displayRiseMm),off=Number(seed.displayBaseOffsetMm);
+    rise=isFinite(rise)&&rise>=0&&rise<=6000?rise:0;
+    off=isFinite(off)&&off>=0&&off<=6000?off:0;
+    var base=floorTopY(seed.floor||1)+off*U;
+    return {baseY:base,topY:base+rise*U,riseM:rise*U};
+  }
   var fl=(seed&&seed.floor)||1, nf=fl+1;
   var ends=stairRunEndsMm(seed);
   var baseY=stairFootY(seed,ends);
@@ -11468,6 +11564,7 @@ function stairGroupRiseM(it){
   return stairUpperSpanM(it).riseM;
 }
 function stairRiseInfo(it){
+  if(it&&it.stairDisplayOnly) return {index:0,count:1,base:0,rise:stairUpperSpanM(it).riseM,steps:getStairStepCount(it)};
   // 床として使う踊り場は段を持たず、足元の床から指定の高さまで板を上げる。
   if(isFloorLanding(it)) return {index:0,count:1,base:Math.max(0,landingFloorTopY(it)-floorLandingBaseY(it)),rise:0,steps:0};
   var group=stairGroupOrdered(it);
@@ -11492,6 +11589,8 @@ function getStairStepCount(it){
   // 踊り場は段を持たない。上り高さを分け合わないので 0 を返す。
   if(isStairLandingType(it.type)) return 0;
   if(it.type==='stair-corner') return 3;
+  if(it.sourceStairConnection&&sourceStairConnectionSpan(it))return it.sourceStairConnection.steps;
+  if(it.stairDisplayOnly) return stairStepCount(Math.round(stairUpperSpanM(it).riseM/U),it.d||2730);
   // レベル階段は段差ぶんしか上らないので、段数も実際の上り高さから出す。
   // 上階へ上がる階段の段数を階高から出しているのは従来どおり(実際の上り高さに
   // 変えると、保存済みプランの階段の段数が黙って変わる)。
@@ -12749,6 +12848,7 @@ function buildItem3D(it){
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
       ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness,it.finishTextures,FINISH_TEXTURE_DEPS);
+      if(typeof TailoredSofaFinish!=='undefined'&&it.type===TailoredSofaFinish.type)getTailoredSofaFinishRuntime().apply(fmpClone,_modelCache[fmp.model],it,ModelQuality);
       if(fmp.mirrorOption && it.showMirror){
         var spec=fmp.mirrorOption,sx=it.w/fmp.w,sy=getItemHeightValue(it)/fmp.h;
         var mirror=new THREE.Mesh(new THREE.BoxGeometry(spec.w*sx,spec.h*sy,.004),new THREE.MeshStandardMaterial({color:0xe1e7e8,metalness:1,roughness:.035}));
@@ -14985,21 +15085,46 @@ function scheduleGltfRebuild3D(){
     if(typeof invalidate3D==='function') invalidate3D();
   },delay);
 }
+// Shared panes use the host's private certificate registry, without cache tags.
+function getTailoredSofaFinishRuntime(){
+  return EDITOR_PANE&&window.parent.TailoredSofaFinish?window.parent.TailoredSofaFinish:TailoredSofaFinish;
+}
+function loadEditorGltf(url,onLoad,onError){
+  var fetchUrl=url+(url.indexOf('?')<0?'?v='+MODEL_ASSET_VER:'');
+  var loader=getGltfLoader();
+  if(typeof TailoredSofaFinish==='undefined'||url!==TailoredSofaFinish.url){loader.load(fetchUrl,onLoad,undefined,onError);return;}
+  // Inspect the exact bytes that GLTFLoader parses; a mismatch still loads natively.
+  var file=new THREE.FileLoader(loader.manager);file.setResponseType('arraybuffer');
+  file.load(fetchUrl,function(bytes){
+    var runtime=getTailoredSofaFinishRuntime();
+    runtime.inspect(bytes).then(function(inspection){
+      loader.parse(bytes,THREE.LoaderUtils.extractUrlBase(url),function(gltf){
+        runtime.register(gltf,inspection).then(function(){onLoad(gltf);if(ST.selected&&ST.selected.type===runtime.type)updateProps();},onError);
+      },onError);
+    },onError);
+  },undefined,onError);
+}
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
   if(_modelLoading[url]) return false;
   _modelLoading[url]=true;
   _modelFailed[url]=false;
-  var fetchUrl = url + (url.indexOf('?')<0 ? '?v='+MODEL_ASSET_VER : '');
-  getGltfLoader().load(fetchUrl,function(gltf){
+  if(EDITOR_PANE && window.parent.ParallelEditors){
+    window.parent.ParallelEditors.modelPool.get(url,function(){return new Promise(function(resolve,reject){loadEditorGltf(url,function(gltf){ModelQuality.prepare(gltf.scene,url);if(_texCapSize)capModelTextures(gltf.scene,_texCapSize);if(url===TailoredSofaFinish.url)getTailoredSofaFinishRuntime().publish(gltf.scene);resolve(gltf.scene);},reject);});}).then(function(template){
+      if(window._editorPaneDisposed)return;var copy=window.EditorPane.cloneModel(template);
+      _modelCache[url]=copy;_modelLoading[url]=false;delete _modelFailed[url];scheduleGltfRebuild3D();if(typeof TailoredSofaFinish!=='undefined'&&url===TailoredSofaFinish.url&&ST.selected&&ST.selected.type===TailoredSofaFinish.type)updateProps();
+    },function(err){_modelLoading[url]=false;_modelFailed[url]=true;console.warn('GLB load failed:',url,err);scheduleGltfRebuild3D();});return false;
+  }
+  loadEditorGltf(url,function(gltf){
     ModelQuality.prepare(gltf.scene,url);
     if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
+    if(url===TailoredSofaFinish.url)getTailoredSofaFinishRuntime().publish(gltf.scene);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
     delete _modelFailed[url];
     scheduleGltfRebuild3D();
-  },undefined,function(err){
+  },function(err){
     _modelLoading[url]=false;
     _modelFailed[url]=true;
     console.warn('GLB load failed; using fallback geometry:',url,err);
@@ -15200,6 +15325,7 @@ function queueFmpInstance(url,it,grp){
   // applyFinishes を通らないため)。finishTextures を足したときに実際に
   // 起きた。項目を増やすときは FINISH_PROPS に足すこと。
   if(it.colorCustom || FINISH_PROPS.some(function(k){ return it[k] && Object.keys(it[k]).length; })) return false;
+  if(typeof TailoredSofaFinish!=='undefined'&&TailoredSofaFinish.active(it)) return false;
   if(!getGltfNativeBox(url)) return false;
   grp.updateMatrix();
   var fitMatrix=computeBoxFitLocalMatrix(url,it.w*U,getItemHeightValue(it)*U,it.d*U);
@@ -15783,7 +15909,7 @@ function stairQuadOf(it){
 // **通り抜ける**床だけだからである(levelStairHolesForRoom)。
 function levelStairQuadsForFloor(floor){
   return DATA.items.filter(function(it){
-    return it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
+    return !it.stairDisplayOnly && !it.sourceStairDisplay && !it.sourceStairConnection && it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
   }).map(function(it){
     var span=stairLevelSpanM(it);
     return {quad:stairQuadOf(it), baseY:span.baseY, topY:span.topY};
@@ -15811,7 +15937,7 @@ function stairwellQuadsForFloor(floor){
     // レベル階段は上階へ抜けないので、上階の床に穴を開けてはいけない。
     // 段差へ上る階段のグループに付いた踊り場も抜けない(部材の宣言だけで見ると
     // 宣言を持たない踊り場が上階に穴を開けていた)。床として使う踊り場も同じ。
-    return it.floor===belowFloor && isStairPartType(it.type) &&
+    return !it.stairDisplayOnly && !it.sourceStairDisplay && !it.sourceStairConnection && it.floor===belowFloor && isStairPartType(it.type) &&
       !isFloorLanding(it) && !stairGroupIsLevel(it) && !it.hidden3D;
   }).map(stairQuadOf);
 }
@@ -15879,7 +16005,7 @@ function stairTreadFloorMaterial(it,wM,dM){
     var fl=it.floor||1, cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
     var room=roomAtPointOnFloor(fl,cx,cy);
     if(!room) return null;
-    src={n:room.n,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
+    src={n:room.n,use:room.use,floorDiagramPattern:room.floorDiagramPattern,floorModuleMm:room.floorModuleMm,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
       floorMaterial:room.floorMaterial,floorColor:room.floorColor};
   } else if(FLOOR_PBR_STEM[mode]){
     src={floorMaterial:mode};
@@ -15887,14 +16013,18 @@ function stairTreadFloorMaterial(it,wM,dM){
   src.w=Math.max(1,wM/U); src.d=Math.max(1,dM/U);
   return makeRoomFloorMaterial(src);
 }
+// Semantic room use survives import even when the printed name is unusual.
+// This is a display default only: it does not infer a measured finish or floor step.
+function defaultRoomFloorMaterialKey(r){
+  return /^(entry|entrance|bath|bathroom|toilet|wash|washroom)$/.test(r.use||'')||/^(玄関|土間|バス|浴室|トイレ|洗面|洗面所)$/.test(r.n||'')?'tile_floor':'wood_floor';
+}
 function makeRoomFloorMaterial(r){
   if(r.floorDiagramPattern==='plain'&&!r.texture) return new THREE.MeshStandardMaterial({color:r.floorColor||0xffffff,roughness:.85,metalness:0,envMapIntensity:.20});
   var rw=r.w*U, rd=r.d*U;
-  var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
   var tint=(r&&r.floorColor)||0xffffff;
   // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
   // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
-  var floorKey=roomFloorMaterialKey(r)||(isWet?'tile_floor':'wood_floor');
+  var floorKey=roomFloorMaterialKey(r)||defaultRoomFloorMaterialKey(r);
   var stem=FLOOR_PBR_STEM[floorKey];
   var diffName=stem+'_diffuse.jpg';
   var normName=stem+'_normal.jpg';
@@ -16557,7 +16687,10 @@ function buildLandscape(){
     gx1=Math.max(gx1,b[2]); gz1=Math.max(gz1,b[3]);
   });
   bx=(gx0+gx1)/2*U; bz=(gz0+gz1)/2*U;
-  var gndSize = Math.max(Math.max(bw, bd) + 12,
+  // Keep init3D's 60m backdrop: a small imported plan must not shrink it below
+  // a wide upper-floor camera frustum when two editor panes become one.
+  // The plane remains two triangles; it is a backdrop, not a room or site boundary.
+  var gndSize = Math.max(60, Math.max(bw, bd) + 12,
                          Math.max((gx1-gx0)*U, (gz1-gz0)*U) * 3);
   var gndMat = new THREE.MeshStandardMaterial({
     color: 0xd7d5ce,
@@ -16855,12 +16988,16 @@ function applyInteriorLightBudget(cam){
   // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
   // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
   // compileAsync は隠れている物の材質も作る(three.js r169)。
-  if(!(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)&&!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+  // Submit the same hidden-material shader warmup without compileAsync's timer.
+  // That timer dereferences disposed material programs after a rebuild/detach
+  // in three.js r169; a Promise catch cannot catch its timer callback error.
+  if(!(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)&&!L.precompiled&&ren&&typeof ren.compile==='function'){
     L.precompiled=true;
-    try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
+    try{ ren.compile(sc3,cam); }catch(e){}
   }
 }
 function render3DNow(){
+  if(typeof window!=='undefined'&&window._editorHostCovered)return;
   if(!ren||!sc3||!camExt) return;
   applyInteriorLightBudget(camExt);
   // 斜線の寸法の文字を、この視点で建物に被らない位置へ逃がしてから描く。
@@ -16962,7 +17099,7 @@ function walkStairSampleAt(xMm,zMm,floor,marginMm){
   var best=null;
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
+    if(it.stairDisplayOnly || it.sourceStairDisplay || it.sourceStairConnection || it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
     // レベル階段は階をまたがない。上下階の遷移を扱うこの経路には入れない。
     // 段差へ上る階段(踊り場を含むグループ全体)は、上の階への経路に入れない。
     // 部材の宣言(isLevelStairPart)だけで見ると、宣言を持たない踊り場が上の階への
@@ -16988,7 +17125,7 @@ function walkLevelStairGroundAt(xMm,zMm,floor,marginMm){
   var best=null, top=floorTopY(floor);
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
+    if(it.stairDisplayOnly || it.sourceStairDisplay || it.sourceStairConnection || it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
     // 踊り場も、段差へ上る階段のグループに属していればここで足元を持つ。
     if(!stairGroupIsLevel(it)) continue;
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
@@ -17008,7 +17145,7 @@ function walkFloorLandingGroundAt(xMm,zMm,floor){
   var best=null, top=floorTopY(floor);
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor||!isFloorLanding(it)||it.hidden3D) continue;
+    if(it.stairDisplayOnly||it.floor!==floor||!isFloorLanding(it)||it.hidden3D) continue;
     if(stairLocalProgress(it,xMm,zMm,0)===null) continue;
     var y=landingFloorTopY(it)-top;
     if(best===null||y>best) best=y;
@@ -17474,7 +17611,7 @@ function initWalkHud(){
     b.addEventListener('pointerleave',release);
   });
 }
-function exitWalkMode(){ setView('3d-ext'); setTimeout(fitCameraToScene,100); }
+function exitWalkMode(){ setView('3d-ext'); scheduleSceneCameraFit(100); }
 // ドアの接近自動開閉。プラン上のデフォルト状態(開/閉)に関わらず、
 // ウォークスルー中は「近づくと開き、離れると閉まる」で統一する。
 // (以前はプラン側で開扉状態のドアを丸ごとスキップしており、
@@ -17765,8 +17902,10 @@ function setDynamicResolution(low){
   if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
+  if(typeof window!=='undefined'&&window._editorPaneDisposed)return;
   if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return; // Captures render explicitly, with no camera animation.
   requestAnimationFrame(loop3D);
+  if(typeof window!=='undefined'&&window._editorHostCovered)return;
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
   if(ST.view==='2d' || document.hidden) return;
@@ -17798,7 +17937,7 @@ function loop3D(){
   } else if(lowResWanted){
     setDynamicResolution(true);
   }
-  if(!animating && !_needs3DRender && now-_lastSafety3DRenderAt<1500) return;
+  if(!animating && !_needs3DRender && ((typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE) || now-_lastSafety3DRenderAt<1500)) return;
   _last3DFrameAt=now;
   // 静的シャドウマップの更新トリガ: シーン変更・ドア開閉アニメ・ギズモ操作
   if(ren&&ren.shadowMap&&(_needs3DShadowUpdate||GIZMO_DRAG.active||WALK._doorsAnim)) ren.shadowMap.needsUpdate=true;
@@ -17971,7 +18110,7 @@ function setView(v){
     // 保存済み/直前の外観カメラがあれば復元、無ければ全体表示
     if(v==='3d-ext'){
       if(ST._camStash&&ST._camStash.ext) applyStashedCamera(ST._camStash.ext);
-      else setTimeout(fitCameraToScene, 100);
+      else scheduleSceneCameraFit(100);
     }
     // 2Dで選択中のオブジェクトがあれば、3Dでも設定パネルを引き継いで開く
     // (ウォークスルーはHUDと干渉するため除外)
@@ -17995,7 +18134,7 @@ function refresh3DPreview(){
   if(!ren) init3D();
   if(ren){
     build3D();
-    if(ST.view==='3d-ext') setTimeout(fitCameraToScene, 50);
+    if(ST.view==='3d-ext') scheduleSceneCameraFit(50);
   }
   syncExteriorWallPanel();
   if(typeof invalidate3D==='function') invalidate3D();
@@ -18129,6 +18268,8 @@ function resetView(){
 function onFloorChange(v){
   ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false; resetPickCycle();
   document.getElementById('props').classList.remove('show');
+  // The previous selection is gone; its hidden controls are rebuilt on the next selection.
+  var oldProps=document.getElementById('props-body');if(oldProps)oldProps.textContent='';
   document.getElementById('st-floor').textContent='フロア:'+v+'F';
   draw2d();
 }
@@ -18656,7 +18797,7 @@ function isInsideSwingDoor2dLocal(it,lx,ly){
   var span=leafX-hingeX;
   var openDir=it.flipY?-1:1;
   var isClosed=doorOpenState(it)==='closed';
-  var openAng=isClosed?0:openDir*Math.PI/3;
+  var openAng=isClosed?0:openDir*Math.PI/2;
   var openX=hingeX+span*Math.cos(openAng);
   var openY=span*Math.sin(openAng);
   if(Math.abs(ly)<=tol && lx>=-hw-tol && lx<=hw+tol) return true;
@@ -19470,6 +19611,8 @@ async function savePlanToStorage(){
   captureViewState();
   setSaveButtonBusy(true);
   var browserSaved=false;
+  var saveSucceeded=false;
+  var savedGeneration=serializeDataSnapshot();
   try{
     await StorageAdapter.save(DATA);
     browserSaved=true;
@@ -19487,7 +19630,8 @@ async function savePlanToStorage(){
       sharedSetStatus('ブラウザとクラウドへ保存しました。');
       renderSharedUi();
     }
-    clearDirty();
+    if(serializeDataSnapshot()===savedGeneration)clearDirty();
+    saveSucceeded=true;
   }catch(e){
     var message=(e&&e.message?e.message:e);
     if(browserSaved&&SHARED.roomId){
@@ -19499,6 +19643,7 @@ async function savePlanToStorage(){
   }finally{
     setSaveButtonBusy(false);
   }
+  return saveSucceeded;
 }
 async function loadPlanFromStorage(){
   var d=await StorageAdapter.load();
@@ -19535,17 +19680,19 @@ async function loadPlanFromStorage(){
 async function loadPlanFromStorageButton(){
   if(!(await StorageAdapter.hasData())){
     alert('ブラウザ保存されたプランがありません。');
-    return;
+    return false;
   }
-  if(!confirm('ブラウザ保存されたプランを読み込みますか？\n現在の未保存の編集内容は上書きされます。')) return;
+  if(!confirm('ブラウザ保存されたプランを読み込みますか？\n現在の未保存の編集内容は上書きされます。')) return false;
   if(await loadPlanFromStorage()){
     clearDirty();
     ST.selected=null;
     document.getElementById('props').classList.remove('show');
     draw2d();
     if(ren) rebuild3D();
+    return true;
   }else{
     alert('保存されたプランが空のため読み込みませんでした。');
+    return false;
   }
 }
 async function checkStorageOnInit(){
@@ -22274,8 +22421,8 @@ function applyJsonImport(staged){
 }
 var _jsonImportRequest=0;
 function doImport(inp){
-  var file=inp.files&&inp.files[0];if(!file)return;
   var request=++_jsonImportRequest;
+  var file=inp.files&&inp.files[0];if(!file)return;
   // Let the same file trigger change again after an error or a successful load.
   inp.value='';
   function failed(){
@@ -22286,7 +22433,7 @@ function doImport(inp){
     var r=new FileReader();
     r.onload=function(e){
       if(request!==_jsonImportRequest)return;
-      try{applyJsonImport(stageJsonImport(e.target.result));}
+      try{var staged=stageJsonImport(e.target.result);if(DIRTY&&!confirm('現在の未保存の編集を、選んだ間取りJSONへ置き換えますか？'))return;if(request!==_jsonImportRequest)return;applyJsonImport(staged);}
       catch(ex){console.warn('[WebCAD] JSON import failed',ex);failed();}
     };
     r.onerror=failed;
@@ -22510,7 +22657,7 @@ function applyIntCamera(){
 
 try {
   ensureHeightDefaults(); syncHeightDefaultsUI();
-  if(!COMPARISON_PREVIEW) loadPreset();
+  if(!COMPARISON_PREVIEW && !EDITOR_PANE) loadPreset();
   normalizeLegacyFurnitureItems(); renderOpeningModelToolMenus(); resize2d(); resetView();
   window.comparisonCatalogueReady=loadFurnitureMegaLibrary();
 } catch(e) {
@@ -22624,6 +22771,9 @@ function getTouchDist(e){
 canvas.addEventListener('touchstart',function(e){
   blurActiveControl();
   if(ST.view!=='2d') return;
+  // preventDefault suppresses the browser's normal iframe focus. Keep subsequent
+  // hardware-keyboard edits in the native editor that was actually touched.
+  window.focus();
   e.preventDefault();
   if(e.touches.length===1){
     var t=e.touches[0];
@@ -23798,12 +23948,13 @@ var JISDRAW=(function(){
   // 開き戸(door-swing系)・玄関ドア(door-front): 吊元から開口幅の1/4円弧+扉線1本。
   // 円の中心=吊元なので、回転(等長変換)後もワールド座標上で半径rは不変。
   function sourceDoorSymbolSvg(it,info,LW){
-    var fr=openingFrame(info),plan=SceneOpeningGeometry.sourcePlanGeometry(it,it.doorOpenState!=='closed');
+    var fr=openingFrame(info),plan=SceneOpeningGeometry.planGeometry(it,info.wall.thick||120,it.doorOpenState!=='closed');
     if(!plan)return '';
     var out=rectCutSvg(fr,it.w/2,(info.wall.thick||120)/2);
     function polygon(points,fill,dash){return '<polygon points="'+points.map(function(p){return frameStr(fr,p.x,p.y);}).join(' ')+'" fill="'+fill+'" stroke="#000" stroke-width="'+LW.thin+'"'+(dash?' stroke-dasharray="'+LW.thin*3+' '+LW.thin*2+'"':'')+'/>';}
     if(plan.pocket)out+=polygon(plan.pocket,'#fff',false);
     out+=polygon(plan.closedLeaf,'none',true)+polygon(plan.leaf,'#fff',false);
+    if(plan.fixedLeaf)out+=polygon(plan.fixedLeaf,'#fff',false);
     var p=plan.parameters;
     if(p.mode==='hinge'&&it.doorOpenState!=='closed'){
       var a=p.leafCenterXmm>0?0:Math.PI,b=a-p.openAngleY,r=p.leafWidthMm,z=p.hingeZmm||0;
@@ -23813,63 +23964,8 @@ var JISDRAW=(function(){
     return out;
   }
 
-  function swingDoorSymbolSvg(it,info,LW){
-    if(it.openingSourceGeometry)return sourceDoorSymbolSvg(it,info,LW);
-    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
-    var fr=openingFrame(info);
-    var out=rectCutSvg(fr,halfW,halfT);
-    var hingeLX=it.flipX?halfW:-halfW;
-    var leafDir=it.flipX?-1:1;
-    var swingDir=it.flipY?-1:1;
-    var r=it.w||0;
-    var arcStart=leafDir>0?0:Math.PI;
-    var openAngle=swingDir*Math.PI/2;
-    var arcEnd=arcStart+openAngle;
-    var p0=fr.pt(hingeLX+r*Math.cos(arcStart), r*Math.sin(arcStart));
-    var p1=fr.pt(hingeLX+r*Math.cos(arcEnd), r*Math.sin(arcEnd));
-    var hinge=fr.pt(hingeLX,0);
-    var sweep=openAngle>0?1:0;
-    out+='<path d="M'+p0.x+','+p0.y+' A'+r+','+r+' 0 0,'+sweep+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
-    out+='<line x1="'+hinge.x+'" y1="'+hinge.y+'" x2="'+p1.x+'" y2="'+p1.y+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
-    return out;
-  }
-
-  // 引戸(door-slide/door-slide-s/door-pocket): 既存2D表現(:6885-6949)をSVGへ移植。
-  function slideDoorSymbolSvg(it,info,LW){
-    if(it.openingSourceGeometry)return sourceDoorSymbolSvg(it,info,LW);
-    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
-    var fr=openingFrame(info);
-    var out=rectCutSvg(fr,halfW,halfT);
-    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
-    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
-    var isOpen=(it.doorOpenState!=='closed');
-    var dash=(LW.thin*3)+' '+(LW.thin*2);
-    if(it.type==='door-slide'){
-      var openW=it.w||0, panelW=openW*0.56;
-      var leftOpen=!!it.flipX;
-      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
-      var movingClosedX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
-      var movingX=isOpen?fixedX:movingClosedX;
-      out+=lineTag(fr,fixedX,-halfT*0.28,fixedX+panelW,-halfT*0.28,LW.mid);
-      out+=lineTag(fr,movingX, halfT*0.28,movingX+panelW, halfT*0.28,LW.mid);
-    } else if(it.type==='door-slide-s'){
-      var sDir=it.flipX?-1:1;
-      var openW2=it.w||0;
-      var px0=isOpen?sDir*openW2:0;
-      var pz=(it.flipY?1:-1)*halfT*1.05;
-      out+=lineTag(fr,px0-halfW,pz,px0+halfW,pz,LW.mid);
-      out+=lineTag(fr,sDir*halfW,pz,sDir*halfW*3,pz,LW.thin,dash);
-    } else { // door-pocket(引込み戸)
-      var sDir2=it.flipX?-1:1;
-      if(isOpen){
-        out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.mid,dash);
-      } else {
-        out+=lineTag(fr,-halfW,0,halfW,0,LW.mid);
-      }
-      out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.thin,dash);
-    }
-    return out;
-  }
+  function swingDoorSymbolSvg(it,info,LW){return sourceDoorSymbolSvg(it,info,LW);}
+  function slideDoorSymbolSvg(it,info,LW){return sourceDoorSymbolSvg(it,info,LW);}
 
   // 折戸(door-fold/door-fold-w): 既存2D表現(:6951-6969)の山形記号をSVGへ移植。
   function foldDoorSymbolSvg(it,info,LW){
@@ -24578,7 +24674,7 @@ function jisPrint(){
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
-if(!COMPARISON_PREVIEW) initSharedRoomFromUrl().then(async function(joined){
+if(!COMPARISON_PREVIEW && !EDITOR_PANE) initSharedRoomFromUrl().then(async function(joined){
   if(!joined) await checkStorageOnInit();
   // 既定間取りで始まる起動なら、どの間取りで始めるかを選んでもらう
   maybeOfferPresetChoice();
@@ -24840,7 +24936,7 @@ updateMobileShiftButton();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
 <link rel="stylesheet" href="assets/plan-comparison.css">
-<button id="compare-launch" onclick="PlanComparison.open()">▧ 案を比較 <small>試作</small></button>
+<button id="compare-launch" onclick="ParallelEditors.open()">▧ 案を比較 <small>試作</small></button>
 <dialog id="compare-dialog" aria-labelledby="compare-heading">
   <div class="compare-row"><span class="compare-muted">LOCAL COMPARISON · 比較の試作</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
   <h2 id="compare-heading">同じ視点で、住まいの案を比べる</h2>
@@ -24865,5 +24961,6 @@ updateMobileShiftButton();
 </dialog>
 <script src="assets/js/comparison-renderer.js"></script>
 <script src="assets/js/plan-comparison.js"></script>
+<script src="assets/js/parallel-editors.js"></script>
 </body>
 </html>

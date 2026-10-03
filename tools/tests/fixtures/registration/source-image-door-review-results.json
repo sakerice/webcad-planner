@@ -1,0 +1,127 @@
+[
+  {
+    "sourceItemIndex": 5,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": true,
+    "diagnostics": [],
+    "physicalValidation": "native-envelope-pass"
+  },
+  {
+    "sourceItemIndex": 6,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": true,
+    "diagnostics": [
+      {
+        "code": "opening-sweep-collision",
+        "message": "The rendered leaf sweep intersects another wall",
+        "wallId": 3
+      }
+    ],
+    "physicalValidation": "reader-geometry-unresolved"
+  },
+  {
+    "sourceItemIndex": 7,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": true,
+    "diagnostics": [
+      {
+        "code": "opening-sweep-collision",
+        "message": "The rendered leaf sweep intersects another wall",
+        "wallId": 2
+      }
+    ],
+    "physicalValidation": "reader-geometry-unresolved"
+  },
+  {
+    "sourceItemIndex": 8,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "衣類室南側。引戸らしい平行線はあるが、左右の可動方向と壁側の凡例がない。出入り方向の矢印は引込み方向とは扱わない。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 9,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "衣類室東側。出入り方向の横矢印は戸の移動方向と直交する。可動方向・壁側は未確定。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 10,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "洗面室南側。引戸らしい線と出入り矢印があるが、左右の可動方向・壁側は未確定。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 11,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "浴室西側。斜線による折戸らしい記号が見えるが、折れ方・吊元・可動側を確定できない。片引戸という元読取も未確認。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 12,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "収納南側。左右2枚の円弧があり両開き戸の可能性が高い。元読取の折戸と一致せず、厳密な両開きモデルは未対応。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 32,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "applied": true,
+    "diagnostics": [
+      {
+        "code": "opening-sweep-collision",
+        "message": "The rendered leaf sweep intersects another wall",
+        "wallId": 27
+      }
+    ],
+    "physicalValidation": "reader-geometry-unresolved"
+  },
+  {
+    "sourceItemIndex": 33,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "applied": false,
+    "diagnostics": [
+      {
+        "code": "image-door-intent-unknown",
+        "message": "3階書斎1西側。出入り方向の横矢印は戸の移動方向と直交する。片引戸／戸袋と可動方向は未確定。"
+      }
+    ]
+  },
+  {
+    "sourceItemIndex": 34,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "applied": true,
+    "diagnostics": [
+      {
+        "code": "opening-sweep-collision",
+        "message": "The rendered leaf sweep intersects another wall",
+        "wallId": 34
+      }
+    ],
+    "physicalValidation": "reader-geometry-unresolved"
+  }
+]
