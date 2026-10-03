@@ -35,3 +35,14 @@ test('API structural-only preview is bounded, isolated and still reports full un
  const r=await api.preview_patch(request);assert.equal(r.rendered,true);assert.equal(calls,1);assert.equal(r.previewPlan.walls.length,5);assert.equal(r.applyAvailable,false);assert.ok(r.fullDiagnostics.some(d=>d.code==='wrong_adjacent_room'));assert.ok(r.fullDiagnostics.some(d=>d.code==='unsupported_opening_mechanism'));assert.equal(JSON.stringify(state),before);
  await assert.rejects(api.preview_patch({...request,selectedEntityIds:['ann-title']}),e=>e.code==='invalid_patch');await assert.rejects(api.preview_patch({...request,selectedEntityIds:['wall-west','wall-west']}),e=>e.code==='invalid_patch');await assert.rejects(api.preview_patch({...request,selectionScope:r.selectionScope}),e=>e.code==='invalid_request');
 });
+
+test('selected nonphysical symbol failure belongs to review and unresolved ledger before Apply gating',()=>{
+ const s=fixture();s.objects[0].objectType=f('unidentified-symbol');
+ const opts=options(s);opts.bindingDecisions=[];
+ const r=Scene.compile(s,opts);
+ const d=r.diagnostics.find(d=>d.code==='selected_object_unmaterialized');assert.ok(d);
+ assert.equal(r.canApply,false);
+ assert.ok(r.reviewGroups.find(g=>g.entityId==='chair').diagnostics.some(x=>x.code===d.code));
+ assert.ok(r.unresolvedEntities.find(e=>e.id==='chair').reasons.some(x=>x.code===d.code));
+ assert.equal(r.reviewGroups.find(g=>g.entityId==='chair').canAcknowledgeOmission,false);
+});

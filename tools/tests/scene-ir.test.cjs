@@ -198,7 +198,7 @@ test('grouped review dialog requires actual checkbox action and retains incomple
  c.document={getElementById:id=>nodes[id]||null,createElement:node,createTextNode:text=>({tag:'#text',textContent:text,children:[]})};
  const s=fixture();s.furniture.push({id:'decor-vase',floor:f(1),catalogId:unknown(),center:f({x:3500,y:4400}),sizeMm:unknown(),rotationDeg:unknown(),hostRoomId:f('study'),semanticExtent:f('asset')});
  c.PlanImport.stageSceneIR(s);assert.equal(nodes['plan-import-apply'].disabled,true);
- function all(n){return [n,...n.children.flatMap(all)];}let boxes=all(nodes['scene-ir-review']).filter(n=>n.tag==='input');assert.equal(boxes.length,1,'No global accept-all control or automatic omission');
+ function all(n){return [n,...n.children.flatMap(all)];}let boxes=all(nodes['scene-ir-review']).filter(n=>n.tag==='input'&&n.type==='checkbox');assert.equal(boxes.length,1,'No global accept-all control or automatic omission');
  boxes[0].checked=true;boxes[0].listeners.change();assert.equal(nodes['plan-import-apply'].disabled,false);assert.ok(nodes['plan-import-notes'].textContent.includes('未完成'));assert.equal(c.DATA.items.length,0,'Review itself never Applies');
  assert.ok(all(nodes['scene-ir-review']).some(n=>n.tag==='pre'&&n.textContent.includes('unknown')));
 });

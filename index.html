@@ -3554,6 +3554,8 @@ input[type="reset"]:focus-visible{
       <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="resetPlanImport()">やり直す</button>
     </div>
 
+    <details id="scene-review-files" class="scene-review-files"></details>
+
     <div id="plan-import-step2" style="display:none">
       <!-- PDFはページ別に送信予定画像を確認。自動切り出し失敗を黙って送らない。 -->
       <div id="plan-import-pdf-review" style="display:none">
@@ -3840,6 +3842,7 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/source-image-rails.js"></script>
 <script src="assets/js/source-stair-display.js"></script>
 <script src="assets/js/plan-import.js"></script>
+<script src="assets/js/scene-review-flow.js"></script>
 <script>
 // ───── 3D ENGINE ─────
 var ren=null,sc3=null,camExt=null,camInt=null,orbit=null,composer=null;
@@ -18266,6 +18269,7 @@ function resetView(){
   draw2d();
 }
 function onFloorChange(v){
+  if(typeof SceneReviewFlow!=='undefined'&&SceneReviewFlow.reviewInteraction)SceneReviewFlow.reviewInteraction();
   ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false; resetPickCycle();
   document.getElementById('props').classList.remove('show');
   // The previous selection is gone; its hidden controls are rebuilt on the next selection.
@@ -22421,6 +22425,7 @@ function applyJsonImport(staged){
 }
 var _jsonImportRequest=0;
 function doImport(inp){
+  var reviewTicket=typeof PlanImport!=='undefined'?{version:PlanImport.state.version,request:PlanImport.state.requestVersion,result:PlanImport.state.result,operation:typeof SceneReviewFlow!=='undefined'&&SceneReviewFlow.interactionEpoch?SceneReviewFlow.interactionEpoch():null}:null;
   var request=++_jsonImportRequest;
   var file=inp.files&&inp.files[0];if(!file)return;
   // Let the same file trigger change again after an error or a successful load.
@@ -22433,7 +22438,7 @@ function doImport(inp){
     var r=new FileReader();
     r.onload=function(e){
       if(request!==_jsonImportRequest)return;
-      try{var staged=stageJsonImport(e.target.result);if(DIRTY&&!confirm('現在の未保存の編集を、選んだ間取りJSONへ置き換えますか？'))return;if(request!==_jsonImportRequest)return;applyJsonImport(staged);}
+      try{var candidate=JSON.parse(e.target.result);if(typeof SceneReviewFlow!=='undefined'&&SceneReviewFlow.isReviewData(candidate)){if(reviewTicket&&(reviewTicket.version!==PlanImport.state.version||reviewTicket.request!==PlanImport.state.requestVersion||reviewTicket.result!==PlanImport.state.result||reviewTicket.operation!==null&&reviewTicket.operation!==SceneReviewFlow.interactionEpoch()))return;SceneReviewFlow.mount();try{SceneReviewFlow.importText(e.target.result);}catch(reviewError){document.getElementById('plan-import-modal').classList.add('show');document.getElementById('scene-review-files').open=true;document.getElementById('scene-review-file-status').textContent=reviewError.message;}return;}var staged=stageJsonImport(e.target.result);if(DIRTY&&!confirm('現在の未保存の編集を、選んだ間取りJSONへ置き換えますか？'))return;if(request!==_jsonImportRequest)return;applyJsonImport(staged);}
       catch(ex){console.warn('[WebCAD] JSON import failed',ex);failed();}
     };
     r.onerror=failed;

@@ -95,3 +95,18 @@ test('partial-import notice persists after save/reload and clears on Undo via no
  h.c.DATA=JSON.parse(JSON.stringify(h.c.DATA));h.c.PlanImport.syncBuildingNotice();assert.equal(notice.hidden,false);h.c.DATA=JSON.parse(h.c.HISTORY[0]);h.c.PlanImport.syncBuildingNotice();assert.equal(notice.hidden,true);
  const draw=require('node:fs').readFileSync(require('node:path').join(__dirname,'../../assets/js/draw-2d.js'),'utf8');assert.match(draw,/function draw2d\(\)\{\s*if\(typeof PlanImport[^\n]+syncBuildingNotice/);
 });
+
+test('saved reviewed multi-floor alignment replays exactly without accepting changed correspondence',()=>{
+ const h=setup();approve(h);const before=copy(h.body.buildingCompilation);h.apply.click();
+ const Schema=require('../../assets/js/plan-schema.js');
+ const loaded=Schema.normalizePlan(JSON.parse(JSON.stringify(h.c.DATA))),report=loaded.sceneReconstructionReports[0];
+ const restored={sourceLocal:copy(report.sourceLocal),buildingRegistration:copy(report.proposals),buildingDecisions:copy(report.decisions)};
+ const source=JSON.stringify(restored.sourceLocal),decisions=JSON.stringify(restored.buildingDecisions);
+ const replay=h.c.PlanImport.compileBuildingReview(restored);
+ assert.deepEqual(copy(replay.poses),copy(before.poses));assert.deepEqual(copy(replay.plan),copy(before.plan));
+ assert.deepEqual(copy(replay.deferredItems),copy(before.deferredItems));assert.deepEqual(copy(replay.diagnostics),copy(before.diagnostics));
+ assert.equal(replay.status,'partial-building-assembly');assert.equal(JSON.stringify(restored.sourceLocal),source);assert.equal(JSON.stringify(restored.buildingDecisions),decisions);
+ restored.buildingRegistration.floors[2].anchors[0].building.y+=100;
+ assert.equal(h.c.PlanImport.compileBuildingReview(restored).canApply,false,'Saved approval cannot cover new alignment');
+ assert.deepEqual(copy(report.poses),copy(before.poses),'Saved original report must remain unchanged');
+});

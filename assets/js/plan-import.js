@@ -63,6 +63,7 @@
     m.classList.add('show');
     if (!ST.image && !ST.pages) resetPlanImport();
     showQuota();
+    if(root.SceneReviewFlow)root.SceneReviewFlow.mount();
   }
 
   // 本日あと何回使えるかを出す。
@@ -87,6 +88,7 @@
   }
 
   function closePlanImport() {
+    if(root.SceneReviewFlow)root.SceneReviewFlow.invalidate();
     if (ST.busy) resetPlanImport();
     ST.version++; ST.previewVersion++;
     ST.extractionMode = 'v1';
@@ -98,6 +100,7 @@
   }
 
   function resetPlanImport() {
+    if(root.SceneReviewFlow)root.SceneReviewFlow.invalidate();
     ST.extractionMode = 'v1';
     ST.version++; ST.previewVersion++;
     ST.requestVersion++;
@@ -1014,6 +1017,7 @@
     }
     renderSceneIRReview(body);
     renderBuildingReview(body);
+    if(root.SceneReviewFlow)root.SceneReviewFlow.render(body);
     show('plan-import-step3', true);
   }
 
@@ -1326,9 +1330,9 @@
     var axes = { '+Z': {x:0,y:1}, '-Z': {x:0,y:-1}, '+X': {x:1,y:0}, '-X': {x:-1,y:0} };
     if (!type || !extent || !fp || !fp.axisX || !fp.sizeMm || !place || type === 'stair' || type === 'unidentified-symbol') return { candidates: [], rejected: [], reason: '物の種類・範囲・外形・配置の根拠が不足、または未対応です。元の根拠を保持し、自動で置き換えません。' };
     registry.list().forEach(function (model) {
-      if ((model.sourceObjectType || model.kind) !== type || model.openingOnly) return;
+      if (!SceneCatalogue.supportsSourceObjectType(model, type) || model.openingOnly) return;
       var reasons = [], front = sceneFactValue(source.frontDirection), head = sceneFactValue(source.headDirection);
-      if (model.semanticExtent !== extent) reasons.push('意味範囲が異なる: ' + extent + ' → ' + model.semanticExtent);
+      if (!SceneCatalogue.supportsSemanticExtent(model, extent)) reasons.push('意味範囲が異なる: ' + extent + ' → ' + model.semanticExtent);
       if (!Number.isFinite(model.w) || !Number.isFinite(model.d) || model.w <= 0 || model.d <= 0) reasons.push('寸法が未確認');
       if (place.domain === 'exterior' && type !== 'car') reasons.push('この種類の屋外配置は未対応');
       var rotation = Math.atan2(fp.axisX.y, fp.axisX.x);
@@ -1376,6 +1380,7 @@
     detail.appendChild(saved);
     button.addEventListener('click', function () {
       if (ST.result !== body || ST.busy || ST.mappingEditor || (body.sceneApplied||body.scenePartialOpened) || body.sceneOptions.sourceInvalidated) return;
+      if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
       var editor = { body: body, sourceId: source.id }; ST.mappingEditor = editor;
       var reviewBox = $('scene-ir-review');
       if (reviewBox) Array.prototype.forEach.call(reviewBox.querySelectorAll('[data-scene-review-control]'), function (control) { control.disabled = true; });
@@ -1476,7 +1481,7 @@
     });
   }
 
-  function renderScenePartialControls(body, box) {
+  function renderScenePartialControls(body, box, optionsOpen) {
     if(body.sceneIR.sceneVersion!==3||body.sceneOptions.materialization!=='bounded-v3'||typeof SceneIR.createPartialSelection!=='function')return;
     var field=document.createElement('fieldset');field.className='scene-placement-context';var legend=document.createElement('legend');legend.textContent='候補を確認して、新しい案で部分プレビュー';field.appendChild(legend);
     var candidates=body.sceneIR.objects.map(function(source){return {source:source,choices:sceneMappingCandidates(source,sceneCatalogue())};}).filter(function(row){return row.choices.candidates.length;});
@@ -1485,10 +1490,12 @@
     function stage(ids,on,structureIds){if(ST.result!==body||ST.mappingEditor||ST.busy||body.sceneApplied||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));opts.partialSelection=on?SceneIR.createPartialSelection(body.sceneIR,ids,true,structureIds===undefined?(body.sceneOptions.partialSelection&&body.sceneOptions.partialSelection.structureIds||[]):structureIds)||{version:1,objectIds:[],entityIds:[],incompleteConfirmed:true}:null;opts.acceptedReviews=[];opts.acceptedReviewGroups=[];opts.reviewedEntities={};opts.unresolvedDecisions=[];stageSceneIR(body.sceneIR,opts);}
     enable.addEventListener('change',function(){stage(candidates.map(function(row){return row.source.id;}),enable.checked);});
     if(enable.checked){
-      candidates.forEach(function(row){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-object',row.source.id);input.setAttribute('data-scene-review-control','');input.checked=body.sceneOptions.partialSelection.objectIds.indexOf(row.source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+row.source.id+' — '+(row.choices.candidates.length===1?'推奨候補1つ':'候補'+row.choices.candidates.length+'件・選択が必要')));field.appendChild(label);input.addEventListener('change',function(){var ids=body.sceneOptions.partialSelection.objectIds.filter(function(id){return id!==row.source.id;});if(input.checked)ids.push(row.source.id);stage(ids,true);});});
-      ['walls','rooms','openings'].forEach(function(collection){body.sceneIR[collection].forEach(function(source){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-structure',source.id);input.setAttribute('data-scene-review-control','');input.checked=(body.sceneOptions.partialSelection.structureIds||[]).indexOf(source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+source.id+' — '+collection+'（host壁の全開口と隣接部屋も確認）'));field.appendChild(label);input.addEventListener('change',function(){var ids=(body.sceneOptions.partialSelection.structureIds||[]).filter(function(id){return id!==source.id;});if(input.checked)ids.push(source.id);stage(body.sceneOptions.partialSelection.objectIds,true,ids);});});});
-      var assumed=document.createElement('pre');assumed.style.whiteSpace='pre-wrap';assumed.textContent='この部分の表示仮定（図面から測定した値ではありません）\n'+body.sceneCompilation.defaults.map(function(d){return d.path+': '+JSON.stringify(d.value)+' — '+d.reason;}).join('\n')+'\n色の部位範囲が不明な場合、既存の染色チャンネルだけに適用します。黒い脚など元の色が残る場合があり、全面単色再現は保証しません。';field.appendChild(assumed);
-      var reviewLabel=document.createElement('label'),review=document.createElement('input');review.type='checkbox';review.setAttribute('data-scene-partial-accept','');review.setAttribute('data-scene-review-control','');var groups=body.sceneCompilation.reviewGroups.filter(function(g){return body.sceneOptions.partialSelection.entityIds.indexOf(g.entityId)>=0&&g.reviewPaths.length;});review.checked=groups.length>0&&groups.every(function(g){return g.accepted;});review.disabled=body.sceneCompilation.diagnostics.some(function(d){return d.severity==='error';});reviewLabel.appendChild(review);reviewLabel.appendChild(document.createTextNode(' 選んだ候補・元図の推定値・表示仮定と適用限界をまとめて確認した（未配置部分の再現は承認しない）'));field.appendChild(reviewLabel);review.addEventListener('change',function(){if(ST.result!==body||ST.mappingEditor||ST.busy||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));groups.forEach(function(g){opts.acceptedReviewGroups=opts.acceptedReviewGroups.filter(function(id){return id!==g.id;});delete opts.reviewedEntities[g.entityId];if(review.checked){opts.acceptedReviewGroups.push(g.id);opts.reviewedEntities[g.entityId]=g.reviewKey;}});stageSceneIR(body.sceneIR,opts);});
+      var controls = document.createElement('details'), title = document.createElement('summary'); controls.setAttribute('data-scene-partial-options', ''); controls.open = !!optionsOpen;
+      title.textContent = '選択対象・表示仮定を確認する（選択 ' + body.sceneOptions.partialSelection.entityIds.length + ' 項目）'; controls.appendChild(title); field.appendChild(controls);
+      candidates.forEach(function(row){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-object',row.source.id);input.setAttribute('data-scene-review-control','');input.checked=body.sceneOptions.partialSelection.objectIds.indexOf(row.source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+row.source.id+' — '+(row.choices.candidates.length===1?'推奨候補1つ':'候補'+row.choices.candidates.length+'件・選択が必要')));controls.appendChild(label);input.addEventListener('change',function(){var ids=body.sceneOptions.partialSelection.objectIds.filter(function(id){return id!==row.source.id;});if(input.checked)ids.push(row.source.id);stage(ids,true);});});
+      ['walls','rooms','openings'].forEach(function(collection){body.sceneIR[collection].forEach(function(source){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-structure',source.id);input.setAttribute('data-scene-review-control','');input.checked=(body.sceneOptions.partialSelection.structureIds||[]).indexOf(source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+source.id+' — '+collection+'（host壁の全開口と隣接部屋も確認）'));controls.appendChild(label);input.addEventListener('change',function(){var ids=(body.sceneOptions.partialSelection.structureIds||[]).filter(function(id){return id!==source.id;});if(input.checked)ids.push(source.id);stage(body.sceneOptions.partialSelection.objectIds,true,ids);});});});
+      var assumed=document.createElement('pre');assumed.style.whiteSpace='pre-wrap';assumed.textContent='この部分の表示仮定（図面から測定した値ではありません）\n'+body.sceneCompilation.defaults.map(function(d){return d.path+': '+JSON.stringify(d.value)+' — '+d.reason;}).join('\n')+'\n色の部位範囲が不明な場合、既存の染色チャンネルだけに適用します。黒い脚など元の色が残る場合があり、全面単色再現は保証しません。';controls.appendChild(assumed);
+      var reviewLabel=document.createElement('label'),review=document.createElement('input');review.type='checkbox';review.setAttribute('data-scene-partial-accept','');review.setAttribute('data-scene-review-control','');var groups=body.sceneCompilation.reviewGroups.filter(function(g){return body.sceneOptions.partialSelection.entityIds.indexOf(g.entityId)>=0&&g.reviewPaths.length;});review.checked=groups.length>0&&groups.every(function(g){return g.accepted;});review.disabled=body.sceneCompilation.diagnostics.some(function(d){return d.severity==='error';});reviewLabel.appendChild(review);reviewLabel.appendChild(document.createTextNode(' 選んだ候補・元図の推定値・表示仮定と適用限界をまとめて確認した（未配置部分の再現は承認しない）'));controls.appendChild(reviewLabel);review.addEventListener('change',function(){if(ST.result!==body||ST.mappingEditor||ST.busy||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));groups.forEach(function(g){opts.acceptedReviewGroups=opts.acceptedReviewGroups.filter(function(id){return id!==g.id;});delete opts.reviewedEntities[g.entityId];if(review.checked){opts.acceptedReviewGroups.push(g.id);opts.reviewedEntities[g.entityId]=g.reviewKey;}});stageSceneIR(body.sceneIR,opts);});
     }
     if(!candidates.length&&!body.sceneIR.walls.length&&!body.sceneIR.rooms.length&&!body.sceneIR.openings.length){enable.disabled=true;note.textContent+=' このページには適合候補がありません。原図の記号と拒否理由は下に残します。';}
     box.appendChild(field);
@@ -1497,6 +1504,9 @@
   function renderSceneIRReview(body) {
     if (typeof document.createElement !== 'function') return;
     var old = $('scene-ir-review'), openGroups = [];
+    var oldSearch = old && old.querySelector && old.querySelector('[data-scene-review-search]'), oldFilter = old && old.querySelector && old.querySelector('[data-scene-review-filter]');
+    var oldPartial = old && old.querySelector && old.querySelector('[data-scene-partial-options]'), partialOptionsOpen = oldPartial && oldPartial.open;
+    var searchValue = oldSearch ? oldSearch.value : '', filterValue = oldFilter ? oldFilter.value : 'all';
     if (old) { Array.prototype.forEach.call(old.querySelectorAll('details[open]'), function (d) { openGroups.push(d.getAttribute('data-scene-group')); }); old.remove(); }
     if (!body.sceneCompilation) return;
     var notes = $('plan-import-notes');
@@ -1528,15 +1538,37 @@
       select.addEventListener('change', function () { if (ST.result !== body) return; confirmed.checked = false; if (context) confirmScenePlacement(body, Number(select.value), false); });
       box.appendChild(destination);
     }
-    renderScenePartialControls(body, box);
+    var full = body.sceneFullCompilation || body.sceneCompilation;
+    var audit = document.createElement('fieldset'); audit.className = 'scene-placement-context';
+    var auditLegend = document.createElement('legend'); auditLegend.textContent = '原図全体の診断（部分プレビューとは別）'; audit.appendChild(auditLegend);
+    var fullErrors = full.diagnostics.filter(function (d) { return d.severity === 'error'; });
+    var auditStatus = document.createElement('p'); auditStatus.setAttribute('data-scene-full-status', '');
+    auditStatus.textContent = '全体のエラー ' + fullErrors.length + ' 件 / 未解決 ' + full.unresolvedEntities.length + ' 項目 / 全体適用: ' + (full.canApply ? '確認済みの範囲で可能' : '不可') + '。表示仮定・原図のみの表示は実測や完全再現を意味しません。'; audit.appendChild(auditStatus);
+    var diagnosticList = document.createElement('details'), diagnosticTitle = document.createElement('summary');
+    diagnosticTitle.textContent = '全体の診断コードと対象を確認（' + fullErrors.length + ' 件）'; diagnosticList.appendChild(diagnosticTitle);
+    var diagnostics = document.createElement('pre'); diagnostics.style.whiteSpace = 'pre-wrap'; diagnostics.setAttribute('data-scene-full-errors', '');
+    diagnostics.textContent = fullErrors.map(function (d) { return d.code + ' — ' + d.path + '\n' + d.message; }).join('\n\n') || 'エラーはありません。推定値・表示仮定の確認は各項目に残ります。'; diagnosticList.appendChild(diagnostics); audit.appendChild(diagnosticList);
+    var searchLabel = document.createElement('label'); searchLabel.textContent = '根拠・ID・診断コードを検索 ';
+    var search = document.createElement('input'); search.type = 'search'; search.value = searchValue; search.setAttribute('data-scene-review-search', ''); search.setAttribute('data-scene-review-control', ''); searchLabel.appendChild(search); audit.appendChild(searchLabel);
+    var filter = document.createElement('select'); filter.setAttribute('data-scene-review-filter', ''); filter.setAttribute('data-scene-review-control', ''); filter.setAttribute('aria-label', '根拠の表示対象');
+    [['all','すべて'],['unresolved','全体で未解決'],['review','現在の範囲で確認が必要']].forEach(function (row) { var option = document.createElement('option'); option.value = row[0]; option.textContent = row[1]; filter.appendChild(option); }); filter.value = filterValue; audit.appendChild(filter);
+    var visibleCount = document.createElement('p'); visibleCount.setAttribute('data-scene-filter-count', ''); visibleCount.setAttribute('aria-live', 'polite'); audit.appendChild(visibleCount); box.appendChild(audit);
+    renderScenePartialControls(body, box, partialOptionsOpen);
+    var rows = [];
     body.sceneCompilation.reviewGroups.forEach(function (group) {
       var detail = document.createElement('details'), summary = document.createElement('summary');
       detail.setAttribute('data-scene-group', group.id); detail.open = openGroups.indexOf(group.id) >= 0;
       summary.textContent = (body.sceneOptions.partialSelection&&body.sceneOptions.partialSelection.entityIds.indexOf(group.entityId)<0?'[原図のみ・未配置] ':'') + group.label + ' — ' + group.diagnostics.length + ' 項目' + (group.acknowledgedOmission ? '（未配置・未完成）' : '');
       detail.appendChild(summary);
+      var fullGroup = full.reviewGroups.find(function (g) { return g.id === group.id; }) || group;
+      if (body.sceneOptions.partialSelection && fullGroup.diagnostics.some(function (d) { return d.severity === 'error'; })) {
+        summary.textContent += ' / 全体の未解決 ' + fullGroup.diagnostics.filter(function (d) { return d.severity === 'error'; }).length + ' 件';
+        var remaining = document.createElement('pre'); remaining.style.whiteSpace = 'pre-wrap'; remaining.setAttribute('data-scene-full-group-errors', group.id);
+        remaining.textContent = '原図全体で残る未解決（部分の承認では解消しません）\n' + fullGroup.diagnostics.filter(function (d) { return d.severity === 'error'; }).map(function (d) { return d.code + ' — ' + d.path + '\n' + d.message; }).join('\n\n'); detail.appendChild(remaining);
+      }
       var fields = document.createElement('pre'); fields.style.whiteSpace = 'pre-wrap';
-      fields.textContent = group.diagnostics.map(function (d) { return d.severity + ': ' + d.path + '\n' + d.message; }).join('\n\n') + '\n\n' +
-        group.evidence.map(function (e) { return e.path + ': ' + e.status + ' ' + JSON.stringify(e.value) + (e.source ? '\n出典: ' + e.source : '') + (e.reason ? '\n理由: ' + e.reason : ''); }).join('\n');
+      fields.textContent = group.diagnostics.map(function (d) { return d.severity + ': ' + d.code + ' — ' + d.path + '\n' + d.message; }).join('\n\n') + '\n\n' +
+        fullGroup.evidence.map(function (e) { return e.path + ': ' + e.status + ' ' + JSON.stringify(e.value) + (e.source ? '\n出典: ' + e.source : '') + (e.reason ? '\n理由: ' + e.reason : ''); }).join('\n');
       detail.appendChild(fields);
       if(group.collection==='objects'){var source=body.sceneIR.objects.find(function(e){return e.id===group.entityId;}),choices=sceneMappingCandidates(source,sceneCatalogue()),status=document.createElement('p');status.className='scene-mapping-summary';var reasons=[];choices.rejected.forEach(function(r){r.reasons.forEach(function(reason){if(reasons.indexOf(reason)<0)reasons.push(reason);});});status.textContent=choices.candidates.length?'表示用の'+(choices.candidates.length===1?'推奨候補1つ':'候補'+choices.candidates.length+'件（明示選択が必要）')+'。製品特定ではありません。':'候補なし — '+choices.reason+(reasons.length?' '+reasons.join('／'):'');detail.appendChild(status);}
       renderSceneMappingButton(body, group, detail);
@@ -1563,8 +1595,17 @@
         else if (opts.reviewedEntities) delete opts.reviewedEntities[group.entityId];
         stageSceneIR(ST.result.sceneIR, opts);
       });
+      rows.push({node:detail, unresolved:fullGroup.diagnostics.some(function (d) { return d.severity === 'error'; }), review:group.reviewPaths.length > 0 && !group.accepted, text:(group.entityId + ' ' + detail.textContent).toLowerCase()});
       box.appendChild(detail);
     });
+    function filterRows() {
+      if (ST.result !== body) return;
+      var query = search.value.trim().toLowerCase(), count = 0;
+      rows.forEach(function (row) { var show = (!query || row.text.indexOf(query) >= 0) && (filter.value === 'all' || filter.value === 'unresolved' && row.unresolved || filter.value === 'review' && row.review); row.node.hidden = !show; if (show) count++; });
+      visibleCount.textContent = count + ' / ' + rows.length + ' 項目を表示。絞り込みは診断・適用条件を変更しません。';
+    }
+    search.addEventListener('input', filterRows); filter.addEventListener('change', filterRows); filterRows();
+    if(root.SceneReviewFlow)root.SceneReviewFlow.enhance(body,box);
     notes.parentNode.appendChild(box);
   }
 
@@ -1749,7 +1790,10 @@
     ST.mappingEditor = null;
     ST.requestVersion++;
     var input = JSON.parse(JSON.stringify(scene));
+    // Both scopes use the same detached editor snapshot and unchanged source.
+    options = Object.assign({}, options, {targetSnapshot: options && options.targetSnapshot !== undefined ? options.targetSnapshot : (typeof DATA === 'object' ? JSON.parse(JSON.stringify(DATA)) : {})});
     var compiled = previewSceneIR(input, options);
+    var fullCompiled = options.partialSelection ? previewSceneIR(input, Object.assign({}, options, {partialSelection:null})) : compiled;
     options=Object.assign({},options,{bindingDecisions:JSON.parse(JSON.stringify(options&&options.bindingDecisions||[]))});
     (compiled.appearanceProfiles||[]).forEach(function(p){var decision=options.bindingDecisions.find(function(d){return d.binding&&d.binding.sourceEntityId===p.sourceEntityId;});if(decision)decision.appearanceProvenance=JSON.parse(JSON.stringify(p.provenance));});
     ST.result = { sceneIR: input, sceneOptions: { materialization: options && options.materialization,
@@ -1763,7 +1807,7 @@
         acceptedReviewGroups: (options && options.acceptedReviewGroups || []).slice(),
         unresolvedDecisions: JSON.parse(JSON.stringify(options && options.unresolvedDecisions || [])),
         extraction: options && options.extraction ? JSON.parse(JSON.stringify(options.extraction)) : null },
-      sceneCompilation: compiled, plan: compiled.plan,
+      sceneCompilation: compiled, sceneFullCompilation: fullCompiled, plan: compiled.plan,
       extraction: options && options.extraction ? JSON.parse(JSON.stringify(options.extraction)) : null,
       summary: { walls: compiled.plan.walls.length, rooms: compiled.plan.rooms.length,
         items: compiled.plan.items.length, floors: floorsOfObjects(compiled.plan.walls, compiled.plan.rooms, compiled.plan.items) },
@@ -1927,8 +1971,9 @@
     if(!compiled.canApply||!compiled.partialSelection){setStatus('選んだ部分の候補・表示仮定・未解決項目を確認してください。既存の案は変更していません。');return;}
     if(!root.ParallelEditors||typeof root.ParallelEditors.openPlan!=='function'){setStatus('新しい案の編集画面を開けません。既存の案へは適用しません。');return;}
     var read=materializeSceneObjects(compiled.plan),payload={walls:read.walls,rooms:read.rooms,items:read.items,heightDefaults:JSON.parse(JSON.stringify(DATA.heightDefaults||{modelVersion:2,floorThickness:180})),floors:JSON.parse(JSON.stringify(DATA.floors||{})),sceneReconstructionReports:[reconstructionReport(expected,compiled,read,0)]};
+    if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
     ST.busy=true;syncPlanImportButtons();
-    try{var id=await root.ParallelEditors.openPlan(payload,'原図からの部分プレビュー（未完成）');if(ST.result!==expected||expected.sceneOptions.sourceInvalidated){await root.ParallelEditors.remove(id);return;}expected.scenePartialOpened=true;expected.partialPlanId=id;setStatus('確認した部分を新しい案で開きました。未配置の根拠を保持する未完成のプレビューです。元の案は変更していません。');return id;}
+    try{var id=await root.ParallelEditors.openPlan(payload,'原図からの部分プレビュー（未完成）');if(ST.result!==expected||expected.sceneOptions.sourceInvalidated){await root.ParallelEditors.remove(id);return;}expected.scenePartialOpened=true;expected.partialPlanId=id;var reviewModal=$('plan-import-modal');if(reviewModal)reviewModal.classList.remove('show');setStatus('確認した部分を新しい案で開きました。未配置の根拠を保持する未完成のプレビューです。元の案は変更していません。');return id;}
     catch(error){setStatus(error.message);}
     finally{ST.busy=false;syncPlanImportButtons();}
   }
@@ -1936,6 +1981,7 @@
   function applyPlanImport() {
     if (!ST.result || !ST.result.plan || ST.result.sceneApplied || ST.result.scenePartialOpened || ST.result.buildingApplied || ST.mappingEditor) return;
     if (typeof DATA === 'undefined' || !DATA || ST.busy) return;
+    if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
     if(ST.result.sceneIR&&ST.result.sceneOptions.partialSelection)return openScenePartialPlan(ST.result);
     var buildingCompilation = ST.result.sourceLocal ? compileBuildingReview(ST.result) : null;
     if (ST.result.sourceLocal && (!buildingCompilation || !buildingCompilation.canApply)) {
