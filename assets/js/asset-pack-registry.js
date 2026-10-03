@@ -1,4 +1,4 @@
-/* Standalone, immutable catalogue membership. Not connected to the editor yet.
+/* Immutable catalogue membership used by the editor's pane-local pack picker.
  * Selection is an argument, never shared state. All IDs remain resolvable.
  * Supply the editor's already-resolved legacy catalogue, not raw overlapping
  * source manifests. No plan migration, network, DOM, storage or model loading.

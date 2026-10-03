@@ -14,7 +14,7 @@ placement, model loader, renderer, JSON and history paths are reused.
   `a6d20a0ef427f1d3e6ae4b308c63d4350f1d45e0`.
 - Non-destructive merge: `a8c592ee44b4a08dfc95076c4201ace36bc833c4`, tree
   `bfeba3419d610b039d4a0375a3efdfd16db27400`.
-- Working branch: `cloud/rpg-asset-pack-c072`, worktree `/workspace/webcad-rpg-pack`.
+- Implementation branch: `cloud/rpg-asset-pack-c072` (preserved locally).
 
 The unavailable Library recovery ZIP was not bypassed. The authorized Git remote
 provided the new baseline; its hashes matched exactly. No forced reset, discarded
@@ -95,8 +95,9 @@ SKIP_DEPLOY=1 bash build.sh
 `PLAYWRIGHT_MODULE`, `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` and `RPG_REPORT_DIR`
 can override the integration test's installed tooling/output. The pack itself
 requires no new runtime dependency. Existing local-preview server retains its
-offline restrictions. Do not run wrangler deploy/versions upload, main merge,
-remote push or PR creation; publication awaits the parent's completed review.
+offline restrictions. Deployment remains outside this handoff: no manual wrangler deploy/versions upload,
+main merge, automerge or main push. After independent review, the user authorized
+a separate feature-branch push and a draft PR dependent on PR72.
 
 ## Remaining scope
 
@@ -112,3 +113,29 @@ for the separate placement/TPS adapter. No avatar controller was added here.
 Runtime behavior was checked in local Chromium/SwiftShader, not on a physical
 mobile GPU or deployed production site. This is a reviewable feature branch;
 deployment and publication are not part of this handoff.
+
+## Additional pre-publication review
+
+`node tools/tests/asset-pack-delayed-model.browser.cjs` gates the chair GLB response
+in three fresh Chromium contexts. While the request is pending, each case switches
+to the standard pack and cancels the pending placement tool. It then (1) undoes
+the chair placement, (2) reselects the RPG pack and desk candidate, or (3) replaces
+the pane's plan. After releasing the GLB response, current plan/history/dirty/tool/
+pack state and the other pane remain unchanged. Scene selection references show
+only the still-placed chair in case 2, no removed chair in cases 1/3, and no
+unplaced desk. These three deterministic success-response cases passed; they do
+not cover every possible network failure or race.
+
+Publication review of the RPG delta from `0a1af8d`: credential/private Library URL
+patterns were absent; the one environment-specific worktree path in this document
+was removed. The exported mixed-plan fixture and browser captures originate from
+synthetic tests, not user plans. Existing QA text logs total less than 5KB, with
+no individual log over 2KB. Source `.blend` files and model/review images are
+intentional deliverables. Earlier reviewed Library artifacts remain intact.
+
+The draft PR targets main but depends on **PR72**: its base `0a1af8d` is part of
+that unmerged PR, so the main-relative diff includes overlapping PR72 work. Review
+the RPG-specific delta against `0a1af8d`. Integrate PR72 first, then reconcile the
+RPG branch and merge only its remaining changes; do not merge overlapping work
+as independent implementations. Manual-source workflow changes, automatic support
+height and TPS integration are outside this RPG change.

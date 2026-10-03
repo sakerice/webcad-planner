@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "case": "cancel-placement",
+      "heldRequests": 1,
+      "renderedItemTypes": [],
+      "result": "passed"
+    },
+    {
+      "case": "reselect-candidate",
+      "heldRequests": 1,
+      "renderedItemTypes": [
+        "rpg-mansion-chair-01"
+      ],
+      "result": "passed"
+    },
+    {
+      "case": "replace-pane-plan",
+      "heldRequests": 1,
+      "renderedItemTypes": [],
+      "result": "passed"
+    }
+  ],
+  "errors": [],
+  "scope": "Three gated success-response scenarios in local Chromium/SwiftShader. No claim of exhaustive network-race coverage.",
+  "status": "passed"
+}
