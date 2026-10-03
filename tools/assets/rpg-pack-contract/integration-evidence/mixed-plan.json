@@ -1,0 +1,206 @@
+{
+  "walls": [],
+  "rooms": [
+    {
+      "id": "room-1",
+      "x": 0,
+      "y": 0,
+      "w": 6000,
+      "d": 4000,
+      "n": "書斎",
+      "floor": 1
+    }
+  ],
+  "items": [
+    {
+      "id": "item-1",
+      "type": "fmp-Table01",
+      "x": 800,
+      "y": 700,
+      "w": 1200,
+      "d": 700,
+      "h": 750,
+      "rot": 180,
+      "floor": 1,
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "item-2",
+      "type": "missing-asset-stays",
+      "x": 4800,
+      "y": 700,
+      "w": 400,
+      "d": 400,
+      "h": 500,
+      "rot": 30,
+      "floor": 1,
+      "customMetadata": {
+        "retain": true
+      }
+    },
+    {
+      "id": 3,
+      "type": "rpg-mansion-chair-01",
+      "x": 2340,
+      "y": 1530,
+      "rot": 0,
+      "floor": 1,
+      "modelFacingVersion": 1,
+      "w": 520,
+      "d": 550,
+      "color": null,
+      "flipX": false,
+      "flipY": false,
+      "textureFlipX": false,
+      "textureFlipY": false,
+      "sScale": 1,
+      "sX": 0,
+      "sY": 0,
+      "elev": 0,
+      "fmpId": "rpg-mansion-chair-01",
+      "colorCustom": false
+    }
+  ],
+  "floorCount": 1,
+  "startMode": "blank",
+  "exteriorWallSettings": {
+    "whole": {
+      "linked": false,
+      "color": "#e8e0cc",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": true,
+        "color": "#5c3820",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    },
+    "walls": {},
+    "faces": {}
+  },
+  "interiorWallSettings": {
+    "whole": {
+      "linked": false,
+      "color": "#f4f0e8",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    },
+    "faces": {}
+  },
+  "roofAppearance": {
+    "whole": {
+      "linked": true,
+      "color": "#2a2a30",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    }
+  },
+  "floorMetadata": {},
+  "heightDefaults": {
+    "perFloor": false,
+    "wallHeight": 2400,
+    "floorRaise": 0
+  },
+  "floors": {},
+  "planFixes": {
+    "ceilingFixtureElev": 1,
+    "outdoorCeilingFixtureElev": 1
+  },
+  "viewState": {
+    "twoD": {
+      "zoom": 1.8606393606393603,
+      "panX": 582.2159090909091,
+      "panY": 318.86363636363643
+    },
+    "ext": null,
+    "int": null
+  }
+}

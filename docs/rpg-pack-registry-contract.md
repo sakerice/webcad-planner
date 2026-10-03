@@ -1,5 +1,11 @@
 # Independent pack registry and TPS geometry contracts
 
+**Historical standalone contract.** The pause and integration-pending statements
+below describe the reviewed `a851d05`/`a6d20a0` handoff, not the current runtime.
+The authorized latest-base integration is documented in
+[rpg-pack-integration.md](rpg-pack-integration.md). Geometry/socket proposals and
+their placement/TPS limitations below still apply; they are not runtime adapters.
+
 This supplement adds a pure module and measured sidecars. **No editor, picker,
 plan store, renderer or TPS controller is connected.** PR72 base is
 `6c5fe1819ba388bcfac8055cc94744bd7831d734`; c072 recovery remains blocked. The

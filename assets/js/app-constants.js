@@ -2985,6 +2985,7 @@ function buildDetailedExterior(grp,it,w,d,h){
 var FMP_MANIFEST_URL = 'assets/models/furniture_mega/manifest.json';
 var INTERIOR_MODEL_MANIFEST_URL = 'assets/models/interior_model_0_26_1/manifest.json';
 var CUSTOM_MODEL_MANIFEST_URL = 'assets/models/custom/manifest.json';
+var RPG_MODEL_MANIFEST_URL = 'assets/models/packs/rpg-mansion/manifest.json';
 var FMP_MANIFEST_SOURCES = [
   {url:FMP_MANIFEST_URL, globalName:'FMP_MANIFEST'},
   {url:INTERIOR_MODEL_MANIFEST_URL, globalName:'INTERIOR_MODEL_MANIFEST'},
@@ -3159,14 +3160,21 @@ function catalogueHeading(item){
 function catalogueGroup(item){
   return (item&&item.kindGroup)||(item&&item.group)||'家具';
 }
-function applyFurnitureMegaManifest(manifests){
+function applyFurnitureMegaManifest(manifests,rpg){
   FMP_ITEMS={};
   (Array.isArray(manifests)?manifests:[manifests]).forEach(function(manifest){
     if(manifest) mergeFurnitureMegaManifest(manifest);
   });
+  // Validate the additive pack before registration; never overwrite legacy IDs.
+  var acceptedRpg=null;
+  if(rpg&&typeof AssetPackRegistry==='object')try{
+    AssetPackRegistry.createRegistry(JSON.parse(JSON.stringify(Object.values(FMP_ITEMS))),[rpg]);
+    mergeFurnitureMegaManifest(rpg);acceptedRpg=rpg;
+  }catch(error){console.warn('RPG catalogue not registered:',error);}
   normalizeLegacyFurnitureItems();
   renderFurnitureMegaLibrary();
   renderOpeningModelToolMenus();
+  if(typeof AssetPackPicker==='object')AssetPackPicker.install(document.getElementById('sidebar'),FMP_ITEMS,acceptedRpg);
   draw2d();
   if(ren) rebuild3D();
 }
@@ -3186,13 +3194,13 @@ function loadFurnitureMegaLibrary(){
   var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
   }).catch(function(){ return null; });};
-  return Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+  return Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL),side(RPG_MODEL_MANIFEST_URL)]
     .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
     CATALOGUE_TAGS=all[0]||null;
     CATALOGUE_FINISHES=all[1]||null;
     if(CATALOGUE_FINISHES && typeof ModelQuality==='object') ModelQuality.setFinishes(CATALOGUE_FINISHES);
-    var manifests=all.slice(2).filter(Boolean);
-    if(manifests.length) applyFurnitureMegaManifest(manifests);
+    var manifests=all.slice(3).filter(Boolean);
+    if(manifests.length||all[2]) applyFurnitureMegaManifest(manifests,all[2]);
   });
 }
 function isBuildingComponentFmpItem(item){

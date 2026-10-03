@@ -60,6 +60,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* Catalogue controls stay in the scrolling category area, below common tools. */
 .catalogue-search{padding:8px 10px 14px}
 .catalogue-search label{display:block;color:var(--hp-text);font-size:12px;font-weight:700;margin-bottom:8px}
+.catalogue-pack-field{margin-bottom:14px}
+.catalogue-pack-field select{width:100%;min-height:44px;padding:8px 12px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit}
+#sidebar [data-tool][hidden],#sidebar .cat-body[hidden],#sidebar .cat-hdr[hidden],#sidebar .asset-tile img[hidden]{display:none!important}
+.asset-thumbnail-fallback{display:flex;align-items:center;justify-content:center;height:90px;color:var(--hp-muted)}
+.asset-thumbnail-fallback svg{width:40px;height:40px}
 .catalogue-search input{width:100%;min-width:0;min-height:44px;padding:10px 14px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit;font-size:16px;touch-action:manipulation}
 .catalogue-count{margin-top:8px;color:var(--hp-muted);font-size:11px;line-height:1.6}
 #sidebar .asset-subcat[hidden],#sidebar .asset-tile[hidden]{display:none!important}
