@@ -6,6 +6,23 @@ plan store, renderer or TPS controller is connected.** PR72 base is
 reviewed model snapshot `769f44a24e35780bbe69650706e998eef72fee87` and its Library
 ZIP remain unchanged, including every GLB, `.blend`, image and original manifest.
 
+## Handoff checkpoint: paused pending latest source and release-safety review
+
+Validation count is **registry 11 + geometry 5 = 16 distinct tests total**.
+The portable run repeats the same five geometry tests; it is not five additional
+tests and the registry suite alone does not contain 16 tests.
+
+The standalone registry is implemented, but connection to the editor registry,
+picker/UI, undo, pane state and TPS is **not implemented**. Support-surface
+sidecars are measured proposals and are not consumed by placement code. Floating
+tabletop props are therefore **not fixed in the application** by this work.
+
+Further feature work on the old PR72 base is paused. Keep both reviewed Library
+ZIPs and this isolated worktree intact while awaiting the latest source handoff
+and publication-safety confirmation. No integration, remote push or deployment
+is authorized by this checkpoint. Resume against the approved restored source;
+do not replace that source with this older checkout.
+
 ## Pure registry API
 
 `assets/js/asset-pack-registry.js` exports CommonJS or the inert browser global
