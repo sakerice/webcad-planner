@@ -16,6 +16,8 @@
 
 姿勢切替は即時で、entering/posing timerは自然な跨ぎ・着座motionの再生ではありません。鏡の反射renderer、水、裸モデル、新しい階段移動、通常歩行の四肢collision/foot IKは追加していません。将来のrig/motionには別の接触・遷移検証が必要で、現在の仮人物のclearanceを流用できません。狭い形状では保守的に操作やTPS cameraを拒否します。正式素材の取得・課金・認証・raw Mixamo配布は行っていません。
 
+退出できないactionは入力lockを維持し、人物を非表示にします。最後のaction座標・支持高は診断用に保持しますが、削除・移動済み家具の支持が残るとは扱わず、未検証のWALK位置へ人物を移しません。障害物を除いて「退出を再確認」するか、既存の「ウォークスルー終了」で編集表示へ戻れます。階/plan/view変更は既存のcontext resetへ渡します。非表示は安全な位置への復帰が完了したという意味ではありません。
+
 ## Reproduction
 
 既存の完全checkoutとモデル資産が必要です。新たなモデルbinaryや実行ログ、画像、ブラウザprofileはこの差分に含めません。ブラウザーfixtureは各テスト内の合成プランだけを使用し、local origin以外と`/api/`への通信を遮断します。
@@ -30,12 +32,12 @@ python3 -m http.server 8950 --bind 127.0.0.1
 別ターミナルで、インストール済みPlaywrightとChromiumを使います（この手順にinstall/login操作はありません）。`CHROMIUM_PATH`、`PLAYWRIGHT_MODULE`、`EVIDENCE_DIR`は必要に応じて指定できます。出力先未指定時は一時ディレクトリを作ります。
 
 ```sh
-for suite in mirror bath eye-height acceptance actions-panes integrated; do
+for suite in mirror bath eye-height acceptance actions-panes integrated blocked-action; do
   APP_URL=http://127.0.0.1:8950 node "tools/tests/walk-tps-${suite}.browser.cjs" || exit 1
 done
 ```
 
-元の候補では全193 Node test files＋lint selftest、TPS subset 51 cases、選択した実Chromium 6 scripts・49 groups、非deploy buildが成功しました。この公開snapshotは検証済みruntimeをbyte-identicalに移し、browser testの出力先/起動設定だけをportable化しています。検証の全ログ・画像と途中履歴は別途保全しており、独立レビュー済みとは扱いません。
+初回公開snapshot `a8b3ea6f` では全193 Node test files＋lint selftest、TPS subset 51 cases、選択した実Chromium 6 scripts・49 groups、非deploy buildが成功しました。独立レビューで見つかった「退出拒否中に削除済み家具のaction座標が未検証のWALK位置へ置き換わる」欠陥を後続修正し、`blocked-action` のNode/実ブラウザー回帰を追加しています。検証ログ・画像と途中履歴は別途保全しており、この修正もレビュー済みとは扱いません。
 
 ## Integration
 

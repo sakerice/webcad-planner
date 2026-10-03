@@ -136,7 +136,8 @@
       // Socket availability is an explicit catalogue opt-in, never guessed by name.
       if(!validPose(p)||!s||!['sit','mirror-pose','bath-pose'].includes(s.kind)||(expectedKind&&s.kind!==expectedKind)||(s.kind==='bath-pose'&&!Number.isFinite(s.supportY))||!validPose(s.pose)||!finite(s.approach)||s.pose.floor!==p.floor||
         distance(p,s.approach)>1.25||!host.isSafe(p)||s.reachable!==true)return false;
-      action={id:id,kind:s.kind,signature:s.signature,origin:poseCopy(p)};
+      action={id:id,kind:s.kind,signature:s.signature,origin:poseCopy(p),
+        lastPose:poseCopy(s.pose),supportY:Number.isFinite(s.supportY)?s.supportY:null};
       phase=0;state=s.kind==='bath-pose'?'entering':s.kind==='mirror-pose'?'posing':'sitting';reason=null;host.clearInput();return true;
     }
     function tick(seconds){
@@ -147,16 +148,20 @@
       var avatar=poseCopy(p),supportY=null;
       if(action){
         var s=host.resolveSocket(action.id);
-        if(!s||s.kind!==action.kind||!validPose(s.pose)||s.signature!==action.signature||s.pose.floor!==p.floor){
-          cancel('socket-changed',true);p=host.readPose();avatar=poseCopy(p);
+        if(!s||s.kind!==action.kind||!validPose(s.pose)||(action.kind==='bath-pose'&&!Number.isFinite(s.supportY))||s.signature!==action.signature||s.pose.floor!==p.floor){
+          cancel('socket-changed',true);p=host.readPose();
         }else{
-          supportY=Number.isFinite(s.supportY)?s.supportY:null;
-          if(state==='blocked'){if(action.kind==='bath-pose')avatar=poseCopy(s.pose);}
-          else {
-            avatar=poseCopy(s.pose);phase=Math.min(1,phase+dt/0.35);
+          if(state!=='blocked'){
+            action.lastPose=poseCopy(s.pose);action.supportY=Number.isFinite(s.supportY)?s.supportY:null;
+            phase=Math.min(1,phase+dt/0.35);
             state=action.kind==='bath-pose'?(phase===1?'bathing':'entering'):action.kind==='mirror-pose'?(phase===1?'posed':'posing'):(phase===1?'seated':'sitting');
           }
         }
+        // A refused exit is not a new placement. In particular, deletion may
+        // remove the physical support, so retain diagnostics but hide the actor
+        // until the host certifies an exit (or leaves the walkthrough context).
+        avatar=action?poseCopy(action.lastPose):poseCopy(p);
+        supportY=action?action.supportY:null;
       }
       if(!action){
         var same=previous&&previous.floor===p.floor;
@@ -176,7 +181,8 @@
         host.sweepCameraBoundary,projection):null;
       if(view)boom=view.distance;
       return {version:VERSION,mode:prefs.mode,state:state,reason:reason,avatar:avatar,phase:phase,
-        motionSource:'procedural-placeholder',actionKind:action?action.kind:null,supportY:supportY,locked:!!action,camera:view};
+        motionSource:'procedural-placeholder',actionKind:action?action.kind:null,supportY:supportY,
+        avatarHidden:!!action&&state==='blocked',locked:!!action,camera:view};
     }
     return {tick:tick,requestAction:requestAction,requestSit:function(id){return requestAction(id,'sit');},setMode:setMode,
       cancel:function(){return !disposed&&cancel('cancelled',true);},

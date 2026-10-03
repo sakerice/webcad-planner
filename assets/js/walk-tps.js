@@ -200,8 +200,8 @@
     updateWalkEyePresetButton();
     mode.setAttribute('aria-pressed',String(prefs.mode==='tps'));mode.textContent=prefs.mode==='tps'?'FPSへ':'TPS試作';
     action.hidden=prefs.mode!=='tps';action.disabled=!(output&&output.locked)&&!candidate;
-    action.textContent=output&&output.locked?(output.actionKind==='bath-pose'?'出る / 解除':output.actionKind==='mirror-pose'?'ポーズ終了':'立つ / 解除'):candidateKind==='bath-pose'?'入浴姿勢（仮）':candidateKind==='mirror-pose'?'ポーズ（仮）':'座る';
-    label.hidden=prefs.mode!=='tps';label.textContent=output&&output.state==='blocked'?'安全な退出先がありません':
+    action.textContent=output&&output.state==='blocked'?'退出を再確認':output&&output.locked?(output.actionKind==='bath-pose'?'出る / 解除':output.actionKind==='mirror-pose'?'ポーズ終了':'立つ / 解除'):candidateKind==='bath-pose'?'入浴姿勢（仮）':candidateKind==='mirror-pose'?'ポーズ（仮）':'座る';
+    label.hidden=prefs.mode!=='tps';label.textContent=output&&output.state==='blocked'?'人物を非表示：安全な退出先がありません。障害物を除いて再確認、またはウォークスルー終了':
       output&&output.camera&&!output.camera.verified?'TPS未検証・FPS表示':
       output&&output.camera&&!output.camera.avatarVisible?'壁際：仮人物を一時非表示':output&&output.locked?(output.actionKind==='bath-pose'?'服あり・入浴姿勢（仮）':output.actionKind==='mirror-pose'?'仮モデル・鏡前ポーズ（仮）':'仮モデル・着座姿勢（仮）'):'仮モデル・仮歩行';
   }
@@ -224,7 +224,7 @@
   }
   function setMode(mode){
     if(disposed)return false;context();ensure();if(stale)collect();
-    if(!controller.setMode(mode))return false;prefs=controller.preference();
+    if(!controller.setMode(mode)){update(0);return false;}prefs=controller.preference();
     if(mode==='fps'){releaseAvatar();output=null;walkApplyFpsCamera();}else update(0);
     updateUi();invalidate3D();return true;
   }

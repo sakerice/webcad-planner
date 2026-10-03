@@ -24,6 +24,9 @@
     var disposed=false;
     return {group:group,pose:function(s,groundY){
       if(disposed)return;
+      // A blocked action may have lost its furniture/support entirely. Do not
+      // move or fit limbs at an unchecked host origin, even for a single frame.
+      if(s.avatarHidden||s.locked&&s.state==='blocked'){group.visible=false;return;}
       var bathing=s.locked&&s.actionKind==='bath-pose';
       var posing=s.locked&&s.actionKind==='mirror-pose'&&s.state!=='blocked';
       var seated=s.locked&&s.actionKind!=='mirror-pose'&&(s.state!=='blocked'||bathing);
