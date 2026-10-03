@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.1.0",
+  "reviewedAssetCommit": "769f44a24e35780bbe69650706e998eef72fee87",
+  "baseCommit": "6c5fe1819ba388bcfac8055cc94744bd7831d734",
+  "c072Recovery": "pending",
+  "packId": "rpg-mansion",
+  "manifestSha256": "78a46bd84c2b20b14836c698694ffa9f4e7da8daede3b2fe47d243f0981fdb7f",
+  "editorIntegration": "none",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "actorConvention": "yaw 0 faces -Z; local model +Z facing corresponds to yaw pi",
+  "sockets": [
+    {
+      "assetId": "rpg-mansion-chair-01",
+      "socketId": "seat-main",
+      "socketRevision": "seat-surface-v1",
+      "assetRevision": "sha256:cc88d91918b287e850ba8ed495b22a58862ae5126f7ebd5f6e8c524758cee13c",
+      "kind": "sit",
+      "status": "geometry-candidate-host-validation-required",
+      "localSeatSurfaceCenter": [
+        0.0,
+        0.513499975,
+        0.017105259
+      ],
+      "localFrontDirection": [
+        0,
+        0,
+        1
+      ],
+      "actorLocalYawRadians": 3.141592654,
+      "localApproachFloorPoint": [
+        0.0,
+        0,
+        0.875000006
+      ],
+      "approachStatus": "proposed-front-floor-point-not-path-validated",
+      "approachMarginFromAssetFrontM": 0.6,
+      "seatSurfaceBoundsM": {
+        "min": [
+          -0.216250017,
+          0.513499975,
+          -0.210526332
+        ],
+        "max": [
+          0.216250017,
+          0.513499975,
+          0.24473685
+        ]
+      },
+      "seatSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "evidence": {
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-chair-01.blend",
+        "sourceBlendSha256": "c3e2bc4d5c5b2b7c0c35e7787ad8abcad4a5f081f0d9b343d4e53b477a4d4f00",
+        "mesh": "rpg-mansion-chair-01",
+        "polygonIndex": 324,
+        "verticesLocalGltfM": [
+          [
+            0.216250017,
+            0.513499975,
+            -0.210526332
+          ],
+          [
+            -0.216250017,
+            0.513499975,
+            -0.210526332
+          ],
+          [
+            -0.216250017,
+            0.513499975,
+            0.24473685
+          ],
+          [
+            0.216250017,
+            0.513499975,
+            0.24473685
+          ]
+        ],
+        "surfaceAreaM2": 0.196901351,
+        "method": "Read single broad upward cushion polygon from reviewed Blender mesh; transform (x,y,z) to glTF (x,z,-y)",
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "explicit requestSit",
+        "world transform including scale, facing correction and floor elevation",
+        "same-floor approach within 1.25 metres",
+        "path check before reachable:true",
+        "signature includes geometry/socket revision and placement transform",
+        "release on signature change or asset deletion",
+        "blocked exit when no safe standing point",
+        "TPS rig-specific pelvis alignment; no fixed pelvis offset in metadata"
+      ]
+    }
+  ]
+}

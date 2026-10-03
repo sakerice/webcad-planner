@@ -1,0 +1,679 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.1.0",
+  "reviewedAssetCommit": "769f44a24e35780bbe69650706e998eef72fee87",
+  "baseCommit": "6c5fe1819ba388bcfac8055cc94744bd7831d734",
+  "c072Recovery": "pending",
+  "packId": "rpg-mansion",
+  "manifestSha256": "78a46bd84c2b20b14836c698694ffa9f4e7da8daede3b2fe47d243f0981fdb7f",
+  "editorIntegration": "none",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "correctionScope": "Final GLB byte counts only; original archive and reports retained",
+  "items": [
+    {
+      "model": "rpg-mansion-chair-01",
+      "dimensions_mm": [
+        519.9999809265137,
+        550.000011920929,
+        1049.9999523162842
+      ],
+      "bounds_m": [
+        [
+          -0.25999999046325684,
+          -0.2750000059604645,
+          0.0
+        ],
+        [
+          0.25999999046325684,
+          0.2750000059604645,
+          1.0499999523162842
+        ]
+      ],
+      "triangles": 1668,
+      "uv": {
+        "meters_per_uv": 1.989646156426164,
+        "min": 1.8047693757982302,
+        "max": 2.55564584194632,
+        "p05": 1.8528533915587977,
+        "p95": 2.279911744369151,
+        "total_triangles": 1668,
+        "valid_triangles": 1668,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Oxblood velvet": "fabric",
+        "RPG Antique brass": "metal",
+        "RPG Walnut edge": "wood"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 61072,
+      "previousPreMetadataGlbBytes": 60840,
+      "modelSha256": "cc88d91918b287e850ba8ed495b22a58862ae5126f7ebd5f6e8c524758cee13c",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-chair-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-desk-01",
+      "dimensions_mm": [
+        1399.999976158142,
+        740.0000095367432,
+        786.0000133514404
+      ],
+      "bounds_m": [
+        [
+          -0.699999988079071,
+          -0.3700000047683716,
+          0.0
+        ],
+        [
+          0.699999988079071,
+          0.3700000047683716,
+          0.7860000133514404
+        ]
+      ],
+      "triangles": 1596,
+      "uv": {
+        "meters_per_uv": 3.063369823095095,
+        "min": 2.788631022455083,
+        "max": 3.983169629400232,
+        "p05": 2.8514363340913094,
+        "p95": 3.596374477201862,
+        "total_triangles": 1596,
+        "valid_triangles": 1596,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Walnut edge": "wood",
+        "RPG Teal leather": "fabric",
+        "RPG Antique brass": "metal"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 58992,
+      "previousPreMetadataGlbBytes": 58764,
+      "modelSha256": "c39663186e2f1deafb014434d8264584818091ea0b45bfc70df0046f6f36d732",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-desk-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-bookcase-01",
+      "dimensions_mm": [
+        1100.000023841858,
+        379.9999952316284,
+        2000.0
+      ],
+      "bounds_m": [
+        [
+          -0.550000011920929,
+          -0.1899999976158142,
+          0.0
+        ],
+        [
+          0.550000011920929,
+          0.1899999976158142,
+          2.0
+        ]
+      ],
+      "triangles": 3576,
+      "uv": {
+        "meters_per_uv": 14.053587350779615,
+        "min": 11.566741840396102,
+        "max": 15.711512561745016,
+        "p05": 11.853436014671901,
+        "p95": 15.68351742412665,
+        "total_triangles": 3576,
+        "valid_triangles": 3576,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut edge": "wood",
+        "RPG Walnut": "wood",
+        "RPG Oxblood velvet": "fabric",
+        "RPG Parchment": null,
+        "RPG Antique brass": "metal",
+        "RPG Teal leather": "fabric"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 172244,
+      "previousPreMetadataGlbBytes": 172012,
+      "modelSha256": "ff28a3ecd45616c65cd723a1cf0d4e6bf7735f5235672e55e30552c0fc0d2be6",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-bookcase-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-candlestick-01",
+      "dimensions_mm": [
+        180.00000715255737,
+        180.00000715255737,
+        412.00000047683716
+      ],
+      "bounds_m": [
+        [
+          -0.09000000357627869,
+          -0.09000000357627869,
+          0.0
+        ],
+        [
+          0.09000000357627869,
+          0.09000000357627869,
+          0.41200000047683716
+        ]
+      ],
+      "triangles": 532,
+      "uv": {
+        "meters_per_uv": 0.47779578463019223,
+        "min": 0.44241764023985464,
+        "max": 0.5770398323563287,
+        "p05": 0.4520072991736479,
+        "p95": 0.540880023027968,
+        "total_triangles": 532,
+        "valid_triangles": 532,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Antique brass": "metal",
+        "RPG Wax": null,
+        "RPG Ink": null
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 23500,
+      "previousPreMetadataGlbBytes": 23268,
+      "modelSha256": "e90befcfd413852e47c64739c42d231736ce407afe19752be35faa3dbc8b2242",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-frame-01",
+      "dimensions_mm": [
+        660.0000262260437,
+        75.00000298023224,
+        899.9999761581421
+      ],
+      "bounds_m": [
+        [
+          -0.33000001311302185,
+          -0.03750000149011612,
+          0.0
+        ],
+        [
+          0.33000001311302185,
+          0.03750000149011612,
+          0.8999999761581421
+        ]
+      ],
+      "triangles": 584,
+      "uv": {
+        "meters_per_uv": 2.129661267002427,
+        "min": 1.934525870125008,
+        "max": 2.6467853917953916,
+        "p05": 1.9952544476002532,
+        "p95": 2.5731995715468554,
+        "total_triangles": 584,
+        "valid_triangles": 584,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Teal leather": "fabric",
+        "RPG Antique brass": "metal",
+        "RPG Parchment": null,
+        "RPG Walnut edge": "wood"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 27232,
+      "previousPreMetadataGlbBytes": 27004,
+      "modelSha256": "4e0c3040d039f278b866f68980b362dde35409a1916fd9e2b28dced5565a40db",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-frame-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-chest-01",
+      "dimensions_mm": [
+        819.9999928474426,
+        490.00000953674316,
+        535.0000262260437
+      ],
+      "bounds_m": [
+        [
+          -0.4099999964237213,
+          -0.24500000476837158,
+          0.0
+        ],
+        [
+          0.4099999964237213,
+          0.24500000476837158,
+          0.5350000262260437
+        ]
+      ],
+      "triangles": 752,
+      "uv": {
+        "meters_per_uv": 2.151969565638671,
+        "min": 1.8222989908325136,
+        "max": 3.1556213212174855,
+        "p05": 1.926558111325519,
+        "p95": 2.673489805129157,
+        "total_triangles": 752,
+        "valid_triangles": 752,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Walnut edge": "wood",
+        "RPG Antique brass": "metal",
+        "RPG Ink": null
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 33404,
+      "previousPreMetadataGlbBytes": 33172,
+      "modelSha256": "275f126b634cc09cfc3d213f7b07f74500a083b1a1a7df8079d7a84b732ea77a",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-chest-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-rug-01",
+      "dimensions_mm": [
+        1399.999976158142,
+        2000.0,
+        9.999999776482582
+      ],
+      "bounds_m": [
+        [
+          -0.699999988079071,
+          -1.0,
+          0.0
+        ],
+        [
+          0.699999988079071,
+          1.0,
+          0.009999999776482582
+        ]
+      ],
+      "triangles": 128,
+      "uv": {
+        "meters_per_uv": 2.92258130815972,
+        "min": 2.4585197330359563,
+        "max": 3.5178080801015907,
+        "p05": 2.458918259595438,
+        "p95": 3.5177315619317646,
+        "total_triangles": 128,
+        "valid_triangles": 128,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Oxblood velvet": "fabric",
+        "RPG Parchment": null,
+        "RPG Antique brass": "metal"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 11320,
+      "previousPreMetadataGlbBytes": 11088,
+      "modelSha256": "1edecea53c2d9dc87d964897ea760c75fa0ab1778d1e0907dc920322ed97b841",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-side-table-01",
+      "dimensions_mm": [
+        639.9999856948853,
+        639.9999856948853,
+        637.0000243186951
+      ],
+      "bounds_m": [
+        [
+          -0.3199999928474426,
+          -0.3199999928474426,
+          0.0
+        ],
+        [
+          0.3199999928474426,
+          0.3199999928474426,
+          0.6370000243186951
+        ]
+      ],
+      "triangles": 784,
+      "uv": {
+        "meters_per_uv": 1.7122496071422817,
+        "min": 1.596111837323988,
+        "max": 1.9674104062884414,
+        "p05": 1.6330302214203272,
+        "p95": 1.8874213197750422,
+        "total_triangles": 784,
+        "valid_triangles": 784,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Walnut edge": "wood",
+        "RPG Antique brass": "metal"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 31864,
+      "previousPreMetadataGlbBytes": 31632,
+      "modelSha256": "0e3de9ae08e7b65b1787bfd40fc4252a9bb3b595481f8494937194f92664f45d",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-side-table-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-mantel-clock-01",
+      "dimensions_mm": [
+        360.00001430511475,
+        204.99999821186066,
+        430.0000071525574
+      ],
+      "bounds_m": [
+        [
+          -0.18000000715255737,
+          -0.10249999910593033,
+          0.0
+        ],
+        [
+          0.18000000715255737,
+          0.10249999910593033,
+          0.4300000071525574
+        ]
+      ],
+      "triangles": 1284,
+      "uv": {
+        "meters_per_uv": 1.06467215253554,
+        "min": 0.9376360130184482,
+        "max": 1.3754625198574515,
+        "p05": 0.9967338531427737,
+        "p95": 1.188062640653345,
+        "total_triangles": 1284,
+        "valid_triangles": 1284,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut edge": "wood",
+        "RPG Walnut": "wood",
+        "RPG Antique brass": "metal",
+        "RPG Parchment": null,
+        "RPG Ink": null
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 51468,
+      "previousPreMetadataGlbBytes": 51240,
+      "modelSha256": "95747d5301e5acd372805fdfd289d9bed0939e7acade6741834c06437989f221",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-mantel-clock-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-letter-01",
+      "dimensions_mm": [
+        219.9999988079071,
+        144.99999582767487,
+        12.000000104308128
+      ],
+      "bounds_m": [
+        [
+          -0.10999999940395355,
+          -0.07249999791383743,
+          0.0
+        ],
+        [
+          0.10999999940395355,
+          0.07249999791383743,
+          0.012000000104308128
+        ]
+      ],
+      "triangles": 300,
+      "uv": {
+        "meters_per_uv": 0.33899589339728875,
+        "min": 0.30406604944657506,
+        "max": 0.430910107739142,
+        "p05": 0.31634388397831953,
+        "p95": 0.3904587066794367,
+        "total_triangles": 300,
+        "valid_triangles": 300,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Parchment": null,
+        "RPG Wax": null,
+        "RPG Seal": null,
+        "RPG Antique brass": "metal"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 14644,
+      "previousPreMetadataGlbBytes": 14412,
+      "modelSha256": "86866397ed51b1f2bc11c27a5e57b5ac8f5fa3ba7706ace4349d1857037e49a7",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-key-01",
+      "dimensions_mm": [
+        56.0000017285347,
+        129.99999523162842,
+        8.00000037997961
+      ],
+      "bounds_m": [
+        [
+          -0.02800000086426735,
+          -0.06499999761581421,
+          0.0
+        ],
+        [
+          0.02800000086426735,
+          0.06499999761581421,
+          0.00800000037997961
+        ]
+      ],
+      "triangles": 292,
+      "uv": {
+        "meters_per_uv": 0.14190308223015374,
+        "min": 0.11869421023546457,
+        "max": 0.181580893776221,
+        "p05": 0.13291649866368138,
+        "p95": 0.16462757035596653,
+        "total_triangles": 292,
+        "valid_triangles": 292,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Antique brass": "metal"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 13200,
+      "previousPreMetadataGlbBytes": 12972,
+      "modelSha256": "11b959d36cff185876170e2c11a390d5634c108bc328e0747fc639541a9fd36c",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-key-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-fallen-chair-01",
+      "dimensions_mm": [
+        519.9999809265137,
+        1049.9999523162842,
+        550.000011920929
+      ],
+      "bounds_m": [
+        [
+          -0.25999999046325684,
+          -0.5249999761581421,
+          0.0
+        ],
+        [
+          0.25999999046325684,
+          0.5249999761581421,
+          0.550000011920929
+        ]
+      ],
+      "triangles": 1668,
+      "uv": {
+        "meters_per_uv": 2.022314748472442,
+        "min": 1.8344083006690326,
+        "max": 2.5976009625754872,
+        "p05": 1.8832808456891572,
+        "p95": 2.317361787404744,
+        "total_triangles": 1668,
+        "valid_triangles": 1668,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Walnut": "wood",
+        "RPG Oxblood velvet": "fabric",
+        "RPG Antique brass": "metal",
+        "RPG Walnut edge": "wood"
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 61072,
+      "previousPreMetadataGlbBytes": 60844,
+      "modelSha256": "b71ea27d3b931fa935e67bae935de1ce62ae3e1381366287490403fb9ad0db53",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-fallen-chair-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-glass-shards-01",
+      "dimensions_mm": [
+        569.9999928474426,
+        500.0,
+        4.000000189989805
+      ],
+      "bounds_m": [
+        [
+          -0.2849999964237213,
+          -0.25,
+          0.0
+        ],
+        [
+          0.2849999964237213,
+          0.25,
+          0.004000000189989805
+        ]
+      ],
+      "triangles": 40,
+      "uv": {
+        "meters_per_uv": 0.5127939653319415,
+        "min": 0.5127921509985409,
+        "max": 0.5127953328064473,
+        "p05": 0.5127925099064579,
+        "p95": 0.5127950076019849,
+        "total_triangles": 40,
+        "valid_triangles": 40,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Stylized pale glass": null
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 4604,
+      "previousPreMetadataGlbBytes": 4376,
+      "modelSha256": "759cecf7e5a8d33f99293a2c38a37a1675f1a3dd875a62905d684822c9581347",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-glass-shards-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    },
+    {
+      "model": "rpg-mansion-clue-stain-01",
+      "dimensions_mm": [
+        589.9999737739563,
+        330.00001311302185,
+        1.0000000474974513
+      ],
+      "bounds_m": [
+        [
+          -0.29499998688697815,
+          -0.16500000655651093,
+          0.0
+        ],
+        [
+          0.29499998688697815,
+          0.16500000655651093,
+          0.0010000000474974513
+        ]
+      ],
+      "triangles": 276,
+      "uv": {
+        "meters_per_uv": 0.5960663977827254,
+        "min": 0.5405536957328964,
+        "max": 0.7049000990270292,
+        "p05": 0.5615049366280175,
+        "p95": 0.6319804023784181,
+        "total_triangles": 276,
+        "valid_triangles": 276,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "materials": {
+        "RPG Seal": null
+      },
+      "front_blender": "-Y",
+      "front_gltf": "+Z",
+      "glb_bytes": 14476,
+      "previousPreMetadataGlbBytes": 14248,
+      "modelSha256": "b39c8f9e52124e9eafa40f9c03e2aecd6b9bb29b4cbce7f3247546246d9ffb23",
+      "reviewedValidationPath": "tools/blender/rpg_mansion/work/rpg-mansion-clue-stain-01-validation.json",
+      "correction": "Final bytes after GLB extras; reviewed source report unchanged"
+    }
+  ]
+}

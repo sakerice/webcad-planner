@@ -1,0 +1,24 @@
+✔ default and RPG packs keep canonical IDs, labels, order and dimensions (6.070189ms)
+✔ unselected, malformed or unknown pack falls back, empty known pack stays empty (0.515819ms)
+✔ registry snapshots neither freeze nor retain mutable caller data (0.867283ms)
+✔ mixed and repeated placements resolve across 1000 pane-local selections without mutation (2.841756ms)
+✔ one definition may belong to several packs; shared membership never remaps an ID (0.270443ms)
+✔ invalid registrations fail atomically, without modifying inputs or existing registry (0.653544ms)
+✔ prototype-like legacy IDs are ordinary keys; absent IDs do not turn into defaults (0.144505ms)
+✔ missing thumbnail stays missing for existing picker fallback; registry does not fetch (0.116734ms)
+✔ existing search matcher filters only selected candidates (0.571052ms)
+✔ browser-style load works with no DOM, storage or network capabilities (1.547877ms)
+✔ actual resolved PR72 catalogue preserves every existing ID and record (9.541193ms)
+✔ 14 canonical IDs, measured bounds and revisions match delivered GLB bytes (34.480238ms)
+✔ corrected validation records use final post-metadata bytes; originals remain traceable (1.900263ms)
+✔ upright chair socket is on actual exported cushion surface, not foot/root height (0.766091ms)
+✔ no geometry-only proposal grants reachability or embeds a rig pelvis offset (0.661716ms)
+✔ measured tabletop planes replace arbitrary 750mm placement guesses (4.709961ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 103.390299
