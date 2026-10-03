@@ -8,6 +8,7 @@ import bpy
 from exterior_build import render_top,render_thumb
 sys.path.insert(0,str(HERE))
 from render_config import configure
+from png_metadata import strip_metadata
 configure()
 manifest=json.loads((ROOT/'assets/models/packs/rpg-mansion/manifest.json').read_text())
 for item in manifest['items']:
@@ -20,4 +21,5 @@ for item in manifest['items']:
     obj.rotation_euler.z=math.pi
     bpy.context.view_layer.update()
     render_thumb(obj,str(ROOT/item['rear']))
+    for key in ['thumb','top','rear']:strip_metadata(ROOT/item[key])
     print('PREVIEW_COMPLETE '+item['id'],flush=True)

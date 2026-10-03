@@ -292,3 +292,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 
 /* Keep the comparison entry above the native 3D elevation controls. */
 body:has(#elev-snap-fab.show) #compare-launch{bottom:126px}
+
+/* Conversion is an explicit pane operation; uses comparison control vocabulary. */
+#asset-conversion-open{width:100%;min-height:44px;margin-top:8px;white-space:normal}
+.asset-conversion-dialog{margin:auto;position:fixed;inset:0;border:0;border-radius:24px;padding:24px;width:min(960px,calc(100vw - 24px));max-height:92dvh;box-sizing:border-box;color:var(--ui-text,#353b42);background:white;box-shadow:0 20px 70px #25304233;overflow:auto}
+.asset-conversion-dialog::backdrop{background:#25304277}
+.asset-conversion-dialog h2{font-size:20px;margin:0;flex:1}.asset-conversion-dialog p{font-size:13px;line-height:1.65}
+.asset-conversion-dialog button{min-height:44px;border:0;border-radius:999px;padding:10px 17px;background:#edf4f8;color:#354d5d;cursor:pointer;font:inherit;font-size:13px}
+.asset-conversion-dialog button.compare-primary{background:var(--ui-accent,#ee604b);color:white}.asset-conversion-dialog button:disabled{opacity:.45;cursor:default}
+.asset-conversion-table{max-height:42dvh;overflow:auto}.asset-conversion-table table{width:100%;border-collapse:collapse;font-size:12px}.asset-conversion-table th{text-align:left;position:sticky;top:0;background:white;padding:8px}.asset-conversion-table td{padding:10px 8px;vertical-align:middle;border-bottom:1px solid #edf0f2;overflow-wrap:anywhere}.asset-conversion-table td small{display:block;color:#677580;margin-top:4px;line-height:1.5}.asset-conversion-table img{object-fit:contain;display:block}.asset-conversion-table input{width:24px;height:24px;cursor:pointer;margin:10px}
+.asset-conversion-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}.asset-conversion-images figure{margin:0}.asset-conversion-images img{width:100%;border-radius:12px}.asset-conversion-images figcaption{font-size:13px;margin-bottom:8px}
+@media(max-width:600px){.asset-conversion-dialog{padding:16px}.asset-conversion-table{max-height:38dvh}.asset-conversion-table th,.asset-conversion-table td{padding:6px 4px}.asset-conversion-table img{width:48px;height:48px}.asset-conversion-table td:last-child{min-width:110px}.asset-conversion-images{grid-template-columns:1fr}}
+.asset-conversion-table summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:#536c7b;font-size:12px;list-style:revert}

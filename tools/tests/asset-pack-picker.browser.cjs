@@ -26,7 +26,7 @@ const plan={walls:[],rooms:[{id:'room-1',x:0,y:0,w:6000,d:4000,n:'書斎',floor:
   assert.equal(await page.evaluate(async()=>JSON.stringify(await StorageAdapter.load())===window.__savedBefore),true);
   report.checks.push('existing items and saved local plan byte content unchanged by switching');
   await page.locator('#object-search-input').fill('椅子');
-  assert.equal(await page.locator('#object-search-results [data-tool]').count(),2);
+  assert.equal(await page.locator('#object-search-results [data-tool]').count(),6);
   assert.equal(await page.locator('#object-search-results [data-tool="rpg-mansion-chair-01"]').count(),1);
   await page.locator('#object-search-results [data-tool="rpg-mansion-chair-01"]').click();
   const loc=await page.evaluate(()=>({x:ST.panX+2600*ST.zoom*.05,y:ST.panY+1800*ST.zoom*.05}));
@@ -113,7 +113,7 @@ const plan={walls:[],rooms:[{id:'room-1',x:0,y:0,w:6000,d:4000,n:'書斎',floor:
   await mobile.goto(url+'?preset=blank');await ready(mobile);await mobile.click('#bnav-tools');
   await mobile.waitForFunction(()=>document.getElementById('sidebar').getBoundingClientRect().top<300);
   await mobile.selectOption('#catalogue-pack','rpg-mansion');await mobile.locator('#object-search-input').fill('椅子');
-  assert.equal(await mobile.locator('#object-search-results [data-tool]').count(),2);
+  assert.equal(await mobile.locator('#object-search-results [data-tool]').count(),6);
   await mobile.locator('#sidebar').evaluate(el=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{}))));
   const box=await mobile.locator('#catalogue-pack').boundingBox();assert.ok(box&&box.width>150&&box.height>=40&&box.x>=0&&box.x+box.width<=390&&box.y>=0&&box.y+box.height<=844);
   assert.equal(await mobile.evaluate(()=>{const el=document.getElementById('catalogue-pack'),r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el;}),true);

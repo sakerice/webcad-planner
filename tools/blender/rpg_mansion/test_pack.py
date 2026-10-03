@@ -1,5 +1,5 @@
 """Read delivered GLB bytes, not builder assumptions. Run from any directory."""
-import json, math, struct, unittest
+import json, math, struct, unittest, os
 from pathlib import Path
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[3]
@@ -21,7 +21,7 @@ def glb(path):
 class Pack(unittest.TestCase):
     def test_ids_and_isolation(self):
         ids=[i['id'] for i in MANIFEST['items']]
-        self.assertEqual(len(ids),14);self.assertEqual(len(set(ids)),14)
+        self.assertEqual(len(ids),50);self.assertEqual(len(set(ids)),50)
         legacy=set()
         for folder in ['custom','furniture_mega','interior_model_0_26_1']:
             legacy.update(i['id'] for i in json.loads((ROOT/'assets/models'/folder/'manifest.json').read_text())['items'])
@@ -40,7 +40,10 @@ class Pack(unittest.TestCase):
                 self.assertFalse(j.get('images'));self.assertFalse(j.get('textures'))
                 channels={m.get('extras',{}).get('finishChannel') for m in j['materials']}-{None}
                 self.assertEqual(channels,{c['key'] for c in item['finishChannels']})
-                self.assertTrue((ROOT/item['sourceBlend']).read_bytes().startswith(b'BLENDER'))
+                self.assertTrue((ROOT/item['builder']).is_file())
+                source=Path(os.environ.get('RPG_SOURCE_ARCHIVE',ROOT))/item['sourceBlend']
+                if os.environ.get('RPG_SOURCE_ARCHIVE') or source.exists():
+                    self.assertTrue(source.read_bytes().startswith(b'BLENDER'))
                 report=json.loads((ROOT/item['validation']).read_text())
                 self.assertEqual(report['uv']['degenerate_world'],0)
                 self.assertEqual(report['uv']['degenerate_uv'],0)
@@ -55,13 +58,55 @@ class Pack(unittest.TestCase):
                             self.assertGreater(area,1e-12,item['id']+' collapsed exported UV')
                 self.assertLessEqual(tris,6000)
                 self.assertEqual(tris,report['triangles'])
-        self.assertLess(total,1000000)
+        self.assertLess(total,3500000)
+
+    def test_expansion_coplanar_faces_normals_and_leaf_orientation(self):
+        # Inspect delivered bytes across material primitives, not only source meshes.
+        for item in MANIFEST['items'][14:]:
+            j,read=glb(ROOT/item['model']);seen=set();leaf_triangles=[]
+            for mesh in j['meshes']:
+                for p in mesh['primitives']:
+                    xyz=read(p['attributes']['POSITION']);normals=read(p['attributes']['NORMAL']);idx=[v[0] for v in read(p['indices'])]
+                    for k in range(0,len(idx),3):
+                        ids=idx[k:k+3];points=[xyz[i] for i in ids]
+                        key=tuple(sorted(tuple(round(v,7) for v in pt) for pt in points))
+                        self.assertNotIn(key,seen,item['id']+' duplicated coplanar triangle');seen.add(key)
+                        a,b,c=points;u=[b[i]-a[i] for i in range(3)];v=[c[i]-a[i] for i in range(3)]
+                        cross=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]]
+                        n=[sum(normals[q][i] for q in ids) for i in range(3)]
+                        self.assertGreaterEqual(sum(x*y for x,y in zip(cross,n)),-1e-10,item['id']+' reversed normal')
+                        if item['id']=='rpg-mansion-planter-01' and j['materials'][p['material']].get('extras',{}).get('finishChannel')=='foliage':leaf_triangles.append(points)
+            if leaf_triangles:
+                # Weld positional UV/normal seams, then inspect each disconnected solid.
+                parents={}
+                def root(v):
+                    parents.setdefault(v,v)
+                    if parents[v]!=v:parents[v]=root(parents[v])
+                    return parents[v]
+                def pos(v):return tuple(round(x,7) for x in v)
+                for t in leaf_triangles:
+                    a,b,c=map(pos,t);parents[root(b)]=root(a);parents[root(c)]=root(a)
+                components={}
+                for t in leaf_triangles:components.setdefault(root(pos(t[0])),[]).append(t)
+                leaves=[ts for ts in components.values() if len({pos(v) for t in ts for v in t})==5]
+                self.assertEqual(len(leaves),9)
+                for ts in leaves:
+                    volume=0
+                    for a,b,c in ts:volume+=(a[0]*(b[1]*c[2]-b[2]*c[1])+a[1]*(b[2]*c[0]-b[0]*c[2])+a[2]*(b[0]*c[1]-b[1]*c[0]))/6
+                    self.assertGreater(volume,0,'exported leaf winding must face outward')
 
     def test_previews_not_empty_or_clipped(self):
         for item in MANIFEST['items']:
-            for key in ['thumb','top','rear']:
+            keys=['thumb','top']
+            if os.environ.get('RPG_SOURCE_ARCHIVE') or (ROOT/item['rear']).exists():keys.append('rear')
+            for key in keys:
                 with self.subTest(item=item['id'],view=key):
-                    im=Image.open(ROOT/item[key]).convert('RGBA');self.assertEqual(im.size,(512,512))
+                    im=Image.open((Path(os.environ.get('RPG_SOURCE_ARCHIVE',ROOT)) if key=='rear' else ROOT)/item[key]).convert('RGBA');self.assertEqual(im.size,(512,512))
+                    if key!='rear':
+                        self.assertFalse({'File','Date','Camera','Scene','RenderTime','exif'} & set(im.info),'Private render metadata in public preview')
+                        if os.environ.get('RPG_SOURCE_ARCHIVE'):
+                            original=Image.open(Path(os.environ['RPG_SOURCE_ARCHIVE'])/item[key]).convert('RGBA')
+                            self.assertEqual(im.tobytes(),original.tobytes(),'Public pixels differ from reviewed source')
                     bounds=im.getchannel('A').getbbox();self.assertIsNotNone(bounds)
                     self.assertGreater(bounds[0],0);self.assertGreater(bounds[1],0)
                     self.assertLess(bounds[2],512);self.assertLess(bounds[3],512)

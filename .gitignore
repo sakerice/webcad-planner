@@ -37,3 +37,14 @@ output/
 # Vertex AI のサービスアカウントの秘密鍵が入る。
 .dev.vars
 .dev.vars.*
+
+# RPG generated working sources and raw QA stay in local/Library archives.
+tools/blender/rpg_mansion/**/work/*.blend*
+tools/blender/rpg_mansion/**/work/*-rear.png
+tools/blender/rpg_mansion/work/*.blend*
+tools/blender/rpg_mansion/work/*-rear.png
+tools/blender/rpg_mansion/evidence/
+tools/assets/rpg-pack-contract/*evidence*/
+tools/assets/rpg-pack-contract/tps-fixture/*.png
+tools/assets/rpg-pack-contract/tps-fixture/world-results.json
+tools/assets/rpg-pack-contract/tps-fixture/*tests.txt

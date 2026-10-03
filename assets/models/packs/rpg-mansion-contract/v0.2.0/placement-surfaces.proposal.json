@@ -1,0 +1,419 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.2.0",
+  "baseSidecarVersion": "0.1.0",
+  "coverage": "Additional six representatives; merge by assetId and preserve v0.1.0 records",
+  "reviewedAssetCommit": "d7a89c65a370146b74ecb8c5c8da670b41fce247",
+  "packId": "rpg-mansion",
+  "manifestSha256": "56399b1b56438f323a7e4f86cce1d7e272d5df0575fa451556f8d7fd1f34e6d8",
+  "editorIntegration": "fixture-only; TPS host integration pending",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "surfaces": [
+    {
+      "assetId": "rpg-mansion-dining-table-01",
+      "assetRevision": "sha256:78b42f0e694af94ce8e62fdc783ddfaabc519fee4a4293bb8251c806c2a6fccf",
+      "surfaceId": "top-main",
+      "surfaceRevision": "top-surface-v1",
+      "status": "geometry-candidate-host-validation-required",
+      "localSurfaceCenter": [
+        0.0,
+        0.7799999713897705,
+        0.0
+      ],
+      "localSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "surfaceBoundsM": {
+        "min": [
+          -0.9584999680519104,
+          0.7799999713897705,
+          -0.4334999918937683
+        ],
+        "max": [
+          0.9584999680519104,
+          0.7799999713897705,
+          0.4334999918937683
+        ]
+      },
+      "polygonLocalGltfM": [
+        [
+          -0.9584999680519104,
+          0.7799999713897705,
+          -0.4334999918937683
+        ],
+        [
+          0.9584999680519104,
+          0.7799999713897705,
+          -0.4334999918937683
+        ],
+        [
+          0.9584999680519104,
+          0.7799999713897705,
+          0.4334999918937683
+        ],
+        [
+          -0.9584999680519104,
+          0.7799999713897705,
+          0.4334999918937683
+        ]
+      ],
+      "usableRegionProposal": {
+        "shape": "surface-polygon",
+        "note": "Host must inset by actual prop footprint and check obstacles; secretary writing board excludes pigeonhole top"
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-dining-table-01.glb",
+        "modelSha256": "78b42f0e694af94ce8e62fdc783ddfaabc519fee4a4293bb8251c806c2a6fccf",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-dining-table-01.blend",
+        "sourceBlendSha256": "b4baac55257f54ee5028b86c9700440607a355f7fa78318e9f8f87607f9720bf",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "wood",
+        "selectionHeightRangeM": [
+          0.775,
+          0.79
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 0,
+            "triangle": 704
+          },
+          {
+            "mesh": 0,
+            "primitive": 0,
+            "triangle": 705
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.9584999680519104,
+              0.7799999713897705,
+              -0.4334999918937683
+            ],
+            [
+              -0.9584999680519104,
+              0.7799999713897705,
+              -0.4334999918937683
+            ],
+            [
+              -0.9584999680519104,
+              0.7799999713897705,
+              0.4334999918937683
+            ]
+          ],
+          [
+            [
+              0.9584999680519104,
+              0.7799999713897705,
+              -0.4334999918937683
+            ],
+            [
+              -0.9584999680519104,
+              0.7799999713897705,
+              0.4334999918937683
+            ],
+            [
+              0.9584999680519104,
+              0.7799999713897705,
+              0.4334999918937683
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 1.6620389135227214,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "use editor effective height, not stored item.h or 750mm hint",
+        "transform polygon to world and normal by inverse transpose",
+        "test prop footprint containment, collisions and horizontal support",
+        "place prop bottom on measured plane; no automatic plan mutation"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-coffee-table-01",
+      "assetRevision": "sha256:f410c850b36dfe75cc2c6d9f24dfb2ea1529c0d3ecc0b3f07edba497e7f7eb5d",
+      "surfaceId": "top-main",
+      "surfaceRevision": "top-surface-v1",
+      "status": "geometry-candidate-host-validation-required",
+      "localSurfaceCenter": [
+        0.0,
+        0.44999998807907104,
+        0.0
+      ],
+      "localSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "surfaceBoundsM": {
+        "min": [
+          -0.5084999799728394,
+          0.44999998807907104,
+          -0.25849997997283936
+        ],
+        "max": [
+          0.5084999799728394,
+          0.44999998807907104,
+          0.25849997997283936
+        ]
+      },
+      "polygonLocalGltfM": [
+        [
+          -0.5084999799728394,
+          0.44999998807907104,
+          -0.25849997997283936
+        ],
+        [
+          0.5084999799728394,
+          0.44999998807907104,
+          -0.25849997997283936
+        ],
+        [
+          0.5084999799728394,
+          0.44999998807907104,
+          0.25849997997283936
+        ],
+        [
+          -0.5084999799728394,
+          0.44999998807907104,
+          0.25849997997283936
+        ]
+      ],
+      "usableRegionProposal": {
+        "shape": "surface-polygon",
+        "note": "Host must inset by actual prop footprint and check obstacles; secretary writing board excludes pigeonhole top"
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-coffee-table-01.glb",
+        "modelSha256": "f410c850b36dfe75cc2c6d9f24dfb2ea1529c0d3ecc0b3f07edba497e7f7eb5d",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-coffee-table-01.blend",
+        "sourceBlendSha256": "bf7432c37bfc4c93b9acf1f81600542c6f88189d8633535e7b4fed856ae82011",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "wood",
+        "selectionHeightRangeM": [
+          0.447,
+          0.46
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 0,
+            "triangle": 704
+          },
+          {
+            "mesh": 0,
+            "primitive": 0,
+            "triangle": 705
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.5084999799728394,
+              0.44999998807907104,
+              -0.25849997997283936
+            ],
+            [
+              -0.5084999799728394,
+              0.44999998807907104,
+              -0.25849997997283936
+            ],
+            [
+              -0.5084999799728394,
+              0.44999998807907104,
+              0.25849997997283936
+            ]
+          ],
+          [
+            [
+              0.5084999799728394,
+              0.44999998807907104,
+              -0.25849997997283936
+            ],
+            [
+              -0.5084999799728394,
+              0.44999998807907104,
+              0.25849997997283936
+            ],
+            [
+              0.5084999799728394,
+              0.44999998807907104,
+              0.25849997997283936
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 0.5257889385566727,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "use editor effective height, not stored item.h or 750mm hint",
+        "transform polygon to world and normal by inverse transpose",
+        "test prop footprint containment, collisions and horizontal support",
+        "place prop bottom on measured plane; no automatic plan mutation"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-secretary-01",
+      "assetRevision": "sha256:5165b72baebfe8d8ec81fae5d5fecc6ea7545133d2c140646d0481c6cb8edd56",
+      "surfaceId": "top-main",
+      "surfaceRevision": "top-surface-v1",
+      "status": "geometry-candidate-host-validation-required",
+      "localSurfaceCenter": [
+        0.0,
+        0.9829999804496765,
+        0.046052634716033936
+      ],
+      "localSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "surfaceBoundsM": {
+        "min": [
+          -0.41749998927116394,
+          0.9829999804496765,
+          -0.20032894611358643
+        ],
+        "max": [
+          0.41749998927116394,
+          0.9829999804496765,
+          0.2924342155456543
+        ]
+      },
+      "polygonLocalGltfM": [
+        [
+          -0.41749998927116394,
+          0.9829999804496765,
+          -0.20032894611358643
+        ],
+        [
+          0.41749998927116394,
+          0.9829999804496765,
+          -0.20032894611358643
+        ],
+        [
+          0.41749998927116394,
+          0.9829999804496765,
+          0.2924342155456543
+        ],
+        [
+          -0.41749998927116394,
+          0.9829999804496765,
+          0.2924342155456543
+        ]
+      ],
+      "usableRegionProposal": {
+        "shape": "surface-polygon",
+        "note": "Host must inset by actual prop footprint and check obstacles; secretary writing board excludes pigeonhole top"
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-secretary-01.glb",
+        "modelSha256": "5165b72baebfe8d8ec81fae5d5fecc6ea7545133d2c140646d0481c6cb8edd56",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-secretary-01.blend",
+        "sourceBlendSha256": "2bc04f6e94aef463fc30630d13c3d335d71cd949589269e1abd91eda3c9c0964",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "fabric",
+        "selectionHeightRangeM": [
+          0.96,
+          1.01
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 3,
+            "triangle": 4
+          },
+          {
+            "mesh": 0,
+            "primitive": 3,
+            "triangle": 5
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.41749998927116394,
+              0.9829999804496765,
+              -0.20032894611358643
+            ],
+            [
+              -0.41749998927116394,
+              0.9829999804496765,
+              -0.20032894611358643
+            ],
+            [
+              -0.41749998927116394,
+              0.9829999804496765,
+              0.2924342155456543
+            ]
+          ],
+          [
+            [
+              0.41749998927116394,
+              0.9829999804496765,
+              -0.20032894611358643
+            ],
+            [
+              -0.41749998927116394,
+              0.9829999804496765,
+              0.2924342155456543
+            ],
+            [
+              0.41749998927116394,
+              0.9829999804496765,
+              0.2924342155456543
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 0.41145722941191565,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "use editor effective height, not stored item.h or 750mm hint",
+        "transform polygon to world and normal by inverse transpose",
+        "test prop footprint containment, collisions and horizontal support",
+        "place prop bottom on measured plane; no automatic plan mutation"
+      ]
+    }
+  ],
+  "placementRules": [
+    {
+      "assetId": "rpg-mansion-candlestick-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-mantel-clock-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-letter-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-key-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    }
+  ]
+}

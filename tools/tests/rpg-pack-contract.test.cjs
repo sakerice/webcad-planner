@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const ROOT=path.resolve(__dirname,'../..'),DIR='assets/models/packs/rpg-mansion-contract/v0.1.0/';
 const read=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p))),hash=p=>crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT,p))).digest('hex');
 const geometry=read(DIR+'asset-geometry.json'),seats=read(DIR+'sit-sockets.proposal.json'),surfaces=read(DIR+'placement-surfaces.proposal.json');
-const manifest=read('assets/models/packs/rpg-mansion/manifest.json'),final=read(DIR+'validation-final.json');
+const manifest=read('assets/models/packs/rpg-mansion-contract/v0.1.0/reviewed-manifest.json'),final=read(DIR+'validation-final.json');
 function glb(p){
  const b=fs.readFileSync(path.join(ROOT,p)),length=b.readUInt32LE(12),j=JSON.parse(b.subarray(20,20+length)),bin=b.subarray(28+length);
  const values=i=>{const a=j.accessors[i],v=j.bufferViews[a.bufferView],n={SCALAR:1,VEC3:3}[a.type],bytes={5126:4,5125:4,5123:2}[a.componentType],method={5126:'readFloatLE',5125:'readUInt32LE',5123:'readUInt16LE'}[a.componentType];return Array.from({length:a.count},(_,row)=>Array.from({length:n},(_,col)=>bin[method]((v.byteOffset||0)+(a.byteOffset||0)+row*(v.byteStride||n*bytes)+col*bytes)));};
@@ -25,9 +25,9 @@ function findHorizontalFaces(assetId,height,channel){
 }
 test('14 canonical IDs, measured bounds and revisions match delivered GLB bytes',()=>{
  assert.deepEqual(geometry.items.map(i=>i.assetId),manifest.items.map(i=>i.id));
- assert.equal(geometry.manifestSha256,hash('assets/models/packs/rpg-mansion/manifest.json'));
+ assert.equal(geometry.manifestSha256,hash('assets/models/packs/rpg-mansion-contract/v0.1.0/reviewed-manifest.json'));
  for(const item of geometry.items){
-  assert.equal(item.assetRevision,'sha256:'+hash(item.modelPath));assert.equal(item.sourceBlendSha256,hash(item.sourceBlend));
+  assert.equal(item.assetRevision,'sha256:'+hash(item.modelPath));assert.match(item.sourceBlendSha256,/^[a-f0-9]{64}$/);const archived=path.resolve(process.env.RPG_SOURCE_ARCHIVE||ROOT,item.sourceBlend);if(process.env.RPG_SOURCE_ARCHIVE||fs.existsSync(archived))assert.equal(item.sourceBlendSha256,crypto.createHash('sha256').update(fs.readFileSync(archived)).digest('hex'));
   const {j,values}=glb(item.modelPath),vertices=j.meshes.flatMap(m=>m.primitives.flatMap(p=>values(p.attributes.POSITION)));
   for(let k=0;k<3;k++){
    assert.ok(Math.abs(Math.min(...vertices.map(v=>v[k]))-item.measuredBoundsM.min[k])<1e-7);

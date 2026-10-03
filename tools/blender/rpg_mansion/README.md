@@ -1,3 +1,7 @@
+> Historical 0.1.0 asset-production record. Current 50-model expansion and opt-in
+> duplicate conversion: [current documentation](../../../docs/rpg-expanded-conversion.md).
+> The original 14 outputs remain preserved; use the expansion builder for additions.
+
 # RPG mansion pack 0.1.0
 
 Independent native asset deliverable, **not registered in the editor**. Built on

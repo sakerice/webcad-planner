@@ -196,6 +196,9 @@ def main():
     configure()
     items=[]
     selected=sys.argv[sys.argv.index('--only')+1].split(',') if '--only' in sys.argv else None
+    existing=PACK/'manifest.json'
+    if not selected and existing.exists() and len(json.loads(existing.read_text()).get('items',[]))>len(SPECS):
+        raise RuntimeError('Expanded catalogue exists. Use --only for legacy assets; expansion/build.py preserves all existing entries.')
     for slug,name,size,fn,category,elevation in SPECS:
         if selected and slug not in selected: continue
         stem='rpg-mansion-'+slug+'-01'
@@ -204,6 +207,8 @@ def main():
         kit.clear_scene();preview=build_one(fn,size)
         channels={m.get('finishChannel') for m in preview.data.materials if m.get('finishChannel')}
         obj=kit.run([(stem,size,lambda fn=fn,size=size:build_one(fn,size),channels,6000)])[0]
+        from png_metadata import strip_metadata
+        for image in [kit.PREVIEW_DIR/(stem+'-thumb.png'),kit.PREVIEW_DIR/(stem+'-top.png'),kit.WORK_DIR/(stem+'-rear.png')]:strip_metadata(image)
         path=kit.GLB_DIR/(stem+'.glb')
         if path.exists():
             b=path.read_bytes();n=struct.unpack_from('<I',b,12)[0];j=json.loads(b[20:20+n])

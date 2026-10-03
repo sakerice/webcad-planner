@@ -8,7 +8,9 @@ from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[3]
 OUT=ROOT/'assets/models/packs/rpg-mansion-contract/v0.1.0'
 PACK=ROOT/'assets/models/packs/rpg-mansion'
-manifest=json.loads((PACK/'manifest.json').read_text())
+# This v0.1.0 probe must never overwrite reviewed sockets using an expanded pack.
+manifest_path=OUT/'reviewed-manifest.json'
+manifest=json.loads(manifest_path.read_text())
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 def gltf(v):return [float(v.x),float(v.z),float(-v.y)]
 def bounds(points):return {'min':[min(p[i] for p in points) for i in range(3)],'max':[max(p[i] for p in points) for i in range(3)]}
@@ -89,7 +91,7 @@ for item in manifest['items']:
 OUT.mkdir(parents=True,exist_ok=True)
 common={'schemaVersion':1,'sidecarVersion':'0.1.0','reviewedAssetCommit':'769f44a24e35780bbe69650706e998eef72fee87',
         'baseCommit':manifest['baseCommit'],'c072Recovery':'pending','packId':manifest['id'],
-        'manifestSha256':sha(PACK/'manifest.json'),'editorIntegration':'none','units':'metres','coordinateSystem':'glTF +Y up, model front +Z'}
+        'manifestSha256':sha(manifest_path),'editorIntegration':'none','units':'metres','coordinateSystem':'glTF +Y up, model front +Z'}
 (OUT/'asset-geometry.json').write_text(json.dumps(rounded(dict(common,items=items)),ensure_ascii=False,indent=2)+'\n')
 (OUT/'sit-sockets.proposal.json').write_text(json.dumps(rounded(dict(common,actorConvention='yaw 0 faces -Z; local model +Z facing corresponds to yaw pi',sockets=sockets)),ensure_ascii=False,indent=2)+'\n')
 (OUT/'validation-final.json').write_text(json.dumps(dict(common,correctionScope='Final GLB byte counts only; original archive and reports retained',items=final_validations),ensure_ascii=False,indent=2)+'\n')

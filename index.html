@@ -104,6 +104,9 @@ window.dispatchEvent(new Event('three-ready'));
 <script src="assets/js/asset-catalogue.js"></script>
 <script src="assets/js/asset-pack-registry.js"></script>
 <script src="assets/js/asset-pack-picker.js"></script>
+<script src="assets/js/asset-pack-conversion-contract.js"></script>
+<script src="assets/js/asset-pack-conversion.js"></script>
+<script src="assets/js/asset-pack-conversion-ui.js"></script>
 <script src="assets/js/menu-icons.js"></script>
 <script src="assets/js/number-expr.js"></script>
 <style>
@@ -14445,6 +14448,11 @@ function build3DManualDownspout(grp,it){
 }
 
 function getItemHeightValue(it){
+  // Opt-in only for newly previewed RPG duplicates; never reinterpret legacy item.h.
+  if(it && isFmpItemType(it.type) && typeof AssetPackConversion==='object'){
+    var convertedHeight=AssetPackConversion.renderHeight(it,getFmpItem,typeof AssetPackConversionContract==='object'?AssetPackConversionContract:null);
+    if(convertedHeight!==null) return convertedHeight;
+  }
   if(it && isCustomBlockType(it.type)) return getCustomBlockHeight(it);
   if(it && isLightItemType(it.type)) return 80;
   if(it && isContextExteriorItemType(it.type)) return getContextExteriorHeight(it);

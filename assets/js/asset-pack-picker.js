@@ -65,6 +65,7 @@
       const option=document.createElement('option');option.value=pack.id;option.textContent=pack.name;select.append(option);
     }
     setSelection(selected);
+    root.AssetPackConversionUI?.install(sidebar.querySelector('#object-search'));
   }
   root.AssetPackPicker={install,getSelection,setSelection,getRegistry:()=>registry,refresh:apply};
 })(window);

@@ -8,11 +8,11 @@ const legacy=()=>[{id:'chair',name:'日本の椅子',w:450,d:450,h:800,nested:{t
 
 test('default and RPG packs keep canonical IDs, labels, order and dimensions',()=>{
  const input=legacy(),before=JSON.stringify(input),r=createRegistry(input,[rpg]);
- assert.deepEqual(r.listPacks().map(p=>[p.id,p.name,p.count]),[[DEFAULT_PACK_ID,'日本建築標準',2],['rpg-mansion','RPGアセット',14]]);
+ assert.deepEqual(r.listPacks().map(p=>[p.id,p.name,p.count]),[[DEFAULT_PACK_ID,'日本建築標準',2],['rpg-mansion','RPGアセット',rpg.items.length]]);
  assert.deepEqual(r.listCandidates().map(i=>i.id),input.map(i=>i.id));
  assert.deepEqual(r.getAsset('chair'),input[0]);assert.equal(JSON.stringify(input),before);
  assert.deepEqual(r.listCandidates('rpg-mansion').map(i=>i.id),rpg.items.map(i=>i.id));
- assert.equal(r.listAssets().length,16);assert.equal(r.getAsset('rpg-mansion-chair-01').w,520);
+ assert.equal(r.listAssets().length,2+rpg.items.length);assert.equal(r.getAsset('rpg-mansion-chair-01').w,520);
 });
 test('unselected, malformed or unknown pack falls back, empty known pack stays empty',()=>{
  const r=createRegistry(legacy(),[rpg,{id:'empty',name:'Empty',items:[]}]);
@@ -50,7 +50,7 @@ test('one definition may belong to several packs; shared membership never remaps
  const r=createRegistry(legacy(),[{id:'favorites',name:'Shared',assetIds:['chair','rpg-mansion-key-01','chair']},rpg]);
  assert.deepEqual(r.listCandidates('favorites').map(i=>i.id),['chair','rpg-mansion-key-01']);
  assert.equal(r.listCandidates('favorites')[0],r.getAsset('chair'));
- assert.equal(r.listAssets().length,16);assert.equal(r.hasCandidate('chair','rpg-mansion'),false);
+ assert.equal(r.listAssets().length,2+rpg.items.length);assert.equal(r.hasCandidate('chair','rpg-mansion'),false);
 });
 test('invalid registrations fail atomically, without modifying inputs or existing registry',()=>{
  const old=createRegistry(legacy(),[rpg]),before=JSON.stringify(old.listAssets());
@@ -82,7 +82,7 @@ test('existing search matcher filters only selected candidates',()=>{
  const r=createRegistry(legacy(),[rpg]);
  const search=pack=>r.listCandidates(pack).filter(item=>matches(item.name+' '+item.id,'椅子'));
  assert.deepEqual(search(DEFAULT_PACK_ID).map(i=>i.id),['chair']);
- assert.deepEqual(search('rpg-mansion').map(i=>i.id),['rpg-mansion-chair-01','rpg-mansion-fallen-chair-01']);
+ assert.deepEqual(search('rpg-mansion').map(i=>i.id),rpg.items.filter(i=>matches(i.name+' '+i.id,'椅子')).map(i=>i.id));
 });
 test('browser-style load works with no DOM, storage or network capabilities',()=>{
  const context=vm.createContext({});vm.runInContext(fs.readFileSync(path.join(ROOT,'assets/js/asset-pack-registry.js'),'utf8'),context);
@@ -94,5 +94,5 @@ test('actual resolved PR72 catalogue preserves every existing ID and record',()=
  const input=Array.from(map.values()),before=JSON.stringify(input),r=createRegistry(input,[rpg]);
  assert.deepEqual(r.listCandidates().map(i=>i.id),input.map(i=>i.id));
  for(const item of input)assert.deepEqual(r.getAsset(item.id),item);
- assert.equal(r.listAssets().length,input.length+14);assert.equal(JSON.stringify(input),before);
+ assert.equal(r.listAssets().length,input.length+rpg.items.length);assert.equal(JSON.stringify(input),before);
 });
