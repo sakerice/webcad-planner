@@ -1,0 +1,3079 @@
+{
+  "sceneVersion": 3,
+  "units": "mm",
+  "coordinateSystem": "x-east-y-south-clockwise",
+  "annotations": [
+    {
+      "id": "ann-title",
+      "kind": "label",
+      "literalText": {
+        "value": "住宅と敷地の平面図",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      }
+    },
+    {
+      "id": "ann-subtitle",
+      "kind": "legend",
+      "literalText": {
+        "value": "架空の試験用プラン ・ 単位 mm ・ 北は上",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      }
+    },
+    {
+      "id": "ann-north",
+      "kind": "direction-note",
+      "literalText": {
+        "value": "N / 北",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upward north arrow at upper right"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upward north arrow at upper right"
+      }
+    },
+    {
+      "id": "ann-site-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "12 000 敷地",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; top parcel dimension"
+      },
+      "valuesMm": {
+        "value": [
+          12000
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; top parcel dimension"
+      },
+      "basis": {
+        "value": "site-boundary",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; top parcel dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; top parcel dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "parcel"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; top parcel dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-site-depth",
+      "kind": "dimension",
+      "literalText": {
+        "value": "11 000 敷地",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; right parcel dimension"
+      },
+      "valuesMm": {
+        "value": [
+          11000
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; right parcel dimension"
+      },
+      "basis": {
+        "value": "site-boundary",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; right parcel dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; right parcel dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "parcel"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; right parcel dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-building-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "7 200 外法",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper overall building dimension"
+      },
+      "valuesMm": {
+        "value": [
+          7200
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper overall building dimension"
+      },
+      "basis": {
+        "value": "outer-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper overall building dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper overall building dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "building"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper overall building dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-building-depth",
+      "kind": "dimension",
+      "literalText": {
+        "value": "5 200 外法",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left overall building dimension"
+      },
+      "valuesMm": {
+        "value": [
+          5200
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left overall building dimension"
+      },
+      "basis": {
+        "value": "outer-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left overall building dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left overall building dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "building"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left overall building dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-center-x",
+      "kind": "dimension",
+      "literalText": {
+        "value": "4 500 / 2 500 / 芯々寸法",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper inner dimension chain, read west to east"
+      },
+      "valuesMm": {
+        "value": [
+          4500,
+          2500
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper inner dimension chain, read west to east"
+      },
+      "basis": {
+        "value": "wall-centerline",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper inner dimension chain, read west to east"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper inner dimension chain, read west to east"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "wall-west"
+          },
+          {
+            "entityId": "wall-divider"
+          },
+          {
+            "entityId": "wall-east"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; upper inner dimension chain, read west to east",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-center-y",
+      "kind": "dimension",
+      "literalText": {
+        "value": "3 000 / 2 000",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left inner dimension chain, read north to south"
+      },
+      "valuesMm": {
+        "value": [
+          3000,
+          2000
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left inner dimension chain, read north to south"
+      },
+      "basis": {
+        "value": "wall-centerline",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left inner dimension chain, read north to south",
+        "reason": "The extension lines terminate at the north, entry-partition and south wall centerlines, consistent with the diagram convention."
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left inner dimension chain, read north to south"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "wall-north"
+          },
+          {
+            "entityId": "wall-entry-north"
+          },
+          {
+            "entityId": "wall-south"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; left inner dimension chain, read north to south",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-bottom-chain",
+      "kind": "dimension",
+      "literalText": {
+        "value": "3 100 / 900 / 3 200",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; bottom dimension chain, west outside face to west entry jamb to east entry jamb to east outside face"
+      },
+      "valuesMm": {
+        "value": [
+          3100,
+          900,
+          3200
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; bottom dimension chain, west outside face to west entry jamb to east entry jamb to east outside face"
+      },
+      "basis": {
+        "value": "outer-face",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; bottom dimension chain, west outside face to west entry jamb to east entry jamb to east outside face",
+        "reason": "This outside building chain uses exterior-face endpoints and intermediate opening-jamb stations; its middle jamb-to-jamb segment is separately preserved as ann-entry-door-width. It is not the wall-centerline chain."
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; bottom dimension chain, west outside face to west entry jamb to east entry jamb to east outside face"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "wall-west"
+          },
+          {
+            "entityId": "opening-entry-exterior"
+          },
+          {
+            "entityId": "wall-east"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; bottom dimension chain, west outside face to west entry jamb to east entry jamb to east outside face",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-living-clear",
+      "kind": "dimension",
+      "literalText": {
+        "value": "内法 4 340",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal clear dimension across upper living/hall"
+      },
+      "valuesMm": {
+        "value": [
+          4340
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal clear dimension across upper living/hall"
+      },
+      "basis": {
+        "value": "clear-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal clear dimension across upper living/hall"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal clear dimension across upper living/hall"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-living"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal clear dimension across upper living/hall",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-study-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "内法 2 340",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal study clear dimension"
+      },
+      "valuesMm": {
+        "value": [
+          2340
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal study clear dimension"
+      },
+      "basis": {
+        "value": "clear-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal study clear dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal study clear dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-study"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; horizontal study clear dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-study-depth",
+      "kind": "dimension",
+      "literalText": {
+        "value": "内法 4 800",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; vertical study clear dimension"
+      },
+      "valuesMm": {
+        "value": [
+          4800
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; vertical study clear dimension"
+      },
+      "basis": {
+        "value": "clear-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; vertical study clear dimension"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; vertical study clear dimension"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-study"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; vertical study clear dimension",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-clear",
+      "kind": "dimension",
+      "literalText": {
+        "value": "玄関の内法：1 740 × 1 840 ／ 段差は西側の開口部",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box below building"
+      },
+      "valuesMm": {
+        "value": [
+          1740,
+          1840
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box below building"
+      },
+      "basis": {
+        "value": "clear-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box below building"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-entry"
+          },
+          {
+            "entityId": "opening-entry-hall"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box below building",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-pocket-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "片引戸 / 開口 900",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label beside central partition opening"
+      },
+      "valuesMm": {
+        "value": [
+          900
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label beside central partition opening"
+      },
+      "basis": {
+        "value": "opening-jamb",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label beside central partition opening"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label beside central partition opening"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "opening-pocket"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label beside central partition opening",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-pocket-direction",
+      "kind": "direction-note",
+      "literalText": {
+        "value": "北の戸袋へ",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; north-pointing arrow beside pocket door"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; north-pointing arrow beside pocket door"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "opening-pocket"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; north-pointing arrow beside pocket door",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-hall-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "開口 / 900",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label to west of entry/hall opening"
+      },
+      "valuesMm": {
+        "value": [
+          900
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label to west of entry/hall opening"
+      },
+      "basis": {
+        "value": "opening-jamb",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label to west of entry/hall opening"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label to west of entry/hall opening"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "opening-entry-hall"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label to west of entry/hall opening",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-door-width",
+      "kind": "dimension",
+      "literalText": {
+        "value": "900",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; middle segment of bottom chain between the two exterior entry jambs"
+      },
+      "valuesMm": {
+        "value": [
+          900
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; middle segment of bottom chain between the two exterior entry jambs"
+      },
+      "basis": {
+        "value": "opening-jamb",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; middle segment of bottom chain between the two exterior entry jambs"
+      },
+      "axis": {
+        "value": {
+          "x": 1,
+          "y": 0
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; middle segment of bottom chain between the two exterior entry jambs"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "opening-entry-exterior"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; middle segment of bottom chain between the two exterior entry jambs",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-door",
+      "kind": "label",
+      "literalText": {
+        "value": "玄関の開き戸：内開き",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text below bottom dimension chain"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "opening-entry-exterior"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text below bottom dimension chain",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-living-label",
+      "kind": "label",
+      "literalText": {
+        "value": "居間・ホール / 木質床",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-living"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-study-label",
+      "kind": "label",
+      "literalText": {
+        "value": "書斎 / 淡緑の床",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-study"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-label",
+      "kind": "label",
+      "literalText": {
+        "value": "玄関",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-entry"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-tile",
+      "kind": "dimension",
+      "literalText": {
+        "value": "300角タイル",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor"
+      },
+      "valuesMm": {
+        "value": [
+          300
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor"
+      },
+      "basis": {
+        "value": "nominal-module",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-entry"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-level-short",
+      "kind": "level-note",
+      "literalText": {
+        "value": "居間より150 mm低い",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-entry"
+          },
+          {
+            "entityId": "room-living"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text within entry floor",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-entry-level",
+      "kind": "level-note",
+      "literalText": {
+        "value": "床の段差 / 玄関床は、隣接する居間・ホール床より150 mm低い",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "room-entry"
+          },
+          {
+            "entityId": "room-living"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; floor-level note box",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-level-unspecified",
+      "kind": "level-note",
+      "literalText": {
+        "value": "屋外地盤・書斎と居間床の高さ関係は未指定",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; last line in floor-level note box"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "ground"
+          },
+          {
+            "entityId": "room-study"
+          },
+          {
+            "entityId": "room-living"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; last line in floor-level note box",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-desk-size",
+      "kind": "dimension",
+      "literalText": {
+        "value": "机 1 400 × 700",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; white text within blue desk"
+      },
+      "valuesMm": {
+        "value": [
+          1400,
+          700
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; white text within blue desk"
+      },
+      "basis": {
+        "value": "object-envelope",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; white text within blue desk"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-desk"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; white text within blue desk",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-desk-front",
+      "kind": "direction-note",
+      "literalText": {
+        "value": "前",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow immediately east of desk points down/south"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow immediately east of desk points down/south"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-desk"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow immediately east of desk points down/south",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-chair",
+      "kind": "label",
+      "literalText": {
+        "value": "椅子",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-chair"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-chair-front",
+      "kind": "direction-note",
+      "literalText": {
+        "value": "前",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow east of chair points up/north"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow east of chair points up/north"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-chair"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arrow east of chair points up/north",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-parking",
+      "kind": "label",
+      "literalText": {
+        "value": "屋外駐車スペース",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "parking"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-parking-size",
+      "kind": "dimension",
+      "literalText": {
+        "value": "舗装 3 000 × 5 100",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label over parking rectangle"
+      },
+      "valuesMm": {
+        "value": [
+          3000,
+          5100
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label over parking rectangle"
+      },
+      "basis": {
+        "value": "site-boundary",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label over parking rectangle",
+        "reason": "The two dimensions describe the outlined exterior parking/paving region rather than an indoor room or the vehicle."
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "parking"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; label over parking rectangle",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-car",
+      "kind": "label",
+      "literalText": {
+        "value": "車",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-car"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-car-front",
+      "kind": "direction-note",
+      "literalText": {
+        "value": "前方＝北",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text below car, with northward arrow within front of car"
+      },
+      "axis": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text below car, with northward arrow within front of car"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "object-car"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; text below car, with northward arrow within front of car",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-ground",
+      "kind": "label",
+      "literalText": {
+        "value": "庭・敷地内地盤 / 建物の外側",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm"
+      },
+      "references": {
+        "value": [
+          {
+            "entityId": "ground"
+          }
+        ],
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm",
+        "reason": "The annotation is adjacent to, or its extension lines terminate on, these depicted entities."
+      }
+    },
+    {
+      "id": "ann-scale",
+      "kind": "legend",
+      "literalText": {
+        "value": "0 / 2 000 mm",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 2000 mm graphic scale bar at lower left"
+      }
+    },
+    {
+      "id": "ann-reading-conventions",
+      "kind": "legend",
+      "literalText": {
+        "value": "読図の約束 / 外法＝外壁外面間 ／ 芯々＝壁中心間 ／ 内法＝室内の有効寸法 外壁200・間仕切120",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; first legend line below parcel"
+      }
+    },
+    {
+      "id": "ann-door-conventions",
+      "kind": "legend",
+      "literalText": {
+        "value": "実線の戸＝表示位置、破線の戸＝閉位置。片引戸は北の戸袋に収納。机・椅子・車の矢印は正面。",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; second legend line below parcel"
+      }
+    },
+    {
+      "id": "ann-color-legend",
+      "kind": "legend",
+      "literalText": {
+        "value": "木質床 / タイル / 書斎床 / 机 / 椅子 / 車",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; six illustrated color swatches"
+      }
+    },
+    {
+      "id": "ann-disclaimer",
+      "kind": "legend",
+      "literalText": {
+        "value": "色は図示色。製品・メーカー、天井高、壁高、窓の高さは指定しない。住宅の必要諸室をすべて表す図ではない。",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; last line below legend"
+      }
+    }
+  ],
+  "walls": [
+    {
+      "id": "wall-north",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 1100,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 8100,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 200,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-east",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 8100,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 8100,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 200,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-south",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 1100,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 8100,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 200,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-west",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 1100,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 1100,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 200,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-divider",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 5600,
+          "y": 1500
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 5600,
+          "y": 6300
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 120,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-entry-north",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 3740,
+          "y": 4400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 5600,
+          "y": 4400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 120,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    },
+    {
+      "id": "wall-entry-west",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "start": {
+        "value": {
+          "x": 3740,
+          "y": 4400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 3740,
+          "y": 6300
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit wall centerline endpoint",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      },
+      "thicknessMm": {
+        "value": 120,
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; legend states 外壁200・間仕切120",
+        "evidenceRefs": [
+          "ann-reading-conventions"
+        ]
+      }
+    }
+  ],
+  "rooms": [
+    {
+      "id": "room-living",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "shape": {
+        "value": {
+          "kind": "orthogonalPolygon",
+          "outer": [
+            {
+              "x": 1200,
+              "y": 1500
+            },
+            {
+              "x": 5540,
+              "y": 1500
+            },
+            {
+              "x": 5540,
+              "y": 4340
+            },
+            {
+              "x": 3680,
+              "y": 4340
+            },
+            {
+              "x": 3680,
+              "y": 6300
+            },
+            {
+              "x": 1200,
+              "y": 6300
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Interior-face floor outline for 居間・ホール",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-living-label",
+          "ann-living-clear",
+          "ann-center-x",
+          "ann-center-y",
+          "ann-reading-conventions"
+        ]
+      },
+      "boundaryBasis": {
+        "value": "clear-face",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; inner wall faces and clear-dimension annotations",
+        "reason": "The room trace follows clear internal wall faces, not centerlines.",
+        "evidenceRefs": [
+          "ann-living-label",
+          "ann-living-clear",
+          "ann-center-x",
+          "ann-center-y",
+          "ann-reading-conventions"
+        ]
+      },
+      "name": {
+        "value": "居間・ホール",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-living-label",
+          "ann-living-clear",
+          "ann-center-x",
+          "ann-center-y",
+          "ann-reading-conventions"
+        ]
+      },
+      "use": {
+        "value": "living / hall",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-living-label",
+          "ann-living-clear",
+          "ann-center-x",
+          "ann-center-y",
+          "ann-reading-conventions"
+        ]
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#e6ceaa",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; wood-colored living/hall fill; 木質床 label",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-living-label",
+            "ann-color-legend"
+          ]
+        },
+        "pattern": {
+          "value": "plank-lines",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; wood-colored living/hall fill; 木質床 label"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": "wood floor",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; wood-colored living/hall fill; 木質床 label",
+            "evidenceRefs": [
+              "ann-living-label",
+              "ann-color-legend"
+            ]
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      }
+    },
+    {
+      "id": "room-entry",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 3800,
+              "y": 4460,
+              "w": 1740,
+              "d": 1840
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Interior-face floor outline for 玄関",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-entry-clear",
+          "ann-entry-label",
+          "ann-reading-conventions"
+        ]
+      },
+      "boundaryBasis": {
+        "value": "clear-face",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; inner wall faces and clear-dimension annotations",
+        "reason": "The room trace follows clear internal wall faces, not centerlines.",
+        "evidenceRefs": [
+          "ann-entry-clear",
+          "ann-entry-label",
+          "ann-reading-conventions"
+        ]
+      },
+      "name": {
+        "value": "玄関",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-entry-clear",
+          "ann-entry-label",
+          "ann-reading-conventions"
+        ]
+      },
+      "use": {
+        "value": "entry",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-entry-clear",
+          "ann-entry-label",
+          "ann-reading-conventions"
+        ]
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#f0e5d4",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; light tan square-grid entry fill; 300角タイル label",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-entry-tile"
+          ]
+        },
+        "pattern": {
+          "value": "square-grid",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; light tan square-grid entry fill; 300角タイル label"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": "tile",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; light tan square-grid entry fill; 300角タイル label",
+            "evidenceRefs": [
+              "ann-entry-tile"
+            ]
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        },
+        "moduleMm": {
+          "value": 300,
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 300角タイル label",
+          "evidenceRefs": [
+            "ann-entry-tile"
+          ]
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": -150,
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; entry is explicitly 150 mm below adjacent living/hall floor",
+          "evidenceRefs": [
+            "ann-entry-level",
+            "ann-entry-level-short"
+          ]
+        },
+        "relativeToId": {
+          "value": "room-living",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; note explicitly names the adjacent 居間・ホール floor",
+          "evidenceRefs": [
+            "ann-entry-level"
+          ]
+        }
+      }
+    },
+    {
+      "id": "room-study",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 5660,
+              "y": 1500,
+              "w": 2340,
+              "d": 4800
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Interior-face floor outline for 書斎",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-study-width",
+          "ann-study-depth",
+          "ann-study-label"
+        ]
+      },
+      "boundaryBasis": {
+        "value": "clear-face",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; inner wall faces and clear-dimension annotations",
+        "reason": "The room trace follows clear internal wall faces, not centerlines.",
+        "evidenceRefs": [
+          "ann-study-width",
+          "ann-study-depth",
+          "ann-study-label"
+        ]
+      },
+      "name": {
+        "value": "書斎",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-study-width",
+          "ann-study-depth",
+          "ann-study-label"
+        ]
+      },
+      "use": {
+        "value": "study",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; room label",
+        "evidenceRefs": [
+          "ann-study-width",
+          "ann-study-depth",
+          "ann-study-label"
+        ]
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#cad9c6",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale green study fill and 淡緑の床 label",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-study-label",
+            "ann-color-legend"
+          ]
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale green study fill and 淡緑の床 label"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      }
+    }
+  ],
+  "openings": [
+    {
+      "id": "opening-pocket",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "hostWallId": {
+        "value": "wall-divider",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Single sliding leaf retracts into the partition to the north"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "room-living",
+          "room-study"
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Single sliding leaf retracts into the partition to the north"
+      },
+      "start": {
+        "value": {
+          "x": 5600,
+          "y": 3200
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Single sliding leaf retracts into the partition to the north; first physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-pocket-width",
+          "ann-pocket-direction",
+          "ann-door-conventions"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 5600,
+          "y": 4100
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Single sliding leaf retracts into the partition to the north; second physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-pocket-width",
+          "ann-pocket-direction",
+          "ann-door-conventions"
+        ]
+      },
+      "mechanism": {
+        "value": "pocket",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Single sliding leaf retracts into the partition to the north",
+        "evidenceRefs": [
+          "ann-pocket-width",
+          "ann-pocket-direction",
+          "ann-door-conventions"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; no height is specified"
+      },
+      "sillMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "leaves": [
+        {
+          "id": "leaf-pocket",
+          "mechanism": {
+            "value": "pocket",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 片引戸 and north pocket note",
+            "evidenceRefs": [
+              "ann-pocket-width",
+              "ann-door-conventions"
+            ]
+          },
+          "leafWidthMm": {
+            "value": 940,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; actual solid leaf runs approximately from source y451 to y556 within the longer pocket outline",
+            "reason": "Scale the solid inner leaf, not the 900 mm gap or the surrounding 980 mm pocket; approximately 940 mm.",
+            "evidenceRefs": [
+              "ann-scale"
+            ]
+          },
+          "thicknessMm": {
+            "value": 40,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; solid inner leaf is approximately 4.5 source pixels thick",
+            "reason": "Measured plan thickness at the annotated scale; raster precision is limited."
+          },
+          "closedAxis": {
+            "value": {
+              "x": 0,
+              "y": 1
+            },
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; closed dashed line is vertical"
+          },
+          "openState": {
+            "value": "open",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; solid leaf is inside north pocket, while dashed line marks closed location",
+            "evidenceRefs": [
+              "ann-door-conventions"
+            ]
+          },
+          "travelDirection": {
+            "value": {
+              "x": 0,
+              "y": -1
+            },
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 北の戸袋へ northward arrow",
+            "evidenceRefs": [
+              "ann-pocket-direction"
+            ]
+          },
+          "travelDistanceMm": {
+            "value": 940,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; dashed closed marker center near source (847.2,608.8); solid displayed leaf center near (847.2,503.5)",
+            "reason": "Independent scaled center displacement: (3650 - 2710) mm northward; not set equal to the 900 mm opening.",
+            "evidenceRefs": [
+              "ann-pocket-width",
+              "ann-door-conventions"
+            ]
+          },
+          "closedCenter": {
+            "value": {
+              "x": 5600,
+              "y": 3650
+            },
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Center of the displayed dashed closed-position marker",
+            "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+            "evidenceRefs": [
+              "ann-door-conventions"
+            ]
+          },
+          "openCenter": {
+            "value": {
+              "x": 5600,
+              "y": 2710
+            },
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Center of the actual solid displayed leaf in the north pocket",
+            "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+            "evidenceRefs": [
+              "ann-door-conventions"
+            ]
+          },
+          "pocketRegion": {
+            "value": {
+              "kind": "rectUnion",
+              "rectangles": [
+                {
+                  "x": 5565,
+                  "y": 2220,
+                  "w": 70,
+                  "d": 980
+                }
+              ]
+            },
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Narrow outlined north pocket around the displayed solid door leaf; approximate raster envelope",
+            "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+            "evidenceRefs": [
+              "ann-pocket-direction"
+            ]
+          },
+          "hingeJamb": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          },
+          "pivot": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          },
+          "angleDeg": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      ],
+      "leafRelation": {
+        "value": "single",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one pocket-door leaf is drawn"
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#9b9b90",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; visible muted gray pocket leaf",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; visible muted gray pocket leaf"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    },
+    {
+      "id": "opening-entry-hall",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "hostWallId": {
+        "value": "wall-entry-west",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Clear west-side entry/hall passage with no door leaf"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "room-living",
+          "room-entry"
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Clear west-side entry/hall passage with no door leaf"
+      },
+      "start": {
+        "value": {
+          "x": 3740,
+          "y": 4900
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Clear west-side entry/hall passage with no door leaf; first physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-entry-hall-width",
+          "ann-entry-clear"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 3740,
+          "y": 5800
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Clear west-side entry/hall passage with no door leaf; second physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-entry-hall-width",
+          "ann-entry-clear"
+        ]
+      },
+      "mechanism": {
+        "value": "opening",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Clear west-side entry/hall passage with no door leaf",
+        "evidenceRefs": [
+          "ann-entry-hall-width",
+          "ann-entry-clear"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; no height is specified"
+      },
+      "sillMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "leaves": []
+    },
+    {
+      "id": "opening-entry-exterior",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "hostWallId": {
+        "value": "wall-south",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; South exterior entry gap with single inward-swinging leaf"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "room-entry",
+          null
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; South exterior entry gap with single inward-swinging leaf"
+      },
+      "start": {
+        "value": {
+          "x": 4100,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; South exterior entry gap with single inward-swinging leaf; first physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-entry-door-width",
+          "ann-entry-door",
+          "ann-bottom-chain"
+        ]
+      },
+      "end": {
+        "value": {
+          "x": 5000,
+          "y": 6400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; South exterior entry gap with single inward-swinging leaf; second physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-entry-door-width",
+          "ann-entry-door",
+          "ann-bottom-chain"
+        ]
+      },
+      "mechanism": {
+        "value": "swing",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; South exterior entry gap with single inward-swinging leaf",
+        "evidenceRefs": [
+          "ann-entry-door-width",
+          "ann-entry-door",
+          "ann-bottom-chain"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; no height is specified"
+      },
+      "sillMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "leaves": [
+        {
+          "id": "leaf-entry",
+          "mechanism": {
+            "value": "swing",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; solid hinged leaf and quarter-circle inward swing arc",
+            "evidenceRefs": [
+              "ann-entry-door"
+            ]
+          },
+          "hingeJamb": {
+            "value": "start",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; hinge lies at the west/start jamb"
+          },
+          "pivot": {
+            "value": {
+              "x": 4100,
+              "y": 6300
+            },
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Visible hinge dot at source approximately (679.2,905.6), on north/inside wall face; 100 mm north of gap centerline",
+            "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+          },
+          "closedAxis": {
+            "value": {
+              "x": 1,
+              "y": 0
+            },
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; leaf closes eastward from the west hinge"
+          },
+          "leafWidthMm": {
+            "value": 900,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; solid northward leaf and arc radius span approximately 100.8 pixels",
+            "reason": "Scale the depicted hinge-to-tip length; it agrees with the separately annotated 900 mm gap.",
+            "evidenceRefs": [
+              "ann-entry-door-width"
+            ]
+          },
+          "thicknessMm": {
+            "value": 40,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; thin solid door rectangle about 4.5 pixels across",
+            "reason": "Approximate plan thickness from raster scale."
+          },
+          "swingSide": {
+            "value": {
+              "x": 0,
+              "y": -1
+            },
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; arc lies north, inside the entry",
+            "evidenceRefs": [
+              "ann-entry-door"
+            ]
+          },
+          "angleDeg": {
+            "value": -90,
+            "status": "inferred",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; displayed leaf points north from its west hinge",
+            "reason": "Northward displayed leaf is a -90 degree clockwise-system rotation from the eastward closed axis."
+          },
+          "openState": {
+            "value": "open",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; solid northward leaf is displayed open and dashed line represents closure",
+            "evidenceRefs": [
+              "ann-door-conventions"
+            ]
+          }
+        }
+      ],
+      "leafRelation": {
+        "value": "single",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; single leaf and one swing arc"
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#b88552",
+          "status": "inferred",
+          "source": "source.png; tan/orange displayed entry door leaf, sampled at source pixel (679,850)",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; tan/orange displayed entry door leaf"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    },
+    {
+      "id": "opening-window-north",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "hostWallId": {
+        "value": "wall-north",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "room-living",
+          null
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "start": {
+        "value": {
+          "x": 1900,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall; first physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+      },
+      "end": {
+        "value": {
+          "x": 3700,
+          "y": 1400
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall; second physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+      },
+      "mechanism": {
+        "value": "window",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; no height is specified"
+      },
+      "sillMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "leaves": [],
+      "windowKind": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "ambiguous",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; parallel glazing lines and a center divider are visible, without an explicit operation designation"
+      },
+      "leafRelation": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "ambiguous"
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#bdd8e0",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale blue glazing symbol",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale blue glazing symbol"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    },
+    {
+      "id": "opening-window-east",
+      "floor": {
+        "value": 1,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; one site-connected residential plan is depicted",
+        "reason": "Use local floor index 1 for the single depicted ground-level plan; the image does not explicitly print a storey number."
+      },
+      "hostWallId": {
+        "value": "wall-east",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "adjacentRoomIds": {
+        "value": [
+          "room-study",
+          null
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "start": {
+        "value": {
+          "x": 8100,
+          "y": 3300
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall; first physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+      },
+      "end": {
+        "value": {
+          "x": 8100,
+          "y": 4800
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall; second physical gap jamb on host centerline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+      },
+      "mechanism": {
+        "value": "window",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue glazed insert is independently visible within the exterior wall"
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; no height is specified"
+      },
+      "sillMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "leaves": [],
+      "windowKind": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "ambiguous",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; parallel glazing lines and a center divider are visible, without an explicit operation designation"
+      },
+      "leafRelation": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "ambiguous"
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#bdd8e0",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale blue glazing symbol",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale blue glazing symbol"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    }
+  ],
+  "objects": [
+    {
+      "id": "object-desk",
+      "objectType": {
+        "value": "desk",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue desk in north study, explicitly labeled 1400 × 700",
+        "evidenceRefs": [
+          "ann-desk-size",
+          "ann-desk-front"
+        ]
+      },
+      "semanticExtent": {
+        "value": "asset",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; individually drawn and labeled desk"
+      },
+      "placement": {
+        "value": {
+          "domain": "room",
+          "roomId": "room-study"
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue desk in north study, explicitly labeled 1400 × 700"
+      },
+      "sourceFootprint": {
+        "value": {
+          "center": {
+            "x": 6800,
+            "y": 1900
+          },
+          "sizeMm": {
+            "w": 1400,
+            "d": 700
+          },
+          "axisX": {
+            "x": 1,
+            "y": 0
+          }
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Blue desk in north study, explicitly labeled 1400 × 700; oriented source-symbol envelope",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-desk-size",
+          "ann-desk-front"
+        ]
+      },
+      "frontDirection": {
+        "value": {
+          "x": 0,
+          "y": 1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; labeled front arrow",
+        "evidenceRefs": [
+          "ann-desk-size",
+          "ann-desk-front"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": [
+            {
+              "region": "top",
+              "color": "#497eaa"
+            }
+          ],
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; blue desk top",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-color-legend"
+          ]
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; blue desk top"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    },
+    {
+      "id": "object-chair",
+      "objectType": {
+        "value": "chair",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Orange chair south of desk; approximate overall visible envelope includes the short thin northward stem, source x948..1015 and y473..542",
+        "evidenceRefs": [
+          "ann-chair",
+          "ann-chair-front"
+        ]
+      },
+      "semanticExtent": {
+        "value": "asset",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; individually drawn and labeled chair"
+      },
+      "placement": {
+        "value": {
+          "domain": "room",
+          "roomId": "room-study"
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Orange chair south of desk; approximate overall visible envelope includes the short thin northward stem, source x948..1015 and y473..542"
+      },
+      "sourceFootprint": {
+        "value": {
+          "center": {
+            "x": 6800,
+            "y": 2750
+          },
+          "sizeMm": {
+            "w": 600,
+            "d": 620
+          },
+          "axisX": {
+            "x": 1,
+            "y": 0
+          }
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Orange chair south of desk; approximate overall visible envelope includes the short thin northward stem, source x948..1015 and y473..542; oriented source-symbol envelope",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-chair",
+          "ann-chair-front"
+        ]
+      },
+      "frontDirection": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; labeled front arrow",
+        "evidenceRefs": [
+          "ann-chair",
+          "ann-chair-front"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": [
+            {
+              "region": "seat",
+              "color": "#d8903c"
+            },
+            {
+              "region": "body",
+              "color": "#bb782b"
+            }
+          ],
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; orange chair seat and darker brown surrounding/back portions",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-color-legend"
+          ]
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; orange chair seat and darker brown surrounding/back portions"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    },
+    {
+      "id": "object-car",
+      "objectType": {
+        "value": "car",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; North-facing car in outdoor parking; envelope includes projecting wheels/sides, source x1262..1463 and y810..1303",
+        "evidenceRefs": [
+          "ann-car",
+          "ann-car-front"
+        ]
+      },
+      "semanticExtent": {
+        "value": "asset",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; individually drawn and labeled car"
+      },
+      "placement": {
+        "value": {
+          "domain": "exterior",
+          "regionId": "parking"
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; North-facing car in outdoor parking; envelope includes projecting wheels/sides, source x1262..1463 and y810..1303"
+      },
+      "sourceFootprint": {
+        "value": {
+          "center": {
+            "x": 10200,
+            "y": 7650
+          },
+          "sizeMm": {
+            "w": 1800,
+            "d": 4400
+          },
+          "axisX": {
+            "x": 1,
+            "y": 0
+          }
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; North-facing car in outdoor parking; envelope includes projecting wheels/sides, source x1262..1463 and y810..1303; oriented source-symbol envelope",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-car",
+          "ann-car-front"
+        ]
+      },
+      "frontDirection": {
+        "value": {
+          "x": 0,
+          "y": -1
+        },
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; labeled front arrow",
+        "evidenceRefs": [
+          "ann-car",
+          "ann-car-front"
+        ]
+      },
+      "heightMm": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": [
+            {
+              "region": "body",
+              "color": "#9dabb9"
+            },
+            {
+              "region": "top",
+              "color": "#8798a8"
+            }
+          ],
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; blue-gray vehicle body with darker central top panel",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-color-legend"
+          ]
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; blue-gray vehicle body with darker central top panel"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      }
+    }
+  ],
+  "siteRegions": [
+    {
+      "id": "parcel",
+      "role": {
+        "value": "parcel-boundary",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; outlined site rectangle labeled 敷地",
+        "evidenceRefs": [
+          "ann-site-width",
+          "ann-site-depth"
+        ]
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 0,
+              "y": 0,
+              "w": 12000,
+              "d": 11000
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Explicit rectangular parcel outline",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-site-width",
+          "ann-site-depth"
+        ]
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      }
+    },
+    {
+      "id": "ground",
+      "role": {
+        "value": "ground",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 庭・敷地内地盤 / 建物の外側",
+        "evidenceRefs": [
+          "ann-ground"
+        ]
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 0,
+              "y": 0,
+              "w": 12000,
+              "d": 11000
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Pale green exterior ground inside the parcel",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-site-width",
+          "ann-site-depth",
+          "ann-ground"
+        ]
+      },
+      "subtractRegionIds": [
+        "building",
+        "parking",
+        "approach"
+      ],
+      "appearance": {
+        "diagramColor": {
+          "value": "#e1ead8",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale green garden/site ground",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; pale green garden/site ground"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; relationship to living/study floors explicitly unspecified"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      }
+    },
+    {
+      "id": "parking",
+      "role": {
+        "value": "parking",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 屋外駐車スペース",
+        "evidenceRefs": [
+          "ann-parking"
+        ]
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 8700,
+              "y": 5200,
+              "w": 3000,
+              "d": 5100
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Outlined paved parking rectangle to southeast of building",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-parking-size"
+        ]
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#d8dad9",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; plain gray parking pavement; 舗装 label",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish.",
+          "evidenceRefs": [
+            "ann-parking-size"
+          ]
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; plain gray parking pavement; 舗装 label"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": "paving",
+            "status": "observed",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; plain gray parking pavement; 舗装 label",
+            "evidenceRefs": [
+              "ann-parking-size"
+            ]
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      }
+    },
+    {
+      "id": "approach",
+      "role": {
+        "value": "approach",
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; tan rectangular exterior strip extends south from entry door",
+        "reason": "Its alignment and direct connection with the exterior entrance support an entry approach; no ramp slope is marked."
+      },
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 4000,
+              "y": 6500,
+              "w": 1100,
+              "d": 1500
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Tan approach strip, source approximately x668..791 and y928..1096; lower end partially overlaid by note box",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces."
+      },
+      "appearance": {
+        "diagramColor": {
+          "value": "#c8b596",
+          "status": "inferred",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; tan exterior approach fill",
+          "reason": "Approximate diagram RGB sampled from the visible fill; this is not a specified physical product or finish."
+        },
+        "pattern": {
+          "value": "plain",
+          "status": "observed",
+          "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; tan exterior approach fill"
+        },
+        "specifiedMaterial": {
+          "category": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown",
+            "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; material/product is not specified"
+          },
+          "sourceCode": {
+            "value": null,
+            "status": "unknown",
+            "unknownReason": "not-shown"
+          }
+        }
+      },
+      "relativeElevation": {
+        "offsetMm": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        },
+        "relativeToId": {
+          "value": null,
+          "status": "unknown",
+          "unknownReason": "not-shown"
+        }
+      },
+      "direction": {
+        "value": null,
+        "status": "unknown",
+        "unknownReason": "not-shown"
+      }
+    }
+  ],
+  "buildingFootprints": [
+    {
+      "id": "building",
+      "shape": {
+        "value": {
+          "kind": "rectUnion",
+          "rectangles": [
+            {
+              "x": 1000,
+              "y": 1300,
+              "w": 7200,
+              "d": 5200
+            }
+          ]
+        },
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; Outer building wall faces; offsets to parcel estimated from raster",
+        "reason": "Reconstructed from the annotated scale (1344 source pixels = 12000 mm, 0.112 px/mm); origin is the northwest parcel corner at source pixel (220,200). Approximate raster positions are snapped only where supported by dimensions and wall faces.",
+        "evidenceRefs": [
+          "ann-building-width",
+          "ann-building-depth"
+        ]
+      },
+      "boundaryBasis": {
+        "value": "outer-face",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 外法 dimension annotations identify exterior wall faces",
+        "evidenceRefs": [
+          "ann-building-width",
+          "ann-building-depth"
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "connections": [
+    {
+      "id": "connection-living-study",
+      "rooms": {
+        "value": [
+          "room-living",
+          "room-study"
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; central door connects living/hall and study"
+      },
+      "openingId": {
+        "value": "opening-pocket",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; single central physical door gap"
+      },
+      "requiredTraversable": {
+        "value": true,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 900 mm pocket doorway",
+        "reason": "Doorway provides the visible route between these rooms.",
+        "evidenceRefs": [
+          "ann-pocket-width"
+        ]
+      }
+    },
+    {
+      "id": "connection-living-entry",
+      "rooms": {
+        "value": [
+          "room-living",
+          "room-entry"
+        ],
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; west entry passage opens to hall"
+      },
+      "openingId": {
+        "value": "opening-entry-hall",
+        "status": "observed",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; physical open passage"
+      },
+      "requiredTraversable": {
+        "value": true,
+        "status": "inferred",
+        "source": "source.png; the 1800 by 1680 pixel plan, north upward, units mm; 900 mm passage and floor-step note",
+        "reason": "Passage is the visible connection despite the explicitly 150 mm lower entry floor.",
+        "evidenceRefs": [
+          "ann-entry-hall-width",
+          "ann-entry-clear"
+        ]
+      }
+    }
+  ]
+}

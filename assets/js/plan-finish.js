@@ -43,8 +43,8 @@
     var out = [];
     (plan.items || []).forEach(function (it) {
       if ((it.floor || 1) !== (room.floor || 1)) return;
-      var w = Number(it.w) || 0, d = Number(it.d) || 0;
-      if (!inRect(Number(it.x) + w / 2, Number(it.y) + d / 2, room)) return;
+      // Raw extraction uses centers; editor corners are introduced only on Apply.
+      if (!inRect(Number(it.x), Number(it.y), room)) return;
       var kind = kindOf(it.type);
       if (kind) out.push(kind);
     });
@@ -91,8 +91,7 @@
   }
 
   function roomAt(plan, it) {
-    var w = Number(it.w) || 0, d = Number(it.d) || 0;
-    var cx = Number(it.x) + w / 2, cy = Number(it.y) + d / 2;
+    var cx = Number(it.x), cy = Number(it.y);
     var found = null;
     (plan.rooms || []).forEach(function (r, i) {
       if (found) return;

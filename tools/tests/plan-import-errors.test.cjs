@@ -19,7 +19,7 @@ assert.match(src, /JSON\.parse\(text\)/, '本文を自分で読んでいない')
 // 文面を画面に出す2つの経路（読み取り・見直し）が、この窓口を通っていること。
 // 残り回数の取得と図面の位置探しも res.json() を呼ぶが、どちらも失敗を握りつぶす
 // ので文面は出ない。
-assert.equal((src.match(/\.then\(readReply\)/g) || []).length, 3,
+assert.equal((src.match(/\.then\(readReply\)/g) || []).length, 4,
   '読み取り・見直し・出来上がりの問い合わせが、返事を読む窓口を通っていない');
 
 // 例外の中身をそのまま画面へ出していない

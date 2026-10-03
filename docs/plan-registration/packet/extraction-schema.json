@@ -1,0 +1,444 @@
+{
+  "type": "object",
+  "properties": {
+    "floors": {
+      "type": "array",
+      "description": "階ごとの読み取り結果",
+      "items": {
+        "type": "object",
+        "description": "1つの階",
+        "properties": {
+          "floor": {
+            "type": "integer",
+            "description": "階数"
+          },
+          "dims": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "寸法線",
+            "properties": {
+              "top": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "その辺の寸法線",
+                "properties": {
+                  "total": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "その辺の総寸法"
+                  },
+                  "parts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "内訳",
+                    "items": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "内訳ひとつ"
+                    }
+                  }
+                },
+                "required": [
+                  "total",
+                  "parts"
+                ],
+                "additionalProperties": false
+              },
+              "bottom": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "その辺の寸法線",
+                "properties": {
+                  "total": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "その辺の総寸法"
+                  },
+                  "parts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "内訳",
+                    "items": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "内訳ひとつ"
+                    }
+                  }
+                },
+                "required": [
+                  "total",
+                  "parts"
+                ],
+                "additionalProperties": false
+              },
+              "left": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "その辺の寸法線",
+                "properties": {
+                  "total": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "その辺の総寸法"
+                  },
+                  "parts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "内訳",
+                    "items": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "内訳ひとつ"
+                    }
+                  }
+                },
+                "required": [
+                  "total",
+                  "parts"
+                ],
+                "additionalProperties": false
+              },
+              "right": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "その辺の寸法線",
+                "properties": {
+                  "total": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "その辺の総寸法"
+                  },
+                  "parts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "内訳",
+                    "items": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "内訳ひとつ"
+                    }
+                  }
+                },
+                "required": [
+                  "total",
+                  "parts"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "top",
+              "bottom",
+              "left",
+              "right"
+            ],
+            "additionalProperties": false
+          },
+          "width": {
+            "type": "number",
+            "description": "建物の総幅"
+          },
+          "depth": {
+            "type": "number",
+            "description": "建物の総奥行き"
+          },
+          "rooms": {
+            "type": "array",
+            "description": "この階の部屋",
+            "items": {
+              "type": "object",
+              "description": "部屋",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "室名"
+                },
+                "parts": {
+                  "type": "array",
+                  "description": "その部屋が占める長方形",
+                  "items": {
+                    "type": "object",
+                    "description": "部屋が占める長方形",
+                    "properties": {
+                      "x0": {
+                        "type": "number",
+                        "description": "左端のx"
+                      },
+                      "y0": {
+                        "type": "number",
+                        "description": "上端のy"
+                      },
+                      "x1": {
+                        "type": "number",
+                        "description": "右端のx"
+                      },
+                      "y1": {
+                        "type": "number",
+                        "description": "下端のy"
+                      }
+                    },
+                    "required": [
+                      "x0",
+                      "y0",
+                      "x1",
+                      "y1"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "level": {
+                  "type": "number",
+                  "description": "その階の床からの段差"
+                },
+                "use": {
+                  "type": "string",
+                  "description": "その部屋の用途",
+                  "enum": [
+                    "ldk",
+                    "living",
+                    "dining",
+                    "kitchen",
+                    "bedroom",
+                    "kids",
+                    "washitsu",
+                    "study",
+                    "entry",
+                    "hall",
+                    "stairs",
+                    "bath",
+                    "washroom",
+                    "toilet",
+                    "wic",
+                    "storage",
+                    "balcony",
+                    "outdoor",
+                    "other"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "parts",
+                "level",
+                "use"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "items": {
+            "type": "array",
+            "description": "この階の建具・階段・設備",
+            "items": {
+              "type": "object",
+              "description": "建具・階段・設備",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "種類",
+                  "enum": [
+                    "window",
+                    "window-door",
+                    "door-swing",
+                    "door-slide-s",
+                    "door-fold",
+                    "door-opening",
+                    "door-front",
+                    "stair",
+                    "stair-corner",
+                    "bath",
+                    "toilet",
+                    "sink",
+                    "kitchen",
+                    "balcony"
+                  ]
+                },
+                "x": {
+                  "type": "number",
+                  "description": "中心のx"
+                },
+                "y": {
+                  "type": "number",
+                  "description": "中心のy"
+                },
+                "w": {
+                  "type": "number",
+                  "description": "幅"
+                },
+                "d": {
+                  "type": "number",
+                  "description": "奥行き"
+                },
+                "rot": {
+                  "type": "number",
+                  "description": "回転角(度)"
+                }
+              },
+              "required": [
+                "type",
+                "x",
+                "y",
+                "w",
+                "d",
+                "rot"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "marks": {
+            "type": "array",
+            "description": "この階の家具などの印",
+            "items": {
+              "type": "object",
+              "description": "図面の家具などの印",
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "description": "中心のx"
+                },
+                "y": {
+                  "type": "number",
+                  "description": "中心のy"
+                },
+                "w": {
+                  "type": "number",
+                  "description": "幅"
+                },
+                "d": {
+                  "type": "number",
+                  "description": "奥行き"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "添えられた文字"
+                },
+                "looks": {
+                  "type": "string",
+                  "description": "見たままの形"
+                },
+                "guess": {
+                  "type": "string",
+                  "description": "何だと思うか",
+                  "enum": [
+                    "kitchen-unit",
+                    "kitchen-storage",
+                    "cooktop",
+                    "range-hood",
+                    "cooking-appliance",
+                    "kitchen-sink",
+                    "refrigerator",
+                    "bathtub",
+                    "shower",
+                    "vanity",
+                    "toilet",
+                    "laundry",
+                    "shoe-storage",
+                    "hvac",
+                    "utility-equipment",
+                    "joinery-prop",
+                    "light",
+                    "appliance",
+                    "sofa",
+                    "tv",
+                    "chair",
+                    "dining-table",
+                    "low-table",
+                    "desk",
+                    "counter-table",
+                    "table-set",
+                    "bed",
+                    "bedding",
+                    "closet",
+                    "cabinet",
+                    "chest",
+                    "shelf",
+                    "curtain",
+                    "roller-screen",
+                    "rug",
+                    "mirror",
+                    "wall-decor",
+                    "decor",
+                    "plant",
+                    "kids",
+                    "pet",
+                    "gate-post",
+                    "deck",
+                    "garden-plant",
+                    "garden-equipment",
+                    "fence",
+                    "other"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "w",
+                "d",
+                "label",
+                "looks",
+                "guess"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "floor",
+          "dims",
+          "width",
+          "depth",
+          "rooms",
+          "items",
+          "marks"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "読み取りの記録",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "floors",
+    "notes"
+  ],
+  "additionalProperties": false
+}

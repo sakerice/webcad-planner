@@ -1,0 +1,152 @@
+{
+  "type": "object",
+  "properties": {
+    "buildingRegistration": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        "floors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "floor": {
+                "type": "integer"
+              },
+              "sourcePageId": {
+                "type": "string"
+              },
+              "anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "local": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "building": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "evidence": {
+                      "type": "string"
+                    },
+                    "precisionMm": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "local",
+                    "building",
+                    "evidence",
+                    "precisionMm"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "directions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "local": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "building": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "evidence": {
+                      "type": "string"
+                    },
+                    "precisionDeg": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "local",
+                    "building",
+                    "evidence",
+                    "precisionDeg"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "floor",
+              "sourcePageId",
+              "anchors",
+              "directions"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "version",
+        "floors"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "buildingRegistration"
+  ],
+  "additionalProperties": false
+}

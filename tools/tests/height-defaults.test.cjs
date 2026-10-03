@@ -234,9 +234,14 @@ test('壁の高さを持たないプランを読み込むと、既定に戻る�
 test('プランを差し替える経路は、必ず高さの既定を戻してからそろえる', () => {
   // 読み込みの手順は3か所(ファイル取り込み・白紙・共同編集の同期)にある。
   // 1か所でも抜けると「エラーは出ないのに家の高さだけ違う」壊れ方をする。
-  const doImport = html.slice(html.indexOf('function doImport('), html.indexOf('function doImport(') + 1600);
-  assert.match(doImport, /resetHeightGlobalsForPlanLoad\(\)/);
-  assert.match(doImport, /ensureHeightDefaults\(\)/);
+  const doImport = topLevelFunction('doImport');
+  assert.match(doImport, /var staged=stageJsonImport\(e\.target\.result\)/);
+  assert.ok(doImport.indexOf('stageJsonImport(e.target.result)') < doImport.indexOf('confirm('));
+  assert.ok(doImport.indexOf('confirm(') < doImport.indexOf('applyJsonImport(staged)'));
+  const stage = topLevelFunction('stageJsonImport');
+  assert.match(stage, /resetHeightGlobalsForPlanLoad\(\)/);
+  assert.match(stage, /ensureHeightDefaults\(\)/);
+  assert.ok(stage.indexOf('resetHeightGlobalsForPlanLoad()') < stage.indexOf('ensureHeightDefaults()'));
   const blank = html.slice(html.indexOf('function chooseBlankPlan('), html.indexOf('function chooseBlankPlan(') + 1200);
   assert.match(blank, /resetHeightGlobalsForPlanLoad\(\)/);
   assert.match(blank, /ensureHeightDefaults\(\)/);

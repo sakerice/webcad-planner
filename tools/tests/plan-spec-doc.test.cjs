@@ -18,8 +18,10 @@ test('単位と座標系が書かれている', async () => {
   assert.match(s, /長さ: ミリメートル/);
   assert.match(s, /角度: 度/);
   assert.match(s, /x は右が正、y は下が正/);
-  assert.match(s, /原点 \(0,0\) は建物の左上の外角/);
-  assert.match(s, /全階で同一の座標系/);
+  assert.match(s, /原点 \(0,0\) はその階の平面図の左上の外角/);
+  assert.match(s, /各階は独立したローカル座標系/);
+  assert.match(s, /共通座標に合わせるためにローカル座標や総寸法を変えない/);
+  assert.doesNotMatch(s, /全階で同一の座標系/);
 });
 
 test('出力する項目がすべて説明されている', async () => {

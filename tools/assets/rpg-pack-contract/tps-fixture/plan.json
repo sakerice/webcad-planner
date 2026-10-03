@@ -1,0 +1,260 @@
+{
+  "walls": [],
+  "rooms": [
+    {
+      "id": "fixture-room",
+      "x": 0,
+      "y": 0,
+      "w": 18000,
+      "d": 6000,
+      "n": "TPS fixture",
+      "floor": 2
+    }
+  ],
+  "items": [
+    {
+      "id": "fixture-0",
+      "type": "rpg-mansion-wing-chair-01",
+      "x": 500,
+      "y": 1400,
+      "w": 765,
+      "d": 935.0000000000001,
+      "h": 123,
+      "rot": 37,
+      "floor": 2,
+      "elev": 127,
+      "flipX": false,
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "fixture-1",
+      "type": "rpg-mansion-stool-01",
+      "x": 3100,
+      "y": 1400,
+      "w": 405,
+      "d": 495.00000000000006,
+      "h": 123,
+      "rot": 90,
+      "floor": 2,
+      "elev": 127,
+      "flipX": true,
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "fixture-2",
+      "type": "rpg-mansion-sofa-01",
+      "x": 5700,
+      "y": 1400,
+      "w": 1680.3,
+      "d": 847.0000000000001,
+      "h": 123,
+      "rot": -45,
+      "floor": 2,
+      "elev": 127,
+      "flipX": false,
+      "assetPackConversion": {
+        "version": 2,
+        "mappingVersion": "rpg-mansion-0.2.0-v1",
+        "sourceType": "sofa",
+        "targetType": "rpg-mansion-sofa-01",
+        "heightPolicy": "preserve-effective-height-v1",
+        "sourceEffectiveHeightMm": 750,
+        "renderHeightMm": 750
+      },
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "fixture-3",
+      "type": "rpg-mansion-dining-table-01",
+      "x": 8300,
+      "y": 1400,
+      "w": 937.8000000000001,
+      "d": 707.3000000000001,
+      "h": 123,
+      "rot": 18,
+      "floor": 2,
+      "elev": 127,
+      "flipX": false,
+      "assetPackConversion": {
+        "version": 2,
+        "mappingVersion": "rpg-mansion-0.2.0-v1",
+        "sourceType": "dining-table",
+        "targetType": "rpg-mansion-dining-table-01",
+        "heightPolicy": "preserve-effective-height-v1",
+        "sourceEffectiveHeightMm": 730,
+        "renderHeightMm": 730
+      },
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "fixture-4",
+      "type": "rpg-mansion-coffee-table-01",
+      "x": 10900,
+      "y": 1400,
+      "w": 937.8000000000001,
+      "d": 707.3000000000001,
+      "h": 123,
+      "rot": 70,
+      "floor": 2,
+      "elev": 127,
+      "flipX": false,
+      "assetPackConversion": {
+        "version": 2,
+        "mappingVersion": "rpg-mansion-0.2.0-v1",
+        "sourceType": "low_table",
+        "targetType": "rpg-mansion-coffee-table-01",
+        "heightPolicy": "preserve-effective-height-v1",
+        "sourceEffectiveHeightMm": 400,
+        "renderHeightMm": 400
+      },
+      "modelFacingVersion": 1
+    },
+    {
+      "id": "fixture-5",
+      "type": "rpg-mansion-secretary-01",
+      "x": 13500,
+      "y": 1400,
+      "w": 900,
+      "d": 770.0000000000001,
+      "h": 123,
+      "rot": 0,
+      "floor": 2,
+      "elev": 127,
+      "flipX": false,
+      "modelFacingVersion": 1
+    }
+  ],
+  "floorCount": 2,
+  "startMode": "blank",
+  "exteriorWallSettings": {
+    "whole": {
+      "linked": false,
+      "color": "#e8e0cc",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": true,
+        "color": "#5c3820",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": true,
+        "color": "#e8e0cc",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    },
+    "walls": {},
+    "faces": {}
+  },
+  "interiorWallSettings": {
+    "whole": {
+      "linked": false,
+      "color": "#f4f0e8",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": false,
+        "color": "#f4f0e8",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    },
+    "faces": {}
+  },
+  "roofAppearance": {
+    "whole": {
+      "linked": true,
+      "color": "#2a2a30",
+      "texture": null,
+      "textureFlipX": false,
+      "textureFlipY": false
+    },
+    "floors": {
+      "1": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "2": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "3": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      },
+      "4": {
+        "linked": false,
+        "color": "#2a2a30",
+        "texture": null,
+        "textureFlipX": false,
+        "textureFlipY": false
+      }
+    }
+  },
+  "floorMetadata": {},
+  "heightDefaults": {
+    "perFloor": false,
+    "wallHeight": 2400,
+    "floorRaise": 0
+  },
+  "floors": {},
+  "planFixes": {
+    "ceilingFixtureElev": 1,
+    "outdoorCeilingFixtureElev": 1
+  }
+}

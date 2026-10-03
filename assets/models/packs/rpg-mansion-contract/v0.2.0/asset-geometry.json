@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.2.0",
+  "baseSidecarVersion": "0.1.0",
+  "coverage": "Additional six representatives; merge by assetId and preserve v0.1.0 records",
+  "reviewedAssetCommit": "d7a89c65a370146b74ecb8c5c8da670b41fce247",
+  "packId": "rpg-mansion",
+  "manifestSha256": "56399b1b56438f323a7e4f86cce1d7e272d5df0575fa451556f8d7fd1f34e6d8",
+  "editorIntegration": "fixture-only; TPS host integration pending",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "items": [
+    {
+      "assetId": "rpg-mansion-wing-chair-01",
+      "assetRevision": "sha256:b307c79b25cbbd34f467424ddf7fa1bf2d2b42a172596626c5384cded6addf3d",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-wing-chair-01.glb",
+      "dimensionsMM": {
+        "w": 850,
+        "d": 850,
+        "h": 1220
+      },
+      "measuredBoundsM": {
+        "min": [
+          -0.42500001192092896,
+          0.0,
+          -0.42500001192092896
+        ],
+        "max": [
+          0.42500001192092896,
+          1.2200000286102295,
+          0.42500001192092896
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": [
+        "seat-main"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-stool-01",
+      "assetRevision": "sha256:0c3ce23e96a4d9eae0aa9b10667ae3328e3717f15f638895ab29b9d84b1f2996",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-stool-01.glb",
+      "dimensionsMM": {
+        "w": 450,
+        "d": 450,
+        "h": 540
+      },
+      "measuredBoundsM": {
+        "min": [
+          -0.22499999403953552,
+          0.0,
+          -0.22499999403953552
+        ],
+        "max": [
+          0.22499999403953552,
+          0.5400000214576721,
+          0.22499999403953552
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": [
+        "seat-main"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-sofa-01",
+      "assetRevision": "sha256:5d9230f4dd7c953db9c8bc643e61588dcd4edc81dc455a16d6b981856ee24151",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-sofa-01.glb",
+      "dimensionsMM": {
+        "w": 2050,
+        "d": 850,
+        "h": 1120
+      },
+      "measuredBoundsM": {
+        "min": [
+          -1.024999976158142,
+          0.0,
+          -0.42500001192092896
+        ],
+        "max": [
+          1.024999976158142,
+          1.1200000047683716,
+          0.42500001192092896
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": [
+        "seat-main"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-dining-table-01",
+      "assetRevision": "sha256:78b42f0e694af94ce8e62fdc783ddfaabc519fee4a4293bb8251c806c2a6fccf",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-dining-table-01.glb",
+      "dimensionsMM": {
+        "w": 2000,
+        "d": 950,
+        "h": 780
+      },
+      "measuredBoundsM": {
+        "min": [
+          -1.0,
+          0.0,
+          -0.4749999940395355
+        ],
+        "max": [
+          1.0,
+          0.7799999713897705,
+          0.4749999940395355
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": []
+    },
+    {
+      "assetId": "rpg-mansion-coffee-table-01",
+      "assetRevision": "sha256:f410c850b36dfe75cc2c6d9f24dfb2ea1529c0d3ecc0b3f07edba497e7f7eb5d",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-coffee-table-01.glb",
+      "dimensionsMM": {
+        "w": 1100,
+        "d": 600,
+        "h": 450
+      },
+      "measuredBoundsM": {
+        "min": [
+          -0.550000011920929,
+          0.0,
+          -0.30000001192092896
+        ],
+        "max": [
+          0.550000011920929,
+          0.44999998807907104,
+          0.30000001192092896
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": []
+    },
+    {
+      "assetId": "rpg-mansion-secretary-01",
+      "assetRevision": "sha256:5165b72baebfe8d8ec81fae5d5fecc6ea7545133d2c140646d0481c6cb8edd56",
+      "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-secretary-01.glb",
+      "dimensionsMM": {
+        "w": 1000,
+        "d": 700,
+        "h": 1410
+      },
+      "measuredBoundsM": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.3499999940395355
+        ],
+        "max": [
+          0.5,
+          1.409999966621399,
+          0.3499999940395355
+        ]
+      },
+      "units": "metres",
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "front": [
+        0,
+        0,
+        1
+      ],
+      "origin": "bottom-centre",
+      "socketIds": []
+    }
+  ]
+}

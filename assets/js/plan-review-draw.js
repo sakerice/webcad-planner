@@ -87,6 +87,40 @@
     return best;
   }
 
+  // Union perimeter of the extracted rectangles, without artificial seams between
+  // parts of one room. Split edges at every intersecting rectangle boundary.
+  function roomEdges(room) {
+    var parts = partsOf(room).filter(function (p) {
+      return p && ['x0','x1','y0','y1'].every(function (k) { return typeof p[k] === 'number' && isFinite(p[k]); }) &&
+        p.x1 > p.x0 && p.y1 > p.y0;
+    });
+    var edges = [], seen = new Set();
+    parts.forEach(function (p) {
+      [[true,p.x0,p.y0,p.y1,-1],[true,p.x1,p.y0,p.y1,1],
+       [false,p.y0,p.x0,p.x1,-1],[false,p.y1,p.x0,p.x1,1]].forEach(function (e) {
+        var vertical=e[0], fixed=e[1], lo=e[2], hi=e[3], side=e[4];
+        var cuts=[lo,hi];
+        parts.forEach(function(q) {
+          [vertical?q.y0:q.x0,vertical?q.y1:q.x1].forEach(function(v) { if(v>lo && v<hi) cuts.push(v); });
+        });
+        cuts=Array.from(new Set(cuts)).sort(function(a,b){return a-b;});
+        for(var i=1;i<cuts.length;i++) {
+          var mid=(cuts[i-1]+cuts[i])/2;
+          var covered=parts.some(function(q) {
+            var a=vertical?q.x0:q.y0, b=vertical?q.x1:q.y1;
+            var c=vertical?q.y0:q.x0, d=vertical?q.y1:q.x1;
+            return mid>c && mid<d && (side<0 ? a<fixed && b>=fixed : a<=fixed && b>fixed);
+          });
+          if(covered) continue;
+          var segment=vertical ? [fixed,cuts[i-1],fixed,cuts[i]] : [cuts[i-1],fixed,cuts[i],fixed];
+          var key=segment.join(',');
+          if(!seen.has(key)) { seen.add(key); edges.push(segment); }
+        }
+      });
+    });
+    return edges;
+  }
+
   function drawRooms(ctx, floor, s) {
     var rooms = (floor && Array.isArray(floor.rooms)) ? floor.rooms : [];
     rooms.forEach(function (room) {
@@ -95,10 +129,12 @@
         var w = (num(p.x1) - num(p.x0)) * s, h = (num(p.y1) - num(p.y0)) * s;
         ctx.fillStyle = '#eef2f7';
         ctx.fillRect(x, y, w, h);
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, w, h);
       });
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      roomEdges(room).forEach(function(e) { ctx.moveTo(e[0]*s,e[1]*s); ctx.lineTo(e[2]*s,e[3]*s); });
+      ctx.stroke();
       var big = biggestPart(room);
       if (!big) return;
       var cx = (num(big.x0) + num(big.x1)) / 2 * s;
@@ -162,9 +198,8 @@
   // 外形と、上辺・左辺の寸法。図面の寸法線と突き合わせられるように数字を出す。
   function drawFrame(ctx, ext, s) {
     var W = ext.w * s, D = ext.d * s;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(0, 0, W, D);
+    // Width/depth describe a bounding box, not exterior walls. Dimension lines
+    // below give its extent without drawing a false wall across an L/U recess.
 
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 1.5;
@@ -236,6 +271,7 @@
 
   return {
     drawPage: drawPage,
+    roomEdges: roomEdges,
     FLOOR_PX: FLOOR_PX,
     JA: JA,
     SIZES: SIZES,
