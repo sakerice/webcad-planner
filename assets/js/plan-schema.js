@@ -21,9 +21,9 @@
 // errors が1件でもあれば読み込んではいけない。warnings は読み込めるが
 // 意図しない結果になりそうなもの(見慣れない種類、極端な寸法)を挙げる。
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.PlanSchema = factory();
-}(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./room-geometry.js'));
+  else root.PlanSchema = factory(root.RoomGeometry);
+}(typeof self !== 'undefined' ? self : this, function (RoomGeometry) {
 
   // 寸法はすべてミリメートル。アプリの座標系と同じ。
   var LIMITS = {
@@ -104,6 +104,17 @@
       errors.push(where + ': 大きさ ' + w + '×' + d + 'mm が範囲外(' +
         LIMITS.MIN_SIZE_MM + '〜' + LIMITS.MAX_SIZE_MM + 'mm)');
     }
+    if(r.shape!==undefined && r.shape!==null){
+      try{
+        if(!RoomGeometry)throw Error('Room geometry module unavailable');
+        var canonical=RoomGeometry.normalize(r.shape), bounds=RoomGeometry.bounds({shape:canonical});
+        if(['x','y','w','d'].some(function(k){return Math.abs(bounds[k]-num(r[k]))>1e-6;}))
+          errors.push(where+': room shape bounds disagree with cached x/y/w/d');
+      }catch(e){errors.push(where+': invalid room shape: '+e.message);}
+    }
+    if(r.floorDiagramPattern!==undefined && r.floorDiagramPattern!=='plain') errors.push(where+': unsupported floorDiagramPattern');
+    if(r.floorModuleMm!==undefined && (!Number.isFinite(r.floorModuleMm)||r.floorModuleMm<10||r.floorModuleMm>10000))
+      errors.push(where+': floorModuleMm must be between 10 and 10000 mm');
     checkFloor(r.floor, where, errors);
     if (r.n !== undefined && typeof r.n !== 'string') warnings.push(where + ': 部屋名が文字列でない');
     // スキップフロアの段差。読み込めなくはないので errors ではなく warnings。
@@ -209,7 +220,7 @@
       var seen = Object.create(null);
       plan[name].forEach(function (o, i) {
         var id = o && o.id;
-        if (id === undefined || id === null) return;
+        if (id === undefined || id === null || id === '') return;
         var key = String(id);
         if (seen[key] !== undefined) {
           errors.push(name + '[' + i + ']: id "' + key + '" が ' + name + '[' + seen[key] + '] と重複');
@@ -249,10 +260,21 @@
     Object.keys(plan).forEach(function (k) {
       if (COLLECTIONS.indexOf(k) < 0) out[k] = plan[k];
     });
+    // Reserve every existing ID before assigning any placeholder. References
+    // (baseRoom, appearance maps, etc.) keep pointing at the original objects.
+    var usedIds = new Set();
+    COLLECTIONS.forEach(function (name) {
+      plan[name].forEach(function (o) {
+        if (o.id !== undefined && o.id !== null && o.id !== '') usedIds.add(String(o.id));
+      });
+    });
     var nextId = 1;
     function idFor(o) {
       if (o.id !== undefined && o.id !== null && o.id !== '') return o.id;
-      return 'p' + (nextId++);
+      var id;
+      do { id = 'p' + (nextId++); } while (usedIds.has(id));
+      usedIds.add(id);
+      return id;
     }
     function base(o) {
       var c = {};
@@ -270,6 +292,7 @@
     plan.rooms.forEach(function (r) {
       var c = base(r);
       c.x = num(r.x); c.y = num(r.y); c.w = num(r.w); c.d = num(r.d);
+      if(c.shape){c.shape=RoomGeometry.normalize(c.shape);Object.assign(c,RoomGeometry.bounds(c));}
       out.rooms.push(c);
     });
     plan.items.forEach(function (it) {

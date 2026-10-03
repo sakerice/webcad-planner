@@ -13,6 +13,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script>
+// A child-only, read-only runtime for sequential comparison captures.
+var EDITOR_PANE = window.parent !== window && /^[a-z0-9-]{1,80}$/.test(new URLSearchParams(location.search).get('editorPane')||'') ? new URLSearchParams(location.search).get('editorPane') : null;
+var COMPARISON_PREVIEW = window.parent !== window && new URLSearchParams(location.search).get('comparisonPreview') === '1';
+if(COMPARISON_PREVIEW || EDITOR_PANE){
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=function(input,options){
+    const url=new URL(typeof input==='string'?input:input.url,location.href);
+    if(url.pathname.startsWith('/api/') || (options&&options.method&&options.method.toUpperCase()!=='GET')) return Promise.reject(new Error('Comparison preview cannot access application APIs'));
+    return originalFetch(input,options);
+  };
+  window.WebSocket=function(){throw new Error('Comparison preview cannot join collaboration');};
+}
 // importmap 非対応の古いSafari(iPadOS 16.3以前)等では es-module-shims でポリフィルする。
 // 対応ブラウザでは何もロードしない
 (function(){
@@ -66,20 +78,27 @@ try {
   const mod = await import('./assets/vendor/n8ao.js');
   window.THREE.N8AOPass = mod.N8AOPass;
 } catch(e) { console.warn('N8AO load failed; AO disabled', e); }
+// Publish readiness only after optional rendering modules have settled.
+window.threeModulesReady = true;
 window.dispatchEvent(new Event('three-ready'));
 </script>
 <script src="assets/models/furniture_mega/manifest.js"></script>
 <script src="assets/models/interior_model_0_26_1/manifest.js"></script>
 <script src="assets/models/custom/manifest.js"></script>
+<script src="assets/js/room-geometry.js"></script>
 <script src="assets/js/height-model.js"></script>
 <!-- 間取りJSONの「読み込める形」。worker 側の取り込みと同じものを読む -->
 <script src="assets/js/plan-schema.js"></script>
+<script src="assets/js/scene-opening-geometry.js"></script>
+<script src="assets/js/source-opening-review.js"></script>
 <script src="assets/js/setback-law.js"></script>
 <!-- video-prompt.js は LockTiers を読むので、lock-tiers.js より後に置くこと -->
 <script src="assets/js/lock-tiers.js"></script>
 <script src="assets/js/video-prompt.js"></script>
 <script src="assets/js/shadow-lift.js"></script>
 <script src="assets/js/model-quality.js"></script>
+<script src="assets/js/tailored-sofa-finish.js"></script>
+<script src="assets/js/scene-appearance-profiles.js"></script>
 <script src="assets/js/utility-wires.js"></script>
 <script src="assets/js/photographic-sky.js"></script>
 <script src="assets/js/asset-catalogue.js"></script>
@@ -275,6 +294,12 @@ body{font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;he
 
 #plan-import-modal{display:none;position:fixed;inset:0;background:rgba(5,9,18,0.64);z-index:900;align-items:center;justify-content:center;padding:16px}
 #plan-import-modal.show{display:flex}
+.scene-placement-context{margin:12px 0;padding:12px;border:1px solid #24385f;border-radius:8px;background:#0f172a;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.scene-placement-context legend{padding:0 6px;font-weight:600}
+.scene-placement-context select{margin:6px 10px 8px 0;padding:6px 12px;border:1px solid #24385f;border-radius:16px;background:#16213e;color:inherit}
+.scene-placement-context label{display:block;line-height:1.6}
+.scene-placement-context input{margin-right:6px}
+.scene-placement-context p{margin:8px 0 0;font-size:12px;line-height:1.6;color:#aac}
 /* 囲む操作をするので、指のスクロールに持っていかれないようにする */
 .plan-import-canvas{display:block;width:100%;height:auto;max-height:52dvh;object-fit:contain;background:#0f172a;border:1px solid #24385f;border-radius:6px;cursor:crosshair;touch-action:none}
 #unity-render-toolbar-btn{display:none}
@@ -3365,6 +3390,7 @@ input[type="reset"]:focus-visible{
   <div id="asset-preview"><img alt=""><div></div></div>
 
   <div id="canvas-area">
+    <details id="building-registration-notice" hidden><summary>部分取り込み: 階段・高さなどは未完成</summary><div id="building-registration-notice-detail"></div></details>
     <div id="surface-control" role="group" aria-label="現在のビューの表示対象">
       <label id="surface-context" for="surface-sel">平面図の表示</label>
       <select id="surface-sel" aria-label="編集対象" onchange="CeilingDesigner.setSurface(this.value)"><option value="floor">床ビュー</option><option value="ceiling">天井ビュー</option></select>
@@ -3529,16 +3555,38 @@ input[type="reset"]:focus-visible{
     </div>
 
     <div id="plan-import-step2" style="display:none">
-      <!-- 囲む操作は**任意**。何もせずそのまま読み取れる。紙面の一部にしか
-           図面が写っていない画像のときだけ、囲むと精度が上がる。
-           PDF はそのまま送るので、この枠ごと出さない。 -->
+      <!-- PDFはページ別に送信予定画像を確認。自動切り出し失敗を黙って送らない。 -->
+      <div id="plan-import-pdf-review" style="display:none">
+        <div class="unity-render-config">
+          <div><label for="plan-import-page">確認するページ</label>
+            <select id="plan-import-page" onchange="selectPlanImportPage(this.value)"></select></div>
+        </div>
+        <div id="plan-import-page-status" class="unity-render-status" role="status"></div>
+        <div class="airx-source-note">送信予定の画像（全ページを読み取ります）</div>
+        <img id="plan-import-output" alt="送信予定画像" style="display:block;max-width:100%;max-height:28dvh;margin:auto;object-fit:contain">
+        <div class="unity-render-actions">
+          <button id="plan-import-confirm-page" class="pbtn sec" style="width:auto;padding:7px 14px" onclick="confirmPlanImportPage()">このページ全体を確認して使う</button>
+        </div>
+        <div class="airx-source-note">平面図・寸法線以外の外観パースや表題欄、氏名・住所が入っていないか確認してください。下の元ページをドラッグして囲み直せます。</div>
+      </div>
       <div id="plan-import-crop">
-        <div class="ph">2. 図面の部分を囲む（任意）</div>
+        <div class="ph">2. 元画像で図面の範囲を確認・調整</div>
         <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
         <div class="unity-render-actions">
           <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
           <span id="plan-import-crop-size" class="airx-source-note"></span>
         </div>
+      </div>
+      <div id="plan-import-mode-wrap" style="display:none">
+        <div class="unity-render-config">
+          <div><label for="plan-import-mode">読み取り方</label>
+            <select id="plan-import-mode" style="min-height:40px" onchange="setPlanImportExtractionMode(this.value)">
+              <option value="v1">従来の下書き</option>
+              <option id="plan-import-source-mode" value="scene-ir-v3">元図の情報を確認（実験）</option>
+            </select>
+          </div>
+        </div>
+        <div id="plan-import-mode-note" class="airx-source-note" role="status"></div>
       </div>
       <div class="unity-render-config">
         <div>
@@ -3771,6 +3819,9 @@ input[type="reset"]:focus-visible{
 <!-- plan-rooms / plan-structure / pdf-pages は plan-import より先に読む（取り込み時に使う） -->
 <script src="assets/js/plan-rooms.js"></script>
 <script src="assets/js/plan-structure.js"></script>
+<script src="assets/js/plan-grid.js"></script>
+<script src="assets/js/plan-registration.js"></script>
+<script src="assets/js/plan-source-identity.js"></script>
 <script src="assets/js/pdf-pages.js"></script>
 <script src="assets/js/plan-review-draw.js"></script>
 <!-- room-program / plan-finish も plan-import より先に読む（取り込んだあとの仕上げに使う） -->
@@ -3779,6 +3830,15 @@ input[type="reset"]:focus-visible{
 <script src="assets/js/room-program.js"></script>
 <script src="assets/js/plan-check.js"></script>
 <script src="assets/js/plan-finish.js"></script>
+<script src="assets/js/scene-material-audit.js"></script>
+<script src="assets/js/scene-catalogue.js"></script>
+<script src="assets/js/scene-source-overlay.js"></script>
+<script src="assets/js/scene-ir-v3-materialize.js"></script>
+<script src="assets/js/scene-ir-v3.js"></script>
+<script src="assets/js/scene-ir.js"></script>
+<script src="assets/js/source-object-mapping.js"></script>
+<script src="assets/js/source-image-rails.js"></script>
+<script src="assets/js/source-stair-display.js"></script>
 <script src="assets/js/plan-import.js"></script>
 <script>
 // ───── 3D ENGINE ─────
@@ -3935,7 +3995,7 @@ function disposeObj(obj,seenGeo,seenMat) {
   seenMat=seenMat||new Set();
   if (obj.geometry && !seenGeo.has(obj.geometry)) {
     seenGeo.add(obj.geometry);
-    obj.geometry.dispose();
+    if(!(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(obj.geometry)))obj.geometry.dispose();
   }
   if (obj.material) {
     if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m,seenMat); });
@@ -3947,7 +4007,7 @@ function disposeMat(m,seenMat) {
   if(!m || (seenMat&&seenMat.has(m))) return;
   if(seenMat) seenMat.add(m);
   m.dispose();
-  if (m.map) m.map.dispose();
+  if (m.map && !(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(m.map))) m.map.dispose();
   // Only release explicitly owned auxiliary maps. GLB normal/roughness maps may
   // be shared with cached models and must remain alive across scene rebuilds.
   var owned=m.userData&&m.userData.ownedAuxiliaryTextures;
@@ -4173,16 +4233,26 @@ function applyGradeSettings(){
   _gradePass.uniforms.gLift.value=GRADE_LIFT;
   _gradePass.uniforms.gBalance.value.set(GRADE_BALANCE[0],GRADE_BALANCE[1],GRADE_BALANCE[2]);
 }
+var _threeReadyWaiting=false,_threeReadyListener=null,_threeReadyTimer=0;
+function cancel3DEngineWait(){
+  if(_threeReadyListener)window.removeEventListener('three-ready',_threeReadyListener);
+  if(_threeReadyTimer)clearTimeout(_threeReadyTimer);
+  _threeReadyWaiting=false;_threeReadyListener=null;_threeReadyTimer=0;
+}
 function init3D(){
-  if(ren) return;
-  if(typeof window.THREE==='undefined'){
+  if(window._editorPaneDisposed||ren) return;
+  if(!window.threeModulesReady){
     // ESモジュール(three.js)ロード前に呼ばれた場合はロード完了後に再実行。
     // ロード中/失敗を画面に表示し、無言の空画面にしない
     show3DEngineNotice('loading');
-    window.addEventListener('three-ready',function(){ hide3DEngineNotice(); init3D(); if(sc3&&ST.view!=='2d') rebuild3D(); },{once:true});
-    setTimeout(function(){ if(typeof window.THREE==='undefined') show3DEngineNotice('failed'); },8000);
+    if(_threeReadyWaiting)return;
+    _threeReadyWaiting=true;
+    _threeReadyListener=function(){cancel3DEngineWait();if(window._editorPaneDisposed)return;hide3DEngineNotice();if(ST.view!=='2d')setView(ST.view);};
+    window.addEventListener('three-ready',_threeReadyListener,{once:true});
+    _threeReadyTimer=setTimeout(function(){_threeReadyTimer=0;if(!window._editorPaneDisposed&&!window.threeModulesReady)show3DEngineNotice('failed');},8000);
     return;
   }
+  cancel3DEngineWait();
   hide3DEngineNotice();
   var wrap=document.getElementById('c3d-wrap');
   ren=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -4436,6 +4506,7 @@ function init3D(){
   if(!_3dGlobalsWired){
   _3dGlobalsWired=true;
   document.addEventListener('keydown',function(e){
+    if(isPlanImportDialogOpen()) return;
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
     var k=e.key.toLowerCase();
     if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0){ iMov[k]=true; invalidate3D(); }
@@ -4495,6 +4566,9 @@ if(typeof document!=='undefined'){
   window.addEventListener('focus',function(){ recover3DIfContextLost(); });
 }
 
+var _sceneCameraFitTimer=null;
+function cancelScheduledCameraFit(){if(_sceneCameraFitTimer!==null)clearTimeout(_sceneCameraFitTimer);_sceneCameraFitTimer=null;}
+function scheduleSceneCameraFit(delay){cancelScheduledCameraFit();_sceneCameraFitTimer=setTimeout(function(){_sceneCameraFitTimer=null;fitCameraToScene();},delay);}
 function fitCameraToScene(){
   if(!sc3||!camExt||!orbit) return;
   if(WALKTHROUGH) return;
@@ -5222,7 +5296,7 @@ function setbackBuildingTopWorldYAt(xMm,yMm){
   });
   (DATA.rooms||[]).forEach(function(r){
     if(!r||r.hidden3D) return;
-    if(xMm<r.x||xMm>r.x+r.w||yMm<r.y||yMm>r.y+r.d) return;
+    if(r.shape?!RoomGeometry.contains(r,xMm,yMm):(xMm<r.x||xMm>r.x+r.w||yMm<r.y||yMm>r.y+r.d)) return;
     y=floorBaseY(r.floor)+wallFullHeightM(r.floor);
     if(top===null||y>top) top=y;
   });
@@ -5426,7 +5500,7 @@ function setbackRoofItems(){
   planes.forEach(function(pl){
     sig.push(pl.kind,pl.baseMm,pl.slope,pl.nx,pl.ny,pl.d0);
   });
-  (DATA.rooms||[]).forEach(function(r){ if(r&&!r.hidden3D) sig.push('r',r.x,r.y,r.w,r.d,r.floor); });
+  (DATA.rooms||[]).forEach(function(r){ if(r&&!r.hidden3D) sig.push('r',r.x,r.y,r.w,r.d,r.floor,JSON.stringify(r.shape||null)); });
   (DATA.items||[]).forEach(function(it){
     if(!it||it.type!=='roof'||it.hidden3D) return;
     sig.push('f',it.x,it.y,it.w,it.d,it.floor,it.rot,it.elev,it.roofType,it.pitch,
@@ -5477,6 +5551,7 @@ function clipPlanPolyByRoofLocal(it,poly,useZ,lo,hi){
 // 同じ道を通る。判定そのものは roofCoversPlanPoint に任せる -- ここが返すのは
 // 「どこを見ればよいか」だけで、覆いの定義を2か所に書かない。
 function roofRoomOverlapPointsMm(it,room){
+  if(room.shape) return RoomGeometry.cells(room).reduce(function(out,c){return out.concat(roofRoomOverlapPointsMm(it,Object.assign({},room,c,{shape:null})));},[]);
   var quad=[[room.x,room.y],[room.x+room.w,room.y],
     [room.x+room.w,room.y+room.d],[room.x,room.y+room.d]];
   var rs=(it.setbackOutline&&it.setbackOutline.rects)||
@@ -5516,10 +5591,11 @@ function setbackRoofsOverRoom(room){
   if(_setbackRoomRoofsCacheKey!==_setbackRoofCacheKey){
     _setbackRoomRoofsCache={}; _setbackRoomRoofsCacheKey=_setbackRoofCacheKey;
   }
-  var ck=[room.id||'?',room.floor,room.x,room.y,room.w,room.d,floorY].join(':');
+  var ck=[room.id||'?',room.floor,room.x,room.y,room.w,room.d,JSON.stringify(room.shape||null),floorY].join(':');
   if(_setbackRoomRoofsCache[ck]) return _setbackRoomRoofsCache[ck];
   var corners=[[room.x+room.w/2,room.y+room.d/2],
     [room.x,room.y],[room.x+room.w,room.y],[room.x,room.y+room.d],[room.x+room.w,room.y+room.d]];
+  if(room.shape){var anchor=RoomGeometry.labelAnchor(room);corners=RoomGeometry.polygon(room).map(function(p){return [p.x,p.y];});corners.push([anchor.x,anchor.y]);}
   items.forEach(function(it){
     // 中心と四隅に加えて、輪郭と部屋が重なっている所そのものを見る。
     var pts=corners.concat(roofRoomOverlapPointsMm(it,room));
@@ -6707,10 +6783,12 @@ function apply3DGizmoDrag(e){
   (gd.group||[{obj:ref,orig:gd.orig}]).forEach(function(m){
     var o=m.obj, og=m.orig;
     if(gd.axis==='x'){
-      if(o.x!==undefined) o.x=og.x+deltaMm;
+      if(o.shape) RoomGeometry.translate(o,deltaMm,0,og);
+      else if(o.x!==undefined) o.x=og.x+deltaMm;
       else {o.x1=og.x1+deltaMm; o.x2=og.x2+deltaMm;}
     } else if(gd.axis==='z'){
-      if(o.y!==undefined) o.y=og.y+deltaMm;
+      if(o.shape) RoomGeometry.translate(o,0,deltaMm,og);
+      else if(o.y!==undefined) o.y=og.y+deltaMm;
       else {o.y1=og.y1+deltaMm; o.y2=og.y2+deltaMm;}
     } else if(gd.axis==='y' && canMoveRefVertically3D(o)){
       o.elev=Math.max(-5000,Math.min(10000,(og.elev||0)+deltaMm));
@@ -6725,6 +6803,11 @@ function apply3DGizmoDrag(e){
 }
 
 function finish3DGizmoDrag(){
+  if(GIZMO_DRAG.saved && (GIZMO_DRAG.axis==='x'||GIZMO_DRAG.axis==='z') && typeof SceneOpeningGeometry!=='undefined'){
+    (GIZMO_DRAG.group||[{obj:GIZMO_DRAG.ref,orig:GIZMO_DRAG.orig}]).forEach(function(entry){
+      SceneOpeningGeometry.rebindAfterEdit(entry.obj,DATA.walls,{before:entry.orig,snapToWall:true});
+    });
+  }
   var usedPartial=!!(GIZMO_DRAG.partialRoots&&GIZMO_DRAG.partialRoots.length);
   GIZMO_DRAG.active=false;
   GIZMO_DRAG.axis=null;
@@ -8558,26 +8641,24 @@ function windowHeightMm(it){
   return isFinite(v)?Math.max(200,Math.min(windowMaxTopMm(it),v)):def;
 }
 function windowMaxTopMm(it){
-  return Math.max(200,wallHeightMm(it&&it._wallRef)-50);
+  var wall=it&&it._wallRef;
+  // Explicit Scene IR hosts use the same floor/host-height datum in preview,
+  // property normalization and rendering. Legacy windows retain their fallback.
+  if(it&&((it.sceneImportVersion===2||it.sceneImportVersion===3)||it.openingHostWallId!==undefined)){
+    if(!wall&&typeof DATA==='object'&&DATA&&Array.isArray(DATA.walls)){
+      var matches=DATA.walls.filter(function(w){return w&&w.id===it.openingHostWallId;});
+      if(matches.length===1)wall=matches[0];
+    }
+    if(!wall)wall={floor:it.floor};
+  }
+  return Math.max(200,wallHeightMm(wall)-50);
 }
 function windowTopMm(it){
   return Math.min(windowMaxTopMm(it),windowSillMm(it)+windowHeightMm(it));
 }
 function normalizeWindowVerticalProps(it,prefer){
   if(!it || !isWindowLikeType(it.type)) return;
-  var maxTop=windowMaxTopMm(it);
-  var sill=Number(it.windowSill);
-  var height=Number(it.windowHeight);
-  if(!isFinite(sill)) sill=it.type==='window-door'?0:900;
-  if(!isFinite(height)) height=it.type==='window-door'?2100:1200;
-  sill=Math.max(0,Math.min(maxTop-200,sill));
-  height=Math.max(200,Math.min(maxTop,height));
-  if(sill+height>maxTop){
-    height=Math.max(200,maxTop-sill);
-  }
-  it.windowSill=Math.round(sill);
-  it.windowHeight=Math.round(height);
-  if(it.windowTop!==undefined) delete it.windowTop;
+  HeightModel.normalizeWindowVerticalProps(it,windowMaxTopMm(it));
 }
 function ensureWindowProps(it){
   if(!it || !isWindowLikeType(it.type)) return;
@@ -8635,6 +8716,7 @@ function isWallOnExteriorShell(w){
 
 function isPointInsideAnyRoom(x,y,fl){
   return DATA.rooms.some(function(r){
+    if(r.shape) return r.floor===fl&&RoomGeometry.contains(r,x,y);
     return r.floor===fl &&
       x>=r.x-2 && x<=r.x+r.w+2 &&
       y>=r.y-2 && y<=r.y+r.d+2;
@@ -8651,7 +8733,8 @@ function getExteriorZones(fl){
   var zones=[];
   DATA.rooms.forEach(function(r){
     if(r.floor===fl && isExteriorRoom(r)){
-      zones.push({x:r.x,y:r.y,w:r.w,d:r.d,rot:0});
+      if(r.shape) RoomGeometry.cells(r).forEach(function(c){zones.push(Object.assign({rot:0},c));});
+      else zones.push({x:r.x,y:r.y,w:r.w,d:r.d,rot:0});
     }
   });
   DATA.items.forEach(function(it){
@@ -9946,6 +10029,18 @@ function buildWall3D(w){
     var segLen=b-a;
     if(segLen<0.03||h<=0.001||(h<0.03&&!allowThin)) return;
     var mid=(a+b)/2;
+    if(sourcePocketVoids&&sourcePocketVoids.length){
+      var pieces=SceneOpeningGeometry.subtractBoxes([a,b,yBase,yBase+h,-w.thick*U/2,w.thick*U/2],sourcePocketVoids);
+      pieces.forEach(function(p){
+        var m=new THREE.Mesh(new THREE.BoxGeometry(p[1]-p[0],p[3]-p[2],p[5]-p[4]),mat);
+        var along=(p[0]+p[1])/2, normal=(p[4]+p[5])/2;
+        m.position.set(x1+dirX*along-dirZ*normal,fy+(p[2]+p[3])/2,z1+dirZ*along+dirX*normal);
+        m.rotation.y=rotY;m.castShadow=true;m.receiveShadow=true;
+        if(isOuter){markInteriorCutawayCandidate(m,w,0,0);m.userData.noMerge=true;}
+        wallGroup.add(m);
+      });
+      return;
+    }
     if(style==='balcony-fence'){
       // フェンスは開口・バンドの影響を受けず、床から1100mm+笠木で一定
       if(yBase<=0.001) addBalconyFencePiece(a,b);
@@ -10097,6 +10192,14 @@ function buildWall3D(w){
     glass.userData.windowWallGlass=true;
     wallGroup.add(glass);
   }
+  var sourcePocketVoids=[];
+  DATA.items.forEach(function(it){
+    if(!it.openingSourceGeometry || typeof SceneOpeningGeometry==='undefined')return;
+    SceneOpeningGeometry.pocketCutsForWall(it,DATA.walls,w).forEach(function(c){
+      var bottom=item3DBaseY(it)-fy;
+      sourcePocketVoids.push([c.a*U,c.b*U,bottom,bottom+doorHeightMm(it)*U,c.z0*U,c.z1*U]);
+    });
+  });
   var openings=[];
   if((w.wallBand||'full')!=='full' || style!=='solid'){
     addBandPiece(0,len);
@@ -10112,7 +10215,7 @@ function buildWall3D(w){
     // 以前は+80mm・最小450mmの余裕を持たせていたが、これは窓枠の外形より広く、
     // 特に幅の狭い窓(すべり出し窓など)で壁側ガラスが窓枠からはみ出して見える
     // 原因になっていた。ドア側は建具の納まり上の余白が必要なため従来通り。
-    var openW=isWindowLikeType(it.type) ? Math.min(len, Math.max(it.w*U,0.1)) : Math.min(len, Math.max(it.w*U+0.08, 0.45));
+    var openW=SceneOpeningGeometry.wallCutWidthMm(it,len/U)*U;
     if(isWindowLikeType(it.type)){
       // 開口の高さは**壁の足元 fy から**測る。壁が持ち上がった床から立つときに
       // floorBaseY で測ると、その差ぶん窓が壁の中へ沈む。
@@ -10213,7 +10316,7 @@ function buildWinFrames(flFilt){
     var openingModel=getOpeningModelItem(it);
     // カスタム画像はGLB内蔵マテリアルより優先する。モデル固有の不定なUVへ
     // 無理に貼らず標準パネルへ切り替えることで、トリミング結果も一貫させる。
-    var openingModelReady=openingModel && !it.texture && ensureGltfModel(openingModel.model);
+    var openingModelReady=!it.openingSourceGeometry && openingModel && !it.texture && ensureGltfModel(openingModel.model);
     
     function addBox(mat,x,y,z,w,h,d){
       var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
@@ -10285,7 +10388,7 @@ function buildWinFrames(flFilt){
       if(!exSign){
         // フォールバック: 部屋矩形の有無で内外を推定
         function roomAt(sx,sy){
-          return DATA.rooms.some(function(r){return r.floor===fl && sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d;});
+          return DATA.rooms.some(function(r){return r.floor===fl && (r.shape?RoomGeometry.contains(r,sx,sy):(sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d));});
         }
         var rp=roomAt(wallInfo.x+nx*450,wallInfo.y+ny*450), rn=roomAt(wallInfo.x-nx*450,wallInfo.y-ny*450);
         if(rp&&!rn) exSign=-1; else if(rn&&!rp) exSign=1;
@@ -10465,15 +10568,16 @@ function buildWinFrames(flFilt){
         var isPocket=(it.type==='door-pocket');
         addBox(doorJambMat,0,dh-0.022,0,ww+jamb*2,0.044,isPocket?frameDepth:0.06);
         var ssWant=doorOpenWant(it);
-        var ssDir=it.flipX?-1:1;
-        var leafW=ww+0.06;
-        var zOffS=isPocket?0:(it.flipY?1:-1)*(((best.thick||120)/2)*U+0.036/2+0.008);
-        var closedXS=0, openXS=ssDir*(ww+0.03);
+        var ssGeometry=SceneOpeningGeometry.rendererParameters(it,best.thick||120);
+        var ssDir=ssGeometry.direction;
+        var leafW=ssGeometry.leafWidthMm*U;
+        var zOffS=ssGeometry.leafZmm*U;
+        var closedXS=ssGeometry.closedXmm*U, openXS=ssGeometry.openXmm*U;
         var leafG=new THREE.Group();
         leafG.position.set(ssWant?openXS:closedXS,0,0);
         leafG.userData.noMerge=true;
         grp.add(leafG);
-        var lm=new THREE.Mesh(new THREE.BoxGeometry(leafW,panelH,0.036),doorLeafMat);
+        var lm=new THREE.Mesh(new THREE.BoxGeometry(leafW,panelH,ssGeometry.leafThicknessMm*U),doorLeafMat);
         lm.position.set(0,panelY,zOffS);
         lm.castShadow=true; lm.receiveShadow=true;
         leafG.add(lm);
@@ -10481,7 +10585,7 @@ function buildWinFrames(flFilt){
         var pullMatS=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
         [-1,1].forEach(function(ss){
           var pm=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.10,0.004),pullMatS);
-          pm.position.set(-ssDir*(leafW/2-0.05),doorHardwareY(0.95),zOffS+ss*(0.036/2-0.001));
+          pm.position.set(-ssDir*(leafW/2-0.05),doorHardwareY(0.95),zOffS+ss*(ssGeometry.leafThicknessMm*U/2-0.001));
           leafG.add(pm);
         });
         // 片引き戸: 上吊りレールを控え壁側まで延長
@@ -10494,7 +10598,7 @@ function buildWinFrames(flFilt){
           var bridgeRoom=DATA.rooms.filter(function(r){return !r.hidden3D&&r.floor===fl;}).find(function(r){
             return [1,-1].some(function(s){
               var sx=wallInfo.x+nx*sampleMm*s, sy=wallInfo.y+ny*sampleMm*s;
-              return sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d;
+              return r.shape?RoomGeometry.contains(r,sx,sy):(sx>=r.x&&sx<=r.x+r.w&&sy>=r.y&&sy<=r.y+r.d);
             });
           });
           var bridgeMat=bridgeRoom?makeRoomFloorMaterial(bridgeRoom):new THREE.MeshStandardMaterial({color:0xd8d0c2,roughness:0.95,metalness:0});
@@ -10553,13 +10657,15 @@ function buildWinFrames(flFilt){
         var slideOpen=doorOpenState(it)!=='closed';
         var slideWant=doorOpenWant(it);
         var leftOpen=!!it.flipX;
-        var panelW=ww*0.54;
-        var leftPos=-ww*0.23, rightPos=ww*0.23;
-        var fixedX=leftOpen?rightPos:leftPos;
+        var bypassGeometry=SceneOpeningGeometry.rendererParameters(it,best.thick||120);
+        leafT=bypassGeometry.leafThicknessMm*U;
+        var panelW=bypassGeometry.leafWidthMm*U;
+        var leftPos=bypassGeometry.leftXmm*U, rightPos=bypassGeometry.rightXmm*U;
+        var fixedX=bypassGeometry.fixedXmm*U;
         var movingX=slideWant?fixedX:(leftOpen?leftPos:rightPos);
         // 引き違い2枚のレールピッチは34mm(戸厚36mmでほぼ密着する実際の納まり)
-        addBox(doorLeafMat,fixedX,panelY,-0.019,panelW,panelH,leafT);
-        var slideLeaf=addBox(doorLeafMat,movingX,panelY, 0.019,panelW,panelH,leafT);
+        addBox(doorLeafMat,fixedX,panelY,bypassGeometry.fixedZmm*U,panelW,panelH,leafT);
+        var slideLeaf=addBox(doorLeafMat,movingX,panelY,bypassGeometry.leafZmm*U,panelW,panelH,leafT);
         // 掘り込み引手: 各戸の召し合わせ側端部から25mm内側、縦長30x100(中心H950)・両面。
         // パネル面より一段暗いグレーで2mm沈んで見える表現
         var pullMat=new THREE.MeshStandardMaterial({color:0x55504a,roughness:0.7,metalness:0.15});
@@ -10578,13 +10684,15 @@ function buildWinFrames(flFilt){
           initiallyOpen:slideOpen,_want:slideWant});
       } else {
         var pivot=new THREE.Group();
-        var hingeX=it.flipX ? ww/2 : -ww/2;
-        var leafX=it.flipX ? -ww/2 : ww/2;
+        var hingeGeometry=SceneOpeningGeometry.rendererParameters(it,best.thick||120);
+        leafT=hingeGeometry.leafThicknessMm*U;
+        var hingeX=hingeGeometry.hingeXmm*U;
+        var leafX=hingeGeometry.leafCenterXmm*U;
         var openDir=it.flipY?-1:1;
         var openSide=-openDir;
-        pivot.position.set(hingeX,0,0);
+        pivot.position.set(hingeX,0,(hingeGeometry.hingeZmm||0)*U);
         // 開き戸は90度まで開く(ウォークスルーの通行と実際の使い方に合わせる)
-        var doorOpenY=openSide*Math.PI/2;
+        var doorOpenY=hingeGeometry.openAngleY;
         var pivotWant=doorOpenWant(it);
         pivot.rotation.y=pivotWant?doorOpenY:0;
         if(openingModelReady){
@@ -10604,7 +10712,8 @@ function buildWinFrames(flFilt){
           }
           pivot.add(modelLeafWrap);
         } else {
-          var leaf=it.doorFinish==='bath-clear'?makeBathroomDoorLeaf(ww,panelH,leafT):new THREE.Mesh(new THREE.BoxGeometry(ww,panelH,leafT),doorLeafMat);
+          var sourceLeafW=hingeGeometry.leafWidthMm*U;
+          var leaf=it.doorFinish==='bath-clear'?makeBathroomDoorLeaf(sourceLeafW,panelH,leafT):new THREE.Mesh(new THREE.BoxGeometry(sourceLeafW,panelH,leafT),doorLeafMat);
           leaf.position.set(leafX,panelY,0);
           leaf.castShadow=true; leaf.receiveShadow=true;
           pivot.add(leaf);
@@ -10782,7 +10891,13 @@ function stairEdgesFace(ea,eb){
 // {a,b,ea,eb,gap,span} / null。
 var _stairLinkCache={};
 var _stairLinkCacheSize=0;
+function stairSourceGroupMatches(a,b){
+  var ca=a&&a.sourceStairConnection,cb=b&&b.sourceStairConnection;
+  return !ca&&!cb||!!(ca&&cb&&typeof ca.groupId==='string'&&ca.groupId&&ca.groupId===cb.groupId);
+}
 function stairPartsLink(a,b){
+  if(!stairSourceGroupMatches(a,b))return null;
+  if((a&&a.stairDisplayOnly)||(b&&b.stairDisplayOnly)) return null;
   if(!a||!b||a===b||(a.floor||1)!==(b.floor||1)) return null;
   var ck=stairPartShapeKey(a)+'|'+stairPartShapeKey(b);
   if(Object.prototype.hasOwnProperty.call(_stairLinkCache,ck)){
@@ -10795,6 +10910,8 @@ function stairPartsLink(a,b){
   return r;
 }
 function stairPartsLinkRaw(a,b){
+  if(!stairSourceGroupMatches(a,b))return null;
+  if((a&&a.stairDisplayOnly)||(b&&b.stairDisplayOnly)) return null;
   var best=null, EA=stairPartEdgesMm(a), EB=stairPartEdgesMm(b);
   EA.forEach(function(ea){
     if(ea.role==='side') return;
@@ -10822,12 +10939,13 @@ function stairPartsLinked(a,b){ return !!stairPartsLink(a,b); }
 // どちらもつながっている部材どうし(床の踊り場で折り返す2本)は、横腹が接して
 // いても正しい形なので知らせない。
 function stairTouchingUnlinked(seed){
+  if(seed&&seed.stairDisplayOnly) return [];
   if(!seed||!isStairPartType(seed.type)||isFloorLanding(seed)) return [];
   var chain=stairChainParts(seed), fl=seed.floor||1;
   var floors=DATA.items.filter(function(l){ return (l.floor||1)===fl&&isFloorLanding(l); });
   var myFloors=floors.filter(function(l){ return chain.some(function(p){ return stairPartsLinked(p,l); }); });
   return DATA.items.filter(function(o){
-    if((o.floor||1)!==fl||!isStairPartType(o.type)||isFloorLanding(o)||chain.indexOf(o)>=0) return false;
+    if(!stairSourceGroupMatches(seed,o)||(o.floor||1)!==fl||!isStairPartType(o.type)||isFloorLanding(o)||chain.indexOf(o)>=0) return false;
     if(myFloors.some(function(l){ return stairChainParts(o).some(function(q){ return stairPartsLinked(q,l); }); })) return false;
     return chain.some(function(p){ return stairPartsTouch(p,o)&&!stairPartsLinked(p,o); });
   });
@@ -10838,12 +10956,12 @@ function stairTouchingUnlinked(seed){
 // 吸い付かなければ {x,y} をそのまま返す。
 var STAIR_SNAP_MM=250;
 function stairSnapPosition(it,x,y){
-  if(!it||!isStairPartType(it.type)) return {x:x,y:y};
+  if(!it||it.stairDisplayOnly||!isStairPartType(it.type)) return {x:x,y:y};
   var probe=Object.assign({},it,{x:x,y:y});
   var mine=stairPartEdgesMm(probe).filter(function(e){ return e.role!=='side'; });
   var best=null, fl=it.floor||1;
   DATA.items.forEach(function(o){
-    if(o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
+    if(!stairSourceGroupMatches(it,o)||o.stairDisplayOnly||o===it||(o.floor||1)!==fl||!isStairPartType(o.type)||(it.id!==undefined&&o.id===it.id)) return;
     stairPartEdgesMm(o).forEach(function(eo){
       if(eo.role==='side') return;
       mine.forEach(function(e){
@@ -10864,8 +10982,62 @@ function stairSnapPosition(it,x,y){
   });
   return best||{x:x,y:y};
 }
+// Source geometry connections are reviewed drafts, never implicit floor openings or walk routes.
+function sourceStairConnectionCandidate(it){
+  if(!it||(it.floor!==1&&it.floor!==2)||!it.stairDisplayOnly||!it.sourceStairDisplay)return null;
+  var sourceFloor=it.floor,targetFloor=sourceFloor+1;
+  var pair=DATA.items.filter(function(o){return o.floor===sourceFloor&&o.stairDisplayOnly&&o.sourceStairDisplay&&o.sourceStairDisplay.targetFloor===targetFloor;});
+  if(pair.length!==2||!pair.some(function(o){return o.type==='stair';})||!pair.some(function(o){return o.type==='stair-corner';}))return null;
+  var clones=pair.map(function(o){return Object.assign({},o,{stairDisplayOnly:false});}),info=stairGroupChainInfo(clones);
+  if(!info.order||info.conflicts.length||info.branches.length||info.order[0].type!=='stair-corner')return null;
+  var link=stairPartsLink(info.order[0],info.order[1]);if(!link||link.legacy||link.ea.role!=='up'||link.eb.role!=='down')return null;
+  var ordered=info.order.map(function(o){return pair.find(function(p){return p.id===o.id;});}),down=stairPartPortsMm(ordered[0],0).down,up=stairPartPortsMm(ordered[1],0).up;
+  if(!roomAtPointOnFloor(targetFloor,up.x,up.y))return null;
+  var report=(DATA.sceneReconstructionReports||[]).slice().reverse().find(function(r){return r.sourceLocal&&Array.isArray(r.stairDisplayDecisions)&&pair.every(function(o){return r.sourceLocal.items&&JSON.stringify(r.sourceLocal.items[o.sourceStairDisplay.sourceItemIndex])===o.sourceStairDisplay.sourceSnapshot;});});
+  if(!report||!report.poses||!report.poses[sourceFloor]||!report.translation)return null;
+  var decisions=report.stairDisplayDecisions.filter(function(d){return pair.some(function(o){return o.sourceStairDisplay.sourceItemIndex===d.sourceItemIndex;});}),expected;
+  try{var sourceKey=PlanRegistration.snapshot(report.sourceLocal),proposalKey=PlanRegistration.snapshot(report.proposals);if(decisions.some(function(d){return d.sourceSnapshot!==sourceKey||d.proposalSnapshot!==proposalKey;}))return null;expected=SourceStairDisplay.materialize(report.sourceLocal,decisions.map(function(d){return Object.assign({},d,{sourceSnapshot:d.entitySnapshot});}));}catch(error){return null;}
+  if(expected.length!==2)return null;
+  for(var i=0;i<pair.length;i++){
+    var actual=pair[i],original=expected.find(function(o){return o.sourceStairDisplay.sourceItemIndex===actual.sourceStairDisplay.sourceItemIndex;});if(!original)return null;
+    var centre=PlanRegistration.transform({x:original.x+original.w/2,y:original.y+original.d/2},report.poses[sourceFloor]),tx=report.translation.x,ty=report.translation.y;
+    if(!Number.isFinite(tx)||!Number.isFinite(ty)||Math.abs(actual.x-(centre.x+tx-original.w/2))>0.001||Math.abs(actual.y-(centre.y+ty-original.d/2))>0.001||actual.w!==original.w||actual.d!==original.d||actual.rot!==((original.rot||0)+report.poses[sourceFloor].quarterTurns*90)%360||!!actual.flipX!==!!original.flipX||!!actual.flipY!==!!original.flipY||(actual.elev||0)!==0)return null;
+  }
+  var baseRoom=roomAtPointOnFloor(sourceFloor,down.x,down.y),targetRoom=roomAtPointOnFloor(targetFloor,up.x,up.y),reviewSnapshot=JSON.stringify({parts:ordered,sourceItems:pair.map(function(o){return report.sourceLocal.items[o.sourceStairDisplay.sourceItemIndex];}),decisions:decisions.map(function(d){return {sourceItemIndex:d.sourceItemIndex,entitySnapshot:d.entitySnapshot,reviewed:d.reviewed,displayRiseMm:d.displayRiseMm,displayBaseOffsetMm:d.displayBaseOffsetMm,partOrder:d.partOrder,targetFloor:d.targetFloor,directionDecision:d.directionDecision};}),poses:report.poses,translation:report.translation,datum:{sourceFloor:sourceFloor,targetFloor:targetFloor,sourceFloorY:floorTopY(sourceFloor),targetFloorY:floorTopY(targetFloor),baseRoom:baseRoom,targetRoom:targetRoom,baseY:roomFloorAt(sourceFloor,down.x,down.y),targetY:roomFloorAt(targetFloor,up.x,up.y)}});
+  return {sourceFloor:sourceFloor,targetFloor:targetFloor,parts:ordered,reviewSnapshot:reviewSnapshot,baseRoomId:baseRoom&&baseRoom.id,targetRoomId:targetRoom.id,baseOffsetMm:Math.round((roomFloorAt(sourceFloor,down.x,down.y)-floorTopY(sourceFloor))/U),targetOffsetMm:Math.round((roomFloorAt(targetFloor,up.x,up.y)-floorTopY(targetFloor))/U),straightSteps:getStairStepCount(ordered[1])};
+}
+function connectSelectedSourceStairDraft(){
+  var draft=sourceStairConnectionCandidate(ST.selected);if(!draft){alert('元図の階段2部材と上り方向・行先を再確認してください。');return;}
+  var review=document.getElementById('source-stair-connect');if(!review||review.getAttribute('data-source-review')!==draft.reviewSnapshot){alert('元データまたは高さ基準が変わりました。設定欄を開き直して再確認してください。');return;}
+  var sourceFloor=draft.sourceFloor,targetFloor=draft.targetFloor;
+  var base=Number(document.getElementById('source-stair-base-offset').value),top=Number(document.getElementById('source-stair-target-offset').value),steps=Number(document.getElementById('source-stair-straight-steps').value);
+  var baseMm=Math.round(floorTopY(sourceFloor)/U)+base,topMm=Math.round(floorTopY(targetFloor)/U)+top;
+  if(!Number.isFinite(base)||base<0||base>6000||!Number.isFinite(top)||top< -1000||top>6000||!Number.isInteger(steps)||steps<3||steps>30||topMm-baseMm<500||topMm-baseMm>6000){alert('高さ仮定と直線段数を確認してください。');return;}
+  var snapshot=draft.reviewSnapshot;
+  if(!confirm(sourceFloor+'F→'+targetFloor+'Fの接続下書き: 足元 '+baseMm+'mm、上端 '+topMm+'mm、回り3段＋直線'+steps+'段。高さ・段数は未測定の仮定です。床穴と階移動は作りません。この条件で接続しますか？'))return;
+  var current=sourceStairConnectionCandidate(ST.selected);if(!current||current.reviewSnapshot!==snapshot){alert('確認中に元データまたは高さ基準が変わりました。再確認してください。');return;}
+  saveState();var ids=current.parts.map(function(o){return o.id;});
+  current.parts.forEach(function(o,n){o.stairDisplayOnly=false;o.stairOrder=n+1;o.stairTarget='upper';o.sourceStairConnection={version:1,groupId:ids.join(':'),memberIds:ids.slice(),targetFloor:targetFloor,baseMm:baseMm,topMm:topMm,steps:n?steps:3,heightProvenance:'user-reviewed-unmeasured-assumption',measured:false,floorOpeningsReviewed:false,walkRouteReviewed:false,baseRoomId:current.baseRoomId,targetRoomId:current.targetRoomId,reviewSnapshot:snapshot};});
+  updateProps();draw2d();if(ren)rebuild3D();
+}
+function sourceStairConnectionSpan(it){
+  var c=it&&it.sourceStairConnection;if(!c||c.version!==1||(it.floor!==1&&it.floor!==2)||c.targetFloor!==it.floor+1||!Number.isFinite(c.baseMm)||!Number.isFinite(c.topMm)||c.topMm-c.baseMm<500||c.topMm-c.baseMm>6000||!Number.isInteger(c.steps)||c.steps<3||c.steps>30)return null;
+  return {baseY:c.baseMm*U,topY:c.topMm*U,riseM:(c.topMm-c.baseMm)*U};
+}
 // 選んだ階段の、上る順番とつながりの説明(設定欄に出す)。
 function stairConnectionSummary(it){
+  if(it&&it.sourceStairConnection){
+    var c=it.sourceStairConnection,span=sourceStairConnectionSpan(it),group=getConnectedStairParts(it),info=stairGroupChainInfo(group),ends=stairRunEndsMm(it,0),gap=span?Math.round((roomFloorAt(c.targetFloor,ends.up.x,ends.up.y)-span.topY)/U):null,baseGap=span?Math.round((roomFloorAt(it.floor,ends.down.x,ends.down.y)-span.baseY)/U):null;
+    return {text:'元図の投影線とは別の'+it.floor+'F→'+c.targetFloor+'F接続下書き。高さ・段数は未測定の仮定。回り3段固定。床開口・階移動は未確認のため無効。'+(span?'足元 '+c.baseMm+'mm、上端 '+c.topMm+'mm。足元床との高さ差 '+baseGap+'mm、行先床との高さ差 '+gap+'mm。':'高さ仮定の記録が不正です。')+(group.length!==2||info.conflicts.length||!info.order?'部材の接続方向・欠落を再確認してください。':''),warn:true};
+  }
+  if(it&&it.stairDisplayOnly){
+    var text="図面からの表示用階段。高さは確認した表示上の仮定です。階接続・床開口・歩行経路は作りません。コーナーは既存モデルの3段固定です。";
+    var target=it.sourceStairDisplay&&it.sourceStairDisplay.targetFloor;
+    if(Number.isInteger(target)&&target===(it.floor||1)+1&&typeof stairPartPortsMm==='function'&&typeof roomFloorAt==='function'){
+      try{var ports=stairPartPortsMm(it,0),gap=(roomFloorAt(target,ports.up.x,ports.up.y)-stairUpperSpanM(it).topY)/U;if(isFinite(gap))text+=' '+target+'階の床とこの部材の表示上端との差 '+Math.round(gap)+'mm（現在の床高さも表示仮定。接続完了ではありません）。';}catch(error){text+=' 行先床の位置・高さを確認できません。';}
+    }else text+=' 行先階の確認がありません。';
+    return {text:text,warn:true};
+  }
   if(!it||!isStairPartType(it.type)) return null;
   var names={'stair':'直階段','stair-corner':'コーナー階段','stair-landing':'踊り場'};
   if(isFloorLanding(it)){
@@ -10895,6 +11067,7 @@ function stairConnectionSummary(it){
   return {text:text+'。'+notes.join(''),warn:warn};
 }
 function getConnectedStairParts(seed){
+  if(seed&&seed.stairDisplayOnly) return [seed];
   // 行き先の違う階段は、接していても1本の階段にしない。
   // 「段差へ上る階段」の隣に「上の階へ行く階段」を折り返しで置くと、
   // 以前は1つのグループになり、上の階へ行くはずの階段が段差用の階段として
@@ -10906,7 +11079,7 @@ function getConnectedStairParts(seed){
   if(isFloorLanding(seed)) return [seed];
   var parts=DATA.items.filter(function(o){
     // 踊り場も階段の部材。種類を並べ直さず isStairPartType の1か所から読む。
-    return o.floor===seed.floor && isStairPartType(o.type) && !isFloorLanding(o);
+    return !o.stairDisplayOnly && o.floor===seed.floor && isStairPartType(o.type) && !isFloorLanding(o) && stairSourceGroupMatches(seed,o);
   });
   // 踊り場は1つのグループにだけ属する。段差へ上る階段(レベル)に(踊り場を介して
   // でも)接していればそちら、そうでなければ上の階へ上がる階段の側。
@@ -10956,7 +11129,7 @@ function stairLandingIsLevel(landing,parts){
 // 上がる階段なのか段差を上る階段なのかを区別できないからである。
 // 省略時は 'upper' なので、保存済みプランの階段は1段も変わらない。
 function isLevelStairPart(it){
-  return !!(it && isStairPartType(it.type) && !isFloorLanding(it) && it.stairTarget==='level');
+  return !!(it && !it.stairDisplayOnly && isStairPartType(it.type) && !isFloorLanding(it) && it.stairTarget==='level');
 }
 // ── 踊り場の使い方 ─────────────────────────────────────────────────────
 // 踊り場には2通りの使い方がある。
@@ -10986,7 +11159,7 @@ function floorLandingAtMm(fl,pt,marginMm){
   var list=DATA.items;
   for(var i=0;i<list.length;i++){
     var o=list[i];
-    if((o.floor||1)===fl&&isFloorLanding(o)&&!o.hidden3D&&stairPointOnPart(o,pt,marginMm===undefined?0:marginMm)) return o;
+    if(!o.stairDisplayOnly&&(o.floor||1)===fl&&isFloorLanding(o)&&!o.hidden3D&&stairPointOnPart(o,pt,marginMm===undefined?0:marginMm)) return o;
   }
   return null;
 }
@@ -10997,6 +11170,7 @@ function stairFloorAtMm(fl,pt){
 }
 // 行き先に選べる床: この階段に接している、床として使う踊り場と段差の部屋。
 function stairTargetCandidates(seed){
+  if(seed&&seed.stairDisplayOnly) return [];
   if(!seed||!isStairPartType(seed.type)||isFloorLanding(seed)) return [];
   var fl=seed.floor||1, chain=stairChainParts(seed), out=[];
   // 段差の部屋は、この階段の空いている出入り口の先にあるときだけ並べる。
@@ -11061,9 +11235,10 @@ function stairChainFreeEnds(chain,outMm){
 // 行き先を変えるときは、この1本すべてに同じ値を入れる -- 部材ごとに違う行き先が
 // 残ると、踊り場がどちらの階段に付くかが利用者から見えなくなる。
 function stairChainParts(seed){
+  if(seed&&seed.stairDisplayOnly) return [seed];
   if(!seed||!isStairPartType(seed.type)) return [];
   if(isFloorLanding(seed)) return [seed];
-  var parts=DATA.items.filter(function(o){ return o.floor===seed.floor&&isStairPartType(o.type)&&!isFloorLanding(o); });
+  var parts=DATA.items.filter(function(o){ return !o.stairDisplayOnly&&o.floor===seed.floor&&isStairPartType(o.type)&&!isFloorLanding(o)&&stairSourceGroupMatches(seed,o); });
   var out=[], queue=[seed], seen={};
   seen[seed.id]=true;
   while(queue.length){
@@ -11285,7 +11460,7 @@ function stairFootY(seed,ends){
   if(explicitY!==null) return explicitY;
   // 下端の先が、別のグループ(段差へ上る階段)の踊り場の上なら、その踊り場から始まる。
   var land=DATA.items.filter(function(o){
-    return o.floor===fl&&isStairLandingType(o.type)&&ends.group.indexOf(o)<0&&stairPointOnPart(o,ends.down,0);
+    return !o.stairDisplayOnly&&o.floor===fl&&isStairLandingType(o.type)&&ends.group.indexOf(o)<0&&stairPointOnPart(o,ends.down,0);
   })[0];
   if(land) return stairLandingTopY(land);
   var r=roomAtPointOnFloor(fl,ends.down.x,ends.down.y);
@@ -11302,6 +11477,14 @@ function stairLandingTopY(landing){
   return span.baseY+stairRiseInfo(landing).base;
 }
 function stairUpperSpanM(seed){
+  if(seed&&seed.sourceStairConnection){var reviewed=sourceStairConnectionSpan(seed);if(reviewed)return reviewed;return {baseY:floorTopY(seed.floor||1),topY:floorTopY(seed.floor||1),riseM:0};}
+  if(seed&&seed.stairDisplayOnly){
+    var rise=Number(seed.displayRiseMm),off=Number(seed.displayBaseOffsetMm);
+    rise=isFinite(rise)&&rise>=0&&rise<=6000?rise:0;
+    off=isFinite(off)&&off>=0&&off<=6000?off:0;
+    var base=floorTopY(seed.floor||1)+off*U;
+    return {baseY:base,topY:base+rise*U,riseM:rise*U};
+  }
   var fl=(seed&&seed.floor)||1, nf=fl+1;
   var ends=stairRunEndsMm(seed);
   var baseY=stairFootY(seed,ends);
@@ -11381,6 +11564,7 @@ function stairGroupRiseM(it){
   return stairUpperSpanM(it).riseM;
 }
 function stairRiseInfo(it){
+  if(it&&it.stairDisplayOnly) return {index:0,count:1,base:0,rise:stairUpperSpanM(it).riseM,steps:getStairStepCount(it)};
   // 床として使う踊り場は段を持たず、足元の床から指定の高さまで板を上げる。
   if(isFloorLanding(it)) return {index:0,count:1,base:Math.max(0,landingFloorTopY(it)-floorLandingBaseY(it)),rise:0,steps:0};
   var group=stairGroupOrdered(it);
@@ -11405,6 +11589,8 @@ function getStairStepCount(it){
   // 踊り場は段を持たない。上り高さを分け合わないので 0 を返す。
   if(isStairLandingType(it.type)) return 0;
   if(it.type==='stair-corner') return 3;
+  if(it.sourceStairConnection&&sourceStairConnectionSpan(it))return it.sourceStairConnection.steps;
+  if(it.stairDisplayOnly) return stairStepCount(Math.round(stairUpperSpanM(it).riseM/U),it.d||2730);
   // レベル階段は段差ぶんしか上らないので、段数も実際の上り高さから出す。
   // 上階へ上がる階段の段数を階高から出しているのは従来どおり(実際の上り高さに
   // 変えると、保存済みプランの階段の段数が黙って変わる)。
@@ -12662,6 +12848,7 @@ function buildItem3D(it){
       var fmpClone=makeGltfBoxFitClone(fmp.model,it.w*U,getItemHeightValue(it)*U,it.d*U,null);
       applyGltfModelConfig(fmpClone,it.type);
       ModelQuality.applyFinishes(fmpClone,it.finishColors,it.finishRoughness,it.finishTextures,FINISH_TEXTURE_DEPS);
+      if(typeof TailoredSofaFinish!=='undefined'&&it.type===TailoredSofaFinish.type)getTailoredSofaFinishRuntime().apply(fmpClone,_modelCache[fmp.model],it,ModelQuality);
       if(fmp.mirrorOption && it.showMirror){
         var spec=fmp.mirrorOption,sx=it.w/fmp.w,sy=getItemHeightValue(it)/fmp.h;
         var mirror=new THREE.Mesh(new THREE.BoxGeometry(spec.w*sx,spec.h*sy,.004),new THREE.MeshStandardMaterial({color:0xe1e7e8,metalness:1,roughness:.035}));
@@ -12822,7 +13009,10 @@ function buildItem3D(it){
       configureCarGlbMaterials();
       grp.add(makeGltfBoxFitClone(CONTEXT_CAR_GLB,w3,h,d3,it.colorCustom?it.color:null));
     } else {
-      build3DCar(grp,it,w3,d3,col); // 読込中・失敗時のフォールバック
+      // The audited loaded car faces +Z; procedural headlights were authored -Z.
+      // Correct only the fallback child, never the saved item yaw or footprint.
+      var fallbackCar = new THREE.Group(); fallbackCar.rotation.y = Math.PI;
+      build3DCar(fallbackCar,it,w3,d3,col); grp.add(fallbackCar); // 読込中・失敗時のフォールバック
     }
   }
   else if(it.type==='bicycle'||it.type==='bicycle-fold'){
@@ -14895,21 +15085,46 @@ function scheduleGltfRebuild3D(){
     if(typeof invalidate3D==='function') invalidate3D();
   },delay);
 }
+// Shared panes use the host's private certificate registry, without cache tags.
+function getTailoredSofaFinishRuntime(){
+  return EDITOR_PANE&&window.parent.TailoredSofaFinish?window.parent.TailoredSofaFinish:TailoredSofaFinish;
+}
+function loadEditorGltf(url,onLoad,onError){
+  var fetchUrl=url+(url.indexOf('?')<0?'?v='+MODEL_ASSET_VER:'');
+  var loader=getGltfLoader();
+  if(typeof TailoredSofaFinish==='undefined'||url!==TailoredSofaFinish.url){loader.load(fetchUrl,onLoad,undefined,onError);return;}
+  // Inspect the exact bytes that GLTFLoader parses; a mismatch still loads natively.
+  var file=new THREE.FileLoader(loader.manager);file.setResponseType('arraybuffer');
+  file.load(fetchUrl,function(bytes){
+    var runtime=getTailoredSofaFinishRuntime();
+    runtime.inspect(bytes).then(function(inspection){
+      loader.parse(bytes,THREE.LoaderUtils.extractUrlBase(url),function(gltf){
+        runtime.register(gltf,inspection).then(function(){onLoad(gltf);if(ST.selected&&ST.selected.type===runtime.type)updateProps();},onError);
+      },onError);
+    },onError);
+  },undefined,onError);
+}
 function ensureGltfModel(url){
   if(_modelCache[url]) return true;
   if(_modelFailed[url]) return false;
   if(_modelLoading[url]) return false;
   _modelLoading[url]=true;
   _modelFailed[url]=false;
-  var fetchUrl = url + (url.indexOf('?')<0 ? '?v='+MODEL_ASSET_VER : '');
-  getGltfLoader().load(fetchUrl,function(gltf){
+  if(EDITOR_PANE && window.parent.ParallelEditors){
+    window.parent.ParallelEditors.modelPool.get(url,function(){return new Promise(function(resolve,reject){loadEditorGltf(url,function(gltf){ModelQuality.prepare(gltf.scene,url);if(_texCapSize)capModelTextures(gltf.scene,_texCapSize);if(url===TailoredSofaFinish.url)getTailoredSofaFinishRuntime().publish(gltf.scene);resolve(gltf.scene);},reject);});}).then(function(template){
+      if(window._editorPaneDisposed)return;var copy=window.EditorPane.cloneModel(template);
+      _modelCache[url]=copy;_modelLoading[url]=false;delete _modelFailed[url];scheduleGltfRebuild3D();if(typeof TailoredSofaFinish!=='undefined'&&url===TailoredSofaFinish.url&&ST.selected&&ST.selected.type===TailoredSofaFinish.type)updateProps();
+    },function(err){_modelLoading[url]=false;_modelFailed[url]=true;console.warn('GLB load failed:',url,err);scheduleGltfRebuild3D();});return false;
+  }
+  loadEditorGltf(url,function(gltf){
     ModelQuality.prepare(gltf.scene,url);
     if(_texCapSize) capModelTextures(gltf.scene,_texCapSize);
+    if(url===TailoredSofaFinish.url)getTailoredSofaFinishRuntime().publish(gltf.scene);
     _modelCache[url]=gltf.scene;
     _modelLoading[url]=false;
     delete _modelFailed[url];
     scheduleGltfRebuild3D();
-  },undefined,function(err){
+  },function(err){
     _modelLoading[url]=false;
     _modelFailed[url]=true;
     console.warn('GLB load failed; using fallback geometry:',url,err);
@@ -15110,6 +15325,7 @@ function queueFmpInstance(url,it,grp){
   // applyFinishes を通らないため)。finishTextures を足したときに実際に
   // 起きた。項目を増やすときは FINISH_PROPS に足すこと。
   if(it.colorCustom || FINISH_PROPS.some(function(k){ return it[k] && Object.keys(it[k]).length; })) return false;
+  if(typeof TailoredSofaFinish!=='undefined'&&TailoredSofaFinish.active(it)) return false;
   if(!getGltfNativeBox(url)) return false;
   grp.updateMatrix();
   var fitMatrix=computeBoxFitLocalMatrix(url,it.w*U,getItemHeightValue(it)*U,it.d*U);
@@ -15693,7 +15909,7 @@ function stairQuadOf(it){
 // **通り抜ける**床だけだからである(levelStairHolesForRoom)。
 function levelStairQuadsForFloor(floor){
   return DATA.items.filter(function(it){
-    return it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
+    return !it.stairDisplayOnly && !it.sourceStairDisplay && !it.sourceStairConnection && it.floor===floor && isLevelStairPart(it) && !it.hidden3D;
   }).map(function(it){
     var span=stairLevelSpanM(it);
     return {quad:stairQuadOf(it), baseY:span.baseY, topY:span.topY};
@@ -15721,7 +15937,7 @@ function stairwellQuadsForFloor(floor){
     // レベル階段は上階へ抜けないので、上階の床に穴を開けてはいけない。
     // 段差へ上る階段のグループに付いた踊り場も抜けない(部材の宣言だけで見ると
     // 宣言を持たない踊り場が上階に穴を開けていた)。床として使う踊り場も同じ。
-    return it.floor===belowFloor && isStairPartType(it.type) &&
+    return !it.stairDisplayOnly && !it.sourceStairDisplay && !it.sourceStairConnection && it.floor===belowFloor && isStairPartType(it.type) &&
       !isFloorLanding(it) && !stairGroupIsLevel(it) && !it.hidden3D;
   }).map(stairQuadOf);
 }
@@ -15789,7 +16005,7 @@ function stairTreadFloorMaterial(it,wM,dM){
     var fl=it.floor||1, cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
     var room=roomAtPointOnFloor(fl,cx,cy);
     if(!room) return null;
-    src={n:room.n,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
+    src={n:room.n,use:room.use,floorDiagramPattern:room.floorDiagramPattern,floorModuleMm:room.floorModuleMm,texture:room.texture,textureFlipX:room.textureFlipX,textureFlipY:room.textureFlipY,
       floorMaterial:room.floorMaterial,floorColor:room.floorColor};
   } else if(FLOOR_PBR_STEM[mode]){
     src={floorMaterial:mode};
@@ -15797,19 +16013,25 @@ function stairTreadFloorMaterial(it,wM,dM){
   src.w=Math.max(1,wM/U); src.d=Math.max(1,dM/U);
   return makeRoomFloorMaterial(src);
 }
+// Semantic room use survives import even when the printed name is unusual.
+// This is a display default only: it does not infer a measured finish or floor step.
+function defaultRoomFloorMaterialKey(r){
+  return /^(entry|entrance|bath|bathroom|toilet|wash|washroom)$/.test(r.use||'')||/^(玄関|土間|バス|浴室|トイレ|洗面|洗面所)$/.test(r.n||'')?'tile_floor':'wood_floor';
+}
 function makeRoomFloorMaterial(r){
+  if(r.floorDiagramPattern==='plain'&&!r.texture) return new THREE.MeshStandardMaterial({color:r.floorColor||0xffffff,roughness:.85,metalness:0,envMapIntensity:.20});
   var rw=r.w*U, rd=r.d*U;
-  var isWet=r.texture==='tile_floor'||r.n==='バス'||r.n==='トイレ'||r.n==='洗面';
   var tint=(r&&r.floorColor)||0xffffff;
   // 床材はキーからPBRの3枚組を引く。真偽値で分けると、床材を足すたびに
   // 「diffuse だけ新しくて法線と粗さは旧のまま」になる
-  var floorKey=roomFloorMaterialKey(r)||(isWet?'tile_floor':'wood_floor');
+  var floorKey=roomFloorMaterialKey(r)||defaultRoomFloorMaterialKey(r);
   var stem=FLOOR_PBR_STEM[floorKey];
   var diffName=stem+'_diffuse.jpg';
   var normName=stem+'_normal.jpg';
   var roughName=stem+'_roughness.jpg';
-  var tileM=texTileM(floorKey,0.9);
-  var repU=Math.max(0.5,rw/tileM), repV=Math.max(0.5,rd/tileM);
+  var tileM=(Number.isFinite(r.floorModuleMm)&&r.floorModuleMm>=10&&r.floorModuleMm<=10000)?r.floorModuleMm*U:texTileM(floorKey,0.9);
+  var explicitModule=Number.isFinite(r.floorModuleMm)&&r.floorModuleMm>=10&&r.floorModuleMm<=10000;
+  var repU=explicitModule?rw/tileM:Math.max(0.5,rw/tileM), repV=explicitModule?rd/tileM:Math.max(0.5,rd/tileM);
   var fd=cloneTextureWithRepeat(pbrTex(diffName),repU,repV,r);
   var fn=cloneTextureWithRepeat(pbrTexLinear(normName),repU,repV,r);
   var fr2=cloneTextureWithRepeat(pbrTexLinear(roughName),repU,repV,r);
@@ -15844,6 +16066,27 @@ function stairwellHolesForRoom(r,stairQuadsCache){
 // 部屋の床(スラブ本体・仕上げ面)を、階段の穴があれば THREE.Shape+holes で、
 // なければ従来通りの単純な Box/Plane で生成する
 function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
+  if(r.shape){
+    var parts=RoomGeometry.cells(r), floorGroup=new THREE.Group(), bodyGroup=new THREE.Group();
+    parts.forEach(function(cell){
+      var clipped=(holes||[]).map(function(h){return clipPolyToRect(h,cell.x*U,cell.y*U,(cell.x+cell.w)*U,(cell.y+cell.d)*U);}).filter(function(h){return h.length>=3&&polyAreaAbs(h)>0.000001;});
+      var piece=buildRoomFloorMeshes(Object.assign({},r,cell,{shape:null}),matFloor,slabH,ry,floorY,clipped);
+      // Shared material repeats describe the full logical room. Rebase every cell's
+      // UV to that same origin so a 300 mm grid stays 300 mm across the internal cuts.
+      piece.slab.updateMatrixWorld(true);
+      piece.slab.traverse(function(mesh){
+        if(!mesh.geometry)return;
+        var pos=mesh.geometry.attributes.position,uv=mesh.geometry.attributes.uv,v=new THREE.Vector3();
+        for(var i=0;i<pos.count;i++){
+          v.fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld);
+          uv.setXY(i,(v.x/U-r.x)/r.w,1-(v.z/U-r.y)/r.d);
+        }
+        uv.needsUpdate=true;
+      });
+      floorGroup.add(piece.slab); if(piece.slabBody)bodyGroup.add(piece.slabBody);
+    });
+    return {slab:floorGroup,slabBody:slabH>0?bodyGroup:null};
+  }
   var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   if(!holes || !holes.length){
@@ -15864,8 +16107,8 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
   // シェイプ座標は shapeX=ワールドX, shapeY=-ワールドZ とし、生成後に X軸-90°回転で
   // (shapeX, extrudeDepth, -shapeY) = (worldX, 0..slabH, worldZ) の向きに揃える
   var outline=new THREE.Shape();
-  outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
-  holes.forEach(function(hole){
+  (typeof RoomGeometry!=='undefined'?RoomGeometry.polygon(r):[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y},{x:r.x+r.w,y:r.y+r.d},{x:r.x,y:r.y+r.d}]).forEach(function(p,i){if(i===0)outline.moveTo(p.x*U,-p.y*U);else outline.lineTo(p.x*U,-p.y*U);}); outline.closePath();
+  (holes||[]).forEach(function(hole){
     var path=new THREE.Path();
     hole.forEach(function(p,i){ if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z); });
     path.closePath();
@@ -15919,6 +16162,10 @@ function buildRoomFloorMeshes(r,matFloor,slabH,ry,floorY,holes){
 // 回した階段など、開口が軸に沿った矩形にならないときは null を返し、
 // 呼び出し側は従来の穴の経路へ落ちる。
 function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
+  if(r.shape){
+    if((holes||[]).some(function(h){return !polyAsAxisRectMm(h);})) return null;
+    return RoomGeometry.cells(r).reduce(function(n,cell){return n+buildSkipDeckMeshes(Object.assign({},r,cell,{shape:null,_logicalRoom:r}),matFloor,deckM,yBottom,yTop,holes);},0);
+  }
   var rects=[];
   for(var i=0;i<(holes||[]).length;i++){
     var rc=polyAsAxisRectMm(holes[i]);
@@ -15934,12 +16181,17 @@ function buildSkipDeckMeshes(r,matFloor,deckM,yBottom,yTop,holes){
     var body=new THREE.Mesh(new THREE.BoxGeometry(w3,deckM,d3),bodyMat);
     body.position.set(cx,yBottom+deckM/2,cz);
     body.castShadow=true; body.receiveShadow=true;
-    mark3DSelectable(body,r,'room'); sc3.add(body);
+    mark3DSelectable(body,r._logicalRoom||r,'room'); sc3.add(body);
     var face=new THREE.Mesh(new THREE.PlaneGeometry(w3,d3),matFloor);
     face.rotation.x=-Math.PI/2;
     face.position.set(cx,yTop+0.004,cz);
     face.receiveShadow=true;
-    mark3DSelectable(face,r,'room'); sc3.add(face);
+    if(r._logicalRoom){
+      var logical=r._logicalRoom,pos=face.geometry.attributes.position,uv=face.geometry.attributes.uv;
+      for(var vi=0;vi<pos.count;vi++)uv.setXY(vi,((pos.getX(vi)+cx)/U-logical.x)/logical.w,1-((cz-pos.getY(vi))/U-logical.y)/logical.d);
+      uv.needsUpdate=true;
+    }
+    mark3DSelectable(face,r._logicalRoom||r,'room'); sc3.add(face);
   });
   return pieces.length;
 }
@@ -15952,11 +16204,21 @@ function roomHasCoverAbove(r){
   // その上の屋根なので、直上階だけを見ると天井が張られず空が抜けて見える。
   var upperRoofs=DATA.items.filter(function(it){return !it.hidden3D&&it.floor>r.floor&&it.type==='roof';});
   if(!upperRooms.length&&!upperRoofs.length) return false;
+  // Polygon arms can be narrower than every AABB grid interval. Test occupied
+  // rectangle intersections for upper rooms; sample within each occupied cell for roofs.
+  if(r.shape){
+    var cells=RoomGeometry.cells(r);
+    if(upperRooms.some(function(u){return RoomGeometry.cells(u).some(function(uc){return cells.some(function(c){
+      return Math.min(c.x+c.w,uc.x+uc.w)-Math.max(c.x,uc.x)>1 && Math.min(c.y+c.d,uc.y+uc.d)-Math.max(c.y,uc.y)>1;
+    });});}))return true;
+    return RoomGeometry.samplePoints(r).some(function(p){return upperRoofs.some(function(roof){return isInsideItem(roof,p.x,p.y);});});
+  }
   var fractions=[0.18,0.5,0.82];
   for(var ix=0;ix<fractions.length;ix++) for(var iz=0;iz<fractions.length;iz++){
     var px=r.x+r.w*fractions[ix], pz=r.y+r.d*fractions[iz];
+    if(r.shape&&!RoomGeometry.contains(r,px,pz)) continue;
     var roomCovered=upperRooms.some(function(u){
-      return px>=u.x&&px<=u.x+u.w&&pz>=u.y&&pz<=u.y+u.d;
+      return u.shape?RoomGeometry.contains(u,px,pz):(px>=u.x&&px<=u.x+u.w&&pz>=u.y&&pz<=u.y+u.d);
     });
     if(roomCovered||upperRoofs.some(function(roof){return isInsideItem(roof,px,pz);})) return true;
   }
@@ -16165,10 +16427,10 @@ function buildSteppedCeilingGrid(r,ceilY,segX,segZ){
 function buildSlopedCeilingGeometry(r,holes,profile){
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   var drop=(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012);
-  function ceilY(xMm,yMm){ return roomCeilingWorldYAtMm(r,profile,xMm,yMm)-drop; }
+  function ceilY(xMm,yMm){ return roomCeilingWorldYAtMm(r._logicalRoom||r,profile,xMm,yMm)-drop; }
   var geo;
   // 段差が生まれるのは、2枚以上の屋根がかかる部屋だけ(1枚なら天井は連続している)。
-  if((!holes||!holes.length)&&profile.source==='roof'&&(profile.roofs||[]).length>1){
+  if(!r.shape&&(!holes||!holes.length)&&profile.source==='roof'&&(profile.roofs||[]).length>1){
     var sx=Math.max(1,Math.min(96,Math.ceil(rw/CEILING_SAMPLE_STEP_M)));
     var sz=Math.max(1,Math.min(96,Math.ceil(rd/CEILING_SAMPLE_STEP_M)));
     var stepped=buildSteppedCeilingGrid(r,ceilY,sx,sz);
@@ -16191,7 +16453,7 @@ function buildSlopedCeilingGeometry(r,holes,profile){
   }
   var pos=geo.attributes.position, i;
   for(i=0;i<pos.count;i++){
-    pos.setY(i,roomCeilingWorldYAtMm(r,profile,pos.getX(i)/U,pos.getZ(i)/U)-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012));
+    pos.setY(i,roomCeilingWorldYAtMm(r._logicalRoom||r,profile,pos.getX(i)/U,pos.getZ(i)/U)-(typeof usesFinishedHeightModel==='function'&&usesFinishedHeightModel()?0:0.012));
   }
   pos.needsUpdate=true;
   geo.computeVertexNormals();
@@ -16201,8 +16463,8 @@ function buildSlopedCeilingGeometry(r,holes,profile){
 function buildRoomCeilingShapeGeometry(r,holes){
   var rx1=r.x*U, rx2=(r.x+r.w)*U, rz1=r.y*U, rz2=(r.y+r.d)*U;
   var outline=new THREE.Shape();
-  outline.moveTo(rx1,-rz1); outline.lineTo(rx2,-rz1); outline.lineTo(rx2,-rz2); outline.lineTo(rx1,-rz2); outline.closePath();
-  holes.forEach(function(hole){
+  (typeof RoomGeometry!=='undefined'?RoomGeometry.polygon(r):[{x:r.x,y:r.y},{x:r.x+r.w,y:r.y},{x:r.x+r.w,y:r.y+r.d},{x:r.x,y:r.y+r.d}]).forEach(function(p,i){if(i===0)outline.moveTo(p.x*U,-p.y*U);else outline.lineTo(p.x*U,-p.y*U);}); outline.closePath();
+  (holes||[]).forEach(function(hole){
     var path=new THREE.Path();
     hole.forEach(function(p,i){if(i===0) path.moveTo(p.x,-p.z); else path.lineTo(p.x,-p.z);});
     path.closePath(); outline.holes.push(path);
@@ -16216,6 +16478,15 @@ function buildRoomCeilingShapeGeometry(r,holes){
 // slope が渡された部屋だけが勾配の枝を通る。渡されなければ従来の経路そのままで、
 // 高さフィールドを持たないプランのジオメトリは1頂点も動かない。
 function buildRoomCeilingMesh(r,ceilY,matCeiling,holes,profile){
+  if(r.shape){
+    var group=new THREE.Group();
+    RoomGeometry.cells(r).forEach(function(cell){
+      var clipped=(holes||[]).map(function(h){return clipPolyToRect(h,cell.x*U,cell.y*U,(cell.x+cell.w)*U,(cell.y+cell.d)*U);}).filter(function(h){return h.length>=3&&polyAreaAbs(h)>0.000001;});
+      group.add(buildRoomCeilingMesh(Object.assign({},r,cell,{shape:null,_logicalRoom:r}),ceilY,matCeiling,clipped,profile));
+    });
+    group.userData={b:true,ceiling:true,roomId:r.id,aiInstanceType:'ceiling'};
+    return group;
+  }
   var rw=r.w*U, rd=r.d*U, rcx=(r.x+r.w/2)*U, rcz=(r.y+r.d/2)*U;
   var ceiling;
   if(profile){
@@ -16356,6 +16627,7 @@ function buildRooms3D(flFilt){
 	    var roomHasUserLight=isIndoorView && DATA.items.some(function(li){
 	      if(!isLightItemType(li.type) || li.floor!==r.floor || li.hidden3D) return false;
 	      var lcx=li.x+li.w/2, lcy=li.y+li.d/2;
+	      if(r.shape) return RoomGeometry.contains(r,lcx,lcy);
 	      return lcx>=r.x-200 && lcx<=r.x+r.w+200 && lcy>=r.y-200 && lcy<=r.y+r.d+200;
 	    });
 	    if(!roomHasUserLight && autoRoomLightsEnabled()){
@@ -16365,8 +16637,10 @@ function buildRooms3D(flFilt){
 	      // ceilY は部屋でいちばん高い天井なので、そこに全部付けると、天井が低い
 	      // ところのライトが天井(ときには屋根)を突き抜けて宙に浮いた(報告された)。
 	      var lightProfile=roomCeilingProfile(r);
-	      for(var ii=0;ii<nx2;ii++) for(var jj=0;jj<nz2;jj++){
-	        var lx=r.x*U+rw*(ii+0.5)/nx2, lz=r.y*U+rd*(jj+0.5)/nz2;
+	      var lightPoints=r.shape?RoomGeometry.gridPoints(r,lightPitch/U):[];
+      if(!r.shape)for(var ii=0;ii<nx2;ii++)for(var jj=0;jj<nz2;jj++)lightPoints.push({x:r.x+r.w*(ii+0.5)/nx2,y:r.y+r.d*(jj+0.5)/nz2});
+      for(var li=0;li<lightPoints.length;li++){
+	        var lx=lightPoints[li].x*U, lz=lightPoints[li].y*U;
 	        var lceil=lightProfile?Math.min(ceilY,roomCeilingWorldYAtMm(r,lightProfile,lx/U,lz/U)):ceilY;
 	        if(showAutoLightFixtures){
 	          sc3.add(makeAutoLightFixtureMesh(fixMat,lx,lceil-0.013,lz));
@@ -16413,7 +16687,10 @@ function buildLandscape(){
     gx1=Math.max(gx1,b[2]); gz1=Math.max(gz1,b[3]);
   });
   bx=(gx0+gx1)/2*U; bz=(gz0+gz1)/2*U;
-  var gndSize = Math.max(Math.max(bw, bd) + 12,
+  // Keep init3D's 60m backdrop: a small imported plan must not shrink it below
+  // a wide upper-floor camera frustum when two editor panes become one.
+  // The plane remains two triangles; it is a backdrop, not a room or site boundary.
+  var gndSize = Math.max(60, Math.max(bw, bd) + 12,
                          Math.max((gx1-gx0)*U, (gz1-gz0)*U) * 3);
   var gndMat = new THREE.MeshStandardMaterial({
     color: 0xd7d5ce,
@@ -16711,12 +16988,16 @@ function applyInteriorLightBudget(cam){
   // 光の数は一定なので、ここで作ったものがどの階でもそのまま使える。これが無いと、
   // 初めて2階へ上がった瞬間に、2階の材質のシェーダーを作るため数秒止まった(実測 8.6秒)。
   // compileAsync は隠れている物の材質も作る(three.js r169)。
-  if(!L.precompiled&&ren&&typeof ren.compileAsync==='function'){
+  // Submit the same hidden-material shader warmup without compileAsync's timer.
+  // That timer dereferences disposed material programs after a rebuild/detach
+  // in three.js r169; a Promise catch cannot catch its timer callback error.
+  if(!(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)&&!L.precompiled&&ren&&typeof ren.compile==='function'){
     L.precompiled=true;
-    try{ ren.compileAsync(sc3,cam).catch(function(){}); }catch(e){}
+    try{ ren.compile(sc3,cam); }catch(e){}
   }
 }
 function render3DNow(){
+  if(typeof window!=='undefined'&&window._editorHostCovered)return;
   if(!ren||!sc3||!camExt) return;
   applyInteriorLightBudget(camExt);
   // 斜線の寸法の文字を、この視点で建物に被らない位置へ逃がしてから描く。
@@ -16818,7 +17099,7 @@ function walkStairSampleAt(xMm,zMm,floor,marginMm){
   var best=null;
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
+    if(it.stairDisplayOnly || it.sourceStairDisplay || it.sourceStairConnection || it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
     // レベル階段は階をまたがない。上下階の遷移を扱うこの経路には入れない。
     // 段差へ上る階段(踊り場を含むグループ全体)は、上の階への経路に入れない。
     // 部材の宣言(isLevelStairPart)だけで見ると、宣言を持たない踊り場が上の階への
@@ -16844,7 +17125,7 @@ function walkLevelStairGroundAt(xMm,zMm,floor,marginMm){
   var best=null, top=floorTopY(floor);
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
+    if(it.stairDisplayOnly || it.sourceStairDisplay || it.sourceStairConnection || it.floor!==floor || !isStairPartType(it.type) || isFloorLanding(it)) continue;
     // 踊り場も、段差へ上る階段のグループに属していればここで足元を持つ。
     if(!stairGroupIsLevel(it)) continue;
     var t=stairLocalProgress(it,xMm,zMm,marginMm);
@@ -16864,7 +17145,7 @@ function walkFloorLandingGroundAt(xMm,zMm,floor){
   var best=null, top=floorTopY(floor);
   for(var i=0;i<DATA.items.length;i++){
     var it=DATA.items[i];
-    if(it.floor!==floor||!isFloorLanding(it)||it.hidden3D) continue;
+    if(it.stairDisplayOnly||it.floor!==floor||!isFloorLanding(it)||it.hidden3D) continue;
     if(stairLocalProgress(it,xMm,zMm,0)===null) continue;
     var y=landingFloorTopY(it)-top;
     if(best===null||y>best) best=y;
@@ -17018,6 +17299,7 @@ function walkSpawnClearNear(xMm,zMm,fl){
     var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
     for(var x=r.x+margin;x<=x1;x+=step){
       for(var y=r.y+margin;y<=y1;y+=step){
+        if(r.shape&&!RoomGeometry.contains(r,x,y))continue;
         var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
         if(d>=bestD) continue;
         if(walkSpawnObstructed(x,y,fl)) continue;
@@ -17091,6 +17373,7 @@ function walkSpawnClearNear(xMm,zMm,fl){
     var x1=r.x+r.w-margin, y1=r.y+r.d-margin;
     for(var x=r.x+margin;x<=x1;x+=step){
       for(var y=r.y+margin;y<=y1;y+=step){
+        if(r.shape&&!RoomGeometry.contains(r,x,y))continue;
         var d=(x-xMm)*(x-xMm)+(y-zMm)*(y-zMm);
         if(d>=bestD) continue;
         if(walkSpawnObstructed(x,y,fl)) continue;
@@ -17204,7 +17487,7 @@ function drawWalkMinimap(){
   // 部屋
   ctx.fillStyle='rgba(120,150,200,0.18)';
   DATA.rooms.filter(function(r){return r.floor===fl;}).forEach(function(r){
-    ctx.fillRect(mx(r.x),my(r.y),r.w*t.sc,r.d*t.sc);
+    RoomGeometry.trace(ctx,r,function(p){return {x:mx(p.x),y:my(p.y)};}); ctx.fill();
   });
   // 壁
   ctx.strokeStyle='#33415e'; ctx.lineWidth=2; ctx.lineCap='round';
@@ -17328,7 +17611,7 @@ function initWalkHud(){
     b.addEventListener('pointerleave',release);
   });
 }
-function exitWalkMode(){ setView('3d-ext'); setTimeout(fitCameraToScene,100); }
+function exitWalkMode(){ setView('3d-ext'); scheduleSceneCameraFit(100); }
 // ドアの接近自動開閉。プラン上のデフォルト状態(開/閉)に関わらず、
 // ウォークスルー中は「近づくと開き、離れると閉まる」で統一する。
 // (以前はプラン側で開扉状態のドアを丸ごとスキップしており、
@@ -17373,7 +17656,7 @@ function getWallDoorGapsMm(w){
     var info=getOpeningWallInfo(it);
     if(!info || info.wall!==w) return;
     var c=info.t*len;
-    var openW=Math.min(len,Math.max((Number(it.w)||800)+80,450));
+    var openW=SceneOpeningGeometry.wallCutWidthMm(it,len);
     gaps.push({a:Math.max(0,c-openW/2),b:Math.min(len,c+openW/2)});
   });
   return gaps;
@@ -17619,7 +17902,10 @@ function setDynamicResolution(low){
   if(_bloomPass) _bloomPass.enabled=(LIGHT_SETTINGS.timeOfDay==='night')&&!low;
 }
 function loop3D(){
+  if(typeof window!=='undefined'&&window._editorPaneDisposed)return;
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return; // Captures render explicitly, with no camera animation.
   requestAnimationFrame(loop3D);
+  if(typeof window!=='undefined'&&window._editorHostCovered)return;
   var cam = camExt;  // always use orbit camera (interior = bird's eye of current floor)
   if(!cam || !ren) return;
   if(ST.view==='2d' || document.hidden) return;
@@ -17651,7 +17937,7 @@ function loop3D(){
   } else if(lowResWanted){
     setDynamicResolution(true);
   }
-  if(!animating && !_needs3DRender && now-_lastSafety3DRenderAt<1500) return;
+  if(!animating && !_needs3DRender && ((typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE) || now-_lastSafety3DRenderAt<1500)) return;
   _last3DFrameAt=now;
   // 静的シャドウマップの更新トリガ: シーン変更・ドア開閉アニメ・ギズモ操作
   if(ren&&ren.shadowMap&&(_needs3DShadowUpdate||GIZMO_DRAG.active||WALK._doorsAnim)) ren.shadowMap.needsUpdate=true;
@@ -17824,7 +18110,7 @@ function setView(v){
     // 保存済み/直前の外観カメラがあれば復元、無ければ全体表示
     if(v==='3d-ext'){
       if(ST._camStash&&ST._camStash.ext) applyStashedCamera(ST._camStash.ext);
-      else setTimeout(fitCameraToScene, 100);
+      else scheduleSceneCameraFit(100);
     }
     // 2Dで選択中のオブジェクトがあれば、3Dでも設定パネルを引き継いで開く
     // (ウォークスルーはHUDと干渉するため除外)
@@ -17848,7 +18134,7 @@ function refresh3DPreview(){
   if(!ren) init3D();
   if(ren){
     build3D();
-    if(ST.view==='3d-ext') setTimeout(fitCameraToScene, 50);
+    if(ST.view==='3d-ext') scheduleSceneCameraFit(50);
   }
   syncExteriorWallPanel();
   if(typeof invalidate3D==='function') invalidate3D();
@@ -17887,6 +18173,7 @@ function setTool(t){
   draw2d();
 }
 function canApplyOpeningPresetToItem(it,preset){
+  if(it&&it.openingSourceGeometry)return false;
   if(!it||!preset) return false;
   if(preset.kind==='door' && !(isInteriorSwingDoorType(it.type)||it.type==='door-fold'||it.type==='door-fold-w')) return false;
   if(preset.kind==='window' && !isWindowLikeType(it.type)) return false;
@@ -17981,6 +18268,8 @@ function resetView(){
 function onFloorChange(v){
   ST.floor=+v; ST.selected=null; clearMultiSelection(); DRAG.active=false; resetPickCycle();
   document.getElementById('props').classList.remove('show');
+  // The previous selection is gone; its hidden controls are rebuilt on the next selection.
+  var oldProps=document.getElementById('props-body');if(oldProps)oldProps.textContent='';
   document.getElementById('st-floor').textContent='フロア:'+v+'F';
   draw2d();
 }
@@ -18223,6 +18512,11 @@ canvas.addEventListener('mouseup',function(){
     return;
   }
   var wasDragging=DRAG.active;
+  if(wasDragging && DRAG.saved && typeof SceneOpeningGeometry!=='undefined'){
+    (DRAG.group||[{obj:ST.selected,orig:DRAG.origItem}]).forEach(function(entry){
+      SceneOpeningGeometry.rebindAfterEdit(entry.obj,DATA.walls,{before:entry.orig,snapToWall:DRAG.handle==='move'||DRAG.handle==='wall-move'});
+    });
+  }
   DRAG.active=false; DRAG.group=null; ST._snapState=null;
   if(wasDragging) updateProps();
   if(ren)build3D();
@@ -18231,7 +18525,7 @@ canvas.addEventListener('mouseup',function(){
 });
 // Complete a gesture even when the pointer leaves the canvas.
 window.addEventListener('mousemove',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee))canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:e.clientX,clientY:e.clientY,buttons:e.buttons,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey}));});
-window.addEventListener('keydown',function(e){if(e.key==='Escape'&&DRAG.marquee){DRAG.marquee=null;draw2d();}});
+window.addEventListener('keydown',function(e){if(isPlanImportDialogOpen()) return;if(e.key==='Escape'&&DRAG.marquee){DRAG.marquee=null;draw2d();}});
 window.addEventListener('mouseup',function(e){if(e.target!==canvas&&(DRAG.active||DRAG.marquee||DRAG.shiftClick))canvas.dispatchEvent(new MouseEvent('mouseup'));});
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -18435,7 +18729,8 @@ function handleErase(wx,wy){
 }
 function isNearRoomLabel(r, cx, cy){
   var sc=ST.zoom*0.05;
-  var px=ST.panX+(r.x+r.w/2)*sc, py=ST.panY+(r.y+r.d/2)*sc;
+  var anchor=r.shape?RoomGeometry.labelAnchor(r):{x:r.x+r.w/2,y:r.y+r.d/2};
+  var px=ST.panX+anchor.x*sc, py=ST.panY+anchor.y*sc;
   var name=r.n||'部屋';
   var hw=Math.max(44,name.length*6.5)+14, hh=24;
   return Math.abs(cx-px)<=hw && Math.abs(cy-py)<=hh;
@@ -18490,6 +18785,10 @@ function isNearWalkRoute2d(it,px,py){
   return false;
 }
 function isInsideSwingDoor2dLocal(it,lx,ly){
+  if(it.openingSourceGeometry){
+    var shape=SceneOpeningGeometry.sourcePlanGeometry(it,doorOpenState(it)!=='closed'),hitTol=planHitToleranceMm(9);
+    return [shape.leaf,shape.closedLeaf].some(function(poly){return poly.some(function(p,i){var q=poly[(i+1)%poly.length];return distPointToSegment2d(lx,ly,p.x,p.y,q.x,q.y)<=hitTol;});});
+  }
   var w=Math.max(1,it.w||0);
   var hw=w/2;
   var tol=planHitToleranceMm(9);
@@ -18498,7 +18797,7 @@ function isInsideSwingDoor2dLocal(it,lx,ly){
   var span=leafX-hingeX;
   var openDir=it.flipY?-1:1;
   var isClosed=doorOpenState(it)==='closed';
-  var openAng=isClosed?0:openDir*Math.PI/3;
+  var openAng=isClosed?0:openDir*Math.PI/2;
   var openX=hingeX+span*Math.cos(openAng);
   var openY=span*Math.sin(openAng);
   if(Math.abs(ly)<=tol && lx>=-hw-tol && lx<=hw+tol) return true;
@@ -18514,6 +18813,7 @@ function isInsideSwingDoor2dLocal(it,lx,ly){
   return false;
 }
 function isInsideItem(it, px, py){
+  if(it && it.shape && typeof RoomGeometry!=='undefined') return RoomGeometry.contains(it,px,py);
   var pose=getItemDisplayPose(it);
   var cx = pose.x, cy = pose.y;
   var rad = -(pose.rot||0)*Math.PI/180;
@@ -18840,7 +19140,7 @@ function drawDim(){
     var fr2=DATA.rooms.filter(function(r){return r.floor===ST.floor && ST.selected===r;});
     fr2.forEach(function(r){
       if(!isFiniteCanvasValue(r.x) || !isFiniteCanvasValue(r.y) || !isFiniteCanvasValue(r.w) || !isFiniteCanvasValue(r.d)) return;
-      var p=w2c(r.x+r.w/2, r.y+r.d/2);
+      var anchor=r.shape?RoomGeometry.labelAnchor(r):{x:r.x+r.w/2,y:r.y+r.d/2}, p=w2c(anchor.x,anchor.y);
       // Small dims below room label
       ctx.save();
       var fsz=Math.max(8, ST.zoom*3.5);
@@ -19045,7 +19345,8 @@ function pasteCopiedObject(){
     cp.floor=ST.floor;
     DATA.walls.push(cp);
   } else {
-    cp.x+=off; cp.y+=off;
+    if(cp.shape) RoomGeometry.translate(cp,off,off);
+    else {cp.x+=off; cp.y+=off;}
     if(cp.type==='site-rect') cp.floor=1;
     else cp.floor=ST.floor;
     if(CLIPBOARD.kind==='room'){
@@ -19054,6 +19355,7 @@ function pasteCopiedObject(){
       DATA.items.push(cp);
     }
   }
+  if(typeof SceneOpeningGeometry!=='undefined') SceneOpeningGeometry.rebindAfterEdit(cp,DATA.walls,{snapToWall:true});
   ST.selectAll=false;
   ST.selected=cp;
   ST.tool='select';
@@ -19092,7 +19394,14 @@ function restoreHistorySnapshot(snapshot){
   draw2d();if(ren)rebuild3D();
 }
 
+// 読み取り画面のページ選択・ボタン操作を、背後の間取りへ伝えない。
+// preventDefault はしないので、select の矢印・入力欄の Undo などはそのまま。
+function isPlanImportDialogOpen(){
+  var dialog=document.getElementById('plan-import-modal');
+  return !!(dialog && dialog.classList.contains('show'));
+}
 window.addEventListener('keydown', function(e){
+  if(isPlanImportDialogOpen()) return;
   if(e.key==='Shift'){ST.shiftKey=true; draw2d();}
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
   if((e.key==='Enter' || e.key==='Escape') && ST.tool==='walk-route' && ST.drawing){
@@ -19135,7 +19444,9 @@ window.addEventListener('keydown', function(e){
     if(ST.selected.x1!==undefined && ST.selected.x2!==undefined){
       ST.selected.x1+=dx;ST.selected.x2+=dx;ST.selected.y1+=dy;ST.selected.y2+=dy;
     } else {
-      ST.selected.x+=dx;ST.selected.y+=dy;
+      if(ST.selected.shape) RoomGeometry.translate(ST.selected,dx,dy);
+      else {ST.selected.x+=dx;ST.selected.y+=dy;}
+      if(typeof SceneOpeningGeometry!=='undefined') SceneOpeningGeometry.rebindAfterEdit(ST.selected,DATA.walls);
     }
     updateProps(); draw2d(); if(ren)rebuild3D();
     return;
@@ -19144,8 +19455,8 @@ window.addEventListener('keydown', function(e){
   if(isWalkView()) return;
   if(e.key === 'Backspace' || e.key === 'Delete'){ if(ST.selected){ e.preventDefault(); delSel(); } }
   if(e.key.toLowerCase() === 'r') { ST.placingRot = (ST.placingRot + 90) % 360; draw2d(); }
-  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
-  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { saveState(); ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'f') { if(ST.selected && !isObjectLocked(ST.selected)) { if(ST.selected.openingSourceGeometry){updateSelectedProp('flipX',!ST.selected.flipX);return;} saveState(); ST.selected.flipX = !ST.selected.flipX; draw2d(); if(ren)rebuild3D(); } }
+  if(e.key.toLowerCase() === 'v') { if(ST.selected && !isObjectLocked(ST.selected)) { if(ST.selected.openingSourceGeometry){updateSelectedProp('flipY',!ST.selected.flipY);return;} saveState(); ST.selected.flipY = !ST.selected.flipY; draw2d(); if(ren)rebuild3D(); } }
 });
 window.addEventListener('keyup', function(e){
   if(e.key==='Shift'){ST.shiftKey=false; ST.ctrlKey=false; draw2d();}
@@ -19300,10 +19611,13 @@ async function savePlanToStorage(){
   captureViewState();
   setSaveButtonBusy(true);
   var browserSaved=false;
+  var saveSucceeded=false;
+  var savedGeneration=serializeDataSnapshot();
   try{
     await StorageAdapter.save(DATA);
     browserSaved=true;
     if(SHARED.roomId){
+      if(typeof sceneV3LocalOnlyPlan==='function'&&sceneV3LocalOnlyPlan(DATA))throw new Error('Scene IR v3 は現在ローカル専用です。ブラウザには保存しましたが共同編集へは送信していません。');
       await flushSharedChanges();
       var response=await fetch('/api/rooms/'+SHARED.roomId+'/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:sharedClientId(),baseVersion:SHARED.version,plan:DATA},function(k,v){return k==='_texObj'?undefined:v;})});
       if(!response.ok) throw new Error(response.status===413?'プランが10MBを超えています。':'クラウド保存に失敗しました（'+response.status+'）');
@@ -19316,7 +19630,8 @@ async function savePlanToStorage(){
       sharedSetStatus('ブラウザとクラウドへ保存しました。');
       renderSharedUi();
     }
-    clearDirty();
+    if(serializeDataSnapshot()===savedGeneration)clearDirty();
+    saveSucceeded=true;
   }catch(e){
     var message=(e&&e.message?e.message:e);
     if(browserSaved&&SHARED.roomId){
@@ -19328,6 +19643,7 @@ async function savePlanToStorage(){
   }finally{
     setSaveButtonBusy(false);
   }
+  return saveSucceeded;
 }
 async function loadPlanFromStorage(){
   var d=await StorageAdapter.load();
@@ -19364,17 +19680,19 @@ async function loadPlanFromStorage(){
 async function loadPlanFromStorageButton(){
   if(!(await StorageAdapter.hasData())){
     alert('ブラウザ保存されたプランがありません。');
-    return;
+    return false;
   }
-  if(!confirm('ブラウザ保存されたプランを読み込みますか？\n現在の未保存の編集内容は上書きされます。')) return;
+  if(!confirm('ブラウザ保存されたプランを読み込みますか？\n現在の未保存の編集内容は上書きされます。')) return false;
   if(await loadPlanFromStorage()){
     clearDirty();
     ST.selected=null;
     document.getElementById('props').classList.remove('show');
     draw2d();
     if(ren) rebuild3D();
+    return true;
   }else{
     alert('保存されたプランが空のため読み込みませんでした。');
+    return false;
   }
 }
 async function checkStorageOnInit(){
@@ -19393,7 +19711,8 @@ async function checkStorageOnInit(){
 var SHARED={roomId:null,version:0,expiresAt:0,savedAt:0,clientId:null,socket:null,baseline:null,timer:null,localAutoTimer:null,sending:false,sendPromise:null,pending:false,people:[],reconnectTimer:null,applying:false,forceScan:false,dirtyIds:{walls:{},items:{},rooms:{}},rebuildTimer:null,needs3DRebuild:false,saveBusy:false,lastLocalVersion:0,refreshing:false,refreshPromise:null};
 // northDeg（敷地の方位）もここに入れる。入れないと、共同編集の相手が方位を回しても
 // 手元には届かず、同じプランを見ているのに斜線制限の向きと立面図の呼称だけが食い違う。
-var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata','northDeg'];
+function sceneV3LocalOnlyPlan(plan){return !!plan&&((plan.sceneReconstructionReports||[]).some(function(r){return r.version===3||r.kind==='building-registration';})||(plan.rooms||[]).some(function(r){return !!r.shape||r.sceneImportVersion===3;})||(plan.items||[]).some(function(i){return i.sceneImportVersion===3;}));}
+var SHARED_FIELDS=['exteriorWallSettings','interiorWallSettings','roofAppearance','exteriorDetail','floorMetadata','northDeg','sceneReconstructionReports'];
 function sharedClone(v){return v===undefined?undefined:JSON.parse(JSON.stringify(v,function(k,x){return k==='_texObj'?undefined:x;}));}
 function sharedFastSignature(value){
   return JSON.stringify(value,function(k,v){
@@ -19544,6 +19863,7 @@ function queueSharedSync(delay){
   clearTimeout(SHARED.timer);SHARED.timer=setTimeout(function(){SHARED.timer=null;sharedSyncNow();},delay===undefined?500:delay);
 }
 async function sharedSyncNow(){
+  if(typeof sceneV3LocalOnlyPlan==='function'&&sceneV3LocalOnlyPlan(DATA)){sharedSetStatus('Scene IR v3 は現在ローカル専用です。共同編集の互換性保護が整うまで同期できません。',true);return;}
   if(!SHARED.roomId||SHARED.applying)return;
   if(SHARED.sending){SHARED.pending=true;return SHARED.sendPromise;}
   var patch=buildSharedPatch(DATA,SHARED.baseline);if(!patch)return;
@@ -19638,6 +19958,7 @@ async function refreshSharedPlan(){
   return SHARED.refreshPromise;
 }
 async function initSharedRoomFromUrl(){
+  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW) return false;
   var roomId=sharedRoomFromLocation();if(!roomId)return false;
   try{installSharedPlan(await fetchSharedPlan(roomId),roomId);return true;}
   catch(e){sharedSetStatus(e.message,true);openShareDialog();return false;}
@@ -19651,6 +19972,7 @@ async function retrySharedJoin(){
   }finally{if(button)button.disabled=false;renderSharedUi();}
 }
 async function createSharedRoom(){
+  if(typeof sceneV3LocalOnlyPlan==='function'&&sceneV3LocalOnlyPlan(DATA)){sharedSetStatus('Scene IR v3 は現在ローカル専用です。共同編集の互換性保護が整うまで共有できません。',true);return;}
   // URLに共有ルームが載ったままここへ来るのは「参加に失敗した人が新規作成を押した」状態。
   // そのまま作るとURLが差し替わり、共有相手と永久につながらなくなるので必ず確認する。
   var pending=sharedRoomFromLocation();
@@ -22026,14 +22348,99 @@ async function renderUnityImage(){
     setUnityRenderBusy(false);
   }
 }
+// JSON import is synchronous once the file has been read: no save/sync can see
+// the candidate until its migrations and first render have succeeded.
+function stageJsonImport(text){
+  var candidate=JSON.parse(text);
+  var checked=PlanSchema.validatePlan(candidate);
+  if(!checked.ok) throw new Error(checked.errors.slice(0,3).join(' / '));
+  var previous={data:DATA,state:ST,wallHeight:WALL_H,nextId:nextId};
+  try{
+    DATA=candidate;
+    // Legacy helpers use globals. Give them a private state and restore every
+    // global they write in finally, including when a migration throws.
+    ST=Object.assign({},ST,{selected:null,multiSelected:[]});
+    resetHeightGlobalsForPlanLoad();
+    // Normalize missing/empty IDs against all reserved IDs first, then advance
+    // the editor's allocator. Existing IDs and their references stay unchanged.
+    DATA=PlanSchema.normalizePlan(DATA);
+    ensureObjectIds();
+    ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();
+    ensureFloorMetadata();ensureHeightDefaults();
+    syncExteriorWallSettings();normalizeLegacyFurnitureItems();
+    checked=PlanSchema.validatePlan(DATA);
+    if(!checked.ok) throw new Error(checked.errors.slice(0,3).join(' / '));
+    return {data:DATA,wallHeight:WALL_H,nextId:nextId};
+  }finally{
+    DATA=previous.data;ST=previous.state;WALL_H=previous.wallHeight;nextId=previous.nextId;
+  }
+}
+function applyJsonImport(staged){
+  var previous={data:DATA,state:ST,drag:DRAG,wallHeight:WALL_H,nextId:nextId,
+    north:LIGHT_SETTINGS.northDeg,dirty:DIRTY,pending:_defaultPlanPending};
+  var camera=camExt?{position:camExt.position.clone(),quaternion:camExt.quaternion.clone(),
+    target:orbit?orbit.target.clone():null}:null;
+  try{
+    DATA=staged.data;WALL_H=staged.wallHeight;nextId=staged.nextId;
+    ST=Object.assign({},ST,{selected:null,multiSelected:[],selectAll:false,
+      drawing:false,drawPts:[],_snapState:null});
+    DRAG=Object.assign({},DRAG,{active:false,shiftClick:null,group:null,marquee:null});
+    restoreViewState();syncNorthFromPlan();syncHeightDefaultsUI();updateProps();
+    draw2d();
+    // Do not defer the first build to another frame: its exception must still
+    // belong to this transaction, before history or shared storage is touched.
+    rebuild3D(true);
+    DIRTY=true;
+    var saveButton=document.getElementById('save-btn');
+    if(saveButton) saveButton.classList.add('dirty');
+    renderSaveButtonState();
+  }catch(error){
+    DATA=previous.data;ST=previous.state;DRAG=previous.drag;
+    WALL_H=previous.wallHeight;nextId=previous.nextId;
+    LIGHT_SETTINGS.northDeg=previous.north;DIRTY=previous.dirty;
+    _defaultPlanPending=previous.pending;
+    // A failed renderer may already have cleared its canvas/scene. Recover the
+    // old presentation too; a second render failure must not prevent restoration
+    // of the plan, history, selection, or camera.
+    [syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,function(){rebuild3D(true);},
+      function(){
+        var btn=document.getElementById('save-btn');
+        if(btn) btn.classList.toggle('dirty',DIRTY);
+        renderSaveButtonState();
+      }].forEach(function(recover){try{recover();}catch(e){console.warn('[WebCAD] import recovery',e);}});
+    if(camera){
+      camExt.position.copy(camera.position);camExt.quaternion.copy(camera.quaternion);
+      if(orbit&&camera.target) orbit.target.copy(camera.target);
+      invalidate3D();
+    }
+    throw error;
+  }
+  _defaultPlanPending=false;
+  clearEditHistory();
+  sharedForceFullSync();queueSharedSync(700);queueSharedLocalAutoSave();
+}
+var _jsonImportRequest=0;
 function doImport(inp){
-  var file=inp.files[0];if(!file)return;
-  var r=new FileReader();
-  r.onload=function(e){
-    try{ _defaultPlanPending=false; DATA=JSON.parse(e.target.result); resetHeightGlobalsForPlanLoad(); syncNorthFromPlan(); ensureObjectIds(); ensureExteriorWallSettings(); ensureInteriorWallSettings(); ensureRoofAppearance(); ensureFloorMetadata(); ensureHeightDefaults(); syncHeightDefaultsUI(); syncExteriorWallSettings(); normalizeLegacyFurnitureItems(); restoreViewState(); clearEditHistory(); sharedForceFullSync(); markDirty(); draw2d(); rebuild3D(); }
-    catch(ex){alert('読み込みエラー:'+ex.message);}
-  };
-  r.readAsText(file);
+  var request=++_jsonImportRequest;
+  var file=inp.files&&inp.files[0];if(!file)return;
+  // Let the same file trigger change again after an error or a successful load.
+  inp.value='';
+  function failed(){
+    if(request!==_jsonImportRequest)return;
+    alert('読み込めませんでした。編集中の間取りと操作履歴はそのままです。\nこのアプリから書き出したJSONファイルを選んで、もう一度お試しください。');
+  }
+  try{
+    var r=new FileReader();
+    r.onload=function(e){
+      if(request!==_jsonImportRequest)return;
+      try{var staged=stageJsonImport(e.target.result);if(DIRTY&&!confirm('現在の未保存の編集を、選んだ間取りJSONへ置き換えますか？'))return;if(request!==_jsonImportRequest)return;applyJsonImport(staged);}
+      catch(ex){console.warn('[WebCAD] JSON import failed',ex);failed();}
+    };
+    r.onerror=failed;
+    // Aborted reads and cancelling the picker leave the current plan untouched.
+    r.onabort=function(){};
+    r.readAsText(file);
+  }catch(ex){failed();}
 }
 
 // 天井に固定する器具。値は「取付面(elev)から器具の上端までの高さ(mm)」。
@@ -22061,7 +22468,9 @@ function snapCeilingFixturesToCeiling(){
   DATA.planFixes[PLAN_FIX_CEILING_FIXTURES]=1;
   var moved=0;
   DATA.items.forEach(function(it){
-    if(!it) return;
+    // Canonical Scene IR parameters are already explicit/reviewed; legacy
+    // migration must not overwrite them on save, load or a shared-room echo.
+    if(!it || (it.sceneImportVersion===2||it.sceneImportVersion===3)) return;
     var topOff=CEILING_FIXTURE_TOP_MM[it.type];
     if(topOff===undefined) return;
     var fl=it.floor||1;
@@ -22090,7 +22499,9 @@ function snapOutdoorCeilingFixturesToRoof(){
   DATA.planFixes[PLAN_FIX_OUTDOOR_CEILING_FIXTURES]=1;
   var moved=0;
   DATA.items.forEach(function(it){
-    if(!it) return;
+    // Canonical Scene IR parameters are already explicit/reviewed; legacy
+    // migration must not overwrite them on save, load or a shared-room echo.
+    if(!it || (it.sceneImportVersion===2||it.sceneImportVersion===3)) return;
     var topOff=CEILING_FIXTURE_TOP_MM[it.type];
     if(topOff===undefined) return;
     var cx=(it.x||0)+(it.w||0)/2, cy=(it.y||0)+(it.d||0)/2;
@@ -22246,8 +22657,9 @@ function applyIntCamera(){
 
 try {
   ensureHeightDefaults(); syncHeightDefaultsUI();
-  loadPreset(); normalizeLegacyFurnitureItems(); renderOpeningModelToolMenus(); resize2d(); resetView();
-  loadFurnitureMegaLibrary();
+  if(!COMPARISON_PREVIEW && !EDITOR_PANE) loadPreset();
+  normalizeLegacyFurnitureItems(); renderOpeningModelToolMenus(); resize2d(); resetView();
+  window.comparisonCatalogueReady=loadFurnitureMegaLibrary();
 } catch(e) {
   console.error("Initialization error:", e);
 }
@@ -22359,6 +22771,9 @@ function getTouchDist(e){
 canvas.addEventListener('touchstart',function(e){
   blurActiveControl();
   if(ST.view!=='2d') return;
+  // preventDefault suppresses the browser's normal iframe focus. Keep subsequent
+  // hardware-keyboard edits in the native editor that was actually touched.
+  window.focus();
   e.preventDefault();
   if(e.touches.length===1){
     var t=e.touches[0];
@@ -23532,61 +23947,25 @@ var JISDRAW=(function(){
 
   // 開き戸(door-swing系)・玄関ドア(door-front): 吊元から開口幅の1/4円弧+扉線1本。
   // 円の中心=吊元なので、回転(等長変換)後もワールド座標上で半径rは不変。
-  function swingDoorSymbolSvg(it,info,LW){
-    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
-    var fr=openingFrame(info);
-    var out=rectCutSvg(fr,halfW,halfT);
-    var hingeLX=it.flipX?halfW:-halfW;
-    var leafDir=it.flipX?-1:1;
-    var swingDir=it.flipY?-1:1;
-    var r=it.w||0;
-    var arcStart=leafDir>0?0:Math.PI;
-    var openAngle=swingDir*Math.PI/2;
-    var arcEnd=arcStart+openAngle;
-    var p0=fr.pt(hingeLX+r*Math.cos(arcStart), r*Math.sin(arcStart));
-    var p1=fr.pt(hingeLX+r*Math.cos(arcEnd), r*Math.sin(arcEnd));
-    var hinge=fr.pt(hingeLX,0);
-    var sweep=openAngle>0?1:0;
-    out+='<path d="M'+p0.x+','+p0.y+' A'+r+','+r+' 0 0,'+sweep+' '+p1.x+','+p1.y+'" fill="none" stroke="#000" stroke-width="'+LW.mid+'"/>';
-    out+='<line x1="'+hinge.x+'" y1="'+hinge.y+'" x2="'+p1.x+'" y2="'+p1.y+'" stroke="#000" stroke-width="'+LW.mid+'"/>';
-    return out;
-  }
-
-  // 引戸(door-slide/door-slide-s/door-pocket): 既存2D表現(:6885-6949)をSVGへ移植。
-  function slideDoorSymbolSvg(it,info,LW){
-    var halfW=(it.w||0)/2, halfT=(info.wall.thick||120)/2;
-    var fr=openingFrame(info);
-    var out=rectCutSvg(fr,halfW,halfT);
-    out+=lineTag(fr,-halfW,-halfT*0.62,halfW,-halfT*0.62,LW.thin);
-    out+=lineTag(fr,-halfW, halfT*0.62,halfW, halfT*0.62,LW.thin);
-    var isOpen=(it.doorOpenState!=='closed');
-    var dash=(LW.thin*3)+' '+(LW.thin*2);
-    if(it.type==='door-slide'){
-      var openW=it.w||0, panelW=openW*0.56;
-      var leftOpen=!!it.flipX;
-      var fixedX=leftOpen?(-halfW+openW*0.40):(-halfW+openW*0.04);
-      var movingClosedX=leftOpen?(-halfW+openW*0.04):(-halfW+openW*0.40);
-      var movingX=isOpen?fixedX:movingClosedX;
-      out+=lineTag(fr,fixedX,-halfT*0.28,fixedX+panelW,-halfT*0.28,LW.mid);
-      out+=lineTag(fr,movingX, halfT*0.28,movingX+panelW, halfT*0.28,LW.mid);
-    } else if(it.type==='door-slide-s'){
-      var sDir=it.flipX?-1:1;
-      var openW2=it.w||0;
-      var px0=isOpen?sDir*openW2:0;
-      var pz=(it.flipY?1:-1)*halfT*1.05;
-      out+=lineTag(fr,px0-halfW,pz,px0+halfW,pz,LW.mid);
-      out+=lineTag(fr,sDir*halfW,pz,sDir*halfW*3,pz,LW.thin,dash);
-    } else { // door-pocket(引込み戸)
-      var sDir2=it.flipX?-1:1;
-      if(isOpen){
-        out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.mid,dash);
-      } else {
-        out+=lineTag(fr,-halfW,0,halfW,0,LW.mid);
-      }
-      out+=lineTag(fr,sDir2*halfW,0,sDir2*halfW*3,0,LW.thin,dash);
+  function sourceDoorSymbolSvg(it,info,LW){
+    var fr=openingFrame(info),plan=SceneOpeningGeometry.planGeometry(it,info.wall.thick||120,it.doorOpenState!=='closed');
+    if(!plan)return '';
+    var out=rectCutSvg(fr,it.w/2,(info.wall.thick||120)/2);
+    function polygon(points,fill,dash){return '<polygon points="'+points.map(function(p){return frameStr(fr,p.x,p.y);}).join(' ')+'" fill="'+fill+'" stroke="#000" stroke-width="'+LW.thin+'"'+(dash?' stroke-dasharray="'+LW.thin*3+' '+LW.thin*2+'"':'')+'/>';}
+    if(plan.pocket)out+=polygon(plan.pocket,'#fff',false);
+    out+=polygon(plan.closedLeaf,'none',true)+polygon(plan.leaf,'#fff',false);
+    if(plan.fixedLeaf)out+=polygon(plan.fixedLeaf,'#fff',false);
+    var p=plan.parameters;
+    if(p.mode==='hinge'&&it.doorOpenState!=='closed'){
+      var a=p.leafCenterXmm>0?0:Math.PI,b=a-p.openAngleY,r=p.leafWidthMm,z=p.hingeZmm||0;
+      var start=fr.pt(p.hingeXmm+r*Math.cos(a),z+r*Math.sin(a)),end=fr.pt(p.hingeXmm+r*Math.cos(b),z+r*Math.sin(b));
+      out+='<path d="M'+start.x+','+start.y+' A'+r+','+r+' 0 0,'+(-p.openAngleY>0?1:0)+' '+end.x+','+end.y+'" fill="none" stroke="#000" stroke-width="'+LW.thin+'"/>';
     }
     return out;
   }
+
+  function swingDoorSymbolSvg(it,info,LW){return sourceDoorSymbolSvg(it,info,LW);}
+  function slideDoorSymbolSvg(it,info,LW){return sourceDoorSymbolSvg(it,info,LW);}
 
   // 折戸(door-fold/door-fold-w): 既存2D表現(:6951-6969)の山形記号をSVGへ移植。
   function foldDoorSymbolSvg(it,info,LW){
@@ -23806,9 +24185,9 @@ var JISDRAW=(function(){
   function roomLabelsToSvg(floor,LW){
     var out='';
     DATA.rooms.filter(function(r){return (r.floor||1)===floor;}).forEach(function(r){
-      var cx=r.x+r.w/2, cy=r.y+r.d/2;
+      var anchor=r.shape?RoomGeometry.labelAnchor(r):{x:r.x+r.w/2,y:r.y+r.d/2}, cx=anchor.x, cy=anchor.y;
       var name=escSvgText(r.n||'部屋');
-      var tatami=(r.w*r.d*1e-6/1.62).toFixed(1)+'帖';
+      var tatami=((r.shape?RoomGeometry.area(r):r.w*r.d)*1e-6/1.62).toFixed(1)+'帖';
       var maxTextW=r.w*0.9;
       var minFs=LW.text*0.35; // これ未満は紙面上判読困難とみなす下限
       var fsNameRaw=LW.text*1.15, fsAreaRaw=LW.text*0.95;
@@ -24295,7 +24674,7 @@ function jisPrint(){
 
 // ─── Init storage / shared room ───────────────────
 // URLの共同編集プランを、端末内の保存データより優先する。
-initSharedRoomFromUrl().then(async function(joined){
+if(!COMPARISON_PREVIEW && !EDITOR_PANE) initSharedRoomFromUrl().then(async function(joined){
   if(!joined) await checkStorageOnInit();
   // 既定間取りで始まる起動なら、どの間取りで始めるかを選んでもらう
   maybeOfferPresetChoice();
@@ -24556,5 +24935,32 @@ updateMobileShiftButton();
 })();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
+<link rel="stylesheet" href="assets/plan-comparison.css">
+<button id="compare-launch" onclick="ParallelEditors.open()">▧ 案を比較 <small>試作</small></button>
+<dialog id="compare-dialog" aria-labelledby="compare-heading">
+  <div class="compare-row"><span class="compare-muted">LOCAL COMPARISON · 比較の試作</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
+  <h2 id="compare-heading">同じ視点で、住まいの案を比べる</h2>
+  <p class="compare-muted">名前を付けて案を残し、左右で切り替え。編集中のプランとは別に、このブラウザだけに保存します。</p>
+  <div class="compare-row"><label for="compare-name">案の名前</label><input id="compare-name" maxlength="80" placeholder="例：A案 / リビングの壁紙"><button id="compare-save" class="compare-primary" data-compare-write>現在のプランを保存</button><button id="compare-import-open" data-compare-write>JSONから追加</button><input id="compare-import" type="file" accept=".json,application/json" hidden><span id="compare-count" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-mode">比較表示</label><select id="compare-mode"><option value="2d">平面概略</option><option value="3d">内観3D（アプリの描画）</option></select><span class="compare-muted">3Dは同じカメラ・画角・照明で順番に撮影します。</span></div>
+  <div id="compare-3d-controls" hidden>
+    <div class="compare-row"><label for="compare-room">部屋の視点</label><select id="compare-room"></select><button id="compare-room-camera">この部屋から見る</button><button id="compare-live-camera">現在の内観3D視点を使う</button></div>
+    <div class="compare-row"><label for="compare-camera-name">3D視点名</label><input id="compare-camera-name" maxlength="80" placeholder="例：リビング / ソファ側"><button id="compare-save-camera" data-compare-write>3D視点を保存</button><label for="compare-cameras">保存した3D視点</label><select id="compare-cameras"></select><button id="compare-recapture">同じ条件で撮り直す</button><button id="compare-cancel-capture">撮影を中止</button></div>
+  </div>
+  <div id="compare-2d-controls">
+  <div class="compare-row"><label for="compare-floor">階</label><select id="compare-floor"><option value="1">1F</option><option value="2">2F</option><option value="3">3F</option></select><button id="compare-fit">両案が入る共通範囲</button><button data-compare-camera="in" aria-label="共通視点を拡大">＋</button><button data-compare-camera="out" aria-label="共通視点を縮小">−</button><button data-compare-camera="left" aria-label="共通視点を左へ">←</button><button data-compare-camera="right" aria-label="共通視点を右へ">→</button><button data-compare-camera="up" aria-label="共通視点を上へ">↑</button><button data-compare-camera="down" aria-label="共通視点を下へ">↓</button><span id="compare-view-label" class="compare-muted"></span></div>
+  <div class="compare-row"><label for="compare-view-name">共通視点</label><input id="compare-view-name" maxlength="80" placeholder="例：1F 全体"><button id="compare-save-view" data-compare-write>視点を保存</button><label for="compare-views">保存した視点</label><select id="compare-views"></select></div>
+  </div>
+  <div class="compare-grid">
+    <article class="compare-tile"><div class="compare-row"><label for="compare-a">A</label><select id="compare-a"></select><button id="compare-a-export">JSON保存</button></div><h3 id="compare-a-title"></h3><img id="compare-a-image" hidden alt="左の案"><p id="compare-a-finishes" class="compare-muted"></p></article>
+    <article class="compare-tile"><div class="compare-row"><label for="compare-b">B</label><select id="compare-b"></select><button id="compare-b-export">JSON保存</button></div><h3 id="compare-b-title"></h3><img id="compare-b-image" hidden alt="右の案"><p id="compare-b-finishes" class="compare-muted"></p></article>
+  </div>
+  <div class="compare-row"><button id="compare-images" class="compare-primary">比較画像を保存</button><span class="compare-muted">同一範囲・画角 / 各960 × 720</span></div>
+  <p id="compare-status" role="status" aria-live="polite"></p>
+  <details open><summary>この試作で確認できること</summary><p class="compare-muted">内観3Dは既存アプリの壁・素材・家具を同じ視点で描画します。製品の実物色や照明の物理的な再現を保証するものではありません。部屋から見る視点は自動配置なので、見づらい場合は編集中の内観3Dで視点を調整してから使ってください。平面は家具や開口を省略した概略です。案の切替は比較画面だけに反映します。各案の画像AI用パッケージとAI完成画像は未実装です。</p></details>
+</dialog>
+<script src="assets/js/comparison-renderer.js"></script>
+<script src="assets/js/plan-comparison.js"></script>
+<script src="assets/js/parallel-editors.js"></script>
 </body>
 </html>

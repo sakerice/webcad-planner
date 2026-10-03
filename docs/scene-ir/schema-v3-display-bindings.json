@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:webcad:scene-ir:3:display-binding",
+  "title": "Optional display binding; source extraction schema remains frozen",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+    },
+    "sourceEntityId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+    },
+    "catalogId": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            },
+            "unknownReason": {
+              "enum": [
+                "not-shown",
+                "unreadable",
+                "ambiguous"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "sizingPolicy": {
+      "enum": [
+        "native",
+        "fit-source",
+        "proxy"
+      ]
+    },
+    "rotationDeg": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -1000000,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "observed"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -1000000,
+              "maximum": 1000000
+            },
+            "status": {
+              "const": "inferred"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            }
+          },
+          "required": [
+            "value",
+            "status",
+            "source",
+            "reason"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "status": {
+              "const": "unknown"
+            },
+            "source": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+              },
+              "maxItems": 64,
+              "minItems": 0
+            },
+            "unknownReason": {
+              "enum": [
+                "not-shown",
+                "unreadable",
+                "ambiguous"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "status"
+          ]
+        }
+      ]
+    },
+    "appearanceMode": {
+      "enum": [
+        "unspecified",
+        "match-diagram-appearance"
+      ]
+    },
+    "appearanceProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+        },
+        "version": {
+          "const": 1
+        },
+        "assetSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "seat": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            }
+          },
+          "required": [
+            "body",
+            "seat"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "assetSha256",
+        "colors"
+      ]
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sourceRegion": {
+            "enum": [
+              "body",
+              "top",
+              "seat",
+              "frame"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        },
+        "required": [
+          "sourceRegion",
+          "channel",
+          "color"
+        ]
+      },
+      "maxItems": 16,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "id",
+    "sourceEntityId",
+    "catalogId",
+    "sizingPolicy"
+  ]
+}

@@ -1,0 +1,1695 @@
+{
+  "version": 2,
+  "baseCommit": "d41e98d",
+  "units": "mm",
+  "note": "Generated from runtime manifests/tags/finish channels. Native dimensions/appearance are not image observations. Null front is unverified. Catalogue presence does not certify source product identity.",
+  "items": [
+    {
+      "id": "car",
+      "source": "builtin",
+      "name": "car",
+      "w": 2083,
+      "d": 4790,
+      "h": 1620,
+      "kind": "car",
+      "front": null,
+      "semanticExtent": "asset",
+      "finishChannels": [],
+      "genericColor": true,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "color",
+        "colorCustom"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "fmp-BathTub01",
+      "source": "catalogue",
+      "name": "BathTub01",
+      "w": 1150,
+      "d": 526,
+      "h": 412,
+      "kind": "bathtub",
+      "front": null,
+      "semanticExtent": "individual-fixture",
+      "openingOnly": false,
+      "category": "バスルーム",
+      "finishChannels": [
+        {
+          "key": "body",
+          "default": "#cfc9c1"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "fmp-Toilet01",
+      "source": "catalogue",
+      "name": "Toilet01",
+      "w": 339,
+      "d": 516,
+      "h": 708,
+      "kind": "toilet",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "トイレ",
+      "finishChannels": [
+        {
+          "key": "body",
+          "default": "#cfc9c1"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "fmp-WashBasin01",
+      "source": "catalogue",
+      "name": "WashBasin01",
+      "w": 644,
+      "d": 435,
+      "h": 264,
+      "kind": "vanity",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "洗面台",
+      "finishChannels": [
+        {
+          "key": "body",
+          "default": "#cfc9c1"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-island",
+      "source": "catalogue",
+      "name": "シンクアイランド 2100",
+      "w": 2100,
+      "d": 900,
+      "h": 1180,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B39A78"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E0D4"
+        },
+        {
+          "key": "metal",
+          "default": "#A6AFB4"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-cooking",
+      "source": "catalogue",
+      "name": "壁付IHカウンター 2560",
+      "w": 2560,
+      "d": 650,
+      "h": 861,
+      "kind": "cooktop",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B39A78"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E0D4"
+        },
+        {
+          "key": "metal",
+          "default": "#A6AFB4"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2100",
+      "source": "catalogue",
+      "name": "I型キッチン 2100",
+      "w": 2100,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2400",
+      "source": "catalogue",
+      "name": "I型キッチン 2400",
+      "w": 2400,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2550",
+      "source": "catalogue",
+      "name": "I型キッチン 2550・食洗機",
+      "w": 2550,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2700",
+      "source": "catalogue",
+      "name": "I型キッチン 2700・食洗機",
+      "w": 2700,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-gas2550",
+      "source": "catalogue",
+      "name": "I型ガスキッチン 2550・食洗機",
+      "w": 2550,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-p2550-750",
+      "source": "catalogue",
+      "name": "対面キッチン 2550・奥行750",
+      "w": 2550,
+      "d": 750,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-p2550-970",
+      "source": "catalogue",
+      "name": "対面キッチン 2550・奥行970",
+      "w": 2550,
+      "d": 970,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-sink900",
+      "source": "catalogue",
+      "name": "シンクBOX 900",
+      "w": 900,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-sink",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-hob750",
+      "source": "catalogue",
+      "name": "IHコンロBOX 750",
+      "w": 750,
+      "d": 650,
+      "h": 863.5,
+      "kind": "cooktop",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-drawer450",
+      "source": "catalogue",
+      "name": "引出しBOX 450",
+      "w": 450,
+      "d": 650,
+      "h": 850,
+      "kind": "kitchen-storage",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-drawer600",
+      "source": "catalogue",
+      "name": "引出しBOX 600",
+      "w": 600,
+      "d": 650,
+      "h": 850,
+      "kind": "kitchen-storage",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-drawer750",
+      "source": "catalogue",
+      "name": "引出しBOX 750",
+      "w": 750,
+      "d": 650,
+      "h": 850,
+      "kind": "kitchen-storage",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-drawer900",
+      "source": "catalogue",
+      "name": "引出しBOX 900",
+      "w": 900,
+      "d": 650,
+      "h": 850,
+      "kind": "kitchen-storage",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-box-dishwasher450",
+      "source": "catalogue",
+      "name": "食洗機BOX 450",
+      "w": 450,
+      "d": 650,
+      "h": 850,
+      "kind": "cooking-appliance",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2100-dw",
+      "source": "catalogue",
+      "name": "I型キッチン 2100・食洗機",
+      "w": 2100,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2400-dw",
+      "source": "catalogue",
+      "name": "I型キッチン 2400・食洗機",
+      "w": 2400,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2550-no-dw",
+      "source": "catalogue",
+      "name": "I型キッチン 2550・食洗機なし",
+      "w": 2550,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-i2700-no-dw",
+      "source": "catalogue",
+      "name": "I型キッチン 2700・食洗機なし",
+      "w": 2700,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-gas2550-no-dw",
+      "source": "catalogue",
+      "name": "I型ガスキッチン 2550・食洗機なし",
+      "w": 2550,
+      "d": 650,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-p2550-750-no-dw",
+      "source": "catalogue",
+      "name": "対面キッチン 2550・奥行750・食洗機なし",
+      "w": 2550,
+      "d": 750,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-kitchen-p2550-970-no-dw",
+      "source": "catalogue",
+      "name": "対面キッチン 2550・奥行970・食洗機なし",
+      "w": 2550,
+      "d": 970,
+      "h": 1162.67,
+      "kind": "kitchen-unit",
+      "front": null,
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "キッチン",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#B59F86"
+        },
+        {
+          "key": "stone",
+          "default": "#E4E1DA"
+        },
+        {
+          "key": "metal",
+          "default": "#A6ADB0"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-sofa",
+      "source": "catalogue",
+      "name": "オークフレーム ソファ",
+      "w": 2100,
+      "d": 900,
+      "h": 820,
+      "kind": "sofa",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "ソファ",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "default": "#aab5af"
+        },
+        {
+          "key": "wood",
+          "default": "#9e7e5d"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-bed",
+      "source": "catalogue",
+      "name": "ファブリックヘッド ベッド",
+      "w": 1600,
+      "d": 2150,
+      "h": 980,
+      "kind": "bed",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "ベッド",
+      "finishChannels": [
+        {
+          "key": "fabric",
+          "default": "#aab5af"
+        },
+        {
+          "key": "wood",
+          "default": "#9e7e5d"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-bathtub",
+      "source": "catalogue",
+      "name": "浴槽（1坪ユニットバス用）",
+      "w": 1600,
+      "d": 750,
+      "h": 600,
+      "kind": "bathtub",
+      "front": "+Z",
+      "semanticExtent": "individual-fixture",
+      "openingOnly": false,
+      "category": "バスルーム",
+      "finishChannels": [],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-toilet",
+      "source": "catalogue",
+      "name": "便器（タンク付き）",
+      "w": 390,
+      "d": 700,
+      "h": 800,
+      "kind": "toilet",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "トイレ",
+      "finishChannels": [],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-desk",
+      "source": "catalogue",
+      "name": "学習机（片袖3段）",
+      "w": 1000,
+      "d": 600,
+      "h": 720,
+      "kind": "desk",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "テーブル",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#c9a97e"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-desk-work",
+      "source": "catalogue",
+      "name": "ワークデスク（書斎・幅1400）",
+      "w": 1400,
+      "d": 700,
+      "h": 730,
+      "kind": "desk",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "テーブル",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#c9a97e"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    },
+    {
+      "id": "original-desk-counter",
+      "source": "catalogue",
+      "name": "スタディカウンター（2人並び・幅1800）",
+      "w": 1800,
+      "d": 450,
+      "h": 730,
+      "kind": "desk",
+      "front": "+Z",
+      "semanticExtent": "asset",
+      "openingOnly": false,
+      "category": "テーブル",
+      "finishChannels": [
+        {
+          "key": "wood",
+          "default": "#c9ad85"
+        }
+      ],
+      "genericColor": false,
+      "defaultElevation": 0,
+      "parameters": [
+        "w",
+        "d",
+        "rot",
+        "flipX",
+        "flipY",
+        "elev",
+        "baseRoom",
+        "baseLevel",
+        "finishColors",
+        "finishTextures",
+        "finishRoughness"
+      ],
+      "textureIds": [
+        "wood_oak",
+        "wood_floor",
+        "tile_floor",
+        "stone"
+      ],
+      "roughnessValues": [
+        0.85,
+        0.48,
+        0.22
+      ]
+    }
+  ]
+}

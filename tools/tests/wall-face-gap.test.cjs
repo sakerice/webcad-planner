@@ -77,6 +77,7 @@ function ctxFor(walls) {
     console: console, DATA: data, THREE: THREE, Math: Math, Number: Number,
     isFinite: isFinite, isNaN: isNaN, Array: Array, Object: Object,
     HeightModel: require(join(ROOT, 'assets', 'js', 'height-model.js')),
+    SceneOpeningGeometry: require(join(ROOT, 'assets', 'js', 'scene-opening-geometry.js')),
     sc3: { add: function (o) { built.push(o); return o; } }, __built: built,
     mark3DSelectable: function () {}, markInteriorCutawayCandidate: function () {},
     makeWallCoreMaterial: function () { return {}; },

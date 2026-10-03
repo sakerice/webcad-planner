@@ -1,0 +1,232 @@
+[
+  {
+    "sourceItemIndex": 5,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-front\",\"x\":6825,\"y\":3240,\"w\":910,\"d\":200,\"rot\":90,\"floor\":1}",
+    "reviewed": true,
+    "observedKind": "door-front",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "1階玄関。閉じた縦線の南端を中心に、東へ開く扉線と四分円がある。",
+      "crop": {
+        "scaleToWidth": 9600,
+        "x": 3200,
+        "y": 3100,
+        "width": 900,
+        "height": 850
+      }
+    },
+    "hingeSide": "axis-high",
+    "openSide": "normal-low",
+    "evidence": "1階玄関。閉じた縦線の南端を中心に、東へ開く扉線と四分円がある。"
+  },
+  {
+    "sourceItemIndex": 6,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-swing\",\"x\":2730,\"y\":2275,\"w\":780,\"d\":780,\"rot\":0,\"floor\":1}",
+    "reviewed": true,
+    "observedKind": "door-swing",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "1階主寝室／衣類室境界。閉じた横線の東端を中心に、北へ開く扉線と四分円がある。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "hingeSide": "axis-high",
+    "openSide": "normal-low",
+    "evidence": "1階主寝室／衣類室境界。閉じた横線の東端を中心に、北へ開く扉線と四分円がある。"
+  },
+  {
+    "sourceItemIndex": 7,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-swing\",\"x\":2665,\"y\":3185,\"w\":780,\"d\":780,\"rot\":0,\"floor\":1}",
+    "reviewed": true,
+    "observedKind": "door-swing",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "1階トイレ。閉じた横線の西端を中心に、北へ開く扉線と四分円がある。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "hingeSide": "axis-low",
+    "openSide": "normal-low",
+    "evidence": "1階トイレ。閉じた横線の西端を中心に、北へ開く扉線と四分円がある。"
+  },
+  {
+    "sourceItemIndex": 8,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-slide-s\",\"x\":2045,\"y\":1365,\"w\":780,\"d\":150,\"rot\":0,\"floor\":1}",
+    "reviewed": false,
+    "observedKind": "door-slide-s",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "衣類室南側。引戸らしい平行線はあるが、左右の可動方向と壁側の凡例がない。出入り方向の矢印は引込み方向とは扱わない。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "衣類室南側。引戸らしい平行線はあるが、左右の可動方向と壁側の凡例がない。出入り方向の矢印は引込み方向とは扱わない。"
+  },
+  {
+    "sourceItemIndex": 9,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-slide-s\",\"x\":3185,\"y\":910,\"w\":910,\"d\":150,\"rot\":90,\"floor\":1}",
+    "reviewed": false,
+    "observedKind": "door-slide-s",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "衣類室東側。出入り方向の横矢印は戸の移動方向と直交する。可動方向・壁側は未確定。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "衣類室東側。出入り方向の横矢印は戸の移動方向と直交する。可動方向・壁側は未確定。"
+  },
+  {
+    "sourceItemIndex": 10,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-slide-s\",\"x\":4820,\"y\":2275,\"w\":780,\"d\":150,\"rot\":0,\"floor\":1}",
+    "reviewed": false,
+    "observedKind": "door-slide-s",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "洗面室南側。引戸らしい線と出入り矢印があるが、左右の可動方向・壁側は未確定。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "洗面室南側。引戸らしい線と出入り矢印があるが、左右の可動方向・壁側は未確定。"
+  },
+  {
+    "sourceItemIndex": 11,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-slide-s\",\"x\":5460,\"y\":1365,\"w\":780,\"d\":150,\"rot\":90,\"floor\":1}",
+    "reviewed": false,
+    "observedKind": "door-slide-s",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "浴室西側。斜線による折戸らしい記号が見えるが、折れ方・吊元・可動側を確定できない。片引戸という元読取も未確認。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "浴室西側。斜線による折戸らしい記号が見えるが、折れ方・吊元・可動側を確定できない。片引戸という元読取も未確認。"
+  },
+  {
+    "sourceItemIndex": 12,
+    "sourcePageId": "native:sha256:6fa5392d55a91fc112457cc72f566596087c854f6195d2914e6a1835c80494e8",
+    "originalSnapshot": "{\"type\":\"door-fold\",\"x\":4095,\"y\":3185,\"w\":780,\"d\":420,\"rot\":0,\"floor\":1}",
+    "reviewed": false,
+    "observedKind": "door-fold",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 1,
+      "description": "収納南側。左右2枚の円弧があり両開き戸の可能性が高い。元読取の折戸と一致せず、厳密な両開きモデルは未対応。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "収納南側。左右2枚の円弧があり両開き戸の可能性が高い。元読取の折戸と一致せず、厳密な両開きモデルは未対応。"
+  },
+  {
+    "sourceItemIndex": 32,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "originalSnapshot": "{\"type\":\"door-swing\",\"x\":2730,\"y\":1820,\"w\":780,\"d\":780,\"rot\":0,\"floor\":3}",
+    "reviewed": true,
+    "observedKind": "door-swing",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 3,
+      "description": "3階トイレ。閉じた横線の東端を中心に、南へ開く扉線と四分円がある。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "hingeSide": "axis-high",
+    "openSide": "normal-high",
+    "evidence": "3階トイレ。閉じた横線の東端を中心に、南へ開く扉線と四分円がある。"
+  },
+  {
+    "sourceItemIndex": 33,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "originalSnapshot": "{\"type\":\"door-slide-s\",\"x\":2275,\"y\":2275,\"w\":780,\"d\":150,\"rot\":90,\"floor\":3}",
+    "reviewed": false,
+    "observedKind": "door-slide-s",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 3,
+      "description": "3階書斎1西側。出入り方向の横矢印は戸の移動方向と直交する。片引戸／戸袋と可動方向は未確定。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "reason": "3階書斎1西側。出入り方向の横矢印は戸の移動方向と直交する。片引戸／戸袋と可動方向は未確定。"
+  },
+  {
+    "sourceItemIndex": 34,
+    "sourcePageId": "native:sha256:2722a7e44fa17826c9cc139f2d80c7cea758532dac8f0cc0af4f0ed75480b1a6",
+    "originalSnapshot": "{\"type\":\"door-swing\",\"x\":3185,\"y\":2275,\"w\":780,\"d\":780,\"rot\":90,\"floor\":3}",
+    "reviewed": true,
+    "observedKind": "door-swing",
+    "region": {
+      "source": "tools/tests/fixtures/madori-3f.pdf",
+      "page": 3,
+      "description": "3階書斎2。閉じた縦線の南端を中心に、東へ開く扉線と四分円がある。",
+      "crop": {
+        "scaleToWidth": 4800,
+        "x": 690,
+        "y": 1050,
+        "width": 1250,
+        "height": 1050
+      }
+    },
+    "hingeSide": "axis-high",
+    "openSide": "normal-low",
+    "evidence": "3階書斎2。閉じた縦線の南端を中心に、東へ開く扉線と四分円がある。"
+  }
+]

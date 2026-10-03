@@ -285,6 +285,7 @@ function capturePlan2dDataUrl(options){
 // (build3D と同じ仕組み)。2階の壁の隅の取り合いは下の階の壁の高さを見るので、
 // 覚えておかないと描画1回で同じ屋根の高さを千回以上求め直し、ドラッグが重くなる。
 function draw2d(){
+  if(typeof PlanImport!=='undefined' && PlanImport.syncBuildingNotice) PlanImport.syncBuildingNotice();
   if(typeof _roofBaseCache==='undefined'||_roofBaseCache) return draw2dScene();
   _roofBaseCache={};
   try{ return draw2dScene(); } finally { _roofBaseCache=null; }
@@ -305,8 +306,9 @@ function draw2dScene(){
     ctx.save(); ctx.globalAlpha = 0.22;
     DATA.rooms.filter(function(r){return r.floor===ghostFloor;}).forEach(function(r){
       var px=ST.panX+r.x*sc, py=ST.panY+r.y*sc, w=r.w*sc, d=r.d*sc;
-      ctx.fillStyle='rgba(160,160,210,0.4)'; ctx.fillRect(px,py,w,d);
-      ctx.strokeStyle='#6070a0'; ctx.lineWidth=1; ctx.strokeRect(px,py,w,d);
+      ctx.fillStyle='rgba(160,160,210,0.4)'; if(r.shape){RoomGeometry.trace(ctx,r,function(p){return {x:ST.panX+p.x*sc,y:ST.panY+p.y*sc};}); ctx.fill();}
+      else ctx.fillRect(px,py,w,d);
+      ctx.strokeStyle='#6070a0'; ctx.lineWidth=1; if(r.shape)ctx.stroke();else ctx.strokeRect(px,py,w,d);
     });
     DATA.walls.filter(function(w){return w.floor===ghostFloor;}).forEach(drawWall2d);
     ctx.restore();
@@ -329,13 +331,15 @@ function draw2dScene(){
     ctx.save();
     ctx.shadowBlur=12; ctx.shadowColor='rgba(0,0,0,0.06)';
     ctx.fillStyle='rgba(252,251,248,0.95)';
-    ctx.fillRect(px,py,w,d);
+    if(r.shape){RoomGeometry.trace(ctx,r,function(p){return {x:ST.panX+p.x*sc,y:ST.panY+p.y*sc};}); ctx.fill();}
+    else ctx.fillRect(px,py,w,d);
     ctx.restore();
     ctx.strokeStyle=sel?'#e94560':'rgba(0,0,0,0.1)';
     ctx.lineWidth=sel?3.5:1.2;
-    ctx.strokeRect(px,py,w,d);
+    if(r.shape)ctx.stroke();else ctx.strokeRect(px,py,w,d);
     if(ST.selected===r&&ST.tool==='select') drawHandles(r,px+w/2,py+d/2,w/2,d/2,sc);
   });
+  if(typeof SceneSourceOverlay!=='undefined'&&typeof SceneSourceOverlay.draw==='function') SceneSourceOverlay.draw(ctx,DATA,ST);
   // 4. Walls
   fw.forEach(drawWall2d);
   if(ST.selected && ST.selected.x1!==undefined && ST.selected.x2!==undefined) drawWallHandles(ST.selected);
@@ -548,10 +552,10 @@ function drawGrid(){
   ctx.restore();
 }
 
-function drawAreaTag(cx,cy,w,d,name,isSelected){
+function drawAreaTag(cx,cy,w,d,name,isSelected,areaMm2){
   if(!isFiniteCanvasValue(cx) || !isFiniteCanvasValue(cy) || !isFiniteCanvasValue(w) || !isFiniteCanvasValue(d)) return;
   var p=w2c(cx,cy);
-  var sqm = (w * d) / 1000000;
+  var sqm = (areaMm2===undefined?w*d:areaMm2) / 1000000;
   var tatami = sqm / 1.62;
   var areaStr = tatami.toFixed(1) + '畳 / ' + sqm.toFixed(2) + '㎡';
   var showArea = ST.zoom >= 0.4;
@@ -604,7 +608,8 @@ function drawRoomLbls(){
   var fr=DATA.rooms.filter(function(r){return r.floor===ST.floor;});
   fr.forEach(function(l){
     drawSkipLevelEdges2d(l);
-    drawAreaTag(l.x+l.w/2,l.y+l.d/2,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l);
+    var anchor=l.shape?RoomGeometry.labelAnchor(l):{x:l.x+l.w/2,y:l.y+l.d/2};
+    drawAreaTag(anchor.x,anchor.y,l.w,l.d,l.n||'部屋',planCaptureShows('selection')&&ST.selected===l,l.shape?RoomGeometry.area(l):undefined);
     drawCeilingLabel2d(l);
   });
   DATA.items.filter(function(i){return i.floor===ST.floor && i.type==='balcony';}).forEach(function(it){
@@ -625,7 +630,7 @@ function drawCeilingLabel2d(room){
   if(!planCaptureCeilingLabels()&&!lvl) return;
   if(!isFiniteCanvasValue(room.x)||!isFiniteCanvasValue(room.y)||!isFiniteCanvasValue(room.w)||!isFiniteCanvasValue(room.d)) return;
   var text=planCaptureCeilingLabels()?roomHeightLabel(room):lvl;
-  var p=w2c(room.x+room.w/2,room.y+room.d/2);
+  var anchor=room.shape?RoomGeometry.labelAnchor(room):{x:room.x+room.w/2,y:room.y+room.d/2}, p=w2c(anchor.x,anchor.y);
   var szN=Math.max(planCaptureMinFont(10),ST.zoom*0.8), szA=Math.max(planCaptureMinFont(8),ST.zoom*0.55);
   var tagH=(ST.zoom>=0.4)?(szN+szA+14):(szN+12);
   var sz=Math.max(planCaptureMinFont(9),ST.zoom*0.5);
@@ -690,7 +695,7 @@ function drawLockOverlays(fw,fi){
   // 施錠バッジは編集用の目印であって設計要素ではない
   if(!planCaptureShows('annotations')) return;
   DATA.rooms.filter(function(r){return r.floor===ST.floor && isObjectLocked(r);}).forEach(function(r){
-    var p=w2c(r.x+r.w/2,r.y+r.d/2);
+    var anchor=r.shape?RoomGeometry.labelAnchor(r):{x:r.x+r.w/2,y:r.y+r.d/2}, p=w2c(anchor.x,anchor.y);
     drawLockBadgePx(p.cx,p.cy);
   });
   fw.filter(isObjectLocked).forEach(function(w){
@@ -718,6 +723,11 @@ function isOpeningItemType(type){
 }
 function getOpeningWallInfo(it){
   if(!isOpeningItemType(it.type)) return null;
+  // Scene IR bindings survive save/load. Invalid explicit hosts never fall
+  // back to the legacy nearest-wall/clamping heuristic below.
+  if(it.openingHostWallId!==undefined){
+    return typeof SceneOpeningGeometry==='undefined' ? null : SceneOpeningGeometry.explicitHostWallInfo(it,DATA.walls);
+  }
   var centers=getOpeningCenterCandidates(it);
   function findBestForCenter(cen){
     var best=null, bestD=999999, bestT=0;
@@ -773,6 +783,7 @@ function slideDoorPocketInfo(it,dir){
   if(!it||!isSlideInDoorType(it.type)) return null;
   var info=getOpeningWallInfo(it);
   if(!info||!info.wall) return null;
+  if(typeof SourceOpeningReview!=='undefined')return SourceOpeningReview.slidingBacking(it,dir,info,DATA.walls,DATA.items,function(o){return isOpeningItemType(o.type)?getOpeningWallInfo(o):null;});
   var w=info.wall, wdx=w.x2-w.x1, wdy=w.y2-w.y1, wlen=Math.hypot(wdx,wdy);
   if(wlen<1) return null;
   var ux=wdx/wlen, uy=wdy/wlen;
@@ -830,7 +841,7 @@ function slideDoorDirLabel(it,dir){
 function orientSlideInDoorsToWalls(items){
   var changed=0;
   (items||[]).forEach(function(it){
-    if(!it||!isSlideInDoorType(it.type)) return;
+    if(!it||!isSlideInDoorType(it.type)||it.openingSourceGeometry) return;
     var fwd=slideDoorPocketInfo(it,1), back=slideDoorPocketInfo(it,-1);
     if(!fwd||!back) return;
     var want=(back.haveMm>fwd.haveMm+1);
@@ -1768,9 +1779,10 @@ function drawItem2d(it){
       }
       ctx.stroke();
     } else if(it.type === 'lattice-screen') {
-      ctx.fillStyle='rgba(176,148,104,0.30)';
-      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);
-      ctx.strokeStyle='rgba(107,86,54,0.8)';
+      var latticeFrame=railFrameColorOf(it);
+      ctx.save();ctx.fillStyle=latticeFrame||'#b09468';ctx.globalAlpha*=0.30;
+      ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc);ctx.restore();
+      ctx.strokeStyle=latticeFrame||'rgba(107,86,54,0.8)';
       ctx.lineWidth=Math.max(1,sc*14);
       ctx.beginPath();
       // 向きは意匠から。fencePattern は指定の無い保存済みプランの読み替えに使う。
@@ -1941,49 +1953,26 @@ function drawItem2d(it){
       ctx.fillStyle='rgba(48,54,60,0.86)';
       ctx.textAlign='center'; ctx.textBaseline='top';
       ctx.fillText('電柱',0,rr+3);
-    } else if(it.type === 'door-swing' || it.type === 'door-swing-s' || it.type === 'door-front') {
-      var hingeX=(it.flipX?hw:-hw), leafX=(it.flipX?-hw:hw);
-      var openDir=it.flipY?-1:1;
-      var span=leafX-hingeX;
-      var isClosed=doorOpenState(it)==='closed';
-      var openAng=isClosed?0:openDir*Math.PI/3;
-      var openX=hingeX+span*Math.cos(openAng);
-      var openY=span*Math.sin(openAng);
-      var arcStart=span>0?0:Math.PI;
-      var arcEnd=arcStart+openAng;
-      var baseThickness=it.type==='door-front'
-        ? Math.max(7, Math.min(14, it.d*sc*0.55))
-        : Math.max(4, Math.min(9, it.d*sc*0.2));
-      var baseColor=it.type==='door-front'?'#d1945c':'#e8c47a';
-      var baseX=Math.min(hingeX, leafX);
-      var baseW=Math.abs(span);
-      ctx.fillStyle=baseColor;
-      ctx.fillRect(baseX, -baseThickness/2, baseW, baseThickness);
-      ctx.strokeStyle='rgba(70,54,36,0.75)'; ctx.lineWidth=1;
-      ctx.strokeRect(baseX, -baseThickness/2, baseW, baseThickness);
-      ctx.strokeStyle='#333'; ctx.fillStyle='#333';
-      ctx.beginPath(); ctx.arc(hingeX, 0, Math.max(2.5,3*sc), 0, Math.PI*2); ctx.fill();
-      // 建具線(扉)は壁外形線より細くし、線の太さの優先順位(壁>建具>寸法/軌跡線)を明確にする
-      ctx.lineWidth=1.4;
-      ctx.beginPath(); ctx.moveTo(hingeX, 0); ctx.lineTo(leafX, 0); ctx.stroke();
-      ctx.lineWidth=1.8;
-      ctx.beginPath(); ctx.moveTo(hingeX, 0); ctx.lineTo(openX, openY); ctx.stroke();
-      if(!isClosed){
-        ctx.lineWidth=0.9; ctx.setLineDash([3,3]);
-        ctx.beginPath();
-        ctx.arc(hingeX, 0, it.w*sc, arcStart, arcEnd, openDir<0);
-        ctx.strokeStyle='#555'; ctx.stroke();
-        ctx.setLineDash([]);
-        var arrowT=0.64;
-        var arrowAng=arcStart+(arcEnd-arcStart)*arrowT;
-        var ax=hingeX+Math.cos(arrowAng)*it.w*sc, ay=Math.sin(arrowAng)*it.w*sc;
-        var tangent=arrowAng+(openDir>0?Math.PI/2:-Math.PI/2);
-        ctx.fillStyle='#333';
-        ctx.beginPath();
-        ctx.moveTo(ax,ay);
-        ctx.lineTo(ax-Math.cos(tangent-0.55)*8*sc,ay-Math.sin(tangent-0.55)*8*sc);
-        ctx.lineTo(ax-Math.cos(tangent+0.55)*8*sc,ay-Math.sin(tangent+0.55)*8*sc);
-        ctx.closePath(); ctx.fill();
+    } else if(it.openingSourceGeometry && it.openingSourceGeometry.mode!=='opening' || ['door-swing','door-swing-s','door-front','door-slide','door-slide-s','door-pocket'].indexOf(it.type)>=0) {
+      // Source-faithful panel/pivot/travel: this is the same geometry as 3D and
+      // strict validation, including ordinary procedural door symbols.
+      var sourcePlan=SceneOpeningGeometry.planGeometry(it,pose.wallInfo&&pose.wallInfo.wall.thick||120,doorOpenState(it)!=='closed');
+      function sourcePath(points){ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p.x*sc,p.y*sc);else ctx.moveTo(p.x*sc,p.y*sc);});ctx.closePath();}
+      ctx.strokeStyle='#555';ctx.lineWidth=0.9;ctx.setLineDash([3,3]);
+      sourcePath(sourcePlan.closedLeaf);ctx.stroke();
+      if(sourcePlan.pocket){sourcePath(sourcePlan.pocket);ctx.stroke();}
+      ctx.setLineDash([]);ctx.fillStyle=getItem2dFillColor(it);ctx.strokeStyle='#333';ctx.lineWidth=1.4;
+      sourcePath(sourcePlan.leaf);ctx.fill();ctx.stroke();
+      if(sourcePlan.fixedLeaf){sourcePath(sourcePlan.fixedLeaf);ctx.fill();ctx.stroke();}
+      var sourceP=sourcePlan.parameters;
+      if(sourceP.mode==='hinge'){
+        var px=sourceP.hingeXmm*sc,py=(sourceP.hingeZmm||0)*sc;
+        ctx.beginPath();ctx.arc(px,py,2.5,0,Math.PI*2);ctx.fillStyle='#333';ctx.fill();
+        if(doorOpenState(it)!=='closed'){
+          var startAngle=sourceP.leafCenterXmm>0?0:Math.PI, sweepAngle=-sourceP.openAngleY;
+          ctx.setLineDash([3,3]);ctx.lineWidth=0.9;ctx.beginPath();
+          ctx.arc(px,py,sourceP.leafWidthMm*sc,startAngle,startAngle+sweepAngle,sweepAngle<0);ctx.stroke();ctx.setLineDash([]);
+        }
       }
     } else if(it.type === 'door-opening' || it.type === 'door-opening-arch') {
       // 建具なし開口: 開口端を中細線、開口範囲を細い破線で示す。
@@ -2002,72 +1991,6 @@ function drawItem2d(it){
       ctx.strokeStyle='rgba(70,70,70,0.58)';
       ctx.strokeRect(-hw,-hd,it.w*sc,it.d*sc);
       ctx.setLineDash([]);
-    } else if(it.type === 'door-slide') {
-      // 引き違い戸: 壁厚内の二本のレールと、互い違いの二枚の建具線に簡略化する。
-      ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
-      ctx.strokeStyle='#444'; ctx.lineWidth=0.9;
-      ctx.beginPath();
-      ctx.moveTo(-hw,-hd*0.62); ctx.lineTo(hw,-hd*0.62);
-      ctx.moveTo(-hw, hd*0.62); ctx.lineTo(hw, hd*0.62);
-      ctx.stroke();
-      var slideOpen=doorOpenState(it)!=='closed';
-      var leftOpen=!!it.flipX;
-      var panelW=it.w*sc*0.56;
-      var fixedX=leftOpen?(-hw+it.w*sc*0.40):(-hw+it.w*sc*0.04);
-      var movingClosedX=leftOpen?(-hw+it.w*sc*0.04):(-hw+it.w*sc*0.40);
-      var movingX=slideOpen?fixedX:movingClosedX;
-      ctx.strokeStyle='#222'; ctx.lineWidth=1.5;
-      ctx.beginPath();
-      ctx.moveTo(fixedX,-hd*0.28); ctx.lineTo(fixedX+panelW,-hd*0.28);
-      ctx.moveTo(movingX,hd*0.28); ctx.lineTo(movingX+panelW,hd*0.28);
-      ctx.stroke();
-      if(slideOpen){
-        ctx.fillStyle='#333'; var ax=leftOpen?-hw+it.w*sc*0.18:hw-it.w*sc*0.18;
-        var dir=leftOpen?-1:1;
-        ctx.beginPath();
-        ctx.moveTo(ax,0);
-        ctx.lineTo(ax-dir*8*sc,-5*sc);
-        ctx.lineTo(ax-dir*8*sc,5*sc);
-        ctx.closePath(); ctx.fill();
-      }
-    } else if(it.type === 'door-slide-s' || it.type === 'door-pocket') {
-      // 片引き戸: 戸を壁面片側の線で示し引き代側へ伸ばす / 引込み戸: 開口内実線+ポケット側破線
-      ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
-      ctx.strokeStyle='#444'; ctx.lineWidth=0.9;
-      ctx.beginPath();
-      ctx.moveTo(-hw,-hd*0.62); ctx.lineTo(hw,-hd*0.62);
-      ctx.moveTo(-hw, hd*0.62); ctx.lineTo(hw, hd*0.62);
-      ctx.stroke();
-      var sDir=it.flipX?-1:1;
-      var sOpen=doorOpenState(it)!=='closed';
-      ctx.strokeStyle='#222'; ctx.lineWidth=1.5;
-      if(it.type==='door-slide-s'){
-        var pz=(it.flipY?1:-1)*hd*1.05;
-        var px0=sOpen?sDir*it.w*sc:0;
-        ctx.beginPath();
-        ctx.moveTo(px0-hw,pz); ctx.lineTo(px0+hw,pz);
-        ctx.stroke();
-        // 引き代(戸が重なる壁範囲)の細線
-        ctx.strokeStyle='rgba(34,34,34,0.35)'; ctx.lineWidth=1;
-        ctx.beginPath();
-        ctx.moveTo(sDir*hw,pz); ctx.lineTo(sDir*hw*3,pz);
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        if(sOpen){
-          ctx.setLineDash([5*sc,3*sc]);
-          ctx.moveTo(sDir*hw,0); ctx.lineTo(sDir*hw*3,0);
-        } else {
-          ctx.moveTo(-hw,0); ctx.lineTo(hw,0);
-        }
-        ctx.stroke(); ctx.setLineDash([]);
-        // ポケット(戸袋)側の案内破線
-        ctx.strokeStyle='rgba(34,34,34,0.35)'; ctx.lineWidth=1;
-        ctx.setLineDash([4*sc,3*sc]);
-        ctx.beginPath();
-        ctx.moveTo(sDir*hw,0); ctx.lineTo(sDir*hw*3,0);
-        ctx.stroke(); ctx.setLineDash([]);
-      }
     } else if(it.type === 'door-fold' || it.type === 'door-fold-w') {
       // 折れ戸: 開口線+山形(折り)のJIS流平面記号。flipYで突出方向、片開きはflipXで吊元
       ctx.save(); ctx.globalAlpha=0.22; ctx.fillStyle=getItem2dFillColor(it); ctx.fillRect(-hw,-hd,it.w*sc,it.d*sc); ctx.restore();
@@ -2163,7 +2086,7 @@ function drawHandles(o,ccx,ccy,hw,hd,sc,rotOverride){
   ctx.translate(ccx,ccy); ctx.rotate((rotOverride!==undefined?rotOverride:(o.rot||0))*Math.PI/180);
   ctx.strokeStyle='#3080e8'; ctx.lineWidth=1.5; ctx.setLineDash([4,2]);
   ctx.strokeRect(-hw,-hd,hw*2,hd*2); ctx.setLineDash([]);
-  if(isObjectLocked(o)){ ctx.restore(); return; }
+  if(isObjectLocked(o)||o.openingSourceGeometry){ ctx.restore(); return; }
   // corners: square (aspect-ratio locked resize), edges: circle (single-axis resize)
   var corners=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]];
   var edges=[[0,-hd],[hw,0],[0,hd],[-hw,0]];
@@ -2384,6 +2307,7 @@ function applyResizeEdgeSnap(h, o, nx, ny, nw, nd, excludeId){
 function applyHandleDrag(cx,cy,e){
   var h=DRAG.handle, o=DRAG.origItem, it=ST.selected;
   if(!it||!o) return;
+  if(it.openingSourceGeometry&&h!=='move'){DRAG.active=false;return;}
   if(isObjectLocked(it)){ DRAG.active=false; return; }
   if(DRAG.group&&DRAG.group.length>1&&(h==='move'||h==='wall-move')){
     if(Math.hypot(cx-DRAG.startCX,cy-DRAG.startCY)<3&&!DRAG.saved)return;
@@ -2392,6 +2316,7 @@ function applyHandleDrag(cx,cy,e){
     DRAG.group.forEach(function(entry){var target=entry.obj,base=entry.orig;
       if(isObjectLocked(target))return;
       if(base.x1!==undefined){target.x1=base.x1+gx;target.y1=base.y1+gy;target.x2=base.x2+gx;target.y2=base.y2+gy;}
+      else if(base.shape)RoomGeometry.translate(target,gx,gy,base);
       else{target.x=base.x+gx;target.y=base.y+gy;}
     });ST._snapState=null;return;
   }
@@ -2414,7 +2339,8 @@ function applyHandleDrag(cx,cy,e){
       var ss=stairSnapPosition(it,nx,ny);
       nx=ss.x; ny=ss.y;
     }
-    it.x=nx; it.y=ny;
+    if(o.shape)RoomGeometry.translate(it,nx-o.x,ny-o.y,o);
+    else {it.x=nx; it.y=ny;}
 
   }else if(h==='rot'){
     var ocx=o.x+o.w/2, ocy=o.y+o.d/2;
@@ -2498,7 +2424,8 @@ function applyHandleDrag(cx,cy,e){
       it.pathPoints=o.pathPoints.map(function(p){return {x:(Number(p.x)||0)*sx,y:(Number(p.y)||0)*sy};});
     }
     if(it.windowStd && nw!==o.w) delete it.windowStd; // 手動リサイズで規格プリセット表示を解除
-    it.w=nw; it.d=nd; it.x=nx; it.y=ny;
+    if(o.shape)RoomGeometry.setBounds(it,{x:nx,y:ny,w:nw,d:nd},o);
+    else {it.w=nw; it.d=nd; it.x=nx; it.y=ny;}
   }
   if(!DRAG.active) updateProps();
 }
@@ -2512,6 +2439,10 @@ function hitHandle(it,mx,my){
   var dx=mx-ccx, dy=my-ccy;
   var rad=-(pose.rot||0)*Math.PI/180, cos=Math.cos(rad), sin=Math.sin(rad);
   var lx=dx*cos-dy*sin, ly=dx*sin+dy*cos;
+  if(it.openingSourceGeometry){
+    if(isSwingDoorType(it.type))return isInsideSwingDoor2dLocal(it,lx/sc,ly/sc)?'move':null;
+    return Math.abs(lx)<=hw&&Math.abs(ly)<=hd?'move':null;
+  }
   var handles=[
     {lx:-hw,ly:-hd,t:'nw'},{lx:0,ly:-hd,t:'n'},{lx:hw,ly:-hd,t:'ne'},
     {lx:hw,ly:0,t:'e'},{lx:hw,ly:hd,t:'se'},{lx:0,ly:hd,t:'s'},

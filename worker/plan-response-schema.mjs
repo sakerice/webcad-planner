@@ -24,13 +24,15 @@ const mm = (description) => ({ type: "NUMBER", description });
 // 寸法線1辺ぶん。総寸法と、その内訳の並び。
 const EDGE = {
   type: "OBJECT",
+  nullable: true,
   description: "その辺の寸法線",
   properties: {
-    total: mm("その辺の総寸法"),
+    total: { ...mm("その辺の総寸法"), nullable: true },
     parts: {
       type: "ARRAY",
+      nullable: true,
       description: "内訳",
-      items: mm("内訳ひとつ"),
+      items: { ...mm("内訳ひとつ"), nullable: true },
     },
   },
   propertyOrdering: ["total", "parts"],
@@ -126,6 +128,7 @@ const FLOOR = {
     },
     dims: {
       type: "OBJECT",
+      nullable: true,
       description: "寸法線",
       properties: { top: EDGE, bottom: EDGE, left: EDGE, right: EDGE },
       propertyOrdering: ["top", "bottom", "left", "right"],

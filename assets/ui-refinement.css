@@ -231,3 +231,59 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 開いた欄を一瞬示す(強調はオレンジの1色だけ)。見出しの浮きの影は別の規則が
    !important で持っているので、box-shadow には触らず outline で描く。 */
 #sidebar .asset-subcat.plan-recommend-target>.asset-subhdr{outline:2px solid var(--hp-primary);outline-offset:-2px}
+
+/* Local-only Scene IR correspondence review, using the existing import card. */
+#scene-ir-review details { margin: 10px 0; padding: 12px; border-radius: 16px; background: #fff; box-shadow: 0 2px 10px #26364512; }
+#scene-ir-review summary { cursor: pointer; font-weight: 600; overflow-wrap: anywhere; }
+#scene-ir-review pre { font-size: 12px; max-height: 240px; overflow: auto; overflow-wrap: anywhere; }
+#scene-ir-review label { display: block; margin: 10px 0; }
+#scene-ir-review .scene-mapping-editor { border: 0; border-radius: 16px; padding: 14px; margin-top: 12px; background: #f5f8fa; min-width: 0; }
+#scene-ir-review .scene-mapping-editor legend { font-weight: 600; overflow-wrap: anywhere; }
+#scene-ir-review .scene-mapping-editor select { display: block; max-width: 100%; width: 100%; min-height: 40px; margin-top: 6px; }
+#scene-ir-review button { border-radius: 999px; min-height: 40px; padding: 8px 16px; margin: 4px 6px 4px 0; }
+#scene-ir-review p { font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+#scene-ir-review [role="status"] { color: #9a3412; }
+
+/* Existing import review panel: bounded source-local registration controls. */
+.building-registration-review { overflow-wrap: anywhere; }
+.building-registration-review details { margin: 12px 0; padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 2px 10px #30445212; }
+.building-registration-anchors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; border: 0; padding: 0; }
+.building-registration-anchors label { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.building-registration-anchors label:last-child { grid-column: 1 / -1; }
+.building-registration-review input:not([type=checkbox]) { box-sizing: border-box; width: 100%; min-height: 40px; }
+.building-registration-review button { min-height: 40px; white-space: normal; }
+
+#building-registration-notice { position:absolute; z-index:25; left:12px; right:12px; bottom:12px; max-width:560px; padding:10px 14px; border-radius:14px; color:#5e4329; background:#fff9ed; box-shadow:0 3px 16px #30445220; font-size:12px; }
+#building-registration-notice[hidden] { display:none; }
+#building-registration-notice summary { cursor:pointer; font-weight:600; }
+#building-registration-notice-detail { margin-top:8px; white-space:pre-wrap; line-height:1.6; }
+
+/* Comparison uses the existing toolbar controls/tokens; child editors own all plan actions. */
+.editor-pane #compare-launch,.editor-pane #toolbar>.brand-mark,.editor-pane #toolbar>.tsep:first-of-type{display:none!important}
+.editor-pane #toolbar .tbtn.mob-hide{display:inline-flex!important}
+.parallel-open body>#toolbar>.brand-mark,.parallel-open .offline-preview-banner{display:none}
+.parallel-editors{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#f2f4f7;color:var(--hp-text)}
+.parallel-editors[hidden]{display:none}
+.parallel-heading,.parallel-controls{display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 12px;background:#fff;box-shadow:var(--hp-shadow-soft);border-radius:24px}
+.parallel-heading [data-parallel-close]{margin-left:auto}
+.parallel-heading .brand-mark{flex-shrink:0}
+.parallel-local-notice,[data-parallel-status]{font-size:11px;color:var(--hp-muted)}
+.parallel-controls{flex-wrap:wrap}
+.parallel-controls select,.parallel-pane header select{min-height:40px;min-width:0;padding:6px 12px;border:0;border-radius:var(--hp-control-radius);background:#f5f6f3;color:var(--hp-text);font:inherit;font-size:12px}
+.parallel-editors .tbtn{min-height:40px;border:0;border-radius:var(--hp-control-radius);box-shadow:none!important}
+.parallel-recovery summary{margin:0;font-size:12px}
+[data-parallel-status]{margin:6px 18px}
+.parallel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex:1;min-height:0;gap:8px;padding:8px 12px}
+.parallel-pane{display:flex;min-width:0;min-height:0;flex-direction:column;background:#fff;border-radius:24px;overflow:hidden;box-shadow:var(--hp-shadow)}
+.parallel-pane header{padding:6px;display:flex}
+.parallel-pane header select{flex:1;width:auto;background:#fff}
+.parallel-pane-remove{flex:0 0 40px;min-height:40px;font-size:22px;padding:0;border-radius:var(--hp-control-radius)}
+.parallel-pane iframe{width:100%;flex:1;border:0;min-height:0}
+.parallel-editors button:disabled{opacity:.5;cursor:default}
+@media(max-width:768px){.parallel-heading{flex-wrap:wrap}.parallel-local-notice{display:none}.parallel-controls{max-height:30dvh;overflow:auto}.parallel-grid{gap:6px;padding:6px}.parallel-heading,.parallel-controls{margin-left:6px;margin-right:6px}}
+
+/* Preserve the native disconnected state against general button display rules. */
+#toolbar #collab-indicator:not(.show){display:none!important}
+
+/* Keep the comparison entry above the native 3D elevation controls. */
+body:has(#elev-snap-fab.show) #compare-launch{bottom:126px}
