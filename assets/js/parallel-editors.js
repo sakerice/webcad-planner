@@ -17,12 +17,15 @@
  }
  const clone=v=>JSON.parse(JSON.stringify(v));
  function syncCamera(source,target){const view=target.view(),from=source.view();view.twoD=from.twoD;if(from.camera&&view.camera&&((from.view==='3d-walk')===(view.view==='3d-walk')))view.camera=from.camera;target.applyView(view);}
- function modelPool(){const cache=new Map();let resources=new Set();return {get resources(){return resources;},cache,get(url,load){if(!cache.has(url)){const owned=resources;let promise;promise=Promise.resolve().then(load).then(scene=>{scene.traverse(o=>{if(o.geometry)owned.add(o.geometry);for(const m of [].concat(o.material||[]))for(const v of Object.values(m))if(v&&v.isTexture)owned.add(v);});return scene;}).catch(e=>{if(cache.get(url)===promise)cache.delete(url);throw e;});cache.set(url,promise);}return cache.get(url);},async dispose(){const pending=[...cache.values()],owned=resources;cache.clear();resources=new Set();const results=await Promise.allSettled(pending),materials=new Set();for(const r of results)if(r.status==='fulfilled')r.value.traverse(o=>{for(const m of [].concat(o.material||[]))materials.add(m);});for(const m of materials)m.dispose();for(const resource of owned)resource.dispose();owned.clear();}};}
+ function modelPool(){const cache=new Map(),controllers=new Map();let resources=new Set(),materials=new Set();return {get resources(){return resources;},owns(resource){return resources.has(resource)||materials.has(resource);},cache,get(url,load){if(!cache.has(url)){const owned=resources,ownedMaterials=materials,controller=new AbortController();controllers.set(url,controller);let promise;promise=Promise.resolve().then(()=>{if(controller.signal.aborted)throw controller.signal.reason;return load(controller.signal);}).then(scene=>{if(controllers.get(url)===controller)controllers.delete(url);scene.traverse(o=>{if(o.geometry)owned.add(o.geometry);for(const m of [].concat(o.material||[])){ownedMaterials.add(m);for(const v of Object.values(m))if(v&&v.isTexture)owned.add(v);}});return scene;}).catch(e=>{if(cache.get(url)===promise){cache.delete(url);controllers.delete(url);}throw e;});cache.set(url,promise);}return cache.get(url);},async dispose(){const pending=[...cache.values()],owned=resources,ownedMaterials=materials;for(const controller of controllers.values())controller.abort();controllers.clear();cache.clear();resources=new Set();materials=new Set();await Promise.allSettled(pending);for(const m of ownedMaterials)m.dispose();ownedMaterials.clear();for(const resource of owned)resource.dispose();owned.clear();}};}
 
  if(typeof module!=='undefined')module.exports={modelPool,cloneState,cloneRecord,detachSharedTextureListeners,detachRendererTextureListeners};
  if(!root.document)return;
  root.createEditorModelPool=modelPool;
- if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE){
+ root.cloneEditorPaneState=cloneState;
+ if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE || typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR){
+  const native=typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR,paneId=native?NATIVE_EDITOR_PANE:EDITOR_PANE;
+  const hostApi=()=>native?root.PlanLibrary:root.parent.ParallelEditors;
   let renderCalls=0,applying=false,installGeneration=0;const paneGeometries=new Set(),pendingEngineWaits=new Set();
   const oldRender=render3DNow;render3DNow=function(){renderCalls++;const result=oldRender.apply(this,arguments);changed();return result;};
   const ready=Promise.resolve(root.comparisonCatalogueReady);
@@ -32,8 +35,8 @@
    const done=()=>finish(),cancel=()=>finish(),timer=setTimeout(()=>finish(new Error('3D描画エンジンの読み込みが完了しませんでした。復元対象のデータは変更していません。')),30000);
    pendingEngineWaits.add(cancel);root.addEventListener('three-ready',done,{once:true});
   });}
-  function view(){return {view:ST.view,floor:ST.floor,twoD:{zoom:ST.zoom,panX:ST.panX,panY:ST.panY},camera:camExt&&orbit?{pos:camExt.position.toArray(),target:orbit.target.toArray(),fov:camExt.fov,walk:ST.view==='3d-walk'&&WALK.active?{x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}:null}:null};}
-  function applyView(v){applying=true;try{if(v.floor!==ST.floor){onFloorChange(v.floor);document.getElementById('floor-sel').value=String(v.floor);if(ren)rebuild3D();}if(v.view!==ST.view)setView(v.view);if(v.twoD){Object.assign(ST,v.twoD);draw2d();}if(v.camera&&camExt&&orbit){if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();camExt.fov=v.camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&v.camera.walk&&WALK.active){for(const k of ['x','z','yaw','pitch'])if(Number.isFinite(v.camera.walk[k]))WALK[k]=v.camera.walk[k];walkApplyCamera();}else applyStashedCamera(v.camera);invalidate3D();}}finally{applying=false;lastCamera=cameraKey();}}
+  function view(){return {view:ST.view,floor:ST.floor,walkProfile:root.WalkTps&&root.WalkTps.enabled()?root.WalkTps.preference():undefined,twoD:{zoom:ST.zoom,panX:ST.panX,panY:ST.panY},camera:camExt&&orbit?{pos:camExt.position.toArray(),target:orbit.target.toArray(),fov:camExt.fov,walk:ST.view==='3d-walk'&&WALK.active?{x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}:null}:null};}
+  function applyView(v){applying=true;try{if(v.floor!==ST.floor){onFloorChange(v.floor);document.getElementById('floor-sel').value=String(v.floor);if(ren)rebuild3D();}if(v.view!==ST.view)setView(v.view);if(root.WalkTps)root.WalkTps.restorePreference(v.walkProfile);if(v.twoD){Object.assign(ST,v.twoD);draw2d();}if(v.camera&&camExt&&orbit){if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();camExt.fov=v.camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&v.camera.walk&&WALK.active){for(const k of ['x','z','yaw','pitch'])if(Number.isFinite(v.camera.walk[k]))WALK[k]=v.camera.walk[k];walkApplyCamera();}else applyStashedCamera(v.camera);invalidate3D();}}finally{applying=false;lastCamera=cameraKey();}}
   function localGeometry(source){
    const geometry=new THREE.BufferGeometry();geometry.name=source.name;geometry.groups=clone(source.groups);geometry.drawRange={start:source.drawRange.start,count:source.drawRange.count};geometry.userData=clone(source.userData||{});
    function attribute(a){const Typed=root[a.array.constructor.name];const array=new Typed(a.array.buffer,a.array.byteOffset,a.array.length);const out=new THREE.BufferAttribute(array,a.itemSize,a.normalized);out.usage=a.usage;return out;}
@@ -42,20 +45,60 @@
    if(source.boundingBox)geometry.boundingBox=new THREE.Box3(new THREE.Vector3().copy(source.boundingBox.min),new THREE.Vector3().copy(source.boundingBox.max));if(source.boundingSphere)geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3().copy(source.boundingSphere.center),source.boundingSphere.radius);
    root.parent.ParallelEditors.modelPool.resources.add(geometry);paneGeometries.add(geometry);return geometry;
   }
-  root.EditorPane={ready,view,applyView,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
-   async install(plan,saved){++_jsonImportRequest;const generation=++installGeneration;cancelEngineWaits();await ready;if(root._editorPaneDisposed||generation!==installGeneration)return false;if(saved&&saved.view&&saved.view.view!=='2d')await waitForEngine();if(root._editorPaneDisposed||generation!==installGeneration)return false;DATA=clone(plan);_defaultPlanPending=false;resetHeightGlobalsForPlanLoad();ensureObjectIds();ensureFloorMetadata();ensureHeightDefaults();ensureExteriorWallSettings();ensureInteriorWallSettings();ensureRoofAppearance();normalizeLegacyFurnitureItems();syncExteriorWallSettings();ST.selected=null;clearMultiSelection();HISTORY.length=0;REDO_HISTORY.length=0;if(saved){HISTORY.push(...saved.history);REDO_HISTORY.push(...saved.redo);DIRTY=saved.dirty;}else DIRTY=false;restoreViewState();draw2d();if(ren)rebuild3D();if(saved)applyView(saved.view);else resetView();root.AssetPackPicker?.setSelection(saved?.cataloguePack);},
-   undo:()=>undoAction(),redo:()=>redoAction(),async save(){captureViewState();const saved=serializeDataSnapshot();await StorageAdapter.save(DATA);if(serializeDataSnapshot()===saved)clearDirty();return root.EditorPane.snapshot();},
+  // Both JSON import and shared-room handoff own this same native rollback.
+  // Keep object-selection references attached to the untouched previous DATA.
+  function captureInstallState(){
+   return {data:DATA,state:{...clone({...ST,selected:null,multiSelected:[],_snapState:null}),selected:ST.selected,multiSelected:ST.multiSelected.slice(),_snapState:ST._snapState},
+    drag:{...clone({...DRAG,origItem:null}),origItem:DRAG.origItem},history:HISTORY.slice(),redo:REDO_HISTORY.slice(),dirty:DIRTY,view:view(),
+    wallHeight:WALL_H,nextId:nextId,light:clone(LIGHT_SETTINGS),pending:_defaultPlanPending,legacyAdmission:root.__legacyPlanAdmission,
+    walk:typeof WALK==='undefined'?null:clone(WALK),cataloguePack:root.AssetPackPicker?.getSelection()};
+  }
+  function restoreInstallState(previous){
+   DATA=previous.data;ST=previous.state;DRAG=previous.drag;DIRTY=previous.dirty;root.__legacyPlanAdmission=previous.legacyAdmission;
+   WALL_H=previous.wallHeight;nextId=previous.nextId;for(const key of Object.keys(LIGHT_SETTINGS))if(!(key in previous.light))delete LIGHT_SETTINGS[key];Object.assign(LIGHT_SETTINGS,previous.light);_defaultPlanPending=previous.pending;
+   if(previous.walk&&typeof WALK!=='undefined')WALK=previous.walk;
+   HISTORY.length=0;HISTORY.push(...previous.history);REDO_HISTORY.length=0;REDO_HISTORY.push(...previous.redo);
+   // Restore authoritative state first. A renderer fault during recovery must
+   // never prevent undo, unsaved edits, selection, options or camera recovery.
+   for(const recover of [()=>{const camera=previous.view.camera;if(camera&&camExt&&orbit){camExt.position.fromArray(camera.pos);orbit.target.fromArray(camera.target);camExt.fov=camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&WALK.active)walkApplyCamera();else orbit.update();invalidate3D();}},()=>applyView(previous.view),syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,
+    ()=>{if(ren)rebuild3D(true);},()=>root.AssetPackPicker?.setSelection(previous.cataloguePack),()=>{document.getElementById('save-btn')?.classList.toggle('dirty',DIRTY);renderSaveButtonState();}]){
+    try{recover();}catch(recoveryError){console.warn('[WebCAD] pane install recovery',recoveryError);}
+   }
+  }
+  root.EditorPane={ready,view,applyView,captureInstallState,restoreInstallState,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
+   async install(plan,saved,admission){
+    ++_jsonImportRequest;const generation=++installGeneration;cancelEngineWaits();await ready;
+    if(root._editorPaneDisposed||generation!==installGeneration)return false;
+    if(saved?.view&&saved.view.view!=='2d')await waitForEngine();
+    if(root._editorPaneDisposed||generation!==installGeneration)return false;
+    // Use the native JSON validation/migration/render transaction. A failed
+    // first draw must never leave the new scene under the previous plan ID.
+    const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();
+    try{
+     applyJsonImport(staged);
+     HISTORY.length=0;REDO_HISTORY.length=0;
+     if(saved){HISTORY.push(...(saved.history||[]));REDO_HISTORY.push(...(saved.redo||[]));}
+     DIRTY=!!saved?.dirty;
+     if(saved?.view)applyView(saved.view);else resetView();
+     root.AssetPackPicker?.setSelection(saved?.cataloguePack);if(DIRTY)renderSaveButtonState();else clearDirty();
+     return true;
+    }catch(error){
+     restoreInstallState(previous);
+     throw error;
+    }
+   },
+   undo:()=>undoAction(),redo:()=>redoAction(),async save(){captureViewState();const saved=serializeDataSnapshot(),result=await StorageAdapter.save(DATA);if(serializeDataSnapshot()===saved&&result?.canClean!==false)clearDirty();return root.EditorPane.snapshot();},
    metrics:()=>({renderCalls,modelCount:Object.keys(_modelCache).length,pixelRatio:ren&&ren.getPixelRatio(),renderer:ren?clone(ren.info.memory):null,quality:{ao:!!(_n8aoPass&&_n8aoPass.enabled),shadows:!!(ren&&ren.shadowMap.enabled)}}),
-   dispose(){++_jsonImportRequest;root._editorPaneDisposed=true;++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
+   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root._editorPaneDisposed=true;if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
   };
   let scheduled=false,lastCamera=null;
   function cameraKey(){const v=view();return JSON.stringify({twoD:v.twoD,camera:v.camera},(k,value)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toFixed(8)):value);}
-  function changed(){if(applying||scheduled||root._editorPaneDisposed||root.parent.ParallelEditors.activeId!==EDITOR_PANE)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;if(root._editorPaneDisposed)return;const key=cameraKey();if(key===lastCamera)return;lastCamera=key;root.parent.ParallelEditors.changed(EDITOR_PANE);});}
+  function changed(){if(applying||scheduled||root._editorPaneDisposed||hostApi()?.activeId!==paneId)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;if(root._editorPaneDisposed)return;const key=cameraKey();if(key===lastCamera)return;lastCamera=key;hostApi()?.changed(paneId);});}
   document.addEventListener('wheel',changed,{passive:true});document.addEventListener('pointermove',e=>{if(e.buttons)changed();},{passive:true});document.addEventListener('pointerup',changed,{passive:true});document.addEventListener('keyup',changed);document.addEventListener('click',changed);
-  document.documentElement.classList.add('editor-pane');
+  if(!native)document.documentElement.classList.add('editor-pane');
   // Reuse the existing load button itself, its handler and styling; no duplicate action menu.
   const savedLoad=document.querySelector('.mobile-data-grid [onclick="loadPlanFromStorageButton()"]');
-  if(savedLoad){savedLoad.className='tbtn';document.getElementById('save-btn').after(savedLoad);}
+  if(savedLoad&&!native){savedLoad.className='tbtn';document.getElementById('save-btn').after(savedLoad);}
   return;
  }
  if(typeof COMPARISON_PREVIEW!=='undefined'&&COMPARISON_PREVIEW)return;
@@ -69,7 +112,7 @@
    const id='plan-'+Date.now().toString(36)+'-'+(++sequence);plans.set(id,{id,name:name||'案 '+String.fromCharCode(64+plans.size+1),plan:clone(valid||plan),explicitlySaved:false,memoryOnly:options.memoryOnly===true});options.onCreated?.(id);if(panes.size<2)await mount(id,options.signal);checkPreviewSignal(options.signal);refresh();return id;},
   async openPlan(plan,name,options){options=options||{};checkPreviewSignal(options.signal);const checked=root.PlanSchema.validatePlan(plan);if(!checked.ok)throw Error('間取りJSONを確認してください。');if(plans.size>=4)throw Error('保持できる案は最大4案です。既存の案を保存してから確認してください。');root._editorHostCovered=true;document.documentElement.classList.add('parallel-open');if(!panel)buildPanel();else panel.hidden=false;if(!plans.size)await api.addPlan(DATA,'案 A（現在の間取りのコピー）',options);else if(!panes.size)for(const id of [...plans.keys()].slice(0,2))await mount(id);checkPreviewSignal(options.signal);const id=await api.addPlan(plan,name,options);checkPreviewSignal(options.signal);if(![...panes.values()].some(p=>p.planId===id)){const target=[...panes.values()].find(p=>p.ready&&!p.busy);if(!target)throw Error('編集画面の処理が完了するまでお待ちください。');await api.select(target.id,id);}const pane=[...panes.values()].find(p=>p.planId===id),editor=pane&&pane.frame.contentWindow;if(editor){const floors=[...new Set([...(plan.walls||[]),...(plan.rooms||[]),...(plan.items||[])].map(o=>Number(o.floor)||1))].sort((a,b)=>a-b);if(floors.length){editor.document.getElementById('floor-sel').value=String(floors[0]);editor.onFloorChange(floors[0]);}editor.resetView();api.changed(pane.id);}return id;},
   discardMemoryPlan(id){const record=plans.get(id);if(!record)return;if(!record.memoryOnly)throw Error('Only memory-only previews can be discarded without review');for(const pane of [...panes.values()])if(pane.planId===id){pane.cancelMount?.();pane.frame.contentWindow.EditorPane?.dispose();pane.card.remove();panes.delete(pane.id);}plans.delete(id);if(!panes.has(activeId))activeId=panes.keys().next().value||null;refresh();if(!plans.size&&!panes.size&&panel)api.close();},
-  async select(paneId,planId){const pane=panes.get(paneId),record=plans.get(planId);if(!pane||!record)throw Error('案がありません。');if(!pane.ready||pane.busy)throw Error('編集画面の処理が完了するまでお待ちください。');if([...panes.values()].some(p=>p!==pane&&p.planId===planId))throw Error('この案はもう一方の画面で編集中です。');stash(pane);pane.ready=false;refresh();try{pane.planId=planId;await pane.frame.contentWindow.EditorPane.install(record.plan,record.state);pane.frame.contentWindow.__editorPlanId=planId;}finally{pane.ready=true;refresh();}api.changed(pane.id);},
+  async select(paneId,planId){const pane=panes.get(paneId),record=plans.get(planId);if(!pane||!record)throw Error('案がありません。');if(!pane.ready||pane.busy)throw Error('編集画面の処理が完了するまでお待ちください。');if([...panes.values()].some(p=>p!==pane&&p.planId===planId))throw Error('この案はもう一方の画面で編集中です。');stash(pane);pane.ready=false;refresh();try{await pane.frame.contentWindow.EditorPane.install(record.plan,record.state);pane.planId=planId;pane.frame.contentWindow.__editorPlanId=planId;}finally{pane.ready=true;refresh();}api.changed(pane.id);},
   async remove(id){const record=plans.get(id);if(!record)return;const mounted=[...panes.values()].filter(p=>p.planId===id);for(const pane of mounted)if(pane.busy)throw Error('この案は保存中です。完了してから操作してください。');
    const dirty=mounted.length?mounted.some(p=>p.frame.contentWindow.EditorPane?.state().dirty):record.state?.dirty;
    if(dirty&&!confirm('この案の未保存の編集を除いてよいですか？'))return false;

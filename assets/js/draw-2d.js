@@ -1392,7 +1392,7 @@ function drawRulerSnapMarker(p,color){
 }
 
 function drawLight2d(it,sc){
-  ensureLightDefaults(it);
+  it=getEffectiveLightItem(it);
   var hw=(it.w||200)*sc/2, hd=(it.d||200)*sc/2;
   var color=it.lightColor||'#fff6dd';
   var kind=it.lightKind||lightKindFromType(it.type);

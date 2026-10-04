@@ -161,8 +161,16 @@ function ensureLightDefaults(it){
       ? defaultLightElevationMm(it.floor,it.x+it.w/2,it.y+it.d/2)
       : Math.max(1800,attach);
   }
-  it.color=it.lightColor;
+  if(it.color===undefined) it.color=it.lightColor;
   return it;
+}
+function getEffectiveLightItem(it){
+  if(!it || !isLightItemType(it.type)) return it;
+  // Rendering and the property panel use defaults on a detached view. The
+  // saved item may intentionally retain different legacy color fields.
+  var light=ensureLightDefaults(Object.assign({},it));
+  light.color=light.lightColor;
+  return light;
 }
 function contextStoryHeightMm(){
   // 隣家・周辺ビルの階高。設計対象の建物の階高とは別概念なので、高さモデルを通さない。
@@ -1151,6 +1159,7 @@ function updateProps(){
   }
   document.getElementById('props').classList.add('show');
   var it = ST.selected;
+  if(isLightItemType(it.type)) it=getEffectiveLightItem(it);
   if(typeof CeilingDesigner!=='undefined'&&CeilingDesigner.zone(it)){CeilingDesigner.props(it);return;}
   if(it.sScale === undefined) { it.sScale = 1; it.sX = 0; it.sY = 0; }
   var html = '';
@@ -1435,7 +1444,6 @@ function updateProps(){
     }
   }
   if(isLightItemType(it.type)){
-    ensureLightDefaults(it);
     var lk=it.lightKind||lightKindFromType(it.type);
     html += '<div class="ph" style="margin-top:12px">ライト設定</div>';
     html += '<div class="pr"><div class="pl">ライト種</div><select class="pi" onchange="updateSelectedLightKind(this.value)">';
@@ -2045,7 +2053,7 @@ function updateSelectedProp(p,v,noSave){
   }
   if(isWindowLikeType(ST.selected.type) && (p==='w'||p==='windowHeight'||p==='windowSill'||p==='windowTop')) delete ST.selected.windowStd;
   if((p==='exteriorColor'||p==='exteriorTexture') && ST.selected.x1!==undefined){
-    var ws=getExteriorWallSetting(ST.selected);
+    var ws=ensureExteriorWallSetting(ST.selected);
     if(p==='exteriorColor') ws.color=v||null;
     if(p==='exteriorTexture') ws.texture=v||null;
   }
@@ -2391,6 +2399,12 @@ var StorageAdapter = (function(){
       hasData:async function(){return !!(await window.parent.ParallelEditors.readSavedPane(window.__editorPlanId));}
     };
   }
+
+  if(typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR) return {
+    save:function(data){return window.PlanLibrary.persistPane(NATIVE_EDITOR_PANE,window.__editorPlanId,JSON.parse(JSON.stringify(data,function(k,v){return k==='_texObj'?undefined:v;})));},
+    load:async function(){await window.PlanLibrary.ready;return window.PlanLibrary.readSavedPane(window.__editorPlanId);},
+    hasData:async function(){await window.PlanLibrary.ready;return !!(await window.PlanLibrary.readSavedPane(window.__editorPlanId));}
+  };
 
   var DB_NAME='webcad', STORE='plans', VERSION=1, KEY='webcad-plan-v1';
   var LEGACY_LS_KEY='webcad-plan-v1';

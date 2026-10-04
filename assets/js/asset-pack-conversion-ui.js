@@ -3,7 +3,7 @@
  'use strict';
  let dialog,button,contract=null,controller=null,capture=null,generation=0,sourceText='',sourcePlanId=null,preview=null,converter=null,excluded=new Set(),approved=new Set(),busy=false;
  const clone=v=>JSON.parse(JSON.stringify(v)),host=()=>root.EDITOR_PANE?root.parent:root;
- const currentPlanId=()=>root.EDITOR_PANE?root.__editorPlanId:null;
+ const currentPlanId=()=>root.EDITOR_PANE||root.NATIVE_PLAN_EDITOR?root.__editorPlanId:null;
  const el=id=>dialog.querySelector('[data-conversion="'+id+'"]');
  function status(text){el('status').textContent=text;}
  function stopCapture(){capture?.abort();capture=null;el('images').replaceChildren();}
@@ -52,15 +52,19 @@
   finally{if(capture===own)el('capture').disabled=false;}
  }
  async function create(){
-  if(busy||!preview?.changed)return;
+  if(busy||!dialog?.open||!preview?.changed)return;
   if(!unchanged()){status('元プランが更新されました。閉じてプレビューを開き直してください。');return;}
   const name=el('name').value.trim();if(!name){status('複製案の名前を入力してください。');return;}
-  const workspace=host().ParallelEditors;if(!workspace||workspace.plans.size>=4){status('比較は4案までです。不要な案を保存してから比較対象から外してください。');return;}
-  busy=true;el('create').disabled=true;el('close').disabled=true;el('cancel-bottom').disabled=true;stopCapture();
+  const workspace=host().ParallelEditors,common=typeof workspace?.createIndependentPlan==='function';if(!workspace||(common?workspace.retained.length:workspace.plans.size)>=4){status('比較は4案までです。不要な案を保存してから比較対象から外してください。');return;}
+  if(root.EDITOR_PANE&&(workspace.plans.get(sourcePlanId)?.memoryOnly||root.COMPARISON_PREVIEW)){status('隔離プレビューから保存可能な案は作成できません。');return;}
+  const ticket=generation;busy=true;el('create').disabled=true;el('close').disabled=true;el('cancel-bottom').disabled=true;stopCapture();
   try{
-   const plan=clone(preview.plan),checked=root.PlanSchema.validatePlan(plan);if(!checked.ok)throw Error('変換案の形式を確認できませんでした。');
+   const plan=clone(preview.plan),checked=common?await workspace.validateDerivedPlan(sourcePlanId,plan):root.PlanSchema.validatePlan(plan);if(!checked.ok)throw Error('変換案の形式を確認できませんでした。');
    let id;
-   if(root.EDITOR_PANE){
+   if(common){
+    id=await workspace.createIndependentPlan(plan,name,{sourcePaneId:root.EDITOR_PANE||root.NATIVE_EDITOR_PANE||null,sourcePlanId,sourceSnapshot:sourceText,signal:controller?.signal,isCurrent:()=>ticket===generation&&dialog.open&&unchanged(),cataloguePack:'rpg-mansion'});
+    if(!unchanged()){status('元の案が更新されました。複製は共通一覧へ保持しています。');return;}
+   }else if(root.EDITOR_PANE){
     const pane=[...workspace.panes.values()].find(p=>p.frame.contentWindow===root);if(!pane||pane.planId!==sourcePlanId||pane.busy)throw Error('元のpaneが切り替わりました。');
     // addPlan is a separate record; select stashes the unmodified original.
     id=await workspace.addPlan(plan,name);
@@ -68,7 +72,7 @@
     if(![...workspace.panes.values()].some(p=>p.planId===id))await workspace.select(pane.id,id);
    }else{id=await workspace.openPlan(plan,name);}
    const destination=[...workspace.panes.values()].find(p=>p.planId===id)?.frame.contentWindow;
-   destination?.AssetPackPicker.setSelection('rpg-mansion');if(destination){destination.DIRTY=true;destination.renderSaveButtonState();workspace.changed([...workspace.panes.values()].find(p=>p.planId===id).id);}
+   if(!common)destination?.AssetPackPicker.setSelection('rpg-mansion');if(destination&&!common){destination.DIRTY=true;destination.renderSaveButtonState();workspace.changed([...workspace.panes.values()].find(p=>p.planId===id).id);}
    dialog.close();
   }catch(e){status(e.message+' 元プランは上書きしていません。');}
   finally{busy=false;el('create').disabled=!preview?.changed;el('close').disabled=false;el('cancel-bottom').disabled=false;}

@@ -205,6 +205,7 @@ function ensureHeightDefaults(plan){
 // 持つようになって、これが見えるようになった(読み込んだ間取りが288mm
 // 高く建つ)。プランを差し替える側で、先に既定へ戻す。
 function resetHeightGlobalsForPlanLoad(){
+  if(typeof WalkTps!=='undefined')WalkTps.reset(true);
   WALL_H=DEFAULT_WALL_H_MM;
 }
 function perFloorHeightsEnabled(){
