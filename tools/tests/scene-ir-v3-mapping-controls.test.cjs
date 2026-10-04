@@ -321,3 +321,70 @@ test('full diagnostic refresh follows explicit room mapping while frozen raw and
  assert.ok(result(h).sceneFullCompilation.diagnostics.some(d=>d.code==='unsupported_stair_reconstruction'));
  assert.equal(JSON.stringify(result(h).sceneIR),h.raw);assert.deepEqual(clone(result(h).extraction),h.extraction);assertUnchanged(h);
 });
+
+test('failed full Apply revalidation refreshes readiness and review controls without changing source or choices',()=>{
+ const h=setup();mapFullScene(h);acceptReviews(h);
+ const old=result(h),choices=clone(old.sceneOptions.bindingDecisions),oldAccept=control(h,'input[data-scene-accept]');
+ assert.equal(old.sceneFullCompilation.canApply,true);assert.equal(h.apply.disabled,false);
+ const search=control(h,'[data-scene-review-search]');search.value='object-desk';search.dispatchEvent(new ReviewEvent('input'));
+ h.c.DATA.heightDefaults.floorThickness=240;const before=JSON.stringify(h.c.DATA);
+ h.c.applyPlanImport();
+ assert.equal(result(h).sceneCompilation.canApply,false);
+ assert.equal(result(h).sceneFullCompilation.canApply,false,'Full readiness must reflect the compiler that rejected Apply');
+ assert.equal(h.apply.disabled,true,'Failed Apply must not leave an enabled stale button');
+ assert.match(control(h,'[data-scene-full-status]').textContent,/全体適用: 不可/);
+ assert.ok(h.document.querySelectorAll('input[data-scene-accept]').some(n=>!n.checked),'Fresh checks must be visible for the changed target datum');
+ assert.equal(control(h,'[data-scene-review-search]').value,'object-desk');
+ assert.equal(oldAccept.isConnected,false);const fresh=result(h);
+ oldAccept.dispatchEvent(new ReviewEvent('change'));assert.strictEqual(result(h),fresh,'Retired controls cannot approve the refreshed result');
+ assert.deepEqual(clone(result(h).sceneOptions.bindingDecisions),choices);assert.equal(JSON.stringify(result(h).sceneIR),h.raw);assert.deepEqual(clone(result(h).extraction),h.extraction);
+ assert.equal(JSON.stringify(h.c.DATA),before);assert.equal(h.c.HISTORY.length,0);
+ acceptReviews(h);assert.equal(h.apply.disabled,false,'Fresh review can resume the same source after local validation');
+ h.apply.click();assert.equal(h.c.HISTORY.length,1);assert.equal(h.c.DATA.sceneReconstructionReports.length,1);
+});
+
+test('failed partial Apply revalidation refreshes selected and full diagnostics before opening any new plan',async()=>{
+ const h=setup();mapFullScene(h);
+ const opts=clone(result(h).sceneOptions);opts.partialSelection=SceneV3.createPartialSelection(h.source,[],true,['wall-north']);
+ h.c.PlanImport.stageSceneIR(h.source,opts);acceptReviews(h);assert.equal(result(h).sceneCompilation.canApply,true);
+ let opens=0;h.c.ParallelEditors={openPlan:async()=>{opens++;return 'unexpected';}};
+ h.c.DATA.heightDefaults.floorThickness=240;const before=JSON.stringify(h.c.DATA),selection=clone(result(h).sceneOptions.partialSelection);
+ await h.c.applyPlanImport();
+ assert.equal(opens,0);assert.equal(result(h).sceneCompilation.canApply,false,'Rejected partial preview must replace its older accepted compilation');
+ assert.equal(h.apply.disabled,true);assert.equal(result(h).sceneFullCompilation.canApply,false);
+ assert.equal(control(h,'input[data-scene-partial-accept]').checked,false);
+ assert.deepEqual(clone(result(h).sceneOptions.partialSelection),selection);assert.equal(JSON.stringify(h.c.DATA),before);assert.equal(h.c.HISTORY.length,0);
+ assert.equal(JSON.stringify(result(h).sceneIR),h.raw);assert.deepEqual(clone(result(h).extraction),h.extraction);
+});
+
+test('removed catalogue metadata at Apply is exposed as a live blocker without discarding the confirmed choice',()=>{
+ const h=setup();mapFullScene(h);acceptReviews(h);
+ const choices=clone(result(h).sceneOptions.bindingDecisions);delete h.c.FMP_ITEMS['original-desk-work'];
+ h.c.applyPlanImport();
+ assert.equal(h.apply.disabled,true);assert.equal(result(h).sceneFullCompilation.canApply,false);
+ assert.match(control(h,'[data-scene-full-errors]').textContent,/mapping_unresolved/);
+ assert.match(group(h,'objects','object-desk').textContent,/mapping_unresolved/);
+ assert.deepEqual(clone(result(h).sceneOptions.bindingDecisions),choices,'An unavailable model is retained as a choice to fix, not replaced by a guessed candidate');
+ assert.equal(JSON.stringify(result(h).sceneIR),h.raw);assert.deepEqual(clone(result(h).extraction),h.extraction);assertUnchanged(h);
+});
+
+test('source Apply remains one-shot and undoable when post-commit drawing fails',()=>{
+ for(const callback of ['draw2d','rebuild3D']){
+  const h=setup();mapFullScene(h);acceptReviews(h);
+  const body=result(h),choices=JSON.stringify(body.sceneOptions),oldAccept=control(h,'input[data-scene-accept]');
+  let draws=0;
+  h.c[callback]=()=>{draws++;assert.equal(body.sceneApplied,true,'Consumption precedes every post-commit callback');oldAccept.dispatchEvent(new ReviewEvent('change'));h.c.applyPlanImport();throw Error('synthetic post-commit drawing failure');};
+  assert.doesNotThrow(()=>h.c.applyPlanImport(),'Committed source geometry must remain consumed when rendering fails');
+  assert.strictEqual(result(h),body);assert.equal(body.sceneApplied,true);assert.equal(h.apply.disabled,true);
+  assert.equal(draws,1,'Reentrant Apply cannot reach the drawing callback twice');
+  assert.ok(h.document.querySelectorAll('[data-scene-review-control]').every(n=>n.disabled),'Consumed review controls are visibly disabled after the interrupted import');
+  assert.equal(h.c.DATA.sceneReconstructionReports.length,1);assert.equal(h.c.HISTORY.length,1);
+  assert.match(control(h,'#plan-import-status').textContent,/表示の更新に失敗.*再適用はできません/);
+  const committed=JSON.stringify(h.c.DATA);
+  oldAccept.dispatchEvent(new ReviewEvent('change'));h.c.cancelPlanImportDrag();h.apply.dispatchEvent(new ReviewEvent('click'));h.c.applyPlanImport();
+  assert.strictEqual(result(h),body);assert.equal(JSON.stringify(body.sceneOptions),choices);assert.equal(h.apply.disabled,true);
+  assert.equal(JSON.stringify(h.c.DATA),committed);assert.equal(h.c.HISTORY.length,1,'No second import or undo snapshot is allowed after a render failure');
+  assert.equal(JSON.stringify(body.sceneIR),h.raw);assert.deepEqual(clone(body.extraction),h.extraction);
+  h.c.DATA=JSON.parse(h.c.HISTORY.pop());assert.equal(JSON.stringify(h.c.DATA),h.before,'Existing one-step undo restores the exact pre-Apply plan');
+ }
+});

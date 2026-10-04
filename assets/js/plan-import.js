@@ -558,7 +558,11 @@
     syncPdfReview();
 
     var apply = $('plan-import-apply');
-    if (apply) apply.disabled = !!ST.mappingEditor || !ST.result || ST.busy || !!(ST.result && (ST.result.buildingApplied||ST.result.scenePartialOpened)) || !!(ST.result.sceneCompilation && !ST.result.sceneCompilation.canApply) || !!(ST.result && ST.result.sourceLocal && (!ST.result.buildingCompilation || !ST.result.buildingCompilation.canApply));
+    if (apply) apply.disabled = !!ST.mappingEditor || !ST.result || ST.busy || !!(ST.result && (ST.result.buildingApplied||ST.result.sceneApplied||ST.result.scenePartialOpened)) || !!(ST.result.sceneCompilation && !ST.result.sceneCompilation.canApply) || !!(ST.result && ST.result.sourceLocal && (!ST.result.buildingCompilation || !ST.result.buildingCompilation.canApply));
+    var sceneReview = $('scene-ir-review');
+    if (sceneReview && typeof sceneReview.querySelectorAll === 'function' && ST.result && (ST.result.sceneApplied || ST.result.scenePartialOpened)) {
+      Array.prototype.forEach.call(sceneReview.querySelectorAll('[data-scene-review-control]'), function (control) { control.disabled = true; });
+    }
     var size = $('plan-import-crop-size');
     if (size && ST.crop) {
       var pdfCrop = ST.pageReview && ST.pageReview[ST.selectedPage].box;
@@ -1580,7 +1584,7 @@
         label.appendChild(input); label.appendChild(document.createTextNode(labelText)); detail.appendChild(label);
       }
       if (group.reviewPaths.length) choice(' このオブジェクトの推定値を確認して採用する', group.accepted, function (on) {
-        if (ST.result !== body || ST.mappingEditor || body.scenePartialOpened || ST.busy) return;
+        if (ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
         var opts = JSON.parse(JSON.stringify(ST.result.sceneOptions));
         opts.acceptedReviewGroups = opts.acceptedReviewGroups.filter(function (id) { return id !== group.id; });
         if (on) { opts.acceptedReviewGroups.push(group.id); if (group.reviewKey) opts.reviewedEntities[group.entityId] = group.reviewKey; }
@@ -1588,7 +1592,7 @@
         stageSceneIR(ST.result.sceneIR, opts);
       });
       if (group.canAcknowledgeOmission) choice(' この物は非必須の装飾であり、未配置のまま残すことを確認する（再構成は未完成）', group.acknowledgedOmission, function (on) {
-        if (ST.result !== body || ST.mappingEditor || body.scenePartialOpened || ST.busy) return;
+        if (ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
         var opts = JSON.parse(JSON.stringify(ST.result.sceneOptions));
         opts.unresolvedDecisions = opts.unresolvedDecisions.filter(function (d) { return d.entityId !== group.entityId; });
         if (on) { opts.unresolvedDecisions.push({ entityId: group.entityId, decision: 'leave-unplaced', classification: 'noncritical-decoration' }); if (group.reviewKey) opts.reviewedEntities[group.entityId] = group.reviewKey; }
@@ -1968,7 +1972,12 @@
   async function openScenePartialPlan(expected) {
     if(!expected||ST.result!==expected||ST.busy||ST.mappingEditor||expected.scenePartialOpened||expected.sceneOptions.sourceInvalidated)return;
     var compiled=previewSceneIR(expected.sceneIR,expected.sceneOptions);
-    if(!compiled.canApply||!compiled.partialSelection){setStatus('選んだ部分の候補・表示仮定・未解決項目を確認してください。既存の案は変更していません。');return;}
+    if(!compiled.canApply||!compiled.partialSelection){
+      // The target defaults/catalogue may have changed since the last review.
+      // Restage both selected and full diagnostics; retire the stale controls.
+      stageSceneIR(expected.sceneIR,expected.sceneOptions);
+      setStatus('選んだ部分の候補・表示仮定・未解決項目を確認してください。既存の案は変更していません。');return;
+    }
     var workspace=root.EDITOR_PANE&&root.parent.PlanLibrary?root.parent.PlanLibrary:root.PlanLibrary||root.ParallelEditors,common=typeof workspace?.createIndependentPlan==='function';
     if(!workspace||!common&&typeof workspace.openPlan!=='function'){setStatus('新しい案の編集画面を開けません。既存の案へは適用しません。');return;}
     var read=materializeSceneObjects(compiled.plan),payload={walls:read.walls,rooms:read.rooms,items:read.items,heightDefaults:JSON.parse(JSON.stringify(DATA.heightDefaults||{modelVersion:2,floorThickness:180})),floors:JSON.parse(JSON.stringify(DATA.floors||{})),sceneReconstructionReports:[reconstructionReport(expected,compiled,read,0)]};
@@ -2007,6 +2016,7 @@
       sceneCompilation = previewSceneIR(ST.result.sceneIR, ST.result.sceneOptions);
       ST.result.sceneCompilation = sceneCompilation;
       if (!sceneCompilation.canApply) {
+        stageSceneIR(ST.result.sceneIR, ST.result.sceneOptions);
         setStatus('Scene IR に未解決項目があります。適用せずに確認へ戻ります。');
         return;
       }
@@ -2043,9 +2053,10 @@
     // 押し間違いを1手で戻せるべきである。
     if (typeof saveState === 'function') saveState();
     root._defaultPlanPending = false;
-    // Consume this registration once before post-commit callbacks can fail.
-    // Undo remains available; a render error must never duplicate the building.
+    // Consume this reviewed import once before post-commit callbacks can fail.
+    // Undo remains available; a render error must never duplicate its geometry.
     if (buildingCompilation) ST.result.buildingApplied = true;
+    if (sceneCompilation) ST.result.sceneApplied = true;
 
     if (beside) {
       // 隣へずらしてから構造部材を作る。順番が逆だと、基礎と屋根だけが
@@ -2131,11 +2142,10 @@
     // 図面に描かれていた家具を「おすすめの家具」としてカタログの先頭に出す。
     // **ここからは置かない。**押すとカタログのその欄を開く(plan-finish.js の mount)。
     if (ST.result.finish && typeof PlanFinish !== 'undefined') PlanFinish.mount(ST.result.finish);
-    if (sceneCompilation) ST.result.sceneApplied = true;
     closePlanImport();
     } catch (error) {
-      if (!buildingCompilation) throw error;
-      setStatus('部分的な取り込みは保存されましたが、表示の更新に失敗しました。重複を防ぐため再適用はできません。元に戻す操作で取り消せます。');
+      if (!buildingCompilation && !sceneCompilation) throw error;
+      setStatus('取り込みは案へ反映しましたが、表示の更新に失敗しました。重複を防ぐため再適用はできません。元に戻す操作で取り消せます。');
       syncPlanImportButtons();
     }
   }
