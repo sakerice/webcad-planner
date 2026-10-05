@@ -651,7 +651,7 @@ function harness(opts) {
     makeZipBlob: function (files) { log.zips.push(files.map((f) => f.name)); return { zip: true }; },
     downloadBlobFile: function (name) { log.downloads.push(name); }
   });
-  vm.runInContext(VIDEO_VARS.map(topLevelVar2)
+  vm.runInContext([require('./native-output-source.cjs').nativeOutputContextSource()].concat(VIDEO_VARS.map(topLevelVar2))
     .concat(VIDEO_FNS.map(topLevelFunction2)).join('\n'), ctx);
   ctx.$log = log;
   ctx.$registry = registry;

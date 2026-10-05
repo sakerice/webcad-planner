@@ -7980,9 +7980,14 @@ function interiorFaceKey(w,face){
   return wallSettingKey(w)+'_'+face.sign+'_'+Math.round(face.a*1000)+'_'+Math.round(face.b*1000);
 }
 
-function getInteriorFaceSetting(w,face){
+function getInteriorFaceSetting(w,face,readOnly){
   var s=ensureInteriorWallSettings();
   var key=interiorFaceKey(w,face);
+  // Rendering may encounter a new face before any deliberate face-property edit.
+  // Resolve its inherited appearance without creating a persisted write target.
+  if(readOnly){
+    return normalizeTextureOrientationTarget(Object.assign({mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false},s.faces[key]||{}));
+  }
   if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
   normalizeTextureOrientationTarget(s.faces[key]);
   return s.faces[key];
@@ -8006,7 +8011,7 @@ function resolveInteriorFaceAppearance(w,face){
   var s=ensureInteriorWallSettings();
   var fl=w.floor||1;
   var fs=s.floors[fl]||defaultInteriorFloorSetting();
-  var faceSetting=face?getInteriorFaceSetting(w,face):null;
+  var faceSetting=face?getInteriorFaceSetting(w,face,true):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||INTERIOR_WALL_DEFAULT,faceSetting.texture||null,'face',faceSetting);
   }
@@ -8035,7 +8040,7 @@ function resolveInteriorFaceAppearance(w,face){
 // 色の null は「壁紙のその面の色に合わせる」(描画側 addSkirting が面材から取る)。
 function resolveSkirtingForFace(w,face){
   var s=ensureInteriorWallSettings();
-  var fs=face?getInteriorFaceSetting(w,face):null;
+  var fs=face?getInteriorFaceSetting(w,face,true):null;
   var fl=s.floors[w.floor||1]||null;
   var on=(fs&&fs.skirting!==undefined)?fs.skirting!==false
        :(fl&&fl.skirting!==undefined)?fl.skirting!==false
@@ -8085,7 +8090,7 @@ function updateInteriorFaceSetting(wallId,faceKey,key,value,noSave){
   if(!w) return;
   var face=getWallInteriorFaces(w).find(function(f){return interiorFaceKey(w,f)===faceKey;});
   if(!face) return;
-  var fs=getInteriorFaceSetting(w,face);
+  var fs=getInteriorFaceSetting(w,face,false);
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   setTextureSettingValue(fs,key,value);
@@ -8109,9 +8114,14 @@ function exteriorFaceKey(w,face){
   return wallSettingKey(w)+'_'+face.sign+'_'+Math.round(face.a*1000)+'_'+Math.round(face.b*1000);
 }
 
-function getExteriorFaceSetting(w,face){
+function getExteriorFaceSetting(w,face,readOnly){
   var s=ensureExteriorWallSettings();
   var key=exteriorFaceKey(w,face);
+  // Rendering may encounter a new face before any deliberate face-property edit.
+  // Resolve its inherited appearance without creating a persisted write target.
+  if(readOnly){
+    return normalizeTextureOrientationTarget(Object.assign({mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false},s.faces[key]||{}));
+  }
   if(!s.faces[key]) s.faces[key]={mode:'inherit',color:null,texture:null,textureFlipX:false,textureFlipY:false};
   normalizeTextureOrientationTarget(s.faces[key]);
   return s.faces[key];
@@ -8121,7 +8131,7 @@ function resolveExteriorFaceAppearance(w,face){
   var s=ensureExteriorWallSettings();
   var fl=w.floor||1;
   var fs=s.floors[fl]||defaultExteriorFloorSetting(fl);
-  var faceSetting=face?getExteriorFaceSetting(w,face):null;
+  var faceSetting=face?getExteriorFaceSetting(w,face,true):null;
   if(faceSetting && faceSetting.mode==='custom'){
     return appearanceWithTextureOrientation(faceSetting.color||'#e8e0cc',faceSetting.texture||null,'face',faceSetting);
   }
@@ -8139,7 +8149,7 @@ function updateExteriorFaceSetting(wallId,faceKey,key,value,noSave){
   if(!w) return;
   var face=getWallExteriorSpans(w).find(function(f){return exteriorFaceKey(w,f)===faceKey;});
   if(!face) return;
-  var fs=getExteriorFaceSetting(w,face);
+  var fs=getExteriorFaceSetting(w,face,false);
   if(noSave&&key==='color') markAppearanceColorDirty();
   else if(!noSave) saveState();
   setTextureSettingValue(fs,key,value);
@@ -20346,20 +20356,30 @@ function currentUnityCameraSettings(){
   }
   return settings;
 }
-function buildUnityRenderRequest(){
-  normalizeLegacyFurnitureItems();
-  ensureObjectIds();
-  ensureExteriorWallSettings();
-  ensureInteriorWallSettings();
-  ensureRoofAppearance();
-  syncExteriorWallSettings();
-  var plan=buildUnityRenderPlan();
-  return {
-    version:1,
-    createdAt:new Date().toISOString(),
-    plan:plan,
-    settings:currentUnityCameraSettings()
-  };
+function buildUnityRenderRequest(sourceSnapshot){
+  // Native image packages use the exact captured JSON source. Existing migration
+  // and appearance getters may fill defaults/face maps, so run those synchronous
+  // reads on a detached copy without turning an export into a live plan edit.
+  var source=sourceSnapshot===undefined?null:JSON.parse(sourceSnapshot);
+  var previous=source?{data:DATA,nextId:nextId,selected:ST.selected}:null;
+  if(previous)DATA=source;
+  try{
+    normalizeLegacyFurnitureItems();
+    ensureObjectIds();
+    ensureExteriorWallSettings();
+    ensureInteriorWallSettings();
+    ensureRoofAppearance();
+    syncExteriorWallSettings();
+    var plan=buildUnityRenderPlan();
+    return {
+      version:1,
+      createdAt:new Date().toISOString(),
+      plan:plan,
+      settings:currentUnityCameraSettings()
+    };
+  }finally{
+    if(previous){DATA=previous.data;nextId=previous.nextId;ST.selected=previous.selected;}
+  }
 }
 function buildUnityRenderPlan(){
   var plan=JSON.parse(JSON.stringify(DATA));
@@ -20424,6 +20444,72 @@ function exportUnityRenderRequest(){
 var AI_RENDER_PACKAGE=null;
 var AI_RENDER_DOWNLOAD_URLS=[];
 var AI_RENDER_CAPTURE_SPEC=null;
+// The native dialogs belong to the installed plan, not to a reusable editor pane.
+// Keep the exact source immutable across capture/encoding waits, including edits
+// to the same plan ID. Request ownership is separate so old finally/error handlers
+// cannot clear the result or busy state of a newer request.
+var NATIVE_OUTPUT_REQUESTS={epoch:0,image:0,video:0,jis:0};
+function nativeOutputSnapshot(){
+  return typeof DATA==='undefined'?null:JSON.stringify(DATA,function(k,v){return k==='_texObj'?undefined:v;});
+}
+function captureNativeOutputSource(){
+  return {epoch:NATIVE_OUTPUT_REQUESTS.epoch,planId:globalThis.__editorPlanId||null,
+    data:typeof DATA==='undefined'?null:DATA,snapshot:nativeOutputSnapshot()};
+}
+function beginNativeOutputRequest(kind){
+  var context=captureNativeOutputSource();
+  context.kind=kind;context.request=++NATIVE_OUTPUT_REQUESTS[kind];
+  return context;
+}
+function ownsNativeOutputRequest(context){
+  return !!context&&!globalThis._editorPaneDisposed&&context.epoch===NATIVE_OUTPUT_REQUESTS.epoch&&
+    (!context.kind||context.request===NATIVE_OUTPUT_REQUESTS[context.kind]);
+}
+function isNativeOutputSourceCurrent(context){
+  return !!context&&!globalThis._editorPaneDisposed&&context.epoch===NATIVE_OUTPUT_REQUESTS.epoch&&
+    context.planId===(globalThis.__editorPlanId||null)&&context.data===(typeof DATA==='undefined'?null:DATA)&&
+    context.snapshot===nativeOutputSnapshot();
+}
+function isNativeOutputRequestCurrent(context){
+  return ownsNativeOutputRequest(context)&&isNativeOutputSourceCurrent(context);
+}
+function assertNativeOutputRequest(context){
+  if(isNativeOutputRequestCurrent(context))return;
+  var error=new Error('元の間取りが変更されたため、データ作成を中止しました。現在の間取りで、もう一度作成してください。');
+  error.nativeOutputCancelled=true;throw error;
+}
+function tagNativeOutputPackage(pkg,context){
+  if(pkg._nativeOutputContext!==context)Object.defineProperty(pkg,'_nativeOutputContext',{value:context});
+  return pkg;
+}
+function isNativeOutputPackageCurrent(pkg){
+  return !!pkg&&isNativeOutputSourceCurrent(pkg._nativeOutputContext);
+}
+function cancelNativeOutputRequest(kind){
+  ++NATIVE_OUTPUT_REQUESTS[kind];
+}
+function clearAiRenderOutput(){
+  AI_RENDER_PACKAGE=null;AI_RENDER_CAPTURE_SPEC=null;
+  setAiPackagePreview(null);setAiInstructionsPreview('');
+  clearAiRenderDownloadLinks();setUnityRenderImage('');
+}
+function clearVideoRenderOutput(){
+  VIDEO_RENDER_PACKAGE=null;
+  setVideoInstructionsPreview('');clearVideoRenderDownloadLinks();setVideoRenderImage('');
+}
+function invalidateNativeOutputs(){
+  ++NATIVE_OUTPUT_REQUESTS.epoch;
+  // Reset after a committed install only. A failed native install retains both
+  // its original DATA and these completed outputs, just like Undo and selection.
+  [clearAiRenderOutput,clearVideoRenderOutput,function(){setUnityRenderBusy(false);setVideoRenderBusy(false);},
+    function(){setUnityRenderStatus('');setVideoRenderStatus('');},
+    function(){document.getElementById('unity-render-modal')?.classList.remove('show');document.getElementById('video-render-modal')?.classList.remove('show');},
+    function(){cancelJisPendingOutputs();JIS_UI.sheet=null;JIS_UI.source=null;
+      var overlay=document.getElementById('jis-drawing-overlay');if(overlay)overlay.style.display='none';
+      var preview=document.getElementById('jis-preview'),list=document.getElementById('jis-sheet-list');
+      if(preview)preview.innerHTML='';if(list)list.innerHTML='';jisSetStatus('');}]
+    .forEach(function(reset){try{reset();}catch(error){console.warn('[WebCAD] native output reset',error);}});
+}
 function revokeAiRenderDownloadUrls(){
   AI_RENDER_DOWNLOAD_URLS.forEach(function(url){
     try{ URL.revokeObjectURL(url); }catch(e){}
@@ -20952,8 +21038,8 @@ function collectAiMaterialSummary(plan){
     sites:sites
   };
 }
-function buildAiRenderMetadata(instanceLegend){
-  var req=buildUnityRenderRequest();
+function buildAiRenderMetadata(instanceLegend,sourceSnapshot){
+  var req=buildUnityRenderRequest(sourceSnapshot);
   var plan=req.plan;
   var summary=collectAiMaterialSummary(plan);
   return {
@@ -21193,6 +21279,7 @@ function setAiPackagePreview(pkg){
   var instance=document.getElementById('ai-instance-img');
   if(!wrap) return;
   if(!pkg){
+    [base,edge,seg,depth,normal,instance].forEach(function(img){if(img)img.removeAttribute('src');});
     wrap.classList.remove('show');
     return;
   }
@@ -21338,17 +21425,18 @@ function makeZipBlob(files){
   parts.push(eocd);
   return new Blob(parts,{type:'application/zip'});
 }
-function aiRenderPackageJsonText(){
-  if(!AI_RENDER_PACKAGE) return '{}';
+function aiRenderPackageJsonText(pkg){
+  pkg=pkg||AI_RENDER_PACKAGE;
+  if(!pkg) return '{}';
   var imageFiles={};
-  Object.keys(AI_RENDER_PACKAGE.images||{}).forEach(function(key){
-    imageFiles[key]=AI_RENDER_PACKAGE.images[key].filename;
+  Object.keys(pkg.images||{}).forEach(function(key){
+    imageFiles[key]=pkg.images[key].filename;
   });
   return JSON.stringify({
-    version:AI_RENDER_PACKAGE.version,
-    createdAt:AI_RENDER_PACKAGE.createdAt,
-    prompt:AI_RENDER_PACKAGE.prompt,
-    metadata:AI_RENDER_PACKAGE.metadata,
+    version:pkg.version,
+    createdAt:pkg.createdAt,
+    prompt:pkg.prompt,
+    metadata:pkg.metadata,
     imageFiles:imageFiles
   },null,2);
 }
@@ -21391,26 +21479,27 @@ function syncAiRenderDownloadLinks(){
 }
 function handleAiDownloadLinkClick(e){
   var a=e&&e.currentTarget;
-  if(a && !a.classList.contains('disabled')) return true;
+  if(isNativeOutputPackageCurrent(AI_RENDER_PACKAGE)&&a&&!a.classList.contains('disabled'))return true;
+  if(AI_RENDER_PACKAGE&&!isNativeOutputPackageCurrent(AI_RENDER_PACKAGE))clearAiRenderOutput();
   if(e) e.preventDefault();
   setUnityRenderStatus('まだ画像AI用データがありません。「画像AI用データを作る」を押してから、保存ボタンを押してください。');
   return false;
 }
 async function generateAiRenderPackage(){
   openUnityRenderModal();
-  setAiPackagePreview(null);
-  setAiInstructionsPreview('');
-  clearAiRenderDownloadLinks();
-  setUnityRenderImage('');
-  await ensureAiRenderableView();
-  if(!isAiCaptureView()){
-    setUnityRenderStatus('外観3D・内観3D・ウォークスルーのどれかを表示してから画像AI用データを作ってください。');
-    return null;
-  }
+  var context=beginNativeOutputRequest('image');
+  clearAiRenderOutput();
   setUnityRenderBusy(true);
   try{
+    await ensureAiRenderableView();
+    assertNativeOutputRequest(context);
+    if(!isAiCaptureView()){
+      setUnityRenderStatus('外観3D・内観3D・ウォークスルーのどれかを表示してから画像AI用データを作ってください。');
+      return null;
+    }
     setUnityRenderStatus('現在の3Dビューから基準画像を撮影しています...');
     await waitFrame(50);
+    assertNativeOutputRequest(context);
     // No await between captures: orbit damping, loading callbacks and resizing must
     // not advance the scene between the base and its structural guides.
     var base=captureCurrent3DDataUrl();
@@ -21419,12 +21508,13 @@ async function generateAiRenderPackage(){
     var instance=instanceData.dataUrl;
     var depth=captureAiOverrideGuideDataUrl('depth');
     var normal=captureAiOverrideGuideDataUrl('normal');
-    var metadata=buildAiRenderMetadata(instanceData.legend);
+    var metadata=buildAiRenderMetadata(instanceData.legend,context.snapshot);
     if([base,seg,instance,depth,normal].some(function(image){return !image || image.length<1000;})){
       throw new Error('構造ガイドを撮影できませんでした。3Dの読込完了後に再度お試しください。');
     }
     setUnityRenderStatus('同じ視点の構造ガイドからエッジ画像を作っています...');
     var edge=await makeEdgeDataUrlFromSegmentation(instance);
+    assertNativeOutputRequest(context);
     var prompt=buildAiRenderPrompt(metadata);
     setUnityRenderStatus('保存するZIPを準備しています...');
     var enc=new TextEncoder();
@@ -21442,7 +21532,8 @@ async function generateAiRenderPackage(){
       {name:'normal_guide.png',bytes:await dataUrlToBytes(normal)},
       {name:'instance_guide.png',bytes:await dataUrlToBytes(instance)}
     ];
-    AI_RENDER_PACKAGE={
+    assertNativeOutputRequest(context);
+    AI_RENDER_PACKAGE=tagNativeOutputPackage({
       version:2,
       createdAt:metadata.createdAt,
       prompt:prompt,
@@ -21456,7 +21547,7 @@ async function generateAiRenderPackage(){
         instance:{filename:'instance_guide.png',dataUrl:instance}
       },
       zipBlob:makeZipBlob(zipFiles)
-    };
+    },context);
     setAiPackagePreview(AI_RENDER_PACKAGE);
     setAiInstructionsPreview(AI_RENDER_PACKAGE.prompt);
     syncAiRenderDownloadLinks();
@@ -21471,19 +21562,22 @@ async function generateAiRenderPackage(){
     );
     return AI_RENDER_PACKAGE;
   }catch(err){
+    if(!ownsNativeOutputRequest(context))return null;
     setUnityRenderStatus('画像AI用データを作れませんでした。\n\n詳細:\n'+(err&&err.message?err.message:String(err)));
     return null;
   }finally{
-    setUnityRenderBusy(false);
+    if(ownsNativeOutputRequest(context))setUnityRenderBusy(false);
   }
 }
 async function copyAiRenderPrompt(){
-  if(!AI_RENDER_PACKAGE){
+  var source=captureNativeOutputSource(),pkg=AI_RENDER_PACKAGE;
+  if(!isNativeOutputPackageCurrent(pkg)){
     setUnityRenderStatus('AIへの指示文を作っています。作ったあとコピーを試します...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
+    pkg=await generateAiRenderPackage();
+    if(!pkg) return;
   }
-  var text=AI_RENDER_PACKAGE.prompt;
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  var request=NATIVE_OUTPUT_REQUESTS.image,text=pkg.prompt;
   setAiInstructionsPreview(text);
   var copied=false;
   if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
@@ -21492,6 +21586,7 @@ async function copyAiRenderPrompt(){
       copied=true;
     }catch(err){}
   }
+  if(!isNativeOutputSourceCurrent(source)||pkg!==AI_RENDER_PACKAGE||request!==NATIVE_OUTPUT_REQUESTS.image)return;
   if(!copied){
     var ta=document.getElementById('ai-instructions-preview');
     if(ta){
@@ -21508,45 +21603,53 @@ async function copyAiRenderPrompt(){
   );
 }
 async function downloadAiRenderPrompt(){
-  if(!AI_RENDER_PACKAGE){
+  var source=captureNativeOutputSource(),pkg=AI_RENDER_PACKAGE;
+  if(!isNativeOutputPackageCurrent(pkg)){
     setUnityRenderStatus('AIへの指示文を保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
+    pkg=await generateAiRenderPackage();
+    if(!pkg) return;
   }
-  downloadTextFile('ai-instructions.md',AI_RENDER_PACKAGE.prompt,'text/markdown;charset=utf-8');
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  downloadTextFile('ai-instructions.md',pkg.prompt,'text/markdown;charset=utf-8');
   setUnityRenderStatus('AIへの指示文を保存しました。\nファイル名: ai-instructions.md');
 }
 async function downloadAiRenderPackageJson(){
-  if(!AI_RENDER_PACKAGE){
+  var source=captureNativeOutputSource(),pkg=AI_RENDER_PACKAGE;
+  if(!isNativeOutputPackageCurrent(pkg)){
     setUnityRenderStatus('パッケージJSONを保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
+    pkg=await generateAiRenderPackage();
+    if(!pkg) return;
   }
-  downloadTextFile('ai-render-package.json',aiRenderPackageJsonText(),'application/json;charset=utf-8');
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  downloadTextFile('ai-render-package.json',aiRenderPackageJsonText(pkg),'application/json;charset=utf-8');
   setUnityRenderStatus('パッケージJSONを保存しました。\nファイル名: ai-render-package.json');
 }
 async function downloadAiRenderImage(kind, quiet){
-  if(!AI_RENDER_PACKAGE){
+  var source=captureNativeOutputSource(),pkg=AI_RENDER_PACKAGE;
+  if(!isNativeOutputPackageCurrent(pkg)){
     setUnityRenderStatus('画像を保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
+    pkg=await generateAiRenderPackage();
+    if(!pkg) return;
   }
-  var img=AI_RENDER_PACKAGE.images[kind];
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  var img=pkg.images[kind];
   if(img){
     await downloadDataUrl(img.filename,img.dataUrl);
-    if(!quiet) setUnityRenderStatus('画像を保存しました。\nファイル名: '+img.filename);
+    if(!quiet&&isNativeOutputSourceCurrent(source)&&pkg===AI_RENDER_PACKAGE) setUnityRenderStatus('画像を保存しました。\nファイル名: '+img.filename);
   }else if(!quiet){
     setUnityRenderStatus('指定された画像が見つかりませんでした: '+kind);
   }
 }
 async function downloadAiRenderBundle(){
-  if(!AI_RENDER_PACKAGE){
+  var source=captureNativeOutputSource(),pkg=AI_RENDER_PACKAGE;
+  if(!isNativeOutputPackageCurrent(pkg)){
     setUnityRenderStatus('ZIPを保存するため、先に画像AI用データを作っています...');
-    await generateAiRenderPackage();
-    if(!AI_RENDER_PACKAGE) return;
+    pkg=await generateAiRenderPackage();
+    if(!pkg) return;
   }
-  if(AI_RENDER_PACKAGE.zipBlob){
-    downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob);
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  if(pkg.zipBlob){
+    downloadBlobFile('house-planner-ai-render-package.zip',pkg.zipBlob);
     setUnityRenderStatus(
       '画像AI用データを作り、ZIPを保存しました。\n\n'+
       '保存される内容:\n'+
@@ -21565,21 +21668,22 @@ async function downloadAiRenderBundle(){
   }
   setUnityRenderStatus('ZIPを作っています...');
   var enc=new TextEncoder();
-  var legendText=JSON.stringify({version:2,legend:AI_RENDER_PACKAGE.metadata.segmentationLegend,siteContext:AI_RENDER_PACKAGE.metadata.siteContext},null,2);
-  var instanceLegendText=JSON.stringify({version:2,instances:AI_RENDER_PACKAGE.metadata.instanceLegend||[]},null,2);
+  var legendText=JSON.stringify({version:2,legend:pkg.metadata.segmentationLegend,siteContext:pkg.metadata.siteContext},null,2);
+  var instanceLegendText=JSON.stringify({version:2,instances:pkg.metadata.instanceLegend||[]},null,2);
   var files=[
-    {name:'ai-instructions.md',bytes:enc.encode(AI_RENDER_PACKAGE.prompt)},
-    {name:'ai-render-package.json',bytes:enc.encode(aiRenderPackageJsonText())},
+    {name:'ai-instructions.md',bytes:enc.encode(pkg.prompt)},
+    {name:'ai-render-package.json',bytes:enc.encode(aiRenderPackageJsonText(pkg))},
     {name:'segmentation-legend.json',bytes:enc.encode(legendText)},
     {name:'instance-legend.json',bytes:enc.encode(instanceLegendText)},
-    {name:'base_render.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.base.dataUrl)},
-    {name:'edge_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.edge.dataUrl)},
-    {name:'segmentation_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.segmentation.dataUrl)},
-    {name:'depth_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.depth.dataUrl)},
-    {name:'normal_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.normal.dataUrl)},
-    {name:'instance_guide.png',bytes:await dataUrlToBytes(AI_RENDER_PACKAGE.images.instance.dataUrl)}
+    {name:'base_render.png',bytes:await dataUrlToBytes(pkg.images.base.dataUrl)},
+    {name:'edge_guide.png',bytes:await dataUrlToBytes(pkg.images.edge.dataUrl)},
+    {name:'segmentation_guide.png',bytes:await dataUrlToBytes(pkg.images.segmentation.dataUrl)},
+    {name:'depth_guide.png',bytes:await dataUrlToBytes(pkg.images.depth.dataUrl)},
+    {name:'normal_guide.png',bytes:await dataUrlToBytes(pkg.images.normal.dataUrl)},
+    {name:'instance_guide.png',bytes:await dataUrlToBytes(pkg.images.instance.dataUrl)}
   ];
-  downloadBlobFile('house-planner-ai-render-package.zip',AI_RENDER_PACKAGE.zipBlob||makeZipBlob(files));
+  if(!isNativeOutputSourceCurrent(source)||!isNativeOutputPackageCurrent(pkg)||pkg!==AI_RENDER_PACKAGE)return;
+  downloadBlobFile('house-planner-ai-render-package.zip',pkg.zipBlob||makeZipBlob(files));
   setUnityRenderStatus(
     '画像AI用データを作り、ZIPを保存しました。\n\n'+
     '保存される内容:\n'+
@@ -21970,6 +22074,8 @@ function planPlaceholderError(placeholders,topImages){
 }
 async function generateVideoRenderPackage(options){
   var opt=options||{};
+  var context=opt.nativeOutputContext||beginNativeOutputRequest('video');
+  assertNativeOutputRequest(context);
   // 素材の種類は呼び出し側が宣言する。既定は Task 7 のまま 3D。
   var source=opt.source||'3d';
   var includeGuides=!!opt.includeGuides;   // 設計 §12.3: ガイド画像は既定オフ
@@ -21992,6 +22098,7 @@ async function generateVideoRenderPackage(options){
     var planEmpty=planEmptyFloorRefusal(planBounds,planFloor,'平面図');
     if(planEmpty) throw planEmpty;
     var planTop=await waitForPlanFloorTopImages(planFloor);
+    assertNativeOutputRequest(context);
     // 構図はユーザーのパン・ズームに任せない。参照そのものが平面図である以上、
     // 主題が小さければ生成に渡る絵の解像度がそのまま落ちる（Task 7b 実測 15%）。
     // 画素数は3D経路と揃える。
@@ -22003,6 +22110,7 @@ async function generateVideoRenderPackage(options){
     var planPh=planCapturePlaceholderRoster();
     if(planPh.length) throw planPlaceholderError(planPh,planTop);
     var planIm=await decodePngDataUrlToImageData(planRef);
+    assertNativeOutputRequest(context);
     // 撮ったものを測る。値は記録するだけで、下限は設けない（拒否は撤回した）。
     var planRatio=planSubjectFrameRatio(planBounds,planView,planIm.width,planIm.height);
     // 部材の名指しは DATA から作る（真実源は DATA で、legend の方が派生物）。
@@ -22037,14 +22145,15 @@ async function generateVideoRenderPackage(options){
       {name:'prompt.txt',bytes:enc.encode(planPrompt)},
       {name:'package.json',bytes:enc.encode(planJsonText)}
     ];
-    VIDEO_RENDER_PACKAGE={
+    assertNativeOutputRequest(context);
+    VIDEO_RENDER_PACKAGE=tagNativeOutputPackage({
       packageJson:planJson,
       packageJsonText:planJsonText,
       prompt:planPrompt,
       files:planFiles.map(function(f){return {name:f.name,size:f.bytes.length};}),
       images:{reference:planRef,planContext:null},
       zipBlob:makeZipBlob(planFiles)
-    };
+    },context);
     if(opt.download!==false){
       downloadBlobFile('house-planner-video-package.zip',VIDEO_RENDER_PACKAGE.zipBlob);
     }
@@ -22061,10 +22170,12 @@ async function generateVideoRenderPackage(options){
   var view=aiCaptureViewMode();
 
   await waitFrame(50);
+  assertNativeOutputRequest(context);
   // 1) 参照の本体と、部材ごとのマスク。既存の静止画版とまったく同じ関数を呼ぶ。
   var base=captureCurrent3DDataUrl();
   if(!base) throw new Error('3Dビューの撮影に失敗しました。');
   await waitFrame(30);
+  assertNativeOutputRequest(context);
   var instanceData=captureInstance3DData();
   if(!instanceData.dataUrl) throw new Error('部材IDガイドの撮影に失敗しました。');
 
@@ -22078,7 +22189,9 @@ async function generateVideoRenderPackage(options){
             floor:e.floor,tier:LockTiers.tierOf(e.type)};
   });
   var baseIm=await decodePngDataUrlToImageData(base);
+  assertNativeOutputRequest(context);
   var instIm=await decodePngDataUrlToImageData(instanceData.dataUrl);
+  assertNativeOutputRequest(context);
   var measurements=ShadowLift.measure(baseIm,instIm,lockTiers);
   var curve=ShadowLift.curveFor(measurements);
   var reference=imageDataToPngDataUrl(ShadowLift.apply(baseIm,curve));
@@ -22094,6 +22207,7 @@ async function generateVideoRenderPackage(options){
   var contextEmpty=planEmptyFloorRefusal(contextBounds,floor,'plan_context.png');
   if(contextEmpty) throw contextEmpty;
   var topImages=await waitForPlanFloorTopImages(floor);
+  assertNativeOutputRequest(context);
   var plan=capturePlan2dDataUrl({annotations:false,ceilingLabels:true,floor:floor,
     fit:true,fitBounds:contextBounds});
   if(!plan) throw new Error('平面図の撮影に失敗しました。');
@@ -22104,11 +22218,13 @@ async function generateVideoRenderPackage(options){
   var placeholders=planCapturePlaceholderRoster();
   if(placeholders.length) throw planPlaceholderError(placeholders,topImages);
   var planIm=await decodePngDataUrlToImageData(plan);
+  assertNativeOutputRequest(context);
   // 家がこの図の何割を占めるかは測って記録するだけ（カメラを入れた分だけ主題は
   // 小さく写る。それはこの図の目的が家の描写ではないからで、不良ではない）。
   var contextRatio=planSubjectFrameRatio(planSubjectBoundsMm(floor),planView,
     planIm.width,planIm.height);
   var planContext=await drawPlanCameraOverlay(plan,camera,planView);
+  assertNativeOutputRequest(context);
 
   // 4) プロンプト。光を書けなかったら黙って続けない。
   var prompt=composeVideoPromptOrThrow({
@@ -22120,15 +22236,19 @@ async function generateVideoRenderPackage(options){
   var guides=null;
   if(includeGuides){
     await waitFrame(30);
+    assertNativeOutputRequest(context);
     var seg=captureSegmentation3DDataUrl();
     await waitFrame(30);
+    assertNativeOutputRequest(context);
     var depth=captureAiOverrideGuideDataUrl('depth');
     await waitFrame(30);
+    assertNativeOutputRequest(context);
     var normal=captureAiOverrideGuideDataUrl('normal');
     guides={
       segmentation:seg,depth:depth,normal:normal,
       edge:await makeEdgeDataUrlFromSegmentation(instanceData.dataUrl)
     };
+    assertNativeOutputRequest(context);
   }
 
   var names=['reference.png','plan_context.png','prompt.txt','package.json'];
@@ -22163,23 +22283,29 @@ async function generateVideoRenderPackage(options){
   ];
   if(guides){
     files.push({name:'edge_guide.png',bytes:await dataUrlToBytes(guides.edge)});
+    assertNativeOutputRequest(context);
     files.push({name:'depth_guide.png',bytes:await dataUrlToBytes(guides.depth)});
+    assertNativeOutputRequest(context);
     files.push({name:'normal_guide.png',bytes:await dataUrlToBytes(guides.normal)});
+    assertNativeOutputRequest(context);
     files.push({name:'segmentation_guide.png',bytes:await dataUrlToBytes(guides.segmentation)});
+    assertNativeOutputRequest(context);
     files.push({name:'instance_guide.png',bytes:await dataUrlToBytes(instanceData.dataUrl)});
+    assertNativeOutputRequest(context);
     files.push({name:'instance-legend.json',bytes:enc.encode(
       JSON.stringify({version:2,instances:instanceData.legend},null,2))});
     files.push({name:'segmentation-legend.json',bytes:enc.encode(
       JSON.stringify({version:2,legend:aiSegmentationLegend()},null,2))});
   }
-  VIDEO_RENDER_PACKAGE={
+  assertNativeOutputRequest(context);
+  VIDEO_RENDER_PACKAGE=tagNativeOutputPackage({
     packageJson:json,
     packageJsonText:jsonText,
     prompt:prompt,
     files:files.map(function(f){return {name:f.name,size:f.bytes.length};}),
     images:{reference:reference,planContext:planContext},
     zipBlob:makeZipBlob(files)
-  };
+  },context);
   if(opt.download!==false){
     downloadBlobFile('house-planner-video-package.zip',VIDEO_RENDER_PACKAGE.zipBlob);
   }
@@ -22195,6 +22321,7 @@ var VIDEO_RENDER_MIN_DURATION_SEC=4;
 // 参照は「いま画面に出ているもの」。3Dを見ていれば3D、平面図を見ていれば平面図。
 // ウォークスルーも 3D 側(目線をそのまま撮る)。説明文は下の
 // videoRenderSourceNoteText がビューごとに書き分ける。
+
 function videoRenderSourceFromView(){ return ST.view==='2d'?'plan':'3d'; }
 function videoRenderSourceLabel(source){ return source==='plan'?'平面図':'3Dビュー'; }
 function videoRenderPresetById(id){
@@ -22353,12 +22480,19 @@ function syncVideoRenderDownloadLinks(pkg){
 }
 function handleVideoDownloadLinkClick(e){
   var a=e&&e.currentTarget;
-  if(a && !a.classList.contains('disabled')) return true;
+  if(isNativeOutputPackageCurrent(VIDEO_RENDER_PACKAGE)&&a&&!a.classList.contains('disabled'))return true;
+  if(VIDEO_RENDER_PACKAGE&&!isNativeOutputPackageCurrent(VIDEO_RENDER_PACKAGE))clearVideoRenderOutput();
   if(e) e.preventDefault();
   setVideoRenderStatus('まだ動画AI用データがありません。「動画AI用データを作る」を押してから、保存ボタンを押してください。');
   return false;
 }
 async function copyVideoRenderPrompt(){
+  var source=captureNativeOutputSource(),pkg=VIDEO_RENDER_PACKAGE,request=NATIVE_OUTPUT_REQUESTS.video;
+  if(!isNativeOutputPackageCurrent(pkg)){
+    clearVideoRenderOutput();
+    setVideoRenderStatus('まだAIへの指示文がありません。「動画AI用データを作る」を押してください。');
+    return;
+  }
   var ta=document.getElementById('video-instructions-preview');
   var text=ta?String(ta.value||''):'';
   if(!text){
@@ -22369,6 +22503,7 @@ async function copyVideoRenderPrompt(){
   if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){
     try{ await navigator.clipboard.writeText(text); copied=true; }catch(err){}
   }
+  if(!isNativeOutputSourceCurrent(source)||pkg!==VIDEO_RENDER_PACKAGE||request!==NATIVE_OUTPUT_REQUESTS.video)return;
   if(!copied&&ta){
     ta.classList.add('show');
     ta.focus();
@@ -22401,13 +22536,17 @@ function openVideoRenderDialog(){
   if(m) m.classList.add('show');
 }
 function closeVideoRenderModal(){
+  cancelNativeOutputRequest('video');
+  setVideoRenderBusy(false);
   var m=document.getElementById('video-render-modal');
   if(m) m.classList.remove('show');
 }
 async function runVideoRenderPackage(){
   // 撮る直前の画面に合わせ直す。ダイアログを開いた後に階やビューを触っていても、
   // 参照とプリセットは必ず一対で渡る。
+  var context=beginNativeOutputRequest('video');
   var source=syncVideoRenderSource();
+  clearVideoRenderOutput();
   var presetId=videoRenderSelectedPresetId();
   var durationSec=videoRenderDurationSec();
   var includeGuides=videoRenderIncludesGuides();
@@ -22419,13 +22558,16 @@ async function runVideoRenderPackage(){
     // 中身を見てから選んで保存する（画像AI側と同じ流れ）。
     var pkg=await generateVideoRenderPackage({
       source:source,
+      nativeOutputContext:context,
       presetId:presetId,
       note:videoRenderNote(),
       durationSec:durationSec,
       includeGuides:includeGuides,
       download:false
     });
+    assertNativeOutputRequest(context);
     if(!pkg) throw new Error('パッケージが作られませんでした。');
+    VIDEO_RENDER_PACKAGE=tagNativeOutputPackage(pkg,context);
     setVideoInstructionsPreview(pkg.prompt);
     setVideoRenderImage(pkg.images&&pkg.images.reference);
     syncVideoRenderDownloadLinks(pkg);
@@ -22435,16 +22577,15 @@ async function runVideoRenderPackage(){
       '下の「データ出力」から、必要なものを保存してください。');
     return pkg;
   }catch(err){
+    if(!ownsNativeOutputRequest(context))return null;
     // 生成側の拒否は「直せる指示」である。要約も置き換えもせず、そのまま出す。
-    setVideoInstructionsPreview('');
-    clearVideoRenderDownloadLinks();
-    setVideoRenderImage('');
+    clearVideoRenderOutput();
     setVideoRenderStatus('動画AI用データを作れませんでした。\n\n'+
       (err&&err.message?err.message:String(err))+'\n\n'+
       '入力はそのまま残してあります。直してから、もう一度「動画AI用データを作る」を押してください。');
     return null;
   }finally{
-    setVideoRenderBusy(false);
+    if(ownsNativeOutputRequest(context))setVideoRenderBusy(false);
   }
 }
 var UNITY_RENDER_SERVER_KEY='webcadUnityRenderServer';
@@ -22499,6 +22640,8 @@ function openUnityRenderModal(){
   if(m) m.classList.add('show');
 }
 function closeUnityRenderModal(){
+  cancelNativeOutputRequest('image');
+  setUnityRenderBusy(false);
   var m=document.getElementById('unity-render-modal');
   if(m) m.classList.remove('show');
 }
@@ -22670,7 +22813,7 @@ function validateEditorPlan(plan,admission){
   if(!repository?.isAdmission(admission))throw new Error('旧保存コピーの原本を確認できません。現在の編集は変更していません。');
   return repository.validateAdmission(plan,admission);
 }
-function applyJsonImport(staged){
+function applyJsonImport(staged,options){
   var previous={data:DATA,state:ST,drag:DRAG,wallHeight:WALL_H,nextId:nextId,
     north:LIGHT_SETTINGS.northDeg,dirty:DIRTY,pending:_defaultPlanPending,legacyAdmission:globalThis.__legacyPlanAdmission};
   var camera=camExt?{position:camExt.position.clone(),quaternion:camExt.quaternion.clone(),
@@ -22710,6 +22853,7 @@ function applyJsonImport(staged){
     }
     throw error;
   }
+  if(!options?.deferNativeOutputReset&&typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();
   _defaultPlanPending=false;
   clearEditHistory();
   sharedForceFullSync();queueSharedSync(700);queueSharedLocalAutoSave();
@@ -24758,8 +24902,19 @@ var JISDRAW=(function(){
   return {availableSheets:availableSheets, buildFloorPlanSvg:buildFloorPlanSvg, buildElevationSvg:buildElevationSvg, lineWidths:lineWidths};
 })();
 
-var JIS_UI={sheet:null};
+var JIS_UI={sheet:null,source:null};
+var JIS_PNG_JOBS=new Set();
+function cancelJisPendingOutputs(){
+  cancelNativeOutputRequest('jis');
+  for(var cancel of Array.from(JIS_PNG_JOBS))cancel();
+  // Once print() has begun, keep its document until afterprint/normal cleanup.
+  // Removing an active print iframe can produce a blank page on Safari.
+  if(JIS_PRINT_IFRAME&&!JIS_PRINT_IFRAME._jisPrinting)jisRemovePrintIframe();
+}
 function openJisDrawingDialog(){
+  cancelJisPendingOutputs();
+  if(!isNativeOutputSourceCurrent(JIS_UI.source))JIS_UI.sheet=null;
+  JIS_UI.source=captureNativeOutputSource();
   var sheets=JISDRAW.availableSheets();
   var ov=document.getElementById('jis-drawing-overlay');
   ov.style.display='flex';
@@ -24778,8 +24933,10 @@ function openJisDrawingDialog(){
   renderJisSheetList(sheets);
   jisRerender();
 }
-function closeJisDrawingDialog(){ document.getElementById('jis-drawing-overlay').style.display='none'; }
+function closeJisDrawingDialog(){ cancelJisPendingOutputs();document.getElementById('jis-drawing-overlay').style.display='none'; }
 function jisSelectSheet(kind,key){
+  if(!isNativeOutputSourceCurrent(JIS_UI.source))return;
+  cancelJisPendingOutputs();
   JIS_UI.sheet={kind:kind,key:key};
   renderJisSheetList(JISDRAW.availableSheets());
   jisRerender();
@@ -24810,6 +24967,7 @@ function jisCurrentOpts(){
   return {scale:document.getElementById('jis-scale').value, paper:document.getElementById('jis-paper').value};
 }
 function jisCurrentSvg(){
+  if(!JIS_UI.sheet||!isNativeOutputSourceCurrent(JIS_UI.source))return '';
   var s=JIS_UI.sheet;
   return s.kind==='plan' ? JISDRAW.buildFloorPlanSvg(s.key,jisCurrentOpts())
                          : JISDRAW.buildElevationSvg(s.key,jisCurrentOpts());
@@ -24817,7 +24975,7 @@ function jisCurrentSvg(){
 function jisRerender(){
   var host=document.getElementById('jis-preview');
   // sheetがnull(空プラン、またはstale検証で消えた)なら偽図面で上書きせず空メッセージのまま何もしない。
-  if(!JIS_UI.sheet){
+  if(!JIS_UI.sheet||!isNativeOutputSourceCurrent(JIS_UI.source)){
     host.innerHTML='<div class="jis-empty">壁が配置されていないため図面を生成できません。2D画面で間取りを作成してください。</div>';
     jisSetStatus('');
     return;
@@ -24847,12 +25005,16 @@ function jisFileBaseName(){
 }
 function jisDownloadSvg(){
   if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  if(!isNativeOutputSourceCurrent(JIS_UI.source)){jisSetStatus('間取りが変更されています。図面を開き直してください。',true);return;}
   // downloadTextFile(:16841)→downloadBlobFile(:16829)は<a download>+objectURL方式で、
   // 既存の画像AI用データのZIP保存等でも使われておりiPad Safariでも動作実績のあるパターン。そのまま踏襲する。
   downloadTextFile(jisFileBaseName()+'.svg', jisCurrentSvg(), 'image/svg+xml;charset=utf-8');
 }
 function jisDownloadPng(){
   if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  if(!isNativeOutputSourceCurrent(JIS_UI.source)){jisSetStatus('間取りが変更されています。図面を開き直してください。',true);return;}
+  cancelJisPendingOutputs();
+  var context=beginNativeOutputRequest('jis'),filename=jisFileBaseName()+'.png';
   jisSetStatus('');
   var svgStr=jisCurrentSvg();
   // SVGのviewBoxから紙の縦横比を取り出し、長辺約3000pxになるピクセルサイズを決める
@@ -24873,7 +25035,14 @@ function jisDownloadPng(){
   var blob=new Blob([svgWithSize],{type:'image/svg+xml;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var img=new Image();
+  var finished=false;
+  function cleanup(){
+    if(finished)return;finished=true;
+    img.onload=null;img.onerror=null;URL.revokeObjectURL(url);JIS_PNG_JOBS.delete(cleanup);
+  }
+  JIS_PNG_JOBS.add(cleanup);
   img.onload=function(){
+    if(!isNativeOutputRequestCurrent(context)){cleanup();return;}
     try{
       var canvas=document.createElement('canvas');
       canvas.width=pxW; canvas.height=pxH;
@@ -24882,20 +25051,23 @@ function jisDownloadPng(){
       ctx.fillRect(0,0,pxW,pxH); // 白背景を先に塗ってから図面を重ねる(SVG側は透過が無い想定だが念のため)
       ctx.drawImage(img,0,0,pxW,pxH);
       canvas.toBlob(function(pngBlob){
-        URL.revokeObjectURL(url);
+        cleanup();
+        if(!isNativeOutputRequestCurrent(context))return;
         if(!pngBlob){
           jisSetStatus('PNGへの変換に失敗しました。ブラウザの制限により生成できない場合があります。',true);
           return;
         }
-        downloadBlobFile(jisFileBaseName()+'.png', pngBlob);
+        downloadBlobFile(filename, pngBlob);
       },'image/png');
     }catch(e){
-      URL.revokeObjectURL(url);
+      cleanup();
+      if(!isNativeOutputRequestCurrent(context))return;
       jisSetStatus('PNGへの変換に失敗しました: '+(e&&e.message?e.message:e),true);
     }
   };
   img.onerror=function(){
-    URL.revokeObjectURL(url);
+    cleanup();
+    if(!isNativeOutputRequestCurrent(context))return;
     jisSetStatus('PNG変換用の画像読み込みに失敗しました。ブラウザやOSの制限が原因の可能性があります。',true);
   };
   img.src=url;
@@ -24908,6 +25080,10 @@ function jisRemovePrintIframe(){
 }
 function jisPrint(){
   if(!JIS_UI.sheet){ jisSetStatus('図面が選択されていません。',true); return; }
+  if(!isNativeOutputSourceCurrent(JIS_UI.source)){jisSetStatus('間取りが変更されています。図面を開き直してください。',true);return;}
+  if(JIS_PRINT_IFRAME?._jisPrinting){jisSetStatus('前の印刷が終了するまでお待ちください。');return;}
+  cancelJisPendingOutputs();
+  var context=beginNativeOutputRequest('jis');
   jisRemovePrintIframe(); // 連続クリックしても前回分が残らないよう先に片付ける
   var opts=jisCurrentOpts();
   var pageSize=(opts.paper==='a4') ? 'A4 landscape' : 'A3 landscape';
@@ -24940,16 +25116,20 @@ function jisPrint(){
     if(JIS_PRINT_IFRAME===iframe) JIS_PRINT_IFRAME=null;
   }
   iframe.onload=function(){
+    if(!isNativeOutputRequestCurrent(context)||JIS_PRINT_IFRAME!==iframe){cleanup();return;}
     var win=iframe.contentWindow;
     var printed=false; // fonts.ready完了とタイムアウトのどちらか早い方で発火するため、二重print()呼び出しを防ぐガード
     function doPrint(){
       if(printed) return;
       printed=true;
+      if(!isNativeOutputRequestCurrent(context)||JIS_PRINT_IFRAME!==iframe){cleanup();return;}
       try{
+        iframe._jisPrinting=true;
         win.onafterprint=cleanup; // 印刷ダイアログが閉じたタイミングで除去(対応ブラウザ向け)
         win.focus();
         win.print();
       }catch(e){
+        iframe._jisPrinting=false;cleanup();
         jisSetStatus('印刷の開始に失敗しました: '+(e&&e.message?e.message:e),true);
       }
       // afterprint未対応環境向けのフォールバック除去。print()が非ブロッキングなブラウザ(Firefox/Safari系)では

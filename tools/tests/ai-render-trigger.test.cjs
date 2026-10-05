@@ -198,6 +198,7 @@ function harness(opts) {
   const ctxRef = ctx;
 
   vm.runInContext([
+    require('./native-output-source.cjs').nativeOutputContextSource(),
     topLevelVar('AI_RENDER_PACKAGE'),
     topLevelVar('AI_RENDER_DOWNLOAD_URLS'),
     topLevelVar('unityRenderBusy'),

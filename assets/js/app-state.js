@@ -1279,7 +1279,7 @@ function updateProps(){
         html += '<div style="font-size:9px;color:#7a8fb0;margin-top:5px">この壁は両面が外観カラー対象です。</div>';
       }
       faces.forEach(function(face,idx){
-        var fs=getInteriorFaceSetting(it,face);
+        var fs=getInteriorFaceSetting(it,face,true);
         var faceKey=interiorFaceKey(it,face);
         var ap=resolveInteriorFaceAppearance(it,face);
         html += '<div class="face-card">';
@@ -1293,7 +1293,7 @@ function updateProps(){
       if(extFaces.length){
         html += '<div class="ph" style="margin-top:12px">外観カラー（外観面）</div>';
         extFaces.forEach(function(face,idx){
-          var efs=getExteriorFaceSetting(it,face);
+          var efs=getExteriorFaceSetting(it,face,true);
           var faceKey=exteriorFaceKey(it,face);
           var ap=resolveExteriorFaceAppearance(it,face);
           html += '<div class="face-card">';

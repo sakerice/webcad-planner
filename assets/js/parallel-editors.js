@@ -75,12 +75,13 @@
     // first draw must never leave the new scene under the previous plan ID.
     const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();
     try{
-     applyJsonImport(staged);
+     applyJsonImport(staged,{deferNativeOutputReset:true});
      HISTORY.length=0;REDO_HISTORY.length=0;
      if(saved){HISTORY.push(...(saved.history||[]));REDO_HISTORY.push(...(saved.redo||[]));}
      DIRTY=!!saved?.dirty;
      if(saved?.view)applyView(saved.view);else resetView();
      root.AssetPackPicker?.setSelection(saved?.cataloguePack);if(DIRTY)renderSaveButtonState();else clearDirty();
+     if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();
      return true;
     }catch(error){
      restoreInstallState(previous);
@@ -89,7 +90,7 @@
    },
    undo:()=>undoAction(),redo:()=>redoAction(),async save(){captureViewState();const saved=serializeDataSnapshot(),result=await StorageAdapter.save(DATA);if(serializeDataSnapshot()===saved&&result?.canClean!==false)clearDirty();return root.EditorPane.snapshot();},
    metrics:()=>({renderCalls,modelCount:Object.keys(_modelCache).length,pixelRatio:ren&&ren.getPixelRatio(),renderer:ren?clone(ren.info.memory):null,quality:{ao:!!(_n8aoPass&&_n8aoPass.enabled),shadows:!!(ren&&ren.shadowMap.enabled)}}),
-   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root._editorPaneDisposed=true;if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
+   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
   };
   let scheduled=false,lastCamera=null;
   function cameraKey(){const v=view();return JSON.stringify({twoD:v.twoD,camera:v.camera},(k,value)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toFixed(8)):value);}
