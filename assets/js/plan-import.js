@@ -48,9 +48,11 @@
     extractionMode: 'v1', // Session-only explicit choice; never persisted into plans.
   };
 
-  // Session-local ownership only. No transport allowance or persistent source archive.
+  // Session-local ownership. The comparison host owns the fixed-operation transport;
+  // source evidence is never added to a persistent source archive.
   var importEpoch = 0, quotaVersion = 0, reviewOwner = null, activeContexts = new Set();
   var fallbackTarget = null, fallbackText = null, fallbackGeneration = 0;
+  var transportContexts = new WeakMap(), transportTickets = new WeakMap();
   function targetOwner() {
     if (root._editorPaneDisposed || root._editorPlanInstalling) return null;
     if (root.EditorPane && root.EditorPane.importOwner) return root.EditorPane.importOwner();
@@ -62,18 +64,57 @@
   function sourceKey() {
     return JSON.stringify([ST.fileName, ST.pages ? null : ST.image && ST.image.src || null, ST.pages, ST.pageReview, ST.pdfData, ST.pages ? null : ST.crop, ST.extractionMode]);
   }
-  function captureContext(withSource) {
+  function captureContext(withSource) { return createContext(withSource, 'local'); }
+  function createContext(withSource, kind, extraCurrent) {
     var owner = JSON.stringify(targetOwner()), epoch = importEpoch, version = ST.version, request = ST.requestVersion;
     var source = withSource === false ? null : sourceKey(), controller = typeof AbortController === 'function' ? new AbortController() : null;
-    var cancelled = false, cancels = new Set();
+    var cancelled = false, cancels = new Set(), networkSource = null, sequence = 0;
     var context = { signal: controller && controller.signal,
-      isCurrent: function () { return !cancelled && epoch === importEpoch && version === ST.version && request === ST.requestVersion && owner !== 'null' && owner === JSON.stringify(targetOwner()) && (source === null || source === sourceKey()); },
+      isCurrent: function () { return !cancelled && epoch === importEpoch && version === ST.version && request === ST.requestVersion && owner !== 'null' && owner === JSON.stringify(targetOwner()) && (source === null || source === sourceKey()) && (networkSource === null || networkSource === sourceKey()) && (!extraCurrent || extraCurrent()); },
       cancel: function () { cancelled = true; if (controller) controller.abort(); cancels.forEach(function (fn) { fn(); }); cancels.clear(); activeContexts.delete(context); },
       delay: function (ms) { return new Promise(function (resolve) { var finish = function () { clearTimeout(timer); cancels.delete(finish); resolve(); }, timer = setTimeout(finish, ms); cancels.add(finish); }); },
       onCancel: function (fn) { cancels.add(fn);return function(){cancels.delete(fn);}; },
-      done: function () { activeContexts.delete(context); }
+      done: function () { activeContexts.delete(context); },
+      finish: function (body) { return requestOperation('finish', body, context); },
+      retainFailedReply: function(body){if(activeContexts.has(context)&&context.isCurrent())ST.failedSceneResponse=body;}
     };
+    transportContexts.set(context, { kind: kind, descriptor: function () {
+      return {kind:kind,epoch:epoch,sourceVersion:version,requestVersion:request,target:owner,source:networkSource};
+    }, ticket: function (operation,payload,signal) {
+      if(kind !== 'quota' && networkSource === null) networkSource=sourceKey();
+      return {operation:operation,body:payload === null ? null : JSON.stringify(payload),signal:signal || context.signal,sequence:++sequence,claimed:false};
+    }});
     activeContexts.add(context); return context;
+  }
+  // Tickets are created only at the existing controller's network call sites.
+  // The host consumes a real ticket once; an asserted pane/context ID is not enough.
+  function transportContext(context) {
+    var record=transportContexts.get(context);
+    return record && activeContexts.has(context) && context.isCurrent() ? record.descriptor() : null;
+  }
+  function claimTransportRequest(context,ticket) {
+    var intent=transportTickets.get(ticket),owner=transportContext(context);
+    if(!owner || !intent || intent.context!==context || intent.claimed)return null;
+    intent.claimed=true;
+    return Object.assign({},owner,{operation:intent.operation,body:intent.body,signal:intent.signal,sequence:intent.sequence});
+  }
+  function requestOperation(operation,payload,context,signal) {
+    if(!context || !context.isCurrent())return Promise.reject(new Error('Import owner is no longer current'));
+    var record=transportContexts.get(context),intent=record.ticket(operation,payload,signal),ticket={};
+    intent.context=context;transportTickets.set(ticket,intent);
+    var result;
+    try {
+      if(root.EDITOR_PANE && root.parent && root.parent!==root && root.parent.PlanLibrary){
+        result=root.parent.PlanLibrary.requestImportOperation(root.EDITOR_PANE,root,context,ticket);
+      }else{
+        var paths={quota:'/api/ai/quota',locate:'/api/ai/find-plan',read:'/api/ai/import-plan','read-result':'/api/ai/plan-result',revise:'/api/ai/revise-plan',finish:'/api/ai/finish-plan',register:'/api/ai/register-plan','register-result':'/api/ai/register-plan-result'};
+        if(!Object.prototype.hasOwnProperty.call(paths,operation))throw Error('Import operation is unavailable');
+        var options={signal:intent.signal};
+        if(operation!=='quota'){options.method='POST';options.headers={'content-type':'application/json'};options.body=intent.body;}
+        result=fetch(paths[operation],options);
+      }
+    }catch(error){result=Promise.reject(error);}
+    return Promise.resolve(result).then(function(reply){transportTickets.delete(ticket);return reply;},function(error){transportTickets.delete(ticket);throw error;});
   }
   function bindReview(body) { reviewOwner = body ? { body: body, owner: JSON.stringify(targetOwner()), source: sourceKey(), epoch: importEpoch } : null; }
   function currentReview(body) {
@@ -170,9 +211,9 @@
   function showQuota() {
     var box = $('plan-import-quota');
     if (!box) return;
-    var context = captureContext(false), token = ++quotaVersion;
+    var token = ++quotaVersion, context = createContext(false, 'quota', function(){return token === quotaVersion;});
     function current() { return token === quotaVersion && context.isCurrent(); }
-    fetch('/api/ai/quota', {signal: context.signal}).then(function (r) { return r.json(); }).then(function (q) {
+    requestOperation('quota', null, context).then(function (r) { if(root.EDITOR_PANE && !r.ok)throw Error('Import quota is unavailable');return r.json(); }).then(function (q) {
       if (!current()) return;
       ST.sceneIRV3Available = !!(q && q.sceneIRV3 && q.sceneIRV3.enabled === true);
       ST.quotaBlocked = !!(q && q.counted && q.left !== null && q.left !== undefined && q.left <= 0);
@@ -184,7 +225,7 @@
         : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
       var run = $('plan-import-run');
       if (run && q.left <= 0) run.disabled = true;
-    }).catch(function () { if (!current()) return; ST.sceneIRV3Available = false; box.style.display = 'none'; syncPlanImportButtons(); }).then(context.done);
+    }).catch(function () { if (!current()) return; ST.sceneIRV3Available = false; if(root.EDITOR_PANE){box.style.display='';box.textContent='残り回数を確認できませんでした。読み取りの利用可否はサーバの確認が必要です。';}else box.style.display = 'none'; syncPlanImportButtons(); }).then(context.done);
   }
 
   function closePlanImport() {
@@ -240,12 +281,7 @@
       var controller=typeof AbortController==='function'?new AbortController():null;
       function cancel(){clearTimeout(timer);if(controller)controller.abort();resolve(null);}
       var timer=setTimeout(cancel,LOCATE_TIMEOUT_MS),detach=context?context.onCancel(cancel):function(){};
-      fetch('/api/ai/find-plan', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ image: smallDataUrl }),
-        signal: controller && controller.signal,
-      }).then(function (res) { return res.ok ? res.json() : null; })
+      requestOperation('locate', { image: smallDataUrl }, context, controller && controller.signal).then(function (res) { return res.ok ? res.json() : null; })
         .then(function (body) { clearTimeout(timer);detach();resolve(body || null); })
         .catch(function () { clearTimeout(timer);detach();resolve(null); });
     });
@@ -381,7 +417,7 @@
     resetPlanImport();
     ST.fileName = file.name || '';
     var version = ST.version, sourceVersion = ST.requestVersion;
-    var context = captureContext(false);
+    var context = createContext(false, 'locate');
     function current() { return context.isCurrent() && version === ST.version && sourceVersion === ST.requestVersion; }
     function fail(message) {
       if (!current()) {context.done();return;}
@@ -714,7 +750,7 @@
     var images = ST.pages ? ST.pages.slice() : (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
     if (!images.length) return;
     if (contract && images.length !== 1) { setStatus('この読み取り方式は図面1枚に対応しています。旧方式を使う場合は明示的に選び直してください。'); return; }
-    var requestVersion = ++ST.requestVersion, context = captureContext();
+    var requestVersion = ++ST.requestVersion, context = createContext(true, 'read');
     var pageScope = contract ? images.map(function (image, i) { return "image:" + (i + 1) + ":" + SceneIR.sourceHash(image); }) : null;
     ST.busy = true; ST.result = null; ST.mappingEditor = null;
     show('plan-import-step3', false);
@@ -736,19 +772,17 @@
       return !sourcePages || ST.pageReview && ST.pages && JSON.stringify(ST.pageReview.map(function (p) { return p.sourceIdentity; })) === JSON.stringify(sourcePages)
         && ST.pages.length === images.length && ST.pages.every(function (image, i) { return image === images[i]; });
     }
-    return fetch('/api/ai/import-plan', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: context.signal,
-    }).then(readReply).then(function (r) {
+    return requestOperation('read', requestBody, context).then(readReply).then(function (r) {
       if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return null;
-      return waitForJobs(r, { context: context, isCurrent: function () { return context.isCurrent() && version === ST.version && requestVersion === ST.requestVersion; }, onProgress: function (done, total) {
+      return waitForJobs(r, { context: context, extractionContract: contract || null, isCurrent: function () { return context.isCurrent() && version === ST.version && requestVersion === ST.requestVersion; }, onProgress: function (done, total) {
         if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return;
         setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
       if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion || !r) return;
+      if(unexpectedImportContract(r.body,contract,r.status===200)){
+        ST.failedSceneResponse=r.body;ST.busy=false;showPlanImportError(409,{error:'ai_extraction_contract_mismatch'});syncPlanImportButtons();return;
+      }
       var isSceneResponse = contract || (r.body && r.body.extractionContract === 'scene-ir-v3');
       var repairable = !isSceneResponse && r.status === 422 && r.body && r.body.error === 'ai_invalid_plan' &&
         r.body.revisionCandidate === true && Array.isArray(r.body.pages) && r.body.pages.length;
@@ -840,9 +874,15 @@
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
   // 受付番号が入っていなければ、そのまま返す（Vertex は投げた通信で答えが返る）。
+  function unexpectedImportContract(body, expected, required) {
+    if(!body)return !!expected && required;
+    if(Object.prototype.hasOwnProperty.call(body,'extractionContract'))return body.extractionContract!==expected;
+    return !!expected && required || !expected && !!body.sceneIR;
+  }
   function waitForJobs(first, opts) {
     opts = opts || {};
     if (first.status !== 200 || !first.body || !first.body.jobs) return Promise.resolve(first);
+    if (Object.prototype.hasOwnProperty.call(opts,'extractionContract') && unexpectedImportContract(first.body,opts.extractionContract || undefined,true)) return Promise.resolve(first);
     var jobs = first.body.jobs;
     var extractionContract = first.body.extractionContract;
     var until = Date.now() + JOB_TIMEOUT_MS;
@@ -852,13 +892,10 @@
       if (Date.now() > until) return { status: 504, body: null };
       var pollBody = { jobs: jobs, revised: Boolean(opts.revised) };
       if (extractionContract) pollBody.extractionContract = extractionContract;
-      return fetch('/api/ai/plan-result', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(pollBody),
-        signal: opts.context && opts.context.signal,
-      }).then(readReply).then(function (r) {
+      return requestOperation('read-result', pollBody, opts.context).then(readReply).then(function (r) {
         if (opts.isCurrent && !opts.isCurrent()) return null;
+        if (Object.prototype.hasOwnProperty.call(opts,'extractionContract') && unexpectedImportContract(r.body,opts.extractionContract || undefined,r.status===200)) return r;
+        if (extractionContract && (!r.body || r.body.extractionContract !== extractionContract)) return r;
         if (r.status !== 200 || !r.body || !r.body.pending) return r;
         if (opts.onProgress) opts.onProgress(r.body.done, r.body.total);
         return (opts.context ? opts.context.delay(JOB_POLL_MS) : delay(JOB_POLL_MS)).then(once);
@@ -928,19 +965,17 @@
 
     if (context && !context.isCurrent()) return Promise.resolve(null);
     setStatus('読み取った間取りを描き起こして、AIに見直させています… 30秒ほどかかります。');
-    return fetch('/api/ai/revise-plan', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(Object.assign({ images: images, renders: renders, pages: pages, hint: hint }, body.sourcePages ? { sourcePages: body.sourcePages } : {})),
-      signal: context && context.signal,
-    }).then(readReply).then(function (r) {
+    return requestOperation('revise', Object.assign({ images: images, renders: renders, pages: pages, hint: hint }, body.sourcePages ? { sourcePages: body.sourcePages } : {}), context).then(readReply).then(function (r) {
       if (context && !context.isCurrent() || version !== ST.version) return null;
-      return waitForJobs(r, { context: context, revised: true, isCurrent: function () { return (!context || context.isCurrent()) && version === ST.version; }, onProgress: function (done, total) {
+      return waitForJobs(r, { context: context, revised: true, extractionContract: null, isCurrent: function () { return (!context || context.isCurrent()) && version === ST.version; }, onProgress: function (done, total) {
         if (context && !context.isCurrent() || version !== ST.version) return;
         setStatus('AIに見直させています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
       if (context && !context.isCurrent() || version !== ST.version || !r) return body;
+      if(unexpectedImportContract(r.body,undefined,r.status===200)){
+        ST.failedSceneResponse=r.body;return {error:'ai_extraction_contract_mismatch'};
+      }
       if (r.body && r.body.error === 'ai_ambiguous_floors') return r.body;
       if (r.status !== 200 || !r.body || !r.body.plan) {
         body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
@@ -952,8 +987,9 @@
       r.body.reviewChanges = reviewChanges(pages, r.body.pages || []);
       r.body.beforePages = pages;   // 見直す前の答え。何が変わったかを後から確かめるため
       return r.body;
-    }).catch(function () {
+    }).catch(function (error) {
       if (context && !context.isCurrent()) return null;
+      if(error && error.name==='AbortError')return {error:'ai_import_context_mismatch'};
       body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
       return body;
     });
@@ -1031,6 +1067,8 @@
   function showPlanImportError(status, body) {
     var code = (body && body.error) || '';
     var map = {
+      ai_import_context_mismatch: '原図・確認対象または受付番号が一致しないため停止しました。現在の入力を保持し、自動の読み直しは行いません。',
+      ai_extraction_contract_mismatch: '読み取り方式と返答が一致しません。元の返答を保持し、自動で読み直したり別の方式へ切り替えずに停止しました。',
       scene_ir_v3_job_mismatch: '読み取り方式が更新されたため、この結果は現在の方式では取り込めません。保存済みプランは変更していません。自動で読み直すことはありません。読み直す場合は新しいAPI呼び出しになり、利用回数・費用が発生する可能性があります。',
       ai_not_configured: 'この環境ではまだAIの読み取りを使えません（管理者の設定待ちです）。',
       ai_model_not_japan_resident: 'AIの設定が正しくないため実行しませんでした。管理者にお伝えください。',
@@ -1191,23 +1229,31 @@
   }
   function requestBuildingRegistration(body) {
     if (!currentReview(body) || ST.result !== body || ST.busy || body.importApplied || body.buildingApplied || !body.sourceLocal || !ST.pages || ST.pages.length < 2) return;
-    var version=ST.version, requestVersion=++ST.requestVersion, context=captureContext(), sourceSnapshot=PlanRegistration.snapshot(body.sourceLocal);
+    var version=ST.version, requestVersion=++ST.requestVersion, sourceSnapshot=PlanRegistration.snapshot(body.sourceLocal);
+    var registrationContract=null,context=createContext(true,'register',function(){return currentReview(body)&&ST.result===body&&PlanRegistration.snapshot(body.sourceLocal)===sourceSnapshot;});
     ST.busy=true;
     invalidateFixtureReview(body);
     body.buildingDecisions={sourceSnapshot:sourceSnapshot,floors:[],partialAcknowledged:false};
     syncPlanImportButtons();
     setStatus('全ページの位置合わせを追加で読み取っています。結果は確認前の提案です。');
     function current(){return context.isCurrent() && currentReview(body) && ST.result===body && ST.version===version && ST.requestVersion===requestVersion && PlanRegistration.snapshot(body.sourceLocal)===sourceSnapshot;}
-    function post(path,payload){if(!current())return Promise.resolve(null);return fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:context.signal}).then(readReply);}
+    function post(operation,payload){if(!current())return Promise.resolve(null);return requestOperation(operation,payload,context).then(readReply).then(function(reply){
+      if(!current())return null;
+      var explicit=reply.body&&Object.prototype.hasOwnProperty.call(reply.body,'registrationContract');
+      if(explicit&&reply.body.registrationContract!=='building-registration-v1'||registrationContract&&(reply.status===200||reply.status===202)&&(!explicit||reply.body.registrationContract!==registrationContract)){
+        ST.failedSceneResponse=reply.body;return {status:409,body:{message:'位置合わせの方式と返答が一致しません。元の返答を保持し、自動で読み直さずに停止しました。'}};
+      }
+      if(explicit)registrationContract=reply.body.registrationContract;return reply;
+    });}
     function poll(reply){
       if(!current() || !reply) return null;
       if(reply.status!==202) return reply;
       return context.delay(3000).then(function(){
         if(!current())return null;
-        return post('/api/ai/register-plan-result',{jobs:reply.body.jobs,sourceLocal:body.sourceLocal,sourceSnapshot:sourceSnapshot}).then(poll);
+        return post('register-result',{jobs:reply.body.jobs,sourceLocal:body.sourceLocal,sourceSnapshot:sourceSnapshot}).then(poll);
       });
     }
-    return post('/api/ai/register-plan',{images:ST.pages.slice(),sourceLocal:body.sourceLocal,sourceSnapshot:sourceSnapshot}).then(poll).then(function(reply){
+    return post('register',{images:ST.pages.slice(),sourceLocal:body.sourceLocal,sourceSnapshot:sourceSnapshot}).then(poll).then(function(reply){
       if(!current() || !reply)return;
       ST.busy=false;
       if(reply.status!==200 || !reply.body || reply.body.sourceSnapshot!==sourceSnapshot || !reply.body.buildingRegistration){
@@ -2325,7 +2371,7 @@
   // 検査から中身を覗くため
   root.PlanImport = {
     state: ST,
-    capture: captureImport, restore: restoreImport, invalidate: invalidateImport, captureContext: captureContext, currentReview: currentReview,
+    capture: captureImport, restore: restoreImport, invalidate: invalidateImport, captureContext: captureContext, transportContext: transportContext, claimTransportRequest: claimTransportRequest, currentReview: currentReview,
     hasUnexportedReview: function () { return !!(ST.result || ST.failedSceneResponse || ST.image || ST.originalImageSource || ST.pages || ST.pdfData || ST.fileName); },
     get epoch() { return importEpoch; },
     croppedDataUrl: croppedDataUrl,

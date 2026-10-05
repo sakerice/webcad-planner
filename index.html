@@ -23,6 +23,30 @@ var NATIVE_PLAN_EDITOR = window.parent === window && !PLAN_LIBRARY_HOST && !COMP
 var NATIVE_EDITOR_PANE = NATIVE_PLAN_EDITOR ? 'native-editor' : null;
 if(COMPARISON_PREVIEW || EDITOR_PANE){
   const originalFetch=window.fetch.bind(window);
+  // This one-shot bootstrap is consumed by the real library host. Neither a
+  // pane nor a capture-only preview receives the private original transport.
+  // Same-origin panes are an application ownership boundary, not a sandbox.
+  if(PLAN_LIBRARY_HOST){
+    let transportClaimed=false;
+    Object.defineProperty(window,'__takePlanLibraryAITransport',{configurable:true,value:function(){
+      if(transportClaimed)throw Error('Import transport is already owned');
+      transportClaimed=true;delete window.__takePlanLibraryAITransport;
+      const operations=Object.freeze({quota:['GET','/api/ai/quota'],locate:['POST','/api/ai/find-plan'],read:['POST','/api/ai/import-plan'],'read-result':['POST','/api/ai/plan-result'],revise:['POST','/api/ai/revise-plan'],finish:['POST','/api/ai/finish-plan'],register:['POST','/api/ai/register-plan'],'register-result':['POST','/api/ai/register-plan-result']});
+      return async function(operation,body,signal,check){
+        if(!Object.prototype.hasOwnProperty.call(operations,operation)||typeof check!=='function')throw Error('Import operation is unavailable');
+        const [method,path]=operations[operation];
+        if(method==='GET'?body!==null:typeof body!=='string'||!body.startsWith('{'))throw Error('Import payload is unavailable');
+        check();
+        const options={method,signal,credentials:'same-origin',redirect:'error'};
+        if(method==='POST'){options.headers={'content-type':'application/json'};options.body=body;}
+        const response=await originalFetch(new URL(path,location.href).href,options);
+        check();
+        if(response.redirected||response.url&&new URL(response.url,location.href).origin!==new URL(location.href).origin)throw Error('Import redirect is unavailable');
+        const text=await response.text();check();
+        return {status:response.status,text};
+      };
+    }});
+  }
   window.fetch=function(input,options){
     const url=new URL(typeof input==='string'?input:input.url,location.href);
     if(url.pathname.startsWith('/api/') || (options&&options.method&&options.method.toUpperCase()!=='GET')) return Promise.reject(new Error('Comparison preview cannot access application APIs'));

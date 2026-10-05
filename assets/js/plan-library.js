@@ -91,6 +91,92 @@ function record(p){return plans.get(p.planId);}
 function snapshot(p){const r=record(p),s=state(p),encoded=JSON.stringify(s.plan);if(r.lastPayload!==encoded){r.generation++;r.lastPayload=encoded;}r.state=s;r.plan=s.plan;return s;}
 async function checkpoint(p){const r=record(p);if(r.baseRevisionId)return;const s=snapshot(p),result=await repo.save({planId:r.id,name:r.name,operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:s.plan,kind:'unsaved-checkpoint',origin:{explicitlySaved:false}});if(result.status!=='saved')throw Error('未保存の編集保全が競合しました。');r.baseRevisionId=result.revisionId;r.baseGeneration=result.head.headGeneration;r.state.dirty=true;p.frame.contentWindow.markDirty();await persistDraft(p);}
 async function persistDraft(p,captured){const r=record(p),s=captured||snapshot(p);const result=await repo.saveDraft(session,r.id,{...s,payload:s.plan,generation:r.generation,baseRevisionId:r.baseRevisionId,baseGeneration:r.baseGeneration});if(result.status==='conflict')throw Error('下書きの世代が競合しました。元の編集を保持しています。');return result;}
+// Private, typed host transport. The early bootstrap is absent in native mode
+// and capture previews, then removed after this real library host claims it.
+const importTransport=!native&&window.PLAN_LIBRARY_HOST===true&&typeof window.__takePlanLibraryAITransport==='function'?window.__takePlanLibraryAITransport():null;
+const importChains=new WeakMap(),importPaneFlows=new WeakMap();
+function importDenied(){return new DOMException('原図・確認対象または読み取り処理が変わりました。元の入力を保持して停止しました。','AbortError');}
+function importShape(payload,keys){return payload&&typeof payload==='object'&&!Array.isArray(payload)&&Object.keys(payload).every(key=>keys.includes(key));}
+function importJobs(value){return Array.isArray(value)&&value.length>0&&value.every(job=>typeof job==='string'&&job.length>0);}
+function sameImportValue(a,b){return JSON.stringify(a)===JSON.stringify(b);}
+function reserveImportOperation(chain,request){
+ const op=request.operation,body=request.body===null?null:JSON.parse(request.body);
+ if(request.sequence!==chain.sequence+1)throw importDenied();
+ if(chain.kind==='quota'){
+  if(op!=='quota'||body!==null||chain.sequence)throw importDenied();
+ }else if(chain.kind==='locate'){
+  if(op!=='locate'||!importShape(body,['image'])||typeof body.image!=='string')throw importDenied();
+ }else if(chain.kind==='read'){
+  if(op==='read'){
+   if(chain.phase!=='start'||!importShape(body,['images','hint','sourcePages','extractionContract'])||!Array.isArray(body.images)||!body.images.length||body.images.some(image=>typeof image!=='string')||typeof body.hint!=='string'||body.extractionContract!==undefined&&body.extractionContract!=='scene-ir-v3')throw importDenied();
+   chain.read=body;chain.contract=body.extractionContract||null;chain.phase='reading';
+  }else if(op==='read-result'){
+   if(!['poll-read','poll-revise'].includes(chain.phase)||!importShape(body,['jobs','revised','extractionContract'])||!sameImportValue(body.jobs,chain.jobs)||body.revised!==(chain.phase==='poll-revise')||(body.extractionContract||null)!==chain.contract)throw importDenied();
+   chain.pollPhase=chain.phase;chain.phase='polling';
+  }else if(op==='revise'){
+   if(chain.contract||chain.phase!=='read-ready'||!importShape(body,['images','renders','pages','hint','sourcePages'])||!sameImportValue(body.images,chain.read.images)||!sameImportValue(body.sourcePages,chain.read.sourcePages)||body.hint!==chain.read.hint||!Array.isArray(body.renders)||!Array.isArray(body.pages))throw importDenied();
+   chain.phase='revising';
+  }else if(op==='finish'){
+   if(chain.contract||!importShape(body,['rooms','slots','marks']))throw importDenied();
+   if(['read-ready','revise-ready'].includes(chain.phase)&&Array.isArray(body.rooms)&&Array.isArray(body.slots)&&body.marks===undefined){chain.phase='finishing';chain.finishCount=1;}
+   else if(chain.phase==='finish-ready'&&chain.finishCount===1&&Array.isArray(body.marks)&&body.rooms===undefined&&body.slots===undefined){chain.phase='finishing';chain.finishCount=2;}
+   else throw importDenied();
+  }else throw importDenied();
+ }else if(chain.kind==='register'){
+  if(op==='register'){
+   if(chain.phase!=='start'||!importShape(body,['images','sourceLocal','sourceSnapshot'])||!Array.isArray(body.images)||body.images.length<2||typeof body.sourceSnapshot!=='string'||!body.sourceLocal||typeof body.sourceLocal!=='object')throw importDenied();
+   chain.registration=body;chain.phase='registering';
+  }else if(op==='register-result'){
+   if(chain.phase!=='poll-register'||!importShape(body,['jobs','sourceLocal','sourceSnapshot'])||!sameImportValue(body.jobs,chain.jobs)||body.sourceSnapshot!==chain.registration.sourceSnapshot||!sameImportValue(body.sourceLocal,chain.registration.sourceLocal))throw importDenied();
+   chain.phase='register-polling';
+  }else throw importDenied();
+ }else throw importDenied();
+ chain.sequence=request.sequence;return body;
+}
+function completeImportOperation(chain,operation,reply){
+ let body;try{body=JSON.parse(reply.text);}catch(_){body=null;}
+ if(chain.kind==='read'){
+  if(chain.contract===null?body&&(Object.prototype.hasOwnProperty.call(body,'extractionContract')||body.sceneIR):!body||body.extractionContract!==chain.contract){chain.phase='closed';return;}
+  if(operation==='read'||operation==='revise'){
+   if(reply.status===200&&importJobs(body?.jobs)){chain.jobs=copy(body.jobs);chain.phase=operation==='read'?'poll-read':'poll-revise';}
+   else chain.phase=operation==='revise'?'revise-ready':reply.status===200||reply.status===422?'read-ready':'closed';
+  }else if(operation==='read-result'){
+   if(body?.jobs&&!sameImportValue(body.jobs,chain.jobs)){chain.phase='closed';throw importDenied();}
+   if(reply.status===200&&body?.pending)chain.phase=chain.pollPhase;
+   else {chain.phase=chain.pollPhase==='poll-revise'?'revise-ready':reply.status===200||reply.status===422?'read-ready':'closed';chain.jobs=null;}
+  }else if(operation==='finish')chain.phase=chain.finishCount===1&&reply.status>=200&&reply.status<300&&body?.rooms?'finish-ready':'closed';
+ }else if(chain.kind==='register'){
+  const explicit=body&&Object.prototype.hasOwnProperty.call(body,'registrationContract');
+  if(explicit&&body.registrationContract!=='building-registration-v1'||chain.registrationContract&&(reply.status===200||reply.status===202)&&(!explicit||body.registrationContract!==chain.registrationContract)){chain.phase='closed';return;}
+  if(explicit)chain.registrationContract=body.registrationContract;
+  if(reply.status===202&&importJobs(body?.jobs)&&body.sourceSnapshot===chain.registration.sourceSnapshot){
+   if(operation==='register-result'&&!sameImportValue(body.jobs,chain.jobs)){chain.phase='closed';throw importDenied();}
+   chain.jobs=copy(body.jobs);chain.phase='poll-register';
+  }else {chain.phase='closed';chain.jobs=null;}
+ }
+}
+async function requestImportOperation(paneId,sourceWindow,context,ticket){
+ // Look up the actual iframe first. Caller-supplied IDs never select an owner.
+ const p=[...panes.values()].find(p=>p.frame.contentWindow===sourceWindow),flow=sourceWindow?.PlanImport;
+ if(!importTransport||!p||p.id!==paneId||sourceWindow.EDITOR_PANE!==p.id||sourceWindow.parent!==window||sourceWindow.COMPARISON_PREVIEW||importPaneFlows.get(p)!==flow||!flow?.claimTransportRequest||!flow?.transportContext)throw importDenied();
+ const request=flow.claimTransportRequest(context,ticket);if(!request)throw importDenied();
+ let chain=importChains.get(context);
+ if(!chain){
+  const r=record(p);if(!r)throw importDenied();
+  chain={pane:p,window:sourceWindow,flow,session,planId:p.planId,installEpoch:p.installEpoch||0,record:r,draftGeneration:r.generation,owner:JSON.stringify(flow.transportContext(context)),kind:request.kind,sequence:0,phase:'start'};
+  importChains.set(context,chain);
+ }
+ function check(){
+  if(chain.session!==session||panes.get(p.id)!==p||chain.pane!==p||chain.window!==sourceWindow||p.frame.contentWindow!==sourceWindow||p.frame.isConnected===false||sourceWindow.parent!==window||sourceWindow.EDITOR_PANE!==p.id||sourceWindow.COMPARISON_PREVIEW||!p.ready||p.installing||p.busy||sourceWindow._editorPaneDisposed||sourceWindow._editorPlanInstalling||sourceWindow.__editorPlanId!==chain.planId||p.planId!==chain.planId||(p.installEpoch||0)!==chain.installEpoch||record(p)!==chain.record||record(p).generation<chain.draftGeneration||sourceWindow.PlanImport!==flow||JSON.stringify(flow.transportContext(context))!==chain.owner||request.signal?.aborted)throw importDenied();
+ }
+ check();reserveImportOperation(chain,request);
+ try{
+  const reply=await importTransport(request.operation,request.body,request.signal,check);check();completeImportOperation(chain,request.operation,reply);check();
+  // Only the existing controller's status/body contract crosses the boundary.
+  // Reads recheck ownership too; no raw Response, headers, URL or fetch escapes.
+  return Object.freeze({status:reply.status,ok:reply.status>=200&&reply.status<300,text:async()=>{check();return reply.text;},json:async()=>{check();return JSON.parse(reply.text);}});
+ }catch(error){chain.phase=error?.name!=='AbortError'&&(request.operation==='revise'||request.operation==='read-result'&&chain.pollPhase==='poll-revise')?'revise-ready':'closed';throw error;}
+}
 const roomContexts=new Map(),nativeActions=new Map();let nativeActionOwner=null,nativeActionRoom=null,nativeActionStatus='none';
 function verifiedRoom(context,planId){return !!context&&/^[A-Za-z0-9_-]{22}$/.test(context.roomId||'')&&planId==='shared-room-'+context.roomId&&context.planId===planId&&typeof context.sourceSession==='string'&&Number.isSafeInteger(context.roomGeneration)&&context.roomGeneration>=0;}
 function viewState(){return {roomContexts:Object.fromEntries([...roomContexts].filter(([id])=>retained.includes(id))),retainedPlanIds:retained.slice(),panelPlanIds:[...panes.values()].map(p=>p.planId),sync,cameras:Object.fromEntries([...panes.values()].filter(p=>p.ready).map(p=>[p.planId,child(p).view()]))};}
@@ -119,7 +205,7 @@ try{
  const loaded=new Promise((resolve,reject)=>{frame.onload=resolve;frame.onerror=()=>reject(Error('編集画面を読み込めませんでした。'));timer=setTimeout(()=>reject(Error('編集画面の読み込みが時間内に完了しませんでした。')),30000);});
  frame.src='/index.html?editorPane='+paneId+'&planLibrary=1';await loaded;
  if(!child(p))throw Error('編集画面の初期化に失敗しました。保存済みプランは変更していません。');
- await child(p).ready;frame.contentWindow.__editorPlanId=id;await install(p,r.plan,r.state);
+ await child(p).ready;importPaneFlows.set(p,p.frame.contentWindow.PlanImport);frame.contentWindow.__editorPlanId=id;await install(p,r.plan,r.state);
  p.ready=true;visibilityObserver?.observe(frame);activeId=activeId||paneId;refresh();if(sync)synchronizeViews(panes.get(activeId)||p);return p;
 }catch(error){await dispose(p);throw error;}finally{clearTimeout(timer);frame.onload=null;frame.onerror=null;}}
 
@@ -127,6 +213,7 @@ async function dispose(p,importRetained=false){if(native)return;if(!importRetain
 async function createBlankPlan(name){nativeNavigation();name=String(name||'新しいプラン').trim().slice(0,80)||'新しいプラン';const id='plan-'+uid(),result=await repo.save({planId:id,name,operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:{walls:[],rooms:[],items:[],startMode:'blank'}});if(result.status!=='saved')throw Error('新しいプランを保存できませんでした。');if(retained.length>=4||!native&&panes.size>=2){status('新しいプラン「'+name+'」を共通一覧に保存しました。現在の画面は保持しています。画面を閉じるか作業対象を外してから「開く」で選んでください。');return {id,opened:false};}try{const opened=await api.openPlan(id);if(!opened)status('新しいプラン「'+name+'」は共通一覧に保存済みです。現在の画面は保持しています。「開く」から選べます。');return {id,opened:!!opened};}catch(error){throw Error(error.message+' 新しいプラン「'+name+'」は共通一覧に保存済みです。「開く」から回収できます。');}}
 const api=window.PlanLibrary=window.ParallelEditors={repo,async validateDerivedPlan(planId,payload){const cap=await repo.admission(planId,payload);return repo.validateAdmission(payload,cap);},plans,panes,modelPool:pool,get activeId(){return activeId;},get session(){return session;},get retained(){return retained.slice();},get nativeActionStatus(){return nativeActionStatus;},get nativeActionOwner(){return nativeActionOwner&&panes.get(NATIVE_EDITOR_PANE)?.planId===nativeActionOwner.ownedPlanId?copy(nativeActionOwner):null;},get nativeActionRoomId(){return nativeActionRoom&&panes.get(NATIVE_EDITOR_PANE)?.planId==='shared-room-'+nativeActionRoom?nativeActionRoom:null;},childReady(){refresh();},refresh,
  async run(fn){if(controlsLocked()){status('保存／読込中の画面があります。完了後に操作してください。');return false;}busy=true;refresh();try{return await fn();}catch(e){status(e);return false;}finally{busy=false;refresh();}},
+ requestImportOperation,
  resetImport(id,sourceWindow){const p=panes.get(id);if(p&&p.frame.contentWindow===sourceWindow)importMementos.delete(JSON.stringify([session,p.planId]));},
  edited(id){const p=panes.get(id);if(p?.ready&&!p.installing){const captured=snapshot(p);refresh();if(record(p)?.baseRevisionId)persistDraft(p,captured).catch(status);}},
  changed(id,options){const source=panes.get(id);if(controlsLocked()||!cameraReady(source))return false;activeId=id;if(sync&&options?.cameraChanged!==false)synchronizeViews(source);api.persistCameras();return true;},

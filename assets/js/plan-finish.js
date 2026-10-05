@@ -16,7 +16,7 @@
 // 掃き出し窓の前に立つ・背面が入口を向く、といった納まりの失敗がそのまま
 // 出荷される。半端に置くくらいなら、置かないほうがよい。
 (function (root) {
-  var ST = { result: null }, analyzeVersion = 0;
+  var ST = { result: null }, analyzeVersion = 0, REJECTED_CONTRACT_REPLY = {};
 
   // 読み取りが出す14種類のうち、カタログの分類に対応するもの。
   // 開口と階段は家具ではないので入れない。
@@ -152,7 +152,7 @@
       if (!current()) return null;
       var asked = got.ask.length ? post({ marks: got.ask }, context) : Promise.resolve(null);
       return asked.then(function (judged) {
-        if (!current()) return null;
+        if (!current() || judged === REJECTED_CONTRACT_REPLY) return null;
         var reads = got.reads.slice();
         ((judged && judged.reads) || []).forEach(function (j) {
           var a = got.ask.filter(function (x) { return x.id === j.id; })[0];
@@ -172,12 +172,17 @@
 
   function post(body, context) {
     if (context && !context.isCurrent()) return Promise.resolve(null);
-    return fetch('/api/ai/finish-plan', {
+    var response=context && typeof context.finish==='function' ? context.finish(body) : fetch('/api/ai/finish-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
       signal: context && context.signal,
-    }).then(function (res) { return res.ok ? res.json() : null; });
+    });
+    return response.then(function (res) { if(context&&!context.isCurrent())return null;return res.ok ? res.json() : null; }).then(function(out){
+      if(context&&!context.isCurrent())return null;
+      if(out&&(Object.prototype.hasOwnProperty.call(out,'extractionContract')||out.sceneIR)){if(context&&context.retainFailedReply)context.retainFailedReply(out);return REJECTED_CONTRACT_REPLY;}
+      return out;
+    });
   }
 
   /**
