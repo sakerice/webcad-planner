@@ -54,7 +54,9 @@
  function usable(){var s=root.PlanImport.state;return !s.busy&&!s.mappingEditor;}
  function reviewInteraction(){interactionVersion++;}
  function interactionEpoch(){return interactionVersion;}
- function invalidate(){readVersion++;referenceVersion++;reference=null;}
+ function invalidate(opts){readVersion++;referenceVersion++;interactionVersion++;if(!opts||!opts.preserveReference){reference=null;renderReference();}}
+ function capture(){return reference?clone(reference):null;}
+ function restore(saved){invalidate();reference=saved?clone(saved):null;renderReference();}
  function clearApprovals(body){if(body&&body.sceneIR){var opts=options(body.sceneOptions);opts.extraction=body.extraction;root.PlanImport.stageSceneIR(body.sceneIR,opts);}else if(body&&body.sourceLocal){root.PlanImport.stageBuildingReview(buildingBody(body));}}
  function importText(text){
   if(!usable())throw Error('処理中または対応付けの編集中です。先に確定か取消をしてください。');
@@ -73,18 +75,18 @@
   status('原本を開きました。Scene IRの対応付け／複数階の対応点は保持します。採用チェックと複数階の部材・表示選択は再確認が必要です。AIは実行していません。'+(parsed.referenceInfo?' 照合画像「'+parsed.referenceInfo.name+'」は保存していません。必要なら選び直してください。':''));
   render(currentBody());return currentBody();
  }
- function readFile(input){var file=input.files&&input.files[0];input.value='';if(!file)return;var token=++readVersion,version=root.PlanImport.state.version,body=currentBody(),request=root.PlanImport.state.requestVersion,operation=interactionVersion;if(file.size>LIMIT){status('確認JSONは8MB以下のファイルを選んでください。');return;}
-  file.text().then(function(text){if(token!==readVersion||version!==root.PlanImport.state.version||body!==currentBody()||request!==root.PlanImport.state.requestVersion)return;if(operation!==interactionVersion){status('読込中に確認操作が変わりました。確認JSONを選び直してください。');return;}try{importText(text);}catch(e){status(e.message);}}).catch(function(){if(token===readVersion&&version===root.PlanImport.state.version&&body===currentBody()&&request===root.PlanImport.state.requestVersion&&operation===interactionVersion)status('ファイルを読めませんでした。元の案と確認中の結果は変更していません。');});
+ function readFile(input){var file=input.files&&input.files[0];input.value='';if(!file)return;var owner=root.PlanImport.captureContext?root.PlanImport.captureContext(false):null,token=++readVersion,version=root.PlanImport.state.version,body=currentBody(),request=root.PlanImport.state.requestVersion,operation=interactionVersion;if(file.size>LIMIT){status('確認JSONは8MB以下のファイルを選んでください。');if(owner)owner.done();return;}
+  file.text().then(function(text){if(owner&&!owner.isCurrent()||token!==readVersion||version!==root.PlanImport.state.version||body!==currentBody()||request!==root.PlanImport.state.requestVersion)return;if(operation!==interactionVersion){status('読込中に確認操作が変わりました。確認JSONを選び直してください。');return;}try{importText(text);}catch(e){status(e.message);}}).catch(function(){if((!owner||owner.isCurrent())&&token===readVersion&&version===root.PlanImport.state.version&&body===currentBody()&&request===root.PlanImport.state.requestVersion&&operation===interactionVersion)status('ファイルを読めませんでした。元の案と確認中の結果は変更していません。');}).then(function(){if(owner)owner.done();});
  }
  function attach(input){
   var file=input.files&&input.files[0];input.value='';if(!file)return;
-  var s=root.PlanImport.state,body=currentBody(),token=++referenceVersion,version=s.version,operation=interactionVersion,request=s.requestVersion;
-  if(!usable()){status('対応付けを確定か取消してから照合画像を選んでください。');return;}
-  if(file.size>32*1024*1024){status('照合用のPDF・画像は32MB以下を選んでください。');return;}
+  var owner=root.PlanImport.captureContext?root.PlanImport.captureContext(false):null,s=root.PlanImport.state,body=currentBody(),token=++referenceVersion,version=s.version,operation=interactionVersion,request=s.requestVersion;
+  if(!usable()){status('対応付けを確定か取消してから照合画像を選んでください。');if(owner)owner.done();return;}
+  if(file.size>32*1024*1024){status('照合用のPDF・画像は32MB以下を選んでください。');if(owner)owner.done();return;}
   // Every asynchronous boundary must still own the same review AND editing operation.
   // Opening/canceling an editor or switching away and back must not revive old work.
   function current(){
-   if(token!==referenceVersion||version!==s.version||body!==currentBody())return false;
+   if(owner&&!owner.isCurrent()||token!==referenceVersion||version!==s.version||body!==currentBody())return false;
    if(operation!==interactionVersion||request!==s.requestVersion||!usable()||body&&(body.sceneApplied||body.scenePartialOpened||body.buildingApplied)){
     status('読込中に確認操作が変わったため、照合ファイルは反映していません。編集中の入力は保持しています。対応付けを確定か取消した後、照合ファイルを選び直してください。');return false;
    }
@@ -92,7 +94,7 @@
   }
   var reader=new FileReader();
   reader.onload=function(e){
-   if(!current())return;
+   if(!current()){if(owner)owner.done();return;}
    var pdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
    var work=Promise.resolve().then(function(){
     if(!current())return null;
@@ -104,10 +106,10 @@
     if(!pages||!pages.length)throw Error('ページがありません');
     reference={name:file.name,pages:pages,index:0};clearApprovals(body);render(currentBody());
     status('照合用ファイルを開きました。抽出JSONとの一致は未確認です。画像を変えたため採用チェックを外しました。AIへの送信はありません。');
-   }).catch(function(err){if(current())status('照合用ファイルを開けません: '+err.message);});
+   }).catch(function(err){if(current())status('照合用ファイルを開けません: '+err.message);}).then(function(){if(owner)owner.done();});
   };
-  reader.onerror=function(){if(current())status('照合用ファイルを読めませんでした。');};
-  if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)||/^image\/(png|jpeg|webp)$/.test(file.type))reader.readAsDataURL(file);else status('照合用にはPDF / PNG / JPEG / WebPを選んでください。');
+  reader.onerror=function(){if(current())status('照合用ファイルを読めませんでした。');if(owner)owner.done();};
+  if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)||/^image\/(png|jpeg|webp)$/.test(file.type))reader.readAsDataURL(file);else {status('照合用にはPDF / PNG / JPEG / WebPを選んでください。');if(owner)owner.done();}
  }
  function mount(){if(!root||!root.document)return;var host=root.document.getElementById('scene-review-files');if(!host)return;if(!host.firstChild){
   var title=el('summary','抽出JSON・確認メモ・保存した根拠を開く（AIなし）');host.appendChild(title);
@@ -124,7 +126,7 @@
   var viewport=el('div');viewport.setAttribute('data-scene-reference-viewport','');viewport.setAttribute('tabindex','0');viewport.setAttribute('aria-label','原図の拡大表示。拡大時は縦横にスクロールできます');
   var image=el('img');image.setAttribute('data-scene-reference-image','');image.alt='利用者が選んだ照合用の原図（抽出元との一致は未確認）';viewport.appendChild(image);compare.appendChild(viewport);host.appendChild(compare);
  }render(currentBody());}
- function renderReference(){var host=root.document.getElementById('scene-review-files');if(!host)return;var select=host.querySelector('[data-scene-reference-page]'),image=host.querySelector('[data-scene-reference-image]');if(!select||!image)return;var zoom=host.querySelector('[data-scene-reference-zoom]');if(zoom){zoom.disabled=!reference;zoom.textContent=reference&&reference.zoom===4?'全体表示に戻す':reference&&reference.zoom===2?'拡大（4倍）':'拡大（2倍）';}select.textContent='';select.hidden=!reference;image.hidden=!reference;if(!reference){image.removeAttribute('src');return;}reference.pages.forEach(function(_,i){var opt=el('option',(i+1)+'ページ / '+reference.pages.length+' — '+reference.name);opt.value=String(i);select.appendChild(opt);});select.value=String(reference.index);image.src=reference.pages[reference.index];image.style.width=reference.zoom>1?(reference.zoom*100)+'%':'';image.style.maxWidth=reference.zoom>1?'none':'';image.style.maxHeight=reference.zoom>1?'none':'';host.querySelector('[data-scene-reference]').open=true;}
+ function renderReference(){if(!root||!root.document)return;var host=root.document.getElementById('scene-review-files');if(!host)return;var select=host.querySelector('[data-scene-reference-page]'),image=host.querySelector('[data-scene-reference-image]');if(!select||!image)return;var zoom=host.querySelector('[data-scene-reference-zoom]');if(zoom){zoom.disabled=!reference;zoom.textContent=reference&&reference.zoom===4?'全体表示に戻す':reference&&reference.zoom===2?'拡大（4倍）':'拡大（2倍）';}select.textContent='';select.hidden=!reference;image.hidden=!reference;if(!reference){image.removeAttribute('src');return;}reference.pages.forEach(function(_,i){var opt=el('option',(i+1)+'ページ / '+reference.pages.length+' — '+reference.name);opt.value=String(i);select.appendChild(opt);});select.value=String(reference.index);image.src=reference.pages[reference.index];image.style.width=reference.zoom>1?(reference.zoom*100)+'%':'';image.style.maxWidth=reference.zoom>1?'none':'';image.style.maxHeight=reference.zoom>1?'none':'';host.querySelector('[data-scene-reference]').open=true;}
  function render(body){if(!root||!root.document)return;var host=root.document.getElementById('scene-review-files');if(!host||!host.firstChild)return;var save=host.querySelector('[data-scene-review-save]');if(save)save.disabled=!body||!body.sceneIR&&!body.sourceLocal||!usable();var list=host.querySelector('[data-scene-saved-reviews]');if(list){list.textContent='';((root.DATA&&root.DATA.sceneReconstructionReports)||[]).forEach(function(report,i){if(!report.originalIR&&!report.sourceLocal)return;var button=el('button','保存した根拠 '+(i+1)+' を再確認');button.type='button';button.setAttribute('data-scene-resume-report',String(i));button.addEventListener('click',function(){if(!usable())return;try{var payload=report.originalIR?{sceneIR:report.originalIR,sceneOptions:report.reviewDecisions||{},extraction:report.extraction}:{sourceLocal:report.sourceLocal,buildingRegistration:report.proposals||report.registrationProposals||report.buildingRegistration||{version:1,floors:[]},originalBuildingRegistration:report.originalProposals||null,notes:report.sourceNotes||[],pages:report.sourceReadings||null,sourceImageAnnotations:report.sourceImageAnnotations||[],registrationExtraction:report.registrationExtraction||null};importText(JSON.stringify(packet(payload)));status('保存した原本を再確認しています。配置後の手動編集は原本へ逆反映しません。現在の案は変更せず、採用チェックをやり直してください。');}catch(e){status(e.message);}});list.appendChild(button);});}renderReference();}
  function enhance(body,box){if(!root||!box)return;var full=body.sceneFullCompilation||body.sceneCompilation,errors=full.diagnostics.filter(function(d){return d.severity==='error';}),groups=Array.prototype.slice.call(box.querySelectorAll('[data-scene-group]'));
   function focus(groupId){if(currentBody()!==body||!usable())return;var search=box.querySelector('[data-scene-review-search]'),filter=box.querySelector('[data-scene-review-filter]');if(search){search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));}if(filter){filter.value='all';filter.dispatchEvent(new Event('change',{bubbles:true}));}var target=groups.find(function(g){return g.getAttribute('data-scene-group')===groupId;})||box;target.hidden=false;if(target!==box)target.open=true;var title=target.querySelector('summary')||target;title.setAttribute('tabindex','-1');if(title.focus)title.focus();if(target.scrollIntoView)target.scrollIntoView({block:'start'});}
@@ -135,5 +137,5 @@
   var audit=box.querySelector('[data-scene-full-status]');if(audit&&audit.parentNode) audit.parentNode.appendChild(nav);else box.appendChild(nav);
   groups.forEach(function(node){var g=full.reviewGroups.find(function(g){return g.id===node.getAttribute('data-scene-group');});if(!g)return;var source=g.collection==='objects'&&body.sceneIR.objects.find(function(o){return o.id===g.entityId;});var messages=[];if(source&&source.objectType&&source.objectType.value==='kitchen-sink')messages.push('表示限界: シンク単体の外形・向きの候補です。取付高さ・支持する天板・天板の切欠き・配管接続は未確認です。既定高さで見えても設置の再現完了ではありません。');g.diagnostics.filter(function(d){return d.severity==='error';}).forEach(function(d){var text=guidance(d);if(messages.indexOf(text)<0)messages.push(text);});if(messages.length){var advice=el('div');advice.setAttribute('data-scene-guidance',g.id);messages.forEach(function(t){advice.appendChild(el('p',t));});node.insertBefore(advice,node.children[1]||null);}});
  }
- return {format:FORMAT,maxFileBytes:LIMIT,byteLength:byteLength,isReviewData:isReviewData,decode:decode,packet:packet,guidance:guidance,mount:mount,render:render,enhance:enhance,importText:importText,invalidate:invalidate,reviewInteraction:reviewInteraction,interactionEpoch:interactionEpoch};
+ return {format:FORMAT,maxFileBytes:LIMIT,byteLength:byteLength,isReviewData:isReviewData,decode:decode,packet:packet,guidance:guidance,mount:mount,render:render,enhance:enhance,importText:importText,capture:capture,restore:restore,invalidate:invalidate,reviewInteraction:reviewInteraction,interactionEpoch:interactionEpoch};
 }));

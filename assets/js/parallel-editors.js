@@ -26,7 +26,26 @@
  if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE || typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR){
   const native=typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR,paneId=native?NATIVE_EDITOR_PANE:EDITOR_PANE;
   const hostApi=()=>native?root.PlanLibrary:root.parent.ParallelEditors;
-  let renderCalls=0,applying=false,installGeneration=0;const paneGeometries=new Set(),pendingEngineWaits=new Set();
+  let renderCalls=0,applying=false,installGeneration=0,importTargetGeneration=0,importTargetData=null,importTargetText=null;const paneGeometries=new Set(),pendingEngineWaits=new Set();
+  function importTargetKey(){return JSON.stringify(DATA,function(key,value){return key==='_texObj'||key==='viewState'&&this===DATA?undefined:value;});}
+  function noteImportTargetEdit(){
+   if(typeof DATA==='undefined')return;
+   const text=importTargetKey(),changed=importTargetData!==DATA||importTargetText!==text;
+   importTargetData=DATA;importTargetText=text;
+   if(changed){++importTargetGeneration;if(!applying&&root.PlanImport)root.PlanImport.invalidate({preserve:true});}
+  }
+  function importOwner(){
+   if(root._editorPaneDisposed||root._editorPlanInstalling||applying)return null;
+   noteImportTargetEdit();
+   return {paneId,planId:root.__editorPlanId||null,installGeneration,targetGeneration:importTargetGeneration,snapshot:importTargetText};
+  }
+  // Observe actual payload changes synchronously, including edit->Undo ABA.
+  // Dirty UI/camera changes alone do not advance this independent import epoch.
+  if(typeof DATA!=='undefined'){importTargetData=DATA;importTargetText=importTargetKey();}
+  for(const name of ['markDirty','markDirtyUiOnly','applyJsonImport','undoAction','redoAction','draw2d','updateSelectedProp','applyHandleDrag','apply3DGizmoDrag','pasteCopiedObject','delSel','removeObjectRef']){
+   const original=root[name];if(typeof original!=='function')continue;
+   root[name]=function(){try{return original.apply(this,arguments);}finally{noteImportTargetEdit();}};
+  }
   const oldRender=render3DNow;render3DNow=function(){renderCalls++;const result=oldRender.apply(this,arguments);changed();return result;};
   const ready=Promise.resolve(root.comparisonCatalogueReady);
   function cancelEngineWaits(){for(const cancel of [...pendingEngineWaits])cancel();}
@@ -91,13 +110,16 @@
    return {data:DATA,state:{...clone({...ST,selected:null,multiSelected:[],_snapState:null}),selected:ST.selected,multiSelected:ST.multiSelected.slice(),_snapState:ST._snapState},
     drag:{...clone({...DRAG,origItem:null}),origItem:DRAG.origItem},history:HISTORY.slice(),redo:REDO_HISTORY.slice(),dirty:DIRTY,view:view(),
     wallHeight:WALL_H,nextId:nextId,light:clone(LIGHT_SETTINGS),pending:_defaultPlanPending,legacyAdmission:root.__legacyPlanAdmission,
-    walk:typeof WALK==='undefined'?null:clone(WALK),cataloguePack:root.AssetPackPicker?.getSelection()};
+    walk:typeof WALK==='undefined'?null:clone(WALK),cataloguePack:root.AssetPackPicker?.getSelection(),importReview:root.PlanImport?.capture()};
   }
   function restoreInstallState(previous){
    DATA=previous.data;ST=previous.state;DRAG=previous.drag;DIRTY=previous.dirty;root.__legacyPlanAdmission=previous.legacyAdmission;
    WALL_H=previous.wallHeight;nextId=previous.nextId;for(const key of Object.keys(LIGHT_SETTINGS))if(!(key in previous.light))delete LIGHT_SETTINGS[key];Object.assign(LIGHT_SETTINGS,previous.light);_defaultPlanPending=previous.pending;
    if(previous.walk&&typeof WALK!=='undefined')WALK=previous.walk;
    HISTORY.length=0;HISTORY.push(...previous.history);REDO_HISTORY.length=0;REDO_HISTORY.push(...previous.redo);
+   if(typeof importTargetKey==='function'){importTargetData=DATA;importTargetText=importTargetKey();}
+   // Restore the source/review even if a later recovery draw fails. No pending work resumes.
+   root.PlanImport?.restore(previous.importReview);
    // Restore authoritative state first. A renderer fault during recovery must
    // never prevent undo, unsaved edits, selection, options or camera recovery.
    for(const recover of [()=>root.CeilingDesigner?.restoreViewContext(previous.view.surface),()=>{const camera=previous.view.camera;if(camera&&camExt&&orbit){camExt.position.fromArray(camera.pos);orbit.target.fromArray(camera.target);camExt.fov=camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&WALK.active)walkApplyCamera();else orbit.update();invalidate3D();}},()=>applyView(previous.view),syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,
@@ -105,8 +127,9 @@
     try{recover();}catch(recoveryError){console.warn('[WebCAD] pane install recovery',recoveryError);}
    }
   }
-  root.EditorPane={ready,view,applyView,captureInstallState,restoreInstallState,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
+  root.EditorPane={ready,view,applyView,captureInstallState,restoreInstallState,importOwner,noteImportTargetEdit,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
    async install(plan,saved,admission,options){
+    const priorReview=root.PlanImport?.capture();root.PlanImport?.invalidate({preserve:true});
     ++_jsonImportRequest;const generation=++installGeneration;cancelEngineWaits();await ready;
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
     // A native action must retain a camera even when its selected view is 2D.
@@ -116,7 +139,7 @@
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
     // Use the native JSON validation/migration/render transaction. A failed
     // first draw must never leave the new scene under the previous plan ID.
-    const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();
+    const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();previous.importReview=priorReview;
     try{
      if(restoreCamera&&(!camExt||!orbit)){init3D();if(!camExt||!orbit)throw Error('引き継ぎ元のカメラを復元できませんでした。元の編集は保持しています。');}
      // Leave the old ceiling through its controller before replacing its plan.
@@ -128,6 +151,7 @@
      applyView(saved?.view,true);if(!saved?.view)resetView();
      root.AssetPackPicker?.setSelection(saved?.cataloguePack);if(DIRTY)renderSaveButtonState();else clearDirty();
      if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();
+     root.PlanImport?.invalidate();importTargetData=DATA;importTargetText=importTargetKey();
      return true;
     }catch(error){
      restoreInstallState(previous);
@@ -136,7 +160,7 @@
    },
    undo:()=>undoAction(),redo:()=>redoAction(),async save(){captureViewState();const saved=serializeDataSnapshot(),result=await StorageAdapter.save(DATA);if(serializeDataSnapshot()===saved&&result?.canClean!==false)clearDirty();return root.EditorPane.snapshot();},
    metrics:()=>({renderCalls,modelCount:Object.keys(_modelCache).length,pixelRatio:ren&&ren.getPixelRatio(),renderer:ren?clone(ren.info.memory):null,quality:{ao:!!(_n8aoPass&&_n8aoPass.enabled),shadows:!!(ren&&ren.shadowMap.enabled)}}),
-   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
+   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root.PlanImport?.invalidate({preserve:true});root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
   };
   let scheduled=false,lastCamera=null,lastView=null;
   function cameraKey(){const v=view();return JSON.stringify({twoD:v.twoD,camera:v.camera},(k,value)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toFixed(8)):value);}

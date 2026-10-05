@@ -58,7 +58,7 @@ test('explicit joint model request never automatically approves proposed anchors
 test('cancel during joint request drops late reply without resurrecting Apply or mutating DATA',async()=>{
  const h=setup();let resolve;h.c.fetch=()=>new Promise(r=>resolve=r);const pending=h.c.PlanImport.requestBuildingRegistration(h.body),sourceSnapshot=JSON.stringify(h.body.sourceLocal);
  h.c.closePlanImport();resolve({status:200,headers:{get:()=> 'application/json'},text:async()=>JSON.stringify({sourceSnapshot,buildingRegistration:h.body.buildingRegistration})});await pending;
- assert.equal(h.c.PlanImport.state.result,null);assert.equal(h.c.DATA.rooms.length,0);assert.equal(h.c.HISTORY.length,0);assert.equal(h.apply.disabled,true);
+ assert.strictEqual(h.c.PlanImport.state.result,h.body);assert.equal(JSON.stringify(h.body.sourceLocal),sourceSnapshot);assert.equal(h.body.buildingDecisions.floors.length,0);assert.equal(h.c.DATA.rooms.length,0);assert.equal(h.c.HISTORY.length,0);assert.equal(h.apply.disabled,true);
 });
 test('registration provenance blocks generic collaborative sharing until supported',()=>{
  const src=require('./app-source.cjs').appSource();const fn=require('./height-runtime.cjs').topLevelFunction('sceneV3LocalOnlyPlan');const vm=require('node:vm'),c=vm.createContext({});vm.runInContext(fn,c);assert.equal(c.sceneV3LocalOnlyPlan({sceneReconstructionReports:[{kind:'building-registration',version:1}]}),true);assert.ok(src.includes('sceneV3LocalOnlyPlan'));

@@ -48,6 +48,101 @@
     extractionMode: 'v1', // Session-only explicit choice; never persisted into plans.
   };
 
+  // Session-local ownership only. No transport allowance or persistent source archive.
+  var importEpoch = 0, quotaVersion = 0, reviewOwner = null, activeContexts = new Set();
+  var fallbackTarget = null, fallbackText = null, fallbackGeneration = 0;
+  function targetOwner() {
+    if (root._editorPaneDisposed || root._editorPlanInstalling) return null;
+    if (root.EditorPane && root.EditorPane.importOwner) return root.EditorPane.importOwner();
+    var data = typeof DATA === 'object' ? DATA : null;
+    var text = JSON.stringify(data, function(key,value){return key === '_texObj' || key === 'viewState' && this === data ? undefined : value;});
+    if (data !== fallbackTarget || text !== fallbackText) { fallbackGeneration++; fallbackTarget = data; fallbackText = text; }
+    return { planId: root.__editorPlanId || null, generation: fallbackGeneration, snapshot: text };
+  }
+  function sourceKey() {
+    return JSON.stringify([ST.fileName, ST.pages ? null : ST.image && ST.image.src || null, ST.pages, ST.pageReview, ST.pdfData, ST.pages ? null : ST.crop, ST.extractionMode]);
+  }
+  function captureContext(withSource) {
+    var owner = JSON.stringify(targetOwner()), epoch = importEpoch, version = ST.version, request = ST.requestVersion;
+    var source = withSource === false ? null : sourceKey(), controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var cancelled = false, cancels = new Set();
+    var context = { signal: controller && controller.signal,
+      isCurrent: function () { return !cancelled && epoch === importEpoch && version === ST.version && request === ST.requestVersion && owner !== 'null' && owner === JSON.stringify(targetOwner()) && (source === null || source === sourceKey()); },
+      cancel: function () { cancelled = true; if (controller) controller.abort(); cancels.forEach(function (fn) { fn(); }); cancels.clear(); activeContexts.delete(context); },
+      delay: function (ms) { return new Promise(function (resolve) { var finish = function () { clearTimeout(timer); cancels.delete(finish); resolve(); }, timer = setTimeout(finish, ms); cancels.add(finish); }); },
+      onCancel: function (fn) { cancels.add(fn);return function(){cancels.delete(fn);}; },
+      done: function () { activeContexts.delete(context); }
+    };
+    activeContexts.add(context); return context;
+  }
+  function bindReview(body) { reviewOwner = body ? { body: body, owner: JSON.stringify(targetOwner()), source: sourceKey(), epoch: importEpoch } : null; }
+  function currentReview(body) {
+    return !root._editorPaneDisposed && !(body && body.sourceInvalidated) && (!reviewOwner || reviewOwner.body === body && reviewOwner.epoch === importEpoch && reviewOwner.owner === JSON.stringify(targetOwner()) && reviewOwner.source === sourceKey());
+  }
+  function invalidateImport(options) {
+    options = options || {}; importEpoch++; quotaVersion++;
+    activeContexts.forEach(function (context) { context.cancel(); });
+    ST.version++; ST.previewVersion++; ST.requestVersion++; ST.busy = false;ST.drag = null;
+    if (root.PlanFinish && root.PlanFinish.invalidate) root.PlanFinish.invalidate();
+    if (root.SceneReviewFlow) root.SceneReviewFlow.invalidate({ preserveReference: options.preserve === true });
+    if (!options.preserve) { ST.originalImageSource = null; ST.image = null; ST.pages = null; ST.pdfData = null; ST.pageReview = null; ST.crop = null; ST.fileName = ''; ST.selectedPage = 0; ST.result = null; ST.failedSceneResponse = null; ST.mappingEditor = null; }
+    if (!options.preserve) bindReview(null);
+    syncPlanImportButtons();
+  }
+  function cancellationStatus() {
+    if(ST.fileName&&!ST.pdfData&&!ST.originalImageSource&&!ST.image&&!ST.pages)return '原図の準備を取消しました。ファイル名だけを保持しています。再開するには元のファイルを選び直してください。';
+    return '処理を取消しました。元の入力と完了した確認結果はこの作業内に保持しています。通信の取消は受付済みの処理・利用分を取り消しません。再開には確認または元のファイルの選び直しが必要です。';
+  }
+  function markChangedReviewSource(body) {
+    if(body&&!body.sceneIR&&reviewOwner&&reviewOwner.body===body&&reviewOwner.source!==sourceKey())body.sourceInvalidated=true;
+  }
+  function revalidateReview() {
+    var body = ST.result; if (!body) return;
+    markChangedReviewSource(body);
+    if(body.sourceInvalidated){bindReview(body);renderPlanImportResult(body);setStatus('原図または切り出しが変わったため、元の結果は照合用として保持しています。新しく読み取るまで取り込めません。');return;}
+    if (body.importApplied || body.sceneApplied || body.scenePartialOpened || body.buildingApplied) {
+      if(body.sceneIR){body.sceneCompilation=previewSceneIR(body.sceneIR,body.sceneOptions);body.sceneFullCompilation=body.sceneOptions.partialSelection?previewSceneIR(body.sceneIR,Object.assign({},body.sceneOptions,{partialSelection:null})):body.sceneCompilation;}
+      bindReview(body);renderPlanImportResult(body);return;
+    }
+    if (body.sceneIR) {
+      var opts = JSON.parse(JSON.stringify(body.sceneOptions));
+      opts.acceptedReviews = []; opts.acceptedReviewGroups = []; opts.reviewedEntities = {}; opts.unresolvedDecisions = []; opts.extraction = body.extraction;
+      stageSceneIR(body.sceneIR, opts);
+    } else if (body.sourceLocal) {
+      body.buildingSourceVersion = ST.version;
+      body.buildingDecisions = {sourceSnapshot: PlanRegistration.snapshot(body.sourceLocal), floors: [], partialAcknowledged: false};
+      body.fixtureDecisions = []; body.entryFloorDecisions = []; body.objectDecisions = []; body.stairDisplayDecisions = [];
+      compileBuildingReview(body); bindReview(body); renderPlanImportResult(body);
+    } else { bindReview(body); renderPlanImportResult(body); }
+  }
+  function captureImport() {
+    if (ST.mappingEditor) throw Error('対応付けの入力を確定か取消してから画面を切り替えてください。確認中の入力は保持しています。');
+    markChangedReviewSource(ST.result);
+    var state = {};
+    ['pages','pageReview','pdfData','originalImageSource','selectedPage','fileName','crop','result','failedSceneResponse','extractionMode'].forEach(function (key) { if (ST[key] !== undefined) state[key] = ST[key]; });
+    state.imageSource = ST.pageReview ? null : ST.image && ST.image.src || ST.originalImageSource || null;
+    return JSON.parse(JSON.stringify({ version: 1, state: state, reference: root.SceneReviewFlow && root.SceneReviewFlow.capture ? root.SceneReviewFlow.capture() : null,
+      status: ST.busy ? cancellationStatus() : ($('plan-import-status') && $('plan-import-status').textContent || ''), modalOpen: !!($('plan-import-modal') && $('plan-import-modal').classList.contains && $('plan-import-modal').classList.contains('show')) }));
+  }
+  function restoreImport(memento) {
+    invalidateImport();
+    if (!memento || memento.version !== 1) { show('plan-import-step2',false);show('plan-import-step3',false);show('plan-import-pdf-review',false);var emptyModal=$('plan-import-modal');if(emptyModal)emptyModal.classList.remove('show');syncPlanImportButtons();return; }
+    var state = JSON.parse(JSON.stringify(memento.state));
+    Object.keys(state).forEach(function (key) { if (key !== 'imageSource') ST[key] = state[key]; });
+    if (root.SceneReviewFlow && root.SceneReviewFlow.restore) root.SceneReviewFlow.restore(memento.reference);
+    show('plan-import-step2', !!(state.imageSource || ST.pages)); show('plan-import-pdf-review', !!ST.pageReview);
+    revalidateReview();
+    if (state.imageSource && !ST.pageReview && typeof Image === 'function') {
+      var context = captureContext(false), image = new Image(); ST.image = image;
+      image.onload = function () { if (!context.isCurrent()) {context.done();return;}if(!ST.crop)ST.crop={x:0,y:0,w:image.naturalWidth,h:image.naturalHeight};drawPlanImportPreview(); bindReview(ST.result); syncPlanImportButtons(); context.done(); };
+      image.onerror = function () { if (context.isCurrent()) setStatus('原図のプレビューを復元できません。元の確認結果を保持しています。'); context.done(); }; image.src = state.imageSource;
+    }
+    if (ST.pageReview) selectPlanImportPage(ST.selectedPage);
+    bindReview(ST.result); syncPlanImportButtons();
+    if(memento.status)setStatus(memento.status);
+    var modal = $('plan-import-modal'); if (modal) modal.classList.toggle('show', !!memento.modalOpen);
+  }
+
   function $(id) { return document.getElementById(id); }
   function show(id, on) { var e = $(id); if (e) e.style.display = on ? '' : 'none'; }
 
@@ -61,7 +156,9 @@
     var m = $('plan-import-modal');
     if (!m) return;
     m.classList.add('show');
-    if (!ST.image && !ST.pages) resetPlanImport();
+    if (!ST.image && !ST.pages && !ST.pdfData && !ST.originalImageSource && !ST.fileName && !ST.result && !ST.failedSceneResponse) resetPlanImport();
+    else if (ST.result && !currentReview(ST.result)) revalidateReview();
+    if (!ST.image && !ST.pages && (ST.pdfData || ST.originalImageSource || ST.fileName)) setStatus(ST.pdfData||ST.originalImageSource?'選択した元のPDF・画像はこの作業内に保持しています。ページの準備は取消済みです。再開するには元のファイルを選び直してください。自動の読み取りは行いません。':'原図の準備を取消しました。ファイル名だけを保持しています。再開するには元のファイルを選び直してください。自動の読み取りは行いません。');
     showQuota();
     if(root.SceneReviewFlow)root.SceneReviewFlow.mount();
   }
@@ -73,7 +170,10 @@
   function showQuota() {
     var box = $('plan-import-quota');
     if (!box) return;
-    fetch('/api/ai/quota').then(function (r) { return r.json(); }).then(function (q) {
+    var context = captureContext(false), token = ++quotaVersion;
+    function current() { return token === quotaVersion && context.isCurrent(); }
+    fetch('/api/ai/quota', {signal: context.signal}).then(function (r) { return r.json(); }).then(function (q) {
+      if (!current()) return;
       ST.sceneIRV3Available = !!(q && q.sceneIRV3 && q.sceneIRV3.enabled === true);
       ST.quotaBlocked = !!(q && q.counted && q.left !== null && q.left !== undefined && q.left <= 0);
       syncPlanImportButtons();
@@ -84,23 +184,26 @@
         : '本日ぶんの読み取りを使い切りました。明日またお試しください。';
       var run = $('plan-import-run');
       if (run && q.left <= 0) run.disabled = true;
-    }).catch(function () { ST.sceneIRV3Available = false; box.style.display = 'none'; syncPlanImportButtons(); });
+    }).catch(function () { if (!current()) return; ST.sceneIRV3Available = false; box.style.display = 'none'; syncPlanImportButtons(); }).then(context.done);
   }
 
   function closePlanImport() {
-    if(root.SceneReviewFlow)root.SceneReviewFlow.invalidate();
-    if (ST.busy) resetPlanImport();
-    ST.version++; ST.previewVersion++;
-    ST.extractionMode = 'v1';
-    ST.requestVersion++; ST.busy = false; ST.result = null; ST.mappingEditor = null;
+    if (ST.mappingEditor) { setStatus('対応付けの入力を確定か取消してから閉じてください。確認中の入力は保持しています。'); return false; }
+    var wasBusy=ST.busy,cancelledStatus=cancellationStatus();
+    invalidateImport({preserve: true});if(wasBusy)setStatus(cancelledStatus);
+    if (ST.result && ST.result.sceneOptions) {
+      ST.result.sceneOptions.acceptedReviews=[];ST.result.sceneOptions.acceptedReviewGroups=[];ST.result.sceneOptions.reviewedEntities={};ST.result.sceneOptions.unresolvedDecisions=[];
+    }
+    if (ST.result && ST.result.sourceLocal) ST.result.buildingDecisions={sourceSnapshot:PlanRegistration.snapshot(ST.result.sourceLocal),floors:[],partialAcknowledged:false};
     syncPlanImportButtons();
-    var m = $('plan-import-modal');
-    if (m) m.classList.remove('show');
-    cancelPlanImportDrag();
+    var m = $('plan-import-modal'); if (m) m.classList.remove('show');
+    cancelPlanImportDrag(); return true;
   }
 
   function resetPlanImport() {
-    if(root.SceneReviewFlow)root.SceneReviewFlow.invalidate();
+    invalidateImport();
+    var host = root.EDITOR_PANE ? root.parent && root.parent.PlanLibrary : root.PlanLibrary;
+    if (host && host.resetImport) host.resetImport(root.EDITOR_PANE || root.NATIVE_EDITOR_PANE, root);
     ST.extractionMode = 'v1';
     ST.version++; ST.previewVersion++;
     ST.requestVersion++;
@@ -131,16 +234,20 @@
   // 読み取りが始まらないのでは本末転倒。時間切れなら手元での確認へ進める。
   var LOCATE_TIMEOUT_MS = 25000;
 
-  function locate(smallDataUrl) {
+  function locate(smallDataUrl, context) {
+    if (context && !context.isCurrent()) return Promise.resolve(null);
     return new Promise(function (resolve) {
-      var timer = setTimeout(function () { resolve(null); }, LOCATE_TIMEOUT_MS);
+      var controller=typeof AbortController==='function'?new AbortController():null;
+      function cancel(){clearTimeout(timer);if(controller)controller.abort();resolve(null);}
+      var timer=setTimeout(cancel,LOCATE_TIMEOUT_MS),detach=context?context.onCancel(cancel):function(){};
       fetch('/api/ai/find-plan', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ image: smallDataUrl }),
+        signal: controller && controller.signal,
       }).then(function (res) { return res.ok ? res.json() : null; })
-        .then(function (body) { clearTimeout(timer); resolve(body || null); })
-        .catch(function () { clearTimeout(timer); resolve(null); });
+        .then(function (body) { clearTimeout(timer);detach();resolve(body || null); })
+        .catch(function () { clearTimeout(timer);detach();resolve(null); });
     });
   }
 
@@ -190,6 +297,7 @@
   }
 
   function selectPlanImportPage(index) {
+    if (!targetOwner()) return;
     index = Number(index);
     if (ST.busy || !ST.pageReview || !Number.isInteger(index) || !ST.pageReview[index]) return;
     ST.selectedPage = index;
@@ -197,24 +305,24 @@
     ST.image = null; ST.crop = null; ST.drag = null;
     var c = $('plan-import-canvas');
     if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
-    var version = ST.version, previewVersion = ++ST.previewVersion;
+    var version = ST.version, previewVersion = ++ST.previewVersion, context = captureContext(false);
     var page = ST.pageReview[index], img = new Image();
     syncPlanImportButtons();
     img.onload = function () {
-      if (version !== ST.version || previewVersion !== ST.previewVersion) return;
+      if (!context.isCurrent() || version !== ST.version || previewVersion !== ST.previewVersion) {context.done();return;}
       ST.image = img;
       var b = page.box || { x0: 0, y0: 0, x1: 1, y1: 1 };
       ST.crop = { x: b.x0 * img.naturalWidth, y: b.y0 * img.naturalHeight,
         w: (b.x1 - b.x0) * img.naturalWidth, h: (b.y1 - b.y0) * img.naturalHeight };
       drawPlanImportPreview();
-      syncPlanImportButtons();
+      syncPlanImportButtons(); context.done();
     };
     img.onerror = function () {
-      if (version !== ST.version || previewVersion !== ST.previewVersion) return;
+      if (!context.isCurrent() || version !== ST.version || previewVersion !== ST.previewVersion) {context.done();return;}
       page.confirmed = false;
       page.status = '要確認'; page.message = 'プレビューを開けません。ファイルを選び直してください。';
       setPdfReviewStatus();
-      syncPlanImportButtons();
+      syncPlanImportButtons(); context.done();
     };
     img.src = page.source;
   }
@@ -231,13 +339,13 @@
 
   // 手で囲んだ範囲もPDFから3072pxで描き直す（縮小済みの画像を拡大しない）。
   function cropPlanImportPage() {
-    if (!ST.pageReview || !ST.image || !ST.crop || ST.busy) return;
-    var index = ST.selectedPage, page = ST.pageReview[index], version = ST.version;
+    if (!targetOwner() || !ST.pageReview || !ST.image || !ST.crop || ST.busy) return;
+    var index = ST.selectedPage, page = ST.pageReview[index], version = ST.version, context = captureContext(false);
     var box = { x0: ST.crop.x / ST.image.naturalWidth, y0: ST.crop.y / ST.image.naturalHeight,
       x1: (ST.crop.x + ST.crop.w) / ST.image.naturalWidth,
       y1: (ST.crop.y + ST.crop.h) / ST.image.naturalHeight };
     if (box.x0 === 0 && box.y0 === 0 && box.x1 === 1 && box.y1 === 1) {
-      planImportSelectAll(); return;
+      context.done();planImportSelectAll(); return;
     }
     page.confirmed = false;
     ST.result = null; ST.mappingEditor = null; ST.busy = true;
@@ -245,37 +353,39 @@
     page.status = '切り出し中'; page.message = '選んだ範囲をPDFから描き直しています。';
     syncPlanImportButtons();
     return Promise.resolve().then(function () {
-      if (version !== ST.version) return null;
+      if (!context.isCurrent() || version !== ST.version) return null;
       return PdfPages.renderRegion(ST.pdfData, page.sourceIdentity ? page.sourceIdentity.pageNumber : index + 1, box, { maxPx: MAX_SEND_PX });
     }).then(function (cropped) {
-      if (version !== ST.version) return;
+      if (!context.isCurrent() || version !== ST.version) return;
       if (!cropped) throw new Error('empty crop');
       ST.pages[index] = cropped; page.box = box; page.confirmed = true;
       if (page.sourceIdentity) page.sourceIdentity = PlanSourceIdentity.cropPage(page.sourceIdentity, box, cropped);
       page.status = '手動で切り出し済み'; page.message = '選んだ範囲を読み取ります。';
     }).catch(function () {
-      if (version !== ST.version) return;
+      if (!context.isCurrent() || version !== ST.version) return;
       ST.pages[index] = page.source; page.box = null; page.confirmed = false;
       if (page.sourceIdentity) page.sourceIdentity = PlanSourceIdentity.cropPage(page.sourceIdentity, null, page.source);
       page.status = '要確認'; page.message = '切り出しに失敗しました。囲み直すか、ページ全体を確認してください。';
     }).then(function () {
-      if (version !== ST.version) return;
+      if (!context.isCurrent() || version !== ST.version) return;
       ST.busy = false;
       selectPlanImportPage(index);
-    });
+    }).then(context.done);
   }
 
   // ── 1. 画像を選ぶ ──────────────────────────────────────────────────
   function onPlanImportFile(input) {
+    if (!targetOwner()) return;
     var file = input && input.files && input.files[0];
     if (!file) return;
     resetPlanImport();
     ST.fileName = file.name || '';
     var version = ST.version, sourceVersion = ST.requestVersion;
-    function current() { return version === ST.version && sourceVersion === ST.requestVersion; }
+    var context = captureContext(false);
+    function current() { return context.isCurrent() && version === ST.version && sourceVersion === ST.requestVersion; }
     function fail(message) {
-      if (!current()) return;
-      ST.busy = false; setStatus(message); syncPlanImportButtons();
+      if (!current()) {context.done();return;}
+      ST.busy = false; setStatus(message); syncPlanImportButtons(); context.done();
     }
     ST.busy = true;
     syncPlanImportButtons();
@@ -284,7 +394,7 @@
     if (file.type === 'application/pdf' || /\.pdf$/i.test(ST.fileName)) {
       var pdfReader = new FileReader();
       pdfReader.onload = function (e) {
-        if (!current()) return;
+        if (!current()) {context.done();return;}
         setStatus('PDFを開いています…');
         if (typeof PdfPages === 'undefined' || !PdfPages) {
           fail('PDFを開く部品がありません。画像にしてからお試しください。');
@@ -316,7 +426,7 @@
               message: '図面の位置を確認できませんでした。囲み直すか、ページ全体を確認してください。' };
           });
           return Promise.all(pages.map(function (page, i) {
-            return locate((smalls && smalls[i]) || page);
+            return locate((smalls && smalls[i]) || page, context);
           })).then(function (locations) {
             if (!current()) return [];
             var boxes = locations.map(function (location, i) {
@@ -353,10 +463,10 @@
           show('plan-import-crop', true);
           show('plan-import-pdf-review', true);
           show('plan-import-step3', false);
-          selectPlanImportPage(0);
+          selectPlanImportPage(0); context.done();
         }).catch(function (err) {
           fail('PDFを開けませんでした: ' + (err && err.message ? err.message : err));
-        });
+        }).then(context.done);
       };
       pdfReader.onerror = function () { fail('ファイルを読めませんでした。'); };
       pdfReader.readAsDataURL(file);
@@ -369,11 +479,12 @@
     }
     var reader = new FileReader();
     reader.onload = function (e) {
-      if (!current()) return;
+      if (!current()) {context.done();return;}
+      ST.originalImageSource = e.target.result;
       var img = new Image();
       img.onload = function () {
-        if (!current()) return;
-        ST.image = img; ST.busy = false;
+        if (!current()) {context.done();return;}
+        ST.image = img; ST.busy = false; context.done();
         ST.crop = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
         show('plan-import-step2', true);
         show('plan-import-crop', true);
@@ -473,7 +584,8 @@
   }
 
   function invalidateScenePlacement() {
-    ST.requestVersion++; ST.busy = false;
+    if(ST.result&&!ST.result.sceneIR)ST.result.sourceInvalidated=true;
+    invalidateImport({preserve:true});
     if (ST.result && ST.result.sceneIR && ST.result.sceneIR.sceneVersion === 3) {
       var opts = JSON.parse(JSON.stringify(ST.result.sceneOptions));
       opts.sourceInvalidated = true;
@@ -485,13 +597,15 @@
 
   function planImportUp() {
     if (!ST.drag) return;
+    var drag=ST.drag;
     // 指が滑っただけの極小の矩形は、選び直しとみなして捨てる。
-    if (ST.drag.w > 20 && ST.drag.h > 20) {
+    if (drag.w > 20 && drag.h > 20) {
       invalidateScenePlacement();
-      ST.crop = { x: ST.drag.x, y: ST.drag.y, w: ST.drag.w, h: ST.drag.h };
+      ST.crop = { x: drag.x, y: drag.y, w: drag.w, h: drag.h };
       if (ST.pageReview) cropPlanImportPage();
     }
     ST.drag = null;
+    if(ST.result&&ST.result.sceneIR&&ST.result.sceneIR.sceneVersion===2)revalidateReview();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -515,6 +629,9 @@
       setPdfReviewStatus();
     }
     ST.crop = { x: 0, y: 0, w: ST.image.naturalWidth, h: ST.image.naturalHeight };
+    // Local v2 JSON evidence is independent of this optional source-image crop.
+    // Recompile with fresh approvals; pending work still owns the retired epoch.
+    if(ST.result&&ST.result.sceneIR&&ST.result.sceneIR.sceneVersion===2)revalidateReview();
     drawPlanImportPreview();
     syncPlanImportButtons();
   }
@@ -558,7 +675,7 @@
     syncPdfReview();
 
     var apply = $('plan-import-apply');
-    if (apply) apply.disabled = !!ST.mappingEditor || !ST.result || ST.busy || !!(ST.result && (ST.result.buildingApplied||ST.result.sceneApplied||ST.result.scenePartialOpened)) || !!(ST.result.sceneCompilation && !ST.result.sceneCompilation.canApply) || !!(ST.result && ST.result.sourceLocal && (!ST.result.buildingCompilation || !ST.result.buildingCompilation.canApply));
+    if (apply) apply.disabled = !!(ST.result && !currentReview(ST.result)) || !!ST.mappingEditor || !ST.result || ST.busy || !!(ST.result && (ST.result.importApplied||ST.result.buildingApplied||ST.result.sceneApplied||ST.result.scenePartialOpened)) || !!(ST.result.sceneCompilation && !ST.result.sceneCompilation.canApply) || !!(ST.result && ST.result.sourceLocal && (!ST.result.buildingCompilation || !ST.result.buildingCompilation.canApply));
     var sceneReview = $('scene-ir-review');
     if (sceneReview && typeof sceneReview.querySelectorAll === 'function' && ST.result && (ST.result.sceneApplied || ST.result.scenePartialOpened)) {
       Array.prototype.forEach.call(sceneReview.querySelectorAll('[data-scene-review-control]'), function (control) { control.disabled = true; });
@@ -591,13 +708,13 @@
     if ((explicitContract || contract) && (contract !== 'scene-ir-v3' || (root.SCENE_IR_V3_IMAGE_IMPORT !== true || ST.sceneIRV3Available !== true))) {
       setStatus('この実験的な読み取り方式は有効になっていません。'); return;
     }
-    if (ST.busy || ST.drag || pendingPdfPages() > 0) return;
+    if (!targetOwner() || ST.busy || ST.drag || pendingPdfPages() > 0) return;
     var version = ST.version;
     // PDFはページごとの画像、画像は切り出して(囲んでいなければ全体を)送る。
     var images = ST.pages ? ST.pages.slice() : (function () { var one = croppedDataUrl(); return one ? [one] : []; }());
     if (!images.length) return;
     if (contract && images.length !== 1) { setStatus('この読み取り方式は図面1枚に対応しています。旧方式を使う場合は明示的に選び直してください。'); return; }
-    var requestVersion = ++ST.requestVersion;
+    var requestVersion = ++ST.requestVersion, context = captureContext();
     var pageScope = contract ? images.map(function (image, i) { return "image:" + (i + 1) + ":" + SceneIR.sourceHash(image); }) : null;
     ST.busy = true; ST.result = null; ST.mappingEditor = null;
     show('plan-import-step3', false);
@@ -623,14 +740,15 @@
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(requestBody),
+      signal: context.signal,
     }).then(readReply).then(function (r) {
-      if (version !== ST.version || requestVersion !== ST.requestVersion) return null;
-      return waitForJobs(r, { isCurrent: function () { return version === ST.version && requestVersion === ST.requestVersion; }, onProgress: function (done, total) {
-        if (version !== ST.version || requestVersion !== ST.requestVersion) return;
+      if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return null;
+      return waitForJobs(r, { context: context, isCurrent: function () { return context.isCurrent() && version === ST.version && requestVersion === ST.requestVersion; }, onProgress: function (done, total) {
+        if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return;
         setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
-      if (version !== ST.version || requestVersion !== ST.requestVersion || !r) return;
+      if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion || !r) return;
       var isSceneResponse = contract || (r.body && r.body.extractionContract === 'scene-ir-v3');
       var repairable = !isSceneResponse && r.status === 422 && r.body && r.body.error === 'ai_invalid_plan' &&
         r.body.revisionCandidate === true && Array.isArray(r.body.pages) && r.body.pages.length;
@@ -660,8 +778,8 @@
         ST.busy = false; setStatus('返答の元ページと送信した画像が一致しません。読み直してください。'); syncPlanImportButtons(); return;
       }
       if (sourcePages) r.body.sourcePages = sourcePages;
-      return maybeRevisePlanImport(images, hint, r.body, version).then(function (body) {
-        if (version !== ST.version || requestVersion !== ST.requestVersion) return;
+      return maybeRevisePlanImport(images, hint, r.body, version, context).then(function (body) {
+        if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return;
         // A failed/skipped repair must never turn the invalid raw reading into
         // ST.result or enable Apply. Revisions are validated by the server again.
         if (!body || !body.plan || body.error) {
@@ -686,25 +804,25 @@
           ST.busy = false; stageBuildingReview(body); showQuota(); return;
         }
         var finish = (typeof PlanFinish === 'undefined' || !body.plan)
-          ? Promise.resolve(null) : PlanFinish.analyze(body.plan, body.marks);
+          ? Promise.resolve(null) : PlanFinish.analyze(body.plan, body.marks, context);
         return finish.then(function (out) {
-          if (version !== ST.version || requestVersion !== ST.requestVersion) return;
+          if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return;
           if (!currentSource()) { ST.busy = false; setStatus('元ページまたは切り出しが変わりました。読み直してください。'); syncPlanImportButtons(); return; }
           body.finish = out;
           ST.busy = false;
-          ST.result = body;
+          ST.result = body; bindReview(body);
           renderPlanImportResult(body);
           syncPlanImportButtons();
           showQuota();
         });
       });
     }).catch(function () {
-      if (version !== ST.version || requestVersion !== ST.requestVersion) return;
+      if (!context.isCurrent() || version !== ST.version || requestVersion !== ST.requestVersion) return;
       ST.busy = false;
       setStatus('サーバに接続できませんでした。通信の状態を確かめて、もう一度お試しください。');
       syncPlanImportButtons();
       showQuota();
-    });
+    }).then(context.done);
   }
 
   // 受付番号を受け取ったら、出来上がるまで数秒おきに見に行く。
@@ -738,10 +856,12 @@
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(pollBody),
+        signal: opts.context && opts.context.signal,
       }).then(readReply).then(function (r) {
+        if (opts.isCurrent && !opts.isCurrent()) return null;
         if (r.status !== 200 || !r.body || !r.body.pending) return r;
         if (opts.onProgress) opts.onProgress(r.body.done, r.body.total);
-        return delay(JOB_POLL_MS).then(once);
+        return (opts.context ? opts.context.delay(JOB_POLL_MS) : delay(JOB_POLL_MS)).then(once);
       });
     }
     return once();
@@ -783,15 +903,15 @@
   //
   // 門が答えを出せなかったとき・古いサーバに当たったときは revise が
   // 付いてこない。そのときは**これまでどおり見直す**。
-  function maybeRevisePlanImport(images, hint, body, version) {
+  function maybeRevisePlanImport(images, hint, body, version, context) {
     if (body && (body.extractionContract === 'scene-ir-v3' || body.sceneIR)) return Promise.resolve(body);
     var advice = body && body.revise;
-    if (!advice || !advice.skipAll) return revisePlanImport(images, hint, body, version);
+    if (!advice || !advice.skipAll) return revisePlanImport(images, hint, body, version, context);
     body.reviewSkipped = true;
     return Promise.resolve(body);
   }
 
-  function revisePlanImport(images, hint, body, version) {
+  function revisePlanImport(images, hint, body, version, context) {
     if (body && (body.extractionContract === 'scene-ir-v3' || body.sceneIR)) return Promise.resolve(body);
     var pages = (body && body.pages) || [];
     if (!pages.length || typeof PlanReviewDraw === 'undefined') return Promise.resolve(body);
@@ -806,19 +926,21 @@
     } catch (e) { return Promise.resolve(body); }
     if (renders.length !== images.length) return Promise.resolve(body);
 
+    if (context && !context.isCurrent()) return Promise.resolve(null);
     setStatus('読み取った間取りを描き起こして、AIに見直させています… 30秒ほどかかります。');
     return fetch('/api/ai/revise-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(Object.assign({ images: images, renders: renders, pages: pages, hint: hint }, body.sourcePages ? { sourcePages: body.sourcePages } : {})),
+      signal: context && context.signal,
     }).then(readReply).then(function (r) {
-      if (version !== ST.version) return null;
-      return waitForJobs(r, { revised: true, isCurrent: function () { return version === ST.version; }, onProgress: function (done, total) {
-        if (version !== ST.version) return;
+      if (context && !context.isCurrent() || version !== ST.version) return null;
+      return waitForJobs(r, { context: context, revised: true, isCurrent: function () { return (!context || context.isCurrent()) && version === ST.version; }, onProgress: function (done, total) {
+        if (context && !context.isCurrent() || version !== ST.version) return;
         setStatus('AIに見直させています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
-      if (version !== ST.version || !r) return body;
+      if (context && !context.isCurrent() || version !== ST.version || !r) return body;
       if (r.body && r.body.error === 'ai_ambiguous_floors') return r.body;
       if (r.status !== 200 || !r.body || !r.body.plan) {
         body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
@@ -831,6 +953,7 @@
       r.body.beforePages = pages;   // 見直す前の答え。何が変わったかを後から確かめるため
       return r.body;
     }).catch(function () {
+      if (context && !context.isCurrent()) return null;
       body.reviewNote = '見直しは行えませんでした（読み取った結果をそのまま出しています）。';
       return body;
     });
@@ -949,8 +1072,9 @@
   }
 
   function renderPlanImportResult(body) {
+    if (ST.result === body && (!reviewOwner || !root.EditorPane && reviewOwner.body !== body)) bindReview(body);
     var applyButton = $('plan-import-apply');
-    if (applyButton) applyButton.disabled = !!ST.mappingEditor || !!(body.buildingApplied||body.scenePartialOpened) || !!(body.sceneCompilation && !body.sceneCompilation.canApply) || !!(body.sourceLocal && (!body.buildingCompilation || !body.buildingCompilation.canApply));
+    if (applyButton) applyButton.disabled = !currentReview(body) || !!ST.mappingEditor || !!(body.importApplied||body.sceneApplied||body.buildingApplied||body.scenePartialOpened) || !!(body.sceneCompilation && !body.sceneCompilation.canApply) || !!(body.sourceLocal && (!body.buildingCompilation || !body.buildingCompilation.canApply));
     var s = body.summary || {};
     setStatus(body.sourceLocal ? '複数階の下書きです。位置合わせと未検証項目を確認してください。' : '下書きができました。取り込んだあと、手で直して仕上げてください。');
     var head = $('plan-import-summary');
@@ -1059,26 +1183,26 @@
     body.originalBuildingRegistration = body.originalBuildingRegistration || JSON.parse(JSON.stringify(body.buildingRegistration || null));
     body.buildingDecisions = {sourceSnapshot:PlanRegistration.snapshot(body.sourceLocal),floors:[],partialAcknowledged:false};
     body.fixtureDecisions=[];body.entryFloorDecisions=[];body.objectDecisions=[];body.stairDisplayDecisions=[];
-    ST.result = body;
+    ST.result = body; bindReview(body);
     compileBuildingReview(body);
     renderPlanImportResult(body);
     syncPlanImportButtons();
     return body.buildingCompilation;
   }
   function requestBuildingRegistration(body) {
-    if (ST.result !== body || ST.busy || !body.sourceLocal || !ST.pages || ST.pages.length < 2) return;
-    var version=ST.version, requestVersion=++ST.requestVersion, sourceSnapshot=PlanRegistration.snapshot(body.sourceLocal);
+    if (!currentReview(body) || ST.result !== body || ST.busy || body.importApplied || body.buildingApplied || !body.sourceLocal || !ST.pages || ST.pages.length < 2) return;
+    var version=ST.version, requestVersion=++ST.requestVersion, context=captureContext(), sourceSnapshot=PlanRegistration.snapshot(body.sourceLocal);
     ST.busy=true;
     invalidateFixtureReview(body);
     body.buildingDecisions={sourceSnapshot:sourceSnapshot,floors:[],partialAcknowledged:false};
     syncPlanImportButtons();
     setStatus('全ページの位置合わせを追加で読み取っています。結果は確認前の提案です。');
-    function current(){return ST.result===body && ST.version===version && ST.requestVersion===requestVersion && PlanRegistration.snapshot(body.sourceLocal)===sourceSnapshot;}
-    function post(path,payload){return fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)}).then(readReply);}
+    function current(){return context.isCurrent() && currentReview(body) && ST.result===body && ST.version===version && ST.requestVersion===requestVersion && PlanRegistration.snapshot(body.sourceLocal)===sourceSnapshot;}
+    function post(path,payload){if(!current())return Promise.resolve(null);return fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:context.signal}).then(readReply);}
     function poll(reply){
-      if(!current()) return null;
+      if(!current() || !reply) return null;
       if(reply.status!==202) return reply;
-      return new Promise(function(resolve){setTimeout(resolve,3000);}).then(function(){
+      return context.delay(3000).then(function(){
         if(!current())return null;
         return post('/api/ai/register-plan-result',{jobs:reply.body.jobs,sourceLocal:body.sourceLocal,sourceSnapshot:sourceSnapshot}).then(poll);
       });
@@ -1093,7 +1217,7 @@
       body.originalBuildingRegistration=JSON.parse(JSON.stringify(reply.body.buildingRegistration));
       body.registrationExtraction={rawResponse:reply.body.rawResponse || null,usage:reply.body.usage || null};
       compileBuildingReview(body);renderPlanImportResult(body);syncPlanImportButtons();
-    }).catch(function(){if(current()){ST.busy=false;setStatus('位置合わせの通信に失敗しました。未確認のまま保持しています。');syncPlanImportButtons();}});
+    }).catch(function(){if(current()){ST.busy=false;setStatus('位置合わせの通信に失敗しました。未確認のまま保持しています。');syncPlanImportButtons();}}).then(context.done);
   }
   // Catalogue mapping is a reviewed display decision, never a rewrite of source readings.
   function bathtubCandidates(body) {
@@ -1235,10 +1359,10 @@
     var heading=document.createElement('p');heading.textContent=body.sourceLocal.floors.length>1?'複数階の位置合わせ（部分的な組み立て）':'元ページの階数確認';box.appendChild(heading);
     if(body.fixtureReviewNotice){var notice=document.createElement('p');notice.textContent=body.fixtureReviewNotice;box.appendChild(notice);}
     var explain=document.createElement('p');explain.textContent=body.sourceLocal.floors.length>1?'各階の元の実寸を保ち、対応点から平行移動と90度単位の回転だけを求めます。残差と根拠の精度を確認してください。残差ゼロは数式上の一致で、画像・建物の精度保証ではありません。階高・階段・床の開口・屋根は未検証です。':'元ページの表題を見て取り込み先の階数を確認してください。階の位置合わせは行いません。';box.appendChild(explain);
-    var propose=document.createElement('button');propose.type='button';propose.textContent='全ページから位置合わせを提案（追加AI読み取り・ページ数分の利用枠）';propose.disabled=ST.busy || !ST.pages || ST.pages.length<2;propose.setAttribute('data-building-propose','');propose.addEventListener('click',function(){if(current())requestBuildingRegistration(body);});if(body.sourceLocal.floors.length>1)box.appendChild(propose);
+    var propose=document.createElement('button');propose.type='button';propose.textContent='全ページから位置合わせを提案（追加AI読み取り・ページ数分の利用枠）';propose.disabled=ST.busy || body.importApplied || body.buildingApplied || !ST.pages || ST.pages.length<2;propose.setAttribute('data-building-propose','');propose.addEventListener('click',function(){if(current())requestBuildingRegistration(body);});if(body.sourceLocal.floors.length>1)box.appendChild(propose);
     var ds=document.createElement('p');ds.style.whiteSpace='pre-wrap';ds.textContent=compiled.diagnostics.map(function(d){return (d.floor?d.floor+'階: ':'')+d.message;}).join('\n');box.appendChild(ds);
     if(compiled.floors.every(function(f){return f.solution.ok;})){var composite=document.createElement('canvas');composite.style.maxWidth='100%';composite.setAttribute('aria-label','位置合わせ後の各階の重ね合わせ。高さ・階段・開口・屋根は未検証。');box.appendChild(composite);drawBuildingAssembly(composite,compiled);}
-    function current(){return ST.result===body && !ST.busy && body.buildingSourceVersion===ST.version && $('building-registration-review')===box;}
+    function current(){return currentReview(body) && !body.importApplied && !body.buildingApplied && ST.result===body && !ST.busy && body.buildingSourceVersion===ST.version && $('building-registration-review')===box;}
     entryFloorCandidates(body).forEach(function(c){
       var label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.setAttribute('data-source-entry-floor',c.key);
       var sourceKey=PlanRegistration.snapshot(body.sourceLocal),proposalKey=PlanRegistration.snapshot(body.buildingRegistration);
@@ -1383,7 +1507,7 @@
     saved.textContent = existing ? '確認済みの対応: ' + (existing.binding.catalogId.value || '図面の色・模様') + ' / ' + existing.binding.sizingPolicy + ' / ' + existing.binding.appearanceMode + ((existing.retainedAppearanceRegions || []).length ? ' / 図面のみ: ' + existing.retainedAppearanceRegions.join(', ') : '') : '対応は未選択です。選択だけでは配置されず、確認後に根拠の再確認と「取り込む」が必要です。';
     detail.appendChild(saved);
     button.addEventListener('click', function () {
-      if (ST.result !== body || ST.busy || ST.mappingEditor || (body.sceneApplied||body.scenePartialOpened) || body.sceneOptions.sourceInvalidated) return;
+      if (!currentReview(body) || ST.result !== body || ST.busy || ST.mappingEditor || (body.sceneApplied||body.scenePartialOpened) || body.sceneOptions.sourceInvalidated) return;
       if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
       var editor = { body: body, sourceId: source.id }; ST.mappingEditor = editor;
       var reviewBox = $('scene-ir-review');
@@ -1443,8 +1567,8 @@
       var error = text(''); error.setAttribute('role', 'status');
       var confirm = document.createElement('button'); confirm.type = 'button'; confirm.textContent = 'この対応を確認して保存'; confirm.setAttribute('data-scene-mapping-confirm', ''); panel.appendChild(confirm);
       var cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = '変更を取り消す'; cancel.setAttribute('data-scene-mapping-cancel', ''); panel.appendChild(cancel);
-      function current() { return ST.result === body && ST.mappingEditor === editor && !ST.busy && !body.sceneApplied && !body.scenePartialOpened && !body.sceneOptions.sourceInvalidated; }
-      cancel.addEventListener('click', function () { if (!current()) return; ST.mappingEditor = null; renderPlanImportResult(body); });
+      function current() { return currentReview(body) && ST.result === body && ST.mappingEditor === editor && !ST.busy && !body.sceneApplied && !body.scenePartialOpened && !body.sceneOptions.sourceInvalidated; }
+      cancel.addEventListener('click', function () { if(ST.result!==body||ST.mappingEditor!==editor)return;ST.mappingEditor=null;if(currentReview(body))renderPlanImportResult(body);else revalidateReview();syncPlanImportButtons(); });
       confirm.addEventListener('click', function () {
         if (!current()) return;
         var model = selectedMetadata, policy = isObject ? sizing.value : 'native', mode = appearance.value;
@@ -1491,7 +1615,7 @@
     var candidates=body.sceneIR.objects.map(function(source){return {source:source,choices:sceneMappingCandidates(source,sceneCatalogue())};}).filter(function(row){return row.choices.candidates.length;});
     var label=document.createElement('label'),enable=document.createElement('input');enable.type='checkbox';enable.setAttribute('data-scene-partial-enable','');enable.setAttribute('data-scene-review-control','');enable.checked=!!body.sceneOptions.partialSelection;label.appendChild(enable);label.appendChild(document.createTextNode(' 選んだ物・構造と必要な部屋だけを確認する。その他は原図の根拠として残し、未配置・未完成であることを確認する'));field.appendChild(label);
     var note=document.createElement('p');note.textContent='候補は製品特定ではありません。一意候補は推奨として事前選択、複数候補は明示選択です。寸法・向きは原図を保持し、高さ・質感は確認した表示仮定を使用します。既存の案を変更せず、通常の編集画面へ別の案として開きます。';field.appendChild(note);
-    function stage(ids,on,structureIds){if(ST.result!==body||ST.mappingEditor||ST.busy||body.sceneApplied||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));opts.partialSelection=on?SceneIR.createPartialSelection(body.sceneIR,ids,true,structureIds===undefined?(body.sceneOptions.partialSelection&&body.sceneOptions.partialSelection.structureIds||[]):structureIds)||{version:1,objectIds:[],entityIds:[],incompleteConfirmed:true}:null;opts.acceptedReviews=[];opts.acceptedReviewGroups=[];opts.reviewedEntities={};opts.unresolvedDecisions=[];stageSceneIR(body.sceneIR,opts);}
+    function stage(ids,on,structureIds){if(!currentReview(body)||ST.result!==body||ST.mappingEditor||ST.busy||body.sceneApplied||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));opts.partialSelection=on?SceneIR.createPartialSelection(body.sceneIR,ids,true,structureIds===undefined?(body.sceneOptions.partialSelection&&body.sceneOptions.partialSelection.structureIds||[]):structureIds)||{version:1,objectIds:[],entityIds:[],incompleteConfirmed:true}:null;opts.acceptedReviews=[];opts.acceptedReviewGroups=[];opts.reviewedEntities={};opts.unresolvedDecisions=[];stageSceneIR(body.sceneIR,opts);}
     enable.addEventListener('change',function(){stage(candidates.map(function(row){return row.source.id;}),enable.checked);});
     if(enable.checked){
       var controls = document.createElement('details'), title = document.createElement('summary'); controls.setAttribute('data-scene-partial-options', ''); controls.open = !!optionsOpen;
@@ -1499,7 +1623,7 @@
       candidates.forEach(function(row){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-object',row.source.id);input.setAttribute('data-scene-review-control','');input.checked=body.sceneOptions.partialSelection.objectIds.indexOf(row.source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+row.source.id+' — '+(row.choices.candidates.length===1?'推奨候補1つ':'候補'+row.choices.candidates.length+'件・選択が必要')));controls.appendChild(label);input.addEventListener('change',function(){var ids=body.sceneOptions.partialSelection.objectIds.filter(function(id){return id!==row.source.id;});if(input.checked)ids.push(row.source.id);stage(ids,true);});});
       ['walls','rooms','openings'].forEach(function(collection){body.sceneIR[collection].forEach(function(source){var label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.setAttribute('data-scene-partial-structure',source.id);input.setAttribute('data-scene-review-control','');input.checked=(body.sceneOptions.partialSelection.structureIds||[]).indexOf(source.id)>=0;label.appendChild(input);label.appendChild(document.createTextNode(' '+source.id+' — '+collection+'（host壁の全開口と隣接部屋も確認）'));controls.appendChild(label);input.addEventListener('change',function(){var ids=(body.sceneOptions.partialSelection.structureIds||[]).filter(function(id){return id!==source.id;});if(input.checked)ids.push(source.id);stage(body.sceneOptions.partialSelection.objectIds,true,ids);});});});
       var assumed=document.createElement('pre');assumed.style.whiteSpace='pre-wrap';assumed.textContent='この部分の表示仮定（図面から測定した値ではありません）\n'+body.sceneCompilation.defaults.map(function(d){return d.path+': '+JSON.stringify(d.value)+' — '+d.reason;}).join('\n')+'\n色の部位範囲が不明な場合、既存の染色チャンネルだけに適用します。黒い脚など元の色が残る場合があり、全面単色再現は保証しません。';controls.appendChild(assumed);
-      var reviewLabel=document.createElement('label'),review=document.createElement('input');review.type='checkbox';review.setAttribute('data-scene-partial-accept','');review.setAttribute('data-scene-review-control','');var groups=body.sceneCompilation.reviewGroups.filter(function(g){return body.sceneOptions.partialSelection.entityIds.indexOf(g.entityId)>=0&&g.reviewPaths.length;});review.checked=groups.length>0&&groups.every(function(g){return g.accepted;});review.disabled=body.sceneCompilation.diagnostics.some(function(d){return d.severity==='error';});reviewLabel.appendChild(review);reviewLabel.appendChild(document.createTextNode(' 選んだ候補・元図の推定値・表示仮定と適用限界をまとめて確認した（未配置部分の再現は承認しない）'));controls.appendChild(reviewLabel);review.addEventListener('change',function(){if(ST.result!==body||ST.mappingEditor||ST.busy||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));groups.forEach(function(g){opts.acceptedReviewGroups=opts.acceptedReviewGroups.filter(function(id){return id!==g.id;});delete opts.reviewedEntities[g.entityId];if(review.checked){opts.acceptedReviewGroups.push(g.id);opts.reviewedEntities[g.entityId]=g.reviewKey;}});stageSceneIR(body.sceneIR,opts);});
+      var reviewLabel=document.createElement('label'),review=document.createElement('input');review.type='checkbox';review.setAttribute('data-scene-partial-accept','');review.setAttribute('data-scene-review-control','');var groups=body.sceneCompilation.reviewGroups.filter(function(g){return body.sceneOptions.partialSelection.entityIds.indexOf(g.entityId)>=0&&g.reviewPaths.length;});review.checked=groups.length>0&&groups.every(function(g){return g.accepted;});review.disabled=body.sceneCompilation.diagnostics.some(function(d){return d.severity==='error';});reviewLabel.appendChild(review);reviewLabel.appendChild(document.createTextNode(' 選んだ候補・元図の推定値・表示仮定と適用限界をまとめて確認した（未配置部分の再現は承認しない）'));controls.appendChild(reviewLabel);review.addEventListener('change',function(){if(!currentReview(body)||ST.result!==body||ST.mappingEditor||ST.busy||body.scenePartialOpened)return;var opts=JSON.parse(JSON.stringify(body.sceneOptions));groups.forEach(function(g){opts.acceptedReviewGroups=opts.acceptedReviewGroups.filter(function(id){return id!==g.id;});delete opts.reviewedEntities[g.entityId];if(review.checked){opts.acceptedReviewGroups.push(g.id);opts.reviewedEntities[g.entityId]=g.reviewKey;}});stageSceneIR(body.sceneIR,opts);});
     }
     if(!candidates.length&&!body.sceneIR.walls.length&&!body.sceneIR.rooms.length&&!body.sceneIR.openings.length){enable.disabled=true;note.textContent+=' このページには適合候補がありません。原図の記号と拒否理由は下に残します。';}
     box.appendChild(field);
@@ -1539,7 +1663,7 @@
       destination.appendChild(label);
       var explanation = document.createElement('p'); explanation.textContent = '元の階情報は不明のまま保存します。既知の階と矛盾する指定、複数ページ、敷地や階段の接続は自動解決しません。配置後の個別確認と適用が別途必要です。'; destination.appendChild(explanation);
       confirmed.addEventListener('change', function () { confirmScenePlacement(body, Number(select.value), confirmed.checked); });
-      select.addEventListener('change', function () { if (ST.result !== body) return; confirmed.checked = false; if (context) confirmScenePlacement(body, Number(select.value), false); });
+      select.addEventListener('change', function () { if (!currentReview(body) || ST.result !== body) return; confirmed.checked = false; if (context) confirmScenePlacement(body, Number(select.value), false); });
       box.appendChild(destination);
     }
     var full = body.sceneFullCompilation || body.sceneCompilation;
@@ -1584,7 +1708,7 @@
         label.appendChild(input); label.appendChild(document.createTextNode(labelText)); detail.appendChild(label);
       }
       if (group.reviewPaths.length) choice(' このオブジェクトの推定値を確認して採用する', group.accepted, function (on) {
-        if (ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
+        if (!currentReview(body) || ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
         var opts = JSON.parse(JSON.stringify(ST.result.sceneOptions));
         opts.acceptedReviewGroups = opts.acceptedReviewGroups.filter(function (id) { return id !== group.id; });
         if (on) { opts.acceptedReviewGroups.push(group.id); if (group.reviewKey) opts.reviewedEntities[group.entityId] = group.reviewKey; }
@@ -1592,7 +1716,7 @@
         stageSceneIR(ST.result.sceneIR, opts);
       });
       if (group.canAcknowledgeOmission) choice(' この物は非必須の装飾であり、未配置のまま残すことを確認する（再構成は未完成）', group.acknowledgedOmission, function (on) {
-        if (ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
+        if (!currentReview(body) || ST.result !== body || ST.mappingEditor || body.sceneApplied || body.scenePartialOpened || ST.busy) return;
         var opts = JSON.parse(JSON.stringify(ST.result.sceneOptions));
         opts.unresolvedDecisions = opts.unresolvedDecisions.filter(function (d) { return d.entityId !== group.entityId; });
         if (on) { opts.unresolvedDecisions.push({ entityId: group.entityId, decision: 'leave-unplaced', classification: 'noncritical-decoration' }); if (group.reviewKey) opts.reviewedEntities[group.entityId] = group.reviewKey; }
@@ -1614,7 +1738,7 @@
   }
 
   function confirmScenePlacement(expectedResult, targetFloor, singleLevelConfirmed) {
-    if (!expectedResult || ST.result !== expectedResult || ST.mappingEditor || ST.busy || (expectedResult.sceneApplied||expectedResult.scenePartialOpened) || expectedResult.sceneOptions.sourceInvalidated || expectedResult.sceneIR.sceneVersion !== 3) return null;
+    if (!expectedResult || !currentReview(expectedResult) || ST.result !== expectedResult || ST.mappingEditor || ST.busy || (expectedResult.sceneApplied||expectedResult.scenePartialOpened) || expectedResult.sceneOptions.sourceInvalidated || expectedResult.sceneIR.sceneVersion !== 3) return null;
     var opts = JSON.parse(JSON.stringify(expectedResult.sceneOptions));
     if (!opts.pageScope || opts.pageScope.length !== 1 || !Number.isInteger(targetFloor) || targetFloor < 1 || targetFloor > 4) return null;
     opts.destinationFloor = targetFloor;
@@ -1791,6 +1915,9 @@
 
   // Explicit caller action stages a draft in the existing review dialog; Apply is still required.
   function stageSceneIR(scene, options) {
+    if (ST.result && ST.result.sceneIR && !currentReview(ST.result)) {
+      options=Object.assign({},options,{acceptedReviews:[],acceptedReviewGroups:[],reviewedEntities:{},unresolvedDecisions:[],placementContext:null,targetSnapshot:typeof DATA==='object'?JSON.parse(JSON.stringify(DATA)):{}});
+    }
     ST.mappingEditor = null;
     ST.requestVersion++;
     var input = JSON.parse(JSON.stringify(scene));
@@ -1821,6 +1948,7 @@
         compiled.acknowledgedOmissions.length ? ['未配置 ' + compiled.acknowledgedOmissions.length + ' 点を残す未完成の再構成です。完全な再現ではありません。'] : [],
         compiled.diagnostics.filter(function (d) { return !compiled.reviewGroups.some(function (g) { return d.path === g.path || d.path.indexOf(g.path + '.') === 0; }); }).map(function (d) { return d.path + ': ' + d.message; })),
     };
+    bindReview(ST.result);
     renderPlanImportResult(ST.result);
     var button = $('plan-import-apply');
     if (button) {button.disabled = !compiled.canApply;button.textContent=ST.result.sceneOptions.partialSelection?'確認した部分を新しい案で開く':'取り込む';}
@@ -1970,7 +2098,7 @@
     return report;
   }
   async function openScenePartialPlan(expected) {
-    if(!expected||ST.result!==expected||ST.busy||ST.mappingEditor||expected.scenePartialOpened||expected.sceneOptions.sourceInvalidated)return;
+    if(!expected||!currentReview(expected)||ST.result!==expected||ST.busy||ST.mappingEditor||expected.scenePartialOpened||expected.sceneOptions.sourceInvalidated)return;
     var compiled=previewSceneIR(expected.sceneIR,expected.sceneOptions);
     if(!compiled.canApply||!compiled.partialSelection){
       // The target defaults/catalogue may have changed since the last review.
@@ -1983,16 +2111,23 @@
     var read=materializeSceneObjects(compiled.plan),payload={walls:read.walls,rooms:read.rooms,items:read.items,heightDefaults:JSON.parse(JSON.stringify(DATA.heightDefaults||{modelVersion:2,floorThickness:180})),floors:JSON.parse(JSON.stringify(DATA.floors||{})),sceneReconstructionReports:[reconstructionReport(expected,compiled,read,0)]};
     if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
     var sourceText=typeof root.serializeDataSnapshot==='function'?root.serializeDataSnapshot():null;
-    var current=function(){return ST.result===expected&&!expected.sceneOptions.sourceInvalidated&&(sourceText===null||root.serializeDataSnapshot()===sourceText)&&!root._editorPaneDisposed;};
+    var context=captureContext();
+    var current=function(){return context.isCurrent() && currentReview(expected) && ST.result===expected&&!expected.sceneOptions.sourceInvalidated&&(sourceText===null||root.serializeDataSnapshot()===sourceText)&&!root._editorPaneDisposed;};
     ST.busy=true;syncPlanImportButtons();
     try{var id=common?await workspace.createIndependentPlan(payload,'原図からの部分プレビュー（未完成）',{sourcePaneId:root.EDITOR_PANE||root.NATIVE_EDITOR_PANE||null,sourcePlanId:root.__editorPlanId,sourceSnapshot:sourceText,isCurrent:current,cataloguePack:root.AssetPackPicker?.getSelection()}):await workspace.openPlan(payload,'原図からの部分プレビュー（未完成）');if(!current()){if(!common)await workspace.remove(id);return;}expected.scenePartialOpened=true;expected.partialPlanId=id;var reviewModal=$('plan-import-modal');if(reviewModal)reviewModal.classList.remove('show');setStatus(common?'確認した部分を共通一覧の新しい案へ追加しました。未完成の根拠と元の案を保持しています。':'確認した部分を新しい案で開きました。未配置の根拠を保持する未完成のプレビューです。元の案は変更していません。');return id;}
-    catch(error){setStatus(error.message);}
-    finally{ST.busy=false;syncPlanImportButtons();}
+    catch(error){if(current())setStatus(error.message);}
+    finally{if(current()){ST.busy=false;syncPlanImportButtons();}context.done();}
   }
 
   function applyPlanImport() {
-    if (!ST.result || !ST.result.plan || ST.result.sceneApplied || ST.result.scenePartialOpened || ST.result.buildingApplied || ST.mappingEditor) return;
-    if (typeof DATA === 'undefined' || !DATA || ST.busy) return;
+    // Explicit legacy caller staging can replace the result; stale review callbacks cannot.
+    if (!root.EditorPane && ST.result && reviewOwner && ST.result !== reviewOwner.body) bindReview(ST.result);
+    if (!ST.result || !ST.result.plan || ST.result.importApplied || ST.result.sceneApplied || ST.result.scenePartialOpened || ST.result.buildingApplied || ST.mappingEditor) return;
+    if (typeof DATA === 'undefined' || !DATA || ST.busy || !targetOwner()) return;
+    if (!currentReview(ST.result)) {
+      if(reviewOwner&&reviewOwner.source!==sourceKey()&&!ST.result.sceneIR)ST.result.sourceInvalidated=true;
+      revalidateReview();setStatus('編集先または原図が変わりました。原本と選択は保持し、現在の条件で再確認してください。まだ適用していません。');syncPlanImportButtons();return;
+    }
     if(root.SceneReviewFlow)root.SceneReviewFlow.reviewInteraction();
     if(ST.result.sceneIR&&ST.result.sceneOptions.partialSelection)return openScenePartialPlan(ST.result);
     var buildingCompilation = ST.result.sourceLocal ? compileBuildingReview(ST.result) : null;
@@ -2044,6 +2179,7 @@
       if (!confirm(ask)) return;
     }
 
+    if (!currentReview(ST.result)) return;
     var read;try{read=sceneCompilation ? materializeSceneObjects(candidatePlan) : toAppObjects(candidatePlan, readerDimensions);}catch(error){setStatus(error.message);return;}
 
     if(beside){try{var here=planBounds(base),there=planBounds(read);if(here&&there){sceneTranslationX=Math.round(here.x1-there.x0+BESIDE_GAP_MM);shiftPlan(read,sceneTranslationX);if(typeof SourceOpeningReview!=='undefined')SourceOpeningReview.initialTranslation(read,sceneTranslationX);if(typeof SourceObjectMapping!=='undefined')SourceObjectMapping.initialTranslation(read,sceneTranslationX);}}catch(error){setStatus(error.message);return;}}
@@ -2051,10 +2187,12 @@
     // 取り消せるようにしてから触る。**丸ごと差し替えていた頃は、取り込みが
     // 最後の操作になるので履歴を捨てていた。** いまは元の間取りが残る以上、
     // 押し間違いを1手で戻せるべきである。
+    if (!currentReview(ST.result)) return;
     if (typeof saveState === 'function') saveState();
     root._defaultPlanPending = false;
     // Consume this reviewed import once before post-commit callbacks can fail.
     // Undo remains available; a render error must never duplicate its geometry.
+    ST.result.importApplied = true;
     if (buildingCompilation) ST.result.buildingApplied = true;
     if (sceneCompilation) ST.result.sceneApplied = true;
 
@@ -2187,6 +2325,9 @@
   // 検査から中身を覗くため
   root.PlanImport = {
     state: ST,
+    capture: captureImport, restore: restoreImport, invalidate: invalidateImport, captureContext: captureContext, currentReview: currentReview,
+    hasUnexportedReview: function () { return !!(ST.result || ST.failedSceneResponse || ST.image || ST.originalImageSource || ST.pages || ST.pdfData || ST.fileName); },
+    get epoch() { return importEpoch; },
     croppedDataUrl: croppedDataUrl,
     toAppObjects: toAppObjects,
     legacyReaderDimensionSnapshot: legacyReaderDimensionSnapshot,

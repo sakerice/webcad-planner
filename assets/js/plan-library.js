@@ -49,7 +49,43 @@ function synchronizeViews(source){if(!cameraReady(source))return false;const fro
 function valid(p,fromNativeSave=false){if(!p?.ready||p.installing||p.busy||!fromNativeSave&&p.frame.contentWindow?.SHARED?.saveBusy)throw Error('編集画面の処理完了をお待ちください。');return p;}
 // Host-owned copies keep saved state without retaining a detached editor realm.
 function state(p){return cloneEditorPaneState(child(p).state());}
-async function install(p,payload,saved,targetPlanId=p.planId,options){p.installEpoch=(p.installEpoch||0)+1;p.installing=true;try{const admission=await repo.admission(targetPlanId,payload);if(await child(p).install(payload,saved,admission,options)===false)throw Error('編集画面の読込を取り消しました。現在の編集は保持しています。');}finally{p.installing=false;}}
+// Detached session-only evidence. Never written to saveDraft, DATA, views or revisions.
+// No eviction: exceeding either encoded-source budget cancels the transition.
+const importMementos=new Map(),IMPORT_PLAN_LIMIT=64*1024*1024,IMPORT_SESSION_LIMIT=128*1024*1024,IMPORT_PLAN_COUNT=16;
+function retainImport(p){
+ const flow=p.frame.contentWindow?.PlanImport;if(!flow?.capture)return;
+ const saved=flow.capture(),key=JSON.stringify([session,p.planId]);
+ // A mounted empty controller reflects reset; a boot realm must not erase retained source.
+ if(!flow.hasUnexportedReview?.()&&!saved.reference){if(p.ready)importMementos.delete(key);return saved;}
+ const encoded=JSON.stringify(saved),bytes=new TextEncoder().encode(encoded).byteLength;
+ let total=bytes;for(const [id,entry]of importMementos)if(id!==key)total+=entry.bytes;
+ if(bytes>IMPORT_PLAN_LIMIT||total>IMPORT_SESSION_LIMIT||!importMementos.has(key)&&importMementos.size>=IMPORT_PLAN_COUNT)throw Error('原図・確認結果の一時保全容量（1案64MB／この作業128MB・16案）を超えるため画面を閉じていません。確認メモをJSONに保存し、必要なら元の入力をやり直してください。現在の入力は保持しています。');
+ importMementos.set(key,{encoded,bytes});return saved;
+}
+async function withRetainedImport(p,work){
+ const saved=retainImport(p),w=p.frame.contentWindow,flow=w.PlanImport,previous=w._editorPlanInstalling;
+ if(!flow)return work();
+ flow.invalidate({preserve:true});w._editorPlanInstalling=true;
+ try{const result=await work(saved);if(result===false){w._editorPlanInstalling=previous;flow.restore(saved);}return result;}
+ catch(error){w._editorPlanInstalling=previous;flow.restore(saved);throw error;}
+ finally{w._editorPlanInstalling=previous;}
+}
+function restoreImport(p,id){const entry=importMementos.get(JSON.stringify([session,id]));p.frame.contentWindow?.PlanImport?.restore(entry?JSON.parse(entry.encoded):null);}
+async function install(p,payload,saved,targetPlanId=p.planId,options){
+ const priorImport=p.ready?retainImport(p):p.frame.contentWindow.PlanImport?.capture(),previousEditor=child(p).captureInstallState?.(),previousIdentity=p.frame.contentWindow.__editorPlanId;
+ p.installEpoch=(p.installEpoch||0)+1;p.installing=true;p.frame.contentWindow._editorPlanInstalling=true;
+ p.frame.contentWindow.PlanImport?.invalidate({preserve:true});
+ try{
+  const admission=await repo.admission(targetPlanId,payload);
+  if(await child(p).install(payload,saved,admission,options)===false)throw Error('編集画面の読込を取り消しました。現在の編集は保持しています。');
+  p.frame.contentWindow.__editorPlanId=targetPlanId;p.frame.contentWindow._editorPlanInstalling=false;
+  restoreImport(p,targetPlanId);
+ }catch(error){
+  p.frame.contentWindow.__editorPlanId=previousIdentity;p.frame.contentWindow._editorPlanInstalling=false;
+  if(previousEditor)child(p).restoreInstallState(previousEditor);
+  p.frame.contentWindow.PlanImport?.restore(priorImport);throw error;
+ }finally{p.installing=false;p.frame.contentWindow._editorPlanInstalling=false;}
+}
 function nativeNavigation(){if(native&&window.SHARED?.createPending)throw Error('共同編集ルームを作成中です。完了後に別のプランを開いてください。');if(native&&window.SHARED?.roomId)throw Error('共同編集中は別のプランへ切り替えられません。共同編集を終了してから開いてください。');}
 function record(p){return plans.get(p.planId);}
 function snapshot(p){const r=record(p),s=state(p),encoded=JSON.stringify(s.plan);if(r.lastPayload!==encoded){r.generation++;r.lastPayload=encoded;}r.state=s;r.plan=s.plan;return s;}
@@ -73,7 +109,8 @@ document.addEventListener('keydown',event=>{
  const active=document.activeElement,inside=box.contains?.(active),target=event.shiftKey?(active===items[0]||active===box||!inside?items.at(-1):null):(active===items.at(-1)||active===box||!inside?items[0]:null);
  if(target||!items.length){event.preventDefault();(target||box).focus?.();}
 },true);
-async function chooseDirty(p){if(!state(p).dirty)return true;return new Promise(resolve=>{const box=modal('「'+record(p).name+'」の未保存の編集');let answered=false;const finish=v=>{if(answered)return;answered=true;dismissDialog=null;closeDialog();resolve(v);};dismissDialog=()=>{if(!answered){answered=true;resolve(false);}};button(box,'保存して続ける',()=>finish('save')).dataset.libraryDecision='save';button(box,'保存せず続ける',()=>finish('discard')).dataset.libraryDecision='discard';button(box,'キャンセル',()=>finish(false)).dataset.libraryDecision='cancel';}).then(async choice=>{if(!choice)return false;if(choice==='save'){authorizedSavePane=p.id;try{if(!await p.frame.contentWindow.savePlanToStorage())return false;return !state(p).dirty;}finally{authorizedSavePane=null;}}
+async function chooseDirty(p,reviewOnly=false){if(!state(p).dirty&&!reviewOnly)return true;return new Promise(resolve=>{const box=modal('「'+record(p).name+'」の未保存の編集');if(reviewOnly){const note=document.createElement('p');note.textContent='原図と確認結果はこの作業中だけ保持します。通常のプラン保存には原図の画像を含みません。再読み込みやタブ終了の前に、既存の「確認メモをJSONに保存」と元のPDF・画像で保全してください。';box.append(note);}let answered=false;const finish=v=>{if(answered)return;answered=true;dismissDialog=null;closeDialog();resolve(v);};dismissDialog=()=>{if(!answered){answered=true;resolve(false);}};button(box,'保存して続ける',()=>finish('save')).dataset.libraryDecision='save';button(box,'保存せず続ける',()=>finish('discard')).dataset.libraryDecision='discard';button(box,'キャンセル',()=>finish(false)).dataset.libraryDecision='cancel';}).then(async choice=>{if(!choice)return false;if(choice==='save'){authorizedSavePane=p.id;try{if(!await p.frame.contentWindow.savePlanToStorage())return false;return !state(p).dirty;}finally{authorizedSavePane=null;}}
+ if(reviewOnly)return true;
  const r=record(p),s=snapshot(p);await repo.saveDraft('discard:'+uid(),r.id,{...s,payload:s.plan,generation:r.generation,baseRevisionId:r.baseRevisionId,baseGeneration:r.baseGeneration});const saved=await repo.read(r.id);if(!saved)return true;await install(p,saved.payload,{view:s.view,cataloguePack:s.cataloguePack,dirty:false});r.state=state(p);r.generation++;r.lastPayload=JSON.stringify(r.state.plan);r.baseRevisionId=saved.revision.id;r.baseGeneration=saved.head.headGeneration;await persistDraft(p);return true;});}
 async function loadRecord(id){const cached=plans.get(id);if(cached?.state?.dirty)return cached;const saved=await repo.read(id);if(cached&&cached.baseRevisionId===saved?.revision.id&&cached.baseGeneration===saved?.head.headGeneration)return cached;if(!saved)throw Error('プランがありません。');const storedDraft=await repo.get('drafts',JSON.stringify([session,id])),draft=storedDraft&&(storedDraft.dirty||storedDraft.baseRevisionId===saved.revision.id&&storedDraft.baseGeneration===saved.head.headGeneration)?storedDraft:null;const recovery=(!draft&&saved.head.recoveredUnsaved)?await repo.get('drafts',JSON.stringify(['recovery:'+saved.head.origin.snapshotId,id])):null,s=draft||recovery;const r={id,name:saved.head.name,plan:s?.plan||s?.payload||saved.payload,state:s?{plan:s.plan||s.payload,history:s.history||[],redo:s.redo||[],view:s.view,dirty:!!s.dirty||saved.revision.kind==='unsaved-checkpoint',cataloguePack:s.cataloguePack}:saved.revision.kind==='unsaved-checkpoint'?{plan:saved.payload,history:[],redo:[],dirty:true}:null,generation:s?.generation||0,baseRevisionId:s?.baseRevisionId||saved.revision.id,baseGeneration:s?.baseGeneration||saved.head.headGeneration};if(cached){r.generation=Math.max(r.generation,cached.generation+1);if(!s)r.state={plan:r.plan,history:[],redo:[],dirty:false,view:cached.state?.view,cataloguePack:cached.state?.cataloguePack};}r.lastPayload=JSON.stringify(r.plan);plans.set(id,r);return r;}
 function refresh(){const locked=controlsLocked();shell.dataset.layout=panes.size===1?'1':'2';for(const p of panes.values()){p.remove.disabled=locked||!p.ready;if(!p.ready)continue;const w=p.frame.contentWindow,r=record(p);p.frame.title=r.name+'の既存エディター';p.remove.title='「'+r.name+'」の画面を閉じる';p.remove.setAttribute('aria-label',p.remove.title);const select=q('[data-library-current]',w.document);if(!select)continue;select.replaceChildren();for(const id of retained){const r=plans.get(id);if(!r)continue;const op=document.createElement('option');op.value=id;op.textContent=r.name;op.disabled=[...panes.values()].some(other=>other!==p&&other.planId===id);select.append(op);}if(native)for(const [id,name] of [['__open__','▤ プランを開く…'],['__new__','＋ 新しいプラン…']]){const op=document.createElement('option');op.value=id;op.textContent=name;select.append(op);}select.value=p.planId;select.disabled=locked;const save=q('#save-btn',w.document);if(save)save.disabled=locked;for(const b of w.document.querySelectorAll('[data-library-action]'))b.disabled=locked;q('[data-library-dirty]',w.document).textContent=w.DIRTY||!record(p)?.baseRevisionId?'● 未保存':'✓ 保存済み';p.label.textContent='';}for(const b of shell.querySelectorAll('.parallel-controls button'))b.disabled=locked;q('[data-parallel-sync]',shell).disabled=locked;}
@@ -86,10 +123,11 @@ try{
  p.ready=true;visibilityObserver?.observe(frame);activeId=activeId||paneId;refresh();if(sync)synchronizeViews(panes.get(activeId)||p);return p;
 }catch(error){await dispose(p);throw error;}finally{clearTimeout(timer);frame.onload=null;frame.onerror=null;}}
 
-async function dispose(p){if(native)return;visibilityObserver?.unobserve(p.frame);child(p)?.dispose();panes.delete(p.id);if(activeId===p.id)activeId=panes.keys().next().value||null;try{if(!panes.size)await pool.dispose();}finally{p.card.remove();refresh();}}
+async function dispose(p,importRetained=false){if(native)return;if(!importRetained)retainImport(p);visibilityObserver?.unobserve(p.frame);child(p)?.dispose();panes.delete(p.id);if(activeId===p.id)activeId=panes.keys().next().value||null;try{if(!panes.size)await pool.dispose();}finally{p.card.remove();refresh();}}
 async function createBlankPlan(name){nativeNavigation();name=String(name||'新しいプラン').trim().slice(0,80)||'新しいプラン';const id='plan-'+uid(),result=await repo.save({planId:id,name,operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:{walls:[],rooms:[],items:[],startMode:'blank'}});if(result.status!=='saved')throw Error('新しいプランを保存できませんでした。');if(retained.length>=4||!native&&panes.size>=2){status('新しいプラン「'+name+'」を共通一覧に保存しました。現在の画面は保持しています。画面を閉じるか作業対象を外してから「開く」で選んでください。');return {id,opened:false};}try{const opened=await api.openPlan(id);if(!opened)status('新しいプラン「'+name+'」は共通一覧に保存済みです。現在の画面は保持しています。「開く」から選べます。');return {id,opened:!!opened};}catch(error){throw Error(error.message+' 新しいプラン「'+name+'」は共通一覧に保存済みです。「開く」から回収できます。');}}
 const api=window.PlanLibrary=window.ParallelEditors={repo,async validateDerivedPlan(planId,payload){const cap=await repo.admission(planId,payload);return repo.validateAdmission(payload,cap);},plans,panes,modelPool:pool,get activeId(){return activeId;},get session(){return session;},get retained(){return retained.slice();},get nativeActionStatus(){return nativeActionStatus;},get nativeActionOwner(){return nativeActionOwner&&panes.get(NATIVE_EDITOR_PANE)?.planId===nativeActionOwner.ownedPlanId?copy(nativeActionOwner):null;},get nativeActionRoomId(){return nativeActionRoom&&panes.get(NATIVE_EDITOR_PANE)?.planId==='shared-room-'+nativeActionRoom?nativeActionRoom:null;},childReady(){refresh();},refresh,
  async run(fn){if(controlsLocked()){status('保存／読込中の画面があります。完了後に操作してください。');return false;}busy=true;refresh();try{return await fn();}catch(e){status(e);return false;}finally{busy=false;refresh();}},
+ resetImport(id,sourceWindow){const p=panes.get(id);if(p&&p.frame.contentWindow===sourceWindow)importMementos.delete(JSON.stringify([session,p.planId]));},
  edited(id){const p=panes.get(id);if(p?.ready&&!p.installing){const captured=snapshot(p);refresh();if(record(p)?.baseRevisionId)persistDraft(p,captured).catch(status);}},
  changed(id,options){const source=panes.get(id);if(controlsLocked()||!cameraReady(source))return false;activeId=id;if(sync&&options?.cameraChanged!==false)synchronizeViews(source);api.persistCameras();return true;},
  persistCameras(){clearTimeout(api.cameraTimer);api.cameraTimer=setTimeout(()=>{const cameras=viewState().cameras;viewQueue=viewQueue.catch(()=>{}).then(()=>repo.updateView(session,previous=>({...previous,cameras,sync}))).catch(status);},200);},
@@ -141,13 +179,13 @@ const api=window.PlanLibrary=window.ParallelEditors={repo,async validateDerivedP
   nativeNavigation();const p=valid(panes.get(paneId));if(p.planId===id)return true;
   if([...panes.values()].some(other=>other!==p&&other.planId===id))throw Error('このプランはもう一方で開いています。');
   const r=await loadRecord(id);if(!await chooseDirty(p)){refresh();return false;}
-  await checkpoint(p);await persistDraft(p);const previousId=p.planId,previousState=state(p);p.ready=false;
+  return withRetainedImport(p,async()=>{await checkpoint(p);await persistDraft(p);const previousId=p.planId,previousState=state(p);p.ready=false;
   try{await install(p,r.plan,r.state,id);p.planId=id;p.frame.contentWindow.__editorPlanId=id;await persistView();}
   catch(error){p.planId=previousId;p.frame.contentWindow.__editorPlanId=previousId;try{await install(p,previousState.plan,previousState);}catch(recoveryError){throw Error(error.message+' 元の案の編集は下書きに保持しています。画面の復元に失敗しました: '+recoveryError.message);}throw error;}
   finally{p.ready=true;refresh();}
-  status('編集中のプランを切り替えました。');return true;
+  status('編集中のプランを切り替えました。');return true;});
  },
- async closePlan(paneId){nativeNavigation();if(native)throw Error('通常の編集画面は閉じません。切替欄から別のプランを選んでください。');if(anyPaneBusy())throw Error('保存中の画面があります。完了後に閉じてください。');const p=valid(panes.get(paneId));await persistDraft(p);const captured=viewState();captured.panelPlanIds=captured.panelPlanIds.filter(id=>id!==p.planId);captured.retainedPlanIds=captured.retainedPlanIds.filter(id=>id!==p.planId);await repo.setView(session,captured);retained=captured.retainedPlanIds;await dispose(p);status('画面を閉じました。未保存の編集・保存済みプラン・履歴は保持しています。');return true;},
+ async closePlan(paneId){nativeNavigation();if(native)throw Error('通常の編集画面は閉じません。切替欄から別のプランを選んでください。');if(anyPaneBusy())throw Error('保存中の画面があります。完了後に閉じてください。');const p=valid(panes.get(paneId));return withRetainedImport(p,async()=>{if(p.frame.contentWindow.PlanImport?.hasUnexportedReview()&&!await chooseDirty(p,true))return false;await persistDraft(p);const captured=viewState();captured.panelPlanIds=captured.panelPlanIds.filter(id=>id!==p.planId);captured.retainedPlanIds=captured.retainedPlanIds.filter(id=>id!==p.planId);await repo.setView(session,captured);retained=captured.retainedPlanIds;await dispose(p,true);status('画面を閉じました。未保存の編集・保存済みプラン・履歴は保持しています。');return true;});},
  async persistPane(paneId,id,data){if((busy||transitionBusy)&&authorizedSavePane!==paneId)throw Error('画面の配置／読込を処理中です。編集は保持しています。完了後に保存してください。');const p=valid(panes.get(paneId),true);if(p.planId!==id)throw Error('保存対象が変わりました。');if(native&&window.SHARED?.roomId&&id!=='shared-room-'+window.SHARED.roomId)throw Error('共同編集の保存先の切替が完了していません。現在の編集は保持しています。');const r=record(p),s=snapshot(p),generation=r.generation,baseRevisionId=r.baseRevisionId,baseGeneration=r.baseGeneration;p.busy=true;refresh();try{const draftResult=await repo.saveDraft(session,id,{...s,plan:copy(data),payload:copy(data),generation,baseRevisionId,baseGeneration});if(draftResult.status==='conflict')throw Error('下書きの世代が競合しました。編集内容を保全しました。');const result=await repo.save({planId:id,payload:data,name:r.name,operationId:uid(),baseRevisionId,baseGeneration,sessionId:session,draftGeneration:generation});if(result.status!=='saved')throw Error('別画面の保存と競合しました。編集内容と競合版を保持しました。履歴で確認してください。');r.baseRevisionId=result.revisionId;r.baseGeneration=result.head.headGeneration;snapshot(p);if(r.generation===generation&&result.canClean){r.state.dirty=false;r.plan=copy(data);}else await persistDraft(p);await persistView();status('「'+r.name+'」を同じプランIDへ保存しました。');return result;}catch(error){status(error);throw error;}finally{p.busy=false;refresh();}},
  async readSavedPane(id){return (await repo.read(id))?.payload||null;},
  async reloadPlan(paneId){const p=valid(panes.get(paneId));if(!record(p).baseRevisionId)return api.legacyList();if(!await chooseDirty(p))return false;const r=record(p),saved=await repo.read(r.id),current=state(p);await install(p,saved.payload,{view:current.view,cataloguePack:current.cataloguePack,dirty:false});r.baseRevisionId=saved.revision.id;r.baseGeneration=saved.head.headGeneration;r.generation++;r.lastPayload=JSON.stringify(child(p).snapshot());await persistDraft(p);refresh();status('保存したプランを開き直しました。');return true;},
@@ -162,8 +200,8 @@ const drafts=recoverable.filter(d=>d.planId===head.id);if(drafts.length){const d
  async legacyList(){const expectedEpoch=dialogEpoch,sources=await repo.readLegacySources();if(expectedEpoch!==dialogEpoch)return false;const box=modal('旧保存：読み取り専用 → コピー → 検証');const note=document.createElement('p');note.textContent='旧保存を削除・更新しません。選んだ原本の非破壊コピーを新しい一覧へ追加します。';box.append(note);for(const source of sources){const row=document.createElement('div');row.className='library-row';const span=document.createElement('span');span.textContent=source.sourceId;row.append(span);button(row,'非破壊コピーして検証',()=>api.run(async()=>{const result=await repo.importSource(source);if(result.diagnostic&&!result.plans.length)throw Error('原本を回収しましたが、この形式を開けません: '+result.diagnostic);status(result.plans.length+'案の原本を一覧へ保全しました。編集用の変換コピーは確認してから別案へ作成してください。旧原本は保持しています。'+(result.entryDiagnostics?.length?' '+result.entryDiagnostics.length+'案は形式を確認できないため原本保全のみです。':''));await api.list();})).dataset.libraryCopySource=source.sourceId;box.append(row);}if(!sources.length){const p=document.createElement('p');p.textContent='旧保存はありません。';box.append(p);}button(box,'戻る',()=>api.list());},
 
  async newPlan(){nativeNavigation();const box=modal('新しいプラン');const input=document.createElement('input');input.placeholder='プラン名';input.setAttribute('aria-label','プラン名');input.maxLength=80;input.value='新しいプラン';box.append(input);button(box,'作成して開く',()=>{const name=input.value.trim()||'新しいプラン';closeDialog();return api.run(()=>createBlankPlan(name));});if(window.LOCAL_PREVIEW_OFFLINE)button(box,'読み取り済み3階サンプルを確認（AIなし）',()=>{closeDialog();api.run(async()=>{const body=await(await fetch('/local-preview/sample.json')).json(),id='plan-'+uid();await repo.save({planId:id,name:'読み取り済み3階サンプル',operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:{walls:[],rooms:[],items:[],startMode:'blank'}});await api.openPlan(id);const p=[...panes.values()].find(p=>p.planId===id),w=p.frame.contentWindow;w.openPlanImport();w.PlanImport.stageBuildingReview(body);w.document.getElementById('plan-import-status').textContent='読み取り済みのテストサンプルです。AIは実行していません。階を確認して部分適用できます。';status('読み取り済みサンプルを既存の取り込み確認UIで開きました。');});}).dataset.librarySample='';if(window.LOCAL_PREVIEW_OFFLINE)button(box,'図面で扉5点を確認した設定例（6点未確認・AIなし）',()=>{closeDialog();api.run(async()=>{if(panes.size>=2||retained.length>=4)throw Error('画面を1つ閉じてから設定例を開いてください。保存済み案は保持されます。');const payload=await(await fetch('/local-preview/source-reviewed-doors.json')).json(),id='plan-'+uid();await repo.save({planId:id,name:'図面確認例：扉5点／6点未確認',operationId:uid(),baseRevisionId:null,baseGeneration:0,payload});await api.openPlan(id);status('手動で図面を確認した方向設定例です。位置・幅は未実測で、4点に壁との干渉が残ります。既存案は上書きしていません。');});}).dataset.libraryReviewedDoors='';button(box,'キャンセル',closeDialog);},
- async layout(count){if(native)return; if(anyPaneBusy())throw Error('保存中の画面があります。完了後に配置を変更してください。');if(count===1&&panes.size===2){const p=[...panes.values()].find(p=>p.id!==activeId)||[...panes.values()][1];await persistDraft(p);const v=viewState();v.panelPlanIds=v.panelPlanIds.filter(id=>id!==p.planId);await repo.setView(session,v);await dispose(p);status('1画面に切り替えました。閉じた案の編集と履歴は作業対象に保持しています。切替欄から開けます。');return;}if(count===2&&panes.size<2){const id=retained.find(id=>![...panes.values()].some(p=>p.planId===id));if(!id)return api.list();let mounted;try{mounted=await mount(id);await persistView();status('作業対象の案を2画面で開きました。各画面のヘッダーから編集・保存できます。');}catch(error){if(mounted)await dispose(mounted);throw error;}}},
- hasUnsaved(){const visible=new Set([...panes.values()].map(p=>p.planId));return [...panes.values()].some(p=>p.ready&&state(p).dirty)||retained.some(id=>!visible.has(id)&&plans.get(id)?.state?.dirty);}
+ async layout(count){if(native)return; if(anyPaneBusy())throw Error('保存中の画面があります。完了後に配置を変更してください。');if(count===1&&panes.size===2){const p=[...panes.values()].find(p=>p.id!==activeId)||[...panes.values()][1];return withRetainedImport(p,async()=>{if(p.frame.contentWindow.PlanImport?.hasUnexportedReview()&&!await chooseDirty(p,true))return false;await persistDraft(p);const v=viewState();v.panelPlanIds=v.panelPlanIds.filter(id=>id!==p.planId);await repo.setView(session,v);await dispose(p,true);status('1画面に切り替えました。閉じた案の編集と履歴は作業対象に保持しています。切替欄から開けます。');return true;});}if(count===2&&panes.size<2){const id=retained.find(id=>![...panes.values()].some(p=>p.planId===id));if(!id)return api.list();let mounted;try{mounted=await mount(id);await persistView();status('作業対象の案を2画面で開きました。各画面のヘッダーから編集・保存できます。');}catch(error){if(mounted)await dispose(mounted);throw error;}}},
+ hasUnsaved(){if([...panes.values()].some(p=>p.frame.contentWindow?.PlanImport?.hasUnexportedReview())||[...importMementos.values()].some(entry=>{const s=JSON.parse(entry.encoded).state;return !!(s.result||s.failedSceneResponse||s.imageSource||s.pages||s.pdfData);}))return true;const visible=new Set([...panes.values()].map(p=>p.planId));return [...panes.values()].some(p=>p.ready&&state(p).dirty)||retained.some(id=>!visible.has(id)&&plans.get(id)?.state?.dirty);}
 };
 const nativeSwitchPlan=api.switchPlan.bind(api);
 // One transition owns its pane until all awaited persistence/install work completes.
@@ -181,6 +219,7 @@ api.withSharedIdentity=async function(roomId,install){
  if(!initializing&&(busy||transitionBusy||anyPaneBusy()))throw Error('保存／画面切替の完了後に共同編集へ接続してください。');
  const p=panes.get(NATIVE_EDITOR_PANE),editor=child(p),id='shared-room-'+roomId,previousId=p.planId,previousTransition=transitionBusy,previousLifecycle=window.SHARED?.roomGeneration||0;
  if(typeof editor?.captureInstallState!=='function'||typeof editor.restoreInstallState!=='function')throw Error('共同編集の復元機能を準備できません。現在の編集は変更していません。');
+ return withRetainedImport(p,async(previousImport)=>{
  transitionBusy=true;refresh();let transaction;
  try{
   let saved;if(previousId!==id){
@@ -192,15 +231,16 @@ api.withSharedIdentity=async function(roomId,install){
   }
   if(p.planId!==previousId||(window.SHARED?.roomGeneration||0)!==previousLifecycle)throw Error('共同編集の接続操作が更新されました。現在の編集は変更していません。');
   const shared=window.SHARED,sharedBefore={...shared};for(const key of ['baseline','confirmedSave','people','dirtyIds'])if(shared[key]!==undefined)sharedBefore[key]=copy(shared[key]);
-  transaction={editor:editor.captureInstallState(),shared:sharedBefore,records:new Map([...plans].map(([key,value])=>[key,copy(value)])),retained:retained.slice(),planId:p.planId,editorPlanId:window.__editorPlanId,url:location.href,historyState:window.history?.state,inert:document.body.inert};
+  transaction={importReview:previousImport,editor:editor.captureInstallState(),shared:sharedBefore,records:new Map([...plans].map(([key,value])=>[key,copy(value)])),retained:retained.slice(),planId:p.planId,editorPlanId:window.__editorPlanId,url:location.href,historyState:window.history?.state,inert:document.body.inert};
   // No user gesture can enter the partially installed scene while its draft and
   // view commit. Old asynchronous room work is invalidated at this boundary.
-  document.body.inert=true;p.installing=true;shared.installing=true;shared.roomGeneration=(shared.roomGeneration||0)+1;
+  document.body.inert=true;p.installing=true;p.installEpoch=(p.installEpoch||0)+1;window._editorPlanInstalling=true;window.PlanImport?.invalidate({preserve:true});shared.installing=true;shared.roomGeneration=(shared.roomGeneration||0)+1;
   install();
   if(previousId!==id){
    const r={id,name:'共同編集のプラン',plan:editor.snapshot(),state:state(p),generation:0,baseRevisionId:saved?.revision.id||null,baseGeneration:saved?.head.headGeneration||0};r.lastPayload=JSON.stringify(r.plan);plans.set(id,r);
    const keepPrevious=!!plans.get(previousId)?.baseRevisionId;retained=[id,...retained.filter(x=>x!==id&&(x!==previousId||keepPrevious))].slice(0,4);p.planId=id;window.__editorPlanId=id;
   }
+  window._editorPlanInstalling=false;restoreImport(p,id);
   snapshot(p);const confirmed=shared.confirmedSave;if(confirmed?.roomId===roomId)confirmed.planId=id;
   if(record(p).baseRevisionId){await persistDraft(p);await persistView();}
   for(const key of ['timer','localAutoTimer','rebuildTimer','reconnectTimer']){clearTimeout(transaction.shared[key]);shared[key]=null;}
@@ -218,7 +258,7 @@ api.withSharedIdentity=async function(roomId,install){
    for(const key of Object.keys(shared))delete shared[key];Object.assign(shared,transaction.shared,{roomGeneration:generation,installing:false,connectAfterInstall:false,sending:false,sendPromise:null,refreshing:false,refreshPromise:null});
    plans.clear();for(const [key,value]of transaction.records)plans.set(key,value);retained=transaction.retained;p.planId=transaction.planId;window.__editorPlanId=transaction.editorPlanId;
    try{window.history?.replaceState(transaction.historyState,'',transaction.url);}catch(recoveryError){console.warn('[WebCAD] room URL recovery',recoveryError);}
-   editor.restoreInstallState(transaction.editor);
+   window._editorPlanInstalling=false;editor.restoreInstallState(transaction.editor);window.PlanImport?.restore(transaction.importReview);
    try{await persistView();}catch(recoveryError){console.warn('[WebCAD] room view recovery',recoveryError);}
    // An invalidated old request cannot finish a restored room's pending work.
    // Reconnect and scan the retained DATA rather than borrowing its response.
@@ -226,7 +266,8 @@ api.withSharedIdentity=async function(roomId,install){
    try{window.renderSharedUi?.();}catch(recoveryError){console.warn('[WebCAD] room UI recovery',recoveryError);}
   }
   status(error);try{window.sharedSetStatus?.(error.message,true);}catch(_){}throw error;
- }finally{if(transaction)document.body.inert=transaction.inert;p.installing=false;transitionBusy=previousTransition;refresh();}
+ }finally{window._editorPlanInstalling=false;if(transaction)document.body.inert=transaction.inert;p.installing=false;transitionBusy=previousTransition;refresh();}
+ });
 };
 // The existing pane header delegates only to its actual host-owned editor.
 // Tickets live in the existing views store; plans never travel in a URL or a
