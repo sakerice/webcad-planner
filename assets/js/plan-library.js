@@ -49,13 +49,15 @@ function synchronizeViews(source){if(!cameraReady(source))return false;const fro
 function valid(p,fromNativeSave=false){if(!p?.ready||p.installing||p.busy||!fromNativeSave&&p.frame.contentWindow?.SHARED?.saveBusy)throw Error('編集画面の処理完了をお待ちください。');return p;}
 // Host-owned copies keep saved state without retaining a detached editor realm.
 function state(p){return cloneEditorPaneState(child(p).state());}
-async function install(p,payload,saved,targetPlanId=p.planId){p.installing=true;try{const admission=await repo.admission(targetPlanId,payload);if(await child(p).install(payload,saved,admission)===false)throw Error('編集画面の読込を取り消しました。現在の編集は保持しています。');}finally{p.installing=false;}}
-function nativeNavigation(){if(native&&window.SHARED?.roomId)throw Error('共同編集中は別のプランへ切り替えられません。共同編集を終了してから開いてください。');}
+async function install(p,payload,saved,targetPlanId=p.planId,options){p.installEpoch=(p.installEpoch||0)+1;p.installing=true;try{const admission=await repo.admission(targetPlanId,payload);if(await child(p).install(payload,saved,admission,options)===false)throw Error('編集画面の読込を取り消しました。現在の編集は保持しています。');}finally{p.installing=false;}}
+function nativeNavigation(){if(native&&window.SHARED?.createPending)throw Error('共同編集ルームを作成中です。完了後に別のプランを開いてください。');if(native&&window.SHARED?.roomId)throw Error('共同編集中は別のプランへ切り替えられません。共同編集を終了してから開いてください。');}
 function record(p){return plans.get(p.planId);}
 function snapshot(p){const r=record(p),s=state(p),encoded=JSON.stringify(s.plan);if(r.lastPayload!==encoded){r.generation++;r.lastPayload=encoded;}r.state=s;r.plan=s.plan;return s;}
 async function checkpoint(p){const r=record(p);if(r.baseRevisionId)return;const s=snapshot(p),result=await repo.save({planId:r.id,name:r.name,operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:s.plan,kind:'unsaved-checkpoint',origin:{explicitlySaved:false}});if(result.status!=='saved')throw Error('未保存の編集保全が競合しました。');r.baseRevisionId=result.revisionId;r.baseGeneration=result.head.headGeneration;r.state.dirty=true;p.frame.contentWindow.markDirty();await persistDraft(p);}
 async function persistDraft(p,captured){const r=record(p),s=captured||snapshot(p);const result=await repo.saveDraft(session,r.id,{...s,payload:s.plan,generation:r.generation,baseRevisionId:r.baseRevisionId,baseGeneration:r.baseGeneration});if(result.status==='conflict')throw Error('下書きの世代が競合しました。元の編集を保持しています。');return result;}
-function viewState(){return {retainedPlanIds:retained.slice(),panelPlanIds:[...panes.values()].map(p=>p.planId),sync,cameras:Object.fromEntries([...panes.values()].filter(p=>p.ready).map(p=>[p.planId,child(p).view()]))};}
+const roomContexts=new Map(),nativeActions=new Map();let nativeActionOwner=null,nativeActionRoom=null,nativeActionStatus='none';
+function verifiedRoom(context,planId){return !!context&&/^[A-Za-z0-9_-]{22}$/.test(context.roomId||'')&&planId==='shared-room-'+context.roomId&&context.planId===planId&&typeof context.sourceSession==='string'&&Number.isSafeInteger(context.roomGeneration)&&context.roomGeneration>=0;}
+function viewState(){return {roomContexts:Object.fromEntries([...roomContexts].filter(([id])=>retained.includes(id))),retainedPlanIds:retained.slice(),panelPlanIds:[...panes.values()].map(p=>p.planId),sync,cameras:Object.fromEntries([...panes.values()].filter(p=>p.ready).map(p=>[p.planId,child(p).view()]))};}
 function persistView(){viewQueue=viewQueue.catch(()=>{}).then(()=>repo.setView(session,viewState()));return viewQueue;}
 function modal(title){closeDialog();dialogReturnFocus=document.activeElement;dialog=document.createElement('div');dialog.className='library-dialog';const box=document.createElement('section'),heading=document.createElement('h2');heading.id='library-dialog-heading-'+dialogEpoch;heading.textContent=title;box.tabIndex=-1;box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-labelledby',heading.id);box.append(heading);dialog.append(box);dialog.onclick=event=>{if(event.target===dialog)closeDialog();};document.body.append(dialog);box.focus?.();return box;}
 function closeDialog(){++dialogEpoch;dialog?.remove();dialog=null;const focus=dialogReturnFocus;dialogReturnFocus=null;focus?.focus?.();const dismiss=dismissDialog;dismissDialog=null;dismiss?.();}
@@ -86,7 +88,7 @@ try{
 
 async function dispose(p){if(native)return;visibilityObserver?.unobserve(p.frame);child(p)?.dispose();panes.delete(p.id);if(activeId===p.id)activeId=panes.keys().next().value||null;try{if(!panes.size)await pool.dispose();}finally{p.card.remove();refresh();}}
 async function createBlankPlan(name){nativeNavigation();name=String(name||'新しいプラン').trim().slice(0,80)||'新しいプラン';const id='plan-'+uid(),result=await repo.save({planId:id,name,operationId:uid(),baseRevisionId:null,baseGeneration:0,payload:{walls:[],rooms:[],items:[],startMode:'blank'}});if(result.status!=='saved')throw Error('新しいプランを保存できませんでした。');if(retained.length>=4||!native&&panes.size>=2){status('新しいプラン「'+name+'」を共通一覧に保存しました。現在の画面は保持しています。画面を閉じるか作業対象を外してから「開く」で選んでください。');return {id,opened:false};}try{const opened=await api.openPlan(id);if(!opened)status('新しいプラン「'+name+'」は共通一覧に保存済みです。現在の画面は保持しています。「開く」から選べます。');return {id,opened:!!opened};}catch(error){throw Error(error.message+' 新しいプラン「'+name+'」は共通一覧に保存済みです。「開く」から回収できます。');}}
-const api=window.PlanLibrary=window.ParallelEditors={repo,async validateDerivedPlan(planId,payload){const cap=await repo.admission(planId,payload);return repo.validateAdmission(payload,cap);},plans,panes,modelPool:pool,get activeId(){return activeId;},get session(){return session;},get retained(){return retained.slice();},childReady(){refresh();},refresh,
+const api=window.PlanLibrary=window.ParallelEditors={repo,async validateDerivedPlan(planId,payload){const cap=await repo.admission(planId,payload);return repo.validateAdmission(payload,cap);},plans,panes,modelPool:pool,get activeId(){return activeId;},get session(){return session;},get retained(){return retained.slice();},get nativeActionStatus(){return nativeActionStatus;},get nativeActionOwner(){return nativeActionOwner&&panes.get(NATIVE_EDITOR_PANE)?.planId===nativeActionOwner.ownedPlanId?copy(nativeActionOwner):null;},get nativeActionRoomId(){return nativeActionRoom&&panes.get(NATIVE_EDITOR_PANE)?.planId==='shared-room-'+nativeActionRoom?nativeActionRoom:null;},childReady(){refresh();},refresh,
  async run(fn){if(controlsLocked()){status('保存／読込中の画面があります。完了後に操作してください。');return false;}busy=true;refresh();try{return await fn();}catch(e){status(e);return false;}finally{busy=false;refresh();}},
  edited(id){const p=panes.get(id);if(p?.ready&&!p.installing){const captured=snapshot(p);refresh();if(record(p)?.baseRevisionId)persistDraft(p,captured).catch(status);}},
  changed(id,options){const source=panes.get(id);if(controlsLocked()||!cameraReady(source))return false;activeId=id;if(sync&&options?.cameraChanged!==false)synchronizeViews(source);api.persistCameras();return true;},
@@ -203,6 +205,8 @@ api.withSharedIdentity=async function(roomId,install){
   if(record(p).baseRevisionId){await persistDraft(p);await persistView();}
   for(const key of ['timer','localAutoTimer','rebuildTimer','reconnectTimer']){clearTimeout(transaction.shared[key]);shared[key]=null;}
   shared.sending=false;shared.sendPromise=null;shared.refreshing=false;shared.refreshPromise=null;shared.installing=false;shared.connectAfterInstall=false;p.installing=false;document.body.inert=transaction.inert;
+  if(nativeActionOwner?.ownedPlanId===previousId)nativeActionOwner.ownedPlanId=id;
+  nativeActionRoom=null;
   // Connection/render failure after the data commit is a connection error, not
   // permission to resume an ordinary plan under a joined room identity.
   try{window.connectSharedSocket?.();window.renderSharedUi?.();if(shared.pending||window.sharedHasTrackedChanges?.())window.queueSharedSync?.(600);}catch(error){status(error);}
@@ -224,6 +228,96 @@ api.withSharedIdentity=async function(roomId,install){
   status(error);try{window.sharedSetStatus?.(error.message,true);}catch(_){}throw error;
  }finally{if(transaction)document.body.inert=transaction.inert;p.installing=false;transitionBusy=previousTransition;refresh();}
 };
+// The existing pane header delegates only to its actual host-owned editor.
+// Tickets live in the existing views store; plans never travel in a URL or a
+// message. This is application ownership, not a same-origin security boundary.
+function actionState(draft){return copy({plan:draft.payload||draft.plan,history:draft.history||[],redo:draft.redo||[],view:draft.view,dirty:!!draft.dirty,cataloguePack:draft.cataloguePack});}
+function ticketShape(view,token){
+ const t=view?.nativeAction,o=t?.source;
+ return !!t&&t.version===1&&t.role==='native-action'&&t.action==='share'&&t.token===token&&t.status==='prepared'&&Number.isSafeInteger(t.expiresAt)&&t.expiresAt>Date.now()&&Number.isSafeInteger(t.preparedAt)&&t.preparedAt<=Date.now()&&t.expiresAt-t.preparedAt<=300000&&typeof t.planId==='string'&&t.planId.length>0&&t.planId.length<=256&&/^[a-f0-9]{64}$/.test(t.stateDigest||'')&&!!o&&typeof o.sessionId==='string'&&typeof o.paneId==='string'&&Number.isSafeInteger(o.installEpoch)&&o.installEpoch>=0&&o.planId===t.planId&&Number.isSafeInteger(o.generation)&&o.generation>=0&&typeof o.baseRevisionId==='string'&&Number.isSafeInteger(o.baseGeneration)&&o.baseGeneration>0&&view.retainedPlanIds?.length===1&&view.retainedPlanIds[0]===t.planId&&view.panelPlanIds?.length===1&&view.panelPlanIds[0]===t.planId&&(!t.roomContext||verifiedRoom(t.roomContext,t.planId));
+}
+async function abandonNativeTicket(entry){
+ if(!entry.token)return;
+ const v=await repo.get('views',entry.token);if(v?.nativeAction?.status!=='prepared')return;
+ await repo.updateView(entry.token,previous=>({...previous,nativeAction:{...previous.nativeAction,status:'cancelled'}}),v.generation);
+}
+api.openNativeAction=function(paneId,action,sourceWindow){
+ let p,r,entry,key;
+ try{
+  if(native||action!=='share')throw Error('この操作は比較の編集画面から開いてください。');
+  p=valid(panes.get(paneId));r=record(p);
+  if(sourceWindow!==p.frame.contentWindow||p.memoryOnly||r.memoryOnly||sourceWindow.COMPARISON_PREVIEW||sourceWindow._editorPaneDisposed||sourceWindow.__editorPlanId!==p.planId)throw Error('元の編集画面を確認できませんでした。');
+  key=JSON.stringify([session,p.id,p.planId,action]);entry=nativeActions.get(key);
+  if(entry&&!entry.target.closed){
+   let destination;try{destination=entry.target.PlanLibrary;}catch(_){entry.target.focus?.();status('共同編集の通常タブの状態を確認できません。そのタブで確認してください。比較の編集と下書きは保持しています。');return Promise.resolve(false);}
+   if(entry.navigated&&(destination?.nativeActionStatus==='failed'||destination?.nativeActionStatus!=='ready'&&entry.expiresAt<=Date.now())){nativeActions.delete(key);abandonNativeTicket(entry).catch(()=>{});entry=null;}
+   else{if(entry.navigated&&destination?.nativeActionStatus==='ready'&&(destination.nativeActionOwner?.sourceSession!==session||destination.nativeActionOwner?.sourcePlanId!==r.id||entry.target.__editorPlanId!==destination.nativeActionOwner?.ownedPlanId)){status('共同編集の通常タブは別のプランへ切り替わっています。そのタブで確認してください。比較の編集は保持しています。');entry.target.focus?.();return Promise.resolve(false);}entry.target.focus?.();if(entry.navigated&&destination?.nativeActionStatus!=='ready'){status('共同編集の通常タブで下書きを復元しています。まだ準備を確認できません。比較の編集と下書きは保持しています。');return Promise.resolve(false);}status('共同編集の通常タブを表示しました。比較の編集と配置は保持しています。');return entry.promise||Promise.resolve(true);}
+  }
+  if(controlsLocked())throw Error('保存／画面切替の完了後に共同編集を開いてください。');
+  const roomContext=roomContexts.get(p.planId);if(String(p.planId).startsWith('shared-room-')&&!verifiedRoom(roomContext,p.planId))throw Error('元の共同編集ルームを確認できません。共有URLから通常の編集画面で再接続してください。比較の編集は保持しています。');
+  // Synchronous with the original header click, before the first await.
+  const target=window.open('about:blank','_blank');if(!target){status('共同編集のタブを開けませんでした。ブラウザでポップアップを許可してください。比較の編集は保持しています。');return Promise.resolve(false);}
+  try{target.opener=null;}catch(error){target.close();throw error;}entry={target,navigated:false,cancelled:false,token:null};nativeActions.set(key,entry);
+  const captured=actionState(snapshot(p)),owner={sessionId:session,paneId:p.id,planId:p.planId,installEpoch:p.installEpoch||0,generation:r.generation,baseRevisionId:r.baseRevisionId,baseGeneration:r.baseGeneration};let expected=JSON.stringify(captured);
+  const check=(checkpointed=false)=>{if(entry.cancelled||target.closed||session!==owner.sessionId||panes.get(p.id)!==p||record(p)!==r||p.planId!==owner.planId||p.frame.contentWindow!==sourceWindow||sourceWindow.__editorPlanId!==owner.planId||sourceWindow._editorPaneDisposed||p.installing||(p.installEpoch||0)!==owner.installEpoch||r.generation!==owner.generation||JSON.stringify(actionState(state(p)))!==expected||!checkpointed&&(r.baseRevisionId!==owner.baseRevisionId||r.baseGeneration!==owner.baseGeneration))throw Error('元の編集／画面が更新されたため共同編集の引き継ぎを中止しました。比較の編集は保持しています。');};
+  entry.promise=api.run(async()=>{
+   try{
+    check();if((await persistDraft(p,captured)).status!=='saved')throw Error('元の下書きの保存を確認できません。');check();
+    if(!r.baseRevisionId){await checkpoint(p);expected=JSON.stringify({...captured,dirty:true});check(true);captured.dirty=true;owner.baseRevisionId=r.baseRevisionId;owner.baseGeneration=r.baseGeneration;}
+    check();if((await persistDraft(p,captured)).status!=='saved')throw Error('元の下書きの保存を確認できません。');check();
+    const saved=await repo.read(owner.planId);check();if(!saved||saved.revision.id!==owner.baseRevisionId||saved.head.headGeneration!==owner.baseGeneration)throw Error('元の保存版が別画面で更新されました。下書きを保持しています。履歴／再読み込みで確認してください。');
+    const token=uid();entry.token=token;const digest=await repo.digest(JSON.stringify(captured));check();
+    const written=await repo.saveDraft(token,owner.planId,{...captured,payload:captured.plan,generation:owner.generation,baseRevisionId:owner.baseRevisionId,baseGeneration:owner.baseGeneration});check();if(written.status!=='saved')throw Error('通常タブへの下書き保存が競合しました。比較の編集は保持しています。');
+    const now=Date.now(),ticket={version:1,role:'native-action',action,token,status:'prepared',preparedAt:now,expiresAt:now+300000,planId:owner.planId,stateDigest:digest,source:copy(owner),roomContext:roomContext?copy(roomContext):null};entry.expiresAt=ticket.expiresAt;
+    const view=await repo.setView(token,{retainedPlanIds:[owner.planId],panelPlanIds:[owner.planId],sync:false,cameras:{[owner.planId]:captured.view},nativeAction:ticket},0);check();
+    const draft=await repo.get('drafts',JSON.stringify([token,owner.planId]));check();const readback=await repo.get('views',token);check();
+    const readDigest=await repo.digest(JSON.stringify(actionState(draft||{})));check();
+    if(!draft||draft.planId!==owner.planId||draft.sessionId!==token||draft.generation!==owner.generation||draft.baseRevisionId!==owner.baseRevisionId||draft.baseGeneration!==owner.baseGeneration||readDigest!==digest||JSON.stringify(draft.plan)!==JSON.stringify(draft.payload)||readback?.generation!==view.generation||JSON.stringify(readback.nativeAction)!==JSON.stringify(ticket))throw Error('通常タブへの下書きの検証に失敗しました。比較の編集は保持しています。');
+    const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('nativeAction',token);check();target.location.replace(url.href);entry.navigated=true;
+    status('同じプランの下書きを通常タブへ引き継ぎました。そこで共同編集を操作できます。比較の編集・履歴・配置は保持しています。');return true;
+   }catch(error){try{await abandonNativeTicket(entry);}catch(_){}if(!entry.navigated)target.close();nativeActions.delete(key);throw error;}
+  });return entry.promise;
+ }catch(error){status(error);return Promise.resolve(false);}
+};
+window.addEventListener('pagehide',()=>{for(const entry of nativeActions.values())if(!entry.navigated){entry.cancelled=true;abandonNativeTicket(entry).catch(()=>{});}});
+async function restoreNativeAction(params){
+ const token=params.get('nativeAction');
+ if(!/^[a-zA-Z0-9-]{1,80}$/.test(token||'')||params.getAll('nativeAction').length!==1||[...params.keys()].some(key=>key!=='nativeAction')||location.hash)throw Error('共同編集の引き継ぎURLを確認できません。比較の編集は保持しています。元の比較タブから開き直してください。');
+ const view=await repo.get('views',token);if(!ticketShape(view,token))throw Error('共同編集の引き継ぎは期限切れ／使用済みです。比較の編集と下書きは保持しています。元の比較タブから開き直してください。');
+ const ticket=copy(view.nativeAction),runtimeSession=uid();let claimed,consumed,transaction,runtimeView;
+ try{
+  claimed=await repo.updateView(token,previous=>({...previous,nativeAction:{...previous.nativeAction,status:'claimed',claimedBy:runtimeSession}}),view.generation);
+  const draft=await repo.get('drafts',JSON.stringify([token,ticket.planId])),o=ticket.source;
+  if(!draft||draft.planId!==ticket.planId||draft.sessionId!==token||draft.generation!==o.generation||draft.baseRevisionId!==o.baseRevisionId||draft.baseGeneration!==o.baseGeneration||JSON.stringify(draft.plan)!==JSON.stringify(draft.payload)||await repo.digest(JSON.stringify(actionState(draft)))!==ticket.stateDigest)throw Error('共同編集の引き継ぎ下書きを確認できません。比較の編集は保持しています。');
+  const saved=await repo.read(ticket.planId,o.baseRevisionId);if(!saved||saved.revision.id!==o.baseRevisionId)throw Error('共同編集の元の保存版を確認できません。');
+  const p=panes.get(NATIVE_EDITOR_PANE),editor=child(p);await editor.ready;
+  const current=await repo.get('views',token);if(current?.generation!==claimed.generation||current.nativeAction?.claimedBy!==runtimeSession||current.nativeAction?.status!=='claimed'||ticket.expiresAt<=Date.now())throw Error('共同編集の引き継ぎ操作が更新されました。');
+  transaction={p,editor:editor.captureInstallState(),records:new Map([...plans].map(([id,r])=>[id,copy(r)])),retained:retained.slice(),session,planId:p.planId,editorPlanId:window.__editorPlanId,clientId:window.SHARED.clientId,inert:document.body.inert};document.body.inert=true;
+  const captured=actionState(draft);await install(p,captured.plan,captured,ticket.planId,{restoreCamera:true});
+  if(ticket.expiresAt<=Date.now())throw Error('共同編集の引き継ぎが復元中に期限切れになりました。');
+  if(JSON.stringify(actionState(state(p)))!==JSON.stringify(captured))throw Error('共同編集の下書きを正確に復元できませんでした。');
+  const r={id:ticket.planId,name:saved.head.name,plan:captured.plan,state:captured,generation:o.generation,baseRevisionId:o.baseRevisionId,baseGeneration:o.baseGeneration,lastPayload:JSON.stringify(captured.plan)};
+  plans.clear();plans.set(r.id,r);retained=[r.id];p.planId=r.id;window.__editorPlanId=r.id;session=runtimeSession;
+  if(ticket.roomContext)roomContexts.set(r.id,copy(ticket.roomContext));
+  const result=await persistDraft(p,captured);if(result.status!=='saved')throw Error('通常タブの下書き保存が競合しました。');
+  runtimeView=await repo.setView(session,viewState(),0);
+  const restored=await repo.get('drafts',JSON.stringify([session,r.id]));if(!restored||await repo.digest(JSON.stringify(actionState(restored)))!==ticket.stateDigest)throw Error('通常タブの下書き保存を確認できません。');
+  consumed=await repo.updateView(token,previous=>({...previous,nativeAction:{...previous.nativeAction,status:'consumed'}}),claimed.generation);
+  if(ticket.expiresAt<=Date.now())throw Error('共同編集の引き継ぎが復元中に期限切れになりました。');
+  // Popups may inherit sessionStorage. Neither runtime nor collaboration
+  // client identity is borrowed from the source or the one-shot ticket.
+  window.SHARED.clientId=uid().replace(/-/g,'');try{sessionStorage.setItem('webcad-collab-client',window.SHARED.clientId);sessionStorage.setItem(sessionKey,session);}catch(_){}
+  nativeActionOwner={token,action:'share',sourceSession:o.sessionId,sourcePlanId:r.id,ownedPlanId:r.id};nativeActionRoom=ticket.roomContext?.roomId||null;
+  document.body.inert=transaction.inert;refresh();window.openShareDialog();nativeActionStatus='ready';
+  const message=nativeActionRoom?'比較の下書きを保持して元の共同編集ルームへの再接続を準備しました。「共有URLに再接続」で接続してください。接続時はルームの内容を開きます。比較の未送信編集は元のタブに残ります。':'比較と同じプランの下書きを開きました。比較の編集と履歴は元のタブに保持しています。共同編集はこの通常タブで開始してください。';
+  status(message);window.sharedSetStatus?.(message);return true;
+ }catch(error){
+  if(transaction){const p=transaction.p;plans.clear();for(const [id,r]of transaction.records)plans.set(id,r);retained=transaction.retained;p.planId=transaction.planId;window.__editorPlanId=transaction.editorPlanId;session=transaction.session;window.SHARED.clientId=transaction.clientId;nativeActionOwner=null;nativeActionRoom=null;transaction.p.frame.contentWindow.EditorPane.restoreInstallState(transaction.editor);if(runtimeView)try{await repo.setView(runtimeSession,viewState(),runtimeView.generation);}catch(_){}document.body.inert=transaction.inert;}
+  if(transaction)try{sessionStorage.setItem(sessionKey,session);if(transaction.clientId)sessionStorage.setItem('webcad-collab-client',transaction.clientId);else sessionStorage.removeItem('webcad-collab-client');}catch(_){}
+  if(claimed)try{await repo.updateView(token,previous=>({...previous,nativeAction:{...previous.nativeAction,status:'failed'}}),(consumed||claimed).generation);}catch(_){}
+  throw Error(error.message+' 比較の編集と引き継ぎ下書きは保持しています。元の比較タブから回収してください。');
+ }
+}
 api.openComparison=async function(){
  // Open synchronously within the click to avoid popup blockers; no URL or saved
  // plan is installed until the verified local checkpoint has completed.
@@ -231,13 +325,16 @@ api.openComparison=async function(){
  try{target.opener=null;const ok=await api.run(async()=>{
   const p=valid(panes.get(NATIVE_EDITOR_PANE));await persistDraft(p);const r=record(p);
   await checkpoint(p);
+  const room=window.SHARED?.roomId;if(room){const context={roomId:room,planId:r.id,sourceSession:session,roomGeneration:window.SHARED.roomGeneration||0};if(!verifiedRoom(context,r.id))throw Error('共同編集の保存先を確認できませんでした。現在の編集は保持しています。');roomContexts.set(r.id,context);}
   const comparisonSession=uid(),captured=state(p);await repo.saveDraft(comparisonSession,r.id,{...captured,payload:captured.plan,generation:r.generation,baseRevisionId:r.baseRevisionId,baseGeneration:r.baseGeneration});
   await repo.setView(comparisonSession,{...viewState(),panelPlanIds:[r.id]});await persistView();
   const url=new URL(location.href);url.search='';url.searchParams.set('planLibrary','1');url.searchParams.set('librarySession',comparisonSession);target.location.replace(url.href);status('同じプランIDの編集を保全して比較を開きました。保存ボタンで保存するまで未保存のままです。');return true;
  });if(!ok)target.close();return !!ok;}catch(error){target.close();status(error);return false;}
 };
 api.ready=(async()=>{
- const requested=new URLSearchParams(location.search).get('librarySession');
+ const params=new URLSearchParams(location.search);
+ if(native&&params.has('nativeAction')){const inert=document.body.inert;document.body.inert=true;nativeActionStatus='restoring';try{await restoreNativeAction(params);}catch(error){nativeActionStatus='failed';throw error;}finally{document.body.inert=inert;}return;}
+ const requested=params.get('librarySession');
  if(!native&&requested&&/^[a-zA-Z0-9-]{1,80}$/.test(requested)){session=requested;try{sessionStorage.setItem(sessionKey,session);}catch(_){} }
  if(native){if(await initSharedRoomFromUrl())return;if(window.SHARED?.roomId)throw Error('共同編集の復元に失敗しました。現在の編集を保持しています。共有URLへ再接続するか共同編集を終了してください。');}
  const preset=new URLSearchParams(location.search).get('preset'),explicitStart=native&&['blank','2f','3f'].includes(preset);
@@ -245,6 +342,7 @@ api.ready=(async()=>{
  if(explicitStart){session=uid();try{sessionStorage.setItem(sessionKey,session);}catch(_){} }
  if(view){
   if(!Array.isArray(view.retainedPlanIds)||view.retainedPlanIds.length>4||!Array.isArray(view.panelPlanIds)||view.panelPlanIds.length>2)throw Error('画面の保存形式を確認できませんでした。保存済みプランは変更していません。');
+  for(const [id,context]of Object.entries(view.roomContexts||{})){if(!verifiedRoom(context,id)||!view.retainedPlanIds.includes(id))throw Error('共同編集の元ルームを確認できませんでした。保存済みプランは変更していません。');roomContexts.set(id,copy(context));}
   for(const id of view.retainedPlanIds)await loadRecord(id);retained=view.retainedPlanIds.slice();sync=view.sync!==false;q('[data-parallel-sync]',shell).checked=sync;
   const visible=native?view.panelPlanIds.slice(0,1):view.panelPlanIds;
   for(const id of visible){const p=await mount(id);if(view.cameras?.[id])child(p).applyView(view.cameras[id]);}

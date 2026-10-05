@@ -20012,10 +20012,11 @@ function saveSharedDisplayName(value){try{localStorage.setItem('webcad-collab-na
 function sharedRoomFromLocation(){
   var hash=(location.hash||'').replace(/^#/,'');
   var id=new URLSearchParams(hash).get('room')||new URLSearchParams(location.search||'').get('room');
+  if(!id&&typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR)id=window.PlanLibrary?.nativeActionRoomId;
   return /^[A-Za-z0-9_-]{22}$/.test(id||'')?id:null;
 }
 function sharedUrl(){
-  var url=new URL(location.href);url.searchParams.delete('room');url.hash=SHARED.roomId?'room='+SHARED.roomId:'';return url.toString();
+  var url=new URL(location.href);url.searchParams.delete('room');url.searchParams.delete('nativeAction');url.hash=SHARED.roomId?'room='+SHARED.roomId:'';return url.toString();
 }
 function sharedSetStatus(message,isError){
   var el=document.getElementById('share-status');if(!el)return;el.textContent=message;el.classList.toggle('error',!!isError);
@@ -20042,6 +20043,9 @@ function renderSharedUi(){
   renderSaveButtonState();
 }
 function openShareDialog(){
+  if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE&&window.parent.PlanLibrary){
+    return window.parent.PlanLibrary.openNativeAction(EDITOR_PANE,'share',window);
+  }
   var overlay=document.getElementById('share-overlay');if(overlay)overlay.classList.add('show');
   var name=document.getElementById('share-name');if(name){name.value=sharedDisplayName()==='ゲスト'?'':sharedDisplayName();setTimeout(function(){name.focus();},0);}
   renderSharedUi();
@@ -20254,6 +20258,7 @@ async function retrySharedJoin(){
   }finally{if(button)button.disabled=false;renderSharedUi();}
 }
 async function createSharedRoom(){
+  if(SHARED.createPending)return;
   if(Array.isArray(DATA.walls)&&DATA.walls.some(function(w){return w&&Number.isFinite(Number(w.x1))&&Number.isFinite(Number(w.y1))&&Number(w.x1)===Number(w.x2)&&Number(w.y1)===Number(w.y2);})){sharedSetStatus('この旧保存コピーはサーバー互換性を確認できないため共有できません。現在の編集と原本は保持しています。',true);return;}
   if(typeof sceneV3LocalOnlyPlan==='function'&&sceneV3LocalOnlyPlan(DATA)){sharedSetStatus('Scene IR v3 は現在ローカル専用です。共同編集の互換性保護が整うまで共有できません。',true);return;}
   // URLに共有ルームが載ったままここへ来るのは「参加に失敗した人が新規作成を押した」状態。
@@ -20261,6 +20266,7 @@ async function createSharedRoom(){
   var pending=sharedRoomFromLocation();
   if(pending&&pending!==SHARED.roomId&&!confirm('共有されたURLのプランにまだ参加できていません。\n\nこのまま新規に開始すると、URLは別のものへ置き換わり、共有相手とはつながりません。\n先に「共有URLに再接続」をお試しください。\n\nそれでも新規に開始しますか？'))return;
   var creationRoom=SHARED.roomId,creationGeneration=SHARED.roomGeneration||0,creationPlanId=window.__editorPlanId||null;
+  var creationOwner={roomId:creationRoom,generation:creationGeneration,planId:creationPlanId};SHARED.createPending=creationOwner;
   function current(){return SHARED.roomId===creationRoom&&(SHARED.roomGeneration||0)===creationGeneration&&(window.__editorPlanId||null)===creationPlanId&&!SHARED.installing;}
   var button=document.getElementById('share-create-btn');if(button)button.disabled=true;sharedSetStatus('共同編集ルームを作成しています…');
   try{
@@ -20270,7 +20276,7 @@ async function createSharedRoom(){
     if(!response.ok)throw new Error(response.status===413?'プランが10MBを超えています。':'共同編集ルームを作成できませんでした。');
     var result=await response.json();if(!current())return;await withSharedPlanIdentity(result.roomId,function(){SHARED.roomId=result.roomId;SHARED.version=result.version;SHARED.expiresAt=result.expiresAt;SHARED.savedAt=result.savedAt||Date.now();SHARED.baseline=sharedBaselineFrom(JSON.parse(creationSnapshot));sharedResetDirtyTracking();if(serializeDataSnapshot()!==creationSnapshot){SHARED.forceScan=true;SHARED.pending=true;}history.replaceState(null,'',result.url);SHARED.confirmedSave={roomId:result.roomId,planId:window.__editorPlanId||null,snapshot:creationSnapshot,version:result.version};connectSharedSocket();if(serializeDataSnapshot()===creationSnapshot)clearDirty();renderSharedUi();});sharedSetStatus('共同編集を開始しました。URLを共有してください。');await copySharedUrl();
   }catch(e){if((window.__editorPlanId||null)===creationPlanId)sharedSetStatus(e.message||'共同編集ルームを作成できませんでした。',true);}
-  finally{if(button)button.disabled=false;}
+  finally{if(SHARED.createPending===creationOwner)SHARED.createPending=null;if(button)button.disabled=false;}
 }
 function leaveSharedRoom(){
   if(!confirm('この端末で共同編集を終了しますか？\nクラウド上のプランと、ほかの参加者の接続は維持されます。'))return;

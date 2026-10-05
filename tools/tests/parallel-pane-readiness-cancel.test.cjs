@@ -31,3 +31,6 @@ test('engine timeout rejects restoration without writing DATA and releases pendi
  for(const callback of [...r.timers.values()])callback();await assert.rejects(pending,/3D描画エンジン/);
  assert.equal(r.ctx.DATA,r.old);assert.equal(r.listeners.get('three-ready').size,0);assert.equal(r.timers.size,0);
 });
+test('native-only 2D retained-camera restore waits and disposal cancels without installing DATA',async()=>{
+ const r=runtime(),pending=r.root.EditorPane.install({replacement:true},{view:{view:'2d',camera:{pos:[1,2,3],target:[0,0,0],fov:45}}},null,{restoreCamera:true});await new Promise(setImmediate);assert.equal(r.listeners.get('three-ready').size,1);r.root.EditorPane.dispose();assert.equal(await pending,false);assert.equal(r.ctx.DATA,r.old);assert.equal(r.timers.size,0);
+});

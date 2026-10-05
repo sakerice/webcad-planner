@@ -106,15 +106,19 @@
    }
   }
   root.EditorPane={ready,view,applyView,captureInstallState,restoreInstallState,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
-   async install(plan,saved,admission){
+   async install(plan,saved,admission,options){
     ++_jsonImportRequest;const generation=++installGeneration;cancelEngineWaits();await ready;
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
-    if(saved?.view&&saved.view.view!=='2d')await waitForEngine();
+    // A native action must retain a camera even when its selected view is 2D.
+    // Ordinary pane remounts still admit 2D before the optional engine loads.
+    const restoreCamera=options?.restoreCamera===true&&!!saved?.view?.camera;
+    if(saved?.view&&(saved.view.view!=='2d'||restoreCamera))await waitForEngine();
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
     // Use the native JSON validation/migration/render transaction. A failed
     // first draw must never leave the new scene under the previous plan ID.
     const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();
     try{
+     if(restoreCamera&&(!camExt||!orbit)){init3D();if(!camExt||!orbit)throw Error('引き継ぎ元のカメラを復元できませんでした。元の編集は保持しています。');}
      // Leave the old ceiling through its controller before replacing its plan.
      root.CeilingDesigner?.restoreViewContext({ceilingView:false,floorCamera:null});
      applyJsonImport(staged,{deferNativeOutputReset:true});
