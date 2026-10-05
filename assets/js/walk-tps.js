@@ -198,11 +198,11 @@
     var key=JSON.stringify([prefs.mode,candidate,candidateKind,output&&output.actionKind,output&&output.locked,output&&output.state==='blocked',output&&output.camera&&output.camera.verified,output&&output.camera&&output.camera.avatarVisible]);
     if(key===uiKey)return;uiKey=key;
     updateWalkEyePresetButton();
-    mode.setAttribute('aria-pressed',String(prefs.mode==='tps'));mode.textContent=prefs.mode==='tps'?'FPSへ':'TPS試作';
+    mode.setAttribute('aria-pressed',String(prefs.mode==='tps'));mode.textContent=prefs.mode==='tps'?'一人称視点へ':'三人称視点へ';mode.title=prefs.mode==='tps'?'一人称視点へ切り替えます':'三人称視点へ切り替えます。人物と動作は仮モデルです';
     action.hidden=prefs.mode!=='tps';action.disabled=!(output&&output.locked)&&!candidate;
     action.textContent=output&&output.state==='blocked'?'退出を再確認':output&&output.locked?(output.actionKind==='bath-pose'?'出る / 解除':output.actionKind==='mirror-pose'?'ポーズ終了':'立つ / 解除'):candidateKind==='bath-pose'?'入浴姿勢（仮）':candidateKind==='mirror-pose'?'ポーズ（仮）':'座る';
     label.hidden=prefs.mode!=='tps';label.textContent=output&&output.state==='blocked'?'人物を非表示：安全な退出先がありません。障害物を除いて再確認、またはウォークスルー終了':
-      output&&output.camera&&!output.camera.verified?'TPS未検証・FPS表示':
+      output&&output.camera&&!output.camera.verified?'三人称視点を確認できないため一人称表示':
       output&&output.camera&&!output.camera.avatarVisible?'壁際：仮人物を一時非表示':output&&output.locked?(output.actionKind==='bath-pose'?'服あり・入浴姿勢（仮）':output.actionKind==='mirror-pose'?'仮モデル・鏡前ポーズ（仮）':'仮モデル・着座姿勢（仮）'):'仮モデル・仮歩行';
   }
   function update(dt){

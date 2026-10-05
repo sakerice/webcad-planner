@@ -9,10 +9,6 @@ class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?')[0] in ('/','/index.html'):
    data=(ROOT/'index.html').read_text().replace('<head>','<head><script src="/local-preview/adapter.js"></script>',1)
-   if 'planLibrary=1' in urlsplit(self.path).query.split('&'):
-    data=data.replace('if(COMPARISON_PREVIEW || EDITOR_PANE){','if(!EDITOR_PANE) COMPARISON_PREVIEW=true;\nif(COMPARISON_PREVIEW || EDITOR_PANE){',1)
-    before,after=data.rsplit('</body>',1)
-    data=before+'<script src="/assets/js/plan-repository-lab.js"></script><script src="/local-preview/plan-library.js"></script></body>'+after
    if 'internalAPI=1' in urlsplit(self.path).query.split('&'):
     before,after=data.rsplit('</body>',1)
     data=before+'<script src="/assets/js/editor-internal-api.js"></script><script src="/local-preview/internal-api.js"></script></body>'+after

@@ -6,9 +6,9 @@ if(!native&&new URLSearchParams(location.search).get('planLibrary')!=='1')return
 const copy=v=>JSON.parse(JSON.stringify(v)),uid=()=>crypto.randomUUID(),q=(s,r=document)=>r.querySelector(s);
 function attachCurrentEditor(parent,paneId){
  const toolbar=q('#toolbar'),label=document.createElement('div'),select=document.createElement('select'),dirty=document.createElement('span');
- label.className='library-current';label.append('編集中：',select,dirty);select.dataset.libraryCurrent='';select.setAttribute('aria-label','編集中のプラン');dirty.dataset.libraryDirty='';dirty.setAttribute('role','status');dirty.setAttribute('aria-live','polite');toolbar.prepend(label);
- for(const [action,title] of [['duplicate','⧉ 複製'],['history','↶ 履歴']]){const b=document.createElement('button');b.className='tbtn';b.textContent=title;b.dataset.libraryAction=action;b.onclick=()=>parent.run(()=>parent[action](paneId));q('#save-btn').after(b);}
+ label.className='library-current';label.append('編集中：',select,dirty);select.dataset.libraryCurrent='';select.setAttribute('aria-label','編集中のプラン');dirty.dataset.libraryDirty='';dirty.setAttribute('role','status');dirty.setAttribute('aria-live','polite');q('#save-btn').after(label);label.setAttribute('role','group');label.setAttribute('aria-label','編集中のプランの操作');
  label.append(q('#save-btn'));
+ for(const [action,title] of [['duplicate','⧉ 複製'],['history','↶ 履歴']]){const b=document.createElement('button');b.className='tbtn';b.textContent=title;b.dataset.libraryAction=action;b.onclick=()=>parent.run(()=>parent[action](paneId));label.append(b);}
  select.onchange=()=>{const target=select.value;parent.run(()=>target==='__open__'?parent.list():target==='__new__'?parent.newPlan():parent.switchPlan(paneId,target));};
  const oldRenderSave=renderSaveButtonState;renderSaveButtonState=function(){oldRenderSave();parent.refresh();};
  const oldSaveBusy=setSaveButtonBusy;setSaveButtonBusy=function(value){oldSaveBusy(value);parent.refresh();};
@@ -16,7 +16,7 @@ function attachCurrentEditor(parent,paneId){
  for(const name of ['applyJsonImport','undoAction','redoAction','markDirtyUiOnly']){const original=window[name];window[name]=function(){const result=original.apply(this,arguments);parent.edited(paneId);return result;};}
  document.addEventListener('change',event=>{if(event.target.id==='catalogue-pack')parent.edited(paneId);});
  window.loadPlanFromStorageButton=()=>parent.run(()=>parent.reloadPlan(paneId));
- const style=document.createElement('style');style.textContent='.library-current{position:sticky;left:0;z-index:3;background:white;border-radius:18px;padding:0 8px;flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}.library-current select{min-height:40px;max-width:210px;border:0;border-radius:18px;background:#f4f5f3;padding:6px}.library-current span{color:#ac5d13}.library-current #save-btn{flex-shrink:0}@media(max-width:600px){.library-current select{max-width:140px}.library-current{padding:0 4px;gap:3px;font-size:11px}}';document.head.append(style);
+ const style=document.createElement('style');style.textContent='.library-current{position:static;padding:0;flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}.library-current select{min-height:40px;max-width:210px;border:0;border-radius:18px;background:#f4f5f3;padding:6px}.library-current span{color:#ac5d13}.library-current #save-btn{flex-shrink:0;display:inline-flex!important}@media(max-width:600px){.library-current select{max-width:140px}.library-current{padding:0 4px;gap:3px;font-size:11px}}';document.head.append(style);
  parent.childReady(paneId);
 }
 if(EDITOR_PANE){attachCurrentEditor(window.parent.PlanLibrary,EDITOR_PANE);return;}

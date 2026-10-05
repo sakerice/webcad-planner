@@ -1,0 +1,36 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const {libraryContext,ROOT}=require('./plan-library-test-support.cjs');
+const source=p=>fs.readFileSync(path.join(ROOT,p),'utf8'),html=source('index.html');
+function header(context){const d=context.document,t=d.querySelector('#toolbar'),brand=d.createElement('b'),floor=d.createElement('select'),actions=d.createElement('div');brand.className='brand-mark';floor.id='floor-sel';actions.className='toolbar-actions';const views=['btn-2d','btn-3de','btn-3di','btn-3dw'].map(id=>{const b=d.createElement('button');b.id=id;return b;});actions.append(...views,d.querySelector('#save-btn'));t.append(brand,floor,actions);return {t,brand,floor,actions,views};}
+test('ordinary plan identity follows service brand in existing actions and groups existing save with plan commands',async()=>{
+ let nodes;const h=libraryContext({beforeLibrary:c=>nodes=header(c)});await h.api.ready;const group=h.document.querySelector('.library-current');assert.deepEqual(nodes.t.children,[nodes.brand,nodes.floor,nodes.actions]);assert.deepEqual(nodes.actions.children.slice(0,4),nodes.views);assert.equal(nodes.actions.children[4],group);assert.equal(h.document.querySelector('#save-btn').parentNode,group);assert.equal(group.attrs['aria-label'],'編集中のプランの操作');assert.deepEqual(group.children.filter(e=>e.dataset.libraryAction).map(e=>e.dataset.libraryAction),['duplicate','history']);
+});
+test('comparison pane identity and save stay owned by pane header, without prepending before branding',()=>{
+ let nodes,ready=0;const parent={refresh(){},run:fn=>fn(),edited(){},childReady:id=>{assert.equal(id,'pane-header');ready++;}};
+ const h=libraryContext({beforeLibrary:c=>{nodes=header(c);c.EDITOR_PANE='pane-header';c.parent={PlanLibrary:parent};}});assert.equal(ready,1);assert.deepEqual(nodes.t.children,[nodes.brand,nodes.floor,nodes.actions]);assert.deepEqual(nodes.actions.children.slice(0,4),nodes.views);assert.equal(h.document.querySelector('#save-btn').parentNode,h.document.querySelector('.library-current'));
+});
+test('comparison has exactly one native header entry and retains original command',()=>{
+ const entry=html.match(/<button id="compare-launch"[^>]*>[\s\S]*?<\/button>/g);assert.equal(entry.length,1);assert.match(entry[0],/class="tbtn"/);assert.match(entry[0],/onclick="PlanLibrary.openComparison\(\)"/);assert.doesNotMatch(entry[0],/試作/);const start=html.indexOf('<div class="toolbar-actions"'),end=html.indexOf('<div id="main">',start),location=html.indexOf('<button id="compare-launch"');assert.ok(start<location&&location<end);assert.ok(html.indexOf('class="brand-mark"')<location);assert.ok(html.indexOf('id="btn-3di"')<html.indexOf('id="save-btn"'));assert.ok(html.indexOf('id="save-btn"')<location);
+});
+test('comparison entry has no floating position or viewport-bottom override to overlap walkthrough',()=>{
+ for(const p of ['assets/plan-comparison.css','assets/ui-refinement.css']){const rules=source(p).match(/[^{}]*#compare-launch[^{}]*\{[^}]*\}/g)||[];for(const rule of rules)assert.doesNotMatch(rule,/position\s*:\s*(fixed|absolute)|bottom\s*:|right\s*:/);}
+ assert.doesNotMatch(source('assets/js/plan-library.js'),/\.library-current\{[^}]*position:sticky|toolbar\.prepend\(label\)/);assert.match(source('assets/ui-refinement.css'),/\.toolbar-actions\{display:flex;grid-column:1\/-1;[^}]*overflow-x:auto/);assert.match(source('assets/ui-refinement.css'),/\.editor-pane #compare-launch/);
+});
+test('TPS user labels are viewpoint actions and still disclose provisional avatar/motion and safety fallback',()=>{
+ const tps=source('assets/js/walk-tps.js');assert.doesNotMatch(html+tps,/TPS試作|人物視点の試作|比較の試作|この試作で/);assert.match(html,/三人称視点へ/);assert.match(tps,/prefs\.mode==='tps'\?'一人称視点へ':'三人称視点へ'/);assert.match(tps,/仮モデル・仮歩行/);assert.match(tps,/安全な退出先がありません/);assert.match(tps,/三人称視点を確認できないため一人称表示/);
+});
+function adapter(search=''){
+ const elements=new Map();function e(tag='div'){return {tagName:tag,children:[],attrs:{},textContent:'',setAttribute(k,v){this.attrs[k]=v;},append(...v){this.children.push(...v);},after(v){this.afterNode=v;},click(){return this.onclick?.();}};}
+ for(const id of ['plan-import-status','plan-import-toolbar-btn','plan-import-file','plan-import-run','share-create-btn','ai-render-run','video-render-run','share-status','unity-render-status','video-render-status'])elements.set(id,e());
+ let mounted=[],called=0;const context={URL,URLSearchParams,TextEncoder,location:{href:'http://127.0.0.1:1/index.html'+search,origin:'http://127.0.0.1:1',search},document:{getElementById:id=>elements.get(id),createElement:e,body:{append:v=>mounted.push(v)}},fetch:async()=>({json:async()=>({}),text:async()=>''}),openPlanImport(){called++;},openShareDialog(){},openUnityRenderModal(){},openVideoRenderDialog(){},addEventListener(type,fn){if(type==='DOMContentLoaded')this.ready=fn;},PlanImport:{stageBuildingReview(){},stageSceneIR(){}},crypto:require('node:crypto').webcrypto};context.window=context;vm.runInNewContext(source('local-preview/adapter.js'),context);context.ready();return {context,elements,mounted,get called(){return called;}};
+}
+test('default offline startup adds no prototype toolbar and communicates disabled APIs through existing import UI',async()=>{
+ const h=adapter();assert.deepEqual(h.mounted,[]);assert.equal(h.elements.get('plan-import-status').afterNode,undefined);h.elements.get('plan-import-status').textContent='以前の診断';h.context.openPlanImport();assert.equal(h.called,1);assert.match(h.elements.get('plan-import-status').textContent,/以前の診断/);h.context.openPlanImport();assert.equal(h.elements.get('plan-import-status').textContent.split('ローカル確認：').length,2);for(const [open,id] of [['openShareDialog','share-status'],['openUnityRenderModal','unity-render-status'],['openVideoRenderDialog','video-render-status']]){h.context[open]();assert.match(h.elements.get(id).textContent,/外部APIは利用できません/);}assert.match(h.elements.get('plan-import-status').textContent,/AI・共同編集・外部APIは利用できません/);assert.equal(h.elements.get('plan-import-run').disabled,true);await assert.rejects(h.context.fetch('/api/plan/read'),/外部通信/);assert.throws(()=>new h.context.WebSocket(),/共有/);
+});
+test('sample replay remains opt-in inside existing import panel without floating UI',()=>{
+ const h=adapter('?sampleReplay=1'),group=h.elements.get('plan-import-status').afterNode;assert.equal(group.className,'unity-render-actions');assert.equal(group.attrs['role'],'group');assert.equal(group.children.length,3);assert.deepEqual(h.mounted,[]);assert.equal(h.elements.get('plan-import-run').disabled,true);assert.doesNotMatch(source('local-preview/adapter.js'),/offline-preview-banner|position:fixed|改善試作|quality-lab/);
+});
+test('offline comparison startup uses same native shared library rather than injecting a divergent duplicate',()=>{
+ const server=source('local-preview/server.py');assert.match(server,/adapter\.js/);assert.doesNotMatch(server,/data=before\+'<script src="\/assets\/js\/plan-repository-lab\.js|COMPARISON_PREVIEW=true/);assert.equal((html.match(/src="assets\/js\/plan-library\.js"/g)||[]).length,1);
+});

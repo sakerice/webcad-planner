@@ -3249,7 +3249,7 @@ input[type="reset"]:focus-visible{
     <option value="1">1F</option><option value="2">2F</option><option value="3">3F</option><option value="4">4F</option>
   </select>
   <div class="tsep"></div>
-  <div class="toolbar-actions" role="group" aria-label="表示と書き出し">
+  <div class="toolbar-actions" role="group" aria-label="プラン・表示・書き出し">
   <button class="tbtn active" id="btn-2d" onclick="setView('2d')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h18v18H3ZM3 12h8V3M11 12h10M11 17v4"/></svg> 平面図</button>
   <button class="tbtn" id="btn-3de" onclick="setViewWithLoading('3d-ext')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10 12 3l9 7v11H3ZM8 21v-7h5v7M16 12h2v3h-2Z"/></svg> 外観3D</button>
   <button class="tbtn" id="btn-3di" onclick="setViewWithLoading('3d-int')"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v16H3ZM3 4l5 4v8l-5 4M21 4l-5 4v8l5 4M8 8h8M8 16h8"/></svg> 内観3D</button>
@@ -3265,6 +3265,7 @@ input[type="reset"]:focus-visible{
   <button class="tbtn" onclick="clearFloor()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></svg> 階クリア</button>
   <div class="tsep mob-hide"></div>
   <button id="save-btn" class="tbtn mob-hide" onclick="savePlanToStorage()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 3h13l3 3v15H4ZM8 3v6h8V3M8 21v-8h8v8"/></svg> 保存</button>
+  <button id="compare-launch" class="tbtn" type="button" onclick="PlanLibrary.openComparison()" title="同じプラン一覧で比較を別タブに開く（未保存の編集も保持）"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h18v16H3ZM12 4v16"/></svg> 案を比較</button>
   <button class="tbtn" id="share-btn" onclick="openShareDialog()"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 4a3 3 0 1 1 0 .01M4 12a3 3 0 1 1 0 .01M16 20a3 3 0 1 1 0 .01M7 11l9-6M7 13l9 6"/></svg> 共同編集</button>
   <button class="tbtn" id="collab-indicator" onclick="openShareDialog()"><span id="collab-dot"></span><span id="collab-count">接続中</span></button>
   <!-- 画像AI/動画AIレンダーも、狭い幅でヘッダーから消さない。 -->
@@ -3444,8 +3445,8 @@ input[type="reset"]:focus-visible{
       <div id="walk-hud" style="display:none">
         <canvas id="walk-minimap" width="220" height="176"></canvas>
         <button id="walk-exit" type="button" onclick="exitWalkMode()">✕ ウォークスルー終了</button>
-        <div id="walk-tps-controls" role="group" aria-label="人物視点の試作">
-          <button id="walk-tps-mode" type="button" aria-pressed="false" onclick="WalkTps.toggle()">TPS試作</button>
+        <div id="walk-tps-controls" role="group" aria-label="ウォークスルーの視点">
+          <button id="walk-tps-mode" type="button" aria-pressed="false" onclick="WalkTps.toggle()" title="三人称視点へ切り替えます。人物と動作は仮モデルです">三人称視点へ</button>
           <button id="walk-tps-action" type="button" hidden disabled onclick="WalkTps.action()">座る</button>
           <span id="walk-tps-status" role="status" hidden>仮モデル・仮歩行</span>
         </div>
@@ -25450,9 +25451,8 @@ updateMobileShiftButton();
 </script>
 <script src="assets/js/ceiling-designer.js"></script>
 <link rel="stylesheet" href="assets/plan-comparison.css">
-<button id="compare-launch" onclick="PlanLibrary.openComparison()" title="同じプラン一覧で比較を別タブに開く（未保存の編集も保持）">▧ 案を比較 <small>試作</small></button>
 <dialog id="compare-dialog" aria-labelledby="compare-heading">
-  <div class="compare-row"><span class="compare-muted">LOCAL COMPARISON · 比較の試作</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
+  <div class="compare-row"><span class="compare-muted">案の比較</span><button id="compare-close" aria-label="比較を閉じる">閉じる ×</button></div>
   <h2 id="compare-heading">同じ視点で、住まいの案を比べる</h2>
   <p class="compare-muted">名前を付けて案を残し、左右で切り替え。編集中のプランとは別に、このブラウザだけに保存します。</p>
   <div class="compare-row"><label for="compare-name">案の名前</label><input id="compare-name" maxlength="80" placeholder="例：A案 / リビングの壁紙"><button id="compare-save" class="compare-primary" data-compare-write>現在のプランを保存</button><button id="compare-import-open" data-compare-write>JSONから追加</button><input id="compare-import" type="file" accept=".json,application/json" hidden><span id="compare-count" class="compare-muted"></span></div>
@@ -25471,7 +25471,7 @@ updateMobileShiftButton();
   </div>
   <div class="compare-row"><button id="compare-images" class="compare-primary">比較画像を保存</button><span class="compare-muted">同一範囲・画角 / 各960 × 720</span></div>
   <p id="compare-status" role="status" aria-live="polite"></p>
-  <details open><summary>この試作で確認できること</summary><p class="compare-muted">内観3Dは既存アプリの壁・素材・家具を同じ視点で描画します。製品の実物色や照明の物理的な再現を保証するものではありません。部屋から見る視点は自動配置なので、見づらい場合は編集中の内観3Dで視点を調整してから使ってください。平面は家具や開口を省略した概略です。案の切替は比較画面だけに反映します。各案の画像AI用パッケージとAI完成画像は未実装です。</p></details>
+  <details open><summary>表示範囲と制約</summary><p class="compare-muted">内観3Dは既存アプリの壁・素材・家具を同じ視点で描画します。製品の実物色や照明の物理的な再現を保証するものではありません。部屋から見る視点は自動配置なので、見づらい場合は編集中の内観3Dで視点を調整してから使ってください。平面は家具や開口を省略した概略です。案の切替は比較画面だけに反映します。各案の画像AI用パッケージとAI完成画像は未実装です。</p></details>
 </dialog>
 <script src="assets/js/comparison-renderer.js"></script>
 <script src="assets/js/plan-comparison.js"></script>

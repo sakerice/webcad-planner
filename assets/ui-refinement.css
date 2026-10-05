@@ -290,8 +290,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* Preserve the native disconnected state against general button display rules. */
 #toolbar #collab-indicator:not(.show){display:none!important}
 
-/* Keep the comparison entry above the native 3D elevation controls. */
-body:has(#elev-snap-fab.show) #compare-launch{bottom:126px}
 
 /* Source review: retain the existing panel while making evidence readable on phones. */
 #scene-ir-review .scene-placement-context{min-width:0;background:#f5f8fa;color:#253341;border:0;border-radius:16px;box-shadow:none}
