@@ -182,6 +182,22 @@ function coveProps(it){
  return html;
 }
 let floorCamera=null;
+// Serialized only in the editor/draft view contract, not the plan geometry.
+function captureViewContext(){
+ return {ceilingView:!!ST.ceilingView,floorCamera:floorCamera?{pos:floorCamera.pos.slice(),target:floorCamera.target.slice(),min:floorCamera.min,max:floorCamera.max}:null,
+  orbitLimits:orbit?{min:orbit.minPolarAngle,max:orbit.maxPolarAngle}:null};
+}
+function restoreViewContext(saved){
+ if(!saved)return;
+ const c=saved.floorCamera,validVector=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isFinite),validLimits=v=>v&&Number.isFinite(v.min)&&Number.isFinite(v.max)&&v.min>=0&&v.max<=Math.PI&&v.min<=v.max;
+ const enabled=saved.ceilingView===true&&(ST.view==='2d'||ST.view==='3d-int');
+ try{if(!!ST.ceilingView!==enabled)setSurface(enabled?'ceiling':'floor',{preserveData:true});}
+ finally{
+  // Recover private state even when the native drawing/rebuild path throws.
+  if(Object.prototype.hasOwnProperty.call(saved,'floorCamera'))floorCamera=c&&validVector(c.pos)&&validVector(c.target)&&validLimits(c)?{pos:c.pos.slice(),target:c.target.slice(),min:c.min,max:c.max}:null;
+  if(orbit&&validLimits(saved.orbitLimits)){orbit.minPolarAngle=saved.orbitLimits.min;orbit.maxPolarAngle=saved.orbitLimits.max;}
+ }
+}
 function ceilingCamera(){
  if(ST.view!=='3d-int'||!ST.ceilingView||!camExt||!orbit)return;
  const rr=DATA.rooms.filter(r=>r.floor===ST.floor);if(!rr.length)return;
@@ -195,9 +211,9 @@ function syncUI(){
  document.getElementById('surface-context').textContent=ST.view==='3d-int'?'内観3Dの表示':'平面図の表示';control.value=ST.ceilingView?'ceiling':'floor';
  if(ST.view==='2d'||ST.view==='3d-int')document.getElementById('st-mode').textContent='モード:'+(ST.view==='2d'?'平面図':'内観3D')+(active()?' · 天井':'');
 }
-function setSurface(value){
- migrate();const enabled=value==='ceiling';if(ST.ceilingView===enabled)return;
- if(ST.view==='3d-int'&&camExt&&orbit){if(enabled)floorCamera={pos:camExt.position.clone(),target:orbit.target.clone(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};else if(floorCamera){camExt.position.copy(floorCamera.pos);orbit.target.copy(floorCamera.target);orbit.minPolarAngle=floorCamera.min;orbit.maxPolarAngle=floorCamera.max;orbit.update();}}
+function setSurface(value,options){
+ if(!options?.preserveData)migrate();const enabled=value==='ceiling';if(ST.ceilingView===enabled)return;
+ if(camExt&&orbit){if(enabled&&ST.view==='3d-int')floorCamera={pos:camExt.position.toArray(),target:orbit.target.toArray(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};else if(!enabled&&floorCamera){if(ST.view==='3d-int'){camExt.position.fromArray(floorCamera.pos);orbit.target.fromArray(floorCamera.target);}orbit.minPolarAngle=floorCamera.min;orbit.maxPolarAngle=floorCamera.max;orbit.update();}}
  ST.ceilingView=enabled;ST.selected=null;clearMultiSelection();ST.drawing=false;ST.drawPts=[];setTool('select');syncUI();draw2d();updateProps();if(ren)rebuild3D();if(enabled)ceilingCamera();
 }
 function editOperation(fn){return function(){if(!hasAreas())return fn.apply(this,arguments);const before=snapshot();const result=fn.apply(this,arguments);reconcile(before);draw2d();if(ren)rebuild3D();return result;};}
@@ -212,7 +228,7 @@ apply3DGizmoDrag=function(){const before=hasAreas()?snapshot():null;if(zone(GIZM
 const originalStash=stashCurrentCamera;
 stashCurrentCamera=function(){if(ST.view==='3d-int'&&ST.ceilingView)return;return originalStash.apply(this,arguments);};
 const originalView=setView;
-setView=function(v){if(ST.ceilingView&&v!=='2d'&&v!=='3d-int')setSurface('floor');originalView(v);syncUI();if(ST.ceilingView&&v==='3d-int'){floorCamera={pos:camExt.position.clone(),target:orbit.target.clone(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};ceilingCamera();}};
+setView=function(v){if(ST.ceilingView&&v!=='2d'&&v!=='3d-int')setSurface('floor');originalView(v);syncUI();if(ST.ceilingView&&v==='3d-int'){floorCamera={pos:camExt.position.toArray(),target:orbit.target.toArray(),min:orbit.minPolarAngle,max:orbit.maxPolarAngle};ceilingCamera();}};
 const originalFloor=onFloorChange;
 onFloorChange=function(){originalFloor.apply(this,arguments);syncUI();if(ST.ceilingView)ceilingCamera();};
 const originalFit=resetView;
@@ -286,7 +302,7 @@ function carveRecesses(scene){
  });
 }
 // The model and view adapter intentionally have no canvas, renderer or dialog of their own.
-window.CeilingDesigner={active,zone,fixture,visible,areas,offsetAt,areaFinishElevationMm,ceilingGroup,migrate,isTool,drawClick,drawArea,props,setSurface,validItem,ceilingCamera,pickPlacement,raisingLimit,floorLoweringLimit,carveRecesses};
+window.CeilingDesigner={active,zone,fixture,visible,areas,offsetAt,areaFinishElevationMm,ceilingGroup,migrate,isTool,drawClick,drawArea,props,setSurface,captureViewContext,restoreViewContext,validItem,ceilingCamera,pickPlacement,raisingLimit,floorLoweringLimit,carveRecesses};
 ILABELS['ceiling-area']='天井範囲';
 syncUI();
 })();

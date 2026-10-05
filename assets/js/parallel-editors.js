@@ -35,8 +35,48 @@
    const done=()=>finish(),cancel=()=>finish(),timer=setTimeout(()=>finish(new Error('3D描画エンジンの読み込みが完了しませんでした。復元対象のデータは変更していません。')),30000);
    pendingEngineWaits.add(cancel);root.addEventListener('three-ready',done,{once:true});
   });}
-  function view(){return {view:ST.view,floor:ST.floor,walkProfile:root.WalkTps&&root.WalkTps.enabled()?root.WalkTps.preference():undefined,twoD:{zoom:ST.zoom,panX:ST.panX,panY:ST.panY},camera:camExt&&orbit?{pos:camExt.position.toArray(),target:orbit.target.toArray(),fov:camExt.fov,walk:ST.view==='3d-walk'&&WALK.active?{x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}:null}:null};}
-  function applyView(v){applying=true;try{if(v.floor!==ST.floor){onFloorChange(v.floor);document.getElementById('floor-sel').value=String(v.floor);if(ren)rebuild3D();}if(v.view!==ST.view)setView(v.view);if(root.WalkTps)root.WalkTps.restorePreference(v.walkProfile);if(v.twoD){Object.assign(ST,v.twoD);draw2d();}if(v.camera&&camExt&&orbit){if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();camExt.fov=v.camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&v.camera.walk&&WALK.active){for(const k of ['x','z','yaw','pitch'])if(Number.isFinite(v.camera.walk[k]))WALK[k]=v.camera.walk[k];walkApplyCamera();}else applyStashedCamera(v.camera);invalidate3D();}}finally{applying=false;lastCamera=cameraKey();}}
+  // View conditions belong to the retained plan's editor state, never DATA.
+  // In particular north and auto-room-light ownership stays with the plan.
+  const lightingDefaults=typeof LIGHT_SETTINGS==='undefined'?{}:clone(LIGHT_SETTINGS);
+  delete lightingDefaults.northDeg;
+  const lightingRanges={hemi:[0,Infinity],sun:[0,2],ambient:[0,1.2],room:[0,1.2],exposure:[0,Infinity],env:[0,Infinity],hour:[0,24],haze:[0,1],cloud:[0,1]};
+  function lightingState(){const result={};for(const key of ['timeOfDay','sunSim','season',...Object.keys(lightingRanges)])if(LIGHT_SETTINGS[key]!==undefined)result[key]=LIGHT_SETTINGS[key];return result;}
+  function preferences(){return {showGrid:ST.showGrid,showDim:ST.showDim,snap:ST.snap,lighting:lightingState()};}
+  function restorePreferences(saved,defaults=false){
+   if(!saved&&!defaults)return;
+   const p=saved||{},light=p.lighting||{},target=defaults?{...lightingDefaults}:{...lightingState()};
+   if(['morning','day','evening','night'].includes(light.timeOfDay))target.timeOfDay=light.timeOfDay;
+   if(['summer','winter','equinox'].includes(light.season))target.season=light.season;
+   if(typeof light.sunSim==='boolean')target.sunSim=light.sunSim;
+   for(const [key,[min,max]]of Object.entries(lightingRanges))if(Number.isFinite(light[key]))target[key]=Math.max(min,Math.min(max,light[key]));
+   const lightChanged=JSON.stringify(target)!==JSON.stringify(lightingState());
+   if(lightChanged){
+    for(const key of Object.keys(lightingRanges))if(!(key in target))delete LIGHT_SETTINGS[key];
+    Object.assign(LIGHT_SETTINGS,target);
+    // These native controllers update room-light meshes, sky/IBL, sliders and
+    // pending sun-hour frames without resetting manual values to a preset.
+    if(typeof updateLightSetting==='function')updateLightSetting('room',LIGHT_SETTINGS.room);
+    if(typeof flushSunHour==='function')flushSunHour();
+   }
+   const grid=typeof p.showGrid==='boolean'?p.showGrid:defaults?true:ST.showGrid;
+   const dim=typeof p.showDim==='boolean'?p.showDim:defaults?true:ST.showDim;
+   if(ST.showGrid!==grid)toggleGrid();if(ST.showDim!==dim)toggleDim();
+   if([0,5,10,100,455,910].includes(p.snap))ST.snap=p.snap;else if(defaults)ST.snap=10;
+   const snap=document.getElementById('snap-sel');if(snap)snap.value=String(ST.snap);
+   if(typeof syncLightPanelUi==='function')syncLightPanelUi();
+  }
+  function view(){return {view:ST.view,floor:ST.floor,surface:root.CeilingDesigner?.captureViewContext()||{ceilingView:!!ST.ceilingView},preferences:preferences(),walkProfile:root.WalkTps&&root.WalkTps.enabled()?root.WalkTps.preference():undefined,twoD:{zoom:ST.zoom,panX:ST.panX,panY:ST.panY},camera:camExt&&orbit?{pos:camExt.position.toArray(),target:orbit.target.toArray(),fov:camExt.fov,walk:ST.view==='3d-walk'&&WALK.active?{x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}:null}:null};}
+  function applyView(v,defaults=false){v=v||{};applying=true;try{
+   restorePreferences(v.preferences,defaults);
+   if(Number.isFinite(v.floor)&&v.floor!==ST.floor){onFloorChange(v.floor);document.getElementById('floor-sel').value=String(v.floor);if(ren)rebuild3D();}
+   if(v.view&&v.view!==ST.view)setView(v.view);
+   // The ceiling controller owns its floor-camera stash and orbit constraints.
+   // Restore those before the requested ceiling camera, which may look upward.
+   if(v.surface||defaults)root.CeilingDesigner?.restoreViewContext(v.surface||{ceilingView:false,floorCamera:null,orbitLimits:{min:0,max:Math.PI}});
+   if(root.WalkTps)root.WalkTps.restorePreference(v.walkProfile);
+   if(v.twoD){Object.assign(ST,v.twoD);draw2d();}
+   if(v.camera&&camExt&&orbit){if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();camExt.fov=v.camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&v.camera.walk&&WALK.active){for(const k of ['x','z','yaw','pitch'])if(Number.isFinite(v.camera.walk[k]))WALK[k]=v.camera.walk[k];walkApplyCamera();}else applyStashedCamera(v.camera);invalidate3D();}
+  }finally{applying=false;lastView=viewKey();lastCamera=cameraKey();}}
   function localGeometry(source){
    const geometry=new THREE.BufferGeometry();geometry.name=source.name;geometry.groups=clone(source.groups);geometry.drawRange={start:source.drawRange.start,count:source.drawRange.count};geometry.userData=clone(source.userData||{});
    function attribute(a){const Typed=root[a.array.constructor.name];const array=new Typed(a.array.buffer,a.array.byteOffset,a.array.length);const out=new THREE.BufferAttribute(array,a.itemSize,a.normalized);out.usage=a.usage;return out;}
@@ -60,7 +100,7 @@
    HISTORY.length=0;HISTORY.push(...previous.history);REDO_HISTORY.length=0;REDO_HISTORY.push(...previous.redo);
    // Restore authoritative state first. A renderer fault during recovery must
    // never prevent undo, unsaved edits, selection, options or camera recovery.
-   for(const recover of [()=>{const camera=previous.view.camera;if(camera&&camExt&&orbit){camExt.position.fromArray(camera.pos);orbit.target.fromArray(camera.target);camExt.fov=camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&WALK.active)walkApplyCamera();else orbit.update();invalidate3D();}},()=>applyView(previous.view),syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,
+   for(const recover of [()=>root.CeilingDesigner?.restoreViewContext(previous.view.surface),()=>{const camera=previous.view.camera;if(camera&&camExt&&orbit){camExt.position.fromArray(camera.pos);orbit.target.fromArray(camera.target);camExt.fov=camera.fov;camExt.updateProjectionMatrix();if(ST.view==='3d-walk'&&WALK.active)walkApplyCamera();else orbit.update();invalidate3D();}},()=>applyView(previous.view),syncNorthUi,syncHeightDefaultsUI,updateProps,draw2d,
     ()=>{if(ren)rebuild3D(true);},()=>root.AssetPackPicker?.setSelection(previous.cataloguePack),()=>{document.getElementById('save-btn')?.classList.toggle('dirty',DIRTY);renderSaveButtonState();}]){
     try{recover();}catch(recoveryError){console.warn('[WebCAD] pane install recovery',recoveryError);}
    }
@@ -75,11 +115,13 @@
     // first draw must never leave the new scene under the previous plan ID.
     const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();
     try{
+     // Leave the old ceiling through its controller before replacing its plan.
+     root.CeilingDesigner?.restoreViewContext({ceilingView:false,floorCamera:null});
      applyJsonImport(staged,{deferNativeOutputReset:true});
      HISTORY.length=0;REDO_HISTORY.length=0;
      if(saved){HISTORY.push(...(saved.history||[]));REDO_HISTORY.push(...(saved.redo||[]));}
      DIRTY=!!saved?.dirty;
-     if(saved?.view)applyView(saved.view);else resetView();
+     applyView(saved?.view,true);if(!saved?.view)resetView();
      root.AssetPackPicker?.setSelection(saved?.cataloguePack);if(DIRTY)renderSaveButtonState();else clearDirty();
      if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();
      return true;
@@ -92,10 +134,12 @@
    metrics:()=>({renderCalls,modelCount:Object.keys(_modelCache).length,pixelRatio:ren&&ren.getPixelRatio(),renderer:ren?clone(ren.info.memory):null,quality:{ao:!!(_n8aoPass&&_n8aoPass.enabled),shadows:!!(ren&&ren.shadowMap.enabled)}}),
    dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
   };
-  let scheduled=false,lastCamera=null;
+  let scheduled=false,lastCamera=null,lastView=null;
   function cameraKey(){const v=view();return JSON.stringify({twoD:v.twoD,camera:v.camera},(k,value)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toFixed(8)):value);}
-  function changed(){if(applying||scheduled||root._editorPaneDisposed||hostApi()?.activeId!==paneId)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;if(root._editorPaneDisposed)return;const key=cameraKey();if(key===lastCamera)return;lastCamera=key;hostApi()?.changed(paneId);});}
-  document.addEventListener('wheel',changed,{passive:true});document.addEventListener('pointermove',e=>{if(e.buttons)changed();},{passive:true});document.addEventListener('pointerup',changed,{passive:true});document.addEventListener('keyup',changed);document.addEventListener('click',changed);
+  function viewKey(){return JSON.stringify(view());}
+  function changed(){if(applying||scheduled||root._editorPaneDisposed||hostApi()?.activeId!==paneId)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;if(root._editorPaneDisposed)return;const current=viewKey(),key=cameraKey();if(current===lastView)return;const cameraChanged=key!==lastCamera;lastView=current;lastCamera=key;hostApi()?.changed(paneId,{cameraChanged});});}
+  if(typeof ST!=='undefined'&&typeof LIGHT_SETTINGS!=='undefined'&&typeof camExt!=='undefined'&&typeof orbit!=='undefined'){lastView=viewKey();lastCamera=cameraKey();}
+  document.addEventListener('wheel',changed,{passive:true});document.addEventListener('pointermove',e=>{if(e.buttons)changed();},{passive:true});document.addEventListener('pointerup',changed,{passive:true});document.addEventListener('keyup',changed);document.addEventListener('click',changed);document.addEventListener('change',changed);document.addEventListener('input',changed);
   if(!native)document.documentElement.classList.add('editor-pane');
   // Reuse the existing load button itself, its handler and styling; no duplicate action menu.
   const savedLoad=document.querySelector('.mobile-data-grid [onclick="loadPlanFromStorageButton()"]');
@@ -107,7 +151,7 @@
  const pool=modelPool();
  const api=root.ParallelEditors={plans,panes,modelPool:pool,get activeId(){return activeId;},
   setSync(value){sync=!!value;if(panel)panel.querySelector('[data-parallel-sync]').checked=sync;if(sync)api.align();},
-  changed(id){activeId=id;if(sync){const source=panes.get(id);if(source?.ready&&source.frame.contentWindow.EditorPane)for(const p of panes.values())if(p.ready&&p.id!==id)p.frame.contentWindow.EditorPane&&syncCamera(source.frame.contentWindow.EditorPane,p.frame.contentWindow.EditorPane);}},
+  changed(id,options){activeId=id;if(sync&&options?.cameraChanged!==false){const source=panes.get(id);if(source?.ready&&source.frame.contentWindow.EditorPane)for(const p of panes.values())if(p.ready&&p.id!==id)p.frame.contentWindow.EditorPane&&syncCamera(source.frame.contentWindow.EditorPane,p.frame.contentWindow.EditorPane);}},
   align(){const active=panes.get(activeId),source=active?.ready?active:[...panes.values()].find(p=>p.ready);if(source?.frame.contentWindow.EditorPane)for(const p of panes.values())if(p.ready&&p!==source)p.frame.contentWindow.EditorPane&&syncCamera(source.frame.contentWindow.EditorPane,p.frame.contentWindow.EditorPane);},
   async addPlan(plan,name,options){options=options||{};checkPreviewSignal(options.signal);if(plans.size>=4)throw Error('保持できる案は最大4案です。');const checked=root.PlanSchema.validatePlan(plan);if(!checked.ok)throw Error('間取りJSONを確認してください: '+checked.errors.slice(0,3).join(' / '));const valid=root.PlanSchema.normalizePlan(clone(plan));
    const id='plan-'+Date.now().toString(36)+'-'+(++sequence);plans.set(id,{id,name:name||'案 '+String.fromCharCode(64+plans.size+1),plan:clone(valid||plan),explicitlySaved:false,memoryOnly:options.memoryOnly===true});options.onCreated?.(id);if(panes.size<2)await mount(id,options.signal);checkPreviewSignal(options.signal);refresh();return id;},

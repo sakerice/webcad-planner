@@ -204,7 +204,7 @@ function withPane(r){
   WALL_H:2400,nextId:2,_defaultPlanPending:false,WALK:{active:false},camExt:null,orbit:null,ren:null,sc3:null,composer:null,_pmremGen:null,_envRT:null,_modelCache:{},_texCache:{},
   parent:{ParallelEditors:{activeId:null,modelPool:{resources:new Set()}}},addEventListener:noop,removeEventListener:noop,render3DNow:noop,
   stageJsonImport:text=>({data:JSON.parse(text)}),applyJsonImport(staged,options){c.installOptions=options;c.DATA=staged.data;},
-  draw2d:noop,rebuild3D:noop,syncNorthUi:noop,syncHeightDefaultsUI:noop,updateProps:noop,renderSaveButtonState:noop,invalidate3D:noop,resetView:noop,
+  toggleGrid(){c.ST.showGrid=!c.ST.showGrid;},toggleDim(){c.ST.showDim=!c.ST.showDim;},draw2d:noop,rebuild3D:noop,syncNorthUi:noop,syncHeightDefaultsUI:noop,updateProps:noop,renderSaveButtonState:noop,invalidate3D:noop,resetView:noop,
   clearDirty(){c.DIRTY=false;},AssetPackPicker:{getSelection:()=>null,setSelection(value){if(value==='fail')throw Error('anonymous restoration failure');}},
   serializeDataSnapshot:()=>JSON.stringify(c.DATA)});
  vm.runInContext(fs.readFileSync('assets/js/parallel-editors.js','utf8'),c);
