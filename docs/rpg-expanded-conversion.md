@@ -1,4 +1,4 @@
-# Mansion catalogue expansion and explicit duplicate conversion
+# Mansion catalogue expansion and explicit object-set replacement
 
 Based on PR73 head `2ca9d766390bb89979c4e8202145a09cde10eb95`, isolated branch
 `cloud/rpg-expanded-conversion-20261004`. Local review only; no publication,
@@ -31,11 +31,21 @@ room functions; it does **not** claim an equivalent for every standard asset or
 
 ## Conversion contract
 
-Candidate pack selection remains a filter only. The separate pane-local
-**この案を洋館に変換…** button opens a preview with before/after thumbnails, retained
-items, dimensions, cautions and per-object exclusion checkboxes. Optional 3D
-comparison reuses `ComparisonCapture.pair` and the existing renderer with the same
-camera and lighting for both plans. It is loaded only on explicit request.
+The existing catalogue search is the first sidebar control. A compact secondary
+**オブジェクトセットの入れ替え** button opens the existing pane-local conversion
+dialog, with two grouped operations:
+
+- **オブジェクトリストの差し替え** changes only the left catalogue candidates
+- **現在の間取りのオブジェクト一斉差し替え** replaces eligible placed objects
+
+Both dropdowns are draft selections. Selecting alone does not apply either
+operation; each group has its own explicit **オブジェクトを差し替え** button.
+New/ordinary lists default to 日本建築標準; saved RPG list selections are retained.
+The placed-object dropdown reflects Japanese/RPG membership; mixed layouts
+require selecting a destination rather than pretending they are Japanese.
+The existing per-object review, thumbnails, dimensions, cautions and retention
+reasons are reused. Optional 3D comparison reuses `ComparisonCapture.pair` and
+the same renderer, camera and lighting; it loads only on explicit request.
 
 `conversion-map.json` lists 313 standard IDs plus 15 native IDs, using exact-ID
 matching at runtime. Catalogue kind/dimensions generate the reviewable table;
@@ -62,12 +72,33 @@ duplicating large user textures. The unchanged original plan remains available.
 Preserving dimensions can stretch the new shape; front conventions differ across
 legacy assets, so 3D preview/manual adjustment remains necessary.
 
-Create adds a separate record through existing `ParallelEditors`, then shows it
-in the invoking pane (or a free pane). It never overwrites the source plan or
-other pane. Four-plan capacity produces an error before mutation. Saving uses the
-existing pane/workspace controls. A changed source snapshot/pane invalidates the
-preview. Closing or cancelling aborts mapping fetch and disposable 3D capture;
-late completion cannot commit a conversion. Duplicate clicks are disabled.
+**元の間取りを残して別プランを作成** is checked by default. It creates an
+independent ID through the existing common `PlanLibrary`/`ParallelEditors`
+repository, source ticket and CAS path. The original live editor, saved head,
+other panes, unknown fields and legacy-copy lineage remain protected. The copy
+is retained in the common inventory as a dirty draft and can be opened through
+the ordinary plan switcher. The four-plan limit blocks before creation.
+
+Unchecking uses the existing native edit transaction, `saveState()` Undo step,
+and `EditorPane` capture/rollback hooks. It stays on the same current plan ID,
+preserves the prior history, and does not immediately persist a saved revision.
+Normal edit/draft behavior remains in use. Geometry and IDs are never normalized
+through JSON import. Failed rendering, tool/catalogue refresh or validation rolls
+back the same native memento. In-place replacement is disabled during active
+shared-room editing; the independent-copy option remains available.
+
+The exact correspondence also supports a conservative Japanese return trip:
+only valid v2 provenance with the known source/target/revision and a verifiably
+preserved effective height may identify an original. Bare RPG objects,
+many-to-one ambiguity, stale or corrupt provenance, attachments and incompatible
+heights are retained with an explicit reason. Provenance/custom fields are kept,
+and the same correspondence can be reapplied; no second reverse mapping table
+or guessed Japanese model is introduced.
+
+A changed source snapshot, identity, installation or edit epoch (including
+edit→Undo) invalidates the preview. Closing/cancelling aborts mapping fetch and
+disposable 3D capture; late completions cannot apply to another plan. Duplicate
+clicks and cancellation while the native commit is busy are guarded.
 
 ## Model and loading contract
 
@@ -116,7 +147,18 @@ The original 14-model builder now refuses to overwrite a larger manifest unless
 specific legacy models are selected. The review gallery pages 10 models at a time.
 See the expansion evidence directory for measured results and actual browser images.
 
-## Verified results
+## Object-set UI redesign verification
+
+The redesigned controls have source/Node acceptance only. The controller tests
+execute the real catalogue/picker/dialog/converter plus native history and
+rollback functions against anonymous DOM contract fixtures. Independent review
+also exercised the actual native sofa resolvers and actual legacy admission/CAS
+repository. The affected browser scripts now use current native library flows,
+but they have not been executed for this redesign: permitted cloud-browser
+navigation is blocked. No screenshot, mobile geometry, touch or WebGL pass is
+claimed for the redesigned UI. This change adds no models or category coverage.
+
+## Historical expansion verification (before this UI redesign)
 
 - 187 test files processed plus lint self-test, runner exit 0. Existing environment
   skips are not counted as browser passes. The focused registry/old-geometry/new-

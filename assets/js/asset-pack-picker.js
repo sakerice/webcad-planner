@@ -1,7 +1,7 @@
 /* Pane-local adapter for the existing catalogue. Never mutates plan/model data. */
 (function(root){
   'use strict';
-  let registry=null,selected='japanese-standard',sidebar=null,select=null;
+  let registry=null,selected='japanese-standard',sidebar=null;
   function getSelection(){return selected;}
   function apply(){
     if(!sidebar||!registry)return;
@@ -18,7 +18,6 @@
       group.hidden=!!(cards.length&&cards.every(card=>card.hidden)&&!hasControls);
       if(group.previousElementSibling?.classList.contains('cat-hdr'))group.previousElementSibling.hidden=group.hidden;
     });
-    if(select)select.value=selected;
     sidebar._globalCatalogueSearch?.();
   }
   function setSelection(id){
@@ -44,12 +43,8 @@
     // snapshots cross the same JSON boundary as their source manifests.
     registry=root.AssetPackRegistry.createRegistry(JSON.parse(JSON.stringify([...legacy.values()])),rpg?[JSON.parse(JSON.stringify(rpg))]:[]);
     root.AssetCatalogue.installGlobal(sidebar);
-    if(!select){
-      const field=document.createElement('div');field.className='catalogue-pack-field';
-      const label=document.createElement('label');label.htmlFor='catalogue-pack';label.textContent='配置候補のセット';
-      select=document.createElement('select');select.id='catalogue-pack';select.setAttribute('aria-label','配置候補のセット');
-      select.addEventListener('change',()=>setSelection(select.value));
-      field.append(label,select);sidebar.querySelector('#object-search').prepend(field);
+    if(!sidebar._assetPackFallbackInstalled){
+      sidebar._assetPackFallbackInstalled=true;
       sidebar.addEventListener('error',event=>{
         const img=event.target,card=img.closest?.('.asset-tile');
         if(img.tagName!=='IMG'||!card||!sidebar.contains(card))return;
@@ -59,10 +54,6 @@
           icon.setAttribute('aria-hidden','true');icon.innerHTML=root.MenuIcons.html('その他');card.prepend(icon);
         }
       },true);
-    }
-    select.replaceChildren();
-    for(const pack of registry.listPacks()){
-      const option=document.createElement('option');option.value=pack.id;option.textContent=pack.name;select.append(option);
     }
     setSelection(selected);
     root.AssetPackConversionUI?.install(sidebar.querySelector('#object-search'));

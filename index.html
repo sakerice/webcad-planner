@@ -22889,6 +22889,45 @@ function applyJsonImport(staged,options){
   clearEditHistory();
   sharedForceFullSync();queueSharedSync(700);queueSharedLocalAutoSave();
 }
+// Object-set replacement is an ordinary native edit, not a JSON import/load.
+// Reuse native rollback/history; never normalize IDs, create a saved revision,
+// replace geometry, or make a separate undo stack.
+function applyObjectSetReplacement(plan,options){
+  options=options||{};
+  if(SHARED.roomId)throw new Error('共同編集中は別プランを作成してください。現在の案への一斉差し替えは利用できません。');
+  if(!window.EditorPane?.captureInstallState||!window.EditorPane?.restoreInstallState)throw new Error('通常の編集画面から差し替えてください。');
+  if(window._editorPaneDisposed||window._editorPlanInstalling||DRAG.active||ST.drawing||
+    (window.__editorPlanId||null)!==options.sourcePlanId||serializeDataSnapshot()!==options.sourceSnapshot||
+    typeof options.isCurrent!=='function'||!options.isCurrent())throw new Error('元の案／編集状態が更新されました。開き直して確認してください。');
+  var source=JSON.parse(options.sourceSnapshot),candidate=JSON.parse(JSON.stringify(plan));
+  var withoutItems=function(value){var copy=Object.assign({},value);delete copy.items;return JSON.stringify(copy);};
+  if(withoutItems(source)!==withoutItems(candidate)||!Array.isArray(candidate.items)||candidate.items.length!==source.items.length)throw new Error('間取りとオブジェクトの対応を確認できません。');
+  source.items.forEach(function(item,index){
+    var next=candidate.items[index];
+    if(!next||JSON.stringify(item.id)!==JSON.stringify(next.id))throw new Error('オブジェクトのIDを変更する差し替えは中止しました。');
+    Object.keys(item).forEach(function(key){
+      if(key==='type'||key==='assetPackConversion')return;
+      if(JSON.stringify(item[key])!==JSON.stringify(next[key]))throw new Error('既存の寸法・配置・設定を変更する差し替えは中止しました。');
+    });
+  });
+  var checked=validateEditorPlan(candidate,window.__legacyPlanAdmission);
+  if(!checked.ok)throw new Error('差し替え案の形式を確認できませんでした。');
+  if(!options.isCurrent())throw new Error('元の案が更新されました。開き直して確認してください。');
+  var previous=window.EditorPane.captureInstallState(),oldItems=DATA.items;
+  var rebind=function(object){var index=oldItems.indexOf(object);return index<0?object:candidate.items[index];};
+  try{
+    saveState();
+    DATA=Object.assign({},DATA,{items:candidate.items});
+    ST=Object.assign({},ST,{selected:rebind(ST.selected),multiSelected:(ST.multiSelected||[]).map(rebind)});
+    updateProps();draw2d();if(ren)rebuild3D(true);
+    // Catalogue/tool refresh belongs to the same rollback boundary. A failed
+    // refresh must not leave a committed edit behind a no-change error.
+    if(options.cataloguePack)window.AssetPackPicker.setSelection(options.cataloguePack);
+    if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();
+    window.EditorPane.noteImportTargetEdit?.();
+    return true;
+  }catch(error){window.EditorPane.restoreInstallState(previous);throw error;}
+}
 var _jsonImportRequest=0;
 function doImport(inp){
   var reviewTicket=typeof PlanImport!=='undefined'?{version:PlanImport.state.version,request:PlanImport.state.requestVersion,result:PlanImport.state.result,operation:typeof SceneReviewFlow!=='undefined'&&SceneReviewFlow.interactionEpoch?SceneReviewFlow.interactionEpoch():null}:null;

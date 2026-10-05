@@ -40,3 +40,34 @@ test('ambiguous mounts/shapes and refrigeration have explicit retention reasons'
 test('v2 render height uses editor-resolved height instead of stored h or target nominal',()=>{const p=plan(),r=preview(p,{resolvedDimensions:[{h:994}]});assert.equal(r.plan.items[0].h,920);assert.equal(r.plan.items[0].assetPackConversion.sourceEffectiveHeightMm,994);const core=require('../../assets/js/asset-pack-conversion.js'),trusted=require('../../assets/js/asset-pack-conversion-contract.js');const renderHeight=i=>core.renderHeight(i,id=>assets.find(a=>a.id===id),trusted);assert.equal(renderHeight(r.plan.items[0]),994);for(const bad of [{...r.plan.items[0],type:'fmp-Chair01'},{...r.plan.items[0],assetPackConversion:{...r.plan.items[0].assetPackConversion,version:1}},{...r.plan.items[0],assetPackConversion:{...r.plan.items[0].assetPackConversion,renderHeightMm:NaN}},item])assert.equal(renderHeight(bad),null);});
 
 test('imported v2 height requires trusted exact pair, source, revision and bounded normal value',()=>{const {renderHeight}=require('../../assets/js/asset-pack-conversion.js'),trusted=require('../../assets/js/asset-pack-conversion-contract.js'),p=preview(plan()).plan.items[0],lookup=id=>assets.find(a=>a.id===id),check=m=>renderHeight({...p,assetPackConversion:{...p.assetPackConversion,...m}},lookup,trusted);assert.ok(check({})>0);for(const h of [5e-324,0,-1,10000000,Infinity,NaN,100,'994'])assert.equal(check({renderHeightMm:h,sourceEffectiveHeightMm:h}),null);for(const m of [{sourceType:'not-an-asset'},{sourceType:'fmp-Bed02'},{targetType:'rpg-mansion-mirror-01'},{mappingVersion:'unknown'},{sourceEffectiveHeightMm:123}])assert.equal(check(m),null);assert.equal(renderHeight(p,()=>null,trusted),null);const nominal=lookup(p.type).h;for(const ratio of [.25,4])assert.equal(check({renderHeightMm:nominal*ratio,sourceEffectiveHeightMm:nominal*ratio}),nominal*ratio);assert.deepEqual(trusted.mappings,contract.mappings.map(r=>({sourceId:r.sourceId,targetId:r.targetId,native:r.kind==='native-explicit'})));assert.equal(trusted.revision,contract.revision);});
+
+test('Japanese return trip uses exact verified provenance, preserves sparse/custom fields, and can reapply the same map',()=>{
+ const p=plan(),converted=preview(p,{resolvedDimensions:[{h:legacy.get(item.type).h}]}).plan;
+ const before=JSON.stringify(converted),r=converter.preview(converted,{targetPack:'japanese-standard',approvedIndexes:[0],resolvedDimensions:[{h:legacy.get(item.type).h}],resolvedTargetHeights:[legacy.get(item.type).h]});
+ assert.equal(JSON.stringify(converted),before);assert.equal(r.changed,1);assert.equal(r.plan.items[0].type,item.type);
+ for(const key of Object.keys(converted.items[0]))if(key!=='type')assert.deepEqual(r.plan.items[0][key],converted.items[0][key]);
+ assert.deepEqual(r.plan.items[1],converted.items[1]);const forward=preview(r.plan);assert.equal(forward.changed,1);assert.equal(forward.plan.items[0].type,'rpg-mansion-chair-01');assert.equal(forward.plan.items[0].assetPackConversion.sourceType,item.type);
+});
+test('bare/ambiguous/stale/corrupt RPG provenance never invents a Japanese model; incompatible effective heights retain',()=>{
+ const p=preview(plan()).plan;
+ for(const mutate of [i=>delete i.assetPackConversion,i=>i.assetPackConversion.sourceType='unknown',i=>i.assetPackConversion.sourceType='fmp-Bed02',i=>i.assetPackConversion.mappingVersion='stale',i=>i.assetPackConversion.targetType='rpg-mansion-bed-01',i=>i.assetPackConversion.version=1,i=>i.assetPackConversion.renderHeightMm=100,i=>i.assetPackConversion.sourceEffectiveHeightMm=100,i=>i.assetPackConversion.renderHeightMm=5e-324]){
+  const input=structuredClone(p);mutate(input.items[0]);const r=converter.preview(input,{targetPack:'japanese-standard',approvedIndexes:[0]});assert.equal(r.changed,0);assert.deepEqual(r.plan,input);assert.match(r.rows[0].reason,/変換情報なし/);
+ }
+ const incompatible=converter.preview(p,{targetPack:'japanese-standard',approvedIndexes:[0],resolvedDimensions:[{h:994}],resolvedTargetHeights:[900]});assert.equal(incompatible.changed,0);assert.deepEqual(incompatible.plan,p);assert.match(incompatible.rows[0].reason,/表示高さ/);
+});
+test('reverse attached/unchecked/review-required objects remain unchanged; arbitrary pack fails closed',()=>{
+ const p=preview(plan()).plan,options={targetPack:'japanese-standard',resolvedDimensions:[{h:legacy.get(item.type).h}],resolvedTargetHeights:[legacy.get(item.type).h]};
+ assert.deepEqual(converter.preview(p,options).plan,p);
+ for(const extra of [{wallId:'wall'},{parentId:'parent'},{supportId:'surface'},{attachment:{}}]){const input=structuredClone(p);Object.assign(input.items[0],extra);assert.deepEqual(converter.preview(input,{...options,approvedIndexes:[0]}).plan,input);}
+ assert.deepEqual(converter.preview(p,{...options,approvedIndexes:[0],excludedIndexes:[0]}).plan,p);assert.throws(()=>converter.preview(p,{targetPack:'imaginary-pack'}),/セット/);
+});
+
+test('native-explicit originals absent from manifests reverse only through exact provenance and existing editor dimensions',()=>{
+ assert.equal(assets.some(a=>a.id==='sofa'),false);const source={walls:[],rooms:[],items:[{id:'native-sofa-fixture',type:'sofa',x:100,y:200,w:1800,d:850,rot:5,floor:1,opaque:{keep:true}}]},dimensions={w:1800,d:850,h:750};
+ const forward=converter.preview(source,{approvedIndexes:[0],resolvedDimensions:[dimensions]});assert.equal(forward.changed,1);assert.equal(forward.plan.items[0].type,'rpg-mansion-sofa-01');
+ const options={targetPack:'japanese-standard',approvedIndexes:[0],resolvedDimensions:[dimensions],resolvedTargetHeights:[750],resolvedTargets:[{id:'sofa',name:'3Pソファ',...dimensions}]};
+ const reverse=converter.preview(forward.plan,options);assert.equal(reverse.changed,1);assert.equal(reverse.plan.items[0].type,'sofa');assert.deepEqual(reverse.plan.items[0].opaque,source.items[0].opaque);assert.deepEqual(reverse.plan.items[0].assetPackConversion,forward.plan.items[0].assetPackConversion);
+ assert.equal(converter.preview(forward.plan,{...options,resolvedTargets:[]}).changed,0);assert.match(converter.preview(forward.plan,{...options,resolvedTargets:[]}).rows[0].reason,/標準モデルの寸法/);
+ for(const target of [{id:'guessed-original',...dimensions},{id:'sofa',...dimensions,w:0},{id:'sofa',...dimensions,d:NaN}])assert.deepEqual(converter.preview(forward.plan,{...options,resolvedTargets:[target]}).plan,forward.plan);
+ assert.equal(converter.preview(reverse.plan,{approvedIndexes:[0],resolvedDimensions:[dimensions]}).changed,1);
+});

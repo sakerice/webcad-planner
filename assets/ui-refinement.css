@@ -60,8 +60,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* Catalogue controls stay in the scrolling category area, below common tools. */
 .catalogue-search{padding:8px 10px 14px}
 .catalogue-search label{display:block;color:var(--hp-text);font-size:12px;font-weight:700;margin-bottom:8px}
-.catalogue-pack-field{margin-bottom:14px}
-.catalogue-pack-field select{width:100%;min-height:44px;padding:8px 12px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit}
 #sidebar [data-tool][hidden],#sidebar .cat-body[hidden],#sidebar .cat-hdr[hidden],#sidebar .asset-tile img[hidden]{display:none!important}
 .asset-thumbnail-fallback{display:flex;align-items:center;justify-content:center;height:90px;color:var(--hp-muted)}
 .asset-thumbnail-fallback svg{width:40px;height:40px}
@@ -316,7 +314,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #plan-import-modal [data-scene-reference-viewport]{overflow:auto;max-height:65vh;min-width:0;max-width:100%;overscroll-behavior:contain}
 
 /* Conversion is an explicit pane operation; uses comparison control vocabulary. */
-#asset-conversion-open{width:100%;min-height:44px;margin-top:8px;white-space:normal}
+#asset-conversion-open{width:100%;min-height:40px;margin-top:10px;padding:7px 10px;white-space:normal;font-size:11px;font-weight:400;background:transparent;color:var(--hp-muted,#657065);box-shadow:none}
 .asset-conversion-dialog{margin:auto;position:fixed;inset:0;border:0;border-radius:24px;padding:24px;width:min(960px,calc(100vw - 24px));max-height:92dvh;box-sizing:border-box;color:var(--ui-text,#353b42);background:white;box-shadow:0 20px 70px #25304233;overflow:auto}
 .asset-conversion-dialog::backdrop{background:#25304277}
 .asset-conversion-dialog h2{font-size:20px;margin:0;flex:1}.asset-conversion-dialog p{font-size:13px;line-height:1.65}
@@ -334,3 +332,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
   .library-host .library-group{padding-right:6px;gap:5px;border:0}
   .library-host .library-group>span{display:none}
 }
+
+/* Optional pack management stays compact below the primary catalogue search. */
+.object-set-operation{margin-top:18px;padding:18px;border-radius:20px;background:#f7f8f6}
+.object-set-operation h3{margin:0;font-size:15px;color:var(--hp-text,#353b42)}
+.object-set-operation label{display:block;font-size:13px;line-height:1.5}
+.object-set-operation select,.object-set-operation input:not([type=checkbox]){display:block;min-height:44px;width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius,22px);background:white;color:inherit;font:inherit;margin-top:6px}
+.object-set-operation .compare-row>label{flex:1;min-width:180px}
+.object-set-copy{display:flex!important;gap:10px;align-items:center;margin-top:16px;min-height:44px}
+.object-set-copy input{width:22px;height:22px;margin:0;flex-shrink:0}
+.object-set-review>summary{min-height:44px;cursor:pointer;font-size:13px;color:#536c7b;display:list-item;align-content:center}
+.object-set-review{background:white;padding:8px 14px;border-radius:18px}
+.object-set-actions{margin-top:16px}.object-set-operation [hidden]{display:none!important}
+@media(max-width:600px){.object-set-operation{padding:14px 12px}.object-set-operation .compare-row>label{min-width:100%}}
