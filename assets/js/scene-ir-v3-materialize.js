@@ -165,12 +165,32 @@
         var x=(a.x-start.x)*u.x+(a.y-start.y)*u.y,y=(b.x-start.x)*u.x+(b.y-start.y)*u.y,lo=Math.max(0,Math.min(x,y)),hi=Math.min(length,Math.max(x,y));if(hi>lo)intervals.push([lo,hi]);});
       intervals.sort(function(a,b){return a[0]-b[0];});var covered=0;for(var i=0;i<intervals.length;i++){if(intervals[i][0]>covered+EPS)return false;covered=Math.max(covered,intervals[i][1]);}return covered>=length-EPS;
     }
-    scene.openings.forEach(function(e,i){if(!selected(e,'openings'))return;var p='openings['+i+']',n=out.diagnostics.length;sourceEvidence(e,p);appearanceLimits(e,p);var a=need(e.start,p+'.start'),b=need(e.end,p+'.end'),floor=runtimeFloor(e,p),host=need(e.hostWallId,p+'.hostWallId'),kind=need(e.mechanism,p+'.mechanism'),adjacent=need(e.adjacentRoomIds,p+'.adjacentRoomIds');if(errorsSince(n))return;var kinds={swing:'door-swing',pocket:'door-pocket',opening:'door-opening',window:'window'},wall=walls.find(function(w){return w.id===host;});
+    scene.openings.forEach(function(e,i){if(!selected(e,'openings'))return;var p='openings['+i+']',n=out.diagnostics.length;sourceEvidence(e,p);appearanceLimits(e,p);var a=need(e.start,p+'.start'),b=need(e.end,p+'.end'),kind=need(e.mechanism,p+'.mechanism'),floor=kind==='slide'?need(e.floor,p+'.floor'):runtimeFloor(e,p),host=need(e.hostWallId,p+'.hostWallId'),adjacent=need(e.adjacentRoomIds,p+'.adjacentRoomIds');if(errorsSince(n))return;var kinds={swing:'door-swing',pocket:'door-pocket',slide:'door-slide-s',opening:'door-opening',window:'window'},wall=walls.find(function(w){return w.id===host;});
       if(!kinds[kind]){issue('unsupported_opening_mechanism',p,'Source '+kind+' retained but not certified for bounded materialization');return;}
       if(!wall){issue('invalid_opening_host',p,'Host wall did not compile');return;}
       if((a.x===b.x)===(a.y===b.y)){issue('invalid_opening_span',p,'Gap must be a nonzero axis-aligned span');return;}
       var spec={id:e.id,floor:floor,hostWallId:host,kind:kinds[kind],sourceExactGap:true,center:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},widthMm:Math.hypot(a.x-b.x,a.y-b.y),axis:{x:(b.x-a.x)/Math.hypot(a.x-b.x,a.y-b.y),y:(b.y-a.y)/Math.hypot(a.x-b.x,a.y-b.y)},_path:p,_source:e};
       adjacent.filter(Boolean).forEach(function(id){var r=rooms.get(id);if(!r||r.floor!==floor||!boundarySpan(r,a,b,wall))issue('wrong_adjacent_room',p+'.adjacentRoomIds','Entire gap must meet each named logical room boundary under its explicit basis');});
+      if(kind==='slide'){
+        // Runtime placement and procedural defaults cannot certify source facts.
+        var sourceWall=scene.walls.find(function(w){return w.id===host;});
+        need(sourceWall.floor,p+'.hostSourceFloor');need(sourceWall.thicknessMm,p+'.hostSourceThicknessMm');
+        adjacent.filter(Boolean).forEach(function(id){var sourceRoom=scene.rooms.find(function(r){return r.id===id;});if(sourceRoom){need(sourceRoom.floor,p+'.adjacentSourceFloor.'+id);need(sourceRoom.boundaryBasis,p+'.adjacentSourceBoundaryBasis.'+id);}});
+        if(!adjacent.some(Boolean)||adjacent[0]&&adjacent[0]===adjacent[1])issue('invalid_slide_adjacency',p+'.adjacentRoomIds','Source wall slide needs distinct named logical adjacent rooms, or one room and explicit exterior');
+        if(!e.leaves||e.leaves.length!==1){issue('unsupported_leaf_group',p+'.leaves','Exactly one source slide leaf is certified; paired/bypass/fold remain retained');return;}
+        var l=e.leaves[0],lp=p+'.leaves[0]',relation=need(e.leafRelation,p+'.leafRelation');
+        if(relation!==undefined&&relation!=='single')issue('unsupported_leaf_relation',p+'.leafRelation','Source wall slide must be explicitly single');
+        if(need(l.mechanism,lp+'.mechanism')!==kind)issue('source_leaf_mechanism_conflict',lp+'.mechanism','Leaf mechanism contradicts the physical opening mechanism');
+        ['pivot','hingeJamb','swingSide','angleDeg','pocketRegion'].forEach(function(key){if(value(l[key])!==undefined)issue('inapplicable_source_leaf_fact',lp+'.'+key,'Known leaf fact does not apply to wall sliding and cannot be silently ignored');});
+        if(value(l.observedPolyline)!==undefined)issue('unsupported_leaf_polyline',lp+'.observedPolyline','Known depicted leaf polyline has no exact physical renderer mapping');
+        spec.sourceLeaf={mechanism:kind,leafWidthMm:need(l.leafWidthMm,lp+'.leafWidthMm'),thicknessMm:need(l.thicknessMm,lp+'.thicknessMm'),closedCenter:need(l.closedCenter,lp+'.closedCenter'),travelDistanceMm:need(l.travelDistanceMm,lp+'.travelDistanceMm')};
+        spec.travelDirection=needDirection(l.travelDirection,lp+'.travelDirection');
+        if(value(l.closedAxis)!==undefined)spec.sourceLeaf.closedAxis=needDirection(l.closedAxis,lp+'.closedAxis');
+        if(value(l.openCenter)!==undefined)spec.sourceLeaf.openCenter=value(l.openCenter);
+        var state=need(l.openState,lp+'.openState');
+        if(state==='partial')issue('unsupported_partial_open_state',lp+'.openState','Partial displayed state retained; runtime only supports open/closed');
+        else if(state!==undefined)spec.doorOpenState=state;
+      }
       if(kind==='swing'||kind==='pocket'){
         if(!e.leaves||e.leaves.length!==1){issue('unsupported_leaf_group',p+'.leaves','Exactly one source leaf is currently certified; paired/fold geometry remains retained');return;}
         var l=e.leaves[0],lp=p+'.leaves[0]',w=need(l.leafWidthMm,lp+'.leafWidthMm'),th=value(l.thicknessMm);if(value(l.mechanism)!==kind)issue('source_leaf_mechanism_conflict',lp+'.mechanism','Leaf mechanism contradicts the physical opening mechanism');var relation=value(e.leafRelation);if(relation&&relation!=='single')issue('unsupported_leaf_relation',p+'.leafRelation','Only an explicitly single procedural leaf is supported in this slice');if(value(l.observedPolyline)!==undefined)issue('unsupported_leaf_polyline',lp+'.observedPolyline','Known depicted leaf polyline has no exact physical renderer mapping');var inapplicable=kind==='swing'?['travelDirection','travelDistanceMm','pocketRegion']:['pivot','hingeJamb','swingSide','angleDeg'];inapplicable.forEach(function(key){if(value(l[key])!==undefined)issue('inapplicable_source_leaf_fact',lp+'.'+key,'Known leaf fact does not apply to this mechanism and cannot be silently ignored');});if(kind==='pocket'&&value(l.closedAxis)&&Math.abs(value(l.closedAxis).x*spec.axis.y-value(l.closedAxis).y*spec.axis.x)>EPS)issue('source_leaf_axis_conflict',lp+'.closedAxis','Pocket leaf axis is not parallel to its wall/gap');if(th===undefined){th=36;defaultValue(lp+'.thicknessMm',th,'Panel thickness absent from source; explicit procedural default needs review');}
@@ -190,11 +210,28 @@
         [['closedCenter',expectedClosed],['openCenter',expectedOpen]].forEach(function(pair){var observed=value(l[pair[0]]);if(observed&&pair[1]&&Math.hypot(observed.x-pair[1].x,observed.y-pair[1].y)>EPS)issue('source_leaf_pose_conflict',lp+'.'+pair[0],'Known source pose conflicts with independent width/pivot/travel facts');});
         var state=value(l.openState);if(state===undefined){state='open';defaultValue(lp+'.openState',state,'Source displayed state is unknown; review procedural open-state default');}if(kind==='swing'&&state==='closed'&&value(l.angleDeg)!==undefined&&value(l.angleDeg)!==0)issue('source_leaf_state_conflict',lp+'.openState','Closed displayed state conflicts with nonzero source angle');if(state==='partial')issue('unsupported_partial_open_state',lp+'.openState','Partial displayed state retained; runtime only supports open/closed');else if(state)spec.doorOpenState=state;
       }
-      var height=value(e.heightMm);if(height===undefined){height=kind==='window'?1200:2100;defaultValue(p+'.heightMm',height,'Opening height absent from source; procedural default needs review');}if(height<(kind==='window'?200:300)||height>3200)issue('opening_height_out_of_range',p+'.heightMm','Opening height would be clamped by runtime');spec._height=height;
+      var height=kind==='slide'?need(e.heightMm,p+'.heightMm'):value(e.heightMm);if(height===undefined&&kind!=='slide'){height=kind==='window'?1200:2100;defaultValue(p+'.heightMm',height,'Opening height absent from source; procedural default needs review');}if(height<(kind==='window'?200:300)||height>3200)issue('opening_height_out_of_range',p+'.heightMm','Opening height would be clamped by runtime');spec._height=height;
       if(kind==='window'){spec._sill=value(e.sillMm);if(spec._sill===undefined){spec._sill=900;defaultValue(p+'.sillMm',900,'Window sill absent from source; default needs review');}spec._windowKind=value(e.windowKind);if(spec._windowKind===undefined){spec._windowKind='fix';defaultValue(p+'.windowKind','fix','Source window sash type is unknown; review fixed-pane display default');}}
       if(!errorsSince(n))specs.push(spec);
     });
-    specs.forEach(function(spec){var result=Openings.compileOpening(spec,walls,specs);result.diagnostics.forEach(function(d){issue('opening_'+d.code,spec._path,d.message);});(result.warnings||[]).forEach(function(d){issue('opening_'+d.code,spec._path,d.message,'warning');});if(!result.ok)return;var it=result.item;it.sceneImportVersion=3;var e=spec._source,wall=walls.find(function(w){return w.id===spec.hostWallId;});
+    specs.forEach(function(spec){var result=Openings.compileOpening(spec,walls,specs);result.diagnostics.forEach(function(d){issue('opening_'+d.code,spec._path,d.message);});(result.warnings||[]).forEach(function(d){issue('opening_'+d.code,spec._path,d.message,'warning');});if(!result.ok)return;
+      if(spec.kind==='door-slide-s'&&spec.sourceLeaf){
+        // Every candidate supplying the certified translated envelope must
+        // belong to a known source floor, not only the named aperture host.
+        // Use the shared proof's basis/envelope; do not invent another sweep.
+        var host=walls.find(function(w){return w.id===spec.hostWallId;}),basis=result.geometry.basis,envelope=result.geometry.sweptIntervalMm,missingBackingSource=false;
+        walls.forEach(function(w){
+          if(w.floor!==spec.floor||Math.abs(w.thick-host.thick)>1e-6)return;
+          var a={x:w.x1-host.x1,y:w.y1-host.y1},b={x:w.x2-host.x1,y:w.y2-host.y1};
+          if(Math.abs(a.x*basis.normal.x+a.y*basis.normal.y)>1e-6||Math.abs(b.x*basis.normal.x+b.y*basis.normal.y)>1e-6)return;
+          var lo=a.x*basis.axis.x+a.y*basis.axis.y,hi=b.x*basis.axis.x+b.y*basis.axis.y;
+          if(Math.max(lo,hi)<=envelope[0]+1e-6||Math.min(lo,hi)>=envelope[1]-1e-6)return;
+          var sourceWall=scene.walls.find(function(e){return e.id===w.id;});
+          if(need(sourceWall&&sourceWall.floor,spec._path+'.backingSourceFloor.'+w.id)===undefined)missingBackingSource=true;
+        });
+        if(missingBackingSource)return;
+      }
+      var it=result.item;it.sceneImportVersion=3;var e=spec._source,wall=walls.find(function(w){return w.id===spec.hostWallId;});
       if(spec.kind==='window'){it.windowHeight=spec._height;it.windowSill=spec._sill;it.windowKind=spec._windowKind;var rs=(value(e.adjacentRoomIds)||[]).filter(Boolean).map(function(id){return rooms.get(id);}).filter(Boolean),limit=options.windowVerticalLimitMm&&options.windowVerticalLimitMm(spec.floor,rs,wall);if(limit!==undefined&&it.windowHeight+it.windowSill>limit){issue('window_vertical_clamp',spec._path,'Window source/default height would exceed runtime wall cut');return;}if(typeof options.normalizeWindow!=='function'||typeof options.windowVerticalLimitMm!=='function'){issue('missing_window_runtime',spec._path,'Exact window vertical values need the actual renderer normalizer and host limit');return;}var normalized=options.normalizeWindow(clone(it),wall);if(!normalized||['windowSill','windowHeight'].some(function(k){return Math.abs(normalized[k]-it[k])>EPS;})){issue('window_vertical_clamp',spec._path,'Known source window values would be clamped or rounded by runtime');return;}}
       else it.doorHeight=spec._height;
       var appearance=e.appearance,b=bindings.get(e.id),color=appearance&&value(appearance.diagramColor);if(color!==undefined){if(!b||b.appearanceMode!=='match-diagram-appearance')issue('appearance_mapping_required',spec._path+'.appearance','Known opening color needs reviewed visualization mapping');else if(typeof color==='string'){if(spec.kind==='door-opening')issue('unsupported_opening_color',spec._path+'.appearance','Fixed passage jamb material cannot honor the known source color');it.color=color;it.colorCustom=true;issue('diagram_appearance_review',spec._path+'.appearance','Drawing fill mapped as display color, not physical finish evidence','review');}else issue('unsupported_opening_color_regions',spec._path+'.appearance.diagramColor','Known regional opening colors have no certified single-color mapping');}

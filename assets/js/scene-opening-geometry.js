@@ -178,10 +178,11 @@
     var s=spec.sourceLeaf;
     if(!s || typeof s!=='object' || Array.isArray(s)) {fail('invalid-source-leaf','sourceLeaf must be an object');return null;}
     var allowed=['mechanism','pivot','closedAxis','leafWidthMm','thicknessMm','angleDeg','closedCenter','travelDistanceMm','pocketPolygon'];
+    if(s.mechanism==='slide')allowed.push('openCenter');
     Object.keys(s).forEach(function(k){if(allowed.indexOf(k)<0)fail('unsupported-source-leaf-field','Unsupported source leaf field: '+k);});
     if(!finite(s.leafWidthMm)||s.leafWidthMm<=0||!finite(s.thicknessMm)||s.thicknessMm<=0){fail('invalid-source-panel','Source leaf width and thickness must be positive finite numbers');return null;}
     function local(p){var d=diff(p,center);return {x:dot(d,frame.u),y:dot(d,frame.n)};}
-    var unused=s.mechanism==='swing'?['closedCenter','travelDistanceMm','pocketPolygon']:['pivot','closedAxis','angleDeg'];
+    var unused=s.mechanism==='swing'?['closedCenter','travelDistanceMm','pocketPolygon']:s.mechanism==='slide'?['pivot','angleDeg','pocketPolygon']:['pivot','closedAxis','angleDeg'];
     unused.forEach(function(k){if(s[k]!==undefined)fail('inapplicable-source-leaf-field',k+' does not apply to '+s.mechanism);});
     if(s.mechanism==='swing' && ['door-swing','door-swing-s','door-front'].indexOf(spec.kind)>=0){
       var sign=parallelSign(s.closedAxis,frame.u), side=parallelSign(spec.swingSide,frame.n);
@@ -192,6 +193,24 @@
       var pivot=local(s.pivot), end=pivot.x+sign*s.leafWidthMm;
       if(Math.min(pivot.x,end)<-spec.widthMm/2-EPS||Math.max(pivot.x,end)>spec.widthMm/2+EPS||Math.abs(pivot.y)>frame.wall.thick/2+EPS){fail('source-swing-outside-gap','Source closed panel and pivot must fit the declared opening span and wall thickness');return null;}
       return {mode:'hinge',hingeXmm:pivot.x,hingeZmm:pivot.y,leafCenterXmm:sign*s.leafWidthMm/2,leafWidthMm:s.leafWidthMm,leafThicknessMm:s.thicknessMm,openAngleY:-side*sign*s.angleDeg*Math.PI/180};
+    }
+    if(s.mechanism==='slide' && spec.kind==='door-slide-s'){
+      // Only the existing native single wall-face envelope is certified. These
+      // equalities reject missing/non-native source facts; they do not supply
+      // measured panel dimensions, offsets or travel from a gap default.
+      var direction=parallelSign(spec.travelDirection,frame.u);
+      if(spec.sourceExactGap!==true){fail('source-slide-exact-gap-required','Source wall sliders require an independently declared exact gap');return null;}
+      if(!point(s.closedCenter)||!direction||!finite(s.travelDistanceMm)||s.travelDistanceMm<=0){fail('invalid-source-slide','Source slide needs exact closed center, host-parallel travel direction and positive distance');return null;}
+      if(spec.doorOpenState!=='open'&&spec.doorOpenState!=='closed')fail('invalid-source-slide-state','Source slide needs a known open or closed displayed state');
+      if(s.closedAxis!==undefined&&!parallelSign(s.closedAxis,frame.u))fail('source-slide-axis-conflict','Source closed leaf axis must be parallel to its host');
+      var c=local(s.closedCenter),face=c.y<0?-1:1;
+      if(!near(s.leafWidthMm,spec.widthMm+60)||!near(s.thicknessMm,36)||!near(c.x,0)||!near(c.y,face*(frame.wall.thick/2+18+8))||!near(s.travelDistanceMm,spec.widthMm+30)){
+        fail('unsupported-source-slide-envelope','Independent source panel width, thickness, closed center and travel must match the native single wall-slide envelope');return null;
+      }
+      if(spec.wallFace!==undefined&&parallelSign(spec.wallFace,frame.n)!==face)fail('source-slide-face-conflict','Explicit wall face contradicts the independent source closed center');
+      var open=c.x+direction*s.travelDistanceMm,expectedOpen=world(frame,center,open,c.y);
+      if(s.openCenter!==undefined&&!samePoint(s.openCenter,expectedOpen))fail('source-slide-pose-conflict','Observed source open center contradicts independent closed center and travel');
+      return {mode:'single',direction:direction,leafWidthMm:s.leafWidthMm,leafThicknessMm:s.thicknessMm,closedXmm:c.x,openXmm:open,leafZmm:c.y};
     }
     if(s.mechanism==='pocket' && spec.kind==='door-pocket'){
       var direction=parallelSign(spec.travelDirection,frame.u);
@@ -207,7 +226,7 @@
       if(lo<-frame.wall.thick/2-EPS||hi>frame.wall.thick/2+EPS){fail('source-pocket-outside-wall','Exact cavity must be contained by its supporting wall thickness');return null;}
       return {mode:'single',direction:direction,leafWidthMm:s.leafWidthMm,leafThicknessMm:s.thicknessMm,closedXmm:c.x,openXmm:open,leafZmm:c.y,pocketBoundsMm:[a,b,lo,hi]};
     }
-    fail('unsupported-source-mechanism','Only a single procedural swing or pocket panel is supported');return null;
+    fail('unsupported-source-mechanism','Only a single procedural swing, native-envelope wall slide or pocket panel is supported');return null;
   }
 
   var sourceEditMessage='読み取り元の建具寸法・回転・反転・引く向きを保持しています。この建具の形状変更・規格置換は未対応です。移動（同じ向きの壁へ）と開閉状態は変更できます。';

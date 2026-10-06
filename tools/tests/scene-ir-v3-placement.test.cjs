@@ -13,7 +13,46 @@ test('exact context rejects absent confirmation, wrong source, wrong page, multi
 test('known conflicting source floors block and cannot be overwritten or approved away',()=>{const s=fixture();s.rooms[0].floor=f(1);const opts=options(s,2),r=Scene.compile(s,approved(s,opts));assert.equal(r.plan.rooms[0].floor,1);assert.equal(r.canApply,false);assert.ok(r.diagnostics.some(d=>d.code==='placement_floor_conflict'));});
 test('target changes invalidate all prior review keys even for same source and default datum',()=>{const s=fixture(),opts=approved(s,options(s,1));assert.equal(Scene.compile(s,opts).canApply,true);opts.placementContext=options(s,2).placementContext;const r=Scene.compile(s,opts);assert.equal(r.canApply,false);assert.equal(r.reviewGroups[0].accepted,false);});
 test('room objects inherit destination; stairs stay unsupported and site remains a source overlay',()=>{const s=fixture();s.objects=[{id:'desk',objectType:f('desk'),semanticExtent:f('asset'),placement:f({domain:'room',roomId:'room'}),sourceFootprint:f({center:{x:1500,y:1500},sizeMm:{w:1000,d:500},axisX:{x:1,y:0}})}];s.bindings=[{id:'binding',sourceEntityId:'desk',catalogId:f('desk'),sizingPolicy:'native'}];s.siteRegions=[{id:'site',role:f('parking'),shape:f({kind:'rectUnion',rectangles:[{x:6000,y:0,w:4000,d:4000}]})}];const opts={...options(s,2),registry:{get:()=>({w:1000,d:500,h:730,semanticExtent:'asset',finishChannels:[]})}};const r=Scene.compile(s,approved(s,opts));assert.equal(r.plan.items[0].floor,2);assert.equal(r.plan.items[0].baseRoom,'room');assert.equal(r.plan.rooms.length,1);assert.ok(r.sourcePreview.polygons.some(p=>p.id==='site'));s.objects[0].objectType=f('stair');const stair=Scene.compile(s,{...opts,placementContext:options(s).placementContext});assert.equal(stair.canApply,false);assert.ok(stair.diagnostics.some(d=>d.code==='unsupported_stair_reconstruction'));});
-test('actual repaired source-c removes exactly 39 floor blockers and retains downstream unsupported mechanisms',()=>{const s=require('./fixtures/scene-ir/v3-source-c-repaired.json'),before=JSON.stringify(s);const initial=Scene.compile(s,base),r=Scene.compile(s,options(s,1));assert.equal(r.valid,true);assert.equal(floorErrors(initial).length,39);assert.equal(floorErrors(r).length,0);assert.equal(r.evidence.filter(e=>e.status==='placement-context').length,39);assert.equal(r.diagnostics.filter(d=>d.code==='unsupported_opening_mechanism').length,4);assert.equal(r.canApply,false);assert.ok(r.reviewGroups.every(g=>!g.accepted));assert.equal(JSON.stringify(s),before);assert.equal(r.sourceScene.rooms[0].floor.value,null);});
+test('actual repaired source-c places 36 runtime floors and retains three uncertified source-slide floors',()=>{
+ const fixturePath=require.resolve('./fixtures/scene-ir/v3-source-c-repaired.json');
+ const fs=require('node:fs'),rawBytes=fs.readFileSync(fixturePath),s=require(fixturePath);
+ const before=JSON.stringify(s),sourceHash=Scene.sourceHash(s),opts=options(s,1);
+ const initial=Scene.compile(s,base),r=Scene.compile(s,opts),reviewed=Scene.compile(s,approved(s,opts));
+ const slideIndices=[4,5,6],slideIds=['opening-closet-bedroom','opening-closet-wash','opening-wash-hall'];
+ const retainedPaths=slideIndices.map(i=>'openings['+i+'].floor');
+ assert.equal(floorErrors(initial).length,39);
+ for(const staged of [r,reviewed]){
+  assert.equal(staged.valid,true);
+  assert.deepEqual(floorErrors(staged).map(d=>d.path),retainedPaths);
+  assert.ok(floorErrors(staged).every(d=>d.severity==='error'));
+  const placements=staged.evidence.filter(e=>e.status==='placement-context');
+  assert.equal(placements.length,36);
+  assert.ok(placements.every(e=>e.value===1&&e.sourceHash===sourceHash));
+  for(const i of slideIndices)assert.ok(!placements.some(e=>e.path==='openings['+i+'].runtimeFloor'));
+  const unsupported=staged.diagnostics.filter(d=>d.code==='unsupported_opening_mechanism');
+  assert.deepEqual(unsupported.map(d=>[d.path,d.severity]),[['openings[7]','error']]);
+  assert.match(unsupported[0].message,/Source fold retained/);
+  assert.equal(staged.canApply,false);
+  assert.equal(staged.fullReconstructionReady,false);
+  assert.ok(!staged.plan.items.some(item=>slideIds.includes(item.id)));
+  assert.equal(JSON.stringify(staged.sourceScene),before);
+  assert.equal(Scene.sourceHash(staged.sourceScene),sourceHash);
+ }
+ assert.ok(r.reviewGroups.every(g=>!g.accepted));
+ for(const [j,i] of slideIndices.entries()){
+  const opening=s.openings[i],group=reviewed.reviewGroups.find(g=>g.entityId===slideIds[j]);
+  assert.equal(opening.id,slideIds[j]);
+  assert.deepEqual(opening.floor,{value:null,status:'unknown',unknownReason:'not-shown'});
+  assert.equal(opening.mechanism.value,'slide');
+  assert.ok(group&&group.accepted,'Fresh inference review cannot supply a source floor');
+  assert.ok(!group.reviewPaths.includes(retainedPaths[j]));
+  assert.equal(group.canAcknowledgeOmission,false);
+ }
+ assert.equal(s.openings[7].mechanism.value,'fold');
+ assert.equal(JSON.stringify(s),before);
+ assert.equal(Scene.sourceHash(s),sourceHash);
+ assert.deepEqual(fs.readFileSync(fixturePath),rawBytes);
+});
 test('staging confirmation invalidates approvals; stale UI handlers cannot replace a newer source or resurrect Cancel',()=>{const c=runtime(),s=fixture();c.PlanImport.stageSceneIR(s,base);const first=c.PlanImport.state.result;const r=c.PlanImport.confirmScenePlacement(first,2,true);assert.equal(r.canApply,false);assert.equal(r.plan.rooms[0].floor,2);assert.equal(c.PlanImport.confirmScenePlacement(first,1,true),null);const staged=c.PlanImport.state.result;c.closePlanImport();assert.equal(c.PlanImport.confirmScenePlacement(staged,1,true),null);assert.strictEqual(c.PlanImport.state.result,staged);assert.equal(staged.sceneOptions.acceptedReviewGroups.length,0);assert.equal(JSON.stringify(staged.sceneIR),JSON.stringify(s));});
 test('Apply revalidates context tampering and saves separate provenance only after fresh reviews',()=>{const c=runtime(),s=fixture(),opts=options(s,2);let r=c.PlanImport.previewSceneIR(s,opts);const accepted={...opts,acceptedReviewGroups:r.reviewGroups.map(g=>g.id),reviewedEntities:Object.fromEntries(r.reviewGroups.map(g=>[g.entityId,g.reviewKey]))};c.PlanImport.stageSceneIR(s,accepted);c.PlanImport.state.result.sceneOptions.placementContext.targetFloor=1;c.applyPlanImport();assert.equal(c.HISTORY.length,0);c.PlanImport.stageSceneIR(s,accepted);c.applyPlanImport();assert.equal(c.HISTORY.length,1);assert.equal(c.DATA.rooms[0].floor,2);const report=c.DATA.sceneReconstructionReports[0];assert.equal(report.placementContext.targetFloor,2);assert.equal(report.originalIR.rooms[0].floor.value,null);assert.deepEqual(copy(report.reviewDecisions.placementContext),copy(opts.placementContext));});
 test('crop changes revoke scoped decisions without changing source facts or permitting Apply',()=>{const c=runtime(),s=fixture();c.PlanImport.stageSceneIR(s,options(s));const get=c.document.getElementById;c.document.getElementById=id=>id==='plan-import-canvas'?null:get(id);c.PlanImport.state.image={naturalWidth:1000,naturalHeight:1000};c.planImportSelectAll();assert.equal(c.PlanImport.state.result.sceneOptions.placementContext,null);assert.equal(c.PlanImport.state.result.sceneOptions.pageScope,null);assert.equal(c.PlanImport.state.result.sceneCompilation.canApply,false);assert.equal(c.PlanImport.state.result.sceneIR.rooms[0].floor.value,null);});

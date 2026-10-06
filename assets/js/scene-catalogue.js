@@ -84,6 +84,8 @@
         entries[id].sourceObjectType=SOURCE_OBJECT_TYPES[id];
         entries[id].semanticExtentProvenance='exact-id-manifest-audit';
       }
+      // Additive schema vocabulary for this existing washer only; preserve laundry.
+      if(id==='original-washer-drum')entries[id].compatibleSourceObjectTypes=['laundry-appliance'];
       var rc=REFRIGERATOR_CERTIFICATE;
       if(id===rc.id&&item.model===rc.url&&item.w===rc.w&&item.d===rc.d&&item.h===rc.h&&(item.front===undefined||item.front===rc.front)){
         entries[id].front=rc.front; entries[id].frontProvenance='hash-pinned-native-normalized-front-audit';

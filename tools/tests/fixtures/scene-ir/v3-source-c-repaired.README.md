@@ -5,6 +5,6 @@
 It is not a new extraction or a hand-edited floor mapping. Its 18 wall, 8 room,
 and 13 opening floor facts remain unknown because the floor label was not printed.
 
-The test supplies a separate user placement context and checks all 39 runtime
-floor blockers disappear while unsupported opening mechanisms still block Apply.
+The test supplies a separate user placement context and checks 36 runtime floor
+destinations resolve while three source-slide floors remain unknown and fold still blocks Apply.
 No provider request, asset approval, or materialization approval is performed.
