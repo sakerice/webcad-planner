@@ -55,10 +55,10 @@ const manifest={id:'rpg-mansion',name:'RPG向け洋館',namespace:'rpg-mansion-'
 const model={id:'fmp-FixtureChair',name:'椅子',w:500,d:500,h:900};
 const contract={version:1,revision:'anonymous-fixture-v1',targetPack:'rpg-mansion',mappings:[{sourceId:model.id,targetId:manifest.items[0].id,reviewRequired:true,reviewReason:'高さ・機能を確認'}]};
 const fixture=()=>({walls:[{id:'wall-fixture',x1:0,y1:0,x2:2000,y2:0,thick:120,floor:1}],rooms:[],items:[{id:'chair-fixture',type:model.id,x:100,y:200,w:500,d:500,rot:12,floor:1,custom:{keep:true}},{id:'unknown-fixture',type:'anonymous-unknown',x:800,y:900,w:50,d:50,rot:0,floor:1,futureField:{keep:[1,2]}}],opaqueRoot:{keep:true}});
-function setup({plan=fixture(),fetcher,shared=false,rpg=manifest,extraTools=[],beforeInstall}={}){
+function setup({plan=fixture(),fetcher,shared=false,rpg=manifest,standard=model,extraTools=[],beforeInstall}={}){
  const document=new Element('document');document.createElement=tag=>new Element(tag);document.createDocumentFragment=()=>new Element('fragment');document.getElementById=id=>document.querySelector('#'+id);document.body=new Element('body');document.append(document.body);
  const sidebar=new Element('aside');sidebar.id='sidebar';document.body.append(sidebar);const common=new Element();common.className='common-tools';sidebar.append(common);const header=new Element();header.className='cat-hdr';header.textContent='家具';const body=new Element();body.className='cat-body';sidebar.append(header,body);
- for(const item of [model,...rpg.items,...extraTools]){const card=new Element('button');card.setAttribute('data-tool',item.id);card.setAttribute('title',item.name);card.textContent=item.name;body.append(card);}
+ for(const item of [standard,...rpg.items,...extraTools]){const card=new Element('button');card.setAttribute('data-tool',item.id);card.setAttribute('title',item.name);card.textContent=item.name;body.append(card);}
  const calls=[],copies=[];let epoch=0;const c={document,console:{warn(){}},AbortController,URL,Set,Map,DATA:plain(plan),ST:{tool:'select',drawing:false,selected:null,multiSelected:[],zoom:1,view:'2d'},DRAG:{active:false},HISTORY:['previous-undo'],REDO_HISTORY:['previous-redo'],HISTORY_LIMIT:80,DIRTY:false,SHARED:{roomId:shared?'anonymous-room':null},ren:{},WALL_H:2500,nextId:90,LIGHT_SETTINGS:{northDeg:0},_defaultPlanPending:false,__editorPlanId:'anonymous-source',NATIVE_PLAN_EDITOR:true,NATIVE_EDITOR_PANE:'native-editor',camExt:null,PlanSchema:require('../../assets/js/plan-schema.js'),MenuIcons:{html:()=>''},getItemDefaultSize:id=>id===model.id||id===manifest.items[0].id?{w:500,d:500,h:900}:{w:50,d:50,h:50},getItemHeightValue:i=>i.assetPackConversion?.targetType===i.type?i.assetPackConversion.renderHeightMm:(i.type===model.id||i.type===manifest.items[0].id?900:50),fetch:fetcher||(async()=>({ok:true,json:async()=>plain(contract)})),syncToolUi(){calls.push('sync-tool');},clearMultiSelection(){c.ST.multiSelected=[];},sharedRememberEditTargets(){calls.push('edit-targets');},queueSharedSync(){calls.push('normal-sync-hook');},queueSharedLocalAutoSave(){calls.push('normal-autosave-hook');},renderSaveButtonState(){calls.push('save-ui');},sharedForceFullSync(){},ensureFloorMetadata(){},syncNorthFromPlan(){},updateProps(){calls.push('props');},draw2d(){calls.push('draw');},rebuild3D(){calls.push('3d');},invalidateNativeOutputs(){calls.push('outputs');},syncNorthUi(){},syncHeightDefaultsUI(){},view(){return {view:'2d',twoD:{zoom:c.ST.zoom}};},applyView(){},clone:plain};c.window=c;c.root=c;
  vm.createContext(c);
  const state=read('assets/js/app-state.js');vm.runInContext(state.slice(state.indexOf('function markDirty(){'),state.indexOf('function ensureObjectIds(){')),c);
@@ -70,7 +70,7 @@ function setup({plan=fixture(),fetcher,shared=false,rpg=manifest,extraTools=[],b
  vm.runInContext(html.slice(html.indexOf('function applyObjectSetReplacement('),html.indexOf('var _jsonImportRequest=0;')),c);
  for(const p of ['asset-pack-registry','asset-catalogue','asset-pack-picker','asset-pack-conversion','asset-pack-conversion-ui'])vm.runInContext(read('assets/js/'+p+'.js'),c);
  beforeInstall?.(c);
- c.AssetPackPicker.install(sidebar,{[model.id]:model},rpg);
+ c.AssetPackPicker.install(sidebar,{[standard.id]:standard},rpg);
  const ui=id=>document.querySelector('[data-conversion="'+id+'"]');
  return {c,document,sidebar,calls,copies,ui,epoch:()=>epoch,edit(){c.DATA.items[0].x++;epoch++;},advance(){epoch++;}};
 }
@@ -222,4 +222,44 @@ test('actual independent repository derivation keeps original saved head and ID,
  const h=libraryContext({plan:fixture()});await h.api.ready;const id=h.context.__editorPlanId,before=h.plan;await h.api.persistPane('native-editor',id,before);h.context.clearDirty();const head=(await h.api.repo.read(id)).revision.id;
  const {createConverter}=require('../../assets/js/asset-pack-conversion.js'),result=createConverter(contract,[model,...manifest.items]).preview(before,{approvedIndexes:[0]});
  const copy=await h.api.createIndependentPlan(result.plan,'匿名の差し替え案',{sourcePaneId:'native-editor',sourcePlanId:id,sourceSnapshot:JSON.stringify(before),isCurrent:()=>true,cataloguePack:'rpg-mansion'});assert.notEqual(copy,id);assert.equal(h.context.__editorPlanId,id);assert.deepEqual(h.plan,before);assert.equal((await h.api.repo.read(id)).revision.id,head);assert.deepEqual(plain((await h.api.repo.read(id)).payload),before);assert.equal((await h.api.repo.get('drafts',JSON.stringify([h.api.session,copy]))).dirty,true);assert.equal((await h.api.repo.get('drafts',JSON.stringify([h.api.session,copy]))).cataloguePack,'rpg-mansion');
+});
+
+// Real correspondence/descriptors, existing dialog/apply/history/repository;
+// anonymous DOM and storage shims are not browser acceptance.
+function footprintSetup(plan,sourceId='fmp-Chair07'){
+ const rpg=JSON.parse(read('assets/models/packs/rpg-mansion/manifest.json')),mapping=JSON.parse(read('assets/models/packs/rpg-mansion/conversion-map.json'));
+ const standards=[...JSON.parse(read('assets/models/furniture_mega/manifest.json')).items,...JSON.parse(read('assets/models/interior_model_0_26_1/manifest.json')).items],standard=standards.find(a=>a.id===sourceId);
+ return setup({plan,rpg,standard,fetcher:async()=>({ok:true,json:async()=>mapping}),beforeInstall(c){
+  c.FMP_ITEMS=Object.fromEntries([...standards,...rpg.items].map(a=>[a.id,a]));c.LEGACY_FMP_TYPE_MAP={};c.ISIZES={};c.balconySlabHeightMm=()=>120;c.AssetPackConversionContract=require('../../assets/js/asset-pack-conversion-contract.js');
+  for(const name of ['isCustomBlockType','isLightItemType','isContextExteriorItemType','isColumnType'])c[name]=()=>false;
+  vm.runInContext(['isFmpItemType','getFmpItem','bestFmpType','getItemDefaultSize','getItemHeightValue','getItemH'].map(topLevelFunction).join('\n'),c);
+ }});
+}
+function footprintPlan(raw={w:null,d:null,h:null},sourceId='fmp-Chair07'){
+ const plan=fixture();plan.items[0]={...plan.items[0],type:sourceId,...raw};return plan;
+}
+test('actual dialog keeps incompatible nullable-footprint rows unselectable through all, copy and in-place attempts',async()=>{
+ for(const raw of [{w:null,d:null,h:null},{w:null,d:507,h:null},{w:392,d:null,h:null}]){
+  const plan=footprintPlan(raw),h=await ready(footprintSetup(plan)),before=snap(h);await chooseBulk(h);assert.equal(h.ui('create').disabled,true);assert.match(h.ui('summary').textContent,/0点を差し替え \/ 2点を保持/);
+  const row=h.ui('rows').children[0];assert.equal(row.querySelector('input').disabled,true);assert.match(row.children[3].textContent,/幅・奥行.*一致しない/);await h.ui('create').dispatch('click');
+  h.ui('copy').checked=false;h.ui('copy').dispatch('change');await h.ui('create').dispatch('click');assert.equal(h.copies.length,0);assert.equal(snap(h),before);
+ }
+});
+test('mixed bulk copy and in-place plus Undo/Redo retain mismatched raw fields and convert only compatible objects',async()=>{
+ for(const copy of [true,false]){
+  const plan=footprintPlan();plan.items.push({...plan.items[0],id:'numeric-chair',w:392,d:507,h:null});const h=await ready(footprintSetup(plan)),before=snap(h),original=h.c.serializeDataSnapshot(),history=h.c.HISTORY.length;
+  await chooseBulk(h);assert.match(h.ui('summary').textContent,/1点を差し替え \/ 2点を保持/);h.ui('copy').checked=copy;h.ui('copy').dispatch('change');await h.ui('create').dispatch('click');
+  const result=copy?h.copies[0].plan:plain(h.c.DATA);assert.deepEqual(result.items[0],plan.items[0]);assert.deepEqual(result.items[1],plan.items[1]);assert.equal(result.items[2].type,'rpg-mansion-chair-01');assert.equal(result.items[2].h,null);assert.equal(h.c.getItemHeightValue(result.items[2]),703);assert.deepEqual(result.opaqueRoot,plan.opaqueRoot);
+  if(copy){assert.equal(h.copies.length,1);assert.equal(snap(h),before);}else{const converted=h.c.serializeDataSnapshot();assert.equal(h.c.HISTORY.length,history+1);h.c.undoAction();assert.equal(h.c.serializeDataSnapshot(),original);h.c.redoAction();assert.equal(h.c.serializeDataSnapshot(),converted);assert.deepEqual(plain(h.c.DATA.items[0]),plan.items[0]);}
+ }
+});
+test('equal nullable fallback remains selectable and the existing copy path retains null-height provenance',async()=>{
+ const id='im0261-Chair-MEGA_PACK_Chair-chair-230409_frame_walnut',plan=footprintPlan({w:null,d:430,h:null},id),h=await ready(footprintSetup(plan,id)),before=snap(h);await chooseBulk(h);assert.equal(h.ui('create').disabled,false);assert.equal(h.ui('rows').children[0].querySelector('input').disabled,false);await h.ui('create').dispatch('click');
+ assert.equal(snap(h),before);assert.equal(h.copies.length,1);assert.equal(h.copies[0].plan.items[0].w,null);assert.equal(h.copies[0].plan.items[0].h,null);assert.equal(h.c.getItemHeightValue(h.copies[0].plan.items[0]),730);
+});
+test('actual independent repository copy saves original nullable raw object and head unchanged',async()=>{
+ const source=footprintPlan();source.items.push({...source.items[0],id:'numeric-chair',w:392,d:507,h:null});const h=libraryContext({plan:source});await h.api.ready;const id=h.context.__editorPlanId,before=h.plan;await h.api.persistPane('native-editor',id,before);h.context.clearDirty();const head=(await h.api.repo.read(id)).revision.id;
+ const {runtime}=require('./asset-pack-footprint-runtime.cjs'),r=await runtime(),result=r.converter.preview(before,{approvedIndexes:[0,2],resolvedDimensions:before.items.map(r.dimensions)});assert.equal(result.changed,1);
+ const copy=await h.api.createIndependentPlan(result.plan,'匿名の寸法保持案',{sourcePaneId:'native-editor',sourcePlanId:id,sourceSnapshot:JSON.stringify(before),isCurrent:()=>true,cataloguePack:'rpg-mansion'});assert.notEqual(copy,id);assert.equal(h.context.__editorPlanId,id);assert.deepEqual(h.plan,before);assert.equal((await h.api.repo.read(id)).revision.id,head);assert.deepEqual(plain((await h.api.repo.read(id)).payload),before);
+ const copied=(await h.api.repo.get('drafts',JSON.stringify([h.api.session,copy])));assert.equal(copied.dirty,true);assert.equal(copied.cataloguePack,'rpg-mansion');assert.deepEqual(plain(copied.plan),result.plan);assert.deepEqual(plain(copied.payload),result.plan);assert.deepEqual(plain((await h.api.repo.read(copy)).payload),result.plan);
 });

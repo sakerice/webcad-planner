@@ -56,6 +56,17 @@
     // Stored item.h is not the ordinary furniture renderer's effective height.
     dimensions.h=options.resolvedDimensions?.[index]?.h??sourceAsset?.h;
     if(match&&!reason&&Object.values(dimensions).some(v=>typeof v!=='number'||!Number.isFinite(v)||v<=0))reason='寸法を確定できないため保持';
+    // A preserved null footprint axis is not fitted by the native
+    // clone/instance renderer. Only the RPG pack's exact, geometry-checked
+    // manifest bounds establish its fallback; original/native return renderers
+    // have no such contract. Missing axes are materialized below as before.
+    const fallbackAxes=['w','d'].filter(key=>Object.prototype.hasOwnProperty.call(item,key)&&typeof item[key]!=='number');
+    const rpgFallback=!reverse&&target?.packId==='rpg-mansion'&&target.model==='assets/models/packs/rpg-mansion/models/'+target.id+'.glb';
+    if(match&&!reason&&fallbackAxes.length){
+     if(!rpgFallback)reason='差し替え先の幅・奥行の標準寸法を確認できないため保持';
+     // 0.001 mm covers Float32 GLB bound rounding, not a size/shape mismatch.
+     else if(fallbackAxes.some(key=>typeof target[key]!=='number'||!Number.isFinite(target[key])||Math.abs(dimensions[key]-target[key])>.001))reason='元の幅・奥行と差し替え先の標準寸法が一致しないため保持';
+    }
     // Returning to a native model must retain the editor's effective height,
     // not assume that a stored h controls its renderer.
     if(match&&reverse&&!reason&&(options.resolvedTargetHeights?.[index]??target?.h)!==dimensions.h)reason='元のモデルの表示高さを維持できないため保持';
