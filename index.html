@@ -4592,7 +4592,7 @@ function init3D(){
   _3dGlobalsWired=true;
   document.addEventListener('keydown',function(e){
     if(isPlanImportDialogOpen()) return;
-    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if(isNativeKeyboardControl(e)) return;
     var k=e.key.toLowerCase();
     if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].indexOf(k)>=0){ iMov[k]=true; invalidate3D(); }
     if(e.key==='Escape'&&isWalkView()){ exitWalkMode(); return; }
@@ -19747,10 +19747,21 @@ function isPlanImportDialogOpen(){
   var dialog=document.getElementById('plan-import-modal');
   return !!(dialog && dialog.classList.contains('show'));
 }
+// ネイティブ操作・継承された編集領域のキーは、間取りや歩行へ伝えない。
+// 既定動作は止めず、ボタンの Space/Enter もそのボタンへ任せる。
+function isNativeKeyboardControl(e){
+  var target=e.target;
+  if(!target) return false;
+  if(target.isContentEditable) return true;
+  var control=typeof target.closest==='function'?target.closest('input,textarea,select,button'):target;
+  if(!control) return false;
+  return control.tagName==='INPUT' || control.tagName==='TEXTAREA' || control.tagName==='SELECT' ||
+    (control.tagName==='BUTTON' && (e.key===' ' || e.key==='Spacebar' || e.key==='Enter'));
+}
 window.addEventListener('keydown', function(e){
   if(isPlanImportDialogOpen()) return;
+  if(isNativeKeyboardControl(e)) return;
   if(e.key==='Shift'){ST.shiftKey=true; draw2d();}
-  if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
   if((e.key==='Enter' || e.key==='Escape') && ST.tool==='walk-route' && ST.drawing){
     e.preventDefault();
     finishWalkRouteDrawing();
@@ -20451,7 +20462,7 @@ function updateUnityRenderControls(){
 }
 function currentUnityCameraSettings(){
   var mode=aiCaptureViewMode();
-  if(orbit && isUnityRenderableView()) orbit.update();
+  if(!AI_CAPTURE_TRANSACTION && orbit && isUnityRenderableView()) orbit.update();
   if(camExt) camExt.updateMatrixWorld(true);
   var settings={
     mode:mode,
@@ -20668,13 +20679,83 @@ function getActive3DCamera(){
   // so use camExt here as well instead of the unused first-person camInt.
   return camExt;
 }
-function ensureAiRenderable3D(){
+// Share the existing pvCapture orbit-state contract without enabling its gated API.
+function captureOrbitState(){
+  if(typeof orbit==='undefined' || !orbit) return null;
+  return {enableDamping:orbit.enableDamping,autoRotate:orbit.autoRotate};
+}
+function restoreOrbitState(prev){
+  if(!prev || typeof orbit==='undefined' || !orbit) return;
+  orbit.enableDamping=prev.enableDamping;
+  orbit.autoRotate=prev.autoRotate;
+}
+var AI_CAPTURE_TRANSACTION=null;
+// All render passes and their metadata run synchronously. No animation, asset-load,
+// resize or user-input callback can enter before finally restores the live view.
+// Encoding/edge/top-image/ZIP waits belong outside this scope.
+function withAiCaptureTransaction(context,capture){
+  assertNativeOutputRequest(context);
+  if(AI_CAPTURE_TRANSACTION) throw new Error('3D撮影はすでに実行中です。');
+  if(!ensureAiRenderable3D(true)) throw new Error('3Dビューの撮影に失敗しました。');
+  var cam=getActive3DCamera(), controls=orbit;
+  var wrap=document.getElementById('c3d-wrap');
+  var size=ren.getSize?ren.getSize(new THREE.Vector2()):new THREE.Vector2(wrap.clientWidth,wrap.clientHeight);
+  var state={context:context,renderer:ren,scene:sc3,camera:cam,controls:controls,
+    orbitState:captureOrbitState(),target:controls&&controls.target?controls.target.clone():null,
+    position:cam.position.clone(),quaternion:cam.quaternion.clone(),up:cam.up.clone(),
+    projection:cam.projectionMatrix.clone(),projectionInverse:cam.projectionMatrixInverse.clone(),
+    fov:cam.fov,aspect:cam.aspect,near:cam.near,far:cam.far,zoom:cam.zoom,
+    pixelRatio:ren.getPixelRatio(),width:size.x,height:size.y,
+    composer:composer,composerRatio:composer?composer._pixelRatio:null,
+    composerWidth:composer?composer._width:null,composerHeight:composer?composer._height:null};
+  AI_CAPTURE_TRANSACTION=state;
+  var captureFailed=false;
+  try{
+    var result=capture();
+    if(result&&typeof result.then==='function') throw new Error('3D撮影中に非同期処理は実行できません。');
+    assertNativeOutputRequest(context);
+    return result;
+  }catch(err){
+    captureFailed=true;throw err;
+  }finally{
+    if(AI_CAPTURE_TRANSACTION===state){
+      AI_CAPTURE_TRANSACTION=null;
+      // A disposed/replaced scene or newly installed plan must never be rewound.
+      if(ren===state.renderer&&sc3===state.scene&&getActive3DCamera()===cam&&orbit===controls&&isNativeOutputRequestCurrent(context)){
+        cam.position.copy(state.position);cam.quaternion.copy(state.quaternion);cam.up.copy(state.up);
+        cam.fov=state.fov;cam.aspect=state.aspect;cam.near=state.near;cam.far=state.far;cam.zoom=state.zoom;
+        cam.projectionMatrix.copy(state.projection);cam.projectionMatrixInverse.copy(state.projectionInverse);
+        cam.updateMatrixWorld(true);
+        if(state.target) controls.target.copy(state.target);
+        restoreOrbitState(state.orbitState);
+        // Restore independently: a failing renderer must not leave controls or the
+        // composer at capture resolution. The original capture error still wins.
+        var restoreError=null;
+        try{ren.setPixelRatio(state.pixelRatio);ren.setSize(state.width,state.height);}catch(e){restoreError=e;}
+        if(composer===state.composer&&composer){
+          try{
+            if(composer.setPixelRatio&&Number.isFinite(state.composerRatio))composer.setPixelRatio(state.composerRatio);
+            composer.setSize(Number.isFinite(state.composerWidth)?state.composerWidth:state.width,
+              Number.isFinite(state.composerHeight)?state.composerHeight:state.height);
+          }catch(e2){if(!restoreError)restoreError=e2;}
+        }
+        if(restoreError&&!captureFailed)throw restoreError;
+      }
+    }
+  }
+}
+function ensureAiRenderable3D(skipOrbitUpdate){
+  if(AI_CAPTURE_TRANSACTION){
+    assertNativeOutputRequest(AI_CAPTURE_TRANSACTION.context);
+    return ren===AI_CAPTURE_TRANSACTION.renderer&&sc3===AI_CAPTURE_TRANSACTION.scene&&
+      getActive3DCamera()===AI_CAPTURE_TRANSACTION.camera;
+  }
   if(!isAiCaptureView()) return false;
   if(!ren || !sc3) init3D();
   if(!ren || !sc3) return false;
   var wrap=document.getElementById('c3d-wrap');
   if(wrap && getComputedStyle(wrap).display==='none') setView(ST.view);
-  if(orbit && isUnityRenderableView()) orbit.update();
+  if(!skipOrbitUpdate && orbit && isUnityRenderableView()) orbit.update();
   var cam=getActive3DCamera();
   if(cam) cam.updateMatrixWorld(true);
   sc3.updateMatrixWorld(true);
@@ -21620,22 +21701,25 @@ async function generateAiRenderPackage(){
     setUnityRenderStatus('現在の3Dビューから基準画像を撮影しています...');
     await waitFrame(50);
     assertNativeOutputRequest(context);
-    // No await between captures: orbit damping, loading callbacks and resizing must
-    // not advance the scene between the base and its structural guides.
-    var base=captureCurrent3DDataUrl();
-    var seg=captureSegmentation3DDataUrl();
-    var instanceData=captureInstance3DData();
-    var instance=instanceData.dataUrl;
-    var depth=captureAiOverrideGuideDataUrl('depth');
-    var normal=captureAiOverrideGuideDataUrl('normal');
-    var metadata=buildAiRenderMetadata(instanceData.legend,context.snapshot);
+    var captured=withAiCaptureTransaction(context,function(){
+      var base=captureCurrent3DDataUrl();
+      var seg=captureSegmentation3DDataUrl();
+      var instanceData=captureInstance3DData();
+      var depth=captureAiOverrideGuideDataUrl('depth');
+      var normal=captureAiOverrideGuideDataUrl('normal');
+      var metadata=buildAiRenderMetadata(instanceData.legend,context.snapshot);
+      return {base:base,seg:seg,instanceData:instanceData,depth:depth,normal:normal,
+        metadata:metadata,prompt:buildAiRenderPrompt(metadata)};
+    });
+    var base=captured.base,seg=captured.seg,instanceData=captured.instanceData;
+    var instance=instanceData.dataUrl,depth=captured.depth,normal=captured.normal;
+    var metadata=captured.metadata,prompt=captured.prompt;
     if([base,seg,instance,depth,normal].some(function(image){return !image || image.length<1000;})){
       throw new Error('構造ガイドを撮影できませんでした。3Dの読込完了後に再度お試しください。');
     }
     setUnityRenderStatus('同じ視点の構造ガイドからエッジ画像を作っています...');
     var edge=await makeEdgeDataUrlFromSegmentation(instance);
     assertNativeOutputRequest(context);
-    var prompt=buildAiRenderPrompt(metadata);
     setUnityRenderStatus('保存するZIPを準備しています...');
     var enc=new TextEncoder();
     var legendText=JSON.stringify({version:2,legend:metadata.segmentationLegend,siteContext:metadata.siteContext},null,2);
@@ -22286,18 +22370,28 @@ async function generateVideoRenderPackage(options){
   // ビューに含む(目線そのままが参照)。投げれば runVideoRenderPackage が動画
   // ダイアログのステータスへそのまま出す。
   if(!isAiCaptureView()) throw new Error(videoRenderViewRefusalText());
-  var floor=ST.floor;
-  var view=aiCaptureViewMode();
-
   await waitFrame(50);
   assertNativeOutputRequest(context);
-  // 1) 参照の本体と、部材ごとのマスク。既存の静止画版とまったく同じ関数を呼ぶ。
-  var base=captureCurrent3DDataUrl();
-  if(!base) throw new Error('3Dビューの撮影に失敗しました。');
-  await waitFrame(30);
-  assertNativeOutputRequest(context);
-  var instanceData=captureInstance3DData();
-  if(!instanceData.dataUrl) throw new Error('部材IDガイドの撮影に失敗しました。');
+  // 1) One prepared pose for every render pass and camera/lighting descriptor.
+  // Slow decoding and top-image waits below cannot change this captured batch.
+  var captured=withAiCaptureTransaction(context,function(){
+    var floor=ST.floor,view=aiCaptureViewMode();
+    var base=captureCurrent3DDataUrl();
+    if(!base) throw new Error('3Dビューの撮影に失敗しました。');
+    var instanceData=captureInstance3DData();
+    if(!instanceData.dataUrl) throw new Error('部材IDガイドの撮影に失敗しました。');
+    var guides=null;
+    if(includeGuides){
+      guides={segmentation:captureSegmentation3DDataUrl(),
+        depth:captureAiOverrideGuideDataUrl('depth'),normal:captureAiOverrideGuideDataUrl('normal')};
+      if(!guides.segmentation||!guides.depth||!guides.normal) throw new Error('構造ガイドの撮影に失敗しました。');
+    }
+    return {base:base,instanceData:instanceData,guides:guides,floor:floor,view:view,
+      camera:videoCameraDescriptor(floor),daylight:videoDaylightDescriptor()};
+  });
+  var base=captured.base,instanceData=captured.instanceData,guides=captured.guides;
+  var floor=captured.floor,view=captured.view,camera=captured.camera;
+  daylight=captured.daylight;
 
   // 2) 暗部の持ち上げ (設計 §12.1)。測る→カーブを決める→適用する→記録する。
   var lockTiers=LockTiers.tableFor(instanceData.legend);
@@ -22322,7 +22416,6 @@ async function generateVideoRenderPackage(options){
   // 家とカメラの両方がフレームに収まって初めて果たせる。カメラが画面外なら
   // この図は役目を果たさない。だから fit する箱は主題だけでなく
   // 「主題 ∪ カメラ」(planContextBoundsMm) にする。占有率の下限は設けない。
-  var camera=videoCameraDescriptor(floor);
   var contextBounds=planContextBoundsMm(floor,camera);
   var contextEmpty=planEmptyFloorRefusal(contextBounds,floor,'plan_context.png');
   if(contextEmpty) throw contextEmpty;
@@ -22352,22 +22445,9 @@ async function generateVideoRenderPackage(options){
     daylight:daylight,note:opt.note
   });
 
-  // 5) ガイド画像。既定では撮らない（撮らないものはZIPにも入らない）。
-  var guides=null;
-  if(includeGuides){
-    await waitFrame(30);
-    assertNativeOutputRequest(context);
-    var seg=captureSegmentation3DDataUrl();
-    await waitFrame(30);
-    assertNativeOutputRequest(context);
-    var depth=captureAiOverrideGuideDataUrl('depth');
-    await waitFrame(30);
-    assertNativeOutputRequest(context);
-    var normal=captureAiOverrideGuideDataUrl('normal');
-    guides={
-      segmentation:seg,depth:depth,normal:normal,
-      edge:await makeEdgeDataUrlFromSegmentation(instanceData.dataUrl)
-    };
+  // 5) Optional guides were captured with the reference. Derive edges afterward.
+  if(guides){
+    guides.edge=await makeEdgeDataUrlFromSegmentation(instanceData.dataUrl);
     assertNativeOutputRequest(context);
   }
 
@@ -25508,15 +25588,8 @@ updateMobileShiftButton();
       // OrbitControls の damping / autoRotate はキャプチャ中は切る必要があるが、
       // 切りっぱなしにするとキャプチャ後のユーザー操作の手触りが恒久的に変わる。
       // 呼び出し前の値を返し、runner の finally で戻せるようにする。
-      captureOrbitState:function(){
-        if(typeof orbit==='undefined' || !orbit) return null;
-        return {enableDamping:orbit.enableDamping,autoRotate:orbit.autoRotate};
-      },
-      restoreOrbitState:function(prev){
-        if(!prev || typeof orbit==='undefined' || !orbit) return;
-        orbit.enableDamping=prev.enableDamping;
-        orbit.autoRotate=prev.autoRotate;
-      },
+      captureOrbitState:function(){ return captureOrbitState(); },
+      restoreOrbitState:function(prev){ restoreOrbitState(prev); },
       setPose:function(pos,target,fov){
         var cam=getActive3DCamera();
         if(!cam) throw new Error('no active 3D camera');

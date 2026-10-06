@@ -87,6 +87,7 @@ function nativeHeight(c){
 function nativeKeyboard(h){
  const listeners={};h.c.addEventListener=(type,fn)=>(listeners[type]||=[]).push(fn);
  h.c.isPlanImportDialogOpen=()=>false;h.c.isWalkView=()=>false;h.c.isInt=true;h.c.iMov={};h.c.invalidate3D=()=>h.calls.push('invalidate');
+ vm.runInContext(topLevelFunction('isNativeKeyboardControl'),h.c);
  const start=html.indexOf("  document.addEventListener('keydown',function(e){"),end=html.indexOf('  loop3D();',start);
  assert.ok(start>=0&&end>start);vm.runInContext(html.slice(start,end),h.c);
  const windowStart=html.indexOf("window.addEventListener('keydown', function(e){"),windowEnd=html.indexOf("window.addEventListener('resize',function(){",windowStart);

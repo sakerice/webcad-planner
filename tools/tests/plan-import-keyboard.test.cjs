@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8');
 const helper = html.match(/function isPlanImportDialogOpen\(\)\{[\s\S]*?\n\}/)[0];
+const nativeControl = html.match(/function isNativeKeyboardControl\(e\)\{[\s\S]*?\n\}/)[0];
 function listener(start, end) {
   const i = html.indexOf(start), j = html.indexOf(end, i);
   assert.ok(i >= 0 && j > i, 'real keyboard listener was not found');
@@ -36,7 +37,7 @@ function setup(open) {
     invalidate3D: () => changes.push('invalidate'), setView: () => changes.push('view'),
     exitWalkMode: () => changes.push('exitWalk'), finishWalkRouteDrawing: () => changes.push('route')
   };
-  vm.createContext(c); vm.runInContext(helper + '\n' + editor + '\n' + interior + '\n' + marquee, c);
+  vm.createContext(c); vm.runInContext(helper + '\n' + nativeControl + '\n' + editor + '\n' + interior + '\n' + marquee, c);
   return { c, changes, snapshot: () => JSON.stringify({ DATA: data, HISTORY: history, ST: c.ST, DRAG: c.DRAG, iMov: c.iMov }),
     key(key, tagName, ctrlKey = false, metaKey = false) {
       let prevented = false;

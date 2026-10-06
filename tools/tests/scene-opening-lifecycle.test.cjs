@@ -42,7 +42,7 @@ function runtime(){
     window:{addEventListener:(name,callback)=>{callbacks['window:'+name]=callback;}},
     document:{getElementById:()=>({classList:{remove:noop,contains:()=>false}})}};
   vm.createContext(c);
-  for(const name of ['isPlanImportDialogOpen','serializeDataSnapshot','pushHistorySnapshot','saveState','explicit2DSelection','clearMultiSelection',
+  for(const name of ['isPlanImportDialogOpen','isNativeKeyboardControl','serializeDataSnapshot','pushHistorySnapshot','saveState','explicit2DSelection','clearMultiSelection',
     'getOpeningWallInfo','getOpeningCenterCandidates','getItemDisplayPose','getWallDoorGapsMm',
     'applyHandleDrag','apply3DGizmoDrag','finish3DGizmoDrag','getSelectedCollectionKind','copySelectedObject','pasteCopiedObject',
     'updateSelectedProp','removeObjectRef','undoAction','redoAction','restoreHistorySnapshot'])load(name,c);
