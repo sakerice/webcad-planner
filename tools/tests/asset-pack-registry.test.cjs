@@ -8,7 +8,7 @@ const legacy=()=>[{id:'chair',name:'日本の椅子',w:450,d:450,h:800,nested:{t
 
 test('default and RPG packs keep canonical IDs, labels, order and dimensions',()=>{
  const input=legacy(),before=JSON.stringify(input),r=createRegistry(input,[rpg]);
- assert.deepEqual(r.listPacks().map(p=>[p.id,p.name,p.count]),[[DEFAULT_PACK_ID,'日本建築標準',2],['rpg-mansion','RPGアセット',rpg.items.length]]);
+ assert.deepEqual(r.listPacks().map(p=>[p.id,p.name,p.count]),[[DEFAULT_PACK_ID,'日本建築標準',2],['rpg-mansion','RPG向け洋館',rpg.items.length]]);
  assert.deepEqual(r.listCandidates().map(i=>i.id),input.map(i=>i.id));
  assert.deepEqual(r.getAsset('chair'),input[0]);assert.equal(JSON.stringify(input),before);
  assert.deepEqual(r.listCandidates('rpg-mansion').map(i=>i.id),rpg.items.map(i=>i.id));
@@ -29,7 +29,7 @@ test('registry snapshots neither freeze nor retain mutable caller data',()=>{
  assert.equal(Object.isFrozen(input[0]),false);input[0].nested.tags.push('changed');input.push({id:'later'});
  pack.items[0].w=123;pack.name='Changed';
  assert.deepEqual(r.getAsset('chair').nested.tags,['wood']);assert.equal(r.getAsset('later'),null);
- assert.equal(r.getAsset('rpg-mansion-chair-01').w,520);assert.equal(r.listPacks()[1].name,'RPGアセット');
+ assert.equal(r.getAsset('rpg-mansion-chair-01').w,520);assert.equal(r.listPacks()[1].name,'RPG向け洋館');
  assert.throws(()=>r.getAsset('chair').nested.tags.push('bad'),TypeError);
  assert.throws(()=>r.listCandidates().pop(),TypeError);assert.throws(()=>r.listPacks()[0].assetIds.push('bad'),TypeError);
 });

@@ -3,6 +3,7 @@
 // with an anonymous DOM contract shim. This is not visual/browser acceptance.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const {libraryContext}=require('./plan-library-test-support.cjs');
+const {topLevelFunction}=require('./height-runtime.cjs');
 const ROOT=path.resolve(__dirname,'../..'),read=p=>fs.readFileSync(path.join(ROOT,p),'utf8'),html=read('index.html');
 const plain=value=>JSON.parse(JSON.stringify(value));
 class Element{
@@ -15,6 +16,7 @@ class Element{
  get previousElementSibling(){return this.parentNode?.children[this.parentNode.children.indexOf(this)-1]||null;}
  setAttribute(k,v){this.attrs[k]=String(v);if(k==='id')this.id=v;if(k==='class')this.className=v;if(k.startsWith('data-'))this.dataset[k.slice(5).replace(/-([a-z])/g,(_,x)=>x.toUpperCase())]=String(v);}
  getAttribute(k){return this.attrs[k]??null;}
+ get attributes(){return Object.entries(this.attrs).map(([name,value])=>({name,value}));}
  removeAttribute(k){delete this.attrs[k];}
  addEventListener(k,fn){(this.listeners[k]||=[]).push(fn);}
  dispatch(k,event={}){event.target||=this;event.stopPropagation||=()=>{};event.preventDefault||=()=>{};for(const fn of this.listeners[k]||[])fn(event);return this['on'+k]?.(event);}
@@ -53,10 +55,10 @@ const manifest={id:'rpg-mansion',name:'RPG向け洋館',namespace:'rpg-mansion-'
 const model={id:'fmp-FixtureChair',name:'椅子',w:500,d:500,h:900};
 const contract={version:1,revision:'anonymous-fixture-v1',targetPack:'rpg-mansion',mappings:[{sourceId:model.id,targetId:manifest.items[0].id,reviewRequired:true,reviewReason:'高さ・機能を確認'}]};
 const fixture=()=>({walls:[{id:'wall-fixture',x1:0,y1:0,x2:2000,y2:0,thick:120,floor:1}],rooms:[],items:[{id:'chair-fixture',type:model.id,x:100,y:200,w:500,d:500,rot:12,floor:1,custom:{keep:true}},{id:'unknown-fixture',type:'anonymous-unknown',x:800,y:900,w:50,d:50,rot:0,floor:1,futureField:{keep:[1,2]}}],opaqueRoot:{keep:true}});
-function setup({plan=fixture(),fetcher,shared=false}={}){
+function setup({plan=fixture(),fetcher,shared=false,rpg=manifest,extraTools=[],beforeInstall}={}){
  const document=new Element('document');document.createElement=tag=>new Element(tag);document.createDocumentFragment=()=>new Element('fragment');document.getElementById=id=>document.querySelector('#'+id);document.body=new Element('body');document.append(document.body);
  const sidebar=new Element('aside');sidebar.id='sidebar';document.body.append(sidebar);const common=new Element();common.className='common-tools';sidebar.append(common);const header=new Element();header.className='cat-hdr';header.textContent='家具';const body=new Element();body.className='cat-body';sidebar.append(header,body);
- for(const item of [model,...manifest.items]){const card=new Element('button');card.setAttribute('data-tool',item.id);card.setAttribute('title',item.name);card.textContent=item.name;body.append(card);}
+ for(const item of [model,...rpg.items,...extraTools]){const card=new Element('button');card.setAttribute('data-tool',item.id);card.setAttribute('title',item.name);card.textContent=item.name;body.append(card);}
  const calls=[],copies=[];let epoch=0;const c={document,console:{warn(){}},AbortController,URL,Set,Map,DATA:plain(plan),ST:{tool:'select',drawing:false,selected:null,multiSelected:[],zoom:1,view:'2d'},DRAG:{active:false},HISTORY:['previous-undo'],REDO_HISTORY:['previous-redo'],HISTORY_LIMIT:80,DIRTY:false,SHARED:{roomId:shared?'anonymous-room':null},ren:{},WALL_H:2500,nextId:90,LIGHT_SETTINGS:{northDeg:0},_defaultPlanPending:false,__editorPlanId:'anonymous-source',NATIVE_PLAN_EDITOR:true,NATIVE_EDITOR_PANE:'native-editor',camExt:null,PlanSchema:require('../../assets/js/plan-schema.js'),MenuIcons:{html:()=>''},getItemDefaultSize:id=>id===model.id||id===manifest.items[0].id?{w:500,d:500,h:900}:{w:50,d:50,h:50},getItemHeightValue:i=>i.assetPackConversion?.targetType===i.type?i.assetPackConversion.renderHeightMm:(i.type===model.id||i.type===manifest.items[0].id?900:50),fetch:fetcher||(async()=>({ok:true,json:async()=>plain(contract)})),syncToolUi(){calls.push('sync-tool');},clearMultiSelection(){c.ST.multiSelected=[];},sharedRememberEditTargets(){calls.push('edit-targets');},queueSharedSync(){calls.push('normal-sync-hook');},queueSharedLocalAutoSave(){calls.push('normal-autosave-hook');},renderSaveButtonState(){calls.push('save-ui');},sharedForceFullSync(){},ensureFloorMetadata(){},syncNorthFromPlan(){},updateProps(){calls.push('props');},draw2d(){calls.push('draw');},rebuild3D(){calls.push('3d');},invalidateNativeOutputs(){calls.push('outputs');},syncNorthUi(){},syncHeightDefaultsUI(){},view(){return {view:'2d',twoD:{zoom:c.ST.zoom}};},applyView(){},clone:plain};c.window=c;c.root=c;
  vm.createContext(c);
  const state=read('assets/js/app-state.js');vm.runInContext(state.slice(state.indexOf('function markDirty(){'),state.indexOf('function ensureObjectIds(){')),c);
@@ -67,13 +69,35 @@ function setup({plan=fixture(),fetcher,shared=false}={}){
  c.validateEditorPlan=(p,admission)=>{calls.push('validate');assert.equal(admission,c.__legacyPlanAdmission);return c.PlanSchema.validatePlan(p);};
  vm.runInContext(html.slice(html.indexOf('function applyObjectSetReplacement('),html.indexOf('var _jsonImportRequest=0;')),c);
  for(const p of ['asset-pack-registry','asset-catalogue','asset-pack-picker','asset-pack-conversion','asset-pack-conversion-ui'])vm.runInContext(read('assets/js/'+p+'.js'),c);
- c.AssetPackPicker.install(sidebar,{[model.id]:model},manifest);
+ beforeInstall?.(c);
+ c.AssetPackPicker.install(sidebar,{[model.id]:model},rpg);
  const ui=id=>document.querySelector('[data-conversion="'+id+'"]');
  return {c,document,sidebar,calls,copies,ui,epoch:()=>epoch,edit(){c.DATA.items[0].x++;epoch++;},advance(){epoch++;}};
 }
 async function ready(h){await h.c.AssetPackConversionUI.open();return h;}
 async function chooseBulk(h,pack='rpg-mansion'){h.ui('pack').value=pack;h.ui('pack').dispatch('change');h.ui('all').dispatch('click');}
 const snap=h=>JSON.stringify([h.c.DATA,h.c.HISTORY,h.c.REDO_HISTORY,h.c.DIRTY,h.c.__editorPlanId]);
+function nativeHeight(c){
+ c.FMP_ITEMS=Object.fromEntries([model,...manifest.items].map(item=>[item.id,item]));
+ c.AssetPackConversionContract={revision:contract.revision,mappings:contract.mappings.map(row=>({sourceId:row.sourceId,targetId:row.targetId,native:false}))};
+ for(const name of ['isCustomBlockType','isLightItemType','isContextExteriorItemType','isColumnType'])c[name]=()=>false;
+ c.balconySlabHeightMm=()=>120;
+ vm.runInContext(['isFmpItemType','getFmpItem','getItemHeightValue','getItemH'].map(topLevelFunction).join('\n'),c);
+}
+function nativeKeyboard(h){
+ const listeners={};h.c.addEventListener=(type,fn)=>(listeners[type]||=[]).push(fn);
+ h.c.isPlanImportDialogOpen=()=>false;h.c.isWalkView=()=>false;h.c.isInt=true;h.c.iMov={};h.c.invalidate3D=()=>h.calls.push('invalidate');
+ const start=html.indexOf("  document.addEventListener('keydown',function(e){"),end=html.indexOf('  loop3D();',start);
+ assert.ok(start>=0&&end>start);vm.runInContext(html.slice(start,end),h.c);
+ const windowStart=html.indexOf("window.addEventListener('keydown', function(e){"),windowEnd=html.indexOf("window.addEventListener('resize',function(){",windowStart);
+ assert.ok(windowStart>=0&&windowEnd>windowStart);vm.runInContext(html.slice(windowStart,windowEnd)+'\n'+topLevelFunction('anyWasdActive'),h.c);
+ return (type,key,target=h.document.body,flags={})=>{
+  const event={key,target,metaKey:false,ctrlKey:false,shiftKey:false,...flags,stopped:false,defaultPrevented:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};
+  for(let node=target;node;node=node.parentNode){node.dispatch(type,event);if(event.stopped)break;}
+  if(!event.stopped)for(const fn of listeners[type]||[])fn(event);
+  return event;
+ };
+}
 test('real sidebar installs search first and one compact optional dialog entry, without the old direct selector',()=>{
  const h=setup(),search=h.sidebar.querySelector('#object-search');assert.equal(search.children[0].textContent,'すべてのオブジェクトを検索');assert.equal(search.children.at(-1).id,'asset-conversion-open');assert.equal(h.document.querySelector('#catalogue-pack'),null);assert.equal(h.document.querySelectorAll('#asset-conversion-open').length,1);assert.equal(h.c.AssetPackPicker.getSelection(),'japanese-standard');assert.equal(h.document.querySelector('#asset-conversion-open').attrs['aria-haspopup'],'dialog');
 });
@@ -90,6 +114,61 @@ test('default bulk copy delegates exactly once to existing independent-plan path
 });
 test('unchecked bulk uses actual native saveState, Undo/Redo, rollback and same current identity',async()=>{
  const h=await ready(setup()),original=h.c.serializeDataSnapshot(),history=h.c.HISTORY.length;h.c.ST.selected=h.c.DATA.items[0];await chooseBulk(h);h.ui('copy').checked=false;h.ui('copy').dispatch('change');assert.equal(h.ui('name-field').hidden,true);await h.ui('create').dispatch('click');assert.equal(h.copies.length,0);assert.equal(h.c.HISTORY.length,history+1);assert.equal(h.c.REDO_HISTORY.length,0);assert.equal(h.c.DIRTY,true);assert.equal(h.c.__editorPlanId,'anonymous-source');assert.equal(h.c.ST.selected.type,manifest.items[0].id);const converted=h.c.serializeDataSnapshot();h.c.undoAction();assert.equal(h.c.serializeDataSnapshot(),original);h.c.redoAction();assert.equal(h.c.serializeDataSnapshot(),converted);assert.ok(h.calls.includes('edit-targets'));
+});
+test('null raw height and absent-height fallback preserve native effective height, Undo and reverse provenance',async()=>{
+ for(const stored of [null,undefined,123,-5]){
+  const plan=fixture();if(stored!==undefined)plan.items[0].h=stored;
+  const h=await ready(setup({plan,beforeInstall:nativeHeight})),original=h.c.serializeDataSnapshot(),effective=h.c.getItemHeightValue(h.c.DATA.items[0]);
+  assert.equal(h.c.PlanSchema.validatePlan(plan).ok,true);assert.equal(effective,model.h);
+  await chooseBulk(h);await h.ui('create').dispatch('click');
+  assert.equal(h.c.serializeDataSnapshot(),original);assert.equal(h.copies.length,1);
+  assert.equal(h.copies[0].plan.items[0].h,stored===undefined?effective:stored);
+  assert.equal(h.c.getItemHeightValue(h.copies[0].plan.items[0]),effective);
+  await ready(h);await chooseBulk(h);h.ui('copy').checked=false;h.ui('copy').dispatch('change');await h.ui('create').dispatch('click');
+  assert.equal(h.c.DATA.items[0].type,manifest.items[0].id);assert.equal(h.c.DATA.items[0].h,stored===undefined?effective:stored);
+  const converted=h.c.serializeDataSnapshot(),provenance=plain(h.c.DATA.items[0].assetPackConversion);
+  assert.equal(h.c.getItemHeightValue(h.c.DATA.items[0]),effective);h.c.undoAction();assert.equal(h.c.serializeDataSnapshot(),original);h.c.redoAction();assert.equal(h.c.serializeDataSnapshot(),converted);
+  await ready(h);await chooseBulk(h,'japanese-standard');h.ui('copy').checked=false;h.ui('copy').dispatch('change');await h.ui('create').dispatch('click');
+  assert.equal(h.c.DATA.items[0].type,model.id);assert.equal(h.c.DATA.items[0].h,stored===undefined?effective:stored);assert.equal(h.c.getItemHeightValue(h.c.DATA.items[0]),effective);assert.deepEqual(plain(h.c.DATA.items[0].assetPackConversion),provenance);
+ }
+});
+test('modal blocks actual native edit/movement keydowns, permits defaults, and releases held movement/modifiers across repeated opens',async()=>{
+ const h=setup(),emit=nativeKeyboard(h);
+ for(const close of ['close','cancel-bottom']){
+  h.c.ST.selected=null;
+  emit('keydown','Shift');h.c.ST.ctrlKey=true;emit('keydown','w');emit('keydown','ArrowLeft');assert.equal(h.c.ST.shiftKey,true);assert.equal(h.c.anyWasdActive(),true);
+  await ready(h);h.c.ST.selected=h.c.DATA.items[0];const before=snap(h);
+  for(const [key,target,flags] of [['ArrowDown',h.ui('list-pack'),{}],['Delete',h.ui('list-pack'),{}],['z',h.ui('list-pack'),{ctrlKey:true}],['z',h.ui('name'),{ctrlKey:true}],['Escape',h.ui('name'),{}],['r',h.ui('list-pack'),{}],['d',h.ui('name'),{}]]){
+   const e=emit('keydown',key,target,flags);assert.equal(e.stopped,true,key);assert.equal(e.defaultPrevented,false,key);assert.equal(snap(h),before,key);
+  }
+  assert.equal(h.c.iMov.d,undefined);
+  for(const key of ['Shift','Control','W','ArrowLeft']){const e=emit('keyup',key,h.ui('name'));assert.equal(e.stopped,false,key);assert.equal(e.defaultPrevented,false,key);}
+  assert.equal(h.c.ST.shiftKey,false);assert.equal(h.c.ST.ctrlKey,false);assert.equal(h.c.anyWasdActive(),false);assert.equal(snap(h),before);
+  h.ui(close).dispatch('click');assert.equal(h.c.ST.shiftKey,false);assert.equal(h.c.ST.ctrlKey,false);assert.equal(h.c.anyWasdActive(),false);
+  h.c.ST.floor=1;h.c.WALK={active:true,floor:1,keys:{},x:5,z:7,yaw:0};h.c.isWalkView=()=>true;h.c._lastWalkTick=0;h.c.updateWalkDoors=()=>false;
+  vm.runInContext(topLevelFunction('updateWalkMode'),h.c);assert.equal(h.c.updateWalkMode(1000),false);assert.equal(h.c.WALK.moving,false);assert.deepEqual([h.c.WALK.x,h.c.WALK.z,h.c.WALK.yaw],[5,7,0]);h.c.isWalkView=()=>false;
+ }
+});
+test('actual RPG manifest and registry supply the requested label to both real dialog selectors',async()=>{
+ const rpg=JSON.parse(read('assets/models/packs/rpg-mansion/manifest.json')),mapping=JSON.parse(read('assets/models/packs/rpg-mansion/conversion-map.json'));
+ const h=await ready(setup({rpg,fetcher:async()=>({ok:true,json:async()=>mapping})}));
+ assert.equal(h.c.AssetPackPicker.getRegistry().listPacks().find(pack=>pack.id==='rpg-mansion').name,'RPG向け洋館');
+ for(const id of ['list-pack','pack'])assert.deepEqual(h.ui(id).children.map(option=>[option.value,option.textContent]),[['japanese-standard','日本建築標準'],['rpg-mansion','RPG向け洋館']]);
+ assert.doesNotMatch(h.ui('status').textContent,/読み込めません|重複・不明/);
+});
+test('RPG filtering retains native structural and generated opening capabilities without showing other standard furniture',()=>{
+ const openingModels=JSON.parse(read('assets/models/interior_model_0_26_1/manifest.json')).items;
+ const windowModel=openingModels.find(item=>item.category==='窓'),doorModel=openingModels.find(item=>item.category==='ドア'&&/^Classroom-door-/i.test(item.name));assert.ok(windowModel&&doorModel);
+ const structures=['site-rect','foundation','exterior-stair','ramp','wall','room-rect','ceiling-lower','ceiling-raise','column','column-round','balcony','stair','stair-corner','stair-landing','roof','door-slide','door-slide-s','door-pocket','door-fold','door-fold-w','door-front','door-opening','door-opening-arch','window','window-door','opening-door-model:default','opening-door-model:small','opening-window-model:default','opening-window-model:fix','opening-window-model:window-door'];
+ structures.push('opening-window-model:'+windowModel.id,'opening-door-model:'+doorModel.id);
+ const h=setup({extraTools:[...structures,'washer','car','opening-window-model:unknown'].map(id=>({id,name:id})),beforeInstall(c){
+  c.FMP_ITEMS={[windowModel.id]:windowModel,[doorModel.id]:doorModel};c.OPENING_DOOR_MODEL_TOOL_PREFIX='opening-door-model:';c.OPENING_WINDOW_MODEL_TOOL_PREFIX='opening-window-model:';
+  vm.runInContext(['isWindowLikeType','isDoorLikeOpeningType','isOpeningItemType','isOpeningDoorModel','getFmpItem','getOpeningModelToolPreset'].map(topLevelFunction).join('\n'),c);
+ }}),before=snap(h),cards=new Map(h.sidebar.querySelectorAll('.cat-body [data-tool]').map(card=>[card.getAttribute('data-tool'),card]));
+ for(const id of structures){h.c.ST.tool=id;h.c.ST.drawing=true;h.c.ST.drawPts=[{x:1,y:2}];h.c.AssetPackPicker.setSelection('rpg-mansion');assert.equal(h.c.ST.tool,id);assert.equal(h.c.ST.drawing,true);assert.equal(cards.get(id).hidden,false,id);assert.equal(cards.get(id).parentNode.hidden,false,id);assert.equal(snap(h),before);h.c.AssetPackPicker.setSelection('japanese-standard');}
+ h.c.AssetPackPicker.setSelection('rpg-mansion');for(const id of [model.id,'washer','car','opening-window-model:unknown'])assert.equal(cards.get(id).hidden,true,id);assert.equal(cards.get(manifest.items[0].id).hidden,false);
+ const search=h.sidebar.querySelector('#object-search-input'),originalSearch=h.sidebar._globalCatalogueSearch;let refreshes=0;h.sidebar._globalCatalogueSearch=()=>{refreshes++;assert.equal(search.value,'wall');originalSearch();};
+ search.value='wall';h.c.AssetPackPicker.refresh();assert.equal(refreshes,1);assert.equal(search.value,'wall');assert.equal(h.sidebar.querySelector('#object-search-results').hidden,false);assert.equal(cards.get(model.id).hidden,true);
 });
 test('same pack keeps objects with counts and disabled apply; pending proposals are explicit',async()=>{
  const h=await ready(setup());assert.equal(h.ui('create').disabled,true);assert.match(h.ui('summary').textContent,/0点を差し替え \/ 2点を保持/);h.ui('pack').value='rpg-mansion';h.ui('pack').dispatch('change');assert.equal(h.ui('create').disabled,true);assert.match(h.ui('summary').textContent,/1点は確認して選択/);h.ui('all').dispatch('click');assert.equal(h.ui('create').disabled,false);assert.match(h.ui('summary').textContent,/1点を差し替え \/ 1点を保持/);h.ui('none').dispatch('click');assert.equal(h.ui('create').disabled,true);

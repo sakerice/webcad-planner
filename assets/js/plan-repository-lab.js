@@ -34,7 +34,36 @@
   async function history(planId){return transaction(['revisions'],'readonly',(t,set)=>{const rows=[],range=IDBKeyRange.bound(planId+':',planId+':\uffff'),r=t.objectStore('revisions').openCursor(range);r.onsuccess=()=>{const cursor=r.result;if(!cursor){set(rows);return;}const {payload,...metadata}=cursor.value;if(metadata.planId===planId)rows.push(metadata);cursor.continue();};});}
   async function draftSummaries(){return transaction(['drafts'],'readonly',(t,set)=>{const rows=[],r=t.objectStore('drafts').openCursor();r.onsuccess=()=>{const cursor=r.result;if(!cursor){set(rows);return;}const d=cursor.value;if(d.dirty)rows.push({id:d.id,planId:d.planId,sessionId:d.sessionId,generation:d.generation,updatedAt:d.updatedAt});cursor.continue();};});}
   function draftId(sessionId,planId){return JSON.stringify([sessionId,planId]);}
-  async function saveDraft(sessionId,planId,state){const record={...clone(state),id:draftId(sessionId,planId),sessionId,planId};return transaction(['drafts'],'readwrite',(t,set)=>{const store=t.objectStore('drafts'),r=store.get(record.id);r.onsuccess=()=>{const previous=r.result,stale=previous&&(record.generation<previous.generation||record.baseGeneration<previous.baseGeneration||record.baseGeneration===previous.baseGeneration&&record.baseRevisionId!==previous.baseRevisionId||record.generation===previous.generation&&(text(record.payload??record.plan)!==text(previous.payload??previous.plan)));if(stale){const conflict={...record,id:record.id+':conflict:'+crypto.randomUUID(),conflictOf:record.id,dirty:true};store.add(conflict);set({...conflict,status:'conflict'});}else{store.put(record);set({...record,status:'saved'});}};});}
+  function draftRecord(sessionId,planId,state){return {...clone(state),id:draftId(sessionId,planId),sessionId,planId};}
+  function staleDraft(record,previous){return previous&&(record.generation<previous.generation||record.baseGeneration<previous.baseGeneration||record.baseGeneration===previous.baseGeneration&&record.baseRevisionId!==previous.baseRevisionId||record.generation===previous.generation&&(text(record.payload??record.plan)!==text(previous.payload??previous.plan)));}
+  async function saveDraft(sessionId,planId,state){const record=draftRecord(sessionId,planId,state);return transaction(['drafts'],'readwrite',(t,set)=>{const store=t.objectStore('drafts'),r=store.get(record.id);r.onsuccess=()=>{const previous=r.result;if(staleDraft(record,previous)){const conflict={...record,id:record.id+':conflict:'+crypto.randomUUID(),conflictOf:record.id,dirty:true};store.add(conflict);set({...conflict,status:'conflict'});}else{store.put(record);set({...record,status:'saved'});}};});}
+  // A lifecycle rotation copies at most four retained drafts. The old session,
+  // heads and legacy sources remain untouched; the target view is the commit.
+  async function rotateSession(request){
+   const {sourceSessionId,targetSessionId}=request,sourceView=clone(request.sourceView),view=clone(request.view),entries=clone(request.drafts);
+   validateView(sourceView);validateView(view);
+   if(typeof sourceSessionId!=='string'||!sourceSessionId||typeof targetSessionId!=='string'||!targetSessionId||sourceSessionId===targetSessionId||sourceView.id!==sourceSessionId||!Array.isArray(entries)||entries.length!==view.retainedPlanIds.length||JSON.stringify(sourceView.retainedPlanIds)!==JSON.stringify(view.retainedPlanIds)||entries.some((entry,i)=>typeof entry.planId!=='string'||!entry.planId||entry.planId!==view.retainedPlanIds[i]||!entry.head||entry.head.id!==entry.planId||entry.sourceDraft&&(entry.sourceDraft.id!==draftId(sourceSessionId,entry.planId)||entry.sourceDraft.sessionId!==sourceSessionId||entry.sourceDraft.planId!==entry.planId)))throw Error('session_rotation_invalid');
+   if(entries.some(({head,state})=>!state||!Array.isArray(state.plan?.walls)||!Array.isArray(state.plan?.rooms)||!Array.isArray(state.plan?.items)||text(state.plan)!==text(state.payload)||!Number.isSafeInteger(state.generation)||state.generation<0||!Number.isSafeInteger(state.baseGeneration)||state.baseGeneration<1||typeof state.baseRevisionId!=='string'||!state.baseRevisionId||!Number.isSafeInteger(head.headGeneration)||head.headGeneration<1||typeof head.headRevisionId!=='string'||!head.headRevisionId))throw Error('session_rotation_invalid');
+   const prepared=entries.map(entry=>({...entry,record:draftRecord(targetSessionId,entry.planId,entry.state)}));
+   return transaction(['views','drafts','plans'],'readwrite',(t,set,abort)=>{
+    const vs=t.objectStore('views'),ds=t.objectStore('drafts'),ps=t.objectStore('plans'),source=vs.get(sourceSessionId),target=vs.get(targetSessionId);
+    const reads=prepared.map(entry=>({...entry,source:ds.get(draftId(sourceSessionId,entry.planId)),target:ds.get(entry.record.id),current:ps.get(entry.planId)}));
+    const requests=[source,target,...reads.flatMap(entry=>[entry.source,entry.target,entry.current])];let remaining=requests.length;
+    for(const r of requests)r.onsuccess=()=>{if(--remaining)return;try{
+     if(JSON.stringify(source.result)!==JSON.stringify(sourceView))throw Error('view_generation_conflict');
+     if(target.result)throw Error('session_target_exists');
+     for(const entry of reads){
+      if(JSON.stringify(entry.current.result)!==JSON.stringify(entry.head))throw Error('plan_generation_conflict');
+      if(JSON.stringify(entry.source.result)!==JSON.stringify(entry.sourceDraft))throw Error('draft_generation_conflict');
+      if(staleDraft(entry.record,entry.target.result))throw Error('draft_generation_conflict');
+      if(entry.target.result)throw Error('session_target_exists');
+     }
+     const committed={...view,id:targetSessionId,generation:1};
+     for(const entry of reads)ds.add(entry.record);
+     vs.add(committed);set({status:'saved',view:committed});
+    }catch(error){abort(error);}};
+   });
+  }
   async function save(request,authorization,commitOptions={}){
    request=snapshotJSON(request);
    if(!schema||typeof schema.validatePlan!=='function')throw Error('plan_schema_unavailable');
@@ -71,7 +100,7 @@
   async function readUnchecked(planId,revisionId,allowUnverified=false){const head=await get('plans',planId);if(!head||head.verified===false&&!allowUnverified)return null;const revision=await get('revisions',revisionId||head.headRevisionId);if(revision&&revision.codecVersion!==1)throw Error('unsupported_revision_codec');if(!revision||revision.planId!==planId||await digest(revision.payload)!==revision.payloadDigest)throw Error('revision_integrity_failed');return {head,revision,payload:JSON.parse(revision.payload)};}
   async function read(planId,revisionId,allowUnverified=false){const result=await readUnchecked(planId,revisionId,allowUnverified);if(result?.head.origin?.legacyCopy){if(!lineage)throw Error('legacy_copy_support_unavailable');await lineage.admission(planId,result.payload);}return result;}
   async function duplicate(planId,newPlanId,newName,operationId){const current=await read(planId);if(!current)throw Error('plan_missing');return derive({planId:newPlanId,name:newName,operationId,baseRevisionId:null,baseGeneration:0,payload:current.payload,kind:'duplicate',origin:{copiedFromPlanId:planId,copiedFromRevisionId:current.revision.id}},planId,current.revision.id);}
-  async function restore(planId,revisionId,baseRevisionId,baseGeneration,operationId){const past=await read(planId,revisionId);return save({planId,payload:past.payload,baseRevisionId,baseGeneration,operationId,kind:'restore',restoredFrom:revisionId});}
+  async function restore(planId,revisionId,baseRevisionId,baseGeneration,operationId,commitOptions){const past=await read(planId,revisionId);return save({planId,payload:past.payload,baseRevisionId,baseGeneration,operationId,kind:'restore',restoredFrom:revisionId},undefined,commitOptions);}
   async function sourceCodec(value){
    const blobHashes=new Map();async function collectBlobs(value,seen=new Set()){if(!value||typeof value!=='object'||seen.has(value))return;seen.add(value);if(typeof Blob!=='undefined'&&value instanceof Blob){blobHashes.set(value,await digest(JSON.stringify(Array.from(new Uint8Array(await value.arrayBuffer())))));return;}const children=value instanceof Map?[...value].flat():value instanceof Set?[...value]:Object.values(value);for(const child of children)await collectBlobs(child,seen);}await collectBlobs(value);
    function encode(value,seen=new Map()){if(value===null)return ['null'];if(typeof value!=='object')return [typeof value,typeof value==='number'&&(!Number.isFinite(value)||Object.is(value,-0))?(Object.is(value,-0)?'-0':String(value)):typeof value==='bigint'?String(value):value];if(seen.has(value))return ['reference',seen.get(value)];seen.set(value,seen.size);if(typeof Blob!=='undefined'&&value instanceof Blob)return ['blob',value.type,value.size,value.name||null,value.lastModified||null,blobHashes.get(value)];if(value instanceof Date)return ['date',Number.isFinite(value.getTime())?value.toISOString():'invalid'];if(value instanceof RegExp)return ['regexp',value.source,value.flags,value.lastIndex];if(value instanceof Error)return ['error',value.name,value.message,value.stack];if(ArrayBuffer.isView(value))return [value.constructor.name,Array.from(new Uint8Array(value.buffer,value.byteOffset,value.byteLength))];if(value instanceof ArrayBuffer)return ['ArrayBuffer',Array.from(new Uint8Array(value))];if(value instanceof Map)return ['Map',[...value].map(([k,v])=>[encode(k,seen),encode(v,seen)])];if(value instanceof Set)return ['Set',[...value].map(v=>encode(v,seen))];const entries=Object.keys(value).sort().map(k=>[k,encode(value[k],seen)]);return Array.isArray(value)?['array',value.length,entries]:['object',entries];}
@@ -122,7 +151,7 @@
     try{if(!db.objectStoreNames.contains(spec.store))continue;await new Promise((resolve,reject)=>{const tx=db.transaction(spec.store,'readonly'),store=tx.objectStore(spec.store),r=spec.key?store.openCursor(IDBKeyRange.only(spec.key)):store.openCursor();r.onsuccess=()=>{const cursor=r.result;if(!cursor)return;sources.push({sourceId:spec.db+'/'+spec.store+'/'+keyToken(cursor.key),kind:spec.kind,name:'旧保存 '+String(cursor.key),sourceKey:clone(cursor.key),raw:clone(cursor.value)});cursor.continue();};tx.oncomplete=resolve;tx.onabort=tx.onerror=()=>reject(tx.error);});}finally{db.close();}
    }return sources;
   }
-  return {save,read,list,get,history,admission,validateAdmission,isAdmission:cap=>!!lineage?.isAdmission(cap),derive,prepareDerivationSource,prepareLegacyCopy,createLegacyCopy,draftSummaries,saveDraft,duplicate,restore,importSource,setView,updateView,detach,readLegacySources,digest,close:async()=>{(await open()).close();opening=null;}};
+  return {save,read,list,get,history,admission,validateAdmission,isAdmission:cap=>!!lineage?.isAdmission(cap),derive,prepareDerivationSource,prepareLegacyCopy,createLegacyCopy,draftSummaries,saveDraft,rotateSession,duplicate,restore,importSource,setView,updateView,detach,readLegacySources,digest,close:async()=>{(await open()).close();opening=null;}};
  }
  return {create};
 });

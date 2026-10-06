@@ -116,5 +116,6 @@ test('重いときは一度画面へ返してから再構築する', () => {
   assert.match(body, /isLikelyHeavy3DRebuild\(\)/);
   assert.match(body, /showAppLoading\(/);
   assert.match(body, /runAfterNextPaint\(/);
-  assert.match(body, /hideAppLoading\(\)/);
+  assert.match(topLevelFunction('finish3DRebuildBatch'), /hideAppLoadingForOwner\(batch\.loadingOwner\)/);
+  assert.match(topLevelFunction('perform3DRebuild'), /finish3DRebuildBatch\(batch\)/);
 });

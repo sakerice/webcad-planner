@@ -2,11 +2,16 @@
 (function(root){
   'use strict';
   let registry=null,selected='japanese-standard',sidebar=null;
+  const structuralTools=new Set(['site-rect','foundation','exterior-stair','ramp','wall','room-rect','ceiling-lower','ceiling-raise','column','column-round','balcony','stair','stair-corner','stair-landing','roof']);
+  // These edit the building itself, independently of the furniture catalogue.
+  // Reuse native opening classification, including generated model-tool IDs.
+  const isStructuralTool=id=>structuralTools.has(id)||root.isOpeningItemType?.(id)||!!root.getOpeningModelToolPreset?.(id);
   function getSelection(){return selected;}
   function apply(){
     if(!sidebar||!registry)return;
     sidebar.querySelectorAll('.cat-body [data-tool]').forEach(card=>{
-      card.hidden=!registry.hasCandidate(card.getAttribute('data-tool'),selected);
+      const id=card.getAttribute('data-tool');
+      card.hidden=!isStructuralTool(id)&&!registry.hasCandidate(id,selected);
     });
     sidebar.querySelectorAll('.asset-subcat').forEach(group=>{
       const cards=[...group.querySelectorAll('[data-tool]')];
@@ -24,7 +29,7 @@
     selected=registry?registry.resolvePackId(id):'japanese-standard';
     // Cancel only a pending placement tool. Preserve selected objects, history,
     // drawings already committed to DATA, and all 3D caches.
-    if(registry&&root.ST&&registry.getAsset(root.ST.tool)&&!registry.hasCandidate(root.ST.tool,selected)){
+    if(registry&&root.ST&&!isStructuralTool(root.ST.tool)&&registry.getAsset(root.ST.tool)&&!registry.hasCandidate(root.ST.tool,selected)){
       root.ST.tool='select';root.ST.drawing=false;root.ST.drawPts=[];
       root.syncToolUi?.();root.draw2d?.();
     }

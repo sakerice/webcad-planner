@@ -160,6 +160,7 @@ const FNS = [
   'setbackBuildingPlanBoundsMm', 'setbackBuildingTopWorldYAt', 'setbackCutSpanMm',
   'setbackRoofTemplateItem', 'setbackPlaneKeyOf', 'setbackBindingClipPlan', 'setbackBindingClipsPlan', 'setbackRoofItemForPlane', 'setbackRoofItems',
   'clipPlanPolyByRoofLocal', 'roofRoomOverlapPointsMm', 'setbackRoofsOverRoom', 'build3DSetbackRoofs',
+  'collectGltfResources', 'retained3DResources', 'isRetained3DResource',
   'setbackCutGeometry', 'applySetbackCut'
 ];
 

@@ -160,6 +160,7 @@ const SETBACK_FNS = [
   'measureSetbackBuildingBox', 'layoutSetbackDimLabels',
   'addSetbackLine', 'makeSetbackLabelSprite', 'addSetbackPlaneMesh',
   'addSetbackDims', 'addSetbackOverhang', 'build3DSetback', 'applySetbackDimVisibility',
+  'collectGltfResources', 'retained3DResources', 'isRetained3DResource',
   'setbackCutGeometry', 'applySetbackCut',
   'setbackZoneOptionsHtml', 'siteSetbackRaw', 'siteSetbackEffective', 'setbackCustomMark',
   'siteSetbackPanelHtml', 'updateSelectedSetback'

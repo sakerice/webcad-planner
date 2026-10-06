@@ -27,6 +27,13 @@ test('missing height resolves from original asset, never from target; invalid di
  p.items[0].h=-5;assert.equal(preview(p).plan.items[0].h,-5);assert.equal(preview(p).plan.items[0].assetPackConversion.renderHeightMm,legacy.get('fmp-Chair01').h);
  assert.equal(preview(p,{resolvedDimensions:[{h:-5}]}).changed,0);
 });
+test('explicit null dimensions remain stored values while missing dimensions use original defaults and v2 effective height',()=>{
+ const p=plan();Object.assign(p.items[0],{w:null,d:null,h:null});const before=JSON.stringify(p),r=preview(p);
+ assert.equal(r.changed,1);assert.equal(JSON.stringify(p),before);for(const key of ['w','d','h'])assert.equal(r.plan.items[0][key],null);
+ assert.equal(r.plan.items[0].assetPackConversion.sourceEffectiveHeightMm,legacy.get(item.type).h);
+ const reverse=converter.preview(r.plan,{targetPack:'japanese-standard',approvedIndexes:[0],resolvedDimensions:[{w:legacy.get(item.type).w,d:legacy.get(item.type).d,h:legacy.get(item.type).h}],resolvedTargetHeights:[legacy.get(item.type).h]});
+ assert.equal(reverse.changed,1);for(const key of ['w','d','h'])assert.equal(reverse.plan.items[0][key],null);assert.deepEqual(reverse.plan.items[0].assetPackConversion,r.plan.items[0].assetPackConversion);
+});
 test('conversion round-trips and is idempotent; preview does not change source history',()=>{
  const p=plan(),history=[JSON.stringify(p)],r=preview(p);assert.deepEqual(JSON.parse(JSON.stringify(r.plan)),r.plan);assert.deepEqual(preview(r.plan).plan,r.plan);assert.deepEqual(history,[JSON.stringify(p)]);
 });

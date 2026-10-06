@@ -40,10 +40,11 @@
     if(!sc3)return;
     sc3.updateMatrixWorld(true);
     function add(m,matrix,ref,kind){
+      var determinant=matrix.determinant();
+      if(!matrix.elements.every(Number.isFinite)||!Number.isFinite(determinant)||Math.abs(determinant)<1e-12){sceneReady=false;return;}
       if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();
       var b=m.geometry.boundingBox&&m.geometry.boundingBox.clone().applyMatrix4(matrix);
       if(!b||b.isEmpty()||![...b.min.toArray(),...b.max.toArray()].every(Number.isFinite)){sceneReady=false;return;}
-      if(Math.abs(matrix.determinant())<1e-12){sceneReady=false;return;}
       boxes.push({min:b.min,max:b.max,ref:ref,kind:kind,local:m.geometry.boundingBox.clone(),inverse:matrix.clone().invert(),geometry:m.geometry,matrix:matrix.clone()});
     }
     sc3.traverse(function(m){
@@ -56,7 +57,17 @@
         m.userData.selectionHelper||m.userData.moveGizmo||m.userData.hitProxy||m.userData.shadowHelper)return;
       if(m.isInstancedMesh){
         var a=new THREE.Matrix4(),world=new THREE.Matrix4();
-        for(var i=0;i<m.count;i++){m.getMatrixAt(i,a);world.multiplyMatrices(m.matrixWorld,a);add(m,world,(m.userData.instanceRefs||[])[i],m.userData.selectKind);}
+        for(var i=0;i<m.count;i++){
+          m.getMatrixAt(i,a);
+          if(m.userData.instanceWalkVisible&&m.userData.instanceWalkVisible[i]===false){
+            // The renderer hides other-floor instances with an exact zero-scale
+            // matrix. Their immutable physical placement still counts as solid.
+            var physical=(m.userData.instanceBaseMatrices||[])[i];
+            if(!a.elements.every(function(value,index){return value===(index===15?1:0);})||!physical||!physical.isMatrix4){sceneReady=false;continue;}
+            a.copy(physical);
+          }
+          world.multiplyMatrices(m.matrixWorld,a);add(m,world,(m.userData.instanceRefs||[])[i],m.userData.selectKind);
+        }
       }else add(m,m.matrixWorld,m.userData.selectRef,m.userData.selectKind);
     });
     var rooms=DATA.rooms.filter(function(r){return r.floor===WALK.floor&&!r.hidden3D;}),heightKnown=true;

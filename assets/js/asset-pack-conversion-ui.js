@@ -138,7 +138,10 @@
   document.body.append(dialog);
   el('pack').onchange=()=>{if(busy)return;excluded=new Set();approved=new Set();render();};el('copy').onchange=syncDestination;el('list-apply').onclick=applyList;
   el('all').onclick=()=>{if(!preview||busy)return;for(const row of preview.rows)if(row.canSelect){approved.add(row.index);excluded.delete(row.index);}render();status('支持高さや個別機能は自動一致しません。3Dと各候補を確認してください。');};el('none').onclick=()=>{if(!preview||busy)return;approved.clear();excluded=new Set(preview.rows.map(r=>r.index));render();};el('close').onclick=()=>dialog.close();el('cancel-bottom').onclick=()=>dialog.close();el('create').onclick=create;el('capture').onclick=capturePair;el('stop').onclick=()=>{stopCapture();el('capture').disabled=!preview?.changed||!JSON.parse(sourceText).rooms.length;status('描画を取り消しました。差し替えは行っていません。');};
-  dialog.addEventListener('close',()=>{cancel();button?.focus();});dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});for(const event of ['keydown','keyup'])dialog.addEventListener(event,e=>e.stopPropagation());
+  dialog.addEventListener('close',()=>{cancel();button?.focus();});dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
+  // Contain edit shortcuts without cancelling native input/select defaults.
+  // Key releases must reach the existing modifier and walk-movement cleanup.
+  dialog.addEventListener('keydown',e=>e.stopPropagation());
  }
  function install(container){
   if(button||!container||!registry()?.listPacks().some(p=>p.id==='rpg-mansion'))return;

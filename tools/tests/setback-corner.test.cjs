@@ -169,6 +169,7 @@ const FNS = [
   'setbackFootprintRects', 'setbackFootprintEdges',
   'setbackSlabAppearanceItem', 'setbackLowestLimitMmAt',
   'build3DSetbackRoofSlab', 'addSetbackSlabGutters', 'setbackSectionsForBuild', 'build3DSetbackRoofs',
+  'collectGltfResources', 'retained3DResources', 'isRetained3DResource',
   'setbackCutGeometry', 'applySetbackCut',
   'build3DRoofItem'
 ];

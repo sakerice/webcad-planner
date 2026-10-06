@@ -4043,34 +4043,66 @@ function getTexture3D(key) {
   return tex;
 }
 
-function disposeObj(obj,seenGeo,seenMat) {
+function disposeObj(obj,seenGeo,seenMat,seenTex,retained) {
   seenGeo=seenGeo||new Set();
   seenMat=seenMat||new Set();
+  seenTex=seenTex||new Set();
+  retained=retained||retained3DResources();
   if (obj.geometry && !seenGeo.has(obj.geometry)) {
     seenGeo.add(obj.geometry);
-    if(!(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(obj.geometry)))obj.geometry.dispose();
+    if(!isRetained3DResource(obj.geometry,retained))obj.geometry.dispose();
   }
   if (obj.material) {
-    if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m,seenMat); });
-    else disposeMat(obj.material,seenMat);
+    if (Array.isArray(obj.material)) obj.material.forEach(function(m){ disposeMat(m,seenMat,seenTex,retained); });
+    else disposeMat(obj.material,seenMat,seenTex,retained);
   }
-  if (obj.children) obj.children.forEach(function(child){disposeObj(child,seenGeo,seenMat);});
+  if (obj.children) obj.children.forEach(function(child){disposeObj(child,seenGeo,seenMat,seenTex,retained);});
 }
-function disposeMat(m,seenMat) {
+function disposeMat(m,seenMat,seenTex,retained) {
   if(!m || (seenMat&&seenMat.has(m))) return;
   if(seenMat) seenMat.add(m);
+  retained=retained||retained3DResources();
+  if(isRetained3DResource(m,retained))return;
+  seenTex=seenTex||new Set();
+  function releaseTexture(tex){
+    if(!tex||seenTex.has(tex)||isRetained3DResource(tex,retained))return;
+    seenTex.add(tex);tex.dispose();
+  }
   m.dispose();
-  if (m.map && !(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE && window.parent.ParallelEditors.modelPool.resources.has(m.map))) m.map.dispose();
+  releaseTexture(m.map);
   // Only release explicitly owned auxiliary maps. GLB normal/roughness maps may
   // be shared with cached models and must remain alive across scene rebuilds.
   var owned=m.userData&&m.userData.ownedAuxiliaryTextures;
   if(owned){
-    var released=new Set();
-    owned.forEach(function(tex){
-      if(tex&&tex!==m.map&&!released.has(tex)){released.add(tex);tex.dispose();}
-    });
+    owned.forEach(releaseTexture);
     m.userData.ownedAuxiliaryTextures=[];
   }
+}
+function collectGltfResources(scene,visit){
+  if(!scene||typeof scene.traverse!=='function')return;
+  scene.traverse(function(object){
+    if(object.geometry)visit(object.geometry);
+    for(var material of [].concat(object.material||[])){
+      if(!material)continue;visit(material);
+      for(var value of Object.values(material))if(value&&value.isTexture)visit(value);
+    }
+  });
+}
+function retained3DResources(){
+  var retained=new Set();
+  // Normal rebuilds borrow from these local templates. A closing editor's
+  // existing cache teardown must instead release its own resources once.
+  if(!(typeof window!=='undefined'&&window._editorPaneDisposed)&&typeof _modelCache!=='undefined'){
+    for(var model of Object.values(_modelCache))collectGltfResources(model,function(resource){retained.add(resource);});
+  }
+  if(typeof _texCache!=='undefined')for(var texture of Object.values(_texCache))retained.add(texture);
+  return retained;
+}
+function isRetained3DResource(resource,retained){
+  if(retained.has(resource))return true;
+  var host=typeof window==='undefined'?null:typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE?window.parent:window;
+  var pool=host&&host.ParallelEditors&&host.ParallelEditors.modelPool;
+  return !!(pool&&(pool.owns?pool.owns(resource):pool.resources.has(resource)));
 }
 
 var composer = null; // single declaration
@@ -6294,6 +6326,7 @@ function applySetbackCut(){
   if(!planes.length) return null;
   var coefs=planes.map(setbackPlaneWorldCoef);
   var meshes=setbackSubjectMeshes();
+  var retained=retained3DResources();
   // 同じジオメトリを複数のメッシュが共有していることがある。差し替えたあとに
   // 元を dispose してよいのは、そのメッシュしか使っていないときだけ。
   var uses={}, i;
@@ -6311,7 +6344,7 @@ function applySetbackCut(){
     o.geometry=ng;
     if(ng.userData.tris===0) dropped++;
     cut++;
-    if(old&&old.uuid&&uses[old.uuid]===1&&old.dispose) old.dispose();
+    if(old&&old.uuid&&uses[old.uuid]===1&&old.dispose&&!isRetained3DResource(old,retained)) old.dispose();
   });
   return {planes:planes.length,subjects:meshes.length,cut:cut,emptied:dropped};
 }
@@ -6360,9 +6393,10 @@ function build3D(){
 function build3DScene(){
   if(typeof WalkTps!=='undefined')WalkTps.invalidate();
   var toRemove=[];
+  var seenGeo=new Set(),seenMat=new Set(),seenTex=new Set(),retained=retained3DResources();
   sc3.children.forEach(function(c){if(c.userData.b) toRemove.push(c);});
   toRemove.forEach(function(c){
-    disposeObj(c);
+    disposeObj(c,seenGeo,seenMat,seenTex,retained);
     sc3.remove(c);
   });
   _activeInteriorShadowLightCount=0;
@@ -6462,6 +6496,9 @@ function fitShadowCamera(sunLight) {
   if(ren && ren.shadowMap) ren.shadowMap.needsUpdate=true;
 }
 var _tablet3DRebuildQueued=false;
+var _tablet3DRebuildBatch=null;
+var _tablet3DRebuildActive=0;
+var _3DRebuildDepth=0;
 // 直前の再構築に実際かかった時間(ms)。当て推量より実測を優先するために持つ。
 var _last3DRebuildMs=0;
 // これを超えたら「固まったように見える」とみなし、次回から先に画面を返して
@@ -6469,15 +6506,35 @@ var _last3DRebuildMs=0;
 // 一般的な目安の上に、オーバーレイの最小表示 (APP_LOADING_MIN_MS=260ms) を
 // 足しても待ち時間が伸びたと感じない範囲を取ってある。
 var HEAVY_3D_REBUILD_MS=200;
-function perform3DRebuild(){
-  if(!sc3) return;
-  var t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
-  build3D();
-  invalidateLightBudget();
-  if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
-  var t1=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
-  _last3DRebuildMs=t1-t0;
+// Each waiting batch owns its callback and loading indicator. A forced build
+// consumes that batch, while a change made during the build queues fresh work.
+function finish3DRebuildBatch(batch){
+  if(_tablet3DRebuildBatch===batch) _tablet3DRebuildBatch=null;
+  _tablet3DRebuildQueued=!!_tablet3DRebuildBatch||_tablet3DRebuildActive>0;
+  try{if(window.WalkTps)WalkTps.invalidate();}
+  finally{if(batch.loadingOwner!==undefined)hideAppLoadingForOwner(batch.loadingOwner);}
 }
+function perform3DRebuild(){
+  var batch=_tablet3DRebuildBatch;
+  if(batch){
+    _tablet3DRebuildBatch=null;
+    _tablet3DRebuildActive++;
+  }
+  _3DRebuildDepth++;
+  try{
+    if(!sc3) return;
+    var t0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+    build3D();
+    invalidateLightBudget();
+    if(ren&&ren.shadowMap) ren.shadowMap.needsUpdate=true;
+    var t1=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+    _last3DRebuildMs=t1-t0;
+  }finally{
+    _3DRebuildDepth--;
+    if(batch){_tablet3DRebuildActive--;finish3DRebuildBatch(batch);}
+  }
+}
+
 // 「重い」はマシンとプランで決まる。入力機器では決まらない。
 //
 // 以前はここが touch 判定で始まっていたため、マウスのPCでは間取りがどれだけ
@@ -6509,25 +6566,32 @@ function isLikelyHeavy3DRebuild(){
 function rebuild3D(quiet){
   if(!sc3) return;
   if(window.WalkTps)WalkTps.invalidate();
+  // Our own indicator is already visible after the first request. Check the
+  // waiting batch before quiet/light/visible-overlay synchronous shortcuts.
+  if(_tablet3DRebuildBatch) return;
   var loadingEl=document.getElementById('app-loading');
   var loadingAlreadyVisible=!!(loadingEl&&loadingEl.classList.contains('show'));
-  if(quiet || !isLikelyHeavy3DRebuild() || loadingAlreadyVisible){
+  if(!_3DRebuildDepth&&(quiet || !isLikelyHeavy3DRebuild() || loadingAlreadyVisible)){
     perform3DRebuild();
     return;
   }
   // 重い同期処理の前に一度ブラウザへ描画を返す。短時間に複数回呼ばれても
   // 再構築は1回にまとめ、タブレットでの固まったような見え方と無駄な処理を抑える。
-  if(_tablet3DRebuildQueued) return;
+  var batch={};
+  _tablet3DRebuildBatch=batch;
   _tablet3DRebuildQueued=true;
-  showAppLoading('3Dを更新中');
-  runAfterNextPaint(function(){
-    try{perform3DRebuild();}
-    finally{
-      _tablet3DRebuildQueued=false;
-      if(window.WalkTps)WalkTps.invalidate();
-      hideAppLoading();
-    }
-  });
+  try{
+    batch.loadingOwner=showAppLoading('3Dを更新中');
+    runAfterNextPaint(function(){
+      // A synchronous caller may already have consumed this batch. Never run
+      // its stale callback or let it clear a newer batch's pending state.
+      if(_tablet3DRebuildBatch!==batch) return;
+      perform3DRebuild();
+    });
+  }catch(err){
+    finish3DRebuildBatch(batch);
+    throw err;
+  }
 }
 
 // グループ直下の「同一マテリアル・同一影設定・同一属性構成」のメッシュを1つに統合し
@@ -15194,16 +15258,6 @@ function getGltfLoader(supportRenderer){
 // graph as well as replacements, because a finish may throw or remove a map.
 function createGltfResourceOwner(gltf){
   var owned=new Set(),borrowed=new Set(),released=new Set();
-  function collect(scene,visit){
-    if(!scene||typeof scene.traverse!=='function')return;
-    scene.traverse(function(object){
-      if(object.geometry)visit(object.geometry);
-      for(var material of [].concat(object.material||[])){
-        if(!material)continue;visit(material);
-        for(var value of Object.values(material))if(value&&value.isTexture)visit(value);
-      }
-    });
-  }
   function shared(resource){
     var pool=window.ParallelEditors&&window.ParallelEditors.modelPool;
     if(pool&&(pool.owns?pool.owns(resource):pool.resources.has(resource)))return true;
@@ -15211,13 +15265,13 @@ function createGltfResourceOwner(gltf){
     return borrowed.has(resource);
   }
   function capture(){
-    if(typeof _modelCache!=='undefined')for(var scene of Object.values(_modelCache))collect(scene,function(resource){borrowed.add(resource);});
-    for(var scene of new Set([gltf.scene].concat(gltf.scenes||[])))collect(scene,function(resource){
+    if(typeof _modelCache!=='undefined')for(var scene of Object.values(_modelCache))collectGltfResources(scene,function(resource){borrowed.add(resource);});
+    for(var scene of new Set([gltf.scene].concat(gltf.scenes||[])))collectGltfResources(scene,function(resource){
       if(shared(resource))borrowed.add(resource);else owned.add(resource);
     });
   }
   function release(keep){
-    capture();var retained=new Set();collect(keep,function(resource){retained.add(resource);});
+    capture();var retained=new Set();collectGltfResources(keep,function(resource){retained.add(resource);});
     for(var resource of owned)if(!retained.has(resource)&&!released.has(resource)&&!shared(resource)){
       released.add(resource);
       try{resource.dispose();}catch(error){console.warn('GLTF resource cleanup failed:',error);}
@@ -17933,12 +17987,34 @@ function walkWallVerticalRangeM(w){
   }
   return {bottom:bottom, top:top};
 }
+// Subtract the union of real opening cuts. Invalid cuts cannot certify passage.
+function walkWallSolidSpansMm(len,gaps){
+  if(!Number.isFinite(len)||len<1||!Array.isArray(gaps)) return null;
+  var sorted=gaps.slice();
+  for(var i=0;i<sorted.length;i++){
+    var g=sorted[i];
+    if(!g||!Number.isFinite(g.a)||!Number.isFinite(g.b)||g.a<0||g.b>len||g.b<g.a) return null;
+  }
+  sorted.sort(function(a,b){return a.a-b.a;});
+  var spans=[],end=0;
+  sorted.forEach(function(g){
+    if(g.b===g.a) return;
+    if(g.a>end) spans.push({a:end,b:g.a});
+    end=Math.max(end,g.b);
+  });
+  if(end<len) spans.push({a:end,b:len});
+  return spans;
+}
 function buildWalkCollisionCache(floor){
   // 3D で一時的に非表示にした壁も、以前どおりぶつかる(見えなくしても壁はある)。
   _walkCollWalls=DATA.walls.filter(function(w){return w.floor===floor;}).map(function(w){
     var vr=walkWallVerticalRangeM(w);
-    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:w.thick||100,gaps:getWallDoorGapsMm(w),
-      bottomY:vr.bottom, topY:vr.top};
+    var thick=(w.thick===undefined||w.thick===null||w.thick===0)?100:w.thick;
+    var valid=[w.x1,w.y1,w.x2,w.y2,thick,vr.bottom,vr.top].every(Number.isFinite)&&thick>0&&vr.top>=vr.bottom;
+    var len=valid?Math.hypot(w.x2-w.x1,w.y2-w.y1):NaN;
+    var gaps=valid?getWallDoorGapsMm(w):[];
+    return {x1:w.x1,y1:w.y1,x2:w.x2,y2:w.y2,thick:thick,gaps:gaps,
+      solidSpans:valid?walkWallSolidSpansMm(len,gaps):null, bottomY:vr.bottom,topY:vr.top};
   });
   _walkCollFloor=floor;
 }
@@ -17951,24 +18027,27 @@ var WALK_BODY_HEIGHT_M=1.7;
 // 跨げ、頭より上にある垂れ壁はくぐれる。
 // feetY を渡さなければ、いまの足元(WALK)で判定する。
 function walkBlockedAt(xMm,zMm,floor,feetY){
+  if(!Number.isFinite(xMm)||!Number.isFinite(zMm)) return true;
   if(_walkCollFloor!==floor) buildWalkCollisionCache(floor);
   var walls=_walkCollWalls;
   var feet=(feetY!==undefined)?feetY:floorTopY(floor)+((WALK&&WALK.groundOff)||0);
+  if(!Number.isFinite(feet)) return true;
   var head=feet+WALK_BODY_HEIGHT_M;
   for(var i=0;i<walls.length;i++){
     var w=walls[i];
-    if(w.topY!==undefined&&(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head)) continue;
-    var dx=w.x2-w.x1, dy=w.y2-w.y1, len2=dx*dx+dy*dy;
-    if(len2<1) continue;
-    var t=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len2;
-    var tc=Math.max(0,Math.min(1,t));
-    var px=w.x1+tc*dx, py=w.y1+tc*dy;
-    var dist=Math.hypot(xMm-px,zMm-py);
-    if(dist>=w.thick/2+WALK_PLAYER_RADIUS_MM) continue;
-    var alongMm=tc*Math.sqrt(len2);
-    var pad=WALK_PLAYER_RADIUS_MM*0.3;
-    var inGap=w.gaps.some(function(g){return alongMm>=g.a-pad && alongMm<=g.b+pad;});
-    if(!inGap) return true;
+    if(!w.solidSpans) return true;
+    if(w.topY<=feet+WALK_MAX_STEP_UP_M||w.bottomY>=head) continue;
+    var dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.hypot(dx,dy);
+    var along=((xMm-w.x1)*dx+(zMm-w.y1)*dy)/len;
+    var normal=Math.abs(((zMm-w.y1)*dx-(xMm-w.x1)*dy)/len);
+    var across=Math.max(0,normal-w.thick/2);
+    // Circle against each remaining finite wall rectangle, including jambs
+    // and endpoint corners. Tangency is allowed; tolerance is numerical only.
+    for(var j=0;j<w.solidSpans.length;j++){
+      var span=w.solidSpans[j];
+      var beside=Math.max(0,span.a-along,along-span.b);
+      if(Math.hypot(beside,across)<WALK_PLAYER_RADIUS_MM-1e-7) return true;
+    }
   }
   return false;
 }
@@ -18205,6 +18284,7 @@ function loop3D(){
 var APP_LOADING_MIN_MS = 260;
 var _appLoadingShownAt = 0;
 var _appLoadingHideTimer = null;
+var _appLoadingGeneration=0;
 // 「インジケーターを出す → 一度ブラウザへ描画を返す → 重い処理」の待ち方。
 //
 // requestAnimationFrame だけに預けると、フレームが来ない環境では**永久に進まない**。
@@ -18228,6 +18308,13 @@ function showAppLoading(label){
   if(_appLoadingHideTimer){clearTimeout(_appLoadingHideTimer);_appLoadingHideTimer=null;}
   _appLoadingShownAt=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   el.classList.add('show');
+  return ++_appLoadingGeneration;
+}
+// The public hide callback deliberately ignores arguments: Promise.then and
+// event handlers may pass result/event values. Only rebuild cleanup owns a token.
+function hideAppLoadingForOwner(owner){
+  if(owner!==_appLoadingGeneration) return;
+  hideAppLoading();
 }
 function hideAppLoading(){
   var el=document.getElementById('app-loading');
@@ -18235,7 +18322,9 @@ function hideAppLoading(){
   var now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   var wait=Math.max(0,APP_LOADING_MIN_MS-(now-_appLoadingShownAt));
   if(_appLoadingHideTimer) clearTimeout(_appLoadingHideTimer);
+  var generation=_appLoadingGeneration;
   _appLoadingHideTimer=setTimeout(function(){
+    if(generation!==_appLoadingGeneration) return;
     el.classList.remove('show');
     _appLoadingHideTimer=null;
   },wait);

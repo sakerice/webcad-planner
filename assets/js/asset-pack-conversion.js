@@ -66,7 +66,9 @@
     if(canSelect&&!reason&&match.reviewRequired&&!approved.has(index))reason=match.reviewReason||'高さ・機能の確認が必要なため保持';
     if(match&&!reason){
      item.type=target.id;
-     for(const key of ['w','d','h'])if(item[key]==null)item[key]=dimensions[key];
+     // An explicit null is a stored setting, not an absent dimension. Effective
+     // height belongs in v2 provenance; never overwrite an existing raw field.
+     for(const key of ['w','d','h'])if(!Object.prototype.hasOwnProperty.call(item,key))item[key]=dimensions[key];
      // Retain all appearance and custom fields. Unmatched finish keys are inert
      // on the target, but survive save/load rather than being discarded.
      if(!reverse)item.assetPackConversion={...(source.assetPackConversion||{}),version:2,mappingVersion:contract.revision,sourceType:source.type,targetType:target.id,heightPolicy:'preserve-effective-height-v1',sourceEffectiveHeightMm:dimensions.h,renderHeightMm:dimensions.h};

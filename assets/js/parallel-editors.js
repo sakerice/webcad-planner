@@ -26,6 +26,10 @@
  if(typeof EDITOR_PANE!=='undefined'&&EDITOR_PANE || typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR){
   const native=typeof NATIVE_PLAN_EDITOR!=='undefined'&&NATIVE_PLAN_EDITOR,paneId=native?NATIVE_EDITOR_PANE:EDITOR_PANE;
   const hostApi=()=>native?root.PlanLibrary:root.parent.ParallelEditors;
+  // Inert blocks normal controls; capture also blocks window-level shortcuts.
+  // Keyup remains available for modifier cleanup. Direct API edits are caught
+  // by the install freshness check rather than silently overwritten.
+  root.addEventListener('keydown',event=>{if(root._editorInputLocked||root._editorPlanInstalling){event.preventDefault();event.stopImmediatePropagation();}},true);
   let renderCalls=0,applying=false,installGeneration=0,importTargetGeneration=0,importTargetData=null,importTargetText=null;const paneGeometries=new Set(),pendingEngineWaits=new Set();
   function importTargetKey(){return JSON.stringify(DATA,function(key,value){return key==='_texObj'||key==='viewState'&&this===DATA?undefined:value;});}
   function noteImportTargetEdit(){
@@ -127,8 +131,14 @@
     try{recover();}catch(recoveryError){console.warn('[WebCAD] pane install recovery',recoveryError);}
    }
   }
+  let installLocks=0,installLockState;
+  function lockInstallInput(){if(!installLocks++)installLockState={body:document.body,inert:document.body?.inert,locked:root._editorInputLocked};if(document.body)document.body.inert=true;root._editorInputLocked=true;return ()=>{if(--installLocks===0){if(installLockState.body)installLockState.body.inert=installLockState.inert;root._editorInputLocked=installLockState.locked;}};}
+  function installSourceKey(){return JSON.stringify({payload:importTargetKey(),history:typeof HISTORY==='undefined'?null:HISTORY,redo:typeof REDO_HISTORY==='undefined'?null:REDO_HISTORY,dirty:typeof DIRTY==='undefined'?null:DIRTY,view:typeof ST==='undefined'||typeof LIGHT_SETTINGS==='undefined'||typeof camExt==='undefined'||typeof orbit==='undefined'?null:view(),cataloguePack:root.AssetPackPicker?.getSelection()});}
   root.EditorPane={ready,view,applyView,captureInstallState,restoreInstallState,importOwner,noteImportTargetEdit,cloneModel(template){const copy=template.clone(true),geometries=new Map();copy.traverse(o=>{if(o.geometry){if(!geometries.has(o.geometry))geometries.set(o.geometry,localGeometry(o.geometry));o.geometry=geometries.get(o.geometry);}if(o.material)o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();});if(root.parent.TailoredSofaFinish)root.parent.TailoredSofaFinish.transfer(template,copy);return copy;},snapshot:()=>JSON.parse(serializeDataSnapshot()),state:()=>({plan:JSON.parse(serializeDataSnapshot()),history:HISTORY.slice(),redo:REDO_HISTORY.slice(),view:view(),dirty:DIRTY,cataloguePack:root.AssetPackPicker?.getSelection()}),
    async install(plan,saved,admission,options){
+    const unlock=lockInstallInput();
+    try{
+    noteImportTargetEdit();const sourceEpoch=importTargetGeneration,sourceState=installSourceKey();
     const priorReview=root.PlanImport?.capture();root.PlanImport?.invalidate({preserve:true});
     ++_jsonImportRequest;const generation=++installGeneration;cancelEngineWaits();await ready;
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
@@ -137,6 +147,8 @@
     const restoreCamera=options?.restoreCamera===true&&!!saved?.view?.camera;
     if(saved?.view&&(saved.view.view!=='2d'||restoreCamera))await waitForEngine();
     if(root._editorPaneDisposed||generation!==installGeneration)return false;
+    noteImportTargetEdit();
+    if(sourceEpoch!==importTargetGeneration||sourceState!==installSourceKey()){const error=Error('復元待機中に元の編集が更新されました。現在の編集を保持して切替を中止しました。');error.editorStateChanged=true;throw error;}
     // Use the native JSON validation/migration/render transaction. A failed
     // first draw must never leave the new scene under the previous plan ID.
     const staged=stageJsonImport(JSON.stringify(plan),admission),previous=captureInstallState();previous.importReview=priorReview;
@@ -157,10 +169,11 @@
      restoreInstallState(previous);
      throw error;
     }
+    }finally{unlock();}
    },
    undo:()=>undoAction(),redo:()=>redoAction(),async save(){captureViewState();const saved=serializeDataSnapshot(),result=await StorageAdapter.save(DATA);if(serializeDataSnapshot()===saved&&result?.canClean!==false)clearDirty();return root.EditorPane.snapshot();},
    metrics:()=>({renderCalls,modelCount:Object.keys(_modelCache).length,pixelRatio:ren&&ren.getPixelRatio(),renderer:ren?clone(ren.info.memory):null,quality:{ao:!!(_n8aoPass&&_n8aoPass.enabled),shadows:!!(ren&&ren.shadowMap.enabled)}}),
-   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root.PlanImport?.invalidate({preserve:true});root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial);for(const texture of Object.values(_texCache||{}))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
+   dispose(){++_jsonImportRequest;if(root._editorPaneDisposed)return;root.PlanImport?.invalidate({preserve:true});root._editorPaneDisposed=true;if(typeof invalidateNativeOutputs==='function')invalidateNativeOutputs();if(root.WalkTps)root.WalkTps.dispose();++installGeneration;cancelEngineWaits();if(typeof cancelScheduledCameraFit==='function')cancelScheduledCameraFit();if(typeof cancel3DEngineWait==='function')cancel3DEngineWait();try{detachRendererTextureListeners(ren,root.parent.ParallelEditors.modelPool.resources,typeof THREE==='undefined'?null:THREE);const seenGeometry=new Set(paneGeometries),seenMaterial=new Set(),seenTexture=new Set();for(const geometry of paneGeometries){root.parent.ParallelEditors.modelPool.resources.delete(geometry);geometry.dispose();}paneGeometries.clear();if(sc3)disposeObj(sc3,seenGeometry,seenMaterial,seenTexture);for(const model of Object.values(_modelCache||{}))disposeObj(model,seenGeometry,seenMaterial,seenTexture);for(const texture of new Set(Object.values(_texCache||{})))if(texture?.dispose&&!root.parent.ParallelEditors.modelPool.resources.has(texture))texture.dispose();orbit&&orbit.dispose();composer&&composer.dispose();_pmremGen&&_pmremGen.dispose();_envRT&&_envRT.dispose();ren&&ren.dispose();ren&&ren.forceContextLoss();}catch(_){} }
   };
   let scheduled=false,lastCamera=null,lastView=null;
   function cameraKey(){const v=view();return JSON.stringify({twoD:v.twoD,camera:v.camera},(k,value)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toFixed(8)):value);}
