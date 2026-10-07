@@ -3,7 +3,7 @@
 <!-- 作業ルール: ここから（元は ~/.claude/templates/CLAUDE.work-rules.md。直すときは元のファイルと、これを入れた各リポジトリを直す） -->
 ## 作業ルール（このリポジトリで作業する Claude へ）
 
-このリポジトリの **main は本番に自動で公開される**（Cloudflare Workers の webcad-planner。main への push で Workers Builds が build.sh を走らせて本番を更新する）。
+このリポジトリの **main は本番に自動で公開される**（Cloudflare Workers / https://cad-planner.srapps.us 。main への push で Workers Builds が build.sh を走らせて本番を更新する）。
 この Mac の外（Claude Code のクラウド、他の人の手元）でも同じルールで動けるよう、ここに書いている。
 
 ### 必ず止まって確認を取る
