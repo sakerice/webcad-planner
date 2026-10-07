@@ -248,3 +248,5 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 小見出しの印はアイコンの右上に重ねる。名前の幅を取らないので、長い名前も省略されない */
 .asset-subhdr .sicon{position:relative}
 .asset-subhdr .sicon .asset-set-mark{position:absolute;top:-9px;left:50%;transform:translateX(-50%);height:14px;padding:0 4px;font-size:8px;line-height:1;box-shadow:0 0 0 2px #fff}
+/* 検索結果のカードを札の位置の基準にする。無いと札がすべて結果欄の左上1か所に重なり、カードには出ない */
+#sidebar .catalogue-result{position:relative}
