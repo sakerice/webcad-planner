@@ -3174,12 +3174,17 @@ function loadFurnitureMegaLibrary(){
   var side=function(url){return fetch(url,{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
   }).catch(function(){ return null; });};
-  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL)]
+  // 標準以外のセット(洋館など)。読めなくても標準のカタログはこれまでどおり出す。
+  var sets=(typeof AssetSets==='object')
+    ? AssetSets.load(side,window.localStorage).catch(function(){ return []; })
+    : Promise.resolve([]);
+  Promise.all([side(CATALOGUE_TAGS_URL),side(CATALOGUE_FINISHES_URL),sets]
     .concat(FMP_MANIFEST_SOURCES.map(loadFurnitureManifestSource))).then(function(all){
     CATALOGUE_TAGS=all[0]||null;
     CATALOGUE_FINISHES=all[1]||null;
     if(CATALOGUE_FINISHES && typeof ModelQuality==='object') ModelQuality.setFinishes(CATALOGUE_FINISHES);
-    var manifests=all.slice(2).filter(Boolean);
+    // 標準を先に登録する(同じ ID があれば標準が勝つ)。
+    var manifests=all.slice(3).filter(Boolean).concat(all[2]||[]);
     if(manifests.length) applyFurnitureMegaManifest(manifests);
   });
 }
@@ -3271,6 +3276,18 @@ function renderOpeningModelToolMenus(){
   renderOpeningDoorModelToolMenu();
   renderOpeningWindowModelToolMenu();
   AssetCatalogue.installGlobal(document.getElementById('sidebar'));
+  if(typeof AssetSets==='object') AssetSets.renderPicker(document,onAssetSetsChanged,window.localStorage);
+}
+// 表示するセットを切り替えたら、カタログを描き直す。開いていた小見出しは開いたままにする。
+function onAssetSetsChanged(){
+  var open=[];
+  document.querySelectorAll('#sidebar .asset-subcat.open > .asset-subhdr').forEach(function(h){ open.push(h.getAttribute('title')); });
+  renderFurnitureMegaLibrary();
+  document.querySelectorAll('#sidebar .asset-subcat > .asset-subhdr').forEach(function(h){
+    if(open.indexOf(h.getAttribute('title'))>=0 && !h.parentElement.classList.contains('open')) toggleAssetCat(h);
+  });
+  var sidebar=document.getElementById('sidebar');
+  if(sidebar && sidebar._globalCatalogueSearch) sidebar._globalCatalogueSearch();
 }
 function renderOpeningDoorModelToolMenu(){
   var mount=document.getElementById('opening-door-model-tools');
@@ -3305,7 +3322,7 @@ function renderFurnitureMegaLibrary(){
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
     var cats={};
-    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return catalogueGroup(item)===group && !isBuildingComponentFmpItem(item);}).forEach(function(item){
+    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return catalogueGroup(item)===group && !isBuildingComponentFmpItem(item) && (typeof AssetSets!=='object' || AssetSets.isVisible(item));}).forEach(function(item){
       var head=catalogueHeading(item);
       (cats[head]||(cats[head]=[])).push(item);
     });
@@ -3317,9 +3334,10 @@ function renderFurnitureMegaLibrary(){
       var kind=(cats[cat][0]&&cats[cat][0].kind)||'';
       html+='<div class="asset-subcat"'+(kind?' data-kind="'+escHtml(kind)+'"':'')+'><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
       cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':'')+(typeof AssetSets==='object'&&AssetSets.badge(item)?' '+AssetSets.badge(item):''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
         html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
-        html+=(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
+        var setBadge=(typeof AssetSets==='object')?AssetSets.badge(item):'';
+        html+=setBadge?'<span class="asset-set-badge">'+escHtml(setBadge)+'</span>':(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
         html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
       });
       html+='</div></div>';
