@@ -1,0 +1,146 @@
+[
+ {
+  "when": "2026-10-07T15:21:36.285Z",
+  "preset": "2f",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+  "devicePixelRatio": 2,
+  "viewport": [
+   1440,
+   900
+  ],
+  "touch": false,
+  "cases": [
+   {
+    "name": "外観3D・静止",
+    "enterMs": 2802,
+    "intervalMedianMs": 100.1,
+    "intervalP95Ms": 120.1,
+    "fps": 10,
+    "renderMedianMs": 101.8,
+    "renderP95Ms": 113.6,
+    "rendered": 90,
+    "calls": 6773,
+    "triangles": 3067890
+   },
+   {
+    "name": "外観3D・回転",
+    "intervalMedianMs": 40,
+    "intervalP95Ms": 59.7,
+    "fps": 25,
+    "renderMedianMs": 40.1,
+    "renderP95Ms": 43.8,
+    "rendered": 150,
+    "calls": 6160,
+    "triangles": 3051863
+   },
+   {
+    "name": "内観3D・静止",
+    "enterMs": 1675,
+    "intervalMedianMs": 79.6,
+    "intervalP95Ms": 80.6,
+    "fps": 12.6,
+    "renderMedianMs": 69.6,
+    "renderP95Ms": 77,
+    "rendered": 90,
+    "calls": 3052,
+    "triangles": 1680985
+   },
+   {
+    "name": "内観3D・回転",
+    "intervalMedianMs": 20.4,
+    "intervalP95Ms": 40.5,
+    "fps": 49,
+    "renderMedianMs": 28.5,
+    "renderP95Ms": 31.5,
+    "rendered": 150,
+    "calls": 3063,
+    "triangles": 1847524
+   },
+   {
+    "name": "ウォークスルー・歩行",
+    "enterMs": 878,
+    "intervalMedianMs": 40,
+    "intervalP95Ms": 60.1,
+    "fps": 25,
+    "renderMedianMs": 43,
+    "renderP95Ms": 53.2,
+    "rendered": 150,
+    "calls": 3878,
+    "triangles": 1937689
+   }
+  ],
+  "jsHeapMB": 145
+ },
+ {
+  "when": "2026-10-07T15:22:23.799Z",
+  "preset": "3f",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+  "devicePixelRatio": 2,
+  "viewport": [
+   1440,
+   900
+  ],
+  "touch": false,
+  "cases": [
+   {
+    "name": "外観3D・静止",
+    "enterMs": 3678,
+    "intervalMedianMs": 99.9,
+    "intervalP95Ms": 101,
+    "fps": 10,
+    "renderMedianMs": 91.8,
+    "renderP95Ms": 99.1,
+    "rendered": 90,
+    "calls": 6018,
+    "triangles": 2975409
+   },
+   {
+    "name": "外観3D・回転",
+    "intervalMedianMs": 40.1,
+    "intervalP95Ms": 61,
+    "fps": 24.9,
+    "renderMedianMs": 45.7,
+    "renderP95Ms": 56.7,
+    "rendered": 150,
+    "calls": 5352,
+    "triangles": 2753642
+   },
+   {
+    "name": "内観3D・静止",
+    "enterMs": 1778,
+    "intervalMedianMs": 100.3,
+    "intervalP95Ms": 200,
+    "fps": 10,
+    "renderMedianMs": 81,
+    "renderP95Ms": 130.6,
+    "rendered": 90,
+    "calls": 2173,
+    "triangles": 907553
+   },
+   {
+    "name": "内観3D・回転",
+    "intervalMedianMs": 59.5,
+    "intervalP95Ms": 100,
+    "fps": 16.8,
+    "renderMedianMs": 40.6,
+    "renderP95Ms": 79.3,
+    "rendered": 150,
+    "calls": 1908,
+    "triangles": 906778
+   },
+   {
+    "name": "ウォークスルー・歩行",
+    "enterMs": 2131,
+    "intervalMedianMs": 40.3,
+    "intervalP95Ms": 80.7,
+    "fps": 24.8,
+    "renderMedianMs": 29.7,
+    "renderP95Ms": 73.9,
+    "rendered": 150,
+    "calls": 1598,
+    "triangles": 941674
+   }
+  ],
+  "jsHeapMB": 180
+ }
+]
