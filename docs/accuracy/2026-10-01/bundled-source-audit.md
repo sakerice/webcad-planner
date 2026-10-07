@@ -1,0 +1,13 @@
+# Bundled realistic source audit
+
+Read-only inspection on 2026-10-01 found a useful existing public source: [tools/tests/fixtures/madori-3f.pdf](https://github.com/sakerice/webcad-planner/blob/d41e98db4f08a74e617752aa4168e05284896b43/tools/tests/fixtures/madori-3f.pdf). GitHub repository metadata confirmed public visibility. No new source image was uploaded or added to the repository.
+
+The PDF has three landscape pages, each approximately 1190.52 × 841.92 PDF points. Each page contains a small dimensioned Japanese floor plan at the left and a much larger perspective rendering at the right. The pages identify floors 1, 2 and 3. Actual page pixels were inspected locally, rather than relying on filenames or extracted text. No address or client name was apparent in the visible pages; a date and ordinary room labels are present. This visual inspection is not a complete privacy or ownership certification, and public availability does not establish a reuse licence.
+
+Page 1 is a useful next native-vision case: closely spaced dimension chains, fractional module dimensions, room labels overlapping furnishings, dense openings, and a staircase share a relatively small plan area. The full page also tests whether the reader excludes the perspective rendering. Page 2 includes a large LDK, stairs and balcony; page 3 has two bedrooms, a toilet, storage and a stepped footprint. Floor alignment and exterior-only regions add coverage missing from the synthetic examples.
+
+For a separately labelled crop experiment, the plan including dimension lines is approximately x=165..480, y=255..490 in PDF page coordinates on page 1. Render directly from the existing PDF at sufficient resolution; keep the original full-page and crop results separate. This bounding box is an inspection aid, not a scored automatic crop prediction. Local page previews were rendered under /tmp only.
+
+Neither bundled default plan is verified ground truth for this PDF. Inspection finds a direct mismatch: the PDF first-floor labelled footprint is approximately 7280 × 4095 mm, whereas assets/default_plan_3f.json has a much deeper layout with a different room arrangement (first-floor extents 5460 × 8190 mm). assets/default_plan.json is a different two-floor design. No room, opening or topology accuracy metrics should be computed against either default as though they represented this PDF.
+
+Recommended next step: blind native reading of page 1 from the existing public PDF, followed by a separately prepared human-reviewed annotation of printed dimensions, room boundaries and openings. Until that annotation exists, report qualitative findings and literal dimension checks only. This source audit itself contains no recognition results and makes no Astra claim.

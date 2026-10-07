@@ -28,6 +28,7 @@
     function entries(){
       var seen=new Set(),out=[];
       sidebar.querySelectorAll('.cat-body [data-tool]').forEach(function(card){
+        if(card.hidden)return;
         var tool=card.getAttribute('data-tool');if(!tool||seen.has(tool))return;seen.add(tool);
         var body=card.closest('.cat-body'),header=body&&body.previousElementSibling;
         var group=header?header.textContent.replace(/[+−-]/g,'').trim():'';

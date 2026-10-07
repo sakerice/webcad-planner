@@ -19,6 +19,10 @@ const { join } = require('node:path');
 
 const ROOT = join(__dirname, '..', '..');
 const html = require('./app-source.cjs').appSource();
+const {nativeCaptureTransactionSource}=require('./native-output-source.cjs');
+const {nativeCaptureModules,installNativeCaptureRuntime}=require('./native-capture-test-support.cjs');
+let captureModules;
+test.before(async()=>{captureModules=await nativeCaptureModules();});
 
 // ── index.html からの切り出し（video-ui.test.cjs と同じやり方）──────────────
 function topLevelFunction(name) {
@@ -196,8 +200,11 @@ function harness(opts) {
     }
   });
   const ctxRef = ctx;
+  installNativeCaptureRuntime(ctx,captureModules);
 
   vm.runInContext([
+    require('./native-output-source.cjs').nativeOutputContextSource(),
+    nativeCaptureTransactionSource(),
     topLevelVar('AI_RENDER_PACKAGE'),
     topLevelVar('AI_RENDER_DOWNLOAD_URLS'),
     topLevelVar('unityRenderBusy'),

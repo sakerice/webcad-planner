@@ -529,6 +529,7 @@ window.FMP_MANIFEST = {
     },
     {
       "id": "fmp-Bed01",
+      "head": "-Z",
       "name": "Bed01",
       "group": "家具",
       "category": "ベッド",
@@ -1369,6 +1370,7 @@ window.FMP_MANIFEST = {
     },
     {
       "id": "fmp-Chair07",
+      "front": "+Z",
       "name": "Chair07",
       "group": "家具",
       "category": "チェア",

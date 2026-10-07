@@ -144,6 +144,7 @@ function ui(opts) {
     }
   });
   vm.runInContext([
+    require('./native-output-source.cjs').nativeOutputContextSource(),
     topLevelVar('VIDEO_RENDER_UI'),
     topLevelVar('VIDEO_RENDER_MIN_DURATION_SEC'),
     topLevelFunction('videoRenderSourceFromView'),

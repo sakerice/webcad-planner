@@ -16,7 +16,7 @@
 // 掃き出し窓の前に立つ・背面が入口を向く、といった納まりの失敗がそのまま
 // 出荷される。半端に置くくらいなら、置かないほうがよい。
 (function (root) {
-  var ST = { result: null };
+  var ST = { result: null }, analyzeVersion = 0, REJECTED_CONTRACT_REPLY = {};
 
   // 読み取りが出す14種類のうち、カタログの分類に対応するもの。
   // 開口と階段は家具ではないので入れない。
@@ -43,8 +43,8 @@
     var out = [];
     (plan.items || []).forEach(function (it) {
       if ((it.floor || 1) !== (room.floor || 1)) return;
-      var w = Number(it.w) || 0, d = Number(it.d) || 0;
-      if (!inRect(Number(it.x) + w / 2, Number(it.y) + d / 2, room)) return;
+      // Raw extraction uses centers; editor corners are introduced only on Apply.
+      if (!inRect(Number(it.x), Number(it.y), room)) return;
       var kind = kindOf(it.type);
       if (kind) out.push(kind);
     });
@@ -91,8 +91,7 @@
   }
 
   function roomAt(plan, it) {
-    var w = Number(it.w) || 0, d = Number(it.d) || 0;
-    var cx = Number(it.x) + w / 2, cy = Number(it.y) + d / 2;
+    var cx = Number(it.x), cy = Number(it.y);
     var found = null;
     (plan.rooms || []).forEach(function (r, i) {
       if (found) return;
@@ -128,13 +127,17 @@
    * 取り込んだ間取りを仕上げる。
    * marks は図面に描かれていた印（読み取りが返す。無くてもよい）。
    */
-  function analyze(plan, marksIn) {
-    if (!plan || !(plan.rooms || []).length) return Promise.resolve(null);
+  function analyze(plan, marksIn, context) {
+    var version = ++analyzeVersion, ownContext = !context;
+    context = context || (root.PlanImport && root.PlanImport.captureContext ? root.PlanImport.captureContext() : null);
+    function current() { return version === analyzeVersion && (!context || context.isCurrent()); }
+    if (!plan || !(plan.rooms || []).length) {if(ownContext&&context)context.done();return Promise.resolve(null);}
     var marks = Array.isArray(marksIn) ? marksIn : [];
     var PC = (typeof PlanCheck === 'object' && PlanCheck) || null;
     var body = { rooms: roomsOf(plan).slice(0, 40), slots: slotsOf(plan).slice(0, 24) };
-    return post(body).then(function (out) {
-      if (!out || !out.rooms) return null;
+    if (!current()) {if(ownContext&&context)context.done();return Promise.resolve(null);}
+    return post(body, context).then(function (out) {
+      if (!current() || !out || !out.rooms) return null;
       // **用途が決まってから、もう一度知識に照らす。**仕上げへは部屋を並び順の
       // 番号で送っているので、取り込んだ部屋の id に付け直してから使う。
       var types = PC ? PC.typesByRoomId(plan, out.rooms) : {};
@@ -146,8 +149,10 @@
       // 図面の印。**読み取りが答えたものはそれを採り**、答えなかったものだけ
       // jev に回す(assets/js/plan-check.js の readMarks を見ること)。
       var got = PC && marks.length ? PC.readMarks(plan, marks, types) : { reads: [], ask: [] };
-      var asked = got.ask.length ? post({ marks: got.ask }) : Promise.resolve(null);
+      if (!current()) return null;
+      var asked = got.ask.length ? post({ marks: got.ask }, context) : Promise.resolve(null);
       return asked.then(function (judged) {
+        if (!current() || judged === REJECTED_CONTRACT_REPLY) return null;
         var reads = got.reads.slice();
         ((judged && judged.reads) || []).forEach(function (j) {
           var a = got.ask.filter(function (x) { return x.id === j.id; })[0];
@@ -162,15 +167,22 @@
         };
         return ST.result;
       });
-    }).catch(function () { return null; });
+    }).catch(function () { return null; }).then(function(out){if(ownContext&&context)context.done();return out;});
   }
 
-  function post(body) {
-    return fetch('/api/ai/finish-plan', {
+  function post(body, context) {
+    if (context && !context.isCurrent()) return Promise.resolve(null);
+    var response=context && typeof context.finish==='function' ? context.finish(body) : fetch('/api/ai/finish-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
-    }).then(function (res) { return res.ok ? res.json() : null; });
+      signal: context && context.signal,
+    });
+    return response.then(function (res) { if(context&&!context.isCurrent())return null;return res.ok ? res.json() : null; }).then(function(out){
+      if(context&&!context.isCurrent())return null;
+      if(out&&(Object.prototype.hasOwnProperty.call(out,'extractionContract')||out.sceneIR)){if(context&&context.retainFailedReply)context.retainFailedReply(out);return REJECTED_CONTRACT_REPLY;}
+      return out;
+    });
   }
 
   /**
@@ -430,6 +442,7 @@
 
   root.PlanFinish = {
     analyze: analyze,
+    invalidate: function () { analyzeVersion++; ST.result = null; },
     applyPicks: applyPicks,
     recommendations: recommendations,
     orderHints: orderHints,

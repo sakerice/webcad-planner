@@ -1,0 +1,46 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RPG mansion • independent asset review</title>
+<style>body{margin:0;background:#f4f1eb;color:#332c29;font:15px system-ui}header{padding:20px 30px;background:white}h1{margin:0 0 6px;font-size:25px}p{margin:5px 0;color:#6f655e}main{padding:20px 30px}canvas{display:block;width:100%;height:710px;background:#e5dfd5;border-radius:16px}#labels{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:15px}#labels div{background:white;padding:10px;border-radius:10px}button{border:0;border-radius:24px;padding:10px 20px;margin:12px 6px 0 0;cursor:pointer;background:#523b33;color:white}#status{font-size:13px}strong{font-weight:600}</style>
+<header><h1>RPGアセット / 洋館 50点</h1><p>Independent review • walnut / oxblood / teal / antique brass • original Blender geometry</p><p>Original Blender models · +Y up / +Z front · millimetre dimensions · paged review</p><button id="front">正面 +Z</button><button id="rear">背面 −Z</button><button id="previous">前の10点</button><button id="next">次の10点</button><span id="status">Loading…</span></header>
+<main><canvas id="view"></canvas><div id="labels"></div></main>
+<script type="importmap">{"imports":{"three":"../../../vendor/three/build/three.module.js","three/addons/":"../../../vendor/three/examples/jsm/"}}</script>
+<script src="../../../js/model-quality.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const base='../../../../',manifest=await(await fetch('./manifest.json')).json();
+const canvas=document.querySelector('canvas'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(1);renderer.setSize(canvas.clientWidth,710,false);renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;
+const scene=new THREE.Scene();scene.background=new THREE.Color('#e5dfd5');
+scene.add(new THREE.HemisphereLight(0xfff9ee,0x665a52,3));
+const light=new THREE.DirectionalLight(0xfff4df,4);light.position.set(-4,8,8);scene.add(light);
+const camera=new THREE.OrthographicCamera(-6,6,3.65,-3.65,.01,100);camera.position.set(0,4,14);camera.lookAt(0,0,0);
+const loader=new GLTFLoader(),models=[],results=[],cache=new Map();let page=0;
+function render(rear=false){for(const m of models)m.rotation.y=rear?Math.PI:0;renderer.render(scene,camera);}
+async function show(){
+ window.RPG_REVIEW={ready:false};
+ for(const m of models)scene.remove(m);models.length=0;results.length=0;document.querySelector('#labels').replaceChildren();
+ const slice=manifest.items.slice(page*10,page*10+10);
+ for(let i=0;i<slice.length;i++){
+ const item=slice[i],gltf=cache.get(item.id)||await loader.loadAsync(base+item.model),obj=gltf.scene.clone(true);cache.set(item.id,gltf);
+ obj.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(obj),size=bounds.getSize(new THREE.Vector3());
+ let triangles=0,uv=true;obj.traverse(o=>{if(o.isMesh){triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;uv&&=!!o.geometry.attributes.uv;}});
+ const target=[item.w,item.h,item.d],dims=size.toArray().map(x=>x*1000);
+ const correct=dims.every((x,k)=>Math.abs(x-target[k])<1)&&Math.abs(bounds.min.y)<.00001&&Math.abs(bounds.min.x+bounds.max.x)<.00001&&Math.abs(bounds.min.z+bounds.max.z)<.00001;
+ // Exercise the same material utility as the editor without altering originals.
+ const original=obj.clone(true);ModelQuality.applyFinishes(original,{wood:'#493025',fabric:'#672e37',metal:'#b29455'});
+ results.push({id:item.id,dimensionsXYZmm:dims,triangles,uv,boundsCorrect:correct});
+ obj.scale.setScalar(1.65/Math.max(size.x,size.y,size.z));
+ const group=new THREE.Group();group.add(obj);obj.position.y=-size.y*obj.scale.y/2;
+ group.position.set((i%5-2)*2.35,1.25-Math.floor(i/5)*2.5,0);scene.add(group);models.push(group);
+ const label=document.createElement('div');label.innerHTML='<strong>'+String(page*10+i+1).padStart(2,'0')+' '+item.name+'</strong><br>'+item.w+' × '+item.d+' × '+item.h+' mm';document.querySelector('#labels').append(label);
+}
+render();window.RPG_REVIEW={results,manifest,renderer:renderer.info.render,ready:true};
+document.querySelector('#status').textContent=(page+1)+' / '+Math.ceil(manifest.items.length/10)+' · display normalized per item · '+results.reduce((s,x)=>s+x.triangles,0)+' triangles';
+document.querySelector('#previous').disabled=page===0;document.querySelector('#next').disabled=(page+1)*10>=manifest.items.length;
+}
+document.querySelector('#front').onclick=()=>render(false);document.querySelector('#rear').onclick=()=>render(true);
+document.querySelector('#previous').onclick=async()=>{page--;await show();};document.querySelector('#next').onclick=async()=>{page++;await show();};
+await show();
+</script></html>

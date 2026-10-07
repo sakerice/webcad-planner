@@ -1,0 +1,4409 @@
+{
+  "version": 1,
+  "revision": "rpg-mansion-0.2.0-v1",
+  "targetPack": "rpg-mansion",
+  "policy": {
+    "operation": "preview then duplicate only",
+    "preserve": [
+      "object IDs",
+      "coordinates",
+      "width/depth/height",
+      "rotation",
+      "floor",
+      "elevation",
+      "flip",
+      "colour",
+      "all custom and finish fields"
+    ],
+    "unsupported": "unchanged",
+    "finish": "matching channels render; unmatched keys remain in JSON",
+    "structure": "walls/rooms/openings unchanged",
+    "units": "millimetres",
+    "runtimeMatching": "exact source ID only",
+    "extremeScale": "retain if any axis ratio below 0.25 or above 4"
+  },
+  "mappings": [
+    {
+      "sourceId": "fmp-BathTub01",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub02",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub03",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub04",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub05",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub06",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathTub07",
+      "targetId": "rpg-mansion-bathtub-01",
+      "kind": "bathtub",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathroomVanity01",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "vanity",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathroomVanity02",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "vanity",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathroomVanity03",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "vanity",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathroomVanity05",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "vanity",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-BathroomVanity07",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "vanity",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet01",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet02",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet03",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet04",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet05",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet06",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Toilet07",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed01",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed02",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed03",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed04",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed05",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed06",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed07",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed08",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed09",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed10",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed11",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed12",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed13",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed14",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed15",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed16",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed17",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed18",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed19",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed20",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed21",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed22",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed23",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed33",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed34",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed35",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed36",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed37",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed38",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed43",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed44",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed47",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Bed48",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair01",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair02",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair03",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair04",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair05",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair06",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair07",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair08",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair09",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair10",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair14",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair17",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair18",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair19",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair21",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair22",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair23",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair24",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair25",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair26",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair27",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair28",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair29",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair30",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair31",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair32",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair33",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair34",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair35",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair36",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair41",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair43",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair44",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair45",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Chair46",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet01",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet04",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet05",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet06",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet16",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet31",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet32",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet33",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet35",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet36",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet37",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet39",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet40",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet41",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet43",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet44",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet45",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet46",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet47",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet48",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Closet49",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer01",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer02",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer03",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer04",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer05",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer06",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer07",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer08",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer09",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer10",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer11",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer12",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer13",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer14",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer15",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer16",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer17",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer18",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer19",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer20",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer21",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer22",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer23",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer24",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer25",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer26",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer27",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer28",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer29",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer30",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer31",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer32",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer33",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer34",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer37",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer38",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer39",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer40",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer41",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer42",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer43",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer44",
+      "targetId": "rpg-mansion-nightstand-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer45",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer46",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer47",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer48",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer49",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Drawer50",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "chest",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa01",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa02",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa03",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa04",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa06",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa07",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa08",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa09",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa11",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa12",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa13",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa14",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa15",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa16",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa17",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa18",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa19",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa20",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa21",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa22",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa23",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa24",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa25",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa26",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa27",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa28",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa29",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa30",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa31",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa32",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa33",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa34",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa35",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa36",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa37",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa38",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa39",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa40",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa42",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa45",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa46",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa47",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa49",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Sofa50",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table04",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table11",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table12",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table13",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table14",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table15",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table16",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table17",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table18",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table19",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table20",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table22",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table23",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table24",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table25",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table26",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table27",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table28",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table29",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table31",
+      "targetId": "rpg-mansion-console-01",
+      "kind": "counter-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table32",
+      "targetId": "rpg-mansion-console-01",
+      "kind": "counter-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table33",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table34",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table35",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table36",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table37",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table38",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table39",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table40",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table42",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table43",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table44",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table45",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table46",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table47",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table49",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "fmp-Table50",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-lower_cabinet",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-102432_Frame_Q_Brown",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-107329_Frame_CK",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-117851-3color",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-117944_Frame_Q_Maple",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-117944_Frame_Q_Teak",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-25333",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-43693",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-43694-43685",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-45539",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Bed-MEGA_PACK_BED-bed-99483",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-133299_frame_countyoffice",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-143628_frame_1_naturalwood",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-154332_frame",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown",
+      "targetId": "rpg-mansion-linen-cabinet-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-336846_frame",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-65549",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-69585",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet--in-65uf.001",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-122712_Dark_Navy",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-221115_frame_granada",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-224774_frame_gray",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-29915_frame",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-345vxc34sdfv",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-49517_frame_mordencheck",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Carpet-MEGA_PACK_Carpet-carpet-horang_frame_orange_0000",
+      "targetId": "rpg-mansion-rug-01",
+      "kind": "rug",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-230409_frame_walnut",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-408727_black_frame",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-459698_Frame_Walnut",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-545882_frame_walnut",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-84415_Frame_Black",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair_142082_Frame_Orange",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "chair",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Curtain-MEGA_PACK_Curtain-curtain-154085_Frame_Gray",
+      "targetId": "rpg-mansion-curtain-01",
+      "kind": "curtain",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Curtain-MEGA_PACK_Curtain-curtain-177647",
+      "targetId": "rpg-mansion-curtain-01",
+      "kind": "curtain",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Curtain-MEGA_PACK_Curtain-curtain-45658",
+      "targetId": "rpg-mansion-curtain-01",
+      "kind": "curtain",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Curtain-MEGA_PACK_Curtain-curtain-47103_Frame_BlueNavy",
+      "targetId": "rpg-mansion-curtain-01",
+      "kind": "curtain",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Mirror-MEGA_PACK_Mirror-mirror-220010_frame_gold",
+      "targetId": "rpg-mansion-mirror-01",
+      "kind": "mirror",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Mirror-MEGA_PACK_Mirror-mirror-325613_frame_natural",
+      "targetId": "rpg-mansion-mirror-01",
+      "kind": "mirror",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Mirror-MEGA_PACK_Mirror-mirror-337570_600_frame_red.001",
+      "targetId": "rpg-mansion-mirror-01",
+      "kind": "mirror",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Mirror-MEGA_PACK_Mirror-mirror-498995_frame_light_brown",
+      "targetId": "rpg-mansion-mirror-01",
+      "kind": "mirror",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Mirror-MEGA_PACK_Mirror-mirror-70923_frame",
+      "targetId": "rpg-mansion-mirror-01",
+      "kind": "mirror",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Plant-MEGA_PACK_Plant-Plant_447168_Frame_Brown",
+      "targetId": "rpg-mansion-planter-01",
+      "kind": "plant",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Plant-MEGA_PACK_Plant-plant-230510",
+      "targetId": "rpg-mansion-planter-01",
+      "kind": "plant",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-157369",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-172151_frame_brown",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-422943_frame_walnut_dark_gray",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Shelf-MEGA_PACK_Shelf-shelf-609241_frame_merbau",
+      "targetId": "rpg-mansion-bookcase-01",
+      "kind": "shelf",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-2-seater_fabric_sofa",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-2-seater_modular_sofa",
+      "targetId": "rpg-mansion-wing-chair-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-Alto_3.5_seater_Louvoir_Fabric_Sofa_blue",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-Artificial_leather_sofa",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-Covering_fabric_sofa",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-Fabric_sofa_with_stool",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-ENDLESS-TABLE_193",
+      "targetId": "rpg-mansion-dining-table-01",
+      "kind": "dining-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-pond_table-WOOD",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-157282",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-167288_frame_1190b_urbanacacia",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-171562_frame_brown_800",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-175980_frame_brown",
+      "targetId": "rpg-mansion-dining-table-01",
+      "kind": "dining-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-309959",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "im0261-Table-MEGA_PACK_Table-table-86358_frame_travertino_a600",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "low-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "custom-sofa-tailored",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-curtain-open-1300-long",
+      "targetId": "rpg-mansion-curtain-01",
+      "kind": "curtain",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": false,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-sofa",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "sofa",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-bed",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "bed",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-table",
+      "targetId": "rpg-mansion-dining-table-01",
+      "kind": "dining-table",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-sideboard",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "cabinet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-wardrobe",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "closet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-toilet",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "toilet",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-desk",
+      "targetId": "rpg-mansion-desk-01",
+      "kind": "desk",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-desk-work",
+      "targetId": "rpg-mansion-desk-01",
+      "kind": "desk",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "original-desk-counter",
+      "targetId": "rpg-mansion-desk-01",
+      "kind": "desk",
+      "basis": "existing catalogue kind + dimensional role; preview required",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "座面・天板・寝面・棚位置や個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "chair",
+      "targetId": "rpg-mansion-chair-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "sofa",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "loveseat_2p",
+      "targetId": "rpg-mansion-sofa-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "low_table",
+      "targetId": "rpg-mansion-coffee-table-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "dining-table",
+      "targetId": "rpg-mansion-dining-table-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "dining_6",
+      "targetId": "rpg-mansion-dining-table-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "round_table_4",
+      "targetId": "rpg-mansion-round-table-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "bed-d",
+      "targetId": "rpg-mansion-canopy-bed-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "bed-s",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "semi_double_bed",
+      "targetId": "rpg-mansion-single-bed-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "desk",
+      "targetId": "rpg-mansion-desk-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "closet",
+      "targetId": "rpg-mansion-wardrobe-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "shoe_cabinet",
+      "targetId": "rpg-mansion-dresser-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "toilet",
+      "targetId": "rpg-mansion-toilet-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    },
+    {
+      "sourceId": "sink",
+      "targetId": "rpg-mansion-washstand-01",
+      "kind": "native-explicit",
+      "basis": "explicit native furniture ID",
+      "orientation": "preserve stored rotation; visual front must be reviewed",
+      "reviewRequired": true,
+      "reviewReason": "nativeモデルの支持高さ・個別機能は一致未確認。初期状態では保持。"
+    }
+  ],
+  "retained": [
+    {
+      "sourceId": "fmp-BathroomVanity04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-ShowerSystem07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WashBasin07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Bed24",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed25",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed26",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed27",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed28",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed29",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed30",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed31",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Bed32",
+      "reason": "多段・収納一体型などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair11",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair12",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair13",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair15",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair16",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair20",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair37",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair38",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair39",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair40",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair42",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair47",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair48",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair49",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Chair50",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet02",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet08",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet09",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet10",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet11",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet12",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet13",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet14",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet15",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet17",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet18",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet19",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet20",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet21",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet22",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet23",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet24",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet25",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet26",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet27",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet28",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet29",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet30",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Closet34",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet38",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet42",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Closet50",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Drawer35",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Drawer36",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetACorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetACorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetA_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetBCorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetBCorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetB_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetCCorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetCCorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetC_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetDCorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetDCorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetD_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetECorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetECorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetE_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetFCorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetFCorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetF_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetGCorner01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetGCorner02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CabinetG_Sink",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GasStove01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GasStove02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GasStove03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GasStove04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GasStove07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenExhaust07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-KitchenOven07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-MicrowaveOven07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator01",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator02",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator03",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator04",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator05",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator06",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Refrigerator07",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "fmp-Sink01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sink07",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa05",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa10",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa41",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa43",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa44",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "fmp-Sofa48",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-349685_Frame_Gray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-382696_1_blue_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-453432",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-4645451",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-853444",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-l933_all_in_one_washbasin_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-lower_cabinet-732",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Bath-MEGA_PACK_BATH-bath-minimal_point_open_upper_cabinet_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-354290_frame_walnut_brown",
+      "reason": "複合・コーナー収納などの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-185637",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-490755_frame_black",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-54418_Brown",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Chair-MEGA_PACK_Chair-chair-marketb_frame_900_black",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-calder_incense_holder",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-clock-116007_Frame_RoseGoldBlack",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-clock-131686",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-clock-68955_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-decor-63422_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-decor-71718_Frame_NaturalWood",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-decor-roland_pom_pom_chrysanthemum_flower_frame_li",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Decor-MEGA_PACK_decor-decor_698778_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-Classroom-door-black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-Classroom-door-blue",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-Classroom-door-grey",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-Classroom-door-red",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-Classroom-door-white",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-ROUND-WHITE-DOOR-White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-door-305142_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-door-305142_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-door-586242_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Door-MEGA_PACK_door-door-837968_Gray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-19522_Frame_Orange",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-228738",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-267923",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-372697",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-477638_black_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-566595",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-79841_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic-80816_frame_white",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Electronic-MEGA_PACK_Electronic-electronic_230181",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-298603_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-383746",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-423938_Frame_Metal",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-553172_frame_black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic-drip-coffee-machine_red",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-electronic_1206268270_Frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-kitchen-171401_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_344313",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_coffeebeangrinder",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Kitchen-MEGA_PACK_kitchen-kitchen_kneader_Frame_red",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-FLOWER-POT-VP3-1",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-lamp-126685_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-lamp-13127_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-lamp-13171_Frame_GunMetal",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-lamp-507702_frame_brown",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Lamp-MEGA_PACK_lamp-lamp-573754_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-decor-355748_frame_500",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-decor-366937_frame_a3_champagne",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-decor-449871_frame_red",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-decor-476641_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-decor-680411_frame_364",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-painting-152307_afishbowl_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-painting-503147_50_70_cm",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_29X42cm_WalnutWood",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-painting_366907_Frame_50X70cm_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Painting-MEGA_PACK_Painting-shelf-163148_frame_a2_black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-4-seater_lounge_sofa",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-BOLIA_sofa_Ivory",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-Cotton_4-seater_sofa",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Sofa-MEGA_PACK_Sofa-EasyClean_Fabric_Sofa",
+      "reason": "L字・寝椅子・低い腰掛けなどの形状を確定できないため保持"
+    },
+    {
+      "sourceId": "im0261-Tv-MEGA_PACK_tv-electronic-101085_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Tv-MEGA_PACK_tv-electronic-46720",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_305163_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_307079_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_453365_Frame_Brown",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_453365_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_454283_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_454305_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_490267_Frame_Maple",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_490267_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_551669_Frame_Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Wall-MEGA_PACK_wall-wall_551669_Frame_White",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_BlueGray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_Brown",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_CharcoalGray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-2W-Long-Spear_CharcoalGray.001",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-HOTEL-ROUND-WINDOW-Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-PLAID-ROUND-WINDOW-Black",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-shelf-33580-14",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-window-33050_wood_frame",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-window-3bf7.004",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "im0261-Window-MEGA_PACK_Window-wood_circle_window",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-AirConditionerWall01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-WoodDeck01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-CeilingFan01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-GatePost01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen01",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen02",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen03",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen04",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen05",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fmp-RollerScreen06",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-island",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-cooking",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2100",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2400",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2550",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2700",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-gas2550",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-p2550-750",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-p2550-970",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-sink900",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-hob750",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-drawer450",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-drawer600",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-drawer750",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-drawer900",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-box-dishwasher450",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2100-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2400-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2550-no-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-i2700-no-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-gas2550-no-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-p2550-750-no-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-kitchen-p2550-970-no-dw",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-roller-open-780",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-roller-open-1235",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-roller-open-1690",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-laundry-rail",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-chair",
+      "reason": "ベンチ・腰掛け・肘掛けの形状差を確定できないため保持"
+    },
+    {
+      "sourceId": "original-ac-unit",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-heat-pump",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-mailbox",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-parcel-box",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-entry-column",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-garden-tap",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-tank",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-meter",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-gas-unit",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-drain-cover",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-parcel-slim-column",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-parcel-integrated-column",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-parcel-pole-mounted",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-bathtub",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-vanity",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-ac-wall",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-ac-wall-wide",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-vent-register",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-bath-dryer",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-door-flush",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-door-slit",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-tree-symbol",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-tree-evergreen",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-shrub",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-deck-1820",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-terrace-tile",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-fence-lattice",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-car-stop",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-standpipe",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-tree-deciduous",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-tree-conifer",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-fence-board",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-books-stack",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-mug-tray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-vase-tall",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-plant-desk",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-entry-tray",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-washer-pan",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-laundry-pole",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "original-ac-wall-slim",
+      "reason": "壁付・天井付など設置方法が異なるため保持"
+    },
+    {
+      "sourceId": "fridge",
+      "reason": "冷蔵設備の機能を保冷庫へ置換しないため保持"
+    }
+  ]
+}

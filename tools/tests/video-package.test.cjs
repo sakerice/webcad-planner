@@ -13,6 +13,10 @@ const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const html = require('./app-source.cjs').appSource();
+const {nativeCaptureTransactionSource}=require('./native-output-source.cjs');
+const {nativeCaptureModules,installNativeCaptureRuntime}=require('./native-capture-test-support.cjs');
+let captureModules;
+test.before(async()=>{captureModules=await nativeCaptureModules();});
 
 function bodyOf(signature, length) {
   const at = html.indexOf(signature);
@@ -651,7 +655,8 @@ function harness(opts) {
     makeZipBlob: function (files) { log.zips.push(files.map((f) => f.name)); return { zip: true }; },
     downloadBlobFile: function (name) { log.downloads.push(name); }
   });
-  vm.runInContext(VIDEO_VARS.map(topLevelVar2)
+  installNativeCaptureRuntime(ctx,captureModules);
+  vm.runInContext([require('./native-output-source.cjs').nativeOutputContextSource(),nativeCaptureTransactionSource()].concat(VIDEO_VARS.map(topLevelVar2))
     .concat(VIDEO_FNS.map(topLevelFunction2)).join('\n'), ctx);
   ctx.$log = log;
   ctx.$registry = registry;

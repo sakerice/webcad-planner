@@ -1,0 +1,14 @@
+{
+ "kind":"manual-source-pixel-calibration-candidate","measurement":"Raster drawing estimate, not surveyed or manufacturer dimensions","pixelUncertainty":3,"anchorPixelUncertainty":2,
+ "pages":{
+  "1":{"rasterWidth":9600,"xAnchors":[{"pixel":1742,"mm":0},{"pixel":3406,"mm":7280}],"yAnchors":[{"pixel":2598,"mm":0},{"pixel":3538,"mm":4095}],"basis":"原図の7280横寸法、4095縦寸法の引出線。線中心の読取は±2px。"},
+  "3":{"rasterWidth":9600,"xAnchors":[{"pixel":1742,"mm":0},{"pixel":3096,"mm":5915}],"yAnchors":[{"pixel":2702,"mm":0},{"pixel":3538,"mm":3640}],"basis":"原図の5915横寸法、3640縦寸法の引出線。3階位置合わせdy455は別に加算。"}
+ },
+ "doors":[
+  {"sourceItemIndex":6,"page":1,"axis":"x","openingPixelEnds":[2278,2458],"leafPixelEnds":[2287,2444],"hingePixel":2444,"hostCrossPixel":3116,"normalOffsetMm":0,"crop":{"x":2150,"y":2810,"width":520,"height":720},"evidence":"主寝室の横開口枠の外端と閉じた扉線の両端。開口約790と扉板約685を区別する。円弧と吊元は同じ右端。"},
+  {"sourceItemIndex":7,"page":1,"axis":"x","openingPixelEnds":[2278,2404],"leafPixelEnds":[2288,2396],"hingePixel":2288,"hostCrossPixel":3328,"normalOffsetMm":0,"crop":{"x":2150,"y":2810,"width":520,"height":720},"evidence":"1階トイレ横枠の外端と扉線／円弧の両端。扉板約475、開口約550。読み取り幅780とは大きく異なる。"},
+  {"sourceItemIndex":32,"page":3,"axis":"x","openingPixelEnds":[2326,2455],"leafPixelEnds":[2333,2445],"hingePixel":2445,"hostCrossPixel":3120,"normalOffsetMm":0,"crop":{"x":2150,"y":2600,"width":700,"height":850},"evidence":"3階トイレ横枠の外端と閉じた扉線の両端。扉板約490、開口約565。右寄せの枠位置も元読取中心と異なる。"},
+  {"sourceItemIndex":34,"page":3,"axis":"y","openingPixelEnds":[3133,3312],"leafPixelEnds":[3143,3297],"hingePixel":3297,"hostCrossPixel":2471,"normalOffsetMm":25,"crop":{"x":2150,"y":2600,"width":700,"height":850},"evidence":"書斎2縦枠の外端と閉じた扉線の上下端。開口約780に対して扉板約670。閉じた板の位置は壁中心から東へ約25mm、線中心の判断が曖昧。"}
+ ],
+ "limitations":["扉の厚み36mmと90度開閉は既存モデルの仮定。原図から実測できない。","枠外端を開口として扱う校正候補。開口躯体寸法と製品有効寸法の意味は未確定。","hostCrossPixelが示す壁軸は元の支持壁座標と誤差内で一致する。候補では支持壁の中心線を維持し、壁を移動しない。","線幅・縮尺・製図記号から誤差が生じるため、製品仕様として確定しない。"]
+}

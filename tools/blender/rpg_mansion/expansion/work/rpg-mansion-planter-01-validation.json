@@ -1,0 +1,44 @@
+{
+  "model": "rpg-mansion-planter-01",
+  "dimensions_mm": [
+    949.999988079071,
+    800.000011920929,
+    1360.0000143051147
+  ],
+  "bounds_m": [
+    [
+      -0.4749999940395355,
+      -0.4000000059604645,
+      0.0
+    ],
+    [
+      0.4749999940395355,
+      0.4000000059604645,
+      1.3600000143051147
+    ]
+  ],
+  "triangles": 1690,
+  "uv": {
+    "meters_per_uv": 2.5821983744978896,
+    "min": 2.2204815074005952,
+    "max": 3.048617119048942,
+    "p05": 2.375840623154671,
+    "p95": 2.8881934659838473,
+    "total_triangles": 1690,
+    "valid_triangles": 1690,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "RPG ceramic": "ceramic",
+    "RPG soil": null,
+    "RPG leaf": "foliage"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 64680,
+  "glb_sha256": "a4b255d7b5c9759438ea69d7d36445e13d381acdf240dc30105298898f0194a1"
+}

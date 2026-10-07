@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.1.0",
+  "reviewedAssetCommit": "769f44a24e35780bbe69650706e998eef72fee87",
+  "baseCommit": "6c5fe1819ba388bcfac8055cc94744bd7831d734",
+  "c072Recovery": "pending",
+  "packId": "rpg-mansion",
+  "manifestSha256": "78a46bd84c2b20b14836c698694ffa9f4e7da8daede3b2fe47d243f0981fdb7f",
+  "editorIntegration": "none",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "surfaces": [
+    {
+      "assetId": "rpg-mansion-desk-01",
+      "assetRevision": "sha256:c39663186e2f1deafb014434d8264584818091ea0b45bfc70df0046f6f36d732",
+      "surfaceId": "top-main",
+      "surfaceRevision": "top-surface-v1",
+      "status": "geometry-candidate-host-validation-required",
+      "localSurfaceCenter": [
+        0.0,
+        0.786000013,
+        0.015000001
+      ],
+      "localSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "surfaceBoundsM": {
+        "min": [
+          -0.574000001,
+          0.786000013,
+          -0.254000008
+        ],
+        "max": [
+          0.574000001,
+          0.786000013,
+          0.284000009
+        ]
+      },
+      "polygonLocalGltfM": [
+        [
+          0.574000001,
+          0.786000013,
+          -0.254000008
+        ],
+        [
+          -0.574000001,
+          0.786000013,
+          -0.254000008
+        ],
+        [
+          -0.574000001,
+          0.786000013,
+          0.284000009
+        ],
+        [
+          0.574000001,
+          0.786000013,
+          0.284000009
+        ]
+      ],
+      "usableRegionProposal": {
+        "shape": "surface-polygon",
+        "note": "Leather inset polygon; host must test prop footprint and clearance"
+      },
+      "evidence": {
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-desk-01.blend",
+        "sourceBlendSha256": "df1d3a275d0614fb7e9c5f9a012ef157cf3674902e7542f4a57ea721c26aeef7",
+        "polygonIndex": 324,
+        "surfaceAreaM2": 0.617624044
+      },
+      "hostRequirements": [
+        "transform surface to world including scale, rotation and floor elevation",
+        "test support orientation, footprint containment and obstacles",
+        "place prop bottom on chosen supporting plane, not fixed 750mm"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-side-table-01",
+      "assetRevision": "sha256:0e3de9ae08e7b65b1787bfd40fc4252a9bb3b595481f8494937194f92664f45d",
+      "surfaceId": "top-main",
+      "surfaceRevision": "top-surface-v1",
+      "status": "geometry-candidate-host-validation-required",
+      "localSurfaceCenter": [
+        0.0,
+        0.63499999,
+        0.0
+      ],
+      "localSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "surfaceBoundsM": {
+        "min": [
+          -0.300000012,
+          0.63499999,
+          -0.300000012
+        ],
+        "max": [
+          0.300000012,
+          0.63499999,
+          0.300000012
+        ]
+      },
+      "polygonLocalGltfM": [
+        [
+          0.300000012,
+          0.63499999,
+          -0.0
+        ],
+        [
+          0.294235587,
+          0.63499999,
+          -0.058527097
+        ],
+        [
+          0.277163863,
+          0.63499999,
+          -0.114805028
+        ],
+        [
+          0.249440879,
+          0.63499999,
+          -0.166671067
+        ],
+        [
+          0.212132037,
+          0.63499999,
+          -0.212132037
+        ],
+        [
+          0.166671067,
+          0.63499999,
+          -0.249440879
+        ],
+        [
+          0.114805028,
+          0.63499999,
+          -0.277163863
+        ],
+        [
+          0.058527097,
+          0.63499999,
+          -0.294235587
+        ],
+        [
+          0.0,
+          0.63499999,
+          -0.300000012
+        ],
+        [
+          -0.058527097,
+          0.63499999,
+          -0.294235587
+        ],
+        [
+          -0.114805028,
+          0.63499999,
+          -0.277163863
+        ],
+        [
+          -0.166671067,
+          0.63499999,
+          -0.249440879
+        ],
+        [
+          -0.212132037,
+          0.63499999,
+          -0.212132037
+        ],
+        [
+          -0.249440879,
+          0.63499999,
+          -0.166671067
+        ],
+        [
+          -0.277163863,
+          0.63499999,
+          -0.114805028
+        ],
+        [
+          -0.294235587,
+          0.63499999,
+          -0.058527097
+        ],
+        [
+          -0.300000012,
+          0.63499999,
+          -0.0
+        ],
+        [
+          -0.294235587,
+          0.63499999,
+          0.058527097
+        ],
+        [
+          -0.277163863,
+          0.63499999,
+          0.114805028
+        ],
+        [
+          -0.249440879,
+          0.63499999,
+          0.166671067
+        ],
+        [
+          -0.212132037,
+          0.63499999,
+          0.212132037
+        ],
+        [
+          -0.166671067,
+          0.63499999,
+          0.249440879
+        ],
+        [
+          -0.114805028,
+          0.63499999,
+          0.277163863
+        ],
+        [
+          -0.058527097,
+          0.63499999,
+          0.294235587
+        ],
+        [
+          -0.0,
+          0.63499999,
+          0.300000012
+        ],
+        [
+          0.058527097,
+          0.63499999,
+          0.294235587
+        ],
+        [
+          0.114805028,
+          0.63499999,
+          0.277163863
+        ],
+        [
+          0.166671067,
+          0.63499999,
+          0.249440879
+        ],
+        [
+          0.212132037,
+          0.63499999,
+          0.212132037
+        ],
+        [
+          0.249440879,
+          0.63499999,
+          0.166671067
+        ],
+        [
+          0.277163863,
+          0.63499999,
+          0.114805028
+        ],
+        [
+          0.294235587,
+          0.63499999,
+          0.058527097
+        ]
+      ],
+      "usableRegionProposal": {
+        "shape": "disc",
+        "radiusM": 0.235,
+        "note": "Inside brass inlay ring; host must test prop footprint and clearance"
+      },
+      "evidence": {
+        "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-side-table-01.blend",
+        "sourceBlendSha256": "05dce0e3e275fcda324ca0161151d54e9f31350f0c5b6567b79d26102b9621bf",
+        "polygonIndex": 219,
+        "surfaceAreaM2": 0.280930072
+      },
+      "hostRequirements": [
+        "transform surface to world including scale, rotation and floor elevation",
+        "test support orientation, footprint containment and obstacles",
+        "place prop bottom on chosen supporting plane, not fixed 750mm"
+      ]
+    }
+  ],
+  "placementRules": [
+    {
+      "assetId": "rpg-mansion-candlestick-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-mantel-clock-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-letter-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    },
+    {
+      "assetId": "rpg-mansion-key-01",
+      "placementPolicy": "host-selected-support-surface",
+      "assetBottomOffsetM": 0,
+      "manifestDefaultElevationMM": 750,
+      "defaultElevationStatus": "legacy-hint-not-measured-support-height"
+    }
+  ]
+}

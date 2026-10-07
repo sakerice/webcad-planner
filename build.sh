@@ -19,6 +19,7 @@ check_cloudflare_asset_sizes() {
 # 出荷する間取りが「読み込める形」であること。テストからは既定間取りを
 # 読めない決まりなので(tools/tests/fixture-only.test.cjs)、ここで見る。
 node tools/check_plan_schema.cjs assets/default_plan.json assets/default_plan_3f.json
+node tools/check_scene_asset_certificates.cjs
 
 rm -rf dist
 mkdir -p dist/assets/env dist/assets/textures dist/assets/models
@@ -68,25 +69,34 @@ check_cloudflare_asset_sizes
 # そうなら、ここから配信を抜くと **main にマージしても本番が更新されなく
 # なる**。黙って止まるのがいちばん困るので、CI からの実行だけは通す。
 #
-# 見分け方は WORKERS_CI。Cloudflare Workers Builds が自分で入れる環境変数で、
-# 手元にもエージェントにも無い。加えて、ビルド段階
-# (`[build] command = "SKIP_DEPLOY=1 bash build.sh"`)では配信しない——
-# あそこは dist/ を作らせるためだけの呼び出しである。
-#
-#   ビルド段階(CI)   WORKERS_CI=1, SKIP_DEPLOY=1 → 作るだけ
-#   配信段階(CI)     WORKERS_CI=1               → 配信する
-#   手元・エージェント  WORKERS_CI 無し            → 作るだけ
-# Cloudflare がこの変数の名前を変えたら、ここは**黙って配信しなくなる**。
-# 本番が更新されないのに誰も気づかないのがいちばん困るので、CI なのに配信
-# しない状況はビルドログへ必ず出す。CI=true も Workers Builds が既定で
-# 入れる(公式ドキュメント「Default variables」)。
+# 暗黙の配信は、公式の Workers Builds の印と main が両方一致するときだけ。
+# SKIP_DEPLOY は未設定または明示 0 だけを許可する。空文字や未知値は出さない。
+# 他providerのbranch情報がある場合も main と一致しない限り出さない。
+# GITHUB_BASE_REF 等のtarget branchだけからsource mainを推定しない。
+# この門はbuild.sh内の配信だけを守る。dashboard後段のdeploy/preview commandは
+# 別の実行なので、この門だけでfeature branch pushを安全とは認定できない。
+workers_ci_production_deploy_allowed() {
+  [ "${WORKERS_CI:-}" = "1" ] || return 1
+  [ "${WORKERS_CI_BRANCH:-}" = "main" ] || return 1
+  if [ "${SKIP_DEPLOY+x}" = "x" ] && [ "${SKIP_DEPLOY}" != "0" ]; then
+    return 1
+  fi
+  local TASK_BUILD_BRANCH_KEY
+  for TASK_BUILD_BRANCH_KEY in CF_PAGES_BRANCH GITHUB_REF_NAME GITHUB_HEAD_REF GITHUB_BASE_REF CI_COMMIT_BRANCH CI_COMMIT_REF_NAME BITBUCKET_BRANCH VERCEL_GIT_COMMIT_REF; do
+    [ -z "${!TASK_BUILD_BRANCH_KEY}" ] || [ "${!TASK_BUILD_BRANCH_KEY}" = "main" ] || return 1
+  done
+  [ -z "${GITHUB_REF:-}" ] || [ "${GITHUB_REF}" = "refs/heads/main" ] || return 1
+  [ -z "${CI_COMMIT_TAG:-}" ] || return 1
+  return 0
+}
+
 if [ "${CI:-}" = "true" ] && [ -z "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
   echo "!!! CI で動いているのに Workers Builds の印がありません。配信しません。"
   echo "!!! ビルド環境の変数が変わった可能性があります。build.sh を確認してください。"
 fi
 
-if [ -n "${WORKERS_CI:-}" ] && [ "${SKIP_DEPLOY:-0}" != "1" ]; then
-  echo "Workers Builds からの実行です。配信します。"
+if workers_ci_production_deploy_allowed; then
+  echo "Workers Builds の main と一致しました。配信します。"
   npx wrangler deploy
   exit 0
 fi

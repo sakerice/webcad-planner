@@ -1,0 +1,15 @@
+// Synthetic source rail segments, real simulator materialization/rendering; independent browser only.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/tmp/webcad-browser-check/node_modules/playwright');
+const fs=require('node:fs');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});try{
+ const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
+ await page.goto(process.env.APP_URL||'http://127.0.0.1:65235/');await page.waitForTimeout(1200);
+ const result=await page.evaluate(async()=>{
+  closePresetChoice();_defaultPlanPending=false;
+  const source={marks:[{guess:'lattice-rail',floor:2,x:500,y:0,w:1000,d:80,start:{x:0,y:0},end:{x:1000,y:0},thick:80,heightMm:1200,elevationMm:100,railInfill:'baluster',fencePattern:'vertical',railFrameColor:'#29465b',latticeCap:true,railCapColor:'#29465b'},{guess:'lattice-rail',floor:2,x:2500,y:0,w:1000,d:80,start:{x:2000,y:0},end:{x:3000,y:0},thick:80,heightMm:1200,elevationMm:100,railInfill:'baluster',fencePattern:'vertical',railFrameColor:'#29465b',latticeCap:true,railCapColor:'#29465b'}]};
+  const before=JSON.stringify(source),items=SourceObjectMapping.candidates(source).flatMap(c=>{const result=SourceObjectMapping.map(source,{sourceId:c.id,sourceSnapshot:c.snapshot,reviewed:true,kind:'lattice-rail'},PlanImport.sceneCatalogue());if(!result.canApply)throw Error(result.diagnostics);return result.items;});
+  const converted=PlanImport.toAppObjects({walls:[],rooms:[],items:items.map(i=>({...i,x:i.x+i.w/2,y:i.y+i.d/2}))});DATA={walls:[],rooms:[{id:'mock-rail-floor',floor:2,x:0,y:0,w:3000,d:1500,n:'模擬柵検証用床',floorRaiseMm:150}],items:converted.items};ensureFloorMetadata();ensureHeightDefaults();document.getElementById('floor-sel').value='2';onFloorChange(2);setView('3d-int');await StorageAdapter.save(DATA);const stored=await StorageAdapter.load();
+  return {synthetic:true,sourceUnchanged:before===JSON.stringify(source),rails:DATA.items.map(i=>({type:i.type,floor:i.floor,w:i.w,d:i.d,x:i.x,y:i.y,latticeHeight:i.latticeHeight,elev:i.elev,railInfill:i.railInfill,railFrameColor:i.railFrameColor,railCapColor:i.railCapColor})),savedIdentical:JSON.stringify(stored.items)===JSON.stringify(DATA.items)};
+ });await page.waitForTimeout(5000);await page.screenshot({path:'/tmp/webcad-synthetic-rail-3d.png'});result.errors=errors;assert.equal(result.rails.length,2);assert.ok(result.rails.every(i=>i.type==='lattice-screen'&&i.floor===2&&i.latticeHeight===1200&&i.elev===100));assert.equal(result.sourceUnchanged,true);assert.equal(result.savedIdentical,true);assert.deepEqual(errors,[]);fs.writeFileSync('/tmp/webcad-synthetic-rail.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

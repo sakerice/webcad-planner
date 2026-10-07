@@ -16,19 +16,24 @@
 // 家の3D画像で個人情報を含まないので、そちらは国外のサービスでよい。
 // (東京で動く画像生成モデルはそもそも無い)
 import { json, readJsonWithLimit, planProblems, PlanSchema } from "./shared.mjs";
+import PlanSourceIdentity from "../assets/js/plan-source-identity.js";
+import { registerPlan, pollPlanRegistration } from "./plan-registration.mjs";
 import PlanRooms from "../assets/js/plan-rooms.js";
 import PlanGrid from "../assets/js/plan-grid.js";
+import PlanRegistration from "../assets/js/plan-registration.js";
+import { mergeReadPages, reconcileReadPages } from "./plan-pages.mjs";
 import { vertexConfig, generate, extractJson, isJapanLocation } from "./vertex.mjs";
 import { openaiConfig, generate as openaiGenerate, startJob, fetchJob, readResult, toJsonSchema } from "./openai.mjs";
 import { SYSTEM_PROMPT, buildPlanPrompt, planProcedure, decodeCompactPlan } from "./plan-prompt.mjs";
 import { PLAN_RESPONSE_SCHEMA } from "./plan-response-schema.mjs";
 import { planSpec } from "./plan-spec.mjs";
 import { planKnowledge } from "./plan-knowledge.mjs";
-import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox } from "./plan-locate.mjs";
+import { LOCATE_SYSTEM, LOCATE_PROMPT, LOCATE_SCHEMA, normalizeBox, normalizeSourceHeader } from "./plan-locate.mjs";
 import { REVISE_SYSTEM, buildRevisePrompt } from "./plan-revise.mjs";
 import { reviseAdvice, failureFacts, nextStep } from "./plan-gate.mjs";
 import { nameRooms, pickModels, judgeMarks, missingByRoom, MAX_ROOMS, MAX_SLOTS, MAX_MARKS } from "./plan-finish.mjs";
 import { knowledgeWarnings } from "./plan-check.mjs";
+import { extractionContractError, isSceneIRV3Request, importSceneIRV3, pollSceneIRV3, sceneIRV3Capability } from "./scene-ir-v3-contract.mjs";
 
 // 画像は data URL で受け取る。10MB は間取り図の写真に十分な大きさ。
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -67,7 +72,7 @@ function quotaLimits(env) {
     },
   };
 }
-// 1回に読むページ数の上限。各ページが各階になる。
+// 1回に読むページ数の上限。ページの通し番号は階の識別には使わない。
 const MAX_PAGES = 8;
 const MAX_PROMPT_CHARS = 8000;
 const MAX_HINT_CHARS = 500;
@@ -86,6 +91,21 @@ export async function handleAi(request, env, url, deps = {}) {
   let payload;
   try { payload = await readJsonWithLimit(request, MAX_AI_REQUEST_BYTES); } catch (response) { return response; }
 
+  // Explicit contracts never enter the legacy normalizer or its automatic follow-up calls.
+  if (["/api/ai/import-plan", "/api/ai/plan-result", "/api/ai/revise-plan", "/api/ai/finish-plan"].includes(url.pathname)) {
+    const contractError = extractionContractError(payload);
+    if (contractError) return contractError;
+    if (isSceneIRV3Request(payload)) {
+      if (url.pathname === "/api/ai/import-plan") {
+        return importSceneIRV3({ payload, env, deps, request, readImage, takeQuota, cost: COST_IMPORT_PAGE });
+      }
+      if (url.pathname === "/api/ai/plan-result") return pollSceneIRV3({ payload, env, deps, request });
+      return json({ error: "scene_ir_v3_revise_unsupported", extractionContract: "scene-ir-v3", message: "v3 source cannot enter legacy finish/revise." }, 409);
+    }
+  }
+
+  if (url.pathname === "/api/ai/register-plan") return registerPlan({ payload, env, deps, request, resolveImportProvider, readImage, takeQuota, cost: COST_IMPORT_PAGE });
+  if (url.pathname === "/api/ai/register-plan-result") return pollPlanRegistration({ payload, env, deps, request, resolveImportProvider });
   if (url.pathname === "/api/ai/finish-plan") return aiFinishPlan(payload, env, deps);
   if (url.pathname === "/api/ai/import-plan") return aiImportPlan(payload, env, deps, request);
   if (url.pathname === "/api/ai/revise-plan") return aiRevisePlan(payload, env, deps, request);
@@ -142,6 +162,7 @@ async function aiQuota(env, request) {
     perUser: limits.imports.perUser,
     total: limits.imports.total,
     counted: counted,
+    ...sceneIRV3Capability(env, counted && seen.ok === true),
   });
 }
 
@@ -215,7 +236,7 @@ async function aiFindPlan(payload, env, deps, request) {
     text: LOCATE_PROMPT,
     image: { mimeType: image.mimeType, base64: image.base64 },
     // 位置が分かればよく、寸法の文字は読まない。考える必要も無い。
-    maxOutputTokens: 512,
+    maxOutputTokens: 1024,
     fetchImpl: deps.fetchImpl,
   };
   const result = provider.kind === "openai"
@@ -226,7 +247,7 @@ async function aiFindPlan(payload, env, deps, request) {
 
   const parsed = extractJson(result.text);
   const box = normalizeBox(parsed);
-  return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, usage: result.usage || null });
+  return json({ box: box.ok ? box : null, reason: box.ok ? "" : box.reason, sourceHeader: normalizeSourceHeader(parsed), usage: result.usage || null });
 }
 
 // ── 読み取ったあとの「仕上げ」 ───────────────────────────────────────
@@ -280,6 +301,9 @@ async function aiImportPlan(payload, env, deps, request) {
     images.push(one);
   }
 
+  const source = PlanSourceIdentity.normalizePages(payload && payload.sourcePages, raw);
+  if (source.problems.length) return json({ error: "invalid_request", problems: source.problems }, 400);
+  const sourcePages = source.pages;
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
   // **数を引く前に、投げられる状態かを確かめる。**
@@ -301,21 +325,21 @@ async function aiImportPlan(payload, env, deps, request) {
 
   const asks = images.map((img, i) => ({
     system: SYSTEM_PROMPT,
-    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length) }),
+    text: buildPlanPrompt({ hint: pageHint(hint, i, images.length, sourcePages && sourcePages[i]) }),
     images: [{ mimeType: img.mimeType, base64: img.base64 }],
     fetchImpl: deps.fetchImpl,
   }));
-  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
+  if (provider.kind === "openai") return startPlanJobs(provider, asks, env, sourcePages);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  const pages = collectPages(results);
+  const pages = collectPages(results, sourcePages);
   if (pages.error) return withNextStep(pages.error, env, deps, { images });
   return withNextStep(finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
     // 見直しのために、**モデルが答えたそのままの形**をページごとに返す。
     // アプリが組み立てたあとの形では、本人に自分の答えとして見せられない。
-    { pages: pages.list, revise: await reviseAdvice(pages.list, env, deps) },
+    { pages: pages.list, ...(sourcePages ? { sourcePages } : {}), revise: pages.merged?.pageProblems?.length ? null : await reviseAdvice(pages.list, env, deps) },
   ), env, deps, { images, pages: pages.list });
 }
 
@@ -346,6 +370,9 @@ async function aiRevisePlan(payload, env, deps, request) {
     pairs.push({ original, drawn, page: pagesIn[i] });
   }
 
+  const source = PlanSourceIdentity.normalizePages(payload && payload.sourcePages, raw);
+  if (source.problems.length) return json({ error: "invalid_request", problems: source.problems }, 400);
+  const sourcePages = source.pages;
   const hint = String((payload && payload.hint) || "").slice(0, MAX_HINT_CHARS);
 
   const provider = resolveImportProvider(env);
@@ -364,7 +391,7 @@ async function aiRevisePlan(payload, env, deps, request) {
     system: REVISE_SYSTEM,
     text: buildRevisePrompt({
       json: JSON.stringify(pair.page),
-      hint: pageHint(hint, i, pairs.length),
+      hint: pageHint(hint, i, pairs.length, sourcePages && sourcePages[i]),
     }),
     // **手順も渡す。** 見直しは全体を作り直させるので、読み取りと同じ手順が要る。
     // 渡さずに作り直させたところ、室名から畳数を除くという手順7の決まりが
@@ -377,15 +404,15 @@ async function aiRevisePlan(payload, env, deps, request) {
     ],
     fetchImpl: deps.fetchImpl,
   }));
-  if (provider.kind === "openai") return startPlanJobs(provider, asks, env);
+  if (provider.kind === "openai") return startPlanJobs(provider, asks, env, sourcePages);
 
   const results = await Promise.all(asks.map((ask) => askForPlan(provider, ask)));
-  const pages = collectPages(results);
+  const pages = collectPages(results, sourcePages);
   if (pages.error) return pages.error;
   return finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
-    { pages: pages.list, revised: true },
+    { pages: pages.list, ...(sourcePages ? { sourcePages } : {}), revised: true },
   );
 }
 
@@ -438,13 +465,13 @@ function startPlanJob(provider, { system, text, images, docs, fetchImpl }) {
 }
 
 // まとめて投げて、受付番号を返す。1回の通信は「投げる」ぶんだけで済む。
-async function startPlanJobs(provider, asks, env) {
+async function startPlanJobs(provider, asks, env, sourcePages) {
   const started = await Promise.all(asks.map((ask) => startPlanJob(provider, ask)));
   const failed = started.find((r) => !r.ok);
   if (failed) return json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502);
   const jobs = [];
-  for (const one of started) jobs.push(await jobToken(one.id, env));
-  return json({ jobs });
+  for (let i = 0; i < started.length; i++) jobs.push(await jobToken(started[i].id, env, sourcePages && sourcePages[i]));
+  return json({ jobs, ...(sourcePages ? { sourcePages } : {}) });
 }
 
 // 受付番号に署名を付ける。
@@ -461,7 +488,12 @@ async function signJob(id, env) {
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
 }
 
-async function jobToken(id, env) { return `${id}.${await signJob(id, env)}`; }
+async function jobToken(id, env, sourcePage) {
+  // Bind source/crop evidence to the actual job. Poll ordering or client metadata
+  // cannot silently relabel a model result. Existing opaque legacy tokens still work.
+  const value = sourcePage ? 'source:' + btoa(unescape(encodeURIComponent(JSON.stringify({ id, sourcePage })))) : id;
+  return `${value}.${await signJob(value, env)}`;
+}
 
 async function readJobToken(token, env) {
   const raw = String(token || "");
@@ -472,7 +504,12 @@ async function readJobToken(token, env) {
   if (sig.length !== want.length) return null;
   let same = 0;
   for (let i = 0; i < want.length; i++) same |= sig.charCodeAt(i) ^ want.charCodeAt(i);
-  return same === 0 ? id : null;
+  if (same !== 0) return null;
+  if (!id.startsWith('source:')) return { id, sourcePage: null };
+  try {
+    const saved = JSON.parse(decodeURIComponent(escape(atob(id.slice(7)))));
+    return typeof saved.id === 'string' && saved.sourcePage ? saved : null;
+  } catch { return null; }
 }
 
 // ── 出来たかどうかを見に行く ─────────────────────────────────────────
@@ -491,12 +528,14 @@ async function aiPlanResult(payload, env, deps) {
     return json({ error: "invalid_request", message: "この提供元は受付番号を使わない" }, 400);
   }
 
-  const ids = [];
+  const ids = [], sourceRecords = [];
   for (const token of tokens) {
     const id = await readJobToken(token, env);
     if (!id) return json({ error: "invalid_request", message: "受付番号が正しくありません。" }, 400);
-    ids.push(id);
+    ids.push(id.id); sourceRecords.push(id.sourcePage);
   }
+  const sourcePages = sourceRecords.some(Boolean) ? sourceRecords : null;
+  if (sourcePages && sourcePages.some(page => !page)) return json({ error: "invalid_request", message: "異なる元ページ契約の受付番号を混ぜられません。" }, 400);
 
   const got = await Promise.all(ids.map((id) => fetchJob({ config: provider.config, id, fetchImpl: deps.fetchImpl })));
   const failed = got.find((g) => !g.ok);
@@ -506,18 +545,19 @@ async function aiPlanResult(payload, env, deps) {
   if (done < got.length) return json({ pending: true, done, total: got.length });
 
   const results = got.map((g) => readResult(g.data));
-  const pages = collectPages(results);
+  const pages = collectPages(results, sourcePages);
   if (pages.error) return withNextStep(pages.error, env, deps, {});
   // 見直しの結果を組み立てているときは、もう一度見直すかを問わない。
   // 門は「読み取りの次に見直しを払うか」だけを決める。
   const revised = Boolean(payload && payload.revised);
   return withNextStep(finishImportedPlan(
-    pages.list.length === 1 ? pages.list[0] : { floors: mergeFloors(pages.list) },
+    pages.merged,
     sumUsage(results),
     {
       pages: pages.list,
+      ...(sourcePages ? { sourcePages } : {}),
       revised,
-      ...(revised ? {} : { revise: await reviseAdvice(pages.list, env, deps) }),
+      ...(revised ? {} : { revise: pages.merged?.pageProblems?.length ? null : await reviseAdvice(pages.list, env, deps) }),
     },
   ), env, deps, { pages: pages.list });
 }
@@ -537,6 +577,7 @@ async function withNextStep(res, env, deps, context) {
   let body;
   try { body = await res.clone().json(); } catch (e) { return res; }
   if (!body || typeof body !== "object" || !body.error) return res;
+  if (body.error === "ai_ambiguous_floors") return res;
   const images = Array.isArray(context && context.images) ? context.images : [];
   const picked = await nextStep(failureFacts({
     error: body.error,
@@ -551,7 +592,7 @@ async function withNextStep(res, env, deps, context) {
 }
 
 // 返事の束を、ページごとのJSONにほどく。1つでも駄目なら全体を失敗にする。
-function collectPages(results) {
+function collectPages(results, sourcePages) {
   const failed = results.find((r) => !r.ok);
   if (failed) {
     return { error: json({ error: "ai_upstream_error", status: failed.status, message: failed.message }, 502) };
@@ -564,7 +605,13 @@ function collectPages(results) {
     }
     list.push(parsed);
   }
-  return { list };
+  const reconciled = reconcileReadPages(list, sourcePages);
+  const merged = mergeReadPages(reconciled.pages);
+  if (reconciled.problems.length) {
+    merged.pageProblems = (merged.pageProblems || []).concat(reconciled.problems);
+    merged.floors = [];
+  }
+  return { list: reconciled.pages, merged };
 }
 
 // 使った枚数を数える。Durable Object が数の持ち主。
@@ -596,31 +643,10 @@ async function takeQuota(request, env, count, peek) {
   }
 }
 
-// ページごとの補足。何ページ目かを伝えると、階の取り違えが減る。
-function pageHint(hint, index, total) {
-  if (total <= 1) return hint;
-  const page = `この画像はPDFの${index + 1}ページ目です（全${total}ページ）。`;
-  return hint ? `${page}\n${hint}` : page;
-}
-
-// ページごとの読み取りを、1つの家にまとめる。
-//
-// 見出し(「2階平面図」など)から階を判断させているが、書かれていない図面も
-// ある。同じ階が2つ来たら、ページの並び順を正とする。
-function mergeFloors(pages) {
-  const out = [];
-  const used = new Set();
-  pages.forEach((page, i) => {
-    const floors = Array.isArray(page && page.floors) ? page.floors : [];
-    for (const f of floors) {
-      if (!f || typeof f !== "object") continue;
-      let floor = Number(f.floor);
-      if (!Number.isFinite(floor) || floor < 1 || used.has(floor)) floor = i + 1;
-      used.add(floor);
-      out.push({ ...f, floor });
-    }
-  });
-  return out;
+// Page number is an ordinal, never evidence that page N depicts floor N.
+function pageHint(hint, index, total, source) {
+  const page = total > 1 ? `この画像は送信画像の${index + 1}ページ目（全${total}枚）です。順番は階数を表しません。` : '';
+  return [page, PlanSourceIdentity.hint(source), hint].filter(Boolean).join('\n');
 }
 
 function sumUsage(results) {
@@ -636,13 +662,62 @@ function sumUsage(results) {
 //
 // ここだけは純粋な関数にしてあるので、モデルを呼ばずに検査できる。
 export function finishImportedPlan(parsed, usage, extra) {
+  if (Array.isArray(parsed?.pageProblems) && parsed.pageProblems.length) {
+    return json({
+      error: "ai_ambiguous_floors",
+      message: "ページと階の対応を確定できません。対象の階の図面だけを選び、階数を補足して読み直してください。",
+      problems: parsed.pageProblems.slice(0, 20),
+      notes: parsed.notes || [],
+      pages: extra?.pages || [],
+      usage: usage || null,
+      revisionCandidate: false,
+    }, 422);
+  }
   const plan = decodeCompactPlan(parsed);
+  // Keep source-local frames outside the normalized app plan. Every registration
+  // and subsequent Apply recompiles these, never transformed room rectangles.
+  const sourceLocal = (plan.floors.length > 1 || plan.floors.some((f) => f.sourceIdentity && f.sourceIdentity.status !== 'confirmed')) ? JSON.parse(JSON.stringify({ floors: plan.floors, items: plan.items, marks: plan.marks })) : null;
+  // An empty extraction is the model's refusal when no physical scale can
+  // be established. Do not turn that (or a missing footprint) into an
+  // applicable empty/partial plan, including mixed multi-page results.
+  const sourcePages = Array.isArray(extra && extra.pages) ? extra.pages
+    : Array.isArray(parsed) ? parsed : [parsed];
+  const positive = (v) => (typeof v === "number" || (typeof v === "string" && v.trim() !== ""))
+    && Number.isFinite(Number(v)) && Number(v) > 0;
+  const readings = [...sourcePages, ...(Array.isArray(parsed) ? parsed : [parsed])];
+  if (readings.some((p) => Array.isArray(p && p.floors)
+    && (!p.floors.length || p.floors.some((f) => !f || !positive(f.width) || !positive(f.depth))))) {
+    return json({
+      error: "ai_invalid_plan",
+      message: "実寸の幅・奥行きを確認できません。寸法線を含む図面と実寸の手がかりを確認してください。",
+      problems: ["読み取りに有効な実寸の階がありません。"],
+      notes: sourcePages.flatMap((p) => Array.isArray(p && p.notes) ? p.notes.map(String) : []).slice(0, 20),
+      pages: sourcePages,
+      usage: usage || null,
+      revisionCandidate: false,
+    }, 422);
+  }
   // 壁はAIに出させず、**部屋と部屋の境目から作る**。
   // 壁の端点を独立に答えさせると、位置は通り芯に載るのに伸ばし方が違う、
   // という失敗が残った(実測で13本中12本は通り芯にぴったり載っていた)。
   // 壁の端点は、その壁が仕切っている部屋から決まるものだからである。
   if (plan.floors.length) {
     const built = PlanGrid.buildFloors(plan.floors);
+    if (built.problems.length) {
+      return json({
+        error: "ai_invalid_plan",
+        message: "読み取った部屋の境界が矛盾しています。図面の範囲を確認して読み直してください。",
+        problems: built.problems.slice(0, 20),
+        // Raw readings are repair input, never an applicable plan. Keep them for
+        // the existing single revision pass; an unsuccessful revision stays 422.
+        ...(extra && Array.isArray(extra.pages) ? {
+          pages: extra.pages,
+          revisionCandidate: !extra.revised,
+          revise: { ...(extra.revise || {}), skipAll: false },
+          usage: usage || null,
+        } : {}),
+      }, 422);
+    }
     plan.walls = built.walls;
     plan.rooms = built.rooms;
     for (const m of built.problems) plan.notes.push(m);
@@ -664,6 +739,12 @@ export function finishImportedPlan(parsed, usage, extra) {
   // といった**読み取りの取り違え**を、この時点で利用者へ返す。
   // 既存の warnings と同じ経路で画面に出る（判定できないものは黙る）。
   const warnings = checked.warnings.concat(knowledgeWarnings(normalized));
+  const buildingReview = sourceLocal ? PlanRegistration.compile(sourceLocal, { proposals: parsed.buildingRegistration }) : null;
+  if (buildingReview) {
+    warnings.push(...buildingReview.diagnostics.map((d) => (d.floor ? d.floor + "階: " : "") + d.message));
+    // The pre-registration local frame is only diagnostic, never an aligned preview.
+    warnings.push(...PlanRegistration.checkBuilding(normalized, {}, []).map((d) => "未位置合わせの仮座標: " + d.message));
+  }
   return json({
     plan: normalized,
     summary: PlanSchema.summarize(normalized),
@@ -675,6 +756,8 @@ export function finishImportedPlan(parsed, usage, extra) {
     notes: plan.notes.slice(0, 20),
     usage: usage || null,
     ...(extra || {}),
+    ...(buildingReview ? { sourceLocal, buildingRegistration: parsed.buildingRegistration || null,
+      buildingReview: { version: 1, canApply: false, status: buildingReview.status, diagnostics: buildingReview.diagnostics } } : {}),
   });
 }
 

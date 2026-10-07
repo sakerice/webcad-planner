@@ -1,0 +1,681 @@
+{
+  "schemaVersion": 1,
+  "sidecarVersion": "0.2.0",
+  "baseSidecarVersion": "0.1.0",
+  "coverage": "Additional six representatives; merge by assetId and preserve v0.1.0 records",
+  "reviewedAssetCommit": "d7a89c65a370146b74ecb8c5c8da670b41fce247",
+  "packId": "rpg-mansion",
+  "manifestSha256": "56399b1b56438f323a7e4f86cce1d7e272d5df0575fa451556f8d7fd1f34e6d8",
+  "editorIntegration": "fixture-only; TPS host integration pending",
+  "units": "metres",
+  "coordinateSystem": "glTF +Y up, model front +Z",
+  "sockets": [
+    {
+      "assetId": "rpg-mansion-wing-chair-01",
+      "socketId": "seat-main",
+      "socketRevision": "seat-surface-v1",
+      "assetRevision": "sha256:b307c79b25cbbd34f467424ddf7fa1bf2d2b42a172596626c5384cded6addf3d",
+      "kind": "sit",
+      "status": "geometry-candidate-host-validation-required",
+      "localSeatSurfaceCenter": [
+        0.0,
+        0.5606809258460999,
+        0.030000001192092896
+      ],
+      "localFrontDirection": [
+        0,
+        0,
+        1
+      ],
+      "actorLocalYawRadians": 3.141592653589793,
+      "localApproachFloorPoint": [
+        0.0,
+        0,
+        1.025000011920929
+      ],
+      "approachStatus": "proposed-front-floor-point-not-path-validated",
+      "approachMarginFromAssetFrontM": 0.6,
+      "seatSurfaceBoundsM": {
+        "min": [
+          -0.3294943869113922,
+          0.5606809258460999,
+          -0.3400000035762787
+        ],
+        "max": [
+          0.3294943869113922,
+          0.5606809258460999,
+          0.4000000059604645
+        ]
+      },
+      "seatSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "seatPolygonLocalGltfM": [
+        [
+          -0.3294943869113922,
+          0.5606809258460999,
+          -0.3400000035762787
+        ],
+        [
+          0.3294943869113922,
+          0.5606809258460999,
+          -0.3400000035762787
+        ],
+        [
+          0.3294943869113922,
+          0.5606809258460999,
+          0.4000000059604645
+        ],
+        [
+          -0.3294943869113922,
+          0.5606809258460999,
+          0.4000000059604645
+        ]
+      ],
+      "seatFrameReference": {
+        "role": "wood rail top; NOT actor seat or pelvis",
+        "localCenter": [
+          0.0,
+          0.40493616461753845,
+          0.015000000596046448
+        ],
+        "boundsM": {
+          "min": [
+            -0.36101123690605164,
+            0.40493616461753845,
+            -0.3580000102519989
+          ],
+          "max": [
+            0.36101123690605164,
+            0.40493616461753845,
+            0.3880000114440918
+          ]
+        },
+        "evidence": {
+          "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-wing-chair-01.glb",
+          "modelSha256": "b307c79b25cbbd34f467424ddf7fa1bf2d2b42a172596626c5384cded6addf3d",
+          "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-wing-chair-01.blend",
+          "sourceBlendSha256": "930aed3056f9099c94d8931e3994bbb3d3118b28ff6ecb0499bfae8344044cb0",
+          "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+          "channel": "wood",
+          "selectionHeightRangeM": [
+            0.35,
+            0.43
+          ],
+          "triangles": [
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 4
+            },
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 5
+            }
+          ],
+          "trianglesLocalGltfM": [
+            [
+              [
+                0.36101123690605164,
+                0.40493616461753845,
+                -0.3580000102519989
+              ],
+              [
+                -0.36101123690605164,
+                0.40493616461753845,
+                -0.3580000102519989
+              ],
+              [
+                -0.36101123690605164,
+                0.40493616461753845,
+                0.3880000114440918
+              ]
+            ],
+            [
+              [
+                0.36101123690605164,
+                0.40493616461753845,
+                -0.3580000102519989
+              ],
+              [
+                -0.36101123690605164,
+                0.40493616461753845,
+                0.3880000114440918
+              ],
+              [
+                0.36101123690605164,
+                0.40493616461753845,
+                0.3880000114440918
+              ]
+            ]
+          ],
+          "surfaceAreaM2": 0.5386287811288941,
+          "rigValidation": "not-performed",
+          "clearanceValidation": "not-performed",
+          "pathValidation": "not-performed"
+        }
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-wing-chair-01.glb",
+        "modelSha256": "b307c79b25cbbd34f467424ddf7fa1bf2d2b42a172596626c5384cded6addf3d",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-wing-chair-01.blend",
+        "sourceBlendSha256": "930aed3056f9099c94d8931e3994bbb3d3118b28ff6ecb0499bfae8344044cb0",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "fabric",
+        "selectionHeightRangeM": [
+          0.45,
+          0.65
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 4
+          },
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 5
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.3294943869113922,
+              0.5606809258460999,
+              -0.3400000035762787
+            ],
+            [
+              -0.3294943869113922,
+              0.5606809258460999,
+              -0.3400000035762787
+            ],
+            [
+              -0.3294943869113922,
+              0.5606809258460999,
+              0.4000000059604645
+            ]
+          ],
+          [
+            [
+              0.3294943869113922,
+              0.5606809258460999,
+              -0.3400000035762787
+            ],
+            [
+              -0.3294943869113922,
+              0.5606809258460999,
+              0.4000000059604645
+            ],
+            [
+              0.3294943869113922,
+              0.5606809258460999,
+              0.4000000059604645
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 0.48765169891346716,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "explicit requestSit",
+        "world transform including actual editor effective height, scale, rotation and floor elevation",
+        "same-floor approach within 1.25 metres; host path/obstacle/exit checks required",
+        "signature includes asset/socket revisions and full placement including conversion height v2",
+        "release on signature change or deletion",
+        "TPS rig-specific pelvis alignment; seat surface is not pelvis root",
+        "single conservative centre socket; no inferred sofa multi-seat slots"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-stool-01",
+      "socketId": "seat-main",
+      "socketRevision": "seat-surface-v1",
+      "assetRevision": "sha256:0c3ce23e96a4d9eae0aa9b10667ae3328e3717f15f638895ab29b9d84b1f2996",
+      "kind": "sit",
+      "status": "geometry-candidate-host-validation-required",
+      "localSeatSurfaceCenter": [
+        0.0,
+        0.5400000214576721,
+        0.002848103642463684
+      ],
+      "localFrontDirection": [
+        0,
+        0,
+        1
+      ],
+      "actorLocalYawRadians": 3.141592653589793,
+      "localApproachFloorPoint": [
+        0.0,
+        0,
+        0.8249999940395355
+      ],
+      "approachStatus": "proposed-front-floor-point-not-path-validated",
+      "approachMarginFromAssetFrontM": 0.6,
+      "seatSurfaceBoundsM": {
+        "min": [
+          -0.1717105209827423,
+          0.5400000214576721,
+          -0.1908227801322937
+        ],
+        "max": [
+          0.1717105209827423,
+          0.5400000214576721,
+          0.19651898741722107
+        ]
+      },
+      "seatSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "seatPolygonLocalGltfM": [
+        [
+          -0.1717105209827423,
+          0.5400000214576721,
+          -0.1908227801322937
+        ],
+        [
+          0.1717105209827423,
+          0.5400000214576721,
+          -0.1908227801322937
+        ],
+        [
+          0.1717105209827423,
+          0.5400000214576721,
+          0.19651898741722107
+        ],
+        [
+          -0.1717105209827423,
+          0.5400000214576721,
+          0.19651898741722107
+        ]
+      ],
+      "seatFrameReference": {
+        "role": "wood rail top; NOT actor seat or pelvis",
+        "localCenter": [
+          0.0,
+          0.38999995589256287,
+          -0.014240503311157227
+        ],
+        "boundsM": {
+          "min": [
+            -0.2107894867658615,
+            0.38999995589256287,
+            -0.2113291174173355
+          ],
+          "max": [
+            0.2107894867658615,
+            0.38999995589256287,
+            0.18284811079502106
+          ]
+        },
+        "evidence": {
+          "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-stool-01.glb",
+          "modelSha256": "0c3ce23e96a4d9eae0aa9b10667ae3328e3717f15f638895ab29b9d84b1f2996",
+          "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-stool-01.blend",
+          "sourceBlendSha256": "70b89b070e01ddaf77d6a3e7c16819ab0ac420eebdd579cabe288e3e294b1d8c",
+          "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+          "channel": "wood",
+          "selectionHeightRangeM": [
+            0.35,
+            0.43
+          ],
+          "triangles": [
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 4
+            },
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 5
+            }
+          ],
+          "trianglesLocalGltfM": [
+            [
+              [
+                0.2107894867658615,
+                0.38999995589256287,
+                -0.2113291174173355
+              ],
+              [
+                -0.2107894867658615,
+                0.38999995589256287,
+                -0.2113291174173355
+              ],
+              [
+                -0.2107894867658615,
+                0.38999995589256287,
+                0.18284811079502106
+              ]
+            ],
+            [
+              [
+                0.2107894867658615,
+                0.38999995589256287,
+                -0.2113291174173355
+              ],
+              [
+                -0.2107894867658615,
+                0.38999995589256287,
+                0.18284811079502106
+              ],
+              [
+                0.2107894867658615,
+                0.38999995589256287,
+                0.18284811079502106
+              ]
+            ]
+          ],
+          "surfaceAreaM2": 0.16617683125934501,
+          "rigValidation": "not-performed",
+          "clearanceValidation": "not-performed",
+          "pathValidation": "not-performed"
+        }
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-stool-01.glb",
+        "modelSha256": "0c3ce23e96a4d9eae0aa9b10667ae3328e3717f15f638895ab29b9d84b1f2996",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-stool-01.blend",
+        "sourceBlendSha256": "70b89b070e01ddaf77d6a3e7c16819ab0ac420eebdd579cabe288e3e294b1d8c",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "fabric",
+        "selectionHeightRangeM": [
+          0.45,
+          0.65
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 4
+          },
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 5
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.1717105209827423,
+              0.5400000214576721,
+              -0.1908227801322937
+            ],
+            [
+              -0.1717105209827423,
+              0.5400000214576721,
+              -0.1908227801322937
+            ],
+            [
+              -0.1717105209827423,
+              0.5400000214576721,
+              0.19651898741722107
+            ]
+          ],
+          [
+            [
+              0.1717105209827423,
+              0.5400000214576721,
+              -0.1908227801322937
+            ],
+            [
+              -0.1717105209827423,
+              0.5400000214576721,
+              0.19651898741722107
+            ],
+            [
+              0.1717105209827423,
+              0.5400000214576721,
+              0.19651898741722107
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 0.1330213134086069,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "explicit requestSit",
+        "world transform including actual editor effective height, scale, rotation and floor elevation",
+        "same-floor approach within 1.25 metres; host path/obstacle/exit checks required",
+        "signature includes asset/socket revisions and full placement including conversion height v2",
+        "release on signature change or deletion",
+        "TPS rig-specific pelvis alignment; seat surface is not pelvis root",
+        "single conservative centre socket; no inferred sofa multi-seat slots"
+      ]
+    },
+    {
+      "assetId": "rpg-mansion-sofa-01",
+      "socketId": "seat-main",
+      "socketRevision": "seat-surface-v1",
+      "assetRevision": "sha256:5d9230f4dd7c953db9c8bc643e61588dcd4edc81dc455a16d6b981856ee24151",
+      "kind": "sit",
+      "status": "geometry-candidate-host-validation-required",
+      "localSeatSurfaceCenter": [
+        0.0,
+        0.5400000214576721,
+        0.030000001192092896
+      ],
+      "localFrontDirection": [
+        0,
+        0,
+        1
+      ],
+      "actorLocalYawRadians": 3.141592653589793,
+      "localApproachFloorPoint": [
+        0.0,
+        0,
+        1.025000011920929
+      ],
+      "approachStatus": "proposed-front-floor-point-not-path-validated",
+      "approachMarginFromAssetFrontM": 0.6,
+      "seatSurfaceBoundsM": {
+        "min": [
+          -0.9269139766693115,
+          0.5400000214576721,
+          -0.3400000035762787
+        ],
+        "max": [
+          0.9269139766693115,
+          0.5400000214576721,
+          0.4000000059604645
+        ]
+      },
+      "seatSurfaceNormal": [
+        0,
+        1,
+        0
+      ],
+      "seatPolygonLocalGltfM": [
+        [
+          -0.9269139766693115,
+          0.5400000214576721,
+          -0.3400000035762787
+        ],
+        [
+          0.9269139766693115,
+          0.5400000214576721,
+          -0.3400000035762787
+        ],
+        [
+          0.9269139766693115,
+          0.5400000214576721,
+          0.4000000059604645
+        ],
+        [
+          -0.9269139766693115,
+          0.5400000214576721,
+          0.4000000059604645
+        ]
+      ],
+      "seatFrameReference": {
+        "role": "wood rail top; NOT actor seat or pelvis",
+        "localCenter": [
+          0.0,
+          0.38999998569488525,
+          0.015000000596046448
+        ],
+        "boundsM": {
+          "min": [
+            -0.9592823386192322,
+            0.38999998569488525,
+            -0.3580000102519989
+          ],
+          "max": [
+            0.9592823386192322,
+            0.38999998569488525,
+            0.3880000114440918
+          ]
+        },
+        "evidence": {
+          "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-sofa-01.glb",
+          "modelSha256": "5d9230f4dd7c953db9c8bc643e61588dcd4edc81dc455a16d6b981856ee24151",
+          "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sofa-01.blend",
+          "sourceBlendSha256": "f392a60cbaaa6164de182cd7ee870db86f1a4b16a9366c1e8405e763c4868323",
+          "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+          "channel": "wood",
+          "selectionHeightRangeM": [
+            0.35,
+            0.43
+          ],
+          "triangles": [
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 4
+            },
+            {
+              "mesh": 0,
+              "primitive": 1,
+              "triangle": 5
+            }
+          ],
+          "trianglesLocalGltfM": [
+            [
+              [
+                0.9592823386192322,
+                0.38999998569488525,
+                -0.3580000102519989
+              ],
+              [
+                -0.9592823386192322,
+                0.38999998569488525,
+                -0.3580000102519989
+              ],
+              [
+                -0.9592823386192322,
+                0.38999998569488525,
+                0.3880000114440918
+              ]
+            ],
+            [
+              [
+                0.9592823386192322,
+                0.38999998569488525,
+                -0.3580000102519989
+              ],
+              [
+                -0.9592823386192322,
+                0.38999998569488525,
+                0.3880000114440918
+              ],
+              [
+                0.9592823386192322,
+                0.38999998569488525,
+                0.3880000114440918
+              ]
+            ]
+          ],
+          "surfaceAreaM2": 1.4312492908452477,
+          "rigValidation": "not-performed",
+          "clearanceValidation": "not-performed",
+          "pathValidation": "not-performed"
+        }
+      },
+      "evidence": {
+        "modelPath": "assets/models/packs/rpg-mansion/models/rpg-mansion-sofa-01.glb",
+        "modelSha256": "5d9230f4dd7c953db9c8bc643e61588dcd4edc81dc455a16d6b981856ee24151",
+        "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-sofa-01.blend",
+        "sourceBlendSha256": "f392a60cbaaa6164de182cd7ee870db86f1a4b16a9366c1e8405e763c4868323",
+        "method": "Explicit audited component role; upward GLB triangles filtered by finish channel and bounded height, full rectangle area verified; not bounding-box top",
+        "channel": "fabric",
+        "selectionHeightRangeM": [
+          0.45,
+          0.65
+        ],
+        "triangles": [
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 4
+          },
+          {
+            "mesh": 0,
+            "primitive": 2,
+            "triangle": 5
+          }
+        ],
+        "trianglesLocalGltfM": [
+          [
+            [
+              0.9269139766693115,
+              0.5400000214576721,
+              -0.3400000035762787
+            ],
+            [
+              -0.9269139766693115,
+              0.5400000214576721,
+              -0.3400000035762787
+            ],
+            [
+              -0.9269139766693115,
+              0.5400000214576721,
+              0.4000000059604645
+            ]
+          ],
+          [
+            [
+              0.9269139766693115,
+              0.5400000214576721,
+              -0.3400000035762787
+            ],
+            [
+              -0.9269139766693115,
+              0.5400000214576721,
+              0.4000000059604645
+            ],
+            [
+              0.9269139766693115,
+              0.5400000214576721,
+              0.4000000059604645
+            ]
+          ]
+        ],
+        "surfaceAreaM2": 1.3718327031500621,
+        "rigValidation": "not-performed",
+        "clearanceValidation": "not-performed",
+        "pathValidation": "not-performed"
+      },
+      "hostRequirements": [
+        "explicit requestSit",
+        "world transform including actual editor effective height, scale, rotation and floor elevation",
+        "same-floor approach within 1.25 metres; host path/obstacle/exit checks required",
+        "signature includes asset/socket revisions and full placement including conversion height v2",
+        "release on signature change or deletion",
+        "TPS rig-specific pelvis alignment; seat surface is not pelvis root",
+        "single conservative centre socket; no inferred sofa multi-seat slots"
+      ]
+    }
+  ],
+  "actorConvention": "yaw 0 faces -Z; local model +Z facing corresponds to yaw pi"
+}

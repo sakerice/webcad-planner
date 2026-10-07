@@ -18,18 +18,26 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #help-box{color:var(--hp-muted)!important;box-shadow:var(--hp-shadow-soft)!important;border-radius:14px!important}
 .help-touch{display:none}
 @media(max-width:768px){
-  #toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) 64px;gap:4px 8px!important;
-    padding:8px!important;border-radius:20px!important;overflow:hidden!important;min-height:104px!important}
+  #toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px!important;
+    padding:8px!important;border-radius:20px!important;overflow:hidden!important;min-height:148px!important}
+  #toolbar>.brand-mark{grid-row:1;grid-column:1}
+  #toolbar>#floor-sel{grid-row:1;grid-column:2;justify-self:end}
+  #toolbar>.library-current{grid-row:2;grid-column:1;min-width:0;flex-shrink:1}
+  #toolbar>#compare-launch{grid-row:2;grid-column:2;min-height:40px!important;padding:0 10px!important;font-size:11px!important}
+  .editor-pane #toolbar{min-height:104px!important}
+  .editor-pane #toolbar>.library-current{grid-row:1;grid-column:1}
+  .editor-pane #toolbar>.toolbar-actions{grid-row:2}
   #toolbar>.tsep{display:none!important}
   #toolbar .brand-mark{min-width:0!important;padding:0 6px!important;margin:0!important;height:36px!important}
   #toolbar .brand-logo{width:30px!important;height:30px!important}
   #toolbar .brand-word{font-size:13px!important;letter-spacing:-.3px}
   #floor-sel{width:64px!important;min-height:36px!important;margin:0!important;padding:4px!important;font-size:13px!important}
-  .toolbar-actions{display:flex;grid-column:1/-1;min-width:0;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 4px}
+  .toolbar-actions{display:flex;grid-column:1/-1;grid-row:3;min-width:0;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 4px}
   #toolbar .toolbar-actions .tbtn{flex:0 0 auto;min-height:42px!important;padding:0 10px!important;font-size:11px!important;margin:0!important}
   #toolbar .toolbar-actions .tsep{display:none}
-  #help-box{top:124px!important;left:12px!important;right:12px!important;width:auto!important;
+  #help-box{top:168px!important;left:12px!important;right:12px!important;width:auto!important;
     padding:8px 12px!important;font-size:10px!important;line-height:1.6!important;pointer-events:none}
+  .editor-pane #help-box{top:124px!important}
   .help-desktop{display:none}.help-touch{display:block}
   #help-box>b,#help-box>br{display:none}
   #bottom-nav{border-radius:var(--hp-control-radius)!important;box-shadow:var(--hp-shadow)!important}
@@ -51,15 +59,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .mobile-data-tools[open]>.mobile-data-title::after{content:'−'}
 @media(hover:none){#asset-preview{display:none!important}}
 @media(max-width:768px){
-  #wall-panel,#light-panel{top:calc(124px + var(--safe-top))!important}
+  #wall-panel,#light-panel{top:calc(168px + var(--safe-top))!important}
+  .editor-pane #wall-panel,.editor-pane #light-panel{top:calc(124px + var(--safe-top))!important}
 }
 @media(max-width:768px){
-  #props.show.prop-expanded{top:calc(124px + var(--safe-top))!important}
+  #props.show.prop-expanded{top:calc(168px + var(--safe-top))!important}
+  .editor-pane #props.show.prop-expanded{top:calc(124px + var(--safe-top))!important}
 }
 
 /* Catalogue controls stay in the scrolling category area, below common tools. */
 .catalogue-search{padding:8px 10px 14px}
 .catalogue-search label{display:block;color:var(--hp-text);font-size:12px;font-weight:700;margin-bottom:8px}
+#sidebar [data-tool][hidden],#sidebar .cat-body[hidden],#sidebar .cat-hdr[hidden],#sidebar .asset-tile img[hidden]{display:none!important}
+.asset-thumbnail-fallback{display:flex;align-items:center;justify-content:center;height:90px;color:var(--hp-muted)}
+.asset-thumbnail-fallback svg{width:40px;height:40px}
 .catalogue-search input{width:100%;min-width:0;min-height:44px;padding:10px 14px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius);background:#fff;color:var(--hp-text);font:inherit;font-size:16px;touch-action:manipulation}
 .catalogue-count{margin-top:8px;color:var(--hp-muted);font-size:11px;line-height:1.6}
 #sidebar .asset-subcat[hidden],#sidebar .asset-tile[hidden]{display:none!important}
@@ -231,3 +244,145 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 開いた欄を一瞬示す(強調はオレンジの1色だけ)。見出しの浮きの影は別の規則が
    !important で持っているので、box-shadow には触らず outline で描く。 */
 #sidebar .asset-subcat.plan-recommend-target>.asset-subhdr{outline:2px solid var(--hp-primary);outline-offset:-2px}
+
+/* Local-only Scene IR correspondence review, using the existing import card. */
+#scene-ir-review details { margin: 10px 0; padding: 12px; border-radius: 16px; background: #fff; box-shadow: 0 2px 10px #26364512; }
+#scene-ir-review summary { cursor: pointer; font-weight: 600; overflow-wrap: anywhere; }
+#scene-ir-review pre { font-size: 12px; max-height: 240px; overflow: auto; overflow-wrap: anywhere; }
+#scene-ir-review label { display: block; margin: 10px 0; }
+#scene-ir-review .scene-mapping-editor { border: 0; border-radius: 16px; padding: 14px; margin-top: 12px; background: #f5f8fa; min-width: 0; }
+#scene-ir-review .scene-mapping-editor legend { font-weight: 600; overflow-wrap: anywhere; }
+#scene-ir-review .scene-mapping-editor select { display: block; max-width: 100%; width: 100%; min-height: 40px; margin-top: 6px; }
+#scene-ir-review button { border-radius: 999px; min-height: 40px; padding: 8px 16px; margin: 4px 6px 4px 0; }
+#scene-ir-review p { font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+#scene-ir-review [role="status"] { color: #9a3412; }
+
+/* Existing import review panel: bounded source-local registration controls. */
+.building-registration-review { overflow-wrap: anywhere; }
+.building-registration-review details { margin: 12px 0; padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 2px 10px #30445212; }
+.building-registration-anchors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; border: 0; padding: 0; }
+.building-registration-anchors label { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.building-registration-anchors label:last-child { grid-column: 1 / -1; }
+.building-registration-review input:not([type=checkbox]) { box-sizing: border-box; width: 100%; min-height: 40px; }
+.building-registration-review button { min-height: 40px; white-space: normal; }
+
+#building-registration-notice { position:absolute; z-index:25; left:12px; right:12px; bottom:12px; max-width:560px; padding:10px 14px; border-radius:14px; color:#5e4329; background:#fff9ed; box-shadow:0 3px 16px #30445220; font-size:12px; }
+#building-registration-notice[hidden] { display:none; }
+#building-registration-notice summary { cursor:pointer; font-weight:600; }
+#building-registration-notice-detail { margin-top:8px; white-space:pre-wrap; line-height:1.6; }
+
+/* Comparison uses the existing toolbar controls/tokens; child editors own all plan actions. */
+.editor-pane #compare-launch,.editor-pane #toolbar>.brand-mark,.editor-pane #toolbar>.tsep:first-of-type{display:none!important}
+.editor-pane #toolbar .tbtn.mob-hide{display:inline-flex!important}
+.parallel-open body>#toolbar>.brand-mark,.parallel-open .offline-preview-banner{display:none}
+.parallel-editors{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;background:#f2f4f7;color:var(--hp-text)}
+.parallel-editors[hidden]{display:none}
+.parallel-heading,.parallel-controls{display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 12px;background:#fff;box-shadow:var(--hp-shadow-soft);border-radius:24px}
+.parallel-heading [data-parallel-close]{margin-left:auto}
+.parallel-heading .brand-mark{flex-shrink:0}
+.parallel-local-notice,[data-parallel-status]{font-size:11px;color:var(--hp-muted)}
+.parallel-controls{flex-wrap:wrap}
+.parallel-controls select,.parallel-pane header select{min-height:40px;min-width:0;padding:6px 12px;border:0;border-radius:var(--hp-control-radius);background:#f5f6f3;color:var(--hp-text);font:inherit;font-size:12px}
+.parallel-editors .tbtn{min-height:40px;border:0;border-radius:var(--hp-control-radius);box-shadow:none!important}
+.parallel-recovery summary{margin:0;font-size:12px}
+[data-parallel-status]{margin:6px 18px}
+.parallel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));flex:1;min-height:0;gap:8px;padding:8px 12px}
+.parallel-pane{display:flex;min-width:0;min-height:0;flex-direction:column;background:#fff;border-radius:24px;overflow:hidden;box-shadow:var(--hp-shadow)}
+.parallel-pane header{padding:6px;display:flex}
+.parallel-pane header select{flex:1;width:auto;background:#fff}
+.parallel-pane-remove{flex:0 0 40px;min-height:40px;font-size:22px;padding:0;border-radius:var(--hp-control-radius)}
+.parallel-pane iframe{width:100%;flex:1;border:0;min-height:0}
+.parallel-editors button:disabled{opacity:.5;cursor:default}
+@media(max-width:768px){.parallel-heading{flex-wrap:wrap}.parallel-local-notice{display:none}.parallel-controls{max-height:30dvh;overflow:auto}.parallel-grid{gap:6px;padding:6px}.parallel-heading,.parallel-controls{margin-left:6px;margin-right:6px}}
+
+/* Preserve the native disconnected state against general button display rules. */
+#toolbar #collab-indicator:not(.show){display:none!important}
+
+
+/* Source review: retain the existing panel while making evidence readable on phones. */
+#scene-ir-review .scene-placement-context{min-width:0;background:#f5f8fa;color:#253341;border:0;border-radius:16px;box-shadow:none}
+#scene-ir-review .scene-placement-context p{color:#52616e}
+#scene-ir-review .scene-placement-context select,
+#scene-ir-review .scene-placement-context input[type="search"]{box-sizing:border-box;max-width:100%;min-height:44px;background:#fff;color:#253341;border:1px solid #cad3da;border-radius:12px;padding:8px 12px}
+#scene-ir-review .scene-placement-context input[type="search"]{display:block;width:100%;margin-top:6px}
+#scene-ir-review pre{overflow-wrap:anywhere;word-break:normal;max-width:100%;font-size:12px;line-height:1.6}
+#scene-ir-review summary{min-height:44px;box-sizing:border-box;padding:10px 0;overflow-wrap:anywhere;cursor:pointer}
+#scene-ir-review [data-scene-partial-options] label{padding:6px 0;min-height:32px;overflow-wrap:anywhere}
+
+/* Offline source review uses the existing dialog card and controls. */
+#plan-import-modal .scene-review-files{margin:12px 0;padding:14px;background:#f5f8fa;color:#253341;border-radius:16px;box-shadow:0 2px 10px #26364512;min-width:0}
+#plan-import-modal .scene-review-files summary{min-height:40px;cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+#plan-import-modal .scene-review-files p{line-height:1.65;font-size:13px;overflow-wrap:anywhere}
+#plan-import-modal .scene-review-files input,#plan-import-modal .scene-review-files select{max-width:100%;min-height:44px;box-sizing:border-box}
+#plan-import-modal .scene-review-files button{min-height:44px;border-radius:999px;margin:6px 8px 6px 0;padding:8px 16px;white-space:normal}
+#plan-import-modal [data-scene-reference-image]{display:block;max-width:100%;height:auto;max-height:65vh;object-fit:contain;background:#fff;margin-top:12px}
+#plan-import-modal [data-scene-reference-image][hidden]{display:none}
+#scene-ir-review [data-scene-guidance]{background:#f5f8fa;border-radius:12px;padding:8px 12px;margin:8px 0}
+#scene-ir-review [data-scene-error-focus]{max-width:100%;white-space:normal;text-align:left;overflow-wrap:anywhere}
+#scene-ir-review summary:focus{outline:2px solid #e8813c;outline-offset:3px}
+
+#plan-import-modal [data-scene-reference-viewport]{overflow:auto;max-height:65vh;min-width:0;max-width:100%;overscroll-behavior:contain}
+
+/* Conversion is an explicit pane operation; uses comparison control vocabulary. */
+#asset-conversion-open{width:100%;min-height:40px;margin-top:10px;padding:7px 10px;white-space:normal;font-size:11px;font-weight:400;background:transparent;color:var(--hp-muted,#657065);box-shadow:none}
+.asset-conversion-dialog{margin:auto;position:fixed;inset:0;border:0;border-radius:24px;padding:24px;width:min(960px,calc(100vw - 24px));max-height:92dvh;box-sizing:border-box;color:var(--ui-text,#353b42);background:white;box-shadow:0 20px 70px #25304233;overflow:auto}
+.asset-conversion-dialog::backdrop{background:#25304277}
+.asset-conversion-dialog h2{font-size:20px;margin:0;flex:1}.asset-conversion-dialog p{font-size:13px;line-height:1.65}
+.asset-conversion-dialog button{min-height:44px;border:0;border-radius:999px;padding:10px 17px;background:#edf4f8;color:#354d5d;cursor:pointer;font:inherit;font-size:13px}
+.asset-conversion-dialog button.compare-primary{background:var(--ui-accent,#ee604b);color:white}.asset-conversion-dialog button:disabled{opacity:.45;cursor:default}
+.asset-conversion-table{max-height:42dvh;overflow:auto}.asset-conversion-table table{width:100%;border-collapse:collapse;font-size:12px}.asset-conversion-table th{text-align:left;position:sticky;top:0;background:white;padding:8px}.asset-conversion-table td{padding:10px 8px;vertical-align:middle;border-bottom:1px solid #edf0f2;overflow-wrap:anywhere}.asset-conversion-table td small{display:block;color:#677580;margin-top:4px;line-height:1.5}.asset-conversion-table img{object-fit:contain;display:block}.asset-conversion-table input{width:24px;height:24px;cursor:pointer;margin:10px}
+.asset-conversion-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}.asset-conversion-images figure{margin:0}.asset-conversion-images img{width:100%;border-radius:12px}.asset-conversion-images figcaption{font-size:13px;margin-bottom:8px}
+@media(max-width:600px){.asset-conversion-dialog{padding:16px}.asset-conversion-table{max-height:38dvh}.asset-conversion-table th,.asset-conversion-table td{padding:6px 4px}.asset-conversion-table img{width:48px;height:48px}.asset-conversion-table td:last-child{min-width:110px}.asset-conversion-images{grid-template-columns:1fr}}
+.asset-conversion-table summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:#536c7b;font-size:12px;list-style:revert}
+
+/* Native comparison editors need a usable phone-width canvas each. */
+@media(max-width:600px){
+  .library-host .parallel-grid{grid-template-columns:minmax(0,1fr);grid-auto-rows:max(560px,75dvh);overflow:auto;align-content:start;overscroll-behavior:contain}
+  .library-host[data-layout="1"] .parallel-grid{grid-auto-rows:minmax(560px,1fr)}
+  .library-host .library-group{padding-right:6px;gap:5px;border:0}
+  .library-host .library-group>span{display:none}
+}
+
+/* Optional pack management stays compact below the primary catalogue search. */
+.object-set-operation{margin-top:18px;padding:18px;border-radius:20px;background:#f7f8f6}
+.object-set-operation h3{margin:0;font-size:15px;color:var(--hp-text,#353b42)}
+.object-set-operation label{display:block;font-size:13px;line-height:1.5}
+.object-set-operation select,.object-set-operation input:not([type=checkbox]){display:block;min-height:44px;width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid #d6ddd8;border-radius:var(--hp-control-radius,22px);background:white;color:inherit;font:inherit;margin-top:6px}
+.object-set-operation .compare-row>label{flex:1;min-width:180px}
+.object-set-copy{display:flex!important;gap:10px;align-items:center;margin-top:16px;min-height:44px}
+.object-set-copy input{width:22px;height:22px;margin:0;flex-shrink:0}
+.object-set-review>summary{min-height:44px;cursor:pointer;font-size:13px;color:#536c7b;display:list-item;align-content:center}
+.object-set-review{background:white;padding:8px 14px;border-radius:18px}
+.object-set-actions{margin-top:16px}.object-set-operation [hidden]{display:none!important}
+@media(max-width:600px){.object-set-operation{padding:14px 12px}.object-set-operation .compare-row>label{min-width:100%}}
+
+/* Viewpoint actions share the existing lower-right walkthrough control lane. */
+#walk-tps-controls{top:auto;left:auto;right:calc(14px + var(--safe-r,0px));bottom:196px;width:max-content;max-width:232px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px;border-radius:24px;background:var(--hp-panel-strong,#fff);box-shadow:var(--hp-shadow-soft);color:var(--hp-text);overflow:auto}
+#walk-tps-controls button{min-height:44px;min-width:44px;padding:8px 12px;border:0;border-radius:var(--hp-control-radius);font:inherit;font-size:12px;background:var(--hp-panel-strong,#fff);color:var(--hp-text);box-shadow:none;white-space:normal;max-width:100%}
+#walk-tps-controls button:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-tps-controls button[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+#walk-tps-controls button[hidden],#walk-tps-controls #walk-tps-status[hidden]{display:none}
+#walk-tps-status{flex-basis:100%;margin:0;padding:0 4px;font-size:11px;line-height:1.4;color:var(--hp-muted);overflow-wrap:anywhere}
+@media(max-width:768px){#walk-tps-controls{right:calc(8px + var(--safe-r,0px));bottom:178px}}
+
+/* Plan import: quiet default flow; evidence stays in native disclosures. */
+#plan-import-modal .plan-import-disclosure,
+#plan-import-modal #scene-ir-review > details,
+#plan-import-modal #building-registration-review{margin:8px 0;padding:0 12px;border:0;border-radius:16px;background:#f6f8fa;box-shadow:none;min-width:0}
+#plan-import-modal summary{min-height:44px;display:list-item;box-sizing:border-box;padding:12px 0;cursor:pointer;overflow-wrap:anywhere;color:var(--hp-text,#353b42)}
+#plan-import-modal summary:focus-visible{outline:2px solid var(--ui-accent,#ee604b);outline-offset:3px;border-radius:6px}
+#plan-import-modal .plan-import-result-actions{margin:10px 0 14px}
+#plan-import-modal .pbtn{min-height:44px;border-radius:999px}
+#plan-import-modal .unity-render-status:empty,#plan-import-modal .airx-source-note:empty{display:none}
+#plan-import-modal #plan-import-result-state{margin-top:4px;color:#9c4b23}
+#plan-import-modal .plan-import-canvas{background:#fff;border:0;border-radius:12px}
+#plan-import-modal #scene-ir-review pre,#plan-import-modal #plan-import-rooms,#plan-import-modal #plan-import-notes{background:transparent;color:var(--hp-text,#353b42);border:0;padding:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+#plan-import-modal #scene-ir-review [data-scene-source-preview]{display:block;max-width:100%;height:auto;max-height:28dvh;object-fit:contain;background:#fff;border-radius:12px}
+#plan-import-modal #scene-ir-review [data-scene-group]{padding:0 8px}
+#plan-import-modal #scene-ir-review [data-scene-group][open]{background:#fff;border-radius:12px}
+#plan-import-modal #scene-ir-review [data-scene-preview-selection]{color:#a64b35;margin:6px 0}
+#plan-import-modal #scene-ir-review [data-scene-full-status]{margin:8px 0;color:var(--hp-muted,#657065)}
+#plan-import-modal #building-registration-review{background:#f6f8fa;color:var(--hp-text,#353b42)}
+#plan-import-modal #building-registration-review select{background:#fff;color:var(--hp-text,#353b42)}
+#plan-import-modal #building-registration-review label,
+#plan-import-modal #building-registration-review select{color:var(--hp-text,#353b42)!important}

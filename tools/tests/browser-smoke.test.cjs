@@ -22,6 +22,7 @@ const PORT = 8793;   // 開発用サーバ(8788/8791)とぶつからない番号
 
 // npx のキャッシュに置かれた playwright を拾う。プロジェクトに入っていればそちらが先。
 function findPlaywright() {
+  if(process.env.PLAYWRIGHT_MODULE){const specified=join(process.env.PLAYWRIGHT_MODULE,'index.mjs');if(existsSync(specified))return specified;}
   const local = join(ROOT, 'node_modules', 'playwright', 'index.mjs');
   if (existsSync(local)) return local;
   const cache = join(process.env.HOME || '', '.npm', '_npx');
@@ -39,13 +40,13 @@ const PLAYWRIGHT = findPlaywright();
 // 直接読むと、入っていない環境で読み込み自体が落ちて他のテストまで巻き込む。
 const SCRIPT = `
 import { chromium } from ${JSON.stringify(PLAYWRIGHT || '')};
-const b = await chromium.launch({args:process.platform==='darwin'?['--use-angle=metal']:[]});
+const b = await chromium.launch({executablePath:${JSON.stringify(process.env.CHROMIUM_PATH||null)}||undefined,args:process.platform==='darwin'?['--use-angle=metal']:[]});
 try {
 const page = await b.newPage({ viewport: { width: 375, height: 780 } });
 const errors = [];
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text().slice(0, 200)); });
-await page.goto('http://127.0.0.1:${PORT}/index.html', { waitUntil: 'load' });
+await page.goto(${JSON.stringify(process.env.APP_URL||'http://127.0.0.1:'+PORT+'/index.html')}, { waitUntil: 'load' });
 await page.waitForTimeout(3000);
 await page.evaluate(async () => {
   // 普通の操作を一通り。ここを通る関数が消えていれば ReferenceError になる。

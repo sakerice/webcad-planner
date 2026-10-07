@@ -111,6 +111,7 @@ try {
       }), { status: 200, headers: { 'content-type': 'application/json' } });
     };
   });
+  await page.locator('#plan-import-hint').evaluate(el=>el.closest('details').open=true);
   await page.locator('#plan-import-hint').fill('1階の平面図です');
   await page.locator('#plan-import-run').click();
   await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });
@@ -171,10 +172,7 @@ try {
     () => /まだAIの読み取りを使えません/.test(document.getElementById('plan-import-status').textContent),
     null, { timeout: 10000 });
 
-  // ── PDF はそのまま送る（囲む操作を出さない） ──────────────────────
-  //
-  // PDFはベクターなので、ブラウザで画像に変換するよりAI側で開いたほうが
-  // 寸法の文字がはっきり読める。実測でもPDF直送が最良だった。
+  // ── PDF はページ画像にし、失敗した自動切り出しを確認してから送る ───
   await page.evaluate(() => { resetPlanImport(); });
   // 本物の(最小の)PDF。pdf.js が実際に開けるものでないと、ページを画像に
   // する経路をまったく通らない。
@@ -184,10 +182,13 @@ try {
   });
   await page.waitForFunction(() => PlanImport.state.pages && PlanImport.state.pages.length > 0,
     null, { timeout: 30000 });
-  assert.equal(await page.locator('#plan-import-crop').isVisible(), false,
-    'PDFなのに囲む操作を出している（利用者に不要な手間をかけている）');
+  assert.equal(await page.locator('#plan-import-crop').isVisible(), true,
+    'PDFの元ページと囲み直しを確認できない');
+  assert.match(await page.locator('#plan-import-page-status').textContent(), /要確認/);
+  assert.equal(await page.locator('#plan-import-run').isDisabled(), true, '未確認の全体画像を送れる');
+  await page.locator('#plan-import-confirm-page').click();
   assert.match(await page.locator('#plan-import-status').textContent(), /ページを読み取ります/);
-  assert.equal(await page.locator('#plan-import-run').isDisabled(), false, 'PDFで読み取りボタンが押せない');
+  assert.equal(await page.locator('#plan-import-run').isDisabled(), false, '確認後の読み取りができない');
 
   // ── 複数階の取り込み ────────────────────────────────────────────────
   //
