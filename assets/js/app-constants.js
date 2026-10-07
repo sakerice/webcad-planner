@@ -3355,7 +3355,7 @@ function catalogueSetMarksHtml(items){
   var seen={},html='';
   items.forEach(function(item){
     var b=AssetSets.badge(item);
-    if(b && !seen[b]){ seen[b]=1; html+='<i class="asset-set-mark" data-mark="'+escHtml(AssetSets.mark(item))+'" title="'+escHtml(b)+'のセットの物があります" aria-label="'+escHtml(b)+'のセットの物があります"></i>'; }
+    if(b && !seen[b]){ seen[b]=1; html+='<i class="asset-set-mark" data-mark="'+escHtml(AssetSets.mark(item)+'有り')+'" title="'+escHtml(b)+'のセットの物があります" aria-label="'+escHtml(b)+'のセットの物があります"></i>'; }
   });
   return html;
 }

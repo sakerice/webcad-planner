@@ -242,9 +242,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #sidebar .asset-grid .asset-set-badge,.catalogue-result .asset-set-badge{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;background:#e3f1fc;color:#1d6aa8}
 /* 標準以外のセットの物が入っている見出しに付ける印 */
 .asset-set-marks{font-style:normal;margin-left:auto;margin-right:8px;display:inline-flex;gap:4px}
-.asset-set-mark{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;font-size:10px;font-weight:700;background:#e3f1fc;color:#1d6aa8;vertical-align:middle}
+.asset-set-mark{font-style:normal;display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 7px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;background:#e3f1fc;color:#1d6aa8;vertical-align:middle}
 .asset-set-marks .asset-set-mark{margin-left:0}
 .asset-set-mark::before{content:attr(data-mark)}
 /* 小見出しの印はアイコンの右上に重ねる。名前の幅を取らないので、長い名前も省略されない */
 .asset-subhdr .sicon{position:relative}
-.asset-subhdr .sicon .asset-set-mark{position:absolute;top:-7px;right:-9px;width:15px;height:15px;font-size:9px;box-shadow:0 0 0 2px #fff}
+.asset-subhdr .sicon .asset-set-mark{position:absolute;top:-9px;left:50%;transform:translateX(-50%);height:14px;padding:0 4px;font-size:8px;line-height:1;box-shadow:0 0 0 2px #fff}
