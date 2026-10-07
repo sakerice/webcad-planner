@@ -18,18 +18,26 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 #help-box{color:var(--hp-muted)!important;box-shadow:var(--hp-shadow-soft)!important;border-radius:14px!important}
 .help-touch{display:none}
 @media(max-width:768px){
-  #toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) 64px;gap:4px 8px!important;
-    padding:8px!important;border-radius:20px!important;overflow:hidden!important;min-height:104px!important}
+  #toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px!important;
+    padding:8px!important;border-radius:20px!important;overflow:hidden!important;min-height:148px!important}
+  #toolbar>.brand-mark{grid-row:1;grid-column:1}
+  #toolbar>#floor-sel{grid-row:1;grid-column:2;justify-self:end}
+  #toolbar>.library-current{grid-row:2;grid-column:1;min-width:0;flex-shrink:1}
+  #toolbar>#compare-launch{grid-row:2;grid-column:2;min-height:40px!important;padding:0 10px!important;font-size:11px!important}
+  .editor-pane #toolbar{min-height:104px!important}
+  .editor-pane #toolbar>.library-current{grid-row:1;grid-column:1}
+  .editor-pane #toolbar>.toolbar-actions{grid-row:2}
   #toolbar>.tsep{display:none!important}
   #toolbar .brand-mark{min-width:0!important;padding:0 6px!important;margin:0!important;height:36px!important}
   #toolbar .brand-logo{width:30px!important;height:30px!important}
   #toolbar .brand-word{font-size:13px!important;letter-spacing:-.3px}
   #floor-sel{width:64px!important;min-height:36px!important;margin:0!important;padding:4px!important;font-size:13px!important}
-  .toolbar-actions{display:flex;grid-column:1/-1;min-width:0;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 4px}
+  .toolbar-actions{display:flex;grid-column:1/-1;grid-row:3;min-width:0;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:2px 0 4px}
   #toolbar .toolbar-actions .tbtn{flex:0 0 auto;min-height:42px!important;padding:0 10px!important;font-size:11px!important;margin:0!important}
   #toolbar .toolbar-actions .tsep{display:none}
-  #help-box{top:124px!important;left:12px!important;right:12px!important;width:auto!important;
+  #help-box{top:168px!important;left:12px!important;right:12px!important;width:auto!important;
     padding:8px 12px!important;font-size:10px!important;line-height:1.6!important;pointer-events:none}
+  .editor-pane #help-box{top:124px!important}
   .help-desktop{display:none}.help-touch{display:block}
   #help-box>b,#help-box>br{display:none}
   #bottom-nav{border-radius:var(--hp-control-radius)!important;box-shadow:var(--hp-shadow)!important}
@@ -51,10 +59,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .mobile-data-tools[open]>.mobile-data-title::after{content:'−'}
 @media(hover:none){#asset-preview{display:none!important}}
 @media(max-width:768px){
-  #wall-panel,#light-panel{top:calc(124px + var(--safe-top))!important}
+  #wall-panel,#light-panel{top:calc(168px + var(--safe-top))!important}
+  .editor-pane #wall-panel,.editor-pane #light-panel{top:calc(124px + var(--safe-top))!important}
 }
 @media(max-width:768px){
-  #props.show.prop-expanded{top:calc(124px + var(--safe-top))!important}
+  #props.show.prop-expanded{top:calc(168px + var(--safe-top))!important}
+  .editor-pane #props.show.prop-expanded{top:calc(124px + var(--safe-top))!important}
 }
 
 /* Catalogue controls stay in the scrolling category area, below common tools. */
@@ -345,3 +355,34 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .object-set-review{background:white;padding:8px 14px;border-radius:18px}
 .object-set-actions{margin-top:16px}.object-set-operation [hidden]{display:none!important}
 @media(max-width:600px){.object-set-operation{padding:14px 12px}.object-set-operation .compare-row>label{min-width:100%}}
+
+/* Viewpoint actions share the existing lower-right walkthrough control lane. */
+#walk-tps-controls{top:auto;left:auto;right:calc(14px + var(--safe-r,0px));bottom:196px;width:max-content;max-width:232px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px;border-radius:24px;background:var(--hp-panel-strong,#fff);box-shadow:var(--hp-shadow-soft);color:var(--hp-text);overflow:auto}
+#walk-tps-controls button{min-height:44px;min-width:44px;padding:8px 12px;border:0;border-radius:var(--hp-control-radius);font:inherit;font-size:12px;background:var(--hp-panel-strong,#fff);color:var(--hp-text);box-shadow:none;white-space:normal;max-width:100%}
+#walk-tps-controls button:hover{background:var(--hp-secondary-soft);color:var(--hp-secondary-dark)}
+#walk-tps-controls button[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+#walk-tps-controls button[hidden],#walk-tps-controls #walk-tps-status[hidden]{display:none}
+#walk-tps-status{flex-basis:100%;margin:0;padding:0 4px;font-size:11px;line-height:1.4;color:var(--hp-muted);overflow-wrap:anywhere}
+@media(max-width:768px){#walk-tps-controls{right:calc(8px + var(--safe-r,0px));bottom:178px}}
+
+/* Plan import: quiet default flow; evidence stays in native disclosures. */
+#plan-import-modal .plan-import-disclosure,
+#plan-import-modal #scene-ir-review > details,
+#plan-import-modal #building-registration-review{margin:8px 0;padding:0 12px;border:0;border-radius:16px;background:#f6f8fa;box-shadow:none;min-width:0}
+#plan-import-modal summary{min-height:44px;display:list-item;box-sizing:border-box;padding:12px 0;cursor:pointer;overflow-wrap:anywhere;color:var(--hp-text,#353b42)}
+#plan-import-modal summary:focus-visible{outline:2px solid var(--ui-accent,#ee604b);outline-offset:3px;border-radius:6px}
+#plan-import-modal .plan-import-result-actions{margin:10px 0 14px}
+#plan-import-modal .pbtn{min-height:44px;border-radius:999px}
+#plan-import-modal .unity-render-status:empty,#plan-import-modal .airx-source-note:empty{display:none}
+#plan-import-modal #plan-import-result-state{margin-top:4px;color:#9c4b23}
+#plan-import-modal .plan-import-canvas{background:#fff;border:0;border-radius:12px}
+#plan-import-modal #scene-ir-review pre,#plan-import-modal #plan-import-rooms,#plan-import-modal #plan-import-notes{background:transparent;color:var(--hp-text,#353b42);border:0;padding:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+#plan-import-modal #scene-ir-review [data-scene-source-preview]{display:block;max-width:100%;height:auto;max-height:28dvh;object-fit:contain;background:#fff;border-radius:12px}
+#plan-import-modal #scene-ir-review [data-scene-group]{padding:0 8px}
+#plan-import-modal #scene-ir-review [data-scene-group][open]{background:#fff;border-radius:12px}
+#plan-import-modal #scene-ir-review [data-scene-preview-selection]{color:#a64b35;margin:6px 0}
+#plan-import-modal #scene-ir-review [data-scene-full-status]{margin:8px 0;color:var(--hp-muted,#657065)}
+#plan-import-modal #building-registration-review{background:#f6f8fa;color:var(--hp-text,#353b42)}
+#plan-import-modal #building-registration-review select{background:#fff;color:var(--hp-text,#353b42)}
+#plan-import-modal #building-registration-review label,
+#plan-import-modal #building-registration-review select{color:var(--hp-text,#353b42)!important}

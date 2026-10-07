@@ -14,7 +14,7 @@ test('clone-only exact mappings preserve identity, dimensions, pose, finishes an
  assert.deepEqual(result.plan.items[1],p.items[1]);assert.deepEqual(result.plan.customRoot,p.customRoot);changed.custom.nested.push(3);assert.equal(p.items[0].custom.nested.length,2);
 });
 test('all 328 explicit proposals resolve, no legacy or reviewed 14 IDs are renamed',()=>{
- assert.equal(contract.mappings.length,328);assert.equal(rpg.items.length,50);assert.equal(legacy.size,787);
+ assert.equal(contract.mappings.length,328);assert.equal(rpg.items.length,55);assert.equal(legacy.size,787);
  for(const m of contract.mappings)assert.ok(rpg.items.some(i=>i.id===m.targetId));
  const old=read('assets/models/packs/rpg-mansion-contract/v0.1.0/reviewed-manifest.json');assert.deepEqual(rpg.items.slice(0,14),old.items);
 });

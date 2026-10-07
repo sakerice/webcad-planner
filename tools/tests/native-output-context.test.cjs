@@ -1,6 +1,9 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const html=require('./app-source.cjs').appSource();
-const {nativeOutputContextSource}=require('./native-output-source.cjs');
+const {nativeOutputContextSource,nativeCaptureTransactionSource}=require('./native-output-source.cjs');
+const {nativeCaptureModules,installNativeCaptureRuntime}=require('./native-capture-test-support.cjs');
+let captureModules;
+test.before(async()=>{captureModules=await nativeCaptureModules();});
 const VideoPrompt=require('../../assets/js/video-prompt.js');
 function fn(name){
  let start=html.indexOf('\nfunction '+name+'(');if(start<0)start=html.indexOf('\nasync function '+name+'(');assert.ok(start>=0,name);start++;
@@ -79,13 +82,31 @@ function runtime(view='3d-int'){
   JISDRAW:{availableSheets:()=>ctx.DATA.floors.map(floor=>({kind:'plan',key:floor,label:floor+'F'})),
    buildFloorPlanSvg:floor=>'<svg viewBox="0 0 420 297"><text>'+ctx.DATA.marker+'-'+floor+'</text></svg>',buildElevationSvg:()=>'<svg></svg>'},
   elevationDirCode:x=>x,alert:noop};
- ctx.window=ctx;vm.createContext(ctx);vm.runInContext(VARIABLES.map(variable).join('\n')+'\n'+nativeOutputContextSource()+'\n'+FUNCTIONS.map(fn).join('\n'),ctx);
+ installNativeCaptureRuntime(ctx,captureModules);
+ ctx.window=ctx;vm.createContext(ctx);vm.runInContext(VARIABLES.map(variable).join('\n')+'\n'+nativeOutputContextSource()+'\n'+nativeCaptureTransactionSource()+'\n'+FUNCTIONS.map(fn).join('\n'),ctx);
  el('jis-scale').value='auto';el('jis-paper').value='a3';el('video-render-duration').value='8';
- function pause(name){let release,enter;const promise=new Promise(resolve=>release=resolve),entered=new Promise(resolve=>enter=resolve);gates.set(name,{promise,enter});return {release,entered};}
+ function pause(name){let release,enter;const promise=new Promise(resolve=>release=resolve),entered=new Promise(resolve=>enter=resolve);gates.set(name,{promise,enter});return {name,release,entered};}
  function switchPlan(marker='B'){ctx.DATA=syntheticPlan(marker);ctx.__editorPlanId='plan-'+marker.toLowerCase();ctx.invalidateNativeOutputs();}
  return {ctx,el,buttons,captures,downloads,images,blobs,revoked,timers,pngCallbacks,iframes,pause,switchPlan};
 }
 const tick=()=>new Promise(setImmediate);
+async function waitForGate(gate,pending,timeoutMs=5000){
+ let timer;
+ try{
+  await Promise.race([gate.entered,Promise.resolve(pending).then(()=>{throw Error('generation completed before '+gate.name+' gate');},error=>{throw Error('generation failed before '+gate.name+' gate',{cause:error});}),
+   new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timed out waiting for '+gate.name+' gate')),timeoutMs);})]);
+ }finally{clearTimeout(timer);}
+}
+test('async gate reports early completion/failure instead of waiting forever',async()=>{
+ const gate={name:'unreached',entered:new Promise(()=>{})};
+ await assert.rejects(waitForGate(gate,Promise.resolve(null)),/generation completed before unreached gate/);
+ const failure=Error('capture setup regression');
+ await assert.rejects(waitForGate(gate,Promise.reject(failure)),error=>error.message==='generation failed before unreached gate'&&error.cause===failure);
+});
+test('async gate has a bounded failure path for a stalled generation',async()=>{
+ const never=new Promise(()=>{});
+ await assert.rejects(waitForGate({name:'stalled',entered:never},never,10),/timed out waiting for stalled gate/);
+});
 
 test('completed image/video outputs remain native packages and the exact anonymous source is unchanged',async()=>{
  const r=runtime(),before=JSON.stringify(r.ctx.DATA),image=await r.ctx.generateAiRenderPackage();
@@ -98,27 +119,27 @@ test('completed image/video outputs remain native packages and the exact anonymo
  assert.ok(r.captures.every(c=>c[1]==='A'));assert.equal(r.downloads.length,0);
 });
 for(const phase of ['ensure','frame','edge','bytes'])test('image plan switch during '+phase+' cannot publish/download old output',async()=>{
- const r=runtime(),gate=r.pause(phase),pending=r.ctx.generateAiRenderPackage();await gate.entered;
+ const r=runtime(),gate=r.pause(phase),pending=r.ctx.generateAiRenderPackage();await waitForGate(gate,pending);
  r.switchPlan();r.ctx.openUnityRenderModal();const newStatus=r.el('unity-render-status').textContent;gate.release();assert.equal(await pending,null);
  assert.equal(r.ctx.AI_RENDER_PACKAGE,null);assert.equal(r.el('unity-render-status').textContent,newStatus);assert.equal(r.ctx.unityRenderBusy,false);assert.equal(r.downloads.length,0);
  if(phase==='ensure'||phase==='frame')assert.equal(r.captures.length,0);
 });
 for(const kind of ['image','video'])test(kind+' exact same-ID source edits reject late output and allow retry',async()=>{
  const r=runtime(kind==='video'?'2d':'3d-int'),gate=r.pause(kind==='video'?'decode':'edge');
- const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await gate.entered;r.ctx.DATA.walls[0].x2=3000;gate.release();assert.equal(await pending,null);
+ const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(gate,pending);r.ctx.DATA.walls[0].x2=3000;gate.release();assert.equal(await pending,null);
  assert.match(r.el(kind==='image'?'unity-render-status':'video-render-status').textContent,/元の間取りが変更/);
  assert.equal(kind==='image'?r.ctx.unityRenderBusy:r.ctx.VIDEO_RENDER_UI.busy,false);
  const retry=kind==='image'?await r.ctx.generateAiRenderPackage():await r.ctx.runVideoRenderPackage();assert.ok(retry);assert.equal(retry._nativeOutputContext.snapshot,JSON.stringify(r.ctx.DATA));
 });
 for(const kind of ['image','video'])test(kind+' identity-only source change cancels request and releases its busy state',async()=>{
  const r=runtime(kind==='video'?'2d':'3d-int'),gate=r.pause(kind==='video'?'decode':'edge');
- const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await gate.entered;
+ const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(gate,pending);
  r.ctx.__editorPlanId='anonymous-new-identity';gate.release();assert.equal(await pending,null);
  assert.equal(kind==='image'?r.ctx.unityRenderBusy:r.ctx.VIDEO_RENDER_UI.busy,false);assert.equal(r.downloads.length,0);
 });
 for(const kind of ['image','video'])test(kind+' same-ID Undo-shaped DATA replacement releases busy and preserves newer source',async()=>{
  const r=runtime(kind==='video'?'2d':'3d-int'),gate=r.pause(kind==='video'?'decode':'edge');
- const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await gate.entered;
+ const pending=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(gate,pending);
  r.ctx.DATA=JSON.parse(JSON.stringify(r.ctx.DATA));r.ctx.DATA.walls[0].x2=3000;const replacement=r.ctx.DATA;gate.release();assert.equal(await pending,null);
  assert.equal(kind==='image'?r.ctx.unityRenderBusy:r.ctx.VIDEO_RENDER_UI.busy,false);assert.equal(r.ctx.DATA,replacement);
  assert.match(r.el(kind==='image'?'unity-render-status':'video-render-status').textContent,/元の間取りが変更/);
@@ -126,7 +147,7 @@ for(const kind of ['image','video'])test(kind+' same-ID Undo-shaped DATA replace
 });
 for(const kind of ['image','video'])test(kind+' close/reopen cancels old completion without overwriting newer results or inputs',async()=>{
  const r=runtime(kind==='video'?'2d':'3d-int'),gate=r.pause(kind==='video'?'top':'edge');r.el('video-render-note').value='anonymous note';r.el('ai-render-style-input').value='anonymous style';
- const old=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await gate.entered;
+ const old=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(gate,old);
  if(kind==='image'){r.ctx.closeUnityRenderModal();r.ctx.openUnityRenderModal();}else{r.ctx.closeVideoRenderModal();r.ctx.openVideoRenderDialog();}
  const newer=kind==='image'?await r.ctx.generateAiRenderPackage():await r.ctx.runVideoRenderPackage(),status=r.el(kind==='image'?'unity-render-status':'video-render-status').textContent;
  assert.ok(newer);gate.release();assert.equal(await old,null);assert.equal(kind==='image'?r.ctx.AI_RENDER_PACKAGE:r.ctx.VIDEO_RENDER_PACKAGE,newer);
@@ -134,8 +155,8 @@ for(const kind of ['image','video'])test(kind+' close/reopen cancels old complet
 });
 for(const kind of ['image','video'])test(kind+' stale failure/finally cannot reset a newer request still busy',async()=>{
  const r=runtime(kind==='video'?'2d':'3d-int'),phase=kind==='video'?'top':'edge',oldGate=r.pause(phase);
- const old=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await oldGate.entered;
- const newGate=r.pause(phase),newer=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await newGate.entered;
+ const old=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(oldGate,old);
+ const newGate=r.pause(phase),newer=kind==='image'?r.ctx.generateAiRenderPackage():r.ctx.runVideoRenderPackage();await waitForGate(newGate,newer);
  const status=r.el(kind==='image'?'unity-render-status':'video-render-status').textContent;oldGate.release();assert.equal(await old,null);
  assert.equal(kind==='image'?r.ctx.unityRenderBusy:r.ctx.VIDEO_RENDER_UI.busy,true);assert.equal(r.el(kind==='image'?'unity-render-status':'video-render-status').textContent,status);
  newGate.release();assert.ok(await newer);assert.equal(kind==='image'?r.ctx.unityRenderBusy:r.ctx.VIDEO_RENDER_UI.busy,false);
@@ -146,12 +167,12 @@ test('runtime-only texture references do not invalidate the exact serialized pla
  r.ctx.DATA.items[0].id='changed-item';assert.equal(r.ctx.isNativeOutputPackageCurrent(pkg),false);
 });
 for(const phase of ['top','decode','bytes'])test('video plan source cannot mix plans during '+phase,async()=>{
- const r=runtime('2d'),gate=r.pause(phase),pending=r.ctx.runVideoRenderPackage();await gate.entered;r.switchPlan();gate.release();assert.equal(await pending,null);
+ const r=runtime('2d'),gate=r.pause(phase),pending=r.ctx.runVideoRenderPackage();await waitForGate(gate,pending);r.switchPlan();gate.release();assert.equal(await pending,null);
  assert.equal(r.ctx.VIDEO_RENDER_PACKAGE,null);assert.equal(r.ctx.VIDEO_RENDER_UI.busy,false);assert.equal(r.downloads.length,0);assert.ok(r.captures.every(c=>c[1]==='A'));
  if(phase==='top')assert.equal(r.captures.length,0);
 });
 test('3D video interrupts before its next live capture after a plan switch',async()=>{
- const r=runtime(),gate=r.pause('decode'),pending=r.ctx.runVideoRenderPackage();await gate.entered;r.switchPlan();gate.release();assert.equal(await pending,null);
+ const r=runtime(),gate=r.pause('decode'),pending=r.ctx.runVideoRenderPackage();await waitForGate(gate,pending);r.switchPlan();gate.release();assert.equal(await pending,null);
  assert.deepEqual(r.captures.map(x=>x[0]),['base','instance']);assert.equal(r.ctx.VIDEO_RENDER_PACKAGE,null);
 });
 test('committed switch revokes both native download URL bags and resets JIS, preserving inputs',async()=>{
@@ -168,12 +189,12 @@ for(const kind of ['image','video'])test(kind+' stale download link is blocked e
  assert.equal(kind==='image'?r.ctx.AI_RENDER_PACKAGE:r.ctx.VIDEO_RENDER_PACKAGE,null);
 });
 test('image download waiting for generation does not adopt another plan/newer package',async()=>{
- const r=runtime(),gate=r.pause('edge'),old=r.ctx.downloadAiRenderPrompt();await gate.entered;r.switchPlan();const newer=await r.ctx.generateAiRenderPackage();gate.release();await old;
+ const r=runtime(),gate=r.pause('edge'),old=r.ctx.downloadAiRenderPrompt();await waitForGate(gate,old);r.switchPlan();const newer=await r.ctx.generateAiRenderPackage();gate.release();await old;
  assert.equal(r.ctx.AI_RENDER_PACKAGE,newer);assert.equal(r.downloads.length,0);
  await r.ctx.downloadAiRenderPrompt();assert.equal(r.downloads[0].text,'image-B');
 });
 test('fallback image ZIP encoding retains a local package and blocks download after source change',async()=>{
- const r=runtime(),pkg=await r.ctx.generateAiRenderPackage();pkg.zipBlob=null;const gate=r.pause('bytes'),pending=r.ctx.downloadAiRenderBundle();await gate.entered;r.switchPlan();gate.release();await pending;assert.equal(r.downloads.length,0);
+ const r=runtime(),pkg=await r.ctx.generateAiRenderPackage();pkg.zipBlob=null;const gate=r.pause('bytes'),pending=r.ctx.downloadAiRenderBundle();await waitForGate(gate,pending);r.switchPlan();gate.release();await pending;assert.equal(r.downloads.length,0);
 });
 test('JIS PNG cancels loading immediately on close and revokes its temporary URL once',()=>{
  const r=runtime();r.ctx.openJisDrawingDialog();r.ctx.jisDownloadPng();const img=r.images[0],callback=img.onload,url=img.src;
@@ -216,7 +237,7 @@ test('EditorPane failed install retains completed outputs, source, inputs and or
  assert.equal(r.ctx.installOptions.deferNativeOutputReset,true);assert.equal(await r.ctx.EditorPane.install(syntheticPlan('B')),true);assert.equal(r.ctx.AI_RENDER_PACKAGE,null);assert.equal(r.ctx.JIS_UI.sheet,null);
 });
 test('pane disposal cancels native asynchronous output and clears completed URL bags once',async()=>{
- const r=runtime(),gate=r.pause('edge'),pending=r.ctx.generateAiRenderPackage();await gate.entered;withPane(r);const epoch=r.ctx.NATIVE_OUTPUT_REQUESTS.epoch;
+ const r=runtime(),gate=r.pause('edge'),pending=r.ctx.generateAiRenderPackage();await waitForGate(gate,pending);withPane(r);const epoch=r.ctx.NATIVE_OUTPUT_REQUESTS.epoch;
  r.ctx.EditorPane.dispose();r.ctx.EditorPane.dispose();gate.release();assert.equal(await pending,null);assert.equal(r.ctx.NATIVE_OUTPUT_REQUESTS.epoch,epoch+1);assert.equal(r.ctx.AI_RENDER_PACKAGE,null);
 });
 
@@ -245,11 +266,22 @@ test('actual native metadata/normalization chain is snapshot-stable for staged n
   vm.runInContext(constants.join('\n')+'\n'+actualNames.map(fn).join('\n'),c);
   c.DATA=c.stageJsonImport(JSON.stringify(payload),cap).data;c.__legacyPlanAdmission=cap||null;
   const before=c.serializeDataSnapshot(),dormant=JSON.stringify(c.DATA.exteriorWallSettings.faces),wallMap=JSON.stringify(c.DATA.exteriorWallSettings.walls);
-  const r=runtime();r.ctx.DATA=c.DATA;r.ctx.ST=c.ST;r.ctx.buildAiRenderMetadata=c.buildAiRenderMetadata;
+  const r=runtime();r.ctx.DATA=c.DATA;r.ctx.ST=c.ST;
+  // Both extracted contexts represent one editor. Metadata reads must observe
+  // the same live camera and transaction as the actual package generator.
+  c.camExt=r.ctx.camExt;c.orbit=r.ctx.orbit;c.aiCaptureTarget=()=>c.orbit.target;
+  Object.defineProperty(c,'AI_CAPTURE_TRANSACTION',{get:()=>r.ctx.AI_CAPTURE_TRANSACTION});
+  r.ctx.buildAiRenderMetadata=function(...args){
+   assert.ok(c.AI_CAPTURE_TRANSACTION,'actual metadata reads occur inside the capture transaction');
+   assert.equal(c.AI_CAPTURE_TRANSACTION,r.ctx.AI_CAPTURE_TRANSACTION,'metadata observes the same owned transaction');
+   assert.equal(c.camExt,c.AI_CAPTURE_TRANSACTION.camera,'metadata describes the captured camera');
+   return c.buildAiRenderMetadata(...args);
+  };
   const pkg=await r.ctx.generateAiRenderPackage();assert.ok(pkg,r.el('unity-render-status').textContent);
   assert.equal(c.serializeDataSnapshot(),before);assert.equal(pkg._nativeOutputContext.snapshot,before);
   assert.equal(JSON.stringify(c.DATA.exteriorWallSettings.faces),dormant);assert.equal(JSON.stringify(c.DATA.exteriorWallSettings.walls),wallMap);
   assert.equal(pkg.metadata.counts.walls,c.DATA.walls.length);assert.ok(pkg.metadata.materials.wallMaterials.length>0);
+  assert.equal(pkg.metadata.camera.camX,r.ctx.camExt.position.x);assert.equal(pkg.metadata.camera.camY,r.ctx.camExt.position.y);assert.equal(pkg.metadata.camera.camZ,r.ctx.camExt.position.z);
   const live=c.DATA,selection=live.walls[0],history=['anonymous undo'],redo=['anonymous redo'],light={northDeg:83,hour:10};
   Object.assign(c,{ST:{...c.ST,selected:selection},HISTORY:history,REDO_HISTORY:redo,DIRTY:true,LIGHT_SETTINGS:light,__editorPlanId:'anonymous-source-id'});
   const request=c.buildUnityRenderRequest(before),id=c.nextId;

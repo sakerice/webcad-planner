@@ -5,4 +5,9 @@ function nativeOutputContextSource(){
  if(start<0||end<0)throw Error('Native output context helpers are missing');
  return html.slice(start+1,end);
 }
-module.exports={nativeOutputContextSource};
+function nativeCaptureTransactionSource(){
+ const html=appSource(),start=html.indexOf('\nfunction getActive3DCamera('),end=html.indexOf('\nfunction aiCaptureBoostedRatio(',start);
+ if(start<0||end<0)throw Error('Native capture transaction helpers are missing');
+ return html.slice(start+1,end);
+}
+module.exports={nativeOutputContextSource,nativeCaptureTransactionSource};

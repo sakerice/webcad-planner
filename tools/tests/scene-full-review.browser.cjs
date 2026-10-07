@@ -1,6 +1,7 @@
 /* Dedicated offline browser: no existing tabs, production data, API or AI. */
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {openImportReview}=require('./plan-import-browser-helpers.cjs');
 const origin=process.env.APP_URL||'http://127.0.0.1:65371';
 assert.ok(/^http:\/\/127\.0\.0\.1:\d+$/.test(origin));
 const out=process.env.OUTPUT_DIR||path.join(os.tmpdir(),'webcad-full-review');fs.mkdirSync(out,{recursive:true});
@@ -14,6 +15,7 @@ const out=process.env.OUTPUT_DIR||path.join(os.tmpdir(),'webcad-full-review');fs
   await page.evaluate(()=>closePresetChoice());
   await page.getByRole('button',{name:'固定raw 2Fの部分プレビュー（AIなし・未完成）'}).click();
   await page.waitForSelector('[data-scene-full-status]');
+  await openImportReview(page);
   const integrity=()=>page.evaluate(()=>({data:serializeDataSnapshot(),history:JSON.stringify(HISTORY),redo:JSON.stringify(REDO_HISTORY),dirty:DIRTY,raw:PlanImport.state.result.extraction,source:PlanImport.state.result.sceneIR,storage:Object.fromEntries(Object.entries(localStorage))}));
   const before=await integrity();
   const baseline=await page.evaluate(()=>({sourceHash:SceneIR.sourceHash(PlanImport.state.result.sceneIR),errors:PlanImport.state.result.sceneFullCompilation.diagnostics.filter(d=>d.severity==='error')}));
@@ -28,8 +30,8 @@ const out=process.env.OUTPUT_DIR||path.join(os.tmpdir(),'webcad-full-review');fs
   await page.locator('[data-scene-partial-options] > summary').click();
   await page.locator('[data-scene-review-filter]').selectOption('unresolved');
   await page.locator('[data-scene-review-search]').fill('unsupported_opening_mechanism');
-  const door=page.locator('details[data-scene-group]').filter({has:page.locator('[data-scene-full-group-errors]')}).filter({hasText:'unsupported_opening_mechanism'});await door.locator('summary').click();
-  assert.equal(await door.isVisible(),true);assert.match(await door.innerText(),/bypass-slide/);
+  const door=page.locator('details[data-scene-group]').filter({has:page.locator('[data-scene-full-group-errors]')}).filter({hasText:'unsupported_opening_mechanism'});await door.locator(':scope > summary').click();
+  assert.equal(await door.isVisible(),true);await door.locator(':scope > details').evaluateAll(es=>es.forEach(e=>e.open=true));assert.match(await door.innerText(),/bypass-slide/);
   await page.screenshot({path:path.join(out,'desktop-full-blocker.png')});
   await door.evaluate(el=>el.scrollIntoView({block:'start'}));await page.screenshot({path:path.join(out,'desktop-door-evidence.png')});
   assert.deepEqual(await integrity(),before);
@@ -56,7 +58,7 @@ const out=process.env.OUTPUT_DIR||path.join(os.tmpdir(),'webcad-full-review');fs
   assert.ok(overflow.page<=overflow.viewport+1,JSON.stringify(overflow));
   // Cancellation returns to last confirmed choices without touching the active plan.
   await page.setViewportSize({width:1440,height:1000});await page.locator('[data-scene-review-filter]').selectOption('all');await page.locator('[data-scene-review-search]').fill('obj-sofa');
-  const sofa=page.locator('details[data-scene-group="objects:obj-sofa"]');await sofa.locator('summary').click();await page.locator('[data-scene-mapping="obj-sofa"]').click();
+  const sofa=page.locator('details[data-scene-group="objects:obj-sofa"]');await sofa.locator(':scope > summary').click();await page.locator('[data-scene-mapping="obj-sofa"]').click();
   const decisions=await page.evaluate(()=>JSON.stringify(PlanImport.state.result.sceneOptions.bindingDecisions));
   await page.locator('[data-scene-mapping-cancel]').click();assert.equal(await page.evaluate(()=>JSON.stringify(PlanImport.state.result.sceneOptions.bindingDecisions)),decisions);assert.deepEqual(await integrity(),before);
   assert.deepEqual(errors,[]);

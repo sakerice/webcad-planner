@@ -99,12 +99,46 @@
       position:at(boom),target:target,distance:boom,avatarVisible:boom>=0.45};
   }
 
+  // Presentation camera only: physical movement/action clearance remains with
+  // the host. Local per-view occluder fading handles architectural obstruction.
+  // "verified" here means a finite transform/projection, not collision freedom.
+  function fixedCamera(anchor,yaw,pitch,projection){
+    function invalid(reason){return {contractVersion:3,strategy:'fixed-distance',
+      verified:false,reason:reason,fallback:'hold-tps',position:null,target:null,
+      distance:2.6,avatarVisible:false,holding:true};}
+    if(!finite(anchor)||!Number.isFinite(yaw)||!Number.isFinite(pitch))return invalid('pose-unverified');
+    if(!cameraVolume(projection))return invalid('projection-unverified');
+    pitch=Math.max(-0.35,Math.min(0.55,pitch));
+    var direction={x:Math.sin(yaw)*Math.cos(pitch),y:Math.sin(pitch)+0.18,z:Math.cos(yaw)*Math.cos(pitch)};
+    var norm=Math.hypot(direction.x,direction.y,direction.z),boom=2.6;
+    return {contractVersion:3,strategy:'fixed-distance',verified:true,holding:false,
+      position:{x:anchor.x+direction.x/norm*boom,y:anchor.y+direction.y/norm*boom,z:anchor.z+direction.z/norm*boom},
+      target:point(anchor),distance:boom,avatarVisible:true};
+  }
+
   function create(host,preference){
     ['readPose','resolveSocket','isSafe','findSafe','restorePose','clearInput','castCamera'].forEach(function(k){
       if(typeof host[k]!=='function') throw new TypeError('TPS host requires '+k);
     });
     var prefs=profile(preference),previous=null,action=null,phase=0,boom=null,disposed=false;
-    var state='idle',reason=null;
+    var state='idle',reason=null,lastCamera=null;
+    function holdCamera(cameraReason){
+      host.clearInput();
+      return lastCamera?Object.assign({},lastCamera,{verified:false,holding:true,reason:cameraReason,fallback:'hold-tps'}):
+        {contractVersion:3,strategy:'fixed-distance',verified:false,holding:true,reason:cameraReason,
+          fallback:'hold-tps',position:null,target:null,distance:2.6,avatarVisible:false};
+    }
+    function frame(avatar,supportY,view,invalidAvatar){
+      // Holding presentation must never restore an older action/placement.
+      // State, lock, support and hiding always describe the current safety result.
+      return {version:VERSION,mode:prefs.mode,state:avatar||action?state:'holding',reason:reason,
+        avatar:avatar,phase:phase,motionSource:'procedural-placeholder',actionKind:action?action.kind:null,
+        supportY:supportY,avatarHidden:!!invalidAvatar||!!action&&state==='blocked',locked:!!action,camera:view};
+    }
+    function socketChanged(s,p){
+      return !s||s.kind!==action.kind||!validPose(s.pose)||
+        (action.kind==='bath-pose'&&!Number.isFinite(s.supportY))||s.signature!==action.signature||s.pose.floor!==p.floor;
+    }
     function cancel(why,restore){
       if(action&&restore){
         if(typeof host.canExitAction==='function'){
@@ -123,7 +157,9 @@
         }
         host.restorePose(poseCopy(safe));
       }
-      action=null;state='idle';reason=why||null;previous=null;boom=null;host.clearInput();return true;
+      action=null;state='idle';reason=why||null;previous=null;boom=null;
+      if(why==='context-reset'||why==='disposed'||why==='mode-change')lastCamera=null;
+      host.clearInput();return true;
     }
     function setMode(mode){
       if(disposed||!['fps','tps'].includes(mode))return false;
@@ -144,11 +180,15 @@
       if(disposed)return null;
       var dt=Math.max(0,Math.min(Number.isFinite(seconds)?seconds:0,0.1));
       var p=host.readPose();
-      if(!validPose(p))return null;
+      if(!validPose(p)){
+        if(action&&socketChanged(host.resolveSocket(action.id),p)){cancel('socket-changed',true);p=host.readPose();}
+        if(!validPose(p))return prefs.mode==='tps'?frame(action?poseCopy(action.lastPose):null,
+          action?action.supportY:null,holdCamera('pose-unverified'),true):null;
+      }
       var avatar=poseCopy(p),supportY=null;
       if(action){
         var s=host.resolveSocket(action.id);
-        if(!s||s.kind!==action.kind||!validPose(s.pose)||(action.kind==='bath-pose'&&!Number.isFinite(s.supportY))||s.signature!==action.signature||s.pose.floor!==p.floor){
+        if(socketChanged(s,p)){
           cancel('socket-changed',true);p=host.readPose();
         }else{
           if(state!=='blocked'){
@@ -177,12 +217,9 @@
       if(typeof host.readCameraProjection==='function'){
         try{projection=host.readCameraProjection();}catch(e){/* unavailable during host rebuild: fallback */}
       }
-      var view=prefs.mode==='tps'?camera(anchor,p.yaw,p.pitch,boom,dt,host.castCamera,
-        host.sweepCameraBoundary,projection):null;
-      if(view)boom=view.distance;
-      return {version:VERSION,mode:prefs.mode,state:state,reason:reason,avatar:avatar,phase:phase,
-        motionSource:'procedural-placeholder',actionKind:action?action.kind:null,supportY:supportY,
-        avatarHidden:!!action&&state==='blocked',locked:!!action,camera:view};
+      var view=prefs.mode==='tps'?fixedCamera(anchor,p.yaw,Number.isFinite(p.pitch)?p.pitch:0,projection):null;
+      if(view){if(view.verified)lastCamera=view;else view=holdCamera(view.reason);}
+      return frame(avatar,supportY,view,false);
     }
     return {tick:tick,requestAction:requestAction,requestSit:function(id){return requestAction(id,'sit');},setMode:setMode,
       cancel:function(){return !disposed&&cancel('cancelled',true);},
@@ -192,5 +229,5 @@
       preference:function(){return profile(prefs);}};
   }
   return {version:VERSION,cameraContractVersion:2,profile:profile,castBoxes:castBoxes,
-    cameraVolume:cameraVolume,camera:camera,create:create};
+    cameraVolume:cameraVolume,camera:camera,fixedCamera:fixedCamera,fixedCameraContractVersion:3,create:create};
 });

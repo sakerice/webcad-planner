@@ -37,7 +37,7 @@ test('FPS culling before selecting TPS follows the same verified source path',as
 });
 test('zero scale without the actual culling state fails closed',async()=>{
  const h=await host();h.instance.setMatrixAt(0,new h.T.Matrix4().makeScale(0,0,0));const result=h.collect();
- assert.equal(result.sceneReady,false);assert.equal(result.output.camera.verified,false);
+ assert.equal(result.sceneReady,false);assert.equal(result.output.camera.verified,true,'physical action certification failure does not change the selected fixed TPS view');
 });
 test('culled instances with missing, singular or non-finite physical source transforms fail closed',async()=>{
  for(const kind of ['missing','singular','non-finite']){
@@ -45,7 +45,7 @@ test('culled instances with missing, singular or non-finite physical source tran
   if(kind==='missing')h.instance.userData.instanceBaseMatrices=[];
   else if(kind==='singular')h.source.makeScale(0,1,1);
   else h.source.elements[12]=NaN;
-  const result=h.collect();assert.equal(result.sceneReady,false,kind);assert.equal(result.output.camera.verified,false,kind);
+  const result=h.collect();assert.equal(result.sceneReady,false,kind);assert.equal(result.output.camera.verified,true,kind+' physical certification does not choose a different view');
  }
 });
 test('a malformed live matrix cannot borrow a valid source merely by claiming it was culled',async()=>{

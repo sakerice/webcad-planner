@@ -60,7 +60,21 @@ test('legacy fallback is a separate explicit choice and preserves its unchanged 
 });
 
 test('expired source contract explains explicit new read without automatic fallback or plan mutation',async()=>{
- const {c,nodes}=setup();c.SCENE_IR_V3_IMAGE_IMPORT=true;c.PlanImport.state.sceneIRV3Available=true;c.setPlanImportExtractionMode('scene-ir-v3');const before=JSON.stringify(c.DATA),failed={error:'scene_ir_v3_job_mismatch',extractionContract:'scene-ir-v3',message:'old packet'};const calls=[];c.fetch=async(url,opts)=>{calls.push(url);return response(url.endsWith('/quota')?{counted:false}:failed, url.endsWith('/quota')?200:409);};await c.runPlanImport();assert.equal(calls.filter(x=>x.endsWith('/import-plan')).length,1);assert.equal(calls.some(x=>x.includes('revise')||x.includes('finish')||x.includes('plan-result')),false);assert.equal(c.PlanImport.state.failedSceneResponse.error,'scene_ir_v3_job_mismatch');assert.equal(JSON.stringify(c.DATA),before);assert.equal(c.HISTORY.length,0);assert.match(nodes['plan-import-status'].textContent,/自動で読み直すことはありません/);assert.match(nodes['plan-import-status'].textContent,/新しいAPI呼び出し/);
+ const {setup:setupUi,visibleText}=require('./plan-import-ui-dom.cjs'),{ReviewEvent}=require('./scene-review-dom.cjs');
+ const c=setupUi();c.PlanImport.state.pages=['data:image/png;base64,AA=='];c.SCENE_IR_V3_IMAGE_IMPORT=true;c.PlanImport.state.sceneIRV3Available=true;c.setPlanImportExtractionMode('scene-ir-v3');
+ const before=JSON.stringify(c.DATA),failed={error:'scene_ir_v3_job_mismatch',extractionContract:'scene-ir-v3',message:'old packet'},calls=[];
+ c.fetch=async(url)=>{calls.push(url);return response(url.endsWith('/quota')?{counted:false}:failed,url.endsWith('/quota')?200:409);};
+ await c.runPlanImport();
+ assert.equal(calls.filter(x=>x.endsWith('/import-plan')).length,1);assert.equal(calls.some(x=>x.includes('revise')||x.includes('finish')||x.includes('plan-result')),false);
+ assert.equal(c.PlanImport.state.failedSceneResponse.error,'scene_ir_v3_job_mismatch');assert.equal(JSON.stringify(c.DATA),before);assert.equal(c.HISTORY.length,0);assert.equal(c.document.getElementById('plan-import-apply').disabled,true);
+ const status=c.document.getElementById('plan-import-status').textContent,details=c.document.getElementById('plan-import-error-details');
+ assert.match(status,/自動では読み直しません/);assert.match(status,/再読み取りは新しいAI処理/);assert.match(status,/回数・料金を消費する場合/);
+ assert.equal(details.open,false);assert.equal(details.style.display,'');
+ assert.match(visibleText(c.document.getElementById('plan-import-modal')),/新しいAI処理.*回数・料金を消費する場合/,'cost and quota notice must be visible before another explicit read');
+ assert.equal(c.document.getElementById('plan-import-run').disabled,false);
+ details.open=true;details.dispatchEvent(new ReviewEvent('toggle'));
+ assert.match(visibleText(details),/自動で読み直すことはありません/);assert.match(visibleText(details),/新しいAPI呼び出し/);assert.match(visibleText(details),/保存済みプランは変更していません/);
+ assert.equal(JSON.stringify(c.DATA),before);assert.equal(c.HISTORY.length,0);assert.equal(calls.filter(x=>x.endsWith('/import-plan')).length,1,'opening diagnostics never initiates another read');
 });
 
 test('empty direct options preserve selected v3 and cannot send legacy through disabled gate',async()=>{

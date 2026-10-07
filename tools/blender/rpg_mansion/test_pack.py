@@ -21,7 +21,9 @@ def glb(path):
 class Pack(unittest.TestCase):
     def test_ids_and_isolation(self):
         ids=[i['id'] for i in MANIFEST['items']]
-        self.assertEqual(len(ids),50);self.assertEqual(len(set(ids)),50)
+        self.assertEqual(len(ids),55);self.assertEqual(len(set(ids)),55)
+        original=json.loads((ROOT/'assets/models/packs/rpg-mansion-contract/v0.2.0/reviewed-manifest.json').read_text())
+        self.assertEqual(MANIFEST['items'][:50],original['items'])
         legacy=set()
         for folder in ['custom','furniture_mega','interior_model_0_26_1']:
             legacy.update(i['id'] for i in json.loads((ROOT/'assets/models'/folder/'manifest.json').read_text())['items'])

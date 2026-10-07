@@ -3590,23 +3590,26 @@ input[type="reset"]:focus-visible{
 <div id="plan-import-modal" onclick="if(event.target===this)closePlanImport()">
   <div class="unity-render-card airx-dialog" role="dialog" aria-modal="true" aria-labelledby="plan-import-title">
     <div class="unity-render-head">
-      <div class="unity-render-title" id="plan-import-title">間取り図から下書きを作る</div>
+      <div class="unity-render-title" id="plan-import-title">間取り図を読み取る</div>
       <button class="unity-render-close" onclick="closePlanImport()">×</button>
     </div>
 
-    <div class="ph">この機能について</div>
-    <div class="unity-render-status">間取り図を読み取って、<b>下書き</b>を起こします。そのまま使える完成品にはなりません。寸法の読み違いや、部屋・建具の取りこぼしが残るので、取り込んだあと手で直してください。<span class="airx-alpha">α版</span></div>
+    <details id="plan-import-source-files" class="plan-import-disclosure" open>
+    <summary id="plan-import-file-title">図面を選ぶ（α版）</summary>
+    <details class="plan-import-disclosure"><summary>説明</summary>
+    <div class="unity-render-status">間取り図を読み取って、<b>下書き</b>を起こします。そのまま使える完成品にはなりません。寸法の読み違いや、部屋・建具の取りこぼしが残るので、取り込んだあと手で直してください。</div></details>
     <div class="unity-render-status" id="plan-import-quota" style="display:none"></div>
 
-    <div class="ph">1. 間取り図のPDFか画像を選ぶ</div>
     <div class="unity-render-actions">
       <input type="file" id="plan-import-file" accept="application/pdf,image/*" onchange="onPlanImportFile(this)">
       <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="resetPlanImport()">やり直す</button>
     </div>
 
     <details id="scene-review-files" class="scene-review-files"></details>
+    </details>
 
-    <div id="plan-import-step2" style="display:none">
+    <details id="plan-import-step2" class="plan-import-disclosure" style="display:none" open>
+      <summary>範囲</summary>
       <!-- PDFはページ別に送信予定画像を確認。自動切り出し失敗を黙って送らない。 -->
       <div id="plan-import-pdf-review" style="display:none">
         <div class="unity-render-config">
@@ -3614,21 +3617,22 @@ input[type="reset"]:focus-visible{
             <select id="plan-import-page" onchange="selectPlanImportPage(this.value)"></select></div>
         </div>
         <div id="plan-import-page-status" class="unity-render-status" role="status"></div>
-        <div class="airx-source-note">送信予定の画像（全ページを読み取ります）</div>
+        <div class="airx-source-note">送る画像（全ページ）</div>
         <img id="plan-import-output" alt="送信予定画像" style="display:block;max-width:100%;max-height:28dvh;margin:auto;object-fit:contain">
         <div class="unity-render-actions">
           <button id="plan-import-confirm-page" class="pbtn sec" style="width:auto;padding:7px 14px" onclick="confirmPlanImportPage()">このページ全体を確認して使う</button>
         </div>
-        <div class="airx-source-note">平面図・寸法線以外の外観パースや表題欄、氏名・住所が入っていないか確認してください。下の元ページをドラッグして囲み直せます。</div>
+        <div class="airx-source-note">氏名・住所や不要な外観画像を除いてください。元ページを囲み直せます。</div>
       </div>
       <div id="plan-import-crop">
-        <div class="ph">2. 元画像で図面の範囲を確認・調整</div>
+        <div class="airx-source-note">氏名・住所を除く</div>
         <canvas id="plan-import-canvas" class="plan-import-canvas"></canvas>
         <div class="unity-render-actions">
           <button class="pbtn sec" style="width:auto;padding:7px 14px" onclick="planImportSelectAll()">全体に戻す</button>
-          <span id="plan-import-crop-size" class="airx-source-note"></span>
         </div>
       </div>
+      <details class="plan-import-disclosure"><summary>設定</summary>
+      <div id="plan-import-crop-size" class="airx-source-note"></div>
       <div id="plan-import-mode-wrap" style="display:none">
         <div class="unity-render-config">
           <div><label for="plan-import-mode">読み取り方</label>
@@ -3646,23 +3650,31 @@ input[type="reset"]:focus-visible{
           <input id="plan-import-hint" type="text" placeholder="例: 2階の平面図です / 尺モジュールです">
         </div>
       </div>
-      <div class="unity-render-actions">
-        <button id="plan-import-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runPlanImport()">この範囲を読み取る</button>
-      </div>
+      </details>
+    </details>
+    <div class="unity-render-actions" id="plan-import-run-actions" style="display:none">
+        <button id="plan-import-run" class="pbtn" style="width:auto;padding:7px 14px" onclick="runPlanImport()">読み取る</button>
     </div>
 
     <div id="plan-import-status" class="unity-render-status"></div>
+    <details id="plan-import-error-details" class="plan-import-disclosure" style="display:none"><summary>エラー詳細</summary><div id="plan-import-error-notes" class="unity-render-cmd"></div></details>
 
     <div id="plan-import-step3" style="display:none">
-      <div class="ph">3. できた下書き</div>
+      <div class="ph">読み取り結果</div>
       <div id="plan-import-summary" class="unity-render-status"></div>
-      <div id="plan-import-cost" class="airx-source-note"></div>
-      <div id="plan-import-rooms" class="unity-render-cmd"></div>
-      <div class="ph">AIが直したこと・読めなかったこと</div>
-      <div id="plan-import-notes" class="unity-render-cmd"></div>
-      <div class="unity-render-actions">
-        <button id="plan-import-apply" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport()">この下書きを取り込む</button>
+      <div id="plan-import-result-state" class="unity-render-status" role="status" aria-live="polite"></div>
+      <div class="unity-render-actions plan-import-result-actions">
+        <button id="plan-import-next" class="pbtn" style="display:none;width:auto;padding:7px 14px" onclick="PlanImport.focusReviewIssue()">確認する箇所を見る</button>
+        <button id="plan-import-apply" class="pbtn" style="width:auto;padding:7px 14px" onclick="applyPlanImport()">取り込む</button>
       </div>
+      <div id="plan-import-review"></div>
+      <div id="plan-import-cost" class="airx-source-note"></div>
+      <details id="plan-import-result-details" class="plan-import-disclosure"><summary>読み取りメモ・詳細</summary>
+      <div id="plan-import-cost-detail" class="airx-source-note"></div>
+      <div id="plan-import-rooms" class="unity-render-cmd"></div>
+      <div class="ph">読み取りメモ</div>
+      <div id="plan-import-notes" class="unity-render-cmd"></div>
+      </details>
     </div>
   </div>
 </div>
@@ -17345,7 +17357,7 @@ function walkEyeY(){
 function updateWalkEyePresetButton(){
   var b=document.getElementById('walk-height-toggle');
   if(!b) return;
-  var tps=typeof WalkTps!=='undefined'&&WalkTps.cameraVerified&&WalkTps.cameraVerified();
+  var tps=typeof WalkTps!=='undefined'&&(WalkTps.enabled?WalkTps.enabled():WalkTps.cameraVerified&&WalkTps.cameraVerified());
   b.disabled=!!tps;
   b.setAttribute('aria-label',tps?'TPS人物追従中。視点高切替はFPS表示で使用できます':'視点の高さを切り替え');
   if(tps){b.innerHTML='TPS<br>追従';b.setAttribute('aria-pressed','false');b.title='TPS人物追従中。視点高切替はFPS表示で使用できます';return;}
@@ -17355,7 +17367,7 @@ function updateWalkEyePresetButton(){
   b.title=sitting?'立ち視点に切り替え':'座り視点に切り替え';
 }
 function toggleWalkEyePreset(){
-  if(typeof WalkTps!=='undefined'&&WalkTps.cameraVerified&&WalkTps.cameraVerified())return;
+  if(typeof WalkTps!=='undefined'&&(WalkTps.enabled?WalkTps.enabled():WalkTps.cameraVerified&&WalkTps.cameraVerified()))return;
   WALK.eyePreset=WALK.eyePreset==='sit'?'stand':'sit';
   updateWalkEyePresetButton();
   walkApplyCamera();
@@ -17873,9 +17885,52 @@ function positionWalkHud(){
   var dp=document.getElementById('walk-dpad');
   if(mm) mm.style.top=topSafe+'px';
   if(ex){ ex.style.top=topSafe+'px'; ex.style.left=leftSafe+'px'; }
+  var walkInsets=typeof window.getComputedStyle==='function'?window.getComputedStyle(hud):null;
+  function walkInset(name){return walkInsets?Math.max(0,parseFloat(walkInsets.getPropertyValue(name))||0):0;}
+  var lowerSafe=Math.max(botSafe,hudGap+walkInset('--safe-bot'));
+  var upperSafe=Math.max(topSafe,hudGap+walkInset('--safe-top'));
+  var laneLeft=Math.max(leftSafe,hudGap+walkInset('--safe-l'));
+  if(dp){dp.style.bottom=lowerSafe+'px';dp.style.right='calc('+hudGap+'px + var(--safe-r, 0px))';}
   var tps=document.getElementById('walk-tps-controls');
-  if(tps){tps.style.top=(topSafe+54)+'px';tps.style.left=leftSafe+'px';}
-  if(dp) dp.style.bottom=botSafe+'px';
+  if(tps){
+    // Keep viewpoint actions by movement controls, using the same edge gutter.
+    // Compact landscape uses the lane beside the D-pad instead of covering it.
+    tps.style.top='auto';tps.style.left='auto';
+    tps.style.right='calc('+hudGap+'px + var(--safe-r, 0px))';
+    tps.style.maxWidth=Math.max(60,Math.min(232,wr.width-laneLeft-hudGap-walkInset('--safe-r')))+'px';
+    tps.style.maxHeight='';tps.style.padding='';
+    var dr=dp?dp.getBoundingClientRect():null;
+    var panel=tps.getBoundingClientRect(),panelHeight=panel.height;
+    var bottom=lowerSafe+(dr&&dr.height>0?dr.height+hudGap:0);
+    var mr=mm?mm.getBoundingClientRect():null;
+    var panelRight=wr.right-hudGap-walkInset('--safe-r');
+    var panelBottom=wr.bottom-bottom;
+    var coversMap=mr&&mr.width>0&&mr.height>0&&panelRight-panel.width<mr.right&&panelRight>mr.left&&panelBottom-panelHeight<mr.bottom&&panelBottom>mr.top;
+    if(dr&&dr.width>0&&wr.height-bottom-upperSafe<panelHeight||coversMap){
+      var laneRight=dr&&dr.width>0?dr.left:panelRight;
+      // Clear the map's horizontal lane too; wrapping may increase panel height.
+      if(mr&&mr.width>0&&mr.height>0)laneRight=Math.min(laneRight,mr.left);
+      var laneWidth=laneRight-wr.left-laneLeft-hudGap;
+      if(laneWidth>=60){
+        tps.style.right=(wr.right-laneRight+hudGap)+'px';
+        var lanePanelWidth=Math.min(232,laneWidth);
+        tps.style.maxWidth=lanePanelWidth+'px';
+        var panelTopSafe=upperSafe;
+        var er=ex?ex.getBoundingClientRect():null;
+        if(er&&er.width>0&&er.height>0&&laneRight-hudGap-lanePanelWidth<er.right&&laneRight-hudGap>er.left)panelTopSafe=Math.max(panelTopSafe,er.bottom-wr.top+hudGap);
+        var laneHeight=Math.max(0,wr.height-lowerSafe-panelTopSafe);
+        tps.style.maxHeight=laneHeight+'px';
+        if(laneHeight<16)tps.style.padding='0px';
+        bottom=lowerSafe;
+      }
+    }
+    tps.style.bottom=bottom+'px';
+    if(typeof ResizeObserver==='function'&&!tps._walkHudResizeObserver){
+      tps._walkHudResizeObserver=new ResizeObserver(positionWalkHud);
+      tps._walkHudResizeObserver.observe(tps);tps._walkHudResizeObserver.observe(wrap);
+      if(dp)tps._walkHudResizeObserver.observe(dp);
+    }
+  }
 }
 // 立面方向スナップボタン: モバイルではフロート表示の#bottom-navが、デスクトップ
 // では常設の#app-version/#statusbarが右下に重なるため、positionWalkHudと同様に
@@ -25683,6 +25738,7 @@ updateMobileShiftButton();
 <script src="assets/js/walk-tps-seat-assets.js"></script>
 <script src="assets/js/walk-tps-interactions.js"></script>
 <script src="assets/js/walk-tps-bath-safety.js"></script>
+<script src="assets/js/walk-tps-occlusion.js"></script>
 <script src="assets/js/walk-tps.js"></script>
 <script src="assets/js/parallel-editors.js"></script>
 <script src="assets/js/plan-repository-lab.js"></script>

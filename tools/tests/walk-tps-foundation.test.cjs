@@ -120,11 +120,11 @@ test('legacy point predicate and uncertified/missing geometry cannot verify came
     assert.equal(v.position,null);assert.equal(v.avatarVisible,false);
   }
 });
-test('a legacy host gets explicit FPS fallback instead of an unverified transform',()=>{
+test('selected fixed TPS camera does not use the legacy volume-boundary gate',()=>{
   const {c,host}=setup();delete host.sweepCameraBoundary;
   host.cameraAllowed=()=>true; // Deliberately cannot substitute for volume sweep.
   const v=c.tick(0.1).camera;
-  assert.equal(v.reason,'boundary-unverified');assert.equal(v.position,null);
+  assert.equal(v.strategy,'fixed-distance');assert.equal(v.verified,true);assert.equal(v.distance,2.6);
 });
 test('zero volume clearance never applies even an anchor transform',()=>{
   for(const [hit,limit] of [[0,2.6],[2.6,0]]){

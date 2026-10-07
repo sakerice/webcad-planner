@@ -1,0 +1,47 @@
+{
+  "model": "rpg-mansion-kitchen-wall-cupboard-01",
+  "dimensions_mm": [
+    600.0000238418579,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "bounds_m": [
+    [
+      -0.30000001192092896,
+      -0.17499999701976776,
+      0.0
+    ],
+    [
+      0.30000001192092896,
+      0.17499999701976776,
+      0.699999988079071
+    ]
+  ],
+  "triangles": 1728,
+  "uv": {
+    "meters_per_uv": 3.0046794927722997,
+    "min": 2.7292374302284377,
+    "max": 3.589281059105624,
+    "p05": 2.794406275617891,
+    "p95": 3.435211149845065,
+    "total_triangles": 1728,
+    "valid_triangles": 1728,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "RPG Walnut": "wood",
+    "RPG Walnut edge": "wood",
+    "RPG Antique brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 67376,
+  "glb_sha256": "6de8b4bed6a222439e7fb449daa2558de485020e6964d5961955cef55de5b264",
+  "placement_hint": "wall",
+  "installation": "Wall installation required. Bottom defaults to 1400mm; align rear with the wall and check clearance manually. Static doors.",
+  "support_height_mm": null
+}

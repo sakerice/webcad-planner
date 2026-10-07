@@ -198,6 +198,7 @@ function setup({ boxes = [null], renderRegion, renderPages, fetchReply, deferIma
   const conflict=setup({boxes:[valid],headers:[header(3)],fetchReply:()=>response(draft)});
   await conflict.load();conflict.c.runPlanImport();await tick();
   assert.equal(conflict.c.PlanImport.state.result,null);
-  assert.match(conflict.elements['plan-import-status'].textContent,/見出し/);
+  assert.match(conflict.elements['plan-import-status'].textContent,/階の対応を確定できません/);
+  assert.match(conflict.elements['plan-import-error-notes'].textContent,/見出し/,'the original header conflict remains available in details');
   console.log('plan-import-pdf-review: fallback gating, crop success/failure, page preview, confirmation and stale-result checks passed');
 })().catch(e => { console.error(e); process.exitCode = 1; });

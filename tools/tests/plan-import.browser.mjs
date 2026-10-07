@@ -111,6 +111,7 @@ try {
       }), { status: 200, headers: { 'content-type': 'application/json' } });
     };
   });
+  await page.locator('#plan-import-hint').evaluate(el=>el.closest('details').open=true);
   await page.locator('#plan-import-hint').fill('1階の平面図です');
   await page.locator('#plan-import-run').click();
   await page.waitForSelector('#plan-import-step3', { state: 'visible', timeout: 10000 });

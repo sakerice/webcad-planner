@@ -2,6 +2,8 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {libraryContext,ROOT}=require('./plan-library-test-support.cjs');
 const html=fs.readFileSync(path.join(ROOT,'index.html'),'utf8');
+const nativeControl=html.match(/function isNativeKeyboardControl\([^)]*\)\{[\s\S]*?\n\}/);
+assert.ok(nativeControl,'real native keyboard control helper must be found');
 const shortcutStart=html.indexOf("window.addEventListener('keydown', function(e){\n  if(isPlanImportDialogOpen()) return;"),shortcutEnd=html.indexOf("window.addEventListener('resize',function(){",shortcutStart);
 const cameraStart=html.indexOf("document.addEventListener('keydown',function(e){\n    if(isPlanImportDialogOpen()) return;"),cameraEnd=html.indexOf('  loop3D();',cameraStart);
 assert.ok(shortcutStart>=0&&shortcutEnd>shortcutStart&&cameraStart>=0&&cameraEnd>cameraStart,'real native key handlers must be found');
@@ -14,7 +16,7 @@ function runtime({cameraBeforeLibrary=false}={}){
   context.ST={selected:context.DATA.rooms[0],tool:'select',drawing:false,snap:10,placingRot:0,shiftKey:false,ctrlKey:false};context.iMov={w:true};context.isInt=true;context.ren=null;context.isPlanImportDialogOpen=()=>false;context.isWalkView=()=>walking;context.isObjectLocked=()=>false;
   context.delSel=()=>{context.DATA.rooms.splice(0,1);context.markDirty();bump('delete');};context.copySelectedObject=()=>{bump('copy');return true;};context.pasteCopiedObject=()=>{bump('paste');return true;};
   context.undoAction=()=>bump('undo');context.redoAction=()=>bump('redo');context.saveState=()=>bump('history');context.draw2d=()=>bump('draw');context.updateProps=()=>bump('props');context.invalidate3D=()=>bump('invalidate');context.finishWalkRouteDrawing=()=>bump('finish-route');context.exitWalkMode=()=>bump('exit-walk');context.setView=()=>bump('set-view');
-  vm.runInContext(html.slice(shortcutStart,shortcutEnd),sandbox);
+  vm.runInContext(nativeControl[0]+'\n'+html.slice(shortcutStart,shortcutEnd),sandbox);
   if(cameraBeforeLibrary)vm.runInContext(html.slice(cameraStart,cameraEnd),sandbox);
  }});
  if(!cameraBeforeLibrary)vm.runInContext(html.slice(cameraStart,cameraEnd),sandbox);

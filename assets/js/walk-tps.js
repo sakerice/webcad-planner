@@ -4,23 +4,44 @@
   'use strict';
   var F=root.WalkTpsFoundation,controller=null,avatar=null,output=null,disposed=false;
   var plan=null,floor=null,scene=null,revision=0,boundary=null,boxes=[],sockets=[],stale=true,sceneReady=false;
-  var bathSafety=null,bathCache=null,collectionRevision=0;
+  var bathSafety=null,bathCache=null,collectionRevision=0,occlusion=null,footShadow=null;
   var prefs=F.profile(null),candidate=null,candidateKind=null,uiKey=null,planStages=0;
   function clearInput(){WALK.keys={};Object.keys(iMov).forEach(function(k){iMov[k]=false;});}
   function pose(){return {x:WALK.x,y:floorTopY(WALK.floor)+(WALK.groundOff||0),z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch||0,floor:WALK.floor};}
-  function invalidate(){stale=true;revision++;}
-  function releaseAvatar(){if(avatar){avatar.dispose();avatar=null;}if(bathSafety){bathSafety.dispose();bathSafety=null;}bathCache=null;}
-  function reset(resetPreference){
+  function invalidate(){if(occlusion)occlusion.reset();stale=true;revision++;}
+  function releaseAvatar(){
+    if(occlusion)occlusion.reset();
+    if(footShadow){footShadow.removeFromParent();footShadow.geometry.dispose();footShadow.material.dispose();footShadow=null;}
+    if(avatar){avatar.dispose();avatar=null;}if(bathSafety){bathSafety.dispose();bathSafety=null;}bathCache=null;
+  }
+  function updatePresentation(){
+    if(!sc3||!avatar)return;
+    if(!occlusion&&root.WalkTpsOcclusion)occlusion=root.WalkTpsOcclusion.create(THREE);
+    if(occlusion)occlusion.update(sc3,camExt,avatar.group);
+    if(!footShadow){
+      footShadow=new THREE.Mesh(new THREE.CircleGeometry(.28,24),new THREE.MeshBasicMaterial({color:0x171d23,
+        transparent:true,opacity:.16,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}));
+      footShadow.rotation.x=-Math.PI/2;footShadow.userData.walkTpsFootShadow=true;sc3.add(footShadow);
+    }
+    var a=output&&output.avatar,ground=a&&a.y;
+    footShadow.visible=!!(avatar.group.visible&&a&&Number.isFinite(ground)&&!output.locked);
+    if(footShadow.visible)footShadow.position.set(a.x,ground+.007,a.z);
+  }
+  function reset(resetPreference,preserveHeldInput){
     if(planStages)return;
+    // Native stair transitions must not consume held free-walk movement. Explicit
+    // plan/view/manual-floor changes still clear input through the normal reset.
+    var held=preserveHeldInput?{keys:WALK.keys,movement:Object.assign({},iMov)}:null;
     if(controller)controller.reset();output=null;candidate=null;releaseAvatar();
     boxes=[];sockets=[];boundary=null;stale=true;clearInput();
     if(resetPreference){prefs=F.profile(null);if(controller)controller.setMode('fps');}
+    if(held){WALK.keys=held.keys;Object.assign(iMov,held.movement);}
   }
   function context(){
     if(planStages)return;
     var changed=plan!==DATA,hadPlan=!!plan;
     if(changed||floor!==WALK.floor){
-      reset(changed);plan=DATA;floor=WALK.floor;
+      reset(changed,!changed&&!(output&&output.locked));plan=DATA;floor=WALK.floor;
       if(changed&&hadPlan&&WALK.active){
         // Use the host spawn after a committed plan replacement. Retain the
         // selected floor if it has rooms; otherwise choose a real room floor.
@@ -206,26 +227,27 @@
   function updateUi(){
     var mode=document.getElementById('walk-tps-mode'),action=document.getElementById('walk-tps-action'),label=document.getElementById('walk-tps-status');
     if(!mode)return;
-    var key=JSON.stringify([prefs.mode,candidate,candidateKind,output&&output.actionKind,output&&output.locked,output&&output.state==='blocked',output&&output.camera&&output.camera.verified,output&&output.camera&&output.camera.avatarVisible]);
+    var effect=occlusion&&occlusion.debug(),key=JSON.stringify([prefs.mode,candidate,candidateKind,output&&output.actionKind,output&&output.locked,output&&output.state==='blocked',output&&output.camera&&output.camera.verified,output&&output.camera&&output.camera.holding,output&&output.camera&&output.camera.reason,effect&&effect.invalid]);
     if(key===uiKey)return;uiKey=key;
     updateWalkEyePresetButton();
     mode.setAttribute('aria-pressed',String(prefs.mode==='tps'));mode.textContent=prefs.mode==='tps'?'一人称視点へ':'三人称視点へ';mode.title=prefs.mode==='tps'?'一人称視点へ切り替えます':'三人称視点へ切り替えます。人物と動作は仮モデルです';
     action.hidden=prefs.mode!=='tps';action.disabled=!(output&&output.locked)&&!candidate;
     action.textContent=output&&output.state==='blocked'?'退出を再確認':output&&output.locked?(output.actionKind==='bath-pose'?'出る / 解除':output.actionKind==='mirror-pose'?'ポーズ終了':'立つ / 解除'):candidateKind==='bath-pose'?'入浴姿勢（仮）':candidateKind==='mirror-pose'?'ポーズ（仮）':'座る';
     label.hidden=prefs.mode!=='tps';label.textContent=output&&output.state==='blocked'?'人物を非表示：安全な退出先がありません。障害物を除いて再確認、またはウォークスルー終了':
-      output&&output.camera&&!output.camera.verified?'三人称視点を確認できないため一人称表示':
-      output&&output.camera&&!output.camera.avatarVisible?'壁際：仮人物を一時非表示':output&&output.locked?(output.actionKind==='bath-pose'?'服あり・入浴姿勢（仮）':output.actionKind==='mirror-pose'?'仮モデル・鏡前ポーズ（仮）':'仮モデル・着座姿勢（仮）'):'仮モデル・仮歩行';
+      output&&output.camera&&output.camera.holding?(output.camera.reason==='projection-unverified'?'視点を保持：カメラの復旧待ち':'視点を保持：人物位置の復旧待ち'):
+      effect&&effect.invalid?'一部の遮蔽物を透過できません':output&&output.locked?(output.actionKind==='bath-pose'?'服あり・入浴姿勢（仮）':output.actionKind==='mirror-pose'?'仮モデル・鏡前ポーズ（仮）':'仮モデル・着座姿勢（仮）'):'仮モデル・仮歩行';
   }
   function update(dt){
     if(disposed||!isWalkView()||!WALK.active)return false;
     context();
     if(prefs.mode!=='tps'){updateUi();return false;}
     ensure();if(stale||WALK._doorsAnim)collect();
-    if(!avatar){avatar=root.createWalkTpsPlaceholder(THREE);sc3.add(avatar.group);}
     var before=output;output=controller.tick(dt);if(!output)return false;
-    avatar.pose(output,Number.isFinite(output.supportY)?output.supportY:pose().y);
-    if(output.camera&&output.camera.verified){var c=output.camera;camExt.position.set(c.position.x,c.position.y,c.position.z);camExt.lookAt(c.target.x,c.target.y,c.target.z);}
-    else walkApplyFpsCamera();
+    if(!avatar&&sc3){avatar=root.createWalkTpsPlaceholder(THREE);sc3.add(avatar.group);}
+    if(avatar){if(output.avatar){var ground=pose().y;avatar.pose(output,Number.isFinite(output.supportY)?output.supportY:Number.isFinite(ground)?ground:output.avatar.y);}else avatar.group.visible=false;}
+    if(camExt&&output.camera&&output.camera.position&&output.camera.target){var c=output.camera;
+      camExt.position.set(c.position.x,c.position.y,c.position.z);camExt.lookAt(c.target.x,c.target.y,c.target.z);}
+    updatePresentation();
     candidate=null;candidateKind=null;
     if(!output.locked&&output.camera&&output.camera.verified&&output.camera.avatarVisible)for(var i=0;i<sockets.length;i++){var resolved=socket(sockets[i].item.id);if(resolved&&resolved.reachable){candidate=String(sockets[i].item.id);candidateKind=resolved.kind;break;}}
     updateUi();
@@ -242,7 +264,7 @@
   function action(){if(!controller)return false;if(stale)collect();
     var ok=output&&output.locked?controller.cancel():candidate&&controller.requestAction(candidate);update(0);return !!ok;}
   function cancel(){if(!controller)return true;if(stale)collect();var ok=controller.cancel();update(0);return ok;}
-  function dispose(){if(disposed)return;reset(true);if(controller)controller.dispose();disposed=true;root.removeEventListener('blur',blur);}
+  function dispose(){if(disposed)return;reset(true);if(occlusion)occlusion.dispose();if(controller)controller.dispose();disposed=true;root.removeEventListener('blur',blur);}
   function preservePlanStage(){
     planStages++;var ended=false;
     return function(){if(!ended){ended=true;planStages--;}};
@@ -251,7 +273,7 @@
   root.addEventListener('blur',blur);
   root.WalkTps={preservePlanStage:preservePlanStage,cameraVerified:function(){return !!(!disposed&&prefs.mode==='tps'&&output&&output.camera&&output.camera.verified);},update:update,invalidate:invalidate,reset:reset,dispose:dispose,cancel:cancel,action:action,setMode:setMode,
     toggle:function(){return setMode(prefs.mode==='tps'?'fps':'tps');},enabled:function(){return !disposed&&prefs.mode==='tps';},
-    beforeMove:function(){context();if(output&&output.locked)clearInput();},
+    beforeMove:function(){context();if(output&&(output.locked||output.camera&&output.camera.holding))clearInput();},
     preference:function(){return F.profile(prefs);},restorePreference:function(p){context();var mode=F.profile(p).mode;return mode===prefs.mode?true:setMode(mode);},
-    debug:function(){return {output:output,candidate:candidate,candidateKind:candidateKind,boxes:boxes.length,sockets:sockets.length,sceneReady:sceneReady,bathQueryActive:!!bathSafety,disposed:disposed};}};
+    debug:function(){return {output:output,candidate:candidate,candidateKind:candidateKind,boxes:boxes.length,sockets:sockets.length,sceneReady:sceneReady,bathQueryActive:!!bathSafety,presentation:occlusion&&occlusion.debug(),footShadowActive:!!footShadow,disposed:disposed};}};
 })(window);

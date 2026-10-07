@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "rpg-mansion",
   "name": "RPG向け洋館",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "integrated-review",
   "namespace": "rpg-mansion-",
   "units": {
@@ -1729,6 +1729,201 @@
         }
       ],
       "placementHint": "floor",
+      "previewVersion": 1
+    },
+    {
+      "id": "rpg-mansion-kitchen-base-cupboard-01",
+      "name": "石天板の低い洋館キッチン戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "キッチン",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-base-cupboard-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-base-cupboard-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-base-cupboard-01-top.png",
+      "rear": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-base-cupboard-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-base-cupboard-01.blend",
+      "validation": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-base-cupboard-01-validation.json",
+      "w": 600,
+      "d": 650,
+      "h": 850,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "builder": "tools/blender/rpg_mansion/kitchen/build.py",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#b29455"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8ad96"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#493025"
+        }
+      ],
+      "placementHint": "floor",
+      "placementNotes": "Closed double-door base storage; full stone counter at 850mm. Static doors, no sink or appliance.",
+      "front": "+Z",
+      "previewVersion": 1
+    },
+    {
+      "id": "rpg-mansion-kitchen-drawer-base-01",
+      "name": "石天板の三段引出しキッチン台",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "キッチン",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-drawer-base-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-drawer-base-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-drawer-base-01-top.png",
+      "rear": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-drawer-base-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-drawer-base-01.blend",
+      "validation": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-drawer-base-01-validation.json",
+      "w": 450,
+      "d": 650,
+      "h": 850,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "builder": "tools/blender/rpg_mansion/kitchen/build.py",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#b29455"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8ad96"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#493025"
+        }
+      ],
+      "placementHint": "floor",
+      "placementNotes": "Three different-height drawer fronts with a full 850mm stone counter. Static drawers, no dishwasher.",
+      "front": "+Z",
+      "previewVersion": 1
+    },
+    {
+      "id": "rpg-mansion-kitchen-corner-base-01",
+      "name": "L字天板のコーナーキッチン戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "キッチン",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-corner-base-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-corner-base-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-corner-base-01-top.png",
+      "rear": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-corner-base-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-corner-base-01.blend",
+      "validation": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-corner-base-01-validation.json",
+      "w": 900,
+      "d": 900,
+      "h": 850,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "builder": "tools/blender/rpg_mansion/kitchen/build.py",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#b29455"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8ad96"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#493025"
+        }
+      ],
+      "placementHint": "floor",
+      "placementNotes": "L-shaped counter with a 250mm return notch and three cupboard fronts on two orientations. Left return; static doors.",
+      "front": "+Z",
+      "previewVersion": 1
+    },
+    {
+      "id": "rpg-mansion-kitchen-wall-cupboard-01",
+      "name": "壁付けの浅型食器戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "キッチン",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-wall-cupboard-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-wall-cupboard-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-wall-cupboard-01-top.png",
+      "rear": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-wall-cupboard-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-wall-cupboard-01.blend",
+      "validation": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-wall-cupboard-01-validation.json",
+      "w": 600,
+      "d": 350,
+      "h": 700,
+      "defaultElevation": 1400,
+      "provenance": "original",
+      "builder": "tools/blender/rpg_mansion/kitchen/build.py",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#b29455"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#493025"
+        }
+      ],
+      "placementHint": "wall",
+      "placementNotes": "Wall installation required. Bottom defaults to 1400mm; align rear with the wall and check clearance manually. Static doors.",
+      "front": "+Z",
+      "previewVersion": 1
+    },
+    {
+      "id": "rpg-mansion-kitchen-pan-rack-01",
+      "name": "壁付け真鍮レールの鍋掛け",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "キッチン",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-pan-rack-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pan-rack-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pan-rack-01-top.png",
+      "rear": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-pan-rack-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-pan-rack-01.blend",
+      "validation": "tools/blender/rpg_mansion/kitchen/work/rpg-mansion-kitchen-pan-rack-01-validation.json",
+      "w": 800,
+      "d": 180,
+      "h": 550,
+      "defaultElevation": 1450,
+      "provenance": "original",
+      "builder": "tools/blender/rpg_mansion/kitchen/build.py",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#b29455"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#493025"
+        }
+      ],
+      "placementHint": "wall",
+      "placementNotes": "Wall installation required. Bottom defaults to 1450mm; align rear mounting rail with wall manually. Cookware is fixed decoration.",
+      "front": "+Z",
       "previewVersion": 1
     }
   ]

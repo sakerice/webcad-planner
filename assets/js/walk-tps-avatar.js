@@ -32,7 +32,7 @@
       var seated=s.locked&&s.actionKind!=='mirror-pose'&&(s.state!=='blocked'||bathing);
       // This pelvis offset belongs only to THIS mock. Never store it in sockets.
       group.position.set(s.avatar.x,s.avatar.y-(seated?.86:0),s.avatar.z);group.rotation.y=s.avatar.yaw;
-      group.visible=!!(s.mode==='tps'&&s.camera&&s.camera.verified&&s.camera.avatarVisible);
+      group.visible=!!(s.mode==='tps'&&s.camera&&(s.camera.verified||s.camera.holding&&s.camera.position&&s.camera.target)&&s.camera.avatarVisible);
       legs.forEach(function(l,i){
         var cycle=s.phase*Math.PI*2+(i?Math.PI:0),walking=s.state==='walking';
         var angle=walking?Math.sin(cycle)*.5:0;
