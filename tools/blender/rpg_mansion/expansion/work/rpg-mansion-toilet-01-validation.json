@@ -1,0 +1,44 @@
+{
+  "model": "rpg-mansion-toilet-01",
+  "dimensions_mm": [
+    460.00000834465027,
+    689.9999976158142,
+    889.9999856948853
+  ],
+  "bounds_m": [
+    [
+      -0.23000000417232513,
+      -0.3449999988079071,
+      0.0
+    ],
+    [
+      0.23000000417232513,
+      0.3449999988079071,
+      0.8899999856948853
+    ]
+  ],
+  "triangles": 996,
+  "uv": {
+    "meters_per_uv": 1.9929288529755762,
+    "min": 1.8000779653621597,
+    "max": 2.4991185569705814,
+    "p05": 1.880032335236014,
+    "p95": 2.2689221061565332,
+    "total_triangles": 996,
+    "valid_triangles": 996,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "RPG ceramic": "ceramic",
+    "RPG Walnut": "wood",
+    "RPG Antique brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 38144,
+  "glb_sha256": "9d444b79bd0b67248ba88f9e762e41356478dffd42b2f03d770a51bb003297bb"
+}

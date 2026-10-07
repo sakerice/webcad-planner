@@ -231,3 +231,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* 開いた欄を一瞬示す(強調はオレンジの1色だけ)。見出しの浮きの影は別の規則が
    !important で持っているので、box-shadow には触らず outline で描く。 */
 #sidebar .asset-subcat.plan-recommend-target>.asset-subhdr{outline:2px solid var(--hp-primary);outline-offset:-2px}
+/* カタログの「表示するセット」(assets/js/asset-sets.js)。検索欄の下に capsule の切り替えを並べる */
+.asset-set-picker{margin-top:12px}
+.asset-set-label{color:var(--hp-text);font-size:12px;font-weight:700;margin-bottom:6px}
+.asset-set-options{display:flex;flex-wrap:wrap;gap:6px}
+.asset-set-option{min-height:40px;padding:0 16px;border:0;border-radius:var(--hp-control-radius);background:#f1f3f1;color:var(--hp-muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.asset-set-option[aria-pressed="true"]{background:var(--hp-primary);color:#fff}
+.asset-set-option:focus-visible{outline:2px solid var(--hp-primary);outline-offset:2px}
+/* 標準以外のセットの家具に付ける札。標準の家具に混ぜて並べても見分けられるように */
+#sidebar .asset-grid .asset-set-badge,.catalogue-result .asset-set-badge{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;background:#e3f1fc;color:#1d6aa8}
+/* 標準以外のセットの物が入っている見出しに付ける印 */
+.asset-set-marks{font-style:normal;margin-left:auto;margin-right:8px;display:inline-flex;gap:4px}
+.asset-set-mark{font-style:normal;display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 7px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;background:#e3f1fc;color:#1d6aa8;vertical-align:middle}
+.asset-set-marks .asset-set-mark{margin-left:0}
+.asset-set-mark::before{content:attr(data-mark)}
+/* 小見出しの印はアイコンの右上に重ねる。名前の幅を取らないので、長い名前も省略されない */
+.asset-subhdr .sicon{position:relative}
+.asset-subhdr .sicon .asset-set-mark{position:absolute;top:-9px;left:50%;transform:translateX(-50%);height:14px;padding:0 4px;font-size:8px;line-height:1;box-shadow:0 0 0 2px #fff}

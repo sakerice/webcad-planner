@@ -1,0 +1,15 @@
+{
+ "note": "カタログで選べるアセットのセット。標準以外は manifest（本番のカタログと同じ形式）を持つ。新しいセットは docs/asset-sets.md の手順で足す。 mark は見出しに付ける1文字の印。",
+ "sets": [
+  {
+   "id": "standard",
+   "name": "標準"
+  },
+  {
+   "id": "rpg-mansion",
+   "name": "洋館",
+   "manifest": "assets/models/packs/rpg-mansion/manifest.json",
+   "mark": "洋"
+  }
+ ]
+}
