@@ -70,6 +70,12 @@
   }
   // 標準以外のセットの物には、セット名の札を付ける（標準の家具に混ぜて並べるため）。
   function badge(item){ var s=setOf(item); return s===STANDARD?'':nameOf(s); }
+  // 見出しに付ける短い印（一覧の mark。無ければセット名の頭1文字）。見出しは幅が狭いので短くする。
+  function mark(item){
+    var id=setOf(item); if(id===STANDARD) return '';
+    var s=registry.filter(function(x){ return x.id===id; })[0];
+    return (s&&s.mark)||String(nameOf(id)).charAt(0);
+  }
 
   // カタログの検索欄の下に「表示するセット」を出す。セットが標準だけなら何も出さない。
   function renderPicker(doc,onChange,storage){
@@ -88,7 +94,7 @@
       b.addEventListener('click',function(){
         if(!toggle(s.id,storage)) return;
         renderPicker(doc,onChange,storage);
-        if(typeof onChange==='function') onChange();
+        if(typeof onChange==='function') onChange(s.id,visible.indexOf(s.id)>=0);
       });
       row.append(b);
     });
@@ -98,7 +104,7 @@
   }
 
   var api={REGISTRY_URL:REGISTRY_URL,STORAGE_KEY:STORAGE_KEY,STANDARD:STANDARD,
-    load:load,restore:restore,isVisible:isVisible,toggle:toggle,badge:badge,setOf:setOf,renderPicker:renderPicker,
+    load:load,restore:restore,isVisible:isVisible,toggle:toggle,badge:badge,mark:mark,setOf:setOf,renderPicker:renderPicker,
     sets:function(){ return registry.slice(); },visible:function(){ return visible.slice(); },
     _reset:function(){ registry=[{id:STANDARD,name:'標準'}]; visible=[STANDARD]; }};
   if(typeof module==='object'&&module.exports) module.exports=api;else root.AssetSets=api;

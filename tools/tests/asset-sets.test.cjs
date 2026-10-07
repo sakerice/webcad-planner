@@ -64,15 +64,18 @@ test('一覧が読めなくても標準だけで動く', async () => {
   assert.deepEqual(AssetSets.sets().map((s) => s.id), ['standard']);
 });
 
-test('標準以外の物にはセット名の札が付く', async () => {
+test('標準以外の物にはセット名の札と、見出し用の短い印が付く', async () => {
   AssetSets._reset();
   await AssetSets.load(fetchJson, memoryStorage());
   assert.equal(AssetSets.badge({ assetSet: 'rpg-mansion' }), '洋館');
   assert.equal(AssetSets.badge({}), '');
+  assert.equal(AssetSets.mark({ assetSet: 'rpg-mansion' }), '洋', '一覧に mark が無ければセット名の頭1文字');
+  assert.equal(AssetSets.mark({}), '');
 });
 
 // ── 納品物の検査（リポジトリに置いてある実物を見る） ──────────────────────
 const doc = JSON.parse(readFileSync(join(ROOT, 'assets/models/asset-sets.json'), 'utf8'));
+const kinds = JSON.parse(readFileSync(join(ROOT, 'assets/models/tags.json'), 'utf8')).kinds || {};
 const standardIds = new Set();
 for (const rel of ['assets/models/furniture_mega/manifest.json', 'assets/models/interior_model_0_26_1/manifest.json', 'assets/models/custom/manifest.json']) {
   for (const it of JSON.parse(readFileSync(join(ROOT, rel), 'utf8')).items || []) standardIds.add(it.id);
@@ -98,6 +101,8 @@ for (const set of doc.sets.filter((s) => s.manifest)) {
       // 色を変えられる部位。割れたガラスのように色を持たない物だけ空でよい（空の配列を明示する）
       assert.ok(Array.isArray(it.finishChannels), `${where}: 色を変えられる部位(finishChannels)の定義が無い`);
       for (const ch of it.finishChannels) assert.ok(ch.key && ch.label && /^#[0-9a-f]{6}$/i.test(ch.default), `${where}: 部位 ${ch.key} の定義が不完全`);
+      // 分類(kind)は標準と同じ名前を使う。標準の見出しの下に混ざって並ぶため。無い物はセット独自の見出しになる
+      if (it.kind) assert.ok(kinds[it.kind], `${where}: 分類 ${it.kind} が tags.json に無い`);
       assert.equal(it.provenance, 'original', `${where}: 独自制作でない物は台帳で権利を確かめてから載せる`);
     }
   });

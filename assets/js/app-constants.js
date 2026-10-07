@@ -3099,7 +3099,9 @@ function mergeFurnitureMegaManifest(manifest){
 // 何も変えずにその語で引けるようになる。
 function applyCatalogueTag(item){
   if(!item || !CATALOGUE_TAGS || !CATALOGUE_TAGS.items) return;
-  var tag=CATALOGUE_TAGS.items[item.id]; if(!tag) return;
+  // 標準以外のセット(洋館など)は、manifest に自分の分類(kind)を書いてくる。
+  // 標準と同じ分類名を使うので、同じ見出しの下に混ざって並ぶ。
+  var tag=CATALOGUE_TAGS.items[item.id]||(item.kind?{kind:item.kind}:null); if(!tag) return;
   var kind=(CATALOGUE_TAGS.kinds||{})[tag.kind];
   item.kind=tag.kind;
   item.mount=tag.mount||null;
@@ -3317,33 +3319,66 @@ function renderOpeningWindowModelToolMenu(){
   html+='</div></div>';
   mount.innerHTML=html;
 }
+// 1つの欄（住設・家具・外構）の中身を、分類ごとの小見出しにまとめて作る。
+// 標準以外のセットの物が入っている小見出しには、セット名の印を付ける。
+// 物が1つも無い小見出しは作らない（表示していないセットの物しか無い分類は出ない）。
+function catalogueSubcatsHtml(items){
+  var cats={};
+  items.forEach(function(item){
+    var head=catalogueHeading(item);
+    (cats[head]||(cats[head]=[])).push(item);
+  });
+  var html='';
+  Object.keys(cats).sort().forEach(function(cat){
+    cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
+    // 欄がどの分類かを残す。取り込み後のおすすめ(assets/js/plan-finish.js)が、
+    // 呼び名の文字ではなくこの印で欄を探して開く。
+    var kind=(cats[cat][0]&&cats[cat][0].kind)||'';
+    var marks=catalogueSetMarksHtml(cats[cat]);
+    html+='<div class="asset-subcat"'+(kind?' data-kind="'+escHtml(kind)+'"':'')+'><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+marks+'</span><span class="asset-subname">'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
+    cats[cat].forEach(function(item){
+      var setBadge=(typeof AssetSets==='object')?AssetSets.badge(item):'';
+      html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':'')+(setBadge?' '+setBadge:''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
+      html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
+      html+=setBadge?'<span class="asset-set-badge">'+escHtml(setBadge)+'</span>':(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
+      html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
+    });
+    html+='</div></div>';
+  });
+  return html;
+}
+// 物の中にある、標準以外のセットの印（例:「洋館」）。重複は1つにまとめる。
+// 印は span にしない: 小見出しの開閉(toggleAssetCat)が span:last-child を +/- の印として書き換える。
+// 文字は CSS で出す: 見出しの textContent は検索結果の見出しや分類名に使われるので、混ぜない。
+function catalogueSetMarksHtml(items){
+  if(typeof AssetSets!=='object') return '';
+  var seen={},html='';
+  items.forEach(function(item){
+    var b=AssetSets.badge(item);
+    if(b && !seen[b]){ seen[b]=1; html+='<i class="asset-set-mark" data-mark="'+escHtml(AssetSets.mark(item))+'" title="'+escHtml(b)+'のセットの物があります" aria-label="'+escHtml(b)+'のセットの物があります"></i>'; }
+  });
+  return html;
+}
 function renderFurnitureMegaLibrary(){
+  var all=Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return !isBuildingComponentFmpItem(item);});
+  var hasSets=typeof AssetSets==='object';
   var mounts={ '住設':document.getElementById('fmp-fixtures'), '家具':document.getElementById('fmp-furniture'), '外構':document.getElementById('fmp-exterior') };
   Object.keys(mounts).forEach(function(group){
     var mount=mounts[group]; if(!mount) return;
-    var cats={};
-    Object.keys(FMP_ITEMS).map(function(k){return FMP_ITEMS[k];}).filter(function(item){return catalogueGroup(item)===group && !isBuildingComponentFmpItem(item) && (typeof AssetSets!=='object' || AssetSets.isVisible(item));}).forEach(function(item){
-      var head=catalogueHeading(item);
-      (cats[head]||(cats[head]=[])).push(item);
-    });
-    var html='';
-    Object.keys(cats).sort().forEach(function(cat){
-      cats[cat].sort(function(a,b){return a.name.localeCompare(b.name);});
-      // 欄がどの分類かを残す。取り込み後のおすすめ(assets/js/plan-finish.js)が、
-      // 呼び名の文字ではなくこの印で欄を探して開く。
-      var kind=(cats[cat][0]&&cats[cat][0].kind)||'';
-      html+='<div class="asset-subcat"'+(kind?' data-kind="'+escHtml(kind)+'"':'')+'><div class="asset-subhdr" onclick="toggleAssetCat(this)" title="'+escHtml(cat)+'"><span class="sicon">'+MenuIcons.html(cat)+'</span><span>'+escHtml(cat)+'</span><span class="asset-arrow">+</span></div><div class="asset-grid">';
-      cats[cat].forEach(function(item){
-        html+='<button class="asset-tile" type="button" data-tool="'+escHtml(item.id)+'" onclick="setTool(\''+escHtml(item.id)+'\')" onmouseenter="showAssetPreview(this,event)" onmousemove="moveAssetPreview(event)" onmouseleave="hideAssetPreview()" title="'+escHtml(item.name+' · '+AssetCatalogue.dimensions(item))+'" data-search="'+escHtml(item.name+' '+item.category+' '+(item.searchWords||'')+' '+item.id+(item.provenance==='original'?' オリジナル':'')+(typeof AssetSets==='object'&&AssetSets.badge(item)?' '+AssetSets.badge(item):''))+'" data-preview="'+escHtml(item.thumb+'?v=3')+'" data-preview-name="'+escHtml(item.name)+'">';
-        html+='<img src="'+escHtml(item.thumb+'?v=3')+'" loading="lazy" alt="">';
-        var setBadge=(typeof AssetSets==='object')?AssetSets.badge(item):'';
-        html+=setBadge?'<span class="asset-set-badge">'+escHtml(setBadge)+'</span>':(item.provenance==='original'?'<span class="original-model-badge">Original</span>':'');
-        html+='<div class="asset-name">'+escHtml(item.name)+'</div><div class="asset-dimensions">'+escHtml(AssetCatalogue.dimensions(item))+'</div></button>';
-      });
-      html+='</div></div>';
-    });
-    mount.innerHTML=html;
-
+    var items=all.filter(function(item){ return catalogueGroup(item)===group && (!hasSets || AssetSets.isVisible(item)); });
+    mount.innerHTML=catalogueSubcatsHtml(items);
+    // 大分類の見出し(住設・家具・外構)にも、中にあるセットの印を付ける
+    var body=mount.closest('.cat-body'), hdr=body&&body.previousElementSibling;
+    if(hdr && hdr.classList.contains('cat-hdr')){
+      var old=hdr.querySelector('.asset-set-marks'); if(old) old.remove();
+      var marks=catalogueSetMarksHtml(items);
+      if(marks){
+        // span にしない: toggleCat は見出しの最初の span を開閉の印(+/-)として書き換える
+        var wrap=document.createElement('i');wrap.className='asset-set-marks';wrap.innerHTML=marks;
+        var toggle=hdr.querySelector('span');
+        hdr.insertBefore(wrap,toggle||null);
+      }
+    }
   });
 }
 function toggleAssetCat(el){
