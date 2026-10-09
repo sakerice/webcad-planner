@@ -360,7 +360,7 @@
     setStatus('読み取っています… 図面1枚で30秒ほどかかります。');
 
     var hint = ($('plan-import-hint') && $('plan-import-hint').value) || '';
-    fetch('/api/ai/import-plan', {
+    return fetch('/api/ai/import-plan', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ images: images, hint: hint }),
@@ -369,11 +369,19 @@
         setStatus('読み取っています… ' + done + ' / ' + total + ' 枚が終わりました。');
       } });
     }).then(function (r) {
-      if (r.status !== 200) {
+      var repairable = r.status === 422 && r.body && r.body.error === 'ai_invalid_plan' &&
+        r.body.revisionCandidate === true && Array.isArray(r.body.pages) && r.body.pages.length;
+      if (r.status !== 200 && !repairable) {
         ST.busy = false;
         showPlanImportError(r.status, r.body); syncPlanImportButtons(); showQuota(); return;
       }
       return maybeRevisePlanImport(images, hint, r.body).then(function (body) {
+        // A failed/skipped repair must never turn the invalid raw reading into
+        // ST.result or enable Apply. Revisions are validated by the server again.
+        if (!body || !body.plan || body.error) {
+          ST.busy = false;
+          showPlanImportError(422, body); syncPlanImportButtons(); showQuota(); return;
+        }
         // 仕上げの判断をもらってから画面を出す。**失敗しても止めない。**
         // 判断が得られなければ、これまでどおり下書きだけを渡す。
         var finish = (typeof PlanFinish === 'undefined' || !body.plan)

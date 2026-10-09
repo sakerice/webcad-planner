@@ -91,6 +91,43 @@
   // 同じ値。ずれると、読み取りが通した段をアプリが黙って切り詰める。
   var SKIP_LEVEL_MAX_MM = 2400;
 
+  // Rectangle coordinates already encode measured wall positions. A fixed module
+  // loses those measurements (and can erase a narrow room). Coordinate compression
+  // preserves every boundary while retaining the same cell/topology algorithm.
+  function rectangleAxes(spec) {
+    var xs = [0, Number(spec.width)], ys = [0, Number(spec.depth)], problems = [];
+    if (![xs[1], ys[1]].every(function (v) { return isFinite(v) && v > 0; })) {
+      return { problems: ['建物の総寸法が正の数ではない'] };
+    }
+    spec.rooms.forEach(function (r) {
+      var parts = r && (Array.isArray(r.parts) ? r.parts : [r]);
+      if (!parts || !parts.length) { problems.push('部屋の範囲が無い'); return; }
+      parts.forEach(function (q) {
+        if (!q || !['x0', 'x1', 'y0', 'y1'].every(function (k) {
+          return typeof q[k] === 'number' && isFinite(q[k]);
+        }) || q.x1 <= q.x0 || q.y1 <= q.y0 || q.x0 < 0 || q.y0 < 0 ||
+          q.x1 > xs[1] || q.y1 > ys[1]) {
+          problems.push('部屋の範囲が不正、または建物の総寸法の外にある'); return;
+        }
+        xs.push(q.x0, q.x1); ys.push(q.y0, q.y1);
+      });
+    });
+    function unique(values) { return Array.from(new Set(values)).sort(function (a, b) { return a - b; }); }
+    xs = unique(xs); ys = unique(ys);
+    // Do not turn floating-point noise into two full-thickness walls. Keep the
+    // measured values unchanged and request review instead of guessing a snap.
+    [xs, ys].forEach(function (axis) {
+      for (var i = 1; i < axis.length; i++) {
+        if (axis[i] - axis[i - 1] <= 1) {
+          problems.push('1mm以下の近接した境界がある（寸法を確認して見直す）'); break;
+        }
+      }
+    });
+    // Bound the Cartesian product before allocating cells, including bad model output.
+    if (xs.length > 256 || ys.length > 256) problems.push('部屋の境界が多すぎる');
+    return { x: xs, y: ys, problems: problems };
+  }
+
   function paintRects(gx, gy, rooms) {
     var cols = gx.length - 1, rows = gy.length - 1;
     var grid = [], j, i;
@@ -119,7 +156,7 @@
         if (!q) return;
         var x0 = Math.min(Number(q.x0), Number(q.x1)), x1 = Math.max(Number(q.x0), Number(q.x1));
         var y0 = Math.min(Number(q.y0), Number(q.y1)), y1 = Math.max(Number(q.y0), Number(q.y1));
-        if (![x0, x1, y0, y1].every(isFinite) || x1 - x0 < 1 || y1 - y0 < 1) return;
+        if (![x0, x1, y0, y1].every(isFinite) || x1 <= x0 || y1 <= y0) return;
         for (var jj = 0; jj < rows; jj++) {
           if (cy[jj] < y0 || cy[jj] > y1) continue;
           for (var ii = 0; ii < cols; ii++) {
@@ -213,10 +250,13 @@
   // 1階ぶんを組み立てる。
   function build(spec) {
     spec = spec || {};
-    // 総寸法が来ていれば、通り芯は等間隔で作る。gridX/gridY の指定は
-    // 古い形のために残してあるだけで、本筋は総寸法のほう。
-    var gx = spec.width ? moduleGrid(spec.width, spec.moduleMm) : numbers(spec.gridX);
-    var gy = spec.depth ? moduleGrid(spec.depth, spec.moduleMm) : numbers(spec.gridY);
+    // Current rectangle readings preserve measured coordinates. The fixed module
+    // and explicit grid paths remain only for legacy cell-based readings.
+    var exact = Array.isArray(spec.rooms) && spec.rooms.length && spec.width && spec.depth
+      ? rectangleAxes(spec) : null;
+    if (exact && exact.problems.length) return { walls: [], rooms: [], problems: exact.problems };
+    var gx = exact ? exact.x : spec.width ? moduleGrid(spec.width, spec.moduleMm) : numbers(spec.gridX);
+    var gy = exact ? exact.y : spec.depth ? moduleGrid(spec.depth, spec.moduleMm) : numbers(spec.gridY);
     var floor = Number(spec.floor) || 1;
     var thick = Number(spec.thick) || DEFAULT_THICK_MM;
     if (gx.length < 2 || gy.length < 2) {
@@ -226,6 +266,7 @@
     var read, names, levels, uses;
     if (Array.isArray(spec.rooms) && spec.rooms.length) {
       var painted = paintRects(gx, gy, spec.rooms);
+      if (exact && painted.problems.length) return { walls: [], rooms: [], problems: painted.problems };
       read = { grid: painted.grid, problems: painted.problems };
       names = painted.names;
       levels = painted.levels;
@@ -280,6 +321,8 @@
       out.walls.push.apply(out.walls, one.walls);
       out.rooms.push.apply(out.rooms, one.rooms);
     });
+    // Do not silently return only the other floors when one floor is ambiguous.
+    if (out.problems.length) { out.walls = []; out.rooms = []; }
     return out;
   }
 
