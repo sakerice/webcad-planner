@@ -127,21 +127,10 @@ const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
     }
   }
 
-  const edgeJa = { top: '上辺', bottom: '下辺', left: '左辺', right: '右辺' };
+  const { formatDimensionLines } = await import(pathToFileURL(join(ROOT, 'tools', 'probe-dimensions.mjs')).href);
   for (const dims of plan.dims) {
     if (!dims || typeof dims !== 'object') continue;
-    const lines = [];
-    for (const side of ['top', 'bottom', 'left', 'right']) {
-      const d = dims[side];
-      if (!d) continue;
-      const total = Number(d.total);
-      const parts = Array.isArray(d.parts) ? d.parts.map(Number) : [];
-      if (!isFinite(total)) continue;
-      const sum = parts.reduce((a, b) => a + b, 0);
-      const ok = !parts.length ? '（内訳なし）'
-        : Math.abs(sum - total) < 1 ? '✓' : `✗ 内訳の合計が ${sum} で合わない`;
-      lines.push(`  ${edgeJa[side]}  総 ${total}  = ${parts.join(' + ')}  ${ok}`);
-    }
+    const lines = formatDimensionLines(dims);
     if (lines.length) {
       console.log(`\n読んだ寸法線（${dims.floor == null ? '' : dims.floor + '階'}）:`);
       console.log(lines.join('\n'));

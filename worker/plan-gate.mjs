@@ -45,6 +45,7 @@
 // **迷ったら払う。** 境目(0.55 / 1.9)は素直な側の実測から離し、壊した側からも
 // 離した位置に置いてある。少しでも怪しければ従来どおり見直す。間違った間取りを
 // 渡すより、¥40 を余分に払うほうが安い。
+import { readDimensionEdge } from "./plan-dimensions.mjs";
 import { jevAsk, noul, score, choice } from "./jev.mjs";
 
 // ── 見直しの門 ──────────────────────────────────────────────────────
@@ -92,12 +93,10 @@ function dimensionCheck(dims) {
   for (const edge of ["top", "bottom", "left", "right"]) {
     const e = dims[edge];
     if (!e || typeof e !== "object") continue;
-    const total = Number(e.total);
-    const parts = (Array.isArray(e.parts) ? e.parts : []).map(Number).filter(Number.isFinite);
-    if (!Number.isFinite(total) && !parts.length) continue;
+    const { total, sum } = readDimensionEdge(e);
     out[edge] = {
       total: round(total),
-      sum_of_parts: parts.length ? round(parts.reduce((a, b) => a + b, 0)) : null,
+      sum_of_parts: round(sum),
     };
   }
   return Object.keys(out).length ? out : null;
