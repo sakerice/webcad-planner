@@ -1,0 +1,45 @@
+{
+  "model": "rpg-mansion-spindle-single-bed-01",
+  "dimensions_mm": [
+    1100.000023841858,
+    2150.0000953674316,
+    1210.0000381469727
+  ],
+  "bounds_m": [
+    [
+      -0.550000011920929,
+      -1.0750000476837158,
+      0.0
+    ],
+    [
+      0.550000011920929,
+      1.0750000476837158,
+      1.2100000381469727
+    ]
+  ],
+  "triangles": 3800,
+  "uv": {
+    "meters_per_uv": 6.168652846667671,
+    "min": 6.1683348403970895,
+    "max": 6.169054254949836,
+    "p05": 6.168569019627097,
+    "p95": 6.168766446063365,
+    "total_triangles": 3800,
+    "valid_triangles": 3800,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Walnut structural heartwood": "wood",
+    "Aged brass joints and finials": "metal",
+    "Polished walnut mouldings": "wood",
+    "Ivory woven mattress and pillows": "bedding",
+    "Deep teal velvet bed cover": "cover"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 267972
+}

@@ -103,7 +103,29 @@ for (const set of doc.sets.filter((s) => s.manifest)) {
       for (const ch of it.finishChannels) assert.ok(ch.key && ch.label && /^#[0-9a-f]{6}$/i.test(ch.default), `${where}: 部位 ${ch.key} の定義が不完全`);
       // 分類(kind)は標準と同じ名前を使う。標準の見出しの下に混ざって並ぶため。無い物はセット独自の見出しになる
       if (it.kind) assert.ok(kinds[it.kind], `${where}: 分類 ${it.kind} が tags.json に無い`);
+      assert.ok(!/[A-Za-z]{3,}/.test(it.name), `${where}: 画面に出す名前が英語のまま (${it.name})`);
+      if (it.retired) {
+        assert.ok(it.retiredBy && m.items.some((x) => x.id === it.retiredBy && !x.retired), `${where}: カタログから外した版の代わり(retiredBy)が無い`);
+      }
       assert.equal(it.provenance, 'original', `${where}: 独自制作でない物は台帳で権利を確かめてから載せる`);
     }
   });
 }
+
+// ── 本番に出た素材は差し替えない ─────────────────────────────────────────
+// 保存プランは家具を ID で持つ。同じ ID のモデルを作り直すと、利用者が置いた家具の見た目が
+// 黙って変わる。作り直すときは別の ID で足し、元の ID は retired にして残す。
+const { createHash } = require('node:crypto');
+const shipped = JSON.parse(readFileSync(join(__dirname, 'fixtures/asset-sets/shipped.json'), 'utf8'));
+test('本番に出た洋館の素材は、同じ ID のまま残り、モデルも変わっていない', () => {
+  const set = doc.sets.find((s) => s.id === shipped.set);
+  const m = JSON.parse(readFileSync(join(ROOT, set.manifest), 'utf8'));
+  const byId = new Map(m.items.map((i) => [i.id, i]));
+  for (const [id, rec] of Object.entries(shipped.items)) {
+    const it = byId.get(id);
+    assert.ok(it, `${id}: 本番に出た ID が消えている`);
+    assert.equal(it.model, rec.model, `${id}: モデルのファイルが変わっている`);
+    const sha = createHash('sha256').update(readFileSync(join(ROOT, it.model))).digest('hex');
+    assert.equal(sha, rec.sha256, `${id}: モデルの中身が差し替えられている（作り直すなら別の ID で足す）`);
+  }
+});

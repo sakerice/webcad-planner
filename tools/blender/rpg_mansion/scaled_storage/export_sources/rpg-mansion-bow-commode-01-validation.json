@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-bow-commode-01",
+  "dimensions_mm": [
+    1000.0,
+    500.0,
+    899.9999761581421
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -0.25,
+      0.0
+    ],
+    [
+      0.5,
+      0.25,
+      0.8999999761581421
+    ]
+  ],
+  "triangles": 4812,
+  "uv": {
+    "meters_per_uv": 5.152384591713411,
+    "min": 4.56674834318695,
+    "max": 6.77310040720365,
+    "p05": 4.88926440345174,
+    "p95": 6.1190934403775765,
+    "total_triangles": 4812,
+    "valid_triangles": 4812,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion walnut veneered fields": "wood",
+    "Mansion patinated brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 201448,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "66a126ab7f0e65515d3fec9d7c96a7789172c92e4a39fcbabe37ad7cf8f3f974",
+  "sourceSha256": "1cf9489290eff6bc10fcce3cae814a337c6dde6c4d6b9f9226ee97fef1ea5347",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "70af723ce046667a5c67f892279d11f5c0a3d3ae56bc842739e20db7bd9e4e90",
+    "authoredDataSignature": "5390a63e90f1c66174944fb4411f75afe45f5ca1e95e1efe48879c0f801606ed",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

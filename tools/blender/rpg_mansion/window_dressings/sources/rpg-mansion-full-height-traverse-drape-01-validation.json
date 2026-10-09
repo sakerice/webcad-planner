@@ -1,0 +1,146 @@
+{
+  "model": "rpg-mansion-full-height-traverse-drape-01",
+  "dimensions_mm": [
+    1240.0000095367432,
+    184.69999730587006,
+    2779.0982723236084
+  ],
+  "bounds_m": [
+    [
+      -0.6200000047683716,
+      -0.09234999865293503,
+      0.0
+    ],
+    [
+      0.6200000047683716,
+      0.09234999865293503,
+      2.7790982723236084
+    ]
+  ],
+  "triangles": 7216,
+  "uv": {
+    "meters_per_uv": 10.908565224604438,
+    "min": 10.693984944754964,
+    "max": 11.223915395217555,
+    "p05": 10.885713446735165,
+    "p95": 10.927038702096054,
+    "total_triangles": 7216,
+    "valid_triangles": 7216,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass hardware": "metal",
+    "Deep teal drape": "fabric",
+    "Sewn warm trim": "trim",
+    "Oiled blind timber": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "datums": {
+    "constructionFamily": "full-height-traverse-drape",
+    "countingClass": "new-construction",
+    "coreConstructionCount": 1,
+    "variantOf": null,
+    "staticDisplayState": "closed/deployed",
+    "host": "french",
+    "installation": {
+      "mount": "interior-wall",
+      "wallContactPlaneBlenderY": 0.0,
+      "attachmentAboveApertureMm": 76,
+      "defaultBottomElevationMm": 74.902,
+      "originalFloorDatumM": 0,
+      "proofRotationBlenderZDegrees": 180,
+      "proofWallPlaneY": 0.12,
+      "nominalClothBaselineMm": 80,
+      "wallContactPlaneCanonicalBlenderY": 0.09234999865293503
+    },
+    "fit": {
+      "apertureWidthMm": 1040,
+      "coverWidthMm": 1240,
+      "sourceRule": "curtain: within300, width+100..400",
+      "widthSurplusMm": 200,
+      "interpretation": "Existing project object-knowledge placement test, not a building or safety standard",
+      "fabricCoverageWidthMm": 1210,
+      "fabricCoverageRangeMm": [
+        77.5,
+        2795
+      ],
+      "floorGapMm": 77.5,
+      "topAboveApertureMm": 45,
+      "measuredHardwareEnvelopeHeightRangeMm": [
+        74.902,
+        2854.0
+      ]
+    },
+    "constructionDetails": "Single full-height11-fold track-hung cloth panel, twelve captive carriers, three screwed wall arms and attached rigid draw wand. Different support construction from paired ring curtain; no automatic opening.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      0.09234999865293503,
+      -0.07490192353725433
+    ],
+    "originalInstalledBoundsBlenderM": [
+      [
+        -0.6200000047683716,
+        -0.18469999730587006,
+        0.07490192353725433
+      ],
+      [
+        0.6200000047683716,
+        0.0,
+        2.8540000915527344
+      ]
+    ],
+    "defaultElevationMm": 74.902
+  },
+  "closedComponentSignedVolumesM3": [
+    4.757149023741168e-06,
+    4.318738623017733e-07,
+    4.761171415642206e-06,
+    4.310669131276267e-07,
+    4.755639868866032e-06,
+    4.304900661130272e-07,
+    4.75706292490941e-06,
+    4.293258749991479e-07,
+    4.756306983229772e-06,
+    4.306545330715986e-07,
+    4.7571121513101355e-06,
+    4.303974634467534e-07,
+    4.756447310683139e-06,
+    0.0014430098226512183,
+    4.3058738204611663e-07,
+    0.00014381488169116566,
+    4.757616958765227e-06,
+    1.9896615413017574e-05,
+    4.302861877173804e-07,
+    4.754083117101495e-06,
+    4.268349584890536e-07,
+    4.227652728635225e-07,
+    4.308844457530845e-07,
+    4.5995957407285385e-05,
+    4.75409494053262e-06,
+    1.9907943624275514e-05,
+    4.328508111939331e-07,
+    4.232104681515612e-07,
+    4.753220612959315e-06,
+    4.231953099065319e-07,
+    4.600253370767864e-05,
+    4.3129458996797106e-07,
+    4.7536323108943e-06,
+    1.9913071203821645e-05,
+    4.3027182528021534e-07,
+    4.2488682083785603e-07,
+    4.2069586925208685e-07,
+    6.674599717371167e-07,
+    4.5996829915869335e-05,
+    0.00657031638863259,
+    4.365991363404955e-05,
+    3.941104244260345e-05,
+    3.902252046827925e-05
+  ],
+  "triangle_budget": 12000,
+  "glb_bytes": 503840
+}

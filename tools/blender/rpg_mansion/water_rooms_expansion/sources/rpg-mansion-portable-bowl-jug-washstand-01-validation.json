@@ -1,0 +1,97 @@
+{
+  "model": "rpg-mansion-portable-bowl-jug-washstand-01",
+  "dimensions_mm": [
+    624.0000128746033,
+    517.5594687461853,
+    1047.0000505447388
+  ],
+  "bounds_m": [
+    [
+      -0.31200000643730164,
+      -0.25877973437309265,
+      0.0
+    ],
+    [
+      0.31200000643730164,
+      0.25877973437309265,
+      1.0470000505447388
+    ]
+  ],
+  "triangles": 2284,
+  "uv": {
+    "meters_per_uv": 2.9138225037481202,
+    "min": 2.9077318280803253,
+    "max": 2.9171618312716245,
+    "p05": 2.913378499222912,
+    "p95": 2.9142706501193505,
+    "total_triangles": 2284,
+    "valid_triangles": 2284,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Dark walnut WC seat": "wood",
+    "Ivory fired porcelain": "ceramic",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 159852,
+  "datums": {
+    "installation": {
+      "mount": "floor",
+      "floorPlaneY": 0
+    },
+    "capacityNote": "Static handwashing furniture; no working plumbing or ergonomic certification.",
+    "rimHeightMm": 894,
+    "faucetHeightMm": null,
+    "clearBowlMm": {
+      "rimWidth": 361,
+      "rimDepth": 281,
+      "depth": 120
+    },
+    "basinCount": 1,
+    "fixtureNote": "Portable washing bowl and hollow water jug; no fixed faucet, drain or working plumbing.",
+    "bottomCenterTranslationBlenderM": [
+      -0.022000014781951904,
+      0.018779747188091278,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.28999999165534973,
+        -0.2775594890117645,
+        0.0
+      ],
+      [
+        0.33400002121925354,
+        0.23999999463558197,
+        1.0470000505447388
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.006417909460499989,
+    0.00016978267315910975,
+    0.0012131931289331985,
+    0.0012131923091753078,
+    0.000802624463782801,
+    0.0008026243508538754,
+    9.998660849911794e-05,
+    2.52752312614272e-05,
+    0.00438706878018517,
+    2.5273799716766614e-05,
+    0.0013015721699503047,
+    0.00115738980197951,
+    0.0011573869266309582,
+    0.001157391550880978,
+    0.0011573893307380938,
+    0.009968266958215575
+  ],
+  "source_sha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+  "glb_sha256": "4ad7d6a0cbe919910504df26233b0515fcc38ef789f1b187546f6492b7141f30"
+}

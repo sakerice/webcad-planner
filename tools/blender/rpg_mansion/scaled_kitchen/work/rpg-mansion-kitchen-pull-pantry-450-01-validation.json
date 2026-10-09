@@ -1,0 +1,143 @@
+{
+  "model": "rpg-mansion-kitchen-pull-pantry-450-01",
+  "dimensions_mm": [
+    449.99998807907104,
+    649.9999761581421,
+    2099.9999046325684
+  ],
+  "bounds_m": [
+    [
+      -0.22499999403953552,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.22499999403953552,
+      0.32499998807907104,
+      2.0999999046325684
+    ]
+  ],
+  "triangles": 1980,
+  "uv": {
+    "meters_per_uv": 5.425409688195771,
+    "min": 4.670731704137612,
+    "max": 6.9337132782736886,
+    "p05": 4.890449792032686,
+    "p95": 6.474534008668601,
+    "total_triangles": 1980,
+    "valid_triangles": 1980,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 86928,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "ab84f68d194d93f6bb9a6da102beec354f5a162d6b48d1a0df925a4911140c86",
+  "source_sha256": "dc8897f91bc8f6391e1fb828b0edc6e5a19ead63242c1a7e0c24ab4a0cb6b365",
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "646ee574c926d271265865a677aebb0d8adba8f01aa0dbb5af08c53d387eff97",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 5.425409688195771,
+      "min": 4.670731704137612,
+      "max": 6.9337132782736886,
+      "p05": 4.890449792032686,
+      "p95": 6.474534008668601,
+      "total_triangles": 1980,
+      "valid_triangles": 1980,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 159432,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    449.99998807907104,
+    649.9999761581421,
+    2099.9999046325684
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.22499999403953552,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.22499999403953552,
+      2.0999999046325684,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 1980,
+    "valid_triangles": 1980,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 4.890449860277479,
+    "p95": 6.47453402574989,
+    "p95_p05": 1.323913793358579,
+    "median": 5.425408036300441
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-pull-pantry-450-01.glb",
+      "sha256": "ab84f68d194d93f6bb9a6da102beec354f5a162d6b48d1a0df925a4911140c86",
+      "bytes": 86928
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-pull-pantry-450-01.blend",
+      "sha256": "dc8897f91bc8f6391e1fb828b0edc6e5a19ead63242c1a7e0c24ab4a0cb6b365",
+      "bytes": 159432
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-thumb.png",
+      "sha256": "b876e870cf5711efc55a9c81e30001022da70146222a240b206f8c3beec65757",
+      "bytes": 180133
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-top.png",
+      "sha256": "a93841fade2165a33a27ee992fa667f0dc3983929db54435801cdb671c9f7744",
+      "bytes": 253710
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-front.png",
+      "sha256": "f00959ff0edd71173da95f125b660cfba816b574250ed6b4dc51de18f99af93b",
+      "bytes": 427854
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-rear.png",
+      "sha256": "65438c39a023e8455d1ee2d174e72081447edb9157e8d4cef11a40a3e3b3e34d",
+      "bytes": 409147
+    }
+  }
+}

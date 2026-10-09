@@ -1,0 +1,143 @@
+{
+  "model": "rpg-mansion-kitchen-tall-larder-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    2099.9999046325684
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.32499998807907104,
+      2.0999999046325684
+    ]
+  ],
+  "triangles": 2508,
+  "uv": {
+    "meters_per_uv": 7.905099045351661,
+    "min": 6.514257963355359,
+    "max": 9.267612583007248,
+    "p05": 6.726360629236118,
+    "p95": 9.081300406677958,
+    "total_triangles": 2508,
+    "valid_triangles": 2508,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 113308,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "5d91cbd3852f8cfd8df858e4fb8576692cba84a5e1fa929a4e282210907a6c6a",
+  "source_sha256": "de8ef047a00fab7b6132046d5c71257b60565ea8ebb2e41b7bff3730f7db3509",
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "fb5bcf0ac3fc4c637d5ccfdaa515914f8cdf8ee9cd0a008fbc8dbd7fcb840e3c",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 7.905099045351661,
+      "min": 6.514257963355359,
+      "max": 9.267612583007248,
+      "p05": 6.726360629236118,
+      "p95": 9.081300406677958,
+      "total_triangles": 2508,
+      "valid_triangles": 2508,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 170123,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    2099.9999046325684
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.44999998807907104,
+      2.0999999046325684,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2508,
+    "valid_triangles": 2508,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 6.726360663227307,
+    "p95": 9.081300407017322,
+    "p95_p05": 1.3501060769257227,
+    "median": 7.905098982703198
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-tall-larder-900-01.glb",
+      "sha256": "5d91cbd3852f8cfd8df858e4fb8576692cba84a5e1fa929a4e282210907a6c6a",
+      "bytes": 113308
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-tall-larder-900-01.blend",
+      "sha256": "de8ef047a00fab7b6132046d5c71257b60565ea8ebb2e41b7bff3730f7db3509",
+      "bytes": 170123
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-thumb.png",
+      "sha256": "d907b2e10eefc185a4e02ea0a8448238a2da154680eb49c16f1bb0be667575a4",
+      "bytes": 205712
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-top.png",
+      "sha256": "da26bec2fe3c6c78674d5dfabd1fe85901b6cc1404d8ea156d52297af7dde53b",
+      "bytes": 239749
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-front.png",
+      "sha256": "64adab18b44c0aa541709a6a2aaee89e3e9f29640d8aaaa2b46928c4a9c11220",
+      "bytes": 521208
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-rear.png",
+      "sha256": "5cbc473b8f800d6432b294eba9560c047bbfc1f7f1fe419323ae3829cf87c884",
+      "bytes": 484892
+    }
+  }
+}

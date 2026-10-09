@@ -1,0 +1,148 @@
+{
+  "model": "rpg-mansion-kitchen-four-drawer-750-01",
+  "dimensions_mm": [
+    750.0,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.375,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.375,
+      0.32499998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 2764,
+  "uv": {
+    "meters_per_uv": 4.190022282725641,
+    "min": 3.7811456067552545,
+    "max": 5.340650605335339,
+    "p05": 3.897006997704384,
+    "p95": 5.111553482106716,
+    "total_triangles": 2764,
+    "valid_triangles": 2764,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 118960,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "fd766ca19eecc545198a3be9e20f46aaba57b55a80af0a788ba4b1f553e76de8",
+  "source_sha256": "bd91e5ca8587cf3cb13c3b56908097f8da315c35490c81ea7bf6bfd247cf0dc1",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.004",
+      "Curved brass drawer pull.005",
+      "Curved brass drawer pull.006",
+      "Curved brass drawer pull.007"
+    ],
+    "corrected_polygons": 104,
+    "geometry_normals_material_signature": "9a4125f29a1e6f6b5a9b940bbe3312e236d5c64ee212195381adf3e5cd286f0c",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 4.190022282725641,
+      "min": 3.7811456067552545,
+      "max": 5.340650605335339,
+      "p05": 3.897006997704384,
+      "p95": 5.111553482106716,
+      "total_triangles": 2764,
+      "valid_triangles": 2764,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 176111,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    750.0,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.375,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.375,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2764,
+    "valid_triangles": 2764,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 3.8970068871915373,
+    "p95": 5.11155350994698,
+    "p95_p05": 1.3116614001241174,
+    "median": 4.19002210658225
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-four-drawer-750-01.glb",
+      "sha256": "fd766ca19eecc545198a3be9e20f46aaba57b55a80af0a788ba4b1f553e76de8",
+      "bytes": 118960
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-four-drawer-750-01.blend",
+      "sha256": "bd91e5ca8587cf3cb13c3b56908097f8da315c35490c81ea7bf6bfd247cf0dc1",
+      "bytes": 176111
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-thumb.png",
+      "sha256": "e4a41491e49e7aab5e44451c4973b477dc75f96160197fca487cb9c2dfeeccf0",
+      "bytes": 288096
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-top.png",
+      "sha256": "d02e14634acd53cbeb2dbb8e6fc2b9554ccc7452ac5572301e59d428844883b2",
+      "bytes": 228172
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-front.png",
+      "sha256": "30544cc5c1de2badf1b6d9cb42782b9b4da640f4b0887bde29fda76e0afe8a19",
+      "bytes": 727755
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-rear.png",
+      "sha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957",
+      "bytes": 649809
+    }
+  }
+}

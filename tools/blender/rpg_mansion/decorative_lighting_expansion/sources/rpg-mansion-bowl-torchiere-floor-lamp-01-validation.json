@@ -1,0 +1,237 @@
+{
+  "model": "rpg-mansion-bowl-torchiere-floor-lamp-01",
+  "dimensions_mm": [
+    483.99999737739563,
+    483.99999737739563,
+    1746.999979019165
+  ],
+  "bounds_m": [
+    [
+      -0.24199999868869781,
+      -0.24199999868869781,
+      0.0
+    ],
+    [
+      0.24199999868869781,
+      0.24199999868869781,
+      1.746999979019165
+    ]
+  ],
+  "triangles": 2280,
+  "uv": {
+    "meters_per_uv": 2.0192583652789065,
+    "min": 1.9928328683424343,
+    "max": 2.0448056456700603,
+    "p05": 2.0185061889124287,
+    "p95": 2.019868638946393,
+    "total_triangles": 2280,
+    "valid_triangles": 2280,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Bronzed iron structure": "metal",
+    "Antique brass structure": "metal",
+    "Ivory enamel spun metal shades": "shade",
+    "Porcelain socket insulator": "ceramic",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 160020,
+  "datums": {
+    "supportProbes": [
+      {
+        "parts": [
+          "Torchiere bowl brace 0",
+          "Torchiere tapered standard"
+        ],
+        "pointOriginalM": [
+          0.019,
+          0.0,
+          1.487
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere bowl brace 0",
+          "Torchiere upward open bowl"
+        ],
+        "pointOriginalM": [
+          0.135,
+          0.0,
+          1.632
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere bowl brace 1",
+          "Torchiere tapered standard"
+        ],
+        "pointOriginalM": [
+          -0.009499999999999996,
+          0.016454482671904334,
+          1.487
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere bowl brace 1",
+          "Torchiere upward open bowl"
+        ],
+        "pointOriginalM": [
+          -0.06749999999999998,
+          0.11691342951089924,
+          1.632
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere bowl brace 2",
+          "Torchiere tapered standard"
+        ],
+        "pointOriginalM": [
+          -0.009500000000000008,
+          -0.01645448267190433,
+          1.487
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere bowl brace 2",
+          "Torchiere upward open bowl"
+        ],
+        "pointOriginalM": [
+          -0.06750000000000006,
+          -0.11691342951089918,
+          1.632
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere weighted pedestal foot",
+          "Torchiere tapered standard"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.053
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere tapered standard",
+          "Torchiere internal socket mount"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          1.557
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere internal socket mount",
+          "Torchiere porcelain socket"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          1.585
+        ]
+      },
+      {
+        "parts": [
+          "Torchiere porcelain socket",
+          "Torchiere upward opal bulb"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          1.617
+        ]
+      }
+    ],
+    "cavityRays": [
+      {
+        "part": "Torchiere upward open bowl",
+        "originOriginalM": [
+          0.1,
+          0,
+          1.85
+        ],
+        "direction": [
+          0,
+          0,
+          -1
+        ],
+        "rangeM": [
+          0.2,
+          0.28
+        ]
+      },
+      {
+        "part": "Torchiere upward open bowl",
+        "originOriginalM": [
+          0,
+          0,
+          1.85
+        ],
+        "direction": [
+          0,
+          0,
+          -1
+        ],
+        "rangeM": [
+          null,
+          null
+        ]
+      }
+    ],
+    "installation": {
+      "mount": "floor",
+      "defaultElevationMm": 0,
+      "note": "Original static decorative fixture with geometric support; no configured runtime light or physical certification."
+    },
+    "bulb": {
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.24199999868869781,
+        -0.24199999868869781,
+        0.0
+      ],
+      [
+        0.24199999868869781,
+        0.24199999868869781,
+        1.746999979019165
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0023734755150144338,
+    0.00018821418837215256,
+    0.003649763342082224,
+    2.6788833679347563e-05,
+    2.6788837447592567e-05,
+    2.6788958500389974e-05,
+    0.002784479970908175,
+    6.05425953684365e-05,
+    6.054259680846979e-05,
+    0.0001169054345761348,
+    6.306731756922093e-05
+  ],
+  "source_sha256": "9ba55ac0c832d648ca2fe8e92fa49b534cfdcf00bbb09173db737676f241a266",
+  "glb_sha256": "caf9af9d4b67de4ebf59c4f1219d64fad22a99ee8eb7a35fb30ed0bed1715bb4"
+}

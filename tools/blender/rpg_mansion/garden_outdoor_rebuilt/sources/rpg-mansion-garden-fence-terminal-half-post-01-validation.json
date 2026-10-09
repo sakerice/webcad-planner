@@ -1,0 +1,73 @@
+{
+  "model": "rpg-mansion-garden-fence-terminal-half-post-01",
+  "dimensions_mm": [
+    52.000001072883606,
+    104.00000214576721,
+    1404.9999713897705
+  ],
+  "bounds_m": [
+    [
+      -0.026000000536441803,
+      -0.052000001072883606,
+      0.0
+    ],
+    [
+      0.026000000536441803,
+      0.052000001072883606,
+      1.4049999713897705
+    ]
+  ],
+  "triangles": 12,
+  "uv": {
+    "meters_per_uv": 1.4061672792220932,
+    "min": 1.406166605082042,
+    "max": 1.4061688769988114,
+    "p05": 1.406166605082042,
+    "p95": 1.4061683103798703,
+    "total_triangles": 12,
+    "valid_triangles": 12,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Oiled garden oak": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 3028,
+  "datums": {
+    "installation": {
+      "mount": "fence-accessory",
+      "joinWidthM": 0.052,
+      "oppositeEndRotationDegrees": 180,
+      "note": "Usable mating half post closes a fence free end. Accessory; zero new core constructions."
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "originalBoundsM": [
+      [
+        -0.026000000536441803,
+        -0.052000001072883606,
+        0.0
+      ],
+      [
+        0.026000000536441803,
+        0.052000001072883606,
+        1.4049999713897705
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.007454928001000856
+  ],
+  "source_sha256": "cfc1e9d969fbee43b5539144fc452fdce9bfa4f18cc31d160cac6b114d38ca10",
+  "glb_sha256": "8f5b206e00809f5372cad00c9a38bf3a5a76c52ecd1553768b2bb3c12cd31776",
+  "authoring_sha256": "bd97d34e78b38e71b07a9c27e956ccd4a5018ec4db21a08141f3e49eaa51dff1"
+}

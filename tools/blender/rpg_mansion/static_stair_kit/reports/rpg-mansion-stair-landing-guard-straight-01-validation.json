@@ -1,0 +1,211 @@
+{
+  "id": "rpg-mansion-stair-landing-guard-straight-01",
+  "triangles": 4400,
+  "triangleBudget": 14000,
+  "dimensionsMm": [
+    120.0,
+    1219.9999,
+    1050.0
+  ],
+  "uv": {
+    "meters_per_uv": 4.004110019900415,
+    "min": 3.9851554036883234,
+    "max": 4.024764669443014,
+    "p05": 4.001361342417907,
+    "p95": 4.007444913896942,
+    "total_triangles": 4400,
+    "valid_triangles": 4400,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "positiveComponentVolumesM3": [
+    0.0008824624413440082,
+    0.0008824622565650012,
+    0.0008824617880236474,
+    5.654591756372914e-05,
+    0.000695085904746954,
+    0.0001646918077469195,
+    0.00475315649692624,
+    0.0008824617173104343,
+    0.00035109801534834645,
+    0.0008824620472296374,
+    0.001558931515508751,
+    4.333161312904584e-05,
+    0.0008824618997399133,
+    0.0008824613672307654,
+    0.0008824618257558351,
+    0.00011684977620274373,
+    5.654591922166219e-05,
+    0.00011684988445918401,
+    0.000882461707462312,
+    0.0008824616287104922,
+    0.0044834984031088725,
+    0.001380272193273413,
+    0.0008824622762707198,
+    0.0008824613829195489
+  ],
+  "nativePartCount": 24,
+  "nativeParts": [
+    {
+      "name": "Landing guard continuous handrail",
+      "vertexCount": 24,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard bottom rail",
+      "vertexCount": 16,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 01",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 02",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 03",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 04",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 05",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 06",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 07",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 08",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 09",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 10",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 11",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard turned spindle 12",
+      "vertexCount": 144,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard brass socket",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard lower rail support",
+      "vertexCount": 16,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard brass socket.001",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Landing guard lower rail support.001",
+      "vertexCount": 16,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support foot",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support brass collar",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support chamfered shaft",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support upper collar",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support cap",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Midspan landing support finial foot",
+      "vertexCount": 56,
+      "role": "construction"
+    }
+  ],
+  "installationDatums": {
+    "role": "Horizontal landing guard straight",
+    "mountingPlaneM": 0,
+    "handrailCenterM": 0.95,
+    "handrailRadiusM": 0.035,
+    "nominalGuardTopM": 1.05,
+    "clearBoundaryOffsetM": 0.06,
+    "shape": "straight",
+    "runM": 1.08,
+    "assemblyStartM": [
+      0,
+      0,
+      0
+    ],
+    "connectionNote": "Horizontal rail ends join the integral raked newel shafts. Only intermediate/corner posts are included, avoiding duplicate posts at flight connections. The start of an upper flight has a vertical 166.667 mm transition carried by its solid newel shaft.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.550000011920929,
+      -0.0
+    ],
+    "constructionBoundsM": [
+      [
+        -0.05999999865889549,
+        -0.05999999865889549,
+        0.0
+      ],
+      [
+        0.05999999865889549,
+        1.159999966621399,
+        1.0499999523162842
+      ]
+    ],
+    "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+  },
+  "contacts": [],
+  "sourceSha256": "5f1af487904cf63d136d933b345c87e34a3bdf9f9e90a5e004d5a27f4b50c985",
+  "authoringSha256": "de27bf01e824fe756d9b75138df17d1bf32828049f3c9a622609301b9502a968",
+  "glbSha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628"
+}
