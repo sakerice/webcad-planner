@@ -1,0 +1,67 @@
+{
+  "expected_sources": 48,
+  "completed_sources": 48,
+  "failed_sources": [],
+  "excluded_seating_slugs": [
+    "sofa",
+    "wing-chair"
+  ],
+  "public_model_thumb_top_hashes_preserved": true,
+  "existing_validation_json_hashes_preserved": true,
+  "geometry_matches": 48,
+  "exact_uv_mapping_matches_1e7": 48,
+  "uv_mapping_differences": [],
+  "method": "Original procedural native builders; dependency-graph-evaluated part capture; exact native join-normalized coordinates retained through transient part/vertex identity; no GLB import",
+  "native_authoring_scene_repairs": {
+    "count": 11,
+    "ids": [
+      "rpg-mansion-butler-sink-01",
+      "rpg-mansion-bathtub-01",
+      "rpg-mansion-washstand-01",
+      "rpg-mansion-sconce-01",
+      "rpg-mansion-chandelier-01",
+      "rpg-mansion-coat-stand-01",
+      "rpg-mansion-umbrella-stand-01",
+      "rpg-mansion-planter-01",
+      "rpg-mansion-fireplace-01",
+      "rpg-mansion-radiator-01",
+      "rpg-mansion-armour-01"
+    ],
+    "same_material_support_max_distance_after_m": 0.0,
+    "triangle_surface_multisets_match": true,
+    "validated_export_meshes_preserved": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  },
+  "portable_render_paths": {
+    "sources": 48,
+    "workspace_path_strings_remaining": 0,
+    "geometry_uv_material_digests_preserved": 48,
+    "other_native_sources_unchanged": 9,
+    "kitchen_native_sources_unchanged": 5
+  },
+  "independent_source_equivalence_verified": {
+    "recovered_sources": 48,
+    "authoring_part_point_support_pass": 48,
+    "authoring_part_triangle_counts_pass": 48,
+    "source_pack_reopens": 57,
+    "source_pack_pass": 57,
+    "error_count": 0
+  },
+  "current_builder_reverification": {
+    "recovered_models": 48,
+    "point_support_pass": 48,
+    "triangle_counts_pass": 48,
+    "triangle_surface_pass": 48,
+    "historical_builder_hashes_retained": true,
+    "verified_current_builders": {
+      "tools/blender/rpg_mansion/expansion/build.py": {
+        "historical_original_builder_sha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+        "verified_current_builder_sha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027"
+      },
+      "tools/blender/rpg_mansion/build.py": {
+        "historical_original_builder_sha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+        "verified_current_builder_sha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36"
+      }
+    }
+  }
+}

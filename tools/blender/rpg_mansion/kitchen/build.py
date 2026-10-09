@@ -184,6 +184,8 @@ def main():
     kit.WORK_DIR = WORK
     manifest_path = old.PACK / 'manifest.json'
     manifest = json.loads(manifest_path.read_text())
+    from catalogue_metadata import is_normalized, production_item, write_catalogue
+    normalized = is_normalized(manifest)
     original = manifest['items'][:50]
     existing = {item['id']: item for item in manifest['items']}
     only = sys.argv[sys.argv.index('--only') + 1].split(',') if '--only' in sys.argv else None
@@ -220,9 +222,13 @@ def main():
                              sourceBlend=rel(WORK / (stem + '.blend')), validation=rel(report), w=size[0], d=size[1], h=size[2],
                              defaultElevation=elevation, provenance='original', builder=rel(HERE / 'build.py'), finishChannels=desc,
                              placementHint=placement, placementNotes=note, front='+Z', previewVersion=1)
-        manifest.update(version='0.3.0', status='integrated-review', items=list(existing.values()))
+        if normalized:
+            existing[stem] = production_item(existing[stem])
+            manifest['items'] = list(existing.values())
+        else:
+            manifest.update(version='0.3.0', status='integrated-review', items=list(existing.values()))
         assert manifest['items'][:50] == original, 'Existing pack entries must stay unchanged'
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+        write_catalogue(manifest_path, manifest)
         print('KITCHEN_COMPLETE ' + stem, flush=True)
 
 

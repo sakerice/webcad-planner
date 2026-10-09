@@ -1,0 +1,1025 @@
+{
+  "allPass": true,
+  "tests": [
+    {
+      "test": "Positive closed unit cube",
+      "pass_": true,
+      "details": {
+        "name": "a",
+        "selfIntersectionsBetweenNonAdjacentTriangles": [],
+        "triangles": 12,
+        "weldedVertices": 8,
+        "signedVolumeM3": 1.0,
+        "connectedClosedComponents": [
+          {
+            "triangles": 12,
+            "signedVolumeM3": 1.0
+          }
+        ],
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0,
+        "inconsistentEdges": 0,
+        "degenerateTriangles": 0,
+        "finite": true,
+        "minimumCornerNormalDot": null,
+        "minimumStoredCornerNormalLength": null,
+        "maximumStoredCornerNormalLength": null,
+        "inwardOrInvalidCornerNormals": 0,
+        "nonUnitCornerNormals": 0,
+        "misalignedFlatCornerNormals": 0,
+        "closedPositivePass": true,
+        "cornerNormalsPass": true
+      }
+    },
+    {
+      "test": "Reversed winding is rejected",
+      "pass_": true,
+      "details": {
+        "name": "reversed",
+        "selfIntersectionsBetweenNonAdjacentTriangles": [],
+        "triangles": 12,
+        "weldedVertices": 8,
+        "signedVolumeM3": -1.0,
+        "connectedClosedComponents": [
+          {
+            "triangles": 12,
+            "signedVolumeM3": -1.0
+          }
+        ],
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0,
+        "inconsistentEdges": 0,
+        "degenerateTriangles": 0,
+        "finite": true,
+        "minimumCornerNormalDot": null,
+        "minimumStoredCornerNormalLength": null,
+        "maximumStoredCornerNormalLength": null,
+        "inwardOrInvalidCornerNormals": 0,
+        "nonUnitCornerNormals": 0,
+        "misalignedFlatCornerNormals": 0,
+        "closedPositivePass": false,
+        "cornerNormalsPass": true
+      }
+    },
+    {
+      "test": "Mixed component winding is rejected",
+      "pass_": true,
+      "details": {
+        "name": "two disjoint solids one reversed",
+        "selfIntersectionsBetweenNonAdjacentTriangles": [],
+        "triangles": 24,
+        "weldedVertices": 16,
+        "signedVolumeM3": -2.7755575615628914e-16,
+        "connectedClosedComponents": [
+          {
+            "triangles": 12,
+            "signedVolumeM3": 1.0
+          },
+          {
+            "triangles": 12,
+            "signedVolumeM3": -1.0
+          }
+        ],
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0,
+        "inconsistentEdges": 0,
+        "degenerateTriangles": 0,
+        "finite": true,
+        "minimumCornerNormalDot": null,
+        "minimumStoredCornerNormalLength": null,
+        "maximumStoredCornerNormalLength": null,
+        "inwardOrInvalidCornerNormals": 0,
+        "nonUnitCornerNormals": 0,
+        "misalignedFlatCornerNormals": 0,
+        "closedPositivePass": false,
+        "cornerNormalsPass": true
+      }
+    },
+    {
+      "test": "Stored inward corner normals are rejected",
+      "pass_": true,
+      "details": {
+        "name": "bad normals",
+        "selfIntersectionsBetweenNonAdjacentTriangles": [],
+        "triangles": 12,
+        "weldedVertices": 8,
+        "signedVolumeM3": 1.0,
+        "connectedClosedComponents": [
+          {
+            "triangles": 12,
+            "signedVolumeM3": 1.0
+          }
+        ],
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0,
+        "inconsistentEdges": 0,
+        "degenerateTriangles": 0,
+        "finite": true,
+        "minimumCornerNormalDot": -1.0,
+        "minimumStoredCornerNormalLength": 1.0,
+        "maximumStoredCornerNormalLength": 1.0,
+        "inwardOrInvalidCornerNormals": 36,
+        "nonUnitCornerNormals": 0,
+        "misalignedFlatCornerNormals": 36,
+        "closedPositivePass": true,
+        "cornerNormalsPass": false
+      }
+    },
+    {
+      "test": "Nonadjacent self-intersections are rejected",
+      "pass_": true,
+      "details": {
+        "name": "intersecting shells",
+        "selfIntersectionsBetweenNonAdjacentTriangles": [
+          [
+            6,
+            21
+          ],
+          [
+            7,
+            12
+          ],
+          [
+            3,
+            20
+          ],
+          [
+            2,
+            17
+          ],
+          [
+            11,
+            16
+          ],
+          [
+            10,
+            13
+          ]
+        ],
+        "triangles": 24,
+        "weldedVertices": 16,
+        "signedVolumeM3": 2.0,
+        "connectedClosedComponents": [
+          {
+            "triangles": 12,
+            "signedVolumeM3": 1.0
+          },
+          {
+            "triangles": 12,
+            "signedVolumeM3": 1.0
+          }
+        ],
+        "boundaryEdges": 0,
+        "nonmanifoldEdges": 0,
+        "inconsistentEdges": 0,
+        "degenerateTriangles": 0,
+        "finite": true,
+        "minimumCornerNormalDot": null,
+        "minimumStoredCornerNormalLength": null,
+        "maximumStoredCornerNormalLength": null,
+        "inwardOrInvalidCornerNormals": 0,
+        "nonUnitCornerNormals": 0,
+        "misalignedFlatCornerNormals": 0,
+        "closedPositivePass": false,
+        "cornerNormalsPass": true
+      }
+    },
+    {
+      "test": "Opposite butt faces are internal contacts",
+      "pass_": true,
+      "details": {
+        "contacts": [
+          {
+            "a": "a",
+            "b": "b",
+            "intersectingTrianglePairs": 1,
+            "containedSurfaceSample": false,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 1.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            },
+            "measuredContactPlanes": [
+              {
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 1.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ],
+        "connectedGroups": [
+          [
+            "a",
+            "b"
+          ]
+        ],
+        "allPartsConnected": true,
+        "coplanarPairs": [
+          {
+            "a": "a",
+            "b": "b",
+            "areaM2": {
+              "opposedInternalContact": 1.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            }
+          }
+        ],
+        "exposedDuplicatePairs": []
+      }
+    },
+    {
+      "test": "Duplicate exposed shell is detected",
+      "pass_": true,
+      "details": {
+        "contacts": [
+          {
+            "a": "a",
+            "b": "exact duplicate",
+            "intersectingTrianglePairs": 0,
+            "containedSurfaceSample": false,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 6.0
+            },
+            "measuredContactPlanes": [
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  -0.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  -0.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  -0.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ],
+        "connectedGroups": [
+          [
+            "a",
+            "exact duplicate"
+          ]
+        ],
+        "allPartsConnected": true,
+        "coplanarPairs": [
+          {
+            "a": "a",
+            "b": "exact duplicate",
+            "areaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 6.0
+            }
+          }
+        ],
+        "exposedDuplicatePairs": [
+          {
+            "a": "a",
+            "b": "exact duplicate",
+            "areaM2": 6.0,
+            "examples": [
+              {
+                "pointM": [
+                  0.3333333432674408,
+                  0.6666666865348816,
+                  0.0
+                ],
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "triangleA": 0,
+                "triangleB": 0,
+                "overlapAreaM2": 0.5
+              },
+              {
+                "pointM": [
+                  0.6666666865348816,
+                  0.3333333432674408,
+                  0.0
+                ],
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "triangleA": 1,
+                "triangleB": 1,
+                "overlapAreaM2": 0.5
+              },
+              {
+                "pointM": [
+                  0.6666666865348816,
+                  0.3333333432674408,
+                  1.0
+                ],
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "triangleA": 2,
+                "triangleB": 2,
+                "overlapAreaM2": 0.5
+              },
+              {
+                "pointM": [
+                  0.3333333432674408,
+                  0.6666666865348816,
+                  1.0
+                ],
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "triangleA": 3,
+                "triangleB": 3,
+                "overlapAreaM2": 0.5
+              },
+              {
+                "pointM": [
+                  0.6666666865348816,
+                  0.0,
+                  0.3333333432674408
+                ],
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "triangleA": 4,
+                "triangleB": 4,
+                "overlapAreaM2": 0.5
+              },
+              {
+                "pointM": [
+                  0.3333333432674408,
+                  0.0,
+                  0.6666666865348816
+                ],
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "triangleA": 5,
+                "triangleB": 5,
+                "overlapAreaM2": 0.5
+              }
+            ],
+            "measuredPlanes": [
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  -0.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  -0.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  -0.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 1.0,
+                "lo": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "test": "Buried duplicate shell is not exposed",
+      "pass_": true,
+      "details": {
+        "contacts": [
+          {
+            "a": "a",
+            "b": "exact duplicate",
+            "intersectingTrianglePairs": 0,
+            "containedSurfaceSample": false,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 6.0,
+              "exposedSameFacingOverlap": 0.0
+            },
+            "measuredContactPlanes": [
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  -0.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "pointM": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  -0.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "pointM": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  -0.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 0.0,
+                "buriedDuplicateAreaM2": 1.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          },
+          {
+            "a": "a",
+            "b": "outer",
+            "intersectingTrianglePairs": 0,
+            "containedSurfaceSample": true,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            },
+            "measuredContactPlanes": []
+          },
+          {
+            "a": "exact duplicate",
+            "b": "outer",
+            "intersectingTrianglePairs": 0,
+            "containedSurfaceSample": true,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            },
+            "measuredContactPlanes": []
+          }
+        ],
+        "connectedGroups": [
+          [
+            "a",
+            "exact duplicate",
+            "outer"
+          ]
+        ],
+        "allPartsConnected": true,
+        "coplanarPairs": [
+          {
+            "a": "a",
+            "b": "exact duplicate",
+            "areaM2": {
+              "opposedInternalContact": 0.0,
+              "buriedSameFacingOverlap": 6.0,
+              "exposedSameFacingOverlap": 0.0
+            }
+          }
+        ],
+        "exposedDuplicatePairs": []
+      }
+    },
+    {
+      "test": "Sub-tolerance seam slivers do not trigger exposed overlap",
+      "pass_": true,
+      "details": {
+        "contacts": [
+          {
+            "a": "a",
+            "b": "float32 seam sliver",
+            "intersectingTrianglePairs": 8,
+            "containedSurfaceSample": false,
+            "coplanarAreaM2": {
+              "opposedInternalContact": 1.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            },
+            "measuredContactPlanes": [
+              {
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "pointM": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "opposedContactAreaM2": 1.0,
+                "buriedDuplicateAreaM2": 0.0,
+                "exposedDuplicateAreaM2": 0.0,
+                "lo": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "hi": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ],
+        "connectedGroups": [
+          [
+            "a",
+            "float32 seam sliver"
+          ]
+        ],
+        "allPartsConnected": true,
+        "coplanarPairs": [
+          {
+            "a": "a",
+            "b": "float32 seam sliver",
+            "areaM2": {
+              "opposedInternalContact": 1.0,
+              "buriedSameFacingOverlap": 0.0,
+              "exposedSameFacingOverlap": 0.0
+            }
+          }
+        ],
+        "exposedDuplicatePairs": []
+      }
+    },
+    {
+      "test": "Separated bodies do not make contact",
+      "pass_": true,
+      "details": {
+        "contacts": [],
+        "connectedGroups": [
+          [
+            "a"
+          ],
+          [
+            "separated"
+          ]
+        ],
+        "allPartsConnected": false,
+        "coplanarPairs": [],
+        "exposedDuplicatePairs": []
+      }
+    },
+    {
+      "test": "Near-edge rays have exact dimensions",
+      "pass_": true,
+      "details": [
+        [
+          0.5,
+          [
+            1.0,
+            7.999999979801942e-06,
+            7.999999979801942e-06
+          ],
+          "a"
+        ],
+        [
+          0.5,
+          [
+            1.0,
+            7.999999979801942e-06,
+            7.999999979801942e-06
+          ],
+          "a"
+        ]
+      ]
+    },
+    {
+      "test": "Triangle outside clearance prism is rejected",
+      "pass_": true,
+      "details": null
+    },
+    {
+      "test": "Triangle intersecting clearance prism is found",
+      "pass_": true,
+      "details": null
+    }
+  ]
+}

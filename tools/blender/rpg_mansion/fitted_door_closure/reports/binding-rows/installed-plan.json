@@ -1,0 +1,23 @@
+{
+  "source": "proofs/door-closed-installed.blend",
+  "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+  "image": "evidence/installed-plan.png",
+  "imageSha256": "752359f5a6a3071b0292fce33ae6398e26853834d2ae7eb9b92b56cda82d5dfc",
+  "recipe": {
+    "function": "build.render",
+    "delta": [
+      0,
+      0,
+      4
+    ],
+    "resolution": 900,
+    "target": null,
+    "orthoScale": null,
+    "engine": "CYCLES",
+    "samples": 32,
+    "denoise": false,
+    "transparent": true,
+    "viewTransform": "AgX",
+    "finishOverride": null
+  }
+}

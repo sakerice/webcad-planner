@@ -1,0 +1,260 @@
+{
+  "case": "gate-mount",
+  "source": "gate-mount.blend",
+  "sourceSha256": "92c774b0afc5dd4676482676190afe0e8ea56a8c36ae2619d9c50e24b5ce67d0",
+  "products": [
+    {
+      "label": "Brick pier",
+      "asset": "rpg-mansion-garden-brick-gate-pier-01",
+      "model": "models/rpg-mansion-garden-brick-gate-pier-01.glb",
+      "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+      "positionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "label": "Mounted board fence",
+      "asset": "rpg-mansion-garden-horizontal-board-fence-01",
+      "model": "models/rpg-mansion-garden-horizontal-board-fence-01.glb",
+      "sha256": "6d699c28f84f2479f1f5405bc633417a892a5c3879a27c1b4b37ac1ec6180e1f",
+      "positionBlenderM": [
+        1.2425000009536744,
+        0,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2424999475479126
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "label": "Fence far terminal",
+      "asset": "rpg-mansion-garden-fence-terminal-half-post-01",
+      "model": "models/rpg-mansion-garden-fence-terminal-half-post-01.glb",
+      "sha256": "8f5b206e00809f5372cad00c9a38bf3a5a76c52ecd1553768b2bb3c12cd31776",
+      "positionBlenderM": [
+        2.1785000009536746,
+        0,
+        0
+      ],
+      "rotationZDegrees": 180,
+      "matrixWorld": [
+        [
+          -1.0,
+          -8.742277657347586e-08,
+          0.0,
+          2.178499937057495
+        ],
+        [
+          8.742277657347586e-08,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        0.3325000009536743,
+        -0.028,
+        0.35
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Mounted board fence",
+      "pointM": [
+        0.3325000009536743,
+        -0.028,
+        0.35
+      ],
+      "distanceM": 2.8347108127491083e-07,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        0.3325000009536743,
+        0.028,
+        0.35
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Mounted board fence",
+      "pointM": [
+        0.3325000009536743,
+        0.028,
+        0.35
+      ],
+      "distanceM": 9.453727045638516e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        -0.3214999990463257,
+        0,
+        0.419
+      ],
+      "distanceM": 0.0009999871253967285,
+      "toleranceM": 0.0011,
+      "passed": true
+    },
+    {
+      "gate": "hinge-clearance",
+      "pinRadiusM": 0.011,
+      "collarInnerRadiusM": 0.012,
+      "radialClearanceM": 0.001,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        0.3325000009536743,
+        -0.028,
+        1.15
+      ],
+      "distanceM": 1.862645149230957e-09,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Mounted board fence",
+      "pointM": [
+        0.3325000009536743,
+        -0.028,
+        1.15
+      ],
+      "distanceM": 8.948454421897623e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        0.3325000009536743,
+        0.028,
+        1.15
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Mounted board fence",
+      "pointM": [
+        0.3325000009536743,
+        0.028,
+        1.15
+      ],
+      "distanceM": 8.942636497977219e-08,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Brick pier",
+      "pointM": [
+        -0.3214999990463257,
+        0,
+        1.2189999999999999
+      ],
+      "distanceM": 0.001000046730041504,
+      "toleranceM": 0.0011,
+      "passed": true
+    },
+    {
+      "gate": "hinge-clearance",
+      "pinRadiusM": 0.011,
+      "collarInnerRadiusM": 0.012,
+      "radialClearanceM": 0.001,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "fixturesCount": 5,
+  "manualCaveat": "Static manual placement and geometric contacts only; no automatic snapping, structural engineering, load certification or fluid simulation."
+}

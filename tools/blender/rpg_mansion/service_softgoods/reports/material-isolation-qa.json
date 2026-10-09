@@ -1,0 +1,166 @@
+{
+  "note": "In-memory GLB material edit check only, plus separate rendered false-color witnesses. Product bytes unchanged. Installed application UI recoloring is a later runtime gate.",
+  "items": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "glbSha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+      "channels": [
+        {
+          "channel": "hardware",
+          "changedMaterialIndices": [
+            1
+          ],
+          "unchangedMaterialIndices": [
+            0
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "metal",
+          "changedMaterialIndices": [
+            0
+          ],
+          "unchangedMaterialIndices": [
+            1
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "glbSha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+      "channels": [
+        {
+          "channel": "metal",
+          "changedMaterialIndices": [
+            1,
+            4
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            2,
+            3
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "washsurface",
+          "changedMaterialIndices": [
+            3
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "wood",
+          "changedMaterialIndices": [
+            0,
+            2
+          ],
+          "unchangedMaterialIndices": [
+            1,
+            3,
+            4
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "glbSha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+      "channels": [
+        {
+          "channel": "hardware",
+          "changedMaterialIndices": [
+            1
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            2
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "metal",
+          "changedMaterialIndices": [
+            2
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            1
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "wood",
+          "changedMaterialIndices": [
+            0
+          ],
+          "unchangedMaterialIndices": [
+            1,
+            2
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "glbSha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+      "channels": [
+        {
+          "channel": "border",
+          "changedMaterialIndices": [
+            1
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            2
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "fabric",
+          "changedMaterialIndices": [
+            0
+          ],
+          "unchangedMaterialIndices": [
+            1,
+            2
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        },
+        {
+          "channel": "pattern",
+          "changedMaterialIndices": [
+            2
+          ],
+          "unchangedMaterialIndices": [
+            0,
+            1
+          ],
+          "unrelatedMaterialsUnchanged": true,
+          "meshNodeAndBufferBytesUnchanged": true
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

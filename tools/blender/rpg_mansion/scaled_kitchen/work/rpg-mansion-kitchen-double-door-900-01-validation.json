@@ -1,0 +1,146 @@
+{
+  "model": "rpg-mansion-kitchen-double-door-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.32499998807907104,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.32499998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 1716,
+  "uv": {
+    "meters_per_uv": 4.246550581054418,
+    "min": 3.8074623702182286,
+    "max": 5.413112648389594,
+    "p05": 3.9385607576359942,
+    "p95": 5.280489974671231,
+    "total_triangles": 1716,
+    "valid_triangles": 1716,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 77684,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "6b0a0a4af96b62394ac6db7016957de015ba12f02c068f6f9abe6e032cd0c5c9",
+  "source_sha256": "a0f7fa711030235071bb010ee7f459e8f9c883bc02178bfbcee6a8df0c636970",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "045d6fac34dd939876407c70a2a4db97d225adcc9562866171c784764350c84c",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 4.246550581054418,
+      "min": 3.8074623702182286,
+      "max": 5.413112648389594,
+      "p05": 3.9385607576359942,
+      "p95": 5.280489974671231,
+      "total_triangles": 1716,
+      "valid_triangles": 1716,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 148964,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    649.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.32499998807907104
+    ],
+    [
+      0.44999998807907104,
+      0.8500000238418579,
+      0.32499998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 1716,
+    "valid_triangles": 1716,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 3.9385606459447495,
+    "p95": 5.280489962656774,
+    "p95_p05": 1.3407156667991673,
+    "median": 4.246587994175403
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-double-door-900-01.glb",
+      "sha256": "6b0a0a4af96b62394ac6db7016957de015ba12f02c068f6f9abe6e032cd0c5c9",
+      "bytes": 77684
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-double-door-900-01.blend",
+      "sha256": "a0f7fa711030235071bb010ee7f459e8f9c883bc02178bfbcee6a8df0c636970",
+      "bytes": 148964
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-thumb.png",
+      "sha256": "634a5f4032f1c5c1a5b663fbc0c00f217737d8dc6cbb3398a6a40da60849d434",
+      "bytes": 271556
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-top.png",
+      "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+      "bytes": 208481
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-front.png",
+      "sha256": "6d34d582d0a985d355cd9c34c0f52a1b68bcbccbf301855ceef22bc2353d2c25",
+      "bytes": 707864
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-rear.png",
+      "sha256": "cc9370ece8a1b8e80fdd242c4f20272d94190e89640bd58be9c8d6bbee19acb4",
+      "bytes": 659011
+    }
+  }
+}

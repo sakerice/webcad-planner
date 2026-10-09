@@ -1,0 +1,99 @@
+{
+  "status": "three-prototype snapshot ready for root visual review and independent byte certification",
+  "acceptedNewModelCount": 0,
+  "prototypeCount": 3,
+  "grossPlannedCandidates": 18,
+  "frozenAccepted171Untouched": true,
+  "applicationAndSharedManifestChanges": false,
+  "remoteOrDeploymentChanges": false,
+  "complete": [
+    "Original native modeled parts and one-mesh canonical exports",
+    "Actual hollow-cavity rays and local intended-bearing endpoint probes",
+    "Actual 512px transparent four-view images with minimum 23px alpha margins",
+    "Labelled QA installation and section images; fixtures excluded from counts",
+    "Packed UV triangle overlap, positive closed components, strict corner normals",
+    "Exact source replay of geometry, UV, indices, full PBR and normals",
+    "Fresh source image replay with exact RGBA equality for all 12 product views",
+    "Compressed saved-payload and actual saved-UI privacy inspection",
+    "Actual baseline geometry delta and conservative role grouping"
+  ],
+  "remaining": [
+    "Root visual approval of three prototypes",
+    "Independent final-byte certification",
+    "Only then begin the remaining useful water-room forms",
+    "Parent packaging and root-only Library delivery after acceptance"
+  ],
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "modelSha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89",
+      "sourceSha256": "0931a9211c841e79bb92ea860ecf1143eea5b16b68d31420ccf6ffb1a4c17934",
+      "triangles": 1896,
+      "glbBytes": 130744,
+      "nativeEditableParts": 22
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "modelSha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84",
+      "sourceSha256": "7eacc9243ae70f897e4762137421c53919881951d74d64a21afb2da240c68195",
+      "triangles": 5336,
+      "glbBytes": 370224,
+      "nativeEditableParts": 54
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "modelSha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+      "sourceSha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+      "triangles": 1748,
+      "glbBytes": 121016,
+      "nativeEditableParts": 11
+    }
+  ],
+  "gates": {
+    "bytes": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/bytes.json",
+      "sha256": "0a57962aed0762fb1a36450f1d6a701c5ba4ac0a6d7cf454455a85b6c3d782cd",
+      "errors": 0
+    },
+    "native": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/native.json",
+      "sha256": "177a04a6205ff40923657ebcfc5a1e9e71dd54d2ad8cbd806f515f863ca0c4bc",
+      "errors": 0
+    },
+    "installation": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/installation.json",
+      "sha256": "476bbe34e1a17d7f56d8b3deba82eb995691f0e41a6c86bc0868720db995443c",
+      "errors": 0
+    },
+    "image-replay": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/image-replay.json",
+      "sha256": "19f1b2050280cb11c1da020a79fa23fdfc8174aa4cfd794b7a8c55c26c3c4ed9",
+      "errors": 0
+    },
+    "source-privacy": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/source-privacy.json",
+      "sha256": "e11703d8b9636ed42443b827c95201c834c8db691abdfe98c06b4ecf8622db15",
+      "errors": []
+    },
+    "baseline-delta": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/baseline-delta.json",
+      "sha256": "8618b924a4502434f5322f375483bdaeab1c636b860af933182b6639a48c301a",
+      "errors": 0
+    },
+    "coplanar": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/coplanar.json",
+      "sha256": "f4726acec98831d0203453e98609420b3bd86aafa92e2f64ee106e1a3bce2842",
+      "errors": 0
+    },
+    "normals-dedupe": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/normals-dedupe.json",
+      "sha256": "1e704a201f7100d4da97b8ecf336545f555cd49499c0d8210412a59e5bb1d646",
+      "errors": 0
+    },
+    "exact-replay": {
+      "path": "tools/blender/rpg_mansion/water_rooms/qa/exact-replay.json",
+      "sha256": "cbcf7314a79143903a608235cc9e2d6a5c2296f7c8fe817c85c2de5d38fd04be",
+      "errors": 0
+    }
+  }
+}

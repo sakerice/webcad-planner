@@ -1,0 +1,1444 @@
+{
+  "method": "Actual final GLB geometry comparison and PNG byte hashes against the supplied pre-joinery baseline",
+  "changedPhysicalGeometryCount": 20,
+  "unchangedPhysicalGeometryCount": 2,
+  "renderScope": "Four views refreshed for physically changed assets; all four files preserved for unchanged assets",
+  "uvOnlyChangePolicy": "Keep images only when exact render-relevant geometry/material/smoothing/normal invariants are preserved",
+  "imageCurrencyIndependentGate": "Requires the coordinator independent render-currency acceptance report",
+  "items": [
+    {
+      "id": "rpg-mansion-scullery-sink-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 1416,
+            "digest": "f23ca20f98516e4103c48e276602fc862767f896b33424cb1e525bbf9acda874"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "878fcca4d29e7e417e5143a1c6a1b1a8d6e3a2124c128d13c93770f1241ffae2"
+          },
+          "Ivory glazed ceramic|ceramic": {
+            "points": 112,
+            "digest": "891925f5e6cc9ed7b9776c3ef35f344a7f583a154a01f37cbaddf1982f557c7f"
+          },
+          "Mansion walnut|wood": {
+            "points": 192,
+            "digest": "1277944d8d224d9bfb07f3fca11df00fc9092eeff2b418ee2c585bb1362fa053"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 81,
+            "digest": "91e5278cc787d02c53c22654ce69af7790a19a4b1401e24e74cabf9f99ccb2da"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 2744,
+          "Carved walnut moulding|wood": 460,
+          "Ivory glazed ceramic|ceramic": 220,
+          "Mansion walnut|wood": 352,
+          "Warm limestone worktop|stone": 162
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "d0a0e027f8cba1170f9ef91c3bb7986297e0297ee0d367577549d6aed3a644c6",
+          "Carved walnut moulding|wood": "bf11a087870629743454fcef637048e34601dbfef453a1cd23ab3ba13dcbad43",
+          "Ivory glazed ceramic|ceramic": "ff43588b2df4dff163ab7aa40031e6ba732c8b7e1c04a06eb6803bbea2d8b9a7",
+          "Mansion walnut|wood": "bbd4c21ded27f83bb0057aeaca1ec8b654d31be5a7af6c8a89bf0cd7fb7e4903",
+          "Warm limestone worktop|stone": "6f570792501f5c1b3e1a61d06ac24723a4fca3e9f96639add314ae467439cccc"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-sink-900-01-thumb.png",
+          "bytes": 232452,
+          "sha256": "5bd8134d04a77b277ae07e68de687b59de1c1b6fdc222eee3e898c0d26e2d451",
+          "baselineSha256": "feb854b30430dcbf67328845239497f533dd4be6f3db32c441a1cf0eda78e069",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-sink-900-01-top.png",
+          "bytes": 254930,
+          "sha256": "66d0a0fa2d38af1dbdc70ca0c71fd8c8d2c6beb05c331dc0394bf2d36519790f",
+          "baselineSha256": "a0e6ea8cadac742b3aaf60fe03914192a62d226a5b3c77ba7c1130c73dd50d82",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-front.png",
+          "bytes": 586943,
+          "sha256": "27b9d2a6a764e711ae8947678d22332a86984cac41508931e6b8e2b8aec57258",
+          "baselineSha256": "315b1833e5a9fd54a2018ef0dcfc17ffb14dfbbc24c64c9bd7ab7ea58cc8f0a5",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-sink-900-01-rear.png",
+          "bytes": 544928,
+          "sha256": "a032247ae7b6bffc9816d37cf8075b3ff5a2a26b32d7d414f1a74bb36542defb",
+          "baselineSha256": "a8aee739daf0d97f08e0e70e1718d976abfd3eeba0eefaa800ceb2dc26c1bb6d",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-four-drawer-750-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 800,
+            "digest": "6ab44bbb9503e337586f83fc7cd7ed9e01563168939fd9636c4a741b66a6480e"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 288,
+            "digest": "54d8328f0f73bb0d7afd4fb0301004e1a2f6e078018aaff6e5cbbae11a1843fd"
+          },
+          "Mansion walnut|wood": {
+            "points": 312,
+            "digest": "717fe003876806d5e38aad41ffb3dcc5668598864fbd2bac7afcee3d6a14b66b"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "85113072ebb0e5e82f23a6beda27b9e697c5d8492766af3403eca41d3d212fae"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1536,
+          "Carved walnut moulding|wood": 564,
+          "Mansion walnut|wood": 572,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "86d14ed2df4c5c19ab9dd8a48020dc09609714ef8e7571cb998af63b507140e2",
+          "Carved walnut moulding|wood": "7a9be2f76f1aee0996b673bfb3d5cfeb4837674b7aefb463950a0b75f7fe60f7",
+          "Mansion walnut|wood": "b1e207b4590a8f5a9a8f38a649a62f5519d415636175fd69959a506d074e1861",
+          "Warm limestone worktop|stone": "ef842d72db68cbf846e63e406eacf99a2449253d0db933030141d52b0b9c7d3f"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-thumb.png",
+          "bytes": 288096,
+          "sha256": "e4a41491e49e7aab5e44451c4973b477dc75f96160197fca487cb9c2dfeeccf0",
+          "baselineSha256": "ac73461ede83029ecd66f5d6fc8d5a60d24ecf0b13fe72ff2832dfc354cfe00e",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-four-drawer-750-01-top.png",
+          "bytes": 228172,
+          "sha256": "d02e14634acd53cbeb2dbb8e6fc2b9554ccc7452ac5572301e59d428844883b2",
+          "baselineSha256": "47af29bd583255417f3b5ee4338acc08f2fda516cd2be605f4862cfc025acf5c",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-front.png",
+          "bytes": 727755,
+          "sha256": "30544cc5c1de2badf1b6d9cb42782b9b4da640f4b0887bde29fda76e0afe8a19",
+          "baselineSha256": "4e969db9b547135e16990344f99cad0fdc077f325c9e7d4bd066be052ff8a70b",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-four-drawer-750-01-rear.png",
+          "bytes": 649809,
+          "sha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957",
+          "baselineSha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-bottle-rack-300-01",
+      "physicalGeometryChanged": false,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 96,
+            "digest": "16153b2e9a958f1eb9598e2959bbef4bb491772e4bcc9a7830c3f4ad245f371b"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 216,
+            "digest": "184c23bf7fa6e5a2367e31af2c738d2f8e4a1d70385535c9abedc5776a1f74c4"
+          },
+          "Mansion walnut|wood": {
+            "points": 120,
+            "digest": "3a589c2582308489f286ef5a4030943225145c7becc333cf3ed78c7aa3d1cf99"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "0c26da89e3cd73e16ee30011adb51ade799a669bc824c01fe832a80a7cd8209c"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 176,
+          "Carved walnut moulding|wood": 400,
+          "Mansion walnut|wood": 220,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "06b1d8b8ae613c259bd5de95ae59c8a72d540eebaa3708496af4276108a903e5",
+          "Carved walnut moulding|wood": "9505464d3d17189b1b83c8649e910d9223b5a023b2437083c09851b60f1dbd36",
+          "Mansion walnut|wood": "439541d59d560eda80ae43e3b64a1e782e5c0b9b13d2d3419892e9c838073fd0",
+          "Warm limestone worktop|stone": "44b7b2508942b4f58ed0b2bfc82d5e1fbb3cb364aabf4fcb4404bf308a317ad0"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-thumb.png",
+          "bytes": 225413,
+          "sha256": "d350b2917cf38cacc26939fdb016e00f6366ceb8e0f8d0c5a7a1de46e7c368e7",
+          "baselineSha256": "d350b2917cf38cacc26939fdb016e00f6366ceb8e0f8d0c5a7a1de46e7c368e7",
+          "bytePreserved": true
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bottle-rack-300-01-top.png",
+          "bytes": 201116,
+          "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+          "baselineSha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-front.png",
+          "bytes": 512887,
+          "sha256": "6ba70708cce4989a76d313eea69a42e0ce943370233cb8328199524b4312f1a9",
+          "baselineSha256": "6ba70708cce4989a76d313eea69a42e0ce943370233cb8328199524b4312f1a9",
+          "bytePreserved": true
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bottle-rack-300-01-rear.png",
+          "bytes": 470165,
+          "sha256": "3ee76f6aee3684a39fd552e321f4b35552b72c54354537d5ac77236dcb8cbe19",
+          "baselineSha256": "3ee76f6aee3684a39fd552e321f4b35552b72c54354537d5ac77236dcb8cbe19",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-three-drawer-600-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 624,
+            "digest": "8c52b37f8980bf9984d1750000f8e6cc3e0366444d4d7d7865d56d80bc15a375"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "5b95746eb98218b120ee62cb75d055208347eaee6f7108a5b2ba2048eed91152"
+          },
+          "Mansion walnut|wood": {
+            "points": 264,
+            "digest": "a15ec0906ab718b983317160daecabf67d0a97c3d543e885be51800a2e161410"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "d0916ec014c28fa87f5cc8b7b7ed72cade45a203dd09fe7bcbeb564868760946"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1196,
+          "Carved walnut moulding|wood": 468,
+          "Mansion walnut|wood": 484,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "a21eba9c0b8859cb63368ae5e73fee921f34008b01c0c8f96dce95890df91f70",
+          "Carved walnut moulding|wood": "5783a48a7c15cce9b86abc165480542701afb3ebb188f4d4fe5779cd7fdfd87b",
+          "Mansion walnut|wood": "a3e17a9cc2e1d75f0c9e07dcb1177f9751fcddb67afc6cc6db9eea12b23a4565",
+          "Warm limestone worktop|stone": "f4f56fc7371c98249e1f63208b5f0b2ac690e59e3e16fbd4b552a3b9608e683d"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-600-01-thumb.png",
+          "bytes": 265242,
+          "sha256": "e82b452ea8206792a339454ecc5b1a719b9fc881bd0c2d81dbbeb1844799b227",
+          "baselineSha256": "d303d46844c327d933fd203d89fba26c0632f9a27e381ece8320d638cf9602c2",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-600-01-top.png",
+          "bytes": 239467,
+          "sha256": "3231e0ce3c64e223dc54bb1cd2be62e1d30dca769ad3d4b3220394c48030a49a",
+          "baselineSha256": "3231e0ce3c64e223dc54bb1cd2be62e1d30dca769ad3d4b3220394c48030a49a",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-front.png",
+          "bytes": 651006,
+          "sha256": "1ddbe4147008f384021c61393fa2b29eb37982eecb89e05415e0b2ac481bc237",
+          "baselineSha256": "124cc2ec0db0ae8292fa6d31100523e3abdaac7cf122933b0e940bf4de587368",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-600-01-rear.png",
+          "bytes": 595552,
+          "sha256": "140c62a1a3b308cabeed3f05fc9af89ba171bd32f2774373f85fec5da6aaaed4",
+          "baselineSha256": "140c62a1a3b308cabeed3f05fc9af89ba171bd32f2774373f85fec5da6aaaed4",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-three-drawer-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 624,
+            "digest": "3bcdb4b5a01698ce52f61ed8b8993108cd8cadc4a276408d2af9a08a1239d616"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "82ba69af8638a798c9b187ea4f90f51e8b91367e5dcb04ed45f6b4be08d1c0d8"
+          },
+          "Mansion walnut|wood": {
+            "points": 264,
+            "digest": "fd0304930426850be2819efd19561f0223030b9dac7e982c602f2c59cc161f3b"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "6149b28c8c412286939a892625dbaa677d45a052207a9b603cd5acb50aa0a518"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1196,
+          "Carved walnut moulding|wood": 468,
+          "Mansion walnut|wood": 484,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "ec3b41b16c9edce2117c3e5f6d4fe211be4fbc1875386ff494bc578fb93499f1",
+          "Carved walnut moulding|wood": "f113b3a376db7898df4a7dfca0234c10244482526c71d207340ebe8a4ac6dc27",
+          "Mansion walnut|wood": "5cc71fe972c71552adeaac3099ee897b37746dbf7ad777667092ae5581c6ceba",
+          "Warm limestone worktop|stone": "63ddd43d9f4be7894f4498e585189be78dc0043bedb1da59fc1ba00c45d78f88"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-thumb.png",
+          "bytes": 283266,
+          "sha256": "09fd2b8b7207bc785300b97dbe7232c59440a5fc2edde0df6ce96e91767bb218",
+          "baselineSha256": "819a29f20b68569f3598f036aea39f7f62a786f962f60c3f1e7b6e1d16f29b97",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-three-drawer-900-01-top.png",
+          "bytes": 208481,
+          "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+          "baselineSha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-front.png",
+          "bytes": 724317,
+          "sha256": "707c2440e0f8d096c438151e76718c6b5b9f53bb913f3a1a2133ef81a8c956d5",
+          "baselineSha256": "450258e0f6078692ce5b059309db6d731e82231ac987af5d9f50e25cd48815e5",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-three-drawer-900-01-rear.png",
+          "bytes": 659010,
+          "sha256": "fc4df01875e57be36a9caa2e13e84bc30deb587fef4a54dcfbf56dd86c24c1fe",
+          "baselineSha256": "fc4df01875e57be36a9caa2e13e84bc30deb587fef4a54dcfbf56dd86c24c1fe",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-single-door-300-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 272,
+            "digest": "b190abb37028f84eb42ef05b8d4675cd6923a4d817ccd0527890a07b7bd95592"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 144,
+            "digest": "86a794a63108d0dbdb68e4b4e8ba270a9527117dcc6beae9c9d74cbe6df0d13a"
+          },
+          "Mansion walnut|wood": {
+            "points": 168,
+            "digest": "1f9a511f2698dbd74eaa668f0e0be5527e47147989ddc483b992e95ffc3d4d97"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "0c26da89e3cd73e16ee30011adb51ade799a669bc824c01fe832a80a7cd8209c"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 516,
+          "Carved walnut moulding|wood": 276,
+          "Mansion walnut|wood": 308,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "cc16f40ff3802a9af04f1eb750a5612e0903248a6cdf9fa3a03d0efb40955b05",
+          "Carved walnut moulding|wood": "06d7069178062537e8686dacdb85dbd04a575a80ce05b3bd87b0320052e55828",
+          "Mansion walnut|wood": "90333130b97b667a2baf3fd0824bd364dd6e9012d49fc856a3525c739c6e3184",
+          "Warm limestone worktop|stone": "44b7b2508942b4f58ed0b2bfc82d5e1fbb3cb364aabf4fcb4404bf308a317ad0"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-thumb.png",
+          "bytes": 221410,
+          "sha256": "8d7c1e646f07e98d770044b6a5d199465c54b4f143ff444b078a222eb830c9d4",
+          "baselineSha256": "469d7429c8330066606e8ab6c7a4c0bacfa28ecc9983939170560dcabb909033",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-single-door-300-01-top.png",
+          "bytes": 201116,
+          "sha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+          "baselineSha256": "0cfbcfd3164fa3ffd01df1d17b8045cef93282bd19bd708b644547b47896aa49",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-front.png",
+          "bytes": 491710,
+          "sha256": "dc36664aa6ea6f5c19bd0c59c82e8658e50d028fb8648b52f5de7ab60ace7c93",
+          "baselineSha256": "7b02c2cfc895b0da95c416ae335ea3e13b3e35819db8f6b3d91cbe46ca62515c",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-single-door-300-01-rear.png",
+          "bytes": 470171,
+          "sha256": "57dc227a813c5fec6875d76c590bfb0258c2aca377e712bf8965e6c97cf57779",
+          "baselineSha256": "57dc227a813c5fec6875d76c590bfb0258c2aca377e712bf8965e6c97cf57779",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-cutlery-cupboard-750-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 624,
+            "digest": "e5d0fe168390688ffe98b3bfb75975778b143146171218babb968f57eec68258"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "fd61d0fa32a79583143b35634f8de08b653d53849ae69e8ecd64fd1dc3be5d9c"
+          },
+          "Mansion walnut|wood": {
+            "points": 264,
+            "digest": "9a2022696bef3ff60cc2738e09e12c4d87acb169781dc15138323b7940b15a80"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "85113072ebb0e5e82f23a6beda27b9e697c5d8492766af3403eca41d3d212fae"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1196,
+          "Carved walnut moulding|wood": 468,
+          "Mansion walnut|wood": 484,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "350bd425ba71b613bb269fc40bab5976b5a9874394fbbdcf6f8e9f9e312a9a89",
+          "Carved walnut moulding|wood": "937261e97404348b183b291c5d1039d16120ad2307593d6b80e6ce41c9fb6789",
+          "Mansion walnut|wood": "015ff90d83b15100fb761951386da0a83f4efd9a87d3425a1f058023da05660d",
+          "Warm limestone worktop|stone": "ef842d72db68cbf846e63e406eacf99a2449253d0db933030141d52b0b9c7d3f"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cutlery-cupboard-750-01-thumb.png",
+          "bytes": 277966,
+          "sha256": "94726fbf82bc4353199ecf79a1bfbe427719e7ea6d5731167ba5b5464439789c",
+          "baselineSha256": "1a87e3132b894751b08f5c669b824739be94cc363259b043c1a1205b2ee121d8",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cutlery-cupboard-750-01-top.png",
+          "bytes": 228172,
+          "sha256": "d02e14634acd53cbeb2dbb8e6fc2b9554ccc7452ac5572301e59d428844883b2",
+          "baselineSha256": "47af29bd583255417f3b5ee4338acc08f2fda516cd2be605f4862cfc025acf5c",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-front.png",
+          "bytes": 707344,
+          "sha256": "921f9cd9b87af8fe01eb29a84e29b369f32786118bf289d4fe956f083e0cf448",
+          "baselineSha256": "08a8218ce8e49d75b9ac3a3c3d9f6ef58214888799ca8aaac81976a7ab7c12ed",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cutlery-cupboard-750-01-rear.png",
+          "bytes": 649809,
+          "sha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957",
+          "baselineSha256": "836c1442808dc22235f1dac2e14b0a1409193cf9384bfdfcfd97721142b84957",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-double-door-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 448,
+            "digest": "8d7d4d1e6e41a0f3e6211b67b25975547f23fe3c1ac153ca139f721f7e83b84e"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 192,
+            "digest": "06008f0009e695501bc76cf93852549e41860501fed7f100d5511f61bbd6ec9b"
+          },
+          "Mansion walnut|wood": {
+            "points": 216,
+            "digest": "39de2b8d5fdcd5ebcb0bba0ef6d4e9ebeb824fb3b7d9957419d302c649fa5ab5"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "6149b28c8c412286939a892625dbaa677d45a052207a9b603cd5acb50aa0a518"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 856,
+          "Carved walnut moulding|wood": 372,
+          "Mansion walnut|wood": 396,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "92a1ec97568881bbcc7674ce2c249193b92e4d1559ce81acef469f8a4e6ca0ce",
+          "Carved walnut moulding|wood": "c9dff1032402744247c97bd183b6290f33e7dc85cb9eb9ba130d461d2ca70966",
+          "Mansion walnut|wood": "f050b5b287686a99f2a637e3fd963279be51092d4c0d74dbb9e65efdf721f6f4",
+          "Warm limestone worktop|stone": "63ddd43d9f4be7894f4498e585189be78dc0043bedb1da59fc1ba00c45d78f88"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-thumb.png",
+          "bytes": 271556,
+          "sha256": "634a5f4032f1c5c1a5b663fbc0c00f217737d8dc6cbb3398a6a40da60849d434",
+          "baselineSha256": "3a8e8e38e9a03b4cbcf615678fb8a3a71fdae94bfbc3c1f71d268f51934fd161",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-double-door-900-01-top.png",
+          "bytes": 208481,
+          "sha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+          "baselineSha256": "4b8e197796e6a04ea0478c0cf35cd446fb1d8a46eb4d1dc9f8f6d2451e2e69c8",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-front.png",
+          "bytes": 707864,
+          "sha256": "6d34d582d0a985d355cd9c34c0f52a1b68bcbccbf301855ceef22bc2353d2c25",
+          "baselineSha256": "b1491e39ee1f510912d8d941fa6f3548e1e9415293d2343edc8d9d929edd723f",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-double-door-900-01-rear.png",
+          "bytes": 659011,
+          "sha256": "cc9370ece8a1b8e80fdd242c4f20272d94190e89640bd58be9c8d6bbee19acb4",
+          "baselineSha256": "cc9370ece8a1b8e80fdd242c4f20272d94190e89640bd58be9c8d6bbee19acb4",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-scullery-double-sink-1200-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 1480,
+            "digest": "6d5514f5ba4547df7f4b40c2b08c8d47c459407884f3af6d303cce6513901b74"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "d2f9dcf31b0e7ba2a11d0bf910779ae18508bbed2df9f2c1cf2bd0dd9077b9bf"
+          },
+          "Ivory glazed ceramic|ceramic": {
+            "points": 224,
+            "digest": "a001a6e962ad6fe2b20bc08a383314b431cc114d74162d218f66b1881ca5db7f"
+          },
+          "Mansion walnut|wood": {
+            "points": 192,
+            "digest": "c13a5028df8713838d004ae06f4230b86f45b5a169b1a92245ce6d524dd25328"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 115,
+            "digest": "d16b1af792a55c9ac06134ddae90ab5a3966edf90cb48502c326331dbdb45598"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 2868,
+          "Carved walnut moulding|wood": 460,
+          "Ivory glazed ceramic|ceramic": 440,
+          "Mansion walnut|wood": 352,
+          "Warm limestone worktop|stone": 234
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "addaf9a0e02711f46dc91b127d554db38ea1c8c5d29a0482416cd5d6fabb6679",
+          "Carved walnut moulding|wood": "595b93e639fe87b8725a052afaf557c8de307ad2a483f0c2def0ce02e8d2f781",
+          "Ivory glazed ceramic|ceramic": "603989d3cf676482aef602a9156dc549966551d9fadd26adbf33a4f8f02aa249",
+          "Mansion walnut|wood": "c058341797b60edc2fdfd91cb4e6051e624606661474287d2dea562adbef1fec",
+          "Warm limestone worktop|stone": "1a19f518856b8f6f6c3a136fc879d41a5b77d7bd62bc8eb13c96f831c70f51fe"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1200-01-thumb.png",
+          "bytes": 244449,
+          "sha256": "c00c89284c4a571db42056a39e8e06112243d4fab93d73117838400d7ffcab9c",
+          "baselineSha256": "dbeac6f35a16f81c8f70a7718c5ff21aa516718889d6658be3eaa1ad3e581915",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1200-01-top.png",
+          "bytes": 222906,
+          "sha256": "bdb3cb2c33b1d71fbfd1287a52355c0d3018bdb3b321294ac8d9f58a9511dcf3",
+          "baselineSha256": "84e64492dda7e76721684e80ec28472398ccc71d5dc179daa7f648bf447085ff",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-front.png",
+          "bytes": 629458,
+          "sha256": "133350345d38d6acf76558f3c125113440d2f638bbd35c7d675ede9ae1312f9e",
+          "baselineSha256": "f9e9bb0c31e61d5d249bde6b0ecbfc060875c5f5204f3d663349af4be4f47c02",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1200-01-rear.png",
+          "bytes": 584026,
+          "sha256": "aa27a06550a474a9192eadc983d0181252765a6855bab36c2f1721556a3c07d8",
+          "baselineSha256": "983d4d2fce0a58a21f514755e3fb4532d537a7b2b92c5ee3529a8eb0bdc0339b",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-scullery-double-sink-1800-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 1480,
+            "digest": "1cb6907cec674ba7c7d671b9f075b5dc3f97b6f27a9cd40f142c198fc8fbd7ac"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 240,
+            "digest": "56161849fa4c794f7576aca565cfa3c5775dcd7ebddc39f312e79fc88cc0b4fb"
+          },
+          "Ivory glazed ceramic|ceramic": {
+            "points": 224,
+            "digest": "12a22fc3ca3e817829785bc39057fe1e1c042b1d71560f56076bb71ffdc624bd"
+          },
+          "Mansion walnut|wood": {
+            "points": 192,
+            "digest": "024245e5760640fb0d64b0429da74f291d75e0db307dd4535cefef7b1ba87553"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 113,
+            "digest": "176cea0064b2a70ff9d2938df609ba09600f23051fd42ea6345891276c429160"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 2868,
+          "Carved walnut moulding|wood": 460,
+          "Ivory glazed ceramic|ceramic": 440,
+          "Mansion walnut|wood": 352,
+          "Warm limestone worktop|stone": 230
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "880a1d399be52a62cdcd398622381a9c00ec0c7f03b496a14ca07e8dfb7eb0a6",
+          "Carved walnut moulding|wood": "2782132d93aaa197c84ed66c74fb84744cf2b38ff85d43a1e68b23c19bae1b04",
+          "Ivory glazed ceramic|ceramic": "35b41dd55bd0d2a119fc321032283d08f2906f08a805ed9cf37e4e5144e5680c",
+          "Mansion walnut|wood": "0cf17d58152f5ec048c789815a1d87df658853aae733925dd6f0385280419dd1",
+          "Warm limestone worktop|stone": "1a6fde7d4f4ec04b1937802d9800056f4d39fa05b4624eed77d74f77468e6b8f"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-thumb.png",
+          "bytes": 198232,
+          "sha256": "430ad69d5eda004da62ee7d438bc06449c47add59304f24ed82813792e28c76c",
+          "baselineSha256": "8f21063d98ecbc1168408780621a3a2321109bb1607f76806a82684f13b8580b",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-scullery-double-sink-1800-01-top.png",
+          "bytes": 183588,
+          "sha256": "04ef3cd53952900f65804d8881b20fe631cbabde759eb9bd8bd2d792c3486d69",
+          "baselineSha256": "49bb2c2e0586b2a59173fa31cb186f305a2e6cdbb0f3d8d577c177aef33fdeb3",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-front.png",
+          "bytes": 503476,
+          "sha256": "eccac8b85ca9427bd90fec31a9680d06f52fd0a7be8f5b2092d4c8bcd97e7d5b",
+          "baselineSha256": "b4dc164bae1608cf6e2f557fc55ac6f9768f3d36affba47e5d72d704c7701dd6",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-scullery-double-sink-1800-01-rear.png",
+          "bytes": 468152,
+          "sha256": "0ca3b071f8763a6d3233b182408851e342c09109699e4e8b0d808981f265d4aa",
+          "baselineSha256": "a3e905e2886e30f4161515326562dbd17d587ad7fa9337d00c799fee44a0af6c",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-glazed-wall-900-01",
+      "physicalGeometryChanged": false,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 400,
+            "digest": "b8f6f5ce729a021628af64a3deca1ce7006ef24b4a27e49d0dfb8015ff681066"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 264,
+            "digest": "2282722678334223bc79695b71f2dadcb4477fb8b6bdbc65fbafd232e5ab4608"
+          },
+          "Mansion walnut|wood": {
+            "points": 72,
+            "digest": "f07d3f3d7e9cc01dc8ed0d589febb1a4606dad9cf640d846d4048e9db691d6e1"
+          },
+          "Pale display glass|glass": {
+            "points": 16,
+            "digest": "04be5ebce0ddb6143db8a0ffb36f142efa3b37239bc15fb4806461e8ef8bab9d"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 768,
+          "Carved walnut moulding|wood": 508,
+          "Mansion walnut|wood": 132,
+          "Pale display glass|glass": 24
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "4f106baffa81df0a7eb04eb40b44c47008df332353aa048da55e1390ecb73f1b",
+          "Carved walnut moulding|wood": "ecc19a27b5566244935b02679964af8e01508a326b00a429aa79db58dba6a1fe",
+          "Mansion walnut|wood": "9d7663da5a11d2af3d8200e90e152bfcf21b7abe1bfd508996a98f107d03b847",
+          "Pale display glass|glass": "af511d004a67b2ac17b841c5375f29ab09d63dd8b492291d87ec3feec0e3acf3"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-thumb.png",
+          "bytes": 256649,
+          "sha256": "f95b80289ca97df980afb6681652dd0e17cd82497bf8fc489f96ef991098e83c",
+          "baselineSha256": "f95b80289ca97df980afb6681652dd0e17cd82497bf8fc489f96ef991098e83c",
+          "bytePreserved": true
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-top.png",
+          "bytes": 184664,
+          "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+          "baselineSha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-front.png",
+          "bytes": 676015,
+          "sha256": "654a241652962d00337a270490ae244b9d38ffaf884ec0d5228faf7dd5d1a15c",
+          "baselineSha256": "654a241652962d00337a270490ae244b9d38ffaf884ec0d5228faf7dd5d1a15c",
+          "bytePreserved": true
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-rear.png",
+          "bytes": 573730,
+          "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+          "baselineSha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-spice-wall-450-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 624,
+            "digest": "d6b2216ebc7fa555cc5808b7780a6a3e01f5f884d1bcb4496e1741c53be21d86"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 192,
+            "digest": "36f2a933eab07e25fe7762ecd92c8bbf3ea606f9f7c650585b35c649fd4aa0d7"
+          },
+          "Ivory glazed ceramic|ceramic": {
+            "points": 576,
+            "digest": "fec86bd63dd6d8d77d9c9948e686843ab117b8ebd57e5e5d9c5894800187c3e6"
+          },
+          "Mansion walnut|wood": {
+            "points": 72,
+            "digest": "2652af643f64a21210da30a5f3b9650f3d469266adfbd57d4e61489f1929c125"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1192,
+          "Carved walnut moulding|wood": 360,
+          "Ivory glazed ceramic|ceramic": 1104,
+          "Mansion walnut|wood": 132
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "0e62380fd3f162fdc5988372fabb05175b6c37cad432e166078b486ee5db6b33",
+          "Carved walnut moulding|wood": "8918ab04e266f5f6417c9237c4a0cedda6d54fa58c3397fa9bcd890c19c988c4",
+          "Ivory glazed ceramic|ceramic": "a8028d86e485037e530abbafe82574544f3053ea283f9740ee7b0f354235f28e",
+          "Mansion walnut|wood": "a15b48192352388852307c6ea49bd1f5ea7894a1414125e480cb36c2aaaf0e60"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-thumb.png",
+          "bytes": 255690,
+          "sha256": "d48ce5b07ee080c82cb05b6e013b2b1f72aeafda1986873def6d6eb0286d785e",
+          "baselineSha256": "46c20d8310a3acac30c0e784f05f40771d19c4b9ddfc1d8c2d4371a67e8b9967",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-top.png",
+          "bytes": 253758,
+          "sha256": "61792bcbc2bb7e47e5eadf3dd6b67132be3c1f39f1de6cb63010d1c470e1980e",
+          "baselineSha256": "61792bcbc2bb7e47e5eadf3dd6b67132be3c1f39f1de6cb63010d1c470e1980e",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-front.png",
+          "bytes": 685053,
+          "sha256": "2235b21ac30ba00f9c0b01d29628f098763485b19f36085a3c83ea5425ac4ce0",
+          "baselineSha256": "91a1a27c3c730e0e29c074e7bcca8e0adae5d627292941a8bdc2ffb69377a11a",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-rear.png",
+          "bytes": 563886,
+          "sha256": "00684aac22a6785120f70bb63e19d256ed150a7c3f3b43604b9bf902f7d8a954",
+          "baselineSha256": "00684aac22a6785120f70bb63e19d256ed150a7c3f3b43604b9bf902f7d8a954",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-plate-rack-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 720,
+            "digest": "e2189569fc3cd498e4a7291c209c26690030dda7184ac32830784d2d8cbf963f"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 168,
+            "digest": "501f7d8090474515e81fcdbf2f06687ea3344a9681b26504d8a90ee4a9e70b28"
+          },
+          "Mansion walnut|wood": {
+            "points": 1080,
+            "digest": "ed00211b3caef7f51677896771cea8ae495b22e660647e603a2d1c64e302c9a4"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1408,
+          "Carved walnut moulding|wood": 316,
+          "Mansion walnut|wood": 2112
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "4ecf491cff7028aeefba5d7b2d2df393818ea1e53289ebb0044ab8219ef97886",
+          "Carved walnut moulding|wood": "e95a4873bb481ccd3e016dbe5734fa122866b316803371d2c1024eb13a1b3df9",
+          "Mansion walnut|wood": "d36e17ed87042b57db99dfd3bd94c345beb0772a002d6602ab1b27d737148308"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-thumb.png",
+          "bytes": 256303,
+          "sha256": "fb540bbb192587b534b3f02aa7ad084de8fc840682e4077311415c9d341fadc5",
+          "baselineSha256": "9777be4060332f7266992263abb7ef09c3a31bd9f09336295e36f00ad0f30c56",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-plate-rack-900-01-top.png",
+          "bytes": 184664,
+          "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+          "baselineSha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-front.png",
+          "bytes": 694795,
+          "sha256": "44eee49b87ce31836ef30e300e1a7a431488e2ee279083d288ca32fc2d039c59",
+          "baselineSha256": "393826cc5af4237ef5ce47d9d9a8691504a685c44963ffeef8756083054c20f5",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-plate-rack-900-01-rear.png",
+          "bytes": 573730,
+          "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+          "baselineSha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-tall-larder-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 448,
+            "digest": "dc1a10b935f7fa71bdb6bfc2de0bed48c5a159f4ae373f3e85477b2aa59440ad"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 624,
+            "digest": "15f07bd09bf441e03a84ff8bdee4b4dddaea554ece50e7174c6c92c0a94bb984"
+          },
+          "Mansion walnut|wood": {
+            "points": 264,
+            "digest": "3622efa6a1ab7adc2143ea2ff7d201b19b72ae97a1901225ce45b89ac4d014be"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 856,
+          "Carved walnut moulding|wood": 1168,
+          "Mansion walnut|wood": 484
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "dd8c905783ece655c3cfd8eb30e0ca096720a12ce39a492f9175e30da6424a49",
+          "Carved walnut moulding|wood": "9d5d52ec564e9578344958d22a8ae4962c9c0c31180899635d515971529a4d98",
+          "Mansion walnut|wood": "676f058e5bbcd3ee7837e4981565f4597fc92f3a90f09084c850aee0e0845cce"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-thumb.png",
+          "bytes": 205712,
+          "sha256": "d907b2e10eefc185a4e02ea0a8448238a2da154680eb49c16f1bb0be667575a4",
+          "baselineSha256": "5c82224741b556cf41ab72e5f8f20ffe3a23f3ef2ea269e6aef2f3385b95bb5a",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-tall-larder-900-01-top.png",
+          "bytes": 239749,
+          "sha256": "da26bec2fe3c6c78674d5dfabd1fe85901b6cc1404d8ea156d52297af7dde53b",
+          "baselineSha256": "da26bec2fe3c6c78674d5dfabd1fe85901b6cc1404d8ea156d52297af7dde53b",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-front.png",
+          "bytes": 521208,
+          "sha256": "64adab18b44c0aa541709a6a2aaee89e3e9f29640d8aaaa2b46928c4a9c11220",
+          "baselineSha256": "eb471a9a04560e310cdbd6b6c397116b78fc845ca8df13f40e1136536e04fbc4",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-tall-larder-900-01-rear.png",
+          "bytes": 484892,
+          "sha256": "5cbc473b8f800d6432b294eba9560c047bbfc1f7f1fe419323ae3829cf87c884",
+          "baselineSha256": "5cbc473b8f800d6432b294eba9560c047bbfc1f7f1fe419323ae3829cf87c884",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-pull-pantry-450-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 448,
+            "digest": "85c0de6a161e0bdc37a0abe7190f7cf5613ef97c0b4c2cbafba349292fd95cbc"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 336,
+            "digest": "1c38c9389e2af4f73618375284b34edbc0e86a6cfa99e191c071ceed4e5eb5bf"
+          },
+          "Mansion walnut|wood": {
+            "points": 264,
+            "digest": "82fe576333c5169174af4809215596854a558565529af3e567f680e7c6ab8f93"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 856,
+          "Carved walnut moulding|wood": 640,
+          "Mansion walnut|wood": 484
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "916263fcf37ef79b583cffd4b2d4cddec417001a45d6e96702e72f565bdae964",
+          "Carved walnut moulding|wood": "663f803c84bc8cbdcaed451ca4396732c80d070de0c171ba016265692322aab7",
+          "Mansion walnut|wood": "1f41bb8a8e6fe64317363f6d175a8ee534313d4e2485ea6135cce2bf88d1f1a6"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-thumb.png",
+          "bytes": 180133,
+          "sha256": "b876e870cf5711efc55a9c81e30001022da70146222a240b206f8c3beec65757",
+          "baselineSha256": "f2d430d37c5a7b25759f836934e445e8a1be22ec18bc57246133e2fd221756b0",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-pull-pantry-450-01-top.png",
+          "bytes": 253710,
+          "sha256": "a93841fade2165a33a27ee992fa667f0dc3983929db54435801cdb671c9f7744",
+          "baselineSha256": "a93841fade2165a33a27ee992fa667f0dc3983929db54435801cdb671c9f7744",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-front.png",
+          "bytes": 427854,
+          "sha256": "f00959ff0edd71173da95f125b660cfba816b574250ed6b4dc51de18f99af93b",
+          "baselineSha256": "17a22a61105dcd5b52ec94b2a7942d39acf6d2b77a14a4f66f0dedb4aeeee2ba",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-pull-pantry-450-01-rear.png",
+          "bytes": 409147,
+          "sha256": "65438c39a023e8455d1ee2d174e72081447edb9157e8d4cef11a40a3e3b3e34d",
+          "baselineSha256": "65438c39a023e8455d1ee2d174e72081447edb9157e8d4cef11a40a3e3b3e34d",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-service-island-2100-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 1328,
+            "digest": "c7f1b7db140d8c7e17fa0ee0130819db89b06825fa42abc447b7ea3ead8b2751"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 576,
+            "digest": "ef355e7d8b4fdce8ff2bb6fb85052a0ed232cf33ffe465cb7eb4cc1cde64117f"
+          },
+          "Mansion walnut|wood": {
+            "points": 480,
+            "digest": "a8703b1d0957b7b3c9a340ea44a43b0ec6973cf142be7ff11022c7739339cafd"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "ab44061df3ee417c62629539c745f35c3f0a7c9e951cd1d6e234623ac26bebfe"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 2556,
+          "Carved walnut moulding|wood": 1140,
+          "Mansion walnut|wood": 880,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "2d754fcc638c7ea8e874901b9c7aa702e57cce6b12e4392fd18fd02eeb4a13b9",
+          "Carved walnut moulding|wood": "040c392d642ca0a359dc301d3634359a8e5f6781110e44cb41d84e0adbb16e9e",
+          "Mansion walnut|wood": "a1b8c1201507284778eca4dc5715c79be2176e3ae3e165c1b3cfe4e1fbc6998f",
+          "Warm limestone worktop|stone": "044b1a16607e0d1f77e59bbcaf7dbabfcd56aeff82fe93e7d54bbe2e8de7517e"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-thumb.png",
+          "bytes": 189974,
+          "sha256": "f470f90d13959dbe2c00eace2d586426771a472df683440ef1eba288f8bdab71",
+          "baselineSha256": "d45036a7acbcf5aa92b2ca54a37c05d04f082974a035898b8fd088ee13b2a52e",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-top.png",
+          "bytes": 170370,
+          "sha256": "ac31387c199e93e46f56bf946f4e6bb95b62b9268a7a1b06719dc5abc177485a",
+          "baselineSha256": "ac31387c199e93e46f56bf946f4e6bb95b62b9268a7a1b06719dc5abc177485a",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-front.png",
+          "bytes": 466531,
+          "sha256": "b16d4dd00282070562ce38a5bb54d30ee0a391234ddc8aabb2caeb3d1af5c0dd",
+          "baselineSha256": "e4576041be343262b8f10b02eb012602c63d6a6f4a6180bbee0b3b6183fc4c64",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-rear.png",
+          "bytes": 440938,
+          "sha256": "92c4c5b5de6ec49ddcda62841416259109ea04fde034ff9bad0226915b7cb7f8",
+          "baselineSha256": "92c4c5b5de6ec49ddcda62841416259109ea04fde034ff9bad0226915b7cb7f8",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-baking-dresser-1200-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 624,
+            "digest": "f5921c530e6b8f5bc109c5d05b64eb6d42e0ce1aba70085ad3687318bf22d9c0"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 360,
+            "digest": "2bb58eb1421adec8b2e07ec5b201352064eb56d1134f8833a9a0d31612f6d426"
+          },
+          "Ivory glazed ceramic|ceramic": {
+            "points": 144,
+            "digest": "4b8157c28d45617d65f4d6e9742f59abba71e0d22658a24e8998cbb6c3e64750"
+          },
+          "Mansion walnut|wood": {
+            "points": 336,
+            "digest": "dda5b3804b3ba812c33cdf2de24a6287cdab1f46879643274b986a6059dc4ac2"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 48,
+            "digest": "9a917a8dc231aaf2a42446d7d4674282dfb1d2ae8f67e450e7f40d7625c24670"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1196,
+          "Carved walnut moulding|wood": 692,
+          "Ivory glazed ceramic|ceramic": 276,
+          "Mansion walnut|wood": 616,
+          "Warm limestone worktop|stone": 92
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "c053948104c4997ee28fe41c8c031a0f1a58350080ecae474916ac595c0db062",
+          "Carved walnut moulding|wood": "7a5639ce144a2d61c7f6a305205dc395389704f04cc012dbe2a4c16b96d3eb29",
+          "Ivory glazed ceramic|ceramic": "411578ea62f2ee530c65e242c00a46baa6ed56cd94435d26d1c4a2b9f9d36d8b",
+          "Mansion walnut|wood": "f153a3a226ad02c44ab73e9d2629f03c6c978ce96ef52db0c9fe7ee3d309c880",
+          "Warm limestone worktop|stone": "98bc5251111e93134c28c710fc2f2ca20a22546987b03cd41d725576efc44db5"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-thumb.png",
+          "bytes": 236555,
+          "sha256": "19fb51e398d3845079b44d173490a74967ee00938ce8e51ff699d540d47f77d7",
+          "baselineSha256": "39b384247f3dd7d352119fca798a23473249cd4fcf8fdc330988a6c27fdfe361",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-baking-dresser-1200-01-top.png",
+          "bytes": 213773,
+          "sha256": "acd2e6da63088f15c9f53b765d99f850c68269525eae4f2c59e12bec5bcf25d1",
+          "baselineSha256": "acd2e6da63088f15c9f53b765d99f850c68269525eae4f2c59e12bec5bcf25d1",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-front.png",
+          "bytes": 638442,
+          "sha256": "ef3574403694f3b3834fd643402ed1105363a70b49446b4a92d8c9a7a8af7ad1",
+          "baselineSha256": "9260b2d898893f6b6b53162b61379fdfedf10f9b565f42af49d0ebe79e9ef089",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-baking-dresser-1200-01-rear.png",
+          "bytes": 558058,
+          "sha256": "eb63ec406eb99b147c9b3ad20f93dd1ab4487aaec53e96d17753eec120b57673",
+          "baselineSha256": "eb63ec406eb99b147c9b3ad20f93dd1ab4487aaec53e96d17753eec120b57673",
+          "bytePreserved": true
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-diagonal-corner-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 240,
+            "digest": "4a44c2cc15445099eca057e4f3bb6e4e0b139daa1f2805b7c1cfb4a676e70777"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 78,
+            "digest": "84bebefc8dd2a8c21abdd2c22bcdd843728d48ee0101d11db284be5cc638202c"
+          },
+          "Mansion walnut|wood": {
+            "points": 78,
+            "digest": "987f53b3811ad480386e622c17ca7ec2c17dc0fedd7e9a787856718219f5bb38"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 30,
+            "digest": "dff79ed7e3596cf371e45cd78aeaae655e0c06d9c4cb1966de2ac3b6c498bc68"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 468,
+          "Carved walnut moulding|wood": 152,
+          "Mansion walnut|wood": 144,
+          "Warm limestone worktop|stone": 56
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "8b3831465321960216ecb19fadc6c7a2af08f822823c09b40598ad154660f0d4",
+          "Carved walnut moulding|wood": "c56a832405ca5ba7df80f2e50fbdd769a05e7fe1e9c2a9a97472e626f9aad935",
+          "Mansion walnut|wood": "b1c1144d15ee1b4e8a7db1ed3e764d0af1a54d3c78eb7c871b64fbc826d183fb",
+          "Warm limestone worktop|stone": "d768afbfff9a80dc7196151d6766ea56e0b9fec598080a61db05227aec96df84"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-diagonal-corner-900-01-thumb.png",
+          "bytes": 265457,
+          "sha256": "ae7273c532dbe30d4006cddcbcc69b016b580e3bb87966e65721fa1424469616",
+          "baselineSha256": "68cea8b005ff4739c7f295a412eb1063fce3a9c792bb42ca4844bffa35c9d016",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-diagonal-corner-900-01-top.png",
+          "bytes": 249816,
+          "sha256": "bda14df3912fee435d2898541e799f31dcfdcf28ec6f48ad936a153345185855",
+          "baselineSha256": "78c0ba36644c0437633e8cd71ae01a8ab75302acabb654d8f2a1ba6256dc7c57",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-front.png",
+          "bytes": 703848,
+          "sha256": "0dd4c672861c757e16214c00f5e0960d23ff0d5234d8144e7d1ce8f193ede96a",
+          "baselineSha256": "2a22228bcea70f8d84defede5b6f8b651f104127434a16440462d51b5ba3a5b5",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-diagonal-corner-900-01-rear.png",
+          "bytes": 643780,
+          "sha256": "60ba63980e88fa4d80158b210cdd070706e2542ab8c34f8f5a590b65b02aad05",
+          "baselineSha256": "1dfdf0bef7a98099308552ff721d84790d751acf7b5db650ebb38eb553243638",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-l-corner-right-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 592,
+            "digest": "f1ee7878c31800851e85fb4b8e2a2d05a2b58bc24e71e35eeb15fa5c5aea4dae"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 252,
+            "digest": "b8dfc124b0cbe8606a34dfff190ecd76e8483721494840e84ac05dfba3d9df77"
+          },
+          "Mansion walnut|wood": {
+            "points": 180,
+            "digest": "e6828f1926f77120799d980f61a0e051a7b54231a3f5a73512e0fc91bb2be951"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 36,
+            "digest": "a25d0526127b35167ccab8c63527d0adc0e49bd1ddb883e20e4d162f794ae903"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1148,
+          "Carved walnut moulding|wood": 488,
+          "Mansion walnut|wood": 332,
+          "Warm limestone worktop|stone": 68
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "de94369d94f63792013a92e07ef3bfdbabc6b9088f7f99ed238c554476b4d68d",
+          "Carved walnut moulding|wood": "e53bba9fc726a6452a3a79c754e1ba967e09b74ef5ad9d9c6024f539f9edd07c",
+          "Mansion walnut|wood": "87e85afbfe738f8c895f1bae5cebb211fd347f245d2e894f218cb9bb5f371eb9",
+          "Warm limestone worktop|stone": "77417c0066d053c6d9fe1a2afe8e5badfd026632e77aea6845bff48c68190225"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-thumb.png",
+          "bytes": 289043,
+          "sha256": "9344bc3c537d622d2a70bf0232ecf629526365adf9793c09b8c9e48b08ee8b2c",
+          "baselineSha256": "962d3f72bed89803230426e8a3c83c7b831f226b6fde9edc2f1d9085403d374d",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-top.png",
+          "bytes": 240720,
+          "sha256": "011011480c3d75a17b81725379b8c9e2e178addf161c33dbe5f4fa0e9af08a4d",
+          "baselineSha256": "011011480c3d75a17b81725379b8c9e2e178addf161c33dbe5f4fa0e9af08a4d",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-front.png",
+          "bytes": 741457,
+          "sha256": "7e9291d436d3839dce40b11ff99b1c01c6d74fdd58d48d865a09a551f7956dc3",
+          "baselineSha256": "782e927ba6f10445b9e1bf042dc0fbdfdc1c196040f81fb8f3b9bfd9e5bb8cdf",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-rear.png",
+          "bytes": 651259,
+          "sha256": "de35c4c213a1c39ae2809e1539488f435cddd493a86bc0fa3f09244eb65d5009",
+          "baselineSha256": "0c60355c11e8be46b5c9eacc6d0bd917326fe57e739f34d5c9c3eaafadd275c5",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-bread-safe-600-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 176,
+            "digest": "17c3f8ae4d2286b8de07644ec901afdb0137aa742a49dae5a96591e1be3b7bfd"
+          },
+          "Carved walnut moulding|wood": {
+            "points": 648,
+            "digest": "036f53a49f4709dccd97eeefc3f8293005bd4aa508bf46a298550e3620e81807"
+          },
+          "Mansion walnut|wood": {
+            "points": 72,
+            "digest": "b05149d8ce1d4d59c83518e28902741734c2e7ebb0e93ded7ac5e860585fbf70"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 340,
+          "Carved walnut moulding|wood": 1204,
+          "Mansion walnut|wood": 132
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "7faea709d1888e7f6064fab602d2e4ddaad87d97bb1b732f7076006618bdc2bb",
+          "Carved walnut moulding|wood": "f8b16ac6f9577b22e799b3c2a9a5969a94b7739ac563e17ef9581218778fa79f",
+          "Mansion walnut|wood": "664fd2861503bff7fb51fe32e7f51e1bf410ad30a540ca227efe7883ac577fe7"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bread-safe-600-01-thumb.png",
+          "bytes": 220080,
+          "sha256": "85ed2277a426d78f403513e567050074c40fc0b0b7606306c694b9c34953f16e",
+          "baselineSha256": "789435b82fd6824e4cb3adc37929f00513571c17cc58d07a8a3379e7102d070f",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-bread-safe-600-01-top.png",
+          "bytes": 246969,
+          "sha256": "c8e28427899202af2667643bf4522f82885cfd437319187eac8758e18b2ad36c",
+          "baselineSha256": "c8e28427899202af2667643bf4522f82885cfd437319187eac8758e18b2ad36c",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-front.png",
+          "bytes": 553791,
+          "sha256": "07b506f988e28ddaf4545505c9fd0f2926275a9232ac7dd0e37142c33a4a058f",
+          "baselineSha256": "a4a845d87a490153ad082918b7ac204195233f8d3af5c8633d505ffec1cb90e2",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-bread-safe-600-01-rear.png",
+          "bytes": 478267,
+          "sha256": "80839412495907251f3e9981e0a82f66e9ccbe169da490fde3730ee4c3f295b7",
+          "baselineSha256": "bfa4af50fa2739b40e2702cd3a408c4eca5ed1c3ef4ccfdb48d1bcf95ef3a907",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-cast-iron-range-750-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Antique brass hardware|metal": {
+            "points": 944,
+            "digest": "6e6ffd31b244ffbe57c6ed078adf476d6467ff6d3e1d0e2c3879007c13306d90"
+          },
+          "Cast iron fittings|iron": {
+            "points": 240,
+            "digest": "0cda5e7a9d38ecff11cf5f0bc31cda0eb5f9d47b1d15f0d40ae11ff114dc9740"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass hardware|metal": 1852,
+          "Cast iron fittings|iron": 456
+        },
+        "triangle_surfaces": {
+          "Antique brass hardware|metal": "cea24bdf4d40562a64b5f94f6a09059cf638a5f81d61e4acfadad88eeadccf54",
+          "Cast iron fittings|iron": "2a72005f2664a08b7133515673f2a85bd7ea5d8f27c2e1d35c08d3bb5d09deb7"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-thumb.png",
+          "bytes": 247031,
+          "sha256": "b40266645bffb0356c0196ba16233c421f9d8eda67d218c4a0488300326d7c1a",
+          "baselineSha256": "1c692aba0fc3de5e2bf55d3a149891c9f875af6964a168bf7ff8e7c963268eee",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-cast-iron-range-750-01-top.png",
+          "bytes": 243499,
+          "sha256": "73a7a6c9b5e06d5d9b2fa6392624ac83e965df2eb7fbffb140c4fbcd2f45b360",
+          "baselineSha256": "73a7a6c9b5e06d5d9b2fa6392624ac83e965df2eb7fbffb140c4fbcd2f45b360",
+          "bytePreserved": true
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-front.png",
+          "bytes": 629777,
+          "sha256": "d06c18c85d13476711a696e6139a32854e19fb398e9a62a640a14029ee5d8b1b",
+          "baselineSha256": "fa604573667d7c90d11d150e30b048c38e2aa62c8d6ba7ef885e675e1f0988bf",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-cast-iron-range-750-01-rear.png",
+          "bytes": 604213,
+          "sha256": "e9e955734961cec4425f04f0ccc65d8b1802c97e354c0de88e2ab72b92f0602e",
+          "baselineSha256": "883209d0fe5e1b4334c342e397dc24153e9118829fa1674591ed44bec0ae8833",
+          "bytePreserved": false
+        }
+      }
+    },
+    {
+      "id": "rpg-mansion-kitchen-draining-stand-900-01",
+      "physicalGeometryChanged": true,
+      "currentPhysicalGeometrySignature": {
+        "point_support": {
+          "Carved walnut moulding|wood": {
+            "points": 72,
+            "digest": "2ff74404681ea1a23f0554b036b4415439ff1965ec5251bb00044ed164248594"
+          },
+          "Mansion walnut|wood": {
+            "points": 192,
+            "digest": "3f61b9392839b1020d08e68c21fe8365dc2f6a78fae42db3da75c95c281ef563"
+          },
+          "Warm limestone worktop|stone": {
+            "points": 360,
+            "digest": "107306c15bfc41168363d5032125c695f18946b05af68bdd1e983b1de675d812"
+          }
+        },
+        "triangle_counts": {
+          "Carved walnut moulding|wood": 132,
+          "Mansion walnut|wood": 368,
+          "Warm limestone worktop|stone": 660
+        },
+        "triangle_surfaces": {
+          "Carved walnut moulding|wood": "3b4d8f6187c5e344e3391aba0f23bbee5d50c469ace80bc8e91e569bbe14e6e5",
+          "Mansion walnut|wood": "328361d4bcce5edb15bd90118b6e9d6f6be1f0b300cf15949ae8abf2889d93d8",
+          "Warm limestone worktop|stone": "3ce3ae09c3d27ecaafc464ad9a02eb76672ac716e66bbfad328fe5e4fd753940"
+        }
+      },
+      "images": {
+        "thumb": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-thumb.png",
+          "bytes": 240419,
+          "sha256": "f9fec10144e04a252148503db961b7ac55cbf9961bc8d3f6df3dcc88cc4b24f0",
+          "baselineSha256": "b4dacf4dc49bee1ee41c273161f2e490cde2de02ac86d8d6857775f627d26f79",
+          "bytePreserved": false
+        },
+        "top": {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-draining-stand-900-01-top.png",
+          "bytes": 257220,
+          "sha256": "cac923a6aaabc3b4822aa1be896c37996660e2bf261d6b2ab0361c8e3e0776a2",
+          "baselineSha256": "f6d598f80badd5aa0fa5837ab798dff6a746785ff7e98865ca1d09920e7905d0",
+          "bytePreserved": false
+        },
+        "front": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-front.png",
+          "bytes": 538582,
+          "sha256": "22502867ceff39caca8477b107291fa352cd16b4dc8ffa5eb1e0e7776b1a73c2",
+          "baselineSha256": "a8ba0167abbbb46f5238224a69851725c77e2df01f56b19b99c35408a8da1f3b",
+          "bytePreserved": false
+        },
+        "rear": {
+          "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-draining-stand-900-01-rear.png",
+          "bytes": 536143,
+          "sha256": "93c3dfe7d7c2530230ae3675098bee1398615174aa01e0bb27cbef94d5b0fd41",
+          "baselineSha256": "47a75f02fa110e4dc9ef58c37721c7e1f870baa1898fd5f7f29f41d6b3fbf497",
+          "bytePreserved": false
+        }
+      }
+    }
+  ]
+}

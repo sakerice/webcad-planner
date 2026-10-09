@@ -1,0 +1,944 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-campaign-x-trestle-cot-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "2e21f4c40b9ae7f16539cd60523695adf070dc9d1d5809ca5b440e9a3b1d997e",
+      "git_blob_sha": "432fdbf4a88f5f20d0c1fe5ab9aba7a8f4ad4a36",
+      "bytes": 91164,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4399999976158142,
+          0.0,
+          -1.090000033378601
+        ],
+        [
+          0.4399999976158142,
+          0.6800000071525574,
+          1.090000033378601
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        879.9999952316284,
+        2180.000066757202,
+        680.0000071525574
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-06,
+        6.67572021484375e-05,
+        7.152557373046875e-06
+      ],
+      "triangles": 1272,
+      "uv": {
+        "triangles": 1272,
+        "valid_triangles": 1272,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.016193816041216,
+        "p95": 5.01633379700082,
+        "p95_p05": 1.0000279058116048,
+        "median": 5.016257594985383
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut structural heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.38999998569488525
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged brass joints and finials",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.42869049310684204,
+              0.27049779891967773,
+              0.07036009430885315,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Polished walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.16202937066555023,
+              0.07036009430885315,
+              0.03189603239297867,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3499999940395355
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "bedding"
+          },
+          "name": "Ivory woven mattress and pillows",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7304607629776001,
+              0.6653872728347778,
+              0.5088813304901123,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8399999737739563
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "cover"
+          },
+          "name": "Deep teal velvet bed cover",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.03560131415724754,
+              0.10702310502529144,
+              0.09530746936798096,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.9100000262260437
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "bedding",
+        "cover",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "bedding",
+        "cover",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "frontMeaning": "foot-end",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no external mesh or image",
+        "source": "tools/blender/rpg_mansion/scaled_beds_additions/build.py",
+        "dimensionBasis": "Intended period-adapted design; missing legacy geometry unverified"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-x-trestle-cot-01-thumb.png",
+          "sha256": "c5eac268dd183e8fa6c897bf742d736db087ab2292b04cdf1d510abab9db0b85",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 50783,
+          "pixel_bbox_alpha_gt_0": [
+            67,
+            104,
+            445,
+            408
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            68,
+            105,
+            444,
+            407
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-campaign-x-trestle-cot-01-top.png",
+          "sha256": "be7a35b4b9a5e8cafbe662ea9e8c7aa848468799aa6ee1defc5c665b8b61b011",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 79307,
+          "pixel_bbox_alpha_gt_0": [
+            165,
+            34,
+            347,
+            478
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            166,
+            35,
+            346,
+            477
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-campaign-x-trestle-cot-01-front.png",
+          "sha256": "bd3947493740a2a180f521b1348c25e91755646a06ea95fd763a756c558abd0a",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 80177,
+          "pixel_bbox_alpha_gt_0": [
+            38,
+            87,
+            474,
+            425
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            38,
+            88,
+            474,
+            424
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-campaign-x-trestle-cot-01-rear.png",
+          "sha256": "37e8c76464db9e0c42c22c16cb9309191a699d7a5a52d620384bc0c13aa10fb0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 50779,
+          "pixel_bbox_alpha_gt_0": [
+            67,
+            103,
+            445,
+            409
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            68,
+            104,
+            444,
+            408
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged brass joints and finials|metal": {
+            "points": 136,
+            "digest": "a961c69acc7edde995b2774d07294a47664c1a837ac397725b1814a70338bc05"
+          },
+          "Deep teal velvet bed cover|cover": {
+            "points": 128,
+            "digest": "16f69346043c40af47e679999a7297a97c28f6a2d993de09ca5e091682d942c6"
+          },
+          "Ivory woven mattress and pillows|bedding": {
+            "points": 152,
+            "digest": "f58c74a8d5035afef2dc7cf29e2ca488c209b9a7249b1b79fd2d51ec49c6f9ac"
+          },
+          "Polished walnut mouldings|wood": {
+            "points": 48,
+            "digest": "dedd35ca8fde33c9af4743201efb5c0153895c4d1cd5283aa1888a95f6d93c5d"
+          },
+          "Walnut structural heartwood|wood": {
+            "points": 224,
+            "digest": "2ed4a241def4ddfbfd20722f06056030f1b4bb18d84cd2f9d1706a789cb7bfc2"
+          }
+        },
+        "triangle_counts": {
+          "Aged brass joints and finials|metal": 240,
+          "Deep teal velvet bed cover|cover": 248,
+          "Ivory woven mattress and pillows|bedding": 292,
+          "Polished walnut mouldings|wood": 88,
+          "Walnut structural heartwood|wood": 404
+        },
+        "triangle_surfaces": {
+          "Aged brass joints and finials|metal": "864680488af5cd0aecadac0aeed4ba337e2c267070fba6219d10df9d1e676630",
+          "Deep teal velvet bed cover|cover": "2da7c00e4d722a09df4c98f3ade38f2a6a9945744d57f4284cf1dca942bdae20",
+          "Ivory woven mattress and pillows|bedding": "cc5b59576ed4e19a14029bc389f1e4fedf88d39adc9b36bd28b18995ffd111f5",
+          "Polished walnut mouldings|wood": "9533afee04241b6b0697ec71f332ce723ce15f9479dcec3bd305e5907cc5603c",
+          "Walnut structural heartwood|wood": "626e59a29b6b10382a11ad25601ba040a137e46606f0579bcd900c6a04b403d2"
+        },
+        "uv_triangle_mapping": {
+          "Aged brass joints and finials|metal": "badec043bcf483fb120aba4183dc5aadd7aa629da79a058da21241079abc69c2",
+          "Deep teal velvet bed cover|cover": "e7ff0758d9710f3f3f9a3ca687a80d3c175d964920766d01ce486dea2cb9ec3d",
+          "Ivory woven mattress and pillows|bedding": "c9f0c520e633724b06a0bd9cd2929356da5b3404f5090b361fef3424076e188e",
+          "Polished walnut mouldings|wood": "b5e48a60107e4afae5da28edd8cb03fc1f1b2c266cb2dee7dcaa486341dc0af4",
+          "Walnut structural heartwood|wood": "987a0f3e431ede0a9aee55a2c00ba25179fdfec90e2c83d9db321a9cf77eb512"
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-barrel-vault-enclosed-bed-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "d43af33a8971ee0845daed61a34a6799bb18e1814ff67224851820c40ef9abb6",
+      "git_blob_sha": "bce6b178bfc75fdf2261a51e30c0a2c98a02b745",
+      "bytes": 191504,
+      "actual_bounds_gltf_m": [
+        [
+          -0.699999988079071,
+          0.0,
+          -1.1200000047683716
+        ],
+        [
+          0.699999988079071,
+          1.9800000190734863,
+          1.1200000047683716
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1399.999976158142,
+        2240.000009536743,
+        1980.0000190734863
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        9.5367431640625e-06,
+        1.9073486328125e-05
+      ],
+      "triangles": 2744,
+      "uv": {
+        "triangles": 2744,
+        "valid_triangles": 2744,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 10.30467411167605,
+        "p95": 10.305329317700643,
+        "p95_p05": 1.0000635833814338,
+        "median": 10.304981044028656
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut structural heartwood",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.08650045841932297,
+              0.03688944876194,
+              0.017641954123973846,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.38999998569488525
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Polished walnut mouldings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.16202937066555023,
+              0.07036009430885315,
+              0.03189603239297867,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.3499999940395355
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Aged brass joints and finials",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.42869049310684204,
+              0.27049779891967773,
+              0.07036009430885315,
+              1
+            ],
+            "metallicFactor": 0.7799999713897705,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "bedding"
+          },
+          "name": "Ivory woven mattress and pillows",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.7304607629776001,
+              0.6653872728347778,
+              0.5088813304901123,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8399999737739563
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "cover"
+          },
+          "name": "Deep teal velvet bed cover",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.03560131415724754,
+              0.10702310502529144,
+              0.09530746936798096,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.9100000262260437
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "bedding",
+        "cover",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "bedding",
+        "cover",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "frontMeaning": "foot-end",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "packId": "rpg-mansion",
+        "provenance": "Original procedural Blender geometry; no external mesh or image",
+        "source": "tools/blender/rpg_mansion/scaled_beds_additions/build.py",
+        "dimensionBasis": "Intended period-adapted design; missing legacy geometry unverified"
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-vault-enclosed-bed-01-thumb.png",
+          "sha256": "b717295def3278ddbbb97aea709640bfae55db62baa9db1cd8e32e1dd1dff92b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 137266,
+          "pixel_bbox_alpha_gt_0": [
+            49,
+            18,
+            462,
+            494
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            50,
+            18,
+            462,
+            494
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-barrel-vault-enclosed-bed-01-top.png",
+          "sha256": "1d39ca38e5dd4b34e7f591bf608ea1038459c5820beea7d1a27494289b51e7d1",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 123355,
+          "pixel_bbox_alpha_gt_0": [
+            117,
+            34,
+            395,
+            478
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            117,
+            35,
+            395,
+            477
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-barrel-vault-enclosed-bed-01-front.png",
+          "sha256": "64be147a4d7b2124c3cb65c274416446ce98b47e1253e780bb470b79bedfdffa",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 113806,
+          "pixel_bbox_alpha_gt_0": [
+            101,
+            38,
+            411,
+            474
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            102,
+            38,
+            410,
+            474
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "tools/blender/rpg_mansion/scaled_beds_additions/evidence/rpg-mansion-barrel-vault-enclosed-bed-01-rear.png",
+          "sha256": "a17232f1dea7c9529d730ade7c5637d82d7990b8b63b5cf55b780412edef54e2",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 138334,
+          "pixel_bbox_alpha_gt_0": [
+            49,
+            18,
+            462,
+            494
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            50,
+            18,
+            462,
+            494
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged brass joints and finials|metal": {
+            "points": 64,
+            "digest": "ec02f233bc2d77e3cc0eb9d9bea3ed48c3fa438015d9587ec11b67e2f693003b"
+          },
+          "Deep teal velvet bed cover|cover": {
+            "points": 128,
+            "digest": "0a398d500c8bb84232c6a095f599e896ef164067844789da94b48441c3110557"
+          },
+          "Ivory woven mattress and pillows|bedding": {
+            "points": 128,
+            "digest": "16feec6ec524a374d12c45edaca452597f77260a58645f667da3d5503c60362f"
+          },
+          "Polished walnut mouldings|wood": {
+            "points": 444,
+            "digest": "c2f1bba7b5334b17c307a652dbcfa6dce68a7d6f7823b9c63ad753ba333b4016"
+          },
+          "Walnut structural heartwood|wood": {
+            "points": 698,
+            "digest": "0edbbffbc04f1537e705e4f71fd5ac0a97c95eb1b74941fd18f355988afd6b76"
+          }
+        },
+        "triangle_counts": {
+          "Aged brass joints and finials|metal": 112,
+          "Deep teal velvet bed cover|cover": 248,
+          "Ivory woven mattress and pillows|bedding": 248,
+          "Polished walnut mouldings|wood": 836,
+          "Walnut structural heartwood|wood": 1300
+        },
+        "triangle_surfaces": {
+          "Aged brass joints and finials|metal": "eb39fe19571d53172b065444566acf34aaacdae8ad44fbbef0b22c758260ca67",
+          "Deep teal velvet bed cover|cover": "3e8409b51e9215681b3980eb9e367053014c8aed6f318c2431cc9b1ad15d201d",
+          "Ivory woven mattress and pillows|bedding": "ef8296487c47b3d3b90f7f15a107bac616ddb36479ecc62302cd313deca2cf90",
+          "Polished walnut mouldings|wood": "81ee6c3a0dde6bedb48c2529ed7c5d40b68eef684e92a4caa2ff46db01449af8",
+          "Walnut structural heartwood|wood": "0a00d982d74e147c0bfbd3d243ce359cb3bb3494b84b04f24d9b883b8f86a153"
+        },
+        "uv_triangle_mapping": {
+          "Aged brass joints and finials|metal": "21b1a5fa728529ce3d71abf795935e19f5e55d15a2c4dc88efb13733b5a7c6e3",
+          "Deep teal velvet bed cover|cover": "43714f1467a4fd388ae001e7b559f39c24a34fe542e7601c24efb68d26bc1bd6",
+          "Ivory woven mattress and pillows|bedding": "e01c5a422ea7a20988982131d27ee284722178d1e09e57cb003bc739087f67dc",
+          "Polished walnut mouldings|wood": "323806aea3c28a76fc2ccf068a44a363d1553a12e6d6842ae8314775d2b2513a",
+          "Walnut structural heartwood|wood": "f3257a9ea75ab5d5a12374f01663c0a97d05a8bef196e03a840824954bf5d3f1"
+        }
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "totalTriangles": 4016,
+  "glbBytes": 282668,
+  "errors": []
+}

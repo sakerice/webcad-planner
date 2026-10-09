@@ -1,0 +1,120 @@
+{
+  "name": "wall-door-corner",
+  "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner.blend",
+  "sourceSha256": "dc7d4d4cf045f60b48b0b2b63639b2d724c34b7420b21d1a1550c1d945cff7ea",
+  "instances": [
+    {
+      "label": "paneled-wall-bay",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        0.6,
+        0,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    },
+    {
+      "label": "rectangular-doorway-bay",
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "modelSha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+      "constructionDatumWorldM": [
+        2.1,
+        0,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.01900000125169754,
+        0.0
+      ]
+    },
+    {
+      "label": "paneled-return-corner",
+      "id": "rpg-mansion-paneled-return-corner-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-return-corner-01.glb",
+      "modelSha256": "eeaca0f153284cba991460371c05c622e9062e6cbf62127ce38e8da4712bc4b2",
+      "constructionDatumWorldM": [
+        3.6,
+        0,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        -0.24000000953674316,
+        -0.24000000953674316,
+        0.0
+      ]
+    },
+    {
+      "label": "Return straight paneled bay",
+      "id": "rpg-mansion-paneled-wall-bay-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "modelSha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37",
+      "constructionDatumWorldM": [
+        3.6,
+        -1.2,
+        0
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.019999999552965164,
+        0.0
+      ]
+    }
+  ],
+  "fixtures": [],
+  "views": {
+    "exterior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-exterior.png",
+      "sha256": "2465a02f24811d882c24904c6b0f6b012bd7f6a8a4fe5347bee226e4670001e5",
+      "camera": {
+        "direction": [
+          -6,
+          8,
+          5
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.908295154571533,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "interior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-interior.png",
+      "sha256": "e4dd929385f99761aaf8f3fab072728b65a98f4807c562d75fc189b354071696",
+      "camera": {
+        "direction": [
+          4,
+          -8,
+          4
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.627947807312012,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "top": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-top.png",
+      "sha256": "79e05996f9ed6ed337746e80204f6839adcd5e1d7b2bc31bfd6371a2e75b33c8",
+      "camera": {
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.179775238037109,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    }
+  }
+}

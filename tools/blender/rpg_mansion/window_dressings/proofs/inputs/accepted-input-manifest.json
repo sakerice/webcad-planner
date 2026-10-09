@@ -1,0 +1,329 @@
+{
+  "raised-sill": {
+    "id": "rpg-mansion-raised-sill-fixed-window-bay-01",
+    "file": "proofs/inputs/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+    "sha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807",
+    "source": "Accepted integrated240 snapshot; copied unchanged",
+    "moduleContract": {
+      "role": "Real wall aperture occupied by fixed four-pane glazing, timber mullion/transom and projecting stone sill",
+      "nominalWidthMm": 1200,
+      "wallHeightMm": 3000,
+      "wallThicknessMm": 240,
+      "wallApertureMm": {
+        "width": 920,
+        "bottom": 800,
+        "top": 2600
+      },
+      "frameClearOpeningMm": {
+        "width": 760,
+        "bottom": 880,
+        "top": 2520
+      },
+      "fixedGlazing": true,
+      "nativeWallCutting": false,
+      "glassThicknessMm": 8,
+      "connections": [
+        {
+          "label": "left",
+          "point": [
+            -0.6,
+            0,
+            0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "assetPointM": [
+            -0.6,
+            0.03999999910593033,
+            0.0
+          ],
+          "constructionPointGltfM": [
+            -0.6,
+            0.0,
+            0.0
+          ],
+          "assetPointGltfM": [
+            -0.6,
+            0.0,
+            -0.03999999910593033
+          ],
+          "normalGltf": [
+            -1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "label": "right",
+          "point": [
+            0.6,
+            0,
+            0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "assetPointM": [
+            0.6,
+            0.03999999910593033,
+            0.0
+          ],
+          "constructionPointGltfM": [
+            0.6,
+            0.0,
+            0.0
+          ],
+          "assetPointGltfM": [
+            0.6,
+            0.0,
+            -0.03999999910593033
+          ],
+          "normalGltf": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "point": [
+            0,
+            0,
+            3
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "assetPointM": [
+            0.0,
+            0.03999999910593033,
+            3.0
+          ],
+          "constructionPointGltfM": [
+            0.0,
+            3.0,
+            0.0
+          ],
+          "assetPointGltfM": [
+            0.0,
+            3.0,
+            -0.03999999910593033
+          ],
+          "normalGltf": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      ],
+      "constructionToAssetTranslationM": [
+        -0.0,
+        0.03999999910593033,
+        -0.0
+      ],
+      "units": "metres",
+      "connectionFrame": "Blender XYZ / Z up",
+      "allowedAssemblyTransforms": "Rigid translation and native Blender Z-axis / glTF Y-axis rotations in90-degree steps; no mirror or scale",
+      "gridMm": [
+        1200,
+        600
+      ],
+      "defaultAssetBottomElevationMm": 0,
+      "wallTopDatumMm": 3000,
+      "constructionToAssetTranslationGltfM": [
+        -0.0,
+        -0.0,
+        -0.03999999910593033
+      ],
+      "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; asset points use exported bottom-centre origin",
+      "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+      "placementExample": {
+        "assetBottomMm": 0,
+        "wallTopMm": 3000
+      },
+      "glazingMaterial": {
+        "appearance": "Lightly tinted fixed glazing with tested visible transmission",
+        "alpha": 0.1,
+        "roughness": 0.08,
+        "glassThicknessMm": 8
+      }
+    },
+    "w": 1200,
+    "d": 360,
+    "h": 3000
+  },
+  "french": {
+    "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+    "file": "proofs/inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+    "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+    "source": "Accepted integrated240 snapshot; copied unchanged",
+    "moduleContract": {
+      "role": "True floor-open wall aperture, fixed timber French frames and eight clear glazing panes",
+      "connections": [
+        {
+          "label": "left",
+          "point": [
+            -0.6,
+            0,
+            0
+          ],
+          "normal": [
+            -1,
+            0,
+            0
+          ],
+          "assetPointM": [
+            -0.6,
+            0.04500000178813934,
+            0.0
+          ],
+          "constructionPointGltfM": [
+            -0.6,
+            0,
+            0
+          ],
+          "assetPointGltfM": [
+            -0.6,
+            0.0,
+            -0.04500000178813934
+          ],
+          "normalGltf": [
+            -1,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "right",
+          "point": [
+            0.6,
+            0,
+            0
+          ],
+          "normal": [
+            1,
+            0,
+            0
+          ],
+          "assetPointM": [
+            0.6,
+            0.04500000178813934,
+            0.0
+          ],
+          "constructionPointGltfM": [
+            0.6,
+            0,
+            0
+          ],
+          "assetPointGltfM": [
+            0.6,
+            0.0,
+            -0.04500000178813934
+          ],
+          "normalGltf": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "point": [
+            0,
+            0,
+            3
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "assetPointM": [
+            0.0,
+            0.04500000178813934,
+            3.0
+          ],
+          "constructionPointGltfM": [
+            0,
+            3,
+            0
+          ],
+          "assetPointGltfM": [
+            0.0,
+            3.0,
+            -0.04500000178813934
+          ],
+          "normalGltf": [
+            0,
+            1,
+            0
+          ]
+        }
+      ],
+      "nominalWidthMm": 1200,
+      "wallHeightMm": 3000,
+      "wallThicknessMm": 240,
+      "wallApertureMm": {
+        "width": 1040,
+        "bottom": 0,
+        "top": 2750
+      },
+      "frameClearOpeningMm": {
+        "width": 920,
+        "bottom": 90,
+        "top": 2680
+      },
+      "fixedGlazing": true,
+      "operable": false,
+      "nativeWallCutting": false,
+      "glassThicknessMm": 8,
+      "constructionToAssetTranslationM": [
+        -0.0,
+        0.04500000178813934,
+        -0.0
+      ],
+      "units": "metres",
+      "connectionFrame": "Blender XYZ / Z up",
+      "allowedAssemblyTransforms": "Rigid translation and Z-axis rotations in 90-degree steps only; no mirrored or normalized scale",
+      "gridMm": [
+        1200,
+        600
+      ],
+      "defaultAssetBottomElevationMm": 0,
+      "wallTopDatumMm": 3000,
+      "constructionToAssetTranslationGltfM": [
+        -0.0,
+        -0.0,
+        -0.04500000178813934
+      ],
+      "exportConnectionFrame": "glTF XYZ / +Y up / +Z front; bottom-centre origin",
+      "axisConversion": "glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y)",
+      "glazingMaterial": {
+        "appearance": "Lightly tinted fixed glazing; current exported transmission testing required",
+        "alpha": 0.1,
+        "roughness": 0.08,
+        "glassThicknessMm": 8
+      }
+    },
+    "w": 1200,
+    "d": 370,
+    "h": 3000
+  },
+  "existing-curtain": {
+    "id": "rpg-mansion-curtain-01",
+    "file": "proofs/inputs/rpg-mansion-curtain-01.glb",
+    "sha256": "dc0e749533c6e8db97eea40aa72c6c3ff66cb24c98756504a9e5512cd639698c",
+    "source": "Accepted integrated240 snapshot; copied unchanged",
+    "moduleContract": null,
+    "w": 2150,
+    "d": 270,
+    "h": 2370
+  }
+}

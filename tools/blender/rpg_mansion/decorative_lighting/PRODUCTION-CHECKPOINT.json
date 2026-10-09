@@ -1,0 +1,112 @@
+{
+  "status": "Producer gates passed and root visual review passed; independent final-byte certificate pending",
+  "acceptedNewModelCount": 0,
+  "prototypeCount": 3,
+  "rootVisualApproval": "2026-10-08T05:22:00Z",
+  "independentAcceptance": false,
+  "expansionBlockedPendingPrototypeCertification": true,
+  "accepted204AndMaterials12Untouched": true,
+  "applicationChanges": false,
+  "remoteOrDeploymentChanges": false,
+  "staticDecorativeModels": true,
+  "nativeRuntimeLightObjects": 0,
+  "qaFixturesCountAsModels": false,
+  "gates": {
+    "bytes": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/bytes.json",
+      "sha256": "afd7191fe51f3f1947335feab2574168862d5f15e59aa02a534de160a99e9619",
+      "errors": 0
+    },
+    "native": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/native.json",
+      "sha256": "8b95e36a42b4528146c96fbd9eda61cfd225df8e97f24b03c3ee063368bc51f2",
+      "errors": 0
+    },
+    "local-supports": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/local-supports.json",
+      "sha256": "1634553b3562dbbb807febfbf53de93a73b9e638d20c53b896fbf112a05344b6",
+      "errors": 0
+    },
+    "cavities": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/cavities.json",
+      "sha256": "637879bf703f46d3810cbf5ee75a14df33f2b4a41a38bbbcd2d6a9444ead7944",
+      "errors": 0
+    },
+    "exported-installation": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/exported-installation.json",
+      "sha256": "28fca32190497871e6cf74f15d061f11b317e31df8d084bfb1ae5f3dc69a3ec3",
+      "errors": 0
+    },
+    "image-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/image-replay.json",
+      "sha256": "4d84bf583526ad2afe864155acc39e79ed096c5b8834e64229c59555e25544b7",
+      "errors": 0
+    },
+    "proof-image-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/proof-image-replay.json",
+      "sha256": "cf0c5f618a747c687ee0df87348f903f73448b8a93ae0452acde3c902caa7d24",
+      "errors": 0
+    },
+    "source-privacy": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/source-privacy.json",
+      "sha256": "0e2589398ba45d1c6011660bba8792ad7e55dfed12eaf53f47e82327cdb76fe5",
+      "errors": []
+    },
+    "accepted-inventory-comparison": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/accepted-inventory-comparison.json",
+      "sha256": "f18a1680324e6fc499791b5a0c9a9071e058266dfdedca16624d5a53777c928f",
+      "errors": 0
+    },
+    "normals-dedupe": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/normals-dedupe.json",
+      "sha256": "cab07b596d011cb54ae709a47e9df51c7bccb31670c67ea42f72459a32345ef7",
+      "errors": 0
+    },
+    "exact-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/exact-replay.json",
+      "sha256": "721fd37ce0eae684839d6f9c4d8db7df0910f40368c7bc91f24f1f8ecdcaf6cf",
+      "errors": 0
+    },
+    "glass-contrast": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/glass-contrast.json",
+      "sha256": "1c496f6486ffdf6ae7828f07bb4758b261f7c3e43794bb5f93ca993343fbddb1",
+      "errors": []
+    },
+    "installation-proofs": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/installation-proofs.json",
+      "sha256": "7409209a824adfd9be2a3592a1326f4bb1353f4c45d4e129425e028795167ce8",
+      "errors": []
+    },
+    "solid-geometry": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting/qa/solid-geometry.json",
+      "sha256": "5ba15e77c559e910d34464b5d3507aac7946aad6fe69a1b95017159efc0a896f",
+      "errors": 0
+    }
+  },
+  "items": [
+    {
+      "id": "rpg-mansion-banker-desk-lamp-01",
+      "modelSha256": "129ef274caa6507d88e47d1d2996e84ba3eaa0223c53efca880aac3ce5858d7a",
+      "sourceSha256": "03c84ce38254d5ace4b54d71ef2a00c3fb7af71e02fbaa4f10d6cedca9576b6f",
+      "triangles": 1856,
+      "glbBytes": 122568,
+      "nativeEditableParts": 18
+    },
+    {
+      "id": "rpg-mansion-bracketed-wall-lantern-01",
+      "modelSha256": "e87629efe628a8b14f5817ac32b0453366b6b09ac71e71437113c001de1bc98b",
+      "sourceSha256": "4657f30a8ef97be3582de02588994dbb77c6cd8f95df83acde29dea9f563c3d4",
+      "triangles": 1940,
+      "glbBytes": 137864,
+      "nativeEditableParts": 31
+    },
+    {
+      "id": "rpg-mansion-linear-four-light-pendant-01",
+      "modelSha256": "52637361d4802565a00a514b5ba49fe2d500316eb4020eb8d17e10c7b52c686a",
+      "sourceSha256": "a8cf49e0aa62d2d36eda2eece08396be4fc7c3762ba68980de8d02ae31447684",
+      "triangles": 5952,
+      "glbBytes": 403232,
+      "nativeEditableParts": 28
+    }
+  ]
+}

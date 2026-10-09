@@ -1,0 +1,151 @@
+{
+  "model": "rpg-mansion-kitchen-service-island-2100-01",
+  "dimensions_mm": [
+    2099.9999046325684,
+    899.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -1.0499999523162842,
+      -0.44999998807907104,
+      0.0
+    ],
+    [
+      1.0499999523162842,
+      0.44999998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 4668,
+  "uv": {
+    "meters_per_uv": 7.942777604226308,
+    "min": 7.107738839006719,
+    "max": 10.148173112063143,
+    "p05": 7.374709211897335,
+    "p95": 9.633389163902862,
+    "total_triangles": 4668,
+    "valid_triangles": 4668,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Antique brass hardware": "metal",
+    "Warm limestone worktop": "stone"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 199096,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "312c0231b4d3332bfacbe4a43bc06dc6b94bbb588e269bc7137712a78d5c1877",
+  "source_sha256": "30ca99e874e823a3dcb6a5a7fd4e0315299a95afeb5b2d064a672ef4624955e1",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.007",
+      "Curved brass drawer pull.008",
+      "Curved brass drawer pull.009",
+      "Curved brass drawer pull.010",
+      "Curved brass drawer pull.011",
+      "Curved brass drawer pull.012",
+      "Curved brass drawer pull.013"
+    ],
+    "corrected_polygons": 182,
+    "geometry_normals_material_signature": "a80328237c0a1200afc978c04ad2218c99629bb701fa2bddcdf87933fb9fc981",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 7.942777604226308,
+      "min": 7.107738839006719,
+      "max": 10.148173112063143,
+      "p05": 7.374709211897335,
+      "p95": 9.633389163902862,
+      "total_triangles": 4668,
+      "valid_triangles": 4668,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 231225,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    2099.9999046325684,
+    899.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -1.0499999523162842,
+      0.0,
+      -0.44999998807907104
+    ],
+    [
+      1.0499999523162842,
+      0.8500000238418579,
+      0.44999998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 4668,
+    "valid_triangles": 4668,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 7.37470935102674,
+    "p95": 9.633389208905362,
+    "p95_p05": 1.3062737459021565,
+    "median": 7.9427774857493905
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-service-island-2100-01.glb",
+      "sha256": "312c0231b4d3332bfacbe4a43bc06dc6b94bbb588e269bc7137712a78d5c1877",
+      "bytes": 199096
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-service-island-2100-01.blend",
+      "sha256": "30ca99e874e823a3dcb6a5a7fd4e0315299a95afeb5b2d064a672ef4624955e1",
+      "bytes": 231225
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-thumb.png",
+      "sha256": "f470f90d13959dbe2c00eace2d586426771a472df683440ef1eba288f8bdab71",
+      "bytes": 189974
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-service-island-2100-01-top.png",
+      "sha256": "ac31387c199e93e46f56bf946f4e6bb95b62b9268a7a1b06719dc5abc177485a",
+      "bytes": 170370
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-front.png",
+      "sha256": "b16d4dd00282070562ce38a5bb54d30ee0a391234ddc8aabb2caeb3d1af5c0dd",
+      "bytes": 466531
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-service-island-2100-01-rear.png",
+      "sha256": "92c4c5b5de6ec49ddcda62841416259109ea04fde034ff9bad0226915b7cb7f8",
+      "bytes": 440938
+    }
+  }
+}

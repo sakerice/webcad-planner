@@ -1,0 +1,198 @@
+{
+  "id": "rpg-mansion-dresser-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-dresser-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-dresser-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-dresser-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 31,
+  "validation": {
+    "model": "rpg-mansion-dresser-01",
+    "dimensions_mm": [
+      1100.000023841858,
+      540.0000214576721,
+      1000.0
+    ],
+    "bounds_m": [
+      [
+        -0.550000011920929,
+        -0.27000001072883606,
+        0.0
+      ],
+      [
+        0.550000011920929,
+        0.27000001072883606,
+        1.0
+      ]
+    ],
+    "triangles": 5092,
+    "uv": {
+      "meters_per_uv": 4.249695147052031,
+      "min": 3.8052186431501567,
+      "max": 5.391330293861738,
+      "p05": 3.9203366969632887,
+      "p95": 4.841924302927729,
+      "total_triangles": 5092,
+      "valid_triangles": 5092,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut": "wood",
+      "RPG Walnut edge": "wood",
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 167732
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "3692336dfc5eb8c3e8ecc83e5acc1916197ae6609492aa67fd50474eaccc7a91",
+    "bytes": 167732,
+    "triangles": 5092,
+    "bounds_gltf_m": [
+      [
+        -0.550000011920929,
+        0.0,
+        -0.27000001072883606
+      ],
+      [
+        0.550000011920929,
+        1.0,
+        0.27000001072883606
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1100.000023841858,
+      540.0000214576721,
+      1000.0
+    ],
+    "geometry_material_sha256_1e7": "490d7ec9aed178675d3bc8c7960b787ba22a005f92a0f481c28af254d555112f",
+    "geometry_material_uv_sha256_1e7": "489e81ee6635a1309193345d4678bb118712f6cc59f128e1446edb5c48fa2694",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 3744
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 876
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 472
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "8f579d321640901896869998c73533ff97631097da41723eec5a80b9e0c8f3f4",
+    "bytes": 167936,
+    "triangles": 5092,
+    "bounds_gltf_m": [
+      [
+        -0.550000011920929,
+        0.0,
+        -0.27000001072883606
+      ],
+      [
+        0.550000011920929,
+        1.0,
+        0.27000001072883606
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1100.000023841858,
+      540.0000214576721,
+      1000.0
+    ],
+    "geometry_material_sha256_1e7": "490d7ec9aed178675d3bc8c7960b787ba22a005f92a0f481c28af254d555112f",
+    "geometry_material_uv_sha256_1e7": "489e81ee6635a1309193345d4678bb118712f6cc59f128e1446edb5c48fa2694",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 3744
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 876
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 472
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 7.29,
+  "source_sha256": "bb18ea268855adfcbeba67894d31046145a14076a9dc9b3f38361af970df8cb5",
+  "front_sha256": "53192685aded268b6c269e96792463e3636f83d7eda09788c650494fbe8c82c9",
+  "rear_sha256": "76ff5211a41b8984ea98e066c160c0ba6431ffee75e93e735c2a79d17ec96f3c",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.027091+00:00",
+    "source_sha256_before": "0543865b680f242e7df318b89f23c43bce68fd89a610f55301d8f0b4e65bb1b8",
+    "source_sha256_after": "bb18ea268855adfcbeba67894d31046145a14076a9dc9b3f38361af970df8cb5",
+    "mesh_geometry_uv_material_digest_preserved": "fdb705029674ff087bc4aa2f6d1d7417f643e0e308117a1e54ae1ec2ab659a51",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-dresser-01-rear.png",
+        "render_filepath": "//rpg-mansion-dresser-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "bb18ea268855adfcbeba67894d31046145a14076a9dc9b3f38361af970df8cb5",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

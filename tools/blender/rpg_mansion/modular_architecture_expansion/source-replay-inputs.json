@@ -1,0 +1,744 @@
+{
+  "method": "Expansion read-only native source re-export and real image replay.\n\nReopens saved delivery sources. Does not invoke builders or save sources. Uses\npublished render recipe, then compares decoded geometry/UV/PBR/corner normals\nand exact RGBA pixels. This is producer reproducibility evidence; independent\nacceptance remains separately owned.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-plain-plaster-bay-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-bay-01.blend",
+      "sourceSha256": "bf511f4b93c68003d1d85e5b3c90eb0dbc1f22d4e13c4871606a7cdf69e233d6",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-plain-plaster-bay-01.glb",
+      "modelSha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-bay-01.glb",
+      "reexportSha256": "3a564884eb0120ef00e1aae56b68d89b70a1e22d2eba98b2a87a6287fe654c76",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-plain-plaster-bay-01-thumb.png",
+          "deliveredSha256": "d9c23410f72611c56b0798e38a48aa8147e0da5b8bc9378a9076a5e3dbe68b97",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-bay-01-thumb.png",
+          "replayedSha256": "d9c23410f72611c56b0798e38a48aa8147e0da5b8bc9378a9076a5e3dbe68b97",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.4892709255218506,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-plain-plaster-bay-01-top.png",
+          "deliveredSha256": "e594e62eb5a416647e75d36987644ecf1f8de2d43ba63a91c61a582ee5be51d5",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-bay-01-top.png",
+          "replayedSha256": "e594e62eb5a416647e75d36987644ecf1f8de2d43ba63a91c61a582ee5be51d5",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-bay-01-front.png",
+          "deliveredSha256": "3c6ed92d2225ce126bbde34064e62e6525b4d7f3f047c602e3a805f707876cc2",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-bay-01-front.png",
+          "replayedSha256": "3c6ed92d2225ce126bbde34064e62e6525b4d7f3f047c602e3a805f707876cc2",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786428451538,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-bay-01-rear.png",
+          "deliveredSha256": "92f7e6880f587757855d714820e16e19f80f56ced09b9315f42b442d04178889",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-bay-01-rear.png",
+          "replayedSha256": "92f7e6880f587757855d714820e16e19f80f56ced09b9315f42b442d04178889",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786666870117,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-plain-plaster-filler-600-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-filler-600-01.blend",
+      "sourceSha256": "12f9c9232a6ae9b13e044ec7cd482b0aa241e1e6467784b76fcd7b71e17ec347",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-plain-plaster-filler-600-01.glb",
+      "modelSha256": "49047f5d275d5e31b192cb99f25ce8fbca585b23967afb9ae91b8ba658980153",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-filler-600-01.glb",
+      "reexportSha256": "5fb920e9626924127440b89a70dd925edc7882b0d2617ee9dd99c7b2265638a7",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-plain-plaster-filler-600-01-thumb.png",
+          "deliveredSha256": "59eb2c7497e3f40869832f1dd6c959785366c233c153b95c3bc96053277ea0f7",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-filler-600-01-thumb.png",
+          "replayedSha256": "59eb2c7497e3f40869832f1dd6c959785366c233c153b95c3bc96053277ea0f7",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.308375597000122,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-plain-plaster-filler-600-01-top.png",
+          "deliveredSha256": "a78be054c9d4f02273eaa92d57e80f40f74307874e6e1479416e3f0040e5a637",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-filler-600-01-top.png",
+          "replayedSha256": "a78be054c9d4f02273eaa92d57e80f40f74307874e6e1479416e3f0040e5a637",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 0.6741573810577393,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-filler-600-01-front.png",
+          "deliveredSha256": "c12b63a075f850c722d8508e8dcd4869962a078223ef401e8cf62062650345cb",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-filler-600-01-front.png",
+          "replayedSha256": "c12b63a075f850c722d8508e8dcd4869962a078223ef401e8cf62062650345cb",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786428451538,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-plain-plaster-filler-600-01-rear.png",
+          "deliveredSha256": "90fdc7e7939c76d95cc79e31ce1f32327f480605a7ff0e7cef80c8c1ff57ab6f",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-plain-plaster-filler-600-01-rear.png",
+          "replayedSha256": "90fdc7e7939c76d95cc79e31ce1f32327f480605a7ff0e7cef80c8c1ff57ab6f",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786428451538,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-exterior-return-corner-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-exterior-return-corner-01.blend",
+      "sourceSha256": "83ec5a9024deb3a027b30dfa49c12a4c35df2d2199007aae50a51ca08b1acdc4",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-exterior-return-corner-01.glb",
+      "modelSha256": "76fee9b1308dacd0abe02458a3ef9f8a5ed0ddb10b88eb08387541ae84b673a5",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-exterior-return-corner-01.glb",
+      "reexportSha256": "ddadbbb3461929918f1a314411ecc88eebf956583b023d33c6f3098b61448515",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-exterior-return-corner-01-thumb.png",
+          "deliveredSha256": "2f7cd98a9684173f72394afc0d033d619ce84be37e3bc2496a11da0bf51fd8fe",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-exterior-return-corner-01-thumb.png",
+          "replayedSha256": "2f7cd98a9684173f72394afc0d033d619ce84be37e3bc2496a11da0bf51fd8fe",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.5455493927001953,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-exterior-return-corner-01-top.png",
+          "deliveredSha256": "574fc07b2ca38e260d498a542c970a60a7903e7d33b7bf44a7121d0620023ce3",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-exterior-return-corner-01-top.png",
+          "replayedSha256": "574fc07b2ca38e260d498a542c970a60a7903e7d33b7bf44a7121d0620023ce3",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 0.8539326786994934,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-exterior-return-corner-01-front.png",
+          "deliveredSha256": "d01fc4aa480d9a37deb8f935177a1bcf9fe74ea1cd12a2d8d47320366d5c02b1",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-exterior-return-corner-01-front.png",
+          "replayedSha256": "d01fc4aa480d9a37deb8f935177a1bcf9fe74ea1cd12a2d8d47320366d5c02b1",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786666870117,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-exterior-return-corner-01-rear.png",
+          "deliveredSha256": "b21965854df28326823a97a782c83ce936a7040e85eb098f0be8c95a8759a2a2",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-exterior-return-corner-01-rear.png",
+          "replayedSha256": "b21965854df28326823a97a782c83ce936a7040e85eb098f0be8c95a8759a2a2",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786666870117,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-arched-doorway-bay-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-arched-doorway-bay-01.blend",
+      "sourceSha256": "4bd24b82a5fffe77d576b22c7ca09ce518c4218738b55ba35c8f48cc81da09ee",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-doorway-bay-01.glb",
+      "modelSha256": "dc8ff831f5167c39d20f7f227be0af1d07aa8bd9ff382036a3f263041a51e524",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-arched-doorway-bay-01.glb",
+      "reexportSha256": "c441e7d1664e544262e3be17fb6ad12b73d65cbfe1f6df44bd703db916b197f7",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-doorway-bay-01-thumb.png",
+          "deliveredSha256": "e76afc5b4301614b37f2ee6311620e6437d87a925f6372c8d8ce8c77e431e3b9",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-arched-doorway-bay-01-thumb.png",
+          "replayedSha256": "e76afc5b4301614b37f2ee6311620e6437d87a925f6372c8d8ce8c77e431e3b9",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.670166254043579,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-doorway-bay-01-top.png",
+          "deliveredSha256": "e02ff51142f620a99499d482a86ad63fcfcdba6ca1638de988867fcf20565a24",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-arched-doorway-bay-01-top.png",
+          "replayedSha256": "e02ff51142f620a99499d482a86ad63fcfcdba6ca1638de988867fcf20565a24",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 2.0224719047546387,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-arched-doorway-bay-01-front.png",
+          "deliveredSha256": "236ad3f33e2fdfc984a7010faa973d377fb36ad9f5d3e857926ce77326126059",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-arched-doorway-bay-01-front.png",
+          "replayedSha256": "236ad3f33e2fdfc984a7010faa973d377fb36ad9f5d3e857926ce77326126059",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786428451538,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-arched-doorway-bay-01-rear.png",
+          "deliveredSha256": "290e2f5a279f94f2a4c42a458b2499abef33de63afe457ac24c87ee69137fdc5",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-arched-doorway-bay-01-rear.png",
+          "replayedSha256": "290e2f5a279f94f2a4c42a458b2499abef33de63afe457ac24c87ee69137fdc5",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786666870117,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-herringbone-parquet-tile-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01.blend",
+      "sourceSha256": "f1b5af06c25f35013d6cefa577fc2f7e118597b4ad374a63fd82f549a1e9854f",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-herringbone-parquet-tile-01.glb",
+      "modelSha256": "cfad0b03c56baf724727163784305acbdd35722305900af7093697266359ff01",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-herringbone-parquet-tile-01.glb",
+      "reexportSha256": "88f21f650d96ebf197fe93f01e7f6f7f2bad56f55b6e6c67b5e82ad2d0db77be",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-thumb.png",
+          "deliveredSha256": "1aad2923cebcfc540c8a7cf93de85cd99990df3107bfb7570405c536c2404ea7",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-herringbone-parquet-tile-01-thumb.png",
+          "replayedSha256": "1aad2923cebcfc540c8a7cf93de85cd99990df3107bfb7570405c536c2404ea7",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.8876405954360962,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-herringbone-parquet-tile-01-top.png",
+          "deliveredSha256": "09c6713b8c03530be6bc994c8ec791c2cdc5d11c53604b67459ab5dc701ad3da",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-herringbone-parquet-tile-01-top.png",
+          "replayedSha256": "09c6713b8c03530be6bc994c8ec791c2cdc5d11c53604b67459ab5dc701ad3da",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314881324768,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-front.png",
+          "deliveredSha256": "ce8cef70711bbd5a9404c97d52140563f86fe44a01bfb531ff20e0089c630c82",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-herringbone-parquet-tile-01-front.png",
+          "replayedSha256": "ce8cef70711bbd5a9404c97d52140563f86fe44a01bfb531ff20e0089c630c82",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-herringbone-parquet-tile-01-rear.png",
+          "deliveredSha256": "69149fcf47747c2ad54c1d66b76ef7c6748ff7b03795b1f388ff3f5982c61adf",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-herringbone-parquet-tile-01-rear.png",
+          "replayedSha256": "69149fcf47747c2ad54c1d66b76ef7c6748ff7b03795b1f388ff3f5982c61adf",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-coffered-ceiling-panel-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-coffered-ceiling-panel-01.blend",
+      "sourceSha256": "e1604edf01bc440a5cbe4b35ae3f2b4704d6d2454e22f0564e5aed836984c710",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-coffered-ceiling-panel-01.glb",
+      "modelSha256": "6868a49047563275493a50447c3e5949fdd034ab3cda6f36db0a102f64b91043",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-coffered-ceiling-panel-01.glb",
+      "reexportSha256": "9b31c4d28c386a87bfccfed9c797cbd78a80c4477b9e8f13d976837cdccf6c4a",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-coffered-ceiling-panel-01-thumb.png",
+          "deliveredSha256": "23bed54b2b8f8ca3031b2d80827dba190b0529b4c0023019e6153b3ea9ac5344",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-coffered-ceiling-panel-01-thumb.png",
+          "replayedSha256": "23bed54b2b8f8ca3031b2d80827dba190b0529b4c0023019e6153b3ea9ac5344",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              -5
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.8876404762268066,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-coffered-ceiling-panel-01-top.png",
+          "deliveredSha256": "46be4e9c2cb3db6ddba9918a5de1053d21c9ab6639fa55af2f1ae6da45a724d5",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-coffered-ceiling-panel-01-top.png",
+          "replayedSha256": "46be4e9c2cb3db6ddba9918a5de1053d21c9ab6639fa55af2f1ae6da45a724d5",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314881324768,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-coffered-ceiling-panel-01-front.png",
+          "deliveredSha256": "fe95ca87b3f5e027611116392b8f660381518e1d00f0b5fb5444a8e23beb77b3",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-coffered-ceiling-panel-01-front.png",
+          "replayedSha256": "fe95ca87b3f5e027611116392b8f660381518e1d00f0b5fb5444a8e23beb77b3",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-coffered-ceiling-panel-01-rear.png",
+          "deliveredSha256": "eebb4bcc145122d09c8299452be5077dc5da2d3399a25a6aad07cb038f8294a3",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-coffered-ceiling-panel-01-rear.png",
+          "replayedSha256": "eebb4bcc145122d09c8299452be5077dc5da2d3399a25a6aad07cb038f8294a3",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-mansard-roof-span-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-roof-span-01.blend",
+      "sourceSha256": "c02209e16d027211beeecda9ca2b5c1e7d9ebb0b0cf54a422e74710979ecd17c",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mansard-roof-span-01.glb",
+      "modelSha256": "75cff083ecd0d83703380e0a17785dcba53a2123afc9b3f77572223d3604d333",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-roof-span-01.glb",
+      "reexportSha256": "46c47e9a13b5ee31fbae740b9d257dcc1bf7235837f7f4a1e6dda713aab8a034",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mansard-roof-span-01-thumb.png",
+          "deliveredSha256": "7ff436d3e42b056c3e68ea6e2b5f38c3d1171e178188f3524a231fdf563d0609",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-roof-span-01-thumb.png",
+          "replayedSha256": "7ff436d3e42b056c3e68ea6e2b5f38c3d1171e178188f3524a231fdf563d0609",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.584270000457764,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mansard-roof-span-01-top.png",
+          "deliveredSha256": "bddbddd2a092416bc6ef1248247446d3fd5791fcf0a47fc305e1973af2f0fac9",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-roof-span-01-top.png",
+          "replayedSha256": "bddbddd2a092416bc6ef1248247446d3fd5791fcf0a47fc305e1973af2f0fac9",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.7191009521484375,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-roof-span-01-front.png",
+          "deliveredSha256": "750a9de0eefa8d0cf418584826c62417da480fda173016295114dff495cee0fd",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-roof-span-01-front.png",
+          "replayedSha256": "750a9de0eefa8d0cf418584826c62417da480fda173016295114dff495cee0fd",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.7191009521484375,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-roof-span-01-rear.png",
+          "deliveredSha256": "ae20b06a34bf48d1a8ae2001f98303f06bd2067e73edb1db77337607a809413a",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-roof-span-01-rear.png",
+          "replayedSha256": "ae20b06a34bf48d1a8ae2001f98303f06bd2067e73edb1db77337607a809413a",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.7191009521484375,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-mansard-hipped-end-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-hipped-end-01.blend",
+      "sourceSha256": "f75a0cbe3bd638eee918661a4fcec272bdab83fc79698d30a7077bdc50230e88",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-mansard-hipped-end-01.glb",
+      "modelSha256": "ef3b1ec8afe092e826d85d1b1eb70fce908bc319ff60c9c7d04a44178b8d582a",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-hipped-end-01.glb",
+      "reexportSha256": "721a95cbf653c0be293ef7249da4b9b23b14587648a4d83c06bf28420625b295",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mansard-hipped-end-01-thumb.png",
+          "deliveredSha256": "bcce7a7566d505de44ee9df0a70edf9cef14ef9bef5c681ab9f5610989620518",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-hipped-end-01-thumb.png",
+          "replayedSha256": "bcce7a7566d505de44ee9df0a70edf9cef14ef9bef5c681ab9f5610989620518",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 5.191011428833008,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-mansard-hipped-end-01-top.png",
+          "deliveredSha256": "1f0ff188f6dc369177879127993253df6488c1bb7177007fdc1943946282e736",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-hipped-end-01-top.png",
+          "replayedSha256": "1f0ff188f6dc369177879127993253df6488c1bb7177007fdc1943946282e736",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.719101428985596,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-hipped-end-01-front.png",
+          "deliveredSha256": "00cd82ea0df15ee765842d5f9266037f1c62f42df4673475ae38f9b900ebe015",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-hipped-end-01-front.png",
+          "replayedSha256": "00cd82ea0df15ee765842d5f9266037f1c62f42df4673475ae38f9b900ebe015",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.7191009521484375,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-mansard-hipped-end-01-rear.png",
+          "deliveredSha256": "155e7c6e48d43f005d42746d75076819b61a22a3740ba64f6c885be293925762",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-mansard-hipped-end-01-rear.png",
+          "replayedSha256": "155e7c6e48d43f005d42746d75076819b61a22a3740ba64f6c885be293925762",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 4.7191009521484375,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-raised-sill-fixed-window-bay-01",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-raised-sill-fixed-window-bay-01.blend",
+      "sourceSha256": "c308a558e55e1ff9c6969e6b8c916206dccc26a4dc91a8ea9cb520968cce4d37",
+      "sourceUnchanged": true,
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+      "modelSha256": "dd11cb6009a7364bd6d5baf93b8413ea6771bfba245e5f42b19f4d478a343807",
+      "reexport": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-raised-sill-fixed-window-bay-01.glb",
+      "reexportSha256": "9887a79e1f006dfa33f3dc03cdad420f29df65e4c634f0a85c7192c40fb38436",
+      "exactCyclicGeometryUvPbrAndCornerNormals": true,
+      "views": [
+        {
+          "view": "thumb",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-raised-sill-fixed-window-bay-01-thumb.png",
+          "deliveredSha256": "ebfe2bd96a37e69c84ad0d1a0897b0e361d4b3aab4cb6bcfe4c06e7ebc1c7865",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-raised-sill-fixed-window-bay-01-thumb.png",
+          "replayedSha256": "ebfe2bd96a37e69c84ad0d1a0897b0e361d4b3aab4cb6bcfe4c06e7ebc1c7865",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.4892709255218506,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "assets/models/packs/rpg-mansion/previews/rpg-mansion-raised-sill-fixed-window-bay-01-top.png",
+          "deliveredSha256": "b89f76c18cc28d0e2afaa13b7a2c283c0559acd16f22476bd61ec1e98aabb6b8",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-raised-sill-fixed-window-bay-01-top.png",
+          "replayedSha256": "b89f76c18cc28d0e2afaa13b7a2c283c0559acd16f22476bd61ec1e98aabb6b8",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 512,
+            "orthographicScale": 1.348314642906189,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "front",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-raised-sill-fixed-window-bay-01-front.png",
+          "deliveredSha256": "3261ec286e90ba122b9c3ee6279284d5a31125371534b7d5d0db1552250664d0",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-raised-sill-fixed-window-bay-01-front.png",
+          "replayedSha256": "3261ec286e90ba122b9c3ee6279284d5a31125371534b7d5d0db1552250664d0",
+          "camera": {
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786428451538,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "rear",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/work/rpg-mansion-raised-sill-fixed-window-bay-01-rear.png",
+          "deliveredSha256": "fe4f58766a1b8a07d2fd0414243ae93715197345e4e8b8ade5e8424b39637e7c",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/rpg-mansion-raised-sill-fixed-window-bay-01-rear.png",
+          "replayedSha256": "fe4f58766a1b8a07d2fd0414243ae93715197345e4e8b8ade5e8424b39637e7c",
+          "camera": {
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "resolution": 512,
+            "orthographicScale": 3.370786666870117,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,186 @@
+{
+  "method": "Read-only native source re-export and real image replay.\n\nReopens saved delivery sources. Does not invoke builders or save sources. Uses\npublished render recipe, then compares decoded geometry/UV/PBR/corner normals\nand exact RGBA pixels. This is producer reproducibility evidence; independent\nacceptance remains separately owned.\n",
+  "items": [
+    {
+      "name": "wall-door-corner",
+      "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner.blend",
+      "sourceSha256": "dc7d4d4cf045f60b48b0b2b63639b2d724c34b7420b21d1a1550c1d945cff7ea",
+      "sourceUnchanged": true,
+      "views": [
+        {
+          "view": "exterior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-exterior.png",
+          "deliveredSha256": "2465a02f24811d882c24904c6b0f6b012bd7f6a8a4fe5347bee226e4670001e5",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-exterior.png",
+          "replayedSha256": "2465a02f24811d882c24904c6b0f6b012bd7f6a8a4fe5347bee226e4670001e5",
+          "camera": {
+            "direction": [
+              -6,
+              8,
+              5
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.908295154571533,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "interior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-interior.png",
+          "deliveredSha256": "e4dd929385f99761aaf8f3fab072728b65a98f4807c562d75fc189b354071696",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-interior.png",
+          "replayedSha256": "e4dd929385f99761aaf8f3fab072728b65a98f4807c562d75fc189b354071696",
+          "camera": {
+            "direction": [
+              4,
+              -8,
+              4
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.627947807312012,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-top.png",
+          "deliveredSha256": "79e05996f9ed6ed337746e80204f6839adcd5e1d7b2bc31bfd6371a2e75b33c8",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-top.png",
+          "replayedSha256": "79e05996f9ed6ed337746e80204f6839adcd5e1d7b2bc31bfd6371a2e75b33c8",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.179775238037109,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "cornice-column",
+      "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column.blend",
+      "sourceSha256": "b61c87277b7681d6b046322ada2c99c0dc50a229395ec537b1e71f0780d91c1e",
+      "sourceUnchanged": true,
+      "views": [
+        {
+          "view": "exterior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-exterior.png",
+          "deliveredSha256": "e00038dc0e980956b131e34afb1c63bbb8c2e771b409cde37af7a9b7049afc5b",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-exterior.png",
+          "replayedSha256": "e00038dc0e980956b131e34afb1c63bbb8c2e771b409cde37af7a9b7049afc5b",
+          "camera": {
+            "direction": [
+              6,
+              8,
+              5
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.281191349029541,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "interior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-interior.png",
+          "deliveredSha256": "b8f71acfc94af0820a979fac0e6d56a3109652e39ea29274c187fbc3b813909b",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-interior.png",
+          "replayedSha256": "b8f71acfc94af0820a979fac0e6d56a3109652e39ea29274c187fbc3b813909b",
+          "camera": {
+            "direction": [
+              -7,
+              -8,
+              4
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.1777729988098145,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-top.png",
+          "deliveredSha256": "f4fb8872374fa7448fc9451c4cae5beb52e479fa92dc16424d325068867f1d8f",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-top.png",
+          "replayedSha256": "f4fb8872374fa7448fc9451c4cae5beb52e479fa92dc16424d325068867f1d8f",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 1024,
+            "orthographicScale": 2.696629524230957,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "hollow-roof-gable",
+      "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable.blend",
+      "sourceSha256": "198e1351c3bdc5e25a6697899359470a191cdd47d834134d8731cec333a05fb7",
+      "sourceUnchanged": true,
+      "views": [
+        {
+          "view": "exterior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-exterior.png",
+          "deliveredSha256": "f91f8095ef1833e8f990b35141a311de3ed169b52726280baf573734ca28ffc6",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-exterior.png",
+          "replayedSha256": "f91f8095ef1833e8f990b35141a311de3ed169b52726280baf573734ca28ffc6",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              4
+            ],
+            "resolution": 1024,
+            "orthographicScale": 5.9222211837768555,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "interior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-interior.png",
+          "deliveredSha256": "ffeb86d692436c040bf386c87227c22544e43eba9dd92669b65c69c92a4dea67",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-interior.png",
+          "replayedSha256": "ffeb86d692436c040bf386c87227c22544e43eba9dd92669b65c69c92a4dea67",
+          "camera": {
+            "direction": [
+              2,
+              8,
+              -0.6
+            ],
+            "resolution": 1024,
+            "orthographicScale": 5.232229232788086,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-top.png",
+          "deliveredSha256": "acd24a028ae1bbc3749c0a42ba3eb0af67037cd3e9cd37d426bbfee292315084",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-top.png",
+          "replayedSha256": "acd24a028ae1bbc3749c0a42ba3eb0af67037cd3e9cd37d426bbfee292315084",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 1024,
+            "orthographicScale": 4.719101428985596,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "complete": true
+}

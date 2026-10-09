@@ -1,0 +1,117 @@
+{
+  "method": "Expansion read-only native source re-export and real image replay.\n\nReopens saved delivery sources. Does not invoke builders or save sources. Uses\npublished render recipe, then compares decoded geometry/UV/PBR/corner normals\nand exact RGBA pixels. This is producer reproducibility evidence; independent\nacceptance remains separately owned.\n",
+  "items": [
+    {
+      "name": "joined-mansard-room",
+      "source": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room.blend",
+      "sourceSha256": "3aa318b68a5a75ea64071dfe889740136190acccca7e822aa2247634015ca429",
+      "sourceUnchanged": true,
+      "views": [
+        {
+          "view": "exterior",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-exterior.png",
+          "deliveredSha256": "8903fe18b60c8d49024f3b02a04a50e76f3df133bc1c38a00512acf8db6da033",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-exterior.png",
+          "replayedSha256": "8903fe18b60c8d49024f3b02a04a50e76f3df133bc1c38a00512acf8db6da033",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              5
+            ],
+            "resolution": 1024,
+            "orthographicScale": 7.415729999542236,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "top",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-top.png",
+          "deliveredSha256": "23c4a4fd74a1b3381309e62a50a735f31f8d0c65ef5fa83cce345fd2725116d2",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-top.png",
+          "replayedSha256": "23c4a4fd74a1b3381309e62a50a735f31f8d0c65ef5fa83cce345fd2725116d2",
+          "camera": {
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "resolution": 1024,
+            "orthographicScale": 6.067416191101074,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "room-cutaway",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-room-cutaway.png",
+          "deliveredSha256": "21c0983793a21ae93e5311efb9e4d2d2f92a21bc11ab9d37fcba3039b948f975",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-room-cutaway.png",
+          "replayedSha256": "21c0983793a21ae93e5311efb9e4d2d2f92a21bc11ab9d37fcba3039b948f975",
+          "camera": {
+            "direction": [
+              6,
+              -8,
+              7
+            ],
+            "resolution": 1024,
+            "orthographicScale": 6.97528076171875,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "ceiling-underside",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-ceiling-underside.png",
+          "deliveredSha256": "6ef3a352e02bddb209def54796d9fbc2a20ae973af8ba0d8b206aaf4f0b90a9f",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-ceiling-underside.png",
+          "replayedSha256": "6ef3a352e02bddb209def54796d9fbc2a20ae973af8ba0d8b206aaf4f0b90a9f",
+          "camera": {
+            "direction": [
+              5,
+              -7,
+              -6
+            ],
+            "resolution": 1024,
+            "orthographicScale": 7.449693202972412,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "roof-underside",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-roof-underside.png",
+          "deliveredSha256": "7187b22929d4b65436df2a0b3952784460760d8cc720948d0b4cfa47688985ed",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-roof-underside.png",
+          "replayedSha256": "7187b22929d4b65436df2a0b3952784460760d8cc720948d0b4cfa47688985ed",
+          "camera": {
+            "direction": [
+              5,
+              -7,
+              -5
+            ],
+            "resolution": 1024,
+            "orthographicScale": 7.36670446395874,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        },
+        {
+          "view": "ceiling-array",
+          "deliveredPath": "tools/blender/rpg_mansion/modular_architecture_expansion/assemblies/joined-mansard-room-ceiling-array.png",
+          "deliveredSha256": "4891387c36253e16b5ba4078b91f66046f4b24992fc2a3a469040265d79e0d9d",
+          "replayedPath": "tools/blender/rpg_mansion/modular_architecture_expansion/replay/joined-mansard-room-ceiling-array.png",
+          "replayedSha256": "4891387c36253e16b5ba4078b91f66046f4b24992fc2a3a469040265d79e0d9d",
+          "camera": {
+            "direction": [
+              5,
+              -7,
+              -6
+            ],
+            "resolution": 1024,
+            "orthographicScale": 6.426274299621582,
+            "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+          }
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "complete": true
+}

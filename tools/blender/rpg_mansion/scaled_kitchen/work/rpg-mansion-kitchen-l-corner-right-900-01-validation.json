@@ -1,0 +1,147 @@
+{
+  "model": "rpg-mansion-kitchen-l-corner-right-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    899.9999761581421,
+    850.0000238418579
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.44999998807907104,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.44999998807907104,
+      0.8500000238418579
+    ]
+  ],
+  "triangles": 2036,
+  "uv": {
+    "meters_per_uv": 4.188423952250938,
+    "min": 3.7617760931674065,
+    "max": 4.91384244892264,
+    "p05": 3.8639355879382116,
+    "p95": 4.787796501217969,
+    "total_triangles": 2036,
+    "valid_triangles": 2036,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Carved walnut moulding": "wood",
+    "Mansion walnut": "wood",
+    "Warm limestone worktop": "stone",
+    "Antique brass hardware": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 87964,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "13e8438d8a744f2614f002f2b203fa141ef905c99d77d9a339d24de58ad8c61f",
+  "source_sha256": "7ea73f9bcb1ec05c073865b65b3db4d934bb905f2da6abbd06543bab878200ab",
+  "countertop_height_mm": 850,
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.003",
+      "Curved brass drawer pull.004",
+      "Curved brass drawer pull.005"
+    ],
+    "corrected_polygons": 78,
+    "geometry_normals_material_signature": "f1c91b971aad0bd245b2de0063109d26643f6c4d781caf33ce40469016bdfacc",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 4.188423952250938,
+      "min": 3.7617760931674065,
+      "max": 4.91384244892264,
+      "p05": 3.8639355879382116,
+      "p95": 4.787796501217969,
+      "total_triangles": 2036,
+      "valid_triangles": 2036,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 166568,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    899.9999761581421,
+    850.0000238418579
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.44999998807907104
+    ],
+    [
+      0.44999998807907104,
+      0.8500000238418579,
+      0.44999998807907104
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2036,
+    "valid_triangles": 2036,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 3.864176465076815,
+    "p95": 4.787796399844572,
+    "p95_p05": 1.2390211583542152,
+    "median": 4.188416678767657
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "metal",
+    "stone",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-l-corner-right-900-01.glb",
+      "sha256": "13e8438d8a744f2614f002f2b203fa141ef905c99d77d9a339d24de58ad8c61f",
+      "bytes": 87964
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-l-corner-right-900-01.blend",
+      "sha256": "7ea73f9bcb1ec05c073865b65b3db4d934bb905f2da6abbd06543bab878200ab",
+      "bytes": 166568
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-thumb.png",
+      "sha256": "9344bc3c537d622d2a70bf0232ecf629526365adf9793c09b8c9e48b08ee8b2c",
+      "bytes": 289043
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-l-corner-right-900-01-top.png",
+      "sha256": "011011480c3d75a17b81725379b8c9e2e178addf161c33dbe5f4fa0e9af08a4d",
+      "bytes": 240720
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-front.png",
+      "sha256": "7e9291d436d3839dce40b11ff99b1c01c6d74fdd58d48d865a09a551f7956dc3",
+      "bytes": 741457
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-l-corner-right-900-01-rear.png",
+      "sha256": "de35c4c213a1c39ae2809e1539488f435cddd493a86bc0fa3f09244eb65d5009",
+      "bytes": 651259
+    }
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "id": "rpg-mansion-stair-terminal-receiver-newel-01",
+  "triangles": 1512,
+  "triangleBudget": 3000,
+  "dimensionsMm": [
+    220.0,
+    220.0,
+    1050.0
+  ],
+  "uv": {
+    "meters_per_uv": 1.0248793803067489,
+    "min": 1.022186752069743,
+    "max": 1.0264133728553713,
+    "p05": 1.02384884996929,
+    "p95": 1.0261185443380323,
+    "total_triangles": 1512,
+    "valid_triangles": 1512,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "positiveComponentVolumesM3": [
+    0.00010298606364974224,
+    0.0002474278742888604,
+    0.0002474277710991074,
+    0.0001029860617265399,
+    0.0006950856955398876,
+    0.00016469178437243198,
+    0.004753158075819404,
+    0.00035109807276967347,
+    0.0015589312697557034,
+    4.33318029611958e-05,
+    0.00024742780086717264,
+    0.00010298604055236638,
+    0.0002474278899976534,
+    0.00010298606542136213
+  ],
+  "nativePartCount": 14,
+  "nativeParts": [
+    {
+      "name": "Terminal connector newel foot",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Terminal connector newel brass collar",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Terminal connector newel chamfered shaft",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Terminal connector newel upper collar",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Terminal connector newel cap",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Terminal connector newel finial foot",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Handrail receiving tenon",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Lower rail receiving tenon",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Cross handrail receiving tenon",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Cross lower rail receiving tenon",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Handrail receiving tenon.001",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Lower rail receiving tenon.001",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Cross handrail receiving tenon.001",
+      "vertexCount": 56,
+      "role": "construction"
+    },
+    {
+      "name": "Cross lower rail receiving tenon.001",
+      "vertexCount": 56,
+      "role": "construction"
+    }
+  ],
+  "installationDatums": {
+    "role": "Terminal receiver newel accessory",
+    "mountingPlaneM": 0,
+    "handrailCenterM": 0.95,
+    "receiverEndPlanesX": [
+      -0.11,
+      0.11
+    ],
+    "receiverEndPlanesY": [
+      -0.11,
+      0.11
+    ],
+    "lowerReceiverCenterM": 0.11,
+    "assemblyStartM": [
+      0,
+      0,
+      0
+    ],
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "constructionBoundsM": [
+      [
+        -0.10999999940395355,
+        -0.10999999940395355,
+        0.0
+      ],
+      [
+        0.10999999940395355,
+        0.10999999940395355,
+        1.0499999523162842
+      ]
+    ],
+    "coordinateRule": "Asset Blender coordinate = construction coordinate + bottomCenterTranslationBlenderM. glTF coordinate = (Blender x, Blender z, -Blender y)."
+  },
+  "contacts": [],
+  "sourceSha256": "697484627c14b773abcb7995d58dd8d4a60f48854dd2ae60c3dd99591866ce94",
+  "authoringSha256": "5b1cbcb49ab0848c669d26a0e22b4d98213660cf02a6a4f70e2dd7e8cff47d55",
+  "glbSha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e"
+}

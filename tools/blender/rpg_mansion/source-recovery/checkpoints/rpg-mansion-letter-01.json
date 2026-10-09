@@ -1,0 +1,207 @@
+{
+  "id": "rpg-mansion-letter-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/build.py",
+  "originalBuilderSha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+  "front": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01-front.png",
+  "rear": "tools/blender/rpg_mansion/work/rpg-mansion-letter-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 4,
+  "validation": {
+    "model": "rpg-mansion-letter-01",
+    "dimensions_mm": [
+      219.9999988079071,
+      144.99999582767487,
+      12.000000104308128
+    ],
+    "bounds_m": [
+      [
+        -0.10999999940395355,
+        -0.07249999791383743,
+        0.0
+      ],
+      [
+        0.10999999940395355,
+        0.07249999791383743,
+        0.012000000104308128
+      ]
+    ],
+    "triangles": 300,
+    "uv": {
+      "meters_per_uv": 0.33899589339728875,
+      "min": 0.30406604944657506,
+      "max": 0.430910107739142,
+      "p05": 0.31634388397831953,
+      "p95": 0.3904587066794367,
+      "total_triangles": 300,
+      "valid_triangles": 300,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Parchment": null,
+      "RPG Wax": null,
+      "RPG Seal": null,
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 14448
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "9e338ffa0b8975bd122d887f99f421185f5ca97108c2871688cb31f47371f702",
+    "bytes": 14448,
+    "triangles": 300,
+    "bounds_gltf_m": [
+      [
+        -0.10999999940395355,
+        0.0,
+        -0.07249999791383743
+      ],
+      [
+        0.10999999940395355,
+        0.012000000104308128,
+        0.07249999791383743
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      219.9999988079071,
+      144.99999582767487,
+      12.000000104308128
+    ],
+    "geometry_material_sha256_1e7": "389eac72335dd8f72cd917a661bf86cfa94452bdbda67cfe29d0ac16840a6414",
+    "geometry_material_uv_sha256_1e7": "09c3be083d9d5daafd1a831da5365787f72f4761312a2b7c1c1b106971867ed1",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 12
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 44
+      },
+      {
+        "material": "RPG Seal",
+        "channel": null,
+        "triangles": 236
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 8
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "86866397ed51b1f2bc11c27a5e57b5ac8f5fa3ba7706ace4349d1857037e49a7",
+    "bytes": 14644,
+    "triangles": 300,
+    "bounds_gltf_m": [
+      [
+        -0.10999999940395355,
+        0.0,
+        -0.07249999791383743
+      ],
+      [
+        0.10999999940395355,
+        0.012000000104308128,
+        0.07249999791383743
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      219.9999988079071,
+      144.99999582767487,
+      12.000000104308128
+    ],
+    "geometry_material_sha256_1e7": "389eac72335dd8f72cd917a661bf86cfa94452bdbda67cfe29d0ac16840a6414",
+    "geometry_material_uv_sha256_1e7": "09c3be083d9d5daafd1a831da5365787f72f4761312a2b7c1c1b106971867ed1",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 12
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 44
+      },
+      {
+        "material": "RPG Seal",
+        "channel": null,
+        "triangles": 236
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 8
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.62,
+  "source_sha256": "1e9b728243dc055670af185e625aab6d65ebb9776ece9af10d0fd3fa9c920832",
+  "front_sha256": "273b86f0be75dc6bd0383dfcfbfbd9d1ff5fe9ee72e63411d56b29b053fda0bf",
+  "rear_sha256": "8b301b61733b2d05cf706d07db8ca7c75e1c998e3805d191c1c4668e703a6a41",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.569530+00:00",
+    "source_sha256_before": "e56189c9230f219d5ad1db5e8b2abd9daee42d16450fb8b396de24a56791a9e9",
+    "source_sha256_after": "1e9b728243dc055670af185e625aab6d65ebb9776ece9af10d0fd3fa9c920832",
+    "mesh_geometry_uv_material_digest_preserved": "2ecccddef4625751b1dc1e8fd387a5c2694ef15abe37f036cb2e0cc060574330",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-letter-01-rear.png",
+        "render_filepath": "//rpg-mansion-letter-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "1e9b728243dc055670af185e625aab6d65ebb9776ece9af10d0fd3fa9c920832",
+    "originalBuilderSha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

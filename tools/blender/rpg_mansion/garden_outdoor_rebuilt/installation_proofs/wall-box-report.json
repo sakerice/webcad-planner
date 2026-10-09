@@ -1,0 +1,98 @@
+{
+  "case": "wall-box",
+  "source": "wall-box.blend",
+  "sourceSha256": "33cebb563cd0b1408bc678bdd50c03c2c04ee249bab9c5f1a7e46bb188b587fa",
+  "products": [
+    {
+      "label": "Installed wall flower box",
+      "asset": "rpg-mansion-garden-wall-window-flower-box-01",
+      "model": "models/rpg-mansion-garden-wall-window-flower-box-01.glb",
+      "sha256": "f223a9a7d0259f4e4ddc485ea2499d538f58f2538a9c4aa7b1506659c1e950fb",
+      "positionBlenderM": [
+        0,
+        0,
+        0.9
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8999999761581421
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Installed wall flower box",
+      "pointM": [
+        -0.36,
+        0.17449992388486862,
+        0.935
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Installed wall flower box",
+      "pointM": [
+        -0.36,
+        0.17449992388486862,
+        1.125
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Installed wall flower box",
+      "pointM": [
+        0.36,
+        0.17449992388486862,
+        0.935
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    },
+    {
+      "gate": "actual-glb-surface-contact",
+      "object": "Installed wall flower box",
+      "pointM": [
+        0.36,
+        0.17449992388486862,
+        1.125
+      ],
+      "distanceM": 0.0,
+      "toleranceM": 0.00015,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "fixturesCount": 2,
+  "manualCaveat": "Static manual placement and geometric contacts only; no automatic snapping, structural engineering, load certification or fluid simulation."
+}

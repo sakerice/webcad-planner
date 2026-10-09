@@ -1,0 +1,155 @@
+{
+  "method": "Independently detect nonzero-area overlap in actual packed GLB UV triangles.\n\nGrid broadphase, then convex polygon clipping. Shared UV edges are allowed.\nSignificant overlap means intersection area >1e-9 unit UV squared and >1e-5\nof the smaller triangle. No textures or producer UV reports are trusted.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-bow-commode-01",
+      "batch": "storage",
+      "model_sha256": "66a126ab7f0e65515d3fec9d7c96a7789172c92e4a39fcbabe37ad7cf8f3f974",
+      "triangles": 4812,
+      "tested_candidate_pairs": 6858,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-arched-vitrine-01",
+      "batch": "storage",
+      "model_sha256": "a7d05673697d92bdf0a72751e06b0a42e00222f4fdfca42aed90afbd6d17552d",
+      "triangles": 3932,
+      "tested_candidate_pairs": 4127,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-slant-bureau-01",
+      "batch": "storage",
+      "model_sha256": "db53d31cbd4e3f498145a3525cd9723ad70539bb1c1c6f40f26424f3f6a4f162",
+      "triangles": 4616,
+      "tested_candidate_pairs": 6233,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-linen-press-01",
+      "batch": "storage",
+      "model_sha256": "9830a37f0dfcb46a998cb328229aa5c8b72bc275a3a6dc299c683a03abcdad3f",
+      "triangles": 2976,
+      "tested_candidate_pairs": 3167,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-louver-cupboard-01",
+      "batch": "storage",
+      "model_sha256": "457b08db71f07840ba17338e7a2bbc1b0b5ed1f75486ab4533212c424c333220",
+      "triangles": 2788,
+      "tested_candidate_pairs": 3314,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-open-etagere-01",
+      "batch": "storage",
+      "model_sha256": "027b78d418f2c6a76f879746b9aad0d43e427c491b53aacf02f6045ba1b26b52",
+      "triangles": 1492,
+      "tested_candidate_pairs": 2066,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-oval-pedestal-cabinet-01",
+      "batch": "storage",
+      "model_sha256": "253d4d8dfea9dc0b6db3b0e109160f88932a787b502a13c907b4bfa8a7c76677",
+      "triangles": 808,
+      "tested_candidate_pairs": 1803,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-apothecary-chest-01",
+      "batch": "storage",
+      "model_sha256": "19dc63e5d5b365f58bbd6aae7d5d69743b0935f4283966c9827fee9bf33897e7",
+      "triangles": 3780,
+      "tested_candidate_pairs": 3512,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-blanket-coffer-01",
+      "batch": "storage",
+      "model_sha256": "e720cfdcb9e3d55c878aeb78f2ea240952ca42e7d02955221d7ca0d94712d756",
+      "triangles": 1808,
+      "tested_candidate_pairs": 1593,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-glazed-credenza-01",
+      "batch": "storage",
+      "model_sha256": "0d94f86db1fc22a1efdc0b6bde80f5050e56ce213eac4455e1a616ba08abc839",
+      "triangles": 2596,
+      "tested_candidate_pairs": 2831,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-tambour-music-01",
+      "batch": "storage",
+      "model_sha256": "b4e291c2b4ebdd0964129fe89799bbcf883e7a500b81c1c76e6a40825d6ba1a2",
+      "triangles": 2144,
+      "tested_candidate_pairs": 2482,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-arched-armoire-01",
+      "batch": "storage",
+      "model_sha256": "0a0f5d0410f1aabdd90932619bf34897a71301fdee97847489bdad65046b228e",
+      "triangles": 2648,
+      "tested_candidate_pairs": 2845,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-corner-vitrine-01",
+      "batch": "storage",
+      "model_sha256": "e0399c46fd72dc3fd15cec2efe9061f7d68953216dafcd80ba79e71bcb896e46",
+      "triangles": 1620,
+      "tested_candidate_pairs": 2459,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-map-flatfile-01",
+      "batch": "storage",
+      "model_sha256": "47497152cb337042d55cf3a85430b10e08b67ccdcaec275f7f1602f096129ce8",
+      "triangles": 3764,
+      "tested_candidate_pairs": 4139,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    },
+    {
+      "id": "rpg-mansion-letter-pigeonhole-01",
+      "batch": "storage",
+      "model_sha256": "1df799c9309ff9c2185d71a1852d2504521b4f863691d3bf5a52cf84adc9eb0e",
+      "triangles": 2084,
+      "tested_candidate_pairs": 2368,
+      "significant_overlap_examples": [],
+      "total_significant_overlap_area": 0,
+      "worst_triangle_fraction": 0
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "model": "rpg-mansion-kitchen-glazed-wall-900-01",
+  "dimensions_mm": [
+    899.9999761581421,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "bounds_m": [
+    [
+      -0.44999998807907104,
+      -0.17499999701976776,
+      0.0
+    ],
+    [
+      0.44999998807907104,
+      0.17499999701976776,
+      0.699999988079071
+    ]
+  ],
+  "triangles": 1432,
+  "uv": {
+    "meters_per_uv": 3.30357035288036,
+    "min": 2.6840721702180197,
+    "max": 4.208706723986595,
+    "p05": 2.980762116660424,
+    "p95": 4.013584270598467,
+    "total_triangles": 1432,
+    "valid_triangles": 1432,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut": "wood",
+    "Carved walnut moulding": "wood",
+    "Antique brass hardware": "metal",
+    "Pale display glass": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 61408,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "ccdbeee1af57439fa89198d853e236447d7cd9e82782ab03a92f4b6305052a52",
+  "source_sha256": "4a39405b3921ccfca6693e0f25618267a9972a3959eee97306706c306ee1fee6",
+  "packed_handle_uv_repair": {
+    "native_parts": [
+      "Curved brass drawer pull.002",
+      "Curved brass drawer pull.003"
+    ],
+    "corrected_polygons": 52,
+    "geometry_normals_material_signature": "7bbb43b63283a0ad212e575147d327decaaaa9b11a9c666430e99f84019d628e",
+    "render_relevant_signature_preserved": true,
+    "uv": {
+      "meters_per_uv": 3.30357035288036,
+      "min": 2.6840721702180197,
+      "max": 4.208706723986595,
+      "p05": 2.980762116660424,
+      "p95": 4.013584270598467,
+      "total_triangles": 1432,
+      "valid_triangles": 1432,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    }
+  },
+  "source_bytes": 138594,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    899.9999761581421,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.44999998807907104,
+      0.0,
+      -0.17499999701976776
+    ],
+    [
+      0.44999998807907104,
+      0.699999988079071,
+      0.17499999701976776
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 1432,
+    "valid_triangles": 1432,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.98075447269749,
+    "p95": 4.013584325268323,
+    "p95_p05": 1.3464994725433237,
+    "median": 3.303565031342088
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "glass",
+    "metal",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-glazed-wall-900-01.glb",
+      "sha256": "ccdbeee1af57439fa89198d853e236447d7cd9e82782ab03a92f4b6305052a52",
+      "bytes": 61408
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-glazed-wall-900-01.blend",
+      "sha256": "4a39405b3921ccfca6693e0f25618267a9972a3959eee97306706c306ee1fee6",
+      "bytes": 138594
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-thumb.png",
+      "sha256": "f95b80289ca97df980afb6681652dd0e17cd82497bf8fc489f96ef991098e83c",
+      "bytes": 256649
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-glazed-wall-900-01-top.png",
+      "sha256": "3594f037450f1bb1986ed47edab7773ccd91bd36598062041e1f7324480888d2",
+      "bytes": 184664
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-front.png",
+      "sha256": "654a241652962d00337a270490ae244b9d38ffaf884ec0d5228faf7dd5d1a15c",
+      "bytes": 676015
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-glazed-wall-900-01-rear.png",
+      "sha256": "003d5445fd0f29a2c2b350a7cfcf6ee328acac158a9d3e72256443f98a68022e",
+      "bytes": 573730
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "id": "rpg-mansion-radiator-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-radiator-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-radiator-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-radiator-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 16,
+  "validation": {
+    "model": "rpg-mansion-radiator-01",
+    "dimensions_mm": [
+      1159.999966621399,
+      280.0000011920929,
+      704.9999833106995
+    ],
+    "bounds_m": [
+      [
+        -0.5799999833106995,
+        -0.14000000059604645,
+        0.0
+      ],
+      [
+        0.5799999833106995,
+        0.14000000059604645,
+        0.7049999833106995
+      ]
+    ],
+    "triangles": 1008,
+    "uv": {
+      "meters_per_uv": 2.918296152615886,
+      "min": 2.398678303463093,
+      "max": 3.378362108852606,
+      "p05": 2.414992148246431,
+      "p95": 3.2755165267009403,
+      "total_triangles": 1008,
+      "valid_triangles": 1008,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG iron": "metal",
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 43060
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "96725c1362c48c53ca87d05211860ccb08a06dcdae8f8d30907386b8c851ca06",
+    "bytes": 43060,
+    "triangles": 1008,
+    "bounds_gltf_m": [
+      [
+        -0.5799999833106995,
+        0.0,
+        -0.14000000059604645
+      ],
+      [
+        0.5799999833106995,
+        0.7049999833106995,
+        0.14000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1159.999966621399,
+      280.0000011920929,
+      704.9999833106995
+    ],
+    "geometry_material_sha256_1e7": "9b7a5332220828452208de20aac72306f9b8f9d50ec798b11799c35c7f7f9347",
+    "geometry_material_uv_sha256_1e7": "46b2004fb7a31eda8817cd57e1d51e15de9451650e8b3d14929c89569aff2d1e",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 200
+      },
+      {
+        "material": "RPG iron",
+        "channel": "metal",
+        "triangles": 808
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "9e8bac152965d8b7074e5b5b91109305533ce46b2df29f6cc67c4105d5fd4b0c",
+    "bytes": 43264,
+    "triangles": 1008,
+    "bounds_gltf_m": [
+      [
+        -0.5799999833106995,
+        0.0,
+        -0.14000000059604645
+      ],
+      [
+        0.5799999833106995,
+        0.7049999833106995,
+        0.14000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1159.999966621399,
+      280.0000011920929,
+      704.9999833106995
+    ],
+    "geometry_material_sha256_1e7": "9b7a5332220828452208de20aac72306f9b8f9d50ec798b11799c35c7f7f9347",
+    "geometry_material_uv_sha256_1e7": "46b2004fb7a31eda8817cd57e1d51e15de9451650e8b3d14929c89569aff2d1e",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 200
+      },
+      {
+        "material": "RPG iron",
+        "channel": "metal",
+        "triangles": 808
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 3.98,
+  "source_sha256": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+  "front_sha256": "bbd0b780f939cc3a34c9a2b4455749ab84d9ecd9a0472854907e4c9f9eab26d8",
+  "rear_sha256": "4c65aaf1405da31cd90e07c0425e6710f75321c7527ac0e81756820270133b21",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:23.786016+00:00",
+    "source_sha256_before": "38c911b42c319fd763afb0a92e140790e08d96b26c3e9232efb4a393f6ae3fad",
+    "source_sha256_after": "af7bfcee726c8c07fc24cd17e53427a3aea6b039e400314cab9b74344c27b48a",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "5756794fd6d1ab35da0cd6e6adae45d4ec9bd3638dc88982c42b8e63fbe1fc93",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.966302+00:00",
+    "source_sha256_before": "af7bfcee726c8c07fc24cd17e53427a3aea6b039e400314cab9b74344c27b48a",
+    "source_sha256_after": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+    "mesh_geometry_uv_material_digest_preserved": "011f8d4beb5eba1f346314e064ae0276efeb06a67aef3ea5b616e57f10c5ee1c",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-radiator-01-rear.png",
+        "render_filepath": "//rpg-mansion-radiator-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "4baef2aae0cec04f07eb1dbad94f3e4ee5c637e3710a5bef879a39da6873e1d0",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

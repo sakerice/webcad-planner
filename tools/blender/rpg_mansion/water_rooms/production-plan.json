@@ -1,0 +1,110 @@
+{
+  "status": "three prototypes awaiting review; no expansion until prototype evidence approved",
+  "grossCandidateCount": 18,
+  "prototypeCount": 3,
+  "acceptedNewModelCount": 0,
+  "sourceDemandIsExactReplacementClaim": false,
+  "baselineReviewed": {
+    "bath": "Symmetric 1720 mm roll-rim clawfoot bath; faucet included",
+    "basin": "680 mm pedestal washstand with high faucet",
+    "toilet": "Low-coupled cistern WC with open seat"
+  },
+  "countingRules": [
+    "No palette, rename, reflection, rotation or scale copies count as distinct",
+    "Three already represented baseline roles remain conditional and may be removed",
+    "Capacity and installation variants are grouped explicitly",
+    "No source geometry is invented where legacy files are absent"
+  ],
+  "candidates": [
+    {
+      "group": "bath",
+      "role": "high-backed-slipper-bath",
+      "status": "prototype"
+    },
+    {
+      "group": "bath",
+      "role": "symmetric-roll-top-bath",
+      "status": "baseline-role-needs-distinct-construction-before-any-new-count"
+    },
+    {
+      "group": "bath",
+      "role": "copper-bateau-cradle-bath",
+      "status": "planned"
+    },
+    {
+      "group": "bath",
+      "role": "paneled-built-in-bath",
+      "status": "planned"
+    },
+    {
+      "group": "bath",
+      "role": "corner-footprint-bath",
+      "status": "planned"
+    },
+    {
+      "group": "bath",
+      "role": "deep-seated-hip-bath",
+      "status": "planned"
+    },
+    {
+      "group": "basin",
+      "role": "ceramic-pedestal-basin",
+      "status": "baseline-role-needs-distinct-construction-before-any-new-count"
+    },
+    {
+      "group": "basin",
+      "role": "bracketed-wall-basin",
+      "status": "prototype"
+    },
+    {
+      "group": "basin",
+      "role": "single-basin-cabinet-mirror",
+      "status": "planned"
+    },
+    {
+      "group": "basin",
+      "role": "double-basin-console",
+      "status": "planned-capacity-group-not-recolor"
+    },
+    {
+      "group": "basin",
+      "role": "portable-bowl-jug-washstand",
+      "status": "planned"
+    },
+    {
+      "group": "basin",
+      "role": "wall-bracketed-corner-basin",
+      "status": "planned-installation-group"
+    },
+    {
+      "group": "toilet",
+      "role": "high-cistern-chain-wc",
+      "status": "prototype"
+    },
+    {
+      "group": "toilet",
+      "role": "low-coupled-cistern-wc",
+      "status": "baseline-role-needs-distinct-construction-before-any-new-count"
+    },
+    {
+      "group": "toilet",
+      "role": "tankless-flushometer-wc",
+      "status": "planned"
+    },
+    {
+      "group": "shower",
+      "role": "rail-hand-shower-hose",
+      "status": "planned"
+    },
+    {
+      "group": "shower",
+      "role": "overhead-standpipe-mixer",
+      "status": "planned"
+    },
+    {
+      "group": "shower",
+      "role": "framed-glass-enclosure-tray",
+      "status": "planned-complexity-gate"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "model": "rpg-mansion-upholstered-divan-bed-01",
+  "dimensions_mm": [
+    1000.0,
+    2140.000104904175,
+    920.0000166893005
+  ],
+  "bounds_m": [
+    [
+      -0.5,
+      -1.0700000524520874,
+      0.0
+    ],
+    [
+      0.5,
+      1.0700000524520874,
+      0.9200000166893005
+    ]
+  ],
+  "triangles": 2060,
+  "uv": {
+    "meters_per_uv": 7.72330795248984,
+    "min": 7.722002334991977,
+    "max": 7.724593186387525,
+    "p05": 7.723071977947478,
+    "p95": 7.723428999323567,
+    "total_triangles": 2060,
+    "valid_triangles": 2060,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Polished walnut mouldings": "wood",
+    "Walnut structural heartwood": "wood",
+    "Muted burgundy upholstered divan": "upholstery",
+    "Ivory woven mattress and pillows": "bedding",
+    "Deep teal velvet bed cover": "cover"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 148768,
+  "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de",
+  "sourceSha256": "4d100507109c4bd6240ba24c21f31ce3ba5aca2ec45636c5ce1b546401474bee",
+  "authoringSha256": "38966e7ab78f1ab43d41b59cbfcf447eaf274c873c214a9b9c838c69d7cdf99d",
+  "features": {
+    "mattressTopM": 0.522,
+    "mattressSupportM": 0.3585,
+    "sleepingCapacity": 1,
+    "mattressDimensionsM": [
+      0.8280000000000001,
+      1.8980000000000001,
+      0.165
+    ],
+    "topology": "low-upholstered-three-sided-divan/rolled-ends/long-side-back/open-sprung-slat-deck/four-short-turned-feet"
+  }
+}

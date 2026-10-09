@@ -1,0 +1,37 @@
+{
+  "method": "Find positive-area co-oriented coplanar surface overlap from decoded GLB triangles.\n\nCoincident coplanar outward faces can z-fight even with valid winding/normals.\nTriangle pairs merely sharing edges are allowed. Bottom-plane overlaps are listed\nseparately; visibility is a normal-direction ray observation, not complete CSG.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "model_sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "model_sha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "model_sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+      "coplanar_overlap_pairs": 0,
+      "total_pairwise_area_m2": 0,
+      "bottom_plane_pairs": 0,
+      "externally_visible_pairs": 0,
+      "externally_visible_pairwise_area_m2": 0,
+      "examples": []
+    }
+  ],
+  "errors": 0,
+  "bottom_floor_contacts_excluded_from_visibility_gate": true
+}

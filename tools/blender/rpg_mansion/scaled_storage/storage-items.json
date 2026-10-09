@@ -1,0 +1,719 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・収納家具試作",
+  "items": [
+    {
+      "id": "rpg-mansion-bow-commode-01",
+      "name": "弓形前板の三段整理箪笥",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bow-commode-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bow-commode-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bow-commode-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-bow-commode-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-bow-commode-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-bow-commode-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-bow-commode-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-bow-commode-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-bow-commode-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1000,
+      "d": 500,
+      "h": 900,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A convex bow-front commode with three separately built curved drawer fronts and suspended brass rings",
+      "dimensionBasis": "Intended footprint, not a measured historical reference",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "66a126ab7f0e65515d3fec9d7c96a7789172c92e4a39fcbabe37ad7cf8f3f974",
+      "sourceSha256": "1cf9489290eff6bc10fcce3cae814a337c6dde6c4d6b9f9226ee97fef1ea5347",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-arched-vitrine-01",
+      "name": "アーチガラスの展示戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-vitrine-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-vitrine-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-vitrine-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-vitrine-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-vitrine-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-vitrine-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-arched-vitrine-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-vitrine-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-vitrine-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 900,
+      "d": 420,
+      "h": 1900,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A two-door segmental-arch glass display cabinet with visible shelf interiors and mullions",
+      "dimensionBasis": "Intended footprint, not a measured historical reference",
+      "finishChannels": [
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#d9e3dd"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "a7d05673697d92bdf0a72751e06b0a42e00222f4fdfca42aed90afbd6d17552d",
+      "sourceSha256": "260082b86b4dc70741c85557293012018bf02063e7baeccfcb5d75b71e5c4b6b",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-slant-bureau-01",
+      "name": "斜め蓋の書記ビューロー",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-slant-bureau-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slant-bureau-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slant-bureau-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-slant-bureau-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-slant-bureau-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-slant-bureau-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-slant-bureau-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-slant-bureau-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-slant-bureau-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1000,
+      "d": 540,
+      "h": 1200,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A closed slant-front writing bureau with wedge cheeks, breadboard fall-front and three drawers",
+      "dimensionBasis": "Intended footprint, not a measured historical reference",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "db53d31cbd4e3f498145a3525cd9723ad70539bb1c1c6f40f26424f3f6a4f162",
+      "sourceSha256": "72f579d7ff3d3cfcc7ad9ec494ce69d732231172b31032d0319655e25178b7c0",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-linen-press-01",
+      "name": "引出し台付きリネンプレス",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-linen-press-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linen-press-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-linen-press-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-linen-press-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-linen-press-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-linen-press-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-linen-press-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-linen-press-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-linen-press-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1003,
+      "d": 591,
+      "h": 1950,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Two-part linen press with lower drawers, upper panel doors and case joining moulding",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "cabinet",
+          "ids": [
+            "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-306913_frame_brown"
+          ]
+        }
+      ],
+      "sha256": "9830a37f0dfcb46a998cb328229aa5c8b72bc275a3a6dc299c683a03abcdad3f",
+      "sourceSha256": "f35be66ee12f57bf7180a187736b31074e5a95fbb45f467d2e332c3bd42c192b",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-louver-cupboard-01",
+      "name": "通気羽板の玄関戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-louver-cupboard-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-louver-cupboard-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-louver-cupboard-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-louver-cupboard-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-louver-cupboard-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-louver-cupboard-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-louver-cupboard-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-louver-cupboard-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-louver-cupboard-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 830,
+      "d": 400,
+      "h": 1140,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Ventilated hall cupboard with individually pitched louver slats",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "cabinet",
+          "ids": [
+            "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-143628_frame_1_naturalwood"
+          ]
+        }
+      ],
+      "sha256": "457b08db71f07840ba17338e7a2bbc1b0b5ed1f75486ab4533212c424c333220",
+      "sourceSha256": "c837e5fd5582bbdf1c52569a14c3168aa4931b4db083f288e455bc43ff68ee8e",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-open-etagere-01",
+      "name": "五段のオープン飾り棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-open-etagere-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-open-etagere-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-open-etagere-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-open-etagere-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-open-etagere-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-open-etagere-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-open-etagere-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-open-etagere-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-open-etagere-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 800,
+      "d": 320,
+      "h": 1740,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Open five-tier etagere with full-height turned posts and brass finials",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "shelf",
+          "ids": [
+            "im0261-Shelf-MEGA_PACK_Shelf-shelf-344463_ModernAcacia-Black"
+          ]
+        }
+      ],
+      "sha256": "027b78d418f2c6a76f879746b9aad0d43e427c491b53aacf02f6045ba1b26b52",
+      "sourceSha256": "5919e7a727adeb174de79906123dd1db55a1168d764366577c304dc3fa8d3a23",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-oval-pedestal-cabinet-01",
+      "name": "楕円形の小型台座戸棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-cabinet-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-cabinet-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-cabinet-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-oval-pedestal-cabinet-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-oval-pedestal-cabinet-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-oval-pedestal-cabinet-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-oval-pedestal-cabinet-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-oval-pedestal-cabinet-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-oval-pedestal-cabinet-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 316,
+      "d": 266,
+      "h": 764,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Elliptical pedestal cupboard with a curved single segment door",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "chest",
+          "ids": [
+            "fmp-Drawer42"
+          ]
+        }
+      ],
+      "sha256": "253d4d8dfea9dc0b6db3b0e109160f88932a787b502a13c907b4bfa8a7c76677",
+      "sourceSha256": "4c1a79b68ad2b5f24d648fa35031e43d8d054f303f2424f15842e284156c4214",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-apothecary-chest-01",
+      "name": "十六小引出しの薬種箪笥",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-apothecary-chest-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-apothecary-chest-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-apothecary-chest-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-apothecary-chest-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-apothecary-chest-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-apothecary-chest-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-apothecary-chest-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-apothecary-chest-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-apothecary-chest-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 874,
+      "d": 469,
+      "h": 1059,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Four-by-four apothecary drawer grid with attached brass nameplates and knobs",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "chest",
+          "ids": [
+            "fmp-Drawer33",
+            "fmp-Drawer34"
+          ]
+        }
+      ],
+      "sha256": "19dc63e5d5b365f58bbd6aae7d5d69743b0935f4283966c9827fee9bf33897e7",
+      "sourceSha256": "2c673df44c2d602e9a3324d91fec63a7c1c8a4ddd1152f66559c475412dba1f7",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-blanket-coffer-01",
+      "name": "板組みの毛布用長櫃",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-blanket-coffer-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-blanket-coffer-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-blanket-coffer-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-blanket-coffer-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-blanket-coffer-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-blanket-coffer-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-blanket-coffer-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-blanket-coffer-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-blanket-coffer-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1100,
+      "d": 600,
+      "h": 600,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Board-and-batten lift-lid blanket coffer with breadboard lid ends and dovetail joints",
+      "dimensionBasis": "Intended footprint, not a measured historical reference",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "e720cfdcb9e3d55c878aeb78f2ea240952ca42e7d02955221d7ca0d94712d756",
+      "sourceSha256": "28bebd052b6991c5921dd0ad40107ff4f9646ce3dc96d84c44af5225da55d1c7",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-glazed-credenza-01",
+      "name": "ガラス両端戸の低い飾り棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-glazed-credenza-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glazed-credenza-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-glazed-credenza-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-glazed-credenza-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-glazed-credenza-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-glazed-credenza-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-glazed-credenza-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-glazed-credenza-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-glazed-credenza-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1600,
+      "d": 450,
+      "h": 710,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Low glazed credenza with two outer glass cupboards and open central bays",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#d9e3dd"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "cabinet",
+          "ids": [
+            "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-149435_frame_brown"
+          ]
+        }
+      ],
+      "sha256": "0d94f86db1fc22a1efdc0b6bde80f5050e56ce213eac4455e1a616ba08abc839",
+      "sourceSha256": "fd3ef52855091f990baf1f1b0cfdcad56977b6ee1799b9f806da91c4e04ea686",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-tambour-music-01",
+      "name": "巻き戸の楽譜収納棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tambour-music-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tambour-music-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tambour-music-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-tambour-music-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-tambour-music-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-tambour-music-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-tambour-music-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-tambour-music-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-tambour-music-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 750,
+      "d": 300,
+      "h": 800,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Tambour-shutter music cupboard over open folio compartments",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "cabinet",
+          "ids": [
+            "im0261-Cabinet-MEGA_PACK_CABINET-cabinet-19565_Frame"
+          ]
+        }
+      ],
+      "sha256": "b4e291c2b4ebdd0964129fe89799bbcf883e7a500b81c1c76e6a40825d6ba1a2",
+      "sourceSha256": "955167691ac222ed9179f83a64c7140b84e80fe89ccee62d2b754b2124e57a4d",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-arched-armoire-01",
+      "name": "曲線破風の衣装箪笥",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-arched-armoire-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-armoire-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-arched-armoire-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-armoire-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-arched-armoire-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-armoire-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-arched-armoire-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-armoire-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-arched-armoire-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1129,
+      "d": 773,
+      "h": 2213,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Deep double-door armoire with swept arch pediment and hanging rail",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "closet",
+          "ids": [
+            "fmp-Closet04",
+            "fmp-Closet05",
+            "fmp-Closet06"
+          ]
+        }
+      ],
+      "sha256": "0a0f5d0410f1aabdd90932619bf34897a71301fdee97847489bdad65046b228e",
+      "sourceSha256": "e2d26c7f0213e0ad87df5be6a8d4ec135f273a08d63b2e9326119e3969538e9b",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-corner-vitrine-01",
+      "name": "六角平面のコーナー展示棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-corner-vitrine-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-vitrine-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-corner-vitrine-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-corner-vitrine-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-corner-vitrine-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-corner-vitrine-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-corner-vitrine-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-corner-vitrine-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-corner-vitrine-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 700,
+      "d": 700,
+      "h": 1850,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "True six-sided corner glass cabinet with fitted polygonal shelves",
+      "dimensionBasis": "Intended footprint, not a measured historical reference",
+      "finishChannels": [
+        {
+          "key": "glass",
+          "label": "ガラス",
+          "default": "#d9e3dd"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "e0399c46fd72dc3fd15cec2efe9061f7d68953216dafcd80ba79e71bcb896e46",
+      "sourceSha256": "deaa9ad6d2ad491699f3a754b0d4f5ea38b287d20a34ab06baec8193a822a510",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-map-flatfile-01",
+      "name": "地図用の六段平引出し",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-map-flatfile-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-map-flatfile-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-map-flatfile-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-map-flatfile-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-map-flatfile-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-map-flatfile-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-map-flatfile-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-map-flatfile-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-map-flatfile-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1366,
+      "d": 515,
+      "h": 934,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Broad six-drawer map flat-file cabinet with thin full-width trays",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "chest",
+          "ids": [
+            "fmp-Drawer40"
+          ]
+        }
+      ],
+      "sha256": "47497152cb337042d55cf3a85430b10e08b67ccdcaec275f7f1602f096129ce8",
+      "sourceSha256": "dca84c64308345a98a322be851e12791a1067b4b7a913f039842e6cdb6c6a31a",
+      "joineryRevision": "storage-joinery-2"
+    },
+    {
+      "id": "rpg-mansion-letter-pigeonhole-01",
+      "name": "書簡仕分けの十二升棚",
+      "packId": "rpg-mansion",
+      "group": "家具",
+      "category": "収納",
+      "sourceFolder": "BlenderRpgMansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-letter-pigeonhole-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-pigeonhole-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-letter-pigeonhole-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-letter-pigeonhole-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_storage/evidence/rpg-mansion-letter-pigeonhole-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-letter-pigeonhole-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_storage/authoring_sources/rpg-mansion-letter-pigeonhole-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-letter-pigeonhole-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_storage/export_sources/rpg-mansion-letter-pigeonhole-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_storage/build.py",
+      "w": 1200,
+      "d": 280,
+      "h": 1390,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "Twelve open correspondence pigeonholes above two shallow drawers",
+      "dimensionBasis": "Matches declared standard catalogue footprint; legacy model geometry not independently measured",
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#9d7b3c"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "standardFootprintMatches": [
+        {
+          "kind": "shelf",
+          "ids": [
+            "im0261-Shelf-MEGA_PACK_Shelf-shelf-395523_frame_black"
+          ]
+        }
+      ],
+      "sha256": "1df799c9309ff9c2185d71a1852d2504521b4f863691d3bf5a52cf84adc9eb0e",
+      "sourceSha256": "e150f012c6e7641d6e66c056ebaad1ebb4855de7d68583f04e181d5d5f0b720a",
+      "joineryRevision": "storage-joinery-2"
+    }
+  ]
+}

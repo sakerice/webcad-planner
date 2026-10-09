@@ -1,0 +1,122 @@
+{
+  "model": "rpg-mansion-kitchen-spice-wall-450-01",
+  "dimensions_mm": [
+    449.99998807907104,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "bounds_m": [
+    [
+      -0.22499999403953552,
+      -0.17499999701976776,
+      0.0
+    ],
+    [
+      0.22499999403953552,
+      0.17499999701976776,
+      0.699999988079071
+    ]
+  ],
+  "triangles": 2788,
+  "uv": {
+    "meters_per_uv": 2.9266761370672514,
+    "min": 2.6656229715392414,
+    "max": 3.823388146479983,
+    "p05": 2.6858810758972327,
+    "p95": 3.6228929211142735,
+    "total_triangles": 2788,
+    "valid_triangles": 2788,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut": "wood",
+    "Carved walnut moulding": "wood",
+    "Antique brass hardware": "metal",
+    "Ivory glazed ceramic": "ceramic"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 119168,
+  "source_metadata": "Compressed native source; relative render paths; counter support height distinct from overall envelope",
+  "glb_sha256": "e46963b29cfa5f64ba82cca31369e318661ff59072d93ebc644baf394dbede99",
+  "source_sha256": "5d563814d4e0d82e56dcf8966204fb598eab90f317c4996aa7dc44682db25335",
+  "source_bytes": 162410,
+  "builder_sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+  "actual_dimensions_wdh_mm": [
+    449.99998807907104,
+    349.9999940395355,
+    699.999988079071
+  ],
+  "actual_bounds_gltf_m": [
+    [
+      -0.22499999403953552,
+      0.0,
+      -0.17499999701976776
+    ],
+    [
+      0.22499999403953552,
+      0.699999988079071,
+      0.17499999701976776
+    ]
+  ],
+  "actual_uv_glb": {
+    "triangles": 2788,
+    "valid_triangles": 2788,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "missing_uv_triangles": 0,
+    "nonfinite_position_vertices": 0,
+    "nonfinite_uv_vertices": 0,
+    "p05": 2.685879058363721,
+    "p95": 3.6228928615720353,
+    "p95_p05": 1.3488667147131925,
+    "median": 2.9266787527293365
+  },
+  "validation_measurement": "Decoded final annotated GLB vertex/index/UV bytes; current source and builder file hashes",
+  "material_finish_channels": [
+    "ceramic",
+    "metal",
+    "wood"
+  ],
+  "actual_file_hashes": {
+    "model": {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-kitchen-spice-wall-450-01.glb",
+      "sha256": "e46963b29cfa5f64ba82cca31369e318661ff59072d93ebc644baf394dbede99",
+      "bytes": 119168
+    },
+    "sourceBlend": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/work/rpg-mansion-kitchen-spice-wall-450-01.blend",
+      "sha256": "5d563814d4e0d82e56dcf8966204fb598eab90f317c4996aa7dc44682db25335",
+      "bytes": 162410
+    },
+    "builder": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/build.py",
+      "sha256": "dca778751d58c61603ef411865753ec7b90ebf070bf4a8eccb57bbcc4d0fa3b7",
+      "bytes": 31810
+    },
+    "thumb": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-thumb.png",
+      "sha256": "d48ce5b07ee080c82cb05b6e013b2b1f72aeafda1986873def6d6eb0286d785e",
+      "bytes": 255690
+    },
+    "top": {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kitchen-spice-wall-450-01-top.png",
+      "sha256": "61792bcbc2bb7e47e5eadf3dd6b67132be3c1f39f1de6cb63010d1c470e1980e",
+      "bytes": 253758
+    },
+    "front": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-front.png",
+      "sha256": "2235b21ac30ba00f9c0b01d29628f098763485b19f36085a3c83ea5425ac4ce0",
+      "bytes": 685053
+    },
+    "rear": {
+      "path": "tools/blender/rpg_mansion/scaled_kitchen/evidence/rpg-mansion-kitchen-spice-wall-450-01-rear.png",
+      "sha256": "00684aac22a6785120f70bb63e19d256ed150a7c3f3b43604b9bf902f7d8a954",
+      "bytes": 563886
+    }
+  }
+}

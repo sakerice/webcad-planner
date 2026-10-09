@@ -1,0 +1,6456 @@
+{
+  "tolerance_m": 2e-05,
+  "method": "Independent world triangle BVH contacts or majority-of-three-direction point containment",
+  "items": [
+    {
+      "id": "rpg-mansion-ladder-side-01",
+      "source_sha256": "dfe78ca47a5acf02b0abdec7db9ab0adc42f190e52c3269f542ed74f103f62fa",
+      "native_parts": 20,
+      "groups": [
+        {
+          "parts": [
+            "Ladder padded seat top",
+            "Ladder continuous rear stile -1",
+            "Ladder swept upper crest",
+            "Ladder central crest crown",
+            "Ladder shaped open back rail 3",
+            "Ladder shaped open back rail 2",
+            "Ladder shaped open back rail 1",
+            "Ladder transverse seat apron 0.181",
+            "Ladder side seat apron 1",
+            "Ladder transverse seat apron -0.205",
+            "Ladder front turned leg -1",
+            "Ladder front foot stretcher",
+            "Ladder side lower mortised stretcher 1",
+            "Ladder front turned leg 1",
+            "Ladder side seat apron -1",
+            "Ladder side lower mortised stretcher -1",
+            "Ladder rear joined ground foot -1",
+            "Ladder shaped seat bearing rail",
+            "Ladder continuous rear stile 1",
+            "Ladder rear joined ground foot 1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Ladder shaped seat bearing rail",
+          "Ladder padded seat top"
+        ],
+        [
+          "Ladder continuous rear stile -1",
+          "Ladder padded seat top"
+        ],
+        [
+          "Ladder continuous rear stile -1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder continuous rear stile -1",
+          "Ladder rear joined ground foot -1"
+        ],
+        [
+          "Ladder front turned leg -1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder side lower mortised stretcher -1",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder side lower mortised stretcher -1",
+          "Ladder front turned leg -1"
+        ],
+        [
+          "Ladder side seat apron -1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder side seat apron -1",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder side seat apron -1",
+          "Ladder front turned leg -1"
+        ],
+        [
+          "Ladder continuous rear stile 1",
+          "Ladder padded seat top"
+        ],
+        [
+          "Ladder continuous rear stile 1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder continuous rear stile 1",
+          "Ladder rear joined ground foot 1"
+        ],
+        [
+          "Ladder front turned leg 1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder side lower mortised stretcher 1",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder side lower mortised stretcher 1",
+          "Ladder front turned leg 1"
+        ],
+        [
+          "Ladder side seat apron 1",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder side seat apron 1",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder side seat apron 1",
+          "Ladder front turned leg 1"
+        ],
+        [
+          "Ladder transverse seat apron -0.205",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder transverse seat apron -0.205",
+          "Ladder front turned leg -1"
+        ],
+        [
+          "Ladder transverse seat apron -0.205",
+          "Ladder side seat apron -1"
+        ],
+        [
+          "Ladder transverse seat apron -0.205",
+          "Ladder front turned leg 1"
+        ],
+        [
+          "Ladder transverse seat apron -0.205",
+          "Ladder side seat apron 1"
+        ],
+        [
+          "Ladder transverse seat apron 0.181",
+          "Ladder shaped seat bearing rail"
+        ],
+        [
+          "Ladder transverse seat apron 0.181",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder transverse seat apron 0.181",
+          "Ladder side seat apron -1"
+        ],
+        [
+          "Ladder transverse seat apron 0.181",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder transverse seat apron 0.181",
+          "Ladder side seat apron 1"
+        ],
+        [
+          "Ladder front foot stretcher",
+          "Ladder front turned leg -1"
+        ],
+        [
+          "Ladder front foot stretcher",
+          "Ladder side lower mortised stretcher -1"
+        ],
+        [
+          "Ladder front foot stretcher",
+          "Ladder front turned leg 1"
+        ],
+        [
+          "Ladder front foot stretcher",
+          "Ladder side lower mortised stretcher 1"
+        ],
+        [
+          "Ladder shaped open back rail 1",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder shaped open back rail 1",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder shaped open back rail 2",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder shaped open back rail 2",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder shaped open back rail 3",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder shaped open back rail 3",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder swept upper crest",
+          "Ladder continuous rear stile -1"
+        ],
+        [
+          "Ladder swept upper crest",
+          "Ladder continuous rear stile 1"
+        ],
+        [
+          "Ladder central crest crown",
+          "Ladder swept upper crest"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-caned-bergere-01",
+      "source_sha256": "c6e0d5a404e2370755ddb285fb0f7201d907744d5daef508eff82a8b6fc869cd",
+      "native_parts": 46,
+      "groups": [
+        {
+          "parts": [
+            "Bergere velvet seat cushion",
+            "Bergere rear arm bearing upright 1",
+            "Bergere vertical cane reed 7",
+            "Bergere crossing cane reed 2",
+            "Bergere vertical cane reed 6",
+            "Bergere crossing cane reed -3",
+            "Bergere crossing cane reed -4",
+            "Bergere crossing cane reed 3",
+            "Bergere vertical cane reed 5",
+            "Bergere crossing cane reed 4",
+            "Bergere vertical cane reed 4",
+            "Bergere crossing cane reed 5",
+            "Bergere crossing cane reed -5",
+            "Bergere vertical cane reed 3",
+            "Bergere vertical cane reed 2",
+            "Bergere lower back bearing rail",
+            "Bergere vertical cane reed 1",
+            "Bergere vertical cane reed 0",
+            "Bergere vertical cane reed -1",
+            "Bergere vertical cane reed -2",
+            "Bergere vertical cane reed -3",
+            "Bergere vertical cane reed -4",
+            "Bergere vertical cane reed -5",
+            "Bergere vertical cane reed -6",
+            "Bergere vertical cane reed -7",
+            "Bergere crossing cane reed -2",
+            "Bergere continuous enclosing oval back frame",
+            "Bergere crossing cane reed 1",
+            "Bergere crossing cane reed 0",
+            "Bergere crossing cane reed -1",
+            "Bergere swept outer arm 1",
+            "Bergere velvet arm pad 1",
+            "Bergere carved elbow finial 1",
+            "Bergere rear arm bearing upright -1",
+            "Bergere continuous cabriole leg -1 1",
+            "Bergere attached brass foot shoe -1 1",
+            "Bergere swept outer arm -1",
+            "Bergere carved elbow finial -1",
+            "Bergere velvet arm pad -1",
+            "Bergere sculpted broad seat frame",
+            "Bergere continuous cabriole leg 1 1",
+            "Bergere attached brass foot shoe 1 1",
+            "Bergere continuous cabriole leg -1 -1",
+            "Bergere attached brass foot shoe -1 -1",
+            "Bergere continuous cabriole leg 1 -1",
+            "Bergere attached brass foot shoe 1 -1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Bergere sculpted broad seat frame",
+          "Bergere velvet seat cushion"
+        ],
+        [
+          "Bergere continuous cabriole leg -1 -1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere attached brass foot shoe -1 -1",
+          "Bergere continuous cabriole leg -1 -1"
+        ],
+        [
+          "Bergere continuous cabriole leg -1 1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere attached brass foot shoe -1 1",
+          "Bergere continuous cabriole leg -1 1"
+        ],
+        [
+          "Bergere swept outer arm -1",
+          "Bergere velvet seat cushion"
+        ],
+        [
+          "Bergere swept outer arm -1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere rear arm bearing upright -1",
+          "Bergere velvet seat cushion"
+        ],
+        [
+          "Bergere rear arm bearing upright -1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere rear arm bearing upright -1",
+          "Bergere continuous cabriole leg -1 1"
+        ],
+        [
+          "Bergere velvet arm pad -1",
+          "Bergere swept outer arm -1"
+        ],
+        [
+          "Bergere continuous cabriole leg 1 -1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere attached brass foot shoe 1 -1",
+          "Bergere continuous cabriole leg 1 -1"
+        ],
+        [
+          "Bergere continuous cabriole leg 1 1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere attached brass foot shoe 1 1",
+          "Bergere continuous cabriole leg 1 1"
+        ],
+        [
+          "Bergere swept outer arm 1",
+          "Bergere velvet seat cushion"
+        ],
+        [
+          "Bergere swept outer arm 1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere rear arm bearing upright 1",
+          "Bergere velvet seat cushion"
+        ],
+        [
+          "Bergere rear arm bearing upright 1",
+          "Bergere sculpted broad seat frame"
+        ],
+        [
+          "Bergere velvet arm pad 1",
+          "Bergere swept outer arm 1"
+        ],
+        [
+          "Bergere continuous enclosing oval back frame",
+          "Bergere rear arm bearing upright -1"
+        ],
+        [
+          "Bergere continuous enclosing oval back frame",
+          "Bergere rear arm bearing upright 1"
+        ],
+        [
+          "Bergere vertical cane reed -7",
+          "Bergere rear arm bearing upright -1"
+        ],
+        [
+          "Bergere vertical cane reed -7",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -6",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -5",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -4",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -3",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -2",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed -1",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 0",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 1",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 2",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 3",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 4",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 5",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 6",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere vertical cane reed 7",
+          "Bergere rear arm bearing upright 1"
+        ],
+        [
+          "Bergere vertical cane reed 7",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed -5",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed -4",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed -3",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -7"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed -2",
+          "Bergere vertical cane reed 7"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere rear arm bearing upright -1"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere rear arm bearing upright 1"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -7"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed -1",
+          "Bergere vertical cane reed 7"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere rear arm bearing upright -1"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere rear arm bearing upright 1"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -7"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed 0",
+          "Bergere vertical cane reed 7"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere rear arm bearing upright 1"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -7"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed 1",
+          "Bergere vertical cane reed 7"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -7"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed 2",
+          "Bergere vertical cane reed 7"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -6"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed 3",
+          "Bergere vertical cane reed 6"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed -5"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere crossing cane reed 4",
+          "Bergere vertical cane reed 5"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed -4"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed -3"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed -2"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed 3"
+        ],
+        [
+          "Bergere crossing cane reed 5",
+          "Bergere vertical cane reed 4"
+        ],
+        [
+          "Bergere lower back bearing rail",
+          "Bergere continuous enclosing oval back frame"
+        ],
+        [
+          "Bergere lower back bearing rail",
+          "Bergere vertical cane reed -1"
+        ],
+        [
+          "Bergere lower back bearing rail",
+          "Bergere vertical cane reed 0"
+        ],
+        [
+          "Bergere lower back bearing rail",
+          "Bergere vertical cane reed 1"
+        ],
+        [
+          "Bergere lower back bearing rail",
+          "Bergere vertical cane reed 2"
+        ],
+        [
+          "Bergere carved elbow finial -1",
+          "Bergere swept outer arm -1"
+        ],
+        [
+          "Bergere carved elbow finial -1",
+          "Bergere velvet arm pad -1"
+        ],
+        [
+          "Bergere carved elbow finial 1",
+          "Bergere swept outer arm 1"
+        ],
+        [
+          "Bergere carved elbow finial 1",
+          "Bergere velvet arm pad 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-curved-rocker-01",
+      "source_sha256": "0d2e7831ce7b4b0ef391bb04cbfbec593333a62153b5f56de2a75613ffa6a7b1",
+      "native_parts": 28,
+      "groups": [
+        {
+          "parts": [
+            "Rocker continuous bent floor rail -1",
+            "Rocker continuous tall rear stile -1",
+            "Rocker arched full-width crest",
+            "Rocker carved crest crown",
+            "Rocker tapered back spindle 3",
+            "Rocker tapered back spindle 2",
+            "Rocker tapered back spindle 1",
+            "Rocker tapered back spindle 0",
+            "Rocker tapered back spindle -1",
+            "Rocker tapered back spindle -2",
+            "Rocker tapered back spindle -3",
+            "Rocker continuous tall rear stile 1",
+            "Rocker swept arm 1",
+            "Rocker elbow crest cap 1",
+            "Rocker front arm upright 1",
+            "Rocker front swept leg 1",
+            "Rocker transverse foot brace -0.205",
+            "Rocker side stretcher 1",
+            "Rocker continuous bent floor rail 1",
+            "Rocker lower back rail",
+            "Rocker transverse foot brace 0.178",
+            "Rocker swept arm -1",
+            "Rocker elbow crest cap -1",
+            "Rocker front arm upright -1",
+            "Rocker side stretcher -1",
+            "Rocker teal velvet seat cushion",
+            "Rocker broad saddle bearing seat",
+            "Rocker front swept leg -1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Rocker teal velvet seat cushion",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker front swept leg -1",
+          "Rocker continuous bent floor rail -1"
+        ],
+        [
+          "Rocker front swept leg -1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker continuous tall rear stile -1",
+          "Rocker continuous bent floor rail -1"
+        ],
+        [
+          "Rocker continuous tall rear stile -1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker continuous tall rear stile -1",
+          "Rocker teal velvet seat cushion"
+        ],
+        [
+          "Rocker side stretcher -1",
+          "Rocker front swept leg -1"
+        ],
+        [
+          "Rocker side stretcher -1",
+          "Rocker continuous tall rear stile -1"
+        ],
+        [
+          "Rocker swept arm -1",
+          "Rocker continuous tall rear stile -1"
+        ],
+        [
+          "Rocker front arm upright -1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker front arm upright -1",
+          "Rocker teal velvet seat cushion"
+        ],
+        [
+          "Rocker front arm upright -1",
+          "Rocker front swept leg -1"
+        ],
+        [
+          "Rocker front arm upright -1",
+          "Rocker swept arm -1"
+        ],
+        [
+          "Rocker elbow crest cap -1",
+          "Rocker swept arm -1"
+        ],
+        [
+          "Rocker front swept leg 1",
+          "Rocker continuous bent floor rail 1"
+        ],
+        [
+          "Rocker front swept leg 1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker continuous tall rear stile 1",
+          "Rocker continuous bent floor rail 1"
+        ],
+        [
+          "Rocker continuous tall rear stile 1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker continuous tall rear stile 1",
+          "Rocker teal velvet seat cushion"
+        ],
+        [
+          "Rocker side stretcher 1",
+          "Rocker front swept leg 1"
+        ],
+        [
+          "Rocker side stretcher 1",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker swept arm 1",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker front arm upright 1",
+          "Rocker broad saddle bearing seat"
+        ],
+        [
+          "Rocker front arm upright 1",
+          "Rocker teal velvet seat cushion"
+        ],
+        [
+          "Rocker front arm upright 1",
+          "Rocker front swept leg 1"
+        ],
+        [
+          "Rocker front arm upright 1",
+          "Rocker swept arm 1"
+        ],
+        [
+          "Rocker elbow crest cap 1",
+          "Rocker swept arm 1"
+        ],
+        [
+          "Rocker transverse foot brace -0.205",
+          "Rocker front swept leg -1"
+        ],
+        [
+          "Rocker transverse foot brace -0.205",
+          "Rocker side stretcher -1"
+        ],
+        [
+          "Rocker transverse foot brace -0.205",
+          "Rocker front swept leg 1"
+        ],
+        [
+          "Rocker transverse foot brace -0.205",
+          "Rocker side stretcher 1"
+        ],
+        [
+          "Rocker transverse foot brace 0.178",
+          "Rocker continuous tall rear stile -1"
+        ],
+        [
+          "Rocker transverse foot brace 0.178",
+          "Rocker side stretcher -1"
+        ],
+        [
+          "Rocker transverse foot brace 0.178",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker transverse foot brace 0.178",
+          "Rocker side stretcher 1"
+        ],
+        [
+          "Rocker lower back rail",
+          "Rocker continuous tall rear stile -1"
+        ],
+        [
+          "Rocker lower back rail",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker tapered back spindle -3",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle -2",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle -1",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle 0",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle 1",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle 2",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker tapered back spindle 3",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker tapered back spindle 3",
+          "Rocker lower back rail"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker continuous tall rear stile -1"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker continuous tall rear stile 1"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle -3"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle -2"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle -1"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle 0"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle 1"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle 2"
+        ],
+        [
+          "Rocker arched full-width crest",
+          "Rocker tapered back spindle 3"
+        ],
+        [
+          "Rocker carved crest crown",
+          "Rocker tapered back spindle -1"
+        ],
+        [
+          "Rocker carved crest crown",
+          "Rocker tapered back spindle 0"
+        ],
+        [
+          "Rocker carved crest crown",
+          "Rocker tapered back spindle 1"
+        ],
+        [
+          "Rocker carved crest crown",
+          "Rocker arched full-width crest"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-lyre-side-01",
+      "source_sha256": "997d1f86dfdfe9bb62478cce6dc3acc9bc073af57738dfda50c6d4238ce1b41f",
+      "native_parts": 25,
+      "groups": [
+        {
+          "parts": [
+            "Lyre cushion seat surface",
+            "Lyre continuous rear bearing stile 1",
+            "Lyre lower bearing sill",
+            "Lyre slender central string 2",
+            "Lyre upper string attachment",
+            "Lyre slender central string 1",
+            "Lyre slender central string 0",
+            "Lyre slender central string -1",
+            "Lyre slender central string -2",
+            "Lyre open S-scroll outer bow 1",
+            "Lyre open S-scroll outer bow -1",
+            "Lyre full bearing crest rail",
+            "Lyre transverse apron 1",
+            "Lyre side underseat apron 0",
+            "Lyre transverse apron 0",
+            "Lyre front turned leg 1",
+            "Lyre front stretcher",
+            "Lyre mortised side stretcher 0",
+            "Lyre front turned leg 0",
+            "Lyre side underseat apron 1",
+            "Lyre mortised side stretcher 1",
+            "Lyre rear joined ground foot 1",
+            "Lyre continuous rear bearing stile 0",
+            "Lyre rear joined ground foot 0",
+            "Lyre carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Lyre carved seat bearing frame",
+          "Lyre cushion seat surface"
+        ],
+        [
+          "Lyre front turned leg 0",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre continuous rear bearing stile 0",
+          "Lyre cushion seat surface"
+        ],
+        [
+          "Lyre continuous rear bearing stile 0",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre continuous rear bearing stile 0",
+          "Lyre rear joined ground foot 0"
+        ],
+        [
+          "Lyre mortised side stretcher 0",
+          "Lyre front turned leg 0"
+        ],
+        [
+          "Lyre mortised side stretcher 0",
+          "Lyre continuous rear bearing stile 0"
+        ],
+        [
+          "Lyre side underseat apron 0",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre side underseat apron 0",
+          "Lyre front turned leg 0"
+        ],
+        [
+          "Lyre side underseat apron 0",
+          "Lyre continuous rear bearing stile 0"
+        ],
+        [
+          "Lyre front turned leg 1",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre continuous rear bearing stile 1",
+          "Lyre cushion seat surface"
+        ],
+        [
+          "Lyre continuous rear bearing stile 1",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre continuous rear bearing stile 1",
+          "Lyre rear joined ground foot 1"
+        ],
+        [
+          "Lyre mortised side stretcher 1",
+          "Lyre front turned leg 1"
+        ],
+        [
+          "Lyre mortised side stretcher 1",
+          "Lyre continuous rear bearing stile 1"
+        ],
+        [
+          "Lyre side underseat apron 1",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre side underseat apron 1",
+          "Lyre front turned leg 1"
+        ],
+        [
+          "Lyre side underseat apron 1",
+          "Lyre continuous rear bearing stile 1"
+        ],
+        [
+          "Lyre transverse apron 0",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre transverse apron 0",
+          "Lyre front turned leg 0"
+        ],
+        [
+          "Lyre transverse apron 0",
+          "Lyre side underseat apron 0"
+        ],
+        [
+          "Lyre transverse apron 0",
+          "Lyre front turned leg 1"
+        ],
+        [
+          "Lyre transverse apron 0",
+          "Lyre side underseat apron 1"
+        ],
+        [
+          "Lyre transverse apron 1",
+          "Lyre carved seat bearing frame"
+        ],
+        [
+          "Lyre transverse apron 1",
+          "Lyre continuous rear bearing stile 0"
+        ],
+        [
+          "Lyre transverse apron 1",
+          "Lyre side underseat apron 0"
+        ],
+        [
+          "Lyre transverse apron 1",
+          "Lyre continuous rear bearing stile 1"
+        ],
+        [
+          "Lyre transverse apron 1",
+          "Lyre side underseat apron 1"
+        ],
+        [
+          "Lyre front stretcher",
+          "Lyre front turned leg 0"
+        ],
+        [
+          "Lyre front stretcher",
+          "Lyre mortised side stretcher 0"
+        ],
+        [
+          "Lyre front stretcher",
+          "Lyre front turned leg 1"
+        ],
+        [
+          "Lyre front stretcher",
+          "Lyre mortised side stretcher 1"
+        ],
+        [
+          "Lyre full bearing crest rail",
+          "Lyre continuous rear bearing stile 0"
+        ],
+        [
+          "Lyre full bearing crest rail",
+          "Lyre continuous rear bearing stile 1"
+        ],
+        [
+          "Lyre lower bearing sill",
+          "Lyre continuous rear bearing stile 0"
+        ],
+        [
+          "Lyre lower bearing sill",
+          "Lyre continuous rear bearing stile 1"
+        ],
+        [
+          "Lyre open S-scroll outer bow -1",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre open S-scroll outer bow -1",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre open S-scroll outer bow 1",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre open S-scroll outer bow 1",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string -2",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre slender central string -2",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string -2",
+          "Lyre open S-scroll outer bow -1"
+        ],
+        [
+          "Lyre slender central string -1",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre slender central string -1",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string 0",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre slender central string 0",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string 1",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre slender central string 1",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string 2",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre slender central string 2",
+          "Lyre lower bearing sill"
+        ],
+        [
+          "Lyre slender central string 2",
+          "Lyre open S-scroll outer bow 1"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre full bearing crest rail"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre open S-scroll outer bow -1"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre open S-scroll outer bow 1"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre slender central string -2"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre slender central string -1"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre slender central string 0"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre slender central string 1"
+        ],
+        [
+          "Lyre upper string attachment",
+          "Lyre slender central string 2"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-balloon-side-01",
+      "source_sha256": "d5eddd42e21f9bc43d002fa880af701ed1cae978104aa02c00d526b662a81f91",
+      "native_parts": 19,
+      "groups": [
+        {
+          "parts": [
+            "Balloon cushion seat surface",
+            "Balloon continuous rear bearing stile 1",
+            "Balloon lower seat-to-back sill",
+            "Balloon velvet back medallion",
+            "Balloon continuous oval upholstered back surround",
+            "Balloon carved oval crown",
+            "Balloon transverse apron 1",
+            "Balloon side underseat apron 0",
+            "Balloon transverse apron 0",
+            "Balloon front turned leg 1",
+            "Balloon front stretcher",
+            "Balloon mortised side stretcher 0",
+            "Balloon front turned leg 0",
+            "Balloon side underseat apron 1",
+            "Balloon mortised side stretcher 1",
+            "Balloon rear joined ground foot 1",
+            "Balloon continuous rear bearing stile 0",
+            "Balloon rear joined ground foot 0",
+            "Balloon carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Balloon carved seat bearing frame",
+          "Balloon cushion seat surface"
+        ],
+        [
+          "Balloon front turned leg 0",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon continuous rear bearing stile 0",
+          "Balloon cushion seat surface"
+        ],
+        [
+          "Balloon continuous rear bearing stile 0",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon continuous rear bearing stile 0",
+          "Balloon rear joined ground foot 0"
+        ],
+        [
+          "Balloon mortised side stretcher 0",
+          "Balloon front turned leg 0"
+        ],
+        [
+          "Balloon mortised side stretcher 0",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon side underseat apron 0",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon side underseat apron 0",
+          "Balloon front turned leg 0"
+        ],
+        [
+          "Balloon side underseat apron 0",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon front turned leg 1",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon continuous rear bearing stile 1",
+          "Balloon cushion seat surface"
+        ],
+        [
+          "Balloon continuous rear bearing stile 1",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon continuous rear bearing stile 1",
+          "Balloon rear joined ground foot 1"
+        ],
+        [
+          "Balloon mortised side stretcher 1",
+          "Balloon front turned leg 1"
+        ],
+        [
+          "Balloon mortised side stretcher 1",
+          "Balloon continuous rear bearing stile 1"
+        ],
+        [
+          "Balloon side underseat apron 1",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon side underseat apron 1",
+          "Balloon front turned leg 1"
+        ],
+        [
+          "Balloon side underseat apron 1",
+          "Balloon continuous rear bearing stile 1"
+        ],
+        [
+          "Balloon transverse apron 0",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon transverse apron 0",
+          "Balloon front turned leg 0"
+        ],
+        [
+          "Balloon transverse apron 0",
+          "Balloon side underseat apron 0"
+        ],
+        [
+          "Balloon transverse apron 0",
+          "Balloon front turned leg 1"
+        ],
+        [
+          "Balloon transverse apron 0",
+          "Balloon side underseat apron 1"
+        ],
+        [
+          "Balloon transverse apron 1",
+          "Balloon carved seat bearing frame"
+        ],
+        [
+          "Balloon transverse apron 1",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon transverse apron 1",
+          "Balloon side underseat apron 0"
+        ],
+        [
+          "Balloon transverse apron 1",
+          "Balloon continuous rear bearing stile 1"
+        ],
+        [
+          "Balloon transverse apron 1",
+          "Balloon side underseat apron 1"
+        ],
+        [
+          "Balloon front stretcher",
+          "Balloon front turned leg 0"
+        ],
+        [
+          "Balloon front stretcher",
+          "Balloon mortised side stretcher 0"
+        ],
+        [
+          "Balloon front stretcher",
+          "Balloon front turned leg 1"
+        ],
+        [
+          "Balloon front stretcher",
+          "Balloon mortised side stretcher 1"
+        ],
+        [
+          "Balloon continuous oval upholstered back surround",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon continuous oval upholstered back surround",
+          "Balloon continuous rear bearing stile 1"
+        ],
+        [
+          "Balloon velvet back medallion",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon velvet back medallion",
+          "Balloon continuous oval upholstered back surround"
+        ],
+        [
+          "Balloon lower seat-to-back sill",
+          "Balloon continuous rear bearing stile 0"
+        ],
+        [
+          "Balloon lower seat-to-back sill",
+          "Balloon continuous rear bearing stile 1"
+        ],
+        [
+          "Balloon lower seat-to-back sill",
+          "Balloon continuous oval upholstered back surround"
+        ],
+        [
+          "Balloon lower seat-to-back sill",
+          "Balloon velvet back medallion"
+        ],
+        [
+          "Balloon carved oval crown",
+          "Balloon continuous oval upholstered back surround"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-windsor-bow-01",
+      "source_sha256": "4d06bbdcf12b3c8fdc8523d570d1cad3a3c520b1af6c28764b5534b249bc5be1",
+      "native_parts": 26,
+      "groups": [
+        {
+          "parts": [
+            "Windsor cushion seat surface",
+            "Windsor radial back spindle 4",
+            "Windsor radial back spindle 3",
+            "Windsor radial back spindle 2",
+            "Windsor radial back spindle 1",
+            "Windsor carved bow crown",
+            "Windsor radial back spindle 0",
+            "Windsor radial back spindle -1",
+            "Windsor radial back spindle -2",
+            "Windsor radial back spindle -3",
+            "Windsor radial back spindle -4",
+            "Windsor continuous bent bow",
+            "Windsor carved seat bearing frame",
+            "Windsor transverse apron 1",
+            "Windsor transverse apron 0",
+            "Windsor side underseat apron 1",
+            "Windsor rear shaped leg 1",
+            "Windsor mortised side stretcher 1",
+            "Windsor front stretcher",
+            "Windsor mortised side stretcher 0",
+            "Windsor rear shaped leg 1 joined ground foot",
+            "Windsor front turned leg 1",
+            "Windsor side underseat apron 0",
+            "Windsor rear shaped leg 0",
+            "Windsor rear shaped leg 0 joined ground foot",
+            "Windsor front turned leg 0"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Windsor carved seat bearing frame",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor front turned leg 0",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor rear shaped leg 0",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor rear shaped leg 0",
+          "Windsor rear shaped leg 0 joined ground foot"
+        ],
+        [
+          "Windsor mortised side stretcher 0",
+          "Windsor front turned leg 0"
+        ],
+        [
+          "Windsor mortised side stretcher 0",
+          "Windsor rear shaped leg 0"
+        ],
+        [
+          "Windsor side underseat apron 0",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor side underseat apron 0",
+          "Windsor front turned leg 0"
+        ],
+        [
+          "Windsor side underseat apron 0",
+          "Windsor rear shaped leg 0"
+        ],
+        [
+          "Windsor front turned leg 1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor rear shaped leg 1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor rear shaped leg 1",
+          "Windsor rear shaped leg 1 joined ground foot"
+        ],
+        [
+          "Windsor mortised side stretcher 1",
+          "Windsor front turned leg 1"
+        ],
+        [
+          "Windsor mortised side stretcher 1",
+          "Windsor rear shaped leg 1"
+        ],
+        [
+          "Windsor side underseat apron 1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor side underseat apron 1",
+          "Windsor front turned leg 1"
+        ],
+        [
+          "Windsor side underseat apron 1",
+          "Windsor rear shaped leg 1"
+        ],
+        [
+          "Windsor transverse apron 0",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor transverse apron 0",
+          "Windsor front turned leg 0"
+        ],
+        [
+          "Windsor transverse apron 0",
+          "Windsor side underseat apron 0"
+        ],
+        [
+          "Windsor transverse apron 0",
+          "Windsor front turned leg 1"
+        ],
+        [
+          "Windsor transverse apron 0",
+          "Windsor side underseat apron 1"
+        ],
+        [
+          "Windsor transverse apron 1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor transverse apron 1",
+          "Windsor rear shaped leg 0"
+        ],
+        [
+          "Windsor transverse apron 1",
+          "Windsor side underseat apron 0"
+        ],
+        [
+          "Windsor transverse apron 1",
+          "Windsor rear shaped leg 1"
+        ],
+        [
+          "Windsor transverse apron 1",
+          "Windsor side underseat apron 1"
+        ],
+        [
+          "Windsor front stretcher",
+          "Windsor front turned leg 0"
+        ],
+        [
+          "Windsor front stretcher",
+          "Windsor mortised side stretcher 0"
+        ],
+        [
+          "Windsor front stretcher",
+          "Windsor front turned leg 1"
+        ],
+        [
+          "Windsor front stretcher",
+          "Windsor mortised side stretcher 1"
+        ],
+        [
+          "Windsor continuous bent bow",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor continuous bent bow",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle -4",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle -4",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle -4",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle -3",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle -3",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle -3",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle -2",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle -2",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle -2",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle -1",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle -1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle -1",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle 0",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle 0",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle 0",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle 1",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle 1",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle 1",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle 2",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle 2",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle 2",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle 3",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle 3",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle 3",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor radial back spindle 4",
+          "Windsor cushion seat surface"
+        ],
+        [
+          "Windsor radial back spindle 4",
+          "Windsor carved seat bearing frame"
+        ],
+        [
+          "Windsor radial back spindle 4",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor carved bow crown",
+          "Windsor continuous bent bow"
+        ],
+        [
+          "Windsor carved bow crown",
+          "Windsor radial back spindle -1"
+        ],
+        [
+          "Windsor carved bow crown",
+          "Windsor radial back spindle 0"
+        ],
+        [
+          "Windsor carved bow crown",
+          "Windsor radial back spindle 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-slipper-01",
+      "source_sha256": "2f7248402de333fede27779375d6e7b9a94cfd071daf45862b2fc04ca846c98a",
+      "native_parts": 9,
+      "groups": [
+        {
+          "parts": [
+            "Slipper cushion seat surface",
+            "Slipper continuous rolled upholstered back",
+            "Slipper rear walnut back bearing rail",
+            "Slipper deep upholstered base",
+            "Slipper short turned foot 0.203 0.162",
+            "Slipper short turned foot 0.203 -0.262",
+            "Slipper short turned foot -0.203 0.162",
+            "Slipper short turned foot -0.203 -0.262",
+            "Slipper carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Slipper carved seat bearing frame",
+          "Slipper cushion seat surface"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper cushion seat surface"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper carved seat bearing frame"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper short turned foot -0.203 -0.262"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper short turned foot -0.203 0.162"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper short turned foot 0.203 -0.262"
+        ],
+        [
+          "Slipper deep upholstered base",
+          "Slipper short turned foot 0.203 0.162"
+        ],
+        [
+          "Slipper continuous rolled upholstered back",
+          "Slipper cushion seat surface"
+        ],
+        [
+          "Slipper continuous rolled upholstered back",
+          "Slipper carved seat bearing frame"
+        ],
+        [
+          "Slipper continuous rolled upholstered back",
+          "Slipper deep upholstered base"
+        ],
+        [
+          "Slipper rear walnut back bearing rail",
+          "Slipper continuous rolled upholstered back"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-corner-01",
+      "source_sha256": "e503b5ba4fa25df597ec5975dfd2959ef06f03e078bac8264e2c5420fb32b154",
+      "native_parts": 22,
+      "groups": [
+        {
+          "parts": [
+            "Corner cushion seat surface",
+            "Corner side spindle 3",
+            "Corner orthogonal enclosing upper rail",
+            "Corner genuine corner cap",
+            "Corner rear spindle 3",
+            "Corner side spindle 2",
+            "Corner rear spindle 2",
+            "Corner side spindle 1",
+            "Corner rear spindle 1",
+            "Corner side spindle 0",
+            "Corner rear spindle 0",
+            "Corner side front continuous post",
+            "Corner corner continuous post",
+            "Corner rear left continuous post",
+            "Corner carved seat bearing frame",
+            "Corner turned leg 0.241 0.229",
+            "Corner side lower stretcher 0.24063",
+            "Corner transverse lower stretcher",
+            "Corner side lower stretcher -0.24063",
+            "Corner turned leg 0.241 -0.229",
+            "Corner turned leg -0.241 0.229",
+            "Corner turned leg -0.241 -0.229"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Corner carved seat bearing frame",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner turned leg -0.241 -0.229",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner turned leg -0.241 0.229",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner turned leg 0.241 -0.229",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner turned leg 0.241 0.229",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner side lower stretcher -0.24063",
+          "Corner turned leg -0.241 -0.229"
+        ],
+        [
+          "Corner side lower stretcher -0.24063",
+          "Corner turned leg -0.241 0.229"
+        ],
+        [
+          "Corner side lower stretcher 0.24063",
+          "Corner turned leg 0.241 -0.229"
+        ],
+        [
+          "Corner side lower stretcher 0.24063",
+          "Corner turned leg 0.241 0.229"
+        ],
+        [
+          "Corner transverse lower stretcher",
+          "Corner turned leg -0.241 -0.229"
+        ],
+        [
+          "Corner transverse lower stretcher",
+          "Corner turned leg 0.241 -0.229"
+        ],
+        [
+          "Corner transverse lower stretcher",
+          "Corner side lower stretcher -0.24063"
+        ],
+        [
+          "Corner transverse lower stretcher",
+          "Corner side lower stretcher 0.24063"
+        ],
+        [
+          "Corner rear left continuous post",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner rear left continuous post",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner corner continuous post",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner corner continuous post",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner side front continuous post",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner side front continuous post",
+          "Corner carved seat bearing frame"
+        ],
+        [
+          "Corner orthogonal enclosing upper rail",
+          "Corner rear left continuous post"
+        ],
+        [
+          "Corner orthogonal enclosing upper rail",
+          "Corner corner continuous post"
+        ],
+        [
+          "Corner orthogonal enclosing upper rail",
+          "Corner side front continuous post"
+        ],
+        [
+          "Corner rear spindle 0",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner rear spindle 0",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner side spindle 0",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner side spindle 0",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner rear spindle 1",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner rear spindle 1",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner side spindle 1",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner side spindle 1",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner rear spindle 2",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner rear spindle 2",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner side spindle 2",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner side spindle 2",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner rear spindle 3",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner rear spindle 3",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner side spindle 3",
+          "Corner cushion seat surface"
+        ],
+        [
+          "Corner side spindle 3",
+          "Corner orthogonal enclosing upper rail"
+        ],
+        [
+          "Corner genuine corner cap",
+          "Corner corner continuous post"
+        ],
+        [
+          "Corner genuine corner cap",
+          "Corner orthogonal enclosing upper rail"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-smoking-01",
+      "source_sha256": "ff06eb903f60b324d9f4490d813cc97d0bd5054534f330be51a861c6f0c8bc22",
+      "native_parts": 20,
+      "groups": [
+        {
+          "parts": [
+            "Smoking cushion seat surface",
+            "Smoking continuous rear bearing stile 1",
+            "Smoking lower splat bearing sill",
+            "Smoking pierced central splat upper bow",
+            "Smoking pierced central splat lower bow",
+            "Smoking elbow pad walnut bearing",
+            "Smoking broad chestnut upper elbow pad",
+            "Smoking transverse apron 1",
+            "Smoking side underseat apron 0",
+            "Smoking transverse apron 0",
+            "Smoking front turned leg 1",
+            "Smoking front stretcher",
+            "Smoking mortised side stretcher 0",
+            "Smoking front turned leg 0",
+            "Smoking side underseat apron 1",
+            "Smoking mortised side stretcher 1",
+            "Smoking rear joined ground foot 1",
+            "Smoking continuous rear bearing stile 0",
+            "Smoking rear joined ground foot 0",
+            "Smoking carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Smoking carved seat bearing frame",
+          "Smoking cushion seat surface"
+        ],
+        [
+          "Smoking front turned leg 0",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking continuous rear bearing stile 0",
+          "Smoking cushion seat surface"
+        ],
+        [
+          "Smoking continuous rear bearing stile 0",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking continuous rear bearing stile 0",
+          "Smoking rear joined ground foot 0"
+        ],
+        [
+          "Smoking mortised side stretcher 0",
+          "Smoking front turned leg 0"
+        ],
+        [
+          "Smoking mortised side stretcher 0",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking side underseat apron 0",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking side underseat apron 0",
+          "Smoking front turned leg 0"
+        ],
+        [
+          "Smoking side underseat apron 0",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking front turned leg 1",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking continuous rear bearing stile 1",
+          "Smoking cushion seat surface"
+        ],
+        [
+          "Smoking continuous rear bearing stile 1",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking continuous rear bearing stile 1",
+          "Smoking rear joined ground foot 1"
+        ],
+        [
+          "Smoking mortised side stretcher 1",
+          "Smoking front turned leg 1"
+        ],
+        [
+          "Smoking mortised side stretcher 1",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking side underseat apron 1",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking side underseat apron 1",
+          "Smoking front turned leg 1"
+        ],
+        [
+          "Smoking side underseat apron 1",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking transverse apron 0",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking transverse apron 0",
+          "Smoking front turned leg 0"
+        ],
+        [
+          "Smoking transverse apron 0",
+          "Smoking side underseat apron 0"
+        ],
+        [
+          "Smoking transverse apron 0",
+          "Smoking front turned leg 1"
+        ],
+        [
+          "Smoking transverse apron 0",
+          "Smoking side underseat apron 1"
+        ],
+        [
+          "Smoking transverse apron 1",
+          "Smoking carved seat bearing frame"
+        ],
+        [
+          "Smoking transverse apron 1",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking transverse apron 1",
+          "Smoking side underseat apron 0"
+        ],
+        [
+          "Smoking transverse apron 1",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking transverse apron 1",
+          "Smoking side underseat apron 1"
+        ],
+        [
+          "Smoking front stretcher",
+          "Smoking front turned leg 0"
+        ],
+        [
+          "Smoking front stretcher",
+          "Smoking mortised side stretcher 0"
+        ],
+        [
+          "Smoking front stretcher",
+          "Smoking front turned leg 1"
+        ],
+        [
+          "Smoking front stretcher",
+          "Smoking mortised side stretcher 1"
+        ],
+        [
+          "Smoking broad chestnut upper elbow pad",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking broad chestnut upper elbow pad",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking elbow pad walnut bearing",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking elbow pad walnut bearing",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking elbow pad walnut bearing",
+          "Smoking broad chestnut upper elbow pad"
+        ],
+        [
+          "Smoking pierced central splat lower bow",
+          "Smoking elbow pad walnut bearing"
+        ],
+        [
+          "Smoking pierced central splat upper bow",
+          "Smoking elbow pad walnut bearing"
+        ],
+        [
+          "Smoking lower splat bearing sill",
+          "Smoking continuous rear bearing stile 0"
+        ],
+        [
+          "Smoking lower splat bearing sill",
+          "Smoking continuous rear bearing stile 1"
+        ],
+        [
+          "Smoking lower splat bearing sill",
+          "Smoking pierced central splat lower bow"
+        ],
+        [
+          "Smoking lower splat bearing sill",
+          "Smoking pierced central splat upper bow"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-campaign-fold-01",
+      "source_sha256": "9f1310d5d004c4800cf574ea5b3bbecde99a1aac207f3d22faffd930d334d2b0",
+      "native_parts": 20,
+      "groups": [
+        {
+          "parts": [
+            "Campaign fixed crossing side rail -1 -1",
+            "Campaign carved seat bearing frame",
+            "Campaign front underseat bearing rail",
+            "Campaign arm front upright 1",
+            "Campaign shaped arm 1",
+            "Campaign rear upright 1",
+            "Campaign lower back bearing rail",
+            "Campaign leather back sling",
+            "Campaign top back bearing rail",
+            "Campaign fixed crossing side rail 1 1",
+            "Campaign horizontal ground bearer 1",
+            "Campaign brass cross pin 1",
+            "Campaign fixed crossing side rail 1 -1",
+            "Campaign arm front upright -1",
+            "Campaign shaped arm -1",
+            "Campaign cushion seat surface",
+            "Campaign horizontal ground bearer -1",
+            "Campaign rear upright -1",
+            "Campaign brass cross pin -1",
+            "Campaign fixed crossing side rail -1 1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Campaign fixed crossing side rail -1 1",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign brass cross pin -1",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign brass cross pin -1",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign rear upright -1",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign horizontal ground bearer -1",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign horizontal ground bearer -1",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign arm front upright -1",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign arm front upright -1",
+          "Campaign shaped arm -1"
+        ],
+        [
+          "Campaign fixed crossing side rail 1 1",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign brass cross pin 1",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign brass cross pin 1",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign rear upright 1",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign horizontal ground bearer 1",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign horizontal ground bearer 1",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign arm front upright 1",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign arm front upright 1",
+          "Campaign shaped arm 1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign arm front upright -1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign cushion seat surface",
+          "Campaign arm front upright 1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign fixed crossing side rail -1 -1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign arm front upright -1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign fixed crossing side rail 1 -1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign rear upright 1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign arm front upright 1"
+        ],
+        [
+          "Campaign carved seat bearing frame",
+          "Campaign cushion seat surface"
+        ],
+        [
+          "Campaign top back bearing rail",
+          "Campaign rear upright -1"
+        ],
+        [
+          "Campaign top back bearing rail",
+          "Campaign rear upright 1"
+        ],
+        [
+          "Campaign leather back sling",
+          "Campaign rear upright -1"
+        ],
+        [
+          "Campaign leather back sling",
+          "Campaign rear upright 1"
+        ],
+        [
+          "Campaign leather back sling",
+          "Campaign top back bearing rail"
+        ],
+        [
+          "Campaign lower back bearing rail",
+          "Campaign rear upright -1"
+        ],
+        [
+          "Campaign lower back bearing rail",
+          "Campaign rear upright 1"
+        ],
+        [
+          "Campaign lower back bearing rail",
+          "Campaign leather back sling"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign fixed crossing side rail -1 1"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign arm front upright -1"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign fixed crossing side rail 1 1"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign arm front upright 1"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign cushion seat surface"
+        ],
+        [
+          "Campaign front underseat bearing rail",
+          "Campaign carved seat bearing frame"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-x-back-01",
+      "source_sha256": "f970bdcb5e6203f601259c583b3bdd0ed82bdf1fd850b27310a4c01c8586632e",
+      "native_parts": 20,
+      "groups": [
+        {
+          "parts": [
+            "X-back cushion seat surface",
+            "X-back continuous rear bearing stile 1",
+            "X-back diagonal open crossing rail 1",
+            "X-back central brass crossing peg",
+            "X-back diagonal open crossing rail -1",
+            "X-back lower bearing sill",
+            "X-back full bearing crest rail",
+            "X-back transverse apron 1",
+            "X-back side underseat apron 0",
+            "X-back transverse apron 0",
+            "X-back front turned leg 1",
+            "X-back front stretcher",
+            "X-back mortised side stretcher 0",
+            "X-back front turned leg 0",
+            "X-back side underseat apron 1",
+            "X-back mortised side stretcher 1",
+            "X-back rear joined ground foot 1",
+            "X-back continuous rear bearing stile 0",
+            "X-back rear joined ground foot 0",
+            "X-back carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "X-back carved seat bearing frame",
+          "X-back cushion seat surface"
+        ],
+        [
+          "X-back front turned leg 0",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back continuous rear bearing stile 0",
+          "X-back cushion seat surface"
+        ],
+        [
+          "X-back continuous rear bearing stile 0",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back continuous rear bearing stile 0",
+          "X-back rear joined ground foot 0"
+        ],
+        [
+          "X-back mortised side stretcher 0",
+          "X-back front turned leg 0"
+        ],
+        [
+          "X-back mortised side stretcher 0",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back side underseat apron 0",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back side underseat apron 0",
+          "X-back front turned leg 0"
+        ],
+        [
+          "X-back side underseat apron 0",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back front turned leg 1",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back continuous rear bearing stile 1",
+          "X-back cushion seat surface"
+        ],
+        [
+          "X-back continuous rear bearing stile 1",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back continuous rear bearing stile 1",
+          "X-back rear joined ground foot 1"
+        ],
+        [
+          "X-back mortised side stretcher 1",
+          "X-back front turned leg 1"
+        ],
+        [
+          "X-back mortised side stretcher 1",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back side underseat apron 1",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back side underseat apron 1",
+          "X-back front turned leg 1"
+        ],
+        [
+          "X-back side underseat apron 1",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back transverse apron 0",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back transverse apron 0",
+          "X-back front turned leg 0"
+        ],
+        [
+          "X-back transverse apron 0",
+          "X-back side underseat apron 0"
+        ],
+        [
+          "X-back transverse apron 0",
+          "X-back front turned leg 1"
+        ],
+        [
+          "X-back transverse apron 0",
+          "X-back side underseat apron 1"
+        ],
+        [
+          "X-back transverse apron 1",
+          "X-back carved seat bearing frame"
+        ],
+        [
+          "X-back transverse apron 1",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back transverse apron 1",
+          "X-back side underseat apron 0"
+        ],
+        [
+          "X-back transverse apron 1",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back transverse apron 1",
+          "X-back side underseat apron 1"
+        ],
+        [
+          "X-back front stretcher",
+          "X-back front turned leg 0"
+        ],
+        [
+          "X-back front stretcher",
+          "X-back mortised side stretcher 0"
+        ],
+        [
+          "X-back front stretcher",
+          "X-back front turned leg 1"
+        ],
+        [
+          "X-back front stretcher",
+          "X-back mortised side stretcher 1"
+        ],
+        [
+          "X-back full bearing crest rail",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back full bearing crest rail",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back lower bearing sill",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back lower bearing sill",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back diagonal open crossing rail -1",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back diagonal open crossing rail -1",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back diagonal open crossing rail -1",
+          "X-back full bearing crest rail"
+        ],
+        [
+          "X-back diagonal open crossing rail -1",
+          "X-back lower bearing sill"
+        ],
+        [
+          "X-back diagonal open crossing rail 1",
+          "X-back continuous rear bearing stile 0"
+        ],
+        [
+          "X-back diagonal open crossing rail 1",
+          "X-back continuous rear bearing stile 1"
+        ],
+        [
+          "X-back diagonal open crossing rail 1",
+          "X-back full bearing crest rail"
+        ],
+        [
+          "X-back diagonal open crossing rail 1",
+          "X-back lower bearing sill"
+        ],
+        [
+          "X-back diagonal open crossing rail 1",
+          "X-back diagonal open crossing rail -1"
+        ],
+        [
+          "X-back central brass crossing peg",
+          "X-back diagonal open crossing rail -1"
+        ],
+        [
+          "X-back central brass crossing peg",
+          "X-back diagonal open crossing rail 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-shield-back-01",
+      "source_sha256": "7163b32931ee7020a6949ffd8b730a71305fbb5b6476fa65e83a2918b831b82c",
+      "native_parts": 22,
+      "groups": [
+        {
+          "parts": [
+            "Shield cushion seat surface",
+            "Shield continuous rear bearing stile 1",
+            "Shield low bearing sill",
+            "Shield central pierced spindle 0",
+            "Shield central pierced spindle 1",
+            "Shield central pierced spindle -1",
+            "Shield right continuous pierced outline",
+            "Shield left continuous pierced outline",
+            "Shield full bearing crest rail",
+            "Shield transverse apron 1",
+            "Shield side underseat apron 0",
+            "Shield transverse apron 0",
+            "Shield front turned leg 1",
+            "Shield front stretcher",
+            "Shield mortised side stretcher 0",
+            "Shield front turned leg 0",
+            "Shield side underseat apron 1",
+            "Shield mortised side stretcher 1",
+            "Shield rear joined ground foot 1",
+            "Shield continuous rear bearing stile 0",
+            "Shield rear joined ground foot 0",
+            "Shield carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Shield carved seat bearing frame",
+          "Shield cushion seat surface"
+        ],
+        [
+          "Shield front turned leg 0",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield continuous rear bearing stile 0",
+          "Shield cushion seat surface"
+        ],
+        [
+          "Shield continuous rear bearing stile 0",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield continuous rear bearing stile 0",
+          "Shield rear joined ground foot 0"
+        ],
+        [
+          "Shield mortised side stretcher 0",
+          "Shield front turned leg 0"
+        ],
+        [
+          "Shield mortised side stretcher 0",
+          "Shield continuous rear bearing stile 0"
+        ],
+        [
+          "Shield side underseat apron 0",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield side underseat apron 0",
+          "Shield front turned leg 0"
+        ],
+        [
+          "Shield side underseat apron 0",
+          "Shield continuous rear bearing stile 0"
+        ],
+        [
+          "Shield front turned leg 1",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield continuous rear bearing stile 1",
+          "Shield cushion seat surface"
+        ],
+        [
+          "Shield continuous rear bearing stile 1",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield continuous rear bearing stile 1",
+          "Shield rear joined ground foot 1"
+        ],
+        [
+          "Shield mortised side stretcher 1",
+          "Shield front turned leg 1"
+        ],
+        [
+          "Shield mortised side stretcher 1",
+          "Shield continuous rear bearing stile 1"
+        ],
+        [
+          "Shield side underseat apron 1",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield side underseat apron 1",
+          "Shield front turned leg 1"
+        ],
+        [
+          "Shield side underseat apron 1",
+          "Shield continuous rear bearing stile 1"
+        ],
+        [
+          "Shield transverse apron 0",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield transverse apron 0",
+          "Shield front turned leg 0"
+        ],
+        [
+          "Shield transverse apron 0",
+          "Shield side underseat apron 0"
+        ],
+        [
+          "Shield transverse apron 0",
+          "Shield front turned leg 1"
+        ],
+        [
+          "Shield transverse apron 0",
+          "Shield side underseat apron 1"
+        ],
+        [
+          "Shield transverse apron 1",
+          "Shield carved seat bearing frame"
+        ],
+        [
+          "Shield transverse apron 1",
+          "Shield continuous rear bearing stile 0"
+        ],
+        [
+          "Shield transverse apron 1",
+          "Shield side underseat apron 0"
+        ],
+        [
+          "Shield transverse apron 1",
+          "Shield continuous rear bearing stile 1"
+        ],
+        [
+          "Shield transverse apron 1",
+          "Shield side underseat apron 1"
+        ],
+        [
+          "Shield front stretcher",
+          "Shield front turned leg 0"
+        ],
+        [
+          "Shield front stretcher",
+          "Shield mortised side stretcher 0"
+        ],
+        [
+          "Shield front stretcher",
+          "Shield front turned leg 1"
+        ],
+        [
+          "Shield front stretcher",
+          "Shield mortised side stretcher 1"
+        ],
+        [
+          "Shield full bearing crest rail",
+          "Shield continuous rear bearing stile 0"
+        ],
+        [
+          "Shield full bearing crest rail",
+          "Shield continuous rear bearing stile 1"
+        ],
+        [
+          "Shield right continuous pierced outline",
+          "Shield left continuous pierced outline"
+        ],
+        [
+          "Shield central pierced spindle -1",
+          "Shield full bearing crest rail"
+        ],
+        [
+          "Shield central pierced spindle 0",
+          "Shield full bearing crest rail"
+        ],
+        [
+          "Shield central pierced spindle 0",
+          "Shield left continuous pierced outline"
+        ],
+        [
+          "Shield central pierced spindle 0",
+          "Shield right continuous pierced outline"
+        ],
+        [
+          "Shield central pierced spindle 0",
+          "Shield central pierced spindle -1"
+        ],
+        [
+          "Shield central pierced spindle 1",
+          "Shield full bearing crest rail"
+        ],
+        [
+          "Shield central pierced spindle 1",
+          "Shield central pierced spindle 0"
+        ],
+        [
+          "Shield low bearing sill",
+          "Shield continuous rear bearing stile 0"
+        ],
+        [
+          "Shield low bearing sill",
+          "Shield continuous rear bearing stile 1"
+        ],
+        [
+          "Shield low bearing sill",
+          "Shield left continuous pierced outline"
+        ],
+        [
+          "Shield low bearing sill",
+          "Shield right continuous pierced outline"
+        ],
+        [
+          "Shield low bearing sill",
+          "Shield central pierced spindle 0"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-gothic-hall-01",
+      "source_sha256": "48f151dd850d1af7b1ad603169cbf68de53622898814f6ac6479a047ed13cf40",
+      "native_parts": 22,
+      "groups": [
+        {
+          "parts": [
+            "Gothic hall cushion seat surface",
+            "Gothic hall continuous rear bearing stile 1",
+            "Gothic low bearing rail",
+            "Gothic pointed outer arch -1",
+            "Gothic upper carved arch apex",
+            "Gothic central vertical mullion",
+            "Gothic inner pointed arch 1",
+            "Gothic inner pointed arch -1",
+            "Gothic pointed outer arch 1",
+            "Gothic hall transverse apron 1",
+            "Gothic hall side underseat apron 0",
+            "Gothic hall transverse apron 0",
+            "Gothic hall front turned leg 1",
+            "Gothic hall front stretcher",
+            "Gothic hall mortised side stretcher 0",
+            "Gothic hall front turned leg 0",
+            "Gothic hall side underseat apron 1",
+            "Gothic hall mortised side stretcher 1",
+            "Gothic hall rear joined ground foot 1",
+            "Gothic hall continuous rear bearing stile 0",
+            "Gothic hall rear joined ground foot 0",
+            "Gothic hall carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Gothic hall carved seat bearing frame",
+          "Gothic hall cushion seat surface"
+        ],
+        [
+          "Gothic hall front turned leg 0",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 0",
+          "Gothic hall cushion seat surface"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 0",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 0",
+          "Gothic hall rear joined ground foot 0"
+        ],
+        [
+          "Gothic hall mortised side stretcher 0",
+          "Gothic hall front turned leg 0"
+        ],
+        [
+          "Gothic hall mortised side stretcher 0",
+          "Gothic hall continuous rear bearing stile 0"
+        ],
+        [
+          "Gothic hall side underseat apron 0",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall side underseat apron 0",
+          "Gothic hall front turned leg 0"
+        ],
+        [
+          "Gothic hall side underseat apron 0",
+          "Gothic hall continuous rear bearing stile 0"
+        ],
+        [
+          "Gothic hall front turned leg 1",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 1",
+          "Gothic hall cushion seat surface"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 1",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall continuous rear bearing stile 1",
+          "Gothic hall rear joined ground foot 1"
+        ],
+        [
+          "Gothic hall mortised side stretcher 1",
+          "Gothic hall front turned leg 1"
+        ],
+        [
+          "Gothic hall mortised side stretcher 1",
+          "Gothic hall continuous rear bearing stile 1"
+        ],
+        [
+          "Gothic hall side underseat apron 1",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall side underseat apron 1",
+          "Gothic hall front turned leg 1"
+        ],
+        [
+          "Gothic hall side underseat apron 1",
+          "Gothic hall continuous rear bearing stile 1"
+        ],
+        [
+          "Gothic hall transverse apron 0",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall transverse apron 0",
+          "Gothic hall front turned leg 0"
+        ],
+        [
+          "Gothic hall transverse apron 0",
+          "Gothic hall side underseat apron 0"
+        ],
+        [
+          "Gothic hall transverse apron 0",
+          "Gothic hall front turned leg 1"
+        ],
+        [
+          "Gothic hall transverse apron 0",
+          "Gothic hall side underseat apron 1"
+        ],
+        [
+          "Gothic hall transverse apron 1",
+          "Gothic hall carved seat bearing frame"
+        ],
+        [
+          "Gothic hall transverse apron 1",
+          "Gothic hall continuous rear bearing stile 0"
+        ],
+        [
+          "Gothic hall transverse apron 1",
+          "Gothic hall side underseat apron 0"
+        ],
+        [
+          "Gothic hall transverse apron 1",
+          "Gothic hall continuous rear bearing stile 1"
+        ],
+        [
+          "Gothic hall transverse apron 1",
+          "Gothic hall side underseat apron 1"
+        ],
+        [
+          "Gothic hall front stretcher",
+          "Gothic hall front turned leg 0"
+        ],
+        [
+          "Gothic hall front stretcher",
+          "Gothic hall mortised side stretcher 0"
+        ],
+        [
+          "Gothic hall front stretcher",
+          "Gothic hall front turned leg 1"
+        ],
+        [
+          "Gothic hall front stretcher",
+          "Gothic hall mortised side stretcher 1"
+        ],
+        [
+          "Gothic pointed outer arch -1",
+          "Gothic hall continuous rear bearing stile 0"
+        ],
+        [
+          "Gothic pointed outer arch 1",
+          "Gothic hall continuous rear bearing stile 1"
+        ],
+        [
+          "Gothic pointed outer arch 1",
+          "Gothic pointed outer arch -1"
+        ],
+        [
+          "Gothic inner pointed arch 1",
+          "Gothic inner pointed arch -1"
+        ],
+        [
+          "Gothic inner pointed arch 1",
+          "Gothic pointed outer arch 1"
+        ],
+        [
+          "Gothic upper carved arch apex",
+          "Gothic pointed outer arch -1"
+        ],
+        [
+          "Gothic upper carved arch apex",
+          "Gothic pointed outer arch 1"
+        ],
+        [
+          "Gothic low bearing rail",
+          "Gothic hall continuous rear bearing stile 0"
+        ],
+        [
+          "Gothic low bearing rail",
+          "Gothic hall continuous rear bearing stile 1"
+        ],
+        [
+          "Gothic low bearing rail",
+          "Gothic pointed outer arch -1"
+        ],
+        [
+          "Gothic low bearing rail",
+          "Gothic pointed outer arch 1"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic pointed outer arch -1"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic inner pointed arch -1"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic pointed outer arch 1"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic inner pointed arch 1"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic upper carved arch apex"
+        ],
+        [
+          "Gothic central vertical mullion",
+          "Gothic low bearing rail"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-barrel-arm-01",
+      "source_sha256": "2523c4539a5e4c9b6fb743bc89e755a348716d3dd795454f260f608e2f82c98d",
+      "native_parts": 26,
+      "groups": [
+        {
+          "parts": [
+            "Barrel cushion seat surface",
+            "Barrel radial back stave 10",
+            "Barrel continuous half-round enclosing rail",
+            "Barrel radial back stave 4",
+            "Barrel enclosing elbow end 1",
+            "Barrel radial back stave 6",
+            "Barrel radial back stave 5",
+            "Barrel central rear crown bearing",
+            "Barrel rear crest crown",
+            "Barrel enclosing elbow end -1",
+            "Barrel radial back stave 9",
+            "Barrel radial back stave 8",
+            "Barrel radial back stave 7",
+            "Barrel radial back stave 3",
+            "Barrel radial back stave 2",
+            "Barrel radial back stave 1",
+            "Barrel radial back stave 0",
+            "Barrel carved seat bearing frame",
+            "Barrel shaped leg 0.239 -0.239",
+            "Barrel shaped leg 0.239 -0.239 joined ground foot",
+            "Barrel shaped leg -0.239 0.166",
+            "Barrel shaped leg -0.239 0.166 joined ground foot",
+            "Barrel shaped leg -0.239 -0.239",
+            "Barrel shaped leg -0.239 -0.239 joined ground foot",
+            "Barrel shaped leg 0.239 0.166",
+            "Barrel shaped leg 0.239 0.166 joined ground foot"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Barrel carved seat bearing frame",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel shaped leg -0.239 -0.239",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel shaped leg -0.239 -0.239",
+          "Barrel shaped leg -0.239 -0.239 joined ground foot"
+        ],
+        [
+          "Barrel shaped leg -0.239 0.166",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel shaped leg -0.239 0.166",
+          "Barrel shaped leg -0.239 0.166 joined ground foot"
+        ],
+        [
+          "Barrel shaped leg 0.239 -0.239",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel shaped leg 0.239 -0.239",
+          "Barrel shaped leg 0.239 -0.239 joined ground foot"
+        ],
+        [
+          "Barrel shaped leg 0.239 0.166",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel shaped leg 0.239 0.166",
+          "Barrel shaped leg 0.239 0.166 joined ground foot"
+        ],
+        [
+          "Barrel radial back stave 0",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 0",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 0",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 1",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 1",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 1",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 2",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 2",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 2",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 3",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 3",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 3",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 4",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 5",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 6",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 7",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 7",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 7",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 8",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 8",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 8",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 9",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 9",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 9",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel radial back stave 10",
+          "Barrel cushion seat surface"
+        ],
+        [
+          "Barrel radial back stave 10",
+          "Barrel carved seat bearing frame"
+        ],
+        [
+          "Barrel radial back stave 10",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel central rear crown bearing",
+          "Barrel radial back stave 5"
+        ],
+        [
+          "Barrel central rear crown bearing",
+          "Barrel rear crest crown"
+        ],
+        [
+          "Barrel enclosing elbow end -1",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel enclosing elbow end -1",
+          "Barrel radial back stave 10"
+        ],
+        [
+          "Barrel enclosing elbow end 1",
+          "Barrel continuous half-round enclosing rail"
+        ],
+        [
+          "Barrel enclosing elbow end 1",
+          "Barrel radial back stave 0"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-scoop-desk-01",
+      "source_sha256": "c94716437f09ddf8a2dabc5f0d1d6b4c2ec9a6525b89bdb5c677e6b943f8b130",
+      "native_parts": 18,
+      "groups": [
+        {
+          "parts": [
+            "Scoop desk cushion seat surface",
+            "Scoop desk continuous back bearing 1",
+            "Scoop desk crown walnut bearing",
+            "Scoop desk rear leather crown pad",
+            "Scoop desk low enclosing walnut bow",
+            "Scoop desk carved side elbow -1",
+            "Scoop desk carved side elbow 1",
+            "Scoop desk continuous back bearing -1",
+            "Scoop desk carved seat bearing frame",
+            "Scoop desk fixed central baluster",
+            "Scoop desk fixed swept spider leg 1 -1",
+            "Scoop desk brass foot cap 1 -1",
+            "Scoop desk fixed swept spider leg -1 1",
+            "Scoop desk brass foot cap -1 1",
+            "Scoop desk fixed swept spider leg -1 -1",
+            "Scoop desk brass foot cap -1 -1",
+            "Scoop desk fixed swept spider leg 1 1",
+            "Scoop desk brass foot cap 1 1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Scoop desk carved seat bearing frame",
+          "Scoop desk cushion seat surface"
+        ],
+        [
+          "Scoop desk fixed central baluster",
+          "Scoop desk carved seat bearing frame"
+        ],
+        [
+          "Scoop desk fixed swept spider leg -1 -1",
+          "Scoop desk fixed central baluster"
+        ],
+        [
+          "Scoop desk brass foot cap -1 -1",
+          "Scoop desk fixed swept spider leg -1 -1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg -1 1",
+          "Scoop desk fixed central baluster"
+        ],
+        [
+          "Scoop desk fixed swept spider leg -1 1",
+          "Scoop desk fixed swept spider leg -1 -1"
+        ],
+        [
+          "Scoop desk brass foot cap -1 1",
+          "Scoop desk fixed swept spider leg -1 1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 -1",
+          "Scoop desk fixed central baluster"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 -1",
+          "Scoop desk fixed swept spider leg -1 -1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 -1",
+          "Scoop desk fixed swept spider leg -1 1"
+        ],
+        [
+          "Scoop desk brass foot cap 1 -1",
+          "Scoop desk fixed swept spider leg 1 -1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 1",
+          "Scoop desk fixed central baluster"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 1",
+          "Scoop desk fixed swept spider leg -1 -1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 1",
+          "Scoop desk fixed swept spider leg -1 1"
+        ],
+        [
+          "Scoop desk fixed swept spider leg 1 1",
+          "Scoop desk fixed swept spider leg 1 -1"
+        ],
+        [
+          "Scoop desk brass foot cap 1 1",
+          "Scoop desk fixed swept spider leg 1 1"
+        ],
+        [
+          "Scoop desk continuous back bearing -1",
+          "Scoop desk cushion seat surface"
+        ],
+        [
+          "Scoop desk continuous back bearing -1",
+          "Scoop desk carved seat bearing frame"
+        ],
+        [
+          "Scoop desk continuous back bearing -1",
+          "Scoop desk low enclosing walnut bow"
+        ],
+        [
+          "Scoop desk continuous back bearing 1",
+          "Scoop desk cushion seat surface"
+        ],
+        [
+          "Scoop desk continuous back bearing 1",
+          "Scoop desk carved seat bearing frame"
+        ],
+        [
+          "Scoop desk continuous back bearing 1",
+          "Scoop desk low enclosing walnut bow"
+        ],
+        [
+          "Scoop desk rear leather crown pad",
+          "Scoop desk continuous back bearing -1"
+        ],
+        [
+          "Scoop desk rear leather crown pad",
+          "Scoop desk continuous back bearing 1"
+        ],
+        [
+          "Scoop desk crown walnut bearing",
+          "Scoop desk continuous back bearing -1"
+        ],
+        [
+          "Scoop desk crown walnut bearing",
+          "Scoop desk continuous back bearing 1"
+        ],
+        [
+          "Scoop desk crown walnut bearing",
+          "Scoop desk rear leather crown pad"
+        ],
+        [
+          "Scoop desk carved side elbow -1",
+          "Scoop desk low enclosing walnut bow"
+        ],
+        [
+          "Scoop desk carved side elbow -1",
+          "Scoop desk continuous back bearing -1"
+        ],
+        [
+          "Scoop desk carved side elbow 1",
+          "Scoop desk low enclosing walnut bow"
+        ],
+        [
+          "Scoop desk carved side elbow 1",
+          "Scoop desk continuous back bearing 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-prayer-01",
+      "source_sha256": "5d6c7bb9cd5bee0fcf90d8ecdcca43df4b4447e4b77094fad4692b36c1f5c9d2",
+      "native_parts": 22,
+      "groups": [
+        {
+          "parts": [
+            "Prayer cushion seat surface",
+            "Prayer continuous rear bearing stile 1",
+            "Prayer lower back bearing sill",
+            "Prayer padded crest walnut bearing",
+            "Prayer narrow back open mullion 0.0624",
+            "Prayer narrow back open mullion -0.0624",
+            "Prayer high padded crest rail",
+            "Prayer transverse apron 1",
+            "Prayer side underseat apron 0",
+            "Prayer transverse apron 0",
+            "Prayer front turned leg 1",
+            "Prayer low footrest velvet pad",
+            "Prayer front stretcher",
+            "Prayer mortised side stretcher 0",
+            "Prayer footrest walnut bearing",
+            "Prayer front turned leg 0",
+            "Prayer side underseat apron 1",
+            "Prayer mortised side stretcher 1",
+            "Prayer rear joined ground foot 1",
+            "Prayer continuous rear bearing stile 0",
+            "Prayer rear joined ground foot 0",
+            "Prayer carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Prayer carved seat bearing frame",
+          "Prayer cushion seat surface"
+        ],
+        [
+          "Prayer front turned leg 0",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer continuous rear bearing stile 0",
+          "Prayer cushion seat surface"
+        ],
+        [
+          "Prayer continuous rear bearing stile 0",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer continuous rear bearing stile 0",
+          "Prayer rear joined ground foot 0"
+        ],
+        [
+          "Prayer mortised side stretcher 0",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer mortised side stretcher 0",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer side underseat apron 0",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer side underseat apron 0",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer side underseat apron 0",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer front turned leg 1",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer continuous rear bearing stile 1",
+          "Prayer cushion seat surface"
+        ],
+        [
+          "Prayer continuous rear bearing stile 1",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer continuous rear bearing stile 1",
+          "Prayer rear joined ground foot 1"
+        ],
+        [
+          "Prayer mortised side stretcher 1",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer mortised side stretcher 1",
+          "Prayer continuous rear bearing stile 1"
+        ],
+        [
+          "Prayer side underseat apron 1",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer side underseat apron 1",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer side underseat apron 1",
+          "Prayer continuous rear bearing stile 1"
+        ],
+        [
+          "Prayer transverse apron 0",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer transverse apron 0",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer transverse apron 0",
+          "Prayer side underseat apron 0"
+        ],
+        [
+          "Prayer transverse apron 0",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer transverse apron 0",
+          "Prayer side underseat apron 1"
+        ],
+        [
+          "Prayer transverse apron 1",
+          "Prayer carved seat bearing frame"
+        ],
+        [
+          "Prayer transverse apron 1",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer transverse apron 1",
+          "Prayer side underseat apron 0"
+        ],
+        [
+          "Prayer transverse apron 1",
+          "Prayer continuous rear bearing stile 1"
+        ],
+        [
+          "Prayer transverse apron 1",
+          "Prayer side underseat apron 1"
+        ],
+        [
+          "Prayer front stretcher",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer front stretcher",
+          "Prayer mortised side stretcher 0"
+        ],
+        [
+          "Prayer front stretcher",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer front stretcher",
+          "Prayer mortised side stretcher 1"
+        ],
+        [
+          "Prayer low footrest velvet pad",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer low footrest velvet pad",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer footrest walnut bearing",
+          "Prayer front turned leg 0"
+        ],
+        [
+          "Prayer footrest walnut bearing",
+          "Prayer front turned leg 1"
+        ],
+        [
+          "Prayer footrest walnut bearing",
+          "Prayer low footrest velvet pad"
+        ],
+        [
+          "Prayer high padded crest rail",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer high padded crest rail",
+          "Prayer continuous rear bearing stile 1"
+        ],
+        [
+          "Prayer padded crest walnut bearing",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer padded crest walnut bearing",
+          "Prayer continuous rear bearing stile 1"
+        ],
+        [
+          "Prayer padded crest walnut bearing",
+          "Prayer high padded crest rail"
+        ],
+        [
+          "Prayer narrow back open mullion -0.0624",
+          "Prayer padded crest walnut bearing"
+        ],
+        [
+          "Prayer narrow back open mullion 0.0624",
+          "Prayer padded crest walnut bearing"
+        ],
+        [
+          "Prayer lower back bearing sill",
+          "Prayer continuous rear bearing stile 0"
+        ],
+        [
+          "Prayer lower back bearing sill",
+          "Prayer continuous rear bearing stile 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-music-01",
+      "source_sha256": "43d4058a58606e09ade691d0222f7b91cf505fed7609ec3fdc66b6701b77a2a3",
+      "native_parts": 19,
+      "groups": [
+        {
+          "parts": [
+            "Music cushion seat surface",
+            "Music continuous rear bearing stile 0",
+            "Music crossed underseat brace 1",
+            "Music front turned leg 1",
+            "Music transverse apron 0",
+            "Music front turned leg 0",
+            "Music side underseat apron 1",
+            "Music crossed underseat brace -1",
+            "Music narrow low back bearing rail",
+            "Music low straight open back spindle 0",
+            "Music low straight open back spindle -1",
+            "Music low straight open back spindle 1",
+            "Music full bearing crest rail",
+            "Music transverse apron 1",
+            "Music side underseat apron 0",
+            "Music rear joined ground foot 0",
+            "Music carved seat bearing frame",
+            "Music continuous rear bearing stile 1",
+            "Music rear joined ground foot 1"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Music carved seat bearing frame",
+          "Music cushion seat surface"
+        ],
+        [
+          "Music front turned leg 0",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music continuous rear bearing stile 0",
+          "Music cushion seat surface"
+        ],
+        [
+          "Music continuous rear bearing stile 0",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music continuous rear bearing stile 0",
+          "Music rear joined ground foot 0"
+        ],
+        [
+          "Music side underseat apron 0",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music side underseat apron 0",
+          "Music front turned leg 0"
+        ],
+        [
+          "Music side underseat apron 0",
+          "Music continuous rear bearing stile 0"
+        ],
+        [
+          "Music front turned leg 1",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music continuous rear bearing stile 1",
+          "Music cushion seat surface"
+        ],
+        [
+          "Music continuous rear bearing stile 1",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music continuous rear bearing stile 1",
+          "Music rear joined ground foot 1"
+        ],
+        [
+          "Music side underseat apron 1",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music side underseat apron 1",
+          "Music front turned leg 1"
+        ],
+        [
+          "Music side underseat apron 1",
+          "Music continuous rear bearing stile 1"
+        ],
+        [
+          "Music transverse apron 0",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music transverse apron 0",
+          "Music front turned leg 0"
+        ],
+        [
+          "Music transverse apron 0",
+          "Music side underseat apron 0"
+        ],
+        [
+          "Music transverse apron 0",
+          "Music front turned leg 1"
+        ],
+        [
+          "Music transverse apron 0",
+          "Music side underseat apron 1"
+        ],
+        [
+          "Music transverse apron 1",
+          "Music carved seat bearing frame"
+        ],
+        [
+          "Music transverse apron 1",
+          "Music continuous rear bearing stile 0"
+        ],
+        [
+          "Music transverse apron 1",
+          "Music side underseat apron 0"
+        ],
+        [
+          "Music transverse apron 1",
+          "Music continuous rear bearing stile 1"
+        ],
+        [
+          "Music transverse apron 1",
+          "Music side underseat apron 1"
+        ],
+        [
+          "Music full bearing crest rail",
+          "Music continuous rear bearing stile 0"
+        ],
+        [
+          "Music full bearing crest rail",
+          "Music continuous rear bearing stile 1"
+        ],
+        [
+          "Music narrow low back bearing rail",
+          "Music continuous rear bearing stile 0"
+        ],
+        [
+          "Music narrow low back bearing rail",
+          "Music continuous rear bearing stile 1"
+        ],
+        [
+          "Music low straight open back spindle -1",
+          "Music full bearing crest rail"
+        ],
+        [
+          "Music low straight open back spindle -1",
+          "Music narrow low back bearing rail"
+        ],
+        [
+          "Music low straight open back spindle 0",
+          "Music full bearing crest rail"
+        ],
+        [
+          "Music low straight open back spindle 0",
+          "Music narrow low back bearing rail"
+        ],
+        [
+          "Music low straight open back spindle 1",
+          "Music full bearing crest rail"
+        ],
+        [
+          "Music low straight open back spindle 1",
+          "Music narrow low back bearing rail"
+        ],
+        [
+          "Music crossed underseat brace -1",
+          "Music front turned leg 0"
+        ],
+        [
+          "Music crossed underseat brace -1",
+          "Music continuous rear bearing stile 1"
+        ],
+        [
+          "Music crossed underseat brace 1",
+          "Music continuous rear bearing stile 0"
+        ],
+        [
+          "Music crossed underseat brace 1",
+          "Music front turned leg 1"
+        ],
+        [
+          "Music crossed underseat brace 1",
+          "Music crossed underseat brace -1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-cane-stool-01",
+      "source_sha256": "2e8ff75214266d2b92e36719b71f13d5b73bf337ea32ce46d80a6bb955502ac4",
+      "native_parts": 34,
+      "groups": [
+        {
+          "parts": [
+            "Cane stool turned leg -0.164 -0.164",
+            "Cane stool continuous bevelled open seat frame",
+            "Cane stool seat weft 6",
+            "Cane stool seat weft 5",
+            "Cane stool seat weft 4",
+            "Cane stool seat weft 3",
+            "Cane stool seat weft 2",
+            "Cane stool seat weft 1",
+            "Cane stool seat weft 0",
+            "Cane stool seat weft -1",
+            "Cane stool seat weft -2",
+            "Cane stool seat weft -3",
+            "Cane stool seat weft -4",
+            "Cane stool seat weft -5",
+            "Cane stool seat weft -6",
+            "Cane stool seat warp 6",
+            "Cane stool seat warp 5",
+            "Cane stool seat warp 4",
+            "Cane stool seat warp 3",
+            "Cane stool seat warp 2",
+            "Cane stool seat warp 1",
+            "Cane stool seat warp 0",
+            "Cane stool seat warp -1",
+            "Cane stool seat warp -2",
+            "Cane stool seat warp -3",
+            "Cane stool seat warp -4",
+            "Cane stool seat warp -5",
+            "Cane stool seat warp -6",
+            "Cane stool turned leg 0.164 0.164",
+            "Cane stool side mortised stretcher 0.164",
+            "Cane stool H centre stretcher",
+            "Cane stool turned leg 0.164 -0.164",
+            "Cane stool turned leg -0.164 0.164",
+            "Cane stool side mortised stretcher -0.164"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Cane stool side mortised stretcher -0.164",
+          "Cane stool turned leg -0.164 -0.164"
+        ],
+        [
+          "Cane stool side mortised stretcher -0.164",
+          "Cane stool turned leg -0.164 0.164"
+        ],
+        [
+          "Cane stool side mortised stretcher 0.164",
+          "Cane stool turned leg 0.164 -0.164"
+        ],
+        [
+          "Cane stool side mortised stretcher 0.164",
+          "Cane stool turned leg 0.164 0.164"
+        ],
+        [
+          "Cane stool H centre stretcher",
+          "Cane stool side mortised stretcher -0.164"
+        ],
+        [
+          "Cane stool H centre stretcher",
+          "Cane stool side mortised stretcher 0.164"
+        ],
+        [
+          "Cane stool continuous bevelled open seat frame",
+          "Cane stool turned leg -0.164 -0.164"
+        ],
+        [
+          "Cane stool continuous bevelled open seat frame",
+          "Cane stool turned leg -0.164 0.164"
+        ],
+        [
+          "Cane stool continuous bevelled open seat frame",
+          "Cane stool turned leg 0.164 -0.164"
+        ],
+        [
+          "Cane stool continuous bevelled open seat frame",
+          "Cane stool turned leg 0.164 0.164"
+        ],
+        [
+          "Cane stool seat warp -6",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp -5",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp -4",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp -3",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp -2",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp -1",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 0",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 1",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 2",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 3",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 4",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 5",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat warp 6",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -6",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -5",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -4",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -3",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -2",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft -1",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 0",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 1",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 2",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 3",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 4",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 5",
+          "Cane stool seat warp 6"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool continuous bevelled open seat frame"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -6"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -5"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -4"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -3"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -2"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp -1"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 0"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 1"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 2"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 3"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 4"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 5"
+        ],
+        [
+          "Cane stool seat weft 6",
+          "Cane stool seat warp 6"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-x-stool-01",
+      "source_sha256": "9d1b05a7d9bb6d9ccb51ed9e4a121bff77ec527018784eb0a10da662041a2c84",
+      "native_parts": 10,
+      "groups": [
+        {
+          "parts": [
+            "X stool cushion seat surface",
+            "X stool fixed crossed frame 0.16799999999999998 1",
+            "X stool brass fixed crossing pin 0.16799999999999998",
+            "X stool continuous ground bearer -0.23600000000000002",
+            "X stool fixed crossed frame 0.16799999999999998 -1",
+            "X stool continuous ground bearer 0.23600000000000002",
+            "X stool fixed crossed frame -0.16799999999999998 1",
+            "X stool brass fixed crossing pin -0.16799999999999998",
+            "X stool fixed crossed frame -0.16799999999999998 -1",
+            "X stool carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "X stool carved seat bearing frame",
+          "X stool cushion seat surface"
+        ],
+        [
+          "X stool fixed crossed frame -0.16799999999999998 -1",
+          "X stool cushion seat surface"
+        ],
+        [
+          "X stool fixed crossed frame -0.16799999999999998 -1",
+          "X stool carved seat bearing frame"
+        ],
+        [
+          "X stool fixed crossed frame -0.16799999999999998 1",
+          "X stool cushion seat surface"
+        ],
+        [
+          "X stool fixed crossed frame -0.16799999999999998 1",
+          "X stool carved seat bearing frame"
+        ],
+        [
+          "X stool fixed crossed frame -0.16799999999999998 1",
+          "X stool fixed crossed frame -0.16799999999999998 -1"
+        ],
+        [
+          "X stool brass fixed crossing pin -0.16799999999999998",
+          "X stool fixed crossed frame -0.16799999999999998 -1"
+        ],
+        [
+          "X stool brass fixed crossing pin -0.16799999999999998",
+          "X stool fixed crossed frame -0.16799999999999998 1"
+        ],
+        [
+          "X stool fixed crossed frame 0.16799999999999998 -1",
+          "X stool cushion seat surface"
+        ],
+        [
+          "X stool fixed crossed frame 0.16799999999999998 -1",
+          "X stool carved seat bearing frame"
+        ],
+        [
+          "X stool fixed crossed frame 0.16799999999999998 1",
+          "X stool cushion seat surface"
+        ],
+        [
+          "X stool fixed crossed frame 0.16799999999999998 1",
+          "X stool carved seat bearing frame"
+        ],
+        [
+          "X stool fixed crossed frame 0.16799999999999998 1",
+          "X stool fixed crossed frame 0.16799999999999998 -1"
+        ],
+        [
+          "X stool brass fixed crossing pin 0.16799999999999998",
+          "X stool fixed crossed frame 0.16799999999999998 -1"
+        ],
+        [
+          "X stool brass fixed crossing pin 0.16799999999999998",
+          "X stool fixed crossed frame 0.16799999999999998 1"
+        ],
+        [
+          "X stool continuous ground bearer -0.23600000000000002",
+          "X stool fixed crossed frame -0.16799999999999998 1"
+        ],
+        [
+          "X stool continuous ground bearer -0.23600000000000002",
+          "X stool fixed crossed frame 0.16799999999999998 1"
+        ],
+        [
+          "X stool continuous ground bearer 0.23600000000000002",
+          "X stool fixed crossed frame -0.16799999999999998 -1"
+        ],
+        [
+          "X stool continuous ground bearer 0.23600000000000002",
+          "X stool fixed crossed frame 0.16799999999999998 -1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-saddle-stool-01",
+      "source_sha256": "97521e5ec8d19e70c10b40ee51190d58a1021c9001f260e8c3d51f6364ca24ce",
+      "native_parts": 10,
+      "groups": [
+        {
+          "parts": [
+            "Saddle stool shaped shallow concave solid seat",
+            "Saddle stool tripod splayed leg 2",
+            "Saddle stool attached ground shoe 2",
+            "Saddle stool triangular low stretcher 2",
+            "Saddle stool triangular low stretcher 0",
+            "Saddle stool triangular low stretcher 1",
+            "Saddle stool tripod splayed leg 1",
+            "Saddle stool attached ground shoe 1",
+            "Saddle stool tripod splayed leg 0",
+            "Saddle stool attached ground shoe 0"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Saddle stool tripod splayed leg 0",
+          "Saddle stool shaped shallow concave solid seat"
+        ],
+        [
+          "Saddle stool attached ground shoe 0",
+          "Saddle stool tripod splayed leg 0"
+        ],
+        [
+          "Saddle stool tripod splayed leg 1",
+          "Saddle stool shaped shallow concave solid seat"
+        ],
+        [
+          "Saddle stool attached ground shoe 1",
+          "Saddle stool tripod splayed leg 1"
+        ],
+        [
+          "Saddle stool tripod splayed leg 2",
+          "Saddle stool shaped shallow concave solid seat"
+        ],
+        [
+          "Saddle stool attached ground shoe 2",
+          "Saddle stool tripod splayed leg 2"
+        ],
+        [
+          "Saddle stool triangular low stretcher 0",
+          "Saddle stool tripod splayed leg 0"
+        ],
+        [
+          "Saddle stool triangular low stretcher 0",
+          "Saddle stool tripod splayed leg 1"
+        ],
+        [
+          "Saddle stool triangular low stretcher 1",
+          "Saddle stool tripod splayed leg 1"
+        ],
+        [
+          "Saddle stool triangular low stretcher 1",
+          "Saddle stool tripod splayed leg 2"
+        ],
+        [
+          "Saddle stool triangular low stretcher 1",
+          "Saddle stool triangular low stretcher 0"
+        ],
+        [
+          "Saddle stool triangular low stretcher 2",
+          "Saddle stool tripod splayed leg 0"
+        ],
+        [
+          "Saddle stool triangular low stretcher 2",
+          "Saddle stool tripod splayed leg 2"
+        ],
+        [
+          "Saddle stool triangular low stretcher 2",
+          "Saddle stool triangular low stretcher 0"
+        ],
+        [
+          "Saddle stool triangular low stretcher 2",
+          "Saddle stool triangular low stretcher 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-piano-stool-01",
+      "source_sha256": "912b1f5bb2c8f8687fdc23c978c95531aaa749681448b09c25e13008fc8668f2",
+      "native_parts": 11,
+      "groups": [
+        {
+          "parts": [
+            "Piano stool round velvet cushion",
+            "Piano stool fixed turned pedestal",
+            "Piano stool fixed brass bearing collar",
+            "Piano stool shaped radial foot 3",
+            "Piano stool attached brass foot shoe 3",
+            "Piano stool shaped radial foot 2",
+            "Piano stool attached brass foot shoe 2",
+            "Piano stool shaped radial foot 1",
+            "Piano stool attached brass foot shoe 1",
+            "Piano stool shaped radial foot 0",
+            "Piano stool attached brass foot shoe 0"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Piano stool fixed turned pedestal",
+          "Piano stool round velvet cushion"
+        ],
+        [
+          "Piano stool shaped radial foot 0",
+          "Piano stool fixed turned pedestal"
+        ],
+        [
+          "Piano stool attached brass foot shoe 0",
+          "Piano stool shaped radial foot 0"
+        ],
+        [
+          "Piano stool shaped radial foot 1",
+          "Piano stool fixed turned pedestal"
+        ],
+        [
+          "Piano stool attached brass foot shoe 1",
+          "Piano stool shaped radial foot 1"
+        ],
+        [
+          "Piano stool shaped radial foot 2",
+          "Piano stool fixed turned pedestal"
+        ],
+        [
+          "Piano stool attached brass foot shoe 2",
+          "Piano stool shaped radial foot 2"
+        ],
+        [
+          "Piano stool shaped radial foot 3",
+          "Piano stool fixed turned pedestal"
+        ],
+        [
+          "Piano stool attached brass foot shoe 3",
+          "Piano stool shaped radial foot 3"
+        ],
+        [
+          "Piano stool fixed brass bearing collar",
+          "Piano stool fixed turned pedestal"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-boot-bench-01",
+      "source_sha256": "0256c932b91f668b85a256dcfed7f3f7be9534d7a7bbe0c926bd767f340b8a18",
+      "native_parts": 22,
+      "groups": [
+        {
+          "parts": [
+            "Boot bench cushion seat surface",
+            "Boot bench centre cushion seam welt",
+            "Boot bench carved seat bearing frame",
+            "Boot bench longitudinal underseat apron 0.1881",
+            "Boot bench longitudinal underseat apron -0.1881",
+            "Boot bench upper load bearer 0.5875",
+            "Boot bench upper load bearer 0",
+            "Boot bench upper load bearer -0.5875",
+            "Boot bench turned load leg 0.588 0.188",
+            "Boot bench shoe-rack cross bearer 0.5875",
+            "Boot bench genuine lower shoe-rack slat -1",
+            "Boot bench shoe-rack cross bearer 0",
+            "Boot bench shoe-rack cross bearer -0.5875",
+            "Boot bench genuine lower shoe-rack slat -2",
+            "Boot bench genuine lower shoe-rack slat 1",
+            "Boot bench genuine lower shoe-rack slat 0",
+            "Boot bench genuine lower shoe-rack slat 2",
+            "Boot bench turned load leg 0.588 -0.188",
+            "Boot bench turned load leg 0.000 0.188",
+            "Boot bench turned load leg 0.000 -0.188",
+            "Boot bench turned load leg -0.588 0.188",
+            "Boot bench turned load leg -0.588 -0.188"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Boot bench carved seat bearing frame",
+          "Boot bench cushion seat surface"
+        ],
+        [
+          "Boot bench turned load leg -0.588 -0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench turned load leg -0.588 0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench turned load leg 0.000 -0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench turned load leg 0.000 0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench turned load leg 0.588 -0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench turned load leg 0.588 0.188",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer -0.5875",
+          "Boot bench turned load leg -0.588 -0.188"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer -0.5875",
+          "Boot bench turned load leg -0.588 0.188"
+        ],
+        [
+          "Boot bench upper load bearer -0.5875",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench upper load bearer -0.5875",
+          "Boot bench turned load leg -0.588 -0.188"
+        ],
+        [
+          "Boot bench upper load bearer -0.5875",
+          "Boot bench turned load leg -0.588 0.188"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer 0",
+          "Boot bench turned load leg 0.000 -0.188"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer 0",
+          "Boot bench turned load leg 0.000 0.188"
+        ],
+        [
+          "Boot bench upper load bearer 0",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench upper load bearer 0",
+          "Boot bench turned load leg 0.000 -0.188"
+        ],
+        [
+          "Boot bench upper load bearer 0",
+          "Boot bench turned load leg 0.000 0.188"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer 0.5875",
+          "Boot bench turned load leg 0.588 -0.188"
+        ],
+        [
+          "Boot bench shoe-rack cross bearer 0.5875",
+          "Boot bench turned load leg 0.588 0.188"
+        ],
+        [
+          "Boot bench upper load bearer 0.5875",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench upper load bearer 0.5875",
+          "Boot bench turned load leg 0.588 -0.188"
+        ],
+        [
+          "Boot bench upper load bearer 0.5875",
+          "Boot bench turned load leg 0.588 0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench turned load leg -0.588 -0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench turned load leg 0.000 -0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench turned load leg 0.588 -0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench shoe-rack cross bearer -0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench shoe-rack cross bearer 0"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -2",
+          "Boot bench shoe-rack cross bearer 0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -1",
+          "Boot bench shoe-rack cross bearer -0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -1",
+          "Boot bench shoe-rack cross bearer 0"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat -1",
+          "Boot bench shoe-rack cross bearer 0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 0",
+          "Boot bench shoe-rack cross bearer -0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 0",
+          "Boot bench shoe-rack cross bearer 0"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 0",
+          "Boot bench shoe-rack cross bearer 0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 1",
+          "Boot bench shoe-rack cross bearer -0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 1",
+          "Boot bench shoe-rack cross bearer 0"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 1",
+          "Boot bench shoe-rack cross bearer 0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench turned load leg -0.588 0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench turned load leg 0.000 0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench turned load leg 0.588 0.188"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench shoe-rack cross bearer -0.5875"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench shoe-rack cross bearer 0"
+        ],
+        [
+          "Boot bench genuine lower shoe-rack slat 2",
+          "Boot bench shoe-rack cross bearer 0.5875"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench turned load leg -0.588 -0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench turned load leg 0.000 -0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench turned load leg 0.588 -0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench upper load bearer -0.5875"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench upper load bearer 0"
+        ],
+        [
+          "Boot bench longitudinal underseat apron -0.1881",
+          "Boot bench upper load bearer 0.5875"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench carved seat bearing frame"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench turned load leg -0.588 0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench turned load leg 0.000 0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench turned load leg 0.588 0.188"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench upper load bearer -0.5875"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench upper load bearer 0"
+        ],
+        [
+          "Boot bench longitudinal underseat apron 0.1881",
+          "Boot bench upper load bearer 0.5875"
+        ],
+        [
+          "Boot bench centre cushion seam welt",
+          "Boot bench cushion seat surface"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-hall-settle-01",
+      "source_sha256": "7ecba65417b4398f3226d64c705e513b802aeccc0bd14539e52e47afb3e7dadc",
+      "native_parts": 39,
+      "groups": [
+        {
+          "parts": [
+            "Hall settle cushion seat surface",
+            "Hall settle continuous rear upright 0.5975",
+            "Hall settle panel 1 upper attached moulding",
+            "Hall settle panel 1 attached stile -1",
+            "Hall settle panel 1 lower attached moulding",
+            "Hall settle lower full back bearing rail",
+            "Hall settle panel 0 attached stile 1",
+            "Hall settle panel 0 upper attached moulding",
+            "Hall settle panel 0 attached stile -1",
+            "Hall settle panel 0 lower attached moulding",
+            "Hall settle solid raised back field 0",
+            "Hall settle panel -1 attached stile 1",
+            "Hall settle panel -1 upper attached moulding",
+            "Hall settle panel -1 attached stile -1",
+            "Hall settle panel -1 lower attached moulding",
+            "Hall settle solid raised back field -1",
+            "Hall settle solid raised back field 1",
+            "Hall settle full back crest rail",
+            "Hall settle cross-seat bearing 0.5975",
+            "Hall settle longitudinal seat apron -0.21099",
+            "Hall settle cross-seat bearing 0",
+            "Hall settle front load leg 0",
+            "Hall settle cross-seat bearing -0.5975",
+            "Hall settle front load leg -0.5975",
+            "Hall settle front load leg 0.5975",
+            "Hall settle longitudinal seat apron 0.13525",
+            "Hall settle rear joined ground foot 0.5975",
+            "Hall settle panel 1 attached stile 1",
+            "Hall settle continuous rear upright 0",
+            "Hall settle rear joined ground foot 0",
+            "Hall settle closed side panel 1",
+            "Hall settle continuous enclosing arm 1",
+            "Hall settle front arm bearing 1",
+            "Hall settle continuous rear upright -0.5975",
+            "Hall settle rear joined ground foot -0.5975",
+            "Hall settle closed side panel -1",
+            "Hall settle continuous enclosing arm -1",
+            "Hall settle front arm bearing -1",
+            "Hall settle carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Hall settle carved seat bearing frame",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle front load leg -0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright -0.5975",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle continuous rear upright -0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright -0.5975",
+          "Hall settle rear joined ground foot -0.5975"
+        ],
+        [
+          "Hall settle front load leg 0",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright 0",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle continuous rear upright 0",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright 0",
+          "Hall settle rear joined ground foot 0"
+        ],
+        [
+          "Hall settle front load leg 0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright 0.5975",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle continuous rear upright 0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle continuous rear upright 0.5975",
+          "Hall settle rear joined ground foot 0.5975"
+        ],
+        [
+          "Hall settle longitudinal seat apron -0.21099",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle longitudinal seat apron -0.21099",
+          "Hall settle front load leg -0.5975"
+        ],
+        [
+          "Hall settle longitudinal seat apron -0.21099",
+          "Hall settle front load leg 0"
+        ],
+        [
+          "Hall settle longitudinal seat apron -0.21099",
+          "Hall settle front load leg 0.5975"
+        ],
+        [
+          "Hall settle longitudinal seat apron 0.13525",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle longitudinal seat apron 0.13525",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle longitudinal seat apron 0.13525",
+          "Hall settle continuous rear upright 0"
+        ],
+        [
+          "Hall settle longitudinal seat apron 0.13525",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle cross-seat bearing -0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle cross-seat bearing -0.5975",
+          "Hall settle front load leg -0.5975"
+        ],
+        [
+          "Hall settle cross-seat bearing -0.5975",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle cross-seat bearing -0.5975",
+          "Hall settle longitudinal seat apron -0.21099"
+        ],
+        [
+          "Hall settle cross-seat bearing -0.5975",
+          "Hall settle longitudinal seat apron 0.13525"
+        ],
+        [
+          "Hall settle cross-seat bearing 0",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle cross-seat bearing 0",
+          "Hall settle front load leg 0"
+        ],
+        [
+          "Hall settle cross-seat bearing 0",
+          "Hall settle continuous rear upright 0"
+        ],
+        [
+          "Hall settle cross-seat bearing 0",
+          "Hall settle longitudinal seat apron -0.21099"
+        ],
+        [
+          "Hall settle cross-seat bearing 0",
+          "Hall settle longitudinal seat apron 0.13525"
+        ],
+        [
+          "Hall settle cross-seat bearing 0.5975",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle cross-seat bearing 0.5975",
+          "Hall settle front load leg 0.5975"
+        ],
+        [
+          "Hall settle cross-seat bearing 0.5975",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle cross-seat bearing 0.5975",
+          "Hall settle longitudinal seat apron -0.21099"
+        ],
+        [
+          "Hall settle cross-seat bearing 0.5975",
+          "Hall settle longitudinal seat apron 0.13525"
+        ],
+        [
+          "Hall settle full back crest rail",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle full back crest rail",
+          "Hall settle continuous rear upright 0"
+        ],
+        [
+          "Hall settle full back crest rail",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle solid raised back field -1",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle solid raised back field -1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel -1 lower attached moulding",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel -1 lower attached moulding",
+          "Hall settle solid raised back field -1"
+        ],
+        [
+          "Hall settle panel -1 upper attached moulding",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle panel -1 upper attached moulding",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle continuous rear upright -0.5975"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle solid raised back field -1"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle panel -1 lower attached moulding"
+        ],
+        [
+          "Hall settle panel -1 attached stile -1",
+          "Hall settle panel -1 upper attached moulding"
+        ],
+        [
+          "Hall settle panel -1 attached stile 1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel -1 attached stile 1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel -1 attached stile 1",
+          "Hall settle solid raised back field -1"
+        ],
+        [
+          "Hall settle panel -1 attached stile 1",
+          "Hall settle panel -1 lower attached moulding"
+        ],
+        [
+          "Hall settle panel -1 attached stile 1",
+          "Hall settle panel -1 upper attached moulding"
+        ],
+        [
+          "Hall settle solid raised back field 0",
+          "Hall settle continuous rear upright 0"
+        ],
+        [
+          "Hall settle solid raised back field 0",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 0 lower attached moulding",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 0 lower attached moulding",
+          "Hall settle solid raised back field 0"
+        ],
+        [
+          "Hall settle panel 0 upper attached moulding",
+          "Hall settle continuous rear upright 0"
+        ],
+        [
+          "Hall settle panel 0 upper attached moulding",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 0 attached stile -1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 0 attached stile -1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 0 attached stile -1",
+          "Hall settle solid raised back field 0"
+        ],
+        [
+          "Hall settle panel 0 attached stile -1",
+          "Hall settle panel 0 lower attached moulding"
+        ],
+        [
+          "Hall settle panel 0 attached stile -1",
+          "Hall settle panel 0 upper attached moulding"
+        ],
+        [
+          "Hall settle panel 0 attached stile 1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 0 attached stile 1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 0 attached stile 1",
+          "Hall settle solid raised back field 0"
+        ],
+        [
+          "Hall settle panel 0 attached stile 1",
+          "Hall settle panel 0 lower attached moulding"
+        ],
+        [
+          "Hall settle panel 0 attached stile 1",
+          "Hall settle panel 0 upper attached moulding"
+        ],
+        [
+          "Hall settle solid raised back field 1",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle solid raised back field 1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 1 lower attached moulding",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 1 lower attached moulding",
+          "Hall settle solid raised back field 1"
+        ],
+        [
+          "Hall settle panel 1 upper attached moulding",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle panel 1 upper attached moulding",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 1 attached stile -1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 1 attached stile -1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 1 attached stile -1",
+          "Hall settle solid raised back field 1"
+        ],
+        [
+          "Hall settle panel 1 attached stile -1",
+          "Hall settle panel 1 lower attached moulding"
+        ],
+        [
+          "Hall settle panel 1 attached stile -1",
+          "Hall settle panel 1 upper attached moulding"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle continuous rear upright 0.5975"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle lower full back bearing rail"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle full back crest rail"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle solid raised back field 1"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle panel 1 lower attached moulding"
+        ],
+        [
+          "Hall settle panel 1 attached stile 1",
+          "Hall settle panel 1 upper attached moulding"
+        ],
+        [
+          "Hall settle front arm bearing -1",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle front arm bearing -1",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle front arm bearing -1",
+          "Hall settle continuous enclosing arm -1"
+        ],
+        [
+          "Hall settle closed side panel -1",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle closed side panel -1",
+          "Hall settle continuous enclosing arm -1"
+        ],
+        [
+          "Hall settle closed side panel -1",
+          "Hall settle front arm bearing -1"
+        ],
+        [
+          "Hall settle front arm bearing 1",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle front arm bearing 1",
+          "Hall settle carved seat bearing frame"
+        ],
+        [
+          "Hall settle front arm bearing 1",
+          "Hall settle continuous enclosing arm 1"
+        ],
+        [
+          "Hall settle closed side panel 1",
+          "Hall settle cushion seat surface"
+        ],
+        [
+          "Hall settle closed side panel 1",
+          "Hall settle continuous enclosing arm 1"
+        ],
+        [
+          "Hall settle closed side panel 1",
+          "Hall settle front arm bearing 1"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-telephone-bench-01",
+      "source_sha256": "6201b4b9e29bbafc6c4dbe553274df1700636ffd0619c432531f59d9c7f5283d",
+      "native_parts": 24,
+      "groups": [
+        {
+          "parts": [
+            "Telephone bench seat cushion seat surface",
+            "Telephone bench seat back lower bearing",
+            "Telephone bench open low back spindle -0.044500000000000026",
+            "Telephone bench seat low back rail",
+            "Telephone bench open low back spindle -0.15450000000000003",
+            "Telephone bench open low back spindle -0.2645",
+            "Telephone bench seat back upright -0.36950000000000005",
+            "Telephone bench connecting main bearing sill",
+            "Telephone bench tall table load post 0.363 0.215",
+            "Telephone bench lower book shelf",
+            "Telephone bench table ground shoe 0.363 0.215",
+            "Telephone bench raised telephone platform",
+            "Telephone bench tall table load post 0.363 -0.215",
+            "Telephone bench table ground shoe 0.363 -0.215",
+            "Telephone bench tall table load post 0.152 0.215",
+            "Telephone bench table ground shoe 0.152 0.215",
+            "Telephone bench tall table load post 0.152 -0.215",
+            "Telephone bench table ground shoe 0.152 -0.215",
+            "Telephone bench seat load leg 0.044 0.215",
+            "Telephone bench seat load leg 0.044 -0.215",
+            "Telephone bench seat load leg -0.353 -0.215",
+            "Telephone bench seat load leg -0.353 0.215",
+            "Telephone bench seat back upright 0.06049999999999997",
+            "Telephone bench seat carved seat bearing frame"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Telephone bench seat carved seat bearing frame",
+          "Telephone bench seat cushion seat surface"
+        ],
+        [
+          "Telephone bench seat load leg -0.353 -0.215",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench seat load leg -0.353 0.215",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench seat load leg 0.044 -0.215",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench seat load leg 0.044 0.215",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench table ground shoe 0.152 -0.215",
+          "Telephone bench tall table load post 0.152 -0.215"
+        ],
+        [
+          "Telephone bench table ground shoe 0.152 0.215",
+          "Telephone bench tall table load post 0.152 0.215"
+        ],
+        [
+          "Telephone bench table ground shoe 0.363 -0.215",
+          "Telephone bench tall table load post 0.363 -0.215"
+        ],
+        [
+          "Telephone bench table ground shoe 0.363 0.215",
+          "Telephone bench tall table load post 0.363 0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench seat load leg -0.353 -0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench seat load leg -0.353 0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench seat load leg 0.044 -0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench seat load leg 0.044 0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench tall table load post 0.152 -0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench tall table load post 0.152 0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench tall table load post 0.363 -0.215"
+        ],
+        [
+          "Telephone bench connecting main bearing sill",
+          "Telephone bench tall table load post 0.363 0.215"
+        ],
+        [
+          "Telephone bench lower book shelf",
+          "Telephone bench tall table load post 0.152 -0.215"
+        ],
+        [
+          "Telephone bench lower book shelf",
+          "Telephone bench tall table load post 0.152 0.215"
+        ],
+        [
+          "Telephone bench lower book shelf",
+          "Telephone bench tall table load post 0.363 -0.215"
+        ],
+        [
+          "Telephone bench lower book shelf",
+          "Telephone bench tall table load post 0.363 0.215"
+        ],
+        [
+          "Telephone bench raised telephone platform",
+          "Telephone bench tall table load post 0.152 -0.215"
+        ],
+        [
+          "Telephone bench raised telephone platform",
+          "Telephone bench tall table load post 0.152 0.215"
+        ],
+        [
+          "Telephone bench raised telephone platform",
+          "Telephone bench tall table load post 0.363 -0.215"
+        ],
+        [
+          "Telephone bench raised telephone platform",
+          "Telephone bench tall table load post 0.363 0.215"
+        ],
+        [
+          "Telephone bench seat back upright -0.36950000000000005",
+          "Telephone bench seat cushion seat surface"
+        ],
+        [
+          "Telephone bench seat back upright -0.36950000000000005",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench seat back upright -0.36950000000000005",
+          "Telephone bench seat load leg -0.353 0.215"
+        ],
+        [
+          "Telephone bench seat back upright -0.36950000000000005",
+          "Telephone bench connecting main bearing sill"
+        ],
+        [
+          "Telephone bench seat back upright 0.06049999999999997",
+          "Telephone bench seat cushion seat surface"
+        ],
+        [
+          "Telephone bench seat back upright 0.06049999999999997",
+          "Telephone bench seat carved seat bearing frame"
+        ],
+        [
+          "Telephone bench seat back upright 0.06049999999999997",
+          "Telephone bench seat load leg 0.044 0.215"
+        ],
+        [
+          "Telephone bench seat back upright 0.06049999999999997",
+          "Telephone bench connecting main bearing sill"
+        ],
+        [
+          "Telephone bench seat low back rail",
+          "Telephone bench seat back upright -0.36950000000000005"
+        ],
+        [
+          "Telephone bench seat low back rail",
+          "Telephone bench seat back upright 0.06049999999999997"
+        ],
+        [
+          "Telephone bench open low back spindle -0.2645",
+          "Telephone bench seat low back rail"
+        ],
+        [
+          "Telephone bench open low back spindle -0.15450000000000003",
+          "Telephone bench seat low back rail"
+        ],
+        [
+          "Telephone bench open low back spindle -0.044500000000000026",
+          "Telephone bench seat low back rail"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench seat cushion seat surface"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench seat back upright -0.36950000000000005"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench seat back upright 0.06049999999999997"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench open low back spindle -0.2645"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench open low back spindle -0.15450000000000003"
+        ],
+        [
+          "Telephone bench seat back lower bearing",
+          "Telephone bench open low back spindle -0.044500000000000026"
+        ]
+      ],
+      "source_changed": false
+    }
+  ]
+}

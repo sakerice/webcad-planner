@@ -1,0 +1,56 @@
+{
+  "model": "rpg-mansion-glazed-credenza-01",
+  "dimensions_mm": [
+    1600.000023841858,
+    449.99998807907104,
+    709.9999785423279
+  ],
+  "bounds_m": [
+    [
+      -0.800000011920929,
+      -0.22499999403953552,
+      0.0
+    ],
+    [
+      0.800000011920929,
+      0.22499999403953552,
+      0.7099999785423279
+    ]
+  ],
+  "triangles": 2596,
+  "uv": {
+    "meters_per_uv": 5.6277002118564345,
+    "min": 5.216942031852092,
+    "max": 7.364871658755168,
+    "p05": 5.303424132986597,
+    "p95": 7.186189986850229,
+    "total_triangles": 2596,
+    "valid_triangles": 2596,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood.014": "wood",
+    "Mansion walnut mouldings.014": "wood",
+    "Mansion clear antique glazing.002": "glass",
+    "Mansion patinated brass.014": "metal",
+    "Mansion walnut veneered fields.013": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 119180,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "0d94f86db1fc22a1efdc0b6bde80f5050e56ce213eac4455e1a616ba08abc839",
+  "sourceSha256": "fd3ef52855091f990baf1f1b0cfdcad56977b6ee1799b9f806da91c4e04ea686",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "31ffe59f6d9a62ec05fc23de1d5958972e4f2a8b7556cfef399948768e0285cf",
+    "authoredDataSignature": "469e3488639ca505d6a61d86d9b7760dbdea2d2c814bc466a1600d00bce02957",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

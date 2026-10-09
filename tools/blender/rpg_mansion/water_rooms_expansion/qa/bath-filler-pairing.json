@@ -1,0 +1,60 @@
+{
+  "status": "static installation proof, not a separate counted asset or working plumbing",
+  "memberCount": 2,
+  "newFillerModelCount": 1,
+  "additionalBathModelCount": 0,
+  "qaFloorFixtureCount": 1,
+  "floorFixtureExcludedFromModelCount": true,
+  "members": [
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-backed-slipper-bath-01.glb",
+      "modelSha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-high-backed-slipper-bath-01.blend",
+      "sourceSha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+      "sourceUnchanged": true,
+      "assemblyTranslationBlenderM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "previouslyAccepted": true
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-freestanding-bath-bridge-filler-01.glb",
+      "modelSha256": "c52a2e3d60abe5c654835b6f170594f42e5cf8abc3a972efa07881cde19120ef",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/rpg-mansion-freestanding-bath-bridge-filler-01.blend",
+      "sourceSha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+      "sourceUnchanged": true,
+      "assemblyTranslationBlenderM": [
+        0.0,
+        0.45750001072883606,
+        0.0
+      ],
+      "previouslyAccepted": false
+    }
+  ],
+  "actualSpoutOutletBlenderM": [
+    0.0,
+    0.25999999046325684,
+    0.8500000238418579
+  ],
+  "actualBathRearInnerOpeningAtCenterM": 0.3449999988079071,
+  "horizontalOutletCenterInsideOpeningMarginMm": 85.00000834465027,
+  "actualCenterlineRimCrestMm": 652.0000100135803,
+  "outletHeightMm": 850.0000238418579,
+  "outletAboveRimMm": 198.0000138282776,
+  "actualFirstDownwardBathHitM": [
+    0.0,
+    0.25999999046325684,
+    0.40214282274246216
+  ],
+  "outletRayReachesBowl": true,
+  "standFootClearanceFromBathRearMm": 150.9999930858612,
+  "bathFillerMeshIntersectionPairs": 0,
+  "actualFloorFixtureTopM": 0.0,
+  "errors": [],
+  "assemblySourceBlend": "tools/blender/rpg_mansion/water_rooms_expansion/sources/qa-slipper-bath-filler-pair.blend",
+  "assemblySourceSha256": "f13d48fe8f57d41ff84130ebe9d21b8345b71ff5e2c8a7fdf657acb16fe9b912"
+}

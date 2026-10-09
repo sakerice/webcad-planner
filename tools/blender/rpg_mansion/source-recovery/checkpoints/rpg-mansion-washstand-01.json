@@ -1,0 +1,196 @@
+{
+  "id": "rpg-mansion-washstand-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-washstand-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-washstand-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-washstand-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 10,
+  "validation": {
+    "model": "rpg-mansion-washstand-01",
+    "dimensions_mm": [
+      680.0000071525574,
+      569.9999928474426,
+      1139.9999856948853
+    ],
+    "bounds_m": [
+      [
+        -0.3400000035762787,
+        -0.2849999964237213,
+        0.0
+      ],
+      [
+        0.3400000035762787,
+        0.2849999964237213,
+        1.1399999856948853
+      ]
+    ],
+    "triangles": 1496,
+    "uv": {
+      "meters_per_uv": 2.0021488064100974,
+      "min": 1.8192371188146075,
+      "max": 2.559671732311185,
+      "p05": 1.8775881957262899,
+      "p95": 2.2235742560993534,
+      "total_triangles": 1496,
+      "valid_triangles": 1496,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG ceramic": "ceramic",
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 53028
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "089a77e8414b7da32480579cc1cf2783db9c765c43fea5e4150bf85f4b50c6ea",
+    "bytes": 53028,
+    "triangles": 1496,
+    "bounds_gltf_m": [
+      [
+        -0.3400000035762787,
+        0.0,
+        -0.2849999964237213
+      ],
+      [
+        0.3400000035762787,
+        1.1399999856948853,
+        0.2849999964237213
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      680.0000071525574,
+      569.9999928474426,
+      1139.9999856948853
+    ],
+    "geometry_material_sha256_1e7": "767349afb5ecc11786a20f9053ae217c164796ff525a6cf9338c9973a72cff6d",
+    "geometry_material_uv_sha256_1e7": "98a902fba27ce1bfe16760449dab90a65c8ac3e22d14f557be2d7a4dbbb7342e",
+    "finish_channels": [
+      "ceramic",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 1184
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 312
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "f05be3bffc31f7e5d16d5479dacdd904e74f17624c4c51da4635af3fe7ba4996",
+    "bytes": 53232,
+    "triangles": 1496,
+    "bounds_gltf_m": [
+      [
+        -0.3400000035762787,
+        0.0,
+        -0.2849999964237213
+      ],
+      [
+        0.3400000035762787,
+        1.1399999856948853,
+        0.2849999964237213
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      680.0000071525574,
+      569.9999928474426,
+      1139.9999856948853
+    ],
+    "geometry_material_sha256_1e7": "767349afb5ecc11786a20f9053ae217c164796ff525a6cf9338c9973a72cff6d",
+    "geometry_material_uv_sha256_1e7": "98a902fba27ce1bfe16760449dab90a65c8ac3e22d14f557be2d7a4dbbb7342e",
+    "finish_channels": [
+      "ceramic",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 1184
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 312
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 4.2,
+  "source_sha256": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+  "front_sha256": "c57e54fe2e2ddcd6c01f92d402d48ab418b355c42431f2914ccb53bdf535a8e1",
+  "rear_sha256": "24f06bd1aa6d0eb3d318fdb63244536f6fce51a49570c58aed7a90f170e7589e",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:22.319360+00:00",
+    "source_sha256_before": "e52d4df9be7f4902567300b53f3f32301ad7176ba1d64dd8bd07a5a60edf0c7b",
+    "source_sha256_after": "e1929eb3475dccac28d3d686c7ecac7beb42d544655c89d5337b553893281831",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "0533474ee85baa2d17598b7bd3c4613e8a230335a9ba2a9ec999bc51a191a240",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:31.699317+00:00",
+    "source_sha256_before": "e1929eb3475dccac28d3d686c7ecac7beb42d544655c89d5337b553893281831",
+    "source_sha256_after": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+    "mesh_geometry_uv_material_digest_preserved": "bbcfdb9386c20ce2e31915498e6617bc8d344985ca401dd7f8559afe1b1e0aa9",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-washstand-01-rear.png",
+        "render_filepath": "//rpg-mansion-washstand-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "94a5a985de24aff18c9f44922f93b138a5f3c8c18c9c8d69332d211c397cfff6",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

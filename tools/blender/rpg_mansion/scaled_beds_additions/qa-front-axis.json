@@ -1,0 +1,34 @@
+{
+  "method": "Measure delivered head/pillow regions to confirm actual foot-end is +Z.",
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "modelSha256": "2e21f4c40b9ae7f16539cd60523695adf070dc9d1d5809ca5b440e9a3b1d997e",
+      "highestRegionZM": [
+        -0.8644999861717224,
+        -0.5995000004768372
+      ],
+      "actualPillowHighRegionZM": [
+        -0.8995000123977661,
+        -0.5644999742507935
+      ],
+      "pillowRegionVertices": 112,
+      "footEndIsPositiveZ": true
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "modelSha256": "d43af33a8971ee0845daed61a34a6799bb18e1814ff67224851820c40ef9abb6",
+      "highestRegionZM": [
+        -1.1200000047683716,
+        1.1200000047683716
+      ],
+      "actualPillowHighRegionZM": [
+        -0.9325000047683716,
+        -0.5975000262260437
+      ],
+      "pillowRegionVertices": 112,
+      "footEndIsPositiveZ": true
+    }
+  ],
+  "errors": []
+}

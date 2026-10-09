@@ -1,0 +1,182 @@
+{
+  "status": "Producer gates passed; final independent certificate and root final review are separate requirements",
+  "acceptedNewModelCount": 0,
+  "expansionCandidateCount": 10,
+  "combinedLightingTargetCount": 13,
+  "rootDirectionApprovalMinute": "2026-10-08T05:47Z",
+  "independentAcceptance": false,
+  "acceptedPrototype3Unchanged": true,
+  "accepted204AndMaterials12Untouched": true,
+  "applicationChanges": false,
+  "remoteOrDeploymentChanges": false,
+  "staticDecorativeModels": true,
+  "nativeRuntimeLightObjects": 0,
+  "sourceDeclaredSupportPoints": 151,
+  "additionalProducerAndIndependentEarRoofPoints": 2,
+  "testedSupportPointsTotal": 153,
+  "qaFixturesCountAsModels": false,
+  "gates": {
+    "bytes": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/bytes.json",
+      "sha256": "863dd2aceb054bcfc168fae47fc5cf1f9e99cee74b7a4573179068072414258b",
+      "errors": 0
+    },
+    "native": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/native.json",
+      "sha256": "9caa372d1201a9bc15b71cd6d71d34f77c5ff7065e66ee279eeb4e2dc0f15a40",
+      "errors": 0
+    },
+    "local-supports": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/local-supports.json",
+      "sha256": "82a9ddb3a45f71a80c88c64fb41acacd887dfcf821011b8c852a1eace97803d5",
+      "errors": 0
+    },
+    "cavities": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/cavities.json",
+      "sha256": "d8f607cfebbbf7bb242ee0ea32d885f30d7954b7de20714fed00308c51807a05",
+      "errors": 0
+    },
+    "exported-installation": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/exported-installation.json",
+      "sha256": "7e64a39b618b083e4b9528d00a61ba2ec7240e87837fde2deb37857d6ae9d294",
+      "errors": 0
+    },
+    "image-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/image-replay.json",
+      "sha256": "0accb9d00fdb5fbd1595b8c4bc72db8ef558607ab4aa67f9efbc98c113c3a19a",
+      "errors": 0
+    },
+    "proof-image-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/proof-image-replay.json",
+      "sha256": "97765ac6b78f64423740b058af0553ac132212e99d17db8a74d7dd111df6d0d2",
+      "errors": 0
+    },
+    "source-privacy": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/source-privacy.json",
+      "sha256": "48f1b5305b59af54a7836a33fb973b86541f88c58d1a7d6da95a275442dc373e",
+      "errors": []
+    },
+    "accepted-inventory-comparison": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/accepted-inventory-comparison.json",
+      "sha256": "3a6d9de0a7131e72ab749703a1a5ea625d0afa661d2115c995daf1c3ab39e56d",
+      "errors": 0
+    },
+    "normals-dedupe": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/normals-dedupe.json",
+      "sha256": "bca820533885093d04cb174c72319ef00485fe8f8f7b92e87e15bfb73c06e44e",
+      "errors": 0
+    },
+    "exact-replay": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/exact-replay.json",
+      "sha256": "e942255b6be6ce1b100a16d755507d05d15e73352d52be460494ba2d36f7b502",
+      "errors": 0
+    },
+    "glass-contrast": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/glass-contrast.json",
+      "sha256": "9b0bdb92a5d8d4077aeaa6caf56d2e7b2a23277e60976d137de1b6ac101f05d1",
+      "errors": 0
+    },
+    "installation-proofs": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/installation-proofs.json",
+      "sha256": "f605771a6f3b6940ec7f240559f4ba92700451088483363fc749bc816948b70c",
+      "errors": []
+    },
+    "solid-geometry": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/solid-geometry.json",
+      "sha256": "80231d8f4fb0b283a315ce7e380e0a7984eddc340294f36a54751e94be61d5fc",
+      "errors": 0
+    },
+    "flat-faces": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/flat-faces.json",
+      "sha256": "ad436d23ca864c9b086f5ac83abc4ba9001c1547844dde1ac3dee09d6f005ffa",
+      "errors": 0
+    },
+    "packed-uv": {
+      "path": "tools/blender/rpg_mansion/decorative_lighting_expansion/qa/packed-uv.json",
+      "sha256": "0356f1766b96fca82355a7f2139899ab9f6f93cdc57f29a62c62095701e57f72",
+      "errors": 0
+    }
+  },
+  "items": [
+    {
+      "id": "rpg-mansion-counterbalanced-task-lamp-01",
+      "modelSha256": "576d165602944e45e67b32ba6ed02cd83957effe345fe8405038e9e5b1ed8254",
+      "sourceSha256": "277f459b6e2fffd90d078dfc783376fedb9e26d453c00d74b3ca3a16e7c67686",
+      "triangles": 2284,
+      "glbBytes": 161016,
+      "nativeEditableParts": 16
+    },
+    {
+      "id": "rpg-mansion-guarded-carry-lantern-01",
+      "modelSha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9",
+      "sourceSha256": "07c9e7d8b09a319d8e1c2d7fa175172608bfb919ef2238705699bb823001bb1c",
+      "triangles": 4240,
+      "glbBytes": 301288,
+      "nativeEditableParts": 20
+    },
+    {
+      "id": "rpg-mansion-tripod-drum-floor-lamp-01",
+      "modelSha256": "b25c9d833f5535380e22def7029fe5621ed1e0d9bc1f214e4ac5aa79c1f5050b",
+      "sourceSha256": "6e8bd90e85eb9c38c942f65a1f062526f06fc82677f315eb6c07b0549b54b570",
+      "triangles": 3148,
+      "glbBytes": 228680,
+      "nativeEditableParts": 16
+    },
+    {
+      "id": "rpg-mansion-arched-reading-floor-lamp-01",
+      "modelSha256": "2bc515fd531dac6621ec365a430ca0f1f9dab72243372f506f8905702cf0a413",
+      "sourceSha256": "0f5b1a00c3b13ef1b33bf7ae40c4d885677d144253a52c060e580b35f2795a86",
+      "triangles": 1804,
+      "glbBytes": 131360,
+      "nativeEditableParts": 8
+    },
+    {
+      "id": "rpg-mansion-bowl-torchiere-floor-lamp-01",
+      "modelSha256": "caf9af9d4b67de4ebf59c4f1219d64fad22a99ee8eb7a35fb30ed0bed1715bb4",
+      "sourceSha256": "9ba55ac0c832d648ca2fe8e92fa49b534cfdcf00bbb09173db737676f241a266",
+      "triangles": 2280,
+      "glbBytes": 160020,
+      "nativeEditableParts": 11
+    },
+    {
+      "id": "rpg-mansion-hexagonal-post-lantern-01",
+      "modelSha256": "de292f25f5328cf9cd1591d560614f69ccda80c45c700d59a9d5e2d0688186b8",
+      "sourceSha256": "6dc91b3077020341118d9fecc9b0f0e494c40ed2a5e1a65067fd328c17e5ea8d",
+      "triangles": 1400,
+      "glbBytes": 107860,
+      "nativeEditableParts": 21
+    },
+    {
+      "id": "rpg-mansion-twin-articulated-wall-reading-lamp-01",
+      "modelSha256": "74a49099b26c197318043a8755442f589988d2643280df7abd95078595c3d52e",
+      "sourceSha256": "1a7c5da2770db29dcb0d200723b3e243f3dc4a2f7036997b974ecaf84fc70b35",
+      "triangles": 3532,
+      "glbBytes": 243648,
+      "nativeEditableParts": 27
+    },
+    {
+      "id": "rpg-mansion-caged-workshop-pendant-01",
+      "modelSha256": "63d0d8c05b8d5ba8a0c5c5549c0ce4478bd55d988991c8bbe1cb0d6a60b731e1",
+      "sourceSha256": "5fbb3dbff57cb44477ee7bf70c4c3b57689814f497cf7536e263cfe46824ea37",
+      "triangles": 3280,
+      "glbBytes": 232288,
+      "nativeEditableParts": 22
+    },
+    {
+      "id": "rpg-mansion-pleated-drum-pendant-01",
+      "modelSha256": "a47c33ebb57c5e993cd68dc41550618bced4dca8df4f8920a2383d1bdc29ceae",
+      "sourceSha256": "769fcc312bf422a83bc62fce69e94e84117761b9fe43f8ec36757adfa56c2a9c",
+      "triangles": 3096,
+      "glbBytes": 218912,
+      "nativeEditableParts": 12
+    },
+    {
+      "id": "rpg-mansion-three-branch-table-candelabrum-01",
+      "modelSha256": "6db6e41c72024e072fd429640753816ba4b9ed067439b14f06da57a2886f4e05",
+      "sourceSha256": "f6426649255c6b9681e32d62104d50d199608fd3a5f0030561713c05b3b411cf",
+      "triangles": 2460,
+      "glbBytes": 174792,
+      "nativeEditableParts": 13
+    }
+  ]
+}

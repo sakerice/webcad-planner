@@ -1,0 +1,494 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・テラスと門扉",
+  "assetSet": "rpg-mansion",
+  "sourceDescriptorSha256": "9d5480fac75438479f1d259024872eb33dbe364117f2866a343074971df9ac9a",
+  "items": [
+    {
+      "id": "rpg-mansion-garden-supported-oak-terrace-01",
+      "name": "Supported oak terrace",
+      "kind": "deck",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-supported-oak-terrace-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/terrace_gate_closure/authoring_sources/rpg-mansion-garden-supported-oak-terrace-01.blend",
+      "validation": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-supported-oak-terrace-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/terrace_gate_closure/reports/rpg-mansion-garden-supported-oak-terrace-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/terrace_gate_closure/build.py",
+      "w": 2400.0,
+      "d": 1800.0,
+      "h": 320.6,
+      "actualMeasuredDimensionsMm": [
+        2400.0,
+        1800.0,
+        320.6
+      ],
+      "triangleBudget": 8000,
+      "triangles": 3336,
+      "glbBytes": 227684,
+      "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6",
+      "sourceSha256": "2a631ea206766619c32eab6ec8b08c1a544bfd9eb5238a7e4e9267becfd57759",
+      "authoringSha256": "c1c11181bb5f7833c66999d3f96a9051169750962c51c217b62cf3e4e44014fc",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "defaultElevationMm": 0,
+        "installation": {
+          "mount": "ground",
+          "boardTopMm": 320,
+          "screwCrownMm": 320.6,
+          "overallWidthMm": 2400,
+          "overallDepthMm": 1800,
+          "boardJointGapMm": 4,
+          "rearThresholdUndersideReceiverMm": {
+            "clearWidth": 1060,
+            "centreJoistRearEndY": 820,
+            "boardUndersideZ": 294,
+            "acceptedWeatherNoseTopZ": 290,
+            "verticalClearance": 4,
+            "bayBottomElevation": 230,
+            "timberSillTop": 320,
+            "boardToSillJointGap": 12
+          },
+          "stepTimberTopMm": 320,
+          "stepTotalHeightMm": 320.6,
+          "stepPlacementBlenderM": [
+            0,
+            -1.2325,
+            0
+          ],
+          "stepRearToTerraceFrontTimberGapMm": 8,
+          "supportedGroundPadCentresBlenderM": [
+            [
+              -1.05,
+              -0.6,
+              0
+            ],
+            [
+              0,
+              -0.6,
+              0
+            ],
+            [
+              1.05,
+              -0.6,
+              0
+            ],
+            [
+              -1.05,
+              0.6,
+              0
+            ],
+            [
+              0,
+              0.6,
+              0
+            ],
+            [
+              1.05,
+              0.6,
+              0
+            ]
+          ],
+          "note": "Independent grounded platform, two beams, five joists and twelve walking boards. Match the accepted timber top and screw-crown datums separately. Static manual assembly; no native deck generation, load or code certification."
+        },
+        "nativeEditableParts": 150,
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -1.2000000476837158,
+            -0.8999999761581421,
+            0.0
+          ],
+          [
+            1.2000000476837158,
+            0.8999999761581421,
+            0.3206000030040741
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        },
+        {
+          "key": "stone",
+          "label": "石材",
+          "default": "#b8b39d"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-supported-oak-terrace-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-supported-oak-terrace-01-top.png",
+      "front": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-supported-oak-terrace-01-front.png",
+      "rear": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-supported-oak-terrace-01-rear.png",
+      "nativeEditableParts": 150,
+      "materialCount": 3,
+      "materialPrimitiveCount": 3,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Warm carved limestone",
+          "finishChannel": "stone",
+          "baseColorFactor": [
+            0.4793201684951782,
+            0.4507857859134674,
+            0.33716362714767456,
+            1
+          ],
+          "baseColorHex": "#b8b39d",
+          "triangles": 264,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 672,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 2400,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "f0b322c06a36a3e3fb79bb2b0bb52b18319ea50b7f10ce86ce9accbb49e64a8f",
+        "top": "5dca4bac6bd545300278e1cc9a9d245d3e5755f9a6a0932b477208afa7441b7c",
+        "front": "2c44e7006ec41bedea7d12bc5ac1356c72b4051277b4652d902d1eea997a0f4d",
+        "rear": "6e28d696231f898c42698f5d7de3e0e74001cac2fe3e135f8db55ce401049ffc"
+      },
+      "group": "外構",
+      "category": "庭・テラスと門扉",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 0,
+      "placementHint": "ground",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "supported-oak-terrace",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+      "name": "Braced oak gate leaf",
+      "kind": "fence",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-braced-oak-gate-leaf-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-braced-oak-gate-leaf-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/terrace_gate_closure/authoring_sources/rpg-mansion-garden-braced-oak-gate-leaf-01.blend",
+      "validation": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-braced-oak-gate-leaf-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/terrace_gate_closure/reports/rpg-mansion-garden-braced-oak-gate-leaf-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/terrace_gate_closure/build.py",
+      "w": 1205.0,
+      "d": 135.0,
+      "h": 1250.0,
+      "actualMeasuredDimensionsMm": [
+        1205.0,
+        135.0,
+        1250.0
+      ],
+      "triangleBudget": 6000,
+      "triangles": 1644,
+      "glbBytes": 118960,
+      "sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f",
+      "sourceSha256": "16ac7c824d0049f05b4b73e9a9735ca2b38aec7cfeb1ef0e95e2cdc7dde7d816",
+      "authoringSha256": "6ea86ad1c5c16e340710acd8d2c400780367f715ae1bb6076e61f4ed0b669ec9",
+      "countingClass": "new-core",
+      "coreConstructionCount": 1,
+      "novelCoreCount": 1,
+      "staticProp": true,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "defaultElevationMm": 100,
+        "installation": {
+          "mount": "gate-hinges",
+          "groundClearanceMm": 100,
+          "pinAxisConstructionBlenderXY": [
+            0,
+            0
+          ],
+          "collarBottomConstructionMm": [
+            362,
+            1162
+          ],
+          "collarTopConstructionMm": [
+            405,
+            1205
+          ],
+          "collarInnerRadiusMm": 12,
+          "collarOuterRadiusMm": 21,
+          "acceptedPinRadiusMm": 11,
+          "nominalRadialClearanceMm": 1,
+          "acceptedPinArmBearingHeightsMm": [
+            362,
+            1162
+          ],
+          "latchAxisConstructionBlenderM": [
+            1.17,
+            -0.045,
+            1.17
+          ],
+          "note": "Closed static gate. Integral hollow collars bear on the accepted pier pin arms. Ground aperture is measured between supports; no animation, native gate linking or certified swing envelope."
+        },
+        "nativeEditableParts": 39,
+        "bottomCenterTranslationBlenderM": [
+          -0.5814999938011169,
+          0.013499999418854713,
+          -0.10000000149011612
+        ],
+        "originalBoundsM": [
+          [
+            -0.020999999716877937,
+            -0.08100000023841858,
+            0.10000000149011612
+          ],
+          [
+            1.184000015258789,
+            0.05400000140070915,
+            1.350000023841858
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#aa8145"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#826044"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-braced-oak-gate-leaf-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-braced-oak-gate-leaf-01-top.png",
+      "front": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-braced-oak-gate-leaf-01-front.png",
+      "rear": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-braced-oak-gate-leaf-01-rear.png",
+      "nativeEditableParts": 39,
+      "materialCount": 3,
+      "materialPrimitiveCount": 3,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Oiled garden oak",
+          "finishChannel": "wood",
+          "baseColorFactor": [
+            0.22322796285152435,
+            0.11697066575288773,
+            0.05780543014407158,
+            1
+          ],
+          "baseColorHex": "#826044",
+          "triangles": 584,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Weathered brass",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.4019777774810791,
+            0.21952620148658752,
+            0.05951123684644699,
+            1
+          ],
+          "baseColorHex": "#aa8145",
+          "triangles": 736,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 2,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 324,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "99ce360138266e14e931aa8650715d452bc8f4639c7c1d421a43aeecb86ce4ae",
+        "top": "6c64928274aa188b1e01b1562ed72446b354219aa122303de6cd213cc7608efb",
+        "front": "2be6174e211f35201ecdec789578df310c948346d0dc634ba20c4d9d6de9685d",
+        "rear": "a95aa575db38e26ceae53d36f20566ffaef5a25c87ccb96845d3ad08d05bb9de"
+      },
+      "group": "外構",
+      "category": "庭・テラスと門扉",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 100,
+      "placementHint": "gate-hinges",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "braced-oak-gate-leaf",
+      "status": "candidate-awaiting-independent-acceptance"
+    },
+    {
+      "id": "rpg-mansion-garden-gate-strike-receiver-01",
+      "name": "Gate strike receiver",
+      "kind": "fence",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-garden-gate-strike-receiver-01.glb",
+      "sourceBlend": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-gate-strike-receiver-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/terrace_gate_closure/authoring_sources/rpg-mansion-garden-gate-strike-receiver-01.blend",
+      "validation": "tools/blender/rpg_mansion/terrace_gate_closure/sources/rpg-mansion-garden-gate-strike-receiver-01-validation.json",
+      "attachments": "tools/blender/rpg_mansion/terrace_gate_closure/reports/rpg-mansion-garden-gate-strike-receiver-01-contacts.json",
+      "builder": "tools/blender/rpg_mansion/terrace_gate_closure/build.py",
+      "w": 56.0,
+      "d": 118.0,
+      "h": 110.0,
+      "actualMeasuredDimensionsMm": [
+        56.0,
+        118.0,
+        110.0
+      ],
+      "triangleBudget": 2000,
+      "triangles": 172,
+      "glbBytes": 15420,
+      "sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b",
+      "sourceSha256": "5b5dd8c2d1b410275d3790da1a63e911974fb440160b5dd6df9b56fa736ea93c",
+      "authoringSha256": "3999a86f0755baf41962159fa37951ca607622d03a36c09c098257e5b37d9a00",
+      "countingClass": "zero-core-accessory",
+      "coreConstructionCount": 0,
+      "novelCoreCount": 0,
+      "staticProp": true,
+      "nativeEditableParts": 9,
+      "provenance": "original",
+      "reconstruction": false,
+      "freshQARequired": true,
+      "installationDatums": {
+        "defaultElevationMm": 1095,
+        "installation": {
+          "mount": "gate-pier-receiver",
+          "constructionMountPlaneX": 1.206,
+          "constructionPoseUsesBottomCentreShift": true,
+          "socketAxisConstructionBlenderM": [
+            1.167,
+            -0.045,
+            1.17
+          ],
+          "socketClearOpeningMm": [
+            18,
+            18
+          ],
+          "boltDiameterMm": 12,
+          "bearingOnAcceptedReceiverPlate": true,
+          "counting": "Zero core. Separate reusable fitted strike accessory; not an extra gate construction.",
+          "note": "Two stand-off feet seat on the actual accepted receiver plate. They clear existing through-anchor tips and provide a hollow socket for the delivered leaf bolt."
+        },
+        "nativeEditableParts": 9,
+        "bottomCenterTranslationBlenderM": [
+          -1.1779999732971191,
+          0.0040000006556510925,
+          -1.0950000286102295
+        ],
+        "originalBoundsM": [
+          [
+            1.149999976158142,
+            -0.06300000101327896,
+            1.0950000286102295
+          ],
+          [
+            1.2059999704360962,
+            0.054999999701976776,
+            1.2050000429153442
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#424b43"
+        }
+      ],
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-gate-strike-receiver-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-garden-gate-strike-receiver-01-top.png",
+      "front": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-gate-strike-receiver-01-front.png",
+      "rear": "tools/blender/rpg_mansion/terrace_gate_closure/evidence/rpg-mansion-garden-gate-strike-receiver-01-rear.png",
+      "materialCount": 2,
+      "materialPrimitiveCount": 2,
+      "materialAssignments": [
+        {
+          "materialIndex": 0,
+          "name": "Garden charcoal iron",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.05448027700185776,
+            0.07036009430885315,
+            0.05612849071621895,
+            1
+          ],
+          "baseColorHex": "#424b43",
+          "triangles": 116,
+          "primitiveCount": 1
+        },
+        {
+          "materialIndex": 1,
+          "name": "Weathered brass",
+          "finishChannel": "metal",
+          "baseColorFactor": [
+            0.4019777774810791,
+            0.21952620148658752,
+            0.05951123684644699,
+            1
+          ],
+          "baseColorHex": "#aa8145",
+          "triangles": 56,
+          "primitiveCount": 1
+        }
+      ],
+      "previewSha256": {
+        "thumb": "e6ce39408f4d12ff4f0bf5e8d110b3482b6edf0759ca7f3dcda40c388925a423",
+        "top": "2534fa7e97fedcf474aaa633e4d3eb246f36962ed0697b6460b940bcb891890e",
+        "front": "c2ee1d004cd702ebfe34db15611cdc337df029c6c0f273e845d7805c29fbd76f",
+        "rear": "1055f92eb02d633b6a0bd9cf7efd19e51e16ac5c05ef075131db6c245495956d"
+      },
+      "group": "外構",
+      "category": "庭・テラスと門扉",
+      "assetSet": "rpg-mansion",
+      "defaultElevation": 1095,
+      "placementHint": "gate-pier-receiver",
+      "dimensionBasis": "Original intended native design; measured authored envelope, not historic product equivalence or structural certification.",
+      "geometrySignature": "gate-strike-receiver",
+      "status": "candidate-awaiting-independent-acceptance"
+    }
+  ]
+}

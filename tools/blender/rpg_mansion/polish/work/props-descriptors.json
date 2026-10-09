@@ -1,0 +1,78 @@
+[
+  {
+    "id": "rpg-mansion-upright-piano-01",
+    "name": "88鍵のアップライトピアノ",
+    "packId": "rpg-mansion",
+    "group": "家具",
+    "category": "小物",
+    "sourceFolder": "BlenderRpgMansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-upright-piano-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-upright-piano-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-upright-piano-01-top.png",
+    "rear": "tools/blender/rpg_mansion/polish/work/rpg-mansion-upright-piano-01-rear.png",
+    "frontPreview": "tools/blender/rpg_mansion/polish/work/rpg-mansion-upright-piano-01-front.png",
+    "sourceBlend": "tools/blender/rpg_mansion/polish/work/rpg-mansion-upright-piano-01.blend",
+    "validation": "tools/blender/rpg_mansion/polish/work/rpg-mansion-upright-piano-01-validation.json",
+    "w": 1460,
+    "d": 620,
+    "h": 1250,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "builder": "tools/blender/rpg_mansion/polish/props.py",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#493025"
+      },
+      {
+        "key": "metal",
+        "label": "金属",
+        "default": "#b29455"
+      }
+    ],
+    "placementHint": "floor",
+    "placementNotes": "Original 88-key decorative upright: A0–C8 keyboard, three pedals, moulded walnut case and framed rear soundboard. Static geometry; no audio playback. Floor placement.",
+    "front": "+Z",
+    "previewVersion": 1,
+    "kind": "decor"
+  },
+  {
+    "id": "rpg-mansion-floor-globe-01",
+    "name": "真鍮子午環の床置き地球儀",
+    "packId": "rpg-mansion",
+    "group": "家具",
+    "category": "小物",
+    "sourceFolder": "BlenderRpgMansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-floor-globe-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-floor-globe-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-floor-globe-01-top.png",
+    "rear": "tools/blender/rpg_mansion/polish/work/rpg-mansion-floor-globe-01-rear.png",
+    "frontPreview": "tools/blender/rpg_mansion/polish/work/rpg-mansion-floor-globe-01-front.png",
+    "sourceBlend": "tools/blender/rpg_mansion/polish/work/rpg-mansion-floor-globe-01.blend",
+    "validation": "tools/blender/rpg_mansion/polish/work/rpg-mansion-floor-globe-01-validation.json",
+    "w": 680,
+    "d": 680,
+    "h": 1180,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "builder": "tools/blender/rpg_mansion/polish/props.py",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#493025"
+      },
+      {
+        "key": "metal",
+        "label": "金属",
+        "default": "#b29455"
+      }
+    ],
+    "placementHint": "floor",
+    "placementNotes": "456mm fantasy globe with seven original organic spline coastlines and restrained topology-backed graticule in a walnut horizon ring, brass meridian and inclined axle, with a turned pedestal and three floor-supported posts. Invented landmasses, not an accurate Earth map. Static floor decoration.",
+    "front": "+Z",
+    "previewVersion": 1,
+    "kind": "decor"
+  }
+]

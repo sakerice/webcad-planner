@@ -1,0 +1,154 @@
+{
+  "name": "cornice-column",
+  "source": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column.blend",
+  "sourceSha256": "b61c87277b7681d6b046322ada2c99c0dc50a229395ec537b1e71f0780d91c1e",
+  "instances": [
+    {
+      "label": "stone-cornice-corner",
+      "id": "rpg-mansion-stone-cornice-corner-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-corner-01.glb",
+      "modelSha256": "5c082dce1194992cb26a2797667c7d494afbb43416382493c67c33c60238ea4f",
+      "constructionDatumWorldM": [
+        0,
+        0,
+        3
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        -0.24000000953674316,
+        -0.24000000953674316,
+        0.0
+      ]
+    },
+    {
+      "label": "stone-cornice-straight",
+      "id": "rpg-mansion-stone-cornice-straight-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-straight-01.glb",
+      "modelSha256": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb",
+      "constructionDatumWorldM": [
+        -1.2,
+        0,
+        3
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.09000000357627869,
+        0.0
+      ]
+    },
+    {
+      "label": "Cornice return straight",
+      "id": "rpg-mansion-stone-cornice-straight-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-straight-01.glb",
+      "modelSha256": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb",
+      "constructionDatumWorldM": [
+        0,
+        -1.2,
+        3
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.09000000357627869,
+        0.0
+      ]
+    },
+    {
+      "label": "Corner bearing column",
+      "id": "rpg-mansion-tuscan-support-column-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+      "modelSha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e",
+      "constructionDatumWorldM": [
+        0,
+        0,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "West grounded bearing column",
+      "id": "rpg-mansion-tuscan-support-column-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+      "modelSha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e",
+      "constructionDatumWorldM": [
+        -1.8,
+        0,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "label": "South grounded bearing column",
+      "id": "rpg-mansion-tuscan-support-column-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+      "modelSha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e",
+      "constructionDatumWorldM": [
+        0,
+        -1.8,
+        0
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "fixtures": [],
+  "views": {
+    "exterior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-exterior.png",
+      "sha256": "e00038dc0e980956b131e34afb1c63bbb8c2e771b409cde37af7a9b7049afc5b",
+      "camera": {
+        "direction": [
+          6,
+          8,
+          5
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.281191349029541,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "interior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-interior.png",
+      "sha256": "b8f71acfc94af0820a979fac0e6d56a3109652e39ea29274c187fbc3b813909b",
+      "camera": {
+        "direction": [
+          -7,
+          -8,
+          4
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.1777729988098145,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    },
+    "top": {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-top.png",
+      "sha256": "f4fb8872374fa7448fc9451c4cae5beb52e479fa92dc16424d325068867f1d8f",
+      "camera": {
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "resolution": 1024,
+        "orthographicScale": 2.696629524230957,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      }
+    }
+  }
+}

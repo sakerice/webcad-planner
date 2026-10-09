@@ -1,0 +1,27 @@
+{
+  "source": "proofs/door-closed-installed.blend",
+  "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+  "image": "evidence/latch-contact-detail.png",
+  "imageSha256": "29150a17577a61320a5f2ea304d61c9c5e42f2cc70045bed8c7323bb966d62f4",
+  "recipe": {
+    "function": "build.render",
+    "delta": [
+      1.1,
+      -4,
+      0.5
+    ],
+    "resolution": 900,
+    "target": [
+      0.6,
+      -0.17,
+      1.06
+    ],
+    "orthoScale": 0.28,
+    "engine": "CYCLES",
+    "samples": 32,
+    "denoise": false,
+    "transparent": true,
+    "viewTransform": "AgX",
+    "finishOverride": null
+  }
+}

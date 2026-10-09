@@ -1,0 +1,196 @@
+{
+  "id": "rpg-mansion-candlestick-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/build.py",
+  "originalBuilderSha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+  "front": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01-front.png",
+  "rear": "tools/blender/rpg_mansion/work/rpg-mansion-candlestick-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 3,
+  "validation": {
+    "model": "rpg-mansion-candlestick-01",
+    "dimensions_mm": [
+      180.00000715255737,
+      180.00000715255737,
+      412.00000047683716
+    ],
+    "bounds_m": [
+      [
+        -0.09000000357627869,
+        -0.09000000357627869,
+        0.0
+      ],
+      [
+        0.09000000357627869,
+        0.09000000357627869,
+        0.41200000047683716
+      ]
+    ],
+    "triangles": 532,
+    "uv": {
+      "meters_per_uv": 0.47779578463019223,
+      "min": 0.44241764023985464,
+      "max": 0.5770398323563287,
+      "p05": 0.4520072991736479,
+      "p95": 0.540880023027968,
+      "total_triangles": 532,
+      "valid_triangles": 532,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Antique brass": "metal",
+      "RPG Wax": null,
+      "RPG Ink": null
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 23304
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "b4432ed78d6bfe49df55964289954f85dfab4139c8a56768b1b5913dde8d3fee",
+    "bytes": 23304,
+    "triangles": 532,
+    "bounds_gltf_m": [
+      [
+        -0.09000000357627869,
+        0.0,
+        -0.09000000357627869
+      ],
+      [
+        0.09000000357627869,
+        0.41200000047683716,
+        0.09000000357627869
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      180.00000715255737,
+      180.00000715255737,
+      412.00000047683716
+    ],
+    "geometry_material_sha256_1e7": "7103f5c0084607dc2ee65de831459eecd044763859244d3e7fd0165d1c16f1c9",
+    "geometry_material_uv_sha256_1e7": "bb0611a260f2a98d3041fea1a40ccf70ca05738a0995763853f2180a011453f7",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 396
+      },
+      {
+        "material": "RPG Ink",
+        "channel": null,
+        "triangles": 12
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 124
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "e90befcfd413852e47c64739c42d231736ce407afe19752be35faa3dbc8b2242",
+    "bytes": 23500,
+    "triangles": 532,
+    "bounds_gltf_m": [
+      [
+        -0.09000000357627869,
+        0.0,
+        -0.09000000357627869
+      ],
+      [
+        0.09000000357627869,
+        0.41200000047683716,
+        0.09000000357627869
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      180.00000715255737,
+      180.00000715255737,
+      412.00000047683716
+    ],
+    "geometry_material_sha256_1e7": "7103f5c0084607dc2ee65de831459eecd044763859244d3e7fd0165d1c16f1c9",
+    "geometry_material_uv_sha256_1e7": "bb0611a260f2a98d3041fea1a40ccf70ca05738a0995763853f2180a011453f7",
+    "finish_channels": [
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 396
+      },
+      {
+        "material": "RPG Ink",
+        "channel": null,
+        "triangles": 12
+      },
+      {
+        "material": "RPG Wax",
+        "channel": null,
+        "triangles": 124
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 2.68,
+  "source_sha256": "7072f91efd399d3b74fa59a07eca1304d122cbe5e8e7e2fbc28d7c8044c97f1b",
+  "front_sha256": "692c24c043eb0caf7347eef65af99ee7bebf4b15ed3ff850ba03412b3920cd37",
+  "rear_sha256": "c3754102b2716a2e0db98152567f2df532a3101ea8c140a0d0e9b0633b21b746",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:29.014762+00:00",
+    "source_sha256_before": "d68bdc5e059a8c2f168e23dc7f4611740968b68279caf7508636a32afd7b2112",
+    "source_sha256_after": "7072f91efd399d3b74fa59a07eca1304d122cbe5e8e7e2fbc28d7c8044c97f1b",
+    "mesh_geometry_uv_material_digest_preserved": "b033eb1d06413fe6f36c768f06e30556c836437dc0340466cefad99f8a3aca9a",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-candlestick-01-rear.png",
+        "render_filepath": "//rpg-mansion-candlestick-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "7072f91efd399d3b74fa59a07eca1304d122cbe5e8e7e2fbc28d7c8044c97f1b",
+    "originalBuilderSha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

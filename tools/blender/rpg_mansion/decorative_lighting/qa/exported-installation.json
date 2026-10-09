@@ -1,0 +1,65 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-banker-desk-lamp-01",
+      "modelSha256": "129ef274caa6507d88e47d1d2996e84ba3eaa0223c53efca880aac3ce5858d7a",
+      "mountAxis": "Y",
+      "mountPlaneM": 0,
+      "contactTriangles": 38,
+      "contactAreaM2": 0.021900824978936667,
+      "runtimeLightObjects": 0,
+      "actualClearMaterials": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-bracketed-wall-lantern-01",
+      "modelSha256": "e87629efe628a8b14f5817ac32b0453366b6b09ac71e71437113c001de1bc98b",
+      "mountAxis": "Z",
+      "mountPlaneM": -0.16175000315904617,
+      "contactTriangles": 2,
+      "contactAreaM2": 0.02386400236940389,
+      "runtimeLightObjects": 0,
+      "actualClearMaterials": [
+        {
+          "alphaMode": "BLEND",
+          "extensions": {
+            "KHR_materials_transmission": {
+              "transmissionFactor": 0.9200000166893005
+            },
+            "KHR_materials_ior": {
+              "ior": 1.4500000476837158
+            }
+          },
+          "extras": {
+            "finishChannel": "glass",
+            "glassAppearance": "Closed 3mm panels, nonzero green tint, alpha 0.10 and transmission 0.92 using standard glTF PBR extension; actual GLB contrast tested"
+          },
+          "name": "Clear lightly tinted glass",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5394794940948486,
+              0.7304607629776001,
+              0.6444796919822693,
+              0.10000000149011612
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.10000000149011612
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-linear-four-light-pendant-01",
+      "modelSha256": "52637361d4802565a00a514b5ba49fe2d500316eb4020eb8d17e10c7b52c686a",
+      "mountAxis": "Y",
+      "mountPlaneM": 0.6,
+      "contactTriangles": 2,
+      "contactAreaM2": 0.08870400094604491,
+      "runtimeLightObjects": 0,
+      "actualClearMaterials": [],
+      "errors": []
+    }
+  ],
+  "errors": 0
+}

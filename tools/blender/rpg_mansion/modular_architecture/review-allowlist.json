@@ -1,0 +1,897 @@
+{
+  "schema": "mansion-prototype-review-allowlist-v1",
+  "status": "Ready for parent/root prototype review; independent acceptance is separate",
+  "assetCount": 8,
+  "assemblyCount": 3,
+  "sourceCount": 19,
+  "deliveredViews": 41,
+  "catalogAssetIds": [
+    "rpg-mansion-paneled-wall-bay-01",
+    "rpg-mansion-rectangular-doorway-bay-01",
+    "rpg-mansion-paneled-return-corner-01",
+    "rpg-mansion-slate-gable-span-01",
+    "rpg-mansion-gable-end-closure-01",
+    "rpg-mansion-stone-cornice-straight-01",
+    "rpg-mansion-stone-cornice-corner-01",
+    "rpg-mansion-tuscan-support-column-01"
+  ],
+  "descriptor": "tools/blender/rpg_mansion/modular_architecture/descriptors.json",
+  "descriptorSha256": "a98eb1d513f83e47412dd5317bb6c2e4249b1b95899e707f98a0764d7daf0ea8",
+  "limits": [
+    "Static manual geometry only.",
+    "One labelled fitted front-wall QA fixture is excluded from asset count.",
+    "No app/runtime placement or finish integration acceptance.",
+    "No expanded32-piece production until actual8-piece review approval."
+  ],
+  "sharedManifestWrites": false,
+  "remoteWrites": false,
+  "files": [
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-gable-end-closure-01.glb",
+      "bytes": 7088,
+      "sha256": "7b4078f59fd9b5b093f8c7ca54bedf227d96e0bb7a2dbbfb49bed74993516713"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-return-corner-01.glb",
+      "bytes": 26020,
+      "sha256": "eeaca0f153284cba991460371c05c622e9062e6cbf62127ce38e8da4712bc4b2"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-paneled-wall-bay-01.glb",
+      "bytes": 23024,
+      "sha256": "b883c521ebb43c21af1073e7edf53afe6e4cc4114356dfb48cb788abf4b6ba37"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "bytes": 22584,
+      "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-slate-gable-span-01.glb",
+      "bytes": 120552,
+      "sha256": "ab98e580b7c4c7739301a052ffb00646ad05fd3bed040263ab33db3b195756ae"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-corner-01.glb",
+      "bytes": 5744,
+      "sha256": "5c082dce1194992cb26a2797667c7d494afbb43416382493c67c33c60238ea4f"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-stone-cornice-straight-01.glb",
+      "bytes": 4152,
+      "sha256": "d4351039b2b44e9a8663d12607b2302ceca071442709ce67f7337ab6424fd3fb"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/models/rpg-mansion-tuscan-support-column-01.glb",
+      "bytes": 134776,
+      "sha256": "3e91566d0b06e62314142670e9d3fce2bdda2a52132d9e5ce8140b75435c824e"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gable-end-closure-01-thumb.png",
+      "bytes": 208343,
+      "sha256": "c246cdd99818101704bdfd9c8ad3bc6329eaf5ed30f0e733492124e6d00c951f"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gable-end-closure-01-top.png",
+      "bytes": 131874,
+      "sha256": "95d5218021c9d83c6bd45735c996fc69b580101ab3598a243667f1fc6cdb7827"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-return-corner-01-thumb.png",
+      "bytes": 192032,
+      "sha256": "82ea61b2f51889692ed149c6b90ffa922b41c95bef3fd9662a582e0f806f932b"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-return-corner-01-top.png",
+      "bytes": 259442,
+      "sha256": "3f3e77944494b83e4e5d4cfe55620e3adbb417dc1a07387782cc660cee259307"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-wall-bay-01-thumb.png",
+      "bytes": 248253,
+      "sha256": "cfdb90592185db3806ca87f9e0a4fc50bdd73f2a2cc88519b60b81504dabe230"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-paneled-wall-bay-01-top.png",
+      "bytes": 158882,
+      "sha256": "e00090aa1eeeaffce8b2207afb1e185af5ebe28c60de45252d1b8c408bb6e3fb"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-thumb.png",
+      "bytes": 232700,
+      "sha256": "3a469cfdd79ac303d6a028867a2af1b3240cfafc31498ca9537499b6763b7e3b"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-rectangular-doorway-bay-01-top.png",
+      "bytes": 148599,
+      "sha256": "78dc91d118f374ecdbcc7fbdcaa85ddd380e6d2b2f7d4ab1901d7013c9c39b45"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slate-gable-span-01-thumb.png",
+      "bytes": 189846,
+      "sha256": "484fdab7b93306fed5ec678bed6f7668c943970880af466d56715dcc81d9d7c5"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-slate-gable-span-01-top.png",
+      "bytes": 183341,
+      "sha256": "74d216dca1ffc29ca3d2f93614baed7b3eacce3a7ba5d69b7e834eb65f2409ec"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-corner-01-thumb.png",
+      "bytes": 220509,
+      "sha256": "70682795dc17e81212f0e9050318cb54d140da29db23e5066cae55c8e2a9ba56"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-corner-01-top.png",
+      "bytes": 284060,
+      "sha256": "e67efae2ca57ca6c69fa08670f829928fdac0b55915f2e2c11ad6be07e6234f0"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-straight-01-thumb.png",
+      "bytes": 184279,
+      "sha256": "3b6849edffe8fec1f84f00a6f69ae94bc79a8d1cb0c83c4ad8cad5a3f857c38e"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-stone-cornice-straight-01-top.png",
+      "bytes": 171860,
+      "sha256": "672cea8389d8ac2d12e2e2bf0c03d14da2bdfa9783ff4d171b85d08a5be78825"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tuscan-support-column-01-thumb.png",
+      "bytes": 181596,
+      "sha256": "ba81aad45cfd25a1bfdcd6f802f959e5d3d6c566a2d19b1e25fc0f30d49cc75d"
+    },
+    {
+      "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-tuscan-support-column-01-top.png",
+      "bytes": 309882,
+      "sha256": "5449997545502621177f3f373e6b0b777255cd1f6d51887baf4c24cb13472f8d"
+    },
+    {
+      "path": "tools/blender/exterior_build.py",
+      "bytes": 19941,
+      "sha256": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1"
+    },
+    {
+      "path": "tools/blender/model_kit.py",
+      "bytes": 13836,
+      "sha256": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/README.md",
+      "bytes": 8674,
+      "sha256": "340107cd6bb7feebe3eb598bb88f40ac3e9f37171f34fa7c298aaa796e19305b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/RIGHTS.md",
+      "bytes": 1367,
+      "sha256": "bc5a50d97b3b358d43bfed2261827ce17bfcfa6efa4e31f5a5717bf5665a8e79"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/all-source-privacy-qa.json",
+      "bytes": 7917,
+      "sha256": "d7c2014888e94b81cc80e1d536e9c589ee684630d19599e8825afd1020dc53f1"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-exterior.png",
+      "bytes": 879572,
+      "sha256": "e00038dc0e980956b131e34afb1c63bbb8c2e771b409cde37af7a9b7049afc5b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-interior.png",
+      "bytes": 907858,
+      "sha256": "b8f71acfc94af0820a979fac0e6d56a3109652e39ea29274c187fbc3b813909b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column-top.png",
+      "bytes": 847751,
+      "sha256": "f4fb8872374fa7448fc9451c4cae5beb52e479fa92dc16424d325068867f1d8f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column.blend",
+      "bytes": 163546,
+      "sha256": "b61c87277b7681d6b046322ada2c99c0dc50a229395ec537b1e71f0780d91c1e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/cornice-column.json",
+      "bytes": 4774,
+      "sha256": "213345c654a1d90cf75540b35793e247c90d062707a9cf9f4c94cfb4dd33f3ff"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-exterior.png",
+      "bytes": 1071575,
+      "sha256": "f91f8095ef1833e8f990b35141a311de3ed169b52726280baf573734ca28ffc6"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-interior.png",
+      "bytes": 1351957,
+      "sha256": "ffeb86d692436c040bf386c87227c22544e43eba9dd92669b65c69c92a4dea67"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable-top.png",
+      "bytes": 960989,
+      "sha256": "acd24a028ae1bbc3749c0a42ba3eb0af67037cd3e9cd37d426bbfee292315084"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable.blend",
+      "bytes": 190208,
+      "sha256": "198e1351c3bdc5e25a6697899359470a191cdd47d834134d8731cec333a05fb7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/hollow-roof-gable.json",
+      "bytes": 5328,
+      "sha256": "7842e3bf1c88b9b11001d781fdcc4dbdd121194dd954d5342a4966bcce86e917"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-exterior.png",
+      "bytes": 912390,
+      "sha256": "2465a02f24811d882c24904c6b0f6b012bd7f6a8a4fe5347bee226e4670001e5"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-interior.png",
+      "bytes": 1001769,
+      "sha256": "e4dd929385f99761aaf8f3fab072728b65a98f4807c562d75fc189b354071696"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner-top.png",
+      "bytes": 591766,
+      "sha256": "79e05996f9ed6ed337746e80204f6839adcd5e1d7b2bc31bfd6371a2e75b33c8"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner.blend",
+      "bytes": 124911,
+      "sha256": "dc7d4d4cf045f60b48b0b2b63639b2d724c34b7420b21d1a1550c1d945cff7ea"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies/wall-door-corner.json",
+      "bytes": 3795,
+      "sha256": "c925c98beec99ce699d103d70fbd093164ca4f9e87281edb098da0ef9354326f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assemblies.py",
+      "bytes": 6256,
+      "sha256": "995885a4c7cd0079b9170d709e27ea1e9e9b6094d55174c2a75bb003eaa5710b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/assembly-replay-inputs.json",
+      "bytes": 8485,
+      "sha256": "274fbf3760ceab5561ccd71a8e5744fcc2ac3267f0f6beed853ffbf765e0fcf6"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/audit-selftest.json",
+      "bytes": 26136,
+      "sha256": "36c04528867770eb1a6ed2094b80a451b62e6464fd147be1fd0d57dbe791c3b0"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/audit_geometry.py",
+      "bytes": 30250,
+      "sha256": "949bbeedd41f71b02ddda31e8069463614d5892e12ca70fba18dd535c1dff2a2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/audit_selftest.py",
+      "bytes": 3194,
+      "sha256": "c63e9a4ec178652be1944beb22cf0592a7cb37407446cc39bbacddefd1a80266"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/exposed-surface-repair-targets.md",
+      "bytes": 6192,
+      "sha256": "2c508d74a880417265a6dac61637d97250d80d40a2bdba2747bc00f17d387ba6"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/geometry-audit-report.md",
+      "bytes": 8941,
+      "sha256": "cb2dbc9c4ee0e24fb4c6713d70160da9497a6603547c056bcf73223283f1d002"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/geometry-audit.json",
+      "bytes": 1152275,
+      "sha256": "5da7b0b030626f057e38062c3ea9e1b484b7959f000d9fada6e0b13d92aa5858"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/audit/summarize_geometry_audit.py",
+      "bytes": 6356,
+      "sha256": "899f14e595625e67b7a4ff48bb46f0958264ea017fb19ccfff2d49046a94cbaf"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/build.py",
+      "bytes": 20778,
+      "sha256": "db926a79ef9d13b698e74f3fd20a8c07bef9cc88c6be1a509e606ecbb3ad9e2e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/check_uv_overlap.py",
+      "bytes": 3173,
+      "sha256": "ce7f5469f1fc851b2d137486da17d0dc2a8f8ff7f4930919b1604aaae4b1f74f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/descriptors.json",
+      "bytes": 52241,
+      "sha256": "a98eb1d513f83e47412dd5317bb6c2e4249b1b95899e707f98a0764d7daf0ea8"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/dimensions-placement-qa.json",
+      "bytes": 8909,
+      "sha256": "0f88fc0ba02cd418c295790c06fb4bfa7d5c5aecee805ebc2006e0cc1821ca97"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/image-framing-qa.json",
+      "bytes": 24797,
+      "sha256": "9f009e3572a1ec139db48d6fd782238582edde95294b0de1309af961e29a1e9b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/image-replay-qa.json",
+      "bytes": 29366,
+      "sha256": "7562c633becace4199402d5644e1a79af5bbfde604dcee0652dee62a9ba1e461"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/metadata_contract.py",
+      "bytes": 2924,
+      "sha256": "f7308e926d66510109cfcb437e802ab4b17503b433d56695a6d65acf5595f0bf"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/metric_atlas.py",
+      "bytes": 1673,
+      "sha256": "1c1d751c4ecda94acd36bbc60c01077c9470b21164c04d8108a73aa71982e152"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/packed-uv-overlap-qa.json",
+      "bytes": 2160,
+      "sha256": "e8c9cd9a25df29d813e56d22ece86a5ea39c873c1ce2b004d5ae7171d003a97b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/render.py",
+      "bytes": 4229,
+      "sha256": "09c6dab2bd57b761c72d2d2a5b9ae2673201e4aa1b3ac877bdb8225362ad2305"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/repair_winding.py",
+      "bytes": 5669,
+      "sha256": "ff225867dc82eb1b30d2e246908f9bc2de6302a8f09696f3cbc390f4bfc32cd0"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-exterior.png",
+      "bytes": 879572,
+      "sha256": "e00038dc0e980956b131e34afb1c63bbb8c2e771b409cde37af7a9b7049afc5b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-interior.png",
+      "bytes": 907858,
+      "sha256": "b8f71acfc94af0820a979fac0e6d56a3109652e39ea29274c187fbc3b813909b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/cornice-column-top.png",
+      "bytes": 847751,
+      "sha256": "f4fb8872374fa7448fc9451c4cae5beb52e479fa92dc16424d325068867f1d8f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-exterior.png",
+      "bytes": 1071575,
+      "sha256": "f91f8095ef1833e8f990b35141a311de3ed169b52726280baf573734ca28ffc6"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-interior.png",
+      "bytes": 1351957,
+      "sha256": "ffeb86d692436c040bf386c87227c22544e43eba9dd92669b65c69c92a4dea67"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/hollow-roof-gable-top.png",
+      "bytes": 960989,
+      "sha256": "acd24a028ae1bbc3749c0a42ba3eb0af67037cd3e9cd37d426bbfee292315084"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-gable-end-closure-01-front.png",
+      "bytes": 183531,
+      "sha256": "b9e2a47f6b43f97af2172abb22367779bc2102dd31598b014aff9c163264fe8e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-gable-end-closure-01-rear.png",
+      "bytes": 154866,
+      "sha256": "d8669f1cc56f7c5019b98ae751f326f5e1b963da4d2576102bcda2b0f5279115"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-gable-end-closure-01-thumb.png",
+      "bytes": 208343,
+      "sha256": "c246cdd99818101704bdfd9c8ad3bc6329eaf5ed30f0e733492124e6d00c951f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-gable-end-closure-01-top.png",
+      "bytes": 131874,
+      "sha256": "95d5218021c9d83c6bd45735c996fc69b580101ab3598a243667f1fc6cdb7827"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-gable-end-closure-01.glb",
+      "bytes": 6920,
+      "sha256": "89ba63344c488b151a8132dea99d1f14fc9e136e47efe5deb287a5d957694e40"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-return-corner-01-front.png",
+      "bytes": 216845,
+      "sha256": "df48c8768d491955ae61a7e7934931b2d603ef43bcf570e9246334e9db50fb32"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-return-corner-01-rear.png",
+      "bytes": 188752,
+      "sha256": "8107804713b6e829e8a958922afb2fb2604f94e48df41213c5b047b857f2b6a7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-return-corner-01-thumb.png",
+      "bytes": 192032,
+      "sha256": "82ea61b2f51889692ed149c6b90ffa922b41c95bef3fd9662a582e0f806f932b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-return-corner-01-top.png",
+      "bytes": 259442,
+      "sha256": "3f3e77944494b83e4e5d4cfe55620e3adbb417dc1a07387782cc660cee259307"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-return-corner-01.glb",
+      "bytes": 25848,
+      "sha256": "a1f3f9fffc17fa2db67389553419db090b8adb5b8da2afa6b1a6e07d7c29ba2d"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-wall-bay-01-front.png",
+      "bytes": 249294,
+      "sha256": "4b6ef53bfd3384aa6b3bf30e1f081e0dbf48a7067b020df87cccdbd5fb31de2e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-wall-bay-01-rear.png",
+      "bytes": 207436,
+      "sha256": "231023277faf24c2c9d79f98396c970e5fe12332aac2e8d980cd6eb28ba78ae2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-wall-bay-01-thumb.png",
+      "bytes": 248253,
+      "sha256": "cfdb90592185db3806ca87f9e0a4fc50bdd73f2a2cc88519b60b81504dabe230"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-wall-bay-01-top.png",
+      "bytes": 158882,
+      "sha256": "e00090aa1eeeaffce8b2207afb1e185af5ebe28c60de45252d1b8c408bb6e3fb"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-paneled-wall-bay-01.glb",
+      "bytes": 22856,
+      "sha256": "4eca4c535b38a44e6442df56f46c0de06d81e0868bffb184ddea189f35a1d54b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-rectangular-doorway-bay-01-front.png",
+      "bytes": 228994,
+      "sha256": "d75e9b15be136fcc0743f919a72716d823c98b215eb322db6d5e10d910e83eb1"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-rectangular-doorway-bay-01-rear.png",
+      "bytes": 209412,
+      "sha256": "a323a1469faace48eb04d75753b0b37ec608c1b3b5cd78706f3ff678f3b5b5fc"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-rectangular-doorway-bay-01-thumb.png",
+      "bytes": 232700,
+      "sha256": "3a469cfdd79ac303d6a028867a2af1b3240cfafc31498ca9537499b6763b7e3b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-rectangular-doorway-bay-01-top.png",
+      "bytes": 148599,
+      "sha256": "78dc91d118f374ecdbcc7fbdcaa85ddd380e6d2b2f7d4ab1901d7013c9c39b45"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "bytes": 22412,
+      "sha256": "84cd7fd6e2ab57c25542d6d97d18220b56e27a14e9b2a04e897b66cde651a72f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-slate-gable-span-01-front.png",
+      "bytes": 137567,
+      "sha256": "ddc18af52b00108adc7d409e09ca984c4aeac41a77125cfa4d8c4fc1c5611fc2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-slate-gable-span-01-rear.png",
+      "bytes": 137526,
+      "sha256": "423c79852817adc3209eb70c3e07fb3ea32f8398a9d131be063df1b753832488"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-slate-gable-span-01-thumb.png",
+      "bytes": 189846,
+      "sha256": "484fdab7b93306fed5ec678bed6f7668c943970880af466d56715dcc81d9d7c5"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-slate-gable-span-01-top.png",
+      "bytes": 183341,
+      "sha256": "74d216dca1ffc29ca3d2f93614baed7b3eacce3a7ba5d69b7e834eb65f2409ec"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-slate-gable-span-01.glb",
+      "bytes": 120388,
+      "sha256": "423fb5dc51e98ede67afe3b189d7926f120fa7dc62fbb64a2f2f9af65e6b5aa2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-corner-01-front.png",
+      "bytes": 202098,
+      "sha256": "f3ea834c77c64c3da026e49137537be6f4f6932c107b625cd055d396113b8d71"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-corner-01-rear.png",
+      "bytes": 174475,
+      "sha256": "a53ab81946f01fee9b8b056109d3cc074dc036c0d380378dad3ba3384ebb78fb"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-corner-01-thumb.png",
+      "bytes": 220509,
+      "sha256": "70682795dc17e81212f0e9050318cb54d140da29db23e5066cae55c8e2a9ba56"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-corner-01-top.png",
+      "bytes": 284060,
+      "sha256": "e67efae2ca57ca6c69fa08670f829928fdac0b55915f2e2c11ad6be07e6234f0"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-corner-01.glb",
+      "bytes": 5576,
+      "sha256": "d15d370a356cec19ce5840a7414641fe539d56190c2ff00e287e00b034fdec37"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-straight-01-front.png",
+      "bytes": 164052,
+      "sha256": "9cd69f42784a1ed20c4684968dcd6ba780c23634971f05aa117dd4366f071dbe"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-straight-01-rear.png",
+      "bytes": 150933,
+      "sha256": "4f19fc0ff37adcc3c38aee5dd86fa0cc450adc7a3c857d6771654db89e348c90"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-straight-01-thumb.png",
+      "bytes": 184279,
+      "sha256": "3b6849edffe8fec1f84f00a6f69ae94bc79a8d1cb0c83c4ad8cad5a3f857c38e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-straight-01-top.png",
+      "bytes": 171860,
+      "sha256": "672cea8389d8ac2d12e2e2bf0c03d14da2bdfa9783ff4d171b85d08a5be78825"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-stone-cornice-straight-01.glb",
+      "bytes": 3980,
+      "sha256": "a6585597f6eda9c68c4e25c6b936b3f0783a9a47802b1349c2d64ad49ba2c10f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-tuscan-support-column-01-front.png",
+      "bytes": 179331,
+      "sha256": "bf5a2a95b558630898a4658cd0a1e91ea26a0937ec6a1b7c765a6fa374b926f7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-tuscan-support-column-01-rear.png",
+      "bytes": 178384,
+      "sha256": "28c120db5dfed53957882db8fc9811ff259bbbcaf1ef9b48662555109caf3843"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-tuscan-support-column-01-thumb.png",
+      "bytes": 181596,
+      "sha256": "ba81aad45cfd25a1bfdcd6f802f959e5d3d6c566a2d19b1e25fc0f30d49cc75d"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-tuscan-support-column-01-top.png",
+      "bytes": 309882,
+      "sha256": "5449997545502621177f3f373e6b0b777255cd1f6d51887baf4c24cb13472f8d"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/rpg-mansion-tuscan-support-column-01.glb",
+      "bytes": 134604,
+      "sha256": "aed0e70cc8038bc930aad5646c57e40ff0e8437a823aacd4e93b002c2b471c29"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-exterior.png",
+      "bytes": 912390,
+      "sha256": "2465a02f24811d882c24904c6b0f6b012bd7f6a8a4fe5347bee226e4670001e5"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-interior.png",
+      "bytes": 1001769,
+      "sha256": "e4dd929385f99761aaf8f3fab072728b65a98f4807c562d75fc189b354071696"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay/wall-door-corner-top.png",
+      "bytes": 591766,
+      "sha256": "79e05996f9ed6ed337746e80204f6839adcd5e1d7b2bc31bfd6371a2e75b33c8"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/replay_sources.py",
+      "bytes": 5092,
+      "sha256": "d8dedf927666f62f5229d94c7b5e933e356dcd0a0da87c725ef37f8ec7886f1c"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/review/joined-assemblies.png",
+      "bytes": 837558,
+      "sha256": "c34d45152fd10d6270a8f0fef6898bc923bfefc947761518d86e14dbe7e24846"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/review/prototype-views-1.png",
+      "bytes": 431373,
+      "sha256": "88308e2fd75544fffb959c4bb57b15fdfc6ec0ff4cd54e09ee4de66de69fcc57"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/review/prototype-views-2.png",
+      "bytes": 454999,
+      "sha256": "47f1e5b5c514ba7ec1015b9f701af6ef439ceab6dcf80b24bc2726ebf0bf22a4"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/review_checks.py",
+      "bytes": 9636,
+      "sha256": "b691d67c02a1fabbe2bb219058a1b1c61098aacd12eab14b638d439992c7c955"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/sanitize_sources.py",
+      "bytes": 6613,
+      "sha256": "5a05edfb7b4043de73c2e456a9d4ef15684f05f924c57b3599657d4792ae619b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/seal_review.py",
+      "bytes": 4578,
+      "sha256": "39c1b5bfa7b44521ba0086517eb2ca0516b42cb3963b59575a6c2eff9b0ca925"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/source-replay-inputs.json",
+      "bytes": 32754,
+      "sha256": "784bcdeded5bc2fd22241db1bbe56272844d8233829b00c20d4461a53437a398"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/source_privacy.py",
+      "bytes": 2104,
+      "sha256": "5916585375c86ee9773a07e91a223c09e1277d8b3d722247ca184ac4968e491b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-authoring.blend",
+      "bytes": 93576,
+      "sha256": "c5bb4c13cb7486021942dbc40a54834ba0b3dd0c69770074decc2c197b32de5a"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-front.png",
+      "bytes": 183531,
+      "sha256": "b9e2a47f6b43f97af2172abb22367779bc2102dd31598b014aff9c163264fe8e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-rear.png",
+      "bytes": 154866,
+      "sha256": "d8669f1cc56f7c5019b98ae751f326f5e1b963da4d2576102bcda2b0f5279115"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-render-binding.json",
+      "bytes": 2216,
+      "sha256": "2ee917e2f70f354e6f6c14d570e8495b356b1472f707d39ae439dcef38439344"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01-validation.json",
+      "bytes": 1732,
+      "sha256": "df754638a62169a72703b9abe8571de266a40723540d5cd33ce14c77c3ab9e74"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-gable-end-closure-01.blend",
+      "bytes": 95720,
+      "sha256": "968f6f816cc68ee26c5903e2195b5fdf5f5d227b31ea063425d362b41afec0bf"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-authoring.blend",
+      "bytes": 96147,
+      "sha256": "599c98a509454dda8b8f9336e84a96f777b82ef03a58020154d0d541651de723"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-front.png",
+      "bytes": 216845,
+      "sha256": "df48c8768d491955ae61a7e7934931b2d603ef43bcf570e9246334e9db50fb32"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-rear.png",
+      "bytes": 188752,
+      "sha256": "8107804713b6e829e8a958922afb2fb2604f94e48df41213c5b047b857f2b6a7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-render-binding.json",
+      "bytes": 2239,
+      "sha256": "23a927697390de9546db09e935502a0ada23330f81cb46b7fc3fca8c5045c2c9"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01-validation.json",
+      "bytes": 3290,
+      "sha256": "f833386aa946bc267aa487b39297be4ada72663bc7f14ea0d86506ad6312343a"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-return-corner-01.blend",
+      "bytes": 102983,
+      "sha256": "58355ce6cec1a9d63b68065ad8fa3008f46f642342e834d7b09ad7bf2e926b4a"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-authoring.blend",
+      "bytes": 98151,
+      "sha256": "d5481dc40fb64053d91d5255c1d7fb46df0499e6d9c8cc123fb9552144c336ee"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-front.png",
+      "bytes": 249294,
+      "sha256": "4b6ef53bfd3384aa6b3bf30e1f081e0dbf48a7067b020df87cccdbd5fb31de2e"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-rear.png",
+      "bytes": 207436,
+      "sha256": "231023277faf24c2c9d79f98396c970e5fe12332aac2e8d980cd6eb28ba78ae2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-render-binding.json",
+      "bytes": 2214,
+      "sha256": "1f7a97ea99c3761e1254b45214446503816c72f9c8003a44f7b7ef790c19e1bf"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01-validation.json",
+      "bytes": 3265,
+      "sha256": "37b06381a0de8afe0813b9a3af85254798bc3a9743d4d1d47c968ff851254ca6"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-paneled-wall-bay-01.blend",
+      "bytes": 104467,
+      "sha256": "4bac86df9dea39ff4db7b667ffa7aa1d66a02e5c4f4d5bd7a2dd7742c8b7e6f1"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-authoring.blend",
+      "bytes": 95952,
+      "sha256": "2b9c3e06ff42e0378bbe144dd4aa63175d21723a16a6f75e49921bd82ad7c9df"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-front.png",
+      "bytes": 228994,
+      "sha256": "d75e9b15be136fcc0743f919a72716d823c98b215eb322db6d5e10d910e83eb1"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-rear.png",
+      "bytes": 209412,
+      "sha256": "a323a1469faace48eb04d75753b0b37ec608c1b3b5cd78706f3ff678f3b5b5fc"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-render-binding.json",
+      "bytes": 2249,
+      "sha256": "7ffd04498e6886f27eb4ed5325f8b1c00d070c4346f2b16233de90c4a9e6293c"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01-validation.json",
+      "bytes": 3627,
+      "sha256": "db88bbaf50c7d65d60fc7e3e819d9229ac54e0a8764d76901e10c2bfdc5eaede"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-rectangular-doorway-bay-01.blend",
+      "bytes": 101786,
+      "sha256": "7b9191be26cc883b44e951171cdd9c492b97ae4b923b25edc383d15d26efeb8d"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-authoring.blend",
+      "bytes": 114825,
+      "sha256": "d12ab41017a66905ce82348107544900d7dfb18d13f7fe27eb54a90392afdc5f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-front.png",
+      "bytes": 137567,
+      "sha256": "ddc18af52b00108adc7d409e09ca984c4aeac41a77125cfa4d8c4fc1c5611fc2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-rear.png",
+      "bytes": 137526,
+      "sha256": "423c79852817adc3209eb70c3e07fb3ea32f8398a9d131be063df1b753832488"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-render-binding.json",
+      "bytes": 2216,
+      "sha256": "348bd19b358ddbd7789f0e2dbaf6324935315e6ebabd8d5f495ff7f15f7ec4e7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01-validation.json",
+      "bytes": 12543,
+      "sha256": "b58e7889eceb8126dd90597ec287fa28815f0193823b802e46a4880b96c72781"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-slate-gable-span-01.blend",
+      "bytes": 145096,
+      "sha256": "0d7dcecf976303f4abceae5ee0224f85a87466124633f393441f4e877dabe516"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-authoring.blend",
+      "bytes": 86907,
+      "sha256": "342dc01d4a80975afae84376f6246bbcc2345e25bff94884aab3886b2a03aeda"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-front.png",
+      "bytes": 202098,
+      "sha256": "f3ea834c77c64c3da026e49137537be6f4f6932c107b625cd055d396113b8d71"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-rear.png",
+      "bytes": 174475,
+      "sha256": "a53ab81946f01fee9b8b056109d3cc074dc036c0d380378dad3ba3384ebb78fb"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-render-binding.json",
+      "bytes": 2237,
+      "sha256": "bb462443973f451ddbf65f05503c1c7c912dc3c186df26a2b1d82a317576eb46"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01-validation.json",
+      "bytes": 1230,
+      "sha256": "5959c90225ab6bdb312b057848f550c65f8c9063daa3e99ee27ea3467e58368b"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-corner-01.blend",
+      "bytes": 87593,
+      "sha256": "557c75aae080a1e47e5e18201f012d27a6cff1abf264d64d1b808e5b77be717f"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-authoring.blend",
+      "bytes": 86503,
+      "sha256": "2ca1eb3e1da0d5d9dbdbcc1c9af2c9360bfbb01cf789aa258a745b041ca336c2"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-front.png",
+      "bytes": 164052,
+      "sha256": "9cd69f42784a1ed20c4684968dcd6ba780c23634971f05aa117dd4366f071dbe"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-rear.png",
+      "bytes": 150933,
+      "sha256": "4f19fc0ff37adcc3c38aee5dd86fa0cc450adc7a3c857d6771654db89e348c90"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-render-binding.json",
+      "bytes": 2245,
+      "sha256": "041b1c1692449210c3210ff012d3c6c749d5c173bbd53649dac53e8bc3353703"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01-validation.json",
+      "bytes": 1235,
+      "sha256": "23225bf380391dbe2332e2952dc3d9f49d0b9695db770ee078d2baabbb873254"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-stone-cornice-straight-01.blend",
+      "bytes": 87136,
+      "sha256": "45fedb6f68609628f6edfd08a7a1762a225b5c426892d51d1079643d5bdf40d1"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-authoring.blend",
+      "bytes": 124081,
+      "sha256": "5d4cc24391404f6029cacf6a08853aa54bfa1da16a04cade5866dbcb149cb838"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-front.png",
+      "bytes": 179331,
+      "sha256": "bf5a2a95b558630898a4658cd0a1e91ea26a0937ec6a1b7c765a6fa374b926f7"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-rear.png",
+      "bytes": 178384,
+      "sha256": "28c120db5dfed53957882db8fc9811ff259bbbcaf1ef9b48662555109caf3843"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-render-binding.json",
+      "bytes": 2238,
+      "sha256": "be0a09beabf939fd69160b6f76acaff0964aef9b4d788d1e73884f1c78f1ced9"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01-validation.json",
+      "bytes": 1547,
+      "sha256": "37993dd81e93ab2c577afff4b685fdf32a8b123812e0be563f851ace7dd791cc"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/modular_architecture/work/rpg-mansion-tuscan-support-column-01.blend",
+      "bytes": 140069,
+      "sha256": "4d492526eff50d25c7d5f8a46d71d70c2c046c3ac1aa336b13ef439fb4afff45"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/png_metadata.py",
+      "bytes": 688,
+      "sha256": "dfa11faf1382666a9a29eadb7bf72500b7b97c21085637ebb034a2ae907edada"
+    },
+    {
+      "path": "tools/blender/rpg_mansion/qa_asset_delivery.py",
+      "bytes": 39230,
+      "sha256": "55befe8339de8e6089340e865186bdd1008cf9ed5ee53486ced779172459cee9"
+    },
+    {
+      "path": "tools/blender/shape_kit.py",
+      "bytes": 6733,
+      "sha256": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e"
+    }
+  ],
+  "fileCount": 173,
+  "totalBytes": 35762740
+}

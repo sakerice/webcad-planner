@@ -1,0 +1,74 @@
+{
+  "model": "rpg-mansion-garden-fence-corner-adapter-01",
+  "dimensions_mm": [
+    103.00000011920929,
+    104.00000214576721,
+    1404.9999713897705
+  ],
+  "bounds_m": [
+    [
+      -0.051500000059604645,
+      -0.052000001072883606,
+      0.0
+    ],
+    [
+      0.051500000059604645,
+      0.052000001072883606,
+      1.4049999713897705
+    ]
+  ],
+  "triangles": 12,
+  "uv": {
+    "meters_per_uv": 1.4063860976010503,
+    "min": 1.4063855316228222,
+    "max": 1.4063878806599817,
+    "p05": 1.4063855316228222,
+    "p95": 1.4063878319507146,
+    "total_triangles": 12,
+    "valid_triangles": 12,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Garden charcoal iron": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 3060,
+  "datums": {
+    "installation": {
+      "mount": "fence-accessory",
+      "widthM": 0.103,
+      "depthM": 0.104,
+      "heightM": 1.405,
+      "note": "103 mm connector fills a paired right angle joint, with 1 mm outer face recess. Accessory; zero new core constructions."
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "originalBoundsM": [
+      [
+        -0.051500000059604645,
+        -0.052000001072883606,
+        0.0
+      ],
+      [
+        0.051500000059604645,
+        0.052000001072883606,
+        1.4049999713897705
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.01505036000162363
+  ],
+  "source_sha256": "500b9e1f9c86873c89ae5ad0a930039c2bb37bbdb31cd48549afb2929e86e09b",
+  "glb_sha256": "6462dfa5bbb68c35a7e03a1864b6b9ed48dacfc2415676888db3d73a8fdf8b3c",
+  "authoring_sha256": "c9ec0fd193b87f2599d72ea95b0933e159ebe93a9f92d6d8842a816d20afa8d6"
+}

@@ -1,0 +1,198 @@
+{
+  "id": "rpg-mansion-rug-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/build.py",
+  "originalBuilderSha256": "1980db41d3219826c4970076a618e7af57725828144e7d8746aa4b74994ddffb",
+  "front": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01-front.png",
+  "rear": "tools/blender/rpg_mansion/work/rpg-mansion-rug-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 8,
+  "validation": {
+    "model": "rpg-mansion-rug-01",
+    "dimensions_mm": [
+      1399.999976158142,
+      2000.0,
+      9.999999776482582
+    ],
+    "bounds_m": [
+      [
+        -0.699999988079071,
+        -1.0,
+        0.0
+      ],
+      [
+        0.699999988079071,
+        1.0,
+        0.009999999776482582
+      ]
+    ],
+    "triangles": 128,
+    "uv": {
+      "meters_per_uv": 2.92258130815972,
+      "min": 2.4585197330359563,
+      "max": 3.5178080801015907,
+      "p05": 2.458918259595438,
+      "p95": 3.5177315619317646,
+      "total_triangles": 128,
+      "valid_triangles": 128,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Oxblood velvet": "fabric",
+      "RPG Parchment": null,
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 11124
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "9a5c24bc1b4a486aca3ce0afef8fe9510960b27d40695edd3a00dbd301342325",
+    "bytes": 11124,
+    "triangles": 128,
+    "bounds_gltf_m": [
+      [
+        -0.699999988079071,
+        0.0,
+        -1.0
+      ],
+      [
+        0.699999988079071,
+        0.009999999776482582,
+        1.0
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1399.999976158142,
+      2000.0,
+      9.999999776482582
+    ],
+    "geometry_material_sha256_1e7": "f8ff3a1c89c69cec432d04412bf78a535ef276fbb19377c642c7505f6da2da95",
+    "geometry_material_uv_sha256_1e7": "2ee2dffe4483815c91999b45116d465d1f47b9a1cc3bca973714f957000d536c",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 36
+      },
+      {
+        "material": "RPG Oxblood velvet",
+        "channel": "fabric",
+        "triangles": 44
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 48
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "1edecea53c2d9dc87d964897ea760c75fa0ab1778d1e0907dc920322ed97b841",
+    "bytes": 11320,
+    "triangles": 128,
+    "bounds_gltf_m": [
+      [
+        -0.699999988079071,
+        0.0,
+        -1.0
+      ],
+      [
+        0.699999988079071,
+        0.009999999776482582,
+        1.0
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1399.999976158142,
+      2000.0,
+      9.999999776482582
+    ],
+    "geometry_material_sha256_1e7": "f8ff3a1c89c69cec432d04412bf78a535ef276fbb19377c642c7505f6da2da95",
+    "geometry_material_uv_sha256_1e7": "2ee2dffe4483815c91999b45116d465d1f47b9a1cc3bca973714f957000d536c",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 36
+      },
+      {
+        "material": "RPG Oxblood velvet",
+        "channel": "fabric",
+        "triangles": 44
+      },
+      {
+        "material": "RPG Parchment",
+        "channel": null,
+        "triangles": 48
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 6.82,
+  "source_sha256": "bf8552bb4b35e0f6e70a655fbfd0ee122ee8dfe03f3cc479e3f44a6f061b137f",
+  "front_sha256": "8d7dcab7707066d793d2e2dbe3ec19923f6df78f591b1c7a302b11c6af65793f",
+  "rear_sha256": "b4aa477f0011b7d73ce582eda57fe89b2ce4f1455698c9ca6bc1ebd09a82ee76",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:31.098867+00:00",
+    "source_sha256_before": "35e2ab91ad58ac6ee669838c9d982646b54b96c359ce1b973cb3d484281d04b9",
+    "source_sha256_after": "bf8552bb4b35e0f6e70a655fbfd0ee122ee8dfe03f3cc479e3f44a6f061b137f",
+    "mesh_geometry_uv_material_digest_preserved": "c76977f8c889f8467a9c4b16dc742c217bd27ba9e6b03a32f449caeda67f25b8",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-rug-01-rear.png",
+        "render_filepath": "//rpg-mansion-rug-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "bf8552bb4b35e0f6e70a655fbfd0ee122ee8dfe03f3cc479e3f44a6f061b137f",
+    "originalBuilderSha256": "368a3b5e90ede008c429d33168d1f7ffc352d381d44ece5402c28364d4690a36",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

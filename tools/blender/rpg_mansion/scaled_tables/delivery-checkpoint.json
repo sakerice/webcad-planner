@@ -1,0 +1,110 @@
+{
+  "status": "stable-ready",
+  "assetCount": 15,
+  "sourceCount": 30,
+  "modelBytes": 1846072,
+  "triangles": 43392,
+  "corrections": {
+    "outwardNativeParts": 7,
+    "flippedSourceComponentsAcrossThreeRepresentations": 21,
+    "uvCorrectedParts": [
+      "Concave desk center drawer face",
+      "Roll-top cover bottom handle rail"
+    ],
+    "windingRerenderedAssetCount": 4,
+    "changedModelCount": 5,
+    "changedModels": [
+      "rpg-mansion-kidney-writing-desk-01",
+      "rpg-mansion-drum-library-table-01",
+      "rpg-mansion-baize-card-table-01",
+      "rpg-mansion-oval-mirror-dressing-table-01",
+      "rpg-mansion-roll-top-writing-desk-01"
+    ],
+    "unchangedModelCount": 10,
+    "changedImageCount": 3,
+    "changedImages": [
+      {
+        "id": "rpg-mansion-oval-mirror-dressing-table-01",
+        "field": "thumb"
+      },
+      {
+        "id": "rpg-mansion-oval-mirror-dressing-table-01",
+        "field": "top"
+      },
+      {
+        "id": "rpg-mansion-oval-mirror-dressing-table-01",
+        "field": "front"
+      }
+    ],
+    "unchangedImageCount": 57,
+    "kidneyPureColorImagesUnchanged": true
+  },
+  "exactOrientedTriangleSurfacesMaterialsPreservedAfterExpectedWindingFixes": true,
+  "maximumCustomNormalVectorRoundTripError": 0.00033553923422460633,
+  "customNormalVectorTolerance": 0.0005,
+  "packedUvSignificantOverlapArea": 0,
+  "weakLibraryReferencesRemoved": 109,
+  "orphanDatablocksPurged": 13,
+  "allSourcesCompressed": true,
+  "decompressedPrivatePathErrors": 0,
+  "linkedLibraries": 0,
+  "externalImages": 0,
+  "releaseGlbMeshSceneCounts": [
+    1,
+    1
+  ],
+  "genericReexportMeshSceneCounts": [
+    1,
+    1
+  ],
+  "reopenedSourceErrors": 0,
+  "outwardComponentOrientationErrors": 0,
+  "contactDisconnectedAssets": 0,
+  "genericReexportErrors": 0,
+  "allValidationByteCountersAndStoredModelSourceHashesCurrent": true,
+  "descriptorSha256": "a1f2dc82c6f62321d396e0b28ba7451931cf98661fc24bd0da0d8aadce0c8e36",
+  "summarySha256": "fb99f50e9d4f50a62e05f027567032dbbbb6c8409b8a1cade8d61df6b06381ab",
+  "builderSha256": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3",
+  "qaReports": {
+    "actual-byte-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/actual-byte-qa.json",
+      "sha256": "465999a54fd348fbcf5d6a56705f708e7e67e712f6d621a3d5dc1190b035cf39"
+    },
+    "reopened-source-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/reopened-source-qa.json",
+      "sha256": "c0ea1e785a6423b351380347f9c18ecae360adf55728d569e1a82b816bca77da"
+    },
+    "native-joint-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/native-joint-qa.json",
+      "sha256": "f1c853a6384603b7c60879b184198318d20c9f9d9e723b546acef093dcfa8a46"
+    },
+    "generic-source-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/generic-source-qa.json",
+      "sha256": "ad7b2bd109e253b490f573ade30a4b8b8f186fe85415623eb6ac957d93889bca"
+    },
+    "source-sanitization-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/source-sanitization-qa.json",
+      "sha256": "47f3a81c356b7e9620b68d5f38fbe10e645fb68f1eb81bcb83992cef817fb357"
+    },
+    "saved-source-privacy-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/saved-source-privacy-qa.json",
+      "sha256": "4d63e4be2a832dce0835c37b309a456314f59bd7553e48748796a17594fa4955"
+    },
+    "outward-winding-repair-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/outward-winding-repair-qa.json",
+      "sha256": "68aa608540a53218d2690d14e90f9285d19b09876c06af98a966649ab6747c51"
+    },
+    "uv-atlas-repair-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/uv-atlas-repair-qa.json",
+      "sha256": "30227513368d7bbaf6574928d25b9f8b07273c3302e813c7de0521625c63e4ff"
+    },
+    "packed-uv-overlap-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/packed-uv-overlap-qa.json",
+      "sha256": "c10aab79dd3a6a086a706a873c18c90cc394a22bae05389e76b0c833c8dc42f9"
+    },
+    "repair-preservation-qa.json": {
+      "path": "tools/blender/rpg_mansion/scaled_tables/repair-preservation-qa.json",
+      "sha256": "823a572b9599a28f18a89d78689ee7fe9abdfa9620f5ef19a8c56b4cae24a6d2"
+    }
+  }
+}

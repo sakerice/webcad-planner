@@ -1,0 +1,273 @@
+{
+  "stage": "Producer native verification; independent acceptance still required",
+  "items": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "authoringSha256": "0b830de8ba7eb10f9b5d7c15952e9faaca0815a15e6f8fb2ab78dd007a403346",
+      "modelSha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "allWallPlatesContactWall": true,
+        "bracketsInsideCheekExterior": true,
+        "bracketUpperEndsMeetInnerShell": true,
+        "bracketsMeetWallPlates": true,
+        "actualFlueCentreIsOpen": true,
+        "rangeClearanceAtLeast700mm": true
+      },
+      "measurements": {
+        "wallPlateRearPlanesM": [
+          0.36000001430511475,
+          0.36000001430511475,
+          0.36000001430511475
+        ],
+        "diagonalBracketEnvelopeAndContacts": [
+          {
+            "name": "Diagonal canopy bearing bracket",
+            "minimumSideExteriorContainmentMm": 8.256507784712486,
+            "shellIntersectionCount": 19,
+            "upperInnerShellIntersectionCount": 2,
+            "wallPlateIntersectionCount": 7
+          },
+          {
+            "name": "Diagonal canopy bearing bracket.001",
+            "minimumSideExteriorContainmentMm": 8.256507784712486,
+            "shellIntersectionCount": 18,
+            "upperInnerShellIntersectionCount": 1,
+            "wallPlateIntersectionCount": 7
+          }
+        ],
+        "measuredCanopyUndersideMm": 1610.00001
+      },
+      "passed": true
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "authoringSha256": "dc0b96d5e06717a862d40f91604d0da916ba345155d88dcf56cead6e6b7d0a8d",
+      "modelSha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "lowerStretcherSupportedByBothSideRails": true,
+        "lowerSideRailsJoinFourLegs": true,
+        "bothLiftingLoopsSeatedInTubWall": true,
+        "boardFeetTouchBasin": true,
+        "tubSupportedByBearers": true,
+        "boardCleatsTouchActualRim": true,
+        "boardCleatsIntersectStiles": true,
+        "cavityOpenToMeasuredFloor": true
+      },
+      "measurements": {
+        "lowerStretcherSideRailIntersections": [
+          "Stand lower side rail",
+          "Stand lower side rail.001"
+        ],
+        "lowerSideRailLegIntersections": [
+          {
+            "name": "Stand lower side rail",
+            "legs": [
+              "Stand timber upright",
+              "Stand timber upright.001"
+            ]
+          },
+          {
+            "name": "Stand lower side rail.001",
+            "legs": [
+              "Stand timber upright.002",
+              "Stand timber upright.003"
+            ]
+          }
+        ],
+        "liftingLoopTubIntersections": [
+          {
+            "name": "Tub side lifting loop",
+            "intersectionCount": 56
+          },
+          {
+            "name": "Tub side lifting loop.001",
+            "intersectionCount": 56
+          }
+        ],
+        "actualBoardFootToBasinSurfaceMm": [
+          0.0,
+          1.535976501543246e-05
+        ],
+        "tubBottomToBearerTopMm": [
+          [
+            0.5040000081062317,
+            0.5040000081062317,
+            0.0
+          ],
+          [
+            0.5040000081062317,
+            0.5040000081062317,
+            0.0
+          ]
+        ],
+        "rimBearingWitnesses": [
+          {
+            "pointCanonicalM": [
+              -0.16200000047683716,
+              0.22050026059150696,
+              0.8700000047683716
+            ],
+            "cleatDistanceMm": 0.0,
+            "tubDistanceMm": 1.4901161193847656e-05
+          },
+          {
+            "pointCanonicalM": [
+              0.16200000047683716,
+              0.22050026059150696,
+              0.8700000047683716
+            ],
+            "cleatDistanceMm": 0.0,
+            "tubDistanceMm": 0.0
+          }
+        ],
+        "boardCleatStileSurfaceDistancesMm": [
+          2.9999911785125732,
+          2.9999911785125732
+        ],
+        "cavityRayHitHeightMm": 524.9999761581421
+      },
+      "passed": true
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "authoringSha256": "4169a7799d9bc7845f90b53ec66b206f77a5d6628e0379215f455c2fe7ebfd7c",
+      "modelSha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "fourLegsGrounded": true,
+        "fourPositiveAreaFlatFootBearings": true,
+        "everyRodHasTwoLegSupports": true,
+        "eachPivotJoinsTwoLegs": true
+      },
+      "measurements": {
+        "legGroundHeightsMm": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "horizontalFootBearings": [
+          {
+            "name": "Drying frame hinged timber leg",
+            "horizontalGroundContactAreaM2": 0.0014026826247572899
+          },
+          {
+            "name": "Drying frame hinged timber leg.001",
+            "horizontalGroundContactAreaM2": 0.0014026826247572899
+          },
+          {
+            "name": "Drying frame hinged timber leg.002",
+            "horizontalGroundContactAreaM2": 0.0014026826247572899
+          },
+          {
+            "name": "Drying frame hinged timber leg.003",
+            "horizontalGroundContactAreaM2": 0.0014026826247572899
+          }
+        ],
+        "dryingRodLegIntersections": [
+          {
+            "name": "Round timber drying rod",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg",
+              "Drying frame hinged timber leg.002"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.001",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg",
+              "Drying frame hinged timber leg.002"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.002",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg",
+              "Drying frame hinged timber leg.002"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.003",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg",
+              "Drying frame hinged timber leg.002"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.004",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg.001",
+              "Drying frame hinged timber leg.003"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.005",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg.001",
+              "Drying frame hinged timber leg.003"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.006",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg.001",
+              "Drying frame hinged timber leg.003"
+            ]
+          },
+          {
+            "name": "Round timber drying rod.007",
+            "intersectingLegs": [
+              "Drying frame hinged timber leg.001",
+              "Drying frame hinged timber leg.003"
+            ]
+          }
+        ],
+        "pivotLegIntersections": [
+          {
+            "name": "Drying frame pivot pin",
+            "legs": [
+              "Drying frame hinged timber leg",
+              "Drying frame hinged timber leg.001"
+            ]
+          },
+          {
+            "name": "Drying frame pivot pin.001",
+            "legs": [
+              "Drying frame hinged timber leg.002",
+              "Drying frame hinged timber leg.003"
+            ]
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "authoringSha256": "be7e0fcdcf99e10f3ec171a76bf14883d90b94ed20409b10aead2f8b8be3c4f6",
+      "modelSha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+      "checks": {
+        "allClosedOutward": true,
+        "allEditableMeshParts": true,
+        "allNativePartUvs": true,
+        "floorContact": true,
+        "walkingPlaneBelow10mm": true,
+        "narrowHallFit": true
+      },
+      "measurements": {
+        "actualBottomMm": 0.0,
+        "actualWalkingPlaneMm": 7.600000128149986,
+        "widthMm": 759.9999904632568
+      },
+      "passed": true
+    }
+  ],
+  "passed": true
+}

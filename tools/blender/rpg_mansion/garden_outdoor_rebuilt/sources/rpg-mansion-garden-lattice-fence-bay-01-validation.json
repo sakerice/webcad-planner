@@ -1,0 +1,110 @@
+{
+  "model": "rpg-mansion-garden-lattice-fence-bay-01",
+  "dimensions_mm": [
+    1820.0000524520874,
+    104.00000214576721,
+    1404.9999713897705
+  ],
+  "bounds_m": [
+    [
+      -0.9100000262260437,
+      -0.052000001072883606,
+      0.0
+    ],
+    [
+      0.9100000262260437,
+      0.052000001072883606,
+      1.4049999713897705
+    ]
+  ],
+  "triangles": 384,
+  "uv": {
+    "meters_per_uv": 2.9505918463208967,
+    "min": 2.9503840294759107,
+    "max": 2.950828228142623,
+    "p05": 2.9504540752651516,
+    "p95": 2.950717512185841,
+    "total_triangles": 384,
+    "valid_triangles": 384,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Oiled garden oak": "wood"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 29300,
+  "datums": {
+    "installation": {
+      "mount": "ground",
+      "modulePitchM": 1.82,
+      "joinBoundaryX": [
+        -0.91,
+        0.91
+      ],
+      "postDepthM": 0.104,
+      "apexHeightM": 1.405,
+      "note": "Half-posts pair at straight joints. Outer free ends need terminal half-post accessories; right-angle joints need the 103 mm corner adapter. Static hand assembly, no automatic snapping."
+    },
+    "construction": "Two crossed diagonal strip layers clipped into continuous top/bottom rails and side stiles.",
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "originalBoundsM": [
+      [
+        -0.9100000262260437,
+        -0.052000001072883606,
+        0.0
+      ],
+      [
+        0.9100000262260437,
+        0.052000001072883606,
+        1.4049999713897705
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0003934346332243881,
+    0.0045359974368087315,
+    0.00025223932607332245,
+    0.00011104432633146641,
+    0.00011104407652358821,
+    0.0002522396704686495,
+    0.0003934349466968949,
+    0.0005346302229251402,
+    0.0006758239457364349,
+    0.000748627712406839,
+    0.000748627908857695,
+    0.0007486283175239804,
+    0.0006758244696053829,
+    0.0005346294856281019,
+    0.0003934344422305007,
+    0.00025223907141480595,
+    0.00011104403044252332,
+    0.00011104428631369953,
+    0.0002522393248606628,
+    0.0003934347065902936,
+    0.0005346301807852191,
+    0.0006758238171945171,
+    0.000748627868233598,
+    0.00745493130913625,
+    0.0007486279488754619,
+    0.007454932473289467,
+    0.0007486282678049366,
+    0.010249344011147818,
+    0.0006758245799574066,
+    0.010249340285857514,
+    0.0005346297233093839,
+    0.004535998057690448
+  ],
+  "source_sha256": "831ec8f4624b04bcb0792d5d6182c7b13f73941e77731574752e84083ace0d4f",
+  "glb_sha256": "b6070ce8b36f6609135b0e2093115feeaa53564207fcba56c9de1d461e444ede",
+  "authoring_sha256": "6929b1571ced22ea7fe1e531193a90ab7773e1567bb82778eb18f30a3bcd3873"
+}

@@ -1,0 +1,4801 @@
+{
+  "deliveredIds": 3,
+  "historicalReconstructionIds": 0,
+  "newCoreConstructions": 2,
+  "zeroCoreAccessories": 1,
+  "totalCoreConstructionsInThisPackage": 2,
+  "historicalAccounting": "Accepted dependencies add zero new IDs or constructions.",
+  "glbBytes": 362064,
+  "triangles": 5152,
+  "materialPrimitives": 8,
+  "perAsset": [
+    {
+      "id": "rpg-mansion-garden-supported-oak-terrace-01",
+      "triangles": 3336,
+      "triangleBudget": 8000,
+      "glbBytes": 227684,
+      "materialPrimitiveCount": 3,
+      "actualMeasuredDimensionsMm": [
+        2400.0,
+        1800.0,
+        320.6
+      ]
+    },
+    {
+      "id": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+      "triangles": 1644,
+      "triangleBudget": 6000,
+      "glbBytes": 118960,
+      "materialPrimitiveCount": 3,
+      "actualMeasuredDimensionsMm": [
+        1205.0,
+        135.0,
+        1250.0
+      ]
+    },
+    {
+      "id": "rpg-mansion-garden-gate-strike-receiver-01",
+      "triangles": 172,
+      "triangleBudget": 2000,
+      "glbBytes": 15420,
+      "materialPrimitiveCount": 2,
+      "actualMeasuredDimensionsMm": [
+        56.0,
+        118.0,
+        110.0
+      ]
+    }
+  ],
+  "installationChecks": [
+    {
+      "case": "gate-leaf-between-accepted-piers",
+      "source": "gate-leaf-between-accepted-piers.blend",
+      "sourceSha256": "5849145a64b17c077b4dc77db0a00a5059c1a53b75abcf1bf8205d304fe9e04d",
+      "products": [
+        {
+          "label": "Accepted hinge pier",
+          "asset": "rpg-mansion-garden-brick-gate-pier-01",
+          "file": "inputs/rpg-mansion-garden-brick-gate-pier-01.glb",
+          "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+          "newCandidate": false,
+          "positionBlenderM": [
+            -0.3215,
+            0,
+            0
+          ],
+          "rotationZDegrees": 180,
+          "matrixWorld": [
+            [
+              -1.0,
+              -8.742277657347586e-08,
+              0.0,
+              -0.3215000033378601
+            ],
+            [
+              8.742277657347586e-08,
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.6540000438690186,
+              -0.30000004172325134,
+              0.0
+            ],
+            [
+              0.011000007390975952,
+              0.30000004172325134,
+              1.4800000190734863
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted strike pier",
+          "asset": "rpg-mansion-garden-brick-gate-pier-01",
+          "file": "inputs/rpg-mansion-garden-brick-gate-pier-01.glb",
+          "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+          "newCandidate": false,
+          "positionBlenderM": [
+            1.5325,
+            0,
+            0
+          ],
+          "rotationZDegrees": 180,
+          "matrixWorld": [
+            [
+              -1.0,
+              -8.742277657347586e-08,
+              0.0,
+              1.5325000286102295
+            ],
+            [
+              8.742277657347586e-08,
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              1.2000000476837158,
+              -0.30000004172325134,
+              0.0
+            ],
+            [
+              1.8650000095367432,
+              0.30000004172325134,
+              1.4800000190734863
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Gate leaf",
+          "asset": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+          "file": "models/rpg-mansion-garden-braced-oak-gate-leaf-01.glb",
+          "sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f",
+          "newCandidate": true,
+          "positionBlenderM": [
+            0.5814999938011169,
+            -0.013499999418854713,
+            0.10000000149011612
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.5814999938011169
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.013499999418854713
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.10000000149011612
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.021000027656555176,
+              -0.08100000023841858,
+              0.10000000149011612
+            ],
+            [
+              1.184000015258789,
+              0.05400000512599945,
+              1.350000023841858
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Strike receiver",
+          "asset": "rpg-mansion-garden-gate-strike-receiver-01",
+          "file": "models/rpg-mansion-garden-gate-strike-receiver-01.glb",
+          "sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b",
+          "newCandidate": true,
+          "positionBlenderM": [
+            1.1779999732971191,
+            -0.0040000006556510925,
+            1.0950000286102295
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              1.1779999732971191
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0040000006556510925
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0950000286102295
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              1.149999976158142,
+              -0.06300000101327896,
+              1.0950000286102295
+            ],
+            [
+              1.2059999704360962,
+              0.054999999701976776,
+              1.2050000429153442
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted hinge pier",
+          "pointM": [
+            -0.333,
+            0,
+            0
+          ],
+          "distanceM": 2.9802322387695312e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded gate ground",
+          "pointM": [
+            -0.333,
+            0,
+            0
+          ],
+          "distanceM": 1.884864389012364e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted strike pier",
+          "pointM": [
+            1.521,
+            0,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded gate ground",
+          "pointM": [
+            1.521,
+            0,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted hinge pier",
+          "pointM": [
+            -0.017,
+            0,
+            0.362
+          ],
+          "distanceM": 1.862645149230957e-09,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Gate leaf",
+          "pointM": [
+            -0.017,
+            0,
+            0.362
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-pin-collar-radial-clearance",
+          "passed": true,
+          "levelM": 0.362,
+          "minRadialClearanceMm": 1.0000262409448624,
+          "maxRadialClearanceMm": 1.5384070575237274,
+          "sampleCount": 24
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted hinge pier",
+          "pointM": [
+            -0.017,
+            0,
+            1.162
+          ],
+          "distanceM": 1.862645149230957e-09,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Gate leaf",
+          "pointM": [
+            -0.017,
+            0,
+            1.162
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-pin-collar-radial-clearance",
+          "passed": true,
+          "levelM": 1.162,
+          "minRadialClearanceMm": 1.0000243782997131,
+          "maxRadialClearanceMm": 1.5384070575237274,
+          "sampleCount": 24
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Strike receiver",
+          "pointM": [
+            1.206,
+            -0.044,
+            1.15
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted strike pier",
+          "pointM": [
+            1.206,
+            -0.044,
+            1.15
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Strike receiver",
+          "pointM": [
+            1.206,
+            0.044,
+            1.15
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted strike pier",
+          "pointM": [
+            1.206,
+            0.044,
+            1.15
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-strike-socket-clearance",
+          "passed": true,
+          "direction": [
+            0,
+            1,
+            0
+          ],
+          "clearanceFromAxisMm": 9.000003337860107,
+          "boltRadiusMm": 6
+        },
+        {
+          "gate": "actual-strike-socket-clearance",
+          "passed": true,
+          "direction": [
+            0,
+            -1,
+            0
+          ],
+          "clearanceFromAxisMm": 8.999999612569809,
+          "boltRadiusMm": 6
+        },
+        {
+          "gate": "actual-strike-socket-clearance",
+          "passed": true,
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "clearanceFromAxisMm": 9.000062942504883,
+          "boltRadiusMm": 6
+        },
+        {
+          "gate": "actual-strike-socket-clearance",
+          "passed": true,
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "clearanceFromAxisMm": 8.999943733215332,
+          "boltRadiusMm": 6
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Gate leaf",
+          "pointM": [
+            1.184,
+            -0.045,
+            1.17
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Strike receiver",
+          "pointM": [
+            1.184,
+            -0.045,
+            1.17
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "gate-closed-placement",
+          "passed": true,
+          "groundClearanceMm": 100,
+          "clearBetweenPierPlinthFacesMm": 1254,
+          "clearBetweenReceiverAndHingePlinthMm": 1183,
+          "minimumProjectCirculationGuidelineMm": 750,
+          "state": "Closed static leaf occupies the opening. Clear aperture describes the support spacing, not an animated open gate or certified swing envelope."
+        }
+      ],
+      "passed": true,
+      "excludedFixtures": [
+        "Excluded gate ground"
+      ],
+      "limits": "Static original visual assets, rigid manual assembly only. No automatic openings, native deck/gate links, gate animation, load engineering or code certification."
+    },
+    {
+      "case": "terrace-step-doorway-threshold",
+      "source": "terrace-step-doorway-threshold.blend",
+      "sourceSha256": "ce61318b5cc7887eb2932c228cd45a2095aa8fce672857a43b5277ea07a2032b",
+      "products": [
+        {
+          "label": "Terrace",
+          "asset": "rpg-mansion-garden-supported-oak-terrace-01",
+          "file": "models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+          "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6",
+          "newCandidate": true,
+          "positionBlenderM": [
+            0,
+            0,
+            0
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -1.2000000476837158,
+              -0.8999999761581421,
+              0.0
+            ],
+            [
+              1.2000000476837158,
+              0.8999999761581421,
+              0.3206000030040741
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted access step",
+          "asset": "rpg-mansion-garden-two-riser-deck-step-01",
+          "file": "inputs/rpg-mansion-garden-two-riser-deck-step-01.glb",
+          "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+          "newCandidate": false,
+          "positionBlenderM": [
+            0,
+            -1.2325,
+            0
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -1.2324999570846558
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.550000011920929,
+              -1.5649999380111694,
+              0.0
+            ],
+            [
+              0.550000011920929,
+              -0.8999999761581421,
+              0.3206000030040741
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted open doorway",
+          "asset": "rpg-mansion-rectangular-doorway-bay-01",
+          "file": "inputs/rpg-mansion-rectangular-doorway-bay-01.glb",
+          "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+          "newCandidate": false,
+          "positionBlenderM": [
+            0,
+            1.044,
+            0.32
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0440000295639038
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.3199999928474426
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.8999999761581421,
+              0.9000000357627869,
+              0.3199999928474426
+            ],
+            [
+              0.8999999761581421,
+              1.187999963760376,
+              3.319999933242798
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted interior floor -0.6",
+          "asset": "rpg-mansion-octagon-cabochon-floor-tile-01",
+          "file": "inputs/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+          "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+          "newCandidate": false,
+          "positionBlenderM": [
+            -0.6,
+            1.5,
+            0.245
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.6000000238418579
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.5
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.24500000476837158
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -1.2000000476837158,
+              0.8999999761581421,
+              0.24500000476837158
+            ],
+            [
+              0.0,
+              2.0999999046325684,
+              0.3199999928474426
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted interior floor 0.6",
+          "asset": "rpg-mansion-octagon-cabochon-floor-tile-01",
+          "file": "inputs/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+          "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+          "newCandidate": false,
+          "positionBlenderM": [
+            0.6,
+            1.5,
+            0.245
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.6000000238418579
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.5
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.24500000476837158
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              0.0,
+              0.8999999761581421,
+              0.24500000476837158
+            ],
+            [
+              1.2000000476837158,
+              2.0999999046325684,
+              0.3199999928474426
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            -1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 2.6656007889869215e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            0,
+            -0.6,
+            0
+          ],
+          "distanceM": 1.4901161193847656e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -0.6,
+            0
+          ],
+          "distanceM": 4.339283634635649e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 2.384185791015625e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            -1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 1.6858739115832577e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            0,
+            0.6,
+            0
+          ],
+          "distanceM": 7.450580596923828e-09,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            0.6,
+            0
+          ],
+          "distanceM": 1.6858739115832577e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 2.384185791015625e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            -0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 2.4575624024691933e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            -0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.664001972467304e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.3328003944934608e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -1.4925,
+            0
+          ],
+          "distanceM": 1.1920928955078125e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.244724204407248e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.7881393432617188e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 2.4575624024691933e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.664001972467304e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.884864389012364e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Terrace",
+          "originM": [
+            0.3,
+            -0.825,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.30000001192092896,
+            -0.824999988079071,
+            0.31999996304512024
+          ],
+          "distanceM": 0.28000006079673767,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted access step",
+          "originM": [
+            0.3,
+            -0.9595,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.30000001192092896,
+            -0.9595000147819519,
+            0.3199999928474426
+          ],
+          "distanceM": 0.2800000309944153,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "matching-screw-crown",
+          "passed": true,
+          "object": "Terrace",
+          "actualTopM": 0.3206000030040741,
+          "expectedTopM": 0.3206
+        },
+        {
+          "gate": "matching-screw-crown",
+          "passed": true,
+          "object": "Accepted access step",
+          "actualTopM": 0.3206000030040741,
+          "expectedTopM": 0.3206
+        },
+        {
+          "gate": "upper-tread-to-terrace-joint",
+          "passed": true,
+          "timberJointGapMm": 8,
+          "stepWidthMm": 1100,
+          "projectCirculationGuidelineMm": 750,
+          "appliesTo": "Static clear walking surface geometry; not code certification."
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted interior floor -0.6",
+          "pointM": [
+            -0.6,
+            1.5,
+            0.245
+          ],
+          "distanceM": 5.960464477539063e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded interior floor foundation",
+          "pointM": [
+            -0.6,
+            1.5,
+            0.245
+          ],
+          "distanceM": 1.1920928955078125e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted interior floor -0.6",
+          "originM": [
+            -0.44999999999999996,
+            1.35,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            -0.44999998807907104,
+            1.350000023841858,
+            0.3199999928474426
+          ],
+          "distanceM": 0.2800000309944153,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted interior floor 0.6",
+          "pointM": [
+            0.6,
+            1.5,
+            0.245
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded interior floor foundation",
+          "pointM": [
+            0.6,
+            1.5,
+            0.245
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted interior floor 0.6",
+          "originM": [
+            0.75,
+            1.35,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.75,
+            1.350000023841858,
+            0.3199999928474426
+          ],
+          "distanceM": 0.2800000309944153,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted open doorway",
+          "pointM": [
+            -0.75,
+            1.044,
+            0.32
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted interior floor -0.6",
+          "pointM": [
+            -0.75,
+            1.044,
+            0.32
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted open doorway",
+          "pointM": [
+            0.75,
+            1.044,
+            0.32
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted interior floor 0.6",
+          "pointM": [
+            0.75,
+            1.044,
+            0.32
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": -0.55,
+          "zM": 0.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": -0.55,
+          "zM": 1.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": -0.55,
+          "zM": 2.6
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0,
+          "zM": 0.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0,
+          "zM": 1.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0,
+          "zM": 2.6
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0.55,
+          "zM": 0.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0.55,
+          "zM": 1.4
+        },
+        {
+          "gate": "open-doorway-clear-ray",
+          "passed": true,
+          "xM": 0.55,
+          "zM": 2.6
+        },
+        {
+          "gate": "doorway-circulation-datum",
+          "passed": true,
+          "clearWidthMm": 1200,
+          "clearHeightMm": 2400,
+          "terraceTimberTopMm": 320,
+          "interiorFloorTopMm": 320
+        }
+      ],
+      "passed": true,
+      "excludedFixtures": [
+        "Excluded continuous ground",
+        "Excluded interior floor foundation"
+      ],
+      "limits": "Static original visual assets, rigid manual assembly only. No automatic openings, native deck/gate links, gate animation, load engineering or code certification."
+    },
+    {
+      "case": "terrace-step-fixed-window-threshold",
+      "source": "terrace-step-fixed-window-threshold.blend",
+      "sourceSha256": "e749d14a326cb64d946d9e0c99a01978b4f5603f484c5ff4af0c21e10a90cd39",
+      "products": [
+        {
+          "label": "Terrace",
+          "asset": "rpg-mansion-garden-supported-oak-terrace-01",
+          "file": "models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+          "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6",
+          "newCandidate": true,
+          "positionBlenderM": [
+            0,
+            0,
+            0
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -1.2000000476837158,
+              -0.8999999761581421,
+              0.0
+            ],
+            [
+              1.2000000476837158,
+              0.8999999761581421,
+              0.3206000030040741
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted access step",
+          "asset": "rpg-mansion-garden-two-riser-deck-step-01",
+          "file": "inputs/rpg-mansion-garden-two-riser-deck-step-01.glb",
+          "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+          "newCandidate": false,
+          "positionBlenderM": [
+            0,
+            -1.2325,
+            0
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -1.2324999570846558
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.550000011920929,
+              -1.5649999380111694,
+              0.0
+            ],
+            [
+              0.550000011920929,
+              -0.8999999761581421,
+              0.3206000030040741
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "Accepted fixed French bay",
+          "asset": "rpg-mansion-tall-fixed-french-window-bay-01",
+          "file": "inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+          "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+          "newCandidate": false,
+          "positionBlenderM": [
+            0,
+            1.015,
+            0.23
+          ],
+          "rotationZDegrees": 0,
+          "matrixWorld": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              1.0149999856948853
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.23000000417232513
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "actualBoundsBlenderM": [
+            [
+              -0.6000000238418579,
+              0.8299999833106995,
+              0.23000000417232513
+            ],
+            [
+              0.6000000238418579,
+              1.2000000476837158,
+              3.2300000190734863
+            ]
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            -1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 2.6656007889869215e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            0,
+            -0.6,
+            0
+          ],
+          "distanceM": 1.4901161193847656e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -0.6,
+            0
+          ],
+          "distanceM": 4.339283634635649e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            1.05,
+            -0.6,
+            0
+          ],
+          "distanceM": 2.384185791015625e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            -1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 1.6858739115832577e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            0,
+            0.6,
+            0
+          ],
+          "distanceM": 7.450580596923828e-09,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            0.6,
+            0
+          ],
+          "distanceM": 1.6858739115832577e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            1.05,
+            0.6,
+            0
+          ],
+          "distanceM": 2.384185791015625e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            -0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 2.4575624024691933e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            -0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.664001972467304e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            -0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.3328003944934608e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -1.4925,
+            0
+          ],
+          "distanceM": 1.1920928955078125e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.244724204407248e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.7881393432617188e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0.43,
+            -1.4925,
+            0
+          ],
+          "distanceM": 2.4575624024691933e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted access step",
+          "pointM": [
+            0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 6.664001972467304e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded continuous ground",
+          "pointM": [
+            0.43,
+            -0.9824999999999999,
+            0
+          ],
+          "distanceM": 1.884864389012364e-07,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Terrace",
+          "originM": [
+            0.3,
+            -0.825,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.30000001192092896,
+            -0.824999988079071,
+            0.31999996304512024
+          ],
+          "distanceM": 0.28000006079673767,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted access step",
+          "originM": [
+            0.3,
+            -0.9595,
+            0.6
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.30000001192092896,
+            -0.9595000147819519,
+            0.3199999928474426
+          ],
+          "distanceM": 0.2800000309944153,
+          "expectedDistanceM": 0.28,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "matching-screw-crown",
+          "passed": true,
+          "object": "Terrace",
+          "actualTopM": 0.3206000030040741,
+          "expectedTopM": 0.3206
+        },
+        {
+          "gate": "matching-screw-crown",
+          "passed": true,
+          "object": "Accepted access step",
+          "actualTopM": 0.3206000030040741,
+          "expectedTopM": 0.3206
+        },
+        {
+          "gate": "upper-tread-to-terrace-joint",
+          "passed": true,
+          "timberJointGapMm": 8,
+          "stepWidthMm": 1100,
+          "projectCirculationGuidelineMm": 750,
+          "appliesTo": "Static clear walking surface geometry; not code certification."
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted fixed French bay",
+          "pointM": [
+            -0.56,
+            1.015,
+            0.23
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded window foundation",
+          "pointM": [
+            -0.56,
+            1.015,
+            0.23
+          ],
+          "distanceM": 5.960464477539063e-08,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted fixed French bay",
+          "pointM": [
+            0.56,
+            1.015,
+            0.23
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Excluded window foundation",
+          "pointM": [
+            0.56,
+            1.015,
+            0.23
+          ],
+          "distanceM": 0.0,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted fixed French bay",
+          "originM": [
+            0.2,
+            0.94,
+            0.35
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.20000000298023224,
+            0.9399999976158142,
+            0.3199999928474426
+          ],
+          "distanceM": 0.029999997466802597,
+          "expectedDistanceM": 0.03,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-ray-datum",
+          "passed": true,
+          "object": "Accepted fixed French bay",
+          "originM": [
+            0.2,
+            0.9,
+            0.32
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "hitM": [
+            0.20000000298023224,
+            0.8999999761581421,
+            0.28999999165534973
+          ],
+          "distanceM": 0.030000001192092896,
+          "expectedDistanceM": 0.03,
+          "toleranceM": 0.00015
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Terrace",
+          "pointM": [
+            0.2,
+            0.86,
+            0.294
+          ],
+          "distanceM": 7.4595309342839755e-06,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "actual-surface-contact",
+          "object": "Accepted fixed French bay",
+          "pointM": [
+            0.2,
+            0.9,
+            0.29
+          ],
+          "distanceM": 4.846177489525871e-06,
+          "toleranceM": 0.00015,
+          "passed": true
+        },
+        {
+          "gate": "weather-nose-recess",
+          "passed": true,
+          "boardUndersideMm": 294,
+          "weatherNoseTopMm": 290,
+          "minimumVerticalGapMm": 4,
+          "fasciaRecessWidthMm": 1060,
+          "weatherNoseWidthMm": 1040,
+          "sideGapEachMm": 10,
+          "centreJoistRearYMm": 820,
+          "noseFrontYMm": 830
+        },
+        {
+          "gate": "fixed-window-threshold-level",
+          "passed": true,
+          "bayBottomMm": 230,
+          "woodSillTopMm": 320,
+          "deckTopMm": 320,
+          "timberJointGapMm": 12,
+          "staticState": "Fixed glazing remains closed and does not provide passage."
+        }
+      ],
+      "passed": true,
+      "excludedFixtures": [
+        "Excluded continuous ground",
+        "Excluded window foundation"
+      ],
+      "limits": "Static original visual assets, rigid manual assembly only. No automatic openings, native deck/gate links, gate animation, load engineering or code certification."
+    }
+  ],
+  "producerContactAudit": {
+    "stage": "Producer verification, independent QA still required",
+    "passed": true,
+    "assets": [
+      {
+        "id": "rpg-mansion-garden-supported-oak-terrace-01",
+        "nativeEditableParts": 150,
+        "contactCheckCount": 178,
+        "checks": [
+          {
+            "part": "Grounded limestone pad (-1.05, -0.6)",
+            "pointM": [
+              -1.05,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              -1.05,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Grounded limestone pad (0, -0.6)",
+            "pointM": [
+              0.0,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              0.0,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Grounded limestone pad (1.05, -0.6)",
+            "pointM": [
+              1.05,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              1.05,
+              -0.6,
+              0.104
+            ],
+            "distanceM": 2.4575624024691933e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Grounded limestone pad (-1.05, 0.6)",
+            "pointM": [
+              -1.05,
+              0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              -1.05,
+              0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Grounded limestone pad (0, 0.6)",
+            "pointM": [
+              0.0,
+              0.6,
+              0.104
+            ],
+            "distanceM": 7.450580596923828e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              0.0,
+              0.6,
+              0.104
+            ],
+            "distanceM": 1.1920928955078125e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Grounded limestone pad (1.05, 0.6)",
+            "pointM": [
+              1.05,
+              0.6,
+              0.104
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              1.05,
+              0.6,
+              0.104
+            ],
+            "distanceM": 2.6656007889869215e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              -1.05,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 2.4575624024691933e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 1.1876140888489317e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              -1.05,
+              0.6,
+              0.194
+            ],
+            "distanceM": 2.6656007889869215e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              -0.6,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 1.7781775341063621e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 1.1710454828062211e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              -0.6,
+              0.6,
+              0.194
+            ],
+            "distanceM": 1.7930994999915129e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              0.0,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 8.356615808224888e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              0.0,
+              0.6,
+              0.194
+            ],
+            "distanceM": 1.1920928955078125e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.6,
+              0.194
+            ],
+            "distanceM": 5.587935447692871e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              0.6,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 1.1876140888489317e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              0.6,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              1.05,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.6,
+              0.194
+            ],
+            "distanceM": 1.157312908617314e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              1.05,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.6,
+              0.194
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front end fascia",
+            "pointM": [
+              -1.05,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front end fascia",
+            "pointM": [
+              -0.6,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front end fascia",
+            "pointM": [
+              0.0,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 1.5417889187574474e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front end fascia",
+            "pointM": [
+              0.6,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 4.117280241189292e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front end fascia",
+            "pointM": [
+              1.05,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 1.2013700256829907e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Rear threshold clearance fascia -1",
+            "pointM": [
+              -0.6,
+              0.868,
+              0.24
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Rear threshold clearance fascia -1",
+            "pointM": [
+              -1.05,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Rear threshold clearance fascia 1",
+            "pointM": [
+              0.6,
+              0.868,
+              0.24
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Rear threshold clearance fascia 1",
+            "pointM": [
+              1.05,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.868,
+              0.24
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Side fascia -1.184",
+            "pointM": [
+              -1.168,
+              -0.6,
+              0.189
+            ],
+            "distanceM": 3.268079922236211e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              -1.168,
+              -0.6,
+              0.189
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Side fascia -1.184",
+            "pointM": [
+              -1.168,
+              0.6,
+              0.189
+            ],
+            "distanceM": 2.4553930870752083e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              -1.168,
+              0.6,
+              0.189
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Side fascia 1.184",
+            "pointM": [
+              1.168,
+              -0.6,
+              0.189
+            ],
+            "distanceM": 2.4553930870752083e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam -0.6",
+            "pointM": [
+              1.168,
+              -0.6,
+              0.189
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Side fascia 1.184",
+            "pointM": [
+              1.168,
+              0.6,
+              0.189
+            ],
+            "distanceM": 3.268079922236211e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Continuous bearing beam 0.6",
+            "pointM": [
+              1.168,
+              0.6,
+              0.189
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 00",
+            "pointM": [
+              -1.05,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 00",
+            "pointM": [
+              -0.6,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 00",
+            "pointM": [
+              0.0,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 1.862645149230957e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 00",
+            "pointM": [
+              0.6,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 8.429369557916289e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 00",
+            "pointM": [
+              1.05,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 1.3328003944934608e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 01",
+            "pointM": [
+              -1.05,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 8.344650268554688e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 01",
+            "pointM": [
+              -0.6,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 8.365910275642818e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 01",
+            "pointM": [
+              0.0,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 4.339283634635649e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 01",
+            "pointM": [
+              0.6,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 8.344650268554688e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 01",
+            "pointM": [
+              1.05,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 1.3328003944934608e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.6749999999999999,
+              0.294
+            ],
+            "distanceM": 8.429369700024836e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 02",
+            "pointM": [
+              -1.05,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539062e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 02",
+            "pointM": [
+              -0.6,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 6.743495646333031e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 02",
+            "pointM": [
+              0.0,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.1664442354231142e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 02",
+            "pointM": [
+              0.6,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 6.336060778266983e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 02",
+            "pointM": [
+              1.05,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.1920928955078125e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 6.743495646333031e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 03",
+            "pointM": [
+              -1.05,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 5.623090828521526e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 03",
+            "pointM": [
+              -0.6,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 6.13667396009987e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 03",
+            "pointM": [
+              0.0,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 6.114925099609536e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 03",
+            "pointM": [
+              0.6,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 5.623090828521526e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 03",
+            "pointM": [
+              1.05,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 1.2287812012345967e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.375,
+              0.294
+            ],
+            "distanceM": 6.664001830358757e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 04",
+            "pointM": [
+              -1.05,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 6.769327228539623e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 04",
+            "pointM": [
+              -0.6,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 6.771688276785426e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 04",
+            "pointM": [
+              0.0,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 3.1888484954833984e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 04",
+            "pointM": [
+              0.6,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 1.3113868817526964e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 6.769327228539623e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 04",
+            "pointM": [
+              1.05,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.22499999999999998,
+              0.294
+            ],
+            "distanceM": 6.7745731939794496e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 05",
+            "pointM": [
+              -1.05,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 4.805624485015869e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 05",
+            "pointM": [
+              -0.6,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 4.805624485015869e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 05",
+            "pointM": [
+              0.0,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 3.6908961646986427e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 05",
+            "pointM": [
+              0.6,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.31132333081041e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 4.805624485015869e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 05",
+            "pointM": [
+              1.05,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.5359765370703826e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              -0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 4.805624485015869e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 06",
+            "pointM": [
+              -1.05,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 4.470348358154297e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 06",
+            "pointM": [
+              -0.6,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.341104507446289e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 06",
+            "pointM": [
+              0.0,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 06",
+            "pointM": [
+              0.6,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 06",
+            "pointM": [
+              1.05,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.07499999999999996,
+              0.294
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 07",
+            "pointM": [
+              -1.05,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 07",
+            "pointM": [
+              -0.6,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 07",
+            "pointM": [
+              0.0,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 2.986047320518992e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 07",
+            "pointM": [
+              0.6,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 1.3113868817526964e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 07",
+            "pointM": [
+              1.05,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 1.2287812012345967e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.2250000000000001,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 08",
+            "pointM": [
+              -1.05,
+              0.375,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.375,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 08",
+            "pointM": [
+              -0.6,
+              0.375,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.375,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 08",
+            "pointM": [
+              0.0,
+              0.375,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.375,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 08",
+            "pointM": [
+              0.6,
+              0.375,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.375,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 08",
+            "pointM": [
+              1.05,
+              0.375,
+              0.294
+            ],
+            "distanceM": 1.2287812012345967e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.375,
+              0.294
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 09",
+            "pointM": [
+              -1.05,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 09",
+            "pointM": [
+              -0.6,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 09",
+            "pointM": [
+              0.0,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 09",
+            "pointM": [
+              0.6,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 09",
+            "pointM": [
+              1.05,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 1.1920928955078125e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.5249999999999999,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 10",
+            "pointM": [
+              -1.05,
+              0.675,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.675,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 10",
+            "pointM": [
+              -0.6,
+              0.675,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.675,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 10",
+            "pointM": [
+              0.0,
+              0.675,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.675,
+              0.294
+            ],
+            "distanceM": 5.965010529962456e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 10",
+            "pointM": [
+              0.6,
+              0.675,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.675,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 10",
+            "pointM": [
+              1.05,
+              0.675,
+              0.294
+            ],
+            "distanceM": 1.3328003944934608e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.675,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 11",
+            "pointM": [
+              -1.05,
+              0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -1.05",
+            "pointM": [
+              -1.05,
+              0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 11",
+            "pointM": [
+              -0.6,
+              0.825,
+              0.294
+            ],
+            "distanceM": 5.960464477539063e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist -0.6",
+            "pointM": [
+              -0.6,
+              0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 11",
+            "pointM": [
+              0.0,
+              0.8,
+              0.294
+            ],
+            "distanceM": 1.1920928955078125e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0",
+            "pointM": [
+              0.0,
+              0.8,
+              0.294
+            ],
+            "distanceM": 1.57160684466362e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 11",
+            "pointM": [
+              0.6,
+              0.825,
+              0.294
+            ],
+            "distanceM": 1.3113021850585938e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 0.6",
+            "pointM": [
+              0.6,
+              0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Terrace walking board 11",
+            "pointM": [
+              1.05,
+              0.825,
+              0.294
+            ],
+            "distanceM": 1.3328003944934608e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Supported terrace joist 1.05",
+            "pointM": [
+              1.05,
+              0.825,
+              0.294
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+        "nativeEditableParts": 39,
+        "contactCheckCount": 62,
+        "checks": [
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.45149999380111694,
+              0.013499999418854713,
+              0.07499999850988387
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.45149999380111694,
+              0.013499999418854713,
+              0.07499999850988387
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate latch-side stile",
+            "pointM": [
+              0.4885000061988831,
+              0.013499999418854713,
+              0.07499999850988387
+            ],
+            "distanceM": 5.972094641037984e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.4885000061988831,
+              0.013499999418854713,
+              0.07499999850988387
+            ],
+            "distanceM": 5.963374150042e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.45149999380111694,
+              0.013499999418854713,
+              1.1749999985098838
+            ],
+            "distanceM": 2.4817956045808387e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              -0.45149999380111694,
+              0.013499999418854713,
+              1.1749999985098838
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate latch-side stile",
+            "pointM": [
+              0.4885000061988831,
+              0.013499999418854713,
+              1.1749999985098838
+            ],
+            "distanceM": 2.55745987942646e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.4885000061988831,
+              0.013499999418854713,
+              1.1749999985098838
+            ],
+            "distanceM": 5.967009286678149e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 00",
+            "pointM": [
+              -0.40149999380111695,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.40149999380111695,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 3.725290298461914e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 00",
+            "pointM": [
+              -0.40149999380111695,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              -0.40149999380111695,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 01",
+            "pointM": [
+              -0.29649999380111697,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.29649999380111697,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 2.269677281674376e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 01",
+            "pointM": [
+              -0.29649999380111697,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              -0.29649999380111697,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 2.986047320518992e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 02",
+            "pointM": [
+              -0.19149999380111693,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.19149999380111693,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 2.2352517703438934e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 02",
+            "pointM": [
+              -0.19149999380111693,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              -0.19149999380111693,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 4.4713182489886094e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 03",
+            "pointM": [
+              -0.08649999380111695,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.08649999380111695,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 1.8679508002605871e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 03",
+            "pointM": [
+              -0.08649999380111695,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 3.725290298461914e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              -0.08649999380111695,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 7.450580596923828e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 04",
+            "pointM": [
+              0.018500006198883034,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.018500006198883034,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 5.890201215663637e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 04",
+            "pointM": [
+              0.018500006198883034,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 4.165001232792065e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.018500006198883034,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 5.890201215663637e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 05",
+            "pointM": [
+              0.12350000619888313,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.12350000619888313,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 1.4901161193847656e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 05",
+            "pointM": [
+              0.12350000619888313,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.12350000619888313,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 1.8753506765278871e-06,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 06",
+            "pointM": [
+              0.2285000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.2285000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 2.981687075021e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 06",
+            "pointM": [
+              0.2285000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.2285000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 2.0862457006387558e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 07",
+            "pointM": [
+              0.3335000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.3335000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 2.986047320518992e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 07",
+            "pointM": [
+              0.3335000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.3335000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 2.269677281674376e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 08",
+            "pointM": [
+              0.4385000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 1.862645149230957e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              0.4385000061988831,
+              0.013499999418854713,
+              0.14999999850988388
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate framed oak slat 08",
+            "pointM": [
+              0.4385000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 9.313225746154785e-10,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.4385000061988831,
+              0.013499999418854713,
+              1.0999999985098838
+            ],
+            "distanceM": 2.2351741790771484e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Back diagonal compression brace",
+            "pointM": [
+              -0.39649999380111695,
+              0.04349999941885471,
+              0.059999998509883884
+            ],
+            "distanceM": 2.511464742838143e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate bottom rail",
+            "pointM": [
+              -0.39649999380111695,
+              0.04349999941885471,
+              0.059999998509883884
+            ],
+            "distanceM": 3.725290298461914e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Back diagonal compression brace",
+            "pointM": [
+              0.4485000061988831,
+              0.04349999941885471,
+              1.199999998509884
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate top rail",
+            "pointM": [
+              0.4485000061988831,
+              0.04349999941885471,
+              1.199999998509884
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Collar welded connecting arm 0.35",
+            "pointM": [
+              -0.5314999938011169,
+              0.013499999418854713,
+              0.2799999985098839
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.5314999938011169,
+              0.013499999418854713,
+              0.2799999985098839
+            ],
+            "distanceM": 2.993300185494263e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Collar welded connecting arm 0.35",
+            "pointM": [
+              -0.5604999938011169,
+              0.013499999418854713,
+              0.2799999985098839
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Integral hollow female gate collar 0.35",
+            "pointM": [
+              -0.5604999938011169,
+              0.013499999418854713,
+              0.2799999985098839
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front forged hinge strap 0.35",
+            "pointM": [
+              -0.491499993801117,
+              -0.016500000581145285,
+              0.2799999985098839
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.491499993801117,
+              -0.016500000581145285,
+              0.2799999985098839
+            ],
+            "distanceM": 4.214684778958144e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Collar welded connecting arm 1.15",
+            "pointM": [
+              -0.5314999938011169,
+              0.013499999418854713,
+              1.0799999985098838
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.5314999938011169,
+              0.013499999418854713,
+              1.0799999985098838
+            ],
+            "distanceM": 6.134977184046875e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Collar welded connecting arm 1.15",
+            "pointM": [
+              -0.5604999938011169,
+              0.013499999418854713,
+              1.0799999985098838
+            ],
+            "distanceM": 2.9802322387695312e-08,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Integral hollow female gate collar 1.15",
+            "pointM": [
+              -0.5604999938011169,
+              0.013499999418854713,
+              1.0799999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Front forged hinge strap 1.15",
+            "pointM": [
+              -0.491499993801117,
+              -0.016500000581145285,
+              1.0799999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate hinge-side stile",
+            "pointM": [
+              -0.491499993801117,
+              -0.016500000581145285,
+              1.0799999985098838
+            ],
+            "distanceM": 1.4901161193847656e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Latch bolt mounting block",
+            "pointM": [
+              0.5305000061988832,
+              -0.016500000581145285,
+              1.0699999985098838
+            ],
+            "distanceM": 0.0,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Gate latch-side stile",
+            "pointM": [
+              0.5305000061988832,
+              -0.016500000581145285,
+              1.0699999985098838
+            ],
+            "distanceM": 2.6656007889869215e-07,
+            "toleranceM": 0.00015,
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-garden-gate-strike-receiver-01",
+        "nativeEditableParts": 9,
+        "contactCheckCount": 4,
+        "checks": [
+          {
+            "part": "Strike receiver front mounting plate",
+            "pointM": [
+              0.01600002670288081,
+              -0.039999999344348905,
+              0.05499997138977042
+            ],
+            "distanceM": 6.71586253275791e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Receiver stand-off foot -0.044",
+            "pointM": [
+              0.01600002670288081,
+              -0.039999999344348905,
+              0.05499997138977042
+            ],
+            "distanceM": 6.71586253275791e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Strike receiver front mounting plate",
+            "pointM": [
+              0.01600002670288081,
+              0.04800000065565109,
+              0.05499997138977042
+            ],
+            "distanceM": 5.587935447692871e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          },
+          {
+            "part": "Receiver stand-off foot 0.044",
+            "pointM": [
+              0.01600002670288081,
+              0.04800000065565109,
+              0.05499997138977042
+            ],
+            "distanceM": 6.71586253275791e-09,
+            "toleranceM": 0.00015,
+            "passed": true
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "acceptedInputIntegrity": [
+      {
+        "id": "rpg-mansion-garden-two-riser-deck-step-01",
+        "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-garden-brick-gate-pier-01",
+        "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+        "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-rectangular-doorway-bay-01",
+        "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+        "passed": true
+      },
+      {
+        "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+        "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+        "passed": true
+      }
+    ]
+  },
+  "acceptanceStatus": "Unaccepted candidate requiring coordinator visual gate and independent QA"
+}

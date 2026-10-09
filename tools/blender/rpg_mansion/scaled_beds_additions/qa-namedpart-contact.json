@@ -1,0 +1,802 @@
+{
+  "tolerance_m": 2e-05,
+  "method": "Independent world triangle BVH contacts or majority-of-three-direction point containment",
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "source_sha256": "389d6189a8a0dd34dab4fb143e56d6d16c8747109ffa9f0d5e51e8a44f31daa5",
+      "native_parts": 26,
+      "groups": [
+        {
+          "parts": [
+            "Campaign cot broad grounded foot pad",
+            "Campaign cot crossed diagonal trestle beam",
+            "Canvas rail brass tension fastener.003",
+            "Campaign cot taut woven canvas support deck",
+            "Linen mattress supported by wooden slats",
+            "Thick teal cover with turned-down top",
+            "Attached folded cover bolster",
+            "Inflated linen sleeping pillow 1",
+            "Canvas rail brass tension fastener.005",
+            "Canvas rail brass tension fastener.004",
+            "Canvas rail brass tension fastener.002",
+            "Canvas rail brass tension fastener.001",
+            "Canvas rail brass tension fastener",
+            "Campaign cot inset tenoned end stretcher.001",
+            "Campaign cot inset tenoned end stretcher",
+            "Campaign cot longitudinal canvas tension rail",
+            "Campaign cot crossed diagonal trestle beam.003",
+            "Campaign cot broad grounded foot pad.003",
+            "Campaign cot brass through-pivot axle.001",
+            "Campaign cot crossed diagonal trestle beam.002",
+            "Campaign cot broad grounded foot pad.002",
+            "Campaign cot central longitudinal stabilizing stretcher",
+            "Campaign cot longitudinal canvas tension rail.001",
+            "Campaign cot brass through-pivot axle",
+            "Campaign cot crossed diagonal trestle beam.001",
+            "Campaign cot broad grounded foot pad.001"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Campaign cot crossed diagonal trestle beam",
+          "Campaign cot broad grounded foot pad"
+        ],
+        [
+          "Campaign cot crossed diagonal trestle beam.001",
+          "Campaign cot broad grounded foot pad.001"
+        ],
+        [
+          "Campaign cot crossed diagonal trestle beam.001",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Campaign cot brass through-pivot axle",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Campaign cot brass through-pivot axle",
+          "Campaign cot crossed diagonal trestle beam.001"
+        ],
+        [
+          "Campaign cot crossed diagonal trestle beam.002",
+          "Campaign cot broad grounded foot pad.002"
+        ],
+        [
+          "Campaign cot crossed diagonal trestle beam.003",
+          "Campaign cot broad grounded foot pad.003"
+        ],
+        [
+          "Campaign cot crossed diagonal trestle beam.003",
+          "Campaign cot crossed diagonal trestle beam.002"
+        ],
+        [
+          "Campaign cot brass through-pivot axle.001",
+          "Campaign cot crossed diagonal trestle beam.002"
+        ],
+        [
+          "Campaign cot brass through-pivot axle.001",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Campaign cot longitudinal canvas tension rail",
+          "Campaign cot crossed diagonal trestle beam.001"
+        ],
+        [
+          "Campaign cot longitudinal canvas tension rail",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Campaign cot longitudinal canvas tension rail.001",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Campaign cot longitudinal canvas tension rail.001",
+          "Campaign cot crossed diagonal trestle beam.002"
+        ],
+        [
+          "Campaign cot inset tenoned end stretcher",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Campaign cot inset tenoned end stretcher",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Campaign cot inset tenoned end stretcher.001",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Campaign cot inset tenoned end stretcher.001",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot crossed diagonal trestle beam.001"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot brass through-pivot axle"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot crossed diagonal trestle beam.002"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Campaign cot central longitudinal stabilizing stretcher",
+          "Campaign cot brass through-pivot axle.001"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot crossed diagonal trestle beam.001"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot crossed diagonal trestle beam.002"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot inset tenoned end stretcher"
+        ],
+        [
+          "Campaign cot taut woven canvas support deck",
+          "Campaign cot inset tenoned end stretcher.001"
+        ],
+        [
+          "Canvas rail brass tension fastener",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Canvas rail brass tension fastener",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Canvas rail brass tension fastener.001",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Canvas rail brass tension fastener.001",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Canvas rail brass tension fastener.002",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Canvas rail brass tension fastener.002",
+          "Campaign cot longitudinal canvas tension rail"
+        ],
+        [
+          "Canvas rail brass tension fastener.002",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Canvas rail brass tension fastener.003",
+          "Campaign cot crossed diagonal trestle beam"
+        ],
+        [
+          "Canvas rail brass tension fastener.003",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Canvas rail brass tension fastener.003",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Canvas rail brass tension fastener.004",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Canvas rail brass tension fastener.004",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Canvas rail brass tension fastener.005",
+          "Campaign cot longitudinal canvas tension rail.001"
+        ],
+        [
+          "Canvas rail brass tension fastener.005",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Campaign cot crossed diagonal trestle beam.001"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Campaign cot crossed diagonal trestle beam.003"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Campaign cot taut woven canvas support deck"
+        ],
+        [
+          "Thick teal cover with turned-down top",
+          "Linen mattress supported by wooden slats"
+        ],
+        [
+          "Attached folded cover bolster",
+          "Thick teal cover with turned-down top"
+        ],
+        [
+          "Inflated linen sleeping pillow 1",
+          "Linen mattress supported by wooden slats"
+        ],
+        [
+          "Inflated linen sleeping pillow 1",
+          "Thick teal cover with turned-down top"
+        ]
+      ],
+      "source_changed": false
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "source_sha256": "12c0137fe1b8793304d6f01d50732fe2e0f4c6238e83d2a6e92f2b8adf74362d",
+      "native_parts": 45,
+      "groups": [
+        {
+          "parts": [
+            "Vault bed stout turned ground pedestal",
+            "Vault bed transverse lower load beam",
+            "Vault bed recessed lower enclosure wall.001",
+            "Vault rib integral supporting upright.003",
+            "Barrel vault laminated semicircular load rib.001",
+            "Vault rib integral supporting upright.002",
+            "Vault rib integral supporting upright.001",
+            "Barrel vault laminated semicircular load rib",
+            "Vault rib integral supporting upright",
+            "Vault rib brass secured sill joint",
+            "Vault rib brass secured sill joint.003",
+            "Vault bed inset tenoned end plinth sill.001",
+            "Vault bed inset tenoned end plinth sill",
+            "Vault rib brass secured sill joint.001",
+            "Vault bed transverse lower load beam.001",
+            "Vault bed stout turned ground pedestal.003",
+            "Vault bed stout turned ground pedestal.001",
+            "Vault bed closed arched head panel",
+            "Vault rib brass secured sill joint.002",
+            "Vault rib integral supporting upright.004",
+            "Barrel bed continuous curved timber roof",
+            "Vault rib integral supporting upright.005",
+            "Barrel vault laminated semicircular load rib.002",
+            "Vault bed recessed lower enclosure wall",
+            "Vault bed high internal longitudinal load bearer.001",
+            "Vault bed transverse actual mattress slat.011",
+            "Linen mattress supported by wooden slats",
+            "Inflated linen sleeping pillow 1",
+            "Thick teal cover with turned-down top",
+            "Attached folded cover bolster",
+            "Vault bed transverse actual mattress slat.010",
+            "Vault bed transverse actual mattress slat.009",
+            "Vault bed transverse actual mattress slat.008",
+            "Vault bed transverse actual mattress slat.007",
+            "Vault bed transverse actual mattress slat.006",
+            "Vault bed transverse actual mattress slat.005",
+            "Vault bed transverse actual mattress slat.004",
+            "Vault bed transverse actual mattress slat.003",
+            "Vault bed transverse actual mattress slat.002",
+            "Vault bed transverse actual mattress slat.001",
+            "Vault bed transverse actual mattress slat",
+            "Vault bed high internal longitudinal load bearer",
+            "Vault bed long moulded plinth sill.001",
+            "Vault bed long moulded plinth sill",
+            "Vault bed stout turned ground pedestal.002"
+          ],
+          "ground_contact": true,
+          "lowest_mm": 0.0
+        }
+      ],
+      "group_count": 1,
+      "floating_groups": 0,
+      "contact_edges": [
+        [
+          "Vault bed transverse lower load beam",
+          "Vault bed stout turned ground pedestal"
+        ],
+        [
+          "Vault bed transverse lower load beam",
+          "Vault bed stout turned ground pedestal.002"
+        ],
+        [
+          "Vault bed transverse lower load beam.001",
+          "Vault bed stout turned ground pedestal.001"
+        ],
+        [
+          "Vault bed transverse lower load beam.001",
+          "Vault bed stout turned ground pedestal.003"
+        ],
+        [
+          "Vault bed long moulded plinth sill",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed long moulded plinth sill",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed long moulded plinth sill.001",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed long moulded plinth sill.001",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed inset tenoned end plinth sill",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault bed inset tenoned end plinth sill",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault bed inset tenoned end plinth sill.001",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault bed inset tenoned end plinth sill.001",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault bed high internal longitudinal load bearer",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed high internal longitudinal load bearer",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed high internal longitudinal load bearer.001",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed high internal longitudinal load bearer.001",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.001",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.001",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.002",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.002",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.003",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.003",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.004",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.004",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.005",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.005",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.006",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.006",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.007",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.007",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.008",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.008",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.009",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.009",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.010",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.010",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.011",
+          "Vault bed high internal longitudinal load bearer"
+        ],
+        [
+          "Vault bed transverse actual mattress slat.011",
+          "Vault bed high internal longitudinal load bearer.001"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall",
+          "Vault bed inset tenoned end plinth sill"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall",
+          "Vault bed inset tenoned end plinth sill.001"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall.001",
+          "Vault bed transverse lower load beam"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall.001",
+          "Vault bed transverse lower load beam.001"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall.001",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall.001",
+          "Vault bed inset tenoned end plinth sill"
+        ],
+        [
+          "Vault bed recessed lower enclosure wall.001",
+          "Vault bed inset tenoned end plinth sill.001"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault rib integral supporting upright",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault rib integral supporting upright",
+          "Barrel vault laminated semicircular load rib"
+        ],
+        [
+          "Vault rib integral supporting upright.001",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault rib integral supporting upright.001",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright.001",
+          "Barrel vault laminated semicircular load rib"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib.001",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib.001",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright.002",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault rib integral supporting upright.002",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault rib integral supporting upright.002",
+          "Barrel vault laminated semicircular load rib.001"
+        ],
+        [
+          "Vault rib integral supporting upright.003",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault rib integral supporting upright.003",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright.003",
+          "Barrel vault laminated semicircular load rib.001"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib.002",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Barrel vault laminated semicircular load rib.002",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright.004",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault rib integral supporting upright.004",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault rib integral supporting upright.004",
+          "Barrel vault laminated semicircular load rib.002"
+        ],
+        [
+          "Vault rib integral supporting upright.005",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault rib integral supporting upright.005",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib integral supporting upright.005",
+          "Barrel vault laminated semicircular load rib.002"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Barrel vault laminated semicircular load rib"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright.001"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Barrel vault laminated semicircular load rib.001"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright.002"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright.003"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Barrel vault laminated semicircular load rib.002"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright.004"
+        ],
+        [
+          "Barrel bed continuous curved timber roof",
+          "Vault rib integral supporting upright.005"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault bed long moulded plinth sill"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault bed long moulded plinth sill.001"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault bed inset tenoned end plinth sill.001"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Barrel vault laminated semicircular load rib.002"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault rib integral supporting upright.004"
+        ],
+        [
+          "Vault bed closed arched head panel",
+          "Vault rib integral supporting upright.005"
+        ],
+        [
+          "Vault rib brass secured sill joint",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault rib brass secured sill joint",
+          "Vault rib integral supporting upright"
+        ],
+        [
+          "Vault rib brass secured sill joint.001",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib brass secured sill joint.001",
+          "Vault rib integral supporting upright.001"
+        ],
+        [
+          "Vault rib brass secured sill joint.002",
+          "Vault bed recessed lower enclosure wall"
+        ],
+        [
+          "Vault rib brass secured sill joint.002",
+          "Vault rib integral supporting upright.004"
+        ],
+        [
+          "Vault rib brass secured sill joint.002",
+          "Vault bed closed arched head panel"
+        ],
+        [
+          "Vault rib brass secured sill joint.003",
+          "Vault bed recessed lower enclosure wall.001"
+        ],
+        [
+          "Vault rib brass secured sill joint.003",
+          "Vault rib integral supporting upright.005"
+        ],
+        [
+          "Vault rib brass secured sill joint.003",
+          "Vault bed closed arched head panel"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.001"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.002"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.003"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.004"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.005"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.006"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.007"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.008"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.009"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.010"
+        ],
+        [
+          "Linen mattress supported by wooden slats",
+          "Vault bed transverse actual mattress slat.011"
+        ],
+        [
+          "Thick teal cover with turned-down top",
+          "Linen mattress supported by wooden slats"
+        ],
+        [
+          "Attached folded cover bolster",
+          "Thick teal cover with turned-down top"
+        ],
+        [
+          "Inflated linen sleeping pillow 1",
+          "Linen mattress supported by wooden slats"
+        ],
+        [
+          "Inflated linen sleeping pillow 1",
+          "Thick teal cover with turned-down top"
+        ]
+      ],
+      "source_changed": false
+    }
+  ],
+  "errors": []
+}

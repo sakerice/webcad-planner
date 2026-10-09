@@ -1,0 +1,448 @@
+[
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "previews/rpg-mansion-fitted-six-panel-door-1200-01-thumb.png",
+    "imageSha256": "0ad576ad0635f0022410c5fdee8b0a26166978724ac58e179371c3d54334d2f6",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        2,
+        -4,
+        1.2
+      ],
+      "resolution": 512,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "previews/rpg-mansion-fitted-six-panel-door-1200-01-top.png",
+    "imageSha256": "b7a50e590e54f7ea015745cdce37c48aa8a6d66c4ce8b82ccbe020b7fc726290",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        0,
+        0,
+        4
+      ],
+      "resolution": 512,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+    "sourceSha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+    "image": "evidence/actual-glb-finish-baseline.png",
+    "imageSha256": "9a98114a1ebb538608baa6f1cc431be9aff71d55e45146e15dedb292f91e6110",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.3,
+        -4,
+        0.6
+      ],
+      "resolution": 640,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-closed-installed.blend",
+    "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+    "image": "evidence/installed-front.png",
+    "imageSha256": "ec046a88ed447ababfd37e36f2d473b5306cc62394a540caa3ced26f345f7f3e",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.8,
+        -4,
+        1.0
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+    "sourceSha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+    "image": "evidence/actual-glb-finish-wood.png",
+    "imageSha256": "7c1eda96cb0beffc5ca350745a04b6cbe74679699a51e6e3e61f4acf1740e68c",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.3,
+        -4,
+        0.6
+      ],
+      "resolution": 640,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": {
+        "channel": "wood",
+        "color": [
+          0.07,
+          0.37,
+          0.68,
+          1
+        ]
+      }
+    }
+  },
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "evidence/rpg-mansion-fitted-six-panel-door-1200-01-front.png",
+    "imageSha256": "413be50a7bc2b3aef68236d130c68250d4d9dd761c42b88324e02586eee5f806",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        0,
+        -4,
+        0
+      ],
+      "resolution": 768,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+    "sourceSha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+    "image": "evidence/actual-glb-finish-trim.png",
+    "imageSha256": "293342ff2f646ce89f4322563796a5ac903180b868d5429d1c5f8c996bd16d3f",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.3,
+        -4,
+        0.6
+      ],
+      "resolution": 640,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": {
+        "channel": "trim",
+        "color": [
+          0.07,
+          0.37,
+          0.68,
+          1
+        ]
+      }
+    }
+  },
+  {
+    "source": "proofs/door-closed-installed.blend",
+    "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+    "image": "evidence/installed-rear.png",
+    "imageSha256": "4e609c11648bd93e47e873753597d45fa8cade8009df35a95511b321ce610bee",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        -1.8,
+        4,
+        1.0
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "evidence/rpg-mansion-fitted-six-panel-door-1200-01-rear.png",
+    "imageSha256": "57b64f625ed59a16239234f57972ff030e6602e86291c41387615e8f19e2ee80",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        0,
+        4,
+        0
+      ],
+      "resolution": 768,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "models/rpg-mansion-fitted-six-panel-door-1200-01.glb",
+    "sourceSha256": "96be7522c86ac346d375e87a16a8f4d9b3025ab655eca846da25f33ad9c403b7",
+    "image": "evidence/actual-glb-finish-metal.png",
+    "imageSha256": "214a4f68875876da6c22491f7e1ecad9b4ff420076e66552aa0be638a1b5ce67",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.3,
+        -4,
+        0.6
+      ],
+      "resolution": 640,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": {
+        "channel": "metal",
+        "color": [
+          0.07,
+          0.37,
+          0.68,
+          1
+        ]
+      }
+    }
+  },
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "evidence/rpg-mansion-fitted-six-panel-door-1200-01-left.png",
+    "imageSha256": "c0371398d4891103ce991cce6397ccb2fbee22c4486bd9c3c8d09d7b5a6e3d79",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        -4,
+        0,
+        0
+      ],
+      "resolution": 768,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "sources/rpg-mansion-fitted-six-panel-door-1200-01.blend",
+    "sourceSha256": "b38e09e975200b87a787d487417aa7bd401b3614f3473206789f8d92bbd2990b",
+    "image": "evidence/rpg-mansion-fitted-six-panel-door-1200-01-right.png",
+    "imageSha256": "1720d2043007eae191a7588e1fee6de6711e1e43c4fb38c4f6bc37c08bcf5636",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        4,
+        0,
+        0
+      ],
+      "resolution": 768,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-closed-installed.blend",
+    "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+    "image": "evidence/installed-plan.png",
+    "imageSha256": "752359f5a6a3071b0292fce33ae6398e26853834d2ae7eb9b92b56cda82d5dfc",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        0,
+        0,
+        4
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-closed-installed.blend",
+    "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+    "image": "evidence/hinge-contact-detail.png",
+    "imageSha256": "b846ba11baa4070b440c93d3d36b7f612903209d15b5bea52750a44a69a68e48",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        -1.1,
+        -4,
+        0.5
+      ],
+      "resolution": 900,
+      "target": [
+        -0.61,
+        -0.17,
+        1.19
+      ],
+      "orthoScale": 0.32,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-closed-installed.blend",
+    "sourceSha256": "528516f73423cb4e5b68762b5ff58f3dde26f6cc55ac1fb53a3608eaa54dff1f",
+    "image": "evidence/latch-contact-detail.png",
+    "imageSha256": "29150a17577a61320a5f2ea304d61c9c5e42f2cc70045bed8c7323bb966d62f4",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.1,
+        -4,
+        0.5
+      ],
+      "resolution": 900,
+      "target": [
+        0.6,
+        -0.17,
+        1.06
+      ],
+      "orthoScale": 0.28,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-manual-open-qa-only.blend",
+    "sourceSha256": "2341615db3fddc4ea1fd11c63b5c2d2dc7ea93069f77da6981e01cb42ba982a4",
+    "image": "evidence/manual-open-front.png",
+    "imageSha256": "f8570501f46a6c0f7190769629909a0ce05bb6993ca1b7b7e42b091d8edc3e45",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        1.8,
+        -4,
+        1.0
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-manual-open-qa-only.blend",
+    "sourceSha256": "2341615db3fddc4ea1fd11c63b5c2d2dc7ea93069f77da6981e01cb42ba982a4",
+    "image": "evidence/manual-open-plan.png",
+    "imageSha256": "d36893bf889baf8fa61a9f8c0f52c6d4498992f28f8ef3e022e77275ba9af490",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        0,
+        0,
+        4
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  },
+  {
+    "source": "proofs/door-manual-open-qa-only.blend",
+    "sourceSha256": "2341615db3fddc4ea1fd11c63b5c2d2dc7ea93069f77da6981e01cb42ba982a4",
+    "image": "evidence/manual-open-rear.png",
+    "imageSha256": "93722f57d17daf06c42a6250bbac06d6cf3253ab37b75e3a0407d5668101bfb9",
+    "recipe": {
+      "function": "build.render",
+      "delta": [
+        -1.8,
+        4,
+        1.0
+      ],
+      "resolution": 900,
+      "target": null,
+      "orthoScale": null,
+      "engine": "CYCLES",
+      "samples": 32,
+      "denoise": false,
+      "transparent": true,
+      "viewTransform": "AgX",
+      "finishOverride": null
+    }
+  }
+]

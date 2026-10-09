@@ -1,0 +1,1139 @@
+{
+  "stage": "Producer actual-byte check; not independent acceptance",
+  "items": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "model": "models/rpg-mansion-period-range-canopy-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "f978a061d0dafc3c547a2620c2c2cf8bb0f006ab4de7ea62656b486877888e0a",
+      "git_blob_sha": "2ddc6987252dbadc34de6d86b9bb6a42634f163b",
+      "bytes": 269716,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4699999988079071,
+          0.0,
+          -0.3889999985694885
+        ],
+        [
+          0.4699999988079071,
+          1.209999918937683,
+          0.3889999985694885
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        939.9999976158142,
+        777.999997138977,
+        1209.999918937683
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-06,
+        -2.86102294921875e-06,
+        -8.106231689453125e-05
+      ],
+      "triangles": 3872,
+      "uv": {
+        "triangles": 3872,
+        "valid_triangles": 3872,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.899722583841157,
+        "p95": 2.915807803531489,
+        "p95_p05": 1.0055471581247004,
+        "median": 2.907002519749186
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Blackened period iron",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.03560131415724754,
+              0.05126945674419403,
+              0.04817182570695877,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.49000000953674316
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "hardware"
+          },
+          "name": "Aged brass fasteners",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.44520118832588196,
+              0.2961382567882538,
+              0.09084171056747437,
+              1
+            ],
+            "metallicFactor": 0.7599999904632568,
+            "roughnessFactor": 0.3700000047683716
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "hardware",
+        "metal"
+      ],
+      "manifest_finish_channels": [
+        "hardware",
+        "metal"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "Original native Blender geometry; no external assets",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "previews/rpg-mansion-period-range-canopy-01-thumb.png",
+          "sha256": "bdba860b0366ee2fbfdf11ae56556543ef7a209dd430611e3f88db9c50338aa7",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 92860,
+          "pixel_bbox_alpha_gt_0": [
+            68,
+            30,
+            444,
+            482
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            69,
+            30,
+            443,
+            482
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "previews/rpg-mansion-period-range-canopy-01-top.png",
+          "sha256": "95bb1f248fea0aabce52e7e598a29d65f6df404b0beb89658138493b2d8561e5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 141670,
+          "pixel_bbox_alpha_gt_0": [
+            29,
+            68,
+            483,
+            444
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            30,
+            69,
+            482,
+            443
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged brass fasteners|hardware": {
+            "points": 1852,
+            "digest": "88cbba57d8451182f5509977a159963a2274e7a6c46b11b73b8f99bf302de4c3"
+          },
+          "Blackened period iron|metal": {
+            "points": 112,
+            "digest": "329588005539acb5bdac42332136c836eb7ad909f13330b06c1182cc850982e1"
+          }
+        },
+        "triangle_counts": {
+          "Aged brass fasteners|hardware": 3652,
+          "Blackened period iron|metal": 220
+        },
+        "triangle_surfaces": {
+          "Aged brass fasteners|hardware": "cd748a9a81d2812d5306e1000401e1b55f67a83628ea097ecfc38d970bc37b59",
+          "Blackened period iron|metal": "ee247b13c5d1bf37a5a3edf70136e5bf0e812f0341654f9c9b9edb97dc12bbb5"
+        },
+        "uv_triangle_mapping": {
+          "Aged brass fasteners|hardware": "d03cc84129892b90c6623b1e8ea1af829fec6cf99a94827f646df45a5b3ca34b",
+          "Blackened period iron|metal": "63f66e297fe4a3f2a41ec47fd35084d9997dbbc6ffbc5a18d1c09b3d32901d54"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ]
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "model": "models/rpg-mansion-manual-wash-tub-board-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "1f54d3d6e7a0fc05522c467445b7a767a543efc393b47a27cf22267637527195",
+      "git_blob_sha": "07b99e8b69c5f1e255b35d920a305812fcdc22b6",
+      "bytes": 350904,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4545999765396118,
+          0.0,
+          -0.2914997339248657
+        ],
+        [
+          0.4545999765396118,
+          1.1749356985092163,
+          0.2914997339248657
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        909.1999530792236,
+        582.9994678497314,
+        1174.9356985092163
+      ],
+      "dimension_error_mm": [
+        -4.6920776412662235e-05,
+        0.00046784973142166564,
+        -0.0003014907836131897
+      ],
+      "triangles": 5032,
+      "uv": {
+        "triangles": 5032,
+        "valid_triangles": 5032,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 4.124381315531963,
+        "p95": 4.132127480062711,
+        "p95_p05": 1.001878139759187,
+        "median": 4.129229598232731
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled honey oak",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12743768095970154,
+              0.05612849071621895,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5799999833106995
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Soft pewter galvanized wash tub",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.32314321398735046,
+              0.38642942905426025,
+              0.38132601976394653,
+              1
+            ],
+            "metallicFactor": 0.5799999833106995,
+            "roughnessFactor": 0.41999998688697815
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Pale scrubbed washboard timber",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.520995557308197,
+              0.4019777774810791,
+              0.2015562504529953,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.7200000286102295
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "washsurface"
+          },
+          "name": "Fluted zinc rubbing surface",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.43415364623069763,
+              0.4969329833984375,
+              0.4910208582878113,
+              1
+            ],
+            "metallicFactor": 0.44999998807907104,
+            "roughnessFactor": 0.47999998927116394
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Blackened period iron",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.03560131415724754,
+              0.05126945674419403,
+              0.04817182570695877,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.49000000953674316
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "washsurface",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "washsurface",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "Original native Blender geometry; no external assets",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "previews/rpg-mansion-manual-wash-tub-board-01-thumb.png",
+          "sha256": "498594fee89f25df76f65e70f17bcc8eff5aa9abd575cea4350246c6a2e10f89",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 73007,
+          "pixel_bbox_alpha_gt_0": [
+            113,
+            30,
+            399,
+            482
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            113,
+            30,
+            399,
+            482
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "previews/rpg-mansion-manual-wash-tub-board-01-top.png",
+          "sha256": "0be9c1cfefcbe8513255fdb8094e0783878de5cb35f8c044291751ec99c5eb18",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 89821,
+          "pixel_bbox_alpha_gt_0": [
+            30,
+            110,
+            482,
+            402
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            30,
+            111,
+            482,
+            401
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Blackened period iron|metal": {
+            "points": 600,
+            "digest": "396b108cc940b336dcdc553976dc037035a33aa59bc7e52343b2a245fd1fecdb"
+          },
+          "Fluted zinc rubbing surface|washsurface": {
+            "points": 1248,
+            "digest": "9a725312bddb97dae6e6def9b783d775c5554c7ada3927e1445044affe9a9810"
+          },
+          "Oiled honey oak|wood": {
+            "points": 264,
+            "digest": "b25ad5276e6f561e91ad6d73ea0b720a155353e38db0d702b9ad25ba47fda174"
+          },
+          "Pale scrubbed washboard timber|wood": {
+            "points": 144,
+            "digest": "44a1aa3c172fc199750e32ae92d2a514646a109b684d2f71119f05321c3efb9e"
+          },
+          "Soft pewter galvanized wash tub|metal": {
+            "points": 336,
+            "digest": "f83315602b91709a452bcf6ae4f1f2b1932f881539c671256ac1904680c6a0b8"
+          }
+        },
+        "triangle_counts": {
+          "Blackened period iron|metal": 1192,
+          "Fluted zinc rubbing surface|washsurface": 2424,
+          "Oiled honey oak|wood": 484,
+          "Pale scrubbed washboard timber|wood": 264,
+          "Soft pewter galvanized wash tub|metal": 668
+        },
+        "triangle_surfaces": {
+          "Blackened period iron|metal": "7c1aada222d72716581c8af6084a47b0cf3e568c7d18d261fbdbc658401f9869",
+          "Fluted zinc rubbing surface|washsurface": "f9452b6686a6afd43effc8b88b96d4912fbd8120d64cc2c8bbb924688e6830ac",
+          "Oiled honey oak|wood": "fd3f3f6d703668cd8575bbc75bcf7c184c337462d574820f5899efe89f12c33d",
+          "Pale scrubbed washboard timber|wood": "b3198071595a6494f8c7f67e37ff6d3911d9473962943908e82325ac1b8d9599",
+          "Soft pewter galvanized wash tub|metal": "415668796f3613f840fb46d0563d5264371a44412f4cf98ad25a55cf00864ce6"
+        },
+        "uv_triangle_mapping": {
+          "Blackened period iron|metal": "a80bb5979a61fc46de882d9ea586065b1d1e4d0a533ddfc85ad09e4841c3f123",
+          "Fluted zinc rubbing surface|washsurface": "56b4772e6b40bf1ac919e2912f7d3b3f8ee42427036c3bd30cd96f9f400ccc68",
+          "Oiled honey oak|wood": "2a0c7514f3aa744d35ca7a10a14663ed1b619bbe793c2fa977e5cedc6203cca6",
+          "Pale scrubbed washboard timber|wood": "0c1bccf8ac5c50508a0263b7b56e2624f01dc96aa75b35bb97a23afaec64adcc",
+          "Soft pewter galvanized wash tub|metal": "3126fe5ead321beaae0e25d78b27f1ad8bbee7f8eee23b61d335f542a1ae9af4"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ]
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "model": "models/rpg-mansion-hinged-timber-drying-frame-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "22726a3e9d37cd3868850c0bad20da3b707c23d5c11eccb08965621b05cc616a",
+      "git_blob_sha": "ac82c30e5f51914ea287d0d915c06d8e98831020",
+      "bytes": 238456,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4819999933242798,
+          0.0,
+          -0.4139551818370819
+        ],
+        [
+          0.4819999933242798,
+          1.204979658126831,
+          0.4139551818370819
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        963.9999866485596,
+        827.9103636741638,
+        1204.979658126831
+      ],
+      "dimension_error_mm": [
+        -1.33514404296875e-05,
+        0.0003636741638501917,
+        -0.0003418731689635024
+      ],
+      "triangles": 3488,
+      "uv": {
+        "triangles": 3488,
+        "valid_triangles": 3488,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.966287121631602,
+        "p95": 1.9727930777915148,
+        "p95_p05": 1.003308751854365,
+        "median": 1.9699588425754098
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Oiled honey oak",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.25015828013420105,
+              0.12743768095970154,
+              0.05612849071621895,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5799999833106995
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "hardware"
+          },
+          "name": "Aged brass fasteners",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.44520118832588196,
+              0.2961382567882538,
+              0.09084171056747437,
+              1
+            ],
+            "metallicFactor": 0.7599999904632568,
+            "roughnessFactor": 0.3700000047683716
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Blackened period iron",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.03560131415724754,
+              0.05126945674419403,
+              0.04817182570695877,
+              1
+            ],
+            "metallicFactor": 0.7200000286102295,
+            "roughnessFactor": 0.49000000953674316
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "hardware",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "hardware",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "Original native Blender geometry; no external assets",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "previews/rpg-mansion-hinged-timber-drying-frame-01-thumb.png",
+          "sha256": "6bab00a4805f70fa0a416f880e70d4f21f51f2e13841dfc84675bf5e3e84a3bf",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 48242,
+          "pixel_bbox_alpha_gt_0": [
+            62,
+            30,
+            450,
+            482
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            62,
+            30,
+            450,
+            482
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "previews/rpg-mansion-hinged-timber-drying-frame-01-top.png",
+          "sha256": "f987f1c5ba6f96d00af4aaeefdec1512d0446b4cc4fbb60d1f593f7ef7d4ea6f",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 63800,
+          "pixel_bbox_alpha_gt_0": [
+            29,
+            61,
+            482,
+            451
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            30,
+            62,
+            482,
+            450
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Aged brass fasteners|hardware": {
+            "points": 1552,
+            "digest": "55b41662db4041c6cb814d17a14d130d94cebb5d34e9fc3df202d7fba60b9a1e"
+          },
+          "Blackened period iron|metal": {
+            "points": 32,
+            "digest": "31432ec77cd905a29fe1722f5a1a2e1a65f3e5241bf098bdb81d461146af4192"
+          },
+          "Oiled honey oak|wood": {
+            "points": 224,
+            "digest": "f28cf093e4ff1f0ab8d68219456f6f5ec3ba65912b445fba410308476c2a6fb7"
+          }
+        },
+        "triangle_counts": {
+          "Aged brass fasteners|hardware": 3040,
+          "Blackened period iron|metal": 48,
+          "Oiled honey oak|wood": 400
+        },
+        "triangle_surfaces": {
+          "Aged brass fasteners|hardware": "cefe0df91b239cecc2eac1359e8df77b31b9127b27551e82fbcc24928ff910f0",
+          "Blackened period iron|metal": "fb1bc7ff2023e25f8f08dbf4ff2184d8ef2e6d03784f54d400b7d73f316bdedf",
+          "Oiled honey oak|wood": "8e1ec42e0b759219b110a6016413ef93b3c23d6dc9dcc967a5a1c28dbb829bd8"
+        },
+        "uv_triangle_mapping": {
+          "Aged brass fasteners|hardware": "e170f4ad314d3e4a01dca03b674b211c3c5d0437cf3afa5e912161ae775d492a",
+          "Blackened period iron|metal": "ac91ab59381b8613b1a9c2b1f68a5bb8bb1512580aaae78cef5f57f505cafe45",
+          "Oiled honey oak|wood": "ee8aaa7e301e7e077f96f649aa68e811eb6d36c82b7912eb246fe5e9a311d7b2"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ]
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "model": "models/rpg-mansion-narrow-hall-runner-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "2d70abca8105aec18d2e4cef833b7df34dea3976dfd0e33cd83caabc866b2024",
+      "git_blob_sha": "f499f8c03404247996d93ba27ab8e742e1762831",
+      "bytes": 39188,
+      "actual_bounds_gltf_m": [
+        [
+          -0.3799999952316284,
+          0.0,
+          -1.5
+        ],
+        [
+          0.3799999952316284,
+          0.007600000128149986,
+          1.5
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        759.9999904632568,
+        3000.0,
+        7.600000128149986
+      ],
+      "dimension_error_mm": [
+        -9.5367431640625e-06,
+        0.0,
+        1.281499866223612e-07
+      ],
+      "triangles": 496,
+      "uv": {
+        "triangles": 496,
+        "valid_triangles": 496,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.0014948914521207,
+        "p95": 3.0109415896164258,
+        "p95_p05": 1.0031473310819912,
+        "median": 3.0080334294310678
+      },
+      "actual_materials": [
+        {
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Claret woven runner ground",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.12477181851863861,
+              0.028426039963960648,
+              0.0423114113509655,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.9200000166893005
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "border"
+          },
+          "name": "Warm ivory runner border",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.5906188488006592,
+              0.47353148460388184,
+              0.2581828534603119,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.8899999856948853
+          }
+        },
+        {
+          "extras": {
+            "finishChannel": "pattern"
+          },
+          "name": "Sage geometric woven medallions",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.11953842639923096,
+              0.17464740574359894,
+              0.12743768095970154,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.9300000071525574
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "border",
+        "fabric",
+        "pattern"
+      ],
+      "manifest_finish_channels": [
+        "border",
+        "fabric",
+        "pattern"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "Original native Blender geometry; no external assets",
+        "staticProp": true
+      },
+      "previews": [
+        {
+          "path": "previews/rpg-mansion-narrow-hall-runner-01-thumb.png",
+          "sha256": "d05c5472ab71976be67aa46e87ec5d58f9a715d72356254445e7a382ea25b266",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 32085,
+          "pixel_bbox_alpha_gt_0": [
+            30,
+            163,
+            482,
+            349
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            30,
+            164,
+            482,
+            348
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "previews/rpg-mansion-narrow-hall-runner-01-top.png",
+          "sha256": "c1265ac114338aff33114d9e20187fca056873b82c525d767789058d9677db1b",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 52461,
+          "pixel_bbox_alpha_gt_0": [
+            197,
+            29,
+            315,
+            483
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            198,
+            30,
+            314,
+            482
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Claret woven runner ground|fabric": {
+            "points": 24,
+            "digest": "5b2355a2f82225da31d91971c93517a4f2fab6c736fd0546bf3f330e86e64ebf"
+          },
+          "Sage geometric woven medallions|pattern": {
+            "points": 72,
+            "digest": "d793d24a8920ce600071274eb41f23c0c3f706dea33332eaa1e1ff22dd427b5b"
+          },
+          "Warm ivory runner border|border": {
+            "points": 156,
+            "digest": "517989f8c5a9c58871d6f763b61136cc057adc73d7c1eee34ad1538d26f4fca9"
+          }
+        },
+        "triangle_counts": {
+          "Claret woven runner ground|fabric": 44,
+          "Sage geometric woven medallions|pattern": 144,
+          "Warm ivory runner border|border": 308
+        },
+        "triangle_surfaces": {
+          "Claret woven runner ground|fabric": "3258d87a20663fb235e85dd2a396a760b20b1147067fcb26c65dd6628633c702",
+          "Sage geometric woven medallions|pattern": "e77369863997fb3587d073960ae282bcf66b4561a290f01554583e176f13b4b4",
+          "Warm ivory runner border|border": "b2f967b4737348e10727edf763004f1b3ae3fe43414da6bea4e9c3dda80ab0a4"
+        },
+        "uv_triangle_mapping": {
+          "Claret woven runner ground|fabric": "809f30ca9f10db707252ba2d96f6826765f5fdda5e96f7b9bebe1baa7f605219",
+          "Sage geometric woven medallions|pattern": "9bf7acd9eb64d4646f6bfb553d7d4e1518e2364ed8460c017a96c795ba20c5e2",
+          "Warm ivory runner border|border": "b7a816984ea837056b7e84b05b9f96cc46f20608dad25e606893507b6c62fec4"
+        }
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "passed": true
+}

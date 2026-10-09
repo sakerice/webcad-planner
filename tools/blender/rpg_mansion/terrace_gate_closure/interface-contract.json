@@ -1,0 +1,261 @@
+{
+  "stage": "Candidate awaiting coordinator visual gate and independent QA",
+  "coreConstructions": 2,
+  "zeroCoreAccessories": 1,
+  "frame": "Construction coordinates are Blender metres, Z up, -Y front. glTF(x,y,z)=(Blender.x,Blender.z,-Blender.y). Each bottom-centre translation is recorded per asset.",
+  "assets": [
+    {
+      "id": "rpg-mansion-garden-supported-oak-terrace-01",
+      "kind": "deck",
+      "actualMeasuredDimensionsMm": [
+        2400.0,
+        1800.0,
+        320.6
+      ],
+      "coreConstructionCount": 1,
+      "countingClass": "new-core",
+      "installationDatums": {
+        "defaultElevationMm": 0,
+        "installation": {
+          "mount": "ground",
+          "boardTopMm": 320,
+          "screwCrownMm": 320.6,
+          "overallWidthMm": 2400,
+          "overallDepthMm": 1800,
+          "boardJointGapMm": 4,
+          "rearThresholdUndersideReceiverMm": {
+            "clearWidth": 1060,
+            "centreJoistRearEndY": 820,
+            "boardUndersideZ": 294,
+            "acceptedWeatherNoseTopZ": 290,
+            "verticalClearance": 4,
+            "bayBottomElevation": 230,
+            "timberSillTop": 320,
+            "boardToSillJointGap": 12
+          },
+          "stepTimberTopMm": 320,
+          "stepTotalHeightMm": 320.6,
+          "stepPlacementBlenderM": [
+            0,
+            -1.2325,
+            0
+          ],
+          "stepRearToTerraceFrontTimberGapMm": 8,
+          "supportedGroundPadCentresBlenderM": [
+            [
+              -1.05,
+              -0.6,
+              0
+            ],
+            [
+              0,
+              -0.6,
+              0
+            ],
+            [
+              1.05,
+              -0.6,
+              0
+            ],
+            [
+              -1.05,
+              0.6,
+              0
+            ],
+            [
+              0,
+              0.6,
+              0
+            ],
+            [
+              1.05,
+              0.6,
+              0
+            ]
+          ],
+          "note": "Independent grounded platform, two beams, five joists and twelve walking boards. Match the accepted timber top and screw-crown datums separately. Static manual assembly; no native deck generation, load or code certification."
+        },
+        "nativeEditableParts": 150,
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalBoundsM": [
+          [
+            -1.2000000476837158,
+            -0.8999999761581421,
+            0.0
+          ],
+          [
+            1.2000000476837158,
+            0.8999999761581421,
+            0.3206000030040741
+          ]
+        ]
+      },
+      "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6"
+    },
+    {
+      "id": "rpg-mansion-garden-braced-oak-gate-leaf-01",
+      "kind": "fence",
+      "actualMeasuredDimensionsMm": [
+        1205.0,
+        135.0,
+        1250.0
+      ],
+      "coreConstructionCount": 1,
+      "countingClass": "new-core",
+      "installationDatums": {
+        "defaultElevationMm": 100,
+        "installation": {
+          "mount": "gate-hinges",
+          "groundClearanceMm": 100,
+          "pinAxisConstructionBlenderXY": [
+            0,
+            0
+          ],
+          "collarBottomConstructionMm": [
+            362,
+            1162
+          ],
+          "collarTopConstructionMm": [
+            405,
+            1205
+          ],
+          "collarInnerRadiusMm": 12,
+          "collarOuterRadiusMm": 21,
+          "acceptedPinRadiusMm": 11,
+          "nominalRadialClearanceMm": 1,
+          "acceptedPinArmBearingHeightsMm": [
+            362,
+            1162
+          ],
+          "latchAxisConstructionBlenderM": [
+            1.17,
+            -0.045,
+            1.17
+          ],
+          "note": "Closed static gate. Integral hollow collars bear on the accepted pier pin arms. Ground aperture is measured between supports; no animation, native gate linking or certified swing envelope."
+        },
+        "nativeEditableParts": 39,
+        "bottomCenterTranslationBlenderM": [
+          -0.5814999938011169,
+          0.013499999418854713,
+          -0.10000000149011612
+        ],
+        "originalBoundsM": [
+          [
+            -0.020999999716877937,
+            -0.08100000023841858,
+            0.10000000149011612
+          ],
+          [
+            1.184000015258789,
+            0.05400000140070915,
+            1.350000023841858
+          ]
+        ]
+      },
+      "sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f"
+    },
+    {
+      "id": "rpg-mansion-garden-gate-strike-receiver-01",
+      "kind": "fence",
+      "actualMeasuredDimensionsMm": [
+        56.0,
+        118.0,
+        110.0
+      ],
+      "coreConstructionCount": 0,
+      "countingClass": "zero-core-accessory",
+      "installationDatums": {
+        "defaultElevationMm": 1095,
+        "installation": {
+          "mount": "gate-pier-receiver",
+          "constructionMountPlaneX": 1.206,
+          "constructionPoseUsesBottomCentreShift": true,
+          "socketAxisConstructionBlenderM": [
+            1.167,
+            -0.045,
+            1.17
+          ],
+          "socketClearOpeningMm": [
+            18,
+            18
+          ],
+          "boltDiameterMm": 12,
+          "bearingOnAcceptedReceiverPlate": true,
+          "counting": "Zero core. Separate reusable fitted strike accessory; not an extra gate construction.",
+          "note": "Two stand-off feet seat on the actual accepted receiver plate. They clear existing through-anchor tips and provide a hollow socket for the delivered leaf bolt."
+        },
+        "nativeEditableParts": 9,
+        "bottomCenterTranslationBlenderM": [
+          -1.1779999732971191,
+          0.0040000006556510925,
+          -1.0950000286102295
+        ],
+        "originalBoundsM": [
+          [
+            1.149999976158142,
+            -0.06300000101327896,
+            1.0950000286102295
+          ],
+          [
+            1.2059999704360962,
+            0.054999999701976776,
+            1.2050000429153442
+          ]
+        ]
+      },
+      "sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b"
+    }
+  ],
+  "acceptedDependencies": [
+    {
+      "id": "rpg-mansion-garden-two-riser-deck-step-01",
+      "file": "inputs/rpg-mansion-garden-two-riser-deck-step-01.glb",
+      "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3",
+      "excludedFromNewCounts": true
+    },
+    {
+      "id": "rpg-mansion-garden-brick-gate-pier-01",
+      "file": "inputs/rpg-mansion-garden-brick-gate-pier-01.glb",
+      "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94",
+      "excludedFromNewCounts": true
+    },
+    {
+      "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+      "file": "inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+      "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642",
+      "excludedFromNewCounts": true
+    },
+    {
+      "id": "rpg-mansion-rectangular-doorway-bay-01",
+      "file": "inputs/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc",
+      "excludedFromNewCounts": true
+    },
+    {
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "file": "inputs/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "excludedFromNewCounts": true
+    }
+  ],
+  "staticLimits": [
+    "No native deck generation",
+    "No automatic opening cuts",
+    "No gate animation or certified swing envelope",
+    "No structural loads or building-code certification",
+    "Fixed French glazing remains closed; doorway proof supplies the clear passage"
+  ],
+  "walkingDatumsMm": {
+    "acceptedStepTimber": 320,
+    "terraceTimber": 320,
+    "acceptedStepScrewCrown": 320.6,
+    "terraceScrewCrown": 320.6,
+    "interiorFloor": 320,
+    "fixedFrenchSurroundSill": 320
+  }
+}

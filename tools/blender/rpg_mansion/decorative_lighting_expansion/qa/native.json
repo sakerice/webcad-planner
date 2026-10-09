@@ -1,0 +1,2349 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-counterbalanced-task-lamp-01",
+      "source_sha256": "277f459b6e2fffd90d078dfc783376fedb9e26d453c00d74b3ca3a16e7c67686",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        9.967606452695084e-05,
+        0.00016137024477795117,
+        5.0967385983350745e-05,
+        6.323170962711326e-05,
+        5.096727828875676e-05,
+        6.32318513945999e-05,
+        2.2656822485108322e-05,
+        0.0002872280694343014,
+        9.54452245120289e-05,
+        5.876701357957851e-05,
+        2.308876225735427e-05,
+        0.0003275116308761502,
+        0.0013096775587181735,
+        0.00018473653966566417,
+        9.967650214548485e-05,
+        9.967655319087498e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Task lamp weighted oval base": [
+          0.0013096775587181735
+        ],
+        "Task pivot foot": [
+          0.00018473653966566417
+        ],
+        "Task lower pivot": [
+          9.967650214548485e-05
+        ],
+        "Task elbow pivot": [
+          9.967655319087498e-05
+        ],
+        "Task head pivot": [
+          9.967606452695084e-05
+        ],
+        "Task lower twin bar -1": [
+          5.0967385983350745e-05
+        ],
+        "Task upper twin bar -1": [
+          6.323170962711326e-05
+        ],
+        "Task lower twin bar 1": [
+          5.096727828875676e-05
+        ],
+        "Task upper twin bar 1": [
+          6.32318513945999e-05
+        ],
+        "Task counterweight lever": [
+          2.2656822485108322e-05
+        ],
+        "Task rear counterweight": [
+          0.0002872280694343014
+        ],
+        "Task adjustable head stem": [
+          9.54452245120289e-05
+        ],
+        "Task adjustable head porcelain": [
+          5.876701357957851e-05
+        ],
+        "Task adjustable head retaining collar": [
+          2.308876225735427e-05
+        ],
+        "Task adjustable head open reflector": [
+          0.0003275116308761502
+        ],
+        "Task adjustable head opal bulb": [
+          0.00016137024477795117
+        ]
+      },
+      "actual_support": {
+        "native_parts": 16,
+        "groups": [
+          {
+            "parts": [
+              "Task lamp weighted oval base",
+              "Task pivot foot",
+              "Task lower twin bar 1",
+              "Task elbow pivot",
+              "Task upper twin bar -1",
+              "Task head pivot",
+              "Task adjustable head stem",
+              "Task adjustable head retaining collar",
+              "Task adjustable head open reflector",
+              "Task adjustable head porcelain",
+              "Task adjustable head opal bulb",
+              "Task counterweight lever",
+              "Task rear counterweight",
+              "Task upper twin bar 1",
+              "Task lower twin bar -1",
+              "Task lower pivot"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [
+              "Task lamp weighted oval base"
+            ],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Task pivot foot",
+            "Task lamp weighted oval base"
+          ],
+          [
+            "Task lower pivot",
+            "Task pivot foot"
+          ],
+          [
+            "Task lower twin bar -1",
+            "Task pivot foot"
+          ],
+          [
+            "Task lower twin bar -1",
+            "Task lower pivot"
+          ],
+          [
+            "Task lower twin bar -1",
+            "Task elbow pivot"
+          ],
+          [
+            "Task upper twin bar -1",
+            "Task elbow pivot"
+          ],
+          [
+            "Task upper twin bar -1",
+            "Task head pivot"
+          ],
+          [
+            "Task upper twin bar -1",
+            "Task lower twin bar -1"
+          ],
+          [
+            "Task lower twin bar 1",
+            "Task pivot foot"
+          ],
+          [
+            "Task lower twin bar 1",
+            "Task lower pivot"
+          ],
+          [
+            "Task lower twin bar 1",
+            "Task elbow pivot"
+          ],
+          [
+            "Task upper twin bar 1",
+            "Task elbow pivot"
+          ],
+          [
+            "Task upper twin bar 1",
+            "Task head pivot"
+          ],
+          [
+            "Task upper twin bar 1",
+            "Task lower twin bar 1"
+          ],
+          [
+            "Task counterweight lever",
+            "Task elbow pivot"
+          ],
+          [
+            "Task rear counterweight",
+            "Task counterweight lever"
+          ],
+          [
+            "Task adjustable head stem",
+            "Task head pivot"
+          ],
+          [
+            "Task adjustable head stem",
+            "Task upper twin bar -1"
+          ],
+          [
+            "Task adjustable head stem",
+            "Task upper twin bar 1"
+          ],
+          [
+            "Task adjustable head porcelain",
+            "Task adjustable head stem"
+          ],
+          [
+            "Task adjustable head retaining collar",
+            "Task adjustable head stem"
+          ],
+          [
+            "Task adjustable head open reflector",
+            "Task adjustable head retaining collar"
+          ],
+          [
+            "Task adjustable head opal bulb",
+            "Task adjustable head porcelain"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.2477487211417788,
+        "min": 1.2413994500318448,
+        "max": 1.2612353940369572,
+        "p05": 1.2473261486808263,
+        "p95": 1.2481409781507176,
+        "total_triangles": 2284,
+        "valid_triangles": 2284,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "822f89e5cfe7fe7e96b821c049de57583cd08ba806fda72c128455550b211035",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-guarded-carry-lantern-01",
+      "source_sha256": "07c9e7d8b09a319d8e1c2d7fa175172608bfb919ef2238705699bb823001bb1c",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0013925974188092975,
+        3.583916683247425e-05,
+        0.00043010717286051653,
+        1.4302247639837647e-05,
+        2.5678669847669273e-05,
+        0.0006172281082399422,
+        2.567868072371008e-05,
+        6.33675919689362e-05,
+        5.197285493826107e-07,
+        5.197290420255741e-07,
+        5.197290420255741e-07,
+        5.197290420255741e-07,
+        2.824887095205971e-05,
+        2.8248989186370938e-05,
+        2.8248840256613526e-05,
+        2.8248957733012503e-05,
+        3.583919730469158e-05,
+        0.00012466981404675911,
+        5.1128924942152785e-05,
+        0.0002862503543369736
+      ],
+      "positive_native_part_volumes_m3": {
+        "Portable lantern stepped foot": [
+          0.0013925974188092975
+        ],
+        "Portable lantern closed cylindrical glass": [
+          0.00043010717286051653
+        ],
+        "Portable lantern hollow ventilator roof": [
+          0.0006172281082399422
+        ],
+        "Portable glass upper retaining ring": [
+          1.4302247639837647e-05
+        ],
+        "Portable glass upper retainer stay 0": [
+          5.197285493826107e-07
+        ],
+        "Portable glass upper retainer stay 1": [
+          5.197290420255741e-07
+        ],
+        "Portable glass upper retainer stay 2": [
+          5.197290420255741e-07
+        ],
+        "Portable glass upper retainer stay 3": [
+          5.197290420255741e-07
+        ],
+        "Portable lantern guard upright 0": [
+          2.824887095205971e-05
+        ],
+        "Portable lantern guard upright 1": [
+          2.8248989186370938e-05
+        ],
+        "Portable lantern guard upright 2": [
+          2.8248840256613526e-05
+        ],
+        "Portable lantern guard upright 3": [
+          2.8248957733012503e-05
+        ],
+        "Portable lantern guard hoop 0.1": [
+          3.583919730469158e-05
+        ],
+        "Portable lantern guard hoop 0.23": [
+          3.583916683247425e-05
+        ],
+        "Portable handle mounting ear -1": [
+          2.5678669847669273e-05
+        ],
+        "Portable handle mounting ear 1": [
+          2.567868072371008e-05
+        ],
+        "Portable carrying bow": [
+          6.33675919689362e-05
+        ],
+        "Portable interior pedestal": [
+          0.00012466981404675911
+        ],
+        "Portable porcelain socket": [
+          5.1128924942152785e-05
+        ],
+        "Portable opal bulb": [
+          0.0002862503543369736
+        ]
+      },
+      "actual_support": {
+        "native_parts": 20,
+        "groups": [
+          {
+            "parts": [
+              "Portable lantern stepped foot",
+              "Portable interior pedestal",
+              "Portable porcelain socket",
+              "Portable opal bulb",
+              "Portable lantern guard upright 3",
+              "Portable lantern guard hoop 0.23",
+              "Portable lantern guard hoop 0.1",
+              "Portable lantern hollow ventilator roof",
+              "Portable carrying bow",
+              "Portable handle mounting ear 1",
+              "Portable glass upper retaining ring",
+              "Portable handle mounting ear -1",
+              "Portable glass upper retainer stay 3",
+              "Portable glass upper retainer stay 2",
+              "Portable glass upper retainer stay 1",
+              "Portable glass upper retainer stay 0",
+              "Portable lantern guard upright 2",
+              "Portable lantern guard upright 1",
+              "Portable lantern guard upright 0",
+              "Portable lantern closed cylindrical glass"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [
+              "Portable lantern stepped foot"
+            ],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Portable lantern closed cylindrical glass",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable glass upper retaining ring",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable glass upper retainer stay 0",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable glass upper retainer stay 0",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable glass upper retainer stay 0",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable glass upper retainer stay 1",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable glass upper retainer stay 1",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable glass upper retainer stay 1",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable glass upper retainer stay 2",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable glass upper retainer stay 2",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable glass upper retainer stay 2",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable glass upper retainer stay 3",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable glass upper retainer stay 3",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable glass upper retainer stay 3",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable lantern guard upright 0",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable lantern guard upright 0",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable lantern guard upright 1",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable lantern guard upright 1",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable lantern guard upright 2",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable lantern guard upright 2",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable lantern guard upright 3",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable lantern guard upright 3",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable lantern guard hoop 0.1",
+            "Portable lantern guard upright 0"
+          ],
+          [
+            "Portable lantern guard hoop 0.1",
+            "Portable lantern guard upright 1"
+          ],
+          [
+            "Portable lantern guard hoop 0.1",
+            "Portable lantern guard upright 2"
+          ],
+          [
+            "Portable lantern guard hoop 0.1",
+            "Portable lantern guard upright 3"
+          ],
+          [
+            "Portable lantern guard hoop 0.23",
+            "Portable lantern guard upright 0"
+          ],
+          [
+            "Portable lantern guard hoop 0.23",
+            "Portable lantern guard upright 1"
+          ],
+          [
+            "Portable lantern guard hoop 0.23",
+            "Portable lantern guard upright 2"
+          ],
+          [
+            "Portable lantern guard hoop 0.23",
+            "Portable lantern guard upright 3"
+          ],
+          [
+            "Portable handle mounting ear -1",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable handle mounting ear -1",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable handle mounting ear -1",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable handle mounting ear -1",
+            "Portable glass upper retainer stay 2"
+          ],
+          [
+            "Portable handle mounting ear 1",
+            "Portable lantern closed cylindrical glass"
+          ],
+          [
+            "Portable handle mounting ear 1",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable handle mounting ear 1",
+            "Portable glass upper retaining ring"
+          ],
+          [
+            "Portable handle mounting ear 1",
+            "Portable glass upper retainer stay 0"
+          ],
+          [
+            "Portable carrying bow",
+            "Portable lantern hollow ventilator roof"
+          ],
+          [
+            "Portable carrying bow",
+            "Portable handle mounting ear -1"
+          ],
+          [
+            "Portable carrying bow",
+            "Portable handle mounting ear 1"
+          ],
+          [
+            "Portable interior pedestal",
+            "Portable lantern stepped foot"
+          ],
+          [
+            "Portable porcelain socket",
+            "Portable interior pedestal"
+          ],
+          [
+            "Portable opal bulb",
+            "Portable porcelain socket"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.9161894611162942,
+        "min": 1.8846183508820726,
+        "max": 1.941150595542624,
+        "p05": 1.9152359016598588,
+        "p95": 1.9171916526475823,
+        "total_triangles": 4240,
+        "valid_triangles": 4240,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "c85b55f5ca5b14e4c8b470e64f3e9839562f115a86076a8d37f3f31321f45707",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-tripod-drum-floor-lamp-01",
+      "source_sha256": "6e8bd90e85eb9c38c942f65a1f062526f06fc82677f315eb6c07b0549b54b570",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0003252341500494064,
+        0.003992427643955429,
+        8.506166038084044e-05,
+        8.505797147032992e-05,
+        1.4282715350570171e-05,
+        1.4280776885774042e-05,
+        1.428316234826831e-05,
+        0.001042104371814882,
+        0.001821897711441996,
+        6.047532919891604e-05,
+        0.0018218948290401236,
+        6.047535960275918e-05,
+        0.0018218957674989154,
+        6.047534659421673e-05,
+        0.00010160462084248442,
+        6.770354416355911e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Tripod upper metal hub": [
+          0.001042104371814882
+        ],
+        "Spreading walnut tripod leg 0": [
+          0.001821897711441996
+        ],
+        "Tripod floor shoe 0": [
+          6.047532919891604e-05
+        ],
+        "Spreading walnut tripod leg 1": [
+          0.0018218948290401236
+        ],
+        "Tripod floor shoe 1": [
+          6.047535960275918e-05
+        ],
+        "Spreading walnut tripod leg 2": [
+          0.0018218957674989154
+        ],
+        "Tripod floor shoe 2": [
+          6.047534659421673e-05
+        ],
+        "Tripod socket pedestal": [
+          0.00010160462084248442
+        ],
+        "Tripod porcelain socket": [
+          6.770354416355911e-05
+        ],
+        "Tripod opal bulb": [
+          0.0003252341500494064
+        ],
+        "Tripod pleated fabric shell": [
+          0.003992427643955429
+        ],
+        "Tripod lower rim": [
+          8.505797147032992e-05
+        ],
+        "Tripod upper rim": [
+          8.506166038084044e-05
+        ],
+        "Tripod lower shade spoke 0": [
+          1.4282715350570171e-05
+        ],
+        "Tripod lower shade spoke 1": [
+          1.4280776885774042e-05
+        ],
+        "Tripod lower shade spoke 2": [
+          1.428316234826831e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 16,
+        "groups": [
+          {
+            "parts": [
+              "Tripod upper metal hub",
+              "Tripod lower shade spoke 2",
+              "Tripod lower rim",
+              "Tripod pleated fabric shell",
+              "Tripod upper rim",
+              "Tripod lower shade spoke 1",
+              "Tripod lower shade spoke 0",
+              "Tripod socket pedestal",
+              "Tripod porcelain socket",
+              "Tripod opal bulb",
+              "Spreading walnut tripod leg 2",
+              "Tripod floor shoe 2",
+              "Spreading walnut tripod leg 1",
+              "Tripod floor shoe 1",
+              "Spreading walnut tripod leg 0",
+              "Tripod floor shoe 0"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Spreading walnut tripod leg 0",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod floor shoe 0",
+            "Spreading walnut tripod leg 0"
+          ],
+          [
+            "Spreading walnut tripod leg 1",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod floor shoe 1",
+            "Spreading walnut tripod leg 1"
+          ],
+          [
+            "Spreading walnut tripod leg 2",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod floor shoe 2",
+            "Spreading walnut tripod leg 2"
+          ],
+          [
+            "Tripod socket pedestal",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod porcelain socket",
+            "Tripod socket pedestal"
+          ],
+          [
+            "Tripod opal bulb",
+            "Tripod porcelain socket"
+          ],
+          [
+            "Tripod lower rim",
+            "Tripod pleated fabric shell"
+          ],
+          [
+            "Tripod upper rim",
+            "Tripod pleated fabric shell"
+          ],
+          [
+            "Tripod lower shade spoke 0",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod lower shade spoke 0",
+            "Tripod socket pedestal"
+          ],
+          [
+            "Tripod lower shade spoke 0",
+            "Tripod pleated fabric shell"
+          ],
+          [
+            "Tripod lower shade spoke 0",
+            "Tripod lower rim"
+          ],
+          [
+            "Tripod lower shade spoke 1",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod lower shade spoke 1",
+            "Tripod socket pedestal"
+          ],
+          [
+            "Tripod lower shade spoke 1",
+            "Tripod pleated fabric shell"
+          ],
+          [
+            "Tripod lower shade spoke 1",
+            "Tripod lower rim"
+          ],
+          [
+            "Tripod lower shade spoke 1",
+            "Tripod lower shade spoke 0"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod upper metal hub"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod socket pedestal"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod pleated fabric shell"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod lower rim"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod lower shade spoke 0"
+          ],
+          [
+            "Tripod lower shade spoke 2",
+            "Tripod lower shade spoke 1"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 3.0140408875775657,
+        "min": 3.006850988798788,
+        "max": 3.020375666486192,
+        "p05": 3.0111684989543708,
+        "p95": 3.015631305691141,
+        "total_triangles": 3148,
+        "valid_triangles": 3148,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "663b99baf9b6298af562ff5666dd8fa47afca1e67766ff4468fe78ab3aa81480",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-arched-reading-floor-lamp-01",
+      "source_sha256": "0f5b1a00c3b13ef1b33bf7ae40c4d885677d144253a52c060e580b35f2795a86",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.002157973525802011,
+        0.0010039083639033677,
+        0.0002925625040006707,
+        0.0004946392409976852,
+        0.00018013751438653952,
+        7.076945864052202e-05,
+        0.015293377459895662,
+        0.0002059454297220024
+      ],
+      "positive_native_part_volumes_m3": {
+        "Arched lamp limestone counterweight": [
+          0.015293377459895662
+        ],
+        "Arched lamp base collar": [
+          0.0002059454297220024
+        ],
+        "Continuous arched reading support": [
+          0.002157973525802011
+        ],
+        "Arched reading head stem": [
+          0.0002925625040006707
+        ],
+        "Arched reading head porcelain": [
+          0.00018013751438653952
+        ],
+        "Arched reading head retaining collar": [
+          7.076945864052202e-05
+        ],
+        "Arched reading head open reflector": [
+          0.0010039083639033677
+        ],
+        "Arched reading head opal bulb": [
+          0.0004946392409976852
+        ]
+      },
+      "actual_support": {
+        "native_parts": 8,
+        "groups": [
+          {
+            "parts": [
+              "Arched lamp limestone counterweight",
+              "Arched lamp base collar",
+              "Continuous arched reading support",
+              "Arched reading head stem",
+              "Arched reading head retaining collar",
+              "Arched reading head open reflector",
+              "Arched reading head porcelain",
+              "Arched reading head opal bulb"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Arched lamp base collar",
+            "Arched lamp limestone counterweight"
+          ],
+          [
+            "Continuous arched reading support",
+            "Arched lamp base collar"
+          ],
+          [
+            "Arched reading head stem",
+            "Continuous arched reading support"
+          ],
+          [
+            "Arched reading head porcelain",
+            "Arched reading head stem"
+          ],
+          [
+            "Arched reading head retaining collar",
+            "Arched reading head stem"
+          ],
+          [
+            "Arched reading head open reflector",
+            "Arched reading head retaining collar"
+          ],
+          [
+            "Arched reading head opal bulb",
+            "Arched reading head porcelain"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.8741448383985015,
+        "min": 1.8501324947439202,
+        "max": 1.9040018438173307,
+        "p05": 1.8737241482146276,
+        "p95": 1.8744459606806678,
+        "total_triangles": 1804,
+        "valid_triangles": 1804,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "63a302bd492f87dc5206e65224640e87fe5265bee5f578a4210ebf71ac84d2ea",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-bowl-torchiere-floor-lamp-01",
+      "source_sha256": "9ba55ac0c832d648ca2fe8e92fa49b534cfdcf00bbb09173db737676f241a266",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0023734755150144338,
+        0.00018821418837215256,
+        2.6788833679347563e-05,
+        2.6788837447592567e-05,
+        2.6788958500389974e-05,
+        0.003649763342082224,
+        0.002784479970908175,
+        6.05425953684365e-05,
+        0.0001169054345761348,
+        6.054259680846979e-05,
+        6.306731756922093e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Torchiere weighted pedestal foot": [
+          0.003649763342082224
+        ],
+        "Torchiere tapered standard": [
+          0.002784479970908175
+        ],
+        "Torchiere standard collar 0.14": [
+          6.05425953684365e-05
+        ],
+        "Torchiere standard collar 1.4": [
+          6.054259680846979e-05
+        ],
+        "Torchiere upward open bowl": [
+          0.0023734755150144338
+        ],
+        "Torchiere internal socket mount": [
+          0.0001169054345761348
+        ],
+        "Torchiere porcelain socket": [
+          6.306731756922093e-05
+        ],
+        "Torchiere upward opal bulb": [
+          0.00018821418837215256
+        ],
+        "Torchiere bowl brace 0": [
+          2.6788833679347563e-05
+        ],
+        "Torchiere bowl brace 1": [
+          2.6788837447592567e-05
+        ],
+        "Torchiere bowl brace 2": [
+          2.6788958500389974e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 11,
+        "groups": [
+          {
+            "parts": [
+              "Torchiere weighted pedestal foot",
+              "Torchiere tapered standard",
+              "Torchiere bowl brace 2",
+              "Torchiere upward open bowl",
+              "Torchiere bowl brace 1",
+              "Torchiere bowl brace 0",
+              "Torchiere internal socket mount",
+              "Torchiere porcelain socket",
+              "Torchiere upward opal bulb",
+              "Torchiere standard collar 1.4",
+              "Torchiere standard collar 0.14"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Torchiere tapered standard",
+            "Torchiere weighted pedestal foot"
+          ],
+          [
+            "Torchiere standard collar 0.14",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere standard collar 1.4",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere internal socket mount",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere internal socket mount",
+            "Torchiere upward open bowl"
+          ],
+          [
+            "Torchiere porcelain socket",
+            "Torchiere internal socket mount"
+          ],
+          [
+            "Torchiere upward opal bulb",
+            "Torchiere porcelain socket"
+          ],
+          [
+            "Torchiere bowl brace 0",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere bowl brace 0",
+            "Torchiere upward open bowl"
+          ],
+          [
+            "Torchiere bowl brace 1",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere bowl brace 1",
+            "Torchiere upward open bowl"
+          ],
+          [
+            "Torchiere bowl brace 2",
+            "Torchiere tapered standard"
+          ],
+          [
+            "Torchiere bowl brace 2",
+            "Torchiere upward open bowl"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 2.0192583652789065,
+        "min": 1.9928328683424343,
+        "max": 2.0448056456700603,
+        "p05": 2.0185061889124287,
+        "p95": 2.019868638946393,
+        "total_triangles": 2280,
+        "valid_triangles": 2280,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "3b1b787a688435769d3526ff78ba4c70b15670ae5718d3c4bbba76679a3b6887",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-hexagonal-post-lantern-01",
+      "source_sha256": "6dc91b3077020341118d9fecc9b0f0e494c40ed2a5e1a65067fd328c17e5ea8d",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.004850805627029331,
+        0.00274582330409127,
+        6.062303920847019e-05,
+        6.062275663983504e-05,
+        6.062445481802571e-05,
+        6.062312043771575e-05,
+        6.062200509404647e-05,
+        6.0624435112307174e-05,
+        0.000472722109407185,
+        0.001681155656115152,
+        0.00013466936979966704,
+        0.0001346695668568525,
+        0.00013467026337821153,
+        0.0001346702471588893,
+        0.00013466997526119973,
+        0.0001346703218890374,
+        0.00022846141079450405,
+        0.00020528615823423022,
+        9.482707810093419e-05,
+        0.0005737948255083818,
+        0.005202171703179677
+      ],
+      "positive_native_part_volumes_m3": {
+        "Hexagonal lantern post plinth": [
+          0.005202171703179677
+        ],
+        "Hexagonal lantern tapered post": [
+          0.004850805627029331
+        ],
+        "Hexagonal lantern lower tray": [
+          0.00274582330409127
+        ],
+        "Hexagonal frame upright 0": [
+          6.062303920847019e-05
+        ],
+        "Hexagonal frame upright 1": [
+          6.062275663983504e-05
+        ],
+        "Hexagonal frame upright 2": [
+          6.062445481802571e-05
+        ],
+        "Hexagonal frame upright 3": [
+          6.062312043771575e-05
+        ],
+        "Hexagonal frame upright 4": [
+          6.062200509404647e-05
+        ],
+        "Hexagonal frame upright 5": [
+          6.0624435112307174e-05
+        ],
+        "Hexagonal continuous upper frame": [
+          0.000472722109407185
+        ],
+        "Hexagonal hollow pyramidal roof": [
+          0.001681155656115152
+        ],
+        "Hexagonal clear pane 0": [
+          0.00013466936979966704
+        ],
+        "Hexagonal clear pane 1": [
+          0.0001346695668568525
+        ],
+        "Hexagonal clear pane 2": [
+          0.00013467026337821153
+        ],
+        "Hexagonal clear pane 3": [
+          0.0001346702471588893
+        ],
+        "Hexagonal clear pane 4": [
+          0.00013466997526119973
+        ],
+        "Hexagonal clear pane 5": [
+          0.0001346703218890374
+        ],
+        "Hexagonal roof finial": [
+          0.00022846141079450405
+        ],
+        "Hexagonal interior lamp pedestal": [
+          0.00020528615823423022
+        ],
+        "Hexagonal porcelain socket": [
+          9.482707810093419e-05
+        ],
+        "Hexagonal opal lamp bulb": [
+          0.0005737948255083818
+        ]
+      },
+      "actual_support": {
+        "native_parts": 21,
+        "groups": [
+          {
+            "parts": [
+              "Hexagonal lantern post plinth",
+              "Hexagonal lantern tapered post",
+              "Hexagonal lantern lower tray",
+              "Hexagonal interior lamp pedestal",
+              "Hexagonal porcelain socket",
+              "Hexagonal opal lamp bulb",
+              "Hexagonal frame upright 5",
+              "Hexagonal clear pane 4",
+              "Hexagonal continuous upper frame",
+              "Hexagonal clear pane 3",
+              "Hexagonal clear pane 2",
+              "Hexagonal clear pane 1",
+              "Hexagonal clear pane 0",
+              "Hexagonal hollow pyramidal roof",
+              "Hexagonal roof finial",
+              "Hexagonal clear pane 5",
+              "Hexagonal frame upright 4",
+              "Hexagonal frame upright 3",
+              "Hexagonal frame upright 2",
+              "Hexagonal frame upright 1",
+              "Hexagonal frame upright 0"
+            ],
+            "ground_contact": true,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Hexagonal lantern tapered post",
+            "Hexagonal lantern post plinth"
+          ],
+          [
+            "Hexagonal lantern lower tray",
+            "Hexagonal lantern tapered post"
+          ],
+          [
+            "Hexagonal frame upright 0",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal frame upright 1",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal frame upright 2",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal frame upright 3",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal frame upright 4",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal frame upright 5",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 0"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 1"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 2"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 3"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 4"
+          ],
+          [
+            "Hexagonal continuous upper frame",
+            "Hexagonal frame upright 5"
+          ],
+          [
+            "Hexagonal hollow pyramidal roof",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 0",
+            "Hexagonal frame upright 0"
+          ],
+          [
+            "Hexagonal clear pane 0",
+            "Hexagonal frame upright 1"
+          ],
+          [
+            "Hexagonal clear pane 0",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 1",
+            "Hexagonal frame upright 1"
+          ],
+          [
+            "Hexagonal clear pane 1",
+            "Hexagonal frame upright 2"
+          ],
+          [
+            "Hexagonal clear pane 1",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 2",
+            "Hexagonal frame upright 2"
+          ],
+          [
+            "Hexagonal clear pane 2",
+            "Hexagonal frame upright 3"
+          ],
+          [
+            "Hexagonal clear pane 2",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 3",
+            "Hexagonal frame upright 3"
+          ],
+          [
+            "Hexagonal clear pane 3",
+            "Hexagonal frame upright 4"
+          ],
+          [
+            "Hexagonal clear pane 3",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 4",
+            "Hexagonal frame upright 4"
+          ],
+          [
+            "Hexagonal clear pane 4",
+            "Hexagonal frame upright 5"
+          ],
+          [
+            "Hexagonal clear pane 4",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal clear pane 5",
+            "Hexagonal frame upright 0"
+          ],
+          [
+            "Hexagonal clear pane 5",
+            "Hexagonal frame upright 5"
+          ],
+          [
+            "Hexagonal clear pane 5",
+            "Hexagonal continuous upper frame"
+          ],
+          [
+            "Hexagonal roof finial",
+            "Hexagonal hollow pyramidal roof"
+          ],
+          [
+            "Hexagonal interior lamp pedestal",
+            "Hexagonal lantern lower tray"
+          ],
+          [
+            "Hexagonal porcelain socket",
+            "Hexagonal interior lamp pedestal"
+          ],
+          [
+            "Hexagonal opal lamp bulb",
+            "Hexagonal porcelain socket"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.9994038709975284,
+        "min": 1.9922230044397928,
+        "max": 2.0069749346879004,
+        "p05": 1.9985350167100313,
+        "p95": 1.999960203938319,
+        "total_triangles": 1400,
+        "valid_triangles": 1400,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "3cb8909acfda92547988e455ea1c650ab6c2e19be0cb69323e38420e93402916",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-twin-articulated-wall-reading-lamp-01",
+      "source_sha256": "1a7c5da2770db29dcb0d200723b3e243f3dc4a2f7036997b974ecaf84fc70b35",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.00026031794722728807,
+        4.67105364047408e-05,
+        1.835176264345743e-05,
+        0.00012826262326370852,
+        0.00026031690000749563,
+        0.00012826326585487397,
+        8.849717020590711e-05,
+        8.849759312094344e-05,
+        8.84974706423236e-05,
+        0.00011507120583094847,
+        0.00010715452496394089,
+        2.0830567033650972e-05,
+        7.58628567988732e-05,
+        4.6710279169322653e-05,
+        1.835189429281551e-05,
+        0.0014469166123186974,
+        1.2965401765541176e-06,
+        1.2956237090596308e-06,
+        1.295725420883779e-06,
+        1.2960037262625217e-06,
+        8.849732982222727e-05,
+        8.849758357124908e-05,
+        8.849722083444551e-05,
+        0.00011506816713335866,
+        0.00010715439865786418,
+        2.083009076159215e-05,
+        7.586406940163215e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Twin reading wall mounting plate": [
+          0.0014469166123186974
+        ],
+        "Twin wall fixing screw -0.065 0.457": [
+          1.2965401765541176e-06
+        ],
+        "Twin wall fixing screw -0.065 0.693": [
+          1.2956237090596308e-06
+        ],
+        "Twin wall fixing screw 0.065 0.457": [
+          1.295725420883779e-06
+        ],
+        "Twin wall fixing screw 0.065 0.693": [
+          1.2960037262625217e-06
+        ],
+        "Twin -1 wall pivot": [
+          8.849732982222727e-05
+        ],
+        "Twin -1 elbow pivot": [
+          8.849758357124908e-05
+        ],
+        "Twin -1 head pivot": [
+          8.849722083444551e-05
+        ],
+        "Twin -1 first articulated arm": [
+          0.00011506816713335866
+        ],
+        "Twin -1 second articulated arm": [
+          0.00010715439865786418
+        ],
+        "Twin -1 wall standoff": [
+          2.083009076159215e-05
+        ],
+        "Twin -1 reading head stem": [
+          7.586406940163215e-05
+        ],
+        "Twin -1 reading head porcelain": [
+          4.67105364047408e-05
+        ],
+        "Twin -1 reading head retaining collar": [
+          1.835176264345743e-05
+        ],
+        "Twin -1 reading head open reflector": [
+          0.00026031690000749563
+        ],
+        "Twin -1 reading head opal bulb": [
+          0.00012826326585487397
+        ],
+        "Twin 1 wall pivot": [
+          8.849717020590711e-05
+        ],
+        "Twin 1 elbow pivot": [
+          8.849759312094344e-05
+        ],
+        "Twin 1 head pivot": [
+          8.84974706423236e-05
+        ],
+        "Twin 1 first articulated arm": [
+          0.00011507120583094847
+        ],
+        "Twin 1 second articulated arm": [
+          0.00010715452496394089
+        ],
+        "Twin 1 wall standoff": [
+          2.0830567033650972e-05
+        ],
+        "Twin 1 reading head stem": [
+          7.58628567988732e-05
+        ],
+        "Twin 1 reading head porcelain": [
+          4.6710279169322653e-05
+        ],
+        "Twin 1 reading head retaining collar": [
+          1.835189429281551e-05
+        ],
+        "Twin 1 reading head open reflector": [
+          0.00026031794722728807
+        ],
+        "Twin 1 reading head opal bulb": [
+          0.00012826262326370852
+        ]
+      },
+      "actual_support": {
+        "native_parts": 27,
+        "groups": [
+          {
+            "parts": [
+              "Twin reading wall mounting plate",
+              "Twin 1 wall standoff",
+              "Twin 1 first articulated arm",
+              "Twin 1 second articulated arm",
+              "Twin 1 reading head stem",
+              "Twin 1 reading head porcelain",
+              "Twin 1 reading head opal bulb",
+              "Twin 1 reading head retaining collar",
+              "Twin 1 reading head open reflector",
+              "Twin 1 head pivot",
+              "Twin 1 elbow pivot",
+              "Twin 1 wall pivot",
+              "Twin -1 wall standoff",
+              "Twin -1 first articulated arm",
+              "Twin -1 elbow pivot",
+              "Twin -1 second articulated arm",
+              "Twin -1 head pivot",
+              "Twin -1 reading head stem",
+              "Twin -1 reading head retaining collar",
+              "Twin -1 reading head open reflector",
+              "Twin -1 reading head porcelain",
+              "Twin -1 reading head opal bulb",
+              "Twin -1 wall pivot",
+              "Twin wall fixing screw 0.065 0.693",
+              "Twin wall fixing screw 0.065 0.457",
+              "Twin wall fixing screw -0.065 0.693",
+              "Twin wall fixing screw -0.065 0.457"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [
+              "Twin reading wall mounting plate"
+            ],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Twin wall fixing screw -0.065 0.457",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin wall fixing screw -0.065 0.693",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin wall fixing screw 0.065 0.457",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin wall fixing screw 0.065 0.693",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin -1 wall pivot",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin -1 first articulated arm",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin -1 first articulated arm",
+            "Twin -1 wall pivot"
+          ],
+          [
+            "Twin -1 first articulated arm",
+            "Twin -1 elbow pivot"
+          ],
+          [
+            "Twin -1 second articulated arm",
+            "Twin -1 elbow pivot"
+          ],
+          [
+            "Twin -1 second articulated arm",
+            "Twin -1 head pivot"
+          ],
+          [
+            "Twin -1 second articulated arm",
+            "Twin -1 first articulated arm"
+          ],
+          [
+            "Twin -1 wall standoff",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin -1 wall standoff",
+            "Twin -1 wall pivot"
+          ],
+          [
+            "Twin -1 wall standoff",
+            "Twin -1 first articulated arm"
+          ],
+          [
+            "Twin -1 reading head stem",
+            "Twin -1 head pivot"
+          ],
+          [
+            "Twin -1 reading head stem",
+            "Twin -1 second articulated arm"
+          ],
+          [
+            "Twin -1 reading head porcelain",
+            "Twin -1 reading head stem"
+          ],
+          [
+            "Twin -1 reading head retaining collar",
+            "Twin -1 reading head stem"
+          ],
+          [
+            "Twin -1 reading head open reflector",
+            "Twin -1 reading head retaining collar"
+          ],
+          [
+            "Twin -1 reading head opal bulb",
+            "Twin -1 reading head porcelain"
+          ],
+          [
+            "Twin 1 wall pivot",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin 1 first articulated arm",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin 1 first articulated arm",
+            "Twin 1 wall pivot"
+          ],
+          [
+            "Twin 1 first articulated arm",
+            "Twin 1 elbow pivot"
+          ],
+          [
+            "Twin 1 second articulated arm",
+            "Twin 1 elbow pivot"
+          ],
+          [
+            "Twin 1 second articulated arm",
+            "Twin 1 head pivot"
+          ],
+          [
+            "Twin 1 second articulated arm",
+            "Twin 1 first articulated arm"
+          ],
+          [
+            "Twin 1 wall standoff",
+            "Twin reading wall mounting plate"
+          ],
+          [
+            "Twin 1 wall standoff",
+            "Twin 1 wall pivot"
+          ],
+          [
+            "Twin 1 wall standoff",
+            "Twin 1 first articulated arm"
+          ],
+          [
+            "Twin 1 reading head stem",
+            "Twin 1 head pivot"
+          ],
+          [
+            "Twin 1 reading head stem",
+            "Twin 1 second articulated arm"
+          ],
+          [
+            "Twin 1 reading head porcelain",
+            "Twin 1 reading head stem"
+          ],
+          [
+            "Twin 1 reading head retaining collar",
+            "Twin 1 reading head stem"
+          ],
+          [
+            "Twin 1 reading head open reflector",
+            "Twin 1 reading head retaining collar"
+          ],
+          [
+            "Twin 1 reading head opal bulb",
+            "Twin 1 reading head porcelain"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.7478615593788018,
+        "min": 1.7254967249185822,
+        "max": 1.7861939117067167,
+        "p05": 1.7468794939804086,
+        "p95": 1.7486605967129976,
+        "total_triangles": 3532,
+        "valid_triangles": 3532,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "5d1a8a2fee890e9ed11638edb4e0a02a85f96a78736ef807fc5a3fbc5609d458",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-caged-workshop-pendant-01",
+      "source_sha256": "5fbb3dbff57cb44477ee7bf70c4c3b57689814f497cf7536e263cfe46824ea37",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.0001880821666115177,
+        3.609179794731668e-05,
+        6.205855259603747e-06,
+        7.389505609959694e-05,
+        3.626967085305447e-05,
+        6.205858996320773e-06,
+        0.0010481871334680666,
+        3.5841727239471766e-05,
+        6.205861390400933e-06,
+        2.638386966680173e-05,
+        0.0005164599172570542,
+        0.0002536840035342417,
+        6.858178541809443e-05,
+        3.609179969051487e-05,
+        6.205855593558833e-06,
+        3.62696764544997e-05,
+        0.0013722492003580555,
+        8.8528440793804e-05,
+        6.205858996320773e-06,
+        0.0003054684781697385,
+        3.584173027585772e-05,
+        6.205861390400933e-06
+      ],
+      "positive_native_part_volumes_m3": {
+        "Cage pendant ceiling canopy": [
+          0.0013722492003580555
+        ],
+        "Cage pendant suspension rod": [
+          8.8528440793804e-05
+        ],
+        "Cage protected head stem": [
+          0.0003054684781697385
+        ],
+        "Cage protected head porcelain": [
+          0.0001880821666115177
+        ],
+        "Cage protected head retaining collar": [
+          7.389505609959694e-05
+        ],
+        "Cage protected head open reflector": [
+          0.0010481871334680666
+        ],
+        "Cage protected head opal bulb": [
+          0.0005164599172570542
+        ],
+        "Cage upper guard clamp": [
+          0.0002536840035342417
+        ],
+        "Cage lower perimeter": [
+          6.858178541809443e-05
+        ],
+        "Cage bowed guard 0": [
+          3.609179969051487e-05
+        ],
+        "Cage underside radial guard 0": [
+          6.205855593558833e-06
+        ],
+        "Cage bowed guard 1": [
+          3.62696764544997e-05
+        ],
+        "Cage underside radial guard 1": [
+          6.205858996320773e-06
+        ],
+        "Cage bowed guard 2": [
+          3.584173027585772e-05
+        ],
+        "Cage underside radial guard 2": [
+          6.205861390400933e-06
+        ],
+        "Cage bowed guard 3": [
+          3.609179794731668e-05
+        ],
+        "Cage underside radial guard 3": [
+          6.205855259603747e-06
+        ],
+        "Cage bowed guard 4": [
+          3.626967085305447e-05
+        ],
+        "Cage underside radial guard 4": [
+          6.205858996320773e-06
+        ],
+        "Cage bowed guard 5": [
+          3.5841727239471766e-05
+        ],
+        "Cage underside radial guard 5": [
+          6.205861390400933e-06
+        ],
+        "Cage underside central boss": [
+          2.638386966680173e-05
+        ]
+      },
+      "actual_support": {
+        "native_parts": 22,
+        "groups": [
+          {
+            "parts": [
+              "Cage pendant ceiling canopy",
+              "Cage pendant suspension rod",
+              "Cage upper guard clamp",
+              "Cage bowed guard 5",
+              "Cage underside radial guard 5",
+              "Cage underside central boss",
+              "Cage underside radial guard 4",
+              "Cage underside radial guard 3",
+              "Cage underside radial guard 2",
+              "Cage underside radial guard 1",
+              "Cage underside radial guard 0",
+              "Cage lower perimeter",
+              "Cage bowed guard 4",
+              "Cage bowed guard 3",
+              "Cage bowed guard 2",
+              "Cage bowed guard 1",
+              "Cage bowed guard 0",
+              "Cage protected head retaining collar",
+              "Cage protected head open reflector",
+              "Cage protected head stem",
+              "Cage protected head porcelain",
+              "Cage protected head opal bulb"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [
+              "Cage pendant ceiling canopy"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Cage pendant suspension rod",
+            "Cage pendant ceiling canopy"
+          ],
+          [
+            "Cage protected head stem",
+            "Cage pendant suspension rod"
+          ],
+          [
+            "Cage protected head porcelain",
+            "Cage protected head stem"
+          ],
+          [
+            "Cage protected head retaining collar",
+            "Cage protected head stem"
+          ],
+          [
+            "Cage protected head open reflector",
+            "Cage protected head retaining collar"
+          ],
+          [
+            "Cage protected head opal bulb",
+            "Cage protected head porcelain"
+          ],
+          [
+            "Cage upper guard clamp",
+            "Cage pendant suspension rod"
+          ],
+          [
+            "Cage upper guard clamp",
+            "Cage protected head stem"
+          ],
+          [
+            "Cage upper guard clamp",
+            "Cage protected head retaining collar"
+          ],
+          [
+            "Cage bowed guard 0",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 0",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 0",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 0",
+            "Cage bowed guard 0"
+          ],
+          [
+            "Cage bowed guard 1",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 1",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 1",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 1",
+            "Cage bowed guard 1"
+          ],
+          [
+            "Cage bowed guard 2",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 2",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 2",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 2",
+            "Cage bowed guard 2"
+          ],
+          [
+            "Cage bowed guard 3",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 3",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 3",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 3",
+            "Cage bowed guard 3"
+          ],
+          [
+            "Cage bowed guard 4",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 4",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 4",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 4",
+            "Cage bowed guard 4"
+          ],
+          [
+            "Cage bowed guard 5",
+            "Cage upper guard clamp"
+          ],
+          [
+            "Cage bowed guard 5",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 5",
+            "Cage lower perimeter"
+          ],
+          [
+            "Cage underside radial guard 5",
+            "Cage bowed guard 5"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 0"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 1"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 2"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 3"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 4"
+          ],
+          [
+            "Cage underside central boss",
+            "Cage underside radial guard 5"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.9733405079008612,
+        "min": 1.9691232329350095,
+        "max": 1.9766568267940443,
+        "p05": 1.9725915220381587,
+        "p95": 1.9741435169285764,
+        "total_triangles": 3280,
+        "valid_triangles": 3280,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "a8b6849094dd12bd3256f639d05bed32857f952ec6f118a4fd6dc4f067144eb1",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-pleated-drum-pendant-01",
+      "source_sha256": "769fcc312bf422a83bc62fce69e94e84117761b9fe43f8ec36757adfa56c2a9c",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.001324774525566378,
+        6.612769556113562e-05,
+        0.00023521680714111426,
+        2.8393936429912014e-05,
+        2.8393439601851836e-05,
+        2.8393461017609915e-05,
+        0.0001700510474999343,
+        0.0026041213765590023,
+        4.888957024225723e-05,
+        0.0002505131646435288,
+        8.732817461994576e-05,
+        8.732888090889908e-05
+      ],
+      "positive_native_part_volumes_m3": {
+        "Drum pendant ceiling canopy": [
+          0.001324774525566378
+        ],
+        "Drum central suspension rod": [
+          6.612769556113562e-05
+        ],
+        "Drum three-stay joining boss": [
+          0.00023521680714111426
+        ],
+        "Suspended drum pleated fabric shell": [
+          0.0026041213765590023
+        ],
+        "Suspended drum lower rim": [
+          8.732817461994576e-05
+        ],
+        "Suspended drum upper rim": [
+          8.732888090889908e-05
+        ],
+        "Drum sloping suspension stay 0": [
+          2.8393936429912014e-05
+        ],
+        "Drum sloping suspension stay 1": [
+          2.8393439601851836e-05
+        ],
+        "Drum sloping suspension stay 2": [
+          2.8393461017609915e-05
+        ],
+        "Drum interior socket stem": [
+          0.0001700510474999343
+        ],
+        "Drum porcelain socket": [
+          4.888957024225723e-05
+        ],
+        "Drum opal bulb": [
+          0.0002505131646435288
+        ]
+      },
+      "actual_support": {
+        "native_parts": 12,
+        "groups": [
+          {
+            "parts": [
+              "Drum pendant ceiling canopy",
+              "Drum central suspension rod",
+              "Drum three-stay joining boss",
+              "Drum sloping suspension stay 1",
+              "Suspended drum upper rim",
+              "Suspended drum pleated fabric shell",
+              "Suspended drum lower rim",
+              "Drum sloping suspension stay 0",
+              "Drum sloping suspension stay 2",
+              "Drum interior socket stem",
+              "Drum porcelain socket",
+              "Drum opal bulb"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [],
+            "verified_ceiling_anchor": [
+              "Drum pendant ceiling canopy"
+            ],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Drum central suspension rod",
+            "Drum pendant ceiling canopy"
+          ],
+          [
+            "Drum three-stay joining boss",
+            "Drum central suspension rod"
+          ],
+          [
+            "Suspended drum lower rim",
+            "Suspended drum pleated fabric shell"
+          ],
+          [
+            "Suspended drum upper rim",
+            "Suspended drum pleated fabric shell"
+          ],
+          [
+            "Drum sloping suspension stay 0",
+            "Drum three-stay joining boss"
+          ],
+          [
+            "Drum sloping suspension stay 0",
+            "Suspended drum pleated fabric shell"
+          ],
+          [
+            "Drum sloping suspension stay 0",
+            "Suspended drum upper rim"
+          ],
+          [
+            "Drum sloping suspension stay 1",
+            "Drum three-stay joining boss"
+          ],
+          [
+            "Drum sloping suspension stay 1",
+            "Suspended drum pleated fabric shell"
+          ],
+          [
+            "Drum sloping suspension stay 1",
+            "Suspended drum upper rim"
+          ],
+          [
+            "Drum sloping suspension stay 2",
+            "Drum three-stay joining boss"
+          ],
+          [
+            "Drum sloping suspension stay 2",
+            "Suspended drum pleated fabric shell"
+          ],
+          [
+            "Drum sloping suspension stay 2",
+            "Suspended drum upper rim"
+          ],
+          [
+            "Drum interior socket stem",
+            "Drum central suspension rod"
+          ],
+          [
+            "Drum interior socket stem",
+            "Drum three-stay joining boss"
+          ],
+          [
+            "Drum porcelain socket",
+            "Drum interior socket stem"
+          ],
+          [
+            "Drum opal bulb",
+            "Drum porcelain socket"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 2.340386191766748,
+        "min": 2.3137815275165945,
+        "max": 2.366060390859141,
+        "p05": 2.3390535634228042,
+        "p95": 2.3411959501013877,
+        "total_triangles": 3096,
+        "valid_triangles": 3096,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "a44330e826c3ba34a51718604d1a35b20ec9ea589c651902a79982e5442d1919",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    },
+    {
+      "id": "rpg-mansion-three-branch-table-candelabrum-01",
+      "source_sha256": "f6426649255c6b9681e32d62104d50d199608fd3a5f0030561713c05b3b411cf",
+      "source_unchanged": true,
+      "native_parts_match_canonical": true,
+      "positive_signed_component_volumes_m3": [
+        0.00011856666351188021,
+        8.269841641587543e-05,
+        1.0837621526131168e-07,
+        8.269889577642668e-05,
+        0.0011448441161216276,
+        0.0004613574015384832,
+        0.00011856655986737981,
+        1.0837418843815771e-07,
+        8.269840182606458e-05,
+        7.62398198546066e-05,
+        7.623982720635544e-05,
+        0.00011856661922138301,
+        1.0836885167009311e-07
+      ],
+      "positive_native_part_volumes_m3": {
+        "Candelabrum oval weighted base": [
+          0.0011448441161216276
+        ],
+        "Candelabrum turned central standard": [
+          0.0004613574015384832
+        ],
+        "Candelabrum swept branch -1": [
+          7.62398198546066e-05
+        ],
+        "Candelabrum swept branch 1": [
+          7.623982720635544e-05
+        ],
+        "Candelabrum candle cup 0": [
+          8.269841641587543e-05
+        ],
+        "Candelabrum wax candle 0": [
+          0.00011856666351188021
+        ],
+        "Candelabrum wick 0": [
+          1.0837621526131168e-07
+        ],
+        "Candelabrum candle cup 1": [
+          8.269889577642668e-05
+        ],
+        "Candelabrum wax candle 1": [
+          0.00011856655986737981
+        ],
+        "Candelabrum wick 1": [
+          1.0837418843815771e-07
+        ],
+        "Candelabrum candle cup 2": [
+          8.269840182606458e-05
+        ],
+        "Candelabrum wax candle 2": [
+          0.00011856661922138301
+        ],
+        "Candelabrum wick 2": [
+          1.0836885167009311e-07
+        ]
+      },
+      "actual_support": {
+        "native_parts": 13,
+        "groups": [
+          {
+            "parts": [
+              "Candelabrum oval weighted base",
+              "Candelabrum turned central standard",
+              "Candelabrum candle cup 1",
+              "Candelabrum swept branch 1",
+              "Candelabrum wax candle 2",
+              "Candelabrum wick 2",
+              "Candelabrum candle cup 2",
+              "Candelabrum swept branch -1",
+              "Candelabrum wax candle 0",
+              "Candelabrum wick 0",
+              "Candelabrum candle cup 0",
+              "Candelabrum wax candle 1",
+              "Candelabrum wick 1"
+            ],
+            "ground_contact": false,
+            "lowest_mm": 0.0,
+            "verified_wall_anchors": [],
+            "verified_desk_support": [
+              "Candelabrum oval weighted base"
+            ],
+            "verified_ceiling_anchor": [],
+            "valid_installed_support": true
+          }
+        ],
+        "contact_edges": [
+          [
+            "Candelabrum turned central standard",
+            "Candelabrum oval weighted base"
+          ],
+          [
+            "Candelabrum swept branch -1",
+            "Candelabrum turned central standard"
+          ],
+          [
+            "Candelabrum swept branch 1",
+            "Candelabrum turned central standard"
+          ],
+          [
+            "Candelabrum swept branch 1",
+            "Candelabrum swept branch -1"
+          ],
+          [
+            "Candelabrum candle cup 0",
+            "Candelabrum swept branch -1"
+          ],
+          [
+            "Candelabrum wax candle 0",
+            "Candelabrum swept branch -1"
+          ],
+          [
+            "Candelabrum wax candle 0",
+            "Candelabrum candle cup 0"
+          ],
+          [
+            "Candelabrum wick 0",
+            "Candelabrum wax candle 0"
+          ],
+          [
+            "Candelabrum candle cup 1",
+            "Candelabrum turned central standard"
+          ],
+          [
+            "Candelabrum wax candle 1",
+            "Candelabrum turned central standard"
+          ],
+          [
+            "Candelabrum wax candle 1",
+            "Candelabrum candle cup 1"
+          ],
+          [
+            "Candelabrum wick 1",
+            "Candelabrum wax candle 1"
+          ],
+          [
+            "Candelabrum candle cup 2",
+            "Candelabrum swept branch 1"
+          ],
+          [
+            "Candelabrum wax candle 2",
+            "Candelabrum swept branch 1"
+          ],
+          [
+            "Candelabrum wax candle 2",
+            "Candelabrum candle cup 2"
+          ],
+          [
+            "Candelabrum wick 2",
+            "Candelabrum wax candle 2"
+          ]
+        ],
+        "seat_load_paths": [],
+        "floating_groups": 0
+      },
+      "uv": {
+        "meters_per_uv": 1.0824567894957646,
+        "min": 1.0789554649706337,
+        "max": 1.0865536865041243,
+        "p05": 1.0819019037812267,
+        "p95": 1.0829970347986018,
+        "total_triangles": 2460,
+        "valid_triangles": 2460,
+        "excluded_triangles": 0,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "degenerate_world_indices": [],
+        "degenerate_uv_indices": []
+      },
+      "errors": [],
+      "authoring_sha256": "3c0cd7f05636d123a93edf9484392a1b53fbdebd86ab4365a7b36b7923f32e7c",
+      "authoring_unchanged": true,
+      "standalone_authoring_matches": true
+    }
+  ],
+  "errors": 0
+}

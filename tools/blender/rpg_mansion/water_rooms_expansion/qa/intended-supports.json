@@ -1,0 +1,707 @@
+{
+  "method": "Actual reopened local bearing and connection probes using triangle solid-angle containment; floor and wall anchoring also tested by native graph.",
+  "items": [
+    {
+      "id": "rpg-mansion-copper-bateau-cradle-bath-01",
+      "sourceSha256": "23c474f664b27e268eed6a3e40d6145fce3b5732dbf6b2146815833d3fb5a94f",
+      "checks": [
+        {
+          "label": "Cradle head into copper hull -1",
+          "actualBottomCentredPointM": [
+            -0.49000000953674316,
+            0.0,
+            0.14499999582767487
+          ],
+          "insideExpectedParts": {
+            "Bateau continuous copper hull and open cavity": true,
+            "Cradle transverse bath bearer -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Skid to bearer -1 -1",
+          "actualBottomCentredPointM": [
+            -0.49000000953674316,
+            -0.1899999976158142,
+            0.07500000298023224
+          ],
+          "insideExpectedParts": {
+            "Cradle transverse bath bearer -1": true,
+            "Longitudinal timber cradle skid -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Skid to bearer -1 1",
+          "actualBottomCentredPointM": [
+            -0.49000000953674316,
+            0.1899999976158142,
+            0.07500000298023224
+          ],
+          "insideExpectedParts": {
+            "Cradle transverse bath bearer -1": true,
+            "Longitudinal timber cradle skid 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Cradle head into copper hull 1",
+          "actualBottomCentredPointM": [
+            0.49000000953674316,
+            0.0,
+            0.14499999582767487
+          ],
+          "insideExpectedParts": {
+            "Bateau continuous copper hull and open cavity": true,
+            "Cradle transverse bath bearer 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Skid to bearer 1 -1",
+          "actualBottomCentredPointM": [
+            0.49000000953674316,
+            -0.1899999976158142,
+            0.07500000298023224
+          ],
+          "insideExpectedParts": {
+            "Cradle transverse bath bearer 1": true,
+            "Longitudinal timber cradle skid -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Skid to bearer 1 1",
+          "actualBottomCentredPointM": [
+            0.49000000953674316,
+            0.1899999976158142,
+            0.07500000298023224
+          ],
+          "insideExpectedParts": {
+            "Cradle transverse bath bearer 1": true,
+            "Longitudinal timber cradle skid 1": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-paneled-built-in-bath-01",
+      "sourceSha256": "e094b81cb1f1aeadba8d53ebdc60ae0626fa19488700c6ca52288f4ea125f6af",
+      "checks": [
+        {
+          "label": "Porcelain underside to structural plinth",
+          "actualBottomCentredPointM": [
+            0.0,
+            0.0,
+            0.09099999815225601
+          ],
+          "insideExpectedParts": {
+            "Built-in porcelain bath shell and continuous inset rim": true,
+            "Built-in structural base plinth": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-quadrant-corner-bath-01",
+      "sourceSha256": "a472a49fc93b244d91e8063a118d185113fd8aa491580614b4c5c39304b21353",
+      "checks": [],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-deep-seated-hip-bath-01",
+      "sourceSha256": "6dc56fd0049ea7660ff7454f86c918e7f9f80f7682e94d8a28bfd08f1a1474f4",
+      "checks": [
+        {
+          "label": "Curved internal bench bears on bowl floor",
+          "actualBottomCentredPointM": [
+            -0.2849999964237213,
+            0.0,
+            0.14900000393390656
+          ],
+          "insideExpectedParts": {
+            "Deep hip bath continuous high-sided hollow shell": true,
+            "Hip bath internal raised sitting bench": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-double-basin-open-console-01",
+      "sourceSha256": "1f399049b6e588d9cf298b70d40d5034dbb7db0147102d53a3e20757a035d67a",
+      "checks": [
+        {
+          "label": "Console post to stone -1 -1",
+          "actualBottomCentredPointM": [
+            -0.6430000066757202,
+            -0.22499999403953552,
+            0.7950000166893005
+          ],
+          "insideExpectedParts": {
+            "Console metal load-bearing leg -1 -1": true,
+            "Separate cut-stone basin slab -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Console post to stone -1 1",
+          "actualBottomCentredPointM": [
+            -0.6430000066757202,
+            0.22499999403953552,
+            0.7950000166893005
+          ],
+          "insideExpectedParts": {
+            "Console metal load-bearing leg -1 1": true,
+            "Separate cut-stone basin slab -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Console post to stone 1 -1",
+          "actualBottomCentredPointM": [
+            0.6430000066757202,
+            -0.22499999403953552,
+            0.7950000166893005
+          ],
+          "insideExpectedParts": {
+            "Console metal load-bearing leg 1 -1": true,
+            "Separate cut-stone basin slab 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Console post to stone 1 1",
+          "actualBottomCentredPointM": [
+            0.6430000066757202,
+            0.22499999403953552,
+            0.7950000166893005
+          ],
+          "insideExpectedParts": {
+            "Console metal load-bearing leg 1 1": true,
+            "Separate cut-stone basin slab 1": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-portable-bowl-jug-washstand-01",
+      "sourceSha256": "509e51affb77feac6ebc8ef9acd1a2eee9fe0c6f63fa65bca24d9353f3c2d057",
+      "checks": [
+        {
+          "label": "Loose washing bowl rests on timber top",
+          "actualBottomCentredPointM": [
+            -0.08500001579523087,
+            -0.006220253184437752,
+            0.7509999871253967
+          ],
+          "insideExpectedParts": {
+            "Portable washstand loose hollow washing bowl": true,
+            "Portable washstand top": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Water jug rests on timber top",
+          "actualBottomCentredPointM": [
+            0.1759999841451645,
+            0.14677974581718445,
+            0.7509999871253967
+          ],
+          "insideExpectedParts": {
+            "Portable ceramic water jug hollow body": true,
+            "Portable washstand top": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-two-wall-corner-basin-01",
+      "sourceSha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+      "checks": [
+        {
+          "label": "Rear bracket to basin underside",
+          "actualBottomCentredPointM": [
+            -0.10999999195337296,
+            0.08500000834465027,
+            0.18000000715255737
+          ],
+          "insideExpectedParts": {
+            "Corner basin rear bearing arm": true,
+            "Corner basin quarter-front hollow shell": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Side bracket to basin underside",
+          "actualBottomCentredPointM": [
+            0.08500000834465027,
+            -0.10999999195337296,
+            0.18000000715255737
+          ],
+          "insideExpectedParts": {
+            "Corner basin side bearing arm": true,
+            "Corner basin quarter-front hollow shell": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Rear brace into rear wall plate",
+          "actualBottomCentredPointM": [
+            -0.10999999195337296,
+            0.26500001549720764,
+            0.041999999433755875
+          ],
+          "insideExpectedParts": {
+            "Corner basin rear triangulated brace": true,
+            "Corner basin rear wall bearing plate": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Side brace into side wall plate",
+          "actualBottomCentredPointM": [
+            0.26500001549720764,
+            -0.10999999195337296,
+            0.041999999433755875
+          ],
+          "insideExpectedParts": {
+            "Corner basin side triangulated brace": true,
+            "Corner basin side wall bearing plate": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-freestanding-bath-bridge-filler-01",
+      "sourceSha256": "21c65772e17231da7e87c293db50006696347e55b9dcd0b0af19d80eed0ce2df",
+      "checks": [
+        {
+          "label": "Floor column into mixer valve -1",
+          "actualBottomCentredPointM": [
+            -0.11500000208616257,
+            0.16249999403953552,
+            0.800000011920929
+          ],
+          "insideExpectedParts": {
+            "Filler grounded floor mounting foot -1": true,
+            "Filler valve body -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bridge into mixer valve -1",
+          "actualBottomCentredPointM": [
+            -0.11500000208616257,
+            0.16249999403953552,
+            0.8339999914169312
+          ],
+          "insideExpectedParts": {
+            "Filler bridge mixer": true,
+            "Filler valve body -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Floor column into mixer valve 1",
+          "actualBottomCentredPointM": [
+            0.11500000208616257,
+            0.16249999403953552,
+            0.800000011920929
+          ],
+          "insideExpectedParts": {
+            "Filler grounded floor mounting foot 1": true,
+            "Filler valve body 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bridge into mixer valve 1",
+          "actualBottomCentredPointM": [
+            0.11500000208616257,
+            0.16249999403953552,
+            0.8339999914169312
+          ],
+          "insideExpectedParts": {
+            "Filler bridge mixer": true,
+            "Filler valve body 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Gooseneck into bridge mixer",
+          "actualBottomCentredPointM": [
+            0.0,
+            0.16249999403953552,
+            0.8339999914169312
+          ],
+          "insideExpectedParts": {
+            "Long-reach bath filler gooseneck": true,
+            "Filler bridge mixer": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-rail-hand-shower-hose-01",
+      "sourceSha256": "0e499241ed9e55911fb1b48b55d07e27b7ae033bd5d69d9a0ac7987790c9fdc3",
+      "checks": [
+        {
+          "label": "Sliding clamp engages rail",
+          "actualBottomCentredPointM": [
+            0.0030064061284065247,
+            0.0563976913690567,
+            0.815771758556366
+          ],
+          "insideExpectedParts": {
+            "Hand-shower sliding support clamp": true,
+            "Hand-shower sliding rail": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Sliding clamp holds handset",
+          "actualBottomCentredPointM": [
+            0.10300640761852264,
+            0.023397691547870636,
+            0.8177717328071594
+          ],
+          "insideExpectedParts": {
+            "Hand-shower sliding support clamp": true,
+            "Handset ergonomic handle": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Rail bracket into wall plate 0.375",
+          "actualBottomCentredPointM": [
+            0.0030064061284065247,
+            0.12039769440889359,
+            0.33977174758911133
+          ],
+          "insideExpectedParts": {
+            "Rail wall mounting plate 0.375": true,
+            "Rail wall support arm 0.375": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Rail bracket engages rail 0.375",
+          "actualBottomCentredPointM": [
+            0.0030064061284065247,
+            0.0563976913690567,
+            0.33977174758911133
+          ],
+          "insideExpectedParts": {
+            "Hand-shower sliding rail": true,
+            "Rail wall support arm 0.375": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Rail bracket into wall plate 1.17",
+          "actualBottomCentredPointM": [
+            0.0030064061284065247,
+            0.12039769440889359,
+            1.134771704673767
+          ],
+          "insideExpectedParts": {
+            "Rail wall mounting plate 1.17": true,
+            "Rail wall support arm 1.17": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Rail bracket engages rail 1.17",
+          "actualBottomCentredPointM": [
+            0.0030064061284065247,
+            0.0563976913690567,
+            1.134771704673767
+          ],
+          "insideExpectedParts": {
+            "Hand-shower sliding rail": true,
+            "Rail wall support arm 1.17": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-overhead-brass-standpipe-01",
+      "sourceSha256": "5f8c7af33f70e21dbbc1384889a305c5d6ec7cff208eef83d2b785f3d6fd75b6",
+      "checks": [
+        {
+          "label": "Ceramic lever into valve -1",
+          "actualBottomCentredPointM": [
+            -0.14300000667572021,
+            0.23749999701976776,
+            1.090999960899353
+          ],
+          "insideExpectedParts": {
+            "Overhead shower ceramic lever -1": true,
+            "Overhead shower mixer valve -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Ceramic lever into valve 1",
+          "actualBottomCentredPointM": [
+            0.14300000667572021,
+            0.23749999701976776,
+            1.090999960899353
+          ],
+          "insideExpectedParts": {
+            "Overhead shower ceramic lever 1": true,
+            "Overhead shower mixer valve 1": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-tankless-flushometer-wc-01",
+      "sourceSha256": "fcf6293ef24659802abad5db49f5a409cea128593a86b4361dc45615cdd731c6",
+      "checks": [
+        {
+          "label": "Inlet reaches wall escutcheon",
+          "actualBottomCentredPointM": [
+            0.0,
+            0.3842499852180481,
+            0.8949999809265137
+          ],
+          "insideExpectedParts": {
+            "Flushometer wall inlet": true,
+            "Flushometer wall service escutcheon": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Bowl feed reaches bowl rear",
+          "actualBottomCentredPointM": [
+            0.0,
+            0.17925000190734863,
+            0.38999998569488525
+          ],
+          "insideExpectedParts": {
+            "Flushometer vertical bowl feed": true,
+            "Flushometer WC continuous hollow bowl and broad foot": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-single-basin-mirrored-cabinet-01",
+      "sourceSha256": "194ae6d2a68776ad5253d0b96859f8b781bcd6c4cfa988bdc03d458222e1de81",
+      "checks": [
+        {
+          "label": "Countertop into side cabinet -1",
+          "actualBottomCentredPointM": [
+            -0.3499999940395355,
+            0.01715739071369171,
+            0.8100000023841858
+          ],
+          "insideExpectedParts": {
+            "Limestone vanity top with actual basin aperture": true,
+            "Vanity cabinet side -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into carcass -1 0.32",
+          "actualBottomCentredPointM": [
+            -0.34200000762939453,
+            -0.2378426045179367,
+            0.3199999928474426
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf -1 0.32": true,
+            "Vanity cabinet side -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into door -1 0.32",
+          "actualBottomCentredPointM": [
+            -0.32899999618530273,
+            -0.2518426179885864,
+            0.3199999928474426
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf -1 0.32": true,
+            "Raised-panel vanity door -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into carcass -1 0.62",
+          "actualBottomCentredPointM": [
+            -0.34200000762939453,
+            -0.2378426045179367,
+            0.6200000047683716
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf -1 0.62": true,
+            "Vanity cabinet side -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into door -1 0.62",
+          "actualBottomCentredPointM": [
+            -0.32899999618530273,
+            -0.2518426179885864,
+            0.6200000047683716
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf -1 0.62": true,
+            "Raised-panel vanity door -1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Countertop into side cabinet 1",
+          "actualBottomCentredPointM": [
+            0.3499999940395355,
+            0.01715739071369171,
+            0.8100000023841858
+          ],
+          "insideExpectedParts": {
+            "Limestone vanity top with actual basin aperture": true,
+            "Vanity cabinet side 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into carcass 1 0.32",
+          "actualBottomCentredPointM": [
+            0.34200000762939453,
+            -0.2378426045179367,
+            0.3199999928474426
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf 1 0.32": true,
+            "Vanity cabinet side 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into door 1 0.32",
+          "actualBottomCentredPointM": [
+            0.32899999618530273,
+            -0.2518426179885864,
+            0.3199999928474426
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf 1 0.32": true,
+            "Raised-panel vanity door 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into carcass 1 0.62",
+          "actualBottomCentredPointM": [
+            0.34200000762939453,
+            -0.2378426045179367,
+            0.6200000047683716
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf 1 0.62": true,
+            "Vanity cabinet side 1": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Hinge into door 1 0.62",
+          "actualBottomCentredPointM": [
+            0.32899999618530273,
+            -0.2518426179885864,
+            0.6200000047683716
+          ],
+          "insideExpectedParts": {
+            "Mounted vanity door hinge leaf 1 0.62": true,
+            "Raised-panel vanity door 1": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-framed-glass-shower-enclosure-01",
+      "sourceSha256": "4613189a4e86111c88afb1ae17f8ffb7d3469db54b0dfed1a26c4420fe654579",
+      "checks": [
+        {
+          "label": "Enclosure upright into tray -1 -1",
+          "actualBottomCentredPointM": [
+            -0.4620000123977661,
+            -0.45100000500679016,
+            0.11999999731779099
+          ],
+          "insideExpectedParts": {
+            "Shower enclosure vertical frame -1 -1": true,
+            "Enclosure genuinely hollow shower tray": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Enclosure upright into tray -1 1",
+          "actualBottomCentredPointM": [
+            -0.4620000123977661,
+            0.47300001978874207,
+            0.11999999731779099
+          ],
+          "insideExpectedParts": {
+            "Shower enclosure vertical frame -1 1": true,
+            "Enclosure genuinely hollow shower tray": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Enclosure upright into tray 1 -1",
+          "actualBottomCentredPointM": [
+            0.4620000123977661,
+            -0.45100000500679016,
+            0.11999999731779099
+          ],
+          "insideExpectedParts": {
+            "Shower enclosure vertical frame 1 -1": true,
+            "Enclosure genuinely hollow shower tray": true
+          },
+          "pass": true
+        },
+        {
+          "label": "Enclosure upright into tray 1 1",
+          "actualBottomCentredPointM": [
+            0.4620000123977661,
+            0.47300001978874207,
+            0.11999999731779099
+          ],
+          "insideExpectedParts": {
+            "Shower enclosure vertical frame 1 1": true,
+            "Enclosure genuinely hollow shower tray": true
+          },
+          "pass": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": 0
+}

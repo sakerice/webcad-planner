@@ -1,0 +1,92 @@
+{
+  "name": "supported-portico",
+  "assemblySourceSha256": "5b40313c5c0aea920e92bb68f6e48cf4890d9a2c6fb9c9e8770d13f754719bd3",
+  "instanceCount": 7,
+  "actualGlbContacts": [
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.001"
+      ],
+      "atM": [
+        -1.1999999284744263,
+        0.0,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.00011920928955078125,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.001"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.002"
+      ],
+      "atM": [
+        0.0,
+        0.0,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "paired actual connector",
+      "a": [
+        "octagon-cabochon-floor-tile.002"
+      ],
+      "b": [
+        "octagon-cabochon-floor-tile.003"
+      ],
+      "atM": [
+        1.2000000476837158,
+        0.0,
+        -0.05000000298023224
+      ],
+      "gapMm": 0.00011920928955078125,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to pediment",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001"
+      ],
+      "b": [
+        "portico-pediment"
+      ],
+      "atM": [
+        -1.8,
+        0.0,
+        3.0
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    },
+    {
+      "test": "column abacus to pediment",
+      "a": [
+        "tuscan-support-column",
+        "tuscan-support-column.001"
+      ],
+      "b": [
+        "portico-pediment"
+      ],
+      "atM": [
+        1.8,
+        0.0,
+        3.0
+      ],
+      "gapMm": 0.0,
+      "passTest": true
+    }
+  ],
+  "cavitySamples": [],
+  "clearanceSamples": [],
+  "errors": []
+}

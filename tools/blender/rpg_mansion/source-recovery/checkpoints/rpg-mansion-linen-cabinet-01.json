@@ -1,0 +1,198 @@
+{
+  "id": "rpg-mansion-linen-cabinet-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-linen-cabinet-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-linen-cabinet-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-linen-cabinet-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 15,
+  "validation": {
+    "model": "rpg-mansion-linen-cabinet-01",
+    "dimensions_mm": [
+      750.0,
+      490.00000953674316,
+      1799.9999523162842
+    ],
+    "bounds_m": [
+      [
+        -0.375,
+        -0.24500000476837158,
+        0.0
+      ],
+      [
+        0.375,
+        0.24500000476837158,
+        1.7999999523162842
+      ]
+    ],
+    "triangles": 2044,
+    "uv": {
+      "meters_per_uv": 3.8488610186575407,
+      "min": 3.4507626521945145,
+      "max": 4.8816871417647585,
+      "p05": 3.474882756585631,
+      "p95": 4.446140723840671,
+      "total_triangles": 2044,
+      "valid_triangles": 2044,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Walnut": "wood",
+      "RPG Walnut edge": "wood",
+      "RPG Antique brass": "metal"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 71096
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "cb9f0b114e3e2a0c52e450684f5df8b8537f0587bc9c90b7993fd77738873528",
+    "bytes": 71096,
+    "triangles": 2044,
+    "bounds_gltf_m": [
+      [
+        -0.375,
+        0.0,
+        -0.24500000476837158
+      ],
+      [
+        0.375,
+        1.7999999523162842,
+        0.24500000476837158
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      750.0,
+      490.00000953674316,
+      1799.9999523162842
+    ],
+    "geometry_material_sha256_1e7": "528c88c3e297d54053f70dc6fb82175e52a6e9d930c9b32996de6f09de8d0b6e",
+    "geometry_material_uv_sha256_1e7": "ef266ae624ea9b3b5dc6cc7e71d20b5a9344fdf944115915d193730eab1b16ed",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 976
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 788
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 280
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "ffce5070e474bec58f9d567406a1003806e4b27f31b1e7db9e83d8416d5ab488",
+    "bytes": 71300,
+    "triangles": 2044,
+    "bounds_gltf_m": [
+      [
+        -0.375,
+        0.0,
+        -0.24500000476837158
+      ],
+      [
+        0.375,
+        1.7999999523162842,
+        0.24500000476837158
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      750.0,
+      490.00000953674316,
+      1799.9999523162842
+    ],
+    "geometry_material_sha256_1e7": "528c88c3e297d54053f70dc6fb82175e52a6e9d930c9b32996de6f09de8d0b6e",
+    "geometry_material_uv_sha256_1e7": "ef266ae624ea9b3b5dc6cc7e71d20b5a9344fdf944115915d193730eab1b16ed",
+    "finish_channels": [
+      "metal",
+      "wood"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 976
+      },
+      {
+        "material": "RPG Walnut",
+        "channel": "wood",
+        "triangles": 788
+      },
+      {
+        "material": "RPG Walnut edge",
+        "channel": "wood",
+        "triangles": 280
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 4.4,
+  "source_sha256": "059d74ab908ca25a89d5a842e713c50fe63374f894841ac4063d010f03c2439c",
+  "front_sha256": "a45065683436321bffac25ce41aafc874089c07bfd20ca41d6f18e3971dd7bb4",
+  "rear_sha256": "e5dd14e0e8f6a1f1bf58d3206824dbd0b0475a38708e3ce76643dc3d97c4fea5",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.647657+00:00",
+    "source_sha256_before": "5a0b316c683e00c5d062c4815e99f125b50829048b613c9d712a186178e5d0e4",
+    "source_sha256_after": "059d74ab908ca25a89d5a842e713c50fe63374f894841ac4063d010f03c2439c",
+    "mesh_geometry_uv_material_digest_preserved": "7eab03cb8e3ce7d0f5c2719d19c444a2e8458243ee210b724a89ae01cc9af737",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-linen-cabinet-01-rear.png",
+        "render_filepath": "//rpg-mansion-linen-cabinet-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "059d74ab908ca25a89d5a842e713c50fe63374f894841ac4063d010f03c2439c",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

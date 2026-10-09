@@ -1,0 +1,4497 @@
+{
+  "items": [
+    {
+      "id": "rpg-mansion-oval-pedestal-dining-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-dining-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "943cf28ddf7a3a3ba4be075656ed9ab5cca3535fe08aaa775037008c5581a17d",
+      "git_blob_sha": "1b1e664722ea890d1dda9e94f733803fc260b6d3",
+      "bytes": 235668,
+      "actual_bounds_gltf_m": [
+        [
+          -1.100000023841858,
+          0.0,
+          -0.5600000023841858
+        ],
+        [
+          1.100000023841858,
+          0.7599999904632568,
+          0.5600000023841858
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        2200.000047683716,
+        1120.0000047683716,
+        759.9999904632568
+      ],
+      "dimension_error_mm": [
+        4.76837158203125e-05,
+        4.76837158203125e-06,
+        -9.5367431640625e-06
+      ],
+      "triangles": 5772,
+      "uv": {
+        "triangles": 5772,
+        "valid_triangles": 5772,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.823346924095816,
+        "p95": 7.36311891799611,
+        "p95_p05": 1.26441357761617,
+        "median": 6.1798833962716015
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-oval-pedestal-dining-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-dining-01-thumb.png",
+          "sha256": "5930b13be30ed189d2e1bbd3feeaf87d26091f6f3d19ec3de82daf5c31b38fc5",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 24731,
+          "pixel_bbox_alpha_gt_0": [
+            98,
+            163,
+            414,
+            335
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            99,
+            163,
+            413,
+            335
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-dining-01-top.png",
+          "sha256": "8ddf833c0b1e8038f9c7112470c99d7c089810088af11196f6aac68684a6c1e4",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 94200,
+          "pixel_bbox_alpha_gt_0": [
+            14,
+            132,
+            499,
+            380
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            132,
+            498,
+            380
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 752,
+            "digest": "ad3aa636363bf63d7b9785e51b0b5179294da83b54438d2a4e985271896cb4d0"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 544,
+            "digest": "0ccc66621386a2978eeb3401ce0eba694d3b3cf85e6fb008a7e422d739b928cb"
+          },
+          "Walnut figured body|wood": {
+            "points": 1440,
+            "digest": "c783d50d25f4a442eb31722c0e64f05bfab928d9f05bcf1b9611542a02e772a1"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 192,
+            "digest": "bfcebcc01885a7736fadb58b061fb6b0f6af575418970b1c063ef01abda92445"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 1472,
+          "Walnut carved moulding|wood": 1080,
+          "Walnut figured body|wood": 2840,
+          "Walnut recessed joinery|wood": 380
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "b671198b8f4dc6d5051ed9a3eaa48317afa382e799bb3981aec6f9b14e2b7beb",
+          "Walnut carved moulding|wood": "dc14ed353a9ceaea0014a22070b87f28f30979a44d176fc6ce7627fa8f8d0927",
+          "Walnut figured body|wood": "23994e4310dbd534b54a930e336b38a5f18c6845d8419f5757597868ca2c1847",
+          "Walnut recessed joinery|wood": "d2dbd5e6d82baa687feaee0b590e0d9eb78274f2d38221821164924bb40fe43b"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "7b20f5af09e16718fb1dbeeb918621ba92b1464fe6a9fa1454a642d02e2b22d5",
+          "Walnut carved moulding|wood": "2e3bd491163bfeb79941e8d9851b5819996415b9ae774f0151348de433c041a0",
+          "Walnut figured body|wood": "14e0f35d000fb575e94bec9cada322c04e50de8de50fb40b596fab861c3e720c",
+          "Walnut recessed joinery|wood": "a6d30fa7bdf66ebeef3db2e7a6d7c3d60218e483212de03a08a780eca8b79792"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-kidney-writing-desk-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kidney-writing-desk-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "24af2c7b855776acc866d60713044f09ae0d0afe7ad60f9e4eef601ad2fefb66",
+      "git_blob_sha": "9891ec611fafa6b9ff4c9df7b5089e072dffd122",
+      "bytes": 169500,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6499999761581421,
+          0.0,
+          -0.3499999940395355
+        ],
+        [
+          0.6499999761581421,
+          0.7710000276565552,
+          0.3499999940395355
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1299.9999523162842,
+        699.999988079071,
+        771.0000276565552
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-05,
+        -1.1920928955078125e-05,
+        2.765655517578125e-05
+      ],
+      "triangles": 3964,
+      "uv": {
+        "triangles": 3964,
+        "valid_triangles": 3964,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.9291374911784387,
+        "p95": 3.5862802473653166,
+        "p95_p05": 1.224346845501779,
+        "median": 3.1096793386848756
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "leather"
+          },
+          "name": "Teal desk leather",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.022173885256052017,
+              0.07421357184648514,
+              0.07036009430885315,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.6899999976158142
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-kidney-writing-desk-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kidney-writing-desk-01-thumb.png",
+          "sha256": "347bf9b7eb4bedd63016dca0f7b823b5cbd98fe4ee1e41dfe82223e2c50a5cfe",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 33488,
+          "pixel_bbox_alpha_gt_0": [
+            76,
+            114,
+            409,
+            379
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            77,
+            114,
+            408,
+            378
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kidney-writing-desk-01-top.png",
+          "sha256": "5725fb00e9fcac0c2a08a0b0db4844764bb73287f55aad347c11d9a5f51f7203",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 100621,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            125,
+            499,
+            387
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            125,
+            498,
+            387
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 824,
+            "digest": "d27a9be56bc347e41469d0a61809e5fe7791f8c66998b2270ff1ea19f1e385e3"
+          },
+          "Teal desk leather|leather": {
+            "points": 128,
+            "digest": "21e34999b62a0ba5c7cbf252cc08cae6cd0729eb1f59711355baf60323ac5a87"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 64,
+            "digest": "3d642865cbee36b2bb2f79c4edd375302df458e7ac4f0c632113b342a7b5aed6"
+          },
+          "Walnut figured body|wood": {
+            "points": 672,
+            "digest": "94357090eef2d1b2d1da42cfeae17a3a0958bf7a6282ef0dcfb588ee71bc15d5"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 320,
+            "digest": "907891f6f89287caf135d95b9bd33b76fe788bd2cda529d875d0393005fc2a6f"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 1628,
+          "Teal desk leather|leather": 252,
+          "Walnut carved moulding|wood": 124,
+          "Walnut figured body|wood": 1324,
+          "Walnut recessed joinery|wood": 636
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "8b7d9ac303e50616304ba89f08691f0b2102439a309f6a3dd048bb0ece191f3f",
+          "Teal desk leather|leather": "cf97e579a5ece0475ac569960aa4c5211d8c65dd2b874a76ac9beb39fb0ddf17",
+          "Walnut carved moulding|wood": "a903b5e20c3fd0d1ddc3353f24c5a449237b2cdc63e18b82a87aeb87f15684e3",
+          "Walnut figured body|wood": "4487afa0ca5fe926dbc4327044a34a02387f4776514565110e2b659ffc60fd0c",
+          "Walnut recessed joinery|wood": "d720823764a2f6972ea9fb0f0543c6dd19b18a24577b9a58d84eeefafe26e732"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "27f0466630851e5db3b80ee4049749ccf04af0c1b4128ba0828e95ea75e5aa60",
+          "Teal desk leather|leather": "dad975e536634e2225c322eabbe2932c07a9fbd8a0602ba9b5a5370d787facaa",
+          "Walnut carved moulding|wood": "b8217a90a6c98d9ca34c8e2f905a11ac84ee8f512f113e4b1b51f268a22e0a69",
+          "Walnut figured body|wood": "6e15d0ccbf4b694d111d21f01edd486a0dfe89bc1a7b52476f3f0d3bb81c375a",
+          "Walnut recessed joinery|wood": "3c4375492e8dacd739fd1e00cbb6e752e2ff94b15ad7470016e7ae20bbd50188"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-drum-library-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-drum-library-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "9783abf31ee7cc1f986a28fedd89f5e6aab58ede00928ead89cab0de4ddb7fca",
+      "git_blob_sha": "06cf28f30eeb29dbda4917586399e9069c701a27",
+      "bytes": 231596,
+      "actual_bounds_gltf_m": [
+        [
+          -0.5600000023841858,
+          0.0,
+          -0.5600000023841858
+        ],
+        [
+          0.5600000023841858,
+          0.7400000095367432,
+          0.5600000023841858
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1120.0000047683716,
+        1120.0000047683716,
+        740.0000095367432
+      ],
+      "dimension_error_mm": [
+        4.76837158203125e-06,
+        4.76837158203125e-06,
+        9.5367431640625e-06
+      ],
+      "triangles": 5960,
+      "uv": {
+        "triangles": 5960,
+        "valid_triangles": 5960,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 4.103370739082754,
+        "p95": 5.147690735863894,
+        "p95_p05": 1.2545029594412378,
+        "median": 4.3364428911431965
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-drum-library-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-drum-library-table-01-thumb.png",
+          "sha256": "2da3a9e91c45617da0365650b059527a15adac7e86f691b6a9b7f9e6c790af01",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 52743,
+          "pixel_bbox_alpha_gt_0": [
+            77,
+            85,
+            435,
+            391
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            78,
+            85,
+            434,
+            390
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-drum-library-table-01-top.png",
+          "sha256": "ea4a1f2a3a2f3573c82ca9a57381bd5890486e5c3049861ced235b5a40630f3a",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 184240,
+          "pixel_bbox_alpha_gt_0": [
+            14,
+            13,
+            499,
+            499
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings.001|metal": {
+            "points": 1032,
+            "digest": "dbd5636b4c5a7dedf2b1baccf7c3ecbacd810dbed3e217f49a6c189e4131ac88"
+          },
+          "Walnut carved moulding.001|wood": {
+            "points": 912,
+            "digest": "90f2a6299028cf9e414bc8af26ddab1dc8661578cd482505dc9b71afced5791f"
+          },
+          "Walnut figured body.001|wood": {
+            "points": 1080,
+            "digest": "06f9e3b8831cbae2685a3e1e46ac15a41c0bae0d93da2f378ca90ed84bd304b3"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings.001|metal": 2028,
+          "Walnut carved moulding.001|wood": 1800,
+          "Walnut figured body.001|wood": 2132
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings.001|metal": "d88eae1ab533527af4d2905aa0e344574af2d1b37a331bd6f606bfe406879d2f",
+          "Walnut carved moulding.001|wood": "520303d220e6aad83794fffc370f0fe6a71650824afc34c508262e9b38c77784",
+          "Walnut figured body.001|wood": "c747a4ad46ca79de1380a2ab6bd807042bb51d4ac61f1ae567361e039d044de9"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings.001|metal": "f4dee2f36afa5c4c0e2ffba019c79001005cda0326dd7aff5d6f2cea2eff3be6",
+          "Walnut carved moulding.001|wood": "d7379e18ccb08236a9509ddc16ed9ac42980c3b49039fdc88c3085f44f513151",
+          "Walnut figured body.001|wood": "64b264f8cf82a4acbfb2cb150598e30ec05b3008146c20c51c23f6ba6cd764ef"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-gateleg-drop-leaf-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gateleg-drop-leaf-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "57b5231618d22f3f2774e916ebc8fbb18f57ee0c71a37f34353c4b3a42bdea70",
+      "git_blob_sha": "6ac679720437c30bbc15894b549c31c1993fb549",
+      "bytes": 112220,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6499999761581421,
+          0.0,
+          -0.4399999976158142
+        ],
+        [
+          0.6499999761581421,
+          0.7400000095367432,
+          0.4399999976158142
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1299.9999523162842,
+        879.9999952316284,
+        740.0000095367432
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-05,
+        -4.76837158203125e-06,
+        9.5367431640625e-06
+      ],
+      "triangles": 2904,
+      "uv": {
+        "triangles": 2904,
+        "valid_triangles": 2904,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.8917530978590493,
+        "p95": 3.62955389479607,
+        "p95_p05": 1.2551396236017738,
+        "median": 3.1311572631486237
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-gateleg-drop-leaf-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gateleg-drop-leaf-01-thumb.png",
+          "sha256": "a53635665a9501811322a25d7c6eb6a47311714b483218e5495622a64c849d89",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 44164,
+          "pixel_bbox_alpha_gt_0": [
+            48,
+            101,
+            464,
+            370
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            49,
+            102,
+            463,
+            369
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gateleg-drop-leaf-01-top.png",
+          "sha256": "e15a3748e1b1f5f01e83b056976cf22331a7f17785b455b1144a810681082c07",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 157704,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            91,
+            499,
+            421
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            92,
+            498,
+            420
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Walnut carved moulding|wood": {
+            "points": 128,
+            "digest": "6c5fe7cee483ce5eb11e58d8d9310f00a413162d17533dbaede2f0a9476cc095"
+          },
+          "Walnut figured body|wood": {
+            "points": 1168,
+            "digest": "06a25d54c41cf346c9f21005c6841eaaf1ad0e037dec5aab7739a07408f65386"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 64,
+            "digest": "ce862caef64cb8efd96f97177f4070b1ac020139f91f14fe39a0a3da5d23f21b"
+          }
+        },
+        "triangle_counts": {
+          "Walnut carved moulding|wood": 248,
+          "Walnut figured body|wood": 2532,
+          "Walnut recessed joinery|wood": 124
+        },
+        "triangle_surfaces": {
+          "Walnut carved moulding|wood": "cf82867884df657d8fdea377e67cb98f05883effe9970f72cfce9c3047c751d8",
+          "Walnut figured body|wood": "ca61f4d1e6b2820aaaf1ca90c3f3774d0061649415ca5b1395092de1a08109dd",
+          "Walnut recessed joinery|wood": "c75e353469d0681e4316076726810bb0e22975e97b16ad110a9c7e6238355115"
+        },
+        "uv_triangle_mapping": {
+          "Walnut carved moulding|wood": "d02b31d0402f142e5f5af525100589ff2ca63e85ab385ce00c85dab9db182c06",
+          "Walnut figured body|wood": "e7e0adbce12cc887fffb85f6ecd3e605674aaaf38f94dd805b0ed787d0654721",
+          "Walnut recessed joinery|wood": "66cde24b33e3e473a2debc281a3a9c7b38a1b763e2ad4bb642d861bd00dd86da"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-folding-tea-tray-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-folding-tea-tray-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "90258f7f9e135f895a4b8e4b9ccb91f3d43189a83a98b29ba7fb84e9c3ce6eb6",
+      "git_blob_sha": "d0f797076d2660f5d22273ad3a931facf7d9b1cd",
+      "bytes": 83964,
+      "actual_bounds_gltf_m": [
+        [
+          -0.33000001311302185,
+          0.0,
+          -0.2199999988079071
+        ],
+        [
+          0.33000001311302185,
+          0.699999988079071,
+          0.2199999988079071
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        660.0000262260437,
+        439.9999976158142,
+        699.999988079071
+      ],
+      "dimension_error_mm": [
+        2.6226043701171875e-05,
+        -2.384185791015625e-06,
+        -1.1920928955078125e-05
+      ],
+      "triangles": 2080,
+      "uv": {
+        "triangles": 2080,
+        "valid_triangles": 2080,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.8157020035195508,
+        "p95": 2.171142583271557,
+        "p95_p05": 1.1957593146138636,
+        "median": 1.9762746746232198
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-folding-tea-tray-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-folding-tea-tray-table-01-thumb.png",
+          "sha256": "70df0dd46088f44283d9f27167efa41394d904ecbd75a075b2d6c9b6b22c995c",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 67737,
+          "pixel_bbox_alpha_gt_0": [
+            58,
+            16,
+            454,
+            455
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            59,
+            16,
+            453,
+            455
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-folding-tea-tray-table-01-top.png",
+          "sha256": "83a833a3f3d86b26fb73ba76d5e17f6e9b78501fffeca5e15c64da6d241ab250",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 156729,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            94,
+            499,
+            419
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            94,
+            498,
+            418
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 208,
+            "digest": "a104d5c88bcaf6e487a781847e7fe1ff76e761cf1eb18724cb7a41092f42b201"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 256,
+            "digest": "c4144050017cfc96896b4842113771b7a41d6a66ebf8035cc2bd6fce04b12ac9"
+          },
+          "Walnut figured body|wood": {
+            "points": 540,
+            "digest": "f8314dd830987c42e81ff7cdcd9e46093239c455854775ff77cc5b04989db9c7"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 64,
+            "digest": "24b9e3efd5088beba7a3f98333525d347b9dd8bc089951b1f9494e792bc70409"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 408,
+          "Walnut carved moulding|wood": 496,
+          "Walnut figured body|wood": 1052,
+          "Walnut recessed joinery|wood": 124
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "93194f7568600d8c8e0f4e2297d0d9e72747cde00b326a3cbbc9cbdf70cc2c51",
+          "Walnut carved moulding|wood": "56aff0d0b8ab420cf4ac7024321ee2921d5f97ac01854c7df84b4bbdac096ada",
+          "Walnut figured body|wood": "efaa0bfe07fc98da31226dad0c3ed2443f3b7b463e6783a8ee2ade95c4f6cd56",
+          "Walnut recessed joinery|wood": "971f96ed1528ae66d28c0988cc89629b5df53047a5a001f1571f26c2c7deb460"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "a7463a4f54920e82fc6fdbbd536c2134c0dbc28f020564c6979a40ecee75a311",
+          "Walnut carved moulding|wood": "13715c967cff08c7cd0fb58bc871341d0d88d60afb6b9cf78668e5d22a7ad828",
+          "Walnut figured body|wood": "86e8e2964c64f811296465522885ba892d5d981cbde80c0c880b820fd4f00e46",
+          "Walnut recessed joinery|wood": "bfa9ccf5afe00bf8abc211de84846945b954958fbd1ff88b4b400134e205e229"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-baize-card-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-baize-card-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "d03aee4c815d7f00dac7fab53b50d77f41ccc4c9024d2782ccfbea4e8d91eb18",
+      "git_blob_sha": "487f113d8e45683117552661adcac04f80431c42",
+      "bytes": 63952,
+      "actual_bounds_gltf_m": [
+        [
+          -0.4399999976158142,
+          0.0,
+          -0.4399999976158142
+        ],
+        [
+          0.4399999976158142,
+          0.7559999823570251,
+          0.4399999976158142
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        879.9999952316284,
+        879.9999952316284,
+        755.9999823570251
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-06,
+        -4.76837158203125e-06,
+        -1.7642974853515625e-05
+      ],
+      "triangles": 1352,
+      "uv": {
+        "triangles": 1352,
+        "valid_triangles": 1352,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.411690885650973,
+        "p95": 2.9334293789838215,
+        "p95_p05": 1.2163372165301436,
+        "median": 2.5523617272951142
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "fabric"
+          },
+          "name": "Teal wool card baize",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.020288562402129173,
+              0.07618538290262222,
+              0.05951123684644699,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.9100000262260437
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "fabric",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "fabric",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-baize-card-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-baize-card-table-01-thumb.png",
+          "sha256": "c5fda85b1a7a74b5e3521674ada9d419b4ddd253672efeb34377385a574a6789",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 75060,
+          "pixel_bbox_alpha_gt_0": [
+            21,
+            29,
+            491,
+            447
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            22,
+            29,
+            490,
+            446
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-baize-card-table-01-top.png",
+          "sha256": "2f38addf722d93b41fdf5c8c86635953780f9023447d5a9662d15f70038d8700",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 233093,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            13,
+            499,
+            499
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 192,
+            "digest": "ff4848de1e329564dcb60f763668d37a3c04ab00ef7a4c7939e48a5fba31dd41"
+          },
+          "Teal wool card baize|fabric": {
+            "points": 64,
+            "digest": "7a7c66b707f587b56d60f26ef3a5c4fb28dbd5f9f3e9ef9509476a5a216122db"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 256,
+            "digest": "d5340489d112be408a539ad3f7527c9039411339448f3e7631ad5689bfc60b5b"
+          },
+          "Walnut figured body|wood": {
+            "points": 192,
+            "digest": "a413c5171bf6b802095f290d9f8562a5f8a7d33f58355e0dac8fe828c8e9fabf"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 368,
+          "Teal wool card baize|fabric": 124,
+          "Walnut carved moulding|wood": 496,
+          "Walnut figured body|wood": 364
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "5ef9a8574122d11099a2b5e2790a1586d5f2793fa85bd0952884efaddc6aeec8",
+          "Teal wool card baize|fabric": "7ea6ba8d79e4afaf83d1f37a2ecc72648b7b9061ce5e3e5b7e37d594a347ccd8",
+          "Walnut carved moulding|wood": "7294f8d4cc4f7a95bef5846e1b347533dc6721326eaaac5be40960738d19e01e",
+          "Walnut figured body|wood": "d545b4a24e85970ee4f66a3bc0fc89a5795894da22007b095967c7344a79f7a1"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "f63bbb0921abe1555c161440ba8aba7c7a4cc0210020ba0651a8d83cedf77f75",
+          "Teal wool card baize|fabric": "8c8448923a6461b6ca339e4ac7e3f3b341915625fcae3e882572f7d4f98f51ff",
+          "Walnut carved moulding|wood": "3fb9bcdc59b4cef6d1805b554ccec02da7df4c2d81b4169f4e535c0da671a933",
+          "Walnut figured body|wood": "d1861d3a5b95d72ac0594742c8f3ab7444ab60859a858c4bbfd277f5db365b48"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-trestle-banquet-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-trestle-banquet-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "8a229c248f6744775c46257fda64ede8f458758b208cbd39eba6d7b12aa6f351",
+      "git_blob_sha": "1aea4bca7d37d90f3b10b86d5fe2467d550d03f3",
+      "bytes": 109924,
+      "actual_bounds_gltf_m": [
+        [
+          -1.5,
+          0.0,
+          -0.5
+        ],
+        [
+          1.5,
+          0.7599999904632568,
+          0.5
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        3000.0,
+        1000.0,
+        759.9999904632568
+      ],
+      "dimension_error_mm": [
+        0.0,
+        0.0,
+        -9.5367431640625e-06
+      ],
+      "triangles": 2536,
+      "uv": {
+        "triangles": 2536,
+        "valid_triangles": 2536,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.129891409817726,
+        "p95": 6.157250551066006,
+        "p95_p05": 1.2002691790477458,
+        "median": 5.259155010821162
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-trestle-banquet-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-trestle-banquet-table-01-thumb.png",
+          "sha256": "61abc6d5a1083436bb871576f871acfb9ecec8d5b00c55c64e200275e3317d47",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 21057,
+          "pixel_bbox_alpha_gt_0": [
+            74,
+            178,
+            438,
+            319
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            75,
+            178,
+            437,
+            318
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-trestle-banquet-table-01-top.png",
+          "sha256": "e729d4cfe60f3031679a95b5b08a768d3360f540fb497100ffb11a2903106c5f",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 78911,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            174,
+            499,
+            338
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            175,
+            498,
+            337
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 192,
+            "digest": "ea1680c908a053b9c6033208862f225c3f54f8244486fa2e3c9bf6f4cf7056ec"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 384,
+            "digest": "e58b51383e394520a73dc5adfa66a38437fa4533eb3c89e1c80872804aa3ff1f"
+          },
+          "Walnut figured body|wood": {
+            "points": 672,
+            "digest": "1d09c78294cc9b0ce4f8d95682717691496aee4f7d71f59b8a7776ef895b20d1"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 64,
+            "digest": "93ddb865672f32e2d5fecedd3c17e8b6f9e2631c92a3d492b0b8fb61d637bdaf"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 368,
+          "Walnut carved moulding|wood": 744,
+          "Walnut figured body|wood": 1300,
+          "Walnut recessed joinery|wood": 124
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "dabd00366aa3a4226a2ea21a6956c8abb2d241fff915061d75a87a7c18fd1dd5",
+          "Walnut carved moulding|wood": "131277ce2365e79f2657601c43903c7a4f8b6ad23dff440b806b32c10f279809",
+          "Walnut figured body|wood": "4a5e88b09df1216e04f4d6b28689b6632fe4a770f74cfadeea1e371711316be1",
+          "Walnut recessed joinery|wood": "15aa6c51f86250f3eb65ce0ef486253e091de5b76318d7a6cea9814839964d4f"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "d88efbcdcb2384da4ae737b0dea2156eaa4d5ea74bc2b127d9b6aaf2fb61485d",
+          "Walnut carved moulding|wood": "5e7ab2d589e12db7d227124e7338da917067de83c474ce5221cb41a79008795f",
+          "Walnut figured body|wood": "f1eb74299b230b100b15700ecfb5181d2e8eeb5e297db62876a37ed75a89c6ae",
+          "Walnut recessed joinery|wood": "c4a123620c0077c5271d5911a6bc1452f33d872b2cbb6ca22754cd3bdbeb0792"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-octagonal-center-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagonal-center-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "80f2226e66111f1852257878b791d26a93f0e83f7941956901464a1ab715f051",
+      "git_blob_sha": "1283c172c10336900c9b8322f87e0a306a8a77a3",
+      "bytes": 53908,
+      "actual_bounds_gltf_m": [
+        [
+          -0.550000011920929,
+          0.0,
+          -0.550000011920929
+        ],
+        [
+          0.550000011920929,
+          0.7599999904632568,
+          0.550000011920929
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1100.000023841858,
+        1100.000023841858,
+        759.9999904632568
+      ],
+      "dimension_error_mm": [
+        2.384185791015625e-05,
+        2.384185791015625e-05,
+        -9.5367431640625e-06
+      ],
+      "triangles": 1376,
+      "uv": {
+        "triangles": 1376,
+        "valid_triangles": 1376,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.8626619093558596,
+        "p95": 3.494512857787692,
+        "p95_p05": 1.220721471287543,
+        "median": 3.089001759280422
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-octagonal-center-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-octagonal-center-table-01-thumb.png",
+          "sha256": "0c8b67ed1d55204148f794e8e4a60234c8071013416fe206309898bb0b6d50af",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 50229,
+          "pixel_bbox_alpha_gt_0": [
+            81,
+            80,
+            431,
+            390
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            81,
+            80,
+            431,
+            389
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-octagonal-center-table-01-top.png",
+          "sha256": "1ee708720cf36e87d676accdce4772b9b956ecfd71d04356da98c1198e4decb8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 166454,
+          "pixel_bbox_alpha_gt_0": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 48,
+            "digest": "19dda428456e7272144aec5a30e4a452da86231ce383da808083c1035a56b3b1"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 16,
+            "digest": "53b41cff33cde227c7ed9b39f5793df2717c33553b6bfc96addc4de46f128929"
+          },
+          "Walnut figured body|wood": {
+            "points": 640,
+            "digest": "dba9cc33c1db34536c9e916a28ac72dae155a71dec1c0afd934ad3b32e78e888"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 96,
+          "Walnut carved moulding|wood": 28,
+          "Walnut figured body|wood": 1252
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "81bcdd55d44a8bd51672c62119039b7d09cb37149057cf7e8916fb4a3e3411a0",
+          "Walnut carved moulding|wood": "14cbbbc4e955d83350b30e556172b991e067b88a02fc7bab6dfd92d0865cedd0",
+          "Walnut figured body|wood": "91310d6e1cf4bd3bc0341cd6ca63a969f6144dccfc2c18b7972d35e5714b8bd4"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "06f79ad36fb9a7cff2ab08e71c3e1fffa5dde544e8f5b966409b065aa4bc1a9d",
+          "Walnut carved moulding|wood": "1fd36a1935008fa112baf30ea3d809932a56513a364b7f796c184916238313c5",
+          "Walnut figured body|wood": "5a78327f5c1bb88926cefab197694a6fd5cd955bcc6da5a31cefe03963507498"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-half-moon-console-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-half-moon-console-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "be4151a7a7f027a55c9c52003d0a9627f7ee9bb22588b53fad579664eeda02a6",
+      "git_blob_sha": "170a1c1781b6b0b701fbfd2fcfa9de8b46cb9749",
+      "bytes": 51620,
+      "actual_bounds_gltf_m": [
+        [
+          -0.6000000238418579,
+          0.0,
+          -0.22499999403953552
+        ],
+        [
+          0.6000000238418579,
+          0.8199999928474426,
+          0.22499999403953552
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1200.0000476837158,
+        449.99998807907104,
+        819.9999928474426
+      ],
+      "dimension_error_mm": [
+        4.76837158203125e-05,
+        -1.1920928955078125e-05,
+        -7.152557373046875e-06
+      ],
+      "triangles": 1448,
+      "uv": {
+        "triangles": 1448,
+        "valid_triangles": 1448,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 1.9670672755771739,
+        "p95": 2.321941864848876,
+        "p95_p05": 1.1804079574083581,
+        "median": 2.103848111352122
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-half-moon-console-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-half-moon-console-01-thumb.png",
+          "sha256": "f3e9cbe2fd00fe7d388aeb41f11d0a0475323ba7275ce1a801994702d362df47",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 33295,
+          "pixel_bbox_alpha_gt_0": [
+            125,
+            87,
+            443,
+            376
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            126,
+            87,
+            442,
+            375
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-half-moon-console-01-top.png",
+          "sha256": "ef954ecbdb660f6de3cc2302b993656fd56c450d259826a2b3c1c89d6056b145",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 69815,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            164,
+            498,
+            348
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            165,
+            498,
+            347
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Walnut carved moulding|wood": {
+            "points": 132,
+            "digest": "0b5508a1931e920e58b708a1aaee8dbd4317bb906dd15a6000a2348779257d67"
+          },
+          "Walnut figured body|wood": {
+            "points": 602,
+            "digest": "9f3d9f398becc4b1eb531be84ca1130d0bce938fe11715f4b6097d62d0aeb742"
+          }
+        },
+        "triangle_counts": {
+          "Walnut carved moulding|wood": 264,
+          "Walnut figured body|wood": 1184
+        },
+        "triangle_surfaces": {
+          "Walnut carved moulding|wood": "f2aae1924fddadb37df321154a1a5e625dfd3a649a13520593e7193390dcae14",
+          "Walnut figured body|wood": "a962530b0e0133e43a3d6b854cd331ef4a143e44b8b8fce61f53ccae7a7ed6d5"
+        },
+        "uv_triangle_mapping": {
+          "Walnut carved moulding|wood": "7c797b2e73c6f8d15b034254a43fa1ceb6b2906b72732c8707eb4670262e4e31",
+          "Walnut figured body|wood": "aac3b8328ca6d49bc369390f868828d3e1285bd36bca045ff13eef9d8417ae17"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-pedestal-chess-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-pedestal-chess-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "9847a6556e6b192e67c626ba4c76e5dc2d62e7124d906ac8eea64ca645a3fd35",
+      "git_blob_sha": "e5d30c8a6a2ab08c336ca1ed0e03ea47c16667d2",
+      "bytes": 103720,
+      "actual_bounds_gltf_m": [
+        [
+          -0.32499998807907104,
+          0.0,
+          -0.32499998807907104
+        ],
+        [
+          0.32499998807907104,
+          0.7300000190734863,
+          0.32499998807907104
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        649.9999761581421,
+        649.9999761581421,
+        730.0000190734863
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        -2.384185791015625e-05,
+        1.9073486328125e-05
+      ],
+      "triangles": 1932,
+      "uv": {
+        "triangles": 1932,
+        "valid_triangles": 1932,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.5391390773108977,
+        "p95": 3.1098688362578333,
+        "p95_p05": 1.2247729413669506,
+        "median": 2.6883152845215883
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "inlay"
+          },
+          "name": "Pale maple chess squares",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.6444796919822693,
+              0.5028864741325378,
+              0.2788942754268646,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.47999998927116394
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "inlay",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "inlay",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-pedestal-chess-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pedestal-chess-table-01-thumb.png",
+          "sha256": "e106d83226a6573aed470e0af15d0a4d8b70551f0b4e117c61e4a4c953368360",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 56726,
+          "pixel_bbox_alpha_gt_0": [
+            40,
+            5,
+            472,
+            445
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            40,
+            6,
+            472,
+            444
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pedestal-chess-table-01-top.png",
+          "sha256": "4133695da6fbf2b9b7133c86255b1fd1b66c34f2e8d82699bdbd958c70cfaaa8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 234798,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            13,
+            499,
+            499
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 144,
+            "digest": "69520f5414f963492633e72e969f8a7e51635eda9517fe00ac9917e7de668577"
+          },
+          "Pale maple chess squares|inlay": {
+            "points": 158,
+            "digest": "18f90287250ce40125305c930e3318ca01e7a5cea505d73579c9346f319bf24f"
+          },
+          "Walnut figured body|wood": {
+            "points": 392,
+            "digest": "9d3da2cbbbd609f31ddc72e7473623681a0774bf95b30a2b511217e08003bb12"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 222,
+            "digest": "e912f41c87c35b4540863784d259066a95667cab5cda16a8ef194bc767165f94"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 276,
+          "Pale maple chess squares|inlay": 384,
+          "Walnut figured body|wood": 764,
+          "Walnut recessed joinery|wood": 508
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "3a0a6f8f8e4fc9fd912f651b9f905e570b253fa0471e16f0616ab338b79f4602",
+          "Pale maple chess squares|inlay": "85abadef07efe5caa01ef96e2b4abe34f0c2ecea74676d113c9d33e8feaaa611",
+          "Walnut figured body|wood": "dfa3a591422ddcfaa1d1771629f831af5391ad02966477b4832479bbe68f32d9",
+          "Walnut recessed joinery|wood": "674ea85263ca7aa186fcfa39f0cc79e9459016d1058fdd0b2b2687e068437005"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "43d11517be5a34495ce7a1ad4bf0b9e5006f9322442f9e366b301c8dc018a49b",
+          "Pale maple chess squares|inlay": "c725c51cc0031c9556919e4eed6f05b6b51c417917cb6bc9959ba30a1c3a2d31",
+          "Walnut figured body|wood": "4b53c7713792dcebd91b5fc1a0fc72e144bce02c639c16bf7ee41124fa416edb",
+          "Walnut recessed joinery|wood": "df882cb69fbd0fe0000a85257629895558c472b7ba443120bf3d25339a400b93"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-oval-mirror-dressing-table-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-mirror-dressing-table-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "54815a694477861d0d03049ed1b01bbfbf0a6b6d96b9753442e2f7a355d8dd0c",
+      "git_blob_sha": "4ed82b686312a139515e9d3f0b0a67ed5447b516",
+      "bytes": 120756,
+      "actual_bounds_gltf_m": [
+        [
+          -0.550000011920929,
+          0.0,
+          -0.25
+        ],
+        [
+          0.550000011920929,
+          1.3899999856948853,
+          0.25
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1100.000023841858,
+        500.0,
+        1389.9999856948853
+      ],
+      "dimension_error_mm": [
+        2.384185791015625e-05,
+        0.0,
+        -1.430511474609375e-05
+      ],
+      "triangles": 3072,
+      "uv": {
+        "triangles": 3072,
+        "valid_triangles": 3072,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.67037911373588,
+        "p95": 3.394048674306536,
+        "p95_p05": 1.270998809438049,
+        "median": 2.9219630997099695
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Polished silver mirror",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.48514994978904724,
+              0.577580451965332,
+              0.5647115111351013,
+              1
+            ],
+            "roughnessFactor": 0.07999999821186066
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-oval-mirror-dressing-table-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-mirror-dressing-table-01-thumb.png",
+          "sha256": "199021fdd313e19241782c29553510a5ee51e3e79d23e9118d73dca805cd8a76",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 44636,
+          "pixel_bbox_alpha_gt_0": [
+            107,
+            58,
+            405,
+            441
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            108,
+            59,
+            404,
+            440
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-mirror-dressing-table-01-top.png",
+          "sha256": "6422f5c770bba25ee4395df2773ff79bc919bd8b3ffae7a09b944ba069c02fa8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 106997,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            145,
+            499,
+            367
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            146,
+            498,
+            366
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 456,
+            "digest": "4628369d9fa8092405852b005410b5563847595478dd2baf607c28f064b2a56b"
+          },
+          "Polished silver mirror|metal": {
+            "points": 192,
+            "digest": "133924e7d2e99aa323b79f74d4c9ddd994fc92df31a404360f07b07f411e46a2"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 264,
+            "digest": "fa26ca8e7eba3f33923460abff0396bb72a7be6c659de08c8a3584881be3a4c9"
+          },
+          "Walnut figured body|wood": {
+            "points": 608,
+            "digest": "a8ce3a48ecd42c5f999fdeaccdbd1af7aff72329cb5deae0e6c82e4abd271f2b"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 64,
+            "digest": "4f75f3b31f9eeb7c1f8850398af2c65ced10e2a32b6d2466a57a25362609bf67"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 868,
+          "Polished silver mirror|metal": 380,
+          "Walnut carved moulding|wood": 512,
+          "Walnut figured body|wood": 1188,
+          "Walnut recessed joinery|wood": 124
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "4f6d2f86d4b72e7fcd5358e634647ff976917251d24040c5e9100a7afacede05",
+          "Polished silver mirror|metal": "7e9edd8a2d17cc322f590a90e9128ce3d130e323a94fd4e4cad9461c3d791ab7",
+          "Walnut carved moulding|wood": "3b86f752e289eaba0c61f3faa01b070abea39822ca7a21e705819ff4b9dd9fd1",
+          "Walnut figured body|wood": "85e1cc7adce27f2a2a2cf1783b27985e35a17b737b62e9319627b38aa0c23a85",
+          "Walnut recessed joinery|wood": "a19c2ea50f14f533ec19140e940658049d562e3072779913f1ea9cd3217b51f8"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "1013f31f65d484744b88157f507dcd6b23992b42dcddad3bbe70aef906703efa",
+          "Polished silver mirror|metal": "18d2cb459b55463120df3f616d580a3c4fb5b90ff2d6cf5528724f0e6fe265f7",
+          "Walnut carved moulding|wood": "f01db4861b66344c318d4da190c6d31953b3d7d12ce9aea7621ad181a7f27948",
+          "Walnut figured body|wood": "7ef90b039396a0de83f422185445a8a88a652fd57c1bad567fa25e2491f14440",
+          "Walnut recessed joinery|wood": "bcdb323140abe4b19e7f4601fde94a5c496c7627a4a8801fe97dc4cdc05c25ed"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-davenport-writing-desk-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-davenport-writing-desk-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "bc91c9738db14e335779384fdb2024b5a2003a7a4b9858124f870f2e61043dd8",
+      "git_blob_sha": "c2d1d509a901fe318ce0f1aa18de8bd32f1ad0b0",
+      "bytes": 111068,
+      "actual_bounds_gltf_m": [
+        [
+          -0.32499998807907104,
+          0.0,
+          -0.32499998807907104
+        ],
+        [
+          0.32499998807907104,
+          1.0800000429153442,
+          0.32499998807907104
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        649.9999761581421,
+        649.9999761581421,
+        1080.0000429153442
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        -2.384185791015625e-05,
+        4.291534423828125e-05
+      ],
+      "triangles": 2316,
+      "uv": {
+        "triangles": 2316,
+        "valid_triangles": 2316,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 3.2434029141202645,
+        "p95": 4.131876802376718,
+        "p95_p05": 1.2739326293345956,
+        "median": 3.625990990658364
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "leather"
+          },
+          "name": "Teal desk leather",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.022173885256052017,
+              0.07421357184648514,
+              0.07036009430885315,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.6899999976158142
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-davenport-writing-desk-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-davenport-writing-desk-01-thumb.png",
+          "sha256": "0619b2fbe9f72b24717a071cb796d9f848197f04be44cad5e724e8d1ea4e16e0",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 92428,
+          "pixel_bbox_alpha_gt_0": [
+            106,
+            27,
+            405,
+            442
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            107,
+            28,
+            405,
+            442
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-davenport-writing-desk-01-top.png",
+          "sha256": "e5cd07e6f0bd7fc097f7011192a0a2397aa80ed540e97d5c9abea69c4d21ee28",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 235084,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            13,
+            499,
+            499
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings.001|metal": {
+            "points": 576,
+            "digest": "1a581d1b916b35007ecd7070b6a15b913fb25ffe9bc7f1d495e0342cbac05a6d"
+          },
+          "Teal desk leather|leather": {
+            "points": 8,
+            "digest": "9c884b75a767fdab98804a2b14f361a2f8c0e920edae09603527e3d05a560993"
+          },
+          "Walnut carved moulding.001|wood": {
+            "points": 272,
+            "digest": "42fe48c434e63d8705542744e6c7faf1e02967f59d9b876819aa17511fc24cab"
+          },
+          "Walnut figured body.001|wood": {
+            "points": 328,
+            "digest": "d5cfc2c6181c8b2f850a256359839e76d62722ec2c670fe2afdb6832e4cce293"
+          },
+          "Walnut recessed joinery.001|wood": {
+            "points": 64,
+            "digest": "7ddb32524ef9d30da187d4b02953a395ef06dda2ed9d9e828cc0343c0149fca5"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings.001|metal": 1056,
+          "Teal desk leather|leather": 12,
+          "Walnut carved moulding.001|wood": 500,
+          "Walnut figured body.001|wood": 624,
+          "Walnut recessed joinery.001|wood": 124
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings.001|metal": "6cb9765fa0b64fb0f74c7a0f49ed1ee0002a71dbe4366ca94e7a60af6d567a68",
+          "Teal desk leather|leather": "170efe2f7b1331c0f00ea43e8c179424afc04eda9b0dd4fa9e1985c4e17adab4",
+          "Walnut carved moulding.001|wood": "f80069ad21f76092de276ba2ec233a8613c74d26c923d41c5d34e08bbacfb3d2",
+          "Walnut figured body.001|wood": "41f83c5835b877d69d526ad44bc0df2767e91fb959cad74a6e0192dd60b9c6fd",
+          "Walnut recessed joinery.001|wood": "ec8f03f5fa5edf85d366ec64a54e7166e4b45f6a59fe597a32f16f905e4af15c"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings.001|metal": "c64d8ad05e0648ad3abec0a49a814a37cf60264de7cbcbf72161fbfedb61132f",
+          "Teal desk leather|leather": "516e4be6963cb43e6d98ad8654ce41643e730faf9b62cc5c42675eacf1a5aef3",
+          "Walnut carved moulding.001|wood": "47ebe2686a31bc584ce3b6f0a3602b5dd0a8d894d47ad78d7bc582e3c64c1313",
+          "Walnut figured body.001|wood": "45a31467ef412a9451b2fe3da17095e924dca5a6b33b517a5b6f63b934932221",
+          "Walnut recessed joinery.001|wood": "021626784a2741b9043cd73622188bf3a74770ce7ddb86109d74f0766671f588"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-three-tier-dumbwaiter-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-tier-dumbwaiter-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "e1973b1e6f7561cf2e19586eee1265e07eb8f0424cb15dc7e925fe016f037588",
+      "git_blob_sha": "59e442038a6080eef9291ce640c3a6c5ebd25d8f",
+      "bytes": 126836,
+      "actual_bounds_gltf_m": [
+        [
+          -0.32499998807907104,
+          0.0,
+          -0.32499998807907104
+        ],
+        [
+          0.32499998807907104,
+          1.1299999952316284,
+          0.32499998807907104
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        649.9999761581421,
+        649.9999761581421,
+        1129.9999952316284
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        -2.384185791015625e-05,
+        -4.76837158203125e-06
+      ],
+      "triangles": 2856,
+      "uv": {
+        "triangles": 2856,
+        "valid_triangles": 2856,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 2.3951623478533968,
+        "p95": 3.0059244863093753,
+        "p95_p05": 1.2549982213119535,
+        "median": 2.534004370371383
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-three-tier-dumbwaiter-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-tier-dumbwaiter-01-thumb.png",
+          "sha256": "3545951b666d50633473051bd896e8540d9d815af4f7f36394e9d993852db612",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 35022,
+          "pixel_bbox_alpha_gt_0": [
+            152,
+            46,
+            360,
+            433
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            153,
+            46,
+            359,
+            433
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-tier-dumbwaiter-01-top.png",
+          "sha256": "fde62719473a5971c7fcef41587fb2c49e6bccab2ae4f1cc6434505609663132",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 183588,
+          "pixel_bbox_alpha_gt_0": [
+            14,
+            13,
+            499,
+            499
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            14,
+            498,
+            498
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 144,
+            "digest": "8bb82909bcf9d8554596fa381d4f0f280a4223e408f35dd22d1be8251e02933a"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 576,
+            "digest": "7597f3e717838f7551f586f3fccd579c55f529e76748d6658b860010f13ef80c"
+          },
+          "Walnut figured body|wood": {
+            "points": 728,
+            "digest": "3e1990ac128cdd164e1ed6d7d83c8ad2eb43094474bc5790081b5c9638f38f32"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 276,
+          "Walnut carved moulding|wood": 1152,
+          "Walnut figured body|wood": 1428
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "b613e63edd9c57b7f1aa0b54fe0fd86cdc6f8f2c23034a77c1eecec8eb204208",
+          "Walnut carved moulding|wood": "7b29f5f4b1669da5296e4fb7f843cd5ef1af66a3280a006d66494777fea10afc",
+          "Walnut figured body|wood": "3188c89f53b26ee98269c7483dd01fa0c5f9ce71888a4bfb6dc89ac0fb9dea17"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "cb869016b334b5158ef2b50c3405bd0efcab1cb37b527725c8806ea1729dd69a",
+          "Walnut carved moulding|wood": "fde20445f37cff95cf60b4fbf475785b9a25adc5b9eff35bec7a3f12197ed4ed",
+          "Walnut figured body|wood": "6331b65080f523a29757454372cdd7eaf17668911324728978de5ee67ea0ee50"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-partners-leather-desk-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-partners-leather-desk-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "e72fa7425def520cd0ce44287c949e092e0212f1f66cee021fdc51a16114b44b",
+      "git_blob_sha": "fbe7e169efdb8b10ca3fbe17cb3b9a059f3c0359",
+      "bytes": 143432,
+      "actual_bounds_gltf_m": [
+        [
+          -0.8999999761581421,
+          0.0,
+          -0.4749999940395355
+        ],
+        [
+          0.8999999761581421,
+          0.7710000276565552,
+          0.4749999940395355
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1799.9999523162842,
+        949.999988079071,
+        771.0000276565552
+      ],
+      "dimension_error_mm": [
+        -4.76837158203125e-05,
+        -1.1920928955078125e-05,
+        2.765655517578125e-05
+      ],
+      "triangles": 3332,
+      "uv": {
+        "triangles": 3332,
+        "valid_triangles": 3332,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.372093178865769,
+        "p95": 7.070052784898135,
+        "p95_p05": 1.3160703936991025,
+        "median": 6.38769160908344
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "leather"
+          },
+          "name": "Teal desk leather",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.022173885256052017,
+              0.07421357184648514,
+              0.07036009430885315,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.6899999976158142
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings.001",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "leather",
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-partners-leather-desk-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-partners-leather-desk-01-thumb.png",
+          "sha256": "0c3cd4795579c2a99382495a7dd6130c14c2aae8290ccbd3c0f5599ba3d5aab8",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 61815,
+          "pixel_bbox_alpha_gt_0": [
+            59,
+            135,
+            453,
+            360
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            59,
+            136,
+            453,
+            359
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-partners-leather-desk-01-top.png",
+          "sha256": "09a501c62fe56973514582f23c5f22390ca874f785bb350dec23a214de685a91",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 124167,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            127,
+            499,
+            385
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            128,
+            498,
+            384
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings.001|metal": {
+            "points": 1008,
+            "digest": "968735f8ef0c701390db66bfd1513c29e6c60157d5da954c319891468de691aa"
+          },
+          "Teal desk leather|leather": {
+            "points": 64,
+            "digest": "0d77d7fe389f5ded5ab8b259808fe9f1ee18175cd9803de24834de0779d10640"
+          },
+          "Walnut carved moulding.001|wood": {
+            "points": 464,
+            "digest": "88c504309953635815b2261e588d97a78bcce7d419cfd4237d8c0de974699571"
+          },
+          "Walnut figured body.001|wood": {
+            "points": 192,
+            "digest": "79af0e70df4daa7c909708279510e928addd3ff04976d751f34956801cf1dc98"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 64,
+            "digest": "623a2364075e731df8b7406cce98b91204222755430ca567d41631202ea3df48"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings.001|metal": 1848,
+          "Teal desk leather|leather": 124,
+          "Walnut carved moulding.001|wood": 864,
+          "Walnut figured body.001|wood": 372,
+          "Walnut recessed joinery|wood": 124
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings.001|metal": "60fd5bf98ad7b9d94ca97a99222923108b6146d8ccc486b6147ac1f34bde8afc",
+          "Teal desk leather|leather": "12ba1df696fec3ba729a29fe0cf4f45f2c086dfc911528239ba8d50374de2e17",
+          "Walnut carved moulding.001|wood": "1cae108b74b4f68acc092f2c58c16ed9e7c5b013661a67e8c9e8e27ad83955a8",
+          "Walnut figured body.001|wood": "62529599eb0af843d43154ad6bec2e39e0081582c6a787db822e8f6fde458dcd",
+          "Walnut recessed joinery|wood": "2aa48353bc84445404fc8f22159174d566b649ab97f64a69e5aa1026988f7ff6"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings.001|metal": "e19a2ccfc56c787ac2193a0e3a0a39aa3c0ef17eaf405c078971b6d70860f2ac",
+          "Teal desk leather|leather": "f98b0c4971df5305476326c94a75a0a0039675d2cab158006635c85e7b82139c",
+          "Walnut carved moulding.001|wood": "32e2e759f3b2a2e48477008789016f8ea8fc90d8a2bb52215617a151c3448cfc",
+          "Walnut figured body.001|wood": "8c0f9e81827e5d556042a31f633bd4e37f1a0062426e1ba59a8fa83c2418a3bd",
+          "Walnut recessed joinery|wood": "d00bf0501fd7692a5a09d0d381e603ec8f163e768b37948c34b05a1130dd2430"
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "Above the default 3000 triangle guide, within the inherited explicit 6000 budget"
+      ],
+      "meshCount": 1,
+      "sceneCount": 1
+    },
+    {
+      "id": "rpg-mansion-roll-top-writing-desk-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-roll-top-writing-desk-01.glb",
+      "seat_vertex_measurement": null,
+      "sha256": "d6d8d8c4a2b0cc388bffd68f55d973c8f0e2d9e9d1b7fab1b65d532ea3e04d7e",
+      "git_blob_sha": "4712374dbd14c2dfe6fd644454c649da5bf6f994",
+      "bytes": 127908,
+      "actual_bounds_gltf_m": [
+        [
+          -0.699999988079071,
+          0.0,
+          -0.375
+        ],
+        [
+          0.699999988079071,
+          1.1799999475479126,
+          0.375
+        ]
+      ],
+      "actual_dimensions_wdh_mm": [
+        1399.999976158142,
+        750.0,
+        1179.9999475479126
+      ],
+      "dimension_error_mm": [
+        -2.384185791015625e-05,
+        0.0,
+        -5.245208740234375e-05
+      ],
+      "triangles": 2492,
+      "uv": {
+        "triangles": 2492,
+        "valid_triangles": 2492,
+        "degenerate_world": 0,
+        "degenerate_uv": 0,
+        "missing_uv_triangles": 0,
+        "nonfinite_position_vertices": 0,
+        "nonfinite_uv_vertices": 0,
+        "p05": 5.121267043138095,
+        "p95": 6.684257558023033,
+        "p95_p05": 1.3051960582643634,
+        "median": 5.93381015759193
+      },
+      "actual_materials": [
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut figured body",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.09305896610021591,
+              0.04373503103852272,
+              0.026241222396492958,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4300000071525574
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut recessed joinery",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.039546236395835876,
+              0.020288562402129173,
+              0.013702083379030228,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.5
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "wood"
+          },
+          "name": "Walnut carved moulding",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.18116424977779388,
+              0.08437620848417282,
+              0.0382043719291687,
+              1
+            ],
+            "metallicFactor": 0,
+            "roughnessFactor": 0.4000000059604645
+          }
+        },
+        {
+          "doubleSided": true,
+          "extras": {
+            "finishChannel": "metal"
+          },
+          "name": "Antique brass fittings",
+          "pbrMetallicRoughness": {
+            "baseColorFactor": [
+              0.4677838087081909,
+              0.3277781009674072,
+              0.109461709856987,
+              1
+            ],
+            "metallicFactor": 0.75,
+            "roughnessFactor": 0.3199999928474426
+          }
+        }
+      ],
+      "actual_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "manifest_finish_channels": [
+        "metal",
+        "wood"
+      ],
+      "asset_extras": {
+        "front": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "origin": "bottom-centre",
+        "provenance": "original",
+        "sourceAsset": "rpg-mansion-roll-top-writing-desk-01",
+        "staticAsset": true
+      },
+      "previews": [
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roll-top-writing-desk-01-thumb.png",
+          "sha256": "b42d4c6bc0b68e47a7fdd949ad5ef3fe06bd1a9adb29f71f6bd89b7626c51916",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 114902,
+          "pixel_bbox_alpha_gt_0": [
+            57,
+            49,
+            455,
+            432
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            58,
+            50,
+            454,
+            431
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        },
+        {
+          "path": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roll-top-writing-desk-01-top.png",
+          "sha256": "e3880852682e879c9835aae9199c9500bcc66035c352d49afa595bef5f6c4b61",
+          "size": [
+            512,
+            512
+          ],
+          "mode": "RGBA",
+          "alpha_min": 0,
+          "alpha_max": 255,
+          "nonempty_pixels": 126050,
+          "pixel_bbox_alpha_gt_0": [
+            13,
+            125,
+            499,
+            387
+          ],
+          "pixel_bbox_alpha_gt_16": [
+            14,
+            126,
+            498,
+            386
+          ],
+          "edge_nontransparent_pixels": 0,
+          "chunks": [
+            "IHDR",
+            "oFFs",
+            "pHYs",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IDAT",
+            "IEND"
+          ],
+          "metadata_keys": [
+            "dpi"
+          ]
+        }
+      ],
+      "geometry_signature": {
+        "point_support": {
+          "Antique brass fittings|metal": {
+            "points": 504,
+            "digest": "76b66e8bfa884b0002b6bea5a26044fe69d45f8aed4364cf5d8b57cd4795ef13"
+          },
+          "Walnut carved moulding|wood": {
+            "points": 464,
+            "digest": "70cd3cf5892112af570f9d84072598e0eba534a3e69a29bd4059102afab5ad78"
+          },
+          "Walnut figured body|wood": {
+            "points": 192,
+            "digest": "007eb8590dba45e3106a6f1c4f600a8155753e0de5efb40d6a502d1949de401a"
+          },
+          "Walnut recessed joinery|wood": {
+            "points": 192,
+            "digest": "24a3a60f73f7db859beb722c19c8d65901edff7b87e9e35be7a2fdd9fa23f2f3"
+          }
+        },
+        "triangle_counts": {
+          "Antique brass fittings|metal": 924,
+          "Walnut carved moulding|wood": 880,
+          "Walnut figured body|wood": 316,
+          "Walnut recessed joinery|wood": 372
+        },
+        "triangle_surfaces": {
+          "Antique brass fittings|metal": "7b5e0f8a4d7c8441b219512a958de70badc92477faa0dd2cabe75fcf4a6848e4",
+          "Walnut carved moulding|wood": "18a02db7d4fb0a7aee43a13b401e5fb7e660bbbe308a291ec437500b1d7767f9",
+          "Walnut figured body|wood": "912c412a3a9f45985f4189304c73cb5ec72a791ddf574772c498516a4e173410",
+          "Walnut recessed joinery|wood": "6371e3cdf36b20748c74b31677ac1441d74f568092a076666e34250b287fd963"
+        },
+        "uv_triangle_mapping": {
+          "Antique brass fittings|metal": "a4141d549a45b06c4259b5142b7b21aad6b4b890479edc3d3ca89a3c1dd23945",
+          "Walnut carved moulding|wood": "e1dbe1a8f7fa7dfb8fe9ac3210327b702c7bab4ccb170c5b0cff1cd1833290df",
+          "Walnut figured body|wood": "9113ae1dd0f11af786ef287f169f3d48827e044e65ab2747407696fbf743a9ac",
+          "Walnut recessed joinery|wood": "8d093b4c02ab379fd9a9f24ecd74667ba8205da43a464e440b9ebff1716f6c7b"
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "meshCount": 1,
+      "sceneCount": 1
+    }
+  ],
+  "actualModelBytes": 1846072,
+  "actualTriangles": 43392,
+  "errors": 0
+}

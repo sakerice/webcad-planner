@@ -1,0 +1,363 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・水回り試作",
+  "prototypeOnly": true,
+  "items": [
+    {
+      "id": "rpg-mansion-bracketed-wall-basin-01",
+      "name": "三角ブラケット支持・壁掛け洗面器",
+      "kind": "vanity",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-bracketed-wall-basin-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bracketed-wall-basin-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-bracketed-wall-basin-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-bracketed-wall-basin-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-bracketed-wall-basin-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-bracketed-wall-basin-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms/authoring_sources/rpg-mansion-bracketed-wall-basin-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-bracketed-wall-basin-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms/build.py",
+      "w": 680.0,
+      "d": 545.0,
+      "h": 563.491,
+      "authoredNominalDimensionsMm": [
+        680,
+        545,
+        563.5
+      ],
+      "actualMeasuredDimensionsMm": [
+        680.0,
+        545.0,
+        563.491
+      ],
+      "geometrySignature": "wall-bearing-plates-triangulated-brackets-bowl-exposed-trap",
+      "triangleBudget": 6000,
+      "defaultElevation": 530,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "wall-brackets",
+      "semanticCoverage": "A floor-free wall basin on two real triangular brackets, exposed trap and mixer mounted in broad solid back deck.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "rimHeightMm": 870,
+        "clearBowlMm": {
+          "rimLength": 540,
+          "rimWidth": 350,
+          "floorLength": 290,
+          "floorWidth": 135,
+          "depth": 140
+        },
+        "faucetHeightMm": 1093.5,
+        "defaultElevationMm": 530,
+        "capacityNote": "Single hand basin.",
+        "installation": {
+          "mount": "wall-brackets",
+          "wallContactPlaneBlenderY": 0.285,
+          "defaultElevationMm": 530,
+          "bearingPlateCentersX": [
+            -0.185,
+            0.185
+          ],
+          "anchorCentersLocalZ": [
+            0.038,
+            0.255
+          ],
+          "topBearingZ": 0.183,
+          "note": "Two physical wall plates and triangulated brackets carry the shell; P-trap is not structural support.",
+          "wallContactPlaneGltfZ": -0.27249999701976774
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.012500002980232239,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.3400000035762787,
+            -0.25999999046325684,
+            0.0
+          ],
+          [
+            0.3400000035762787,
+            0.2849999964237213,
+            0.5634910464286804
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        }
+      ],
+      "sha256": "7a5afa913fa6966a342fda77661aeee4604e22f9fe3bf28d2e116b3ca5faad89",
+      "sourceSha256": "0931a9211c841e79bb92ea860ecf1143eea5b16b68d31420ccf6ffb1a4c17934",
+      "authoringSha256": "ce587926e464fa8e2a1a3db1941ac2dd3e33ee0b1e1de5a6d86ab94c70cedb3d",
+      "previewSha256": {
+        "thumb": "d37a145a23bf10d5074713f90d73d50c3c8ea05a15f6460e4cf62bff5aafdaf3",
+        "top": "71778ab7679475607f5a653dde78c5a84c1abe5cbe82bf3542c78674bad2f9a0",
+        "front": "2f5b78e073c02288897d6aae3f522f63057ada70e747aba46d448537cb739cf6",
+        "rear": "f90326ae6e92afae98a8980aa4246fa9ac4c49fadacd49fa06f2e55fd210f7d7"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-bracketed-wall-basin-01-installation.png",
+          "sha256": "999735486beccb6388eb028c9b8602cb35ce9c05df842968e4dc646659d24c46",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-bracketed-wall-basin-01-section.png",
+          "sha256": "54583317ba9f1668c2120c5f816935d339fa18a6c99e9a0aaeb5a122ae441c53",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 22,
+      "status": "prototype-awaiting-independent-and-root-review"
+    },
+    {
+      "id": "rpg-mansion-high-cistern-chain-wc-01",
+      "name": "高置水槽・引き鎖式便器",
+      "kind": "toilet",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-cistern-chain-wc-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-high-cistern-chain-wc-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-high-cistern-chain-wc-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-cistern-chain-wc-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-cistern-chain-wc-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-high-cistern-chain-wc-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms/authoring_sources/rpg-mansion-high-cistern-chain-wc-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-high-cistern-chain-wc-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms/build.py",
+      "w": 704.0,
+      "d": 800.0,
+      "h": 2130.0,
+      "authoredNominalDimensionsMm": [
+        704,
+        800,
+        2130
+      ],
+      "actualMeasuredDimensionsMm": [
+        704.0,
+        800.0,
+        2130.0
+      ],
+      "geometrySignature": "high-wall-cistern-independent-brackets-open-seat-chain",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "mixed-floor-and-wall",
+      "semanticCoverage": "Floor-supported hollow WC with open walnut seat and raised lid; separately bracketed high tank, external flush pipe and visible interlinked pull chain.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "seatHeightMm": 460,
+        "bowlRimHeightMm": 420,
+        "clearBowlMm": {
+          "rimLength": 402,
+          "rimWidth": 278,
+          "depth": 150
+        },
+        "faucetHeightMm": null,
+        "cisternBaseHeightMm": 1735,
+        "cisternTopHeightMm": 2130,
+        "capacityNote": "One WC seat; static non-operational plumbing.",
+        "installation": {
+          "mount": "mixed-floor-and-wall",
+          "floorPlaneY": 0,
+          "wallContactPlaneBlenderY": 0.45,
+          "tankBracketCentersX": [
+            -0.2,
+            0.2
+          ],
+          "tankAnchorCentersZ": [
+            1.65,
+            1.95
+          ],
+          "tankBearingHeightMm": 1751,
+          "note": "Independent wall plates, bearing arms and triangulated braces support tank; flush pipe is not tank structure.",
+          "wallContactPlaneGltfZ": -0.40000000298023225
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.04399999976158142,
+          -0.04999999701976776,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.30799999833106995,
+            -0.3499999940395355,
+            0.0
+          ],
+          [
+            0.3959999978542328,
+            0.44999998807907104,
+            2.130000114440918
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533728"
+        }
+      ],
+      "sha256": "ce1989ca36269f141f4cbf4d48f8be0332e4cfd7ca237460c8fb1ef14fdf8f84",
+      "sourceSha256": "7eacc9243ae70f897e4762137421c53919881951d74d64a21afb2da240c68195",
+      "authoringSha256": "9f8c7e0239ef4a8fdbf248227da4ad0faaa03d1c3f7066f7aba9bc452c4a4660",
+      "previewSha256": {
+        "thumb": "48cf1ffc9f9f2b21ecaac01b15ed0b6ea46acaa09ca9a94a826b8c51fa3e5879",
+        "top": "733a51c9132759643fa312206da3fd053b9cbf33837013fb97795e98842e947d",
+        "front": "bdc853093425257f2963ab361b53580f6b50330c3048b52d74383a6dcab541a3",
+        "rear": "8e35ae058791e82ac7ec8bf2457229a3490642d3dd13ea8a9b4f42ac6077841b"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-cistern-chain-wc-01-installation.png",
+          "sha256": "a5290f44f0142b2b4dc94e7e913382e446fe063e9370b69034ba0bc5b7c113df",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-cistern-chain-wc-01-section.png",
+          "sha256": "d3268342567e57a6e2f61752dc823f75051e6cd4d8b8e8097c6c6dedf824ed89",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 54,
+      "status": "prototype-awaiting-independent-and-root-review"
+    },
+    {
+      "id": "rpg-mansion-high-backed-slipper-bath-01",
+      "name": "高背スリッパ浴槽・中空槽",
+      "kind": "bathtub",
+      "group": "住設",
+      "category": "水回り",
+      "packId": "rpg-mansion",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-high-backed-slipper-bath-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-high-backed-slipper-bath-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-high-backed-slipper-bath-01-top.png",
+      "front": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-backed-slipper-bath-01-front.png",
+      "rear": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-backed-slipper-bath-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-high-backed-slipper-bath-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/water_rooms/authoring_sources/rpg-mansion-high-backed-slipper-bath-01.blend",
+      "validation": "tools/blender/rpg_mansion/water_rooms/sources/rpg-mansion-high-backed-slipper-bath-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/water_rooms/build.py",
+      "w": 1780.0,
+      "d": 820.0,
+      "h": 862.0,
+      "authoredNominalDimensionsMm": [
+        1780,
+        820,
+        862
+      ],
+      "actualMeasuredDimensionsMm": [
+        1780.0,
+        820.0,
+        862.0
+      ],
+      "geometrySignature": "asymmetric-high-backed-hollow-slipper-four-cast-feet",
+      "triangleBudget": 6000,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "staticProp": true,
+      "placementHint": "floor",
+      "semanticCoverage": "Asymmetric high-backed freestanding single bath with continuous hollow shell, actual low/high rim and cast feet; supply fixture omitted.",
+      "dimensionBasis": "Original intended design envelope. Source catalogue dimensions are demand references, not measured replacement or ergonomic certification.",
+      "installationDatums": {
+        "rimHeightMm": {
+          "lowEndCrest": 622,
+          "highEndCrest": 862
+        },
+        "internalFloorHeightMm": 225,
+        "clearBowlMm": {
+          "rimLength": 1650,
+          "rimWidth": 690,
+          "floorLength": 1220,
+          "floorWidth": 390,
+          "lowEndDepthToRimCrest": 397,
+          "innerOpeningLowHeight": 614,
+          "innerOpeningHighHeight": 854
+        },
+        "faucetHeightMm": null,
+        "fixtureNote": "No faucet included. Supply is a separate fixture.",
+        "capacityNote": "One bathing occupant; volume and safety are not certified.",
+        "installation": {
+          "mount": "floor",
+          "floorPlaneY": 0
+        },
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "measuredOriginalBoundsM": [
+          [
+            -0.8899999856948853,
+            -0.4099999964237213,
+            0.0
+          ],
+          [
+            0.8899999856948853,
+            0.4099999964237213,
+            0.8619999885559082
+          ]
+        ]
+      },
+      "finishChannels": [
+        {
+          "key": "ceramic",
+          "label": "陶器",
+          "default": "#eee9dc"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#ad8745"
+        }
+      ],
+      "sha256": "502fbd8fea84fd8b9011c3330ad7adec40679541d5d08b9f07c48d405d94d014",
+      "sourceSha256": "5c87a94336f78e7c2588e1739440e9520e7e8c3ecd74f54709482556dd3e4ff6",
+      "authoringSha256": "cbf05fc1b61adc7b1e2806d0bdb9c3b021fa71a4da5566ddb7b5226b668b2942",
+      "previewSha256": {
+        "thumb": "7a64b049f53c0f82fa4064d70b563af5a2bf95600b7b00cee89ddaac12c72684",
+        "top": "cd24ce5a75e4679f508b51cd16f40fcd5d03debcae44006478b68340055649a9",
+        "front": "4db5244f6efedb6236555c78fc1f67a3ca591875958e00610bd3111493a978ed",
+        "rear": "a06eafd5d3e2f6743c3a5bac47bf55439b36999d0b83da5a4bea3d7329f9c3f1"
+      },
+      "qaInstallationEvidence": {
+        "installation": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-backed-slipper-bath-01-installation.png",
+          "sha256": "bdf8536d97380cf71d767b072f65e5519e0731feb7d845155bea5b2f458c247b",
+          "qaFixturesExcludedFromModelCount": true
+        },
+        "section": {
+          "path": "tools/blender/rpg_mansion/water_rooms/evidence/rpg-mansion-high-backed-slipper-bath-01-section.png",
+          "sha256": "1ca9fd5329975c1d0434ae31100eeda052d245d42696cbb0316fd5ce2eb22a7e",
+          "qaFixturesExcludedFromModelCount": true
+        }
+      },
+      "nativeEditableParts": 11,
+      "status": "prototype-awaiting-independent-and-root-review"
+    }
+  ]
+}

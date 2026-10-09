@@ -1,0 +1,103 @@
+{
+  "case": "basin-cavity",
+  "source": "basin-cavity.blend",
+  "sourceSha256": "758799d00b875c9872bfed06d8f0e660dd53b45ab6ea59688b0ae4c1f5c9136c",
+  "products": [
+    {
+      "label": "Hollow basin and standpipe",
+      "asset": "rpg-mansion-garden-standpipe-drain-basin-01",
+      "model": "models/rpg-mansion-garden-standpipe-drain-basin-01.glb",
+      "sha256": "54334c39c913db7b6fdafb6dca4f2636c31a76b75b1db97fe29837d3bfe3b97d",
+      "positionBlenderM": [
+        0,
+        0,
+        0
+      ],
+      "rotationZDegrees": 0,
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "gate": "open-cavity-down-ray",
+      "originM": [
+        0.0,
+        -0.09749999642372131,
+        0.5
+      ],
+      "hitHeightOriginalM": 0.08600005507469177,
+      "expectedFloorHeightM": 0.086,
+      "passed": true
+    },
+    {
+      "gate": "open-cavity-down-ray",
+      "originM": [
+        -0.11999999731779099,
+        -0.16750000417232513,
+        0.5
+      ],
+      "hitHeightOriginalM": 0.085999995470047,
+      "expectedFloorHeightM": 0.086,
+      "passed": true
+    },
+    {
+      "gate": "open-cavity-down-ray",
+      "originM": [
+        0.11999999731779099,
+        -0.16750000417232513,
+        0.5
+      ],
+      "hitHeightOriginalM": 0.085999995470047,
+      "expectedFloorHeightM": 0.086,
+      "passed": true
+    },
+    {
+      "gate": "tap-outlet-gravity-down-ray-enters-basin",
+      "originM": [
+        0.0,
+        0.014691697433590889,
+        0.7057485580444336
+      ],
+      "directionM": [
+        0,
+        0,
+        -1
+      ],
+      "note": "Vertical gravity clearance from just outside the spout; not a fluid-trajectory simulation.",
+      "hitM": [
+        0.0,
+        0.014691697433590889,
+        0.08600008487701416
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "fixturesCount": 0,
+  "manualCaveat": "Static manual placement and geometric contacts only; no automatic snapping, structural engineering, load certification or fluid simulation."
+}

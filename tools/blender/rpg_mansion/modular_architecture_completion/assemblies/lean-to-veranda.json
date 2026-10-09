@@ -1,0 +1,1964 @@
+{
+  "name": "lean-to-veranda",
+  "source": "tools/blender/rpg_mansion/modular_architecture_completion/assemblies/lean-to-veranda.blend",
+  "sourceSha256": "2babfcc24019e22542020424f07028023b82a8f30b55d8b978f0ab0a1084e5e5",
+  "instances": [
+    {
+      "label": "octagon-cabochon-floor-tile",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        -1.2,
+        -0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2000000476837158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            -1.8000000715255737,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.8000000715255737,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            -0.6000000238418579,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -0.6000000238418579,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "octagon-cabochon-floor-tile.001",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        -1.2,
+        0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2000000476837158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            -1.8000000715255737,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.8000000715255737,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            -0.6000000238418579,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -0.6000000238418579,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "octagon-cabochon-floor-tile.002",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        0,
+        -0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            -0.6000000238418579,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -0.6000000238418579,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            0.6000000238418579,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.6000000238418579,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            0.0,
+            -1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            0.0,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            0.0,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            0.0,
+            -0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            0.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "octagon-cabochon-floor-tile.003",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        0,
+        0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            -0.6000000238418579,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -0.6000000238418579,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            0.6000000238418579,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.6000000238418579,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            0.0,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            0.0,
+            1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            0.0,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            0.0,
+            0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            0.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "octagon-cabochon-floor-tile.004",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        1.2,
+        -0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2000000476837158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            0.6000000238418579,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.6000000238418579,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            1.8000000715255737,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.8000000715255737,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "octagon-cabochon-floor-tile.005",
+      "id": "rpg-mansion-octagon-cabochon-floor-tile-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "modelSha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e",
+      "constructionDatumWorldM": [
+        1.2,
+        0.6,
+        -0.075
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2000000476837158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07500000298023224
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "west",
+          "pointBlenderWorldM": [
+            0.6000000238418579,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.6000000238418579,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            -1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "east",
+          "pointBlenderWorldM": [
+            1.8000000715255737,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.8000000715255737,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            1.0,
+            0.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "front",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.0,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            1.2000000476837158,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "bottom",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.6000000238418579,
+            -0.07500000298023224
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            -0.07500000298023224,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "top",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.6000000238418579,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "floor"
+    },
+    {
+      "label": "plain-plaster-bay",
+      "id": "rpg-mansion-plain-plaster-bay-01",
+      "model": "tools/blender/rpg_mansion/modular_architecture_completion/proof_inputs/models/rpg-mansion-plain-plaster-bay-01.glb",
+      "modelSha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8",
+      "constructionDatumWorldM": [
+        -1.2,
+        -0.6,
+        0
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.009999997913837433,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          -1.2100000381469727
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "left",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -4.371137896086452e-10,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            4.371138828673793e-08,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            4.371137896086452e-10
+          ],
+          "normalGltfWorld": [
+            4.371138828673793e-08,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "right",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -1.2000000476837158,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            -4.371138828673793e-08,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            -4.371138828673793e-08,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            3.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "wall"
+    },
+    {
+      "label": "plain-plaster-bay.001",
+      "id": "rpg-mansion-plain-plaster-bay-01",
+      "model": "tools/blender/rpg_mansion/modular_architecture_completion/proof_inputs/models/rpg-mansion-plain-plaster-bay-01.glb",
+      "modelSha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8",
+      "constructionDatumWorldM": [
+        -1.2,
+        0.6,
+        0
+      ],
+      "zRotationDegrees": -90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.009999997913837433,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          -4.371138828673793e-08,
+          1.0,
+          0.0,
+          -1.2100000381469727
+        ],
+        [
+          -1.0,
+          -4.371138828673793e-08,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "left",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            1.2000000476837158,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            4.371138828673793e-08,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            4.371138828673793e-08,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "right",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -4.371137896086452e-10,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            -4.371138828673793e-08,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            0.0,
+            4.371137896086452e-10
+          ],
+          "normalGltfWorld": [
+            -4.371138828673793e-08,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            3.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "wall"
+    },
+    {
+      "label": "plain-plaster-bay.002",
+      "id": "rpg-mansion-plain-plaster-bay-01",
+      "model": "tools/blender/rpg_mansion/modular_architecture_completion/proof_inputs/models/rpg-mansion-plain-plaster-bay-01.glb",
+      "modelSha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8",
+      "constructionDatumWorldM": [
+        1.2,
+        -0.6,
+        0
+      ],
+      "zRotationDegrees": 90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.009999997913837433,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          7.549790126404332e-08,
+          -1.0,
+          0.0,
+          1.2100000381469727
+        ],
+        [
+          1.0,
+          7.549790126404332e-08,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "left",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -1.2000000476837158,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            -7.549790126404332e-08,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            -7.549790126404332e-08,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "right",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            7.549788572092098e-10,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            7.549790126404332e-08,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            -7.549788572092098e-10
+          ],
+          "normalGltfWorld": [
+            7.549790126404332e-08,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            3.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "wall"
+    },
+    {
+      "label": "plain-plaster-bay.003",
+      "id": "rpg-mansion-plain-plaster-bay-01",
+      "model": "tools/blender/rpg_mansion/modular_architecture_completion/proof_inputs/models/rpg-mansion-plain-plaster-bay-01.glb",
+      "modelSha256": "8d90243779eb639f2fc21cb28e04e76a0771b2426ca8d38f5ba4e87ce3833ac8",
+      "constructionDatumWorldM": [
+        1.2,
+        0.6,
+        0
+      ],
+      "zRotationDegrees": 90,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        -0.009999997913837433,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          7.549790126404332e-08,
+          -1.0,
+          0.0,
+          1.2100000381469727
+        ],
+        [
+          1.0,
+          7.549790126404332e-08,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "left",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            7.549788572092098e-10,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            -7.549790126404332e-08,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            -7.549788572092098e-10
+          ],
+          "normalGltfWorld": [
+            -7.549790126404332e-08,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "right",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            1.2000000476837158,
+            0.0
+          ],
+          "normalBlenderWorld": [
+            7.549790126404332e-08,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            0.0,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            7.549790126404332e-08,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "wall-top",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            3.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "wall"
+    },
+    {
+      "label": "standing-seam-lean-to-span",
+      "id": "rpg-mansion-standing-seam-lean-to-span-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-standing-seam-lean-to-span-01.glb",
+      "modelSha256": "dcaa1b5c010958fcb3c2504fe178860419fb0a87428c5172e5a243704e2cb628",
+      "constructionDatumWorldM": [
+        0,
+        -0.6,
+        2.9
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9000000953674316
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "front-repeat",
+          "pointBlenderWorldM": [
+            0.0,
+            -1.2000000476837158,
+            2.9000000953674316
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            2.9000000953674316,
+            1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear-repeat",
+          "pointBlenderWorldM": [
+            0.0,
+            0.0,
+            2.9000000953674316
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            2.9000000953674316,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "low-bearing",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            -0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            3.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "high-bearing",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            -0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            3.0,
+            0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "roof"
+    },
+    {
+      "label": "standing-seam-lean-to-span.001",
+      "id": "rpg-mansion-standing-seam-lean-to-span-01",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-standing-seam-lean-to-span-01.glb",
+      "modelSha256": "dcaa1b5c010958fcb3c2504fe178860419fb0a87428c5172e5a243704e2cb628",
+      "constructionDatumWorldM": [
+        0,
+        0.6,
+        2.9
+      ],
+      "zRotationDegrees": 0,
+      "sourceToConstructionTranslationM": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "assetToWorldBlenderMatrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6000000238418579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9000000953674316
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "worldConnections": [
+        {
+          "label": "front-repeat",
+          "pointBlenderWorldM": [
+            0.0,
+            0.0,
+            2.9000000953674316
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            2.9000000953674316,
+            -0.0
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        {
+          "label": "rear-repeat",
+          "pointBlenderWorldM": [
+            0.0,
+            1.2000000476837158,
+            2.9000000953674316
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "pointGltfWorldM": [
+            0.0,
+            2.9000000953674316,
+            -1.2000000476837158
+          ],
+          "normalGltfWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ]
+        },
+        {
+          "label": "low-bearing",
+          "pointBlenderWorldM": [
+            -1.2000000476837158,
+            0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            -1.2000000476837158,
+            3.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        },
+        {
+          "label": "high-bearing",
+          "pointBlenderWorldM": [
+            1.2000000476837158,
+            0.6000000238418579,
+            3.0
+          ],
+          "normalBlenderWorld": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "pointGltfWorldM": [
+            1.2000000476837158,
+            3.0,
+            -0.6000000238418579
+          ],
+          "normalGltfWorld": [
+            0.0,
+            -1.0,
+            -0.0
+          ]
+        }
+      ],
+      "category": "roof"
+    }
+  ],
+  "instanceCount": 12,
+  "fixtures": [],
+  "views": {
+    "exterior": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/assemblies/lean-to-veranda-exterior.png",
+      "sha256": "34f1d2d4dfd029761f388adab35c172f29627aa49043af089f70b5b238ebbc1e",
+      "camera": {
+        "direction": [
+          6,
+          -8,
+          4
+        ],
+        "resolution": 1024,
+        "orthographicScale": 5.33821964263916,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      },
+      "visibleCategories": [
+        "floor",
+        "roof",
+        "wall"
+      ],
+      "omittedInstances": [],
+      "note": "Whole-module visibility cutaway; transforms and meshes unchanged."
+    },
+    "underside": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/assemblies/lean-to-veranda-underside.png",
+      "sha256": "f9d7d99ddce7435d06e8fc2aab9726f388ec17f8aab3799f62b9b2d6f8ba4a8a",
+      "camera": {
+        "direction": [
+          -5,
+          -7,
+          -4
+        ],
+        "resolution": 1024,
+        "orthographicScale": 5.167815208435059,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      },
+      "visibleCategories": [
+        "roof",
+        "wall"
+      ],
+      "omittedInstances": [
+        "octagon-cabochon-floor-tile",
+        "octagon-cabochon-floor-tile.001",
+        "octagon-cabochon-floor-tile.002",
+        "octagon-cabochon-floor-tile.003",
+        "octagon-cabochon-floor-tile.004",
+        "octagon-cabochon-floor-tile.005"
+      ],
+      "note": "Whole-module visibility cutaway; transforms and meshes unchanged."
+    },
+    "top": {
+      "path": "tools/blender/rpg_mansion/modular_architecture_completion/assemblies/lean-to-veranda-top.png",
+      "sha256": "ee4dfcad61e990389318b0a857956fbfb211fefcc73788949bb2d9639d6a4a2b",
+      "camera": {
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "resolution": 1024,
+        "orthographicScale": 4.0449442863464355,
+        "fit": "project all actual mesh vertices; centre measured camera-space envelope; occupancy 89 percent"
+      },
+      "visibleCategories": [
+        "floor",
+        "roof",
+        "wall"
+      ],
+      "omittedInstances": [],
+      "note": "Whole-module visibility cutaway; transforms and meshes unchanged."
+    }
+  },
+  "viewRecipes": [
+    {
+      "name": "exterior",
+      "direction": [
+        6,
+        -8,
+        4
+      ],
+      "categories": [
+        "floor",
+        "roof",
+        "wall"
+      ]
+    },
+    {
+      "name": "underside",
+      "direction": [
+        -5,
+        -7,
+        -4
+      ],
+      "categories": [
+        "roof",
+        "wall"
+      ]
+    },
+    {
+      "name": "top",
+      "direction": [
+        0,
+        0,
+        1
+      ],
+      "categories": [
+        "floor",
+        "roof",
+        "wall"
+      ]
+    }
+  ],
+  "installationNotes": [
+    "Static manual rigid installation only; no native wall cutting, automatic roofs, stair behavior, collision, or engineering certification.",
+    "Cutaway views omit whole delivered instances; no geometry is added or changed."
+  ]
+}

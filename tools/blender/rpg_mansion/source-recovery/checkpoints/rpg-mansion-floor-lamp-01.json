@@ -1,0 +1,187 @@
+{
+  "id": "rpg-mansion-floor-lamp-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-floor-lamp-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-floor-lamp-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-floor-lamp-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 3,
+  "validation": {
+    "model": "rpg-mansion-floor-lamp-01",
+    "dimensions_mm": [
+      620.0000047683716,
+      620.0000047683716,
+      1690.000057220459
+    ],
+    "bounds_m": [
+      [
+        -0.3100000023841858,
+        -0.3100000023841858,
+        0.0
+      ],
+      [
+        0.3100000023841858,
+        0.3100000023841858,
+        1.690000057220459
+      ]
+    ],
+    "triangles": 404,
+    "uv": {
+      "meters_per_uv": 2.1057993018729113,
+      "min": 1.9540412853528204,
+      "max": 2.6623486986802876,
+      "p05": 2.005244563857432,
+      "p95": 2.32660942719569,
+      "total_triangles": 404,
+      "valid_triangles": 404,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Antique brass": "metal",
+      "RPG linen": "fabric"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 19076
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "463c2f2abcb46b01b0799a4cad38479aebfcfd4a0d68b85d2c184ba786eb5aa6",
+    "bytes": 19076,
+    "triangles": 404,
+    "bounds_gltf_m": [
+      [
+        -0.3100000023841858,
+        0.0,
+        -0.3100000023841858
+      ],
+      [
+        0.3100000023841858,
+        1.690000057220459,
+        0.3100000023841858
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      620.0000047683716,
+      620.0000047683716,
+      1690.000057220459
+    ],
+    "geometry_material_sha256_1e7": "f29111944a2a5920aad5fca135a26ab757f8e2eec42273b4bc5be128fe44c4be",
+    "geometry_material_uv_sha256_1e7": "00a1cb8c3bf612a1537d6757f6536015c343a414465fc79c67e74824f9ac895c",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 216
+      },
+      {
+        "material": "RPG linen",
+        "channel": "fabric",
+        "triangles": 188
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "69342e103bad69595fd4f8d3297d126ee67bfa4749d2d3752c924464c42487e7",
+    "bytes": 19280,
+    "triangles": 404,
+    "bounds_gltf_m": [
+      [
+        -0.3100000023841858,
+        0.0,
+        -0.3100000023841858
+      ],
+      [
+        0.3100000023841858,
+        1.690000057220459,
+        0.3100000023841858
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      620.0000047683716,
+      620.0000047683716,
+      1690.000057220459
+    ],
+    "geometry_material_sha256_1e7": "f29111944a2a5920aad5fca135a26ab757f8e2eec42273b4bc5be128fe44c4be",
+    "geometry_material_uv_sha256_1e7": "00a1cb8c3bf612a1537d6757f6536015c343a414465fc79c67e74824f9ac895c",
+    "finish_channels": [
+      "fabric",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 216
+      },
+      {
+        "material": "RPG linen",
+        "channel": "fabric",
+        "triangles": 188
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 4.04,
+  "source_sha256": "163b62271e322a3e77340a17bd1174f99c069986aa2b2dd19a16b8f7812a73c9",
+  "front_sha256": "e739586f00c9b1cfd611c2cb06c49a30e2e9c4d185a24b40a259ee8e2a2ca69e",
+  "rear_sha256": "4d30e259421ccf385c97186d32223fa1b659077a0914451fe73166a6f015eb3f",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:30.216337+00:00",
+    "source_sha256_before": "179a7134f93abd866e45ebd125c87da5a9643de8cd413cc8d8db9fca118a80dc",
+    "source_sha256_after": "163b62271e322a3e77340a17bd1174f99c069986aa2b2dd19a16b8f7812a73c9",
+    "mesh_geometry_uv_material_digest_preserved": "e0fbe56d72787366c60c3b1b88e7d794c8afdeaa8c34b9689130318eebb209f5",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-floor-lamp-01-rear.png",
+        "render_filepath": "//rpg-mansion-floor-lamp-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "163b62271e322a3e77340a17bd1174f99c069986aa2b2dd19a16b8f7812a73c9",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "model": "rpg-mansion-two-wall-corner-basin-01",
+  "dimensions_mm": [
+    550.000011920929,
+    550.000011920929,
+    527.7917981147766
+  ],
+  "bounds_m": [
+    [
+      -0.2750000059604645,
+      -0.2750000059604645,
+      0.0
+    ],
+    [
+      0.2750000059604645,
+      0.2750000059604645,
+      0.5277917981147766
+    ]
+  ],
+  "triangles": 1132,
+  "uv": {
+    "meters_per_uv": 1.413936614650058,
+    "min": 1.4121040909315699,
+    "max": 1.4157534255094633,
+    "p05": 1.413649273107502,
+    "p95": 1.4142647995046842,
+    "total_triangles": 1132,
+    "valid_triangles": 1132,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Ivory fired porcelain": "ceramic",
+    "Bronzed cast iron brackets": "metal",
+    "Aged polished brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 79984,
+  "datums": {
+    "rimHeightMm": 920,
+    "defaultElevationMm": 600,
+    "faucetHeightMm": 1128,
+    "clearBowlMm": {
+      "maximumOpeningWidth": 394.2,
+      "maximumOpeningDepth": 394.2,
+      "depth": 116
+    },
+    "basinCount": 1,
+    "capacityNote": "One static corner hand basin.",
+    "installation": {
+      "mount": "two-perpendicular-wall-brackets",
+      "defaultElevationMm": 600,
+      "wallContactPlaneBlenderY": 0.28,
+      "secondWallContactPlaneBlenderX": 0.28,
+      "note": "Two perpendicular wall bearing plates and separate triangulated arms. Waste pipe is not structural.",
+      "wallContactPlaneGltfZ": -0.2750000047683716
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.004999995231628418,
+      -0.004999995231628418,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.27000001072883606,
+        -0.27000001072883606,
+        0.0
+      ],
+      [
+        0.2800000011920929,
+        0.2800000011920929,
+        0.5277917981147766
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.014670579744461065,
+    0.0002403393428759652,
+    0.00024033942287360333,
+    0.0002748050942500413,
+    0.00027480520589051594,
+    0.000160753031650529,
+    0.00016075290030433584,
+    1.247298371254147e-06,
+    1.5244756544537568e-06,
+    1.2471470351253322e-06,
+    1.5243441945737382e-06,
+    6.637255585436229e-06,
+    0.00026995806161996444,
+    4.3769753271286994e-05,
+    6.84218988074766e-05,
+    0.00021783500549569604,
+    6.373854754807932e-06
+  ],
+  "source_sha256": "a6162f08a862277e52c5d18c565f3b22ef17bb659769df7597a26d6d68fe839c",
+  "glb_sha256": "5eaf77db03fb593243c5e809a97db9e8ce68991b99283df75af62f4c450d92ee"
+}

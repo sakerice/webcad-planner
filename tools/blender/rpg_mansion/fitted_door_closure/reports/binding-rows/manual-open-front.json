@@ -1,0 +1,23 @@
+{
+  "source": "proofs/door-manual-open-qa-only.blend",
+  "sourceSha256": "2341615db3fddc4ea1fd11c63b5c2d2dc7ea93069f77da6981e01cb42ba982a4",
+  "image": "evidence/manual-open-front.png",
+  "imageSha256": "f8570501f46a6c0f7190769629909a0ce05bb6993ca1b7b7e42b091d8edc3e45",
+  "recipe": {
+    "function": "build.render",
+    "delta": [
+      1.8,
+      -4,
+      1.0
+    ],
+    "resolution": 900,
+    "target": null,
+    "orthoScale": null,
+    "engine": "CYCLES",
+    "samples": 32,
+    "denoise": false,
+    "transparent": true,
+    "viewTransform": "AgX",
+    "finishOverride": null
+  }
+}

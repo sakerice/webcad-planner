@@ -1,0 +1,150 @@
+{
+  "authoring": "Original procedural Blender geometry authored for this project",
+  "thirdPartyGeometry": false,
+  "thirdPartyTextures": false,
+  "paidGeneration": false,
+  "license": "Original project-authored assets for this repository; no separate public reuse license granted",
+  "dimensionPolicy": "Intended designs and measured authored geometry are distinguished from nearest declared standard demand references. All missing legacy bed geometry remains unverified.",
+  "sourceModules": {
+    "qa_contacts.py": "ee15d3b255c1a6b7c32a03ba33243f4e660c839eedf8390add7e8155fdaf0ef1",
+    "qa_support.py": "f56061caf775d87724cd5808ccc593ae8c4e902bb7defdde73ca031e0cc8770e",
+    "qa_dedupe.py": "b7dc23b3a26bc3ede085fb18e3e1316f597a2b23d834c770ca79d6debe119ccf",
+    "finalize_render_recipes.py": "309bd3d0b1b2d00c5b146b0ed3901ca45272168761fe159d85c7e7a98b1e31ba",
+    "freeze_delivery.py": "c28dc59905e1c8f36af4b11f57567b69d6ac98edbc84672b6496d7fe7c052bb1",
+    "qa_pbr_reexport.py": "98129a6b44cef7e018984373e42c702fa64721e157e56fe673542ffd82673b30",
+    "qa_native_parts.py": "66dc8129a797a0e98982b1ce2356359793891ea844f7a2586e108bd2888548de",
+    "previews.py": "390adec24bce1ea61d01957ca997b215872f4d5c530b88f4814117ef88f8b531",
+    "finalize_metadata.py": "ae8ecf9d79fae6dca49d05bb46100f690dbb7be21d6fb6f1c8da7bc931717456",
+    "generic_source_qa.py": "463cad09d1cf9e636f299a51b758a7bd140472975bc093ff974d1b7c77ed7a26",
+    "qa_front_axis.py": "1fa27d0906ed735637348b5c28c1960cbf77834467389cca7c9a706f2e6f5497",
+    "qa.py": "6e098433265b3a0532ab3ad640841bad1a1204a5dbe66042436d51294e3f4db3",
+    "sanitize_source_ui.py": "c570ce016f8dd2bce4be8ab069e8efc1d84f832456bb7f22f4937f9e1deb42fb",
+    "repair_framing.py": "cd704a6aa13101f5ede2e4186d3ce5a33d920c756758cc7286f838f76b7a3798",
+    "contact_sheet.py": "85cff3cbcc8bda4183aee541302ecd08788722a35aae2490162f78b72d533f8a",
+    "source_privacy.py": "e7bdc268239bf4c3eeb42ef55213343296d0be3b93e04f0a7555c4ebebe3ae90",
+    "qa_coplanar_exteriors.py": "f0f41f4df91530f030d067bcc2cdb9fcb2c0b650c1e09d1db9c57d8bc87b92bd",
+    "qa_uv_overlap.py": "15f0b0915545c905e0c4bd037d4e5f1a8ed02a10c76a67d583c3aeaa2b7b4cee",
+    "qa_image_margins.py": "d22a58a5b168b1fa5c2a201bc5d8d25564b3609a57933c5e053a803b49c4d158",
+    "forms.py": "a48249cb2a8bd0767c84f67805aedb1c0c4275c8558df0c4c85d32b811c9e455",
+    "family_contact_sheets.py": "d1eee987edb64ac60e9989f882dc9beed7770833faa36359307d9d22f41771e7",
+    "export_contract.py": "2b9fc0ba51726da3a29115896ba76dd23245bb4182d7af2e459604133c1cc0ee",
+    "build.py": "cf0889086b697680d16f6e9b362aad5046f8315812cf1866cdd7a4d153ddbd1b",
+    "qa_mattress_features.py": "899060f8eff61117c919f4fca28985f5800c61064fe927c7f12c6844d4366581"
+  },
+  "assets": [
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "glbSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d",
+      "canonicalSourceSha256": "46f06093851cda6feb34e0d799d33a125e3786e2045d130c4718b4e3b24e7eb1",
+      "partOnlySourceSha256": "ac1ad518671d61997c2dc6e8ecfc252276081140937e0ad743489a70acd3a962"
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "glbSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a",
+      "canonicalSourceSha256": "329f519ab711d5a196c4879192abd418f8bc46f09dd0cb7913aae421bf8c2cfb",
+      "partOnlySourceSha256": "8ae16c4bc4e0015db09bb7f1a1dc749df13726f943cd235557113614973c7fef"
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "glbSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de",
+      "canonicalSourceSha256": "4d100507109c4bd6240ba24c21f31ce3ba5aca2ec45636c5ce1b546401474bee",
+      "partOnlySourceSha256": "38966e7ab78f1ab43d41b59cbfcf447eaf274c873c214a9b9c838c69d7cdf99d"
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "glbSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328",
+      "canonicalSourceSha256": "ef21ea4386a431b85a469f8b0b1773895bd7486fd7856b9defe68618e99700b3",
+      "partOnlySourceSha256": "c200a8e5c078cfbdee93bdb39c2a4d694c72d5512f11dd701c57f0df4956420a"
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "glbSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d",
+      "canonicalSourceSha256": "32fad8c910748ca62dfc3a91acaa044781a388a6cd63e21ae29e58610004069d",
+      "partOnlySourceSha256": "2b6646a135b11106ee70c3e35e86fab413eb888f21f3078b9fff2bb6d1d4bad8"
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "glbSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41",
+      "canonicalSourceSha256": "92a3000be9a5310be51bb449ece37e5f2ed45ecf9a39d29caf2171101d25af11",
+      "partOnlySourceSha256": "27463278ff408c7d6e375aa08785a00d08b06aabb4d7f7a8e2467570a77c1907"
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "glbSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8",
+      "canonicalSourceSha256": "3b6e98a94163df1841040b15c60bdf7092f9a9aa00d4ea6228f31e08232d778f",
+      "partOnlySourceSha256": "59de7c54b539e5bf8e1003809ac63d65af248f1d01603418730b970249a9a2b4"
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "glbSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a",
+      "canonicalSourceSha256": "a2af0ef79dbe6edaf654274b1187e1924c183a8b2a33c656206183762f7c9511",
+      "partOnlySourceSha256": "9638e0baabaf83ba8bb589ec0af41c7abc6dee1a56669e3d924437391ee73831"
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "glbSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005",
+      "canonicalSourceSha256": "e295403736469ebc4f8a6686363569748ad054fe8a501d9103322a2a193efbab",
+      "partOnlySourceSha256": "37becca7772710c8fe0559983b5adfd57bc0d56fcb74f86436a5adaeaf593ba6"
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "glbSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb",
+      "canonicalSourceSha256": "6aec6d112be9ac2728b5d8c6c241c740cbfd36ea8dc44d28886856c9ce409aad",
+      "partOnlySourceSha256": "ef1407d77a7c07bfdcb4f9f9d8e2b48f13b81bbfe0a837e00116fece0a9aa34e"
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "glbSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35",
+      "canonicalSourceSha256": "4bad20b04f1b2925b6bed09427abea2f333808e24696d5909f80d40d89967f63",
+      "partOnlySourceSha256": "6dc75a52d63b5c5c879540bd50088f6e057c3a1e9a44490a8a406029f4952285"
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "glbSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3",
+      "canonicalSourceSha256": "f6dc70b391d27d906e286c3192555eee908c7e1fa62cc298cc27ccbf9190b678",
+      "partOnlySourceSha256": "7be7ebd8af214e9196d2b70dc4ab6330b30046b966dd4714be245bc4113d7dfc"
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "glbSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440",
+      "canonicalSourceSha256": "1abb34e968324a0a2f2496aed1beb07d04095e58a1694530e80a9cefa6cfc048",
+      "partOnlySourceSha256": "90f3a275bc0941d7be3a46b4dc96bb92398358a1a9fcc413f7c862403cf46ccd"
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "glbSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be",
+      "canonicalSourceSha256": "37a66de53240bf7962609497b5f93546e8bbe238e6ce50c2031d5d23fc159002",
+      "partOnlySourceSha256": "a4311a7461ba746c435b3a50070ed3a068159371002c0933a483e426e1b4bae2"
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "glbSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76",
+      "canonicalSourceSha256": "de7a77e2ab175572d8013eda160359982084235f240e191d9331c9eb769ff5be",
+      "partOnlySourceSha256": "035de1c47e0fe3f1254bf0206c30e874eca23c7f09fceaf37abc44728df0b77f"
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "glbSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858",
+      "canonicalSourceSha256": "16780e0e30e521ff781c957327692c2848e01dfe03e0bf09233ecee45f6906ae",
+      "partOnlySourceSha256": "0d55fa8ddf67242ee74bf13b679530c25af710ed215cc94a16d6b6f758d94fe7"
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "glbSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf",
+      "canonicalSourceSha256": "aba98f021c2ffc4e6588abb9721276f4c24baf6f744712ad05d10a958b2eed32",
+      "partOnlySourceSha256": "8d9ef019bb5a14d0b9d1fe0bd23fb73aaf51d9b5ed07a4c9553128149da8e39a"
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "glbSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72",
+      "canonicalSourceSha256": "d157367ce4366a9123e77692fe1f362ebd7d16acd8eaedebbb5f5b6451135f1c",
+      "partOnlySourceSha256": "63b26afcc2659f9d1f8da93e537fad53c223eee26f3cdc664581fe937d3e2ea9"
+    }
+  ],
+  "geometryHelpers": {
+    "tools/blender/model_kit.py": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f",
+    "tools/blender/shape_kit.py": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e",
+    "tools/blender/exterior_build.py": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1",
+    "tools/blender/build_decor.py": "bb94e0570f91c9e7fcf125dd7c0e315ee26b39390c14f37825c7915f557959ab"
+  }
+}

@@ -1,0 +1,637 @@
+{
+  "family": "Original mansion static stair kit",
+  "stage": "Sealed source and evidence for independent final certification",
+  "assetCount": 10,
+  "counting": {
+    "newCore": 4,
+    "dimensionalVariants": 3,
+    "hostFittingVariants": 2,
+    "connectorAccessories": 1,
+    "total": 10
+  },
+  "productImages": 40,
+  "proofImages": 12,
+  "reviewSheets": 2,
+  "installedProofInstances": 43,
+  "applicationChanged": false,
+  "acceptedFamilyBytesModified": false,
+  "sourceDescriptorSha256": "c2646462bb7ad5c0267f308a7c23a7cfd1db32974b74e212be484583eec645a6",
+  "integrationDescriptorSha256": "5ca268880a673e1319cf22722f76e640f980a3ffcdc936b526718c963ab88687",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "ba0cafce59f8e8e044eae386e10cd954556729be8f432ef87aeb96ee1ce97bc0",
+      "bytes": 7476
+    },
+    {
+      "path": "assemble.py",
+      "sha256": "e224866e56ee0d370eff75f4661c8677a27977b336af9e0823be37ae4c26c9e4",
+      "bytes": 12639
+    },
+    {
+      "path": "assemblies/full-straight-guarded-opening/assembled-from-delivered-glbs.blend",
+      "sha256": "ad0f91b9235f1d0c4d2442f608f95d09e0fa95e47cd3083d22c5578955a6dad7",
+      "bytes": 2327119
+    },
+    {
+      "path": "assemblies/full-straight-guarded-opening/assembly-contract.json",
+      "sha256": "26368061e9ba8d32c7f744b5d9fed396f953ef7bdf6ebca6de1fb10c13e3dfca",
+      "bytes": 104222
+    },
+    {
+      "path": "assemblies/full-straight-guarded-opening/assembly.png",
+      "sha256": "8d49e6e58e87142d9740466a78fc6393fa2cf900801217c22511195bd0033e25",
+      "bytes": 1429523
+    },
+    {
+      "path": "assemblies/full-straight-guarded-opening/side.png",
+      "sha256": "e0f944bb1e95dbe5ca75ae1494fa3ae0cb7274ee18da9ec8b912554c47bb3f2c",
+      "bytes": 973310
+    },
+    {
+      "path": "assemblies/full-straight-guarded-opening/top.png",
+      "sha256": "af5aaa0483611ec9216b6cbde1f6e5deb6895f30bc94e3ec65cd20a41ab986de",
+      "bytes": 1227700
+    },
+    {
+      "path": "assemblies/quarter/assembled-from-delivered-glbs.blend",
+      "sha256": "1b7ac7315ac491c28e1c35a38153cab022205794739e6ffd2761259fb7dfbdca",
+      "bytes": 1546084
+    },
+    {
+      "path": "assemblies/quarter/assembly-contract.json",
+      "sha256": "c56cf3f336a7c0223c304018e78ea34b4ec631e3f7e2b511ad423138330b6c2f",
+      "bytes": 71875
+    },
+    {
+      "path": "assemblies/quarter/assembly.png",
+      "sha256": "0975575e93fd9694c3df0875423721f8576079e2ec9911a97d6d016ffe495e22",
+      "bytes": 1286742
+    },
+    {
+      "path": "assemblies/quarter/side.png",
+      "sha256": "53ede869d8ee16f1e30b5dddbcb8d4920eac85f174cbee958389ec3f1613b4cf",
+      "bytes": 1100802
+    },
+    {
+      "path": "assemblies/quarter/top.png",
+      "sha256": "d7b2b811b4d5d147b9e50d68c0913d00e590cbfdef3804c0a1389c7d6435a9fe",
+      "bytes": 1473787
+    },
+    {
+      "path": "assemblies/return/assembled-from-delivered-glbs.blend",
+      "sha256": "49b2236a9cd1b8d22c76c121ad16f6deda15437f4c7aae80362064f748ed3347",
+      "bytes": 1864188
+    },
+    {
+      "path": "assemblies/return/assembly-contract.json",
+      "sha256": "b7f50dae00754aed85ef2dba04396097d6c5f04b1d9da75dbceca5176d9a7c25",
+      "bytes": 73482
+    },
+    {
+      "path": "assemblies/return/assembly.png",
+      "sha256": "a2980f945c3fe7b9726c83b8e6abc772844ca5849742ed73108dcfcf44c34d1e",
+      "bytes": 1307969
+    },
+    {
+      "path": "assemblies/return/side.png",
+      "sha256": "62a54ba3b9158c4f14c58167db82160c8530c805d7905edb5b6820afdbec7eb7",
+      "bytes": 1038764
+    },
+    {
+      "path": "assemblies/return/top.png",
+      "sha256": "7eca2c3f9d742ed8e2f9b2b40abc2dbf56265eef8d53c64d9cf6afab9fc378d7",
+      "bytes": 1486768
+    },
+    {
+      "path": "assemblies/straight/assembled-from-delivered-glbs.blend",
+      "sha256": "e98ad8fd31d31b7d643c3e508ef50ae18c8c88567bb6eb3a66e3048585a0d881",
+      "bytes": 1483675
+    },
+    {
+      "path": "assemblies/straight/assembly-contract.json",
+      "sha256": "8d9798f61d2cc112956b9e452abd728146d2d319458536dc76a4050861d95381",
+      "bytes": 70897
+    },
+    {
+      "path": "assemblies/straight/assembly.png",
+      "sha256": "bb3fd8048fb3dc59f3b2477bc70194ef9e7caa6adc01518523d18259c22a0357",
+      "bytes": 1369175
+    },
+    {
+      "path": "assemblies/straight/side.png",
+      "sha256": "f2a765cef472303b8ac9653ddc54d1f40a6c05946183060e59d60c3db451b3d5",
+      "bytes": 861360
+    },
+    {
+      "path": "assemblies/straight/top.png",
+      "sha256": "fedc93f009982b80aa770c81720628af15fd7f24b622fd107491ab3243a33dd8",
+      "bytes": 1143982
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-flight-eighteen-riser-01.blend",
+      "sha256": "4716297ea72c840c06fda63c16505e9cfc2830af750dc7e979db05b18bc3b360",
+      "bytes": 175671
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-flight-nine-riser-01.blend",
+      "sha256": "b392d6eccd1c627ea52a72e90744547d3dea43e1dc632ab06d38445d523bc7f7",
+      "bytes": 136649
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-guard-eighteen-riser-01.blend",
+      "sha256": "061890fe49298809522fa09d4ffc09e1273fac788ca1c1d123b28ea2a6c4dd44",
+      "bytes": 171580
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-guard-nine-riser-01.blend",
+      "sha256": "4153c24b9ac80986966691bd7e3e399797e617748c262678e553ff84e84effc8",
+      "bytes": 138880
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-landing-guard-corner-01.blend",
+      "sha256": "e3ce35e59d09228223761b066db98339fb2c5a228506986097439eaa656bee75",
+      "bytes": 122223
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-landing-guard-return-01.blend",
+      "sha256": "85e0a63b10170257acefdc45e97c82373b80b517f976a9142ac5279afc3e1cee",
+      "bytes": 148912
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-landing-guard-straight-01.blend",
+      "sha256": "de27bf01e824fe756d9b75138df17d1bf32828049f3c9a622609301b9502a968",
+      "bytes": 110393
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-return-supported-landing-01.blend",
+      "sha256": "3641343459eee4cec270ced8f3dff815dbfbbf9ae3ae10ede718867a18c25e87",
+      "bytes": 122564
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-square-supported-landing-01.blend",
+      "sha256": "1402a603854a233ac0ffce1822a7af1d07a8e174bd2680fbfd6766396500efd6",
+      "bytes": 121333
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-stair-terminal-receiver-newel-01.blend",
+      "sha256": "5b1cbcb49ab0848c669d26a0e22b4d98213660cf02a6a4f70e2dd7e8cff47d55",
+      "bytes": 104015
+    },
+    {
+      "path": "build.py",
+      "sha256": "af83c78bb30aeb472415161987b6a7710b5eeca3f19935a0c4ea8ceaac18ce9d",
+      "bytes": 10064
+    },
+    {
+      "path": "common.py",
+      "sha256": "5d14cca1fbf887c7a7e52dde61d10ec57f2942fed95fc5df358edc18ce9cc77a",
+      "bytes": 3278
+    },
+    {
+      "path": "descriptors.json",
+      "sha256": "c2646462bb7ad5c0267f308a7c23a7cfd1db32974b74e212be484583eec645a6",
+      "bytes": 34209
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-flight-eighteen-riser-01-front.png",
+      "sha256": "8bc103561c54f8f1e0ff5a66078b17fce17f3b402c48ca6b7e517d90cb91b537",
+      "bytes": 309363
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-flight-eighteen-riser-01-rear.png",
+      "sha256": "d9a97e54a26942ca26ff72050b5be3014e6b9d1449cc21d036132811ec42e375",
+      "bytes": 180102
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-flight-nine-riser-01-front.png",
+      "sha256": "f2fd146d8818fffdf15eea0357229aa41c225d7ed726948e4677b6d20d66f44f",
+      "bytes": 406444
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-flight-nine-riser-01-rear.png",
+      "sha256": "9bc993b651bff34962f6a4ed488a0eeaa1b1a70d8799a5f0005d1896323e4ac0",
+      "bytes": 198422
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-guard-eighteen-riser-01-front.png",
+      "sha256": "4c3c595f2706c54680930ef251ff42b49308d16e2322fd40a3042ce84d18c13b",
+      "bytes": 155397
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-guard-eighteen-riser-01-rear.png",
+      "sha256": "198e350bf62c2ab1bf3f81a0ef1973002317113330d9733f905baf704859989c",
+      "bytes": 282776
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-guard-nine-riser-01-front.png",
+      "sha256": "32179f7d511252b4f81ba2b76a80ea9cae2889d122d72cde0a5138ab8557956b",
+      "bytes": 162859
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-guard-nine-riser-01-rear.png",
+      "sha256": "0ac39aebd1760ac697d15140f408a7884e6e24720f0a85f7f2f9b558a69183ef",
+      "bytes": 342551
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-corner-01-front.png",
+      "sha256": "f80f7bdee55154cf17cbd3a151e32f42239bdc07cd1dd4459fada32c46402a42",
+      "bytes": 321121
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-corner-01-rear.png",
+      "sha256": "1a73cef74c4becf9ce49b7ff2d5cbc4dcfbda19068aa833c3d052d2b291231c5",
+      "bytes": 307826
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-return-01-front.png",
+      "sha256": "b12152d453b2918dbacafc95ee3ef02035146b0f4642b80773af520e330f6e0d",
+      "bytes": 239446
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-return-01-rear.png",
+      "sha256": "f71bb1319eaf1ca5fd207e1a45e6e24a26700eb1e007a2763333b379d7811b71",
+      "bytes": 277141
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-straight-01-front.png",
+      "sha256": "bce5b97138bfc455ba3f0d30c0d3e0b513ecb5fb5770870ed0725ec568c0fb7f",
+      "bytes": 182498
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-landing-guard-straight-01-rear.png",
+      "sha256": "2ee548be65f7b2c3fe6d9012e9bac03772b4489df7c413d68594dba972048d24",
+      "bytes": 298172
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-return-supported-landing-01-front.png",
+      "sha256": "db9cd0674caadbce54f2fa6381a49586829999b232a24e0974f6b6f6b3ea6fb6",
+      "bytes": 185464
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-return-supported-landing-01-rear.png",
+      "sha256": "3a7e8d0258dc6a418b91f41b1ad420fe60d11ec30b87c30474887fc1ea4b4398",
+      "bytes": 269584
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-square-supported-landing-01-front.png",
+      "sha256": "bb9a48a14bf4da66937addeaa78f5269790d3ba78cdd5a009a6d472e8acdbda6",
+      "bytes": 224922
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-square-supported-landing-01-rear.png",
+      "sha256": "8da04b494b0f69e3df05488c689800d9bdab52466d26961c1e01b09831eed9e8",
+      "bytes": 288379
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-terminal-receiver-newel-01-front.png",
+      "sha256": "b73ef6bcbe738f5ee90cc024490b92836f7ca12f02dfa5cfd2c8cbd02bbf1f01",
+      "bytes": 182855
+    },
+    {
+      "path": "evidence/rpg-mansion-stair-terminal-receiver-newel-01-rear.png",
+      "sha256": "b03ff4441d0e93ee1b020eb718d0286f34c10cf1d37bd851be60fa9075890e22",
+      "bytes": 196010
+    },
+    {
+      "path": "evidence/stair-assembly-proof-sheet.png",
+      "sha256": "22042e4003723ef38d5a190e66c9f0c7cd83083a622a6e751c1b75d7794a6df9",
+      "bytes": 2140696
+    },
+    {
+      "path": "evidence/stair-kit-contact-sheet.png",
+      "sha256": "ce984b8ab54650ecccd323ca93c3d680dd85c35ac3d9eb109402fef11e2493cb",
+      "bytes": 504944
+    },
+    {
+      "path": "forms.py",
+      "sha256": "ece370a0cd8f4289a1dfec3a6429a586103c7edfbc8f8f8a1d8c776729580bff",
+      "bytes": 10459
+    },
+    {
+      "path": "full_proof.py",
+      "sha256": "c4c312a40be692199e3ba2e31a4b786891f80b9f5ee7b86a651c91d740a3fdbb",
+      "bytes": 6351
+    },
+    {
+      "path": "helpers/exterior_build.py",
+      "sha256": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1",
+      "bytes": 19941
+    },
+    {
+      "path": "helpers/model_kit.py",
+      "sha256": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f",
+      "bytes": 13836
+    },
+    {
+      "path": "helpers/native_utils.py",
+      "sha256": "08616cea07ceac0a989ba33db0754b3ce45aff0954b2000b794b6a63cc41621a",
+      "bytes": 5481
+    },
+    {
+      "path": "helpers/png_metadata.py",
+      "sha256": "dfa11faf1382666a9a29eadb7bf72500b7b97c21085637ebb034a2ae907edada",
+      "bytes": 688
+    },
+    {
+      "path": "helpers/shape_kit.py",
+      "sha256": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e",
+      "bytes": 6733
+    },
+    {
+      "path": "integration-copy-map.json",
+      "sha256": "c5622579bf0c3bd3d6b480d217b0d5b39460e68d018a5e590cb498f92dc23157",
+      "bytes": 37434
+    },
+    {
+      "path": "integration-descriptors.json",
+      "sha256": "5ca268880a673e1319cf22722f76e640f980a3ffcdc936b526718c963ab88687",
+      "bytes": 45348
+    },
+    {
+      "path": "models/rpg-mansion-stair-flight-eighteen-riser-01.glb",
+      "sha256": "0c45505b42fa60f15e974f85dd729874f5d3942c9589bfd15f4b064d5f2f687d",
+      "bytes": 595672
+    },
+    {
+      "path": "models/rpg-mansion-stair-flight-nine-riser-01.glb",
+      "sha256": "d1f50da9939badc8263ecdaab7c4b23d03052dc7010584272902d7da1b4cfa68",
+      "bytes": 311068
+    },
+    {
+      "path": "models/rpg-mansion-stair-guard-eighteen-riser-01.glb",
+      "sha256": "6767927850f85ca8c36265abf890796db6452a6356dafa2199a3ecedbdd8f5e0",
+      "bytes": 1245356
+    },
+    {
+      "path": "models/rpg-mansion-stair-guard-nine-riser-01.glb",
+      "sha256": "7228a808dfd1158fa17a2bb247a9182593535b328d15d722ca93dfff7699f2b5",
+      "bytes": 639008
+    },
+    {
+      "path": "models/rpg-mansion-stair-landing-guard-corner-01.glb",
+      "sha256": "412149c79231aad3e0a790dd8b67ec35025190bc3f6172e46459d64b42120b6f",
+      "bytes": 541048
+    },
+    {
+      "path": "models/rpg-mansion-stair-landing-guard-return-01.glb",
+      "sha256": "c5c1c61d420866fecde91ccff467e8ce84ab384edee0ea410b1d1a6734294817",
+      "bytes": 1119372
+    },
+    {
+      "path": "models/rpg-mansion-stair-landing-guard-straight-01.glb",
+      "sha256": "823dd1e38bd97d63f0536892e0ca7e44aa9966f736016a7bbf7bb974c0982628",
+      "bytes": 305164
+    },
+    {
+      "path": "models/rpg-mansion-stair-return-supported-landing-01.glb",
+      "sha256": "5d997984e301bced4299e96774c42a86570a152f63a302193c6faabc0db6dd00",
+      "bytes": 258948
+    },
+    {
+      "path": "models/rpg-mansion-stair-square-supported-landing-01.glb",
+      "sha256": "df9098e06af115568e321fa568feee64bca50d1cf19fdc44c90846bdef8e0349",
+      "bytes": 243852
+    },
+    {
+      "path": "models/rpg-mansion-stair-terminal-receiver-newel-01.glb",
+      "sha256": "cda3b04caab17598280176a4522e9a72ba78ed4b6c6682753d06df223adf867e",
+      "bytes": 109796
+    },
+    {
+      "path": "package.py",
+      "sha256": "81285e9ca9b32134b538d984ae74939fed754a607e75d305312e971cb37779d2",
+      "bytes": 4474
+    },
+    {
+      "path": "previews/rpg-mansion-stair-flight-eighteen-riser-01-thumb.png",
+      "sha256": "071c472cd40c63c3b06771723a351efaa42b4f7b30785e953f6af1a6a97f03c9",
+      "bytes": 271553
+    },
+    {
+      "path": "previews/rpg-mansion-stair-flight-eighteen-riser-01-top.png",
+      "sha256": "6b33c96ade01ca7ede0107c11503d9164896d9886dbbccbc8dd1f467d1975c06",
+      "bytes": 246585
+    },
+    {
+      "path": "previews/rpg-mansion-stair-flight-nine-riser-01-thumb.png",
+      "sha256": "270a681c1599a8a6ec2255126b279b3f2bfddd289eb6f53f2e2411424f88a9da",
+      "bytes": 327779
+    },
+    {
+      "path": "previews/rpg-mansion-stair-flight-nine-riser-01-top.png",
+      "sha256": "83005a23836ca8a61abbf099a93ee896d3ae4046e6765408eb63e271888a3853",
+      "bytes": 318021
+    },
+    {
+      "path": "previews/rpg-mansion-stair-guard-eighteen-riser-01-thumb.png",
+      "sha256": "f8d7375fc7f3939802098bad614ac520de8ffa7f51ec0a818966e25ff3660916",
+      "bytes": 212895
+    },
+    {
+      "path": "previews/rpg-mansion-stair-guard-eighteen-riser-01-top.png",
+      "sha256": "f5f2cb496d21dd1aba0aa8c56dbba43c291b9ee7aaf22e9ac816ca6541222c7e",
+      "bytes": 152517
+    },
+    {
+      "path": "previews/rpg-mansion-stair-guard-nine-riser-01-thumb.png",
+      "sha256": "8c58ccc725ca2f405d95158339ea9f0a31d80d73208bc86fffd5de6af86b5e45",
+      "bytes": 229492
+    },
+    {
+      "path": "previews/rpg-mansion-stair-guard-nine-riser-01-top.png",
+      "sha256": "12563718a2fb6db0e6624037191548ef155663f306dd1a7351c6b9d6f715f963",
+      "bytes": 165241
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-corner-01-thumb.png",
+      "sha256": "3bfefb5673bd40199f3f32762d26c710b477cf0238855cd410fb5911ac25ae81",
+      "bytes": 306974
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-corner-01-top.png",
+      "sha256": "436cf3a6bb1447dd3c16ad8fa9448c8d2bd9bbb61c2d8324ee5b0eccf5f55ab0",
+      "bytes": 198398
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-return-01-thumb.png",
+      "sha256": "c4861b41769aeb306a3bdc5826a813a9e13fd533ee7772cb7b2da93e48e96796",
+      "bytes": 280085
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-return-01-top.png",
+      "sha256": "c8b703ac71161506e2aa5786dde1e6bf9fc5104ef0c3a09c1d26da5d4ebc56fb",
+      "bytes": 162355
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-straight-01-thumb.png",
+      "sha256": "65b0dd4af1bc8faa962c36123ceade8499b395547b87da4daba571eaa9fad283",
+      "bytes": 287299
+    },
+    {
+      "path": "previews/rpg-mansion-stair-landing-guard-straight-01-top.png",
+      "sha256": "0df45e442df9af79ddb4cd1a758349b5cb88d13472df60f6bb260e8940e2540d",
+      "bytes": 177574
+    },
+    {
+      "path": "previews/rpg-mansion-stair-return-supported-landing-01-thumb.png",
+      "sha256": "ee63900b3d84d277cc6855894fefe89a831c703665bf629aa882a87519820e94",
+      "bytes": 278359
+    },
+    {
+      "path": "previews/rpg-mansion-stair-return-supported-landing-01-top.png",
+      "sha256": "bea2ec860c173b701a345c8b0e65ed56d40c834d4b618541ab9fd336ed2c2dce",
+      "bytes": 274113
+    },
+    {
+      "path": "previews/rpg-mansion-stair-square-supported-landing-01-thumb.png",
+      "sha256": "ddde51cc8b0f89495656ddcb3775bd26f8cc20c121832f35f9207e148f0d6858",
+      "bytes": 284471
+    },
+    {
+      "path": "previews/rpg-mansion-stair-square-supported-landing-01-top.png",
+      "sha256": "0ccb2a07ba4f67ec98a5d7010c8ada13fa14b9c2f2d15abdf2b8e1ba681269b0",
+      "bytes": 404990
+    },
+    {
+      "path": "previews/rpg-mansion-stair-terminal-receiver-newel-01-thumb.png",
+      "sha256": "3fac837bff5ec08bb9afa1e0d7ec6b43ac8cf2964612d6fed71482d0f6c13ef5",
+      "bytes": 197710
+    },
+    {
+      "path": "previews/rpg-mansion-stair-terminal-receiver-newel-01-top.png",
+      "sha256": "4a7da059794a761eee26141a238459f33c81fdfdbd3b57b338805e84c0082d51",
+      "bytes": 326004
+    },
+    {
+      "path": "proof_sheet.py",
+      "sha256": "0ecff29e1a0c661db2309126736c5810b8a26069bef4b25d0deb99565983f896",
+      "bytes": 1306
+    },
+    {
+      "path": "reports/architecture-datum-reference.json",
+      "sha256": "496552cfe78f63e7c045919eeb3fe1eb25ecf396e31a15b0012419ea68de5bcd",
+      "bytes": 1629
+    },
+    {
+      "path": "reports/image-source-binding.json",
+      "sha256": "db96abed3ee9b669eb341487ab17a61aeeb762d2b0194bfbabf44fca04e30ddf",
+      "bytes": 14478
+    },
+    {
+      "path": "reports/producer-image-framing.json",
+      "sha256": "0d190ae9a3285008778405c095f86de8fe0bfc4727a8160130c450edd181ea0f",
+      "bytes": 13821
+    },
+    {
+      "path": "reports/rpg-mansion-stair-flight-eighteen-riser-01-validation.json",
+      "sha256": "9cf307d423743195b1d52b3eab0f2212cac03097ebc448337aad70b9c2468f9c",
+      "bytes": 24640
+    },
+    {
+      "path": "reports/rpg-mansion-stair-flight-nine-riser-01-validation.json",
+      "sha256": "ef84ff20c7ccba8e19905094a993a41fe9cde31ac9963eafa7f8113c6df88151",
+      "bytes": 13512
+    },
+    {
+      "path": "reports/rpg-mansion-stair-guard-eighteen-riser-01-validation.json",
+      "sha256": "f3288b7ddfb4f0f4c41e0cfa08673e57a84bafda0f9ca9d4e8592e450b12d4af",
+      "bytes": 41745
+    },
+    {
+      "path": "reports/rpg-mansion-stair-guard-nine-riser-01-validation.json",
+      "sha256": "c89ccb6a5c4c61591100b695bb6f5ef2424e78d77288875be3284009de2b2df1",
+      "bytes": 21911
+    },
+    {
+      "path": "reports/rpg-mansion-stair-landing-guard-corner-01-validation.json",
+      "sha256": "43e46cc462121007651d9ef842124ba8427263e677335593daf5fd16bf1e0df7",
+      "bytes": 8089
+    },
+    {
+      "path": "reports/rpg-mansion-stair-landing-guard-return-01-validation.json",
+      "sha256": "28e29e462f21eb850de8bf988b4760d087b20763b1edb6fd6fd2750e5acfa50f",
+      "bytes": 14209
+    },
+    {
+      "path": "reports/rpg-mansion-stair-landing-guard-straight-01-validation.json",
+      "sha256": "c57fdeb473fbf68aa3bd5191d5e3ed12fe7ec8bedad494a9eed4919fc479e602",
+      "bytes": 5454
+    },
+    {
+      "path": "reports/rpg-mansion-stair-return-supported-landing-01-validation.json",
+      "sha256": "30af5ef9cb1fde4042b4652c221799ca5c775f31df5d90961e57ad0c1193d2c3",
+      "bytes": 6733
+    },
+    {
+      "path": "reports/rpg-mansion-stair-square-supported-landing-01-validation.json",
+      "sha256": "b28c35add45e4fcd8da43bbc61a6c078aeb486012bbe496b933d03cb4d87c5bc",
+      "bytes": 6464
+    },
+    {
+      "path": "reports/rpg-mansion-stair-terminal-receiver-newel-01-validation.json",
+      "sha256": "cda2c3357e5193af0fc1dd4ba523351a7fe943d772a3afcd16741a63a4eb53e7",
+      "bytes": 3744
+    },
+    {
+      "path": "rights-and-provenance.json",
+      "sha256": "8a1600a02a569421006e0726474bb495c74eb4ecbddccc485d52688409879b26",
+      "bytes": 1600
+    },
+    {
+      "path": "seal.py",
+      "sha256": "574ce4911f076a4ce5f380a9c4e7ef7aeca508efafb55766a7e2a4b8476c17d3",
+      "bytes": 2046
+    },
+    {
+      "path": "sources/rpg-mansion-stair-flight-eighteen-riser-01.blend",
+      "sha256": "82eba042f8fc62b0fd26bdc9b4350d4748f37d696b15c95415c8895e022395b2",
+      "bytes": 350042
+    },
+    {
+      "path": "sources/rpg-mansion-stair-flight-nine-riser-01.blend",
+      "sha256": "7955e1a1977b18ef8f208a4ce33dffa7baa449f281c517ef0c2ff7dea150858c",
+      "bytes": 231036
+    },
+    {
+      "path": "sources/rpg-mansion-stair-guard-eighteen-riser-01.blend",
+      "sha256": "e386a862afe2d33b5d76e9a7cb1e8f70ce70f95b051538def71288733e602061",
+      "bytes": 522323
+    },
+    {
+      "path": "sources/rpg-mansion-stair-guard-nine-riser-01.blend",
+      "sha256": "892cd6c9dbd0ba160b2bbd225d2a436f6115a4dbd3e814756cc93214830b5acd",
+      "bytes": 318420
+    },
+    {
+      "path": "sources/rpg-mansion-stair-landing-guard-corner-01.blend",
+      "sha256": "f831f50150a48c21ea991e2e3841b4b2451cdf2aea36b467d51f3f4812a27319",
+      "bytes": 275921
+    },
+    {
+      "path": "sources/rpg-mansion-stair-landing-guard-return-01.blend",
+      "sha256": "da160e78384f85b00977f626e5439b2a9791bab160334a78816ace403b32e6ef",
+      "bytes": 461425
+    },
+    {
+      "path": "sources/rpg-mansion-stair-landing-guard-straight-01.blend",
+      "sha256": "5f1af487904cf63d136d933b345c87e34a3bdf9f9e90a5e004d5a27f4b50c985",
+      "bytes": 200683
+    },
+    {
+      "path": "sources/rpg-mansion-stair-return-supported-landing-01.blend",
+      "sha256": "d0fe25babb60f7085ec6f1c5ec081ac118fcc20e841c901592f8a06c5e2905a4",
+      "bytes": 200903
+    },
+    {
+      "path": "sources/rpg-mansion-stair-square-supported-landing-01.blend",
+      "sha256": "213f3ad01bdc03c77485ad93ad69b42c3bbb0d3725eba0bb9effcb2ddfc2beab",
+      "bytes": 195594
+    },
+    {
+      "path": "sources/rpg-mansion-stair-terminal-receiver-newel-01.blend",
+      "sha256": "697484627c14b773abcb7995d58dd8d4a60f48854dd2ae60c3dd99591866ce94",
+      "bytes": 139946
+    }
+  ]
+}

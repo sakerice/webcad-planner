@@ -1,0 +1,932 @@
+[
+  {
+    "id": "rpg-mansion-oval-pedestal-dining-01",
+    "name": "楕円双柱ダイニングテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-pedestal-dining-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-dining-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-pedestal-dining-01-top.png",
+    "w": 2200,
+    "d": 1120,
+    "h": 760,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Two linked turned pedestals; a continuous mortised bridge and three shaped feet on each pedestal support a rolled oval top. Dining surface 760 mm.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 5772,
+    "glbBytes": 235668,
+    "hashes": {
+      "model": "943cf28ddf7a3a3ba4be075656ed9ab5cca3535fe08aaa775037008c5581a17d",
+      "thumb": "5930b13be30ed189d2e1bbd3feeaf87d26091f6f3d19ec3de82daf5c31b38fc5",
+      "top": "8ddf833c0b1e8038f9c7112470c99d7c089810088af11196f6aac68684a6c1e4",
+      "front": "5930b13be30ed189d2e1bbd3feeaf87d26091f6f3d19ec3de82daf5c31b38fc5",
+      "rear": "a2557785940e5a3f839be13d8cef99477bd6b05c2d95ccc4ce1574f7868bc4ba",
+      "sourceBlend": "884dd2dc24dc2a27e67167b271fcaa4aa8aea6cc087a8ceeb6e064dbf19a81ce",
+      "authoringBlend": "30d2b4e9e620cada5b0a31c13281bf3064789ad887ebfe40cf4f7263545b11ca",
+      "exportBlend": "884dd2dc24dc2a27e67167b271fcaa4aa8aea6cc087a8ceeb6e064dbf19a81ce",
+      "validation": "798f85e2c2a6eaf5f4c928b60a8998a0a159c5da9f8f9a9424a1be5e4249fa7a",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-pedestal-dining-01-authoring.blend",
+    "triangleBudget": 6000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-kidney-writing-desk-01",
+    "name": "キドニー型ライティングデスク",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-kidney-writing-desk-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kidney-writing-desk-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-kidney-writing-desk-01-top.png",
+    "w": 1300,
+    "d": 700,
+    "h": 771,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-kidney-writing-desk-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Concave kidney silhouette, inset teal leather writing pad, four continuous cabriole legs and a closed center drawer face. Leather surface 771 mm. Static decorative asset; drawer is not animated.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      },
+      {
+        "key": "leather",
+        "label": "革",
+        "default": "#294d4b"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 3964,
+    "glbBytes": 169500,
+    "hashes": {
+      "model": "24af2c7b855776acc866d60713044f09ae0d0afe7ad60f9e4eef601ad2fefb66",
+      "thumb": "347bf9b7eb4bedd63016dca0f7b823b5cbd98fe4ee1e41dfe82223e2c50a5cfe",
+      "top": "5725fb00e9fcac0c2a08a0b0db4844764bb73287f55aad347c11d9a5f51f7203",
+      "front": "347bf9b7eb4bedd63016dca0f7b823b5cbd98fe4ee1e41dfe82223e2c50a5cfe",
+      "rear": "384e2df648bf1dceac8031c136ce0d63e77b15483e49f33321e655aef2332689",
+      "sourceBlend": "352b1b76f5ce4751eea1fda8e3c0e47e631bb9c61bbe815f2945598f9c08b0c8",
+      "authoringBlend": "f759b549f6cc612244da2216d8439c3bceec0d0c739955654dc726a14f38de17",
+      "exportBlend": "352b1b76f5ce4751eea1fda8e3c0e47e631bb9c61bbe815f2945598f9c08b0c8",
+      "validation": "e2145ec8a819c1c472df32a51e9bc90eb1c9c85aaa83f076e8376c6f39834f2b",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-drum-library-table-01",
+    "name": "ドラム型ライブラリーテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-drum-library-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-drum-library-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-drum-library-table-01-top.png",
+    "w": 1120,
+    "d": 1120,
+    "h": 740,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-drum-library-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Round library reading table at 740 mm, cylindrical radial drawer drum on a baluster and four shaped splayed feet. Drawer faces are static geometry.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 5960,
+    "glbBytes": 231596,
+    "hashes": {
+      "model": "9783abf31ee7cc1f986a28fedd89f5e6aab58ede00928ead89cab0de4ddb7fca",
+      "thumb": "2da3a9e91c45617da0365650b059527a15adac7e86f691b6a9b7f9e6c790af01",
+      "top": "ea4a1f2a3a2f3573c82ca9a57381bd5890486e5c3049861ced235b5a40630f3a",
+      "front": "2da3a9e91c45617da0365650b059527a15adac7e86f691b6a9b7f9e6c790af01",
+      "rear": "60b378898aa747f1a31bd37a3f919c266e59d46fd6ae9dc4623049cfed51f77a",
+      "sourceBlend": "4d05929d33c73092eba3e6428319968f78d5c4c957f914a62551b4368264bbce",
+      "authoringBlend": "ed86ffa79ff6187c521aca94fe9cf13dd1375428efb240d477ba9e3ed24cd250",
+      "exportBlend": "4d05929d33c73092eba3e6428319968f78d5c4c957f914a62551b4368264bbce",
+      "validation": "73abae8dff67afddae346b4487a60d85edf9681856a2a2c5ef4f432512204d77",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "triangleBudget": 6000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-gateleg-drop-leaf-01",
+    "name": "ゲートレッグ・ドロップリーフテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-gateleg-drop-leaf-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gateleg-drop-leaf-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-gateleg-drop-leaf-01-top.png",
+    "w": 1300,
+    "d": 880,
+    "h": 740,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Static open-leaf gateleg arrangement, with two visibly separate leaves, four main turned legs and two supporting gate frames. No moving hinge simulation.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 2904,
+    "glbBytes": 112220,
+    "hashes": {
+      "model": "57b5231618d22f3f2774e916ebc8fbb18f57ee0c71a37f34353c4b3a42bdea70",
+      "thumb": "a53635665a9501811322a25d7c6eb6a47311714b483218e5495622a64c849d89",
+      "top": "e15a3748e1b1f5f01e83b056976cf22331a7f17785b455b1144a810681082c07",
+      "front": "a53635665a9501811322a25d7c6eb6a47311714b483218e5495622a64c849d89",
+      "rear": "edee125138e1ea386744dcdf16c6f5b95e75ae19484aa6ab9f91135000e15f1a",
+      "sourceBlend": "44bcca993b14b3cccb2b5782e908eb8a3b051433a92f49b09c8078897d6344d0",
+      "authoringBlend": "752e2c60a83a8c35599ca85de5a1e34c8b58fd17d2817cad0ac9e2966df668ae",
+      "exportBlend": "44bcca993b14b3cccb2b5782e908eb8a3b051433a92f49b09c8078897d6344d0",
+      "validation": "dbee12e7dd277ead7684d35cc3cf71c41901bc3d7f721af2658a8f9390145158",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-gateleg-drop-leaf-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-folding-tea-tray-table-01",
+    "name": "クロス脚ティートレイテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-folding-tea-tray-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-folding-tea-tray-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-folding-tea-tray-table-01-top.png",
+    "w": 660,
+    "d": 440,
+    "h": 700,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Raised-rim tea tray on crossed folding-style rails, attached brass cross pins and floor bearers. Fixed open geometry, not a simulated folding mechanism.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 2080,
+    "glbBytes": 83964,
+    "hashes": {
+      "model": "90258f7f9e135f895a4b8e4b9ccb91f3d43189a83a98b29ba7fb84e9c3ce6eb6",
+      "thumb": "70df0dd46088f44283d9f27167efa41394d904ecbd75a075b2d6c9b6b22c995c",
+      "top": "83a833a3f3d86b26fb73ba76d5e17f6e9b78501fffeca5e15c64da6d241ab250",
+      "front": "70df0dd46088f44283d9f27167efa41394d904ecbd75a075b2d6c9b6b22c995c",
+      "rear": "6815456d69ea44885759bede2d3f7d061054d81216aa33a14476bdd75e617720",
+      "sourceBlend": "1b3c98a5add13fd99cc3510015e38599f9def2c8c21c64a7fd2dbce7abe3b115",
+      "authoringBlend": "d1f93998360109523f118da84a9e783176de14678a025bd500db5e341c53a5a0",
+      "exportBlend": "1b3c98a5add13fd99cc3510015e38599f9def2c8c21c64a7fd2dbce7abe3b115",
+      "validation": "2c4278d39da162010251706dca14a01ac7cdfa088fafdc657508ac83860fa164",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-folding-tea-tray-table-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-baize-card-table-01",
+    "name": "ベーズ張りカードテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-baize-card-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-baize-card-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-baize-card-table-01-top.png",
+    "w": 880,
+    "d": 880,
+    "h": 756,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Square card-playing table with inset wool baize, corner studs and four tapered legs. Playing surface 756 mm.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      },
+      {
+        "key": "fabric",
+        "label": "布",
+        "default": "#274e45"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 1352,
+    "glbBytes": 63952,
+    "hashes": {
+      "model": "d03aee4c815d7f00dac7fab53b50d77f41ccc4c9024d2782ccfbea4e8d91eb18",
+      "thumb": "c5fda85b1a7a74b5e3521674ada9d419b4ddd253672efeb34377385a574a6789",
+      "top": "2f38addf722d93b41fdf5c8c86635953780f9023447d5a9662d15f70038d8700",
+      "front": "c5fda85b1a7a74b5e3521674ada9d419b4ddd253672efeb34377385a574a6789",
+      "rear": "e2288307cbfd275f65118e040c14f81df7057c401fd28698dd84bcf4a8abde91",
+      "sourceBlend": "70b41089e18cdfb3fa056ce32cef0ee7748751f6bafe60582916a402f23b776f",
+      "authoringBlend": "784a5cf05f67aa9a13fe831011a882ed19c7da4823dd4cb76e9d5f59b68a6323",
+      "exportBlend": "70b41089e18cdfb3fa056ce32cef0ee7748751f6bafe60582916a402f23b776f",
+      "validation": "11a3bb64780d16f0dde0d1c207664a7e5d4a2afe1e03afa9192e12f4a2c5edda",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-baize-card-table-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-trestle-banquet-table-01",
+    "name": "トレッスル式バンケットテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-trestle-banquet-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-trestle-banquet-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-trestle-banquet-table-01-top.png",
+    "w": 3000,
+    "d": 1000,
+    "h": 760,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Long five-plank banquet surface carried by two shaped trestles, with low through-tenon bridge and end wedges. Dining surface 760 mm.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 2536,
+    "glbBytes": 109924,
+    "hashes": {
+      "model": "8a229c248f6744775c46257fda64ede8f458758b208cbd39eba6d7b12aa6f351",
+      "thumb": "61abc6d5a1083436bb871576f871acfb9ecec8d5b00c55c64e200275e3317d47",
+      "top": "e729d4cfe60f3031679a95b5b08a768d3360f540fb497100ffb11a2903106c5f",
+      "front": "61abc6d5a1083436bb871576f871acfb9ecec8d5b00c55c64e200275e3317d47",
+      "rear": "8dadf9103131b90e48e7991c2036cb2c7378067abce82ed170626fa8a18b1d41",
+      "sourceBlend": "c021d18348e66606a590e2da42b067878108925b85c3e240a57dc2a7de5da394",
+      "authoringBlend": "ae60541d6d66e4454fa3fb1d4c3dc2203f8a09c65d3687befa64b9d2685490c0",
+      "exportBlend": "c021d18348e66606a590e2da42b067878108925b85c3e240a57dc2a7de5da394",
+      "validation": "f6cf13c719face4b22e4cf1f9dcb95c11c1b38c408a9c0725e355dcbadc2e364",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-trestle-banquet-table-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-octagonal-center-table-01",
+    "name": "八角形センターテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-octagonal-center-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-octagonal-center-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-octagonal-center-table-01-top.png",
+    "w": 1100,
+    "d": 1100,
+    "h": 760,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Octagonal broad frieze, clustered turned legs and crossed low stretchers; fine brass inlay follows the eight-sided top.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 1376,
+    "glbBytes": 53908,
+    "hashes": {
+      "model": "80f2226e66111f1852257878b791d26a93f0e83f7941956901464a1ab715f051",
+      "thumb": "0c8b67ed1d55204148f794e8e4a60234c8071013416fe206309898bb0b6d50af",
+      "top": "1ee708720cf36e87d676accdce4772b9b956ecfd71d04356da98c1198e4decb8",
+      "front": "0c8b67ed1d55204148f794e8e4a60234c8071013416fe206309898bb0b6d50af",
+      "rear": "6725cc9b6ac8770fa319954ffb1fc7415967cbbeb8ff995f9a115b1d9eacbc9d",
+      "sourceBlend": "a58e73126cdac2f13f881009d3b5e4f9adc08782fe95f2e9824b61a0184db8bf",
+      "authoringBlend": "6769ba91ead0a45a1044b320cd1b11e878e3fdaac110bf86a4f0e229b21c6979",
+      "exportBlend": "a58e73126cdac2f13f881009d3b5e4f9adc08782fe95f2e9824b61a0184db8bf",
+      "validation": "751408cac15db0da67b0eadef01cba9bcd5b637dd5b45b9d5d7af89e2d3de704",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-octagonal-center-table-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-half-moon-console-01",
+    "name": "半月コンソールテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-half-moon-console-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-half-moon-console-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-half-moon-console-01-top.png",
+    "w": 1200,
+    "d": 450,
+    "h": 820,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Flat-backed semicircular console with a hollow curved apron, three turned legs and curved Y-shaped lower bracing. Rear edge faces the wall.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "measuredTriangles": 1448,
+    "glbBytes": 51620,
+    "hashes": {
+      "model": "be4151a7a7f027a55c9c52003d0a9627f7ee9bb22588b53fad579664eeda02a6",
+      "thumb": "f3e9cbe2fd00fe7d388aeb41f11d0a0475323ba7275ce1a801994702d362df47",
+      "top": "ef954ecbdb660f6de3cc2302b993656fd56c450d259826a2b3c1c89d6056b145",
+      "front": "f3e9cbe2fd00fe7d388aeb41f11d0a0475323ba7275ce1a801994702d362df47",
+      "rear": "5e27946312566994e032a43cd2d88b20b1b085db337d9d7e4a43d5f69c4001fb",
+      "sourceBlend": "455b7ae6c75be46f696f22b102b2f1d25bafb9bc23988342cdf183ba72c40480",
+      "authoringBlend": "00b2505a9c7538f005dfc1f50fb3cc4a9824f397de479e617acbd38ef1f9f9e7",
+      "exportBlend": "455b7ae6c75be46f696f22b102b2f1d25bafb9bc23988342cdf183ba72c40480",
+      "validation": "d46cf4f41f8123d73cc6b0a21987e252626c0c47e6188ccfa50ec3a172d45685",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-half-moon-console-01-authoring.blend",
+    "triangleBudget": 4000,
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-pedestal-chess-table-01",
+    "name": "チェス盤付きペデスタルテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-pedestal-chess-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pedestal-chess-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-pedestal-chess-table-01-top.png",
+    "w": 650,
+    "d": 650,
+    "h": 730,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-pedestal-chess-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Physical 64-square walnut/maple chessboard on a slender turned pedestal and three curving feet. No playing pieces or game logic.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      },
+      {
+        "key": "inlay",
+        "label": "象嵌",
+        "default": "#d2bc90"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 1932,
+    "glbBytes": 103720,
+    "hashes": {
+      "model": "9847a6556e6b192e67c626ba4c76e5dc2d62e7124d906ac8eea64ca645a3fd35",
+      "thumb": "e106d83226a6573aed470e0af15d0a4d8b70551f0b4e117c61e4a4c953368360",
+      "top": "4133695da6fbf2b9b7133c86255b1fd1b66c34f2e8d82699bdbd958c70cfaaa8",
+      "front": "e106d83226a6573aed470e0af15d0a4d8b70551f0b4e117c61e4a4c953368360",
+      "rear": "ac5310173c0c6f655d53a9afa864726426fbfc555e0f4c5dd1ba49287b6ebe54",
+      "sourceBlend": "6eb2275bd5e5a55bdd6fbde836c5f71118afb1e7e225f828a3e9f11eb2db700e",
+      "authoringBlend": "b20a807413b844ae6c951e23b5327cf4da00cab867e9cb26380bf51fad825925",
+      "exportBlend": "6eb2275bd5e5a55bdd6fbde836c5f71118afb1e7e225f828a3e9f11eb2db700e",
+      "validation": "73779152e5056e502e30a93553dc476f034d39ae34a3aa1166c68b9951df2178",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-oval-mirror-dressing-table-01",
+    "name": "楕円鏡付きドレッシングテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-oval-mirror-dressing-table-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-mirror-dressing-table-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-oval-mirror-dressing-table-01-top.png",
+    "w": 1100,
+    "d": 500,
+    "h": 1390,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-oval-mirror-dressing-table-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Three-drawer vanity at 760 mm with a framed oval silvered mirror carried by two uprights and fixed side hinge pins. Mirror is a PBR metal surface, not a live reflection renderer.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 3072,
+    "glbBytes": 120756,
+    "hashes": {
+      "model": "54815a694477861d0d03049ed1b01bbfbf0a6b6d96b9753442e2f7a355d8dd0c",
+      "thumb": "199021fdd313e19241782c29553510a5ee51e3e79d23e9118d73dca805cd8a76",
+      "top": "6422f5c770bba25ee4395df2773ff79bc919bd8b3ffae7a09b944ba069c02fa8",
+      "front": "199021fdd313e19241782c29553510a5ee51e3e79d23e9118d73dca805cd8a76",
+      "rear": "944a4f250575f938ca4bea222261de9b4bbc6a7f52efc9cf449b84d8740a9b95",
+      "sourceBlend": "bcb08154b96ea3f21e8052766c9b043bfb6e52200f561a7829214079b46520c1",
+      "authoringBlend": "5cac292607bbf83af11011dbc33de2884455b5469e94f49d1ab8ccb4aa78a387",
+      "exportBlend": "bcb08154b96ea3f21e8052766c9b043bfb6e52200f561a7829214079b46520c1",
+      "validation": "f7f8eb2e93fad0b5e3ceb68fc5956240dff2899d17dd6d903266abc7cdee1dbb",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-davenport-writing-desk-01",
+    "name": "ダヴェンポート・ライティングデスク",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-davenport-writing-desk-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-davenport-writing-desk-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-davenport-writing-desk-01-top.png",
+    "w": 650,
+    "d": 650,
+    "h": 1080,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-davenport-writing-desk-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Compact sloping leather writing lid with front book stop, upper pen box, paired narrow drawer pedestals and short tapered feet. All drawers/lid are fixed geometry.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      },
+      {
+        "key": "leather",
+        "label": "革",
+        "default": "#294d4b"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 2316,
+    "glbBytes": 111068,
+    "hashes": {
+      "model": "bc91c9738db14e335779384fdb2024b5a2003a7a4b9858124f870f2e61043dd8",
+      "thumb": "0619b2fbe9f72b24717a071cb796d9f848197f04be44cad5e724e8d1ea4e16e0",
+      "top": "e5cd07e6f0bd7fc097f7011192a0a2397aa80ed540e97d5c9abea69c4d21ee28",
+      "front": "0619b2fbe9f72b24717a071cb796d9f848197f04be44cad5e724e8d1ea4e16e0",
+      "rear": "8fe6de848b513af8ccd454eb97289b4bc28f5534621b5e6992b4908c6897fbff",
+      "sourceBlend": "d991517c5abb61df61e066e9a28079f2cc6fb49d8bc97ac7991cac9132fe1b9b",
+      "authoringBlend": "a594ff5a6d2d09b8172b3e0ee8fda2e8c15f815613a8acc0dc1294b05f79e3b5",
+      "exportBlend": "d991517c5abb61df61e066e9a28079f2cc6fb49d8bc97ac7991cac9132fe1b9b",
+      "validation": "c9a10a0d3172fab0723944247e134f63851f78f49d2331d6a98ab7880a1e2ee2",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-three-tier-dumbwaiter-01",
+    "name": "三段ダムウェイターテーブル",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-three-tier-dumbwaiter-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-tier-dumbwaiter-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-three-tier-dumbwaiter-01-top.png",
+    "w": 650,
+    "d": 650,
+    "h": 1130,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-three-tier-dumbwaiter-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Three progressively smaller circular serving trays at 340/690/1130 mm on one turned column and tripod base. Trays are static, not rotating.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 2856,
+    "glbBytes": 126836,
+    "hashes": {
+      "model": "e1973b1e6f7561cf2e19586eee1265e07eb8f0424cb15dc7e925fe016f037588",
+      "thumb": "3545951b666d50633473051bd896e8540d9d815af4f7f36394e9d993852db612",
+      "top": "fde62719473a5971c7fcef41587fb2c49e6bccab2ae4f1cc6434505609663132",
+      "front": "3545951b666d50633473051bd896e8540d9d815af4f7f36394e9d993852db612",
+      "rear": "c78d8b664931e98ebe52505f79b988ac115261a8e6dcc57b75e5e1bb15b311d4",
+      "sourceBlend": "fd9b2348671b36f9b2558349b4002db12ee239851a5c52be44debabfd1fa3568",
+      "authoringBlend": "4da22bda99c0597d85a9e2e07a238aec52199e27a906eaa371e39ea5f10881d6",
+      "exportBlend": "fd9b2348671b36f9b2558349b4002db12ee239851a5c52be44debabfd1fa3568",
+      "validation": "22341875fa37cffccb30de83e9c6e1f2b5d567b5c056c1d4f0e9a7e1bbc7cb12",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-partners-leather-desk-01",
+    "name": "パートナーズ・レザーデスク",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-partners-leather-desk-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-partners-leather-desk-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-partners-leather-desk-01-top.png",
+    "w": 1800,
+    "d": 950,
+    "h": 771,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-partners-leather-desk-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Large double-sided partners desk with 14 visible drawer fronts, twin cabinet pedestals, two pencil drawers and broad leather field. Drawers are fixed geometry; surface 771 mm.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      },
+      {
+        "key": "leather",
+        "label": "革",
+        "default": "#294d4b"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 3332,
+    "glbBytes": 143432,
+    "hashes": {
+      "model": "e72fa7425def520cd0ce44287c949e092e0212f1f66cee021fdc51a16114b44b",
+      "thumb": "0c3cd4795579c2a99382495a7dd6130c14c2aae8290ccbd3c0f5599ba3d5aab8",
+      "top": "09a501c62fe56973514582f23c5f22390ca874f785bb350dec23a214de685a91",
+      "front": "0c3cd4795579c2a99382495a7dd6130c14c2aae8290ccbd3c0f5599ba3d5aab8",
+      "rear": "a76667071782b2ccd01b0b0a14554c85a9bd8635eb981941e09ea33f59858d71",
+      "sourceBlend": "af207f970f38e2ce21e4ecb4c2543a7444bc9071a4978a936ae2567c45adb13d",
+      "authoringBlend": "28186716019f05b9afa6fc615185285ec6b59a3fd2635ef16610c798c4316038",
+      "exportBlend": "af207f970f38e2ce21e4ecb4c2543a7444bc9071a4978a936ae2567c45adb13d",
+      "validation": "c1dc2071cb30bfb60407c14a4d0a72a98c8829f94281ca6c8dfad2c5ee5fe101",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  },
+  {
+    "id": "rpg-mansion-roll-top-writing-desk-01",
+    "name": "ロールトップ・ライティングデスク",
+    "group": "家具",
+    "category": "机・テーブル",
+    "kind": "table",
+    "assetSet": "rpg-mansion",
+    "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-roll-top-writing-desk-01.glb",
+    "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roll-top-writing-desk-01-thumb.png",
+    "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-roll-top-writing-desk-01-top.png",
+    "w": 1400,
+    "d": 750,
+    "h": 1180,
+    "defaultElevation": 0,
+    "provenance": "original",
+    "previewVersion": 1,
+    "sourceBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01.blend",
+    "authoringBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01-authoring.blend",
+    "exportBlend": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01.blend",
+    "validation": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01-validation.json",
+    "front": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01-front.png",
+    "rear": "tools/blender/rpg_mansion/scaled_tables/work/rpg-mansion-roll-top-writing-desk-01-rear.png",
+    "builder": "tools/blender/rpg_mansion/scaled_tables/build.py",
+    "placementNotes": "Quarter-round closed tambour hood with individually authored slats, solid curved cheeks, twin lower drawer cabinets and attached handle rail. Static cover, not an operable roll-top mechanism.",
+    "finishChannels": [
+      {
+        "key": "wood",
+        "label": "木部",
+        "default": "#563b2d"
+      },
+      {
+        "key": "metal",
+        "label": "金物",
+        "default": "#b69b5d"
+      }
+    ],
+    "rights": {
+      "status": "original",
+      "creator": "OpenAI assistant using native Blender mesh authoring",
+      "sources": [],
+      "externalGeometry": false,
+      "externalImages": false,
+      "licenseBasis": "Original procedural geometry created for this project"
+    },
+    "triangleBudget": 4000,
+    "measuredTriangles": 2492,
+    "glbBytes": 127908,
+    "hashes": {
+      "model": "d6d8d8c4a2b0cc388bffd68f55d973c8f0e2d9e9d1b7fab1b65d532ea3e04d7e",
+      "thumb": "b42d4c6bc0b68e47a7fdd949ad5ef3fe06bd1a9adb29f71f6bd89b7626c51916",
+      "top": "e3880852682e879c9835aae9199c9500bcc66035c352d49afa595bef5f6c4b61",
+      "front": "b42d4c6bc0b68e47a7fdd949ad5ef3fe06bd1a9adb29f71f6bd89b7626c51916",
+      "rear": "8800a25167eba6c4c74b238a222b17ea51b1959c0f6290fc77e6f8092dd9269c",
+      "sourceBlend": "c1f6e74a63f98bcc130ffc74829f9ba247cf62f071ffcafb0687649d221c338c",
+      "authoringBlend": "c8bbf948753b71dd740d90659ecbe99b3ac6d3a4b05d74a1b8605772f0b89bb6",
+      "exportBlend": "c1f6e74a63f98bcc130ffc74829f9ba247cf62f071ffcafb0687649d221c338c",
+      "validation": "988cfd5e68a0804f9db219ed7c02f9ef2d95115c28f8cb93fbc3b85bb5539249",
+      "builder": "20ecbd0cc5ae47fa2b84ec1237677b35729ad125afe6b39ce3e4db84fb61adb3"
+    },
+    "nativeScene": "Native authoring parts"
+  }
+]

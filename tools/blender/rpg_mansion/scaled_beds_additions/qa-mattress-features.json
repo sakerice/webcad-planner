@@ -1,0 +1,91 @@
+{
+  "method": "Measure every mattress, including paired, stowed/deployed trundle and adult bunks.\n\nRead-only native meshes, direct per-part dimensions and physical support contacts.\nThe nominal 165 mm value is height above support; geometry has a 3 mm seated join.\nThis is static-prop geometry evidence, not a physical product safety certification.\n",
+  "items": [
+    {
+      "id": "rpg-mansion-campaign-x-trestle-cot-01",
+      "sourceSha256": "389d6189a8a0dd34dab4fb143e56d6d16c8747109ffa9f0d5e51e8a44f31daa5",
+      "mattresses": [
+        {
+          "name": "Linen mattress supported by wooden slats",
+          "boundsBlenderM": [
+            [
+              -0.37400001287460327,
+              -0.9629999995231628,
+              0.4050000011920929
+            ],
+            [
+              0.37400001287460327,
+              0.9629999995231628,
+              0.5730000138282776
+            ]
+          ],
+          "actualDimensionsWDTM": [
+            0.7480000257492065,
+            1.9259999990463257,
+            0.1680000126361847
+          ],
+          "mattressTopM": 0.5730000138282776,
+          "supportTopM": 0.40799999237060547,
+          "supportParts": [
+            "Campaign cot taut woven canvas support deck"
+          ],
+          "supportCount": 1,
+          "supportJoinDepthM": 0.0029999911785125732,
+          "nominalThicknessAboveSupportM": 0.16500002145767212
+        }
+      ],
+      "activeMattressCount": 1,
+      "sleepingCapacity": 1,
+      "errors": []
+    },
+    {
+      "id": "rpg-mansion-barrel-vault-enclosed-bed-01",
+      "sourceSha256": "12c0137fe1b8793304d6f01d50732fe2e0f4c6238e83d2a6e92f2b8adf74362d",
+      "mattresses": [
+        {
+          "name": "Linen mattress supported by wooden slats",
+          "boundsBlenderM": [
+            [
+              -0.5600000023841858,
+              -0.9959999918937683,
+              0.41200000047683716
+            ],
+            [
+              0.5600000023841858,
+              0.9959999918937683,
+              0.5799999833106995
+            ]
+          ],
+          "actualDimensionsWDTM": [
+            1.1200000047683716,
+            1.9919999837875366,
+            0.1679999828338623
+          ],
+          "mattressTopM": 0.5799999833106995,
+          "supportTopM": 0.41499999165534973,
+          "supportParts": [
+            "Vault bed transverse actual mattress slat",
+            "Vault bed transverse actual mattress slat.001",
+            "Vault bed transverse actual mattress slat.002",
+            "Vault bed transverse actual mattress slat.003",
+            "Vault bed transverse actual mattress slat.004",
+            "Vault bed transverse actual mattress slat.005",
+            "Vault bed transverse actual mattress slat.006",
+            "Vault bed transverse actual mattress slat.007",
+            "Vault bed transverse actual mattress slat.008",
+            "Vault bed transverse actual mattress slat.009",
+            "Vault bed transverse actual mattress slat.010",
+            "Vault bed transverse actual mattress slat.011"
+          ],
+          "supportCount": 12,
+          "supportJoinDepthM": 0.0029999911785125732,
+          "nominalThicknessAboveSupportM": 0.16499999165534973
+        }
+      ],
+      "activeMattressCount": 1,
+      "sleepingCapacity": 1,
+      "errors": []
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,427 @@
+{
+  "stage": "candidate-awaiting-independent-acceptance",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5629,
+      "sha256": "417cc8830f523eef94457f5d17ea4b257900fbaf656548c62fc367ef88c0ae9a"
+    },
+    {
+      "path": "audit_source_contacts.py",
+      "bytes": 1829,
+      "sha256": "6f17aa564e81c51b15cf5dcc6c01839bff088069727b5ade1b1eab4fc3623e32"
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-garden-braced-oak-gate-leaf-01.blend",
+      "bytes": 110843,
+      "sha256": "6ea86ad1c5c16e340710acd8d2c400780367f715ae1bb6076e61f4ed0b669ec9"
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-garden-gate-strike-receiver-01.blend",
+      "bytes": 92823,
+      "sha256": "3999a86f0755baf41962159fa37951ca607622d03a36c09c098257e5b37d9a00"
+    },
+    {
+      "path": "authoring_sources/rpg-mansion-garden-supported-oak-terrace-01.blend",
+      "bytes": 133768,
+      "sha256": "c1c11181bb5f7833c66999d3f96a9051169750962c51c217b62cf3e4e44014fc"
+    },
+    {
+      "path": "build.py",
+      "bytes": 9428,
+      "sha256": "239a8c3769ad1f3fef98fffd239ea9db4a18478493580a21ccec5222ec079d40"
+    },
+    {
+      "path": "build_installation_proofs.py",
+      "bytes": 9951,
+      "sha256": "a88238d113d47f3c1da5265bc614f3bb1286acd0658a9dff4821086a63dbe29f"
+    },
+    {
+      "path": "common.py",
+      "bytes": 7472,
+      "sha256": "a0e70dac87abc21b3961d106a98959b0a212c0013b09ee872cf6d3336a7a2160"
+    },
+    {
+      "path": "descriptors.json",
+      "bytes": 14743,
+      "sha256": "9d5480fac75438479f1d259024872eb33dbe364117f2866a343074971df9ac9a"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-braced-oak-gate-leaf-01-front.png",
+      "bytes": 340434,
+      "sha256": "2be6174e211f35201ecdec789578df310c948346d0dc634ba20c4d9d6de9685d"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-braced-oak-gate-leaf-01-rear.png",
+      "bytes": 320168,
+      "sha256": "a95aa575db38e26ceae53d36f20566ffaef5a25c87ccb96845d3ad08d05bb9de"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-gate-strike-receiver-01-front.png",
+      "bytes": 216991,
+      "sha256": "c2ee1d004cd702ebfe34db15611cdc337df029c6c0f273e845d7805c29fbd76f"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-gate-strike-receiver-01-rear.png",
+      "bytes": 259693,
+      "sha256": "1055f92eb02d633b6a0bd9cf7efd19e51e16ac5c05ef075131db6c245495956d"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-supported-oak-terrace-01-front.png",
+      "bytes": 145698,
+      "sha256": "2c44e7006ec41bedea7d12bc5ac1356c72b4051277b4652d902d1eea997a0f4d"
+    },
+    {
+      "path": "evidence/rpg-mansion-garden-supported-oak-terrace-01-rear.png",
+      "bytes": 189395,
+      "sha256": "6e28d696231f898c42698f5d7de3e0e74001cac2fe3e135f8db55ce401049ffc"
+    },
+    {
+      "path": "evidence/terrace-gate-installations.png",
+      "bytes": 619609,
+      "sha256": "658057723b67b1078e7cd45927a595257056eea10373b00b89801a7a5d5442b5"
+    },
+    {
+      "path": "evidence/terrace-gate-interface-details.png",
+      "bytes": 753177,
+      "sha256": "8030de53feec0ade426f3dd38ff99f06987af447d744bff6ddb2ce79423fa3f1"
+    },
+    {
+      "path": "evidence/terrace-gate-products-all-sides.png",
+      "bytes": 575029,
+      "sha256": "f7b0fbf962827a66b656c097af51c84f95d075b997337dd4463ca85ddd2c247a"
+    },
+    {
+      "path": "finalize_delivery.py",
+      "bytes": 6828,
+      "sha256": "f74a54ef7eeaeb2142e2b972a5b148daeacf8829a03ead536cd4c7061b70b53d"
+    },
+    {
+      "path": "helpers/exterior_build.py",
+      "bytes": 19941,
+      "sha256": "224add9eeeacc0c35da86cfa1fb3fa3a42ba001102fc3e82324b143a0f4ee1e1"
+    },
+    {
+      "path": "helpers/model_kit.py",
+      "bytes": 13836,
+      "sha256": "7614800d979239e08aa8c14c237bedb53685acce92c4ed9931ddfc3ea9bb432f"
+    },
+    {
+      "path": "helpers/native_utils.py",
+      "bytes": 5481,
+      "sha256": "08616cea07ceac0a989ba33db0754b3ce45aff0954b2000b794b6a63cc41621a"
+    },
+    {
+      "path": "helpers/png_metadata.py",
+      "bytes": 688,
+      "sha256": "dfa11faf1382666a9a29eadb7bf72500b7b97c21085637ebb034a2ae907edada"
+    },
+    {
+      "path": "helpers/shape_kit.py",
+      "bytes": 6733,
+      "sha256": "260e124675d9ba3f00dfc861c03e058d46463fecc7290dc42aff3224a856b28e"
+    },
+    {
+      "path": "inputs/accepted-inputs.json",
+      "bytes": 35270,
+      "sha256": "8ff5fa848bf912e215b65d349803633a6e90161b89f9768fd807f30d96964ae1"
+    },
+    {
+      "path": "inputs/rpg-mansion-garden-brick-gate-pier-01.glb",
+      "bytes": 173848,
+      "sha256": "7862cf0010365268637b6d3f085876102cf61b657a8a28548dfcd268aa344e94"
+    },
+    {
+      "path": "inputs/rpg-mansion-garden-two-riser-deck-step-01.glb",
+      "bytes": 81232,
+      "sha256": "39cadb9f8936ffbadccf35d14b25a2988aea2de84f7ccfb9f7017ddf495c91e3"
+    },
+    {
+      "path": "inputs/rpg-mansion-octagon-cabochon-floor-tile-01.glb",
+      "bytes": 49404,
+      "sha256": "135965a35a10753ef7f5851467257509824cead532378d192c817ee1ec3cf96e"
+    },
+    {
+      "path": "inputs/rpg-mansion-rectangular-doorway-bay-01.glb",
+      "bytes": 22584,
+      "sha256": "09f55c4d0b3070c97afae46d93b5553f027967671319dc4aa956d0e32c67cecc"
+    },
+    {
+      "path": "inputs/rpg-mansion-tall-fixed-french-window-bay-01.glb",
+      "bytes": 30924,
+      "sha256": "3f102fff3e8f4f76bceaef56f9b88f44829d75927afe9ede7ee3f8cc91163642"
+    },
+    {
+      "path": "installation_proofs/detail-hinge-bearing.png",
+      "bytes": 993843,
+      "sha256": "d2485bcf266066e42154e3d1bebbd9f92f0493d474c24588bde0845f7742115a"
+    },
+    {
+      "path": "installation_proofs/detail-step-level-joint.png",
+      "bytes": 904997,
+      "sha256": "cd45dc0fc241400dfa5bcec38460676cf7d7bdb8abb411de2ab8e302a90e4b33"
+    },
+    {
+      "path": "installation_proofs/detail-strike-socket.png",
+      "bytes": 992943,
+      "sha256": "d76aef8ecc86e0b18be2ebcd029b51a3f4cf6bbe65b647e80c27a592cd2fd609"
+    },
+    {
+      "path": "installation_proofs/detail-terrace-underframe.png",
+      "bytes": 602354,
+      "sha256": "f355d0339430d1f5315b5f74a50446110baeae4e807d16845cf028151d287600"
+    },
+    {
+      "path": "installation_proofs/detail-view-replay.json",
+      "bytes": 2642,
+      "sha256": "c2dd5a83947e49fe5891759c58250809eccee04c7944e5f95a17e939ed824067"
+    },
+    {
+      "path": "installation_proofs/detail-window-nose-recess.png",
+      "bytes": 684595,
+      "sha256": "c7c7f63ad191a30320ce95490870cee58000bf3c1971a66bd2fb6c19699645e5"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers-front.png",
+      "bytes": 269481,
+      "sha256": "7b9c15238b888f721dad88e543c8eb4ee0edf49eaee0f9867e2ced4e46b96a77"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers-rear.png",
+      "bytes": 302790,
+      "sha256": "5d5885941ecca327c2a61e885817978bc841eff15987d6e49f03d7f42c55c786"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers-report.json",
+      "bytes": 10071,
+      "sha256": "5292360944d58277a979e27f8bcbb76796e6d98983ca8f2a639ae94a6bddb451"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers-thumb.png",
+      "bytes": 294113,
+      "sha256": "889d12751a5fd5dba07dc74bbc125c560854d6f6bb68d79cc02308593eadfc67"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers-top.png",
+      "bytes": 212118,
+      "sha256": "283eb2dca21999ddb1101882e37aa94df0ed9183a197b4018e4877a8e510866f"
+    },
+    {
+      "path": "installation_proofs/gate-leaf-between-accepted-piers.blend",
+      "bytes": 258663,
+      "sha256": "5849145a64b17c077b4dc77db0a00a5059c1a53b75abcf1bf8205d304fe9e04d"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold-front.png",
+      "bytes": 244586,
+      "sha256": "451ddfdd955cff4beeefd2b9525f9a5b128df83c323a17170c730350bdc360b4"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold-rear.png",
+      "bytes": 233182,
+      "sha256": "37d5290ca70044dcd24c9142c4eb66907a9068698c9a37662087737f0204538b"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold-report.json",
+      "bytes": 17454,
+      "sha256": "f6d955b8262a2c7052f1704da5e804649668d2a7f352eab15504aea7bc209348"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold-thumb.png",
+      "bytes": 248257,
+      "sha256": "10a8b249a298e23d6738432364f82fec731644f94df985ac06d3e17d2146abe1"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold-top.png",
+      "bytes": 338092,
+      "sha256": "9cf361471ee54ed70542493de4c8b9a68ff641ae075b142d50277aa88f87152c"
+    },
+    {
+      "path": "installation_proofs/terrace-step-doorway-threshold.blend",
+      "bytes": 298327,
+      "sha256": "ce61318b5cc7887eb2932c228cd45a2095aa8fce672857a43b5277ea07a2032b"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold-front.png",
+      "bytes": 301077,
+      "sha256": "47008810976934fcebb7750af00cbefde660bccc2bb8cdb859f8e132a301c037"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold-rear.png",
+      "bytes": 243956,
+      "sha256": "d6c13e388195ab0c9ba92d8055641e31d52bcc34772698c1081cc4a1b31540f8"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold-report.json",
+      "bytes": 14199,
+      "sha256": "bab4d2db8685ba084ad104e3403c05065cbeca15f27f2454c9fc77e3cae6f9b4"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold-thumb.png",
+      "bytes": 253861,
+      "sha256": "90c40a83451d74208e722a124239c9e9f7f171da6816d992c6cdb136e6f3c655"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold-top.png",
+      "bytes": 332921,
+      "sha256": "d4ebfa9b198027a5e1ed703da98d71e80b2655d4ed389f7e999e52c83449c152"
+    },
+    {
+      "path": "installation_proofs/terrace-step-fixed-window-threshold.blend",
+      "bytes": 277246,
+      "sha256": "e749d14a326cb64d946d9e0c99a01978b4f5603f484c5ff4af0c21e10a90cd39"
+    },
+    {
+      "path": "integration-descriptors.json",
+      "bytes": 17872,
+      "sha256": "04bc3494da78d07a317ebd5fe5dc1ab0f00cf92df5dc1298b4b7861e11c75121"
+    },
+    {
+      "path": "interface-contract.json",
+      "bytes": 8035,
+      "sha256": "e2f499bf3d3703f7423b2fce7eb34d69d1100bdab97287c15f9858e7ce6fda3c"
+    },
+    {
+      "path": "make_review_sheets.py",
+      "bytes": 2354,
+      "sha256": "05cc66175c7716d65eb0fa6db3396c197605a9d24c2add7b86a08a2e0a1d7384"
+    },
+    {
+      "path": "models/rpg-mansion-garden-braced-oak-gate-leaf-01.glb",
+      "bytes": 118960,
+      "sha256": "6f24e6b1b3adc5aef8d21e03d348cf3c2f40675b9e8e954886a40eeef50d539f"
+    },
+    {
+      "path": "models/rpg-mansion-garden-gate-strike-receiver-01.glb",
+      "bytes": 15420,
+      "sha256": "45b0b65925be3e379d8a95d517807f2993901dc0943118bd920e43cb9aa23a1b"
+    },
+    {
+      "path": "models/rpg-mansion-garden-supported-oak-terrace-01.glb",
+      "bytes": 227684,
+      "sha256": "540d3fe7fcb9389827160febe802acb4049a6cbeeaf8b8957b1f4b68d4d0e2f6"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-braced-oak-gate-leaf-01-thumb.png",
+      "bytes": 319068,
+      "sha256": "99ce360138266e14e931aa8650715d452bc8f4639c7c1d421a43aeecb86ce4ae"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-braced-oak-gate-leaf-01-top.png",
+      "bytes": 138726,
+      "sha256": "6c64928274aa188b1e01b1562ed72446b354219aa122303de6cd213cc7608efb"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-gate-strike-receiver-01-thumb.png",
+      "bytes": 258505,
+      "sha256": "e6ce39408f4d12ff4f0bf5e8d110b3482b6edf0759ca7f3dcda40c388925a423"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-gate-strike-receiver-01-top.png",
+      "bytes": 205900,
+      "sha256": "2534fa7e97fedcf474aaa633e4d3eb246f36962ed0697b6460b940bcb891890e"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-supported-oak-terrace-01-thumb.png",
+      "bytes": 189922,
+      "sha256": "f0b322c06a36a3e3fb79bb2b0bb52b18319ea50b7f10ce86ce9accbb49e64a8f"
+    },
+    {
+      "path": "previews/rpg-mansion-garden-supported-oak-terrace-01-top.png",
+      "bytes": 300812,
+      "sha256": "5dca4bac6bd545300278e1cc9a9d245d3e5755f9a6a0932b477208afa7441b7c"
+    },
+    {
+      "path": "render_details.py",
+      "bytes": 2849,
+      "sha256": "d0721822619ad6063b1980cf155c7f1492132a1bb78cb2f983ed578c10adca5f"
+    },
+    {
+      "path": "reports/measured-delivery-summary.json",
+      "bytes": 124376,
+      "sha256": "9b358a4d79d5949ab8d6ecabbd4918bbdedc1e943ff32346b77868ee6d4ba097"
+    },
+    {
+      "path": "reports/producer-source-contact-audit.json",
+      "bytes": 67811,
+      "sha256": "9513eb528bbe5e4ccedab54d24ebb4df4dcb5cb504a8c58163c4ea031ecd95e6"
+    },
+    {
+      "path": "reports/product-file-validation.json",
+      "bytes": 5380,
+      "sha256": "ae8a103a0ecb3d4b99006fd00b035a36d0fe28301c5857c95925e51674ec7a36"
+    },
+    {
+      "path": "reports/receiver-cap-repair.json",
+      "bytes": 5658,
+      "sha256": "8a61ffec84040d716aafc2194fbb2fe602fe354813a93e7f173b139b7944db11"
+    },
+    {
+      "path": "reports/rpg-mansion-garden-braced-oak-gate-leaf-01-contacts.json",
+      "bytes": 8267,
+      "sha256": "42715e01ab504175463de0616f8b0508716595e76a489f688cbc026f333a37c0"
+    },
+    {
+      "path": "reports/rpg-mansion-garden-gate-strike-receiver-01-contacts.json",
+      "bytes": 584,
+      "sha256": "9ad3148e27b08032bd22a30638909621d45b5bf1266db97011a60a1a7ad9070a"
+    },
+    {
+      "path": "reports/rpg-mansion-garden-supported-oak-terrace-01-contacts.json",
+      "bytes": 21211,
+      "sha256": "213940e6fb5e19fd30d9a63dc5317e4aa3791c11af1d17cef0b44a85f4740a81"
+    },
+    {
+      "path": "rights-and-provenance.json",
+      "bytes": 2933,
+      "sha256": "bb13d15babe0afa7916860bfb98a57aa0c1fff4ce0f9753af95ede9d9972f10d"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-braced-oak-gate-leaf-01-validation.json",
+      "bytes": 3568,
+      "sha256": "93ec93bcdd289c57bbe8a9333a9e4d7499fe9d820f7364c1d03d38107b43dd06"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-braced-oak-gate-leaf-01.blend",
+      "bytes": 149955,
+      "sha256": "16ac7c824d0049f05b4b73e9a9735ca2b38aec7cfeb1ef0e95e2cdc7dde7d816"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-gate-strike-receiver-01-validation.json",
+      "bytes": 2609,
+      "sha256": "343f21b20edba6769bc5642ea0b8cae7c55d3e5ad061e03c32d5067130c91e39"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-gate-strike-receiver-01.blend",
+      "bytes": 99347,
+      "sha256": "5b5dd8c2d1b410275d3790da1a63e911974fb440160b5dd6df9b56fa736ea93c"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-supported-oak-terrace-01-validation.json",
+      "bytes": 7033,
+      "sha256": "993ad26c098370fb15f829d4be814a2fedf66e179cf3571a482afe71220ee3be"
+    },
+    {
+      "path": "sources/rpg-mansion-garden-supported-oak-terrace-01.blend",
+      "bytes": 200690,
+      "sha256": "2a631ea206766619c32eab6ec8b08c1a544bfd9eb5238a7e4e9267becfd57759"
+    },
+    {
+      "path": "terrace_gate_forms.py",
+      "bytes": 7019,
+      "sha256": "a833bd2b58ecd57775782e5dad12e3fc1f36eb0fa136f9741427473bdd2fea00"
+    },
+    {
+      "path": "validate_product_files.py",
+      "bytes": 2081,
+      "sha256": "adff56781e826ba1ec0c8b70cd27aec30600b142d3eacdd1fc2d1ff663f84538"
+    },
+    {
+      "path": "integration-copy-map.json",
+      "bytes": 25751,
+      "sha256": "eeed7f19a08f2dfc56b72bcaedee0e616d9a620fcb826becba11a6fb6a0e5f4a"
+    }
+  ],
+  "totalFiles": 84,
+  "totalBytes": 15125597
+}

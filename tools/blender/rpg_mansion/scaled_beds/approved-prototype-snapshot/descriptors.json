@@ -1,0 +1,343 @@
+{
+  "set": "rpg-mansion",
+  "name": "洋館・寝具家具試作",
+  "items": [
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "name": "曲木のそり型ダブルベッド",
+      "packId": "rpg-mansion",
+      "kind": "bed",
+      "group": "家具",
+      "category": "ベッド",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-sleigh-double-bed-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-sleigh-double-bed-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-sleigh-double-bed-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-sleigh-double-bed-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-sleigh-double-bed-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-sleigh-double-bed-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-sleigh-double-bed-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_beds/authoring_sources/rpg-mansion-sleigh-double-bed-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-sleigh-double-bed-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_beds/build.py",
+      "w": 1660,
+      "d": 2300,
+      "h": 1150,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A double sleeping bed with curved solid walnut head and foot boards, rolled crowns and two pillows",
+      "dimensionBasis": "Intended period-adapted design; declared standard dimensions are demand references only; legacy model geometry missing and unverified",
+      "footprintSemanticEquivalenceVerified": false,
+      "nativeFunctionEquivalencePromised": false,
+      "features": {
+        "mattressTopM": 0.537,
+        "mattressSupportM": 0.372,
+        "sleepingCapacity": 2,
+        "mattressDimensionsM": [
+          1.528,
+          1.908,
+          0.165
+        ],
+        "topology": "continuous-bent-head-and-foot-boards/rolled-crowns/open-slat-frame/five-ground-legs"
+      },
+      "finishChannels": [
+        {
+          "key": "bedding",
+          "label": "寝具",
+          "default": "#ded5bd"
+        },
+        {
+          "key": "cover",
+          "label": "掛け布",
+          "default": "#355c57"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#af8e4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d",
+      "sourceSha256": "46f06093851cda6feb34e0d799d33a125e3786e2045d130c4718b4e3b24e7eb1",
+      "authoringSha256": "ac1ad518671d61997c2dc6e8ecfc252276081140937e0ad743489a70acd3a962",
+      "previewSha256": {
+        "thumb": "9dceb737fbb4560cfb3cb5f44e974bd7f25149b15fdab4d37a02d68e6f80e29e",
+        "top": "5f1a99a57414f1e2d3632ca6134b5c4a5fb69b972cfccbb39e15a0ca0137f76f",
+        "front": "f6e9f44fb67ac16021645bc0970f4cd9a28dafe8a11f8c14ee0e67b45b1ae3df",
+        "rear": "8ba01db08c9c0c0952196e4b4193f621030a6039af2737e00f04d134fbcb13bd"
+      },
+      "standardDemandReferences": [
+        {
+          "declaredDimensionsMm": {
+            "w": 1666,
+            "d": 2107,
+            "h": 1070
+          },
+          "standardIds": [
+            "fmp-Bed16",
+            "fmp-Bed18"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1943,
+            "d": 2428,
+            "h": 1153
+          },
+          "standardIds": [
+            "im0261-Bed-MEGA_PACK_BED-bed-117944_Frame_Q_Teak"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1600,
+            "d": 2150,
+            "h": 980
+          },
+          "standardIds": [
+            "original-bed"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "name": "鉄の曲線装飾シングルベッド",
+      "packId": "rpg-mansion",
+      "kind": "bed",
+      "group": "家具",
+      "category": "ベッド",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-iron-scroll-single-bed-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-iron-scroll-single-bed-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-iron-scroll-single-bed-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-iron-scroll-single-bed-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-iron-scroll-single-bed-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-iron-scroll-single-bed-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-iron-scroll-single-bed-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_beds/authoring_sources/rpg-mansion-iron-scroll-single-bed-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-iron-scroll-single-bed-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_beds/build.py",
+      "w": 1100,
+      "d": 2120,
+      "h": 1220,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A one-person open iron spindle bed with attached S-scrolls and brass acorn post finials",
+      "dimensionBasis": "Intended period-adapted design; declared standard dimensions are demand references only; legacy model geometry missing and unverified",
+      "footprintSemanticEquivalenceVerified": false,
+      "nativeFunctionEquivalencePromised": false,
+      "features": {
+        "mattressTopM": 0.509,
+        "mattressSupportM": 0.34400000000000003,
+        "sleepingCapacity": 1,
+        "mattressDimensionsM": [
+          0.9680000000000001,
+          1.9500000000000002,
+          0.165
+        ],
+        "topology": "arched-wrought-iron-head-foot/open-spindles/four-S-scrolls/brass-finials/open-slat-frame"
+      },
+      "finishChannels": [
+        {
+          "key": "bedding",
+          "label": "寝具",
+          "default": "#ded5bd"
+        },
+        {
+          "key": "cover",
+          "label": "掛け布",
+          "default": "#355c57"
+        },
+        {
+          "key": "metal",
+          "label": "金属",
+          "default": "#af8e4b"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a",
+      "sourceSha256": "329f519ab711d5a196c4879192abd418f8bc46f09dd0cb7913aae421bf8c2cfb",
+      "authoringSha256": "8ae16c4bc4e0015db09bb7f1a1dc749df13726f943cd235557113614973c7fef",
+      "previewSha256": {
+        "thumb": "5b1b40fdb370d949d99644edf9563621b369983fb3911ce607f04b8f8eedb4f4",
+        "top": "76092c285a3d8d623154e98fee194c588bfbe20a35ac9306bbdc1895ca3d0b64",
+        "front": "d96740f31abe932370984d7ca512656283be9623ac0913f7f0ec5c1bdd7f19a6",
+        "rear": "48e32d020477db91fd7bb2f5aa0c972e280228defb8903f604d859d6b932c67f"
+      },
+      "standardDemandReferences": [
+        {
+          "declaredDimensionsMm": {
+            "w": 1086,
+            "d": 1948,
+            "h": 1398
+          },
+          "standardIds": [
+            "fmp-Bed21",
+            "fmp-Bed22",
+            "fmp-Bed23"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1192,
+            "d": 1975,
+            "h": 1070
+          },
+          "standardIds": [
+            "fmp-Bed19"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1302,
+            "d": 2150,
+            "h": 1070
+          },
+          "standardIds": [
+            "fmp-Bed15",
+            "fmp-Bed17"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        }
+      ]
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "name": "布張り三方背の低いディバンベッド",
+      "packId": "rpg-mansion",
+      "kind": "bed",
+      "group": "家具",
+      "category": "ベッド",
+      "model": "assets/models/packs/rpg-mansion/models/rpg-mansion-upholstered-divan-bed-01.glb",
+      "thumb": "assets/models/packs/rpg-mansion/previews/rpg-mansion-upholstered-divan-bed-01-thumb.png",
+      "top": "assets/models/packs/rpg-mansion/previews/rpg-mansion-upholstered-divan-bed-01-top.png",
+      "front": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-upholstered-divan-bed-01-front.png",
+      "rear": "tools/blender/rpg_mansion/scaled_beds/evidence/rpg-mansion-upholstered-divan-bed-01-rear.png",
+      "sourceBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-upholstered-divan-bed-01.blend",
+      "exportBlend": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-upholstered-divan-bed-01.blend",
+      "authoringBlend": "tools/blender/rpg_mansion/scaled_beds/authoring_sources/rpg-mansion-upholstered-divan-bed-01.blend",
+      "validation": "tools/blender/rpg_mansion/scaled_beds/sources/rpg-mansion-upholstered-divan-bed-01-validation.json",
+      "builder": "tools/blender/rpg_mansion/scaled_beds/build.py",
+      "w": 1000,
+      "d": 2140,
+      "h": 920,
+      "defaultElevation": 0,
+      "provenance": "original",
+      "placementHint": "floor",
+      "semanticCoverage": "A one-person low upholstered daybed with unequal rolled ends and one continuous long-side back",
+      "dimensionBasis": "Intended period-adapted design; declared standard dimensions are demand references only; legacy model geometry missing and unverified",
+      "footprintSemanticEquivalenceVerified": false,
+      "nativeFunctionEquivalencePromised": false,
+      "features": {
+        "mattressTopM": 0.522,
+        "mattressSupportM": 0.3585,
+        "sleepingCapacity": 1,
+        "mattressDimensionsM": [
+          0.8280000000000001,
+          1.8980000000000001,
+          0.165
+        ],
+        "topology": "low-upholstered-three-sided-divan/rolled-ends/long-side-back/open-sprung-slat-deck/four-short-turned-feet"
+      },
+      "finishChannels": [
+        {
+          "key": "bedding",
+          "label": "寝具",
+          "default": "#ded5bd"
+        },
+        {
+          "key": "cover",
+          "label": "掛け布",
+          "default": "#355c57"
+        },
+        {
+          "key": "upholstery",
+          "label": "張り布",
+          "default": "#713e45"
+        },
+        {
+          "key": "wood",
+          "label": "木部",
+          "default": "#533624"
+        }
+      ],
+      "sha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de",
+      "sourceSha256": "4d100507109c4bd6240ba24c21f31ce3ba5aca2ec45636c5ce1b546401474bee",
+      "authoringSha256": "38966e7ab78f1ab43d41b59cbfcf447eaf274c873c214a9b9c838c69d7cdf99d",
+      "previewSha256": {
+        "thumb": "9f068a2307a95388ce3cad988f1a77885dc3cf9b0ce414c91e003484cd60b44b",
+        "top": "eb09ed42c0c83a426151e10cbb118cabe3a5f62c56838b6340e4c420e0d8409e",
+        "front": "b8c614e3fab8801c33d2bc62508a1e58772bb411b84e4088e7b7039b3538db5f",
+        "rear": "09967ee275d19165cc02523c7fbb9ada42c1013d5eb3a4a2ed17ed51b6c8e4a0"
+      },
+      "standardDemandReferences": [
+        {
+          "declaredDimensionsMm": {
+            "w": 1050,
+            "d": 1932,
+            "h": 909
+          },
+          "standardIds": [
+            "fmp-Bed03"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1050,
+            "d": 1950,
+            "h": 882
+          },
+          "standardIds": [
+            "fmp-Bed01"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        },
+        {
+          "declaredDimensionsMm": {
+            "w": 1112,
+            "d": 1950,
+            "h": 882
+          },
+          "standardIds": [
+            "fmp-Bed05"
+          ],
+          "legacyGeometryPresent": false,
+          "geometryMeasured": false,
+          "relationship": "nearest declared demand reference only; no replacement equivalence"
+        }
+      ]
+    }
+  ]
+}

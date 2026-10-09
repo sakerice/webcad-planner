@@ -1,0 +1,44 @@
+{
+  "method": "Actual imported exported glass against emissive white/black markers, decoded RGB region averages; clear control hides only glass partition",
+  "items": [
+    {
+      "id": "rpg-mansion-tall-fixed-french-window-bay-01",
+      "meanRgb": {
+        "actual-glass": [
+          0.9525885792913656,
+          0.32210128568971447
+        ],
+        "clear-control": [
+          1.0,
+          0.001707623839009288
+        ]
+      },
+      "whiteBlackContrast": {
+        "actual-glass": 0.6304872936016512,
+        "clear-control": 0.9982923761609908
+      },
+      "retainedContrastRatio": 0.6315657703670322,
+      "passTest": true
+    },
+    {
+      "id": "rpg-mansion-fixed-shed-dormer-01",
+      "meanRgb": {
+        "actual-glass": [
+          0.9524426009720127,
+          0.3109477124183006
+        ],
+        "clear-control": [
+          1.0,
+          0.0016638386123680239
+        ]
+      },
+      "whiteBlackContrast": {
+        "actual-glass": 0.6414948885537122,
+        "clear-control": 0.9983361613876319
+      },
+      "retainedContrastRatio": 0.6425640113667422,
+      "passTest": true
+    }
+  ],
+  "errors": []
+}

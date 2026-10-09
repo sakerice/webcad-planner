@@ -1,0 +1,370 @@
+{
+  "schema": "period-service-construction-v1",
+  "newProductCount": 4,
+  "newConstructionCount": 3,
+  "functionalFootprintVariantCount": 1,
+  "staticOnly": true,
+  "items": [
+    {
+      "id": "rpg-mansion-period-range-canopy-01",
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "variantOf": null,
+      "measuredEnvelopeMm": [
+        940.0,
+        778.0,
+        1210.0
+      ],
+      "installation": {
+        "role": "period-range-canopy",
+        "defaultElevationMm": 1610.0,
+        "hostId": "rpg-mansion-kitchen-cast-iron-range-750-01",
+        "hobTopMm": 863.5,
+        "canopyUndersideMm": 1610,
+        "minimumHobClearanceMm": 746.5,
+        "wallPlaneBlenderY": 0.36,
+        "openThroatMm": [
+          380,
+          305
+        ],
+        "staticLimit": "Open hollow canopy/flue and wall-bearing brackets. No heat, exhaust, ventilation or engineering capacity claim.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          0.028999999165534973,
+          -1.6100000143051147
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4699999988079071,
+            -0.4180000126361847,
+            1.6100000143051147
+          ],
+          [
+            0.4699999988079071,
+            0.36000001430511475,
+            2.819999933242798
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rpg-mansion-manual-wash-tub-board-01",
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "variantOf": null,
+      "measuredEnvelopeMm": [
+        909.2,
+        582.999,
+        1174.936
+      ],
+      "installation": {
+        "role": "manual-wash-tub-and-board",
+        "defaultElevationMm": 0,
+        "tubCavityFloorMm": 525,
+        "tubRimTopMm": 870,
+        "tubClearOpeningMm": [
+          708,
+          498
+        ],
+        "boardTiltFromVerticalDegrees": 20,
+        "boardLowestCornerMm": 525,
+        "boardRimCleatUndersideMm": 870,
+        "boardLowerOriginM": [
+          0.0,
+          0.0560000017285347,
+          0.5304722785949707
+        ],
+        "boardAxisM": [
+          0.0,
+          0.3420201539993286,
+          0.9396926164627075
+        ],
+        "boardNormalM": [
+          0.0,
+          0.9396926164627075,
+          -0.3420201539993286
+        ],
+        "standBearerTopMm": 504,
+        "tubUndersideMm": 504,
+        "staticLimit": "Open empty basin, tilted zinc-ribbed timber washboard, timber stand and lifting loops. No water, washing motion or cloth simulation.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.014499738812446594,
+          -0.0
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4545999765396118,
+            -0.2770000100135803,
+            0.0
+          ],
+          [
+            0.4545999765396118,
+            0.3059994876384735,
+            1.1749356985092163
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rpg-mansion-hinged-timber-drying-frame-01",
+      "countingClass": "new-construction",
+      "coreConstructionCount": 1,
+      "variantOf": null,
+      "measuredEnvelopeMm": [
+        964.0,
+        827.91,
+        1204.98
+      ],
+      "installation": {
+        "role": "manual-laundry-drying-frame",
+        "defaultElevationMm": 0,
+        "legs": [
+          {
+            "x": -0.42800000000000005,
+            "fromM": [
+              -0.42800000309944153,
+              -0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              -0.42800000309944153,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": -0.382,
+            "fromM": [
+              -0.38199999928474426,
+              0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              -0.38199999928474426,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": 0.382,
+            "fromM": [
+              0.38199999928474426,
+              -0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              0.38199999928474426,
+              0.0,
+              1.1799999475479126
+            ]
+          },
+          {
+            "x": 0.42800000000000005,
+            "fromM": [
+              0.42800000309944153,
+              0.39500001072883606,
+              0.006399999838322401
+            ],
+            "toM": [
+              0.42800000309944153,
+              0.0,
+              1.1799999475479126
+            ]
+          }
+        ],
+        "pivotsM": [
+          [
+            -0.405,
+            0,
+            1.18
+          ],
+          [
+            0.405,
+            0,
+            1.18
+          ]
+        ],
+        "rodEndpoints": [
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.30796267893660534,
+              0.265
+            ],
+            "toM": [
+              0.382,
+              -0.30796267893660534,
+              0.265
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.2305512951601909,
+              0.495
+            ],
+            "toM": [
+              0.382,
+              -0.2305512951601909,
+              0.495
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.15313991138377642,
+              0.725
+            ],
+            "toM": [
+              0.382,
+              -0.15313991138377642,
+              0.725
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.42800000000000005,
+              -0.07572852760736197,
+              0.955
+            ],
+            "toM": [
+              0.382,
+              -0.07572852760736197,
+              0.955
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.30796267893660534,
+              0.265
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.30796267893660534,
+              0.265
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.2305512951601909,
+              0.495
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.2305512951601909,
+              0.495
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.15313991138377642,
+              0.725
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.15313991138377642,
+              0.725
+            ],
+            "radiusMm": 14
+          },
+          {
+            "fromM": [
+              -0.382,
+              0.07572852760736197,
+              0.955
+            ],
+            "toM": [
+              0.42800000000000005,
+              0.07572852760736197,
+              0.955
+            ],
+            "radiusMm": 14
+          }
+        ],
+        "displayedState": "deployed A-frame",
+        "staticLimit": "Visible pins, washers and spread-limit links depict the deployed frame. No folding animation, hinge solver or cloth simulation. No load-bearing certification.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -2.023344859480858e-05
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.4819999933242798,
+            -0.4139551818370819,
+            2.023344859480858e-05
+          ],
+          [
+            0.4819999933242798,
+            0.4139551818370819,
+            1.2049999237060547
+          ]
+        ]
+      }
+    },
+    {
+      "id": "rpg-mansion-narrow-hall-runner-01",
+      "countingClass": "functional-footprint-variant",
+      "coreConstructionCount": 0,
+      "variantOf": "rpg-mansion-rug-01",
+      "measuredEnvelopeMm": [
+        760.0,
+        3000.0,
+        7.6
+      ],
+      "installation": {
+        "role": "narrow-hall-runner",
+        "defaultElevationMm": 0,
+        "maximumWalkingPlaneMm": 7.6,
+        "demonstratedHallWidthMm": 1250,
+        "existingRugFootprintMm": [
+          1400,
+          2000
+        ],
+        "runnerFootprintMm": [
+          760,
+          3000
+        ],
+        "sideFloorMarginMm": 245,
+        "staticLimit": "Fixed low-relief woven surface. No cloth deformation, foot collision or slip resistance claim. Existing rectangular rug cannot fit this1250mm hall in either rotation.",
+        "bottomCenterTranslationBlenderM": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "originalInstalledBoundsBlenderM": [
+          [
+            -0.3799999952316284,
+            -1.5,
+            0.0
+          ],
+          [
+            0.3799999952316284,
+            1.5,
+            0.007600000128149986
+          ]
+        ]
+      }
+    }
+  ],
+  "modernOptionalGaps": [
+    "TV/AV",
+    "Powered refrigerator",
+    "Microwave/dishwasher/small cooking appliance",
+    "Powered washing machine/pan",
+    "AC/fan/purifier/vacuum",
+    "Outdoor compressor/boiler/meter",
+    "Child-specific furniture/toys",
+    "Pet bed/bowl/cage"
+  ]
+}

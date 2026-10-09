@@ -1,0 +1,280 @@
+{
+  "model": "rpg-mansion-guarded-carry-lantern-01",
+  "dimensions_mm": [
+    233.9915782213211,
+    222.00000286102295,
+    476.99999809265137
+  ],
+  "bounds_m": [
+    [
+      -0.11699578911066055,
+      -0.11100000143051147,
+      0.0
+    ],
+    [
+      0.11699578911066055,
+      0.11100000143051147,
+      0.47699999809265137
+    ]
+  ],
+  "triangles": 4240,
+  "uv": {
+    "meters_per_uv": 1.9161894611162942,
+    "min": 1.8846183508820726,
+    "max": 1.941150595542624,
+    "p05": 1.9152359016598588,
+    "p95": 1.9171916526475823,
+    "total_triangles": 4240,
+    "valid_triangles": 4240,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Bronzed iron structure": "metal",
+    "Clear lightly tinted glass": "glass",
+    "Antique brass structure": "metal",
+    "Porcelain socket insulator": "ceramic",
+    "Opal bulb glass static appearance": "glass"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 301288,
+  "datums": {
+    "supportProbes": [
+      {
+        "parts": [
+          "Portable lantern stepped foot",
+          "Portable lantern guard upright 0"
+        ],
+        "pointOriginalM": [
+          0.07141778489984131,
+          0.0714177848998413,
+          0.028
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern hollow ventilator roof",
+          "Portable lantern guard upright 0"
+        ],
+        "pointOriginalM": [
+          0.07141778489984131,
+          0.0714177848998413,
+          0.289
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern stepped foot",
+          "Portable lantern guard upright 1"
+        ],
+        "pointOriginalM": [
+          -0.0714177848998413,
+          0.07141778489984131,
+          0.028
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern hollow ventilator roof",
+          "Portable lantern guard upright 1"
+        ],
+        "pointOriginalM": [
+          -0.0714177848998413,
+          0.07141778489984131,
+          0.289
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern stepped foot",
+          "Portable lantern guard upright 2"
+        ],
+        "pointOriginalM": [
+          -0.07141778489984132,
+          -0.0714177848998413,
+          0.028
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern hollow ventilator roof",
+          "Portable lantern guard upright 2"
+        ],
+        "pointOriginalM": [
+          -0.07141778489984132,
+          -0.0714177848998413,
+          0.289
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern stepped foot",
+          "Portable lantern guard upright 3"
+        ],
+        "pointOriginalM": [
+          0.07141778489984128,
+          -0.07141778489984132,
+          0.028
+        ]
+      },
+      {
+        "parts": [
+          "Portable lantern hollow ventilator roof",
+          "Portable lantern guard upright 3"
+        ],
+        "pointOriginalM": [
+          0.07141778489984128,
+          -0.07141778489984132,
+          0.289
+        ]
+      },
+      {
+        "parts": [
+          "Portable carrying bow",
+          "Portable handle mounting ear -1"
+        ],
+        "pointOriginalM": [
+          -0.106,
+          0,
+          0.318
+        ]
+      },
+      {
+        "parts": [
+          "Portable carrying bow",
+          "Portable handle mounting ear 1"
+        ],
+        "pointOriginalM": [
+          0.106,
+          0,
+          0.318
+        ]
+      },
+      {
+        "parts": [
+          "Portable interior pedestal",
+          "Portable lantern stepped foot"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.039
+        ]
+      },
+      {
+        "parts": [
+          "Portable interior pedestal",
+          "Portable porcelain socket"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.079
+        ]
+      },
+      {
+        "parts": [
+          "Portable porcelain socket",
+          "Portable opal bulb"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.103
+        ]
+      }
+    ],
+    "cavityRays": [
+      {
+        "part": "Portable lantern hollow ventilator roof",
+        "originOriginalM": [
+          0.04,
+          0,
+          0.27
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "rangeM": [
+          0.045,
+          0.1
+        ]
+      }
+    ],
+    "glassThicknessProbes": [
+      {
+        "part": "Portable lantern closed cylindrical glass",
+        "originOriginalM": [
+          0.04,
+          -0.14,
+          0.17
+        ],
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "expectedMm": null,
+        "minimumMm": 3,
+        "maximumMm": 3.5
+      }
+    ],
+    "installation": {
+      "mount": "desk",
+      "defaultElevationMm": 740,
+      "note": "Original static decorative fixture with geometric support; no configured runtime light or physical certification."
+    },
+    "bulb": {
+      "materialEmissionStrength": 0.3,
+      "runtimeLightObjects": 0
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.11699578911066055,
+        -0.11100000143051147,
+        0.0
+      ],
+      [
+        0.11699578911066055,
+        0.11100000143051147,
+        0.47699999809265137
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    3.583919730469158e-05,
+    3.583916683247425e-05,
+    0.0013925974188092975,
+    0.00043010717286051653,
+    2.5678669847669273e-05,
+    2.567868072371008e-05,
+    6.33675919689362e-05,
+    0.0006172281082399422,
+    1.4302247639837647e-05,
+    0.00012466981404675911,
+    5.197285493826107e-07,
+    5.197290420255741e-07,
+    5.197290420255741e-07,
+    5.197290420255741e-07,
+    2.824887095205971e-05,
+    5.1128924942152785e-05,
+    2.8248989186370938e-05,
+    2.8248840256613526e-05,
+    2.8248957733012503e-05,
+    0.0002862503543369736
+  ],
+  "source_sha256": "07c9e7d8b09a319d8e1c2d7fa175172608bfb919ef2238705699bb823001bb1c",
+  "glb_sha256": "62d6a940fdbfef3c4bd290df72bb4651493f19bc72d7a18e9714280e40c9c3a9"
+}

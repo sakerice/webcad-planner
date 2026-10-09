@@ -1,0 +1,196 @@
+{
+  "id": "rpg-mansion-bathtub-01",
+  "status": "complete",
+  "sourceBlend": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-bathtub-01.blend",
+  "builder": "tools/blender/rpg_mansion/restore_sources.py",
+  "originalBuilder": "tools/blender/rpg_mansion/expansion/build.py",
+  "originalBuilderSha256": "52d59edbd7a8a379f51fff8d0fca99fddbbb02f6204d2b02b48a6d24ca2cfb64",
+  "front": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-bathtub-01-front.png",
+  "rear": "tools/blender/rpg_mansion/expansion/work/rpg-mansion-bathtub-01-rear.png",
+  "method": "Original procedural builders plus shared model_kit.run; no GLB import",
+  "native_authoring_parts": 13,
+  "validation": {
+    "model": "rpg-mansion-bathtub-01",
+    "dimensions_mm": [
+      1720.0000286102295,
+      800.000011920929,
+      1090.000033378601
+    ],
+    "bounds_m": [
+      [
+        -0.8600000143051147,
+        -0.4000000059604645,
+        0.0
+      ],
+      [
+        0.8600000143051147,
+        0.4000000059604645,
+        1.090000033378601
+      ]
+    ],
+    "triangles": 1772,
+    "uv": {
+      "meters_per_uv": 3.306743872131354,
+      "min": 3.0998440933834313,
+      "max": 3.9670049045163096,
+      "p05": 3.1380803832259945,
+      "p95": 3.6948250547349577,
+      "total_triangles": 1772,
+      "valid_triangles": 1772,
+      "excluded_triangles": 0,
+      "degenerate_world": 0,
+      "degenerate_uv": 0,
+      "degenerate_world_indices": [],
+      "degenerate_uv_indices": []
+    },
+    "materials": {
+      "RPG Antique brass": "metal",
+      "RPG ceramic": "ceramic"
+    },
+    "front_blender": "-Y",
+    "front_gltf": "+Z",
+    "glb_bytes": 62100
+  },
+  "comparison": {
+    "geometry_and_material_assignment_match_1e7": true,
+    "uv_mapping_match_1e7": true,
+    "triangle_count_match": true,
+    "finish_channels_match": true,
+    "primitive_material_channels_match": true,
+    "maximum_bounds_delta_m": 0.0
+  },
+  "regenerated_glb": {
+    "sha256": "a51d0b8573f547a178247ed85e6384dd023a78ffbfdd60685f9189e272df7ac7",
+    "bytes": 62100,
+    "triangles": 1772,
+    "bounds_gltf_m": [
+      [
+        -0.8600000143051147,
+        0.0,
+        -0.4000000059604645
+      ],
+      [
+        0.8600000143051147,
+        1.090000033378601,
+        0.4000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1720.0000286102295,
+      800.000011920929,
+      1090.000033378601
+    ],
+    "geometry_material_sha256_1e7": "770f2638aff49555c7abedc12e487bf5b284e738dabda0ba144ad8284b31d8f4",
+    "geometry_material_uv_sha256_1e7": "c5fb6fc5ba3505c1882f3d4e1f279c6314e807a8235d762ef13be5ddccb873a0",
+    "finish_channels": [
+      "ceramic",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 1616
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 156
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "delivered_glb": {
+    "sha256": "fafe0bfe0c7ce4a9cfdc14a75b556879bce2f39738472bd80a5b9646fb655876",
+    "bytes": 62304,
+    "triangles": 1772,
+    "bounds_gltf_m": [
+      [
+        -0.8600000143051147,
+        0.0,
+        -0.4000000059604645
+      ],
+      [
+        0.8600000143051147,
+        1.090000033378601,
+        0.4000000059604645
+      ]
+    ],
+    "dimensions_mm_wdh": [
+      1720.0000286102295,
+      800.000011920929,
+      1090.000033378601
+    ],
+    "geometry_material_sha256_1e7": "770f2638aff49555c7abedc12e487bf5b284e738dabda0ba144ad8284b31d8f4",
+    "geometry_material_uv_sha256_1e7": "c5fb6fc5ba3505c1882f3d4e1f279c6314e807a8235d762ef13be5ddccb873a0",
+    "finish_channels": [
+      "ceramic",
+      "metal"
+    ],
+    "primitive_material_channels": [
+      {
+        "material": "RPG Antique brass",
+        "channel": "metal",
+        "triangles": 1616
+      },
+      {
+        "material": "RPG ceramic",
+        "channel": "ceramic",
+        "triangles": 156
+      }
+    ],
+    "degenerate_uv_triangles": 0,
+    "degenerate_world_triangles": 0,
+    "finite_positions_and_uvs": true,
+    "has_image_textures": false
+  },
+  "elapsed_seconds": 7.4,
+  "source_sha256": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+  "front_sha256": "1dc732752c14acbf942024e8dec9903641a66a247cc5654e8ab4b5f6145e9fd8",
+  "rear_sha256": "270c6b687c5e2d4e58d87b63593d35c875b109c44782dbdc4f02ddad2fb59cbb",
+  "blender_version": "4.3.2",
+  "render": {
+    "engine": "Cycles",
+    "samples": 24,
+    "threads": 2,
+    "resolution": [
+      512,
+      512
+    ],
+    "front_camera_blender": "-Y",
+    "rear_camera_blender": "+Y"
+  },
+  "native_authoring_repair": {
+    "created_utc": "2026-10-07T19:28:22.129238+00:00",
+    "source_sha256_before": "0ad322a82ef874054955e20ac8279617ee3806c7e332ff35acca3d83f7e65d42",
+    "source_sha256_after": "dfcbd3183b1d2ad2ba856754d3b9e5a6a96b3d7d7d4d0d5d24557455cef0ddb8",
+    "method": "Original builder parts; evaluated dependency graph before copying; transient native part/vertex attributes retain exact join-normalized coordinates; original validated joined mesh untouched; no GLB import",
+    "validated_mesh_digest_preserved": "e7d4f9a80e68d5211353bdf40d2a58670405b3141f5ec50c5abebc64925879c6",
+    "authoring_support_max_distance_m": 0.0,
+    "triangle_surface_multisets_match": true
+  },
+  "render_path_sanitization": {
+    "created_utc": "2026-10-07T19:32:28.612434+00:00",
+    "source_sha256_before": "dfcbd3183b1d2ad2ba856754d3b9e5a6a96b3d7d7d4d0d5d24557455cef0ddb8",
+    "source_sha256_after": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+    "mesh_geometry_uv_material_digest_preserved": "2b5b02198bb4fa5e51e076a64763c05423b7adccad8404a8a17656667952d29b",
+    "scene_render_paths": [
+      {
+        "scene": "Validated export - Blender Z up, front -Y",
+        "previous_absolute_basename": "rpg-mansion-bathtub-01-rear.png",
+        "render_filepath": "//rpg-mansion-bathtub-01-rear.png"
+      }
+    ]
+  },
+  "currentBuilderVerification": {
+    "source_sha256": "ab578259f4f11cd6bf0bfab1ecbb623d0778a94efd4bd0d690509ac585758e38",
+    "originalBuilderSha256": "90d065e26954440023c2afd99c4ef5b1d6195ea5b1d70577fd5cc63f3f360027",
+    "point_support_match": true,
+    "triangle_counts_match": true,
+    "triangle_surfaces_match": true,
+    "receipt": "tools/blender/rpg_mansion/source-recovery/native-authoring-repair-receipt.json"
+  }
+}

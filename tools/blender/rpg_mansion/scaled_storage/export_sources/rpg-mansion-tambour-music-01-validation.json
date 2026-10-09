@@ -1,0 +1,55 @@
+{
+  "model": "rpg-mansion-tambour-music-01",
+  "dimensions_mm": [
+    750.0,
+    300.00001192092896,
+    800.000011920929
+  ],
+  "bounds_m": [
+    [
+      -0.375,
+      -0.15000000596046448,
+      0.0
+    ],
+    [
+      0.375,
+      0.15000000596046448,
+      0.800000011920929
+    ]
+  ],
+  "triangles": 2144,
+  "uv": {
+    "meters_per_uv": 4.017508978603772,
+    "min": 3.297683879576979,
+    "max": 4.89224213000902,
+    "p05": 3.4220959331289076,
+    "p95": 4.647190953190436,
+    "total_triangles": 2144,
+    "valid_triangles": 2144,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Mansion walnut heartwood": "wood",
+    "Mansion walnut mouldings": "wood",
+    "Mansion walnut veneered fields": "wood",
+    "Mansion patinated brass": "metal"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "glb_bytes": 88684,
+  "strictMeshCount": 1,
+  "strictSceneCount": 1,
+  "joineryRevision": "storage-joinery-2",
+  "modelSha256": "b4e291c2b4ebdd0964129fe89799bbcf883e7a500b81c1c76e6a40825d6ba1a2",
+  "sourceSha256": "955167691ac222ed9179f83a64c7140b84e80fe89ccee62d2b754b2124e57a4d",
+  "metadataOnlySourceRefresh": {
+    "revision": "storage-source-ui-1",
+    "sourceSha256BeforeUiCleanup": "4815a167c39e40f6586182bcb271268e27e8ce051b59c4f84621a74ac3ff8bde",
+    "authoredDataSignature": "dde7e6bf306409945697365ef3e7fd722687a21d112532bd7b3b40f82abe2722",
+    "scope": "Saved UI directory metadata only; original geometry, UV, corner normals, material graphs and custom properties preserved exactly"
+  }
+}

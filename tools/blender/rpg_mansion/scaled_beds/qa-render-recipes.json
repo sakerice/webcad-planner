@@ -1,0 +1,514 @@
+{
+  "method": "All four views were freshly rendered from canonical sources for all 13 coplanar-repaired models. Five unchanged assets retain their byte-verified earlier views. Independent QA must confirm pixel replay.",
+  "sourceRecipe": "tools/blender/rpg_mansion/scaled_beds/build.py:render",
+  "originalRecipeDifference": "Skip the projected-fit code block after scene.camera=ob; retain original target and view-specific ortho_scale.",
+  "imageCount": 72,
+  "projectedFitViews": 54,
+  "items": [
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "view": "thumb",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "9dceb737fbb4560cfb3cb5f44e974bd7f25149b15fdab4d37a02d68e6f80e29e",
+      "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d"
+    },
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "view": "top",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "5f1a99a57414f1e2d3632ca6134b5c4a5fb69b972cfccbb39e15a0ca0137f76f",
+      "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d"
+    },
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "view": "front",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "f6e9f44fb67ac16021645bc0970f4cd9a28dafe8a11f8c14ee0e67b45b1ae3df",
+      "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d"
+    },
+    {
+      "id": "rpg-mansion-sleigh-double-bed-01",
+      "view": "rear",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "8ba01db08c9c0c0952196e4b4193f621030a6039af2737e00f04d134fbcb13bd",
+      "modelSha256": "70f8d031baf65dff8ca0a793982ce4a91cafeb4158c6e25f19320bd78145973d"
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "view": "thumb",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "5b1b40fdb370d949d99644edf9563621b369983fb3911ce607f04b8f8eedb4f4",
+      "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a"
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "view": "top",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "76092c285a3d8d623154e98fee194c588bfbe20a35ac9306bbdc1895ca3d0b64",
+      "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a"
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "view": "front",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "d96740f31abe932370984d7ca512656283be9623ac0913f7f0ec5c1bdd7f19a6",
+      "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a"
+    },
+    {
+      "id": "rpg-mansion-iron-scroll-single-bed-01",
+      "view": "rear",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "48e32d020477db91fd7bb2f5aa0c972e280228defb8903f604d859d6b932c67f",
+      "modelSha256": "829e9c0c8ba31b8da16c2906533bd083b0665b8c5592fb9854e7a75c9fc9520a"
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "view": "thumb",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "9f068a2307a95388ce3cad988f1a77885dc3cf9b0ce414c91e003484cd60b44b",
+      "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de"
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "view": "top",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "eb09ed42c0c83a426151e10cbb118cabe3a5f62c56838b6340e4c420e0d8409e",
+      "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de"
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "view": "front",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "b8c614e3fab8801c33d2bc62508a1e58772bb411b84e4088e7b7039b3538db5f",
+      "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de"
+    },
+    {
+      "id": "rpg-mansion-upholstered-divan-bed-01",
+      "view": "rear",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "09967ee275d19165cc02523c7fbb9ada42c1013d5eb3a4a2ed17ed51b6c8e4a0",
+      "modelSha256": "c3ef5619449a9b1613031540fb095020897b7a7fe2a4cd5db41c568bc40823de"
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "307f9daffb355251f4b668a8cee6dddf83881e41476b3d93554ea13f8648e5df",
+      "modelSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8"
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "view": "top",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "b24f8a1d1dac928b16675eb78b379fe4bc7eb56d2b2e377e08427ba779f1e737",
+      "modelSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8"
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "view": "front",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "92ad3d127cf1670e3e20a6b17d7d4c2fff825a924adcad3bf7e4a811d1583241",
+      "modelSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8"
+    },
+    {
+      "id": "rpg-mansion-low-platform-double-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "43b602cc0a60999cb4c479c651bfbb6eff4ed5eebb04864e679f2c2d91db5c6b",
+      "modelSha256": "d4f9e9b6c509977b0ec1d94cb61155de7d105bac284eb01d194611b50075c1c8"
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "view": "thumb",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "2568f78fae430fde7af3ad43ea98cbe127f718f08a46f3cbeb013ec30217bc02",
+      "modelSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72"
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "view": "top",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "579fc23ce0de03941bd32760d767e40c1158104208c4d3a893eccd926951d594",
+      "modelSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72"
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "view": "front",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "88cd829941303cfe5a8f339a9b0712defa82def14ffff1f4d0b176bcab833b7e",
+      "modelSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72"
+    },
+    {
+      "id": "rpg-mansion-sleigh-single-capacity-variant-01",
+      "view": "rear",
+      "recipe": "original-fixed-fit-v1",
+      "imageSha256": "0380fc4ac85d0c8f50ce6284638a8693616725f6d44a919607d447035893e384",
+      "modelSha256": "9e644fe89695ece9d78e6b09ec9cd1617b5ac7ed614950299abe7e91c656ea72"
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "eea41a8d10b05d68dad51ced1e5bab353caa5f77804e2d49482b84aab5c9e873",
+      "modelSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328"
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "eb9be51dc773a66b84d8906be9d688bbf953163986bf48af835d8add012113ac",
+      "modelSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328"
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "7330e7b3e04dae219d89a9d08e825e3425f5687dea90615756bee50fe74663e1",
+      "modelSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328"
+    },
+    {
+      "id": "rpg-mansion-spindle-single-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "23020394924d2cc3cc84c8e51f2036702c36ef352cfcdd3ad9d818c3ef35c651",
+      "modelSha256": "f4f26350930d69b6d1c227c33e5530a1190e9d8e9dc286a6e3a8c2301e942328"
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "2b67ec0dd89d0b609a983d477c8eda064dbb0b2a43502bee95db585b886e39f8",
+      "modelSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d"
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "3e0c18f4d2c2703499342fdbd91b449749f37d88562c38495cf97eed0e7c131f",
+      "modelSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d"
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "d597fb827c224b357918985fca757b0e755ad096c011fcf59a6c654a1d6bf3a0",
+      "modelSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d"
+    },
+    {
+      "id": "rpg-mansion-arched-wide-guest-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "9ac7c46fbff7e170c2e63c773ea2b332e94c930723f74a351eae2fbd69197e02",
+      "modelSha256": "7fd11c310c07036945e6618d7fa847115201ecb5803704daf0de46b740da796d"
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "584c45dfa6b5f5384f439b60b87768f5c4bc737639778f198eecabcedba1e841",
+      "modelSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41"
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "687fedd64903ab670d3c0fe2fc93cd1ce7b543b2ba5dd906404e145c6bf18ee8",
+      "modelSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41"
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "a9da61316c29fb7a40a7e591cd270d789310bad589c5014c121c70bf03191f31",
+      "modelSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41"
+    },
+    {
+      "id": "rpg-mansion-narrow-servants-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "988c631c9a56c6ce3ba11597cb099ae0a53c1228d9415d2e6f9f5a367cb1748d",
+      "modelSha256": "af65833200aa155faa12139038b042150910b87fe6b1d3828a64213157698b41"
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "6c9fcf9d634927f59fa5a1ee41d025bd0f9a1b19ff797586577087ba6f1e3bdb",
+      "modelSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a"
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "0a4111b51d4f117745729faa85496ee0314dbc9eb15679d326e8c3946fb7603a",
+      "modelSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a"
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "dee45286faa6487a009b9504954d6b1cfceb2e47c0555740ead793eef8c3a7cd",
+      "modelSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a"
+    },
+    {
+      "id": "rpg-mansion-open-tester-four-poster-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "6054eb4810d516b6cef2fd5275a2137a63f752c558a9cac2d546073b513c0198",
+      "modelSha256": "4c969668378555393b80b248a00ff32ca3f89566a82ac4bdd25b4335fc10209a"
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "7eda41b0ac8dbc3cef90052c40f9f7a297f799a35911903807acd6378a1bbc32",
+      "modelSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005"
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "cac2d6228e3c61d074faf0b05a764a91d18e9fe613177733baaf157533e6bea6",
+      "modelSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005"
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "05f3b2b7c3f67993d7f95400e1f01a5892f27585983667e7889578979c48594b",
+      "modelSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005"
+    },
+    {
+      "id": "rpg-mansion-half-tester-single-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "10610fc820d790f667dcd9d5ad7bd0d59a7d239bedc0fb90044d34aa55383075",
+      "modelSha256": "588716313d6ec3736eb82904795a319008a5685ddc3fae1c67ddd2278aa4c005"
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "85d467534e9a2fb4d0fd4ac2b91001e9f72cea0fcd417d13a43de2aa1163dcc9",
+      "modelSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb"
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "6167ff5fe018d77b21181e6a33e8af96f04e6287767f2660880134f5d3412dca",
+      "modelSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb"
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "7bc2846adf6890818fc35e6acc77b63613ade663d83a03adcc3c8212a43560b0",
+      "modelSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb"
+    },
+    {
+      "id": "rpg-mansion-paired-twin-beds-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "f551a2b5a62a0df17df12567528a496a9c5fbe09bc1e683b4a77495dc2b36e04",
+      "modelSha256": "651fe654f613bf8516e262fe0dae6ed9c00c742a8fce2fd157e5ce10ae4834fb"
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "dd6ac329ff2c1fbd725d685ab34f35e4a58f5b654dec8be3c2d7dfd964db37a6",
+      "modelSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35"
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "20faeaddc17dc31acaf6a516d8d102cfc4dbf05afb3f14aa6f046111bf974f93",
+      "modelSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35"
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "fdd3e82b952e19ceb2f7682aeace71b9349bfcae762be757aa7f5834602531f6",
+      "modelSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35"
+    },
+    {
+      "id": "rpg-mansion-daybed-deployed-trundle-variant-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "85d0eb062132164e358c787ff0ba2af97cd9f709b910866bba8c32b9030737e2",
+      "modelSha256": "f67cc2842c17405219ecec0ba58d7cd52019e6199c13ef1a23eb96e26c673d35"
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "eff7f9af3edf9666c52bc1b13122c585f1fac6c549e928a6c95df2deb8eb1923",
+      "modelSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3"
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "427a65c369767999b87cfc6f293a30b5e201f51b4526a39d690ba9999fb9b631",
+      "modelSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3"
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "3c5111378137fb5b1bb9095dc6f7a8ca3d3025325ce6b8631e08a763f18293f9",
+      "modelSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3"
+    },
+    {
+      "id": "rpg-mansion-daybed-stowed-trundle-variant-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "1bba64b387459b3fa24fde19e487ce12ca6ff37a63dabb4962df5f4970efaafc",
+      "modelSha256": "b558fb2b25352330e5244fa800d2d82f07aa97e084239835ad0c75d71f1cc5b3"
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "23c529cf1d80ad6661e1e4a8c5878e0b147d9d1feab58fd165a6bf6b5256d192",
+      "modelSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be"
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "f709d82227a6cc22395f0bc5391356675b0418b0b700c40d28f07e783cf5fd90",
+      "modelSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be"
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "f099efaec1352809a0435032452d5fd6bc17604e036dd9d5943bd60ecd4c7ca9",
+      "modelSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be"
+    },
+    {
+      "id": "rpg-mansion-footlocker-single-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "d4ba6cff5c8e98e0e80f341bac39fec1c9e805766c8ae880c7a4632524f667c5",
+      "modelSha256": "e1a2e2df87eb58ea3511a84273c6d3241accdebd1edc2baaf0b08eb227e9e6be"
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "43cfa60d440461ac2348ecc5ab8719661b513be91d6725d5b9e06362b7f3c9fc",
+      "modelSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76"
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "5ada5ae370ec7ff858cc24831b0f05e6eebb2ceed5065323d0dac4ec8aee459e",
+      "modelSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76"
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "07a3e7a86335b44195185d2763eda7a3b3621146576b3d0069054c975198e73d",
+      "modelSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76"
+    },
+    {
+      "id": "rpg-mansion-rope-sprung-single-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "fdac5336c461b37aa443993c620e0e88f698f44623746cab72bc124a3043d8ff",
+      "modelSha256": "ccef3648d1031e08a771bcfb3e2004745a548994340c6e13fbcc2741c06b7e76"
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "17f592071df52e9dbfb76631ecc70c9402eca6963af138c9695ef6f2b4323b8c",
+      "modelSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858"
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "f577fa463e78c9e3e1f0538324add4d0999a08de19de4a022d2c85a7a71ab9fe",
+      "modelSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858"
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "f1c34e7a7432744b55890c77f330d4a80bf12b656f898b369cb184a9e3d751b7",
+      "modelSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858"
+    },
+    {
+      "id": "rpg-mansion-adult-servants-bunk-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "0860b5b154f3e9158c567f55930afb07811157ae5b9dfc9caa0d67880dc6925e",
+      "modelSha256": "b60d6af3b8969115285ab0fe47b7253ec98a53a379e0b27fd2eb5cc137598858"
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "3e071d748b88703199277323aaa843ee53cbfe5831c090fcd797e7b0bafcf456",
+      "modelSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf"
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "04fb065ceb59887782e6321f64a4cdb45a832279b50f6a0af4c77053d9e11636",
+      "modelSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf"
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "ae20c8cd71aa19686dca09751e970fdc99c456b145d4122aba2ffe0a21cc56d9",
+      "modelSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf"
+    },
+    {
+      "id": "rpg-mansion-alcove-enclosed-single-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "cb47427ebccffc1068ff6c0328254a9a7b1ba9b7dc16f6eb98555bc31b38757c",
+      "modelSha256": "77c4ba056fa05a25fdfc33ba8206c841080b369c4ec914df4a7cb9e028494faf"
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "view": "thumb",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "30df13da572058af0dd724374242378782f6226018ecfca1a1f2af701a6ba851",
+      "modelSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440"
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "view": "top",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "c59aec19b7b5a0cfc99235cdefc8e838e3d3dcbc94875a7019c8f4e355df7b0e",
+      "modelSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440"
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "view": "front",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "a86dd802882c2fe00c516851a71b53c26ca57008bcd2a2bdb8818caca25a51ab",
+      "modelSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440"
+    },
+    {
+      "id": "rpg-mansion-drawer-double-bed-01",
+      "view": "rear",
+      "recipe": "projected-fit-v2",
+      "imageSha256": "987943f57435fb945366f01620f70f40e6a7ceaa96fc048231d98ec0cc454b0a",
+      "modelSha256": "47be09bd2d626e0b5e337812a180b9935043ecf437e529b6c4d657c7de571440"
+    }
+  ],
+  "errors": []
+}

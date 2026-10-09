@@ -1,0 +1,224 @@
+{
+  "model": "rpg-mansion-three-branch-table-candelabrum-01",
+  "dimensions_mm": [
+    500.0,
+    181.99999630451202,
+    581.0880661010742
+  ],
+  "bounds_m": [
+    [
+      -0.25,
+      -0.09099999815225601,
+      0.0
+    ],
+    [
+      0.25,
+      0.09099999815225601,
+      0.5810880661010742
+    ]
+  ],
+  "triangles": 2460,
+  "uv": {
+    "meters_per_uv": 1.0824567894957646,
+    "min": 1.0789554649706337,
+    "max": 1.0865536865041243,
+    "p05": 1.0819019037812267,
+    "p95": 1.0829970347986018,
+    "total_triangles": 2460,
+    "valid_triangles": 2460,
+    "excluded_triangles": 0,
+    "degenerate_world": 0,
+    "degenerate_uv": 0,
+    "degenerate_world_indices": [],
+    "degenerate_uv_indices": []
+  },
+  "materials": {
+    "Antique brass structure": "metal",
+    "Ivory candle wax": "wax",
+    "Dark cotton wick": "wax"
+  },
+  "front_blender": "-Y",
+  "front_gltf": "+Z",
+  "triangle_budget": 6000,
+  "glb_bytes": 174792,
+  "datums": {
+    "supportProbes": [
+      {
+        "parts": [
+          "Candelabrum swept branch -1",
+          "Candelabrum turned central standard"
+        ],
+        "pointOriginalM": [
+          -0.008,
+          0,
+          0.168
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum swept branch 1",
+          "Candelabrum turned central standard"
+        ],
+        "pointOriginalM": [
+          0.008,
+          0,
+          0.168
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 0",
+          "Candelabrum wax candle 0"
+        ],
+        "pointOriginalM": [
+          -0.207,
+          0,
+          0.3205
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum wax candle 0",
+          "Candelabrum wick 0"
+        ],
+        "pointOriginalM": [
+          -0.211,
+          0,
+          0.514
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 0",
+          "Candelabrum swept branch -1"
+        ],
+        "pointOriginalM": [
+          -0.211,
+          0,
+          0.318
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 1",
+          "Candelabrum wax candle 1"
+        ],
+        "pointOriginalM": [
+          0.004,
+          0,
+          0.3725
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum wax candle 1",
+          "Candelabrum wick 1"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.566
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 1",
+          "Candelabrum turned central standard"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.367
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 2",
+          "Candelabrum wax candle 2"
+        ],
+        "pointOriginalM": [
+          0.215,
+          0,
+          0.3205
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum wax candle 2",
+          "Candelabrum wick 2"
+        ],
+        "pointOriginalM": [
+          0.211,
+          0,
+          0.514
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum candle cup 2",
+          "Candelabrum swept branch 1"
+        ],
+        "pointOriginalM": [
+          0.211,
+          0,
+          0.318
+        ]
+      },
+      {
+        "parts": [
+          "Candelabrum oval weighted base",
+          "Candelabrum turned central standard"
+        ],
+        "pointOriginalM": [
+          0,
+          0,
+          0.039
+        ]
+      }
+    ],
+    "bulb": {
+      "type": "Three wax candles and static unlit wicks",
+      "materialEmissionStrength": 0,
+      "runtimeLightObjects": 0
+    },
+    "installation": {
+      "mount": "desk",
+      "defaultElevationMm": 740,
+      "note": "Original static decorative fixture with geometric support; no configured runtime light or physical certification."
+    },
+    "bottomCenterTranslationBlenderM": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "measuredOriginalBoundsM": [
+      [
+        -0.25,
+        -0.09099999815225601,
+        0.0
+      ],
+      [
+        0.25,
+        0.09099999815225601,
+        0.5810880661010742
+      ]
+    ]
+  },
+  "closedComponentSignedVolumesM3": [
+    0.0011448441161216276,
+    0.00011856666351188021,
+    0.0004613574015384832,
+    1.0837621526131168e-07,
+    8.269889577642668e-05,
+    7.62398198546066e-05,
+    0.00011856655986737981,
+    7.623982720635544e-05,
+    8.269841641587543e-05,
+    1.0837418843815771e-07,
+    8.269840182606458e-05,
+    0.00011856661922138301,
+    1.0836885167009311e-07
+  ],
+  "source_sha256": "f6426649255c6b9681e32d62104d50d199608fd3a5f0030561713c05b3b411cf",
+  "glb_sha256": "6db6e41c72024e072fd429640753816ba4b9ed067439b14f06da57a2886f4e05"
+}
